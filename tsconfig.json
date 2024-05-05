@@ -1,0 +1,3 @@
+{
+    "extends": "@jterrazz/package-typescript/tsconfig/node-esm"
+}
