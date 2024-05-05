@@ -24,12 +24,11 @@ export default function () {
         });
     }
 
-    // Typescript configuration
+    // Typescript
+    const swcrc = convertTsConfig(tsConfig.compilerOptions);
+    delete swcrc.jsc?.paths; // swc-jest does not handle typescript paths
     jestConfig.transform = {
-        '^.+\\.(t|j)sx?$': [
-            '@swc/jest',
-            convertTsConfig(tsConfig.compilerOptions) as Record<string, unknown>,
-        ],
+        '^.+\\.(t|j)sx?$': ['@swc/jest', swcrc as Record<string, unknown>],
     };
 
     return jestConfig;
