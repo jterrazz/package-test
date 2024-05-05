@@ -5,6 +5,12 @@ import { convertTsConfig } from 'tsconfig-to-swcconfig';
 const readTsConfig = () => {
     const require = createRequire(import.meta.url);
 
+    console.log(require('../../../tsconfig.json'));
+    console.log(require('../../../../tsconfig.json'));
+    console.log(require('../../../../../tsconfig.json'));
+    console.log(require('../../../../../../tsconfig.json'));
+    console.log(require('../../../../../../../tsconfig.json'));
+
     return require('../../../../../tsconfig.json');
 };
 
