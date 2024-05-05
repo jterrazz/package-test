@@ -5,12 +5,6 @@ import { convertTsConfig } from 'tsconfig-to-swcconfig';
 const readTsConfig = () => {
     const require = createRequire(import.meta.url);
 
-    console.log(require('../../../tsconfig.json'));
-    console.log(require('../../../../tsconfig.json'));
-    console.log(require('../../../../../tsconfig.json'));
-    console.log(require('../../../../../../tsconfig.json'));
-    console.log(require('../../../../../../../tsconfig.json'));
-
     return require('../../../../../tsconfig.json');
 };
 
@@ -32,7 +26,10 @@ export default function () {
 
     // Typescript configuration
     jestConfig.transform = {
-        '^.+\\.(t|j)sx?$': ['@swc/jest', convertTsConfig(tsConfig) as Record<string, unknown>],
+        '^.+\\.(t|j)sx?$': [
+            '@swc/jest',
+            convertTsConfig(tsConfig.compilerOptions) as Record<string, unknown>,
+        ],
     };
 
     return jestConfig;
