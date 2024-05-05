@@ -1,13 +1,17 @@
-import { exec } from 'child_process';
+// promisify exec
 import { randomUUID } from 'crypto';
 import { createRequire } from 'module';
+import { exec } from 'node:child_process';
+import util from 'node:util';
 import { JestConfigWithTsJest, pathsToModuleNameMapper } from 'ts-jest';
 
-const getSwcrc = () => {
+const execPromise = util.promisify(exec);
+
+const getSwcrc = async () => {
     const tmpSwcrc = `/tmp/.swcrc.${randomUUID()}.json`;
     const require = createRequire(import.meta.url);
 
-    exec(`npx tsconfig-to-swcconfig --output=${tmpSwcrc}`);
+    await execPromise(`npx tsconfig-to-swcconfig --output=${tmpSwcrc}`);
 
     return require(tmpSwcrc);
 };
@@ -17,8 +21,8 @@ const jestConfig: JestConfigWithTsJest = {
     testMatch: ['**/__tests__/**/*.test.ts'],
 };
 
-export default function () {
-    const swcrc = getSwcrc();
+export default async function () {
+    const swcrc = await getSwcrc();
     const paths = swcrc.jsc?.paths;
 
     // Paths configuration
