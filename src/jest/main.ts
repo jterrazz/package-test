@@ -4,7 +4,7 @@ import { createRequire } from 'module';
 import { JestConfigWithTsJest, pathsToModuleNameMapper } from 'ts-jest';
 
 const getSwcrc = () => {
-    const tmpSwcrc = `/tmp/.swcrc.${randomUUID()}`;
+    const tmpSwcrc = `/tmp/.swcrc.${randomUUID()}.json`;
     const require = createRequire(import.meta.url);
 
     exec(`npx tsconfig-to-swcconfig --output=${tmpSwcrc}`);
