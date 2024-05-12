@@ -17,6 +17,11 @@ const getSwcrc = async () => {
 };
 
 const jestConfig: JestConfigWithTsJest = {
+    // Support for ES6 modules
+    moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+    },
+
     // Convention
     testMatch: ['**/__tests__/**/*.test.ts'],
 };
