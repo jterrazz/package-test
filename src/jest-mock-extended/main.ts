@@ -1,3 +1,3 @@
-import { mock } from 'jest-mock-extended';
+import * as jestMockExtended from 'jest-mock-extended';
 
-export default mock;
+export default jestMockExtended;

@@ -7,7 +7,7 @@ This package provides Jest configuration and test packages for TypeScript projec
 Install the package using npm:
 
 ```bash
-npm install package-typescript-test --save-dev
+npm install @jterrazz/test --save-dev
 ```
 
 ## Usage

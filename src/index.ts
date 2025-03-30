@@ -1,6 +1,6 @@
 import jestConfig from './jest/main.js';
 import jestEslint from './jest-eslint/main.js';
-import mock from './jest-mock-extended/main.js';
-import supertest from './supertest/main.js';
+import jestMockExtended from './jest-mock-extended/main.js';
+import msw from './msw/main.js';
 
-export { jestConfig, mock, supertest, jestEslint };
+export { jestConfig, jestMockExtended, msw, jestEslint };
