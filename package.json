@@ -1,7 +1,7 @@
 {
   "name": "@jterrazz/test",
   "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@jterrazz/quality": "^2.0.3",
-    "@jterrazz/typescript": "^2.0.1"
+    "@jterrazz/typescript": "^2.0.3"
   },
   "dependencies": {
     "@swc/jest": "^0.2.36",
