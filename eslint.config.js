@@ -1,3 +1,3 @@
-import { eslintNodeConfig } from '@jterrazz/package-typescript-quality';
+import { eslintNodeConfig } from '@jterrazz/quality';
 
 export default eslintNodeConfig;
