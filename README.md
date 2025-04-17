@@ -16,7 +16,7 @@ npm install @jterrazz/test --save-dev
 
 ```javascript
 // jest.config.js
-import { jestConfig } from '@jterrazz/package-typescript-test';
+import { jestConfig } from '@jterrazz/test';
 
 export default jestConfig();
 ```
