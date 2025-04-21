@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { createRequire } from 'module';
 import { exec } from 'node:child_process';
 import util from 'node:util';
-import { JestConfigWithTsJest, pathsToModuleNameMapper } from 'ts-jest';
+import { type JestConfigWithTsJest, pathsToModuleNameMapper } from 'ts-jest';
 
 const execPromise = util.promisify(exec);
 

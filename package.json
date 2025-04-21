@@ -15,11 +15,12 @@
   "scripts": {
     "build": "ts-compile",
     "build-watch": "ts-compile --watch",
-    "lint": "quality-check"
+    "lint": "code-standards",
+    "test": "echo 'no tests yet'"
   },
   "devDependencies": {
-    "@jterrazz/quality": "^2.0.3",
-    "@jterrazz/typescript": "^2.0.3"
+    "@jterrazz/quality": "^2.2.0",
+    "@jterrazz/typescript": "^2.0.5"
   },
   "dependencies": {
     "@swc/jest": "^0.2.36",
