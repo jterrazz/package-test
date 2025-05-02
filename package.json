@@ -1,7 +1,7 @@
 {
   "name": "@jterrazz/test",
   "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
-  "version": "2.0.3",
+  "version": "3.0.0",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
@@ -14,23 +14,19 @@
   "type": "module",
   "scripts": {
     "build": "ts-compile",
-    "build-watch": "ts-compile --watch",
     "lint": "code-standards",
-    "test": "echo 'no tests yet'"
+    "test": "# No tests"
   },
   "devDependencies": {
     "@jterrazz/quality": "^2.2.0",
-    "@jterrazz/typescript": "^2.0.5"
+    "@jterrazz/typescript": "^2.2.0"
   },
   "dependencies": {
-    "@swc/jest": "^0.2.36",
-    "@types/jest": "^29.5.12",
-    "eslint-plugin-jest": "^28.5.0",
-    "jest": "^29.7.0",
-    "jest-mock-extended": "^3.0.7",
-    "msw": "^2.7.3",
-    "ts-jest": "^29.1.2",
-    "tsconfig-to-swcconfig": "^2.7.0"
+    "@types/mockdate": "^2.0.0",
+    "mockdate": "^3.0.5",
+    "msw": "^2.7.5",
+    "vitest": "^3.1.2",
+    "vitest-mock-extended": "^3.1.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
