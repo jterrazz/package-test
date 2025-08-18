@@ -2,7 +2,7 @@
 
 # Package Test
 
-This package provides Vitest configuration and testing utilities for TypeScript projects, including MSW (Mock Service Worker) setup for API mocking.
+Shareable Vitest config and helpers for TS projects.
 
 ## Installation
 
