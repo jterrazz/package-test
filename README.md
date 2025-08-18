@@ -1,3 +1,5 @@
+*Hey there – I’m Jean-Baptiste, just another developer doing weird things with code. All my projects live on [jterrazz.com](https://jterrazz.com) – complete with backstories and lessons learned. Feel free to poke around – you might just find something useful!*
+
 # Package Typescript Test
 
 This package provides Vitest configuration and testing utilities for TypeScript projects, including MSW (Mock Service Worker) setup for API mocking.
