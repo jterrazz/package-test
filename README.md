@@ -1,74 +1,47 @@
 *Hey there – I’m Jean-Baptiste, just another developer doing weird things with code. All my projects live on [jterrazz.com](https://jterrazz.com) – complete with backstories and lessons learned. Feel free to poke around – you might just find something useful!*
 
-# Package Test
+# @jterrazz/test
 
-Shareable Vitest config and helpers for TS projects.
+Mocking utilities for TypeScript testing.
 
 ## Installation
 
-Install the package using npm:
+```bash
+npm install -D @jterrazz/test vitest
+```
+
+**Optional:** For API mocking with MSW:
 
 ```bash
-npm install -D @jterrazz/test
+npm install -D msw
 ```
 
 ## Usage
 
-1. Set up MSW for API mocking:
+### Date Mocking
 
 ```typescript
-// handlers.ts
-import { http } from 'msw';
-import { setupServer } from '@jterrazz/test';
-
-// Define your API handlers
-const handlers = [
-  http.get('/api/example', () => {
-    return new Response(JSON.stringify({ data: 'example' }));
-  }),
-];
-
-// Setup MSW server
-export const server = setupServer(...handlers);
-```
-
-2. You can now write your tests using Vitest and MSW!
-
-```typescript
-import { describe, test, expect } from '@jterrazz/test';
-import { server } from './handlers';
-
-describe('API Tests', () => {
-  test('should handle API requests', async () => {
-    const response = await fetch('/api/example');
-    const data = await response.json();
-
-    expect(data).toEqual({ data: 'example' });
-  });
-});
-```
-
-3. Using Date Mocking:
-
-```typescript
+import { describe, test, expect, afterEach } from 'vitest';
 import { mockOfDate } from '@jterrazz/test';
 
 describe('Date Tests', () => {
+  afterEach(() => {
+    mockOfDate.reset();
+  });
+
   test('should mock dates', () => {
     const fixedDate = new Date('2024-01-01');
     mockOfDate.set(fixedDate);
 
     expect(new Date()).toEqual(fixedDate);
-
-    // Reset the mock after your test
-    mockOfDate.reset();
   });
 });
 ```
 
-4. Using Extended Mocking:
+### Deep Mocking
 
 ```typescript
+import { describe, test, expect } from 'vitest';
 import { mockOf } from '@jterrazz/test';
 
 interface UserService {
@@ -76,10 +49,9 @@ interface UserService {
 }
 
 describe('Mock Tests', () => {
-  test('should use extended mocks', async () => {
+  test('should use deep mocks', async () => {
     const mockUserService = mockOf<UserService>();
 
-    // Setup mock behavior
     mockUserService.getUser.mockResolvedValue({ id: '1', name: 'John' });
 
     const user = await mockUserService.getUser('1');
@@ -88,11 +60,16 @@ describe('Mock Tests', () => {
 });
 ```
 
-## Features
+## API
 
-- Vitest configuration with TypeScript support
-- MSW integration for API mocking
-- Mock date utilities for time-based testing
-- Extended mocking capabilities with vitest-mock-extended
+| Export | Description |
+|--------|-------------|
+| `mockOfDate` | Date mocking utilities (`set`, `reset`) |
+| `mockOf<T>()` | Create deep mock of any interface |
+| `MockDatePort` | Type interface for date mocking |
+| `MockPort` | Type interface for deep mocking |
 
-Happy testing! 🚀
+## Peer Dependencies
+
+- `vitest` (required)
+- `msw` (optional)

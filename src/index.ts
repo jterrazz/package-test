@@ -1,2 +1,1 @@
-export * from './msw/main.js';
-export * from './vitest/main.js';
+export * from './mocking/index.js';
