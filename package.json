@@ -13,7 +13,7 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "ts-compile",
+    "build": "ts-build",
     "lint": "ts-check",
     "lint:fix": "ts-fix",
     "test": "# No tests"
