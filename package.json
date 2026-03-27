@@ -1,6 +1,10 @@
 {
   "name": "@jterrazz/test",
   "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jterrazz/package-test"
+  },
   "version": "3.1.0",
   "exports": {
     ".": {
