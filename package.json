@@ -13,7 +13,7 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "typescript build lib",
+    "build": "typescript bundle",
     "lint": "ts-check",
     "lint:fix": "ts-fix",
     "test": "# No tests"
@@ -24,7 +24,7 @@
     "@types/node": "^25.5.0"
   },
   "dependencies": {
-    "@types/mockdate": "^2.0.0",
+    "@types/mockdate": "^3.0.0",
     "mockdate": "^3.0.5",
     "vitest-mock-extended": "^3.1.0"
   },
