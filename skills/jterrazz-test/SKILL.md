@@ -25,7 +25,7 @@ tests/
 │           │   └── transactions.sql
 │           ├── mock/
 │           │   └── inpi-success.json
-│           ├── inputs/
+│           ├── requests/
 │           │   └── request.json
 │           └── responses/
 │               └── created.response.json
@@ -50,7 +50,7 @@ tests/
 | ------------ | ------------------------------------------ |
 | `seeds/`     | Database state setup                       |
 | `mock/`      | Mocked external API responses              |
-| `inputs/`    | Request bodies or data fed into the system |
+| `requests/`    | Request bodies or data fed into the system |
 | `responses/` | Expected API responses from your system    |
 | `expected/`  | Expected output to compare against         |
 
@@ -116,8 +116,8 @@ Same test API — only the setup differs.
 **Action:**
 
 - `.get(path)` — GET request
-- `.post(path, "file.json")` — POST with body from `inputs/`
-- `.put(path, "file.json")` — PUT with body from `inputs/`
+- `.post(path, "file.json")` — POST with body from `requests/`
+- `.put(path, "file.json")` — PUT with body from `requests/`
 - `.delete(path)` — DELETE request
 
 **Assertions (after `.run()`):**

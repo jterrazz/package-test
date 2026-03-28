@@ -144,7 +144,7 @@ export class SpecificationBuilder {
     let body: unknown;
     if (this.request.bodyFile) {
       body = JSON.parse(
-        readFileSync(resolve(this.testDir, "inputs", this.request.bodyFile), "utf8"),
+        readFileSync(resolve(this.testDir, "requests", this.request.bodyFile), "utf8"),
       );
     }
 

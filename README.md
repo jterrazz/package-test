@@ -32,7 +32,7 @@ tests/
 │           │   └── transactions.sql
 │           ├── mock/
 │           │   └── inpi-success.json
-│           ├── inputs/
+│           ├── requests/
 │           │   └── request.json
 │           └── responses/
 │               └── created.response.json
@@ -59,7 +59,7 @@ Each test owns its data in colocated subfolders:
 | ------------ | --------------------------------------- |
 | `seeds/`     | Database state setup                    |
 | `mock/`      | Mocked external API responses           |
-| `inputs/`    | Request bodies or data fed in           |
+| `requests/`    | Request bodies or data fed in           |
 | `responses/` | Expected API responses from your system |
 | `expected/`  | Expected output to compare against      |
 
@@ -131,8 +131,8 @@ Same builder API — only the setup differs.
 | Method                     | Reads from | Description    |
 | -------------------------- | ---------- | -------------- |
 | `.get(path)`               | —          | GET request    |
-| `.post(path, "file.json")` | `inputs/`  | POST with body |
-| `.put(path, "file.json")`  | `inputs/`  | PUT with body  |
+| `.post(path, "file.json")` | `requests/`  | POST with body |
+| `.put(path, "file.json")`  | `requests/`  | PUT with body  |
 | `.delete(path)`            | —          | DELETE request |
 
 **Assertions** (after `.run()`):
