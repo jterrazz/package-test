@@ -61,7 +61,7 @@ tests/
 ```typescript
 // tests/integration/integration.specification.ts
 import { integration } from "@jterrazz/test";
-import { PrismaAdapter } from "@jterrazz/test/adapters/prisma";
+import { PrismaAdapter } from "@jterrazz/test";
 import { app } from "../../src/app.js";
 import { prisma } from "../../src/database.js";
 
@@ -95,7 +95,7 @@ test("creates company from INPI data", async () => {
 ```typescript
 // tests/e2e/e2e.specification.ts
 import { e2e } from "@jterrazz/test";
-import { PrismaAdapter } from "@jterrazz/test/adapters/prisma";
+import { PrismaAdapter } from "@jterrazz/test";
 import { prisma } from "../../src/database.js";
 
 export const spec = e2e({
