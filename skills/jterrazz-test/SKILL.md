@@ -125,6 +125,35 @@ tests/
 | `responses/` | Expected API responses             |
 | `expected/`  | Expected output to compare against |
 
+## Test writing convention
+
+Use `// Given`, `// When`, `// Then` comments to structure non-trivial tests:
+
+```typescript
+test("creates a user and returns 201", async () => {
+  // Given — two existing users
+  const result = await spec("creates user")
+    .seed("initial-users.sql")
+    .post("/users", "new-user.json")
+    .run();
+
+  // Then — user created with all three in table
+  result.expectStatus(201);
+  await result.expectTable("users", {
+    columns: ["name"],
+    rows: [["Alice"], ["Bob"], ["Charlie"]],
+  });
+});
+```
+
+Rules:
+
+- `// Given —` setup context, one short phrase
+- `// When —` only if the action isn't obvious
+- `// Then —` what we verify, one short phrase
+- Skip on trivial tests (single assertion, name says it all)
+- No `// When` for spec builder — `.seed().post().run()` IS the when
+
 ## Builder methods
 
 **Setup:** `.seed("file.sql")`, `.mock("file.json")`

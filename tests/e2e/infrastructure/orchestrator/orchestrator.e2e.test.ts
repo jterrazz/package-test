@@ -20,14 +20,16 @@ describe("orchestrator", () => {
     });
 
     test("starts services via testcontainers", async () => {
+      // When — orchestrator starts with a postgres service
       await orchestrator.start();
 
+      // Then — service is started with connection string
       expect(db.started).toBe(true);
       expect(db.connectionString).toMatch(/^postgresql:\/\//);
     }, 30_000);
 
-    test("reads image from compose file", async () => {
-      // Db was started with image from compose (postgres:17)
+    test("reads image from compose file", () => {
+      // Then — connection string populated (image resolved from compose)
       expect(db.connectionString).toBeTruthy();
     });
 
@@ -36,17 +38,18 @@ describe("orchestrator", () => {
     });
 
     test("getDatabase returns the database handle", () => {
-      const database = orchestrator.getDatabase();
-      expect(database).not.toBeNull();
+      expect(orchestrator.getDatabase()).not.toBeNull();
     });
 
     test("database is functional after start", async () => {
+      // Given — create and populate a test table
       await db.seed('CREATE TABLE IF NOT EXISTS "test_orch" (id SERIAL, val TEXT)');
       await db.seed("INSERT INTO \"test_orch\" (val) VALUES ('hello')");
 
-      const rows = await db.query("test_orch", ["val"]);
-      expect(rows).toEqual([["hello"]]);
+      // Then — data is queryable
+      expect(await db.query("test_orch", ["val"])).toEqual([["hello"]]);
 
+      // Cleanup
       await db.seed('DROP TABLE "test_orch"');
     });
   });
@@ -63,54 +66,60 @@ describe("orchestrator", () => {
     });
 
     test("starts full compose stack", async () => {
-      // Ensure clean state
+      // Given — clean state
       try {
         await orchestrator.stopCompose();
       } catch {
         /* Ignore */
       }
+
+      // When — start compose
       await orchestrator.startCompose();
 
-      const appUrl = orchestrator.getAppUrl();
-      expect(appUrl).toMatch(/^http:\/\/localhost:\d+/);
+      // Then — app URL detected from compose ports
+      expect(orchestrator.getAppUrl()).toMatch(/^http:\/\/localhost:\d+/);
     }, 60_000);
 
     test("auto-detects database service", () => {
-      const database = orchestrator.getDatabase();
-      expect(database).not.toBeNull();
+      expect(orchestrator.getDatabase()).not.toBeNull();
     });
 
     test("auto-detects app URL", () => {
-      const url = orchestrator.getAppUrl();
-      expect(url).toBeTruthy();
+      expect(orchestrator.getAppUrl()).toBeTruthy();
     });
 
     test("app is reachable via detected URL", async () => {
+      // Given — app started via compose
       const url = orchestrator.getAppUrl()!;
+
+      // Then — responds to HTTP
       const response = await fetch(`${url}/users`);
       expect(response.status).toBe(200);
     });
 
     test("database is functional via compose", async () => {
+      // Given — seed data through the compose postgres
       const database = orchestrator.getDatabase()!;
       await database.reset();
       await database.seed(
         "INSERT INTO \"users\" (name, email) VALUES ('TestUser', 'test@orch.com')",
       );
 
-      const rows = await database.query("users", ["name"]);
-      expect(rows).toEqual([["TestUser"]]);
+      // Then — data is queryable
+      expect(await database.query("users", ["name"])).toEqual([["TestUser"]]);
     });
   });
 
   describe("error handling", () => {
     test("throws when compose file not found in e2e mode", async () => {
+      // Given — nonexistent project root
       const orch = new Orchestrator({
         services: [],
         mode: "e2e",
         root: "/tmp/nonexistent",
       });
 
+      // Then — clear error message
       await expect(orch.startCompose()).rejects.toThrow("no compose file found");
     });
   });

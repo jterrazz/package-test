@@ -45,35 +45,37 @@ describe("postgres service", () => {
     });
 
     test("fails on unreachable host", async () => {
+      // Given — connection string pointing to closed port
       const badDb = postgres();
       badDb.connectionString = "postgresql://test:test@localhost:1/test";
 
+      // Then — healthcheck fails with context
       await expect(badDb.healthcheck()).rejects.toThrow("healthcheck failed");
     });
 
     test("fails when no connection string set", async () => {
-      const noConn = postgres();
-
-      await expect(noConn.healthcheck()).rejects.toThrow("no connection string");
+      await expect(postgres().healthcheck()).rejects.toThrow("no connection string");
     });
   });
 
   describe("seed", () => {
     test("executes SQL statements", async () => {
+      // Given — clean table
       await db.reset();
       await db.seed("INSERT INTO \"users\" (name, email) VALUES ('Alice', 'alice@test.com')");
 
-      const rows = await db.query("users", ["name"]);
-      expect(rows).toEqual([["Alice"]]);
+      // Then — row exists
+      expect(await db.query("users", ["name"])).toEqual([["Alice"]]);
     });
 
-    test("executes multiple statements separated by semicolons", async () => {
+    test("executes multiple statements from file", async () => {
+      // Given — SQL file with two inserts
       await db.reset();
       const sql = readFileSync(resolve(import.meta.dirname, "seeds/two-users.sql"), "utf8");
       await db.seed(sql);
 
-      const rows = await db.query("users", ["name"]);
-      expect(rows).toEqual([["Alice"], ["Bob"]]);
+      // Then — both rows exist
+      expect(await db.query("users", ["name"])).toEqual([["Alice"], ["Bob"]]);
     });
 
     test("fails fast on invalid SQL", async () => {
@@ -83,8 +85,8 @@ describe("postgres service", () => {
 
   describe("initialize", () => {
     test("runs init.sql from compose directory", async () => {
+      // Given — compose dir with postgres/init.sql
       await db.reset();
-
       const tmpDir = mkdtempSync(resolve(tmpdir(), "init-test-"));
       mkdirSync(resolve(tmpDir, "postgres"), { recursive: true });
       writeFileSync(
@@ -96,15 +98,16 @@ describe("postgres service", () => {
       initDb.connectionString = db.connectionString;
       initDb.started = true;
 
+      // When — initialize from compose dir
       await initDb.initialize(tmpDir);
 
-      const rows = await db.query("init_test", ["val"]);
-      expect(rows).toEqual([["ok"]]);
-
+      // Then — init script executed
+      expect(await db.query("init_test", ["val"])).toEqual([["ok"]]);
       await db.seed('DROP TABLE "init_test"');
     });
 
     test("reports SQL error context on failure", async () => {
+      // Given — compose dir with invalid init.sql
       const tmpDir = mkdtempSync(resolve(tmpdir(), "init-fail-"));
       mkdirSync(resolve(tmpDir, "postgres"), { recursive: true });
       writeFileSync(resolve(tmpDir, "postgres/init.sql"), 'CREATE TABLE "bad" (id INTEGERRR);');
@@ -113,6 +116,7 @@ describe("postgres service", () => {
       initDb.connectionString = db.connectionString;
       initDb.started = true;
 
+      // Then — error includes "init script failed"
       await expect(initDb.initialize(tmpDir)).rejects.toThrow("init script failed");
     });
   });
@@ -122,45 +126,45 @@ describe("postgres service", () => {
       await db.reset();
       await db.seed("INSERT INTO \"users\" (name, email) VALUES ('Alice', 'alice@test.com')");
 
-      const rows = await db.query("users", ["name", "email"]);
-      expect(rows).toEqual([["Alice", "alice@test.com"]]);
+      expect(await db.query("users", ["name", "email"])).toEqual([["Alice", "alice@test.com"]]);
     });
 
     test("returns empty array when table is empty", async () => {
       await db.reset();
-
-      const rows = await db.query("users", ["name"]);
-      expect(rows).toEqual([]);
+      expect(await db.query("users", ["name"])).toEqual([]);
     });
 
     test("respects column order", async () => {
       await db.reset();
       await db.seed("INSERT INTO \"users\" (name, email) VALUES ('Alice', 'alice@test.com')");
 
-      const rows = await db.query("users", ["email", "name"]);
-      expect(rows).toEqual([["alice@test.com", "Alice"]]);
+      // Then — columns returned in requested order
+      expect(await db.query("users", ["email", "name"])).toEqual([["alice@test.com", "Alice"]]);
     });
   });
 
   describe("reset", () => {
     test("truncates all tables", async () => {
+      // Given — data in table
       await db.reset();
       await db.seed("INSERT INTO \"users\" (name, email) VALUES ('ResetUser', 'reset@test.com')");
 
+      // When — reset
       await db.reset();
 
-      const rows = await db.query("users", ["name"]);
-      expect(rows).toEqual([]);
+      // Then — table is empty
+      expect(await db.query("users", ["name"])).toEqual([]);
     });
 
     test("allows re-inserting after reset", async () => {
+      // Given — insert, reset, insert again
       await db.reset();
       await db.seed("INSERT INTO \"users\" (name, email) VALUES ('First', 'first@test.com')");
       await db.reset();
       await db.seed("INSERT INTO \"users\" (name, email) VALUES ('Second', 'second@test.com')");
 
-      const rows = await db.query("users", ["name"]);
-      expect(rows).toEqual([["Second"]]);
+      // Then — only second insert remains
+      expect(await db.query("users", ["name"])).toEqual([["Second"]]);
     });
   });
 });

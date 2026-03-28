@@ -8,10 +8,7 @@ describe("redis service", () => {
   let container: TestcontainersAdapter;
 
   beforeAll(async () => {
-    container = new TestcontainersAdapter({
-      image: "redis:7",
-      port: 6379,
-    });
+    container = new TestcontainersAdapter({ image: "redis:7", port: 6379 });
     await container.start();
 
     const host = container.getHost();
@@ -36,38 +33,41 @@ describe("redis service", () => {
     });
 
     test("fails on unreachable host", async () => {
+      // Given — connection string pointing to closed port
       const badCache = redis();
       badCache.connectionString = "redis://localhost:1";
 
+      // Then — healthcheck fails with context
       await expect(badCache.healthcheck()).rejects.toThrow("healthcheck failed");
     });
 
     test("fails when no connection string set", async () => {
-      const noConn = redis();
-
-      await expect(noConn.healthcheck()).rejects.toThrow("no connection string");
+      await expect(redis().healthcheck()).rejects.toThrow("no connection string");
     });
   });
 
   describe("reset", () => {
     test("flushes all keys", async () => {
+      // Given — a key exists
       const { createClient } = await import("redis");
       const client = createClient({ url: cache.connectionString });
       await client.connect();
       await client.set("test-key", "test-value");
       await client.disconnect();
 
+      // When — reset
       await cache.reset();
 
+      // Then — key is gone
       const client2 = createClient({ url: cache.connectionString });
       await client2.connect();
       const value = await client2.get("test-key");
       await client2.disconnect();
-
       expect(value).toBeNull();
     });
 
     test("allows re-setting keys after reset", async () => {
+      // Given — key set, then reset, then new key set
       const { createClient } = await import("redis");
 
       const client1 = createClient({ url: cache.connectionString });
@@ -84,6 +84,7 @@ describe("redis service", () => {
       const oldValue = await client2.get("key1");
       await client2.disconnect();
 
+      // Then — new key exists, old key is gone
       expect(value).toBe("value2");
       expect(oldValue).toBeNull();
     });
