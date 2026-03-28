@@ -61,10 +61,10 @@ export function createApp(options: AppOptions) {
 
     // Log event to analytics database if available
     if (options.analyticsDatabaseUrl) {
-      await analyticsQuery(
-        'INSERT INTO "events" (type, payload) VALUES ($1, $2)',
-        ["user_created", JSON.stringify({ name: body.name, email: body.email })],
-      );
+      await analyticsQuery('INSERT INTO "events" (type, payload) VALUES ($1, $2)', [
+        "user_created",
+        JSON.stringify({ name: body.name, email: body.email }),
+      ]);
     }
 
     return c.json({ user: rows[0] }, 201);

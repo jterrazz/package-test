@@ -201,10 +201,7 @@ describe("postgres service", () => {
       // Given — compose dir with broken init.sql
       const tmpDir = mkdtempSync(resolve(tmpdir(), "fail-scenario-"));
       mkdirSync(resolve(tmpDir, "postgres"), { recursive: true });
-      writeFileSync(
-        resolve(tmpDir, "postgres/init.sql"),
-        'CREATE TABLE "broken" (id INTEGERRR);',
-      );
+      writeFileSync(resolve(tmpDir, "postgres/init.sql"), 'CREATE TABLE "broken" (id INTEGERRR);');
 
       const initDb = postgres({ compose: "db" });
       initDb.connectionString = db.connectionString;

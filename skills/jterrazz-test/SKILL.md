@@ -168,8 +168,8 @@ When multiple databases are declared, `seed()` and `expectTable()` accept an opt
 
 ```typescript
 const result = await spec("cross-db")
-  .seed("users.sql")                                   // default db
-  .seed("events.sql", { service: "analytics-db" })     // analytics db
+  .seed("users.sql") // default db
+  .seed("events.sql", { service: "analytics-db" }) // analytics db
   .post("/users", "request.json")
   .run();
 
