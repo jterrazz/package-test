@@ -9,7 +9,9 @@ export class HonoAdapter implements ServerPort {
     request: (path: string, init?: RequestInit) => Promise<Response> | Response;
   };
 
-  constructor(app: { request: (path: string, init?: RequestInit) => Promise<Response> }) {
+  constructor(app: {
+    request: (path: string, init?: RequestInit) => Promise<Response> | Response;
+  }) {
     this.app = app;
   }
 
