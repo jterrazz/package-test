@@ -122,8 +122,6 @@ export function formatTableDiff(
 ): string {
   const lines: string[] = [];
 
-  const rowLabel = (n: number) => (n === 1 ? "1 row" : `${n} rows`);
-
   lines.push(`Table "${table}" mismatch`);
   lines.push(`${DIM}  query: ${columns.join(", ")}${RESET}`);
   lines.push(`${DIM}  expected: ${rowLabel(expected.length)}${RESET}`);
@@ -221,6 +219,10 @@ export function formatServiceLogs(services: { name: string; logs: string }[]): s
 }
 
 // ── Helpers ──
+
+function rowLabel(n: number): string {
+  return n === 1 ? "1 row" : `${n} rows`;
+}
 
 function formatJson(value: unknown, color: string): string {
   return JSON.stringify(value, null, 2)
