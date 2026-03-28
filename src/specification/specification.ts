@@ -13,11 +13,13 @@ import type { ServerPort, ServerResponse } from "./ports/server.port.js";
 
 export interface SpecificationConfig {
   database?: DatabasePort;
+  databases?: Map<string, DatabasePort>;
   server: ServerPort;
 }
 
 export interface SeedEntry {
   file: string;
+  service?: string;
 }
 
 export interface MockEntry {
@@ -75,17 +77,29 @@ export class SpecificationResult {
 
   async expectTable(
     table: string,
-    options: { columns: string[]; rows: unknown[][] },
+    options: { columns: string[]; rows: unknown[][]; service?: string },
   ): Promise<this> {
-    if (!this.config.database) {
-      throw new Error("expectTable requires a database adapter");
+    const db = this.resolveDatabase(options.service);
+    if (!db) {
+      throw new Error(
+        options.service
+          ? `expectTable requires database "${options.service}" but it was not found`
+          : "expectTable requires a database adapter",
+      );
     }
 
-    const actual = await this.config.database.query(table, options.columns);
+    const actual = await db.query(table, options.columns);
     if (JSON.stringify(actual) !== JSON.stringify(options.rows)) {
       throw new Error(formatTableDiff(table, options.columns, options.rows, actual));
     }
     return this;
+  }
+
+  private resolveDatabase(serviceName?: string): DatabasePort | undefined {
+    if (serviceName && this.config.databases) {
+      return this.config.databases.get(serviceName);
+    }
+    return this.config.database;
   }
 }
 
@@ -105,8 +119,8 @@ export class SpecificationBuilder {
     this.label = label;
   }
 
-  seed(file: string): this {
-    this.seeds.push({ file });
+  seed(file: string, options?: { service?: string }): this {
+    this.seeds.push({ file, service: options?.service });
     return this;
   }
 
@@ -142,19 +156,35 @@ export class SpecificationBuilder {
       );
     }
 
-    // Reset database
-    if (this.config.database) {
+    // Reset all databases
+    if (this.config.databases) {
+      for (const db of this.config.databases.values()) {
+        await db.reset();
+      }
+    } else if (this.config.database) {
       await this.config.database.reset();
     }
 
     // Execute seeds
     for (const entry of this.seeds) {
-      if (!this.config.database) {
+      let db: DatabasePort | undefined;
+      if (entry.service && this.config.databases) {
+        db = this.config.databases.get(entry.service);
+        if (!db) {
+          throw new Error(
+            `seed() targets database "${entry.service}" but it was not found. Available: ${[...this.config.databases.keys()].join(", ")}`,
+          );
+        }
+      } else {
+        db = this.config.database;
+      }
+
+      if (!db) {
         throw new Error("seed() requires a database adapter");
       }
 
       const sql = readFileSync(resolve(this.testDir, "seeds", entry.file), "utf8");
-      await this.config.database.seed(sql);
+      await db.seed(sql);
     }
 
     // Register MSW mocks

@@ -107,4 +107,45 @@ describe("redis service", () => {
       expect(cache.createDatabaseAdapter()).toBeNull();
     });
   });
+
+  describe("failure scenarios", () => {
+    test("healthcheck error includes connection context", async () => {
+      // Given — bad connection string
+      const badCache = redis();
+      badCache.connectionString = "redis://localhost:1";
+
+      // Then — error message includes service name with detail
+      try {
+        await badCache.healthcheck();
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(error.message).toContain("redis healthcheck failed");
+        // The message should not end with just ": " — it should include the underlying reason
+        expect(error.message).not.toBe("redis healthcheck failed: ");
+        expect(error.cause).toBeDefined();
+      }
+    });
+
+    test("reset error when connection string is invalid", async () => {
+      // Given — redis handle with unreachable host
+      const badCache = redis();
+      badCache.connectionString = "redis://localhost:1";
+
+      // Then — reset fails with connection error
+      await expect(badCache.reset()).rejects.toThrow();
+    });
+
+    test("healthcheck error without connection string is descriptive", async () => {
+      // Given — fresh handle with no connection string
+      const freshCache = redis();
+
+      // Then — error explains what's missing
+      try {
+        await freshCache.healthcheck();
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(error.message).toBe("redis: cannot healthcheck — no connection string");
+      }
+    });
+  });
 });

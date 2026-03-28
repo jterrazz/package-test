@@ -19,6 +19,26 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     result.expectStatus(201);
   });
 
+  test("sends POST that writes to multiple databases", async () => {
+    // Given — create a user (app writes to both databases)
+    const result = await spec("cross-db write").post("/users", "create-user.json").run();
+
+    result.expectStatus(201);
+
+    // Then — user in default db
+    await result.expectTable("users", {
+      columns: ["name", "email"],
+      rows: [["Charlie", "charlie@test.com"]],
+    });
+
+    // Then — event logged in analytics db
+    await result.expectTable("events", {
+      columns: ["type"],
+      rows: [["user_created"]],
+      service: "analytics-db",
+    });
+  });
+
   test("sends DELETE request", async () => {
     // Given — non-existent resource
     const result = await spec("DELETE").delete("/users/999").run();
@@ -41,7 +61,6 @@ describe.each(runners)("$name — requests", ({ spec }) => {
   });
 
   test("throws on nonexistent request body file", async () => {
-    // Given — reference to nonexistent body file
     await expect(spec("bad body").post("/users", "nonexistent.json").run()).rejects.toThrow(
       "ENOENT",
     );

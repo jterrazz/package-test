@@ -167,4 +167,68 @@ describe("postgres service", () => {
       expect(await db.query("users", ["name"])).toEqual([["Second"]]);
     });
   });
+
+  describe("failure scenarios", () => {
+    test("healthcheck error includes connection context", async () => {
+      // Given — bad connection string
+      const badDb = postgres();
+      badDb.connectionString = "postgresql://test:test@localhost:1/test";
+
+      // Then — error message includes "healthcheck failed" with detail
+      try {
+        await badDb.healthcheck();
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(error.message).toContain("postgres healthcheck failed");
+        // The message should not end with just ": " — it should include the underlying reason
+        expect(error.message).not.toBe("postgres healthcheck failed: ");
+        expect(error.cause).toBeDefined();
+      }
+    });
+
+    test("seed error includes the SQL context", async () => {
+      // Given — invalid SQL
+      try {
+        await db.seed('SELECT * FROM "nonexistent_table_xyz"');
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        // Then — error includes the table name that doesn't exist
+        expect(error.message).toContain("nonexistent_table_xyz");
+      }
+    });
+
+    test("init script error includes file path and SQL error", async () => {
+      // Given — compose dir with broken init.sql
+      const tmpDir = mkdtempSync(resolve(tmpdir(), "fail-scenario-"));
+      mkdirSync(resolve(tmpDir, "postgres"), { recursive: true });
+      writeFileSync(
+        resolve(tmpDir, "postgres/init.sql"),
+        'CREATE TABLE "broken" (id INTEGERRR);',
+      );
+
+      const initDb = postgres({ compose: "db" });
+      initDb.connectionString = db.connectionString;
+      initDb.started = true;
+
+      // Then — error includes "init script failed" and the file path
+      try {
+        await initDb.initialize(tmpDir);
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(error.message).toContain("init script failed");
+        expect(error.message).toContain("postgres/init.sql");
+      }
+    });
+
+    test("query error on nonexistent table", async () => {
+      // Given — query a table that doesn't exist
+      try {
+        await db.query("nonexistent_table_xyz", ["id"]);
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        // Then — error includes the table name
+        expect(error.message).toContain("nonexistent_table_xyz");
+      }
+    });
+  });
 });

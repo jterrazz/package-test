@@ -43,7 +43,7 @@ class RedisHandle implements ServiceHandle {
       await client.ping();
       await client.disconnect();
     } catch (error: any) {
-      throw new Error(`redis healthcheck failed: ${error.message}`, { cause: error });
+      throw new Error(`redis healthcheck failed: ${error.message || error.code || String(error)}`, { cause: error });
     }
   }
 

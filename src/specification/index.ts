@@ -86,9 +86,11 @@ async function integration(options: IntegrationOptions): Promise<SpecificationRu
 
   const app = options.app();
   const database = orchestrator.getDatabase() ?? undefined;
+  const databases = orchestrator.getDatabases();
 
   const runner = createSpecificationRunner({
     database,
+    databases: databases.size > 0 ? databases : undefined,
     server: new HonoAdapter(app),
   }) as SpecificationRunnerWithCleanup;
 
@@ -124,9 +126,11 @@ async function e2e(options: E2eOptions = {}): Promise<SpecificationRunnerWithCle
   }
 
   const database = orchestrator.getDatabase() ?? undefined;
+  const databases = orchestrator.getDatabases();
 
   const runner = createSpecificationRunner({
     database,
+    databases: databases.size > 0 ? databases : undefined,
     server: new FetchAdapter(appUrl),
   }) as SpecificationRunnerWithCleanup;
 

@@ -108,10 +108,7 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
     });
 
     test("throws on nonexistent response file", async () => {
-      // Given — valid request
       const result = await spec("bad response").get("/users").run();
-
-      // Then — ENOENT error
       expect(() => result.expectResponse("nonexistent.json")).toThrow("ENOENT");
     });
   });
@@ -130,6 +127,38 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       await result.expectTable("users", {
         columns: ["name", "email"],
         rows: [["Alice", "alice@test.com"]],
+      });
+    });
+
+    test("queries a specific service by name", async () => {
+      // Given — seed analytics directly
+      const result = await spec("query analytics")
+        .seed("two-events.sql", { service: "analytics-db" })
+        .get("/events")
+        .run();
+
+      // Then — multi-column check on analytics-db
+      await result.expectTable("events", {
+        columns: ["type", "payload"],
+        rows: [
+          ["user_created", '{"name":"Alice"}'],
+          ["user_created", '{"name":"Bob"}'],
+        ],
+        service: "analytics-db",
+      });
+    });
+
+    test("defaults to first database when service is omitted", async () => {
+      // Given — seed default db
+      const result = await spec("backwards compat").seed("two-users.sql").get("/users").run();
+
+      // Then — expectTable without service works as before
+      await result.expectTable("users", {
+        columns: ["name", "email"],
+        rows: [
+          ["Alice", "alice@test.com"],
+          ["Bob", "bob@test.com"],
+        ],
       });
     });
 
@@ -167,10 +196,8 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
     });
 
     test("fails with diff on wrong row values", async () => {
-      // Given — actual rows differ from expected
       const result = await spec("wrong values").seed("one-user.sql").get("/users").run();
 
-      // Then — error shows query context + +/- diff per row
       try {
         await result.expectTable("users", { columns: ["name"], rows: [["NonExistent"]] });
         expect.fail("should have thrown");
@@ -192,10 +219,8 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
     });
 
     test("fails with diff on extra rows", async () => {
-      // Given — table has more rows than expected
       const result = await spec("extra rows").seed("two-users.sql").get("/users").run();
 
-      // Then — row count mismatch + extra rows with + marker
       try {
         await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
         expect.fail("should have thrown");
@@ -217,10 +242,8 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
     });
 
     test("fails with diff on missing rows", async () => {
-      // Given — empty table, expecting rows
       const result = await spec("missing rows").get("/users").run();
 
-      // Then — row count mismatch + missing rows with - marker
       try {
         await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
         expect.fail("should have thrown");
@@ -238,6 +261,18 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
                     - Alice
                 `);
       }
+    });
+
+    test("throws on unknown service name", async () => {
+      const result = await spec("bad expectTable service").get("/users").run();
+
+      await expect(
+        result.expectTable("users", {
+          columns: ["name"],
+          rows: [],
+          service: "nonexistent-db",
+        }),
+      ).rejects.toThrow('expectTable requires database "nonexistent-db" but it was not found');
     });
   });
 });

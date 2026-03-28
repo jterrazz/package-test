@@ -158,9 +158,28 @@ Rules:
 
 ## Builder methods
 
-**Setup:** `.seed("file.sql")`, `.mock("file.json")`
+**Setup:** `.seed("file.sql")`, `.seed("file.sql", { service: "analytics-db" })`, `.mock("file.json")`
 **Action:** `.get(path)`, `.post(path, "body.json")`, `.put(path, "body.json")`, `.delete(path)`
-**Assertions:** `.expectStatus(code)`, `.expectResponse("file.json")`, `.expectTable(table, { columns, rows })`
+**Assertions:** `.expectStatus(code)`, `.expectResponse("file.json")`, `.expectTable(table, { columns, rows })`, `.expectTable(table, { columns, rows, service: "analytics-db" })`
+
+### Multi-database support
+
+When multiple databases are declared, `seed()` and `expectTable()` accept an optional `{ service: "name" }` to target a specific database by its compose name. Without `service`, both default to the first postgres.
+
+```typescript
+const result = await spec("cross-db")
+  .seed("users.sql")                                   // default db
+  .seed("events.sql", { service: "analytics-db" })     // analytics db
+  .post("/users", "request.json")
+  .run();
+
+await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
+await result.expectTable("events", {
+  columns: ["type"],
+  rows: [["user_created"]],
+  service: "analytics-db",
+});
+```
 
 ## Mocking utilities (unit tests)
 

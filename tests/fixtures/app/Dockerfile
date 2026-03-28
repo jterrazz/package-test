@@ -2,7 +2,7 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-RUN npm init -y && npm install hono @hono/node-server pg tsx
+RUN npm init -y && npm install hono @hono/node-server pg redis tsx
 
 COPY app.ts server.ts ./
 

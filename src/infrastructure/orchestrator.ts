@@ -7,6 +7,7 @@ import { detectServiceType, findComposeFile, parseComposeFile } from "./compose-
 import type { ContainerPort } from "./ports/container.port.js";
 import { type AppInfo, formatStartupReport, type ServiceReport } from "./reporter.js";
 import { postgres } from "./services/postgres.js";
+import { redis } from "./services/redis.js";
 import type { ServiceHandle } from "./services/service.port.js";
 
 interface RunningService {
@@ -57,6 +58,7 @@ export class Orchestrator {
 
     for (const handle of this.services) {
       const startTime = Date.now();
+      let container: TestcontainersAdapter | null = null;
 
       try {
         let image = handle.defaultImage;
@@ -67,10 +69,12 @@ export class Orchestrator {
           if (composeService) {
             image = composeService.image ?? image;
             env = { ...env, ...composeService.environment };
+            // Update handle's environment so buildConnectionString uses correct values
+            Object.assign(handle.environment, composeService.environment);
           }
         }
 
-        const container = new TestcontainersAdapter({ image, port: handle.defaultPort, env });
+        container = new TestcontainersAdapter({ image, port: handle.defaultPort, env });
         await container.start();
 
         const host = container.getHost();
@@ -89,14 +93,19 @@ export class Orchestrator {
         });
         this.running.push({ handle, container });
       } catch (error: any) {
-        // Capture container logs on failure
+        // Capture logs from the failing container (not the previous one)
         let logs = "";
-        const lastContainer = this.running.at(-1)?.container;
-        if (lastContainer) {
+        if (container) {
           try {
-            logs = await lastContainer.getLogs();
+            logs = await container.getLogs();
           } catch {
             /* Ignore log fetch errors */
+          }
+          // Clean up the failed container
+          try {
+            await container.stop();
+          } catch {
+            /* Ignore stop errors */
           }
         }
 
@@ -156,15 +165,18 @@ export class Orchestrator {
       const type = detectServiceType(service.image);
 
       if (type === "postgres") {
-        const handle = postgres({ compose: service.name });
+        const handle = postgres({ compose: service.name, env: service.environment });
         const port = this.composeStack.getMappedPort(service.name, 5432);
-        const env = { ...handle.environment, ...service.environment };
         handle.connectionString = handle.buildConnectionString("localhost", port);
 
-        // Override env from compose
-        Object.assign(handle.environment, env);
-
         await handle.initialize(composeDir);
+        handle.started = true;
+
+        this.composeHandles.push(handle);
+      } else if (type === "redis") {
+        const handle = redis({ compose: service.name });
+        const port = this.composeStack.getMappedPort(service.name, 6379);
+        handle.connectionString = handle.buildConnectionString("localhost", port);
         handle.started = true;
 
         this.composeHandles.push(handle);
@@ -197,17 +209,33 @@ export class Orchestrator {
   }
 
   /**
-   * Get the first database service.
+   * Get a database service by compose name, or the first one if no name given.
    */
-  getDatabase(): DatabasePort | null {
-    // Check testcontainer handles first, then compose handles
+  getDatabase(serviceName?: string): DatabasePort | null {
     for (const handle of [...this.services, ...this.composeHandles]) {
+      if (serviceName && handle.composeName !== serviceName) {
+        continue;
+      }
       const adapter = handle.createDatabaseAdapter();
       if (adapter) {
         return adapter;
       }
     }
     return null;
+  }
+
+  /**
+   * Get all database services keyed by compose name.
+   */
+  getDatabases(): Map<string, DatabasePort> {
+    const map = new Map<string, DatabasePort>();
+    for (const handle of [...this.services, ...this.composeHandles]) {
+      const adapter = handle.createDatabaseAdapter();
+      if (adapter && handle.composeName) {
+        map.set(handle.composeName, adapter);
+      }
+    }
+    return map;
   }
 
   /**

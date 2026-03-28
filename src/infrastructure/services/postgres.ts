@@ -56,7 +56,7 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
       await client.query("SELECT 1");
       await client.end();
     } catch (error: any) {
-      throw new Error(`postgres healthcheck failed: ${error.message}`, { cause: error });
+      throw new Error(`postgres healthcheck failed: ${error.message || error.code || String(error)}`, { cause: error });
     }
   }
 
