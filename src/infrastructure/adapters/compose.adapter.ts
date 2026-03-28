@@ -98,7 +98,7 @@ export class ComposeStackAdapter {
       return;
     }
 
-    this.run(`docker compose -f ${this.composeFile} up -d --wait --build`);
+    this.run(`docker compose -f ${this.composeFile} up -d --wait`);
     this.started = true;
   }
 

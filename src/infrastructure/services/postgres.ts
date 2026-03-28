@@ -24,6 +24,8 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
   connectionString = "";
   started = false;
 
+  private client: Client | null = null;
+
   constructor(options: PostgresOptions = {}) {
     this.composeName = options.compose ?? null;
     this.defaultImage = options.image ?? "postgres:17";
@@ -51,8 +53,10 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
       throw new Error("postgres: cannot healthcheck — no connection string");
     }
 
+    // Healthcheck uses a throwaway client (connection might not be established yet)
     try {
-      const client = await this.getClient();
+      const client = new Client({ connectionString: this.connectionString });
+      await client.connect();
       await client.query("SELECT 1");
       await client.end();
     } catch (error: any) {
@@ -88,45 +92,41 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
     }
   }
 
-  private async getClient() {
+  private async getClient(): Promise<Client> {
+    if (this.client) {
+      return this.client;
+    }
     const client = new Client({ connectionString: this.connectionString });
+    client.on("error", () => {
+      // Connection dropped (container stopped) — reset so next call reconnects
+      this.client = null;
+    });
     await client.connect();
+    this.client = client;
     return client;
   }
 
   async seed(sql: string): Promise<void> {
     const client = await this.getClient();
-    try {
-      await client.query(sql);
-    } finally {
-      await client.end();
-    }
+    await client.query(sql);
   }
 
   async query(table: string, columns: string[]): Promise<unknown[][]> {
     const client = await this.getClient();
-    try {
-      const columnList = columns.join(", ");
-      const result = await client.query(`SELECT ${columnList} FROM "${table}" ORDER BY 1`);
-      return result.rows.map((row: Record<string, unknown>) => columns.map((col) => row[col]));
-    } finally {
-      await client.end();
-    }
+    const columnList = columns.join(", ");
+    const result = await client.query(`SELECT ${columnList} FROM "${table}" ORDER BY 1`);
+    return result.rows.map((row: Record<string, unknown>) => columns.map((col) => row[col]));
   }
 
   async reset(): Promise<void> {
     const client = await this.getClient();
-    try {
-      const result = await client.query(`
-                SELECT tablename FROM pg_tables
-                WHERE schemaname = 'public'
-                AND tablename NOT LIKE '_prisma%'
-            `);
-      for (const row of result.rows) {
-        await client.query(`TRUNCATE "${row.tablename}" CASCADE`);
-      }
-    } finally {
-      await client.end();
+    const result = await client.query(`
+            SELECT tablename FROM pg_tables
+            WHERE schemaname = 'public'
+            AND tablename NOT LIKE '_prisma%'
+        `);
+    for (const row of result.rows) {
+      await client.query(`TRUNCATE "${row.tablename}" CASCADE`);
     }
   }
 }
