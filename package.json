@@ -1,37 +1,38 @@
 {
   "name": "@jterrazz/test",
+  "version": "3.1.0",
   "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/jterrazz/package-test"
   },
-  "version": "3.1.0",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "typescript bundle",
-    "lint": "ts-check",
-    "lint:fix": "ts-fix",
+    "lint": "codestyle check",
+    "lint:fix": "codestyle fix",
     "test": "# No tests"
   },
-  "devDependencies": {
-    "@jterrazz/quality": "^5.0.1",
-    "@jterrazz/typescript": "^5.1.0",
-    "@types/node": "^25.5.0"
-  },
   "dependencies": {
-    "@jterrazz/codestyle": "^2.1.0",
-    "@types/mockdate": "^3.0.0",
     "mockdate": "^3.0.5",
     "vitest-mock-extended": "^3.1.0"
+  },
+  "devDependencies": {
+    "@jterrazz/codestyle": "^2.1.0",
+    "@jterrazz/typescript": "^5.1.1",
+    "@types/node": "^25.5.0"
   },
   "peerDependencies": {
     "msw": "^2.12.0",
@@ -41,8 +42,5 @@
     "msw": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
   }
 }

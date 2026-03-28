@@ -1,3 +1,4 @@
 {
-  "extends": "@jterrazz/typescript/presets/tsconfig/node"
+  "extends": "@jterrazz/typescript/presets/tsconfig/node",
+  "include": ["src/"]
 }

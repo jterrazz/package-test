@@ -19,16 +19,16 @@ npm install -D msw
 ### Date Mocking
 
 ```typescript
-import { describe, test, expect, afterEach } from 'vitest';
-import { mockOfDate } from '@jterrazz/test';
+import { describe, test, expect, afterEach } from "vitest";
+import { mockOfDate } from "@jterrazz/test";
 
-describe('Date Tests', () => {
+describe("Date Tests", () => {
   afterEach(() => {
     mockOfDate.reset();
   });
 
-  test('should mock dates', () => {
-    const fixedDate = new Date('2024-01-01');
+  test("should mock dates", () => {
+    const fixedDate = new Date("2024-01-01");
     mockOfDate.set(fixedDate);
 
     expect(new Date()).toEqual(fixedDate);
@@ -39,33 +39,33 @@ describe('Date Tests', () => {
 ### Deep Mocking
 
 ```typescript
-import { describe, test, expect } from 'vitest';
-import { mockOf } from '@jterrazz/test';
+import { describe, test, expect } from "vitest";
+import { mockOf } from "@jterrazz/test";
 
 interface UserService {
   getUser: (id: string) => Promise<{ id: string; name: string }>;
 }
 
-describe('Mock Tests', () => {
-  test('should use deep mocks', async () => {
+describe("Mock Tests", () => {
+  test("should use deep mocks", async () => {
     const mockUserService = mockOf<UserService>();
 
-    mockUserService.getUser.mockResolvedValue({ id: '1', name: 'John' });
+    mockUserService.getUser.mockResolvedValue({ id: "1", name: "John" });
 
-    const user = await mockUserService.getUser('1');
-    expect(user).toEqual({ id: '1', name: 'John' });
+    const user = await mockUserService.getUser("1");
+    expect(user).toEqual({ id: "1", name: "John" });
   });
 });
 ```
 
 ## API
 
-| Export | Description |
-|--------|-------------|
-| `mockOfDate` | Date mocking utilities (`set`, `reset`) |
-| `mockOf<T>()` | Create deep mock of any interface |
-| `MockDatePort` | Type interface for date mocking |
-| `MockPort` | Type interface for deep mocking |
+| Export         | Description                             |
+| -------------- | --------------------------------------- |
+| `mockOfDate`   | Date mocking utilities (`set`, `reset`) |
+| `mockOf<T>()`  | Create deep mock of any interface       |
+| `MockDatePort` | Type interface for date mocking         |
+| `MockPort`     | Type interface for deep mocking         |
 
 ## Peer Dependencies
 
