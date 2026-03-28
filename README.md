@@ -92,11 +92,8 @@ test("creates company", async () => {
 ## Service factories
 
 ```typescript
-import { postgres, redis, sqlite } from "@jterrazz/test";
-
 postgres({ compose: "db" }); // Links to docker-compose.test.yaml
 redis({ compose: "cache" });
-sqlite({ memory: true }); // No container, in-process
 ```
 
 After `await integration()`, service handles have `.connectionString` populated from running containers.

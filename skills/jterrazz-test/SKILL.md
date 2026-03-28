@@ -91,7 +91,6 @@ test("creates company", async () => {
 ```typescript
 postgres({ compose: "db" }); // Links to docker-compose.test.yaml service
 redis({ compose: "cache" });
-sqlite({ memory: true }); // No container, in-process
 ```
 
 After `await integration()`, service handles have `.connectionString` populated.
