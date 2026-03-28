@@ -61,12 +61,12 @@ tests/
 ```typescript
 // tests/integration/integration.specification.ts
 import { integration } from "@jterrazz/test";
-import { PrismaAdapter } from "@jterrazz/test";
+import { BetterSqliteAdapter } from "@jterrazz/test";
 import { app } from "../../src/app.js";
 import { prisma } from "../../src/database.js";
 
 export const spec = integration({
-  database: new PrismaAdapter(prisma),
+  database: new BetterSqliteAdapter(prisma),
   app,
 });
 ```
@@ -95,11 +95,11 @@ test("creates company from INPI data", async () => {
 ```typescript
 // tests/e2e/e2e.specification.ts
 import { e2e } from "@jterrazz/test";
-import { PrismaAdapter } from "@jterrazz/test";
+import { BetterSqliteAdapter } from "@jterrazz/test";
 import { prisma } from "../../src/database.js";
 
 export const spec = e2e({
-  database: new PrismaAdapter(prisma),
+  database: new BetterSqliteAdapter(prisma),
   url: "http://localhost:3000",
 });
 ```
@@ -137,7 +137,7 @@ interface DatabasePort {
 }
 ```
 
-Built-in adapters: `PrismaAdapter`.
+Built-in adapters: `BetterSqliteAdapter`.
 
 ## Mocking utilities
 
@@ -154,4 +154,4 @@ import { mockOf, mockOfDate } from "@jterrazz/test";
 
 - `vitest` (required)
 - `msw` (optional — for `.mock()` in specification runners)
-- `@prisma/client` (optional — for PrismaAdapter)
+- `@prisma/client` (optional — for BetterSqliteAdapter)
