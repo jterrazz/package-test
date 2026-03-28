@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 
+import { integrationSpec } from "../../setup/integration.specification.js";
 import { runners } from "../../setup/runners.js";
+
+// ── Critical paths — both integration and e2e ──
 
 describe.each(runners)("$name — requests", ({ spec }) => {
   test("sends GET request", async () => {
@@ -23,15 +26,12 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     // Given — create a user (app writes to both databases)
     const result = await spec("cross-db write").post("/users", "create-user.json").run();
 
+    // Then — user in default db and event in analytics db
     expect(result.status).toBe(201);
-
-    // Then — user in default db
     await result.table("users").toMatch({
       columns: ["name", "email"],
       rows: [["Charlie", "charlie@test.com"]],
     });
-
-    // Then — event logged in analytics db
     await result.table("events", { service: "analytics-db" }).toMatch({
       columns: ["type"],
       rows: [["user_created"]],
@@ -45,11 +45,15 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     // Then — 404 Not Found
     expect(result.status).toBe(404);
   });
+});
 
+// ── Edge cases — integration only ──
+
+describe("integration — request errors", () => {
   test("throws when run() called without a request method", async () => {
     // Given — seed but no .get()/.post()/.delete()
     try {
-      await spec("no request").seed("one-user.sql").run();
+      await integrationSpec("no request").seed("one-user.sql").run();
       expect.fail("should have thrown");
     } catch (error: any) {
       // Then — descriptive error with spec label
@@ -60,8 +64,9 @@ describe.each(runners)("$name — requests", ({ spec }) => {
   });
 
   test("throws on nonexistent request body file", async () => {
-    await expect(spec("bad body").post("/users", "nonexistent.json").run()).rejects.toThrow(
-      "ENOENT",
-    );
+    // Given — reference to nonexistent body file
+    await expect(
+      integrationSpec("bad body").post("/users", "nonexistent.json").run(),
+    ).rejects.toThrow("ENOENT");
   });
 });
