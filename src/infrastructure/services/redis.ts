@@ -31,6 +31,22 @@ class RedisHandle implements ServiceHandle {
     return null;
   }
 
+  async healthcheck(): Promise<void> {
+    if (!this.connectionString) {
+      throw new Error("redis: cannot healthcheck — no connection string");
+    }
+
+    try {
+      const { createClient } = await import("redis");
+      const client = createClient({ url: this.connectionString });
+      await client.connect();
+      await client.ping();
+      await client.disconnect();
+    } catch (error: any) {
+      throw new Error(`redis healthcheck failed: ${error.message}`, { cause: error });
+    }
+  }
+
   async initialize(): Promise<void> {
     // Redis doesn't need initialization scripts
   }

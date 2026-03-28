@@ -77,14 +77,37 @@ export class Orchestrator {
         const port = container.getMappedPort(handle.defaultPort);
         handle.connectionString = handle.buildConnectionString(host, port);
 
+        // Healthcheck — verify service is ready
+        await handle.healthcheck();
+
+        // Init scripts — fail fast with context
         await handle.initialize(composeDir);
         handle.started = true;
 
         reports.push({ handle, durationMs: Date.now() - startTime });
         this.running.push({ handle, container });
       } catch (error: any) {
-        reports.push({ handle, durationMs: Date.now() - startTime, error: error.message });
-        throw error;
+        // Capture container logs on failure
+        const lastContainer = this.running.at(-1)?.container;
+        let logs = "";
+        if (lastContainer) {
+          try {
+            logs = await lastContainer.getLogs();
+          } catch {
+            /* Ignore log fetch errors */
+          }
+        }
+
+        const errorWithLogs = logs
+          ? `${error.message}\n\n┌ Container logs ─────────────────────\n${logs
+              .split("\n")
+              .slice(-15)
+              .map((l: string) => `│ ${l}`)
+              .join("\n")}\n└─────────────────────────────────────`
+          : error.message;
+
+        reports.push({ handle, durationMs: Date.now() - startTime, error: errorWithLogs });
+        throw new Error(errorWithLogs, { cause: error });
       }
     }
 

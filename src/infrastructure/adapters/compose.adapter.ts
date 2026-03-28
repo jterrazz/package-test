@@ -59,6 +59,14 @@ export class ComposeAdapter implements ContainerPort {
   getConnectionString(): string {
     return `${this.getHost()}:${this.getMappedPort(0)}`;
   }
+
+  async getLogs(): Promise<string> {
+    try {
+      return this.exec(`docker compose -f ${this.composeFile} logs ${this.serviceName} --tail=50`);
+    } catch {
+      return "";
+    }
+  }
 }
 
 /**

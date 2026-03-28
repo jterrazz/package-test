@@ -46,6 +46,20 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
     return this;
   }
 
+  async healthcheck(): Promise<void> {
+    if (!this.connectionString) {
+      throw new Error("postgres: cannot healthcheck — no connection string");
+    }
+
+    try {
+      const client = await this.getClient();
+      await client.query("SELECT 1");
+      await client.end();
+    } catch (error: any) {
+      throw new Error(`postgres healthcheck failed: ${error.message}`, { cause: error });
+    }
+  }
+
   async initialize(composeDir: string): Promise<void> {
     if (!this.composeName) {
       return;
@@ -59,7 +73,13 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
     for (const initPath of initPaths) {
       if (existsSync(initPath)) {
         const sql = readFileSync(initPath, "utf8");
-        await this.seed(sql);
+        try {
+          await this.seed(sql);
+        } catch (error: any) {
+          throw new Error(`postgres init script failed (${initPath}):\n${error.message}`, {
+            cause: error,
+          });
+        }
         return;
       }
     }

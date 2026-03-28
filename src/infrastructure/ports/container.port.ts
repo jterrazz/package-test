@@ -17,4 +17,7 @@ export interface ContainerPort {
 
   /** Get a full connection string for this service. */
   getConnectionString(): string;
+
+  /** Get container logs (stdout + stderr). */
+  getLogs(): Promise<string>;
 }

@@ -25,7 +25,6 @@ export class TestcontainersAdapter implements ContainerPort {
       builder = builder.withEnvironment({ [key]: value });
     }
 
-    // Use log-based wait for postgres, simple port wait for others
     if (this.image.startsWith("postgres")) {
       builder = builder.withWaitStrategy(
         Wait.forLogMessage(/database system is ready to accept connections/, 2),
@@ -58,5 +57,26 @@ export class TestcontainersAdapter implements ContainerPort {
 
   getConnectionString(): string {
     return `${this.getHost()}:${this.getMappedPort(this.containerPort)}`;
+  }
+
+  async getLogs(): Promise<string> {
+    if (!this.container) {
+      return "";
+    }
+
+    const stream = await this.container.logs();
+    return new Promise((resolve) => {
+      let output = "";
+      stream.on("data", (chunk: Buffer) => {
+        output += chunk.toString();
+      });
+      stream.on("end", () => {
+        resolve(output);
+      });
+      // Timeout after 1s if stream doesn't end
+      setTimeout(() => {
+        resolve(output);
+      }, 1000);
+    });
   }
 }

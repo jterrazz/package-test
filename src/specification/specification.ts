@@ -28,19 +28,59 @@ export interface RequestEntry {
 
 // ── Result (after .run()) ──
 
+interface RequestInfo {
+  method: string;
+  path: string;
+  body?: unknown;
+}
+
 export class SpecificationResult {
   private response: ServerResponse;
   private config: SpecificationConfig;
   private testDir: string;
+  private requestInfo: RequestInfo;
 
-  constructor(response: ServerResponse, config: SpecificationConfig, testDir: string) {
+  constructor(
+    response: ServerResponse,
+    config: SpecificationConfig,
+    testDir: string,
+    requestInfo: RequestInfo,
+  ) {
     this.response = response;
     this.config = config;
     this.testDir = testDir;
+    this.requestInfo = requestInfo;
+  }
+
+  private formatContext(): string {
+    const lines: string[] = [];
+
+    lines.push("");
+    lines.push("┌ Request ────────────────────────────");
+    lines.push(`│ ${this.requestInfo.method} ${this.requestInfo.path}`);
+    if (this.requestInfo.body) {
+      lines.push(
+        `│ Body: ${JSON.stringify(this.requestInfo.body, null, 2).split("\n").join("\n│ ")}`,
+      );
+    }
+    lines.push("└─────────────────────────────────────");
+
+    lines.push("");
+    lines.push("┌ Response ───────────────────────────");
+    lines.push(`│ ${this.response.status}`);
+    if (this.response.body) {
+      lines.push(`│ ${JSON.stringify(this.response.body, null, 2).split("\n").join("\n│ ")}`);
+    }
+    lines.push("└─────────────────────────────────────");
+
+    return lines.join("\n");
   }
 
   expectStatus(code: number): this {
-    expect(this.response.status).toBe(code);
+    if (this.response.status !== code) {
+      const context = this.formatContext();
+      throw new Error(`Expected status ${code}, received ${this.response.status}${context}`);
+    }
     return this;
   }
 
@@ -150,7 +190,11 @@ export class SpecificationBuilder {
 
     const response = await this.config.server.request(this.request.method, this.request.path, body);
 
-    return new SpecificationResult(response, this.config, this.testDir);
+    return new SpecificationResult(response, this.config, this.testDir, {
+      method: this.request.method,
+      path: this.request.path,
+      body,
+    });
   }
 }
 
