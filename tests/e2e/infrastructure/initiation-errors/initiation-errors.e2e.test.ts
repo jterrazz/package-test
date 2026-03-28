@@ -5,7 +5,6 @@ import { normalizeOutput, stripAnsi } from "../../../../src/index.js";
 import { Orchestrator } from "../../../../src/infrastructure/orchestrator.js";
 import { postgres } from "../../../../src/infrastructure/services/postgres.js";
 import { redis } from "../../../../src/infrastructure/services/redis.js";
-import { dedent } from "../../../helpers/dedent.js";
 
 const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, "../../../fixtures/broken-postgres-init");
 const BROKEN_MULTI_INIT = resolve(import.meta.dirname, "../../../fixtures/broken-multi-init");
@@ -53,7 +52,7 @@ describe("initiation errors", () => {
       try {
         await orchestrator.start();
       } catch {
-        /* expected */
+        /* Expected */
       }
 
       // Then — formatted report printed to stderr
@@ -82,7 +81,7 @@ describe("initiation errors", () => {
       try {
         await orchestrator.start();
       } catch {
-        /* expected */
+        /* Expected */
       }
 
       // Then — report includes container log lines from the failing postgres
@@ -108,7 +107,7 @@ describe("initiation errors", () => {
       try {
         await orchestrator.start();
       } catch {
-        /* expected */
+        /* Expected */
       }
 
       // Then — report shows redis success, then postgres failure
@@ -135,7 +134,7 @@ describe("initiation errors", () => {
       try {
         await orchestrator.start();
       } catch {
-        /* expected */
+        /* Expected */
       }
 
       // Then — redis line comes before postgres line
@@ -163,7 +162,7 @@ describe("initiation errors", () => {
       try {
         await orchestrator.start();
       } catch {
-        /* expected */
+        /* Expected */
       }
 
       // Then — first postgres succeeded, second failed
@@ -212,7 +211,7 @@ describe("initiation errors", () => {
       try {
         await orchestrator.start();
       } catch {
-        /* expected */
+        /* Expected */
       }
 
       // Then — logs are from the broken-db container, not the first db

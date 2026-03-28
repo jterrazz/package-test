@@ -58,7 +58,7 @@ export class Orchestrator {
 
     for (const handle of this.services) {
       const startTime = Date.now();
-      let container: TestcontainersAdapter | null = null;
+      let container: null | TestcontainersAdapter = null;
 
       try {
         let image = handle.defaultImage;
