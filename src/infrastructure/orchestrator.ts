@@ -1,158 +1,181 @@
-import { resolve } from "node:path";
+import { dirname } from "node:path";
 
 import type { DatabasePort } from "../specification/ports/database.port.js";
+import { ComposeStackAdapter } from "./adapters/compose.adapter.js";
 import { TestcontainersAdapter } from "./adapters/testcontainers.adapter.js";
-import {
-  type ComposeConfig,
-  detectServiceType,
-  findComposeFile,
-  parseComposeFile,
-} from "./compose-parser.js";
+import { findComposeFile, parseComposeFile } from "./compose-parser.js";
 import type { ContainerPort } from "./ports/container.port.js";
-import { PostgresService } from "./services/postgres.service.js";
-import { RedisService } from "./services/redis.service.js";
-
-const DEFAULT_PORTS: Record<string, number> = {
-  postgres: 5432,
-  redis: 6379,
-};
-
-const DEFAULT_ENV: Record<string, Record<string, string>> = {
-  postgres: {
-    POSTGRES_DB: "test",
-    POSTGRES_PASSWORD: "test",
-    POSTGRES_USER: "test",
-  },
-};
+import { printReport } from "./reporter.js";
+import type { ServiceHandle } from "./services/service.port.js";
 
 interface RunningService {
-  container: ContainerPort;
-  handler: DatabasePort | null | RedisService;
-  name: string;
-  type: string;
+  handle: ServiceHandle;
+  container: ContainerPort | null;
+}
+
+interface OrchestratorOptions {
+  services: ServiceHandle[];
+  mode: "e2e" | "integration";
+  projectRoot?: string;
 }
 
 /**
  * Orchestrator for test infrastructure.
- * Reads docker-compose.test.yaml, starts containers, wires adapters.
+ * Starts services, populates connection strings, reports status.
  */
 export class Orchestrator {
-  private composeConfig: ComposeConfig;
-  private composeFilePath: string;
-  private runningServices: RunningService[] = [];
+  private services: ServiceHandle[];
+  private mode: "e2e" | "integration";
+  private projectRoot: string;
+  private running: RunningService[] = [];
+  private composeStack: ComposeStackAdapter | null = null;
   private started = false;
 
-  constructor(projectRoot: string) {
-    const composePath = findComposeFile(projectRoot);
-
-    if (!composePath) {
-      this.composeConfig = { services: [], appService: null, infraServices: [] };
-      this.composeFilePath = resolve(projectRoot, "docker/compose.test.yaml");
-    } else {
-      this.composeFilePath = composePath;
-      this.composeConfig = parseComposeFile(composePath);
-    }
+  constructor(options: OrchestratorOptions) {
+    this.services = options.services;
+    this.mode = options.mode;
+    this.projectRoot = options.projectRoot ?? process.cwd();
   }
 
   /**
-   * Start all infrastructure containers.
-   * Skips the app service (the thing being tested).
+   * Start all declared services.
    */
   async start(): Promise<void> {
     if (this.started) {
       return;
     }
 
-    for (const service of this.composeConfig.infraServices) {
-      const type = detectServiceType(service.image);
+    const composePath = findComposeFile(this.projectRoot);
+    const composeDir = composePath ? dirname(composePath) : this.projectRoot;
+    const composeConfig = composePath ? parseComposeFile(composePath) : null;
 
-      if (type === "unknown" || type === "app") {
-        continue;
+    const reports: { handle: ServiceHandle; durationMs: number; error?: string }[] = [];
+
+    for (const handle of this.services) {
+      const startTime = Date.now();
+
+      try {
+        // SQLite: in-process, no container
+        if (handle.type === "sqlite") {
+          if ("start" in handle && typeof handle.start === "function") {
+            await (handle as any).start();
+          }
+          handle.started = true;
+          reports.push({ handle, durationMs: Date.now() - startTime });
+          this.running.push({ handle, container: null });
+          continue;
+        }
+
+        // Resolve config from compose if linked
+        let image = handle.defaultImage;
+        let env = { ...handle.environment };
+
+        if (handle.composeName && composeConfig) {
+          const composeService = composeConfig.services.find((s) => s.name === handle.composeName);
+          if (composeService) {
+            image = composeService.image ?? image;
+            env = { ...env, ...composeService.environment };
+          }
+        }
+
+        if (this.mode === "e2e" && composePath) {
+          // E2E: use docker compose
+          if (!this.composeStack) {
+            this.composeStack = new ComposeStackAdapter(composePath);
+            await this.composeStack.start();
+          }
+
+          const port = this.composeStack.getMappedPort(
+            handle.composeName ?? handle.type,
+            handle.defaultPort,
+          );
+          handle.connectionString = handle.buildConnectionString("localhost", port);
+        } else {
+          // Integration: use testcontainers
+          const container = new TestcontainersAdapter({
+            image,
+            port: handle.defaultPort,
+            env,
+          });
+          await container.start();
+
+          const host = container.getHost();
+          const port = container.getMappedPort(handle.defaultPort);
+          handle.connectionString = handle.buildConnectionString(host, port);
+
+          this.running.push({ handle, container });
+        }
+
+        await handle.initialize(composeDir);
+        handle.started = true;
+        reports.push({ handle, durationMs: Date.now() - startTime });
+      } catch (error: any) {
+        reports.push({
+          handle,
+          durationMs: Date.now() - startTime,
+          error: error.message,
+        });
+        throw error;
       }
-
-      const port = DEFAULT_PORTS[type];
-
-      if (!port) {
-        continue;
-      }
-
-      const env = { ...DEFAULT_ENV[type], ...service.environment };
-
-      const container = new TestcontainersAdapter({
-        image: service.image!,
-        port,
-        env,
-      });
-
-      await container.start();
-
-      let handler: DatabasePort | null | RedisService = null;
-
-      if (type === "postgres") {
-        const pgService = new PostgresService(container, service, this.composeFilePath);
-        await pgService.initialize();
-        handler = pgService;
-      } else if (type === "redis") {
-        handler = new RedisService(container, service);
-      }
-
-      this.runningServices.push({
-        name: service.name,
-        type,
-        container,
-        handler,
-      });
     }
 
     this.started = true;
+    printReport(this.mode, reports);
   }
 
   /**
    * Stop all running containers.
    */
   async stop(): Promise<void> {
-    for (const service of this.runningServices) {
-      await service.container.stop();
+    for (const { container } of this.running) {
+      if (container) {
+        await container.stop();
+      }
     }
-    this.runningServices = [];
+
+    if (this.composeStack) {
+      await this.composeStack.stop();
+    }
+
+    this.running = [];
     this.started = false;
   }
 
   /**
-   * Get the database adapter (auto-detected from compose).
-   * Returns the first database service found (postgres > sqlite).
+   * Get the first database service (for the specification runner).
    */
   getDatabase(): DatabasePort | null {
-    const dbService = this.runningServices.find((s) => s.type === "postgres");
-    return (dbService?.handler as DatabasePort) ?? null;
+    for (const handle of this.services) {
+      const adapter = handle.createDatabaseAdapter();
+      if (adapter) {
+        return adapter;
+      }
+    }
+    return null;
   }
 
   /**
-   * Get a service's connection string by name.
-   */
-  getConnectionString(serviceName: string): null | string {
-    const service = this.runningServices.find((s) => s.name === serviceName);
-    return service?.container.getConnectionString() ?? null;
-  }
-
-  /**
-   * Get the app service URL from compose (for e2e mode).
+   * Get the app URL from compose (for e2e mode).
    */
   getAppUrl(): null | string {
-    const appService = this.composeConfig.appService;
+    const composePath = findComposeFile(this.projectRoot);
+    if (!composePath) {
+      return null;
+    }
+
+    const config = parseComposeFile(composePath);
+    const appService = config.appService;
 
     if (!appService || appService.ports.length === 0) {
       return null;
     }
 
+    if (this.composeStack) {
+      const port = this.composeStack.getMappedPort(appService.name, appService.ports[0].container);
+      return `http://localhost:${port}`;
+    }
+
     const port = appService.ports[0].host ?? appService.ports[0].container;
     return `http://localhost:${port}`;
-  }
-
-  /**
-   * Check if a compose file was found.
-   */
-  hasComposeFile(): boolean {
-    return this.composeConfig.services.length > 0;
   }
 }

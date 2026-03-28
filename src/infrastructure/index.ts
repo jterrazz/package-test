@@ -1,7 +1,9 @@
 export type { ContainerPort } from "./ports/container.port.js";
+export type { ServiceHandle } from "./services/service.port.js";
+export { ComposeAdapter, ComposeStackAdapter } from "./adapters/compose.adapter.js";
 export { TestcontainersAdapter } from "./adapters/testcontainers.adapter.js";
-export { detectServiceType, findComposeFile, parseComposeFile } from "./compose-parser.js";
-export type { ComposeConfig, ComposeService } from "./compose-parser.js";
+export { findComposeFile, parseComposeFile } from "./compose-parser.js";
 export { Orchestrator } from "./orchestrator.js";
-export { PostgresService } from "./services/postgres.service.js";
-export { RedisService } from "./services/redis.service.js";
+export { postgres } from "./services/postgres.js";
+export { redis } from "./services/redis.js";
+export { sqlite } from "./services/sqlite.js";

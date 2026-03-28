@@ -35,6 +35,7 @@
     "@jterrazz/typescript": "^5.1.1",
     "@prisma/adapter-better-sqlite3": "^7.6.0",
     "@prisma/client": "^7.6.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.5.0",
     "@types/pg": "^8.20.0",
     "better-sqlite3": "^12.8.0",

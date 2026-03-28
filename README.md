@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Testing framework for the @jterrazz ecosystem — conventions, specification runners, and utilities that all projects follow.
+Testing framework for the @jterrazz ecosystem — conventions, specification runners with automatic infrastructure, and utilities that all projects follow.
 
 ## Installation
 
@@ -11,79 +11,62 @@ npm install -D @jterrazz/test vitest
 ## Test structure
 
 ```
-src/
-├── domain/
-│   ├── user.ts
-│   └── user.test.ts                              # Unit — colocated
-
 tests/
-├── setup/                                         # Infrastructure (Docker, DB, migrations)
-│   └── database.ts
+├── setup/                                         # Infrastructure (Docker, DB)
 ├── fixtures/                                      # Shared fake things to test against
-│   └── app/
 ├── helpers/                                       # Shared test utilities
 ├── integration/
 │   ├── integration.specification.ts               # Runner config
 │   └── api/
-│       └── analyze-company/
-│           ├── analyze-company.integration.test.ts
+│       └── {feature}/
+│           ├── {feature}.integration.test.ts
 │           ├── seeds/
 │           ├── mock/
 │           ├── requests/
 │           └── responses/
 └── e2e/
-    ├── e2e.specification.ts                       # Runner config
-    └── api/
-        └── ...
+    ├── e2e.specification.ts
+    └── api/...
 ```
-
-## File naming
-
-| Type        | Suffix                 | Location              |
-| ----------- | ---------------------- | --------------------- |
-| Unit        | `.test.ts`             | Colocated with source |
-| Integration | `.integration.test.ts` | `tests/integration/`  |
-| E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
-
-## Folder conventions
-
-| Folder              | Purpose                                                        |
-| ------------------- | -------------------------------------------------------------- |
-| `tests/setup/`      | Infrastructure — Docker, DB init, migrations                   |
-| `tests/fixtures/`   | Shared fake things to test against (sample apps, mock servers) |
-| `tests/helpers/`    | Shared test utilities                                          |
-| `{test}/seeds/`     | Database state setup (colocated)                               |
-| `{test}/mock/`      | Mocked external API responses (colocated)                      |
-| `{test}/requests/`  | Request bodies (colocated)                                     |
-| `{test}/responses/` | Expected API responses (colocated)                             |
-| `{test}/expected/`  | Expected output to compare against (colocated)                 |
 
 ## Specification runners
 
-Fluent builders for integration and e2e tests.
+Declare services, provide an app factory, the framework handles everything.
 
 ### Integration (in-process, fast)
 
 ```typescript
 // tests/integration/integration.specification.ts
-import { integration, PrismaAdapter } from "@jterrazz/test";
+import { afterAll } from "vitest";
+import { integration, postgres } from "@jterrazz/test";
+import { createApp } from "../../src/app.js";
 
-export const spec = integration({
-  database: new PrismaAdapter(prisma),
-  app, // Hono instance
+const db = postgres({ compose: "db" });
+
+export const spec = await integration({
+  services: [db],
+  app: () => createApp({ databaseUrl: db.connectionString }),
 });
+
+afterAll(() => spec.cleanup());
 ```
 
-### E2E (real HTTP)
+### E2E (real HTTP, automatic server)
 
 ```typescript
 // tests/e2e/e2e.specification.ts
-import { e2e, PrismaAdapter } from "@jterrazz/test";
+import { afterAll } from "vitest";
+import { e2e, postgres } from "@jterrazz/test";
+import { createApp } from "../../src/app.js";
 
-export const spec = e2e({
-  database: new PrismaAdapter(prisma),
-  url: "http://localhost:3000",
+const db = postgres({ compose: "db" });
+
+export const spec = await e2e({
+  services: [db],
+  app: () => createApp({ databaseUrl: db.connectionString }),
 });
+
+afterAll(() => spec.cleanup());
 ```
 
 ### Usage
@@ -94,7 +77,6 @@ import { spec } from "../integration.specification.js";
 test("creates company", async () => {
   const result = await spec("creates company")
     .seed("transactions.sql")
-    .mock("inpi-success.json")
     .post("/api/analyze", "request.json")
     .run();
 
@@ -107,7 +89,28 @@ test("creates company", async () => {
 });
 ```
 
-### Builder API
+## Service factories
+
+```typescript
+import { postgres, redis, sqlite } from "@jterrazz/test";
+
+postgres({ compose: "db" }); // Links to docker-compose.test.yaml
+redis({ compose: "cache" });
+sqlite({ memory: true }); // No container, in-process
+```
+
+After `await integration()`, service handles have `.connectionString` populated from running containers.
+
+## Docker compose convention
+
+```
+docker/
+├── compose.test.yaml                # Auto-detected by framework
+├── postgres/
+│   └── init.sql                     # Auto-run on container start
+```
+
+## Builder API
 
 **Setup:** `.seed("file.sql")`, `.mock("file.json")`
 
@@ -115,19 +118,18 @@ test("creates company", async () => {
 
 **Assertions:** `.expectStatus(code)`, `.expectResponse("file.json")`, `.expectTable(table, { columns, rows })`
 
-## Ports
+## Folder conventions
 
-Plug in your stack by implementing the database port:
-
-```typescript
-interface DatabasePort {
-  seed(sql: string): Promise<void>;
-  query(table: string, columns: string[]): Promise<unknown[][]>;
-  reset(): Promise<void>;
-}
-```
-
-Built-in adapter: `PrismaAdapter`.
+| Folder              | Purpose                                        |
+| ------------------- | ---------------------------------------------- |
+| `tests/setup/`      | Infrastructure — Docker, DB init, migrations   |
+| `tests/fixtures/`   | Shared fake things to test against             |
+| `tests/helpers/`    | Shared test utilities                          |
+| `{test}/seeds/`     | Database state setup (colocated)               |
+| `{test}/mock/`      | Mocked external API responses (colocated)      |
+| `{test}/requests/`  | Request bodies (colocated)                     |
+| `{test}/responses/` | Expected API responses (colocated)             |
+| `{test}/expected/`  | Expected output to compare against (colocated) |
 
 ## Mocking utilities
 
@@ -139,8 +141,3 @@ import { mockOf, mockOfDate } from "@jterrazz/test";
 | ------------- | ---------------------------------------- |
 | `mockOfDate`  | Date mocking — `set(date)` and `reset()` |
 | `mockOf<T>()` | Deep mock of any interface               |
-
-## Peer dependencies
-
-- `vitest` (required)
-- `msw` (optional — for `.mock()`)
