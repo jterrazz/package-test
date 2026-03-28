@@ -218,6 +218,7 @@ export { redis } from "../infrastructure/services/redis.js";
 export type { CommandPort, CommandResult } from "./ports/command.port.js";
 export type { DatabasePort } from "./ports/database.port.js";
 export type { ServerPort, ServerResponse } from "./ports/server.port.js";
+export type { SpecificationResult } from "./specification.js";
 
 // Adapters (for advanced usage)
 export { ExecAdapter } from "./adapters/exec.adapter.js";
