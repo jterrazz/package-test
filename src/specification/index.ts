@@ -149,5 +149,8 @@ export { FetchAdapter } from "./adapters/fetch.adapter.js";
 export { HonoAdapter } from "./adapters/hono.adapter.js";
 export { Orchestrator } from "../infrastructure/orchestrator.js";
 
+// Reporter (for testing output)
+export { normalizeOutput, stripAnsi } from "../infrastructure/reporter.js";
+
 // Runners
 export { e2e, integration };

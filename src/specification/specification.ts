@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { expect } from "vitest";
 
+import {
+  formatResponseDiff,
+  formatStatusError,
+  formatTableDiff,
+} from "../infrastructure/reporter.js";
 import type { DatabasePort } from "./ports/database.port.js";
 import type { ServerPort, ServerResponse } from "./ports/server.port.js";
 
@@ -52,41 +56,20 @@ export class SpecificationResult {
     this.requestInfo = requestInfo;
   }
 
-  private formatContext(): string {
-    const lines: string[] = [];
-
-    lines.push("");
-    lines.push("┌ Request ────────────────────────────");
-    lines.push(`│ ${this.requestInfo.method} ${this.requestInfo.path}`);
-    if (this.requestInfo.body) {
-      lines.push(
-        `│ Body: ${JSON.stringify(this.requestInfo.body, null, 2).split("\n").join("\n│ ")}`,
-      );
-    }
-    lines.push("└─────────────────────────────────────");
-
-    lines.push("");
-    lines.push("┌ Response ───────────────────────────");
-    lines.push(`│ ${this.response.status}`);
-    if (this.response.body) {
-      lines.push(`│ ${JSON.stringify(this.response.body, null, 2).split("\n").join("\n│ ")}`);
-    }
-    lines.push("└─────────────────────────────────────");
-
-    return lines.join("\n");
-  }
-
   expectStatus(code: number): this {
     if (this.response.status !== code) {
-      const context = this.formatContext();
-      throw new Error(`Expected status ${code}, received ${this.response.status}${context}`);
+      throw new Error(
+        formatStatusError(code, this.response.status, this.requestInfo, this.response.body),
+      );
     }
     return this;
   }
 
   expectResponse(file: string): this {
     const expected = JSON.parse(readFileSync(resolve(this.testDir, "responses", file), "utf8"));
-    expect(this.response.body).toEqual(expected);
+    if (JSON.stringify(this.response.body) !== JSON.stringify(expected)) {
+      throw new Error(formatResponseDiff(file, expected, this.response.body));
+    }
     return this;
   }
 
@@ -99,7 +82,9 @@ export class SpecificationResult {
     }
 
     const actual = await this.config.database.query(table, options.columns);
-    expect(actual).toEqual(options.rows);
+    if (JSON.stringify(actual) !== JSON.stringify(options.rows)) {
+      throw new Error(formatTableDiff(table, options.columns, options.rows, actual));
+    }
     return this;
   }
 }

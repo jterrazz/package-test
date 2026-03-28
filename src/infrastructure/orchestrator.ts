@@ -5,7 +5,7 @@ import { ComposeStackAdapter } from "./adapters/compose.adapter.js";
 import { TestcontainersAdapter } from "./adapters/testcontainers.adapter.js";
 import { detectServiceType, findComposeFile, parseComposeFile } from "./compose-parser.js";
 import type { ContainerPort } from "./ports/container.port.js";
-import { printReport } from "./reporter.js";
+import { type AppInfo, formatStartupReport, type ServiceReport } from "./reporter.js";
 import { postgres } from "./services/postgres.js";
 import type { ServiceHandle } from "./services/service.port.js";
 
@@ -53,7 +53,7 @@ export class Orchestrator {
     const composeDir = composePath ? dirname(composePath) : this.root;
     const composeConfig = composePath ? parseComposeFile(composePath) : null;
 
-    const reports: { handle: ServiceHandle; durationMs: number; error?: string }[] = [];
+    const reports: ServiceReport[] = [];
 
     for (const handle of this.services) {
       const startTime = Date.now();
@@ -77,19 +77,21 @@ export class Orchestrator {
         const port = container.getMappedPort(handle.defaultPort);
         handle.connectionString = handle.buildConnectionString(host, port);
 
-        // Healthcheck — verify service is ready
         await handle.healthcheck();
-
-        // Init scripts — fail fast with context
         await handle.initialize(composeDir);
         handle.started = true;
 
-        reports.push({ handle, durationMs: Date.now() - startTime });
+        reports.push({
+          name: handle.composeName ?? handle.type,
+          type: handle.type,
+          connectionString: handle.connectionString,
+          durationMs: Date.now() - startTime,
+        });
         this.running.push({ handle, container });
       } catch (error: any) {
         // Capture container logs on failure
-        const lastContainer = this.running.at(-1)?.container;
         let logs = "";
+        const lastContainer = this.running.at(-1)?.container;
         if (lastContainer) {
           try {
             logs = await lastContainer.getLogs();
@@ -98,21 +100,25 @@ export class Orchestrator {
           }
         }
 
-        const errorWithLogs = logs
-          ? `${error.message}\n\n┌ Container logs ─────────────────────\n${logs
-              .split("\n")
-              .slice(-15)
-              .map((l: string) => `│ ${l}`)
-              .join("\n")}\n└─────────────────────────────────────`
-          : error.message;
+        reports.push({
+          name: handle.composeName ?? handle.type,
+          type: handle.type,
+          durationMs: Date.now() - startTime,
+          error: error.message,
+          logs,
+        });
 
-        reports.push({ handle, durationMs: Date.now() - startTime, error: errorWithLogs });
-        throw new Error(errorWithLogs, { cause: error });
+        const output = formatStartupReport("integration", reports, { type: "in-process" });
+        console.error(output);
+        throw error;
       }
     }
 
     this.started = true;
-    printReport("integration", reports, { type: "in-process" });
+
+    const appInfo: AppInfo = { type: "in-process" };
+    const output = formatStartupReport("integration", reports, appInfo);
+    console.log(output);
   }
 
   /**
@@ -166,11 +172,17 @@ export class Orchestrator {
     }
 
     const durationMs = Date.now() - startTime;
-    const reports = this.composeHandles.map((h) => ({ handle: h, durationMs }));
-    printReport("e2e", reports, {
-      type: "http",
-      url: this.getAppUrl() ?? undefined,
-    });
+    const reports: ServiceReport[] = this.composeHandles.map((h) => ({
+      name: h.composeName ?? h.type,
+      type: h.type,
+      connectionString: h.connectionString,
+      durationMs,
+    }));
+
+    const appUrl = this.getAppUrl();
+    const appInfo: AppInfo = { type: "http", url: appUrl ?? undefined };
+    const output = formatStartupReport("e2e", reports, appInfo);
+    console.log(output);
   }
 
   /**

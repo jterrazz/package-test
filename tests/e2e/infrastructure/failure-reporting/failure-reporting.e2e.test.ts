@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { stripAnsi } from "../../../../src/index.js";
 import { integrationSpec } from "../../../setup/integration.specification.js";
 
 describe("failure reporting", () => {
@@ -16,11 +17,9 @@ describe("failure reporting", () => {
         result.expectStatus(500);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(error.message).toContain("Expected status 500");
-        expect(error.message).toContain("received 201");
-        expect(error.message).toContain("POST /users");
-        expect(error.message).toContain("Request");
-        expect(error.message).toContain("Response");
+        expect(stripAnsi(error.message)).toContain("Expected status: 500");
+        expect(stripAnsi(error.message)).toContain("Received status:");
+        expect(stripAnsi(error.message)).toContain("POST /users");
       }
     });
 
@@ -31,8 +30,8 @@ describe("failure reporting", () => {
         result.expectStatus(500);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(error.message).toContain("Charlie");
-        expect(error.message).toContain("charlie@test.com");
+        expect(stripAnsi(error.message)).toContain("Charlie");
+        expect(stripAnsi(error.message)).toContain("charlie@test.com");
       }
     });
 
@@ -43,7 +42,7 @@ describe("failure reporting", () => {
         result.expectStatus(200);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(error.message).toContain("User not found");
+        expect(stripAnsi(error.message)).toContain("User not found");
       }
     });
   });
