@@ -23,7 +23,7 @@ export function stopServer() {
   server = null;
 }
 
-export const e2eSpec = e2e({
+export const e2eSpec = await e2e({
   database: new PrismaAdapter(prisma),
   url: `http://localhost:${PORT}`,
 });

@@ -1,0 +1,62 @@
+import type { ContainerPort } from "../ports/container.port.js";
+
+/**
+ * Container adapter using testcontainers.
+ * Wraps a GenericContainer for programmatic container lifecycle.
+ */
+export class TestcontainersAdapter implements ContainerPort {
+  private image: string;
+  private containerPort: number;
+  private env: Record<string, string>;
+  private container: any = null;
+
+  constructor(options: { image: string; port: number; env?: Record<string, string> }) {
+    this.image = options.image;
+    this.containerPort = options.port;
+    this.env = options.env ?? {};
+  }
+
+  async start(): Promise<void> {
+    const { GenericContainer, Wait } = await import("testcontainers");
+
+    let builder = new GenericContainer(this.image).withExposedPorts(this.containerPort);
+
+    for (const [key, value] of Object.entries(this.env)) {
+      builder = builder.withEnvironment({ [key]: value });
+    }
+
+    // Use log-based wait for postgres, simple port wait for others
+    if (this.image.startsWith("postgres")) {
+      builder = builder.withWaitStrategy(
+        Wait.forLogMessage(/database system is ready to accept connections/, 2),
+      );
+    }
+
+    this.container = await builder.start();
+  }
+
+  async stop(): Promise<void> {
+    if (this.container) {
+      await this.container.stop();
+      this.container = null;
+    }
+  }
+
+  getMappedPort(containerPort: number): number {
+    if (!this.container) {
+      throw new Error("Container not started");
+    }
+    return this.container.getMappedPort(containerPort);
+  }
+
+  getHost(): string {
+    if (!this.container) {
+      throw new Error("Container not started");
+    }
+    return this.container.getHost();
+  }
+
+  getConnectionString(): string {
+    return `${this.getHost()}:${this.getMappedPort(this.containerPort)}`;
+  }
+}

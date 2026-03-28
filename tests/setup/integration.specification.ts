@@ -6,7 +6,7 @@ const { prisma } = createDatabase();
 await initializeSchema(prisma);
 const app = createApp(prisma);
 
-export const integrationSpec = integration({
+export const integrationSpec = await integration({
   database: new PrismaAdapter(prisma),
   app,
 });
