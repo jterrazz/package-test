@@ -178,13 +178,11 @@ test("creates a user and returns 201", async () => {
 
 Rules:
 
+- Every test gets `// Given —` and `// Then —` comments. Always both, never one without the other
 - `// Given —` setup context, one short phrase
 - `// When —` only if the action isn't obvious
 - `// Then —` what we verify, one short phrase
 - No `// When` for spec builder — `.seed().post().run()` / `.project().exec().run()` IS the when
-- Skip comments ONLY on truly trivial tests (single assertion, name says it all, no setup)
-- Use `// Given` when there's meaningful setup context (seeds, fixtures, multi-exec, specific project)
-- Use `// Then` when there are 2+ assertions or when the assertion intent isn't obvious from the method name
 - Error tests belong in their domain folder (seeding errors in seeding/, not a separate errors/)
 - Failure assertions use full `toBe` with exact multiline output (never `toContain`)
 
