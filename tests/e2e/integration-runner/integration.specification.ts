@@ -1,11 +1,12 @@
-import { BetterSqliteAdapter, integration } from "../../../src/index.js";
+import { integration, PrismaAdapter } from "../../../src/index.js";
 import { createApp } from "../app/app.js";
-import { createDatabase } from "../app/database.js";
+import { createDatabase, initializeSchema } from "../app/database.js";
 
-export const db = createDatabase();
-export const app = createApp(db);
+const { prisma } = createDatabase();
+await initializeSchema(prisma);
+const app = createApp(prisma);
 
 export const integrationSpec = integration({
-  database: new BetterSqliteAdapter(db),
+  database: new PrismaAdapter(prisma),
   app,
 });

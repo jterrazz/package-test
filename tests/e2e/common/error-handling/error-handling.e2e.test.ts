@@ -27,7 +27,7 @@ describe.each(runners)("$name — error handling", ({ spec }) => {
       const result = await spec("wrong table").seed("one-user.sql").get("/users").run();
 
       await expect(
-        result.expectTable("users", {
+        result.expectTable("User", {
           columns: ["name"],
           rows: [["NonExistent"]],
         }),
@@ -38,7 +38,7 @@ describe.each(runners)("$name — error handling", ({ spec }) => {
       const result = await spec("extra rows").seed("one-user.sql").get("/users").run();
 
       await expect(
-        result.expectTable("users", {
+        result.expectTable("User", {
           columns: ["name"],
           rows: [],
         }),
@@ -49,7 +49,7 @@ describe.each(runners)("$name — error handling", ({ spec }) => {
       const result = await spec("missing rows").get("/users").run();
 
       await expect(
-        result.expectTable("users", {
+        result.expectTable("User", {
           columns: ["name"],
           rows: [["Alice"]],
         }),
@@ -85,7 +85,7 @@ describe.each(runners)("$name — error handling", ({ spec }) => {
 
       const result = await spec("clean db").get("/users").run();
 
-      await result.expectTable("users", {
+      await result.expectTable("User", {
         columns: ["name"],
         rows: [],
       });

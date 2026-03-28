@@ -1,15 +1,24 @@
-import Database from "better-sqlite3";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+
+import { PrismaClient } from "./generated/client/index.js";
 
 export function createDatabase() {
-  const db = new Database(":memory:");
+  const adapter = new PrismaBetterSqlite3({ url: ":memory:" });
+  const prisma = new PrismaClient({ adapter });
 
-  db.exec(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE
+  return { prisma };
+}
+
+/**
+ * Initialize the database schema.
+ * Call this before running tests.
+ */
+export async function initializeSchema(prisma: PrismaClient) {
+  await prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "User" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "name" TEXT NOT NULL,
+            "email" TEXT NOT NULL UNIQUE
         )
     `);
-
-  return db;
 }

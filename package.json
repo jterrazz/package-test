@@ -33,10 +33,12 @@
     "@hono/node-server": "^1.19.11",
     "@jterrazz/codestyle": "^2.1.0",
     "@jterrazz/typescript": "^5.1.1",
-    "@types/better-sqlite3": "^7.6.13",
+    "@prisma/adapter-better-sqlite3": "^7.6.0",
+    "@prisma/client": "^7.6.0",
     "@types/node": "^25.5.0",
     "better-sqlite3": "^12.8.0",
     "hono": "^4.12.9",
+    "prisma": "^7.6.0",
     "vitest": "^4.1.2"
   },
   "peerDependencies": {

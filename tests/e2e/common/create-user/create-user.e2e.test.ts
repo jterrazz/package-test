@@ -11,7 +11,7 @@ describe.each(runners)("$name — POST /users", ({ spec }) => {
 
     result.expectStatus(201);
     result.expectResponse("created.response.json");
-    await result.expectTable("users", {
+    await result.expectTable("User", {
       columns: ["name", "email"],
       rows: [
         ["Alice", "alice@test.com"],
@@ -25,7 +25,7 @@ describe.each(runners)("$name — POST /users", ({ spec }) => {
     const result = await spec("creates on empty db").post("/users", "new-user.json").run();
 
     result.expectStatus(201);
-    await result.expectTable("users", {
+    await result.expectTable("User", {
       columns: ["name", "email"],
       rows: [["Charlie", "charlie@test.com"]],
     });

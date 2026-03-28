@@ -1,18 +1,24 @@
-import type Database from "better-sqlite3";
 import { Hono } from "hono";
 
-export function createApp(db: ReturnType<typeof Database>) {
+import type { PrismaClient } from "./generated/client/index.js";
+
+export function createApp(prisma: PrismaClient) {
   const app = new Hono();
 
-  app.get("/users", (c) => {
-    const users = db.prepare("SELECT id, name, email FROM users").all();
+  app.get("/users", async (c) => {
+    const users = await prisma.user.findMany({
+      orderBy: { id: "asc" },
+      select: { email: true, id: true, name: true },
+    });
     return c.json({ users });
   });
 
-  app.get("/users/:id", (c) => {
-    const user = db
-      .prepare("SELECT id, name, email FROM users WHERE id = ?")
-      .get(c.req.param("id"));
+  app.get("/users/:id", async (c) => {
+    const id = Number(c.req.param("id"));
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { email: true, id: true, name: true },
+    });
 
     if (!user) {
       return c.json({ error: "User not found" }, 404);
@@ -23,13 +29,10 @@ export function createApp(db: ReturnType<typeof Database>) {
 
   app.post("/users", async (c) => {
     const body = await c.req.json();
-    const { name, email } = body;
-
-    const result = db.prepare("INSERT INTO users (name, email) VALUES (?, ?)").run(name, email);
-
-    const user = db
-      .prepare("SELECT id, name, email FROM users WHERE id = ?")
-      .get(result.lastInsertRowid);
+    const user = await prisma.user.create({
+      data: { name: body.name, email: body.email },
+      select: { email: true, id: true, name: true },
+    });
 
     return c.json({ user }, 201);
   });

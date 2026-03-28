@@ -14,7 +14,7 @@ describe.each(runners)("$name — GET /users", ({ spec }) => {
     const result = await spec("lists empty").get("/users").run();
 
     result.expectStatus(200);
-    await result.expectTable("users", {
+    await result.expectTable("User", {
       columns: ["name"],
       rows: [],
     });

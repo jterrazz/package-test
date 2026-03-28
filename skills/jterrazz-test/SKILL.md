@@ -50,7 +50,7 @@ tests/
 | ------------ | ------------------------------------------ |
 | `seeds/`     | Database state setup                       |
 | `mock/`      | Mocked external API responses              |
-| `requests/`    | Request bodies or data fed into the system |
+| `requests/`  | Request bodies or data fed into the system |
 | `responses/` | Expected API responses from your system    |
 | `expected/`  | Expected output to compare against         |
 

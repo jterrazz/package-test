@@ -32,5 +32,5 @@ export type { DatabasePort } from "./ports/database.port.js";
 export type { ServerPort, ServerResponse } from "./ports/server.port.js";
 export { FetchAdapter } from "./adapters/fetch.adapter.js";
 export { HonoAdapter } from "./adapters/hono.adapter.js";
-export { BetterSqliteAdapter } from "./adapters/better-sqlite.adapter.js";
+export { PrismaAdapter } from "./adapters/prisma.adapter.js";
 export { e2e, integration };

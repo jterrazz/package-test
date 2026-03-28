@@ -59,7 +59,7 @@ Each test owns its data in colocated subfolders:
 | ------------ | --------------------------------------- |
 | `seeds/`     | Database state setup                    |
 | `mock/`      | Mocked external API responses           |
-| `requests/`    | Request bodies or data fed in           |
+| `requests/`  | Request bodies or data fed in           |
 | `responses/` | Expected API responses from your system |
 | `expected/`  | Expected output to compare against      |
 
@@ -128,12 +128,12 @@ Same builder API — only the setup differs.
 
 **Action** (triggers the request):
 
-| Method                     | Reads from | Description    |
-| -------------------------- | ---------- | -------------- |
-| `.get(path)`               | —          | GET request    |
-| `.post(path, "file.json")` | `requests/`  | POST with body |
-| `.put(path, "file.json")`  | `requests/`  | PUT with body  |
-| `.delete(path)`            | —          | DELETE request |
+| Method                     | Reads from  | Description    |
+| -------------------------- | ----------- | -------------- |
+| `.get(path)`               | —           | GET request    |
+| `.post(path, "file.json")` | `requests/` | POST with body |
+| `.put(path, "file.json")`  | `requests/` | PUT with body  |
+| `.delete(path)`            | —           | DELETE request |
 
 **Assertions** (after `.run()`):
 
