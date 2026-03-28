@@ -21,7 +21,7 @@ export class ComposeAdapter implements ContainerPort {
     return execSync(command, {
       cwd: dirname(this.composeFile),
       encoding: "utf8",
-      stdio: ["pipe", "pipe", "pipe"],
+      stdio: ["pipe", "pipe", "inherit"],
     }).trim();
   }
 
@@ -72,12 +72,17 @@ export class ComposeStackAdapter {
     this.composeFile = composeFile;
   }
 
-  private exec(command: string): string {
-    return execSync(command, {
-      cwd: dirname(this.composeFile),
-      encoding: "utf8",
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+  private run(command: string): string {
+    try {
+      return execSync(command, {
+        cwd: dirname(this.composeFile),
+        encoding: "utf8",
+        timeout: 120_000,
+      }).trim();
+    } catch (error: any) {
+      const stderr = error.stderr?.toString().trim() ?? error.message;
+      throw new Error(`docker compose failed: ${stderr}`, { cause: error });
+    }
   }
 
   async start(): Promise<void> {
@@ -85,7 +90,7 @@ export class ComposeStackAdapter {
       return;
     }
 
-    this.exec(`docker compose -f ${this.composeFile} up -d --wait`);
+    this.run(`docker compose -f ${this.composeFile} up -d --wait`);
     this.started = true;
   }
 
@@ -94,12 +99,12 @@ export class ComposeStackAdapter {
       return;
     }
 
-    this.exec(`docker compose -f ${this.composeFile} down -v`);
+    this.run(`docker compose -f ${this.composeFile} down -v`);
     this.started = false;
   }
 
   getMappedPort(serviceName: string, containerPort: number): number {
-    const output = this.exec(
+    const output = this.run(
       `docker compose -f ${this.composeFile} port ${serviceName} ${containerPort}`,
     );
     const port = output.split(":").pop();

@@ -1,13 +1,8 @@
 import { afterAll } from "vitest";
 
-import { e2e, postgres } from "../../src/index.js";
-import { createApp } from "../fixtures/app/app.js";
-
-const db = postgres({ compose: "db" });
+import { e2e } from "../../src/index.js";
 
 export const e2eSpec = await e2e({
-  services: [db],
-  app: () => createApp({ databaseUrl: db.connectionString }),
   projectRoot: "../fixtures/app",
 });
 

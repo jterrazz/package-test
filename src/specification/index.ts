@@ -1,4 +1,3 @@
-import { serve } from "@hono/node-server";
 import { isAbsolute, resolve } from "node:path";
 
 import { Orchestrator } from "../infrastructure/orchestrator.js";
@@ -20,7 +19,6 @@ function resolveProjectRoot(projectRoot: string | undefined): string {
     return projectRoot;
   }
 
-  // Resolve relative path from the caller's file location
   const stack = new Error("resolve projectRoot").stack;
   if (stack) {
     const lines = stack.split("\n");
@@ -48,28 +46,16 @@ type HonoApp = {
 };
 
 interface IntegrationOptions {
-  /** Declared services (postgres, redis, sqlite, etc.) */
-  services?: ServiceHandle[];
+  /** Declared services — started via testcontainers. */
+  services: ServiceHandle[];
   /** Factory that returns a Hono app — called after services start. */
   app: () => HonoApp;
-  /** Override auto-detected database. */
-  database?: DatabasePort;
-  /** Project root for compose detection. */
+  /** Project root for compose detection (relative paths supported). */
   projectRoot?: string;
 }
 
 interface E2eOptions {
-  /** Declared services (postgres, redis, sqlite, etc.) */
-  services?: ServiceHandle[];
-  /** Factory that returns a Hono app — started as HTTP server. */
-  app: () => HonoApp;
-  /** Override app URL (skip starting server). */
-  url?: string;
-  /** Port for the HTTP server (random by default). */
-  port?: number;
-  /** Override auto-detected database. */
-  database?: DatabasePort;
-  /** Project root for compose detection. */
+  /** Project root — must contain docker/compose.test.yaml. */
   projectRoot?: string;
 }
 
@@ -80,7 +66,7 @@ interface SpecificationRunnerWithCleanup extends SpecificationRunner {
 
 /**
  * Create an integration specification runner.
- * Starts infra containers, builds app in-process.
+ * Starts infra containers via testcontainers, app runs in-process.
  *
  * @example
  * const db = postgres({ compose: "db" });
@@ -91,17 +77,15 @@ interface SpecificationRunnerWithCleanup extends SpecificationRunner {
  */
 async function integration(options: IntegrationOptions): Promise<SpecificationRunnerWithCleanup> {
   const orchestrator = new Orchestrator({
-    services: options.services ?? [],
+    services: options.services,
     mode: "integration",
     projectRoot: resolveProjectRoot(options.projectRoot),
   });
 
-  if (options.services && options.services.length > 0) {
-    await orchestrator.start();
-  }
+  await orchestrator.start();
 
   const app = options.app();
-  const database = options.database ?? orchestrator.getDatabase() ?? undefined;
+  const database = orchestrator.getDatabase() ?? undefined;
 
   const runner = createSpecificationRunner({
     database,
@@ -116,48 +100,37 @@ async function integration(options: IntegrationOptions): Promise<SpecificationRu
 
 /**
  * Create an E2E specification runner.
- * Starts infra containers + HTTP server, sends real HTTP requests.
+ * Starts full docker compose stack. App URL and database auto-detected.
  *
  * @example
- * const db = postgres({ compose: "db" });
  * export const spec = await e2e({
- *     services: [db],
- *     app: () => createApp({ databaseUrl: db.connectionString }),
+ *     projectRoot: "../fixtures/app",
  * });
  */
-async function e2e(options: E2eOptions): Promise<SpecificationRunnerWithCleanup> {
+async function e2e(options: E2eOptions = {}): Promise<SpecificationRunnerWithCleanup> {
   const orchestrator = new Orchestrator({
-    services: options.services ?? [],
+    services: [],
     mode: "e2e",
     projectRoot: resolveProjectRoot(options.projectRoot),
   });
 
-  if (options.services && options.services.length > 0) {
-    await orchestrator.start();
+  await orchestrator.startCompose();
+
+  const appUrl = orchestrator.getAppUrl();
+  if (!appUrl) {
+    throw new Error(
+      "E2E: could not detect app URL from compose. Ensure an app service with ports is defined.",
+    );
   }
 
-  const app = options.app();
-  const database = options.database ?? orchestrator.getDatabase() ?? undefined;
-
-  let url = options.url;
-  let httpServer: null | ReturnType<typeof serve> = null;
-
-  if (!url) {
-    // Start HTTP server automatically
-    const port = options.port ?? 9800 + Math.floor(Math.random() * 100);
-    httpServer = serve({ fetch: app.fetch, port });
-    url = `http://localhost:${port}`;
-  }
+  const database = orchestrator.getDatabase() ?? undefined;
 
   const runner = createSpecificationRunner({
     database,
-    server: new FetchAdapter(url),
+    server: new FetchAdapter(appUrl),
   }) as SpecificationRunnerWithCleanup;
 
-  runner.cleanup = async () => {
-    httpServer?.close();
-    await orchestrator.stop();
-  };
+  runner.cleanup = () => orchestrator.stopCompose();
   runner.orchestrator = orchestrator;
 
   return runner;
