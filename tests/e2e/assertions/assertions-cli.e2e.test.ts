@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { stripAnsi } from "../../../../src/index.js";
-import { cliSpec } from "../../../setup/cli.specification.js";
+import { stripAnsi } from "../../../src/index.js";
+import { cliSpec } from "../../setup/cli.specification.js";
 
 describe("cli assertions", () => {
   describe("expectExitCode", () => {

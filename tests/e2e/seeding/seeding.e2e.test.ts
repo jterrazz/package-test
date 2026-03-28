@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { runners } from "../../../setup/runners.js";
+import { runners } from "../../setup/runners.js";
 
 describe.each(runners)("$name — seeding", ({ spec }) => {
   test("loads a single seed file", async () => {

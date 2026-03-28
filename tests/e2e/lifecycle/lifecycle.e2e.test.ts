@@ -1,6 +1,6 @@
 import { describe, test } from "vitest";
 
-import { runners } from "../../../setup/runners.js";
+import { runners } from "../../setup/runners.js";
 
 describe.each(runners)("$name — lifecycle", ({ spec }) => {
   test("resets database before each spec", async () => {

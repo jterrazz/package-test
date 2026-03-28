@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { cliSpec } from "../../../setup/cli.specification.js";
+import { cliSpec } from "../../setup/cli.specification.js";
 
 describe("cli — exec", () => {
   test("runs a command successfully", async () => {

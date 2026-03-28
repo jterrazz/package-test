@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 
-import { stripAnsi } from "../../../../src/index.js";
-import { dedent } from "../../../helpers/dedent.js";
-import { runners } from "../../../setup/runners.js";
+import { stripAnsi } from "../../../src/index.js";
+import { dedent } from "../../helpers/dedent.js";
+import { runners } from "../../setup/runners.js";
 
 describe.each(runners)("$name — api assertions", ({ spec }) => {
   describe("expectStatus", () => {
