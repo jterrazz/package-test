@@ -12,7 +12,7 @@ import {
   formatStdoutDiff,
   formatTableDiff,
 } from "../infrastructure/reporter.js";
-import type { CommandPort, CommandResult } from "./ports/command.port.js";
+import type { CommandPort, CommandResult, SpawnOptions } from "./ports/command.port.js";
 import type { DatabasePort } from "./ports/database.port.js";
 import type { ServerPort, ServerResponse } from "./ports/server.port.js";
 
@@ -239,7 +239,7 @@ export class SpecificationResult {
 // ── Builder (before .run()) ──
 
 export class SpecificationBuilder {
-  private commandArgs: null | string = null;
+  private commandArgs: null | string | string[] = null;
   private config: SpecificationConfig;
   private fixtures: FixtureEntry[] = [];
   private label: string;
@@ -247,6 +247,7 @@ export class SpecificationBuilder {
   private projectName: null | string = null;
   private request: null | RequestEntry = null;
   private seeds: SeedEntry[] = [];
+  private spawnConfig: null | { args: string; options: SpawnOptions } = null;
   private testDir: string;
 
   constructor(config: SpecificationConfig, testDir: string, label: string) {
@@ -299,10 +300,15 @@ export class SpecificationBuilder {
     return this;
   }
 
-  // ── CLI action ──
+  // ── CLI actions ──
 
-  exec(args: string): this {
+  exec(args: string | string[]): this {
     this.commandArgs = args;
+    return this;
+  }
+
+  spawn(args: string, options: SpawnOptions): this {
+    this.spawnConfig = { args, options };
     return this;
   }
 
@@ -310,7 +316,7 @@ export class SpecificationBuilder {
 
   async run(): Promise<SpecificationResult> {
     const hasHttpAction = this.request !== null;
-    const hasCliAction = this.commandArgs !== null;
+    const hasCliAction = this.commandArgs !== null || this.spawnConfig !== null;
 
     if (!hasHttpAction && !hasCliAction) {
       throw new Error(
@@ -320,7 +326,7 @@ export class SpecificationBuilder {
 
     if (hasHttpAction && hasCliAction) {
       throw new Error(
-        `Specification "${this.label}": cannot mix HTTP (.get/.post) and CLI (.exec) actions`,
+        `Specification "${this.label}": cannot mix HTTP (.get/.post) and CLI (.exec/.spawn) actions`,
       );
     }
 
@@ -432,7 +438,26 @@ export class SpecificationBuilder {
       throw new Error("CLI actions require a command adapter (use cli())");
     }
 
-    const commandResult = await this.config.command.exec(this.commandArgs!, workDir);
+    let commandResult: CommandResult;
+
+    if (this.spawnConfig) {
+      commandResult = await this.config.command.spawn(
+        this.spawnConfig.args,
+        workDir,
+        this.spawnConfig.options,
+      );
+    } else if (Array.isArray(this.commandArgs)) {
+      // Run commands sequentially in the same working directory
+      commandResult = { exitCode: 0, stdout: "", stderr: "" };
+      for (const args of this.commandArgs) {
+        commandResult = await this.config.command.exec(args, workDir);
+        if (commandResult.exitCode !== 0) {
+          break;
+        }
+      }
+    } else {
+      commandResult = await this.config.command.exec(this.commandArgs!, workDir);
+    }
 
     return new SpecificationResult({
       commandResult,

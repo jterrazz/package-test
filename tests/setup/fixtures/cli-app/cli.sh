@@ -10,6 +10,24 @@ case "$COMMAND" in
         echo "console.log('Hello from CLI app');" > dist/index.js
         echo '{"name":"cli-app"}' > dist/manifest.json
         ;;
+    start)
+        if [ ! -f "dist/index.js" ]; then
+            echo "Error: dist/index.js not found. Run build first." >&2
+            exit 1
+        fi
+        node dist/index.js
+        ;;
+    dev)
+        echo "Starting dev mode..."
+        mkdir -p dist
+        echo "console.log('Hello from CLI app');" > dist/index.js
+        echo "Build complete"
+        node dist/index.js
+        # Simulate watch mode — keep running
+        while true; do
+            sleep 1
+        done
+        ;;
     check)
         echo "Checking..."
         if [ -f "invalid.ts" ]; then
