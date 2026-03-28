@@ -226,7 +226,8 @@ export { FetchAdapter } from "./adapters/fetch.adapter.js";
 export { HonoAdapter } from "./adapters/hono.adapter.js";
 export { Orchestrator } from "../infrastructure/orchestrator.js";
 
-// Reporter (for testing output)
+// Utilities
+export { grep } from "./grep.js";
 export { normalizeOutput, stripAnsi } from "../infrastructure/reporter.js";
 
 // Runners

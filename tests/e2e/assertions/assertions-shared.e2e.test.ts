@@ -164,69 +164,22 @@ describe("shared assertions", () => {
     });
   });
 
-  describe("file().toExist", () => {
+  describe("file().exists", () => {
     test("passes when file exists", async () => {
       const result = await cliSpec("file exists").project("cli-app").exec("build").run();
-      result.file("dist/index.js").toExist();
+      expect(result.file("dist/index.js").exists).toBe(true);
     });
 
-    test("fails when file does not exist", async () => {
-      const result = await cliSpec("file missing").project("cli-app").exec("build").run();
-
-      try {
-        result.file("dist/nonexistent.js").toExist();
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(stripAnsi(error.message)).toContain("Expected file to exist");
-        expect(error.message).toContain("dist/nonexistent.js");
-      }
-    });
-  });
-
-  describe("file().not.toExist", () => {
     test("passes when file does not exist", async () => {
-      const result = await cliSpec("no file").project("cli-app").exec("build").run();
-      result.file("dist/index.cjs").not.toExist();
-    });
-
-    test("fails when file unexpectedly exists", async () => {
-      const result = await cliSpec("unexpected file").project("cli-app").exec("build").run();
-
-      try {
-        result.file("dist/index.js").not.toExist();
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(stripAnsi(error.message)).toContain("Expected file NOT to exist");
-      }
+      const result = await cliSpec("file missing").project("cli-app").exec("build").run();
+      expect(result.file("dist/nonexistent.js").exists).toBe(false);
     });
   });
 
-  describe("file().toContain", () => {
+  describe("file().content", () => {
     test("passes when file contains string", async () => {
       const result = await cliSpec("file content").project("cli-app").exec("build").run();
-      result.file("dist/index.js").toContain("Hello from CLI app");
-    });
-
-    test("fails when file does not contain string", async () => {
-      const result = await cliSpec("file mismatch").project("cli-app").exec("build").run();
-
-      try {
-        result.file("dist/index.js").toContain("NONEXISTENT CONTENT");
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(stripAnsi(error.message)).toContain("does not contain expected content");
-      }
-    });
-
-    test("fails when file does not exist", async () => {
-      const result = await cliSpec("file missing").project("cli-app").exec("build").run();
-
-      try {
-        result.file("dist/nope.js").toContain("anything");
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(stripAnsi(error.message)).toContain("Expected file to exist");
-      }
+      expect(result.file("dist/index.js").content).toContain("Hello from CLI app");
     });
   });
 });

@@ -1,65 +1,26 @@
 import { describe, expect, test } from "vitest";
 
-import { stripAnsi } from "../../../src/index.js";
 import { cliSpec } from "../../setup/cli.specification.js";
 
 describe("cli assertions", () => {
-  describe("exitCode.toBe", () => {
+  describe("exitCode", () => {
     test("passes on correct exit code", async () => {
       const result = await cliSpec("exit 0").project("cli-app").exec("build").run();
-      result.exitCode.toBe(0);
-    });
-
-    test("fails with formatted error on wrong exit code", async () => {
-      const result = await cliSpec("exit mismatch").project("cli-app").exec("fail").run();
-
-      try {
-        result.exitCode.toBe(0);
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        const msg = stripAnsi(error.message);
-        expect(msg).toContain("Expected exit code: 0");
-        expect(msg).toContain("Received exit code: 2");
-        expect(msg).toContain("stderr:");
-        expect(msg).toContain("Fatal: something went wrong");
-      }
+      expect(result.exitCode).toBe(0);
     });
   });
 
-  describe("stdout.toContain", () => {
+  describe("stdout", () => {
     test("passes when stdout contains string", async () => {
       const result = await cliSpec("stdout match").project("cli-app").exec("build").run();
-      result.stdout.toContain("Build completed");
-    });
-
-    test("fails when stdout does not contain string", async () => {
-      const result = await cliSpec("stdout miss").project("cli-app").exec("build").run();
-
-      try {
-        result.stdout.toContain("NONEXISTENT");
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(error.message).toContain('Expected stdout to contain: "NONEXISTENT"');
-        expect(error.message).toContain("Actual stdout:");
-      }
+      expect(result.stdout).toContain("Build completed");
     });
   });
 
-  describe("stderr.toContain", () => {
+  describe("stderr", () => {
     test("passes when stderr contains string", async () => {
       const result = await cliSpec("stderr match").project("cli-app").exec("fail").run();
-      result.stderr.toContain("Fatal: something went wrong");
-    });
-
-    test("fails when stderr does not contain string", async () => {
-      const result = await cliSpec("stderr miss").project("cli-app").exec("fail").run();
-
-      try {
-        result.stderr.toContain("NONEXISTENT");
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(error.message).toContain('Expected stderr to contain: "NONEXISTENT"');
-      }
+      expect(result.stderr).toContain("Fatal: something went wrong");
     });
   });
 
@@ -73,15 +34,15 @@ describe("cli assertions", () => {
         .run();
 
       // Then — check detected the invalid file
-      result.exitCode.toBe(1);
-      result.stderr.toContain("unused-var");
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain("unused-var");
     });
 
     test("clean project has no invalid files", async () => {
       const result = await cliSpec("clean check").project("cli-app").exec("check").run();
 
-      result.exitCode.toBe(0);
-      result.stdout.toContain("All checks passed");
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain("All checks passed");
     });
   });
 
@@ -89,12 +50,12 @@ describe("cli assertions", () => {
     test("chains multiple assertions", async () => {
       const result = await cliSpec("chained").project("cli-app").exec("build").run();
 
-      result.exitCode.toBe(0);
-      result.stdout.toContain("Build completed");
-      result.file("dist/index.js").toExist();
-      result.file("dist/manifest.json").toExist();
-      result.file("dist/index.cjs").not.toExist();
-      result.file("dist/index.js").toContain("Hello from CLI app");
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain("Build completed");
+      expect(result.file("dist/index.js").exists).toBe(true);
+      expect(result.file("dist/manifest.json").exists).toBe(true);
+      expect(result.file("dist/index.cjs").exists).toBe(false);
+      expect(result.file("dist/index.js").content).toContain("Hello from CLI app");
     });
   });
 });

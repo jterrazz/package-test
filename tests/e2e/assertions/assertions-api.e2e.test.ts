@@ -5,64 +5,10 @@ import { dedent } from "../../setup/helpers/dedent.js";
 import { runners } from "../../setup/runners.js";
 
 describe.each(runners)("$name — api assertions", ({ spec }) => {
-  describe("status.toBe", () => {
+  describe("status", () => {
     test("passes on correct status", async () => {
       const result = await spec("correct status").seed("two-users.sql").get("/users").run();
-      result.status.toBe(200);
-    });
-
-    test("fails with GET context on wrong status", async () => {
-      // Given — request to non-existent resource
-      const result = await spec("wrong status GET").get("/users/999").run();
-
-      // Then — error shows method, path, response body
-      try {
-        result.status.toBe(200);
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(dedent`
-                    Expected status: 200
-                    Received status: 404
-
-                    GET /users/999
-
-                    Response:
-                    {
-                      "error": "User not found"
-                    }
-                `);
-      }
-    });
-
-    test("fails with POST context including request body", async () => {
-      // Given — POST that succeeds but we expect failure
-      const result = await spec("wrong status POST").post("/users", "create-user.json").run();
-
-      // Then — error includes request body + response body
-      try {
-        result.status.toBe(500);
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        const msg = stripAnsi(error.message);
-        expect(msg).toBe(dedent`
-                    Expected status: 500
-                    Received status: 201
-
-                    POST /users
-                    {
-                      "name": "Charlie",
-                      "email": "charlie@test.com"
-                    }
-
-                    Response:
-                    {
-                      "user": {
-                        "name": "Charlie",
-                        "email": "charlie@test.com"
-                      }
-                    }
-                `);
-      }
+      expect(result.status).toBe(200);
     });
   });
 

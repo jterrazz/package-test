@@ -2,11 +2,7 @@ import { cpSync, existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
-import { FileAssertion } from "./assertions/file.js";
-import { ResponseAssertion } from "./assertions/response.js";
-import { StringAssertion } from "./assertions/string.js";
-import { TableAssertion } from "./assertions/table.js";
-import { ValueAssertion } from "./assertions/value.js";
+import { formatResponseDiff, formatTableDiff } from "../infrastructure/reporter.js";
 import type { CommandPort, CommandResult, SpawnOptions } from "./ports/command.port.js";
 import type { DatabasePort } from "./ports/database.port.js";
 import type { ServerPort, ServerResponse } from "./ports/server.port.js";
@@ -40,18 +36,66 @@ export interface RequestEntry {
   path: string;
 }
 
-// ── Result (after .run()) ──
+// ── File accessor ──
 
-interface RequestInfo {
-  body?: unknown;
-  method: string;
-  path: string;
+export interface FileAccessor {
+  readonly content: string;
+  readonly exists: boolean;
 }
+
+// ── Table assertion (async — vitest can't do DB queries) ──
+
+export class TableAssertion {
+  private tableName: string;
+  private db: DatabasePort;
+
+  constructor(tableName: string, db: DatabasePort) {
+    this.tableName = tableName;
+    this.db = db;
+  }
+
+  async toMatch(expected: { columns: string[]; rows: unknown[][] }): Promise<void> {
+    const actual = await this.db.query(this.tableName, expected.columns);
+    if (JSON.stringify(actual) !== JSON.stringify(expected.rows)) {
+      throw new Error(formatTableDiff(this.tableName, expected.columns, expected.rows, actual));
+    }
+  }
+
+  async toBeEmpty(): Promise<void> {
+    const actual = await this.db.query(this.tableName, ["*"]);
+    if (actual.length !== 0) {
+      throw new Error(
+        `Expected table "${this.tableName}" to be empty, but it has ${actual.length} rows`,
+      );
+    }
+  }
+}
+
+// ── Response accessor ──
+
+export class ResponseAccessor {
+  readonly body: unknown;
+  private testDir: string;
+
+  constructor(body: unknown, testDir: string) {
+    this.body = body;
+    this.testDir = testDir;
+  }
+
+  toMatchFile(file: string): void {
+    const expected = JSON.parse(readFileSync(resolve(this.testDir, "responses", file), "utf8"));
+    if (JSON.stringify(this.body) !== JSON.stringify(expected)) {
+      throw new Error(formatResponseDiff(file, expected, this.body));
+    }
+  }
+}
+
+// ── Result (after .run()) ──
 
 export class SpecificationResult {
   private commandResult?: CommandResult;
   private config: SpecificationConfig;
-  private requestInfo?: RequestInfo;
+  private requestInfo?: { body?: unknown; method: string; path: string };
   private responseData?: ServerResponse;
   private testDir: string;
   private workDir?: string;
@@ -59,7 +103,7 @@ export class SpecificationResult {
   constructor(options: {
     commandResult?: CommandResult;
     config: SpecificationConfig;
-    requestInfo?: RequestInfo;
+    requestInfo?: { body?: unknown; method: string; path: string };
     response?: ServerResponse;
     testDir: string;
     workDir?: string;
@@ -72,52 +116,58 @@ export class SpecificationResult {
     this.workDir = options.workDir;
   }
 
-  // ── Scoped assertion accessors ──
+  // ── Raw value accessors ──
 
-  get exitCode(): ValueAssertion {
+  get exitCode(): number {
     if (!this.commandResult) {
       throw new Error(".exitCode requires a CLI action (.exec())");
     }
-    return new ValueAssertion(this.commandResult.exitCode, "exit code", {
-      stderr: this.commandResult.stderr,
-      stdout: this.commandResult.stdout,
-    });
+    return this.commandResult.exitCode;
   }
 
-  get status(): ValueAssertion {
-    if (!this.responseData || !this.requestInfo) {
+  get status(): number {
+    if (!this.responseData) {
       throw new Error(".status requires an HTTP action (.get(), .post(), etc.)");
     }
-    return new ValueAssertion(this.responseData.status, "status", {
-      request: this.requestInfo,
-      responseBody: this.responseData.body,
-    });
+    return this.responseData.status;
   }
 
-  get response(): ResponseAssertion {
-    if (!this.responseData) {
-      throw new Error(".response requires an HTTP action (.get(), .post(), etc.)");
-    }
-    return new ResponseAssertion(this.responseData.body, this.testDir);
-  }
-
-  get stdout(): StringAssertion {
+  get stdout(): string {
     if (!this.commandResult) {
       throw new Error(".stdout requires a CLI action (.exec())");
     }
-    return new StringAssertion(this.commandResult.stdout, "stdout", this.testDir);
+    return this.commandResult.stdout;
   }
 
-  get stderr(): StringAssertion {
+  get stderr(): string {
     if (!this.commandResult) {
       throw new Error(".stderr requires a CLI action (.exec())");
     }
-    return new StringAssertion(this.commandResult.stderr, "stderr", this.testDir);
+    return this.commandResult.stderr;
   }
 
-  file(path: string): FileAssertion {
+  // ── Structured accessors ──
+
+  get response(): ResponseAccessor {
+    if (!this.responseData) {
+      throw new Error(".response requires an HTTP action (.get(), .post(), etc.)");
+    }
+    return new ResponseAccessor(this.responseData.body, this.testDir);
+  }
+
+  file(path: string): FileAccessor {
     const baseDir = this.workDir ?? this.testDir;
-    return new FileAssertion(path, baseDir);
+    const resolvedPath = resolve(baseDir, path);
+    const exists = existsSync(resolvedPath);
+    return {
+      get content(): string {
+        if (!exists) {
+          throw new Error(`File not found: ${path}`);
+        }
+        return readFileSync(resolvedPath, "utf8");
+      },
+      exists,
+    };
   }
 
   table(tableName: string, options?: { service?: string }): TableAssertion {
@@ -236,7 +286,6 @@ export class SpecificationBuilder {
       );
     }
 
-    // Resolve working directory for CLI mode
     let workDir: null | string = null;
     if (hasCliAction) {
       workDir = this.prepareWorkDir();
@@ -358,7 +407,7 @@ export class SpecificationBuilder {
         this.spawnConfig.options,
       );
     } else if (Array.isArray(this.commandArgs)) {
-      commandResult = { exitCode: 0, stdout: "", stderr: "" };
+      commandResult = { exitCode: 0, stderr: "", stdout: "" };
       for (const args of this.commandArgs) {
         commandResult = await this.config.command.exec(args, workDir);
         if (commandResult.exitCode !== 0) {
@@ -412,10 +461,6 @@ function getCallerDir(): string {
 
 export type SpecificationRunner = (label: string) => SpecificationBuilder;
 
-/**
- * Create a specification runner.
- * Automatically detects the test directory from the call site.
- */
 export function createSpecificationRunner(config: SpecificationConfig): SpecificationRunner {
   return (label: string) => {
     const testDir = getCallerDir();

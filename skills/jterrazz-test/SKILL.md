@@ -134,42 +134,50 @@ Every test follows: `spec("label") → setup → action → assertions`.
 
 ### Assertions
 
-Assertions use a scoped API: `result.{scope}.{assertion}`. `result.table()` is async (returns `Promise`).
+Result properties are raw values — use vitest `expect()` for assertions. Database and response file assertions use custom async methods.
 
-**HTTP-specific** (throw if no HTTP response):
+**Raw values (vitest expect):**
 
-| Method                                     | Description                                                                       |
-| ------------------------------------------ | --------------------------------------------------------------------------------- |
-| `result.status.toBe(code)`                 | Assert HTTP status code. Error shows expected/received + request/response context |
-| `result.response.toMatchFile("file.json")` | Assert response body matches `responses/file.json`. Error shows line-by-line diff |
+| Expression                                   | Description                 |
+| -------------------------------------------- | --------------------------- |
+| `expect(result.exitCode).toBe(0)`            | CLI exit code               |
+| `expect(result.status).toBe(201)`            | HTTP status code            |
+| `expect(result.stdout).toContain("hello")`   | CLI stdout contains string  |
+| `expect(result.stderr).not.toContain("err")` | CLI stderr does not contain |
 
-**CLI-specific** (throw if no command result):
+**Files (result.file returns {exists, content}):**
 
-| Method                                              | Description                                                                   |
-| --------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `result.exitCode.toBe(code)`                        | Assert process exit code. Error shows expected/received + stdout/stderr       |
-| `result.stdout.toContain(str)`                      | Assert stdout contains string                                                 |
-| `result.stdout.not.toContain(str)`                  | Assert stdout does not contain string                                         |
-| `result.stdout.toContain(str, { near: "ctx" })`     | Assert stdout contains string near context                                    |
-| `result.stderr.toContain(str)`                      | Assert stderr contains string                                                 |
-| `result.stderr.not.toContain(str)`                  | Assert stderr does not contain string                                         |
-| `result.stderr.not.toContain(str, { near: "ctx" })` | Assert stderr does not contain string near context                            |
-| `result.stdout.toMatch(/regex/)`                    | Assert stdout matches regex                                                   |
-| `result.stdout.toMatchFile("file.txt")`             | Assert full stdout matches `expected/file.txt`. Error shows line-by-line diff |
-| `result.stderr.toMatchFile("file.txt")`             | Assert full stderr matches `expected/file.txt`. Error shows line-by-line diff |
-| `result.stdout.toBeEmpty()`                         | Assert stdout is empty                                                        |
+| Expression                                                        | Description                 |
+| ----------------------------------------------------------------- | --------------------------- |
+| `expect(result.file("dist/index.js").exists).toBe(true)`          | Assert file exists          |
+| `expect(result.file("dist/index.js").content).toContain("Hello")` | Assert file contains string |
+| `expect(result.file("dist/index.cjs").exists).toBe(false)`        | Assert file does not exist  |
 
-**Cross-mode** (work with any runner):
+**Grep (scoped text matching):**
 
-| Method                                                             | Description                                   |
-| ------------------------------------------------------------------ | --------------------------------------------- |
-| `await result.table(name).toMatch({ columns, rows })`              | Assert database table contents (async)        |
-| `await result.table(name, { service }).toMatch({ columns, rows })` | Assert on a specific database by compose name |
-| `await result.table(name).toBeEmpty()`                             | Assert database table is empty                |
-| `result.file(path).toExist()`                                      | Assert file exists in working directory       |
-| `result.file(path).not.toExist()`                                  | Assert file does not exist                    |
-| `result.file(path).toContain(content)`                             | Assert file contains string                   |
-| `result.file(path).toMatch(/regex/)`                               | Assert file content matches regex             |
+```typescript
+import { grep } from "@jterrazz/test";
+
+expect(grep(result.stdout, "unused-var.ts")).toContain("no-unused-vars");
+expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports");
+```
+
+`grep(output, pattern)` filters multi-line output to the block matching `pattern`, returning a string for vitest assertions.
+
+**Response (HTTP body):**
+
+| Expression                                      | Description                                                                 |
+| ----------------------------------------------- | --------------------------------------------------------------------------- |
+| `result.response.toMatchFile("expected.json")`  | Custom — compares body to `responses/expected.json`, shows diff on mismatch |
+| `expect(result.response.body).toEqual({ ... })` | Raw body object for vitest assertions                                       |
+
+**Tables (custom async — database queries):**
+
+| Expression                                                                      | Description                    |
+| ------------------------------------------------------------------------------- | ------------------------------ |
+| `await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] })` | Assert database table contents |
+| `await result.table("events", { service: "analytics-db" }).toMatch({ ... })`    | Assert on a specific database  |
+| `await result.table("users").toBeEmpty()`                                       | Assert database table is empty |
 
 ### Multi-database support
 
@@ -190,6 +198,7 @@ const result = await spec("cross-db")
   .post("/users", "request.json")
   .run();
 
+expect(result.status).toBe(201);
 await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] });
 await result.table("events", { service: "analytics-db" }).toMatch({
   columns: ["type"],
@@ -275,7 +284,7 @@ test("creates a user and returns 201", async () => {
     .run();
 
   // Then — user created with all three in table
-  result.status.toBe(201);
+  expect(result.status).toBe(201);
   await result.table("users").toMatch({
     columns: ["name"],
     rows: [["Alice"], ["Bob"], ["Charlie"]],
@@ -289,9 +298,9 @@ test("builds the project", async () => {
   const result = await spec("build").project("sample-app").exec("build").run();
 
   // Then — ESM output with source maps
-  result.exitCode.toBe(0);
-  result.file("dist/index.js").toExist();
-  result.file("dist/index.js.map").toExist();
+  expect(result.exitCode).toBe(0);
+  expect(result.file("dist/index.js").exists).toBe(true);
+  expect(result.file("dist/index.js.map").exists).toBe(true);
 });
 ```
 

@@ -8,7 +8,7 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     const result = await spec("GET").seed("two-users.sql").get("/users").run();
 
     // Then — 200 OK
-    result.status.toBe(200);
+    expect(result.status).toBe(200);
   });
 
   test("sends POST with body from file", async () => {
@@ -16,14 +16,14 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     const result = await spec("POST").post("/users", "create-user.json").run();
 
     // Then — 201 Created
-    result.status.toBe(201);
+    expect(result.status).toBe(201);
   });
 
   test("sends POST that writes to multiple databases", async () => {
     // Given — create a user (app writes to both databases)
     const result = await spec("cross-db write").post("/users", "create-user.json").run();
 
-    result.status.toBe(201);
+    expect(result.status).toBe(201);
 
     // Then — user in default db
     await result.table("users").toMatch({
@@ -43,7 +43,7 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     const result = await spec("DELETE").delete("/users/999").run();
 
     // Then — 404 Not Found
-    result.status.toBe(404);
+    expect(result.status).toBe(404);
   });
 
   test("throws when run() called without a request method", async () => {
