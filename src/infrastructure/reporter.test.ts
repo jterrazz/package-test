@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { dedent } from "../../tests/helpers/dedent.js";
 import {
   formatResponseDiff,
   formatServiceLogs,
@@ -8,8 +9,7 @@ import {
   formatTableDiff,
   normalizeOutput,
   stripAnsi,
-} from "../../../src/infrastructure/reporter.js";
-import { dedent } from "../../helpers/dedent.js";
+} from "./reporter.js";
 
 describe("output formatting", () => {
   describe("startup report", () => {
