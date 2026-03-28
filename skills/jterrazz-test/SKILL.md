@@ -134,38 +134,46 @@ Every test follows: `spec("label") → setup → action → assertions`.
 
 ### Assertions
 
-All assertions return `this` for chaining. `expectTable` is async (returns `Promise<this>`).
+Assertions use a scoped API: `result.{scope}.{assertion}`. `result.table()` is async (returns `Promise`).
 
 **HTTP-specific** (throw if no HTTP response):
 
-| Method                         | Description                                                                       |
-| ------------------------------ | --------------------------------------------------------------------------------- |
-| `.expectStatus(code)`          | Assert HTTP status code. Error shows expected/received + request/response context |
-| `.expectResponse("file.json")` | Assert response body matches `responses/file.json`. Error shows line-by-line diff |
+| Method                                     | Description                                                                       |
+| ------------------------------------------ | --------------------------------------------------------------------------------- |
+| `result.status.toBe(code)`                 | Assert HTTP status code. Error shows expected/received + request/response context |
+| `result.response.toMatchFile("file.json")` | Assert response body matches `responses/file.json`. Error shows line-by-line diff |
 
 **CLI-specific** (throw if no command result):
 
-| Method                       | Description                                                                   |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `.expectExitCode(code)`      | Assert process exit code. Error shows expected/received + stdout/stderr       |
-| `.expectStdoutContains(str)` | Assert stdout contains string                                                 |
-| `.expectStderrContains(str)` | Assert stderr contains string                                                 |
-| `.expectStdout("file.txt")`  | Assert full stdout matches `expected/file.txt`. Error shows line-by-line diff |
-| `.expectStderr("file.txt")`  | Assert full stderr matches `expected/file.txt`. Error shows line-by-line diff |
+| Method                                              | Description                                                                   |
+| --------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `result.exitCode.toBe(code)`                        | Assert process exit code. Error shows expected/received + stdout/stderr       |
+| `result.stdout.toContain(str)`                      | Assert stdout contains string                                                 |
+| `result.stdout.not.toContain(str)`                  | Assert stdout does not contain string                                         |
+| `result.stdout.toContain(str, { near: "ctx" })`     | Assert stdout contains string near context                                    |
+| `result.stderr.toContain(str)`                      | Assert stderr contains string                                                 |
+| `result.stderr.not.toContain(str)`                  | Assert stderr does not contain string                                         |
+| `result.stderr.not.toContain(str, { near: "ctx" })` | Assert stderr does not contain string near context                            |
+| `result.stdout.toMatch(/regex/)`                    | Assert stdout matches regex                                                   |
+| `result.stdout.toMatchFile("file.txt")`             | Assert full stdout matches `expected/file.txt`. Error shows line-by-line diff |
+| `result.stderr.toMatchFile("file.txt")`             | Assert full stderr matches `expected/file.txt`. Error shows line-by-line diff |
+| `result.stdout.toBeEmpty()`                         | Assert stdout is empty                                                        |
 
 **Cross-mode** (work with any runner):
 
-| Method                                            | Description                                   |
-| ------------------------------------------------- | --------------------------------------------- |
-| `.expectTable(table, { columns, rows })`          | Assert database table contents (async)        |
-| `.expectTable(table, { columns, rows, service })` | Assert on a specific database by compose name |
-| `.expectFile(path)`                               | Assert file exists in working directory       |
-| `.expectNoFile(path)`                             | Assert file does not exist                    |
-| `.expectFileContains(path, content)`              | Assert file contains string                   |
+| Method                                                             | Description                                   |
+| ------------------------------------------------------------------ | --------------------------------------------- |
+| `await result.table(name).toMatch({ columns, rows })`              | Assert database table contents (async)        |
+| `await result.table(name, { service }).toMatch({ columns, rows })` | Assert on a specific database by compose name |
+| `await result.table(name).toBeEmpty()`                             | Assert database table is empty                |
+| `result.file(path).toExist()`                                      | Assert file exists in working directory       |
+| `result.file(path).not.toExist()`                                  | Assert file does not exist                    |
+| `result.file(path).toContain(content)`                             | Assert file contains string                   |
+| `result.file(path).toMatch(/regex/)`                               | Assert file content matches regex             |
 
 ### Multi-database support
 
-When multiple databases are declared, `seed()` and `expectTable()` accept `{ service: "name" }` to target a specific database by its compose name. Without `service`, both default to the first postgres.
+When multiple databases are declared, `seed()` and `result.table()` accept `{ service: "name" }` to target a specific database by its compose name. Without `service`, both default to the first postgres.
 
 ```typescript
 const db = postgres({ compose: "db" });
@@ -182,11 +190,10 @@ const result = await spec("cross-db")
   .post("/users", "request.json")
   .run();
 
-await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
-await result.expectTable("events", {
+await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] });
+await result.table("events", { service: "analytics-db" }).toMatch({
   columns: ["type"],
   rows: [["user_created"]],
-  service: "analytics-db",
 });
 ```
 
@@ -268,8 +275,8 @@ test("creates a user and returns 201", async () => {
     .run();
 
   // Then — user created with all three in table
-  result.expectStatus(201);
-  await result.expectTable("users", {
+  result.status.toBe(201);
+  await result.table("users").toMatch({
     columns: ["name"],
     rows: [["Alice"], ["Bob"], ["Charlie"]],
   });
@@ -282,9 +289,9 @@ test("builds the project", async () => {
   const result = await spec("build").project("sample-app").exec("build").run();
 
   // Then — ESM output with source maps
-  result.expectExitCode(0);
-  result.expectFile("dist/index.js");
-  result.expectFile("dist/index.js.map");
+  result.exitCode.toBe(0);
+  result.file("dist/index.js").toExist();
+  result.file("dist/index.js.map").toExist();
 });
 ```
 

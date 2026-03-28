@@ -11,7 +11,7 @@ describe.each(runners)("$name — lifecycle", ({ spec }) => {
     const result = await spec("verify clean").get("/users").run();
 
     // Then — table is empty
-    await result.expectTable("users", { columns: ["name"], rows: [] });
+    await result.table("users").toMatch({ columns: ["name"], rows: [] });
   });
 
   test("resets all databases before each spec", async () => {
@@ -26,8 +26,10 @@ describe.each(runners)("$name — lifecycle", ({ spec }) => {
     const result = await spec("after reset").get("/users").run();
 
     // Then — both databases are clean
-    await result.expectTable("users", { columns: ["name"], rows: [] });
-    await result.expectTable("events", { columns: ["type"], rows: [], service: "analytics-db" });
+    await result.table("users").toMatch({ columns: ["name"], rows: [] });
+    await result
+      .table("events", { service: "analytics-db" })
+      .toMatch({ columns: ["type"], rows: [] });
   });
 
   test("seeding one database leaves the other empty", async () => {
@@ -38,11 +40,10 @@ describe.each(runners)("$name — lifecycle", ({ spec }) => {
       .run();
 
     // Then — default db is empty, analytics has data
-    await result.expectTable("users", { columns: ["name"], rows: [] });
-    await result.expectTable("events", {
+    await result.table("users").toMatch({ columns: ["name"], rows: [] });
+    await result.table("events", { service: "analytics-db" }).toMatch({
       columns: ["type"],
       rows: [["user_created"]],
-      service: "analytics-db",
     });
   });
 });

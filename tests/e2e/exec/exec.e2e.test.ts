@@ -5,24 +5,24 @@ import { cliSpec } from "../../setup/cli.specification.js";
 describe("cli — exec", () => {
   test("runs a command successfully", async () => {
     const result = await cliSpec("build").project("cli-app").exec("build").run();
-    result.expectExitCode(0);
+    result.exitCode.toBe(0);
   });
 
   test("runs help command", async () => {
     const result = await cliSpec("help").project("cli-app").exec("help").run();
-    result.expectExitCode(0);
-    result.expectStdoutContains("Usage: cli <command>");
+    result.exitCode.toBe(0);
+    result.stdout.toContain("Usage: cli <command>");
   });
 
   test("captures non-zero exit code", async () => {
     const result = await cliSpec("fail").project("cli-app").exec("fail").run();
-    result.expectExitCode(2);
+    result.exitCode.toBe(2);
   });
 
   test("captures unknown command failure", async () => {
     const result = await cliSpec("unknown").project("cli-app").exec("nonexistent").run();
-    result.expectExitCode(1);
-    result.expectStderrContains("Unknown command");
+    result.exitCode.toBe(1);
+    result.stderr.toContain("Unknown command");
   });
 
   test("throws without action", async () => {
@@ -47,8 +47,8 @@ describe("cli — exec", () => {
       const result = await cliSpec("build+start").project("cli-app").exec(["build", "start"]).run();
 
       // Then — start ran successfully (output from last command)
-      result.expectExitCode(0);
-      result.expectStdoutContains("Hello from CLI app");
+      result.exitCode.toBe(0);
+      result.stdout.toContain("Hello from CLI app");
     });
 
     test("stops on first failure", async () => {
@@ -56,16 +56,16 @@ describe("cli — exec", () => {
       const result = await cliSpec("fail+build").project("cli-app").exec(["fail", "build"]).run();
 
       // Then — stopped at fail
-      result.expectExitCode(2);
-      result.expectStderrContains("Fatal: something went wrong");
+      result.exitCode.toBe(2);
+      result.stderr.toContain("Fatal: something went wrong");
     });
 
     test("preserves files between commands", async () => {
       // Given — build creates dist/, then we check it still exists
       const result = await cliSpec("build+check").project("cli-app").exec(["build", "check"]).run();
 
-      result.expectExitCode(0);
-      result.expectFile("dist/index.js");
+      result.exitCode.toBe(0);
+      result.file("dist/index.js").toExist();
     });
   });
 
@@ -76,9 +76,9 @@ describe("cli — exec", () => {
         .spawn("dev", { waitFor: "Hello from CLI app", timeout: 10_000 })
         .run();
 
-      result.expectExitCode(0);
-      result.expectStdoutContains("Starting dev mode");
-      result.expectStdoutContains("Hello from CLI app");
+      result.exitCode.toBe(0);
+      result.stdout.toContain("Starting dev mode");
+      result.stdout.toContain("Hello from CLI app");
     });
 
     test("returns non-zero when process exits without matching pattern", async () => {
@@ -89,7 +89,7 @@ describe("cli — exec", () => {
         .run();
 
       // Then — exit code 1 (pattern not matched before process exited)
-      result.expectExitCode(1);
+      result.exitCode.toBe(1);
     });
 
     test("times out on long-running process without match", async () => {
@@ -100,7 +100,7 @@ describe("cli — exec", () => {
         .run();
 
       // Then — exit code 124 (timeout)
-      result.expectExitCode(124);
+      result.exitCode.toBe(124);
     });
   });
 });

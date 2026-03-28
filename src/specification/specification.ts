@@ -2,16 +2,11 @@ import { cpSync, existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
-import {
-  formatExitCodeError,
-  formatFileContentMismatch,
-  formatFileMissing,
-  formatFileUnexpected,
-  formatResponseDiff,
-  formatStatusError,
-  formatStdoutDiff,
-  formatTableDiff,
-} from "../infrastructure/reporter.js";
+import { FileAssertion } from "./assertions/file.js";
+import { ResponseAssertion } from "./assertions/response.js";
+import { StringAssertion } from "./assertions/string.js";
+import { TableAssertion } from "./assertions/table.js";
+import { ValueAssertion } from "./assertions/value.js";
 import type { CommandPort, CommandResult, SpawnOptions } from "./ports/command.port.js";
 import type { DatabasePort } from "./ports/database.port.js";
 import type { ServerPort, ServerResponse } from "./ports/server.port.js";
@@ -57,7 +52,7 @@ export class SpecificationResult {
   private commandResult?: CommandResult;
   private config: SpecificationConfig;
   private requestInfo?: RequestInfo;
-  private response?: ServerResponse;
+  private responseData?: ServerResponse;
   private testDir: string;
   private workDir?: string;
 
@@ -69,7 +64,7 @@ export class SpecificationResult {
     testDir: string;
     workDir?: string;
   }) {
-    this.response = options.response;
+    this.responseData = options.response;
     this.commandResult = options.commandResult;
     this.config = options.config;
     this.testDir = options.testDir;
@@ -77,146 +72,64 @@ export class SpecificationResult {
     this.workDir = options.workDir;
   }
 
-  // ── HTTP assertions ──
+  // ── Scoped assertion accessors ──
 
-  expectStatus(code: number): this {
-    if (!this.response || !this.requestInfo) {
-      throw new Error("expectStatus requires an HTTP action (.get(), .post(), etc.)");
-    }
-    if (this.response.status !== code) {
-      throw new Error(
-        formatStatusError(code, this.response.status, this.requestInfo, this.response.body),
-      );
-    }
-    return this;
-  }
-
-  expectResponse(file: string): this {
-    if (!this.response) {
-      throw new Error("expectResponse requires an HTTP action (.get(), .post(), etc.)");
-    }
-    const expected = JSON.parse(readFileSync(resolve(this.testDir, "responses", file), "utf8"));
-    if (JSON.stringify(this.response.body) !== JSON.stringify(expected)) {
-      throw new Error(formatResponseDiff(file, expected, this.response.body));
-    }
-    return this;
-  }
-
-  // ── CLI assertions ──
-
-  expectExitCode(code: number): this {
+  get exitCode(): ValueAssertion {
     if (!this.commandResult) {
-      throw new Error("expectExitCode requires a CLI action (.exec())");
+      throw new Error(".exitCode requires a CLI action (.exec())");
     }
-    if (this.commandResult.exitCode !== code) {
-      throw new Error(
-        formatExitCodeError(
-          code,
-          this.commandResult.exitCode,
-          this.commandResult.stdout,
-          this.commandResult.stderr,
-        ),
-      );
-    }
-    return this;
+    return new ValueAssertion(this.commandResult.exitCode, "exit code", {
+      stderr: this.commandResult.stderr,
+      stdout: this.commandResult.stdout,
+    });
   }
 
-  expectStdout(file: string): this {
+  get status(): ValueAssertion {
+    if (!this.responseData || !this.requestInfo) {
+      throw new Error(".status requires an HTTP action (.get(), .post(), etc.)");
+    }
+    return new ValueAssertion(this.responseData.status, "status", {
+      request: this.requestInfo,
+      responseBody: this.responseData.body,
+    });
+  }
+
+  get response(): ResponseAssertion {
+    if (!this.responseData) {
+      throw new Error(".response requires an HTTP action (.get(), .post(), etc.)");
+    }
+    return new ResponseAssertion(this.responseData.body, this.testDir);
+  }
+
+  get stdout(): StringAssertion {
     if (!this.commandResult) {
-      throw new Error("expectStdout requires a CLI action (.exec())");
+      throw new Error(".stdout requires a CLI action (.exec())");
     }
-    const expected = readFileSync(resolve(this.testDir, "expected", file), "utf8").trim();
-    const actual = this.commandResult.stdout.trim();
-    if (actual !== expected) {
-      throw new Error(formatStdoutDiff(file, expected, actual));
-    }
-    return this;
+    return new StringAssertion(this.commandResult.stdout, "stdout", this.testDir);
   }
 
-  expectStdoutContains(str: string): this {
+  get stderr(): StringAssertion {
     if (!this.commandResult) {
-      throw new Error("expectStdoutContains requires a CLI action (.exec())");
+      throw new Error(".stderr requires a CLI action (.exec())");
     }
-    if (!this.commandResult.stdout.includes(str)) {
-      throw new Error(
-        `Expected stdout to contain: "${str}"\n\nActual stdout:\n${this.commandResult.stdout}`,
-      );
-    }
-    return this;
+    return new StringAssertion(this.commandResult.stderr, "stderr", this.testDir);
   }
 
-  expectStderr(file: string): this {
-    if (!this.commandResult) {
-      throw new Error("expectStderr requires a CLI action (.exec())");
-    }
-    const expected = readFileSync(resolve(this.testDir, "expected", file), "utf8").trim();
-    const actual = this.commandResult.stderr.trim();
-    if (actual !== expected) {
-      throw new Error(formatStdoutDiff(file, expected, actual));
-    }
-    return this;
+  file(path: string): FileAssertion {
+    const baseDir = this.workDir ?? this.testDir;
+    return new FileAssertion(path, baseDir);
   }
 
-  expectStderrContains(str: string): this {
-    if (!this.commandResult) {
-      throw new Error("expectStderrContains requires a CLI action (.exec())");
-    }
-    if (!this.commandResult.stderr.includes(str)) {
-      throw new Error(
-        `Expected stderr to contain: "${str}"\n\nActual stderr:\n${this.commandResult.stderr}`,
-      );
-    }
-    return this;
-  }
-
-  // ── Cross-mode assertions ──
-
-  async expectTable(
-    table: string,
-    options: { columns: string[]; rows: unknown[][]; service?: string },
-  ): Promise<this> {
-    const db = this.resolveDatabase(options.service);
+  table(tableName: string, options?: { service?: string }): TableAssertion {
+    const db = this.resolveDatabase(options?.service);
     if (!db) {
       throw new Error(
-        options.service
-          ? `expectTable requires database "${options.service}" but it was not found`
-          : "expectTable requires a database adapter",
+        options?.service
+          ? `table("${tableName}") requires database "${options.service}" but it was not found`
+          : `table("${tableName}") requires a database adapter`,
       );
     }
-
-    const actual = await db.query(table, options.columns);
-    if (JSON.stringify(actual) !== JSON.stringify(options.rows)) {
-      throw new Error(formatTableDiff(table, options.columns, options.rows, actual));
-    }
-    return this;
-  }
-
-  expectFile(path: string): this {
-    const resolved = this.resolveWorkPath(path);
-    if (!existsSync(resolved)) {
-      throw new Error(formatFileMissing(path));
-    }
-    return this;
-  }
-
-  expectNoFile(path: string): this {
-    const resolved = this.resolveWorkPath(path);
-    if (existsSync(resolved)) {
-      throw new Error(formatFileUnexpected(path));
-    }
-    return this;
-  }
-
-  expectFileContains(path: string, content: string): this {
-    const resolved = this.resolveWorkPath(path);
-    if (!existsSync(resolved)) {
-      throw new Error(formatFileMissing(path));
-    }
-    const actual = readFileSync(resolved, "utf8");
-    if (!actual.includes(content)) {
-      throw new Error(formatFileContentMismatch(path, content, actual));
-    }
-    return this;
+    return new TableAssertion(tableName, db);
   }
 
   // ── Private ──
@@ -226,13 +139,6 @@ export class SpecificationResult {
       return this.config.databases.get(serviceName);
     }
     return this.config.database;
-  }
-
-  private resolveWorkPath(path: string): string {
-    if (this.workDir) {
-      return resolve(this.workDir, path);
-    }
-    return resolve(this.testDir, path);
   }
 }
 
@@ -447,7 +353,6 @@ export class SpecificationBuilder {
         this.spawnConfig.options,
       );
     } else if (Array.isArray(this.commandArgs)) {
-      // Run commands sequentially in the same working directory
       commandResult = { exitCode: 0, stdout: "", stderr: "" };
       for (const args of this.commandArgs) {
         commandResult = await this.config.command.exec(args, workDir);

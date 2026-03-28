@@ -4,17 +4,17 @@ import { stripAnsi } from "../../../src/index.js";
 import { cliSpec } from "../../setup/cli.specification.js";
 
 describe("cli assertions", () => {
-  describe("expectExitCode", () => {
+  describe("exitCode.toBe", () => {
     test("passes on correct exit code", async () => {
       const result = await cliSpec("exit 0").project("cli-app").exec("build").run();
-      result.expectExitCode(0);
+      result.exitCode.toBe(0);
     });
 
     test("fails with formatted error on wrong exit code", async () => {
       const result = await cliSpec("exit mismatch").project("cli-app").exec("fail").run();
 
       try {
-        result.expectExitCode(0);
+        result.exitCode.toBe(0);
         expect.fail("should have thrown");
       } catch (error: any) {
         const msg = stripAnsi(error.message);
@@ -26,17 +26,17 @@ describe("cli assertions", () => {
     });
   });
 
-  describe("expectStdoutContains", () => {
+  describe("stdout.toContain", () => {
     test("passes when stdout contains string", async () => {
       const result = await cliSpec("stdout match").project("cli-app").exec("build").run();
-      result.expectStdoutContains("Build completed");
+      result.stdout.toContain("Build completed");
     });
 
     test("fails when stdout does not contain string", async () => {
       const result = await cliSpec("stdout miss").project("cli-app").exec("build").run();
 
       try {
-        result.expectStdoutContains("NONEXISTENT");
+        result.stdout.toContain("NONEXISTENT");
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(error.message).toContain('Expected stdout to contain: "NONEXISTENT"');
@@ -45,17 +45,17 @@ describe("cli assertions", () => {
     });
   });
 
-  describe("expectStderrContains", () => {
+  describe("stderr.toContain", () => {
     test("passes when stderr contains string", async () => {
       const result = await cliSpec("stderr match").project("cli-app").exec("fail").run();
-      result.expectStderrContains("Fatal: something went wrong");
+      result.stderr.toContain("Fatal: something went wrong");
     });
 
     test("fails when stderr does not contain string", async () => {
       const result = await cliSpec("stderr miss").project("cli-app").exec("fail").run();
 
       try {
-        result.expectStderrContains("NONEXISTENT");
+        result.stderr.toContain("NONEXISTENT");
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(error.message).toContain('Expected stderr to contain: "NONEXISTENT"');
@@ -73,15 +73,15 @@ describe("cli assertions", () => {
         .run();
 
       // Then — check detected the invalid file
-      result.expectExitCode(1);
-      result.expectStderrContains("unused-var");
+      result.exitCode.toBe(1);
+      result.stderr.toContain("unused-var");
     });
 
     test("clean project has no invalid files", async () => {
       const result = await cliSpec("clean check").project("cli-app").exec("check").run();
 
-      result.expectExitCode(0);
-      result.expectStdoutContains("All checks passed");
+      result.exitCode.toBe(0);
+      result.stdout.toContain("All checks passed");
     });
   });
 
@@ -89,13 +89,12 @@ describe("cli assertions", () => {
     test("chains multiple assertions", async () => {
       const result = await cliSpec("chained").project("cli-app").exec("build").run();
 
-      result
-        .expectExitCode(0)
-        .expectStdoutContains("Build completed")
-        .expectFile("dist/index.js")
-        .expectFile("dist/manifest.json")
-        .expectNoFile("dist/index.cjs")
-        .expectFileContains("dist/index.js", "Hello from CLI app");
+      result.exitCode.toBe(0);
+      result.stdout.toContain("Build completed");
+      result.file("dist/index.js").toExist();
+      result.file("dist/manifest.json").toExist();
+      result.file("dist/index.cjs").not.toExist();
+      result.file("dist/index.js").toContain("Hello from CLI app");
     });
   });
 });

@@ -8,7 +8,7 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
     const result = await spec("single seed").seed("one-user.sql").get("/users").run();
 
     // Then — user is in the database
-    await result.expectTable("users", {
+    await result.table("users").toMatch({
       columns: ["name", "email"],
       rows: [["Alice", "alice@test.com"]],
     });
@@ -23,7 +23,7 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
       .run();
 
     // Then — both seeds applied
-    await result.expectTable("users", {
+    await result.table("users").toMatch({
       columns: ["name"],
       rows: [["Alice"], ["Charlie"]],
     });
@@ -34,7 +34,7 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
     const result = await spec("default seed").seed("one-user.sql").get("/users").run();
 
     // Then — user appears in default database
-    await result.expectTable("users", {
+    await result.table("users").toMatch({
       columns: ["name"],
       rows: [["Alice"]],
     });
@@ -48,10 +48,9 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
       .run();
 
     // Then — event appears in analytics database
-    await result.expectTable("events", {
+    await result.table("events", { service: "analytics-db" }).toMatch({
       columns: ["type", "payload"],
       rows: [["user_created", '{"name":"Alice"}']],
-      service: "analytics-db",
     });
   });
 
@@ -64,16 +63,15 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
       .run();
 
     // Then — users in default db
-    await result.expectTable("users", {
+    await result.table("users").toMatch({
       columns: ["name"],
       rows: [["Alice"], ["Bob"]],
     });
 
     // Then — events in analytics db
-    await result.expectTable("events", {
+    await result.table("events", { service: "analytics-db" }).toMatch({
       columns: ["type"],
       rows: [["user_created"], ["user_created"]],
-      service: "analytics-db",
     });
   });
 

@@ -5,10 +5,10 @@ import { dedent } from "../../setup/helpers/dedent.js";
 import { runners } from "../../setup/runners.js";
 
 describe.each(runners)("$name — api assertions", ({ spec }) => {
-  describe("expectStatus", () => {
+  describe("status.toBe", () => {
     test("passes on correct status", async () => {
       const result = await spec("correct status").seed("two-users.sql").get("/users").run();
-      result.expectStatus(200);
+      result.status.toBe(200);
     });
 
     test("fails with GET context on wrong status", async () => {
@@ -17,7 +17,7 @@ describe.each(runners)("$name — api assertions", ({ spec }) => {
 
       // Then — error shows method, path, response body
       try {
-        result.expectStatus(200);
+        result.status.toBe(200);
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toBe(dedent`
@@ -40,7 +40,7 @@ describe.each(runners)("$name — api assertions", ({ spec }) => {
 
       // Then — error includes request body + response body
       try {
-        result.expectStatus(500);
+        result.status.toBe(500);
         expect.fail("should have thrown");
       } catch (error: any) {
         const msg = stripAnsi(error.message);
@@ -66,10 +66,10 @@ describe.each(runners)("$name — api assertions", ({ spec }) => {
     });
   });
 
-  describe("expectResponse", () => {
+  describe("response.toMatchFile", () => {
     test("passes when body matches file", async () => {
       const result = await spec("matching body").seed("two-users.sql").get("/users").run();
-      result.expectResponse("all-users.response.json");
+      result.response.toMatchFile("all-users.response.json");
     });
 
     test("fails with line-by-line JSON diff", async () => {
@@ -78,7 +78,7 @@ describe.each(runners)("$name — api assertions", ({ spec }) => {
 
       // Then — error shows file name + -/+ diff
       try {
-        result.expectResponse("wrong-body.response.json");
+        result.response.toMatchFile("wrong-body.response.json");
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toBe(dedent`
@@ -109,7 +109,7 @@ describe.each(runners)("$name — api assertions", ({ spec }) => {
 
     test("throws on nonexistent response file", async () => {
       const result = await spec("bad response").get("/users").run();
-      expect(() => result.expectResponse("nonexistent.json")).toThrow("ENOENT");
+      expect(() => result.response.toMatchFile("nonexistent.json")).toThrow("ENOENT");
     });
   });
 });

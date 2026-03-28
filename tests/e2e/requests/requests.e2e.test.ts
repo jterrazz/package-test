@@ -8,7 +8,7 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     const result = await spec("GET").seed("two-users.sql").get("/users").run();
 
     // Then — 200 OK
-    result.expectStatus(200);
+    result.status.toBe(200);
   });
 
   test("sends POST with body from file", async () => {
@@ -16,26 +16,25 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     const result = await spec("POST").post("/users", "create-user.json").run();
 
     // Then — 201 Created
-    result.expectStatus(201);
+    result.status.toBe(201);
   });
 
   test("sends POST that writes to multiple databases", async () => {
     // Given — create a user (app writes to both databases)
     const result = await spec("cross-db write").post("/users", "create-user.json").run();
 
-    result.expectStatus(201);
+    result.status.toBe(201);
 
     // Then — user in default db
-    await result.expectTable("users", {
+    await result.table("users").toMatch({
       columns: ["name", "email"],
       rows: [["Charlie", "charlie@test.com"]],
     });
 
     // Then — event logged in analytics db
-    await result.expectTable("events", {
+    await result.table("events", { service: "analytics-db" }).toMatch({
       columns: ["type"],
       rows: [["user_created"]],
-      service: "analytics-db",
     });
   });
 
@@ -44,7 +43,7 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     const result = await spec("DELETE").delete("/users/999").run();
 
     // Then — 404 Not Found
-    result.expectStatus(404);
+    result.status.toBe(404);
   });
 
   test("throws when run() called without a request method", async () => {

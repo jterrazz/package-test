@@ -6,11 +6,11 @@ import { dedent } from "../../setup/helpers/dedent.js";
 import { runners } from "../../setup/runners.js";
 
 describe("shared assertions", () => {
-  describe("expectTable", () => {
+  describe("table().toMatch", () => {
     describe.each(runners)("$name", ({ spec }) => {
       test("passes on single column match", async () => {
         const result = await spec("single col").seed("one-user.sql").get("/users").run();
-        await result.expectTable("users", {
+        await result.table("users").toMatch({
           columns: ["name"],
           rows: [["Alice"]],
         });
@@ -18,7 +18,7 @@ describe("shared assertions", () => {
 
       test("passes on multi-column match", async () => {
         const result = await spec("multi col").seed("one-user.sql").get("/users").run();
-        await result.expectTable("users", {
+        await result.table("users").toMatch({
           columns: ["name", "email"],
           rows: [["Alice", "alice@test.com"]],
         });
@@ -32,20 +32,19 @@ describe("shared assertions", () => {
           .run();
 
         // Then — multi-column check on analytics-db
-        await result.expectTable("events", {
+        await result.table("events", { service: "analytics-db" }).toMatch({
           columns: ["type", "payload"],
           rows: [
             ["user_created", '{"name":"Alice"}'],
             ["user_created", '{"name":"Bob"}'],
           ],
-          service: "analytics-db",
         });
       });
 
       test("defaults to first database when service is omitted", async () => {
         const result = await spec("backwards compat").seed("two-users.sql").get("/users").run();
 
-        await result.expectTable("users", {
+        await result.table("users").toMatch({
           columns: ["name", "email"],
           rows: [
             ["Alice", "alice@test.com"],
@@ -58,7 +57,7 @@ describe("shared assertions", () => {
         const result = await spec("multi col diff").seed("two-users.sql").get("/users").run();
 
         try {
-          await result.expectTable("users", {
+          await result.table("users").toMatch({
             columns: ["name", "email"],
             rows: [
               ["Wrong1", "wrong1@test.com"],
@@ -89,7 +88,7 @@ describe("shared assertions", () => {
         const result = await spec("wrong values").seed("one-user.sql").get("/users").run();
 
         try {
-          await result.expectTable("users", { columns: ["name"], rows: [["NonExistent"]] });
+          await result.table("users").toMatch({ columns: ["name"], rows: [["NonExistent"]] });
           expect.fail("should have thrown");
         } catch (error: any) {
           expect(stripAnsi(error.message)).toBe(dedent`
@@ -112,7 +111,7 @@ describe("shared assertions", () => {
         const result = await spec("extra rows").seed("two-users.sql").get("/users").run();
 
         try {
-          await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
+          await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] });
           expect.fail("should have thrown");
         } catch (error: any) {
           expect(stripAnsi(error.message)).toBe(dedent`
@@ -135,7 +134,7 @@ describe("shared assertions", () => {
         const result = await spec("missing rows").get("/users").run();
 
         try {
-          await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
+          await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] });
           expect.fail("should have thrown");
         } catch (error: any) {
           expect(stripAnsi(error.message)).toBe(dedent`
@@ -154,30 +153,28 @@ describe("shared assertions", () => {
       });
 
       test("throws on unknown service name", async () => {
-        const result = await spec("bad expectTable service").get("/users").run();
+        // Given — valid request
+        const result = await spec("bad table service").get("/users").run();
 
-        await expect(
-          result.expectTable("users", {
-            columns: ["name"],
-            rows: [],
-            service: "nonexistent-db",
-          }),
-        ).rejects.toThrow('expectTable requires database "nonexistent-db" but it was not found');
+        // Then — table() with nonexistent service fails clearly
+        expect(() => result.table("users", { service: "nonexistent-db" })).toThrow(
+          'requires database "nonexistent-db" but it was not found',
+        );
       });
     });
   });
 
-  describe("expectFile (via CLI)", () => {
+  describe("file().toExist", () => {
     test("passes when file exists", async () => {
       const result = await cliSpec("file exists").project("cli-app").exec("build").run();
-      result.expectFile("dist/index.js");
+      result.file("dist/index.js").toExist();
     });
 
     test("fails when file does not exist", async () => {
       const result = await cliSpec("file missing").project("cli-app").exec("build").run();
 
       try {
-        result.expectFile("dist/nonexistent.js");
+        result.file("dist/nonexistent.js").toExist();
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toContain("Expected file to exist");
@@ -186,17 +183,17 @@ describe("shared assertions", () => {
     });
   });
 
-  describe("expectNoFile (via CLI)", () => {
+  describe("file().not.toExist", () => {
     test("passes when file does not exist", async () => {
       const result = await cliSpec("no file").project("cli-app").exec("build").run();
-      result.expectNoFile("dist/index.cjs");
+      result.file("dist/index.cjs").not.toExist();
     });
 
     test("fails when file unexpectedly exists", async () => {
       const result = await cliSpec("unexpected file").project("cli-app").exec("build").run();
 
       try {
-        result.expectNoFile("dist/index.js");
+        result.file("dist/index.js").not.toExist();
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toContain("Expected file NOT to exist");
@@ -204,17 +201,17 @@ describe("shared assertions", () => {
     });
   });
 
-  describe("expectFileContains (via CLI)", () => {
+  describe("file().toContain", () => {
     test("passes when file contains string", async () => {
       const result = await cliSpec("file content").project("cli-app").exec("build").run();
-      result.expectFileContains("dist/index.js", "Hello from CLI app");
+      result.file("dist/index.js").toContain("Hello from CLI app");
     });
 
     test("fails when file does not contain string", async () => {
       const result = await cliSpec("file mismatch").project("cli-app").exec("build").run();
 
       try {
-        result.expectFileContains("dist/index.js", "NONEXISTENT CONTENT");
+        result.file("dist/index.js").toContain("NONEXISTENT CONTENT");
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toContain("does not contain expected content");
@@ -225,7 +222,7 @@ describe("shared assertions", () => {
       const result = await cliSpec("file missing").project("cli-app").exec("build").run();
 
       try {
-        result.expectFileContains("dist/nope.js", "anything");
+        result.file("dist/nope.js").toContain("anything");
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toContain("Expected file to exist");
