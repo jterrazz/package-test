@@ -55,7 +55,7 @@ describe.each(runners)("$name — requests", ({ spec }) => {
     } catch (error: any) {
       // Then — descriptive error with spec label
       expect(error.message).toBe(
-        'Specification "no request": no request defined. Call .get(), .post(), etc. before .run()',
+        'Specification "no request": no action defined. Call .get(), .post(), .exec(), etc. before .run()',
       );
     }
   });

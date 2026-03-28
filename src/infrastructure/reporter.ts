@@ -196,6 +196,96 @@ export function formatResponseDiff(file: string, expected: unknown, actual: unkn
   return lines.join("\n");
 }
 
+// ── Exit code error ──
+
+export function formatExitCodeError(
+  expected: number,
+  received: number,
+  stdout: string,
+  stderr: string,
+): string {
+  const lines: string[] = [];
+
+  lines.push(`Expected exit code: ${GREEN}${expected}${RESET}`);
+  lines.push(`Received exit code: ${RED}${received}${RESET}`);
+
+  if (stdout.trim()) {
+    lines.push("");
+    lines.push(`${DIM}stdout:${RESET}`);
+    for (const line of stdout.trim().split("\n").slice(-15)) {
+      lines.push(`  ${DIM}${line}${RESET}`);
+    }
+  }
+
+  if (stderr.trim()) {
+    lines.push("");
+    lines.push(`${DIM}stderr:${RESET}`);
+    for (const line of stderr.trim().split("\n").slice(-15)) {
+      lines.push(`  ${RED}${line}${RESET}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+// ── Stdout/stderr diff ──
+
+export function formatStdoutDiff(file: string, expected: string, actual: string): string {
+  const lines: string[] = [];
+
+  lines.push(`Output mismatch (${file})`);
+  lines.push("");
+  lines.push(`${GREEN}- Expected${RESET}`);
+  lines.push(`${RED}+ Received${RESET}`);
+  lines.push("");
+
+  const expectedLines = expected.split("\n");
+  const actualLines = actual.split("\n");
+  const maxLines = Math.max(expectedLines.length, actualLines.length);
+
+  for (let i = 0; i < maxLines; i++) {
+    const exp = expectedLines[i];
+    const act = actualLines[i];
+
+    if (exp === act) {
+      lines.push(`  ${exp}`);
+    } else {
+      if (exp !== undefined) {
+        lines.push(`${GREEN}- ${exp}${RESET}`);
+      }
+      if (act !== undefined) {
+        lines.push(`${RED}+ ${act}${RESET}`);
+      }
+    }
+  }
+
+  return lines.join("\n");
+}
+
+// ── File assertions ──
+
+export function formatFileMissing(path: string): string {
+  return `Expected file to exist: ${RED}${path}${RESET}`;
+}
+
+export function formatFileUnexpected(path: string): string {
+  return `Expected file NOT to exist: ${RED}${path}${RESET}`;
+}
+
+export function formatFileContentMismatch(path: string, expected: string, actual: string): string {
+  const lines: string[] = [];
+  lines.push(`File "${path}" does not contain expected content`);
+  lines.push("");
+  lines.push(`${GREEN}Expected to contain:${RESET}`);
+  lines.push(`  ${GREEN}${expected}${RESET}`);
+  lines.push("");
+  lines.push(`${RED}Actual content (first 20 lines):${RESET}`);
+  for (const line of actual.split("\n").slice(0, 20)) {
+    lines.push(`  ${DIM}${line}${RESET}`);
+  }
+  return lines.join("\n");
+}
+
 // ── Service logs section ──
 
 export function formatServiceLogs(services: { name: string; logs: string }[]): string {

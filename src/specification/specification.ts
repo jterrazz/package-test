@@ -1,20 +1,29 @@
-import { readFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
 import {
+  formatExitCodeError,
+  formatFileContentMismatch,
+  formatFileMissing,
+  formatFileUnexpected,
   formatResponseDiff,
   formatStatusError,
+  formatStdoutDiff,
   formatTableDiff,
 } from "../infrastructure/reporter.js";
+import type { CommandPort, CommandResult } from "./ports/command.port.js";
 import type { DatabasePort } from "./ports/database.port.js";
 import type { ServerPort, ServerResponse } from "./ports/server.port.js";
 
 // ── Types ──
 
 export interface SpecificationConfig {
+  command?: CommandPort;
   database?: DatabasePort;
   databases?: Map<string, DatabasePort>;
-  server: ServerPort;
+  fixturesRoot?: string;
+  server?: ServerPort;
 }
 
 export interface SeedEntry {
@@ -22,43 +31,58 @@ export interface SeedEntry {
   service?: string;
 }
 
+export interface FixtureEntry {
+  file: string;
+}
+
 export interface MockEntry {
   file: string;
 }
 
 export interface RequestEntry {
+  bodyFile?: string;
   method: string;
   path: string;
-  bodyFile?: string;
 }
 
 // ── Result (after .run()) ──
 
 interface RequestInfo {
+  body?: unknown;
   method: string;
   path: string;
-  body?: unknown;
 }
 
 export class SpecificationResult {
-  private response: ServerResponse;
+  private commandResult?: CommandResult;
   private config: SpecificationConfig;
+  private requestInfo?: RequestInfo;
+  private response?: ServerResponse;
   private testDir: string;
-  private requestInfo: RequestInfo;
+  private workDir?: string;
 
-  constructor(
-    response: ServerResponse,
-    config: SpecificationConfig,
-    testDir: string,
-    requestInfo: RequestInfo,
-  ) {
-    this.response = response;
-    this.config = config;
-    this.testDir = testDir;
-    this.requestInfo = requestInfo;
+  constructor(options: {
+    commandResult?: CommandResult;
+    config: SpecificationConfig;
+    requestInfo?: RequestInfo;
+    response?: ServerResponse;
+    testDir: string;
+    workDir?: string;
+  }) {
+    this.response = options.response;
+    this.commandResult = options.commandResult;
+    this.config = options.config;
+    this.testDir = options.testDir;
+    this.requestInfo = options.requestInfo;
+    this.workDir = options.workDir;
   }
 
+  // ── HTTP assertions ──
+
   expectStatus(code: number): this {
+    if (!this.response || !this.requestInfo) {
+      throw new Error("expectStatus requires an HTTP action (.get(), .post(), etc.)");
+    }
     if (this.response.status !== code) {
       throw new Error(
         formatStatusError(code, this.response.status, this.requestInfo, this.response.body),
@@ -68,12 +92,84 @@ export class SpecificationResult {
   }
 
   expectResponse(file: string): this {
+    if (!this.response) {
+      throw new Error("expectResponse requires an HTTP action (.get(), .post(), etc.)");
+    }
     const expected = JSON.parse(readFileSync(resolve(this.testDir, "responses", file), "utf8"));
     if (JSON.stringify(this.response.body) !== JSON.stringify(expected)) {
       throw new Error(formatResponseDiff(file, expected, this.response.body));
     }
     return this;
   }
+
+  // ── CLI assertions ──
+
+  expectExitCode(code: number): this {
+    if (!this.commandResult) {
+      throw new Error("expectExitCode requires a CLI action (.exec())");
+    }
+    if (this.commandResult.exitCode !== code) {
+      throw new Error(
+        formatExitCodeError(
+          code,
+          this.commandResult.exitCode,
+          this.commandResult.stdout,
+          this.commandResult.stderr,
+        ),
+      );
+    }
+    return this;
+  }
+
+  expectStdout(file: string): this {
+    if (!this.commandResult) {
+      throw new Error("expectStdout requires a CLI action (.exec())");
+    }
+    const expected = readFileSync(resolve(this.testDir, "expected", file), "utf8").trim();
+    const actual = this.commandResult.stdout.trim();
+    if (actual !== expected) {
+      throw new Error(formatStdoutDiff(file, expected, actual));
+    }
+    return this;
+  }
+
+  expectStdoutContains(str: string): this {
+    if (!this.commandResult) {
+      throw new Error("expectStdoutContains requires a CLI action (.exec())");
+    }
+    if (!this.commandResult.stdout.includes(str)) {
+      throw new Error(
+        `Expected stdout to contain: "${str}"\n\nActual stdout:\n${this.commandResult.stdout}`,
+      );
+    }
+    return this;
+  }
+
+  expectStderr(file: string): this {
+    if (!this.commandResult) {
+      throw new Error("expectStderr requires a CLI action (.exec())");
+    }
+    const expected = readFileSync(resolve(this.testDir, "expected", file), "utf8").trim();
+    const actual = this.commandResult.stderr.trim();
+    if (actual !== expected) {
+      throw new Error(formatStdoutDiff(file, expected, actual));
+    }
+    return this;
+  }
+
+  expectStderrContains(str: string): this {
+    if (!this.commandResult) {
+      throw new Error("expectStderrContains requires a CLI action (.exec())");
+    }
+    if (!this.commandResult.stderr.includes(str)) {
+      throw new Error(
+        `Expected stderr to contain: "${str}"\n\nActual stderr:\n${this.commandResult.stderr}`,
+      );
+    }
+    return this;
+  }
+
+  // ── Cross-mode assertions ──
 
   async expectTable(
     table: string,
@@ -95,23 +191,63 @@ export class SpecificationResult {
     return this;
   }
 
+  expectFile(path: string): this {
+    const resolved = this.resolveWorkPath(path);
+    if (!existsSync(resolved)) {
+      throw new Error(formatFileMissing(path));
+    }
+    return this;
+  }
+
+  expectNoFile(path: string): this {
+    const resolved = this.resolveWorkPath(path);
+    if (existsSync(resolved)) {
+      throw new Error(formatFileUnexpected(path));
+    }
+    return this;
+  }
+
+  expectFileContains(path: string, content: string): this {
+    const resolved = this.resolveWorkPath(path);
+    if (!existsSync(resolved)) {
+      throw new Error(formatFileMissing(path));
+    }
+    const actual = readFileSync(resolved, "utf8");
+    if (!actual.includes(content)) {
+      throw new Error(formatFileContentMismatch(path, content, actual));
+    }
+    return this;
+  }
+
+  // ── Private ──
+
   private resolveDatabase(serviceName?: string): DatabasePort | undefined {
     if (serviceName && this.config.databases) {
       return this.config.databases.get(serviceName);
     }
     return this.config.database;
   }
+
+  private resolveWorkPath(path: string): string {
+    if (this.workDir) {
+      return resolve(this.workDir, path);
+    }
+    return resolve(this.testDir, path);
+  }
 }
 
 // ── Builder (before .run()) ──
 
 export class SpecificationBuilder {
+  private commandArgs: null | string = null;
   private config: SpecificationConfig;
-  private testDir: string;
+  private fixtures: FixtureEntry[] = [];
   private label: string;
-  private seeds: SeedEntry[] = [];
   private mocks: MockEntry[] = [];
+  private projectName: null | string = null;
   private request: null | RequestEntry = null;
+  private seeds: SeedEntry[] = [];
+  private testDir: string;
 
   constructor(config: SpecificationConfig, testDir: string, label: string) {
     this.config = config;
@@ -119,8 +255,20 @@ export class SpecificationBuilder {
     this.label = label;
   }
 
+  // ── Setup ──
+
   seed(file: string, options?: { service?: string }): this {
     this.seeds.push({ file, service: options?.service });
+    return this;
+  }
+
+  fixture(file: string): this {
+    this.fixtures.push({ file });
+    return this;
+  }
+
+  project(name: string): this {
+    this.projectName = name;
     return this;
   }
 
@@ -129,18 +277,20 @@ export class SpecificationBuilder {
     return this;
   }
 
+  // ── HTTP actions ──
+
   get(path: string): this {
     this.request = { method: "GET", path };
     return this;
   }
 
   post(path: string, bodyFile?: string): this {
-    this.request = { method: "POST", path, bodyFile };
+    this.request = { bodyFile, method: "POST", path };
     return this;
   }
 
   put(path: string, bodyFile?: string): this {
-    this.request = { method: "PUT", path, bodyFile };
+    this.request = { bodyFile, method: "PUT", path };
     return this;
   }
 
@@ -149,11 +299,35 @@ export class SpecificationBuilder {
     return this;
   }
 
+  // ── CLI action ──
+
+  exec(args: string): this {
+    this.commandArgs = args;
+    return this;
+  }
+
+  // ── Run ──
+
   async run(): Promise<SpecificationResult> {
-    if (!this.request) {
+    const hasHttpAction = this.request !== null;
+    const hasCliAction = this.commandArgs !== null;
+
+    if (!hasHttpAction && !hasCliAction) {
       throw new Error(
-        `Specification "${this.label}": no request defined. Call .get(), .post(), etc. before .run()`,
+        `Specification "${this.label}": no action defined. Call .get(), .post(), .exec(), etc. before .run()`,
       );
+    }
+
+    if (hasHttpAction && hasCliAction) {
+      throw new Error(
+        `Specification "${this.label}": cannot mix HTTP (.get/.post) and CLI (.exec) actions`,
+      );
+    }
+
+    // Resolve working directory for CLI mode
+    let workDir: null | string = null;
+    if (hasCliAction) {
+      workDir = this.prepareWorkDir();
     }
 
     // Reset all databases
@@ -187,28 +361,84 @@ export class SpecificationBuilder {
       await db.seed(sql);
     }
 
+    // Copy fixture files into working directory
+    if (this.fixtures.length > 0 && workDir) {
+      for (const entry of this.fixtures) {
+        const src = resolve(this.testDir, "fixtures", entry.file);
+        const dest = resolve(workDir, entry.file);
+        cpSync(src, dest, { recursive: true });
+      }
+    }
+
     // Register MSW mocks
     for (const entry of this.mocks) {
       const _mockData = JSON.parse(readFileSync(resolve(this.testDir, "mock", entry.file), "utf8"));
       // TODO: Register MSW handler from mock data
-      // The mock file format and MSW integration will be designed
-      // When the first project needs it
     }
 
-    // Execute request
+    // Execute action
+    if (hasHttpAction) {
+      return this.runHttpAction();
+    }
+    return this.runCliAction(workDir!);
+  }
+
+  // ── Private ──
+
+  private prepareWorkDir(): string {
+    const tempDir = mkdtempSync(resolve(tmpdir(), "spec-cli-"));
+
+    if (this.projectName && this.config.fixturesRoot) {
+      const projectDir = resolve(this.config.fixturesRoot, this.projectName);
+      if (!existsSync(projectDir)) {
+        throw new Error(
+          `project("${this.projectName}"): fixture project not found at ${projectDir}`,
+        );
+      }
+      cpSync(projectDir, tempDir, { recursive: true });
+    }
+
+    return tempDir;
+  }
+
+  private async runHttpAction(): Promise<SpecificationResult> {
+    if (!this.config.server) {
+      throw new Error("HTTP actions require a server adapter (use integration() or e2e())");
+    }
+
     let body: unknown;
-    if (this.request.bodyFile) {
+    if (this.request!.bodyFile) {
       body = JSON.parse(
-        readFileSync(resolve(this.testDir, "requests", this.request.bodyFile), "utf8"),
+        readFileSync(resolve(this.testDir, "requests", this.request!.bodyFile), "utf8"),
       );
     }
 
-    const response = await this.config.server.request(this.request.method, this.request.path, body);
-
-    return new SpecificationResult(response, this.config, this.testDir, {
-      method: this.request.method,
-      path: this.request.path,
+    const response = await this.config.server.request(
+      this.request!.method,
+      this.request!.path,
       body,
+    );
+
+    return new SpecificationResult({
+      config: this.config,
+      requestInfo: { body, method: this.request!.method, path: this.request!.path },
+      response,
+      testDir: this.testDir,
+    });
+  }
+
+  private async runCliAction(workDir: string): Promise<SpecificationResult> {
+    if (!this.config.command) {
+      throw new Error("CLI actions require a command adapter (use cli())");
+    }
+
+    const commandResult = await this.config.command.exec(this.commandArgs!, workDir);
+
+    return new SpecificationResult({
+      commandResult,
+      config: this.config,
+      testDir: this.testDir,
+      workDir,
     });
   }
 }
@@ -221,11 +451,8 @@ function getCallerDir(): string {
     throw new Error("Cannot detect caller directory: no stack trace");
   }
 
-  // Find the first stack frame that is a user test file
-  // (not in node_modules, not this file)
   const lines = stack.split("\n");
   for (const line of lines) {
-    // Match both "at path:line:col" and "at func (file://path:line:col)"
     const match = line.match(/at\s+(?:.*?\()?(?:file:\/\/)?([^:)]+):\d+:\d+/);
     if (!match) {
       continue;

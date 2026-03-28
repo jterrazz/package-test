@@ -9,7 +9,7 @@ Part of the @jterrazz ecosystem. Defines how all projects test.
 
 ## Specification runners
 
-Two modes, same test API. Declare services, provide an app factory, the framework handles containers and wiring.
+Three modes, same test API. The framework handles containers, wiring, and temp directories.
 
 ### Integration (testcontainers, in-process app)
 
@@ -44,7 +44,20 @@ export const spec = await e2e({
 afterAll(() => spec.cleanup());
 ```
 
-### Test usage
+### CLI (local command execution)
+
+```typescript
+// tests/setup/cli.specification.ts
+import { resolve } from "node:path";
+import { cli } from "@jterrazz/test";
+
+export const spec = await cli({
+  command: resolve(import.meta.dirname, "../../bin/my-cli.sh"),
+  root: "../fixtures",
+});
+```
+
+### API test usage
 
 ```typescript
 import { spec } from "../integration.specification.js";
@@ -61,6 +74,23 @@ test("creates company", async () => {
     columns: ["name"],
     rows: [["TEST COMPANY"]],
   });
+});
+```
+
+### CLI test usage
+
+```typescript
+import { spec } from "../setup/cli.specification.js";
+
+test("builds successfully", async () => {
+  const result = await spec("build").project("sample-app").exec("build").run();
+
+  result
+    .expectExitCode(0)
+    .expectStdoutContains("Build completed")
+    .expectFile("dist/index.js")
+    .expectNoFile("dist/index.cjs")
+    .expectFileContains("dist/index.js", "Hello");
 });
 ```
 
@@ -158,9 +188,15 @@ Rules:
 
 ## Builder methods
 
-**Setup:** `.seed("file.sql")`, `.seed("file.sql", { service: "analytics-db" })`, `.mock("file.json")`
-**Action:** `.get(path)`, `.post(path, "body.json")`, `.put(path, "body.json")`, `.delete(path)`
-**Assertions:** `.expectStatus(code)`, `.expectResponse("file.json")`, `.expectTable(table, { columns, rows })`, `.expectTable(table, { columns, rows, service: "analytics-db" })`
+**Setup (cross-mode):** `.seed("file.sql")`, `.seed("file.sql", { service: "name" })`, `.fixture("file")`, `.project("name")`, `.mock("file.json")`
+**HTTP action:** `.get(path)`, `.post(path, "body.json")`, `.put(path, "body.json")`, `.delete(path)`
+**CLI action:** `.exec("command args")`
+
+### Assertions
+
+**HTTP-specific:** `.expectStatus(code)`, `.expectResponse("file.json")`
+**CLI-specific:** `.expectExitCode(code)`, `.expectStdoutContains(str)`, `.expectStderrContains(str)`, `.expectStdout("file.txt")`, `.expectStderr("file.txt")`
+**Cross-mode:** `.expectTable(table, { columns, rows, service? })`, `.expectFile(path)`, `.expectNoFile(path)`, `.expectFileContains(path, content)`
 
 ### Multi-database support
 

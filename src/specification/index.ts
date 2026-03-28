@@ -1,7 +1,9 @@
+import { existsSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 
 import { Orchestrator } from "../infrastructure/orchestrator.js";
 import type { ServiceHandle } from "../infrastructure/services/service.port.js";
+import { ExecAdapter } from "./adapters/exec.adapter.js";
 import { FetchAdapter } from "./adapters/fetch.adapter.js";
 import { HonoAdapter } from "./adapters/hono.adapter.js";
 import type { DatabasePort } from "./ports/database.port.js";
@@ -40,23 +42,56 @@ function resolveProjectRoot(root: string | undefined): string {
   return resolve(process.cwd(), root);
 }
 
+/**
+ * Resolve a CLI command — checks node_modules/.bin, then treats as absolute/PATH.
+ */
+function resolveCommand(command: string, root: string): string {
+  if (isAbsolute(command)) {
+    return command;
+  }
+
+  // Check node_modules/.bin in fixture root
+  const binPath = resolve(root, "node_modules/.bin", command);
+  if (existsSync(binPath)) {
+    return binPath;
+  }
+
+  // Check project root node_modules/.bin
+  const cwdBinPath = resolve(process.cwd(), "node_modules/.bin", command);
+  if (existsSync(cwdBinPath)) {
+    return cwdBinPath;
+  }
+
+  // Treat as PATH command or absolute
+  return command;
+}
+
 type HonoApp = {
   fetch: (...args: any[]) => any;
   request: (path: string, init?: RequestInit) => Promise<Response> | Response;
 };
 
 interface IntegrationOptions {
-  /** Declared services — started via testcontainers. */
-  services: ServiceHandle[];
   /** Factory that returns a Hono app — called after services start. */
   app: () => HonoApp;
   /** Project root for compose detection (relative paths supported). */
   root?: string;
+  /** Declared services — started via testcontainers. */
+  services: ServiceHandle[];
 }
 
 interface E2eOptions {
   /** Project root — must contain docker/compose.test.yaml. */
   root?: string;
+}
+
+interface CliOptions {
+  /** CLI command to run (resolved from node_modules/.bin or PATH). */
+  command: string;
+  /** Project root — base dir for .project() fixture lookup (relative paths supported). */
+  root?: string;
+  /** Optional infrastructure services (started via testcontainers). */
+  services?: ServiceHandle[];
 }
 
 interface SpecificationRunnerWithCleanup extends SpecificationRunner {
@@ -67,19 +102,12 @@ interface SpecificationRunnerWithCleanup extends SpecificationRunner {
 /**
  * Create an integration specification runner.
  * Starts infra containers via testcontainers, app runs in-process.
- *
- * @example
- * const db = postgres({ compose: "db" });
- * export const spec = await integration({
- *     services: [db],
- *     app: () => createApp({ databaseUrl: db.connectionString }),
- * });
  */
 async function integration(options: IntegrationOptions): Promise<SpecificationRunnerWithCleanup> {
   const orchestrator = new Orchestrator({
-    services: options.services,
     mode: "integration",
     root: resolveProjectRoot(options.root),
+    services: options.services,
   });
 
   await orchestrator.start();
@@ -103,17 +131,12 @@ async function integration(options: IntegrationOptions): Promise<SpecificationRu
 /**
  * Create an E2E specification runner.
  * Starts full docker compose stack. App URL and database auto-detected.
- *
- * @example
- * export const spec = await e2e({
- *     root: "../fixtures/app",
- * });
  */
 async function e2e(options: E2eOptions = {}): Promise<SpecificationRunnerWithCleanup> {
   const orchestrator = new Orchestrator({
-    services: [],
     mode: "e2e",
     root: resolveProjectRoot(options.root),
+    services: [],
   });
 
   await orchestrator.startCompose();
@@ -140,15 +163,64 @@ async function e2e(options: E2eOptions = {}): Promise<SpecificationRunnerWithCle
   return runner;
 }
 
+/**
+ * Create a CLI specification runner.
+ * Runs CLI commands against fixture projects. Optionally starts infrastructure.
+ *
+ * @example
+ * export const spec = await cli({
+ *     command: resolve(import.meta.dirname, "../../bin/my-cli.sh"),
+ *     root: "../fixtures",
+ * });
+ */
+async function cli(options: CliOptions): Promise<SpecificationRunnerWithCleanup> {
+  const root = resolveProjectRoot(options.root);
+  const command = resolveCommand(options.command, root);
+
+  let orchestrator: null | Orchestrator = null;
+  let database: DatabasePort | undefined;
+  let databases: Map<string, DatabasePort> | undefined;
+
+  if (options.services?.length) {
+    orchestrator = new Orchestrator({
+      mode: "integration",
+      root,
+      services: options.services,
+    });
+    await orchestrator.start();
+    database = orchestrator.getDatabase() ?? undefined;
+    const dbMap = orchestrator.getDatabases();
+    databases = dbMap.size > 0 ? dbMap : undefined;
+  }
+
+  const runner = createSpecificationRunner({
+    command: new ExecAdapter(command),
+    database,
+    databases,
+    fixturesRoot: root,
+  }) as SpecificationRunnerWithCleanup;
+
+  runner.cleanup = async () => {
+    if (orchestrator) {
+      await orchestrator.stop();
+    }
+  };
+  runner.orchestrator = orchestrator!;
+
+  return runner;
+}
+
 // Service factories
 export { postgres } from "../infrastructure/services/postgres.js";
 export { redis } from "../infrastructure/services/redis.js";
 
 // Types
+export type { CommandPort, CommandResult } from "./ports/command.port.js";
 export type { DatabasePort } from "./ports/database.port.js";
 export type { ServerPort, ServerResponse } from "./ports/server.port.js";
 
 // Adapters (for advanced usage)
+export { ExecAdapter } from "./adapters/exec.adapter.js";
 export { FetchAdapter } from "./adapters/fetch.adapter.js";
 export { HonoAdapter } from "./adapters/hono.adapter.js";
 export { Orchestrator } from "../infrastructure/orchestrator.js";
@@ -157,4 +229,4 @@ export { Orchestrator } from "../infrastructure/orchestrator.js";
 export { normalizeOutput, stripAnsi } from "../infrastructure/reporter.js";
 
 // Runners
-export { e2e, integration };
+export { cli, e2e, integration };
