@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { stripAnsi } from "../../../../src/index.js";
 import { runners } from "../../../setup/runners.js";
 
 describe.each(runners)("$name — assertions", ({ spec }) => {
@@ -10,10 +11,27 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       result.expectStatus(200);
     });
 
-    test("fails on wrong status", async () => {
+    test("fails with formatted error on wrong status", async () => {
       const result = await spec("wrong status").get("/users/999").run();
 
-      expect(() => result.expectStatus(200)).toThrow();
+      try {
+        result.expectStatus(200);
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(stripAnsi(error.message)).toBe(
+          [
+            "Expected status: 200",
+            "Received status: 404",
+            "",
+            "GET /users/999",
+            "",
+            "Response:",
+            "{",
+            '  "error": "User not found"',
+            "}",
+          ].join("\n"),
+        );
+      }
     });
   });
 
@@ -24,10 +42,40 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       result.expectResponse("all-users.response.json");
     });
 
-    test("fails when body differs from file", async () => {
+    test("fails with diff on body mismatch", async () => {
       const result = await spec("wrong body").seed("two-users.sql").get("/users").run();
 
-      expect(() => result.expectResponse("wrong-body.response.json")).toThrow();
+      try {
+        result.expectResponse("wrong-body.response.json");
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        const msg = stripAnsi(error.message);
+        expect(msg).toBe(
+          [
+            "Response mismatch (wrong-body.response.json)",
+            "",
+            "- Expected",
+            "+ Received",
+            "",
+            "  {",
+            '    "users": [',
+            "      {",
+            '-       "name": "Wrong1",',
+            '+       "name": "Alice",',
+            '-       "email": "wrong1@test.com"',
+            '+       "email": "alice@test.com"',
+            "      },",
+            "      {",
+            '-       "name": "Wrong2",',
+            '+       "name": "Bob",',
+            '-       "email": "wrong2@test.com"',
+            '+       "email": "bob@test.com"',
+            "      }",
+            "    ]",
+            "  }",
+          ].join("\n"),
+        );
+      }
     });
   });
 
@@ -41,37 +89,72 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       });
     });
 
-    test("fails on wrong row values", async () => {
+    test("fails with diff on wrong row values", async () => {
       const result = await spec("wrong values").seed("one-user.sql").get("/users").run();
 
-      await expect(
-        result.expectTable("users", {
+      try {
+        await result.expectTable("users", {
           columns: ["name"],
           rows: [["NonExistent"]],
-        }),
-      ).rejects.toThrow();
+        });
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(stripAnsi(error.message)).toBe(
+          [
+            'Table "users" mismatch',
+            "",
+            "- Expected",
+            "+ Received",
+            "",
+            "  name",
+            "- NonExistent",
+            "+ Alice",
+          ].join("\n"),
+        );
+      }
     });
 
-    test("fails on extra rows", async () => {
+    test("fails with diff on extra rows", async () => {
       const result = await spec("extra rows").seed("two-users.sql").get("/users").run();
 
-      await expect(
-        result.expectTable("users", {
+      try {
+        await result.expectTable("users", {
           columns: ["name"],
           rows: [["Alice"]],
-        }),
-      ).rejects.toThrow();
+        });
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(stripAnsi(error.message)).toBe(
+          [
+            'Table "users" mismatch',
+            "",
+            "- Expected",
+            "+ Received",
+            "",
+            "  name",
+            "  Alice",
+            "+ Bob",
+          ].join("\n"),
+        );
+      }
     });
 
-    test("fails on missing rows", async () => {
+    test("fails with diff on missing rows", async () => {
       const result = await spec("missing rows").get("/users").run();
 
-      await expect(
-        result.expectTable("users", {
+      try {
+        await result.expectTable("users", {
           columns: ["name"],
           rows: [["Alice"]],
-        }),
-      ).rejects.toThrow();
+        });
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(stripAnsi(error.message)).toBe(
+          ['Table "users" mismatch', "", "- Expected", "+ Received", "", "  name", "- Alice"].join(
+            "\n",
+          ),
+        );
+      }
     });
   });
 });

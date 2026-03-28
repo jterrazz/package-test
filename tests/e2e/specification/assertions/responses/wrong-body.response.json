@@ -1,3 +1,6 @@
 {
-  "users": [{ "name": "Wrong", "email": "wrong@test.com" }]
+  "users": [
+    { "name": "Wrong1", "email": "wrong1@test.com" },
+    { "name": "Wrong2", "email": "wrong2@test.com" }
+  ]
 }

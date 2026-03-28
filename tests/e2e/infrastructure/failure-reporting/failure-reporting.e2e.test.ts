@@ -7,8 +7,8 @@ describe("failure reporting", () => {
   const spec = integrationSpec;
 
   describe("expectStatus", () => {
-    test("includes request and response context", async () => {
-      const result = await spec("status failure context")
+    test("shows full context on POST status mismatch", async () => {
+      const result = await spec("status POST context")
         .seed("one-user.sql")
         .post("/users", "create-user.json")
         .run();
@@ -17,54 +17,126 @@ describe("failure reporting", () => {
         result.expectStatus(500);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toContain("Expected status: 500");
-        expect(stripAnsi(error.message)).toContain("Received status:");
-        expect(stripAnsi(error.message)).toContain("POST /users");
+        expect(stripAnsi(error.message)).toBe(
+          [
+            "Expected status: 500",
+            "Received status: 201",
+            "",
+            "POST /users",
+            "{",
+            '  "name": "Charlie",',
+            '  "email": "charlie@test.com"',
+            "}",
+            "",
+            "Response:",
+            "{",
+            '  "user": {',
+            '    "name": "Charlie",',
+            '    "email": "charlie@test.com"',
+            "  }",
+            "}",
+          ].join("\n"),
+        );
       }
     });
 
-    test("shows request body in context", async () => {
-      const result = await spec("body in context").post("/users", "create-user.json").run();
-
-      try {
-        result.expectStatus(500);
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(stripAnsi(error.message)).toContain("Charlie");
-        expect(stripAnsi(error.message)).toContain("charlie@test.com");
-      }
-    });
-
-    test("shows response body in context", async () => {
-      const result = await spec("response in context").get("/users/999").run();
+    test("shows context on GET 404 mismatch", async () => {
+      const result = await spec("status GET context").get("/users/999").run();
 
       try {
         result.expectStatus(200);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toContain("User not found");
+        expect(stripAnsi(error.message)).toBe(
+          [
+            "Expected status: 200",
+            "Received status: 404",
+            "",
+            "GET /users/999",
+            "",
+            "Response:",
+            "{",
+            '  "error": "User not found"',
+            "}",
+          ].join("\n"),
+        );
       }
     });
   });
 
   describe("expectResponse", () => {
-    test("throws on mismatch", async () => {
+    test("shows diff on response mismatch", async () => {
       const result = await spec("response mismatch").seed("one-user.sql").get("/users").run();
 
-      expect(() => result.expectResponse("wrong.response.json")).toThrow();
+      try {
+        result.expectResponse("wrong.response.json");
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(stripAnsi(error.message)).toBe(
+          [
+            "Response mismatch (wrong.response.json)",
+            "",
+            "- Expected",
+            "+ Received",
+            "",
+            "  {",
+            '    "users": [',
+            "      {",
+            '-       "name": "Wrong",',
+            '+       "name": "Alice",',
+            '-       "email": "wrong@test.com"',
+            '+       "email": "alice@test.com"',
+            "      }",
+            "    ]",
+            "  }",
+          ].join("\n"),
+        );
+      }
     });
   });
 
   describe("expectTable", () => {
-    test("throws on row mismatch", async () => {
+    test("shows diff on table mismatch", async () => {
       const result = await spec("table mismatch").seed("one-user.sql").get("/users").run();
 
-      await expect(
-        result.expectTable("users", {
+      try {
+        await result.expectTable("users", {
           columns: ["name"],
           rows: [["NonExistent"]],
-        }),
-      ).rejects.toThrow();
+        });
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(stripAnsi(error.message)).toBe(
+          [
+            'Table "users" mismatch',
+            "",
+            "- Expected",
+            "+ Received",
+            "",
+            "  name",
+            "- NonExistent",
+            "+ Alice",
+          ].join("\n"),
+        );
+      }
+    });
+
+    test("shows diff on empty actual", async () => {
+      const result = await spec("table empty").get("/users").run();
+
+      try {
+        await result.expectTable("users", {
+          columns: ["name"],
+          rows: [["Alice"]],
+        });
+        expect.fail("should have thrown");
+      } catch (error: any) {
+        expect(stripAnsi(error.message)).toBe(
+          ['Table "users" mismatch', "", "- Expected", "+ Received", "", "  name", "- Alice"].join(
+            "\n",
+          ),
+        );
+      }
     });
   });
 });

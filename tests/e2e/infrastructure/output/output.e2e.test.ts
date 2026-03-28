@@ -62,9 +62,15 @@ describe("output formatting", () => {
         ),
       );
 
-      expect(output).toContain("INFRA  Starting infrastructure...");
-      expect(output).toContain("✓ postgres (db)");
-      expect(output).toContain("→ app: http://localhost:PORT");
+      expect(output).toBe(
+        [
+          "INFRA  Starting infrastructure...",
+          "",
+          "  ✓ postgres (db)  postgresql://test:test@localhost:PORT/test  Xms",
+          "",
+          "  → app: http://localhost:PORT",
+        ].join("\n"),
+      );
     });
 
     test("formats failed startup with error and logs", () => {
@@ -80,16 +86,21 @@ describe("output formatting", () => {
         ]),
       );
 
-      expect(output).toContain("× postgres (db)");
-      expect(output).toContain("connection refused");
-      expect(output).toContain('FATAL: role "test" does not exist');
-      expect(output).toContain("LOG: shutting down");
+      expect(output).toBe(
+        [
+          "INFRA  Starting infrastructure...",
+          "",
+          "  × postgres (db)  connection refused  Xms",
+          '    FATAL: role "test" does not exist',
+          "    LOG: shutting down",
+        ].join("\n"),
+      );
     });
 
     test("shows only last 10 log lines", () => {
       const manyLogs = Array.from({ length: 20 }, (_, i) => `log line ${i}`).join("\n");
 
-      const output = stripAnsi(
+      const output = normalizeOutput(
         formatStartupReport("integration", [
           {
             name: "db",
@@ -101,10 +112,14 @@ describe("output formatting", () => {
         ]),
       );
 
-      expect(output).not.toContain("log line 0");
-      expect(output).not.toContain("log line 9");
-      expect(output).toContain("log line 10");
-      expect(output).toContain("log line 19");
+      expect(output).toBe(
+        [
+          "INFRA  Starting infrastructure...",
+          "",
+          "  × postgres (db)  failed  Xms",
+          ...Array.from({ length: 10 }, (_, i) => `    log line ${i + 10}`),
+        ].join("\n"),
+      );
     });
   });
 
@@ -115,9 +130,7 @@ describe("output formatting", () => {
           200,
           404,
           { method: "GET", path: "/users/999" },
-          {
-            error: "User not found",
-          },
+          { error: "User not found" },
         ),
       );
 
@@ -141,22 +154,28 @@ describe("output formatting", () => {
         formatStatusError(
           201,
           500,
-          {
-            method: "POST",
-            path: "/users",
-            body: { name: "Alice", email: "alice@test.com" },
-          },
+          { method: "POST", path: "/users", body: { name: "Alice", email: "alice@test.com" } },
           { error: "Internal Server Error" },
         ),
       );
 
-      expect(output).toContain("Expected status: 201");
-      expect(output).toContain("Received status: 500");
-      expect(output).toContain("POST /users");
-      expect(output).toContain('"name": "Alice"');
-      expect(output).toContain('"email": "alice@test.com"');
-      expect(output).toContain("Response:");
-      expect(output).toContain("Internal Server Error");
+      expect(output).toBe(
+        [
+          "Expected status: 201",
+          "Received status: 500",
+          "",
+          "POST /users",
+          "{",
+          '  "name": "Alice",',
+          '  "email": "alice@test.com"',
+          "}",
+          "",
+          "Response:",
+          "{",
+          '  "error": "Internal Server Error"',
+          "}",
+        ].join("\n"),
+      );
     });
 
     test("formats without response body", () => {
@@ -164,15 +183,14 @@ describe("output formatting", () => {
         formatStatusError(200, 204, { method: "DELETE", path: "/users/1" }, null),
       );
 
-      expect(output).toContain("Expected status: 200");
-      expect(output).toContain("Received status: 204");
-      expect(output).toContain("DELETE /users/1");
-      expect(output).not.toContain("Response:");
+      expect(output).toBe(
+        ["Expected status: 200", "Received status: 204", "", "DELETE /users/1"].join("\n"),
+      );
     });
   });
 
   describe("table diff", () => {
-    test("formats row mismatch with +/- markers", () => {
+    test("formats row mismatch", () => {
       const output = stripAnsi(
         formatTableDiff(
           "users",
@@ -201,8 +219,18 @@ describe("output formatting", () => {
         formatTableDiff("users", ["name"], [["Alice"]], [["Alice"], ["Bob"]]),
       );
 
-      expect(output).toContain("  Alice");
-      expect(output).toContain("+ Bob");
+      expect(output).toBe(
+        [
+          'Table "users" mismatch',
+          "",
+          "- Expected",
+          "+ Received",
+          "",
+          "  name",
+          "  Alice",
+          "+ Bob",
+        ].join("\n"),
+      );
     });
 
     test("formats missing rows", () => {
@@ -210,20 +238,38 @@ describe("output formatting", () => {
         formatTableDiff("users", ["name"], [["Alice"], ["Bob"]], [["Alice"]]),
       );
 
-      expect(output).toContain("  Alice");
-      expect(output).toContain("- Bob");
+      expect(output).toBe(
+        [
+          'Table "users" mismatch',
+          "",
+          "- Expected",
+          "+ Received",
+          "",
+          "  name",
+          "  Alice",
+          "- Bob",
+        ].join("\n"),
+      );
     });
 
     test("formats empty actual", () => {
       const output = stripAnsi(formatTableDiff("users", ["name"], [["Alice"]], []));
 
-      expect(output).toContain("- Alice");
+      expect(output).toBe(
+        ['Table "users" mismatch', "", "- Expected", "+ Received", "", "  name", "- Alice"].join(
+          "\n",
+        ),
+      );
     });
 
     test("formats both empty", () => {
       const output = stripAnsi(formatTableDiff("users", ["name"], [], []));
 
-      expect(output).toContain("(empty)");
+      expect(output).toBe(
+        ['Table "users" mismatch', "", "- Expected", "+ Received", "", "  name", "  (empty)"].join(
+          "\n",
+        ),
+      );
     });
   });
 
@@ -237,14 +283,24 @@ describe("output formatting", () => {
         ),
       );
 
-      expect(output).toContain("Response mismatch (expected.response.json)");
-      expect(output).toContain("- Expected");
-      expect(output).toContain("+ Received");
-      expect(output).toContain('-     "name": "Alice"');
-      expect(output).toContain('+     "name": "Bob"');
+      expect(output).toBe(
+        [
+          "Response mismatch (expected.response.json)",
+          "",
+          "- Expected",
+          "+ Received",
+          "",
+          "  {",
+          '    "user": {',
+          '-     "name": "Alice"',
+          '+     "name": "Bob"',
+          "    }",
+          "  }",
+        ].join("\n"),
+      );
     });
 
-    test("shows matching lines without markers", () => {
+    test("formats nested object diff", () => {
       const output = stripAnsi(
         formatResponseDiff(
           "test.json",
@@ -253,8 +309,23 @@ describe("output formatting", () => {
         ),
       );
 
-      // The "users": [ line should match (no +/-)
-      expect(output).toContain('  "users": [');
+      expect(output).toBe(
+        [
+          "Response mismatch (test.json)",
+          "",
+          "- Expected",
+          "+ Received",
+          "",
+          "  {",
+          '    "users": [',
+          "      {",
+          '-       "name": "Alice"',
+          '+       "name": "Bob"',
+          "      }",
+          "    ]",
+          "  }",
+        ].join("\n"),
+      );
     });
   });
 
@@ -264,24 +335,31 @@ describe("output formatting", () => {
         formatServiceLogs([{ name: "postgres (db)", logs: "LOG: database ready\nLOG: listening" }]),
       );
 
-      expect(output).toContain("postgres (db) logs (last 10 lines):");
-      expect(output).toContain("  LOG: database ready");
-      expect(output).toContain("  LOG: listening");
+      expect(output).toBe(
+        [
+          "",
+          "postgres (db) logs (last 10 lines):",
+          "  LOG: database ready",
+          "  LOG: listening",
+        ].join("\n"),
+      );
     });
 
-    test("skips empty logs", () => {
-      const output = formatServiceLogs([{ name: "redis", logs: "" }]);
-
-      expect(output).toBe("");
+    test("returns empty string for empty logs", () => {
+      expect(formatServiceLogs([{ name: "redis", logs: "" }])).toBe("");
     });
 
     test("truncates to last 10 lines", () => {
       const logs = Array.from({ length: 20 }, (_, i) => `line ${i}`).join("\n");
       const output = stripAnsi(formatServiceLogs([{ name: "db", logs }]));
 
-      expect(output).not.toContain("line 9");
-      expect(output).toContain("line 10");
-      expect(output).toContain("line 19");
+      expect(output).toBe(
+        [
+          "",
+          "db logs (last 10 lines):",
+          ...Array.from({ length: 10 }, (_, i) => `  line ${i + 10}`),
+        ].join("\n"),
+      );
     });
   });
 });
