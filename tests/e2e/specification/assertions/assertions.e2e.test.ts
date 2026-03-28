@@ -90,13 +90,16 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       // Given — actual rows differ from expected
       const result = await spec("wrong values").seed("one-user.sql").get("/users").run();
 
-      // Then — error shows +/- diff per row
+      // Then — error shows query context + +/- diff per row
       try {
         await result.expectTable("users", { columns: ["name"], rows: [["NonExistent"]] });
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toBe(dedent`
                     Table "users" mismatch
+                      query: name
+                      expected: 1 row
+                      received: 1 row
 
                     - Expected
                     + Received
@@ -112,13 +115,16 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       // Given — table has more rows than expected
       const result = await spec("extra rows").seed("two-users.sql").get("/users").run();
 
-      // Then — extra rows shown with + marker
+      // Then — row count mismatch + extra rows with + marker
       try {
         await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toBe(dedent`
                     Table "users" mismatch
+                      query: name
+                      expected: 1 row
+                      received: 2 rows
 
                     - Expected
                     + Received
@@ -134,13 +140,16 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       // Given — empty table, expecting rows
       const result = await spec("missing rows").get("/users").run();
 
-      // Then — missing rows shown with - marker
+      // Then — row count mismatch + missing rows with - marker
       try {
         await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
         expect.fail("should have thrown");
       } catch (error: any) {
         expect(stripAnsi(error.message)).toBe(dedent`
                     Table "users" mismatch
+                      query: name
+                      expected: 1 row
+                      received: 0 rows
 
                     - Expected
                     + Received

@@ -122,7 +122,12 @@ export function formatTableDiff(
 ): string {
   const lines: string[] = [];
 
+  const rowLabel = (n: number) => (n === 1 ? "1 row" : `${n} rows`);
+
   lines.push(`Table "${table}" mismatch`);
+  lines.push(`${DIM}  query: ${columns.join(", ")}${RESET}`);
+  lines.push(`${DIM}  expected: ${rowLabel(expected.length)}${RESET}`);
+  lines.push(`${DIM}  received: ${rowLabel(actual.length)}${RESET}`);
   lines.push("");
   lines.push(`${GREEN}- Expected${RESET}`);
   lines.push(`${RED}+ Received${RESET}`);

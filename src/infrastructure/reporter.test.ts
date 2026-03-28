@@ -194,6 +194,9 @@ describe("output formatting", () => {
 
       expect(output).toBe(dedent`
                 Table "users" mismatch
+                  query: name, email
+                  expected: 1 row
+                  received: 1 row
 
                 - Expected
                 + Received
@@ -211,6 +214,9 @@ describe("output formatting", () => {
 
       expect(output).toBe(dedent`
                 Table "users" mismatch
+                  query: name
+                  expected: 1 row
+                  received: 2 rows
 
                 - Expected
                 + Received
@@ -228,6 +234,9 @@ describe("output formatting", () => {
 
       expect(output).toBe(dedent`
                 Table "users" mismatch
+                  query: name
+                  expected: 2 rows
+                  received: 1 row
 
                 - Expected
                 + Received
@@ -243,6 +252,9 @@ describe("output formatting", () => {
 
       expect(output).toBe(dedent`
                 Table "users" mismatch
+                  query: name
+                  expected: 1 row
+                  received: 0 rows
 
                 - Expected
                 + Received
@@ -257,6 +269,9 @@ describe("output formatting", () => {
 
       expect(output).toBe(dedent`
                 Table "users" mismatch
+                  query: name
+                  expected: 0 rows
+                  received: 0 rows
 
                 - Expected
                 + Received
