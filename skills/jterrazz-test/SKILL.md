@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Testing framework for the @jterrazz ecosystem — declarative service factories, Docker-based infrastructure, specification runners, and mocking utilities. Activates when writing tests, setting up test infrastructure, or configuring specification runners.
+description: Testing framework for the @jterrazz ecosystem — declarative service factories, Docker-based infrastructure, specification runners for APIs and CLIs, and mocking utilities. Activates when writing tests, setting up test infrastructure, or configuring specification runners.
 ---
 
 # @jterrazz/test
@@ -9,20 +9,22 @@ Part of the @jterrazz ecosystem. Defines how all projects test.
 
 ## Specification runners
 
-Three modes, same test API. The framework handles containers, wiring, and temp directories.
+Three modes, same builder API. The framework handles containers, wiring, and temp directories.
 
-### Integration (testcontainers, in-process app)
+### `integration()` — testcontainers + in-process app
+
+Starts real containers via testcontainers. App runs in-process (Hono). Fastest feedback loop.
 
 ```typescript
-// tests/integration/integration.specification.ts
 import { afterAll } from "vitest";
-import { integration, postgres } from "@jterrazz/test";
+import { integration, postgres, redis } from "@jterrazz/test";
 import { createApp } from "../../src/app.js";
 
 const db = postgres({ compose: "db" });
+const cache = redis({ compose: "cache" });
 
 export const spec = await integration({
-  services: [db],
+  services: [db, cache],
   app: () => createApp({ databaseUrl: db.connectionString }),
   root: "../../",
 });
@@ -30,10 +32,17 @@ export const spec = await integration({
 afterAll(() => spec.cleanup());
 ```
 
-### E2E (docker compose up, real HTTP)
+| Option     | Type              | Description                                                   |
+| ---------- | ----------------- | ------------------------------------------------------------- |
+| `services` | `ServiceHandle[]` | Declared services — started via testcontainers                |
+| `app`      | `() => HonoApp`   | Factory that returns a Hono app — called after services start |
+| `root`     | `string?`         | Project root for compose detection (relative paths supported) |
+
+### `e2e()` — docker compose up + real HTTP
+
+Starts the full `docker/compose.test.yaml` stack. App URL and databases auto-detected.
 
 ```typescript
-// tests/e2e/e2e.specification.ts
 import { afterAll } from "vitest";
 import { e2e } from "@jterrazz/test";
 
@@ -44,10 +53,15 @@ export const spec = await e2e({
 afterAll(() => spec.cleanup());
 ```
 
-### CLI (local command execution)
+| Option | Type      | Description                                            |
+| ------ | --------- | ------------------------------------------------------ |
+| `root` | `string?` | Project root — must contain `docker/compose.test.yaml` |
+
+### `cli()` — local command execution
+
+Runs CLI commands against fixture projects in isolated temp directories.
 
 ```typescript
-// tests/setup/cli.specification.ts
 import { resolve } from "node:path";
 import { cli } from "@jterrazz/test";
 
@@ -57,40 +71,122 @@ export const spec = await cli({
 });
 ```
 
-### API test usage
+| Option     | Type               | Description                                                         |
+| ---------- | ------------------ | ------------------------------------------------------------------- |
+| `command`  | `string`           | CLI command (resolved from `node_modules/.bin` or absolute path)    |
+| `root`     | `string?`          | Base dir for `.project()` fixture lookup (relative paths supported) |
+| `services` | `ServiceHandle[]?` | Optional infrastructure services (started via testcontainers)       |
+
+### Runner pattern with describe.each
+
+Run the same tests in both integration and e2e modes:
 
 ```typescript
-import { spec } from "../integration.specification.js";
+// tests/setup/runners.ts
+import { integrationSpec } from "./integration.specification.js";
+import { e2eSpec } from "./e2e.specification.js";
 
-test("creates company", async () => {
-  const result = await spec("creates company")
-    .seed("transactions.sql")
-    .post("/api/analyze", "request.json")
-    .run();
+export const runners = [
+  { name: "integration", spec: integrationSpec },
+  { name: "e2e", spec: e2eSpec },
+];
 
-  result.expectStatus(201);
-  result.expectResponse("created.response.json");
-  await result.expectTable("company_profile", {
-    columns: ["name"],
-    rows: [["TEST COMPANY"]],
-  });
+// tests/e2e/users/users.e2e.test.ts
+import { runners } from "../../setup/runners.js";
+
+describe.each(runners)("$name — users", ({ spec }) => {
+  test("creates a user", async () => { ... });
 });
 ```
 
-### CLI test usage
+## Builder API
+
+Every test follows: `spec("label") → setup → action → assertions`.
+
+### Setup (cross-mode)
+
+| Method                                   | Description                                                           |
+| ---------------------------------------- | --------------------------------------------------------------------- |
+| `.seed("file.sql")`                      | Load SQL from `seeds/file.sql` into the default database              |
+| `.seed("file.sql", { service: "name" })` | Load SQL into a specific database by compose name                     |
+| `.fixture("file")`                       | Copy `fixtures/file` into the CLI working directory before exec       |
+| `.project("name")`                       | Use `fixtures/name/` as the CLI working directory (creates temp copy) |
+| `.mock("file.json")`                     | Register mocked external API response (MSW, planned)                  |
+
+### Actions (one per spec, mutually exclusive)
+
+**HTTP actions** (requires `integration()` or `e2e()` runner):
+
+| Method                     | Description                                   |
+| -------------------------- | --------------------------------------------- |
+| `.get(path)`               | HTTP GET request                              |
+| `.post(path, "body.json")` | HTTP POST with body from `requests/body.json` |
+| `.put(path, "body.json")`  | HTTP PUT with body from `requests/body.json`  |
+| `.delete(path)`            | HTTP DELETE request                           |
+
+**CLI actions** (requires `cli()` runner):
+
+| Method                                 | Description                                                                                                              |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `.exec("args")`                        | Run command (blocking, via execSync)                                                                                     |
+| `.exec(["build", "start"])`            | Run commands sequentially in same temp directory, stops on first failure                                                 |
+| `.spawn("args", { waitFor, timeout })` | Run long-lived process — resolves on pattern match (exit 0), process exits without match (exit 1), or timeout (exit 124) |
+
+### Assertions
+
+All assertions return `this` for chaining. `expectTable` is async (returns `Promise<this>`).
+
+**HTTP-specific** (throw if no HTTP response):
+
+| Method                         | Description                                                                       |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| `.expectStatus(code)`          | Assert HTTP status code. Error shows expected/received + request/response context |
+| `.expectResponse("file.json")` | Assert response body matches `responses/file.json`. Error shows line-by-line diff |
+
+**CLI-specific** (throw if no command result):
+
+| Method                       | Description                                                                   |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `.expectExitCode(code)`      | Assert process exit code. Error shows expected/received + stdout/stderr       |
+| `.expectStdoutContains(str)` | Assert stdout contains string                                                 |
+| `.expectStderrContains(str)` | Assert stderr contains string                                                 |
+| `.expectStdout("file.txt")`  | Assert full stdout matches `expected/file.txt`. Error shows line-by-line diff |
+| `.expectStderr("file.txt")`  | Assert full stderr matches `expected/file.txt`. Error shows line-by-line diff |
+
+**Cross-mode** (work with any runner):
+
+| Method                                            | Description                                   |
+| ------------------------------------------------- | --------------------------------------------- |
+| `.expectTable(table, { columns, rows })`          | Assert database table contents (async)        |
+| `.expectTable(table, { columns, rows, service })` | Assert on a specific database by compose name |
+| `.expectFile(path)`                               | Assert file exists in working directory       |
+| `.expectNoFile(path)`                             | Assert file does not exist                    |
+| `.expectFileContains(path, content)`              | Assert file contains string                   |
+
+### Multi-database support
+
+When multiple databases are declared, `seed()` and `expectTable()` accept `{ service: "name" }` to target a specific database by its compose name. Without `service`, both default to the first postgres.
 
 ```typescript
-import { spec } from "../setup/cli.specification.js";
+const db = postgres({ compose: "db" });
+const analyticsDb = postgres({ compose: "analytics-db" });
 
-test("builds successfully", async () => {
-  const result = await spec("build").project("sample-app").exec("build").run();
+const spec = await integration({
+  services: [db, analyticsDb],
+  app: () => createApp({ ... }),
+});
 
-  result
-    .expectExitCode(0)
-    .expectStdoutContains("Build completed")
-    .expectFile("dist/index.js")
-    .expectNoFile("dist/index.cjs")
-    .expectFileContains("dist/index.js", "Hello");
+const result = await spec("cross-db")
+  .seed("users.sql")
+  .seed("events.sql", { service: "analytics-db" })
+  .post("/users", "request.json")
+  .run();
+
+await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
+await result.expectTable("events", {
+  columns: ["type"],
+  rows: [["user_created"]],
+  service: "analytics-db",
 });
 ```
 
@@ -99,42 +195,56 @@ test("builds successfully", async () => {
 ```typescript
 import { postgres, redis } from "@jterrazz/test";
 
-const db = postgres({ compose: "db" }); // Reads config from docker/compose.test.yaml
+const db = postgres({ compose: "db" });
 const cache = redis({ compose: "cache" });
-
-// After await integration(), handles have .connectionString populated
-db.connectionString; // postgresql://test:test@localhost:54321/test
-cache.connectionString; // redis://localhost:63791
 ```
+
+Service handles read image and environment from `docker/compose.test.yaml`. After the runner starts, `.connectionString` is populated from the running container.
+
+| Factory      | Options                   | Connection string format              |
+| ------------ | ------------------------- | ------------------------------------- |
+| `postgres()` | `compose`, `image`, `env` | `postgresql://user:pass@host:port/db` |
+| `redis()`    | `compose`, `image`        | `redis://host:port`                   |
+
+## Mocking utilities (unit tests)
+
+```typescript
+import { mockOf, mockOfDate } from "@jterrazz/test";
+```
+
+| Export        | Description                                                   |
+| ------------- | ------------------------------------------------------------- |
+| `mockOf<T>()` | Deep mock of any interface (wraps vitest-mock-extended)       |
+| `mockOfDate`  | Date mocking via `.set(date)` and `.reset()` (wraps mockdate) |
 
 ## Docker convention
 
 ```
 docker/
-├── compose.test.yaml           # Source of truth for test infrastructure
+├── compose.test.yaml       # Source of truth for test infrastructure
 ├── postgres/
-│   └── init.sql                # Auto-run on container start
+│   └── init.sql            # Auto-run on container start
+├── {service-name}/
+│   └── init.sql            # Per-service init script (matched by compose name)
 ```
 
 ## Test structure
 
 ```
 tests/
-├── setup/                      # Infrastructure (DB init, Docker config)
-├── fixtures/                   # Shared fake things to test against
-├── helpers/                    # Shared test utilities
-├── integration/
-│   ├── integration.specification.ts
-│   └── api/
-│       └── {feature}/
-│           ├── {feature}.integration.test.ts
-│           ├── seeds/
-│           ├── mock/
-│           ├── requests/
-│           └── responses/
-└── e2e/
-    ├── e2e.specification.ts
-    └── api/...
+├── e2e/                    # Full-stack specification tests
+│   └── {feature}/
+│       ├── {feature}.e2e.test.ts
+│       ├── seeds/          # Database state setup (.sql)
+│       ├── fixtures/       # Files copied into CLI working dir
+│       ├── requests/       # HTTP request bodies (.json)
+│       ├── responses/      # Expected HTTP responses (.json)
+│       └── expected/       # Expected CLI output (.txt)
+├── integration/            # Infrastructure tests (containers)
+└── setup/                  # Specification runners, fixtures, helpers
+    ├── fixtures/           # Shared fixture projects (for .project())
+    ├── helpers/            # Shared test utilities
+    └── *.specification.ts  # Runner setup files
 ```
 
 ## File naming
@@ -145,19 +255,9 @@ tests/
 | Integration | `.integration.test.ts` | `tests/integration/`  |
 | E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
 
-## Test data (colocated per test)
-
-| Folder       | Purpose                            |
-| ------------ | ---------------------------------- |
-| `seeds/`     | Database state setup               |
-| `mock/`      | Mocked external API responses      |
-| `requests/`  | Request bodies                     |
-| `responses/` | Expected API responses             |
-| `expected/`  | Expected output to compare against |
-
 ## Test writing convention
 
-Use `// Given`, `// When`, `// Then` comments to structure non-trivial tests:
+Every test uses `// Given` and `// Then` comments. Always both, never one without the other.
 
 ```typescript
 test("creates a user and returns 201", async () => {
@@ -176,6 +276,18 @@ test("creates a user and returns 201", async () => {
 });
 ```
 
+```typescript
+test("builds the project", async () => {
+  // Given — sample app project
+  const result = await spec("build").project("sample-app").exec("build").run();
+
+  // Then — ESM output with source maps
+  result.expectExitCode(0);
+  result.expectFile("dist/index.js");
+  result.expectFile("dist/index.js.map");
+});
+```
+
 Rules:
 
 - Every test gets `// Given —` and `// Then —` comments. Always both, never one without the other
@@ -186,49 +298,8 @@ Rules:
 - Error tests belong in their domain folder (seeding errors in seeding/, not a separate errors/)
 - Failure assertions use full `toBe` with exact multiline output (never `toContain`)
 
-## Builder methods
-
-**Setup (cross-mode):** `.seed("file.sql")`, `.seed("file.sql", { service: "name" })`, `.fixture("file")`, `.project("name")`, `.mock("file.json")`
-**HTTP action:** `.get(path)`, `.post(path, "body.json")`, `.put(path, "body.json")`, `.delete(path)`
-**CLI action:** `.exec("command args")`
-
-### Assertions
-
-**HTTP-specific:** `.expectStatus(code)`, `.expectResponse("file.json")`
-**CLI-specific:** `.expectExitCode(code)`, `.expectStdoutContains(str)`, `.expectStderrContains(str)`, `.expectStdout("file.txt")`, `.expectStderr("file.txt")`
-**Cross-mode:** `.expectTable(table, { columns, rows, service? })`, `.expectFile(path)`, `.expectNoFile(path)`, `.expectFileContains(path, content)`
-
-### Multi-database support
-
-When multiple databases are declared, `seed()` and `expectTable()` accept an optional `{ service: "name" }` to target a specific database by its compose name. Without `service`, both default to the first postgres.
-
-```typescript
-const result = await spec("cross-db")
-  .seed("users.sql") // default db
-  .seed("events.sql", { service: "analytics-db" }) // analytics db
-  .post("/users", "request.json")
-  .run();
-
-await result.expectTable("users", { columns: ["name"], rows: [["Alice"]] });
-await result.expectTable("events", {
-  columns: ["type"],
-  rows: [["user_created"]],
-  service: "analytics-db",
-});
-```
-
-## Mocking utilities (unit tests)
-
-```typescript
-import { mockOf, mockOfDate } from "@jterrazz/test";
-```
-
-| Export        | Description                              |
-| ------------- | ---------------------------------------- |
-| `mockOfDate`  | Date mocking — `set(date)` and `reset()` |
-| `mockOf<T>()` | Deep mock of any interface               |
-
 ## Requirements
 
-- Docker (testcontainers for integration, docker compose for e2e)
-- `vitest` (peer dependency)
+- **Docker** — testcontainers for `integration()`, docker compose for `e2e()`
+- **vitest** — peer dependency
+- **hono** — optional peer, only needed for `integration()` mode with in-process apps
