@@ -1,16 +1,8 @@
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 
-import { spec, startServer, stopServer } from "../e2e.specification.js";
+import { runners } from "../runners.js";
 
-describe("E2E runner — error handling", () => {
-  beforeAll(() => {
-    startServer();
-  });
-
-  afterAll(() => {
-    stopServer();
-  });
-
+describe.each(runners)("$name — error handling", ({ spec }) => {
   describe("expectStatus", () => {
     test("fails when status does not match", async () => {
       const result = await spec("wrong status").get("/users/999").run();
@@ -41,6 +33,28 @@ describe("E2E runner — error handling", () => {
         }),
       ).rejects.toThrow();
     });
+
+    test("fails when table has unexpected extra rows", async () => {
+      const result = await spec("extra rows").seed("one-user.sql").get("/users").run();
+
+      await expect(
+        result.expectTable("users", {
+          columns: ["name"],
+          rows: [],
+        }),
+      ).rejects.toThrow();
+    });
+
+    test("fails when table has fewer rows than expected", async () => {
+      const result = await spec("missing rows").get("/users").run();
+
+      await expect(
+        result.expectTable("users", {
+          columns: ["name"],
+          rows: [["Alice"]],
+        }),
+      ).rejects.toThrow();
+    });
   });
 
   describe("builder validation", () => {
@@ -48,6 +62,20 @@ describe("E2E runner — error handling", () => {
       await expect(spec("no request").seed("one-user.sql").run()).rejects.toThrow(
         "no request defined",
       );
+    });
+
+    test("fails when seed file does not exist", async () => {
+      await expect(spec("bad seed").seed("nonexistent.sql").get("/users").run()).rejects.toThrow();
+    });
+
+    test("fails when input file does not exist", async () => {
+      await expect(spec("bad input").post("/users", "nonexistent.json").run()).rejects.toThrow();
+    });
+
+    test("fails when response file does not exist", async () => {
+      const result = await spec("bad response file").get("/users").run();
+
+      expect(() => result.expectResponse("nonexistent.json")).toThrow();
     });
   });
 

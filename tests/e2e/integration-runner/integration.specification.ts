@@ -5,7 +5,7 @@ import { createDatabase } from "../app/database.js";
 export const db = createDatabase();
 export const app = createApp(db);
 
-export const spec = integration({
+export const integrationSpec = integration({
   database: new BetterSqliteAdapter(db),
   app,
 });

@@ -1,17 +1,9 @@
-import { afterAll, beforeAll, describe, test } from "vitest";
+import { describe, test } from "vitest";
 
-import { spec, startServer, stopServer } from "../e2e.specification.js";
+import { runners } from "../runners.js";
 
-describe("E2E runner — GET /users/:id", () => {
-  beforeAll(() => {
-    startServer();
-  });
-
-  afterAll(() => {
-    stopServer();
-  });
-
-  test("returns a single user by id via real HTTP", async () => {
+describe.each(runners)("$name — GET /users/:id", ({ spec }) => {
+  test("returns a single user by id", async () => {
     const result = await spec("gets user").seed("single-user.sql").get("/users/1").run();
 
     result.expectStatus(200);

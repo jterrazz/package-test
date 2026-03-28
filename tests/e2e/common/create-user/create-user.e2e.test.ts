@@ -1,8 +1,8 @@
 import { describe, test } from "vitest";
 
-import { spec } from "../integration.specification.js";
+import { runners } from "../runners.js";
 
-describe("POST /users", () => {
+describe.each(runners)("$name — POST /users", ({ spec }) => {
   test("creates a user and returns 201", async () => {
     const result = await spec("creates a user")
       .seed("initial-users.sql")

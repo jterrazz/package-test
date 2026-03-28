@@ -23,7 +23,7 @@ export function stopServer() {
   server = null;
 }
 
-export const spec = e2e({
+export const e2eSpec = e2e({
   database: new BetterSqliteAdapter(db),
   url: `http://localhost:${PORT}`,
 });
