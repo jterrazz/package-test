@@ -8,7 +8,7 @@ const db = postgres({ compose: "db" });
 export const integrationSpec = await integration({
   services: [db],
   app: () => createApp({ databaseUrl: db.connectionString }),
-  projectRoot: new URL("../fixtures/app", import.meta.url).pathname,
+  projectRoot: "../fixtures/app",
 });
 
 afterAll(() => integrationSpec.cleanup());

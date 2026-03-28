@@ -8,7 +8,7 @@ const db = postgres({ compose: "db" });
 export const e2eSpec = await e2e({
   services: [db],
   app: () => createApp({ databaseUrl: db.connectionString }),
-  projectRoot: new URL("../fixtures/app", import.meta.url).pathname,
+  projectRoot: "../fixtures/app",
 });
 
 afterAll(() => e2eSpec.cleanup());
