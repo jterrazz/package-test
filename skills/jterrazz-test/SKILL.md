@@ -244,6 +244,65 @@ docker/
 │   └── init.sql            # Per-service init script (matched by compose name)
 ```
 
+## Spec-driven development
+
+Every public behavior is defined by a specification test. The spec IS the source of truth.
+
+### Coverage rules
+
+- Every command, endpoint, feature gets a spec
+- Every spec covers: **success case**, **edge cases**, **error cases with error messages**
+- Error cases are as important as happy paths — test that failures produce useful output
+- Write the spec FIRST, then the code
+
+### When to use which mode
+
+**API projects** (HTTP services with infrastructure):
+
+| Mode                                     | Purpose                                                       | Scope                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `integration` (`describe.each(runners)`) | Development workhorse — fast, real containers, in-process app | All specs — every endpoint, DB state, error                            |
+| `e2e` (`describe.each(runners)`)         | CI validation — full docker compose, real HTTP                | Critical paths only — core flows, cross-service, deployment confidence |
+
+Write specs once with `describe.each(runners)`. Integration runs everything. E2E runs the same specs but only the critical subset (e2e is compute-heavy — focus on what ONLY e2e can catch: real HTTP, cross-container networking, compose orchestration).
+
+To split: use `runners` for shared specs, use `integrationSpec` directly for integration-only detailed tests.
+
+```typescript
+// Shared — runs in both integration AND e2e
+describe.each(runners)("$name — users", ({ spec }) => {
+  test("creates a user", async () => { ... });          // critical path — both modes
+  test("lists all users", async () => { ... });          // critical path — both modes
+});
+
+// Integration-only — detailed edge cases (fast, no e2e needed)
+describe("integration — users edge cases", () => {
+  test("rejects duplicate email", async () => { ... });
+  test("handles empty request body", async () => { ... });
+  test("returns 404 for nonexistent user", async () => { ... });
+});
+```
+
+**CLI projects** (build tools, linters, formatters):
+
+| Mode    | Purpose                                | Scope                                           |
+| ------- | -------------------------------------- | ----------------------------------------------- |
+| `cli()` | Every command, every flag, every error | All specs — success, edge cases, error messages |
+
+CLI tests run the real binary — they're inherently e2e. No split needed. Test every command with every meaningful variation.
+
+```
+Feature: build command
+├── builds successfully (exit 0, output files)
+├── generates ESM output with correct content
+├── generates type declarations
+├── generates source maps
+├── does NOT generate CJS output (app mode)
+├── fails on missing entry point (meaningful error)
+├── fails on invalid TypeScript (meaningful error)
+└── fails on missing tsconfig (meaningful error)
+```
+
 ## Test structure
 
 ```
@@ -312,7 +371,6 @@ Rules:
 - `// Then —` what we verify, one short phrase
 - No `// When` for spec builder — `.seed().post().run()` / `.project().exec().run()` IS the when
 - Error tests belong in their domain folder (seeding errors in seeding/, not a separate errors/)
-- Failure assertions use full `toBe` with exact multiline output (never `toContain`)
 
 ## Requirements
 
