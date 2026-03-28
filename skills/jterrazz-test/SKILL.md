@@ -76,7 +76,7 @@ export const spec = integration({
 import { spec } from "../../integration.specification.js";
 
 test("creates company from INPI data", async () => {
-  await spec(import.meta.dirname, "creates company")
+  await spec("creates company")
     .seed("transactions.sql")
     .mock("inpi-success.json")
     .post("/api/analyze", "request.json")

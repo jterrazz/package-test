@@ -154,16 +154,39 @@ export class SpecificationBuilder {
   }
 }
 
+// ── Caller detection ──
+
+function getCallerDir(): string {
+  const stack = new Error("caller detection").stack;
+  if (!stack) {
+    throw new Error("Cannot detect caller directory: no stack trace");
+  }
+
+  // Find the first stack frame that is NOT in this file
+  const thisFile = import.meta.url;
+  const lines = stack.split("\n");
+  for (const line of lines) {
+    const match = line.match(/(?:at\s+.*\(|at\s+)(file:\/\/[^:)]+)/);
+    if (match && match[1] !== thisFile) {
+      const callerPath = match[1].replace("file://", "");
+      return resolve(callerPath, "..");
+    }
+  }
+
+  throw new Error("Cannot detect caller directory from stack trace");
+}
+
 // ── Factory functions ──
 
-type SpecificationRunner = (testDir: string, label: string) => SpecificationBuilder;
+export type SpecificationRunner = (label: string) => SpecificationBuilder;
 
 /**
- * Create an integration specification runner.
- * Uses in-process requests via the app instance (no real HTTP).
+ * Create a specification runner.
+ * Automatically detects the test directory from the call site.
  */
 export function createSpecificationRunner(config: SpecificationConfig): SpecificationRunner {
-  return (testDir: string, label: string) => {
+  return (label: string) => {
+    const testDir = getCallerDir();
     return new SpecificationBuilder(config, testDir, label);
   };
 }
