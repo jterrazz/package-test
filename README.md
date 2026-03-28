@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Testing framework for the @jterrazz ecosystem — conventions, structure, and utilities that all projects follow.
+Testing framework for the @jterrazz ecosystem — conventions, specification runners, and utilities that all projects follow.
 
 ## Installation
 
@@ -8,7 +8,7 @@ Testing framework for the @jterrazz ecosystem — conventions, structure, and ut
 npm install -D @jterrazz/test vitest
 ```
 
-Optional — for mocking external APIs:
+Optional — for API mocking in specification runners:
 
 ```bash
 npm install -D msw
@@ -20,89 +20,158 @@ npm install -D msw
 src/
 ├── domain/
 │   ├── user.ts
-│   └── user.test.ts                          # Unit — colocated next to source
+│   └── user.test.ts                              # Unit — colocated
 
 tests/
-├── e2e/
-│   └── build/
-│       ├── build.e2e.test.ts
-│       ├── inputs/
-│       └── expected/
 ├── integration/
-│   ├── api/
-│   │   └── list-users/
-│   │       ├── list-users.integration.test.ts
-│   │       ├── seeds/
-│   │       └── responses/
-│   └── persistence/
-│       └── user-repository/
-│           ├── user-repository.integration.test.ts
-│           └── seeds/
+│   ├── integration.specification.ts               # Shared setup
+│   └── api/
+│       └── analyze-company/
+│           ├── analyze-company.integration.test.ts
+│           ├── seeds/
+│           │   └── transactions.sql
+│           ├── mock/
+│           │   └── inpi-success.json
+│           ├── inputs/
+│           │   └── request.json
+│           └── responses/
+│               └── created.response.json
+├── e2e/
+│   ├── e2e.specification.ts
+│   └── api/
+│       └── ...
 └── helpers/
 ```
 
 ## File naming
 
-| Type | Suffix | Location |
-| --- | --- | --- |
-| Unit | `.test.ts` | Colocated with source |
-| Integration | `.integration.test.ts` | `tests/integration/` |
-| E2E | `.e2e.test.ts` | `tests/e2e/` |
+| Type        | Suffix                 | Location              |
+| ----------- | ---------------------- | --------------------- |
+| Unit        | `.test.ts`             | Colocated with source |
+| Integration | `.integration.test.ts` | `tests/integration/`  |
+| E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
 
 ## Test data
 
 Each test owns its data in colocated subfolders:
 
-| Folder | Use when |
-| --- | --- |
-| `inputs/` | Raw data fed into the system under test |
-| `expected/` | Expected output to compare against |
-| `seeds/` | Database or state setup before test runs |
+| Folder       | Use when                                |
+| ------------ | --------------------------------------- |
+| `seeds/`     | Database state setup                    |
+| `mock/`      | Mocked external API responses           |
+| `inputs/`    | Request bodies or data fed in           |
 | `responses/` | Expected API responses from your system |
-| `api/` | Mocked external API responses (third-party) |
+| `expected/`  | Expected output to compare against      |
 
-File names describe the scenario: `empty.response.json`, `wrong-style.ts`, `with-challenges.seed.ts`.
+## Specification runners
 
-## Utilities
+Fluent builders for integration and e2e tests. One setup file per test type, all tests share it.
 
-### Date mocking
+### Integration (in-process, fast)
 
 ```typescript
-import { afterEach } from "vitest";
-import { mockOfDate } from "@jterrazz/test";
+// tests/integration/integration.specification.ts
+import { integration } from "@jterrazz/test";
+import { PrismaAdapter } from "@jterrazz/test/adapters/prisma";
+import { app } from "../../src/app.js";
+import { prisma } from "../../src/database.js";
 
-afterEach(() => mockOfDate.reset());
-
-test("fixed date", () => {
-    mockOfDate.set(new Date("2024-01-01"));
-    expect(new Date()).toEqual(new Date("2024-01-01"));
+export const spec = integration({
+  database: new PrismaAdapter(prisma),
+  app, // Hono instance — requests are in-process, no HTTP
 });
 ```
 
-### Deep mocking
+```typescript
+// tests/integration/api/analyze-company/analyze-company.integration.test.ts
+import { spec } from "../../integration.specification.js";
+
+test("creates company from INPI data", async () => {
+  await spec(import.meta.dirname, "creates company")
+    .seed("transactions.sql")
+    .mock("inpi-success.json")
+    .post("/api/analyze", "request.json")
+    .run()
+    .expectStatus(201)
+    .expectResponse("created.response.json")
+    .expectTable("company_profile", {
+      columns: ["identification_number", "user_id", "company_name"],
+      rows: [["123456789", "test-user-uuid", "TEST COMPANY SARL"]],
+    });
+});
+```
+
+### E2E (real HTTP, real infra)
 
 ```typescript
-import { mockOf } from "@jterrazz/test";
+// tests/e2e/e2e.specification.ts
+import { e2e } from "@jterrazz/test";
+import { PrismaAdapter } from "@jterrazz/test/adapters/prisma";
+import { prisma } from "../../src/database.js";
 
-interface UserService {
-    getUser: (id: string) => Promise<{ id: string; name: string }>;
+export const spec = e2e({
+  database: new PrismaAdapter(prisma),
+  url: "http://localhost:3000", // Real running server
+});
+```
+
+Same builder API — only the setup differs.
+
+### Builder API
+
+**Setup** (before `.run()`):
+
+| Method               | Reads from | Description                           |
+| -------------------- | ---------- | ------------------------------------- |
+| `.seed("file.sql")`  | `seeds/`   | Execute SQL against database          |
+| `.mock("file.json")` | `mock/`    | Register MSW handler for external API |
+
+**Action** (triggers the request):
+
+| Method                     | Reads from | Description    |
+| -------------------------- | ---------- | -------------- |
+| `.get(path)`               | —          | GET request    |
+| `.post(path, "file.json")` | `inputs/`  | POST with body |
+| `.put(path, "file.json")`  | `inputs/`  | PUT with body  |
+| `.delete(path)`            | —          | DELETE request |
+
+**Assertions** (after `.run()`):
+
+| Method                                   | Reads from   | Description                |
+| ---------------------------------------- | ------------ | -------------------------- |
+| `.expectStatus(code)`                    | —            | Check HTTP status          |
+| `.expectResponse("file.json")`           | `responses/` | Deep compare response body |
+| `.expectTable(table, { columns, rows })` | —            | Query DB and compare rows  |
+
+## Ports
+
+Plug in your stack by implementing the database port:
+
+```typescript
+interface DatabasePort {
+  seed(sql: string): Promise<void>;
+  query(table: string, columns: string[]): Promise<unknown[][]>;
+  reset(): Promise<void>;
 }
-
-test("mock service", async () => {
-    const service = mockOf<UserService>();
-    service.getUser.mockResolvedValue({ id: "1", name: "John" });
-    expect((await service.getUser("1")).name).toBe("John");
-});
 ```
 
-## API
+Built-in adapter: `PrismaAdapter`.
 
-| Export | Description |
-| --- | --- |
-| `mockOfDate` | Date mocking — `set(date)` and `reset()` |
-| `mockOf<T>()` | Deep mock of any interface via vitest-mock-extended |
+## Mocking utilities
+
+For unit tests:
+
+```typescript
+import { mockOf, mockOfDate } from "@jterrazz/test";
+```
+
+| Export        | Description                              |
+| ------------- | ---------------------------------------- |
+| `mockOfDate`  | Date mocking — `set(date)` and `reset()` |
+| `mockOf<T>()` | Deep mock of any interface               |
 
 ## Peer dependencies
 
 - `vitest` (required)
-- `msw` (optional — API mocking)
+- `msw` (optional — for `.mock()`)
+- `@prisma/client` (optional — for `PrismaAdapter`)
