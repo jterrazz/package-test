@@ -1,4 +1,4 @@
-import { describe, test } from "vitest";
+import { describe, expect, test } from "vitest";
 
 import { runners } from "../../../setup/runners.js";
 
@@ -25,5 +25,25 @@ describe.each(runners)("$name — requests", ({ spec }) => {
 
     // Then — 404 Not Found
     result.expectStatus(404);
+  });
+
+  test("throws when run() called without a request method", async () => {
+    // Given — seed but no .get()/.post()/.delete()
+    try {
+      await spec("no request").seed("one-user.sql").run();
+      expect.fail("should have thrown");
+    } catch (error: any) {
+      // Then — descriptive error with spec label
+      expect(error.message).toBe(
+        'Specification "no request": no request defined. Call .get(), .post(), etc. before .run()',
+      );
+    }
+  });
+
+  test("throws on nonexistent request body file", async () => {
+    // Given — reference to nonexistent body file
+    await expect(spec("bad body").post("/users", "nonexistent.json").run()).rejects.toThrow(
+      "ENOENT",
+    );
   });
 });

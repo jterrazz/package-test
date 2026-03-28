@@ -153,6 +153,8 @@ Rules:
 - `// Then —` what we verify, one short phrase
 - Skip on trivial tests (single assertion, name says it all)
 - No `// When` for spec builder — `.seed().post().run()` IS the when
+- Error tests belong in their domain folder (seeding errors in seeding/, not a separate errors/)
+- Failure assertions use full `toBe` with exact multiline output (never `toContain`)
 
 ## Builder methods
 

@@ -1,4 +1,4 @@
-import { describe, test } from "vitest";
+import { describe, expect, test } from "vitest";
 
 import { runners } from "../../../setup/runners.js";
 
@@ -38,5 +38,12 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
       columns: ["name"],
       rows: [["Alice"], ["Charlie"]],
     });
+  });
+
+  test("throws on nonexistent seed file", async () => {
+    // Given — reference to nonexistent seed
+    await expect(spec("bad seed").seed("nonexistent.sql").get("/users").run()).rejects.toThrow(
+      "ENOENT",
+    );
   });
 });
