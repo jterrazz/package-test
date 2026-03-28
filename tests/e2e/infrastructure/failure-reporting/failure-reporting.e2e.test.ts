@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { stripAnsi } from "../../../../src/index.js";
+import { dedent } from "../../../helpers/dedent.js";
 import { integrationSpec } from "../../../setup/integration.specification.js";
 
 describe("failure reporting", () => {
@@ -17,26 +18,24 @@ describe("failure reporting", () => {
         result.expectStatus(500);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          [
-            "Expected status: 500",
-            "Received status: 201",
-            "",
-            "POST /users",
-            "{",
-            '  "name": "Charlie",',
-            '  "email": "charlie@test.com"',
-            "}",
-            "",
-            "Response:",
-            "{",
-            '  "user": {',
-            '    "name": "Charlie",',
-            '    "email": "charlie@test.com"',
-            "  }",
-            "}",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Expected status: 500
+                    Received status: 201
+
+                    POST /users
+                    {
+                      "name": "Charlie",
+                      "email": "charlie@test.com"
+                    }
+
+                    Response:
+                    {
+                      "user": {
+                        "name": "Charlie",
+                        "email": "charlie@test.com"
+                      }
+                    }
+                `);
       }
     });
 
@@ -47,19 +46,17 @@ describe("failure reporting", () => {
         result.expectStatus(200);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          [
-            "Expected status: 200",
-            "Received status: 404",
-            "",
-            "GET /users/999",
-            "",
-            "Response:",
-            "{",
-            '  "error": "User not found"',
-            "}",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Expected status: 200
+                    Received status: 404
+
+                    GET /users/999
+
+                    Response:
+                    {
+                      "error": "User not found"
+                    }
+                `);
       }
     });
   });
@@ -72,25 +69,23 @@ describe("failure reporting", () => {
         result.expectResponse("wrong.response.json");
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          [
-            "Response mismatch (wrong.response.json)",
-            "",
-            "- Expected",
-            "+ Received",
-            "",
-            "  {",
-            '    "users": [',
-            "      {",
-            '-       "name": "Wrong",',
-            '+       "name": "Alice",',
-            '-       "email": "wrong@test.com"',
-            '+       "email": "alice@test.com"',
-            "      }",
-            "    ]",
-            "  }",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Response mismatch (wrong.response.json)
+
+                    - Expected
+                    + Received
+
+                      {
+                        "users": [
+                          {
+                    -       "name": "Wrong",
+                    +       "name": "Alice",
+                    -       "email": "wrong@test.com"
+                    +       "email": "alice@test.com"
+                          }
+                        ]
+                      }
+                `);
       }
     });
   });
@@ -106,18 +101,16 @@ describe("failure reporting", () => {
         });
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          [
-            'Table "users" mismatch',
-            "",
-            "- Expected",
-            "+ Received",
-            "",
-            "  name",
-            "- NonExistent",
-            "+ Alice",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Table "users" mismatch
+
+                    - Expected
+                    + Received
+
+                      name
+                    - NonExistent
+                    + Alice
+                `);
       }
     });
 
@@ -131,11 +124,15 @@ describe("failure reporting", () => {
         });
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          ['Table "users" mismatch', "", "- Expected", "+ Received", "", "  name", "- Alice"].join(
-            "\n",
-          ),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Table "users" mismatch
+
+                    - Expected
+                    + Received
+
+                      name
+                    - Alice
+                `);
       }
     });
   });

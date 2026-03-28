@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { stripAnsi } from "../../../../src/index.js";
+import { dedent } from "../../../helpers/dedent.js";
 import { runners } from "../../../setup/runners.js";
 
 describe.each(runners)("$name — assertions", ({ spec }) => {
@@ -18,19 +19,17 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
         result.expectStatus(200);
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          [
-            "Expected status: 200",
-            "Received status: 404",
-            "",
-            "GET /users/999",
-            "",
-            "Response:",
-            "{",
-            '  "error": "User not found"',
-            "}",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Expected status: 200
+                    Received status: 404
+
+                    GET /users/999
+
+                    Response:
+                    {
+                      "error": "User not found"
+                    }
+                `);
       }
     });
   });
@@ -49,32 +48,29 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
         result.expectResponse("wrong-body.response.json");
         expect.fail("should have thrown");
       } catch (error: any) {
-        const msg = stripAnsi(error.message);
-        expect(msg).toBe(
-          [
-            "Response mismatch (wrong-body.response.json)",
-            "",
-            "- Expected",
-            "+ Received",
-            "",
-            "  {",
-            '    "users": [',
-            "      {",
-            '-       "name": "Wrong1",',
-            '+       "name": "Alice",',
-            '-       "email": "wrong1@test.com"',
-            '+       "email": "alice@test.com"',
-            "      },",
-            "      {",
-            '-       "name": "Wrong2",',
-            '+       "name": "Bob",',
-            '-       "email": "wrong2@test.com"',
-            '+       "email": "bob@test.com"',
-            "      }",
-            "    ]",
-            "  }",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Response mismatch (wrong-body.response.json)
+
+                    - Expected
+                    + Received
+
+                      {
+                        "users": [
+                          {
+                    -       "name": "Wrong1",
+                    +       "name": "Alice",
+                    -       "email": "wrong1@test.com"
+                    +       "email": "alice@test.com"
+                          },
+                          {
+                    -       "name": "Wrong2",
+                    +       "name": "Bob",
+                    -       "email": "wrong2@test.com"
+                    +       "email": "bob@test.com"
+                          }
+                        ]
+                      }
+                `);
       }
     });
   });
@@ -99,18 +95,16 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
         });
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          [
-            'Table "users" mismatch',
-            "",
-            "- Expected",
-            "+ Received",
-            "",
-            "  name",
-            "- NonExistent",
-            "+ Alice",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Table "users" mismatch
+
+                    - Expected
+                    + Received
+
+                      name
+                    - NonExistent
+                    + Alice
+                `);
       }
     });
 
@@ -124,18 +118,16 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
         });
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          [
-            'Table "users" mismatch',
-            "",
-            "- Expected",
-            "+ Received",
-            "",
-            "  name",
-            "  Alice",
-            "+ Bob",
-          ].join("\n"),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Table "users" mismatch
+
+                    - Expected
+                    + Received
+
+                      name
+                      Alice
+                    + Bob
+                `);
       }
     });
 
@@ -149,11 +141,15 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
         });
         expect.fail("should have thrown");
       } catch (error: any) {
-        expect(stripAnsi(error.message)).toBe(
-          ['Table "users" mismatch', "", "- Expected", "+ Received", "", "  name", "- Alice"].join(
-            "\n",
-          ),
-        );
+        expect(stripAnsi(error.message)).toBe(dedent`
+                    Table "users" mismatch
+
+                    - Expected
+                    + Received
+
+                      name
+                    - Alice
+                `);
       }
     });
   });
