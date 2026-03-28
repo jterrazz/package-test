@@ -8,8 +8,8 @@ import {
   formatTableDiff,
   normalizeOutput,
   stripAnsi,
-} from "../../../../src/infrastructure/reporter.js";
-import { dedent } from "../../../helpers/dedent.js";
+} from "../../../src/infrastructure/reporter.js";
+import { dedent } from "../../helpers/dedent.js";
 
 describe("output formatting", () => {
   describe("startup report", () => {

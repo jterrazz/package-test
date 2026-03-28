@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
@@ -13,11 +14,7 @@ describe("postgres service", () => {
     container = new TestcontainersAdapter({
       image: "postgres:17",
       port: 5432,
-      env: {
-        POSTGRES_DB: "test",
-        POSTGRES_PASSWORD: "test",
-        POSTGRES_USER: "test",
-      },
+      env: { POSTGRES_DB: "test", POSTGRES_PASSWORD: "test", POSTGRES_USER: "test" },
     });
     await container.start();
 
@@ -26,7 +23,6 @@ describe("postgres service", () => {
     db.connectionString = db.buildConnectionString(host, port);
     db.started = true;
 
-    // Create table for testing
     await db.seed(
       'CREATE TABLE IF NOT EXISTS "users" (id SERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE)',
     );
@@ -40,6 +36,25 @@ describe("postgres service", () => {
     test("builds a valid postgresql connection string", () => {
       expect(db.connectionString).toMatch(/^postgresql:\/\/test:test@/);
       expect(db.connectionString).toContain("/test");
+    });
+  });
+
+  describe("healthcheck", () => {
+    test("passes on healthy container", async () => {
+      await expect(db.healthcheck()).resolves.not.toThrow();
+    });
+
+    test("fails on unreachable host", async () => {
+      const badDb = postgres();
+      badDb.connectionString = "postgresql://test:test@localhost:1/test";
+
+      await expect(badDb.healthcheck()).rejects.toThrow("healthcheck failed");
+    });
+
+    test("fails when no connection string set", async () => {
+      const noConn = postgres();
+
+      await expect(noConn.healthcheck()).rejects.toThrow("no connection string");
     });
   });
 
@@ -59,6 +74,46 @@ describe("postgres service", () => {
 
       const rows = await db.query("users", ["name"]);
       expect(rows).toEqual([["Alice"], ["Bob"]]);
+    });
+
+    test("fails fast on invalid SQL", async () => {
+      await expect(db.seed('CREATE TABLE "bad" (id INTEGERRR)')).rejects.toThrow();
+    });
+  });
+
+  describe("initialize", () => {
+    test("runs init.sql from compose directory", async () => {
+      await db.reset();
+
+      const tmpDir = mkdtempSync(resolve(tmpdir(), "init-test-"));
+      mkdirSync(resolve(tmpDir, "postgres"), { recursive: true });
+      writeFileSync(
+        resolve(tmpDir, "postgres/init.sql"),
+        'CREATE TABLE IF NOT EXISTS "init_test" (id SERIAL, val TEXT); INSERT INTO "init_test" (val) VALUES (\'ok\');',
+      );
+
+      const initDb = postgres({ compose: "db" });
+      initDb.connectionString = db.connectionString;
+      initDb.started = true;
+
+      await initDb.initialize(tmpDir);
+
+      const rows = await db.query("init_test", ["val"]);
+      expect(rows).toEqual([["ok"]]);
+
+      await db.seed('DROP TABLE "init_test"');
+    });
+
+    test("reports SQL error context on failure", async () => {
+      const tmpDir = mkdtempSync(resolve(tmpdir(), "init-fail-"));
+      mkdirSync(resolve(tmpDir, "postgres"), { recursive: true });
+      writeFileSync(resolve(tmpDir, "postgres/init.sql"), 'CREATE TABLE "bad" (id INTEGERRR);');
+
+      const initDb = postgres({ compose: "db" });
+      initDb.connectionString = db.connectionString;
+      initDb.started = true;
+
+      await expect(initDb.initialize(tmpDir)).rejects.toThrow("init script failed");
     });
   });
 

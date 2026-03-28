@@ -30,19 +30,35 @@ describe("redis service", () => {
     });
   });
 
+  describe("healthcheck", () => {
+    test("passes on healthy container", async () => {
+      await expect(cache.healthcheck()).resolves.not.toThrow();
+    });
+
+    test("fails on unreachable host", async () => {
+      const badCache = redis();
+      badCache.connectionString = "redis://localhost:1";
+
+      await expect(badCache.healthcheck()).rejects.toThrow("healthcheck failed");
+    });
+
+    test("fails when no connection string set", async () => {
+      const noConn = redis();
+
+      await expect(noConn.healthcheck()).rejects.toThrow("no connection string");
+    });
+  });
+
   describe("reset", () => {
     test("flushes all keys", async () => {
-      // Set a key
       const { createClient } = await import("redis");
       const client = createClient({ url: cache.connectionString });
       await client.connect();
       await client.set("test-key", "test-value");
       await client.disconnect();
 
-      // Reset
       await cache.reset();
 
-      // Verify empty
       const client2 = createClient({ url: cache.connectionString });
       await client2.connect();
       const value = await client2.get("test-key");
@@ -54,7 +70,6 @@ describe("redis service", () => {
     test("allows re-setting keys after reset", async () => {
       const { createClient } = await import("redis");
 
-      // Set, reset, set again
       const client1 = createClient({ url: cache.connectionString });
       await client1.connect();
       await client1.set("key1", "value1");
@@ -74,20 +89,17 @@ describe("redis service", () => {
     });
   });
 
-  describe("compose integration", () => {
-    test("compose name is stored", () => {
-      const namedCache = redis({ compose: "cache" });
-      expect(namedCache.composeName).toBe("cache");
+  describe("compose config", () => {
+    test("stores compose name", () => {
+      expect(redis({ compose: "cache" }).composeName).toBe("cache");
     });
 
-    test("default image is redis:7", () => {
-      const defaultCache = redis();
-      expect(defaultCache.defaultImage).toBe("redis:7");
+    test("defaults to redis:7 image", () => {
+      expect(redis().defaultImage).toBe("redis:7");
     });
 
-    test("custom image is stored", () => {
-      const customCache = redis({ image: "redis:7-alpine" });
-      expect(customCache.defaultImage).toBe("redis:7-alpine");
+    test("accepts custom image", () => {
+      expect(redis({ image: "redis:7-alpine" }).defaultImage).toBe("redis:7-alpine");
     });
 
     test("does not create a database adapter", () => {
