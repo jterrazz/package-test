@@ -9,7 +9,7 @@ import { createSpecificationRunner, type SpecificationRunner } from "./specifica
 
 type HonoApp = {
   fetch: (...args: any[]) => any;
-  request: (path: string, init?: RequestInit) => Promise<Response>;
+  request: (path: string, init?: RequestInit) => Promise<Response> | Response;
 };
 
 interface IntegrationOptions {

@@ -6,7 +6,7 @@ import type { ServerPort, ServerResponse } from "../ports/server.port.js";
  */
 export class HonoAdapter implements ServerPort {
   private app: {
-    request: (path: string, init?: RequestInit) => Promise<Response>;
+    request: (path: string, init?: RequestInit) => Promise<Response> | Response;
   };
 
   constructor(app: { request: (path: string, init?: RequestInit) => Promise<Response> }) {
