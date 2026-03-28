@@ -16,25 +16,38 @@ src/
 │   └── user.test.ts                              # Unit — colocated
 
 tests/
+├── setup/                                         # Infrastructure (Docker, DB, shared utils)
+│   └── database.ts
+├── fixtures/                                      # Shared fake things to test against
+│   └── app/
 ├── integration/
-│   ├── integration.specification.ts               # Shared setup
+│   ├── integration.specification.ts               # Runner config
 │   └── api/
 │       └── analyze-company/
 │           ├── analyze-company.integration.test.ts
 │           ├── seeds/
-│           │   └── transactions.sql
 │           ├── mock/
-│           │   └── inpi-success.json
 │           ├── requests/
-│           │   └── request.json
 │           └── responses/
-│               └── created.response.json
 ├── e2e/
-│   ├── e2e.specification.ts                       # Shared setup
+│   ├── e2e.specification.ts                       # Runner config
 │   └── api/
-│       └── ...                                    # Same structure
-└── helpers/
+│       └── ...
+└── helpers/                                       # Shared test utilities
 ```
+
+## Folder conventions
+
+| Folder              | Purpose                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| `tests/setup/`      | Infrastructure — Docker, DB init, migrations                   |
+| `tests/fixtures/`   | Shared fake things to test against (sample apps, mock servers) |
+| `tests/helpers/`    | Shared test utilities                                          |
+| `{test}/seeds/`     | Database state setup (colocated)                               |
+| `{test}/mock/`      | Mocked external API responses (colocated)                      |
+| `{test}/requests/`  | Request bodies (colocated)                                     |
+| `{test}/responses/` | Expected API responses (colocated)                             |
+| `{test}/expected/`  | Expected output to compare against (colocated)                 |
 
 ## File naming
 
@@ -44,100 +57,58 @@ tests/
 | Integration | `.integration.test.ts` | `tests/integration/`  |
 | E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
 
-## Test data folders
-
-| Folder       | Use when                                   |
-| ------------ | ------------------------------------------ |
-| `seeds/`     | Database state setup                       |
-| `mock/`      | Mocked external API responses              |
-| `requests/`  | Request bodies or data fed into the system |
-| `responses/` | Expected API responses from your system    |
-| `expected/`  | Expected output to compare against         |
-
 ## Specification runners
 
 ### Integration (in-process, fast)
 
 ```typescript
 // tests/integration/integration.specification.ts
-import { integration } from "@jterrazz/test";
-import { BetterSqliteAdapter } from "@jterrazz/test";
-import { app } from "../../src/app.js";
-import { prisma } from "../../src/database.js";
+import { integration, PrismaAdapter } from "@jterrazz/test";
 
 export const spec = integration({
-  database: new BetterSqliteAdapter(prisma),
-  app,
+  database: new PrismaAdapter(prisma),
+  app, // Hono instance
 });
 ```
 
-```typescript
-// tests/integration/api/analyze-company/analyze-company.integration.test.ts
-import { spec } from "../../integration.specification.js";
-
-test("creates company from INPI data", async () => {
-  await spec("creates company")
-    .seed("transactions.sql")
-    .mock("inpi-success.json")
-    .post("/api/analyze", "request.json")
-    .run()
-    .expectStatus(201)
-    .expectResponse("created.response.json")
-    .expectTable("company_profile", {
-      columns: ["identification_number", "user_id", "company_name"],
-      rows: [["123456789", "test-user-uuid", "TEST COMPANY SARL"]],
-    });
-});
-```
-
-### E2E (real HTTP, real infra)
+### E2E (real HTTP)
 
 ```typescript
 // tests/e2e/e2e.specification.ts
-import { e2e } from "@jterrazz/test";
-import { BetterSqliteAdapter } from "@jterrazz/test";
-import { prisma } from "../../src/database.js";
+import { e2e, PrismaAdapter } from "@jterrazz/test";
 
 export const spec = e2e({
-  database: new BetterSqliteAdapter(prisma),
+  database: new PrismaAdapter(prisma),
   url: "http://localhost:3000",
 });
 ```
 
-Same test API — only the setup differs.
+### Test usage
+
+```typescript
+import { spec } from "../integration.specification.js";
+
+test("creates company", async () => {
+  const result = await spec("creates company")
+    .seed("transactions.sql")
+    .mock("inpi-success.json")
+    .post("/api/analyze", "request.json")
+    .run();
+
+  result.expectStatus(201);
+  result.expectResponse("created.response.json");
+  await result.expectTable("company_profile", {
+    columns: ["name"],
+    rows: [["TEST COMPANY"]],
+  });
+});
+```
 
 ### Builder methods
 
-**Setup:**
-
-- `.seed("file.sql")` — execute SQL from `seeds/`
-- `.mock("file.json")` — register MSW handler from `mock/`
-
-**Action:**
-
-- `.get(path)` — GET request
-- `.post(path, "file.json")` — POST with body from `requests/`
-- `.put(path, "file.json")` — PUT with body from `requests/`
-- `.delete(path)` — DELETE request
-
-**Assertions (after `.run()`):**
-
-- `.expectStatus(code)` — HTTP status
-- `.expectResponse("file.json")` — deep compare with `responses/`
-- `.expectTable(table, { columns, rows })` — query DB and compare
-
-## Ports
-
-```typescript
-// Implement these to plug in your stack
-interface DatabasePort {
-  seed(sql: string): Promise<void>;
-  query(table: string, columns: string[]): Promise<unknown[][]>;
-  reset(): Promise<void>;
-}
-```
-
-Built-in adapters: `BetterSqliteAdapter`.
+**Setup:** `.seed("file.sql")`, `.mock("file.json")`
+**Action:** `.get(path)`, `.post(path, "body.json")`, `.put(path, "body.json")`, `.delete(path)`
+**Assertions:** `.expectStatus(code)`, `.expectResponse("file.json")`, `.expectTable(table, { columns, rows })`
 
 ## Mocking utilities
 
@@ -145,13 +116,7 @@ Built-in adapters: `BetterSqliteAdapter`.
 import { mockOf, mockOfDate } from "@jterrazz/test";
 ```
 
-| Export        | Description                                         |
-| ------------- | --------------------------------------------------- |
-| `mockOfDate`  | Date mocking — `set(date)` and `reset()`            |
-| `mockOf<T>()` | Deep mock of any interface via vitest-mock-extended |
-
-## Peer dependencies
-
-- `vitest` (required)
-- `msw` (optional — for `.mock()` in specification runners)
-- `@prisma/client` (optional — for BetterSqliteAdapter)
+| Export        | Description                              |
+| ------------- | ---------------------------------------- |
+| `mockOfDate`  | Date mocking — `set(date)` and `reset()` |
+| `mockOf<T>()` | Deep mock of any interface               |

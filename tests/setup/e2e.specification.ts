@@ -1,8 +1,8 @@
 import { serve } from "@hono/node-server";
 
-import { e2e, PrismaAdapter } from "../../../src/index.js";
-import { createApp } from "../app/app.js";
-import { createDatabase, initializeSchema } from "../app/database.js";
+import { e2e, PrismaAdapter } from "../../src/index.js";
+import { createApp } from "../fixtures/app/app.js";
+import { createDatabase, initializeSchema } from "../fixtures/app/database.js";
 
 const PORT = 9800 + Math.floor(Math.random() * 100);
 

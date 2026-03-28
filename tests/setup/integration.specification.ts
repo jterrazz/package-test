@@ -1,6 +1,6 @@
-import { integration, PrismaAdapter } from "../../../src/index.js";
-import { createApp } from "../app/app.js";
-import { createDatabase, initializeSchema } from "../app/database.js";
+import { integration, PrismaAdapter } from "../../src/index.js";
+import { createApp } from "../fixtures/app/app.js";
+import { createDatabase, initializeSchema } from "../fixtures/app/database.js";
 
 const { prisma } = createDatabase();
 await initializeSchema(prisma);

@@ -8,7 +8,7 @@ export function createApp(prisma: PrismaClient) {
   app.get("/users", async (c) => {
     const users = await prisma.user.findMany({
       orderBy: { id: "asc" },
-      select: { email: true, id: true, name: true },
+      select: { email: true, name: true },
     });
     return c.json({ users });
   });
@@ -17,7 +17,7 @@ export function createApp(prisma: PrismaClient) {
     const id = Number(c.req.param("id"));
     const user = await prisma.user.findUnique({
       where: { id },
-      select: { email: true, id: true, name: true },
+      select: { email: true, name: true },
     });
 
     if (!user) {
@@ -31,7 +31,7 @@ export function createApp(prisma: PrismaClient) {
     const body = await c.req.json();
     const user = await prisma.user.create({
       data: { name: body.name, email: body.email },
-      select: { email: true, id: true, name: true },
+      select: { email: true, name: true },
     });
 
     return c.json({ user }, 201);
