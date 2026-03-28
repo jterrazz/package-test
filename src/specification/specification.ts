@@ -177,7 +177,7 @@ function getCallerDir(): string {
     if (filePath.includes("node_modules")) {
       continue;
     }
-    if (filePath.includes("/specification/")) {
+    if (filePath.includes("/src/specification/")) {
       continue;
     }
 
