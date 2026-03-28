@@ -298,6 +298,11 @@ export class SpecificationBuilder {
   // ── Private ──
 
   private prepareWorkDir(): string {
+    // No project or fixtures — run from fixturesRoot or cwd (no temp dir needed)
+    if (!this.projectName && this.fixtures.length === 0) {
+      return this.config.fixturesRoot ?? process.cwd();
+    }
+
     const tempDir = mkdtempSync(resolve(tmpdir(), "spec-cli-"));
 
     if (this.projectName && this.config.fixturesRoot) {
