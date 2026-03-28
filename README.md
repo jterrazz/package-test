@@ -2,17 +2,13 @@
 
 Testing framework for the @jterrazz ecosystem — conventions, structure, and utilities that all projects follow.
 
-## Philosophy
-
-Every @jterrazz project tests the same way. This package provides the shared utilities and defines the conventions so testing is consistent across the entire ecosystem.
-
 ## Installation
 
 ```bash
 npm install -D @jterrazz/test vitest
 ```
 
-Optional — for API mocking:
+Optional — for mocking external APIs:
 
 ```bash
 npm install -D msw
@@ -24,19 +20,25 @@ npm install -D msw
 src/
 ├── domain/
 │   ├── user.ts
-│   └── user.test.ts                  # Unit — colocated next to source
+│   └── user.test.ts                          # Unit — colocated next to source
+
 tests/
-├── integration/                       # Real wiring (DB, HTTP, DI)
+├── e2e/
+│   └── build/
+│       ├── build.e2e.test.ts
+│       ├── inputs/
+│       └── expected/
+├── integration/
 │   ├── api/
-│   │   └── list-users.integration.test.ts
+│   │   └── list-users/
+│   │       ├── list-users.integration.test.ts
+│   │       ├── seeds/
+│   │       └── responses/
 │   └── persistence/
-│       └── user-repository.integration.test.ts
-├── e2e/                               # Full system through public interface
-│   └── user-flow.e2e.test.ts
-├── fixtures/                          # Shared test data
-│   └── users.json
-└── helpers/                           # Shared test utilities
-    └── setup.ts
+│       └── user-repository/
+│           ├── user-repository.integration.test.ts
+│           └── seeds/
+└── helpers/
 ```
 
 ## File naming
@@ -46,6 +48,20 @@ tests/
 | Unit | `.test.ts` | Colocated with source |
 | Integration | `.integration.test.ts` | `tests/integration/` |
 | E2E | `.e2e.test.ts` | `tests/e2e/` |
+
+## Test data
+
+Each test owns its data in colocated subfolders:
+
+| Folder | Use when |
+| --- | --- |
+| `inputs/` | Raw data fed into the system under test |
+| `expected/` | Expected output to compare against |
+| `seeds/` | Database or state setup before test runs |
+| `responses/` | Expected API responses from your system |
+| `api/` | Mocked external API responses (third-party) |
+
+File names describe the scenario: `empty.response.json`, `wrong-style.ts`, `with-challenges.seed.ts`.
 
 ## Utilities
 
