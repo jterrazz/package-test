@@ -1,7 +1,7 @@
 import { afterAll } from "vitest";
 
 import { integration, postgres, redis } from "../../src/index.js";
-import { createApp } from "../fixtures/app/app.js";
+import { createApp } from "./fixtures/app/app.js";
 
 const db = postgres({ compose: "db" });
 const analyticsDb = postgres({ compose: "analytics-db" });
@@ -15,7 +15,7 @@ export const integrationSpec = await integration({
       analyticsDatabaseUrl: analyticsDb.connectionString,
       redisUrl: cache.connectionString,
     }),
-  root: "../fixtures/app",
+  root: "./fixtures/app",
 });
 
 afterAll(() => integrationSpec.cleanup());

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import { stripAnsi } from "../../../src/index.js";
-import { dedent } from "../../helpers/dedent.js";
 import { cliSpec } from "../../setup/cli.specification.js";
+import { dedent } from "../../setup/helpers/dedent.js";
 import { runners } from "../../setup/runners.js";
 
 describe("shared assertions", () => {

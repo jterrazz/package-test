@@ -6,11 +6,14 @@ import { Orchestrator } from "../../../../src/infrastructure/orchestrator.js";
 import { postgres } from "../../../../src/infrastructure/services/postgres.js";
 import { redis } from "../../../../src/infrastructure/services/redis.js";
 
-const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, "../../../fixtures/broken-postgres-init");
-const BROKEN_MULTI_INIT = resolve(import.meta.dirname, "../../../fixtures/broken-multi-init");
+const BROKEN_POSTGRES_INIT = resolve(
+  import.meta.dirname,
+  "../../../setup/fixtures/broken-postgres-init",
+);
+const BROKEN_MULTI_INIT = resolve(import.meta.dirname, "../../../setup/fixtures/broken-multi-init");
 const BROKEN_SECOND_POSTGRES = resolve(
   import.meta.dirname,
-  "../../../fixtures/broken-second-postgres",
+  "../../../setup/fixtures/broken-second-postgres",
 );
 
 describe("initiation errors", () => {

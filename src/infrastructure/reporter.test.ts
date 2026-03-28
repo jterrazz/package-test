@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { dedent } from "../../tests/helpers/dedent.js";
+import { dedent } from "../../tests/setup/helpers/dedent.js";
 import {
   formatResponseDiff,
   formatServiceLogs,
