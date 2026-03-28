@@ -1,13 +1,9 @@
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 
-import {
-  detectServiceType,
-  findComposeFile,
-  parseComposeFile,
-} from "../../../../src/infrastructure/compose-parser.js";
+import { detectServiceType, findComposeFile, parseComposeFile } from "./compose-parser.js";
 
-const FIXTURES_DIR = resolve(import.meta.dirname, "../../../fixtures/app");
+const FIXTURES_DIR = resolve(import.meta.dirname, "../../tests/fixtures/app");
 
 describe("compose parser", () => {
   describe("findComposeFile", () => {
