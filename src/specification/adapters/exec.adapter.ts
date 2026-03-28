@@ -14,10 +14,14 @@ export class ExecAdapter implements CommandPort {
   }
 
   async exec(args: string, cwd: string): Promise<CommandResult> {
+    // Clear INIT_CWD so CLI tools use the actual cwd, not npm's caller directory
+    const env = { ...process.env, INIT_CWD: undefined };
+
     try {
       const stdout = execSync(`${this.command} ${args}`, {
         cwd,
         encoding: "utf8",
+        env,
         stdio: ["pipe", "pipe", "pipe"],
       });
       return { exitCode: 0, stdout, stderr: "" };
