@@ -8,12 +8,19 @@ export class TestcontainersAdapter implements ContainerPort {
   private image: string;
   private containerPort: number;
   private env: Record<string, string>;
+  private reuse: boolean;
   private container: any = null;
 
-  constructor(options: { image: string; port: number; env?: Record<string, string> }) {
+  constructor(options: {
+    image: string;
+    port: number;
+    env?: Record<string, string>;
+    reuse?: boolean;
+  }) {
     this.image = options.image;
     this.containerPort = options.port;
     this.env = options.env ?? {};
+    this.reuse = options.reuse ?? false;
   }
 
   async start(): Promise<void> {
@@ -31,11 +38,15 @@ export class TestcontainersAdapter implements ContainerPort {
       );
     }
 
+    if (this.reuse) {
+      builder = builder.withReuse();
+    }
+
     this.container = await builder.start();
   }
 
   async stop(): Promise<void> {
-    if (this.container) {
+    if (this.container && !this.reuse) {
       await this.container.stop();
       this.container = null;
     }

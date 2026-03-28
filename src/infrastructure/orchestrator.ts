@@ -43,7 +43,8 @@ export class Orchestrator {
 
   /**
    * Start declared services via testcontainers (integration mode).
-   * Reads image/env config from docker-compose.test.yaml if a service has compose: "name".
+   * Phase 1: start all containers in parallel (the slow part).
+   * Phase 2: wire connections, healthcheck, and init sequentially (fast).
    */
   async start(): Promise<void> {
     if (this.started) {
@@ -54,29 +55,34 @@ export class Orchestrator {
     const composeDir = composePath ? dirname(composePath) : this.root;
     const composeConfig = composePath ? parseComposeFile(composePath) : null;
 
+    // Phase 1: resolve config and start all containers in parallel
+    const containerTasks = this.services.map((handle) => {
+      let image = handle.defaultImage;
+      let env = { ...handle.environment };
+
+      if (handle.composeName && composeConfig) {
+        const composeService = composeConfig.services.find((s) => s.name === handle.composeName);
+        if (composeService) {
+          image = composeService.image ?? image;
+          env = { ...env, ...composeService.environment };
+          Object.assign(handle.environment, composeService.environment);
+        }
+      }
+
+      const container = new TestcontainersAdapter({ image, port: handle.defaultPort, env });
+      return { container, handle };
+    });
+
+    // Start all containers concurrently
+    await Promise.all(containerTasks.map(({ container }) => container.start()));
+
+    // Phase 2: wire connections, healthcheck, init (fast — containers already running)
     const reports: ServiceReport[] = [];
 
-    for (const handle of this.services) {
-      const startTime = Date.now();
-      let container: null | TestcontainersAdapter = null;
+    for (const { container, handle } of containerTasks) {
+      const serviceStartTime = Date.now();
 
       try {
-        let image = handle.defaultImage;
-        let env = { ...handle.environment };
-
-        if (handle.composeName && composeConfig) {
-          const composeService = composeConfig.services.find((s) => s.name === handle.composeName);
-          if (composeService) {
-            image = composeService.image ?? image;
-            env = { ...env, ...composeService.environment };
-            // Update handle's environment so buildConnectionString uses correct values
-            Object.assign(handle.environment, composeService.environment);
-          }
-        }
-
-        container = new TestcontainersAdapter({ image, port: handle.defaultPort, env });
-        await container.start();
-
         const host = container.getHost();
         const port = container.getMappedPort(handle.defaultPort);
         handle.connectionString = handle.buildConnectionString(host, port);
@@ -89,30 +95,26 @@ export class Orchestrator {
           name: handle.composeName ?? handle.type,
           type: handle.type,
           connectionString: handle.connectionString,
-          durationMs: Date.now() - startTime,
+          durationMs: Date.now() - serviceStartTime,
         });
         this.running.push({ handle, container });
       } catch (error: any) {
-        // Capture logs from the failing container (not the previous one)
         let logs = "";
-        if (container) {
-          try {
-            logs = await container.getLogs();
-          } catch {
-            /* Ignore log fetch errors */
-          }
-          // Clean up the failed container
-          try {
-            await container.stop();
-          } catch {
-            /* Ignore stop errors */
-          }
+        try {
+          logs = await container.getLogs();
+        } catch {
+          /* Ignore log fetch errors */
+        }
+        try {
+          await container.stop();
+        } catch {
+          /* Ignore stop errors */
         }
 
         reports.push({
           name: handle.composeName ?? handle.type,
           type: handle.type,
-          durationMs: Date.now() - startTime,
+          durationMs: Date.now() - serviceStartTime,
           error: error.message,
           logs,
         });
