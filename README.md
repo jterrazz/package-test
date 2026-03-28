@@ -8,12 +8,6 @@ Testing framework for the @jterrazz ecosystem — conventions, specification run
 npm install -D @jterrazz/test vitest
 ```
 
-Optional — for API mocking in specification runners:
-
-```bash
-npm install -D msw
-```
-
 ## Test structure
 
 ```
@@ -23,24 +17,24 @@ src/
 │   └── user.test.ts                              # Unit — colocated
 
 tests/
+├── setup/                                         # Infrastructure (Docker, DB, migrations)
+│   └── database.ts
+├── fixtures/                                      # Shared fake things to test against
+│   └── app/
+├── helpers/                                       # Shared test utilities
 ├── integration/
-│   ├── integration.specification.ts               # Shared setup
+│   ├── integration.specification.ts               # Runner config
 │   └── api/
 │       └── analyze-company/
 │           ├── analyze-company.integration.test.ts
 │           ├── seeds/
-│           │   └── transactions.sql
 │           ├── mock/
-│           │   └── inpi-success.json
 │           ├── requests/
-│           │   └── request.json
 │           └── responses/
-│               └── created.response.json
-├── e2e/
-│   ├── e2e.specification.ts
-│   └── api/
-│       └── ...
-└── helpers/
+└── e2e/
+    ├── e2e.specification.ts                       # Runner config
+    └── api/
+        └── ...
 ```
 
 ## File naming
@@ -51,97 +45,75 @@ tests/
 | Integration | `.integration.test.ts` | `tests/integration/`  |
 | E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
 
-## Test data
+## Folder conventions
 
-Each test owns its data in colocated subfolders:
-
-| Folder       | Use when                                |
-| ------------ | --------------------------------------- |
-| `seeds/`     | Database state setup                    |
-| `mock/`      | Mocked external API responses           |
-| `requests/`  | Request bodies or data fed in           |
-| `responses/` | Expected API responses from your system |
-| `expected/`  | Expected output to compare against      |
+| Folder              | Purpose                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| `tests/setup/`      | Infrastructure — Docker, DB init, migrations                   |
+| `tests/fixtures/`   | Shared fake things to test against (sample apps, mock servers) |
+| `tests/helpers/`    | Shared test utilities                                          |
+| `{test}/seeds/`     | Database state setup (colocated)                               |
+| `{test}/mock/`      | Mocked external API responses (colocated)                      |
+| `{test}/requests/`  | Request bodies (colocated)                                     |
+| `{test}/responses/` | Expected API responses (colocated)                             |
+| `{test}/expected/`  | Expected output to compare against (colocated)                 |
 
 ## Specification runners
 
-Fluent builders for integration and e2e tests. One setup file per test type, all tests share it.
+Fluent builders for integration and e2e tests.
 
 ### Integration (in-process, fast)
 
 ```typescript
 // tests/integration/integration.specification.ts
-import { integration } from "@jterrazz/test";
-import { BetterSqliteAdapter } from "@jterrazz/test";
-import { app } from "../../src/app.js";
-import { prisma } from "../../src/database.js";
+import { integration, PrismaAdapter } from "@jterrazz/test";
 
 export const spec = integration({
-  database: new BetterSqliteAdapter(prisma),
-  app, // Hono instance — requests are in-process, no HTTP
+  database: new PrismaAdapter(prisma),
+  app, // Hono instance
 });
 ```
 
-```typescript
-// tests/integration/api/analyze-company/analyze-company.integration.test.ts
-import { spec } from "../../integration.specification.js";
-
-test("creates company from INPI data", async () => {
-  await spec("creates company")
-    .seed("transactions.sql")
-    .mock("inpi-success.json")
-    .post("/api/analyze", "request.json")
-    .run()
-    .expectStatus(201)
-    .expectResponse("created.response.json")
-    .expectTable("company_profile", {
-      columns: ["identification_number", "user_id", "company_name"],
-      rows: [["123456789", "test-user-uuid", "TEST COMPANY SARL"]],
-    });
-});
-```
-
-### E2E (real HTTP, real infra)
+### E2E (real HTTP)
 
 ```typescript
 // tests/e2e/e2e.specification.ts
-import { e2e } from "@jterrazz/test";
-import { BetterSqliteAdapter } from "@jterrazz/test";
-import { prisma } from "../../src/database.js";
+import { e2e, PrismaAdapter } from "@jterrazz/test";
 
 export const spec = e2e({
-  database: new BetterSqliteAdapter(prisma),
-  url: "http://localhost:3000", // Real running server
+  database: new PrismaAdapter(prisma),
+  url: "http://localhost:3000",
 });
 ```
 
-Same builder API — only the setup differs.
+### Usage
+
+```typescript
+import { spec } from "../integration.specification.js";
+
+test("creates company", async () => {
+  const result = await spec("creates company")
+    .seed("transactions.sql")
+    .mock("inpi-success.json")
+    .post("/api/analyze", "request.json")
+    .run();
+
+  result.expectStatus(201);
+  result.expectResponse("created.response.json");
+  await result.expectTable("company_profile", {
+    columns: ["name"],
+    rows: [["TEST COMPANY"]],
+  });
+});
+```
 
 ### Builder API
 
-**Setup** (before `.run()`):
+**Setup:** `.seed("file.sql")`, `.mock("file.json")`
 
-| Method               | Reads from | Description                           |
-| -------------------- | ---------- | ------------------------------------- |
-| `.seed("file.sql")`  | `seeds/`   | Execute SQL against database          |
-| `.mock("file.json")` | `mock/`    | Register MSW handler for external API |
+**Action:** `.get(path)`, `.post(path, "body.json")`, `.put(path, "body.json")`, `.delete(path)`
 
-**Action** (triggers the request):
-
-| Method                     | Reads from  | Description    |
-| -------------------------- | ----------- | -------------- |
-| `.get(path)`               | —           | GET request    |
-| `.post(path, "file.json")` | `requests/` | POST with body |
-| `.put(path, "file.json")`  | `requests/` | PUT with body  |
-| `.delete(path)`            | —           | DELETE request |
-
-**Assertions** (after `.run()`):
-
-| Method                                   | Reads from   | Description                |
-| ---------------------------------------- | ------------ | -------------------------- |
-| `.expectStatus(code)`                    | —            | Check HTTP status          |
-| `.expectResponse("file.json")`           | `responses/` | Deep compare response body |
-| `.expectTable(table, { columns, rows })` | —            | Query DB and compare rows  |
+**Assertions:** `.expectStatus(code)`, `.expectResponse("file.json")`, `.expectTable(table, { columns, rows })`
 
 ## Ports
 
@@ -155,11 +127,9 @@ interface DatabasePort {
 }
 ```
 
-Built-in adapter: `BetterSqliteAdapter`.
+Built-in adapter: `PrismaAdapter`.
 
 ## Mocking utilities
-
-For unit tests:
 
 ```typescript
 import { mockOf, mockOfDate } from "@jterrazz/test";
@@ -174,4 +144,3 @@ import { mockOf, mockOfDate } from "@jterrazz/test";
 
 - `vitest` (required)
 - `msw` (optional — for `.mock()`)
-- `@prisma/client` (optional — for `BetterSqliteAdapter`)
