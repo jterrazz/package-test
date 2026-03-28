@@ -12,7 +12,7 @@ describe("orchestrator", () => {
     const orchestrator = new Orchestrator({
       services: [db],
       mode: "integration",
-      projectRoot: FIXTURES_DIR,
+      root: FIXTURES_DIR,
     });
 
     afterAll(async () => {
@@ -55,7 +55,7 @@ describe("orchestrator", () => {
     const orchestrator = new Orchestrator({
       services: [],
       mode: "e2e",
-      projectRoot: FIXTURES_DIR,
+      root: FIXTURES_DIR,
     });
 
     afterAll(async () => {
@@ -108,7 +108,7 @@ describe("orchestrator", () => {
       const orch = new Orchestrator({
         services: [],
         mode: "e2e",
-        projectRoot: "/tmp/nonexistent",
+        root: "/tmp/nonexistent",
       });
 
       await expect(orch.startCompose()).rejects.toThrow("no compose file found");

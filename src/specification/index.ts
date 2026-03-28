@@ -8,18 +8,18 @@ import type { DatabasePort } from "./ports/database.port.js";
 import { createSpecificationRunner, type SpecificationRunner } from "./specification.js";
 
 /**
- * Resolve projectRoot — if relative, resolves from the caller's directory.
+ * Resolve root — if relative, resolves from the caller's directory.
  */
-function resolveProjectRoot(projectRoot: string | undefined): string {
-  if (!projectRoot) {
+function resolveProjectRoot(root: string | undefined): string {
+  if (!root) {
     return process.cwd();
   }
 
-  if (isAbsolute(projectRoot)) {
-    return projectRoot;
+  if (isAbsolute(root)) {
+    return root;
   }
 
-  const stack = new Error("resolve projectRoot").stack;
+  const stack = new Error("resolve root").stack;
   if (stack) {
     const lines = stack.split("\n");
     for (const line of lines) {
@@ -33,11 +33,11 @@ function resolveProjectRoot(projectRoot: string | undefined): string {
         continue;
       }
 
-      return resolve(filePath, "..", projectRoot);
+      return resolve(filePath, "..", root);
     }
   }
 
-  return resolve(process.cwd(), projectRoot);
+  return resolve(process.cwd(), root);
 }
 
 type HonoApp = {
@@ -51,12 +51,12 @@ interface IntegrationOptions {
   /** Factory that returns a Hono app — called after services start. */
   app: () => HonoApp;
   /** Project root for compose detection (relative paths supported). */
-  projectRoot?: string;
+  root?: string;
 }
 
 interface E2eOptions {
   /** Project root — must contain docker/compose.test.yaml. */
-  projectRoot?: string;
+  root?: string;
 }
 
 interface SpecificationRunnerWithCleanup extends SpecificationRunner {
@@ -79,7 +79,7 @@ async function integration(options: IntegrationOptions): Promise<SpecificationRu
   const orchestrator = new Orchestrator({
     services: options.services,
     mode: "integration",
-    projectRoot: resolveProjectRoot(options.projectRoot),
+    root: resolveProjectRoot(options.root),
   });
 
   await orchestrator.start();
@@ -104,14 +104,14 @@ async function integration(options: IntegrationOptions): Promise<SpecificationRu
  *
  * @example
  * export const spec = await e2e({
- *     projectRoot: "../fixtures/app",
+ *     root: "../fixtures/app",
  * });
  */
 async function e2e(options: E2eOptions = {}): Promise<SpecificationRunnerWithCleanup> {
   const orchestrator = new Orchestrator({
     services: [],
     mode: "e2e",
-    projectRoot: resolveProjectRoot(options.projectRoot),
+    root: resolveProjectRoot(options.root),
   });
 
   await orchestrator.startCompose();

@@ -17,7 +17,7 @@ interface RunningService {
 interface OrchestratorOptions {
   services: ServiceHandle[];
   mode: "e2e" | "integration";
-  projectRoot?: string;
+  root?: string;
 }
 
 /**
@@ -28,7 +28,7 @@ interface OrchestratorOptions {
 export class Orchestrator {
   private services: ServiceHandle[];
   private mode: "e2e" | "integration";
-  private projectRoot: string;
+  private root: string;
   private running: RunningService[] = [];
   private composeStack: ComposeStackAdapter | null = null;
   private composeHandles: ServiceHandle[] = [];
@@ -37,7 +37,7 @@ export class Orchestrator {
   constructor(options: OrchestratorOptions) {
     this.services = options.services;
     this.mode = options.mode;
-    this.projectRoot = options.projectRoot ?? process.cwd();
+    this.root = options.root ?? process.cwd();
   }
 
   /**
@@ -49,8 +49,8 @@ export class Orchestrator {
       return;
     }
 
-    const composePath = findComposeFile(this.projectRoot);
-    const composeDir = composePath ? dirname(composePath) : this.projectRoot;
+    const composePath = findComposeFile(this.root);
+    const composeDir = composePath ? dirname(composePath) : this.root;
     const composeConfig = composePath ? parseComposeFile(composePath) : null;
 
     const reports: { handle: ServiceHandle; durationMs: number; error?: string }[] = [];
@@ -110,9 +110,9 @@ export class Orchestrator {
    * Auto-detects infra services and creates handles for them.
    */
   async startCompose(): Promise<void> {
-    const composePath = findComposeFile(this.projectRoot);
+    const composePath = findComposeFile(this.root);
     if (!composePath) {
-      throw new Error(`E2E: no compose file found in ${this.projectRoot}`);
+      throw new Error(`E2E: no compose file found in ${this.root}`);
     }
 
     const startTime = Date.now();
@@ -179,7 +179,7 @@ export class Orchestrator {
    * Get app URL from compose (e2e mode).
    */
   getAppUrl(): null | string {
-    const composePath = findComposeFile(this.projectRoot);
+    const composePath = findComposeFile(this.root);
     if (!composePath || !this.composeStack) {
       return null;
     }

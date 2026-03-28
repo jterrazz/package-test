@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Testing framework for the @jterrazz ecosystem — conventions, specification runners with automatic infrastructure, and utilities that all projects follow.
+Testing framework for the @jterrazz ecosystem — declarative Docker infrastructure, specification runners, and conventions that all projects follow.
 
 ## Installation
 
@@ -8,32 +8,13 @@ Testing framework for the @jterrazz ecosystem — conventions, specification run
 npm install -D @jterrazz/test vitest
 ```
 
-## Test structure
-
-```
-tests/
-├── setup/                                         # Infrastructure (Docker, DB)
-├── fixtures/                                      # Shared fake things to test against
-├── helpers/                                       # Shared test utilities
-├── integration/
-│   ├── integration.specification.ts               # Runner config
-│   └── api/
-│       └── {feature}/
-│           ├── {feature}.integration.test.ts
-│           ├── seeds/
-│           ├── mock/
-│           ├── requests/
-│           └── responses/
-└── e2e/
-    ├── e2e.specification.ts
-    └── api/...
-```
+Requires Docker.
 
 ## Specification runners
 
-Declare services, provide an app factory, the framework handles everything.
+Declare services, provide an app factory, the framework starts containers and wires everything.
 
-### Integration (in-process, fast)
+### Integration (testcontainers, in-process app)
 
 ```typescript
 // tests/integration/integration.specification.ts
@@ -46,24 +27,21 @@ const db = postgres({ compose: "db" });
 export const spec = await integration({
   services: [db],
   app: () => createApp({ databaseUrl: db.connectionString }),
+  root: "../../",
 });
 
 afterAll(() => spec.cleanup());
 ```
 
-### E2E (real HTTP, automatic server)
+### E2E (docker compose up, real HTTP)
 
 ```typescript
 // tests/e2e/e2e.specification.ts
 import { afterAll } from "vitest";
-import { e2e, postgres } from "@jterrazz/test";
-import { createApp } from "../../src/app.js";
-
-const db = postgres({ compose: "db" });
+import { e2e } from "@jterrazz/test";
 
 export const spec = await e2e({
-  services: [db],
-  app: () => createApp({ databaseUrl: db.connectionString }),
+  root: "../../",
 });
 
 afterAll(() => spec.cleanup());
@@ -92,19 +70,21 @@ test("creates company", async () => {
 ## Service factories
 
 ```typescript
-postgres({ compose: "db" }); // Links to docker-compose.test.yaml
-redis({ compose: "cache" });
+import { postgres, redis } from "@jterrazz/test";
+
+const db = postgres({ compose: "db" }); // Reads config from docker/compose.test.yaml
+const cache = redis({ compose: "cache" });
 ```
 
 After `await integration()`, service handles have `.connectionString` populated from running containers.
 
-## Docker compose convention
+## Docker convention
 
 ```
 docker/
-├── compose.test.yaml                # Auto-detected by framework
+├── compose.test.yaml           # Source of truth for test infrastructure
 ├── postgres/
-│   └── init.sql                     # Auto-run on container start
+│   └── init.sql                # Auto-run on container start
 ```
 
 ## Builder API
@@ -115,18 +95,43 @@ docker/
 
 **Assertions:** `.expectStatus(code)`, `.expectResponse("file.json")`, `.expectTable(table, { columns, rows })`
 
-## Folder conventions
+## Test structure
 
-| Folder              | Purpose                                        |
-| ------------------- | ---------------------------------------------- |
-| `tests/setup/`      | Infrastructure — Docker, DB init, migrations   |
-| `tests/fixtures/`   | Shared fake things to test against             |
-| `tests/helpers/`    | Shared test utilities                          |
-| `{test}/seeds/`     | Database state setup (colocated)               |
-| `{test}/mock/`      | Mocked external API responses (colocated)      |
-| `{test}/requests/`  | Request bodies (colocated)                     |
-| `{test}/responses/` | Expected API responses (colocated)             |
-| `{test}/expected/`  | Expected output to compare against (colocated) |
+```
+tests/
+├── setup/                      # Infrastructure (DB init, Docker config)
+├── fixtures/                   # Shared fake things to test against
+├── helpers/                    # Shared test utilities
+├── integration/
+│   ├── integration.specification.ts
+│   └── api/
+│       └── {feature}/
+│           ├── {feature}.integration.test.ts
+│           ├── seeds/
+│           ├── requests/
+│           └── responses/
+└── e2e/
+    ├── e2e.specification.ts
+    └── api/...
+```
+
+## Test data (colocated per test)
+
+| Folder       | Purpose                            |
+| ------------ | ---------------------------------- |
+| `seeds/`     | Database state setup               |
+| `mock/`      | Mocked external API responses      |
+| `requests/`  | Request bodies                     |
+| `responses/` | Expected API responses             |
+| `expected/`  | Expected output to compare against |
+
+## File naming
+
+| Type        | Suffix                 | Location              |
+| ----------- | ---------------------- | --------------------- |
+| Unit        | `.test.ts`             | Colocated with source |
+| Integration | `.integration.test.ts` | `tests/integration/`  |
+| E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
 
 ## Mocking utilities
 
