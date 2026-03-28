@@ -23,16 +23,21 @@
     "build": "typescript bundle",
     "lint": "codestyle check",
     "lint:fix": "codestyle fix",
-    "test": "# No tests"
+    "test": "vitest --run"
   },
   "dependencies": {
     "mockdate": "^3.0.5",
     "vitest-mock-extended": "^3.1.0"
   },
   "devDependencies": {
+    "@hono/node-server": "^1.19.11",
     "@jterrazz/codestyle": "^2.1.0",
     "@jterrazz/typescript": "^5.1.1",
-    "@types/node": "^25.5.0"
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.5.0",
+    "better-sqlite3": "^12.8.0",
+    "hono": "^4.12.9",
+    "vitest": "^4.1.2"
   },
   "peerDependencies": {
     "msw": "^2.12.0",

@@ -162,15 +162,26 @@ function getCallerDir(): string {
     throw new Error("Cannot detect caller directory: no stack trace");
   }
 
-  // Find the first stack frame that is NOT in this file
-  const thisFile = import.meta.url;
+  // Find the first stack frame that is a user test file
+  // (not in node_modules, not this file)
   const lines = stack.split("\n");
   for (const line of lines) {
-    const match = line.match(/(?:at\s+.*\(|at\s+)(file:\/\/[^:)]+)/);
-    if (match && match[1] !== thisFile) {
-      const callerPath = match[1].replace("file://", "");
-      return resolve(callerPath, "..");
+    // Match both "at path:line:col" and "at func (file://path:line:col)"
+    const match = line.match(/at\s+(?:.*?\()?(?:file:\/\/)?([^:)]+):\d+:\d+/);
+    if (!match) {
+      continue;
     }
+
+    const filePath = match[1];
+
+    if (filePath.includes("node_modules")) {
+      continue;
+    }
+    if (filePath.includes("/specification/")) {
+      continue;
+    }
+
+    return resolve(filePath, "..");
   }
 
   throw new Error("Cannot detect caller directory from stack trace");
