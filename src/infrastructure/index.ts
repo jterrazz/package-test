@@ -6,4 +6,3 @@ export { findComposeFile, parseComposeFile } from "./compose-parser.js";
 export { Orchestrator } from "./orchestrator.js";
 export { postgres } from "./services/postgres.js";
 export { redis } from "./services/redis.js";
-export { sqlite } from "./services/sqlite.js";

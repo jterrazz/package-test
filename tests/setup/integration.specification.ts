@@ -1,15 +1,13 @@
 import { afterAll } from "vitest";
 
-import { integration, PrismaAdapter } from "../../src/index.js";
+import { integration, postgres } from "../../src/index.js";
 import { createApp } from "../fixtures/app/app.js";
-import { createDatabase, initializeSchema } from "../fixtures/app/database.js";
 
-const { prisma } = createDatabase();
-await initializeSchema(prisma);
+const db = postgres({ compose: "db" });
 
 export const integrationSpec = await integration({
-  database: new PrismaAdapter(prisma),
-  app: () => createApp(prisma),
+  services: [db],
+  app: () => createApp({ databaseUrl: db.connectionString }),
 });
 
 afterAll(() => integrationSpec.cleanup());

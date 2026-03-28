@@ -35,7 +35,7 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
     test("passes when rows match", async () => {
       const result = await spec("matching rows").seed("one-user.sql").get("/users").run();
 
-      await result.expectTable("User", {
+      await result.expectTable("users", {
         columns: ["name", "email"],
         rows: [["Alice", "alice@test.com"]],
       });
@@ -45,7 +45,7 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       const result = await spec("wrong values").seed("one-user.sql").get("/users").run();
 
       await expect(
-        result.expectTable("User", {
+        result.expectTable("users", {
           columns: ["name"],
           rows: [["NonExistent"]],
         }),
@@ -56,7 +56,7 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       const result = await spec("extra rows").seed("two-users.sql").get("/users").run();
 
       await expect(
-        result.expectTable("User", {
+        result.expectTable("users", {
           columns: ["name"],
           rows: [["Alice"]],
         }),
@@ -67,7 +67,7 @@ describe.each(runners)("$name — assertions", ({ spec }) => {
       const result = await spec("missing rows").get("/users").run();
 
       await expect(
-        result.expectTable("User", {
+        result.expectTable("users", {
           columns: ["name"],
           rows: [["Alice"]],
         }),

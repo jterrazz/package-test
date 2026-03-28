@@ -8,7 +8,7 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
 
     const result = await spec("verify clean").get("/users").run();
 
-    await result.expectTable("User", {
+    await result.expectTable("users", {
       columns: ["name"],
       rows: [],
     });
@@ -17,7 +17,7 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
   test("loads a single seed file", async () => {
     const result = await spec("single seed").seed("one-user.sql").get("/users").run();
 
-    await result.expectTable("User", {
+    await result.expectTable("users", {
       columns: ["name", "email"],
       rows: [["Alice", "alice@test.com"]],
     });
@@ -30,7 +30,7 @@ describe.each(runners)("$name — seeding", ({ spec }) => {
       .get("/users")
       .run();
 
-    await result.expectTable("User", {
+    await result.expectTable("users", {
       columns: ["name"],
       rows: [["Alice"], ["Charlie"]],
     });

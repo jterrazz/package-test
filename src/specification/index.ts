@@ -131,7 +131,6 @@ async function e2e(options: E2eOptions): Promise<SpecificationRunnerWithCleanup>
 // Service factories
 export { postgres } from "../infrastructure/services/postgres.js";
 export { redis } from "../infrastructure/services/redis.js";
-export { sqlite } from "../infrastructure/services/sqlite.js";
 
 // Types
 export type { DatabasePort } from "./ports/database.port.js";
@@ -140,7 +139,6 @@ export type { ServerPort, ServerResponse } from "./ports/server.port.js";
 // Adapters (for advanced usage)
 export { FetchAdapter } from "./adapters/fetch.adapter.js";
 export { HonoAdapter } from "./adapters/hono.adapter.js";
-export { PrismaAdapter } from "./adapters/prisma.adapter.js";
 export { Orchestrator } from "../infrastructure/orchestrator.js";
 
 // Runners

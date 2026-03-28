@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { Client } from "pg";
 
 import type { DatabasePort } from "../../specification/ports/database.port.js";
 import type { ServiceHandle } from "./service.port.js";
@@ -65,7 +66,6 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
   }
 
   private async getClient() {
-    const { Client } = await import("pg");
     const client = new Client({ connectionString: this.connectionString });
     await client.connect();
     return client;
