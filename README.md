@@ -136,13 +136,13 @@ Every test follows the same pattern: `spec("label") → setup → action → ass
 
 ### Setup (cross-mode)
 
-| Method                                   | Description                                              |
-| ---------------------------------------- | -------------------------------------------------------- |
-| `.seed("file.sql")`                      | Load SQL from `seeds/file.sql` into the default database |
-| `.seed("file.sql", { service: "name" })` | Load SQL into a specific database                        |
-| `.fixture("file")`                       | Copy `fixtures/file` into the CLI working directory      |
-| `.project("name")`                       | Use `fixtures/name/` as the CLI working directory        |
-| `.mock("file.json")`                     | Register mocked external API response (MSW, planned)     |
+| Method                                   | Description                                               |
+| ---------------------------------------- | --------------------------------------------------------- |
+| `.seed("file.sql")`                      | Load SQL from `seeds/file.sql` into the default database  |
+| `.seed("file.sql", { service: "name" })` | Load SQL into a specific database                         |
+| `.fixture("file")`                       | Copy `fixtures/file` into the CLI working directory       |
+| `.project("name")`                       | Copy `fixtures/name/` into a fresh temp dir and run there |
+| `.mock("file.json")`                     | Register mocked external API response (MSW, planned)      |
 
 ### Actions (one per spec, mutually exclusive)
 
@@ -163,6 +163,8 @@ Every test follows the same pattern: `spec("label") → setup → action → ass
 | `.exec(["build", "start"])`            | Run commands sequentially in same directory                                           |
 | `.spawn("args", { waitFor, timeout })` | Run long-lived process, resolve on pattern match or timeout                           |
 | `.env({ KEY: "value" })`               | Set env vars on the child process (`null` unsets, `$WORKDIR` expands to the temp cwd) |
+
+Every CLI spec runs in a **fresh, empty temp directory** by default. `.project("name")` starts from a copy of `fixtures/name/`; `.fixture("file")` seeds specific files into the temp dir. Bare specs (`spec("x").exec("...")`) get an empty dir — ideal for testing scaffolding CLIs that write into their cwd.
 
 ### Assertions
 

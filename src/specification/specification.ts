@@ -473,11 +473,9 @@ export class SpecificationBuilder {
   }
 
   private prepareWorkDir(): string {
-    // No project or fixtures — run from fixturesRoot or cwd (no temp dir needed)
-    if (!this.projectName && this.fixtures.length === 0) {
-      return this.config.fixturesRoot ?? process.cwd();
-    }
-
+    // Every CLI spec runs in a fresh, empty temp directory unless a project
+    // Fixture is explicitly copied in via .project() (or files via .fixture()).
+    // This guarantees isolation — the runner never writes into fixturesRoot.
     const tempDir = mkdtempSync(resolve(tmpdir(), "spec-cli-"));
 
     if (this.projectName && this.config.fixturesRoot) {

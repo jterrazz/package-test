@@ -25,6 +25,27 @@ describe("cli — exec", () => {
     expect(result.stderr).toContain("Unknown command");
   });
 
+  describe("fresh working dir", () => {
+    test("runs in a fresh empty temp dir when no .project() is set", async () => {
+      // Given — no .project() and no .fixture() — scaffold writes into the cwd
+      const result = await cliSpec("fresh cwd").exec("scaffold").run();
+
+      // Then — the scaffold output exists in the temp workdir
+      expect(result.exitCode).toBe(0);
+      expect(result.file("out/main.go").exists).toBe(true);
+    });
+
+    test("two bare runs get independent temp dirs", async () => {
+      // Given — two independent runs without .project()
+      const a = await cliSpec("run a").exec("scaffold").run();
+      const b = await cliSpec("run b").exec("scaffold-extra").run();
+
+      // Then — a does NOT see b's UNEXPECTED.txt and vice versa
+      expect(a.file("out/UNEXPECTED.txt").exists).toBe(false);
+      expect(b.file("out/UNEXPECTED.txt").exists).toBe(true);
+    });
+  });
+
   test("throws without action", async () => {
     await expect(cliSpec("no action").project("cli-app").run()).rejects.toThrow(
       "no action defined",
