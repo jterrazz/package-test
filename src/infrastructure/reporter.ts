@@ -262,6 +262,84 @@ export function formatStdoutDiff(file: string, expected: string, actual: string)
   return lines.join("\n");
 }
 
+// ── Directory diff ──
+
+interface DirectoryDiffData {
+  added: string[];
+  changed: { path: string; expected: string; actual: string }[];
+  removed: string[];
+}
+
+export function formatDirectoryDiff(
+  fixtureName: string,
+  diff: DirectoryDiffData,
+  hint: string,
+): string {
+  const lines: string[] = [];
+
+  const total = diff.added.length + diff.removed.length + diff.changed.length;
+  lines.push(`Directory mismatch: ${BOLD}${fixtureName}${RESET}`);
+  lines.push(
+    `${DIM}  ${total} difference${total === 1 ? "" : "s"}: ${diff.added.length} added, ${diff.removed.length} removed, ${diff.changed.length} changed${RESET}`,
+  );
+  lines.push("");
+  lines.push(`${GREEN}- Expected (fixture)${RESET}`);
+  lines.push(`${RED}+ Received (generated)${RESET}`);
+  lines.push("");
+
+  for (const path of diff.added) {
+    lines.push(`${RED}+ added    ${path}${RESET}  ${DIM}(not in fixture)${RESET}`);
+  }
+  for (const path of diff.removed) {
+    lines.push(`${GREEN}- removed  ${path}${RESET}  ${DIM}(in fixture, not generated)${RESET}`);
+  }
+  for (const { path, expected, actual } of diff.changed) {
+    const expectedLines = expected.split("\n");
+    const actualLines = actual.split("\n");
+    const changedCount = countLineDifferences(expectedLines, actualLines);
+    lines.push(
+      `${BOLD}~ changed  ${path}${RESET}  ${DIM}(${changedCount} line${changedCount === 1 ? "" : "s"} differ)${RESET}`,
+    );
+
+    let shown = 0;
+    const maxShown = 5;
+    const maxLines = Math.max(expectedLines.length, actualLines.length);
+    for (let i = 0; i < maxLines && shown < maxShown; i++) {
+      const exp = expectedLines[i];
+      const act = actualLines[i];
+      if (exp !== act) {
+        lines.push(`${DIM}    line ${i + 1}:${RESET}`);
+        if (exp !== undefined) {
+          lines.push(`    ${GREEN}- ${exp}${RESET}`);
+        }
+        if (act !== undefined) {
+          lines.push(`    ${RED}+ ${act}${RESET}`);
+        }
+        shown++;
+      }
+    }
+    if (changedCount > maxShown) {
+      lines.push(`    ${DIM}... ${changedCount - maxShown} more line(s)${RESET}`);
+    }
+  }
+
+  lines.push("");
+  lines.push(`${DIM}${hint}${RESET}`);
+
+  return lines.join("\n");
+}
+
+function countLineDifferences(expected: string[], actual: string[]): number {
+  let count = 0;
+  const max = Math.max(expected.length, actual.length);
+  for (let i = 0; i < max; i++) {
+    if (expected[i] !== actual[i]) {
+      count++;
+    }
+  }
+  return count;
+}
+
 // ── File assertions ──
 
 export function formatFileMissing(path: string): string {

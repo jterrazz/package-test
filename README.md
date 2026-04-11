@@ -157,11 +157,12 @@ Every test follows the same pattern: `spec("label") → setup → action → ass
 
 **CLI:**
 
-| Method                                 | Description                                                 |
-| -------------------------------------- | ----------------------------------------------------------- |
-| `.exec("args")`                        | Run command (blocking)                                      |
-| `.exec(["build", "start"])`            | Run commands sequentially in same directory                 |
-| `.spawn("args", { waitFor, timeout })` | Run long-lived process, resolve on pattern match or timeout |
+| Method                                 | Description                                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------- |
+| `.exec("args")`                        | Run command (blocking)                                                                |
+| `.exec(["build", "start"])`            | Run commands sequentially in same directory                                           |
+| `.spawn("args", { waitFor, timeout })` | Run long-lived process, resolve on pattern match or timeout                           |
+| `.env({ KEY: "value" })`               | Set env vars on the child process (`null` unsets, `$WORKDIR` expands to the temp cwd) |
 
 ### Assertions
 
@@ -183,6 +184,16 @@ Result properties are raw values — use vitest `expect()` for assertions. Datab
 | `expect(result.file("dist/index.js").exists).toBe(true)`          | Assert file exists          |
 | `expect(result.file("dist/index.js").content).toContain("Hello")` | Assert file contains string |
 | `expect(result.file("dist/index.cjs").exists).toBe(false)`        | Assert file does not exist  |
+
+**Directories (CLI scaffolding / codegen output):**
+
+| Expression                                                        | Description                                                                    |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `await result.directory("out").toMatchFixture("go-api")`          | Snapshot the tree against `expected/go-api/`, structured diff on mismatch      |
+| `await result.directory().toMatchFixture("scaffold", { ignore })` | Pass extra ignore patterns; defaults already skip `.git`, `node_modules`, etc. |
+| `await result.directory("out").files()`                           | List all files (recursive, sorted) for ad-hoc assertions                       |
+
+Run with `JTERRAZZ_TEST_UPDATE=1` (or vitest `-u`) to overwrite fixtures with the current output. Fixtures live at `{test}/expected/{name}/` — same convention as `responses/` for HTTP bodies.
 
 **Grep (scoped text matching):**
 

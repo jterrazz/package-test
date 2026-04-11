@@ -215,10 +215,14 @@ export { postgres } from "../infrastructure/services/postgres.js";
 export { redis } from "../infrastructure/services/redis.js";
 
 // Types
-export type { CommandPort, CommandResult } from "./ports/command.port.js";
+export type { CommandEnv, CommandPort, CommandResult } from "./ports/command.port.js";
 export type { DatabasePort } from "./ports/database.port.js";
 export type { ServerPort, ServerResponse } from "./ports/server.port.js";
-export type { SpecificationResult } from "./specification.js";
+export type {
+  DirectoryAccessor,
+  DirectorySnapshotOptions,
+  SpecificationResult,
+} from "./specification.js";
 
 // Adapters (for advanced usage)
 export { ExecAdapter } from "./adapters/exec.adapter.js";

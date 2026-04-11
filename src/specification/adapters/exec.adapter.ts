@@ -1,6 +1,29 @@
 import { execSync, spawn } from "node:child_process";
 
-import type { CommandPort, CommandResult, SpawnOptions } from "../ports/command.port.js";
+import type {
+  CommandEnv,
+  CommandPort,
+  CommandResult,
+  SpawnOptions,
+} from "../ports/command.port.js";
+
+/**
+ * Build a child-process env from the parent env plus user overrides.
+ * `null` overrides delete keys (e.g. `INIT_CWD: null`).
+ */
+function buildEnv(extra?: CommandEnv): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, INIT_CWD: undefined };
+  if (extra) {
+    for (const [key, value] of Object.entries(extra)) {
+      if (value === null) {
+        delete env[key];
+      } else {
+        env[key] = value;
+      }
+    }
+  }
+  return env;
+}
 
 /**
  * Executes CLI commands via execSync (blocking) or spawn (long-running).
@@ -13,9 +36,8 @@ export class ExecAdapter implements CommandPort {
     this.command = command;
   }
 
-  async exec(args: string, cwd: string): Promise<CommandResult> {
-    // Clear INIT_CWD so CLI tools use the actual cwd, not npm's caller directory
-    const env = { ...process.env, INIT_CWD: undefined };
+  async exec(args: string, cwd: string, extraEnv?: CommandEnv): Promise<CommandResult> {
+    const env = buildEnv(extraEnv);
 
     try {
       const stdout = execSync(`${this.command} ${args}`, {
@@ -34,8 +56,13 @@ export class ExecAdapter implements CommandPort {
     }
   }
 
-  async spawn(args: string, cwd: string, options: SpawnOptions): Promise<CommandResult> {
-    const env = { ...process.env, INIT_CWD: undefined };
+  async spawn(
+    args: string,
+    cwd: string,
+    options: SpawnOptions,
+    extraEnv?: CommandEnv,
+  ): Promise<CommandResult> {
+    const env = buildEnv(extraEnv);
 
     return new Promise((resolve) => {
       let stdout = "";

@@ -1,9 +1,14 @@
-import { cpSync, existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
-import { formatResponseDiff, formatTableDiff } from "../infrastructure/reporter.js";
-import type { CommandPort, CommandResult, SpawnOptions } from "./ports/command.port.js";
+import {
+  formatDirectoryDiff,
+  formatResponseDiff,
+  formatTableDiff,
+} from "../infrastructure/reporter.js";
+import { diffDirectories, type DirectoryDiff, walkDirectory } from "./directory.js";
+import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from "./ports/command.port.js";
 import type { DatabasePort } from "./ports/database.port.js";
 import type { ServerPort, ServerResponse } from "./ports/server.port.js";
 
@@ -68,6 +73,92 @@ export class TableAssertion {
         `Expected table "${this.tableName}" to be empty, but it has ${actual.length} rows`,
       );
     }
+  }
+}
+
+// ── Directory accessor ──
+
+export interface DirectorySnapshotOptions {
+  /** Extra path segments to ignore (in addition to default: .git, node_modules, etc.). */
+  ignore?: string[];
+  /**
+   * Force update mode regardless of vitest flags / env vars.
+   * `true` writes the fixture, `false` always asserts. Defaults to auto-detect.
+   */
+  update?: boolean;
+}
+
+/**
+ * Detect whether the user wants to update snapshots — `true` for any of:
+ *   - vitest run with `-u` / `--update`
+ *   - JTERRAZZ_TEST_UPDATE=1
+ *   - UPDATE_SNAPSHOTS=1
+ */
+function shouldUpdateSnapshots(): boolean {
+  if (process.env.JTERRAZZ_TEST_UPDATE === "1") {
+    return true;
+  }
+  if (process.env.UPDATE_SNAPSHOTS === "1") {
+    return true;
+  }
+  // Vitest sets these on its config; we read them best-effort.
+  if (process.argv.includes("-u") || process.argv.includes("--update")) {
+    return true;
+  }
+  return false;
+}
+
+export class DirectoryAccessor {
+  private absPath: string;
+  private testDir: string;
+
+  constructor(absPath: string, testDir: string) {
+    this.absPath = absPath;
+    this.testDir = testDir;
+  }
+
+  /**
+   * Compare the directory tree against `expected/{name}/` (relative to the test file).
+   * On mismatch, throws with a structured diff. With update mode enabled, the
+   * fixture is overwritten with the current contents instead.
+   */
+  async toMatchFixture(name: string, options: DirectorySnapshotOptions = {}): Promise<void> {
+    const fixtureDir = resolve(this.testDir, "expected", name);
+    const update = options.update ?? shouldUpdateSnapshots();
+
+    if (update) {
+      rmSync(fixtureDir, { force: true, recursive: true });
+      mkdirSync(fixtureDir, { recursive: true });
+      cpSync(this.absPath, fixtureDir, { recursive: true });
+      return;
+    }
+
+    if (!existsSync(fixtureDir)) {
+      throw new Error(
+        `Directory fixture "${name}" does not exist at ${fixtureDir}.\n` +
+          `Run with JTERRAZZ_TEST_UPDATE=1 (or vitest -u) to create it.`,
+      );
+    }
+
+    const diff: DirectoryDiff = await diffDirectories(fixtureDir, this.absPath, {
+      ignore: options.ignore,
+    });
+
+    if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
+      return;
+    }
+
+    throw new Error(
+      formatDirectoryDiff(name, diff, "Run with JTERRAZZ_TEST_UPDATE=1 to update the fixture."),
+    );
+  }
+
+  /**
+   * List all files in the directory (recursive, sorted, ignoring defaults).
+   * Useful for ad-hoc assertions when you don't want a full snapshot.
+   */
+  async files(options: { ignore?: string[] } = {}): Promise<string[]> {
+    return walkDirectory(this.absPath, options);
   }
 }
 
@@ -155,6 +246,11 @@ export class SpecificationResult {
     return new ResponseAccessor(this.responseData.body, this.testDir);
   }
 
+  directory(path: string = "."): DirectoryAccessor {
+    const baseDir = this.workDir ?? this.testDir;
+    return new DirectoryAccessor(resolve(baseDir, path), this.testDir);
+  }
+
   file(path: string): FileAccessor {
     const baseDir = this.workDir ?? this.testDir;
     const resolvedPath = resolve(baseDir, path);
@@ -196,6 +292,7 @@ export class SpecificationResult {
 
 export class SpecificationBuilder {
   private commandArgs: null | string | string[] = null;
+  private commandEnv: CommandEnv = {};
   private config: SpecificationConfig;
   private fixtures: FixtureEntry[] = [];
   private label: string;
@@ -231,6 +328,21 @@ export class SpecificationBuilder {
 
   mock(file: string): this {
     this.mocks.push({ file });
+    return this;
+  }
+
+  /**
+   * Set environment variables for the CLI process. Merged on top of process.env.
+   * Use `null` to unset a variable. Multiple calls merge.
+   *
+   * The token `$WORKDIR` (in any value) is replaced with the actual working
+   * directory at run-time — useful for tests that need a fully isolated `HOME`.
+   *
+   * @example
+   *   spec("...").env({ HOME: "$WORKDIR", TZ: "UTC" }).exec("status").run();
+   */
+  env(env: CommandEnv): this {
+    this.commandEnv = { ...this.commandEnv, ...env };
     return this;
   }
 
@@ -346,6 +458,20 @@ export class SpecificationBuilder {
 
   // ── Private ──
 
+  private resolveEnv(workDir: string): CommandEnv | undefined {
+    const keys = Object.keys(this.commandEnv);
+    if (keys.length === 0) {
+      return undefined;
+    }
+
+    const resolved: CommandEnv = {};
+    for (const key of keys) {
+      const value = this.commandEnv[key];
+      resolved[key] = typeof value === "string" ? value.replace(/\$WORKDIR/g, workDir) : value;
+    }
+    return resolved;
+  }
+
   private prepareWorkDir(): string {
     // No project or fixtures — run from fixturesRoot or cwd (no temp dir needed)
     if (!this.projectName && this.fixtures.length === 0) {
@@ -398,6 +524,7 @@ export class SpecificationBuilder {
       throw new Error("CLI actions require a command adapter (use cli())");
     }
 
+    const env = this.resolveEnv(workDir);
     let commandResult: CommandResult;
 
     if (this.spawnConfig) {
@@ -405,17 +532,18 @@ export class SpecificationBuilder {
         this.spawnConfig.args,
         workDir,
         this.spawnConfig.options,
+        env,
       );
     } else if (Array.isArray(this.commandArgs)) {
       commandResult = { exitCode: 0, stderr: "", stdout: "" };
       for (const args of this.commandArgs) {
-        commandResult = await this.config.command.exec(args, workDir);
+        commandResult = await this.config.command.exec(args, workDir, env);
         if (commandResult.exitCode !== 0) {
           break;
         }
       }
     } else {
-      commandResult = await this.config.command.exec(this.commandArgs!, workDir);
+      commandResult = await this.config.command.exec(this.commandArgs!, workDir, env);
     }
 
     return new SpecificationResult({

@@ -6,7 +6,7 @@ import { DockerAssertion } from "./docker-assertion.js";
 
 function isDockerRunning(): boolean {
   try {
-    execSync("docker info", { encoding: "utf-8", timeout: 5000 });
+    execSync("docker info", { encoding: "utf8", timeout: 5000 });
     return true;
   } catch {
     return false;
@@ -20,7 +20,7 @@ describeDocker("DockerAdapter", () => {
 
   beforeAll(() => {
     containerId = execSync("docker run -d --rm alpine:latest sleep 60", {
-      encoding: "utf-8",
+      encoding: "utf8",
     }).trim();
   });
 
@@ -67,7 +67,7 @@ describeDocker("DockerAssertion", () => {
 
   beforeAll(() => {
     containerId = execSync("docker run -d --rm alpine:latest sleep 60", {
-      encoding: "utf-8",
+      encoding: "utf8",
     }).trim();
   });
 

@@ -126,11 +126,12 @@ Every test follows: `spec("label") → setup → action → assertions`.
 
 **CLI actions** (requires `cli()` runner):
 
-| Method                                 | Description                                                                                                              |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `.exec("args")`                        | Run command (blocking, via execSync)                                                                                     |
-| `.exec(["build", "start"])`            | Run commands sequentially in same temp directory, stops on first failure                                                 |
-| `.spawn("args", { waitFor, timeout })` | Run long-lived process — resolves on pattern match (exit 0), process exits without match (exit 1), or timeout (exit 124) |
+| Method                                 | Description                                                                                                                                                                              |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.exec("args")`                        | Run command (blocking, via execSync)                                                                                                                                                     |
+| `.exec(["build", "start"])`            | Run commands sequentially in same temp directory, stops on first failure                                                                                                                 |
+| `.spawn("args", { waitFor, timeout })` | Run long-lived process — resolves on pattern match (exit 0), process exits without match (exit 1), or timeout (exit 124)                                                                 |
+| `.env({ KEY: "value" })`               | Set env vars on the child process. `null` unsets a variable. `$WORKDIR` in any value expands to the temp working dir (e.g. `HOME: "$WORKDIR"` for full isolation). Multiple calls merge. |
 
 ### Assertions
 
@@ -152,6 +153,18 @@ Result properties are raw values — use vitest `expect()` for assertions. Datab
 | `expect(result.file("dist/index.js").exists).toBe(true)`          | Assert file exists          |
 | `expect(result.file("dist/index.js").content).toContain("Hello")` | Assert file contains string |
 | `expect(result.file("dist/index.cjs").exists).toBe(false)`        | Assert file does not exist  |
+
+**Directories (CLI scaffolding / codegen output):**
+
+| Expression                                                    | Description                                                                                                                                             |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `await result.directory("out").toMatchFixture("go-api")`      | Snapshot the tree against `expected/go-api/`. On mismatch throws a structured diff (added / removed / changed files, with line-level diff for changed). |
+| `await result.directory().toMatchFixture("name", { ignore })` | Pass extra ignore globs. Defaults already skip `.git`, `.DS_Store`, `node_modules`, `.next`, `dist`, `.turbo`, `.cache`.                                |
+| `await result.directory("out").files()`                       | Sorted recursive list of files — for ad-hoc presence/absence checks.                                                                                    |
+
+Run with `JTERRAZZ_TEST_UPDATE=1` (or vitest `-u`) to overwrite fixtures with the current generated tree. Fixtures live at `{test-dir}/expected/{name}/` — same convention as `responses/` for HTTP bodies. The accessor is path-relative to the CLI working directory.
+
+This is the right idiom for testing **scaffolding tools, code generators, bundler outputs, or any CLI that writes files**. Don't roll your own walk + per-file content loop.
 
 **Grep (scoped text matching):**
 

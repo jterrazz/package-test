@@ -2,5 +2,17 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "vitest": {
     "config": ["vitest.config.ts"]
+  },
+  "ignore": [
+    "tests/setup/fixtures/**",
+    "tests/e2e/assertions/fixtures/**",
+    "tests/e2e/assertions/expected/**",
+    "vitest.workspace.ts"
+  ],
+  "ignoreDependencies": ["@hono/node-server"],
+  "rules": {
+    "exports": "off",
+    "types": "off",
+    "files": "off"
   }
 }

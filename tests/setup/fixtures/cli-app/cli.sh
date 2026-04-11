@@ -41,6 +41,36 @@ case "$COMMAND" in
         echo "Fatal: something went wrong" >&2
         exit 2
         ;;
+    env)
+        echo "MY_VAR=${MY_VAR:-unset}"
+        echo "HOME=${HOME:-unset}"
+        echo "EXTRA=${EXTRA:-unset}"
+        ;;
+    scaffold)
+        mkdir -p out/src out/docs
+        echo "package main" > out/main.go
+        echo "module example" > out/go.mod
+        echo "console.log('hi')" > out/src/index.txt
+        echo "# Docs" > out/docs/README.md
+        echo "Scaffolded"
+        ;;
+    scaffold-changed)
+        mkdir -p out/src out/docs
+        echo "package main" > out/main.go
+        echo "module CHANGED" > out/go.mod
+        echo "console.log('hi')" > out/src/index.txt
+        echo "# Docs" > out/docs/README.md
+        echo "Scaffolded"
+        ;;
+    scaffold-extra)
+        mkdir -p out/src out/docs
+        echo "package main" > out/main.go
+        echo "module example" > out/go.mod
+        echo "console.log('hi')" > out/src/index.txt
+        echo "# Docs" > out/docs/README.md
+        echo "extra" > out/UNEXPECTED.txt
+        echo "Scaffolded"
+        ;;
     help)
         echo "Usage: cli <command>"
         echo ""

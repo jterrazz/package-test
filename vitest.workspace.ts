@@ -8,6 +8,7 @@ export default defineWorkspace([
         "src/**/*.test.ts",
         "tests/e2e/exec/**/*.test.ts",
         "tests/e2e/assertions/assertions-cli.e2e.test.ts",
+        "tests/e2e/assertions/directory.e2e.test.ts",
       ],
     },
   },

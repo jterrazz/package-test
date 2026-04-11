@@ -3,12 +3,16 @@ import { execSync } from "node:child_process";
 import type { DockerContainerPort, DockerInspectResult } from "./docker-port.js";
 
 export class DockerAdapter implements DockerContainerPort {
-  constructor(private containerId: string) {}
+  private containerId: string;
+
+  constructor(containerId: string) {
+    this.containerId = containerId;
+  }
 
   async exec(cmd: string[]): Promise<string> {
     const result = execSync(
       `docker exec ${this.containerId} ${cmd.map((c) => `'${c}'`).join(" ")}`,
-      { encoding: "utf-8", timeout: 10000 },
+      { encoding: "utf8", timeout: 10_000 },
     );
     return result.trim();
   }
@@ -24,10 +28,10 @@ export class DockerAdapter implements DockerContainerPort {
 
   async isRunning(): Promise<boolean> {
     try {
-      const result = execSync(
-        `docker inspect --format='{{.State.Running}}' ${this.containerId}`,
-        { encoding: "utf-8", timeout: 5000 },
-      );
+      const result = execSync(`docker inspect --format='{{.State.Running}}' ${this.containerId}`, {
+        encoding: "utf8",
+        timeout: 5000,
+      });
       return result.trim() === "true";
     } catch {
       return false;
@@ -37,15 +41,15 @@ export class DockerAdapter implements DockerContainerPort {
   async logs(tail?: number): Promise<string> {
     const tailFlag = tail ? `--tail ${tail}` : "";
     const result = execSync(`docker logs ${tailFlag} ${this.containerId}`, {
-      encoding: "utf-8",
-      timeout: 10000,
+      encoding: "utf8",
+      timeout: 10_000,
     });
     return result;
   }
 
   async inspect(): Promise<DockerInspectResult> {
     const raw = execSync(`docker inspect ${this.containerId}`, {
-      encoding: "utf-8",
+      encoding: "utf8",
       timeout: 5000,
     });
     const data = JSON.parse(raw)[0];
@@ -73,12 +77,10 @@ export class DockerAdapter implements DockerContainerPort {
       },
       networkSettings: {
         networks: Object.fromEntries(
-          Object.entries(data.NetworkSettings.Networks || {}).map(
-            ([name, net]: [string, any]) => [
-              name,
-              { gateway: net.Gateway, ipAddress: net.IPAddress },
-            ],
-          ),
+          Object.entries(data.NetworkSettings.Networks || {}).map(([name, net]: [string, any]) => [
+            name,
+            { gateway: net.Gateway, ipAddress: net.IPAddress },
+          ]),
         ),
       },
     };
