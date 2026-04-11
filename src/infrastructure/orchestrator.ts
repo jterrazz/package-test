@@ -15,7 +15,7 @@ interface RunningService {
   container: ContainerPort | null;
 }
 
-interface OrchestratorOptions {
+export interface OrchestratorOptions {
   services: ServiceHandle[];
   mode: "e2e" | "integration";
   root?: string;

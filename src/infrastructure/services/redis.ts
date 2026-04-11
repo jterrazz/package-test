@@ -1,14 +1,14 @@
 import type { DatabasePort } from "../../specification/ports/database.port.js";
 import type { ServiceHandle } from "./service.port.js";
 
-interface RedisOptions {
+export interface RedisOptions {
   /** Map to a service in docker-compose.test.yaml. */
   compose?: string;
   /** Override image. */
   image?: string;
 }
 
-class RedisHandle implements ServiceHandle {
+export class RedisHandle implements ServiceHandle {
   readonly type = "redis";
   readonly composeName: null | string;
   readonly defaultPort = 6379;

@@ -5,7 +5,7 @@ import { Client } from "pg";
 import type { DatabasePort } from "../../specification/ports/database.port.js";
 import type { ServiceHandle } from "./service.port.js";
 
-interface PostgresOptions {
+export interface PostgresOptions {
   /** Map to a service in docker-compose.test.yaml. */
   compose?: string;
   /** Override image. */
@@ -14,7 +14,7 @@ interface PostgresOptions {
   env?: Record<string, string>;
 }
 
-class PostgresHandle implements DatabasePort, ServiceHandle {
+export class PostgresHandle implements DatabasePort, ServiceHandle {
   readonly type = "postgres";
   readonly composeName: null | string;
   readonly defaultPort = 5432;

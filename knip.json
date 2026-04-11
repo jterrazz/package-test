@@ -7,9 +7,10 @@
     "tests/setup/fixtures/**",
     "tests/e2e/assertions/fixtures/**",
     "tests/e2e/assertions/expected/**",
-    "vitest.workspace.ts"
+    "vitest.workspace.ts",
+    "docs/**"
   ],
-  "ignoreDependencies": ["@hono/node-server"],
+  "ignoreDependencies": ["@hono/node-server", "vitepress-plugin-llms"],
   "rules": {
     "exports": "off",
     "types": "off",
