@@ -1,6 +1,6 @@
 import { describe, test } from 'vitest';
 
-import { httpSpec } from '../../setup/http-spec.js';
+import { httpSpec } from '../../setup/http.specification.js';
 
 describe('lifecycle', () => {
     test('resets database before each spec', async () => {

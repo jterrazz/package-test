@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { httpSpec } from '../../setup/http-spec.js';
+import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical paths — both integration and e2e ──
 
