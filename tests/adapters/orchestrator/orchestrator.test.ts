@@ -4,7 +4,7 @@ import { afterAll, describe, expect, test } from 'vitest';
 import { postgres } from '../../../src/adapters/postgres.adapter.js';
 import { Orchestrator } from '../../../src/orchestrator/orchestrator.js';
 
-const FIXTURES_DIR = resolve(import.meta.dirname, '../../../setup/fixtures/app');
+const FIXTURES_DIR = resolve(import.meta.dirname, '../../setup/fixtures/app');
 
 describe('orchestrator', () => {
     describe('integration mode', () => {
