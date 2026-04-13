@@ -11,15 +11,6 @@ export {
     type StackTarget,
 } from './runner/targets.js';
 
-// ── Legacy aliases (backward compatibility) ──
-export { cli, type CliOptions } from './runner/cli.js';
-export { e2e, type E2eOptions } from './runner/e2e.js';
-export {
-    integration,
-    type IntegrationOptions,
-    type SpecificationRunnerWithCleanup,
-} from './runner/integration.js';
-
 // Builder
 export {
     createSpecificationRunner,
@@ -39,26 +30,31 @@ export type { ServerPort, ServerResponse } from './ports/server.port.js';
 export type { ContainerPort } from './ports/container.port.js';
 export type { ServiceHandle } from './ports/service.port.js';
 
-// Adapters
+// Adapters (advanced usage)
 export { ExecAdapter } from './adapters/exec.adapter.js';
 export { FetchAdapter } from './adapters/fetch.adapter.js';
 export { HonoAdapter } from './adapters/hono.adapter.js';
+export { Orchestrator } from './orchestrator/orchestrator.js';
 
-// Services
+// Services (also available via @jterrazz/test/services)
 export { postgres, type PostgresOptions } from './adapters/postgres.adapter.js';
 export { redis, type RedisOptions } from './adapters/redis.adapter.js';
 
-// Orchestrator
-export { Orchestrator } from './orchestrator/orchestrator.js';
+// Legacy aliases (backward compatibility)
+export { cli, type CliOptions } from './runner/cli.js';
+export { e2e, type E2eOptions } from './runner/e2e.js';
+export {
+    integration,
+    type IntegrationOptions,
+    type SpecificationRunnerWithCleanup,
+} from './runner/integration.js';
 
-// Docker
+// Legacy re-exports (use result.grep() and runner.docker() instead)
+export { grep } from './utilities/grep.js';
+export { normalizeOutput, stripAnsi } from './utilities/reporter.js';
 export { dockerContainer } from './docker/docker-adapter.js';
 export { DockerAssertion } from './docker/docker-assertion.js';
 export type { DockerContainerPort, DockerInspectResult } from './docker/docker-port.js';
 
-// Utilities
-export { grep } from './utilities/grep.js';
-export { normalizeOutput, stripAnsi } from './utilities/reporter.js';
-
-// Mocking
+// Mock (also available via @jterrazz/test/mock)
 export * from './mocking/index.js';

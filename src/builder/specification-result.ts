@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import type { CommandResult } from '../ports/command.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import type { ServerResponse } from '../ports/server.port.js';
+import { grep as grepUtil } from '../utilities/grep.js';
 import { DirectoryAccessor } from './directory-accessor.js';
 import { ResponseAccessor } from './response-accessor.js';
 import type { SpecificationConfig } from './specification-builder.js';
@@ -76,6 +77,17 @@ export class SpecificationResult {
             throw new Error('.stderr requires a CLI action (.exec())');
         }
         return this.commandResult.stderr;
+    }
+
+    /**
+     * Extract text blocks from stdout that contain a pattern.
+     * Useful for parsing structured CLI output (linters, compilers).
+     *
+     * @example
+     *   expect(result.grep('error.ts')).toContain('no-unused-vars');
+     */
+    grep(pattern: string): string {
+        return grepUtil(this.stdout, pattern);
     }
 
     // ── Structured accessors ──

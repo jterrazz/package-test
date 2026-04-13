@@ -5,6 +5,8 @@ import {
     createSpecificationRunner,
     type SpecificationBuilder,
 } from '../builder/specification-builder.js';
+import { dockerContainer } from '../docker/docker-adapter.js';
+import { DockerAssertion } from '../docker/docker-assertion.js';
 import { Orchestrator } from '../orchestrator/orchestrator.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
@@ -25,6 +27,13 @@ export interface SpecRunner {
     (label: string): SpecificationBuilder;
     /** Stop all infrastructure started by this runner. */
     cleanup: () => Promise<void>;
+    /**
+     * Get a Docker assertion builder for a running container.
+     *
+     * @example
+     *   await runner.docker('my-container').toBeRunning();
+     */
+    docker: (containerId: string) => DockerAssertion;
     /** The orchestrator managing the test infrastructure lifecycle. */
     orchestrator: Orchestrator;
 }
@@ -81,6 +90,7 @@ async function startApp(target: AppTarget, options: SpecOptions): Promise<SpecRu
     }) as SpecRunner;
 
     runner.cleanup = () => orchestrator.stop();
+    runner.docker = (id: string) => new DockerAssertion(dockerContainer(id));
     runner.orchestrator = orchestrator;
 
     return runner;
@@ -113,6 +123,7 @@ async function startStack(target: StackTarget, options: SpecOptions): Promise<Sp
     }) as SpecRunner;
 
     runner.cleanup = () => orchestrator.stopCompose();
+    runner.docker = (id: string) => new DockerAssertion(dockerContainer(id));
     runner.orchestrator = orchestrator;
 
     return runner;
@@ -150,6 +161,7 @@ async function startCommand(target: CommandTarget, options: SpecOptions): Promis
             await orchestrator.stop();
         }
     };
+    runner.docker = (id: string) => new DockerAssertion(dockerContainer(id));
     runner.orchestrator = orchestrator!;
 
     return runner;

@@ -14,13 +14,21 @@
         ".": {
             "require": "./dist/index.cjs",
             "import": "./dist/index.js"
+        },
+        "./services": {
+            "require": "./dist/services.cjs",
+            "import": "./dist/services.js"
+        },
+        "./mock": {
+            "require": "./dist/mock.cjs",
+            "import": "./dist/mock.js"
         }
     },
     "publishConfig": {
         "registry": "https://registry.npmjs.org/"
     },
     "scripts": {
-        "build": "typescript bundle",
+        "build": "tsdown --config tsdown.config.ts",
         "docs": "typescript docs",
         "lint": "codestyle check",
         "lint:fix": "codestyle fix",
@@ -41,6 +49,7 @@
         "@types/node": "^25.5.0",
         "@types/pg": "^8.20.0",
         "hono": "^4.12.9",
+        "tsdown": "^0.21.8",
         "vitest": "^4.1.2"
     },
     "peerDependencies": {
