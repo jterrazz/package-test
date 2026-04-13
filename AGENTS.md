@@ -28,17 +28,18 @@ Requires Docker running for `integration()` and `e2e()` self-tests.
 ```
 src/
 ├── index.ts                       # public entry — re-exports everything
-├── specification/
-│   ├── specification.ts           # SpecificationBuilder + SpecificationResult
-│   ├── directory.ts               # walkDirectory + diffDirectories (snapshot core)
-│   ├── grep.ts                    # scoped text matching helper
-│   ├── adapters/                  # ExecAdapter, FetchAdapter, HonoAdapter
-│   └── ports/                     # CommandPort, DatabasePort, ServerPort interfaces
-├── infrastructure/
-│   ├── orchestrator.ts            # testcontainers + docker-compose orchestration
-│   ├── reporter.ts                # diff formatters used by assertions
-│   ├── services/                  # postgres, redis service handles
-│   └── docker/                    # DockerContainerPort + DockerAssertion
+├── runner/                        # entry point factories (integration, e2e, cli)
+├── builder/                       # core domain — fluent builder + result accessors
+│   ├── specification-builder.ts   # SpecificationBuilder + createSpecificationRunner
+│   ├── specification-result.ts    # SpecificationResult + FileAccessor
+│   ├── directory-accessor.ts      # directory snapshot assertions
+│   ├── table-assertion.ts         # database table assertions
+│   └── response-accessor.ts       # HTTP response body assertions
+├── ports/                         # all domain contracts (command, database, server, container, service)
+├── adapters/                      # all implementations (exec, fetch, hono, testcontainers, compose, postgres, redis)
+├── orchestrator/                  # container lifecycle + compose parsing
+├── docker/                        # DockerContainerPort + DockerAssertion
+├── utilities/                     # reporter, directory walk/diff, grep
 └── mocking/                       # mockOf, mockOfDate
 tests/
 ├── e2e/                           # self-tests organized by feature

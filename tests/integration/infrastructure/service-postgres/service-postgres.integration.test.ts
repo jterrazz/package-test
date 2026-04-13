@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { TestcontainersAdapter } from '../../../../src/infrastructure/adapters/testcontainers.adapter.js';
-import { postgres } from '../../../../src/infrastructure/services/postgres.js';
+import { postgres } from '../../../../src/adapters/postgres.adapter.js';
+import { TestcontainersAdapter } from '../../../../src/adapters/testcontainers.adapter.js';
 
 describe('postgres service', () => {
     const db = postgres();

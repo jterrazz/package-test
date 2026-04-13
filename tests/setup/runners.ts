@@ -1,4 +1,4 @@
-import type { SpecificationRunner } from '../../src/specification/specification.js';
+import type { SpecificationRunner } from '../../src/builder/specification-builder.js';
 import { e2eSpec } from './e2e.specification.js';
 import { integrationSpec } from './integration.specification.js';
 

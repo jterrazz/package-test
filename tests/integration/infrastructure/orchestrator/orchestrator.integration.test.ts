@@ -1,8 +1,8 @@
 import { resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
 
-import { Orchestrator } from '../../../../src/infrastructure/orchestrator.js';
-import { postgres } from '../../../../src/infrastructure/services/postgres.js';
+import { postgres } from '../../../../src/adapters/postgres.adapter.js';
+import { Orchestrator } from '../../../../src/orchestrator/orchestrator.js';
 
 const FIXTURES_DIR = resolve(import.meta.dirname, '../../../setup/fixtures/app');
 

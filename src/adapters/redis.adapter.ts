@@ -1,5 +1,5 @@
-import type { DatabasePort } from '../../specification/ports/database.port.js';
-import type { ServiceHandle } from './service.port.js';
+import type { DatabasePort } from '../ports/database.port.js';
+import type { ServiceHandle } from '../ports/service.port.js';
 
 export interface RedisOptions {
     /** Map to a service in docker-compose.test.yaml. */

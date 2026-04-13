@@ -1,4 +1,4 @@
-import type { DatabasePort } from '../../specification/ports/database.port.js';
+import type { DatabasePort } from './database.port.js';
 
 /**
  * A service handle — returned by factory functions like postgres(), redis().

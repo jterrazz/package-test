@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { TestcontainersAdapter } from '../../../../src/infrastructure/adapters/testcontainers.adapter.js';
-import { redis } from '../../../../src/infrastructure/services/redis.js';
+import { redis } from '../../../../src/adapters/redis.adapter.js';
+import { TestcontainersAdapter } from '../../../../src/adapters/testcontainers.adapter.js';
 
 describe('redis service', () => {
     const cache = redis();
