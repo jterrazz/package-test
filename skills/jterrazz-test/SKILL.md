@@ -2,7 +2,7 @@
 name: jterrazz-test
 description: Use when writing integration, e2e, or CLI tests with @jterrazz/test. Covers spec runners, directory snapshots, database seeding, fixture projects, and the Given/Then convention.
 metadata:
-    version: '5.2'
+    version: '5.3'
 ---
 
 # `@jterrazz/test`
@@ -95,7 +95,6 @@ test('creates a user', async () => {
 
 ## Live docs (canonical)
 
-- Site: <https://jterrazz.github.io/package-test/>
-- Full docs as one Markdown file (for agent ingestion): <https://jterrazz.github.io/package-test/llms-full.txt>
-- Auto-generated API reference: <https://jterrazz.github.io/package-test/reference/>
-- Changelog with migration notes: <https://github.com/jterrazz/package-test/blob/main/CHANGELOG.md>
+- LLM-friendly full reference: <https://jterrazz.github.io/package-test/llms-full.txt>
+- API index: <https://jterrazz.github.io/package-test/llms.txt>
+- Changelog: <https://github.com/jterrazz/package-test/blob/main/CHANGELOG.md>
