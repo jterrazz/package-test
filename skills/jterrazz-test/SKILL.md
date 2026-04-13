@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Use when authoring tests for any @jterrazz project — covers the @jterrazz/test framework's three specification runners (integration, e2e, cli), directory snapshot assertions, env var injection, and the Given/Then test convention. Activates on imports from @jterrazz/test, edits to *.test.ts / *.integration.test.ts / *.e2e.test.ts files, edits under tests/setup/, or user prompts mentioning "specification", "spec runner", "directory snapshot", or "test fixture". Do not activate for unit tests that use vitest directly without @jterrazz/test.
+description: Use when writing integration, e2e, or CLI tests with @jterrazz/test. Covers spec runners, directory snapshots, database seeding, fixture projects, and the Given/Then convention.
 metadata:
     version: '5.2'
 ---
