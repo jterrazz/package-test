@@ -122,10 +122,14 @@ async function startApp(target: AppTarget, options: SpecOptions): Promise<SpecRu
 
 async function startStack(target: StackTarget, options: SpecOptions): Promise<SpecRunner> {
     const root = resolveProjectRoot(target.root ?? options.root);
+    const workerId = getWorkerId();
+    const projectName = `test-worker-${workerId}`;
+
     const orchestrator = new Orchestrator({
         mode: 'e2e',
         root,
         services: options.services ?? [],
+        projectName,
     });
 
     await orchestrator.startCompose();

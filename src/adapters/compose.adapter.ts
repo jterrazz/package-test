@@ -73,13 +73,20 @@ export class ComposeAdapter implements ContainerPort {
 
 /**
  * Start the full compose stack and stop it all on cleanup.
+ * Supports per-worker project names for parallel execution.
  */
 export class ComposeStackAdapter {
     private composeFile: string;
+    private projectName: null | string;
     private started = false;
 
-    constructor(composeFile: string) {
+    constructor(composeFile: string, projectName?: string) {
         this.composeFile = composeFile;
+        this.projectName = projectName ?? null;
+    }
+
+    private get projectFlag(): string {
+        return this.projectName ? `-p ${this.projectName}` : '';
     }
 
     private run(command: string): string {
@@ -100,7 +107,7 @@ export class ComposeStackAdapter {
             return;
         }
 
-        this.run(`docker compose -f ${this.composeFile} up -d --wait`);
+        this.run(`docker compose ${this.projectFlag} -f ${this.composeFile} up -d --wait`);
         this.started = true;
     }
 
@@ -109,13 +116,13 @@ export class ComposeStackAdapter {
             return;
         }
 
-        this.run(`docker compose -f ${this.composeFile} down -v`);
+        this.run(`docker compose ${this.projectFlag} -f ${this.composeFile} down -v`);
         this.started = false;
     }
 
     getMappedPort(serviceName: string, containerPort: number): number {
         const output = this.run(
-            `docker compose -f ${this.composeFile} port ${serviceName} ${containerPort}`,
+            `docker compose ${this.projectFlag} -f ${this.composeFile} port ${serviceName} ${containerPort}`,
         );
         const port = output.split(':').pop();
         return Number(port);

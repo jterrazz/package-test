@@ -19,6 +19,8 @@ export interface OrchestratorOptions {
     services: ServiceHandle[];
     mode: 'e2e' | 'integration';
     root?: string;
+    /** Compose project name — used for per-worker stack isolation. */
+    projectName?: string;
 }
 
 /**
@@ -30,6 +32,7 @@ export class Orchestrator {
     private services: ServiceHandle[];
     private mode: 'e2e' | 'integration';
     private root: string;
+    private projectName: string | undefined;
     private running: RunningService[] = [];
     private composeStack: ComposeStackAdapter | null = null;
     private composeHandles: ServiceHandle[] = [];
@@ -39,6 +42,7 @@ export class Orchestrator {
         this.services = options.services;
         this.mode = options.mode;
         this.root = options.root ?? process.cwd();
+        this.projectName = options.projectName;
     }
 
     /**
@@ -161,7 +165,7 @@ export class Orchestrator {
         const composeDir = dirname(composePath);
         const composeConfig = parseComposeFile(composePath);
 
-        this.composeStack = new ComposeStackAdapter(composePath);
+        this.composeStack = new ComposeStackAdapter(composePath, this.projectName);
         await this.composeStack.start();
 
         // Create handles for detected infra services

@@ -17,8 +17,7 @@ export default defineWorkspace([
     {
         test: {
             name: 'http-stack',
-            // Sequential: compose mode can't isolate per-worker
-            fileParallelism: false,
+            // Parallel: each worker gets its own compose project (test-worker-N)
             include: ['tests/http/**/*.test.ts'],
             env: { SPEC_RUNNER: 'stack' },
         },
