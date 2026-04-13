@@ -17,6 +17,7 @@ const DASH = '⎯';
 
 // ── Types ──
 
+/** Status report for a single infrastructure service after startup. */
 export interface ServiceReport {
     name: string;
     type: string;
@@ -26,6 +27,7 @@ export interface ServiceReport {
     logs?: string;
 }
 
+/** Describes the application under test for startup reporting. */
 export interface AppInfo {
     type: 'http' | 'in-process';
     url?: string;
@@ -407,11 +409,13 @@ function formatRow(row: unknown[]): string {
 
 // ── Test utilities ──
 
+/** Strip ANSI escape codes from a string. */
 export function stripAnsi(str: string): string {
     // eslint-disable-next-line no-control-regex
     return str.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
+/** Strip ANSI codes and replace volatile tokens (ports, durations) with placeholders. */
 export function normalizeOutput(str: string): string {
     return stripAnsi(str)
         .replace(/localhost:\d+/g, 'localhost:PORT')

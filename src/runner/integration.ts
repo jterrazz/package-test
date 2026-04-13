@@ -21,8 +21,11 @@ export interface IntegrationOptions {
     services: ServiceHandle[];
 }
 
+/** A specification runner that also exposes teardown and the underlying orchestrator. */
 export interface SpecificationRunnerWithCleanup extends SpecificationRunner {
+    /** Stop all infrastructure containers started by this runner. */
     cleanup: () => Promise<void>;
+    /** The orchestrator managing the test infrastructure lifecycle. */
     orchestrator: Orchestrator;
 }
 

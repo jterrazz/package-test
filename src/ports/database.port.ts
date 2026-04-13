@@ -1,6 +1,6 @@
 /**
  * Abstract database interface for specification runners.
- * Implement this to plug in your database stack.
+ * Implement this to plug in your database stack (e.g. Postgres, SQLite).
  */
 export interface DatabasePort {
     /** Execute raw SQL (for seeding test data). */

@@ -9,11 +9,17 @@ import { ResponseAccessor } from './response-accessor.js';
 import type { SpecificationConfig } from './specification-builder.js';
 import { TableAssertion } from './table-assertion.js';
 
+/** Read-only handle to a single file produced by a CLI action. */
 export interface FileAccessor {
+    /** The UTF-8 text content. Throws if the file does not exist. */
     readonly content: string;
     readonly exists: boolean;
 }
 
+/**
+ * The outcome of a single specification run.
+ * Provides accessors for CLI output, HTTP responses, files, directories, and database tables.
+ */
 export class SpecificationResult {
     private commandResult?: CommandResult;
     private config: SpecificationConfig;
@@ -40,6 +46,7 @@ export class SpecificationResult {
 
     // ── Raw value accessors ──
 
+    /** The process exit code. Only available after a CLI action. */
     get exitCode(): number {
         if (!this.commandResult) {
             throw new Error('.exitCode requires a CLI action (.exec())');
@@ -47,6 +54,7 @@ export class SpecificationResult {
         return this.commandResult.exitCode;
     }
 
+    /** The HTTP response status code. Only available after an HTTP action. */
     get status(): number {
         if (!this.responseData) {
             throw new Error('.status requires an HTTP action (.get(), .post(), etc.)');
@@ -54,6 +62,7 @@ export class SpecificationResult {
         return this.responseData.status;
     }
 
+    /** The captured standard output. Only available after a CLI action. */
     get stdout(): string {
         if (!this.commandResult) {
             throw new Error('.stdout requires a CLI action (.exec())');
@@ -61,6 +70,7 @@ export class SpecificationResult {
         return this.commandResult.stdout;
     }
 
+    /** The captured standard error. Only available after a CLI action. */
     get stderr(): string {
         if (!this.commandResult) {
             throw new Error('.stderr requires a CLI action (.exec())');
@@ -70,6 +80,7 @@ export class SpecificationResult {
 
     // ── Structured accessors ──
 
+    /** Access the HTTP response body for assertions. Only available after an HTTP action. */
     get response(): ResponseAccessor {
         if (!this.responseData) {
             throw new Error('.response requires an HTTP action (.get(), .post(), etc.)');
@@ -77,11 +88,13 @@ export class SpecificationResult {
         return new ResponseAccessor(this.responseData.body, this.testDir);
     }
 
+    /** Access a directory (relative to the working directory) for snapshot assertions. */
     directory(path: string = '.'): DirectoryAccessor {
         const baseDir = this.workDir ?? this.testDir;
         return new DirectoryAccessor(resolve(baseDir, path), this.testDir);
     }
 
+    /** Access a single file (relative to the working directory) for content assertions. */
     file(path: string): FileAccessor {
         const baseDir = this.workDir ?? this.testDir;
         const resolvedPath = resolve(baseDir, path);
@@ -97,6 +110,7 @@ export class SpecificationResult {
         };
     }
 
+    /** Access a database table for row-level assertions. */
     table(tableName: string, options?: { service?: string }): TableAssertion {
         const db = this.resolveDatabase(options?.service);
         if (!db) {

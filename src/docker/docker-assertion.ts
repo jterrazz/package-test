@@ -1,6 +1,9 @@
 import type { DockerContainerPort } from './docker-port.js';
 
-/** Fluent assertion builder for Docker containers */
+/**
+ * Fluent assertion builder for Docker containers.
+ * Chain async assertions like `toBeRunning()`, `toHaveFile()`, `toHaveMount()`.
+ */
 export class DockerAssertion {
     private container: DockerContainerPort;
 

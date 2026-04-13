@@ -26,8 +26,9 @@ function buildEnv(extra?: CommandEnv): NodeJS.ProcessEnv {
 }
 
 /**
- * Executes CLI commands via execSync (blocking) or spawn (long-running).
- * Used by cli() for local command execution.
+ * Executes CLI commands via Node.js child_process.
+ * Uses `execSync` for one-shot commands and `spawn` for long-running processes.
+ * Used by the `cli()` specification runner.
  */
 export class ExecAdapter implements CommandPort {
     private command: string;

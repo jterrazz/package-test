@@ -14,6 +14,7 @@ import { SpecificationResult } from './specification-result.js';
 
 // ── Types ──
 
+/** Adapter configuration passed to the specification runner at setup time. */
 export interface SpecificationConfig {
     command?: CommandPort;
     database?: DatabasePort;
@@ -22,19 +23,23 @@ export interface SpecificationConfig {
     server?: ServerPort;
 }
 
+/** A SQL seed file to execute before the action, optionally targeting a named database service. */
 export interface SeedEntry {
     file: string;
     service?: string;
 }
 
+/** A fixture file or directory to copy into the working directory before execution. */
 export interface FixtureEntry {
     file: string;
 }
 
+/** An MSW mock definition file to register before the action. */
 export interface MockEntry {
     file: string;
 }
 
+/** An HTTP request to perform against the server adapter. */
 export interface RequestEntry {
     bodyFile?: string;
     method: string;
@@ -43,6 +48,13 @@ export interface RequestEntry {
 
 // ── Builder (before .run()) ──
 
+/**
+ * Fluent builder for declaring a single test specification.
+ *
+ * Chain setup methods ({@link seed}, {@link fixture}, {@link env}), an action
+ * ({@link get}, {@link post}, {@link exec}), then call {@link run} to execute
+ * and receive a {@link SpecificationResult} for assertions.
+ */
 export class SpecificationBuilder {
     private commandArgs: null | string | string[] = null;
     private commandEnv: CommandEnv = {};
@@ -64,21 +76,30 @@ export class SpecificationBuilder {
 
     // ── Setup ──
 
+    /**
+     * Queue a SQL seed file to run before the action.
+     *
+     * @example
+     *   spec("creates user").seed("users.sql").exec("list-users").run();
+     */
     seed(file: string, options?: { service?: string }): this {
         this.seeds.push({ file, service: options?.service });
         return this;
     }
 
+    /** Copy a file or directory from `fixtures/` into the working directory before execution. */
     fixture(file: string): this {
         this.fixtures.push({ file });
         return this;
     }
 
+    /** Copy an entire project fixture from `fixturesRoot` into the working directory. */
     project(name: string): this {
         this.projectName = name;
         return this;
     }
 
+    /** Register an MSW mock definition file from `mock/` to intercept HTTP calls. */
     mock(file: string): this {
         this.mocks.push({ file });
         return this;
@@ -101,21 +122,36 @@ export class SpecificationBuilder {
 
     // ── HTTP actions ──
 
+    /**
+     * Send a GET request to the server adapter.
+     *
+     * @example
+     *   spec("list items").get("/api/items").run();
+     */
     get(path: string): this {
         this.request = { method: 'GET', path };
         return this;
     }
 
+    /**
+     * Send a POST request to the server adapter.
+     *
+     * @param bodyFile - Optional JSON file from `requests/` to use as the request body.
+     * @example
+     *   spec("create item").post("/api/items", "new-item.json").run();
+     */
     post(path: string, bodyFile?: string): this {
         this.request = { bodyFile, method: 'POST', path };
         return this;
     }
 
+    /** Send a PUT request to the server adapter. */
     put(path: string, bodyFile?: string): this {
         this.request = { bodyFile, method: 'PUT', path };
         return this;
     }
 
+    /** Send a DELETE request to the server adapter. */
     delete(path: string): this {
         this.request = { method: 'DELETE', path };
         return this;
@@ -123,11 +159,20 @@ export class SpecificationBuilder {
 
     // ── CLI actions ──
 
+    /**
+     * Execute a CLI command (or a sequence of commands) in an isolated working directory.
+     * When an array is passed, commands run sequentially and stop on the first non-zero exit code.
+     *
+     * @example
+     *   spec("init project").exec("init --name demo").run();
+     *   spec("multi-step").exec(["init", "build"]).run();
+     */
     exec(args: string | string[]): this {
         this.commandArgs = args;
         return this;
     }
 
+    /** Spawn a long-running CLI process with custom spawn options (e.g. timeout, signal). */
     spawn(args: string, options: SpawnOptions): this {
         this.spawnConfig = { args, options };
         return this;
@@ -135,6 +180,15 @@ export class SpecificationBuilder {
 
     // ── Run ──
 
+    /**
+     * Execute the specification: run seeds, copy fixtures, then perform the
+     * configured action (HTTP or CLI).
+     *
+     * @returns The result object used for assertions.
+     * @example
+     *   const result = await spec("test").exec("status").run();
+     *   expect(result.exitCode).toBe(0);
+     */
     async run(): Promise<SpecificationResult> {
         const hasHttpAction = this.request !== null;
         const hasCliAction = this.commandArgs !== null || this.spawnConfig !== null;
@@ -341,8 +395,13 @@ function getCallerDir(): string {
 
 // ── Factory functions ──
 
+/** Factory function returned by `cli()`, `integration()`, or `e2e()` that starts a new spec. */
 export type SpecificationRunner = (label: string) => SpecificationBuilder;
 
+/**
+ * Create a {@link SpecificationRunner} bound to the given adapter configuration.
+ * The test file directory is auto-detected from the call stack.
+ */
 export function createSpecificationRunner(config: SpecificationConfig): SpecificationRunner {
     return (label: string) => {
         const testDir = getCallerDir();

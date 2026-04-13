@@ -1,8 +1,8 @@
 import type { ServerPort, ServerResponse } from '../ports/server.port.js';
 
 /**
- * Server adapter for Hono — in-process requests, no real HTTP.
- * Used by integration() specification runner.
+ * Server adapter that dispatches requests in-process through a Hono app instance.
+ * Used by the `integration()` specification runner -- no network overhead.
  */
 export class HonoAdapter implements ServerPort {
     private app: {

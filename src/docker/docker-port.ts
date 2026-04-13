@@ -1,3 +1,4 @@
+/** Abstract interface for interacting with a Docker container (exec, inspect, file I/O). */
 export interface DockerContainerPort {
     /** Execute a command inside the container, return stdout */
     exec(cmd: string[]): Promise<string>;
@@ -18,6 +19,7 @@ export interface DockerContainerPort {
     exists(path: string): Promise<boolean>;
 }
 
+/** Normalized subset of `docker inspect` output for assertion use. */
 export interface DockerInspectResult {
     id: string;
     name: string;

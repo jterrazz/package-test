@@ -2,6 +2,10 @@ import { execSync } from 'node:child_process';
 
 import type { DockerContainerPort, DockerInspectResult } from './docker-port.js';
 
+/**
+ * Implements {@link DockerContainerPort} by shelling out to the Docker CLI.
+ * Each instance is bound to a single container ID.
+ */
 export class DockerAdapter implements DockerContainerPort {
     private containerId: string;
 
@@ -101,7 +105,7 @@ export class DockerAdapter implements DockerContainerPort {
     }
 }
 
-/** Create a Docker container port for an existing container */
+/** Create a {@link DockerContainerPort} bound to an existing container by ID. */
 export function dockerContainer(containerId: string): DockerContainerPort {
     return new DockerAdapter(containerId);
 }

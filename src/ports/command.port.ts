@@ -1,9 +1,12 @@
 /**
- * Result of executing a CLI command.
+ * Result of executing a CLI command, including exit code and captured output streams.
  */
 export interface CommandResult {
+    /** Process exit code (0 = success). */
     exitCode: number;
+    /** Captured standard output. */
     stdout: string;
+    /** Captured standard error. */
     stderr: string;
 }
 

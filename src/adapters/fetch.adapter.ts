@@ -1,8 +1,8 @@
 import type { ServerPort, ServerResponse } from '../ports/server.port.js';
 
 /**
- * Server adapter for real HTTP — sends actual fetch requests.
- * Used by e2e() specification runner.
+ * Server adapter that sends real HTTP requests via the Fetch API.
+ * Used by the `e2e()` specification runner to hit a live server.
  */
 export class FetchAdapter implements ServerPort {
     private baseUrl: string;

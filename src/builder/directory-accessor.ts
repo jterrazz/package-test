@@ -33,6 +33,10 @@ function shouldUpdateSnapshots(): boolean {
     return false;
 }
 
+/**
+ * Handle to a directory produced by a specification run.
+ * Supports snapshot-based assertions via {@link toMatchFixture} and file listing via {@link files}.
+ */
 export class DirectoryAccessor {
     private absPath: string;
     private testDir: string;
