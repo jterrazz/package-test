@@ -17,35 +17,66 @@ Every public behavior is defined by a specification test. **The spec IS the sour
 
 ### API projects (HTTP services with infrastructure)
 
-| Mode                                     | Purpose                                                        | Scope                                                                  |
-| ---------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `integration` (`describe.each(runners)`) | Development workhorse — fast, real containers, in-process Hono | All specs — every endpoint, DB state, error                            |
-| `e2e` (`describe.each(runners)`)         | CI validation — full docker compose, real HTTP                 | Critical paths only — core flows, cross-service, deployment confidence |
+| Mode                           | Purpose                                                        | Scope                                                                  |
+| ------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `spec(app(...))` (integration) | Development workhorse — fast, real containers, in-process Hono | All specs — every endpoint, DB state, error                            |
+| `spec(stack(...))` (e2e)       | CI validation — full docker compose, real HTTP                 | Critical paths only — core flows, cross-service, deployment confidence |
 
-Write specs once with `describe.each(runners)`. Integration runs everything. E2E runs the same specs but only the critical subset (e2e is compute-heavy — focus on what ONLY e2e can catch: real HTTP, cross-container networking, compose orchestration).
+Write specs once in an `http.specification.ts` file. Select the active runner via the `SPEC_RUNNER` env var. Integration runs everything. E2E runs the same specs but only the critical subset (e2e is compute-heavy — focus on what ONLY e2e can catch: real HTTP, cross-container networking, compose orchestration).
 
-To split: use `runners` for shared specs, use `integrationSpec` directly for integration-only detailed tests.
+To split: use `SPEC_RUNNER` for shared specs, import the integration runner directly for integration-only detailed tests.
 
 ```typescript
-// Shared — runs in BOTH integration AND e2e
-describe.each(runners)("$name — users", ({ spec }) => {
-  test("creates a user", async () => { ... });           // critical path — both modes
-  test("lists all users", async () => { ... });          // critical path — both modes
-});
+// tests/http/http.specification.ts
+import { spec, app, stack } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 
-// Integration-only — detailed edge cases (fast, no e2e needed)
-describe("integration — users edge cases", () => {
-  test("rejects duplicate email", async () => { ... });
-  test("handles empty request body", async () => { ... });
-  test("returns 404 for nonexistent user", async () => { ... });
+const db = postgres({ compose: 'db' });
+
+const runner =
+    process.env.SPEC_RUNNER === 'e2e'
+        ? await spec(stack('../../'))
+        : await spec(
+              app(() => createApp({ databaseUrl: db.connectionString })),
+              {
+                  services: [db],
+                  root: '../../',
+              },
+          );
+
+export { runner };
+```
+
+```typescript
+// tests/http/users/users.test.ts — runs in BOTH integration AND e2e
+import { runner } from '../http.specification.js';
+
+test('creates a user', async () => {
+    // Given — one existing user
+    const result = await runner('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
+
+    // Then — user created
+    expect(result.status).toBe(201);
 });
+```
+
+```typescript
+// tests/adapters/users.test.ts — integration-only detailed tests
+import { runner } from '../http/http.specification.js';
+
+test('rejects duplicate email', async () => { ... });
+test('handles empty request body', async () => { ... });
+test('returns 404 for nonexistent user', async () => { ... });
 ```
 
 ### CLI projects (build tools, linters, formatters, scaffolding)
 
-| Mode    | Purpose                                | Scope                                           |
-| ------- | -------------------------------------- | ----------------------------------------------- |
-| `cli()` | Every command, every flag, every error | All specs — success, edge cases, error messages |
+| Mode                 | Purpose                                | Scope                                           |
+| -------------------- | -------------------------------------- | ----------------------------------------------- |
+| `spec(command(...))` | Every command, every flag, every error | All specs — success, edge cases, error messages |
 
 CLI tests run the real binary — they're inherently e2e. No split needed. Test every command with every meaningful variation.
 
@@ -61,52 +92,67 @@ Feature: build command
 └── fails on missing tsconfig (meaningful error)
 ```
 
-## Runner pattern with `describe.each`
+## Dual-runner pattern with `SPEC_RUNNER`
 
 ```typescript
-// tests/setup/runners.ts
-import { integrationSpec } from "./integration.specification.js";
-import { e2eSpec } from "./e2e.specification.js";
+// tests/http/http.specification.ts
+import { spec, app, stack } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 
-export const runners = [
-  { name: "integration", spec: integrationSpec },
-  { name: "e2e", spec: e2eSpec },
-];
+const db = postgres({ compose: 'db' });
 
-// tests/e2e/users/users.e2e.test.ts
-import { runners } from "../../setup/runners.js";
+export const runner =
+    process.env.SPEC_RUNNER === 'e2e'
+        ? await spec(stack('../../'))
+        : await spec(
+              app(() => createApp({ databaseUrl: db.connectionString })),
+              {
+                  services: [db],
+                  root: '../../',
+              },
+          );
+```
 
-describe.each(runners)("$name — users", ({ spec }) => {
-  test("creates a user", async () => { ... });
-});
+```typescript
+// tests/http/users/users.test.ts
+import { runner } from '../http.specification.js';
+
+test('creates a user', async () => { ... });
 ```
 
 ## Test structure
 
 ```
 tests/
-├── e2e/                    # Full-stack specification tests
+├── http/                   # HTTP specification tests (shared between integration + e2e)
+│   ├── http.specification.ts  # Runner setup with SPEC_RUNNER switch
 │   └── {feature}/
-│       ├── {feature}.e2e.test.ts
+│       ├── {feature}.test.ts
 │       ├── seeds/          # Database state setup (.sql)
-│       ├── fixtures/       # Files copied into CLI working dir
+│       ├── fixtures/       # Files copied into working dir
 │       ├── requests/       # HTTP request bodies (.json)
 │       ├── responses/      # Expected HTTP responses (.json)
+│       └── expected/       # Expected directory snapshots
+├── cli/                    # CLI specification tests
+│   ├── cli.specification.ts
+│   └── {feature}/
+│       ├── {feature}.test.ts
+│       ├── fixtures/       # Files/projects for CLI tests
 │       └── expected/       # Expected CLI output / directory snapshots
-├── integration/            # Infrastructure tests (containers)
-└── setup/                  # Specification runners, fixtures, helpers
+├── adapters/               # Integration-only detailed tests
+└── setup/                  # Shared fixtures, helpers
     ├── fixtures/           # Shared fixture projects (for .project())
-    ├── helpers/            # Shared test utilities
-    └── *.specification.ts  # Runner setup files
+    └── helpers/            # Shared test utilities
 ```
 
 ## File naming
 
-| Type        | Suffix                 | Location              |
-| ----------- | ---------------------- | --------------------- |
-| Unit        | `.test.ts`             | Colocated with source |
-| Integration | `.integration.test.ts` | `tests/integration/`  |
-| E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
+| Type       | Suffix     | Location              |
+| ---------- | ---------- | --------------------- |
+| Unit       | `.test.ts` | Colocated with source |
+| HTTP specs | `.test.ts` | `tests/http/`         |
+| CLI specs  | `.test.ts` | `tests/cli/`          |
+| Adapters   | `.test.ts` | `tests/adapters/`     |
 
 ## Test writing convention — Given / Then
 
@@ -115,7 +161,7 @@ Every test uses `// Given` and `// Then` comments. **Always both, never one with
 ```typescript
 test('creates a user and returns 201', async () => {
     // Given — two existing users
-    const result = await spec('creates user')
+    const result = await runner('creates user')
         .seed('initial-users.sql')
         .post('/users', 'new-user.json')
         .run();
@@ -132,7 +178,7 @@ test('creates a user and returns 201', async () => {
 ```typescript
 test('builds the project', async () => {
     // Given — sample app project
-    const result = await spec('build').project('sample-app').exec('build').run();
+    const result = await runner('build').project('sample-app').exec('build').run();
 
     // Then — ESM output with source maps
     expect(result.exitCode).toBe(0);

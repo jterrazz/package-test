@@ -13,27 +13,30 @@ npm install -D @jterrazz/test vitest
 ```typescript
 // tests/setup/integration.specification.ts
 import { afterAll } from 'vitest';
-import { integration, postgres } from '@jterrazz/test';
+import { spec, app } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 import { createApp } from '../../src/app.js';
 
 const db = postgres({ compose: 'db' });
 
-export const spec = await integration({
-    services: [db],
-    app: () => createApp({ databaseUrl: db.connectionString }),
-    root: '../../',
-});
+export const run = await spec(
+    app(() => createApp({ databaseUrl: db.connectionString })),
+    {
+        services: [db],
+        root: '../../',
+    },
+);
 
-afterAll(() => spec.cleanup());
+afterAll(() => run.cleanup());
 ```
 
 ```typescript
 // tests/e2e/users/users.e2e.test.ts
-import { spec } from '../../setup/integration.specification.js';
+import { run } from '../../setup/integration.specification.js';
 
 test('creates a user', async () => {
     // Given — one existing user
-    const result = await spec('creates user')
+    const result = await run('creates user')
         .seed('initial-users.sql')
         .post('/users', 'new-user.json')
         .run();
@@ -52,21 +55,20 @@ test('creates a user', async () => {
 ```typescript
 // tests/setup/cli.specification.ts
 import { resolve } from 'node:path';
-import { cli } from '@jterrazz/test';
+import { spec, command } from '@jterrazz/test';
 
-export const spec = await cli({
-    command: resolve(import.meta.dirname, '../../bin/my-cli.sh'),
+export const run = await spec(command(resolve(import.meta.dirname, '../../bin/my-cli.sh')), {
     root: '../fixtures',
 });
 ```
 
 ```typescript
 // tests/e2e/build/build.e2e.test.ts
-import { spec } from '../../setup/cli.specification.js';
+import { run } from '../../setup/cli.specification.js';
 
 test('builds the project', async () => {
     // Given — sample app project
-    const result = await spec('build').project('sample-app').exec('build').run();
+    const result = await run('build').project('sample-app').exec('build').run();
 
     // Then — ESM output with source maps
     expect(result.exitCode).toBe(0);
@@ -81,50 +83,52 @@ test('builds the project', async () => {
 
 Three modes, same builder API. Each handles infrastructure and cleanup automatically.
 
-### `integration()` — testcontainers + in-process app
+### `spec(app(...))` — testcontainers + in-process app
 
 Starts real containers via testcontainers. App runs in-process (Hono). Fastest feedback loop.
 
 ```typescript
-import { integration, postgres, redis } from '@jterrazz/test';
+import { spec, app } from '@jterrazz/test';
+import { postgres, redis } from '@jterrazz/test/services';
 
 const db = postgres({ compose: 'db' });
 const cache = redis({ compose: 'cache' });
 
-export const spec = await integration({
-    services: [db, cache],
-    app: () => createApp({ databaseUrl: db.connectionString }),
-    root: '../../',
-});
+export const run = await spec(
+    app(() => createApp({ databaseUrl: db.connectionString })),
+    {
+        services: [db, cache],
+        root: '../../',
+    },
+);
 ```
 
-### `e2e()` — docker compose up + real HTTP
+### `spec(stack(...))` — docker compose up + real HTTP
 
 Starts the full `docker/compose.test.yaml` stack. App URL and databases auto-detected.
 
 ```typescript
-import { e2e } from '@jterrazz/test';
+import { spec, stack } from '@jterrazz/test';
 
-export const spec = await e2e({
-    root: '../../',
-});
+export const run = await spec(stack('../../'));
 ```
 
-### `cli()` — local command execution
+### `spec(command(...))` — local command execution
 
 Runs CLI commands against fixture projects in temp directories. Optionally starts infrastructure.
 
 ```typescript
-import { cli } from '@jterrazz/test';
+import { spec, command } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 
-export const spec = await cli({
-    command: resolve(import.meta.dirname, '../../bin/my-cli.sh'),
+export const run = await spec(command(resolve(import.meta.dirname, '../../bin/my-cli.sh')), {
     root: '../fixtures',
 });
 
 // With infrastructure (CLI that needs a database)
-export const spec = await cli({
-    command: 'my-migrate-tool',
+const db = postgres({ compose: 'db' });
+
+export const run = await spec(command('my-migrate-tool'), {
     root: '../fixtures',
     services: [db],
 });
@@ -132,7 +136,7 @@ export const spec = await cli({
 
 ## Builder API
 
-Every test follows the same pattern: `spec("label") → setup → action → assertions`.
+Every test follows the same pattern: `run("label") -> setup -> action -> assertions`.
 
 ### Setup (cross-mode)
 
@@ -142,7 +146,6 @@ Every test follows the same pattern: `spec("label") → setup → action → ass
 | `.seed("file.sql", { service: "name" })` | Load SQL into a specific database                         |
 | `.fixture("file")`                       | Copy `fixtures/file` into the CLI working directory       |
 | `.project("name")`                       | Copy `fixtures/name/` into a fresh temp dir and run there |
-| `.mock("file.json")`                     | Register mocked external API response (MSW, planned)      |
 
 ### Actions (one per spec, mutually exclusive)
 
@@ -164,11 +167,11 @@ Every test follows the same pattern: `spec("label") → setup → action → ass
 | `.spawn("args", { waitFor, timeout })` | Run long-lived process, resolve on pattern match or timeout                           |
 | `.env({ KEY: "value" })`               | Set env vars on the child process (`null` unsets, `$WORKDIR` expands to the temp cwd) |
 
-Every CLI spec runs in a **fresh, empty temp directory** by default. `.project("name")` starts from a copy of `fixtures/name/`; `.fixture("file")` seeds specific files into the temp dir. Bare specs (`spec("x").exec("...")`) get an empty dir — ideal for testing scaffolding CLIs that write into their cwd.
+Every CLI spec runs in a **fresh, empty temp directory** by default. `.project("name")` starts from a copy of `fixtures/name/`; `.fixture("file")` seeds specific files into the temp dir.
 
 ### Assertions
 
-Result properties are raw values — use vitest `expect()` for assertions. Database and response file assertions use custom async methods.
+Result properties are raw values -- use vitest `expect()` for assertions. Database and response file assertions use custom async methods.
 
 **Raw values (vitest expect):**
 
@@ -195,27 +198,25 @@ Result properties are raw values — use vitest `expect()` for assertions. Datab
 | `await result.directory().toMatchFixture("scaffold", { ignore })` | Pass extra ignore patterns; defaults already skip `.git`, `node_modules`, etc. |
 | `await result.directory("out").files()`                           | List all files (recursive, sorted) for ad-hoc assertions                       |
 
-Run with `JTERRAZZ_TEST_UPDATE=1` (or vitest `-u`) to overwrite fixtures with the current output. Fixtures live at `{test}/expected/{name}/` — same convention as `responses/` for HTTP bodies.
+Run with `JTERRAZZ_TEST_UPDATE=1` (or vitest `-u`) to overwrite fixtures with the current output.
 
 **Grep (scoped text matching):**
 
 ```typescript
-import { grep } from '@jterrazz/test';
-
-expect(grep(result.stdout, 'unused-var.ts')).toContain('no-unused-vars');
-expect(grep(result.stdout, 'valid/sorted.ts')).not.toContain('sort-imports');
+expect(result.grep('unused-var.ts')).toContain('no-unused-vars');
+expect(result.grep('valid/sorted.ts')).not.toContain('sort-imports');
 ```
 
-`grep(output, pattern)` filters multi-line output to the block matching `pattern`, returning a string for vitest assertions.
+`result.grep(pattern)` filters multi-line output to the block matching `pattern`, returning a string for vitest assertions.
 
 **Response (HTTP body):**
 
-| Expression                                      | Description                                                                 |
-| ----------------------------------------------- | --------------------------------------------------------------------------- |
-| `result.response.toMatchFile("expected.json")`  | Custom — compares body to `responses/expected.json`, shows diff on mismatch |
-| `expect(result.response.body).toEqual({ ... })` | Raw body object for vitest assertions                                       |
+| Expression                                      | Description                                                                  |
+| ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| `result.response.toMatchFile("expected.json")`  | Custom -- compares body to `responses/expected.json`, shows diff on mismatch |
+| `expect(result.response.body).toEqual({ ... })` | Raw body object for vitest assertions                                        |
 
-**Tables (custom async — database queries):**
+**Tables (custom async -- database queries):**
 
 | Expression                                                                      | Description                    |
 | ------------------------------------------------------------------------------- | ------------------------------ |
@@ -223,20 +224,29 @@ expect(grep(result.stdout, 'valid/sorted.ts')).not.toContain('sort-imports');
 | `await result.table("events", { service: "analytics-db" }).toMatch({ ... })`    | Assert on a specific database  |
 | `await result.table("users").toBeEmpty()`                                       | Assert database table is empty |
 
+**Docker (container assertions):**
+
+| Expression          | Description                     |
+| ------------------- | ------------------------------- |
+| `runner.docker(id)` | Access a docker container by id |
+
 ## Multi-database support
 
 When multiple databases are declared, `seed()` and `result.table()` accept `{ service: "name" }` to target a specific database by its compose name. Without `service`, both default to the first postgres.
 
 ```typescript
+import { spec, app } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
+
 const db = postgres({ compose: "db" });
 const analyticsDb = postgres({ compose: "analytics-db" });
 
-const spec = await integration({
+const run = await spec(app(() => createApp({ ... })), {
   services: [db, analyticsDb],
-  app: () => createApp({ ... }),
+  root: '../../',
 });
 
-const result = await spec("cross-db")
+const result = await run("cross-db")
   .seed("users.sql")
   .seed("events.sql", { service: "analytics-db" })
   .post("/users", "request.json")
@@ -253,7 +263,7 @@ await result.table("events", { service: "analytics-db" }).toMatch({
 ## Service factories
 
 ```typescript
-import { postgres, redis } from '@jterrazz/test';
+import { postgres, redis } from '@jterrazz/test/services';
 
 const db = postgres({ compose: 'db' });
 const cache = redis({ compose: 'cache' });
@@ -269,7 +279,7 @@ Service handles read image and environment from `docker/compose.test.yaml`. Afte
 ## Mocking utilities
 
 ```typescript
-import { mockOf, mockOfDate } from '@jterrazz/test';
+import { mockOf, mockOfDate } from '@jterrazz/test/mock';
 ```
 
 | Export        | Description                                  |
@@ -322,7 +332,7 @@ Every test uses `// Given` and `// Then` comments. Always both, never one withou
 ```typescript
 test('creates a user and returns 201', async () => {
     // Given — two existing users
-    const result = await spec('creates user')
+    const result = await run('creates user')
         .seed('initial-users.sql')
         .post('/users', 'new-user.json')
         .run();
@@ -340,6 +350,6 @@ test('creates a user and returns 201', async () => {
 
 ## Requirements
 
-- **Docker** — testcontainers for `integration()`, docker compose for `e2e()`
-- **vitest** — peer dependency
-- **hono** — optional peer, only needed for `integration()` mode with in-process apps
+- **Docker** -- testcontainers for `spec(app(...))`, docker compose for `spec(stack(...))`
+- **vitest** -- peer dependency
+- **hono** -- optional peer, only needed for `spec(app(...))` mode with in-process apps

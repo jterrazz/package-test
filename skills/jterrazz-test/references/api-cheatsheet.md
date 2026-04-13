@@ -2,11 +2,27 @@
 
 > For full reference with type signatures and examples, see <https://jterrazz.github.io/package-test/reference/>. This file is the agent-facing condensed view.
 
+## Imports
+
+```typescript
+import { spec, app, command, stack } from '@jterrazz/test';
+import { postgres, redis } from '@jterrazz/test/services';
+import { mockOf, mockOfDate } from '@jterrazz/test/mock';
+```
+
 ## Builder shape
 
 ```
-spec("label") → setup → action → assertions
+runner("label") -> setup -> action -> assertions
 ```
+
+## Runner creation
+
+| Pattern                                       | Description                                    |
+| --------------------------------------------- | ---------------------------------------------- |
+| `spec(app(() => myApp), { services, root })`  | Integration — testcontainers + in-process Hono |
+| `spec(stack(root))`                           | E2E — docker compose up + real HTTP            |
+| `spec(command('my-cli'), { root, services })` | CLI — child process in a fresh temp dir        |
 
 ## Setup methods (cross-mode)
 
@@ -21,7 +37,7 @@ spec("label") → setup → action → assertions
 
 ## Action methods (one per spec, mutually exclusive)
 
-**HTTP** (requires `integration()` or `e2e()`):
+**HTTP** (requires `spec(app(...))` or `spec(stack(...))`):
 
 | Method                     | Description                                   |
 | -------------------------- | --------------------------------------------- |
@@ -30,7 +46,7 @@ spec("label") → setup → action → assertions
 | `.put(path, "body.json")`  | HTTP PUT                                      |
 | `.delete(path)`            | HTTP DELETE                                   |
 
-**CLI** (requires `cli()`):
+**CLI** (requires `spec(command(...))`):
 
 | Method                                 | Description                                                                                                         |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -40,7 +56,7 @@ spec("label") → setup → action → assertions
 
 ## Working directory
 
-Every CLI spec runs in a **fresh empty `mkdtemp` directory**. `.project("name")` pre-populates it; `.fixture("file")` seeds individual files; a bare `spec("x").exec("...")` runs in a pristine empty dir. The runner never writes into `fixturesRoot`. (Behavior since v5.2.0.)
+Every CLI spec runs in a **fresh empty `mkdtemp` directory**. `.project("name")` pre-populates it; `.fixture("file")` seeds individual files; a bare `runner("x").exec("...")` runs in a pristine empty dir. The runner never writes into `fixturesRoot`.
 
 ## Assertions
 
@@ -86,20 +102,26 @@ Update fixtures with `JTERRAZZ_TEST_UPDATE=1`, `UPDATE_SNAPSHOTS=1`, or `vitest 
 | `await result.table("events", { service: "analytics-db" }).toMatch({ ... })`    | Assert against a specific database |
 | `await result.table("users").toBeEmpty()`                                       | Assert empty table                 |
 
-**Grep** (scoped text matching):
+**Grep** (scoped text matching — instance method on result):
 
 ```typescript
-import { grep } from '@jterrazz/test';
-expect(grep(result.stdout, 'unused-var.ts')).toContain('no-unused-vars');
-expect(grep(result.stdout, 'valid/sorted.ts')).not.toContain('sort-imports');
+expect(result.grep('unused-var.ts')).toContain('no-unused-vars');
+expect(result.grep('valid/sorted.ts')).not.toContain('sort-imports');
 ```
 
-`grep(output, pattern)` filters multi-line output to the block matching `pattern`, returning a string for vitest assertions. Useful for linter / compiler output where errors come in blocks separated by blank lines.
+`result.grep(pattern)` filters multi-line stdout to the block matching `pattern`, returning a string for vitest assertions. Useful for linter / compiler output where errors come in blocks separated by blank lines.
+
+**Docker** (container assertions — via runner):
+
+```typescript
+const container = runner.docker('my-container-id');
+// Use container for filesystem / mount / network assertions
+```
 
 ## Service factories
 
 ```typescript
-import { postgres, redis } from '@jterrazz/test';
+import { postgres, redis } from '@jterrazz/test/services';
 const db = postgres({ compose: 'db' });
 const cache = redis({ compose: 'cache' });
 ```
@@ -119,9 +141,9 @@ When multiple databases are declared, `seed()` and `result.table()` accept `{ se
 const db = postgres({ compose: "db" });
 const analyticsDb = postgres({ compose: "analytics-db" });
 
-const spec = await integration({ services: [db, analyticsDb], app: () => createApp({ ... }) });
+const runner = await spec(app(() => createApp({ ... })), { services: [db, analyticsDb] });
 
-const result = await spec("cross-db")
+const result = await runner("cross-db")
   .seed("users.sql")
   .seed("events.sql", { service: "analytics-db" })
   .post("/users", "request.json")
@@ -134,7 +156,7 @@ await result.table("events", { service: "analytics-db" }).toMatch({ columns: ["t
 ## Mocking utilities (unit tests, not specs)
 
 ```typescript
-import { mockOf, mockOfDate } from '@jterrazz/test';
+import { mockOf, mockOfDate } from '@jterrazz/test/mock';
 ```
 
 | Export        | Description                                                     |
@@ -155,6 +177,6 @@ docker/
 
 ## Requirements
 
-- **Docker** — testcontainers for `integration()`, docker compose for `e2e()`
+- **Docker** — testcontainers for `spec(app(...))`, docker compose for `spec(stack(...))`
 - **vitest** — peer dependency
-- **hono** — optional peer, only needed for `integration()` mode with in-process apps
+- **hono** — optional peer, only needed for `spec(app(...))` mode with in-process apps
