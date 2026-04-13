@@ -26,6 +26,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     started = false;
 
     private client: Client | null = null;
+    private originalConnectionString = '';
     private schema = 'public';
 
     constructor(options: PostgresOptions = {}) {
@@ -141,6 +142,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         return {
             acquire: async (workerId: string) => {
                 const workerSchema = `worker_${workerId}`;
+                this.originalConnectionString = this.connectionString;
                 const client = await this.getClient();
 
                 // Create schema by cloning all tables from public
@@ -162,6 +164,11 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
                 // Switch this handle to use the worker schema
                 this.schema = workerSchema;
                 await client.query(`SET search_path TO "${workerSchema}", public`);
+
+                // Update connectionString so app connections also use the worker schema
+                const url = new URL(this.connectionString);
+                url.searchParams.set('options', `-c search_path=${workerSchema},public`);
+                this.connectionString = url.toString();
             },
 
             reset: async () => {
@@ -172,6 +179,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
                 const client = await this.getClient();
                 const workerSchema = this.schema;
                 this.schema = 'public';
+                this.connectionString = this.originalConnectionString;
                 await client.query(`SET search_path TO public`);
                 await client.query(`DROP SCHEMA IF EXISTS "${workerSchema}" CASCADE`);
             },
