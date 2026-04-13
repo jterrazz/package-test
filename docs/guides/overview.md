@@ -23,22 +23,22 @@ Peer dependencies: `vitest`, optionally `hono` (only for `integration()` mode) a
 The builder shape is always `spec("label") → setup → action → assertions`:
 
 ```typescript
-import { test, expect } from "vitest";
-import { spec } from "../setup/integration.specification.js";
+import { test, expect } from 'vitest';
+import { spec } from '../setup/integration.specification.js';
 
-test("creates a user and returns 201", async () => {
-  // Given — two existing users
-  const result = await spec("creates user")
-    .seed("initial-users.sql")
-    .post("/users", "new-user.json")
-    .run();
+test('creates a user and returns 201', async () => {
+    // Given — two existing users
+    const result = await spec('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
 
-  // Then — user created, all three present in the table
-  expect(result.status).toBe(201);
-  await result.table("users").toMatch({
-    columns: ["name"],
-    rows: [["Alice"], ["Bob"], ["Charlie"]],
-  });
+    // Then — user created, all three present in the table
+    expect(result.status).toBe(201);
+    await result.table('users').toMatch({
+        columns: ['name'],
+        rows: [['Alice'], ['Bob'], ['Charlie']],
+    });
 });
 ```
 

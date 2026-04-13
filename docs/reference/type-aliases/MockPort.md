@@ -9,8 +9,8 @@ Defined in: [mocking/mock-of.ts:3](https://github.com/jterrazz/package-test/blob
 ## Type Parameters
 
 | Type Parameter |
-| ------ |
-| `T` |
+| -------------- |
+| `T`            |
 
 ## Returns
 

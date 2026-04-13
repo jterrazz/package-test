@@ -16,15 +16,15 @@ Execute a command inside the container, return stdout
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `cmd` | `string`[] |
+| Parameter | Type       |
+| --------- | ---------- |
+| `cmd`     | `string`[] |
 
 #### Returns
 
 `Promise`\<`string`\>
 
-***
+---
 
 ### exists()
 
@@ -38,15 +38,15 @@ Check if a file/directory exists
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 
 `Promise`\<`boolean`\>
 
-***
+---
 
 ### file()
 
@@ -63,18 +63,18 @@ Read a file from inside the container
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 
 `Promise`\<\{
-  `content`: `string`;
-  `exists`: `boolean`;
+`content`: `string`;
+`exists`: `boolean`;
 \}\>
 
-***
+---
 
 ### inspect()
 
@@ -90,7 +90,7 @@ Get full docker inspect JSON
 
 `Promise`\<[`DockerInspectResult`](DockerInspectResult.md)\>
 
-***
+---
 
 ### isRunning()
 
@@ -106,7 +106,7 @@ Check if container is running
 
 `Promise`\<`boolean`\>
 
-***
+---
 
 ### logs()
 
@@ -120,9 +120,9 @@ Get container logs
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `tail?` | `number` |
+| Parameter | Type     |
+| --------- | -------- |
+| `tail?`   | `number` |
 
 #### Returns
 

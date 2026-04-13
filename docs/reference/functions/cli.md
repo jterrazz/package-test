@@ -11,8 +11,8 @@ Runs CLI commands against fixture projects. Optionally starts infrastructure.
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type                                        |
+| --------- | ------------------------------------------- |
 | `options` | [`CliOptions`](../interfaces/CliOptions.md) |
 
 ## Returns
@@ -23,7 +23,7 @@ Runs CLI commands against fixture projects. Optionally starts infrastructure.
 
 ```ts
 export const spec = await cli({
-    command: resolve(import.meta.dirname, "../../bin/my-cli.sh"),
-    root: "../fixtures",
+    command: resolve(import.meta.dirname, '../../bin/my-cli.sh'),
+    root: '../fixtures',
 });
 ```

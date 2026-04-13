@@ -1,151 +1,151 @@
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { TestcontainersAdapter } from "../../../../src/infrastructure/adapters/testcontainers.adapter.js";
-import { redis } from "../../../../src/infrastructure/services/redis.js";
+import { TestcontainersAdapter } from '../../../../src/infrastructure/adapters/testcontainers.adapter.js';
+import { redis } from '../../../../src/infrastructure/services/redis.js';
 
-describe("redis service", () => {
-  const cache = redis();
-  let container: TestcontainersAdapter;
+describe('redis service', () => {
+    const cache = redis();
+    let container: TestcontainersAdapter;
 
-  beforeAll(async () => {
-    container = new TestcontainersAdapter({ image: "redis:7", port: 6379 });
-    await container.start();
+    beforeAll(async () => {
+        container = new TestcontainersAdapter({ image: 'redis:7', port: 6379 });
+        await container.start();
 
-    const host = container.getHost();
-    const port = container.getMappedPort(6379);
-    cache.connectionString = cache.buildConnectionString(host, port);
-    cache.started = true;
-  }, 30_000);
+        const host = container.getHost();
+        const port = container.getMappedPort(6379);
+        cache.connectionString = cache.buildConnectionString(host, port);
+        cache.started = true;
+    }, 30_000);
 
-  afterAll(async () => {
-    await container.stop();
-  });
-
-  describe("connectionString", () => {
-    test("builds a valid redis connection string", () => {
-      expect(cache.connectionString).toMatch(/^redis:\/\//);
-    });
-  });
-
-  describe("healthcheck", () => {
-    test("passes on healthy container", async () => {
-      await expect(cache.healthcheck()).resolves.not.toThrow();
+    afterAll(async () => {
+        await container.stop();
     });
 
-    test("fails on unreachable host", async () => {
-      // Given — connection string pointing to closed port
-      const badCache = redis();
-      badCache.connectionString = "redis://localhost:1";
-
-      // Then — healthcheck fails with context
-      await expect(badCache.healthcheck()).rejects.toThrow("healthcheck failed");
+    describe('connectionString', () => {
+        test('builds a valid redis connection string', () => {
+            expect(cache.connectionString).toMatch(/^redis:\/\//);
+        });
     });
 
-    test("fails when no connection string set", async () => {
-      await expect(redis().healthcheck()).rejects.toThrow("no connection string");
-    });
-  });
+    describe('healthcheck', () => {
+        test('passes on healthy container', async () => {
+            await expect(cache.healthcheck()).resolves.not.toThrow();
+        });
 
-  describe("reset", () => {
-    test("flushes all keys", async () => {
-      // Given — a key exists
-      const { createClient } = await import("redis");
-      const client = createClient({ url: cache.connectionString });
-      await client.connect();
-      await client.set("test-key", "test-value");
-      await client.disconnect();
+        test('fails on unreachable host', async () => {
+            // Given — connection string pointing to closed port
+            const badCache = redis();
+            badCache.connectionString = 'redis://localhost:1';
 
-      // When — reset
-      await cache.reset();
+            // Then — healthcheck fails with context
+            await expect(badCache.healthcheck()).rejects.toThrow('healthcheck failed');
+        });
 
-      // Then — key is gone
-      const client2 = createClient({ url: cache.connectionString });
-      await client2.connect();
-      const value = await client2.get("test-key");
-      await client2.disconnect();
-      expect(value).toBeNull();
+        test('fails when no connection string set', async () => {
+            await expect(redis().healthcheck()).rejects.toThrow('no connection string');
+        });
     });
 
-    test("allows re-setting keys after reset", async () => {
-      // Given — key set, then reset, then new key set
-      const { createClient } = await import("redis");
+    describe('reset', () => {
+        test('flushes all keys', async () => {
+            // Given — a key exists
+            const { createClient } = await import('redis');
+            const client = createClient({ url: cache.connectionString });
+            await client.connect();
+            await client.set('test-key', 'test-value');
+            await client.disconnect();
 
-      const client1 = createClient({ url: cache.connectionString });
-      await client1.connect();
-      await client1.set("key1", "value1");
-      await client1.disconnect();
+            // When — reset
+            await cache.reset();
 
-      await cache.reset();
+            // Then — key is gone
+            const client2 = createClient({ url: cache.connectionString });
+            await client2.connect();
+            const value = await client2.get('test-key');
+            await client2.disconnect();
+            expect(value).toBeNull();
+        });
 
-      const client2 = createClient({ url: cache.connectionString });
-      await client2.connect();
-      await client2.set("key2", "value2");
-      const value = await client2.get("key2");
-      const oldValue = await client2.get("key1");
-      await client2.disconnect();
+        test('allows re-setting keys after reset', async () => {
+            // Given — key set, then reset, then new key set
+            const { createClient } = await import('redis');
 
-      // Then — new key exists, old key is gone
-      expect(value).toBe("value2");
-      expect(oldValue).toBeNull();
-    });
-  });
+            const client1 = createClient({ url: cache.connectionString });
+            await client1.connect();
+            await client1.set('key1', 'value1');
+            await client1.disconnect();
 
-  describe("compose config", () => {
-    test("stores compose name", () => {
-      expect(redis({ compose: "cache" }).composeName).toBe("cache");
-    });
+            await cache.reset();
 
-    test("defaults to redis:7 image", () => {
-      expect(redis().defaultImage).toBe("redis:7");
-    });
+            const client2 = createClient({ url: cache.connectionString });
+            await client2.connect();
+            await client2.set('key2', 'value2');
+            const value = await client2.get('key2');
+            const oldValue = await client2.get('key1');
+            await client2.disconnect();
 
-    test("accepts custom image", () => {
-      expect(redis({ image: "redis:7-alpine" }).defaultImage).toBe("redis:7-alpine");
-    });
-
-    test("does not create a database adapter", () => {
-      expect(cache.createDatabaseAdapter()).toBeNull();
-    });
-  });
-
-  describe("failure scenarios", () => {
-    test("healthcheck error includes connection context", async () => {
-      // Given — bad connection string
-      const badCache = redis();
-      badCache.connectionString = "redis://localhost:1";
-
-      // Then — error message includes service name with detail
-      try {
-        await badCache.healthcheck();
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(error.message).toContain("redis healthcheck failed");
-        // The message should not end with just ": " — it should include the underlying reason
-        expect(error.message).not.toBe("redis healthcheck failed: ");
-        expect(error.cause).toBeDefined();
-      }
+            // Then — new key exists, old key is gone
+            expect(value).toBe('value2');
+            expect(oldValue).toBeNull();
+        });
     });
 
-    test("reset error when connection string is invalid", async () => {
-      // Given — redis handle with unreachable host
-      const badCache = redis();
-      badCache.connectionString = "redis://localhost:1";
+    describe('compose config', () => {
+        test('stores compose name', () => {
+            expect(redis({ compose: 'cache' }).composeName).toBe('cache');
+        });
 
-      // Then — reset fails with connection error
-      await expect(badCache.reset()).rejects.toThrow();
+        test('defaults to redis:7 image', () => {
+            expect(redis().defaultImage).toBe('redis:7');
+        });
+
+        test('accepts custom image', () => {
+            expect(redis({ image: 'redis:7-alpine' }).defaultImage).toBe('redis:7-alpine');
+        });
+
+        test('does not create a database adapter', () => {
+            expect(cache.createDatabaseAdapter()).toBeNull();
+        });
     });
 
-    test("healthcheck error without connection string is descriptive", async () => {
-      // Given — fresh handle with no connection string
-      const freshCache = redis();
+    describe('failure scenarios', () => {
+        test('healthcheck error includes connection context', async () => {
+            // Given — bad connection string
+            const badCache = redis();
+            badCache.connectionString = 'redis://localhost:1';
 
-      // Then — error explains what's missing
-      try {
-        await freshCache.healthcheck();
-        expect.fail("should have thrown");
-      } catch (error: any) {
-        expect(error.message).toBe("redis: cannot healthcheck — no connection string");
-      }
+            // Then — error message includes service name with detail
+            try {
+                await badCache.healthcheck();
+                expect.fail('should have thrown');
+            } catch (error: any) {
+                expect(error.message).toContain('redis healthcheck failed');
+                // The message should not end with just ": " — it should include the underlying reason
+                expect(error.message).not.toBe('redis healthcheck failed: ');
+                expect(error.cause).toBeDefined();
+            }
+        });
+
+        test('reset error when connection string is invalid', async () => {
+            // Given — redis handle with unreachable host
+            const badCache = redis();
+            badCache.connectionString = 'redis://localhost:1';
+
+            // Then — reset fails with connection error
+            await expect(badCache.reset()).rejects.toThrow();
+        });
+
+        test('healthcheck error without connection string is descriptive', async () => {
+            // Given — fresh handle with no connection string
+            const freshCache = redis();
+
+            // Then — error explains what's missing
+            try {
+                await freshCache.healthcheck();
+                expect.fail('should have thrown');
+            } catch (error: any) {
+                expect(error.message).toBe('redis: cannot healthcheck — no connection string');
+            }
+        });
     });
-  });
 });

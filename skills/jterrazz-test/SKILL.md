@@ -2,7 +2,7 @@
 name: jterrazz-test
 description: Use when authoring tests for any @jterrazz project — covers the @jterrazz/test framework's three specification runners (integration, e2e, cli), directory snapshot assertions, env var injection, and the Given/Then test convention. Activates on imports from @jterrazz/test, edits to *.test.ts / *.integration.test.ts / *.e2e.test.ts files, edits under tests/setup/, or user prompts mentioning "specification", "spec runner", "directory snapshot", or "test fixture". Do not activate for unit tests that use vitest directly without @jterrazz/test.
 metadata:
-  version: "5.2"
+    version: '5.2'
 ---
 
 # `@jterrazz/test`
@@ -39,16 +39,16 @@ For API services that use both `integration()` and `e2e()`, write specs once wit
 
 ```typescript
 // tests/setup/integration.specification.ts
-import { afterAll } from "vitest";
-import { integration, postgres } from "@jterrazz/test";
-import { createApp } from "../../src/app.js";
+import { afterAll } from 'vitest';
+import { integration, postgres } from '@jterrazz/test';
+import { createApp } from '../../src/app.js';
 
-const db = postgres({ compose: "db" });
+const db = postgres({ compose: 'db' });
 
 export const spec = await integration({
-  services: [db],
-  app: () => createApp({ databaseUrl: db.connectionString }),
-  root: "../../",
+    services: [db],
+    app: () => createApp({ databaseUrl: db.connectionString }),
+    root: '../../',
 });
 
 afterAll(() => spec.cleanup());
@@ -56,18 +56,18 @@ afterAll(() => spec.cleanup());
 
 ```typescript
 // tests/e2e/users/users.e2e.test.ts
-import { spec } from "../../setup/integration.specification.js";
+import { spec } from '../../setup/integration.specification.js';
 
-test("creates a user", async () => {
-  // Given — one existing user
-  const result = await spec("creates user")
-    .seed("initial-users.sql")
-    .post("/users", "new-user.json")
-    .run();
+test('creates a user', async () => {
+    // Given — one existing user
+    const result = await spec('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
 
-  // Then — user created, table has both
-  expect(result.status).toBe(201);
-  await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"], ["Bob"]] });
+    // Then — user created, table has both
+    expect(result.status).toBe(201);
+    await result.table('users').toMatch({ columns: ['name'], rows: [['Alice'], ['Bob']] });
 });
 ```
 

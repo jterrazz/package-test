@@ -89,9 +89,9 @@ Update fixtures with `JTERRAZZ_TEST_UPDATE=1`, `UPDATE_SNAPSHOTS=1`, or `vitest 
 **Grep** (scoped text matching):
 
 ```typescript
-import { grep } from "@jterrazz/test";
-expect(grep(result.stdout, "unused-var.ts")).toContain("no-unused-vars");
-expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports");
+import { grep } from '@jterrazz/test';
+expect(grep(result.stdout, 'unused-var.ts')).toContain('no-unused-vars');
+expect(grep(result.stdout, 'valid/sorted.ts')).not.toContain('sort-imports');
 ```
 
 `grep(output, pattern)` filters multi-line output to the block matching `pattern`, returning a string for vitest assertions. Useful for linter / compiler output where errors come in blocks separated by blank lines.
@@ -99,9 +99,9 @@ expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports");
 ## Service factories
 
 ```typescript
-import { postgres, redis } from "@jterrazz/test";
-const db = postgres({ compose: "db" });
-const cache = redis({ compose: "cache" });
+import { postgres, redis } from '@jterrazz/test';
+const db = postgres({ compose: 'db' });
+const cache = redis({ compose: 'cache' });
 ```
 
 | Factory      | Options                   | Connection string format              |
@@ -134,7 +134,7 @@ await result.table("events", { service: "analytics-db" }).toMatch({ columns: ["t
 ## Mocking utilities (unit tests, not specs)
 
 ```typescript
-import { mockOf, mockOfDate } from "@jterrazz/test";
+import { mockOf, mockOfDate } from '@jterrazz/test';
 ```
 
 | Export        | Description                                                     |

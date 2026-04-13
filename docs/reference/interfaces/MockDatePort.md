@@ -16,7 +16,7 @@ Defined in: [mocking/mock-of-date.ts:4](https://github.com/jterrazz/package-test
 
 `void`
 
-***
+---
 
 ### set
 
@@ -28,9 +28,9 @@ Defined in: [mocking/mock-of-date.ts:5](https://github.com/jterrazz/package-test
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `date` | `string` \| `number` \| `Date` |
+| Parameter | Type                           |
+| --------- | ------------------------------ |
+| `date`    | `string` \| `number` \| `Date` |
 
 #### Returns
 

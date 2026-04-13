@@ -18,7 +18,7 @@ Defined in: [specification/specification.ts:212](https://github.com/jterrazz/pac
 
 `number`
 
-***
+---
 
 ### response
 
@@ -34,7 +34,7 @@ Defined in: [specification/specification.ts:242](https://github.com/jterrazz/pac
 
 [`ResponseAccessor`](ResponseAccessor.md)
 
-***
+---
 
 ### status
 
@@ -50,7 +50,7 @@ Defined in: [specification/specification.ts:219](https://github.com/jterrazz/pac
 
 `number`
 
-***
+---
 
 ### stderr
 
@@ -66,7 +66,7 @@ Defined in: [specification/specification.ts:233](https://github.com/jterrazz/pac
 
 `string`
 
-***
+---
 
 ### stdout
 
@@ -94,15 +94,15 @@ Defined in: [specification/specification.ts:249](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `path` | `string` | `"."` |
+| Parameter | Type     | Default value |
+| --------- | -------- | ------------- |
+| `path`    | `string` | `"."`         |
 
 #### Returns
 
 [`DirectoryAccessor`](DirectoryAccessor.md)
 
-***
+---
 
 ### file()
 
@@ -114,15 +114,15 @@ Defined in: [specification/specification.ts:254](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 
 [`FileAccessor`](FileAccessor.md)
 
-***
+---
 
 ### table()
 
@@ -134,11 +134,11 @@ Defined in: [specification/specification.ts:269](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `tableName` | `string` |
-| `options?` | \{ `service?`: `string`; \} |
-| `options.service?` | `string` |
+| Parameter          | Type                        |
+| ------------------ | --------------------------- |
+| `tableName`        | `string`                    |
+| `options?`         | \{ `service?`: `string`; \} |
+| `options.service?` | `string`                    |
 
 #### Returns
 

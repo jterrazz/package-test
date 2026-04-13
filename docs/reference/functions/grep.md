@@ -12,9 +12,9 @@ returns only blocks matching the pattern.
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `output` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `output`  | `string` |
 | `pattern` | `string` |
 
 ## Returns
@@ -24,6 +24,6 @@ returns only blocks matching the pattern.
 ## Example
 
 ```ts
-expect(grep(result.stdout, "unused-var.ts")).toContain("no-unused-vars")
-expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports")
+expect(grep(result.stdout, 'unused-var.ts')).toContain('no-unused-vars');
+expect(grep(result.stdout, 'valid/sorted.ts')).not.toContain('sort-imports');
 ```

@@ -12,16 +12,16 @@ npm install -D @jterrazz/test vitest
 
 ```typescript
 // tests/setup/integration.specification.ts
-import { afterAll } from "vitest";
-import { integration, postgres } from "@jterrazz/test";
-import { createApp } from "../../src/app.js";
+import { afterAll } from 'vitest';
+import { integration, postgres } from '@jterrazz/test';
+import { createApp } from '../../src/app.js';
 
-const db = postgres({ compose: "db" });
+const db = postgres({ compose: 'db' });
 
 export const spec = await integration({
-  services: [db],
-  app: () => createApp({ databaseUrl: db.connectionString }),
-  root: "../../",
+    services: [db],
+    app: () => createApp({ databaseUrl: db.connectionString }),
+    root: '../../',
 });
 
 afterAll(() => spec.cleanup());
@@ -29,21 +29,21 @@ afterAll(() => spec.cleanup());
 
 ```typescript
 // tests/e2e/users/users.e2e.test.ts
-import { spec } from "../../setup/integration.specification.js";
+import { spec } from '../../setup/integration.specification.js';
 
-test("creates a user", async () => {
-  // Given — one existing user
-  const result = await spec("creates user")
-    .seed("initial-users.sql")
-    .post("/users", "new-user.json")
-    .run();
+test('creates a user', async () => {
+    // Given — one existing user
+    const result = await spec('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
 
-  // Then — user created
-  expect(result.status).toBe(201);
-  await result.table("users").toMatch({
-    columns: ["name"],
-    rows: [["Alice"], ["Bob"]],
-  });
+    // Then — user created
+    expect(result.status).toBe(201);
+    await result.table('users').toMatch({
+        columns: ['name'],
+        rows: [['Alice'], ['Bob']],
+    });
 });
 ```
 
@@ -51,29 +51,29 @@ test("creates a user", async () => {
 
 ```typescript
 // tests/setup/cli.specification.ts
-import { resolve } from "node:path";
-import { cli } from "@jterrazz/test";
+import { resolve } from 'node:path';
+import { cli } from '@jterrazz/test';
 
 export const spec = await cli({
-  command: resolve(import.meta.dirname, "../../bin/my-cli.sh"),
-  root: "../fixtures",
+    command: resolve(import.meta.dirname, '../../bin/my-cli.sh'),
+    root: '../fixtures',
 });
 ```
 
 ```typescript
 // tests/e2e/build/build.e2e.test.ts
-import { spec } from "../../setup/cli.specification.js";
+import { spec } from '../../setup/cli.specification.js';
 
-test("builds the project", async () => {
-  // Given — sample app project
-  const result = await spec("build").project("sample-app").exec("build").run();
+test('builds the project', async () => {
+    // Given — sample app project
+    const result = await spec('build').project('sample-app').exec('build').run();
 
-  // Then — ESM output with source maps
-  expect(result.exitCode).toBe(0);
-  expect(result.stdout).toContain("Build completed");
-  expect(result.file("dist/index.js").exists).toBe(true);
-  expect(result.file("dist/index.cjs").exists).toBe(false);
-  expect(result.file("dist/index.js").content).toContain("Hello");
+    // Then — ESM output with source maps
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('Build completed');
+    expect(result.file('dist/index.js').exists).toBe(true);
+    expect(result.file('dist/index.cjs').exists).toBe(false);
+    expect(result.file('dist/index.js').content).toContain('Hello');
 });
 ```
 
@@ -86,15 +86,15 @@ Three modes, same builder API. Each handles infrastructure and cleanup automatic
 Starts real containers via testcontainers. App runs in-process (Hono). Fastest feedback loop.
 
 ```typescript
-import { integration, postgres, redis } from "@jterrazz/test";
+import { integration, postgres, redis } from '@jterrazz/test';
 
-const db = postgres({ compose: "db" });
-const cache = redis({ compose: "cache" });
+const db = postgres({ compose: 'db' });
+const cache = redis({ compose: 'cache' });
 
 export const spec = await integration({
-  services: [db, cache],
-  app: () => createApp({ databaseUrl: db.connectionString }),
-  root: "../../",
+    services: [db, cache],
+    app: () => createApp({ databaseUrl: db.connectionString }),
+    root: '../../',
 });
 ```
 
@@ -103,10 +103,10 @@ export const spec = await integration({
 Starts the full `docker/compose.test.yaml` stack. App URL and databases auto-detected.
 
 ```typescript
-import { e2e } from "@jterrazz/test";
+import { e2e } from '@jterrazz/test';
 
 export const spec = await e2e({
-  root: "../../",
+    root: '../../',
 });
 ```
 
@@ -115,18 +115,18 @@ export const spec = await e2e({
 Runs CLI commands against fixture projects in temp directories. Optionally starts infrastructure.
 
 ```typescript
-import { cli } from "@jterrazz/test";
+import { cli } from '@jterrazz/test';
 
 export const spec = await cli({
-  command: resolve(import.meta.dirname, "../../bin/my-cli.sh"),
-  root: "../fixtures",
+    command: resolve(import.meta.dirname, '../../bin/my-cli.sh'),
+    root: '../fixtures',
 });
 
 // With infrastructure (CLI that needs a database)
 export const spec = await cli({
-  command: "my-migrate-tool",
-  root: "../fixtures",
-  services: [db],
+    command: 'my-migrate-tool',
+    root: '../fixtures',
+    services: [db],
 });
 ```
 
@@ -200,10 +200,10 @@ Run with `JTERRAZZ_TEST_UPDATE=1` (or vitest `-u`) to overwrite fixtures with th
 **Grep (scoped text matching):**
 
 ```typescript
-import { grep } from "@jterrazz/test";
+import { grep } from '@jterrazz/test';
 
-expect(grep(result.stdout, "unused-var.ts")).toContain("no-unused-vars");
-expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports");
+expect(grep(result.stdout, 'unused-var.ts')).toContain('no-unused-vars');
+expect(grep(result.stdout, 'valid/sorted.ts')).not.toContain('sort-imports');
 ```
 
 `grep(output, pattern)` filters multi-line output to the block matching `pattern`, returning a string for vitest assertions.
@@ -253,10 +253,10 @@ await result.table("events", { service: "analytics-db" }).toMatch({
 ## Service factories
 
 ```typescript
-import { postgres, redis } from "@jterrazz/test";
+import { postgres, redis } from '@jterrazz/test';
 
-const db = postgres({ compose: "db" });
-const cache = redis({ compose: "cache" });
+const db = postgres({ compose: 'db' });
+const cache = redis({ compose: 'cache' });
 ```
 
 Service handles read image and environment from `docker/compose.test.yaml`. After the runner starts, `.connectionString` is populated from the running container.
@@ -269,7 +269,7 @@ Service handles read image and environment from `docker/compose.test.yaml`. Afte
 ## Mocking utilities
 
 ```typescript
-import { mockOf, mockOfDate } from "@jterrazz/test";
+import { mockOf, mockOfDate } from '@jterrazz/test';
 ```
 
 | Export        | Description                                  |
@@ -320,19 +320,19 @@ tests/
 Every test uses `// Given` and `// Then` comments. Always both, never one without the other.
 
 ```typescript
-test("creates a user and returns 201", async () => {
-  // Given — two existing users
-  const result = await spec("creates user")
-    .seed("initial-users.sql")
-    .post("/users", "new-user.json")
-    .run();
+test('creates a user and returns 201', async () => {
+    // Given — two existing users
+    const result = await spec('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
 
-  // Then — user created with all three in table
-  expect(result.status).toBe(201);
-  await result.table("users").toMatch({
-    columns: ["name"],
-    rows: [["Alice"], ["Bob"], ["Charlie"]],
-  });
+    // Then — user created with all three in table
+    expect(result.status).toBe(201);
+    await result.table('users').toMatch({
+        columns: ['name'],
+        rows: [['Alice'], ['Bob'], ['Charlie']],
+    });
 });
 ```
 

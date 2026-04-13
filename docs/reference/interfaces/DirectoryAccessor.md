@@ -17,16 +17,16 @@ Useful for ad-hoc assertions when you don't want a full snapshot.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `options` | \{ `ignore?`: `string`[]; \} |
-| `options.ignore?` | `string`[] |
+| Parameter         | Type                         |
+| ----------------- | ---------------------------- |
+| `options`         | \{ `ignore?`: `string`[]; \} |
+| `options.ignore?` | `string`[]                   |
 
 #### Returns
 
 `Promise`\<`string`[]\>
 
-***
+---
 
 ### toMatchFixture()
 
@@ -42,9 +42,9 @@ fixture is overwritten with the current contents instead.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
+| Parameter | Type                                                      |
+| --------- | --------------------------------------------------------- |
+| `name`    | `string`                                                  |
 | `options` | [`DirectorySnapshotOptions`](DirectorySnapshotOptions.md) |
 
 #### Returns

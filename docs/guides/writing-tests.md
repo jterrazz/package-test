@@ -5,19 +5,19 @@
 Every test uses `// Given` and `// Then` comments. Always both, never one without the other.
 
 ```typescript
-test("creates a user and returns 201", async () => {
-  // Given — two existing users
-  const result = await spec("creates user")
-    .seed("initial-users.sql")
-    .post("/users", "new-user.json")
-    .run();
+test('creates a user and returns 201', async () => {
+    // Given — two existing users
+    const result = await spec('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
 
-  // Then — user created with all three in table
-  expect(result.status).toBe(201);
-  await result.table("users").toMatch({
-    columns: ["name"],
-    rows: [["Alice"], ["Bob"], ["Charlie"]],
-  });
+    // Then — user created with all three in table
+    expect(result.status).toBe(201);
+    await result.table('users').toMatch({
+        columns: ['name'],
+        rows: [['Alice'], ['Bob'], ['Charlie']],
+    });
 });
 ```
 
@@ -57,11 +57,11 @@ Raw result properties use vitest `expect()`. Structured assertions (database, re
 ```typescript
 // Raw (vitest expect)
 expect(result.exitCode).toBe(0);
-expect(result.stdout).toContain("Build completed");
-expect(result.file("dist/index.js").exists).toBe(true);
+expect(result.stdout).toContain('Build completed');
+expect(result.file('dist/index.js').exists).toBe(true);
 
 // Structured (custom)
-await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] });
-result.response.toMatchFile("expected.json");
-await result.directory("out").toMatchFixture("scaffold-output");
+await result.table('users').toMatch({ columns: ['name'], rows: [['Alice']] });
+result.response.toMatchFile('expected.json');
+await result.directory('out').toMatchFixture('scaffold-output');
 ```

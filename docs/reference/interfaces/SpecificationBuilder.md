@@ -14,15 +14,15 @@ Defined in: [specification/specification.ts:366](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### env()
 
@@ -40,9 +40,9 @@ directory at run-time — useful for tests that need a fully isolated `HOME`.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `env` | [`CommandEnv`](../type-aliases/CommandEnv.md) |
+| Parameter | Type                                          |
+| --------- | --------------------------------------------- |
+| `env`     | [`CommandEnv`](../type-aliases/CommandEnv.md) |
 
 #### Returns
 
@@ -51,10 +51,10 @@ directory at run-time — useful for tests that need a fully isolated `HOME`.
 #### Example
 
 ```ts
-spec("...").env({ HOME: "$WORKDIR", TZ: "UTC" }).exec("status").run();
+spec('...').env({ HOME: '$WORKDIR', TZ: 'UTC' }).exec('status').run();
 ```
 
-***
+---
 
 ### exec()
 
@@ -66,15 +66,15 @@ Defined in: [specification/specification.ts:373](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `args` | `string` \| `string`[] |
+| Parameter | Type                   |
+| --------- | ---------------------- |
+| `args`    | `string` \| `string`[] |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### fixture()
 
@@ -86,15 +86,15 @@ Defined in: [specification/specification.ts:319](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `file` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `file`    | `string` |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### get()
 
@@ -106,15 +106,15 @@ Defined in: [specification/specification.ts:351](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### mock()
 
@@ -126,15 +126,15 @@ Defined in: [specification/specification.ts:329](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `file` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `file`    | `string` |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### post()
 
@@ -146,16 +146,16 @@ Defined in: [specification/specification.ts:356](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter   | Type     |
+| ----------- | -------- |
+| `path`      | `string` |
 | `bodyFile?` | `string` |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### project()
 
@@ -167,15 +167,15 @@ Defined in: [specification/specification.ts:324](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `name`    | `string` |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### put()
 
@@ -187,16 +187,16 @@ Defined in: [specification/specification.ts:361](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter   | Type     |
+| ----------- | -------- |
+| `path`      | `string` |
 | `bodyFile?` | `string` |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### run()
 
@@ -210,7 +210,7 @@ Defined in: [specification/specification.ts:385](https://github.com/jterrazz/pac
 
 `Promise`\<[`SpecificationResult`](SpecificationResult.md)\>
 
-***
+---
 
 ### seed()
 
@@ -222,17 +222,17 @@ Defined in: [specification/specification.ts:314](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `file` | `string` |
-| `options?` | \{ `service?`: `string`; \} |
-| `options.service?` | `string` |
+| Parameter          | Type                        |
+| ------------------ | --------------------------- |
+| `file`             | `string`                    |
+| `options?`         | \{ `service?`: `string`; \} |
+| `options.service?` | `string`                    |
 
 #### Returns
 
 `this`
 
-***
+---
 
 ### spawn()
 
@@ -244,9 +244,9 @@ Defined in: [specification/specification.ts:378](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `args` | `string` |
+| Parameter | Type                              |
+| --------- | --------------------------------- |
+| `args`    | `string`                          |
 | `options` | [`SpawnOptions`](SpawnOptions.md) |
 
 #### Returns

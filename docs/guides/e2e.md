@@ -6,11 +6,11 @@ Starts your full `docker/compose.test.yaml` stack via `docker compose up`, then 
 
 ```typescript
 // tests/setup/e2e.specification.ts
-import { afterAll } from "vitest";
-import { e2e } from "@jterrazz/test";
+import { afterAll } from 'vitest';
+import { e2e } from '@jterrazz/test';
 
 export const spec = await e2e({
-  root: "../../",
+    root: '../../',
 });
 
 afterAll(() => spec.cleanup());
@@ -21,15 +21,15 @@ App URL and database connection strings are auto-detected from the compose file.
 ## Writing a test
 
 ```typescript
-import { test, expect } from "vitest";
-import { spec } from "../../setup/e2e.specification.js";
+import { test, expect } from 'vitest';
+import { spec } from '../../setup/e2e.specification.js';
 
-test("health check returns 200", async () => {
-  // Given — the full stack running
-  const result = await spec("health").get("/health").run();
+test('health check returns 200', async () => {
+    // Given — the full stack running
+    const result = await spec('health').get('/health').run();
 
-  // Then
-  expect(result.status).toBe(200);
+    // Then
+    expect(result.status).toBe(200);
 });
 ```
 

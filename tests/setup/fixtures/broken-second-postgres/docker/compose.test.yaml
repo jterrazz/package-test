@@ -1,18 +1,18 @@
 services:
-  db:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: test
-    ports:
-      - "5432"
+    db:
+        image: postgres:17
+        environment:
+            POSTGRES_USER: test
+            POSTGRES_PASSWORD: test
+            POSTGRES_DB: test
+        ports:
+            - '5432'
 
-  broken-db:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: broken
-    ports:
-      - "5432"
+    broken-db:
+        image: postgres:17
+        environment:
+            POSTGRES_USER: test
+            POSTGRES_PASSWORD: test
+            POSTGRES_DB: broken
+        ports:
+            - '5432'

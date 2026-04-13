@@ -18,7 +18,7 @@ Factory that returns a Hono app — called after services start.
 
 `HonoApp`
 
-***
+---
 
 ### root?
 
@@ -30,7 +30,7 @@ Defined in: [specification/index.ts:78](https://github.com/jterrazz/package-test
 
 Project root for compose detection (relative paths supported).
 
-***
+---
 
 ### services
 

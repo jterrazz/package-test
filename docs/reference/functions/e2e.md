@@ -11,8 +11,8 @@ Starts full docker compose stack. App URL and database auto-detected.
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type                                        |
+| --------- | ------------------------------------------- |
 | `options` | [`E2eOptions`](../interfaces/E2eOptions.md) |
 
 ## Returns

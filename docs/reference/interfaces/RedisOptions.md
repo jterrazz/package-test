@@ -14,7 +14,7 @@ Defined in: [infrastructure/services/redis.ts:6](https://github.com/jterrazz/pac
 
 Map to a service in docker-compose.test.yaml.
 
-***
+---
 
 ### image?
 

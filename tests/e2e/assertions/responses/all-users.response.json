@@ -1,6 +1,6 @@
 {
-  "users": [
-    { "name": "Alice", "email": "alice@test.com" },
-    { "name": "Bob", "email": "bob@test.com" }
-  ]
+    "users": [
+        { "name": "Alice", "email": "alice@test.com" },
+        { "name": "Bob", "email": "bob@test.com" }
+    ]
 }

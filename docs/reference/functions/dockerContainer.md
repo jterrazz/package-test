@@ -10,8 +10,8 @@ Create a Docker container port for an existing container
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter     | Type     |
+| ------------- | -------- |
 | `containerId` | `string` |
 
 ## Returns

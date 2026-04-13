@@ -21,8 +21,8 @@ Defined in: [specification/adapters/exec.adapter.ts:35](https://github.com/jterr
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type     |
+| --------- | -------- |
 | `command` | `string` |
 
 #### Returns
@@ -35,8 +35,8 @@ Defined in: [specification/adapters/exec.adapter.ts:35](https://github.com/jterr
 
 ```ts
 exec(
-   args, 
-   cwd, 
+   args,
+   cwd,
 extraEnv?): Promise<CommandResult>;
 ```
 
@@ -46,10 +46,10 @@ Execute a CLI command with the given arguments in the given working directory.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `args` | `string` |
-| `cwd` | `string` |
+| Parameter   | Type                                          |
+| ----------- | --------------------------------------------- |
+| `args`      | `string`                                      |
+| `cwd`       | `string`                                      |
 | `extraEnv?` | [`CommandEnv`](../type-aliases/CommandEnv.md) |
 
 #### Returns
@@ -60,15 +60,15 @@ Execute a CLI command with the given arguments in the given working directory.
 
 [`CommandPort`](../interfaces/CommandPort.md).[`exec`](../interfaces/CommandPort.md#exec)
 
-***
+---
 
 ### spawn()
 
 ```ts
 spawn(
-   args, 
-   cwd, 
-   options, 
+   args,
+   cwd,
+   options,
 extraEnv?): Promise<CommandResult>;
 ```
 
@@ -78,12 +78,12 @@ Spawn a long-running process and wait for a pattern or timeout.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `args` | `string` |
-| `cwd` | `string` |
-| `options` | [`SpawnOptions`](../interfaces/SpawnOptions.md) |
-| `extraEnv?` | [`CommandEnv`](../type-aliases/CommandEnv.md) |
+| Parameter   | Type                                            |
+| ----------- | ----------------------------------------------- |
+| `args`      | `string`                                        |
+| `cwd`       | `string`                                        |
+| `options`   | [`SpawnOptions`](../interfaces/SpawnOptions.md) |
+| `extraEnv?` | [`CommandEnv`](../type-aliases/CommandEnv.md)   |
 
 #### Returns
 

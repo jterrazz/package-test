@@ -18,8 +18,8 @@ Defined in: [infrastructure/orchestrator.ts:38](https://github.com/jterrazz/pack
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type                  |
+| --------- | --------------------- |
 | `options` | `OrchestratorOptions` |
 
 #### Returns
@@ -42,7 +42,7 @@ Get app URL from compose (e2e mode).
 
 `string` \| `null`
 
-***
+---
 
 ### getDatabase()
 
@@ -56,15 +56,15 @@ Get a database service by compose name, or the first one if no name given.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter      | Type     |
+| -------------- | -------- |
 | `serviceName?` | `string` |
 
 #### Returns
 
 [`DatabasePort`](../interfaces/DatabasePort.md) \| `null`
 
-***
+---
 
 ### getDatabases()
 
@@ -80,7 +80,7 @@ Get all database services keyed by compose name.
 
 `Map`\<`string`, [`DatabasePort`](../interfaces/DatabasePort.md)\>
 
-***
+---
 
 ### start()
 
@@ -98,7 +98,7 @@ Phase 2: wire connections, healthcheck, and init sequentially (fast).
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### startCompose()
 
@@ -115,7 +115,7 @@ Auto-detects infra services and creates handles for them.
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### stop()
 
@@ -131,7 +131,7 @@ Stop testcontainers (integration mode).
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### stopCompose()
 

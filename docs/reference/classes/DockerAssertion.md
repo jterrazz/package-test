@@ -16,8 +16,8 @@ Defined in: [infrastructure/docker/docker-assertion.ts:7](https://github.com/jte
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter   | Type                                                          |
+| ----------- | ------------------------------------------------------------- |
 | `container` | [`DockerContainerPort`](../interfaces/DockerContainerPort.md) |
 
 #### Returns
@@ -38,15 +38,15 @@ Execute a command and return output for custom assertions
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `cmd` | `string`[] |
+| Parameter | Type       |
+| --------- | ---------- |
+| `cmd`     | `string`[] |
 
 #### Returns
 
 `Promise`\<`string`\>
 
-***
+---
 
 ### getLogs()
 
@@ -60,15 +60,15 @@ Get logs for custom assertions
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `tail?` | `number` |
+| Parameter | Type     |
+| --------- | -------- |
+| `tail?`   | `number` |
 
 #### Returns
 
 `Promise`\<`string`\>
 
-***
+---
 
 ### readFile()
 
@@ -82,15 +82,15 @@ Read a file for custom assertions
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 
 `Promise`\<`string`\>
 
-***
+---
 
 ### toBeRunning()
 
@@ -106,7 +106,7 @@ Assert the container is running
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toHaveCpuQuota()
 
@@ -120,15 +120,15 @@ Assert CPU quota
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `quota` | `number` |
+| Parameter | Type     |
+| --------- | -------- |
+| `quota`   | `number` |
 
 #### Returns
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toHaveDirectory()
 
@@ -142,15 +142,15 @@ Assert a directory exists
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toHaveFile()
 
@@ -164,17 +164,17 @@ Assert a file exists inside the container
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
-| `opts?` | \{ `containing?`: `string`; \} |
-| `opts.containing?` | `string` |
+| Parameter          | Type                           |
+| ------------------ | ------------------------------ |
+| `path`             | `string`                       |
+| `opts?`            | \{ `containing?`: `string`; \} |
+| `opts.containing?` | `string`                       |
 
 #### Returns
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toHaveMemoryLimit()
 
@@ -188,15 +188,15 @@ Assert memory limit
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `bytes` | `number` |
+| Parameter | Type     |
+| --------- | -------- |
+| `bytes`   | `number` |
 
 #### Returns
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toHaveMount()
 
@@ -210,15 +210,15 @@ Assert a mount exists
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter     | Type     |
+| ------------- | -------- |
 | `destination` | `string` |
 
 #### Returns
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toHaveNetwork()
 
@@ -232,15 +232,15 @@ Assert network mode
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `mode` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `mode`    | `string` |
 
 #### Returns
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toNotExist()
 
@@ -256,7 +256,7 @@ Assert the container is NOT running / doesn't exist
 
 `Promise`\<`DockerAssertion`\>
 
-***
+---
 
 ### toNotHaveFile()
 
@@ -270,9 +270,9 @@ Assert a file does NOT exist
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `path` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `path`    | `string` |
 
 #### Returns
 

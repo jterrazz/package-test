@@ -14,7 +14,7 @@ Defined in: [specification/specification.ts:83](https://github.com/jterrazz/pack
 
 Extra path segments to ignore (in addition to default: .git, node_modules, etc.).
 
-***
+---
 
 ### update?
 

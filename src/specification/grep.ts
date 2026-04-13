@@ -8,8 +8,8 @@
  * expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports")
  */
 export function grep(output: string, pattern: string): string {
-  // eslint-disable-next-line no-control-regex
-  const clean = output.replace(/\x1b\[[0-9;]*m/g, "");
-  const blocks = clean.split(/\n\s*\n/);
-  return blocks.filter((block) => block.includes(pattern)).join("\n\n");
+    // eslint-disable-next-line no-control-regex
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+    const blocks = clean.split(/\n\s*\n/);
+    return blocks.filter((block) => block.includes(pattern)).join('\n\n');
 }

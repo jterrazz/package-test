@@ -1,1 +1,1 @@
-const unused = "this variable is never used";
+const unused = 'this variable is never used';

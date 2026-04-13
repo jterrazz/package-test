@@ -11,8 +11,8 @@ Implement this to plug in your command execution strategy.
 
 ```ts
 exec(
-   args, 
-   cwd, 
+   args,
+   cwd,
 env?): Promise<CommandResult>;
 ```
 
@@ -22,25 +22,25 @@ Execute a CLI command with the given arguments in the given working directory.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `args` | `string` |
-| `cwd` | `string` |
-| `env?` | [`CommandEnv`](../type-aliases/CommandEnv.md) |
+| Parameter | Type                                          |
+| --------- | --------------------------------------------- |
+| `args`    | `string`                                      |
+| `cwd`     | `string`                                      |
+| `env?`    | [`CommandEnv`](../type-aliases/CommandEnv.md) |
 
 #### Returns
 
 `Promise`\<[`CommandResult`](CommandResult.md)\>
 
-***
+---
 
 ### spawn()
 
 ```ts
 spawn(
-   args, 
-   cwd, 
-   options, 
+   args,
+   cwd,
+   options,
 env?): Promise<CommandResult>;
 ```
 
@@ -50,12 +50,12 @@ Spawn a long-running process and wait for a pattern or timeout.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `args` | `string` |
-| `cwd` | `string` |
-| `options` | [`SpawnOptions`](SpawnOptions.md) |
-| `env?` | [`CommandEnv`](../type-aliases/CommandEnv.md) |
+| Parameter | Type                                          |
+| --------- | --------------------------------------------- |
+| `args`    | `string`                                      |
+| `cwd`     | `string`                                      |
+| `options` | [`SpawnOptions`](SpawnOptions.md)             |
+| `env?`    | [`CommandEnv`](../type-aliases/CommandEnv.md) |
 
 #### Returns
 

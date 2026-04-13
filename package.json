@@ -1,62 +1,62 @@
 {
-  "name": "@jterrazz/test",
-  "version": "5.2.0",
-  "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jterrazz/package-test"
-  },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "exports": {
-    ".": {
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
-    }
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
-  "scripts": {
-    "build": "typescript bundle",
-    "lint": "codestyle check",
-    "lint:fix": "codestyle fix",
-    "test": "vitest --run"
-  },
-  "dependencies": {
-    "mockdate": "^3.0.5",
-    "pg": "^8.20.0",
-    "redis": "^5.11.0",
-    "testcontainers": "^11.13.0",
-    "vitest-mock-extended": "^3.1.0",
-    "yaml": "^2.8.3"
-  },
-  "devDependencies": {
-    "@hono/node-server": "^1.19.11",
-    "@jterrazz/codestyle": "^3.0.0",
-    "@jterrazz/typescript": "^5.2.0",
-    "@types/node": "^25.5.0",
-    "@types/pg": "^8.20.0",
-    "hono": "^4.12.9",
-    "typedoc": "^0.28.18",
-    "typedoc-plugin-markdown": "^4.11.0",
-    "vitepress": "^1.6.4",
-    "vitepress-plugin-llms": "^1.12.0",
-    "vitest": "^4.1.2"
-  },
-  "peerDependencies": {
-    "hono": "^4.0.0",
-    "msw": "^2.12.0",
-    "vitest": "^4.1.2"
-  },
-  "peerDependenciesMeta": {
-    "hono": {
-      "optional": true
+    "name": "@jterrazz/test",
+    "version": "5.2.0",
+    "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jterrazz/package-test"
     },
-    "msw": {
-      "optional": true
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "exports": {
+        ".": {
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.js"
+        }
+    },
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org/"
+    },
+    "scripts": {
+        "build": "typescript bundle",
+        "lint": "codestyle check",
+        "lint:fix": "codestyle fix",
+        "test": "vitest --run"
+    },
+    "dependencies": {
+        "mockdate": "^3.0.5",
+        "pg": "^8.20.0",
+        "redis": "^5.11.0",
+        "testcontainers": "^11.13.0",
+        "vitest-mock-extended": "^3.1.0",
+        "yaml": "^2.8.3"
+    },
+    "devDependencies": {
+        "@hono/node-server": "^1.19.11",
+        "@jterrazz/codestyle": "^3.0.9",
+        "@jterrazz/typescript": "^5.2.0",
+        "@types/node": "^25.5.0",
+        "@types/pg": "^8.20.0",
+        "hono": "^4.12.9",
+        "typedoc": "^0.28.18",
+        "typedoc-plugin-markdown": "^4.11.0",
+        "vitepress": "^1.6.4",
+        "vitepress-plugin-llms": "^1.12.0",
+        "vitest": "^4.1.2"
+    },
+    "peerDependencies": {
+        "hono": "^4.0.0",
+        "msw": "^2.12.0",
+        "vitest": "^4.1.2"
+    },
+    "peerDependenciesMeta": {
+        "hono": {
+            "optional": true
+        },
+        "msw": {
+            "optional": true
+        }
     }
-  }
 }

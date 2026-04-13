@@ -21,9 +21,9 @@ Defined in: [specification/adapters/fetch.adapter.ts:10](https://github.com/jter
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `url` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `url`     | `string` |
 
 #### Returns
 
@@ -35,8 +35,8 @@ Defined in: [specification/adapters/fetch.adapter.ts:10](https://github.com/jter
 
 ```ts
 request(
-   method, 
-   path, 
+   method,
+   path,
 body?): Promise<ServerResponse>;
 ```
 
@@ -46,11 +46,11 @@ Send an HTTP request and return the response.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `method` | `string` |
-| `path` | `string` |
-| `body?` | `unknown` |
+| Parameter | Type      |
+| --------- | --------- |
+| `method`  | `string`  |
+| `path`    | `string`  |
+| `body?`   | `unknown` |
 
 #### Returns
 

@@ -16,7 +16,7 @@ Defined in: [specification/ports/command.port.ts:17](https://github.com/jterrazz
 
 Kill the process after this many milliseconds.
 
-***
+---
 
 ### waitFor
 

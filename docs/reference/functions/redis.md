@@ -10,8 +10,8 @@ Create a Redis service handle.
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type                                            |
+| --------- | ----------------------------------------------- |
 | `options` | [`RedisOptions`](../interfaces/RedisOptions.md) |
 
 ## Returns
@@ -21,6 +21,6 @@ Create a Redis service handle.
 ## Example
 
 ```ts
-const cache = redis({ compose: "cache" });
+const cache = redis({ compose: 'cache' });
 // After start: cache.connectionString is populated
 ```

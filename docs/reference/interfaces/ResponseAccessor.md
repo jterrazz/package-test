@@ -24,9 +24,9 @@ Defined in: [specification/specification.ts:176](https://github.com/jterrazz/pac
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `file` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `file`    | `string` |
 
 #### Returns
 

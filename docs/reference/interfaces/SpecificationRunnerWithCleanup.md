@@ -14,9 +14,9 @@ Defined in: [specification/index.ts:97](https://github.com/jterrazz/package-test
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `label` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `label`   | `string` |
 
 ## Returns
 
@@ -36,7 +36,7 @@ Defined in: [specification/index.ts:98](https://github.com/jterrazz/package-test
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### orchestrator
 

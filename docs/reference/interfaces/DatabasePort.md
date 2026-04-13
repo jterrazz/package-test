@@ -19,16 +19,16 @@ Query a table and return rows as arrays of values.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `table` | `string` |
+| Parameter | Type       |
+| --------- | ---------- |
+| `table`   | `string`   |
 | `columns` | `string`[] |
 
 #### Returns
 
 `Promise`\<`unknown`[][]\>
 
-***
+---
 
 ### reset()
 
@@ -44,7 +44,7 @@ Reset database to clean state between tests.
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### seed()
 
@@ -58,9 +58,9 @@ Execute raw SQL (for seeding test data).
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `sql` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `sql`     | `string` |
 
 #### Returns
 

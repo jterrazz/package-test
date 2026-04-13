@@ -8,9 +8,9 @@ Defined in: [infrastructure/reporter.ts:408](https://github.com/jterrazz/package
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `str` | `string` |
+| Parameter | Type     |
+| --------- | -------- |
+| `str`     | `string` |
 
 ## Returns
 

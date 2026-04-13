@@ -11,8 +11,8 @@ Integration mode uses in-process app, E2E mode uses real HTTP.
 
 ```ts
 request(
-   method, 
-   path, 
+   method,
+   path,
 body?): Promise<ServerResponse>;
 ```
 
@@ -22,11 +22,11 @@ Send an HTTP request and return the response.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `method` | `string` |
-| `path` | `string` |
-| `body?` | `unknown` |
+| Parameter | Type      |
+| --------- | --------- |
+| `method`  | `string`  |
+| `path`    | `string`  |
+| `body?`   | `unknown` |
 
 #### Returns
 

@@ -21,10 +21,10 @@ Defined in: [specification/adapters/hono.adapter.ts:12](https://github.com/jterr
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `app` | \{ `request`: (`path`, `init?`) => `Response` \| `Promise`\<`Response`\>; \} |
-| `app.request` | (`path`, `init?`) => `Response` \| `Promise`\<`Response`\> |
+| Parameter     | Type                                                                         |
+| ------------- | ---------------------------------------------------------------------------- |
+| `app`         | \{ `request`: (`path`, `init?`) => `Response` \| `Promise`\<`Response`\>; \} |
+| `app.request` | (`path`, `init?`) => `Response` \| `Promise`\<`Response`\>                   |
 
 #### Returns
 
@@ -36,8 +36,8 @@ Defined in: [specification/adapters/hono.adapter.ts:12](https://github.com/jterr
 
 ```ts
 request(
-   method, 
-   path, 
+   method,
+   path,
 body?): Promise<ServerResponse>;
 ```
 
@@ -47,11 +47,11 @@ Send an HTTP request and return the response.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `method` | `string` |
-| `path` | `string` |
-| `body?` | `unknown` |
+| Parameter | Type      |
+| --------- | --------- |
+| `method`  | `string`  |
+| `path`    | `string`  |
+| `body?`   | `unknown` |
 
 #### Returns
 

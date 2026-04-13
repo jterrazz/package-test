@@ -17,7 +17,7 @@ Defined in: [infrastructure/services/service.port.ts:12](https://github.com/jter
 
 Compose service name (if linked).
 
-***
+---
 
 ### connectionString
 
@@ -29,7 +29,7 @@ Defined in: [infrastructure/services/service.port.ts:24](https://github.com/jter
 
 Connection string — populated after start.
 
-***
+---
 
 ### defaultImage
 
@@ -41,7 +41,7 @@ Defined in: [infrastructure/services/service.port.ts:18](https://github.com/jter
 
 Default Docker image for this service type.
 
-***
+---
 
 ### defaultPort
 
@@ -53,7 +53,7 @@ Defined in: [infrastructure/services/service.port.ts:15](https://github.com/jter
 
 Default container port for this service type.
 
-***
+---
 
 ### environment
 
@@ -65,7 +65,7 @@ Defined in: [infrastructure/services/service.port.ts:21](https://github.com/jter
 
 Environment variables to pass to the container.
 
-***
+---
 
 ### started
 
@@ -77,7 +77,7 @@ Defined in: [infrastructure/services/service.port.ts:27](https://github.com/jter
 
 Whether this service has been started.
 
-***
+---
 
 ### type
 
@@ -103,16 +103,16 @@ Build the connection string from host and port.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `host` | `string` |
-| `port` | `number` |
+| Parameter | Type     |
+| --------- | -------- |
+| `host`    | `string` |
+| `port`    | `number` |
 
 #### Returns
 
 `string`
 
-***
+---
 
 ### createDatabaseAdapter()
 
@@ -128,7 +128,7 @@ Create a DatabasePort adapter (if this is a database). Returns null otherwise.
 
 [`DatabasePort`](DatabasePort.md) \| `null`
 
-***
+---
 
 ### healthcheck()
 
@@ -144,7 +144,7 @@ Verify the service is ready and accepting connections. Throws with context if no
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### initialize()
 
@@ -158,15 +158,15 @@ Run initialization scripts (e.g., init.sql). Throws with SQL error context if it
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter    | Type     |
+| ------------ | -------- |
 | `composeDir` | `string` |
 
 #### Returns
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### reset()
 

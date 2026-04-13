@@ -11,8 +11,8 @@ Starts infra containers via testcontainers, app runs in-process.
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type                                                        |
+| --------- | ----------------------------------------------------------- |
 | `options` | [`IntegrationOptions`](../interfaces/IntegrationOptions.md) |
 
 ## Returns

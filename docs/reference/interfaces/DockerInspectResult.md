@@ -24,7 +24,7 @@ env: string[];
 image: string;
 ```
 
-***
+---
 
 ### hostConfig
 
@@ -58,7 +58,7 @@ mounts: object[];
 networkMode: string;
 ```
 
-***
+---
 
 ### id
 
@@ -68,7 +68,7 @@ id: string;
 
 Defined in: [infrastructure/docker/docker-port.ts:22](https://github.com/jterrazz/package-test/blob/b137209cf84f883c81d2474187f75c6a19108275/src/infrastructure/docker/docker-port.ts#L22)
 
-***
+---
 
 ### name
 
@@ -78,7 +78,7 @@ name: string;
 
 Defined in: [infrastructure/docker/docker-port.ts:23](https://github.com/jterrazz/package-test/blob/b137209cf84f883c81d2474187f75c6a19108275/src/infrastructure/docker/docker-port.ts#L23)
 
-***
+---
 
 ### networkSettings
 
@@ -91,13 +91,16 @@ Defined in: [infrastructure/docker/docker-port.ts:43](https://github.com/jterraz
 #### networks
 
 ```ts
-networks: Record<string, {
-  gateway: string;
-  ipAddress: string;
-}>;
+networks: Record<
+    string,
+    {
+        gateway: string;
+        ipAddress: string;
+    }
+>;
 ```
 
-***
+---
 
 ### state
 

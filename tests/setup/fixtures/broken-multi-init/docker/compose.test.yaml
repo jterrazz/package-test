@@ -1,14 +1,14 @@
 services:
-  cache:
-    image: redis:7
-    ports:
-      - "6379"
+    cache:
+        image: redis:7
+        ports:
+            - '6379'
 
-  db:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: test
-    ports:
-      - "5432"
+    db:
+        image: postgres:17
+        environment:
+            POSTGRES_USER: test
+            POSTGRES_PASSWORD: test
+            POSTGRES_DB: test
+        ports:
+            - '5432'

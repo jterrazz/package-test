@@ -16,7 +16,7 @@ Defined in: [specification/specification.ts:69](https://github.com/jterrazz/pack
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### toMatch()
 
@@ -28,11 +28,11 @@ Defined in: [specification/specification.ts:62](https://github.com/jterrazz/pack
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `expected` | \{ `columns`: `string`[]; `rows`: `unknown`[][]; \} |
-| `expected.columns` | `string`[] |
-| `expected.rows` | `unknown`[][] |
+| Parameter          | Type                                                |
+| ------------------ | --------------------------------------------------- |
+| `expected`         | \{ `columns`: `string`[]; `rows`: `unknown`[][]; \} |
+| `expected.columns` | `string`[]                                          |
+| `expected.rows`    | `unknown`[][]                                       |
 
 #### Returns
 

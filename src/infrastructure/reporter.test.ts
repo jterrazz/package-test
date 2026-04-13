@@ -1,41 +1,41 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from 'vitest';
 
-import { dedent } from "../../tests/setup/helpers/dedent.js";
+import { dedent } from '../../tests/setup/helpers/dedent.js';
 import {
-  formatResponseDiff,
-  formatServiceLogs,
-  formatStartupReport,
-  formatStatusError,
-  formatTableDiff,
-  normalizeOutput,
-  stripAnsi,
-} from "./reporter.js";
+    formatResponseDiff,
+    formatServiceLogs,
+    formatStartupReport,
+    formatStatusError,
+    formatTableDiff,
+    normalizeOutput,
+    stripAnsi,
+} from './reporter.js';
 
-describe("output formatting", () => {
-  describe("startup report", () => {
-    test("formats successful integration startup", () => {
-      const output = normalizeOutput(
-        formatStartupReport(
-          "integration",
-          [
-            {
-              name: "db",
-              type: "postgres",
-              connectionString: "postgresql://test:test@localhost:54321/test",
-              durationMs: 420,
-            },
-            {
-              name: "cache",
-              type: "redis",
-              connectionString: "redis://localhost:63791",
-              durationMs: 180,
-            },
-          ],
-          { type: "in-process" },
-        ),
-      );
+describe('output formatting', () => {
+    describe('startup report', () => {
+        test('formats successful integration startup', () => {
+            const output = normalizeOutput(
+                formatStartupReport(
+                    'integration',
+                    [
+                        {
+                            name: 'db',
+                            type: 'postgres',
+                            connectionString: 'postgresql://test:test@localhost:54321/test',
+                            durationMs: 420,
+                        },
+                        {
+                            name: 'cache',
+                            type: 'redis',
+                            connectionString: 'redis://localhost:63791',
+                            durationMs: 180,
+                        },
+                    ],
+                    { type: 'in-process' },
+                ),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 INFRA  Starting infrastructure...
 
                   ✓ postgres (db)  postgresql://test:test@localhost:PORT/test  Xms
@@ -43,91 +43,92 @@ describe("output formatting", () => {
 
                   → app: in-process (Hono)
             `);
-    });
+        });
 
-    test("formats successful e2e startup", () => {
-      const output = normalizeOutput(
-        formatStartupReport(
-          "e2e",
-          [
-            {
-              name: "db",
-              type: "postgres",
-              connectionString: "postgresql://test:test@localhost:5432/test",
-              durationMs: 2100,
-            },
-          ],
-          { type: "http", url: "http://localhost:3000" },
-        ),
-      );
+        test('formats successful e2e startup', () => {
+            const output = normalizeOutput(
+                formatStartupReport(
+                    'e2e',
+                    [
+                        {
+                            name: 'db',
+                            type: 'postgres',
+                            connectionString: 'postgresql://test:test@localhost:5432/test',
+                            durationMs: 2100,
+                        },
+                    ],
+                    { type: 'http', url: 'http://localhost:3000' },
+                ),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 INFRA  Starting infrastructure...
 
                   ✓ postgres (db)  postgresql://test:test@localhost:PORT/test  Xms
 
                   → app: http://localhost:PORT
             `);
-    });
+        });
 
-    test("formats failed startup with error and logs", () => {
-      const output = normalizeOutput(
-        formatStartupReport("integration", [
-          {
-            name: "db",
-            type: "postgres",
-            durationMs: 180,
-            error: "connection refused",
-            logs: 'FATAL: role "test" does not exist\nLOG: shutting down',
-          },
-        ]),
-      );
+        test('formats failed startup with error and logs', () => {
+            const output = normalizeOutput(
+                formatStartupReport('integration', [
+                    {
+                        name: 'db',
+                        type: 'postgres',
+                        durationMs: 180,
+                        error: 'connection refused',
+                        logs: 'FATAL: role "test" does not exist\nLOG: shutting down',
+                    },
+                ]),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 INFRA  Starting infrastructure...
 
                   × postgres (db)  connection refused  Xms
                     FATAL: role "test" does not exist
                     LOG: shutting down
             `);
+        });
+
+        test('shows only last 10 log lines', () => {
+            const manyLogs = Array.from({ length: 20 }, (_, i) => `log line ${i}`).join('\n');
+            const expectedLogLines = Array.from(
+                { length: 10 },
+                (_, i) => `    log line ${i + 10}`,
+            ).join('\n');
+
+            const output = normalizeOutput(
+                formatStartupReport('integration', [
+                    {
+                        name: 'db',
+                        type: 'postgres',
+                        durationMs: 100,
+                        error: 'failed',
+                        logs: manyLogs,
+                    },
+                ]),
+            );
+
+            expect(output).toBe(
+                `INFRA  Starting infrastructure...\n\n  × postgres (db)  failed  Xms\n${expectedLogLines}`,
+            );
+        });
     });
 
-    test("shows only last 10 log lines", () => {
-      const manyLogs = Array.from({ length: 20 }, (_, i) => `log line ${i}`).join("\n");
-      const expectedLogLines = Array.from({ length: 10 }, (_, i) => `    log line ${i + 10}`).join(
-        "\n",
-      );
+    describe('status error', () => {
+        test('formats GET failure', () => {
+            const output = stripAnsi(
+                formatStatusError(
+                    200,
+                    404,
+                    { method: 'GET', path: '/users/999' },
+                    { error: 'User not found' },
+                ),
+            );
 
-      const output = normalizeOutput(
-        formatStartupReport("integration", [
-          {
-            name: "db",
-            type: "postgres",
-            durationMs: 100,
-            error: "failed",
-            logs: manyLogs,
-          },
-        ]),
-      );
-
-      expect(output).toBe(
-        `INFRA  Starting infrastructure...\n\n  × postgres (db)  failed  Xms\n${expectedLogLines}`,
-      );
-    });
-  });
-
-  describe("status error", () => {
-    test("formats GET failure", () => {
-      const output = stripAnsi(
-        formatStatusError(
-          200,
-          404,
-          { method: "GET", path: "/users/999" },
-          { error: "User not found" },
-        ),
-      );
-
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Expected status: 200
                 Received status: 404
 
@@ -138,19 +139,23 @@ describe("output formatting", () => {
                   "error": "User not found"
                 }
             `);
-    });
+        });
 
-    test("formats POST failure with request body", () => {
-      const output = stripAnsi(
-        formatStatusError(
-          201,
-          500,
-          { method: "POST", path: "/users", body: { name: "Alice", email: "alice@test.com" } },
-          { error: "Internal Server Error" },
-        ),
-      );
+        test('formats POST failure with request body', () => {
+            const output = stripAnsi(
+                formatStatusError(
+                    201,
+                    500,
+                    {
+                        method: 'POST',
+                        path: '/users',
+                        body: { name: 'Alice', email: 'alice@test.com' },
+                    },
+                    { error: 'Internal Server Error' },
+                ),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Expected status: 201
                 Received status: 500
 
@@ -165,34 +170,34 @@ describe("output formatting", () => {
                   "error": "Internal Server Error"
                 }
             `);
-    });
+        });
 
-    test("formats without response body", () => {
-      const output = stripAnsi(
-        formatStatusError(200, 204, { method: "DELETE", path: "/users/1" }, null),
-      );
+        test('formats without response body', () => {
+            const output = stripAnsi(
+                formatStatusError(200, 204, { method: 'DELETE', path: '/users/1' }, null),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Expected status: 200
                 Received status: 204
 
                 DELETE /users/1
             `);
+        });
     });
-  });
 
-  describe("table diff", () => {
-    test("formats row mismatch", () => {
-      const output = stripAnsi(
-        formatTableDiff(
-          "users",
-          ["name", "email"],
-          [["Alice", "alice@test.com"]],
-          [["Bob", "bob@test.com"]],
-        ),
-      );
+    describe('table diff', () => {
+        test('formats row mismatch', () => {
+            const output = stripAnsi(
+                formatTableDiff(
+                    'users',
+                    ['name', 'email'],
+                    [['Alice', 'alice@test.com']],
+                    [['Bob', 'bob@test.com']],
+                ),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Table "users" mismatch
                   query: name, email
                   expected: 1 row
@@ -205,14 +210,14 @@ describe("output formatting", () => {
                 - Alice  |  alice@test.com
                 + Bob  |  bob@test.com
             `);
-    });
+        });
 
-    test("formats extra rows", () => {
-      const output = stripAnsi(
-        formatTableDiff("users", ["name"], [["Alice"]], [["Alice"], ["Bob"]]),
-      );
+        test('formats extra rows', () => {
+            const output = stripAnsi(
+                formatTableDiff('users', ['name'], [['Alice']], [['Alice'], ['Bob']]),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Table "users" mismatch
                   query: name
                   expected: 1 row
@@ -225,14 +230,14 @@ describe("output formatting", () => {
                   Alice
                 + Bob
             `);
-    });
+        });
 
-    test("formats missing rows", () => {
-      const output = stripAnsi(
-        formatTableDiff("users", ["name"], [["Alice"], ["Bob"]], [["Alice"]]),
-      );
+        test('formats missing rows', () => {
+            const output = stripAnsi(
+                formatTableDiff('users', ['name'], [['Alice'], ['Bob']], [['Alice']]),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Table "users" mismatch
                   query: name
                   expected: 2 rows
@@ -245,12 +250,12 @@ describe("output formatting", () => {
                   Alice
                 - Bob
             `);
-    });
+        });
 
-    test("formats empty actual", () => {
-      const output = stripAnsi(formatTableDiff("users", ["name"], [["Alice"]], []));
+        test('formats empty actual', () => {
+            const output = stripAnsi(formatTableDiff('users', ['name'], [['Alice']], []));
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Table "users" mismatch
                   query: name
                   expected: 1 row
@@ -262,12 +267,12 @@ describe("output formatting", () => {
                   name
                 - Alice
             `);
-    });
+        });
 
-    test("formats both empty", () => {
-      const output = stripAnsi(formatTableDiff("users", ["name"], [], []));
+        test('formats both empty', () => {
+            const output = stripAnsi(formatTableDiff('users', ['name'], [], []));
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Table "users" mismatch
                   query: name
                   expected: 0 rows
@@ -279,20 +284,20 @@ describe("output formatting", () => {
                   name
                   (empty)
             `);
+        });
     });
-  });
 
-  describe("response diff", () => {
-    test("formats JSON diff line by line", () => {
-      const output = stripAnsi(
-        formatResponseDiff(
-          "expected.response.json",
-          { user: { name: "Alice" } },
-          { user: { name: "Bob" } },
-        ),
-      );
+    describe('response diff', () => {
+        test('formats JSON diff line by line', () => {
+            const output = stripAnsi(
+                formatResponseDiff(
+                    'expected.response.json',
+                    { user: { name: 'Alice' } },
+                    { user: { name: 'Bob' } },
+                ),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Response mismatch (expected.response.json)
 
                 - Expected
@@ -305,18 +310,18 @@ describe("output formatting", () => {
                     }
                   }
             `);
-    });
+        });
 
-    test("formats nested object diff", () => {
-      const output = stripAnsi(
-        formatResponseDiff(
-          "test.json",
-          { users: [{ name: "Alice" }] },
-          { users: [{ name: "Bob" }] },
-        ),
-      );
+        test('formats nested object diff', () => {
+            const output = stripAnsi(
+                formatResponseDiff(
+                    'test.json',
+                    { users: [{ name: 'Alice' }] },
+                    { users: [{ name: 'Bob' }] },
+                ),
+            );
 
-      expect(output).toBe(dedent`
+            expect(output).toBe(dedent`
                 Response mismatch (test.json)
 
                 - Expected
@@ -331,30 +336,34 @@ describe("output formatting", () => {
                     ]
                   }
             `);
-    });
-  });
-
-  describe("service logs", () => {
-    test("formats service logs", () => {
-      const output = stripAnsi(
-        formatServiceLogs([{ name: "postgres (db)", logs: "LOG: database ready\nLOG: listening" }]),
-      );
-
-      expect(output).toBe(
-        "\npostgres (db) logs (last 10 lines):\n  LOG: database ready\n  LOG: listening",
-      );
+        });
     });
 
-    test("returns empty string for empty logs", () => {
-      expect(formatServiceLogs([{ name: "redis", logs: "" }])).toBe("");
-    });
+    describe('service logs', () => {
+        test('formats service logs', () => {
+            const output = stripAnsi(
+                formatServiceLogs([
+                    { name: 'postgres (db)', logs: 'LOG: database ready\nLOG: listening' },
+                ]),
+            );
 
-    test("truncates to last 10 lines", () => {
-      const logs = Array.from({ length: 20 }, (_, i) => `line ${i}`).join("\n");
-      const output = stripAnsi(formatServiceLogs([{ name: "db", logs }]));
-      const expectedLines = Array.from({ length: 10 }, (_, i) => `  line ${i + 10}`).join("\n");
+            expect(output).toBe(
+                '\npostgres (db) logs (last 10 lines):\n  LOG: database ready\n  LOG: listening',
+            );
+        });
 
-      expect(output).toBe(`\ndb logs (last 10 lines):\n${expectedLines}`);
+        test('returns empty string for empty logs', () => {
+            expect(formatServiceLogs([{ name: 'redis', logs: '' }])).toBe('');
+        });
+
+        test('truncates to last 10 lines', () => {
+            const logs = Array.from({ length: 20 }, (_, i) => `line ${i}`).join('\n');
+            const output = stripAnsi(formatServiceLogs([{ name: 'db', logs }]));
+            const expectedLines = Array.from({ length: 10 }, (_, i) => `  line ${i + 10}`).join(
+                '\n',
+            );
+
+            expect(output).toBe(`\ndb logs (last 10 lines):\n${expectedLines}`);
+        });
     });
-  });
 });

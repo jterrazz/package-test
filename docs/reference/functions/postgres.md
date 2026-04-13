@@ -10,8 +10,8 @@ Create a PostgreSQL service handle.
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type                                                  |
+| --------- | ----------------------------------------------------- |
 | `options` | [`PostgresOptions`](../interfaces/PostgresOptions.md) |
 
 ## Returns
@@ -21,6 +21,6 @@ Create a PostgreSQL service handle.
 ## Example
 
 ```ts
-const db = postgres({ compose: "db" });
+const db = postgres({ compose: 'db' });
 // After start: db.connectionString is populated
 ```

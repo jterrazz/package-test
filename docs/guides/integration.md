@@ -6,16 +6,16 @@ Starts real containers via testcontainers; the app runs **in-process** via a Hon
 
 ```typescript
 // tests/setup/integration.specification.ts
-import { afterAll } from "vitest";
-import { integration, postgres } from "@jterrazz/test";
-import { createApp } from "../../src/app.js";
+import { afterAll } from 'vitest';
+import { integration, postgres } from '@jterrazz/test';
+import { createApp } from '../../src/app.js';
 
-const db = postgres({ compose: "db" });
+const db = postgres({ compose: 'db' });
 
 export const spec = await integration({
-  services: [db],
-  app: () => createApp({ databaseUrl: db.connectionString }),
-  root: "../../",
+    services: [db],
+    app: () => createApp({ databaseUrl: db.connectionString }),
+    root: '../../',
 });
 
 afterAll(() => spec.cleanup());
@@ -25,22 +25,22 @@ afterAll(() => spec.cleanup());
 
 ```typescript
 // tests/e2e/users/users.e2e.test.ts
-import { test, expect } from "vitest";
-import { spec } from "../../setup/integration.specification.js";
+import { test, expect } from 'vitest';
+import { spec } from '../../setup/integration.specification.js';
 
-test("creates a user", async () => {
-  // Given — one existing user
-  const result = await spec("creates user")
-    .seed("initial-users.sql")
-    .post("/users", "new-user.json")
-    .run();
+test('creates a user', async () => {
+    // Given — one existing user
+    const result = await spec('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
 
-  // Then — user created
-  expect(result.status).toBe(201);
-  await result.table("users").toMatch({
-    columns: ["name"],
-    rows: [["Alice"], ["Bob"]],
-  });
+    // Then — user created
+    expect(result.status).toBe(201);
+    await result.table('users').toMatch({
+        columns: ['name'],
+        rows: [['Alice'], ['Bob']],
+    });
 });
 ```
 

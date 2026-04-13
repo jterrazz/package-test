@@ -14,7 +14,7 @@ Defined in: [infrastructure/services/postgres.ts:10](https://github.com/jterrazz
 
 Map to a service in docker-compose.test.yaml.
 
-***
+---
 
 ### env?
 
@@ -26,7 +26,7 @@ Defined in: [infrastructure/services/postgres.ts:14](https://github.com/jterrazz
 
 Override environment variables.
 
-***
+---
 
 ### image?
 

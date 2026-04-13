@@ -1,24 +1,24 @@
-import { dirname } from "node:path";
+import { dirname } from 'node:path';
 
-import type { DatabasePort } from "../specification/ports/database.port.js";
-import { ComposeStackAdapter } from "./adapters/compose.adapter.js";
-import { TestcontainersAdapter } from "./adapters/testcontainers.adapter.js";
-import { detectServiceType, findComposeFile, parseComposeFile } from "./compose-parser.js";
-import type { ContainerPort } from "./ports/container.port.js";
-import { type AppInfo, formatStartupReport, type ServiceReport } from "./reporter.js";
-import { postgres } from "./services/postgres.js";
-import { redis } from "./services/redis.js";
-import type { ServiceHandle } from "./services/service.port.js";
+import type { DatabasePort } from '../specification/ports/database.port.js';
+import { ComposeStackAdapter } from './adapters/compose.adapter.js';
+import { TestcontainersAdapter } from './adapters/testcontainers.adapter.js';
+import { detectServiceType, findComposeFile, parseComposeFile } from './compose-parser.js';
+import type { ContainerPort } from './ports/container.port.js';
+import { type AppInfo, formatStartupReport, type ServiceReport } from './reporter.js';
+import { postgres } from './services/postgres.js';
+import { redis } from './services/redis.js';
+import type { ServiceHandle } from './services/service.port.js';
 
 interface RunningService {
-  handle: ServiceHandle;
-  container: ContainerPort | null;
+    handle: ServiceHandle;
+    container: ContainerPort | null;
 }
 
 export interface OrchestratorOptions {
-  services: ServiceHandle[];
-  mode: "e2e" | "integration";
-  root?: string;
+    services: ServiceHandle[];
+    mode: 'e2e' | 'integration';
+    root?: string;
 }
 
 /**
@@ -27,236 +27,241 @@ export interface OrchestratorOptions {
  * E2E: runs full docker compose up.
  */
 export class Orchestrator {
-  private services: ServiceHandle[];
-  private mode: "e2e" | "integration";
-  private root: string;
-  private running: RunningService[] = [];
-  private composeStack: ComposeStackAdapter | null = null;
-  private composeHandles: ServiceHandle[] = [];
-  private started = false;
+    private services: ServiceHandle[];
+    private mode: 'e2e' | 'integration';
+    private root: string;
+    private running: RunningService[] = [];
+    private composeStack: ComposeStackAdapter | null = null;
+    private composeHandles: ServiceHandle[] = [];
+    private started = false;
 
-  constructor(options: OrchestratorOptions) {
-    this.services = options.services;
-    this.mode = options.mode;
-    this.root = options.root ?? process.cwd();
-  }
-
-  /**
-   * Start declared services via testcontainers (integration mode).
-   * Phase 1: start all containers in parallel (the slow part).
-   * Phase 2: wire connections, healthcheck, and init sequentially (fast).
-   */
-  async start(): Promise<void> {
-    if (this.started) {
-      return;
+    constructor(options: OrchestratorOptions) {
+        this.services = options.services;
+        this.mode = options.mode;
+        this.root = options.root ?? process.cwd();
     }
 
-    const composePath = findComposeFile(this.root);
-    const composeDir = composePath ? dirname(composePath) : this.root;
-    const composeConfig = composePath ? parseComposeFile(composePath) : null;
-
-    // Phase 1: resolve config and start all containers in parallel
-    const containerTasks = this.services.map((handle) => {
-      let image = handle.defaultImage;
-      let env = { ...handle.environment };
-
-      if (handle.composeName && composeConfig) {
-        const composeService = composeConfig.services.find((s) => s.name === handle.composeName);
-        if (composeService) {
-          image = composeService.image ?? image;
-          env = { ...env, ...composeService.environment };
-          Object.assign(handle.environment, composeService.environment);
-        }
-      }
-
-      const container = new TestcontainersAdapter({ image, port: handle.defaultPort, env });
-      return { container, handle };
-    });
-
-    // Start all containers concurrently
-    await Promise.all(containerTasks.map(({ container }) => container.start()));
-
-    // Phase 2: wire connections, healthcheck, init (fast — containers already running)
-    const reports: ServiceReport[] = [];
-
-    for (const { container, handle } of containerTasks) {
-      const serviceStartTime = Date.now();
-
-      try {
-        const host = container.getHost();
-        const port = container.getMappedPort(handle.defaultPort);
-        handle.connectionString = handle.buildConnectionString(host, port);
-
-        await handle.healthcheck();
-        await handle.initialize(composeDir);
-        handle.started = true;
-
-        reports.push({
-          name: handle.composeName ?? handle.type,
-          type: handle.type,
-          connectionString: handle.connectionString,
-          durationMs: Date.now() - serviceStartTime,
-        });
-        this.running.push({ handle, container });
-      } catch (error: any) {
-        let logs = "";
-        try {
-          logs = await container.getLogs();
-        } catch {
-          /* Ignore log fetch errors */
-        }
-        try {
-          await container.stop();
-        } catch {
-          /* Ignore stop errors */
+    /**
+     * Start declared services via testcontainers (integration mode).
+     * Phase 1: start all containers in parallel (the slow part).
+     * Phase 2: wire connections, healthcheck, and init sequentially (fast).
+     */
+    async start(): Promise<void> {
+        if (this.started) {
+            return;
         }
 
-        reports.push({
-          name: handle.composeName ?? handle.type,
-          type: handle.type,
-          durationMs: Date.now() - serviceStartTime,
-          error: error.message,
-          logs,
+        const composePath = findComposeFile(this.root);
+        const composeDir = composePath ? dirname(composePath) : this.root;
+        const composeConfig = composePath ? parseComposeFile(composePath) : null;
+
+        // Phase 1: resolve config and start all containers in parallel
+        const containerTasks = this.services.map((handle) => {
+            let image = handle.defaultImage;
+            let env = { ...handle.environment };
+
+            if (handle.composeName && composeConfig) {
+                const composeService = composeConfig.services.find(
+                    (s) => s.name === handle.composeName,
+                );
+                if (composeService) {
+                    image = composeService.image ?? image;
+                    env = { ...env, ...composeService.environment };
+                    Object.assign(handle.environment, composeService.environment);
+                }
+            }
+
+            const container = new TestcontainersAdapter({ image, port: handle.defaultPort, env });
+            return { container, handle };
         });
 
-        const output = formatStartupReport("integration", reports, { type: "in-process" });
-        console.error(output);
-        throw error;
-      }
+        // Start all containers concurrently
+        await Promise.all(containerTasks.map(({ container }) => container.start()));
+
+        // Phase 2: wire connections, healthcheck, init (fast — containers already running)
+        const reports: ServiceReport[] = [];
+
+        for (const { container, handle } of containerTasks) {
+            const serviceStartTime = Date.now();
+
+            try {
+                const host = container.getHost();
+                const port = container.getMappedPort(handle.defaultPort);
+                handle.connectionString = handle.buildConnectionString(host, port);
+
+                await handle.healthcheck();
+                await handle.initialize(composeDir);
+                handle.started = true;
+
+                reports.push({
+                    name: handle.composeName ?? handle.type,
+                    type: handle.type,
+                    connectionString: handle.connectionString,
+                    durationMs: Date.now() - serviceStartTime,
+                });
+                this.running.push({ handle, container });
+            } catch (error: any) {
+                let logs = '';
+                try {
+                    logs = await container.getLogs();
+                } catch {
+                    /* Ignore log fetch errors */
+                }
+                try {
+                    await container.stop();
+                } catch {
+                    /* Ignore stop errors */
+                }
+
+                reports.push({
+                    name: handle.composeName ?? handle.type,
+                    type: handle.type,
+                    durationMs: Date.now() - serviceStartTime,
+                    error: error.message,
+                    logs,
+                });
+
+                const output = formatStartupReport('integration', reports, { type: 'in-process' });
+                console.error(output);
+                throw error;
+            }
+        }
+
+        this.started = true;
+
+        const appInfo: AppInfo = { type: 'in-process' };
+        const output = formatStartupReport('integration', reports, appInfo);
+        console.log(output);
     }
 
-    this.started = true;
-
-    const appInfo: AppInfo = { type: "in-process" };
-    const output = formatStartupReport("integration", reports, appInfo);
-    console.log(output);
-  }
-
-  /**
-   * Stop testcontainers (integration mode).
-   */
-  async stop(): Promise<void> {
-    for (const { container } of this.running) {
-      if (container) {
-        await container.stop();
-      }
-    }
-    this.running = [];
-    this.started = false;
-  }
-
-  /**
-   * Start full docker compose stack (e2e mode).
-   * Auto-detects infra services and creates handles for them.
-   */
-  async startCompose(): Promise<void> {
-    const composePath = findComposeFile(this.root);
-    if (!composePath) {
-      throw new Error(`E2E: no compose file found in ${this.root}`);
+    /**
+     * Stop testcontainers (integration mode).
+     */
+    async stop(): Promise<void> {
+        for (const { container } of this.running) {
+            if (container) {
+                await container.stop();
+            }
+        }
+        this.running = [];
+        this.started = false;
     }
 
-    const startTime = Date.now();
-    const composeDir = dirname(composePath);
-    const composeConfig = parseComposeFile(composePath);
+    /**
+     * Start full docker compose stack (e2e mode).
+     * Auto-detects infra services and creates handles for them.
+     */
+    async startCompose(): Promise<void> {
+        const composePath = findComposeFile(this.root);
+        if (!composePath) {
+            throw new Error(`E2E: no compose file found in ${this.root}`);
+        }
 
-    this.composeStack = new ComposeStackAdapter(composePath);
-    await this.composeStack.start();
+        const startTime = Date.now();
+        const composeDir = dirname(composePath);
+        const composeConfig = parseComposeFile(composePath);
 
-    // Create handles for detected infra services
-    for (const service of composeConfig.infraServices) {
-      const type = detectServiceType(service.image);
+        this.composeStack = new ComposeStackAdapter(composePath);
+        await this.composeStack.start();
 
-      if (type === "postgres") {
-        const handle = postgres({ compose: service.name, env: service.environment });
-        const port = this.composeStack.getMappedPort(service.name, 5432);
-        handle.connectionString = handle.buildConnectionString("localhost", port);
+        // Create handles for detected infra services
+        for (const service of composeConfig.infraServices) {
+            const type = detectServiceType(service.image);
 
-        await handle.initialize(composeDir);
-        handle.started = true;
+            if (type === 'postgres') {
+                const handle = postgres({ compose: service.name, env: service.environment });
+                const port = this.composeStack.getMappedPort(service.name, 5432);
+                handle.connectionString = handle.buildConnectionString('localhost', port);
 
-        this.composeHandles.push(handle);
-      } else if (type === "redis") {
-        const handle = redis({ compose: service.name });
-        const port = this.composeStack.getMappedPort(service.name, 6379);
-        handle.connectionString = handle.buildConnectionString("localhost", port);
-        handle.started = true;
+                await handle.initialize(composeDir);
+                handle.started = true;
 
-        this.composeHandles.push(handle);
-      }
+                this.composeHandles.push(handle);
+            } else if (type === 'redis') {
+                const handle = redis({ compose: service.name });
+                const port = this.composeStack.getMappedPort(service.name, 6379);
+                handle.connectionString = handle.buildConnectionString('localhost', port);
+                handle.started = true;
+
+                this.composeHandles.push(handle);
+            }
+        }
+
+        const durationMs = Date.now() - startTime;
+        const reports: ServiceReport[] = this.composeHandles.map((h) => ({
+            name: h.composeName ?? h.type,
+            type: h.type,
+            connectionString: h.connectionString,
+            durationMs,
+        }));
+
+        const appUrl = this.getAppUrl();
+        const appInfo: AppInfo = { type: 'http', url: appUrl ?? undefined };
+        const output = formatStartupReport('e2e', reports, appInfo);
+        console.log(output);
     }
 
-    const durationMs = Date.now() - startTime;
-    const reports: ServiceReport[] = this.composeHandles.map((h) => ({
-      name: h.composeName ?? h.type,
-      type: h.type,
-      connectionString: h.connectionString,
-      durationMs,
-    }));
-
-    const appUrl = this.getAppUrl();
-    const appInfo: AppInfo = { type: "http", url: appUrl ?? undefined };
-    const output = formatStartupReport("e2e", reports, appInfo);
-    console.log(output);
-  }
-
-  /**
-   * Stop docker compose stack (e2e mode).
-   */
-  async stopCompose(): Promise<void> {
-    if (this.composeStack) {
-      await this.composeStack.stop();
-      this.composeStack = null;
-    }
-    this.composeHandles = [];
-  }
-
-  /**
-   * Get a database service by compose name, or the first one if no name given.
-   */
-  getDatabase(serviceName?: string): DatabasePort | null {
-    for (const handle of [...this.services, ...this.composeHandles]) {
-      if (serviceName && handle.composeName !== serviceName) {
-        continue;
-      }
-      const adapter = handle.createDatabaseAdapter();
-      if (adapter) {
-        return adapter;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Get all database services keyed by compose name.
-   */
-  getDatabases(): Map<string, DatabasePort> {
-    const map = new Map<string, DatabasePort>();
-    for (const handle of [...this.services, ...this.composeHandles]) {
-      const adapter = handle.createDatabaseAdapter();
-      if (adapter && handle.composeName) {
-        map.set(handle.composeName, adapter);
-      }
-    }
-    return map;
-  }
-
-  /**
-   * Get app URL from compose (e2e mode).
-   */
-  getAppUrl(): null | string {
-    const composePath = findComposeFile(this.root);
-    if (!composePath || !this.composeStack) {
-      return null;
+    /**
+     * Stop docker compose stack (e2e mode).
+     */
+    async stopCompose(): Promise<void> {
+        if (this.composeStack) {
+            await this.composeStack.stop();
+            this.composeStack = null;
+        }
+        this.composeHandles = [];
     }
 
-    const config = parseComposeFile(composePath);
-    const appService = config.appService;
-
-    if (!appService || appService.ports.length === 0) {
-      return null;
+    /**
+     * Get a database service by compose name, or the first one if no name given.
+     */
+    getDatabase(serviceName?: string): DatabasePort | null {
+        for (const handle of [...this.services, ...this.composeHandles]) {
+            if (serviceName && handle.composeName !== serviceName) {
+                continue;
+            }
+            const adapter = handle.createDatabaseAdapter();
+            if (adapter) {
+                return adapter;
+            }
+        }
+        return null;
     }
 
-    const port = this.composeStack.getMappedPort(appService.name, appService.ports[0].container);
-    return `http://localhost:${port}`;
-  }
+    /**
+     * Get all database services keyed by compose name.
+     */
+    getDatabases(): Map<string, DatabasePort> {
+        const map = new Map<string, DatabasePort>();
+        for (const handle of [...this.services, ...this.composeHandles]) {
+            const adapter = handle.createDatabaseAdapter();
+            if (adapter && handle.composeName) {
+                map.set(handle.composeName, adapter);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Get app URL from compose (e2e mode).
+     */
+    getAppUrl(): null | string {
+        const composePath = findComposeFile(this.root);
+        if (!composePath || !this.composeStack) {
+            return null;
+        }
+
+        const config = parseComposeFile(composePath);
+        const appService = config.appService;
+
+        if (!appService || appService.ports.length === 0) {
+            return null;
+        }
+
+        const port = this.composeStack.getMappedPort(
+            appService.name,
+            appService.ports[0].container,
+        );
+        return `http://localhost:${port}`;
+    }
 }

@@ -113,31 +113,31 @@ tests/
 Every test uses `// Given` and `// Then` comments. **Always both, never one without the other.**
 
 ```typescript
-test("creates a user and returns 201", async () => {
-  // Given — two existing users
-  const result = await spec("creates user")
-    .seed("initial-users.sql")
-    .post("/users", "new-user.json")
-    .run();
+test('creates a user and returns 201', async () => {
+    // Given — two existing users
+    const result = await spec('creates user')
+        .seed('initial-users.sql')
+        .post('/users', 'new-user.json')
+        .run();
 
-  // Then — user created with all three in table
-  expect(result.status).toBe(201);
-  await result.table("users").toMatch({
-    columns: ["name"],
-    rows: [["Alice"], ["Bob"], ["Charlie"]],
-  });
+    // Then — user created with all three in table
+    expect(result.status).toBe(201);
+    await result.table('users').toMatch({
+        columns: ['name'],
+        rows: [['Alice'], ['Bob'], ['Charlie']],
+    });
 });
 ```
 
 ```typescript
-test("builds the project", async () => {
-  // Given — sample app project
-  const result = await spec("build").project("sample-app").exec("build").run();
+test('builds the project', async () => {
+    // Given — sample app project
+    const result = await spec('build').project('sample-app').exec('build').run();
 
-  // Then — ESM output with source maps
-  expect(result.exitCode).toBe(0);
-  expect(result.file("dist/index.js").exists).toBe(true);
-  expect(result.file("dist/index.js.map").exists).toBe(true);
+    // Then — ESM output with source maps
+    expect(result.exitCode).toBe(0);
+    expect(result.file('dist/index.js').exists).toBe(true);
+    expect(result.file('dist/index.js.map').exists).toBe(true);
 });
 ```
 
