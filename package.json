@@ -21,6 +21,7 @@
     },
     "scripts": {
         "build": "typescript bundle",
+        "docs": "typescript docs",
         "lint": "codestyle check",
         "lint:fix": "codestyle fix",
         "test": "vitest --run"
@@ -36,12 +37,10 @@
     "devDependencies": {
         "@hono/node-server": "^1.19.11",
         "@jterrazz/codestyle": "^3.0.9",
-        "@jterrazz/typescript": "^5.2.0",
+        "@jterrazz/typescript": "^5.3.0",
         "@types/node": "^25.5.0",
         "@types/pg": "^8.20.0",
         "hono": "^4.12.9",
-        "typedoc": "^0.28.18",
-        "typedoc-plugin-markdown": "^4.11.0",
         "vitest": "^4.1.2"
     },
     "peerDependencies": {

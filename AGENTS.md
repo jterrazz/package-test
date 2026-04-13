@@ -19,7 +19,7 @@ Requires Docker running for `integration()` and `e2e()` self-tests.
 | Build the bundle                 | `npm run build`                                      |
 | Lint + format + typecheck + knip | `npm run lint`                                       |
 | Auto-fix lint issues             | `npm run lint:fix`                                   |
-| Regenerate API reference         | `npx typedoc`                                        |
+| Generate API docs + llms.txt     | `npm run docs` (or `make docs`)                      |
 
 ## Repo layout
 
@@ -81,6 +81,6 @@ This package self-tests via its own framework — i.e. the e2e tests under `test
 
 ## Docs
 
-- API reference (auto-generated): `npx typedoc` → `.docs/`
+- `npm run docs` generates API reference + `llms.txt` + `llms-full.txt` to `.docs/`
+- CI auto-deploys to GitHub Pages on push to main
 - Agent ingestion: <https://jterrazz.github.io/package-test/llms-full.txt>
-- CI deploys typedoc output + `llms.txt` + `llms-full.txt` to GitHub Pages
