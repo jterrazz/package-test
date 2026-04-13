@@ -1,7 +1,0 @@
-{
-  "extends": ["node_modules/@jterrazz/codestyle/presets/oxlint/node.json"],
-  "ignorePatterns": ["tests/**/fixtures/**"],
-  "rules": {
-    "import/exports-last": "off"
-  }
-}
