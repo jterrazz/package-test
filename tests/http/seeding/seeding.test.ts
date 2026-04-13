@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { integrationSpec } from '../../setup/integration.specification.js';
-import { runners } from '../../setup/runners.js';
+import { httpRunners } from '../../setup/http-runners.js';
+import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical paths — both integration and e2e ──
 
-describe.each(runners)('$name — seeding', ({ spec }) => {
+describe.each(httpRunners)('$name — seeding', ({ spec }) => {
     test('loads a single seed file', async () => {
         // Given — one user seeded
         const result = await spec('single seed').seed('one-user.sql').get('/users').run();
@@ -38,10 +38,7 @@ describe.each(runners)('$name — seeding', ({ spec }) => {
 describe('integration — seeding details', () => {
     test('seeds default database without service option', async () => {
         // Given — seed users in default db
-        const result = await integrationSpec('default seed')
-            .seed('one-user.sql')
-            .get('/users')
-            .run();
+        const result = await httpSpec('default seed').seed('one-user.sql').get('/users').run();
 
         // Then — user appears in default database
         await result.table('users').toMatch({
@@ -52,7 +49,7 @@ describe('integration — seeding details', () => {
 
     test('seeds a specific database with service option', async () => {
         // Given — seed events in analytics-db
-        const result = await integrationSpec('analytics seed')
+        const result = await httpSpec('analytics seed')
             .seed('one-event.sql', { service: 'analytics-db' })
             .get('/events')
             .run();
@@ -66,7 +63,7 @@ describe('integration — seeding details', () => {
 
     test('seeds both databases independently', async () => {
         // Given — seed users in default db and events in analytics-db
-        const result = await integrationSpec('dual seed')
+        const result = await httpSpec('dual seed')
             .seed('two-users.sql')
             .seed('two-events.sql', { service: 'analytics-db' })
             .get('/users')
@@ -88,14 +85,14 @@ describe('integration — seeding details', () => {
     test('throws on nonexistent seed file', async () => {
         // Given — reference to nonexistent seed
         await expect(
-            integrationSpec('bad seed').seed('nonexistent.sql').get('/users').run(),
+            httpSpec('bad seed').seed('nonexistent.sql').get('/users').run(),
         ).rejects.toThrow('ENOENT');
     });
 
     test('throws on unknown service name', async () => {
         // Given — reference to nonexistent database service
         await expect(
-            integrationSpec('bad service')
+            httpSpec('bad service')
                 .seed('one-user.sql', { service: 'nonexistent-db' })
                 .get('/users')
                 .run(),

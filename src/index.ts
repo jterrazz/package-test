@@ -1,4 +1,17 @@
-// Runners
+// ── Primary API ──
+export { spec, type SpecOptions, type SpecRunner } from './runner/spec.js';
+export {
+    app,
+    type AppTarget,
+    command,
+    type CommandTarget,
+    type HttpTarget,
+    type SpecTarget,
+    stack,
+    type StackTarget,
+} from './runner/targets.js';
+
+// ── Legacy aliases (backward compatibility) ──
 export { cli, type CliOptions } from './runner/cli.js';
 export { e2e, type E2eOptions } from './runner/e2e.js';
 export {

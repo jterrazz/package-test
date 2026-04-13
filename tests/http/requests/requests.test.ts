@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { integrationSpec } from '../../setup/integration.specification.js';
-import { runners } from '../../setup/runners.js';
+import { httpRunners } from '../../setup/http-runners.js';
+import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical paths — both integration and e2e ──
 
-describe.each(runners)('$name — requests', ({ spec }) => {
+describe.each(httpRunners)('$name — requests', ({ spec }) => {
     test('sends GET request', async () => {
         // Given — seeded data
         const result = await spec('GET').seed('two-users.sql').get('/users').run();
@@ -53,7 +53,7 @@ describe('integration — request errors', () => {
     test('throws when run() called without a request method', async () => {
         // Given — seed but no .get()/.post()/.delete()
         try {
-            await integrationSpec('no request').seed('one-user.sql').run();
+            await httpSpec('no request').seed('one-user.sql').run();
             expect.fail('should have thrown');
         } catch (error: any) {
             // Then — descriptive error with spec label
@@ -65,8 +65,8 @@ describe('integration — request errors', () => {
 
     test('throws on nonexistent request body file', async () => {
         // Given — reference to nonexistent body file
-        await expect(
-            integrationSpec('bad body').post('/users', 'nonexistent.json').run(),
-        ).rejects.toThrow('ENOENT');
+        await expect(httpSpec('bad body').post('/users', 'nonexistent.json').run()).rejects.toThrow(
+            'ENOENT',
+        );
     });
 });

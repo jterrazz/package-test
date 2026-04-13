@@ -3,14 +3,14 @@ import { describe, expect, test } from 'vitest';
 import { stripAnsi } from '../../../src/index.js';
 import { cliSpec } from '../../setup/cli.specification.js';
 import { dedent } from '../../setup/helpers/dedent.js';
-import { integrationSpec } from '../../setup/integration.specification.js';
-import { runners } from '../../setup/runners.js';
+import { httpRunners } from '../../setup/http-runners.js';
+import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical path — both integration and e2e ──
 
 describe('shared assertions', () => {
     describe('table().toMatch', () => {
-        describe.each(runners)('$name', ({ spec }) => {
+        describe.each(httpRunners)('$name', ({ spec }) => {
             test('matches single column', async () => {
                 // Given — one user seeded
                 const result = await spec('single col').seed('one-user.sql').get('/users').run();
@@ -40,7 +40,7 @@ describe('shared assertions', () => {
     describe('integration — table details', () => {
         test('queries a specific service by name', async () => {
             // Given — seed analytics directly
-            const result = await integrationSpec('query analytics')
+            const result = await httpSpec('query analytics')
                 .seed('two-events.sql', { service: 'analytics-db' })
                 .get('/events')
                 .run();
@@ -57,7 +57,7 @@ describe('shared assertions', () => {
 
         test('shows diff on multi-column mismatch', async () => {
             // Given — two users in table, expecting wrong values
-            const result = await integrationSpec('multi col diff')
+            const result = await httpSpec('multi col diff')
                 .seed('two-users.sql')
                 .get('/users')
                 .run();
@@ -93,10 +93,7 @@ describe('shared assertions', () => {
 
         test('shows diff on extra rows', async () => {
             // Given — table has more rows than expected
-            const result = await integrationSpec('extra rows')
-                .seed('two-users.sql')
-                .get('/users')
-                .run();
+            const result = await httpSpec('extra rows').seed('two-users.sql').get('/users').run();
 
             // Then — row count mismatch + extra rows with + marker
             try {
@@ -121,7 +118,7 @@ describe('shared assertions', () => {
 
         test('shows diff on missing rows', async () => {
             // Given — empty table, expecting rows
-            const result = await integrationSpec('missing rows').get('/users').run();
+            const result = await httpSpec('missing rows').get('/users').run();
 
             // Then — row count mismatch + missing rows with - marker
             try {
@@ -145,7 +142,7 @@ describe('shared assertions', () => {
 
         test('throws on unknown service name', async () => {
             // Given — valid request
-            const result = await integrationSpec('bad table service').get('/users').run();
+            const result = await httpSpec('bad table service').get('/users').run();
 
             // Then — table() with nonexistent service fails clearly
             expect(() => result.table('users', { service: 'nonexistent-db' })).toThrow(

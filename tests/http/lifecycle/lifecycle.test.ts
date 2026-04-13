@@ -1,8 +1,8 @@
 import { describe, test } from 'vitest';
 
-import { runners } from '../../setup/runners.js';
+import { httpRunners } from '../../setup/http-runners.js';
 
-describe.each(runners)('$name — lifecycle', ({ spec }) => {
+describe.each(httpRunners)('$name — lifecycle', ({ spec }) => {
     test('resets database before each spec', async () => {
         // Given — data from a previous spec
         await spec('seed first').seed('two-users.sql').get('/users').run();

@@ -1,6 +1,6 @@
 # Agent brief — `@jterrazz/test`
 
-Declarative testing framework for APIs and CLIs. Same fluent builder, three execution modes (`integration()`, `e2e()`, `cli()`).
+Declarative testing framework for APIs and CLIs. One entry point (`spec()`), three targets (`app()`, `stack()`, `command()`).
 
 ## Setup
 
@@ -8,25 +8,27 @@ Declarative testing framework for APIs and CLIs. Same fluent builder, three exec
 npm install
 ```
 
-Requires Docker running for `integration()` and `e2e()` self-tests.
+Requires Docker running for `http(app(...))` and `http(stack(...))` self-tests.
 
 ## Commands
 
-| Task                             | Command                                              |
-| -------------------------------- | ---------------------------------------------------- |
-| Run all tests                    | `npm test`                                           |
-| Run fast tests only (no infra)   | `npx vitest --run env directory exec assertions-cli` |
-| Build the bundle                 | `npm run build`                                      |
-| Lint + format + typecheck + knip | `npm run lint`                                       |
-| Auto-fix lint issues             | `npm run lint:fix`                                   |
-| Generate API docs + llms.txt     | `npm run docs` (or `make docs`)                      |
+| Task                             | Command                               |
+| -------------------------------- | ------------------------------------- |
+| Run all tests                    | `npm test`                            |
+| Run fast tests only (no infra)   | `npx vitest --run tests/cli/`         |
+| Build the bundle                 | `npm run build`                       |
+| Lint + format + typecheck + knip | `npm run lint`                        |
+| Auto-fix lint issues             | `npm run lint:fix`                    |
+| Generate API docs + llms.txt     | `npm run docs` (or `make docs`)       |
 
 ## Repo layout
 
 ```
 src/
 ├── index.ts                       # public entry — re-exports everything
-├── runner/                        # entry point factories (integration, e2e, cli)
+├── runner/                        # spec() + target factories (app, stack, command)
+│   ├── spec.ts                    # spec() entry point — dispatches to targets
+│   └── targets.ts                 # app(), stack(), command() factories
 ├── builder/                       # core domain — fluent builder + result accessors
 │   ├── specification-builder.ts   # SpecificationBuilder + createSpecificationRunner
 │   ├── specification-result.ts    # SpecificationResult + FileAccessor
@@ -40,44 +42,29 @@ src/
 ├── utilities/                     # reporter, directory walk/diff, grep
 └── mocking/                       # mockOf, mockOfDate
 tests/
-├── e2e/                           # self-tests organized by feature
-│   ├── exec/                      # CLI exec / spawn / env tests
-│   ├── assertions/                # all result.* assertion tests + directory snapshots
-│   ├── lifecycle/                 # orchestrator startup/shutdown
-│   ├── requests/                  # HTTP request body handling
-│   └── seeding/                   # SQL seed loading
-├── integration/                   # heavier infra tests
+├── http/                          # HTTP-based spec tests (lifecycle, requests, seeding, assertions)
+├── cli/                           # CLI-based spec tests (exec, env, directory snapshots)
+├── integration/                   # heavier infra tests (container lifecycle, docker)
 └── setup/                         # spec runners + shared fixtures
-skills/jterrazz-test/SKILL.md      # Claude skill — activation triggers + decision matrix
+    ├── http.specification.ts      # spec(app(...)) — in-process Hono
+    ├── http-compose.specification.ts # spec(stack(...)) — docker compose
+    ├── http-runners.ts            # [app, stack] for describe.each
+    └── cli.specification.ts       # spec(command(...))
+skills/jterrazz-test/SKILL.md     # Claude skill
 ```
 
 ## Conventions
 
 This repo follows the `jterrazz-stack` skill for everything cross-cutting:
 
-- Commit messages, release process (release-please / changesets — TBD)
 - Lint config (`@jterrazz/codestyle` — oxlint + oxfmt + knip + tsc)
 - Test writing convention (`// Given —` / `// Then —` comments, always both)
-- File naming (`*.test.ts`, `*.integration.test.ts`, `*.e2e.test.ts`)
+- File naming (`*.test.ts`, `*.integration.test.ts`)
 - Directory layout for tests (`seeds/`, `fixtures/`, `requests/`, `responses/`, `expected/`)
-
-See the [`jterrazz-stack`](../package-stack) skill for the full ecosystem contract.
-
-## Release
-
-The current release flow is manual:
-
-1. Bump `version` in `package.json`.
-2. Add an entry to `CHANGELOG.md` under `## [Unreleased]`, then promote to a versioned section.
-3. `git tag vX.Y.Z && git push --tags`
-4. `gh release create vX.Y.Z --title vX.Y.Z --notes-file <(awk '/^## \[X.Y.Z\]/,/^## \[/' CHANGELOG.md)`
-5. The `release.yaml` workflow validates and publishes to npm with provenance.
-
-For any commit that introduces a behavior change a downstream caller might miss, the `CHANGELOG.md` entry MUST include a `### ⚠ BREAKING CHANGES` section with a migration block before the release ships.
 
 ## Self-test on changes
 
-This package self-tests via its own framework — i.e. the e2e tests under `tests/e2e/` use the `cli()` runner against a fixture CLI app (`tests/setup/fixtures/cli-app/cli.sh`). When you change `SpecificationBuilder` or `DirectoryAccessor`, the self-tests are the canonical regression coverage.
+This package self-tests via its own framework — the tests under `tests/cli/` use `spec(command(...))` against a fixture CLI app (`tests/setup/fixtures/cli-app/cli.sh`). When you change `SpecificationBuilder` or `DirectoryAccessor`, these are the canonical regression coverage.
 
 ## Docs
 

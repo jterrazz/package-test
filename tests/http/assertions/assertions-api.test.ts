@@ -2,12 +2,12 @@ import { describe, expect, test } from 'vitest';
 
 import { stripAnsi } from '../../../src/index.js';
 import { dedent } from '../../setup/helpers/dedent.js';
-import { integrationSpec } from '../../setup/integration.specification.js';
-import { runners } from '../../setup/runners.js';
+import { httpRunners } from '../../setup/http-runners.js';
+import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical path — both integration and e2e ──
 
-describe.each(runners)('$name — api assertions', ({ spec }) => {
+describe.each(httpRunners)('$name — api assertions', ({ spec }) => {
     test('returns correct status code', async () => {
         // Given — seeded data
         const result = await spec('correct status').seed('two-users.sql').get('/users').run();
@@ -30,10 +30,7 @@ describe.each(runners)('$name — api assertions', ({ spec }) => {
 describe('integration — api assertion details', () => {
     test('response.toMatchFile shows diff on mismatch', async () => {
         // Given — response differs from expected file
-        const result = await integrationSpec('wrong body')
-            .seed('two-users.sql')
-            .get('/users')
-            .run();
+        const result = await httpSpec('wrong body').seed('two-users.sql').get('/users').run();
 
         // Then — error shows file name + -/+ diff
         try {
@@ -68,7 +65,7 @@ describe('integration — api assertion details', () => {
 
     test('response.toMatchFile throws on nonexistent file', async () => {
         // Given — valid request
-        const result = await integrationSpec('bad response').get('/users').run();
+        const result = await httpSpec('bad response').get('/users').run();
 
         // Then — ENOENT error
         expect(() => result.response.toMatchFile('nonexistent.json')).toThrow('ENOENT');

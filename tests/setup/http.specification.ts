@@ -1,21 +1,21 @@
 import { afterAll } from 'vitest';
 
-import { integration, postgres, redis } from '../../src/index.js';
+import { app, postgres, redis, spec } from '../../src/index.js';
 import { createApp } from './fixtures/app/app.js';
 
 const db = postgres({ compose: 'db' });
 const analyticsDb = postgres({ compose: 'analytics-db' });
 const cache = redis({ compose: 'cache' });
 
-export const integrationSpec = await integration({
-    services: [db, analyticsDb, cache],
-    app: () =>
+export const httpSpec = await spec(
+    app(() =>
         createApp({
             databaseUrl: db.connectionString,
             analyticsDatabaseUrl: analyticsDb.connectionString,
             redisUrl: cache.connectionString,
         }),
-    root: './fixtures/app',
-});
+    ),
+    { services: [db, analyticsDb, cache], root: './fixtures/app' },
+);
 
-afterAll(() => integrationSpec.cleanup());
+afterAll(() => httpSpec.cleanup());

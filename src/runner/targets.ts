@@ -1,0 +1,75 @@
+/**
+ * Target factories for {@link spec}. Each target describes what is being tested
+ * and how the specification runner should connect to it.
+ */
+
+type HonoApp = {
+    fetch: (...args: any[]) => any;
+    request: (path: string, init?: RequestInit) => Promise<Response> | Response;
+};
+
+// ── Target types ──
+
+/** In-process Hono app target. Created by {@link app}. */
+export interface AppTarget {
+    readonly kind: 'app';
+    readonly factory: () => HonoApp;
+}
+
+/** Docker compose stack target. Created by {@link stack}. */
+export interface StackTarget {
+    readonly kind: 'stack';
+    readonly root: string;
+}
+
+/** CLI command target. Created by {@link command}. */
+export interface CommandTarget {
+    readonly kind: 'command';
+    readonly bin: string;
+}
+
+/** Any target that produces an HTTP interface (app or stack). */
+export type HttpTarget = AppTarget | StackTarget;
+
+/** Any valid spec target. */
+export type SpecTarget = AppTarget | CommandTarget | StackTarget;
+
+// ── Target factories ──
+
+/**
+ * Test against an in-process Hono app. Services are started via testcontainers
+ * and the app runs without network overhead.
+ *
+ * @param factory - Function that returns a Hono app instance (called after services start).
+ *
+ * @example
+ *   await spec(app(() => createApp(db)), { services: [db] });
+ */
+export function app(factory: () => HonoApp): AppTarget {
+    return { kind: 'app', factory };
+}
+
+/**
+ * Test against a full docker compose stack. The stack is started with
+ * `docker compose up` and real HTTP requests are sent to the app service.
+ *
+ * @param root - Project root containing `docker/compose.test.yaml`.
+ *
+ * @example
+ *   await spec(stack('../../'));
+ */
+export function stack(root: string): StackTarget {
+    return { kind: 'stack', root };
+}
+
+/**
+ * Test a CLI binary. Each spec runs in a fresh temp directory.
+ *
+ * @param bin - Path to the CLI binary or command name (resolved from node_modules/.bin or PATH).
+ *
+ * @example
+ *   await spec(command('my-cli'), { root: '../fixtures' });
+ */
+export function command(bin: string): CommandTarget {
+    return { kind: 'command', bin };
+}
