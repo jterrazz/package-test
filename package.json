@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@hono/node-server": "^1.19.11",
-    "@jterrazz/codestyle": "^2.2.0",
+    "@jterrazz/codestyle": "^3.0.0",
     "@jterrazz/typescript": "^5.2.0",
     "@types/node": "^25.5.0",
     "@types/pg": "^8.20.0",
