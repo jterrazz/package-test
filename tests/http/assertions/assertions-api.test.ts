@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { stripAnsi } from '../../../src/index.js';
 import { dedent } from '../../setup/helpers/dedent.js';
-import { httpSpec } from '../../setup/http.specification.js';
+import { httpSpec } from '../../setup/http-spec.js';
 
 // ── Critical path — both integration and e2e ──
 

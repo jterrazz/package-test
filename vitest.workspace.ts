@@ -9,9 +9,24 @@ export default defineWorkspace([
     },
     {
         test: {
-            name: 'infra',
+            name: 'http-app',
             fileParallelism: false,
-            include: ['tests/http/**/*.test.ts', 'tests/integration/**/*.test.ts'],
+            include: ['tests/http/**/*.test.ts'],
+        },
+    },
+    {
+        test: {
+            name: 'http-stack',
+            fileParallelism: false,
+            include: ['tests/http/**/*.test.ts'],
+            env: { SPEC_RUNNER: 'stack' },
+        },
+    },
+    {
+        test: {
+            name: 'adapters',
+            fileParallelism: false,
+            include: ['tests/adapters/**/*.test.ts'],
         },
     },
 ]);
