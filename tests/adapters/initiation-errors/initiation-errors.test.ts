@@ -8,12 +8,12 @@ import { Orchestrator } from '../../../src/orchestrator/orchestrator.js';
 
 const BROKEN_POSTGRES_INIT = resolve(
     import.meta.dirname,
-    '../../../setup/fixtures/broken-postgres-init',
+    '../../setup/fixtures/broken-postgres-init',
 );
-const BROKEN_MULTI_INIT = resolve(import.meta.dirname, '../../../setup/fixtures/broken-multi-init');
+const BROKEN_MULTI_INIT = resolve(import.meta.dirname, '../../setup/fixtures/broken-multi-init');
 const BROKEN_SECOND_POSTGRES = resolve(
     import.meta.dirname,
-    '../../../setup/fixtures/broken-second-postgres',
+    '../../setup/fixtures/broken-second-postgres',
 );
 
 describe('initiation errors', () => {
