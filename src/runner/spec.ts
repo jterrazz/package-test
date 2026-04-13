@@ -100,7 +100,14 @@ async function startApp(target: AppTarget, options: SpecOptions): Promise<SpecRu
     await orchestrator.start();
     await acquireIsolation(services);
 
-    const honoApp = target.factory();
+    // Build services map keyed by composeName or type
+    const servicesMap: Record<string, ServiceHandle> = {};
+    for (const svc of services) {
+        const key = svc.composeName ?? svc.type;
+        servicesMap[key] = svc;
+    }
+
+    const honoApp = target.factory(servicesMap);
     const database = orchestrator.getDatabase() ?? undefined;
     const databases = orchestrator.getDatabases();
 

@@ -59,8 +59,17 @@ export class Orchestrator {
         const composeDir = composePath ? dirname(composePath) : this.root;
         const composeConfig = composePath ? parseComposeFile(composePath) : null;
 
-        // Phase 1: resolve config and start all containers in parallel
-        const containerTasks = this.services.map((handle) => {
+        // Separate services that need containers from embedded ones (e.g. SQLite)
+        const containerServices: { container: TestcontainersAdapter; handle: ServiceHandle }[] = [];
+        const embeddedServices: ServiceHandle[] = [];
+
+        for (const handle of this.services) {
+            if (handle.defaultPort === 0) {
+                // Embedded service (no container needed)
+                embeddedServices.push(handle);
+                continue;
+            }
+
             let image = handle.defaultImage;
             let env = { ...handle.environment };
 
@@ -76,16 +85,23 @@ export class Orchestrator {
             }
 
             const container = new TestcontainersAdapter({ image, port: handle.defaultPort, env });
-            return { container, handle };
-        });
+            containerServices.push({ container, handle });
+        }
 
-        // Start all containers concurrently
-        await Promise.all(containerTasks.map(({ container }) => container.start()));
+        // Phase 1: start containers in parallel + initialize embedded services
+        await Promise.all([
+            ...containerServices.map(({ container }) => container.start()),
+            ...embeddedServices.map(async (handle) => {
+                await handle.initialize(composeDir);
+                handle.started = true;
+                this.running.push({ handle, container: null });
+            }),
+        ]);
 
         // Phase 2: wire connections, healthcheck, init (fast — containers already running)
         const reports: ServiceReport[] = [];
 
-        for (const { container, handle } of containerTasks) {
+        for (const { container, handle } of containerServices) {
             const serviceStartTime = Date.now();
 
             try {

@@ -17,11 +17,11 @@ async function createHttpSpec(): Promise<SpecRunner> {
     const cache = redis({ compose: 'cache' });
 
     return spec(
-        app(() =>
+        app((services) =>
             createApp({
-                databaseUrl: db.connectionString,
-                analyticsDatabaseUrl: analyticsDb.connectionString,
-                redisUrl: cache.connectionString,
+                databaseUrl: services.db.connectionString,
+                analyticsDatabaseUrl: services['analytics-db'].connectionString,
+                redisUrl: services.cache.connectionString,
             }),
         ),
         { services: [db, analyticsDb, cache], root: './fixtures/app' },

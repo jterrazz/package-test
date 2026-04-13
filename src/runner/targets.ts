@@ -3,17 +3,22 @@
  * and how the specification runner should connect to it.
  */
 
+import type { ServiceHandle } from '../ports/service.port.js';
+
 type HonoApp = {
     fetch: (...args: any[]) => any;
     request: (path: string, init?: RequestInit) => Promise<Response> | Response;
 };
+
+/** Services map passed to the app factory after infrastructure starts. */
+export type AppServices = Record<string, ServiceHandle>;
 
 // ── Target types ──
 
 /** In-process Hono app target. Created by {@link app}. */
 export interface AppTarget {
     readonly kind: 'app';
-    readonly factory: () => HonoApp;
+    readonly factory: (services: AppServices) => HonoApp;
 }
 
 /** Docker compose stack target. Created by {@link stack}. */
@@ -37,15 +42,19 @@ export type SpecTarget = AppTarget | CommandTarget | StackTarget;
 // ── Target factories ──
 
 /**
- * Test against an in-process Hono app. Services are started via testcontainers
- * and the app runs without network overhead.
+ * Test against an in-process Hono app. The factory receives started services
+ * so you can wire connection strings into your app/DI container.
  *
- * @param factory - Function that returns a Hono app instance (called after services start).
+ * @param factory - Function that receives services and returns a Hono app instance.
  *
  * @example
- *   await spec(app(() => createApp(db)), { services: [db] });
+ *   const db = postgres({ compose: 'db' });
+ *   await spec(
+ *       app((services) => createApp({ databaseUrl: services.db.connectionString })),
+ *       { services: [db] },
+ *   );
  */
-export function app(factory: () => HonoApp): AppTarget {
+export function app(factory: (services: AppServices) => HonoApp): AppTarget {
     return { kind: 'app', factory };
 }
 

@@ -2,6 +2,7 @@
 export { spec, type SpecOptions, type SpecRunner } from './runner/spec.js';
 export {
     app,
+    type AppServices,
     type AppTarget,
     command,
     type CommandTarget,
@@ -40,6 +41,7 @@ export { Orchestrator } from './orchestrator/orchestrator.js';
 // Services (also available via @jterrazz/test/services)
 export { postgres, type PostgresOptions } from './adapters/postgres.adapter.js';
 export { redis, type RedisOptions } from './adapters/redis.adapter.js';
+export { sqlite, type SqliteOptions } from './adapters/sqlite.adapter.js';
 
 // Legacy aliases (backward compatibility)
 export { cli, type CliOptions } from './runner/cli.js';
