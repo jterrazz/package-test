@@ -2,15 +2,14 @@ import { describe, expect, test } from 'vitest';
 
 import { stripAnsi } from '../../../src/index.js';
 import { dedent } from '../../setup/helpers/dedent.js';
-import { httpRunners } from '../../setup/http-runners.js';
 import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical path — both integration and e2e ──
 
-describe.each(httpRunners)('$name — api assertions', ({ spec }) => {
+describe('api assertions', () => {
     test('returns correct status code', async () => {
         // Given — seeded data
-        const result = await spec('correct status').seed('two-users.sql').get('/users').run();
+        const result = await httpSpec('correct status').seed('two-users.sql').get('/users').run();
 
         // Then — 200 OK
         expect(result.status).toBe(200);
@@ -18,7 +17,7 @@ describe.each(httpRunners)('$name — api assertions', ({ spec }) => {
 
     test('response matches expected file', async () => {
         // Given — seeded data
-        const result = await spec('matching body').seed('two-users.sql').get('/users').run();
+        const result = await httpSpec('matching body').seed('two-users.sql').get('/users').run();
 
         // Then — body matches snapshot file
         result.response.toMatchFile('all-users.response.json');

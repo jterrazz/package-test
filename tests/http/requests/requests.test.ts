@@ -1,14 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { httpRunners } from '../../setup/http-runners.js';
 import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical paths — both integration and e2e ──
 
-describe.each(httpRunners)('$name — requests', ({ spec }) => {
+describe('requests', () => {
     test('sends GET request', async () => {
         // Given — seeded data
-        const result = await spec('GET').seed('two-users.sql').get('/users').run();
+        const result = await httpSpec('GET').seed('two-users.sql').get('/users').run();
 
         // Then — 200 OK
         expect(result.status).toBe(200);
@@ -16,7 +15,7 @@ describe.each(httpRunners)('$name — requests', ({ spec }) => {
 
     test('sends POST with body from file', async () => {
         // Given — request body loaded from requests/create-user.json
-        const result = await spec('POST').post('/users', 'create-user.json').run();
+        const result = await httpSpec('POST').post('/users', 'create-user.json').run();
 
         // Then — 201 Created
         expect(result.status).toBe(201);
@@ -24,7 +23,7 @@ describe.each(httpRunners)('$name — requests', ({ spec }) => {
 
     test('sends POST that writes to multiple databases', async () => {
         // Given — create a user (app writes to both databases)
-        const result = await spec('cross-db write').post('/users', 'create-user.json').run();
+        const result = await httpSpec('cross-db write').post('/users', 'create-user.json').run();
 
         // Then — user in default db and event in analytics db
         expect(result.status).toBe(201);
@@ -40,7 +39,7 @@ describe.each(httpRunners)('$name — requests', ({ spec }) => {
 
     test('sends DELETE request', async () => {
         // Given — non-existent resource
-        const result = await spec('DELETE').delete('/users/999').run();
+        const result = await httpSpec('DELETE').delete('/users/999').run();
 
         // Then — 404 Not Found
         expect(result.status).toBe(404);

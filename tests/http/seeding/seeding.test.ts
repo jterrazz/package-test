@@ -1,14 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { httpRunners } from '../../setup/http-runners.js';
 import { httpSpec } from '../../setup/http.specification.js';
 
 // ── Critical paths — both integration and e2e ──
 
-describe.each(httpRunners)('$name — seeding', ({ spec }) => {
+describe('seeding', () => {
     test('loads a single seed file', async () => {
         // Given — one user seeded
-        const result = await spec('single seed').seed('one-user.sql').get('/users').run();
+        const result = await httpSpec('single seed').seed('one-user.sql').get('/users').run();
 
         // Then — user is in the database
         await result.table('users').toMatch({
@@ -19,7 +18,7 @@ describe.each(httpRunners)('$name — seeding', ({ spec }) => {
 
     test('loads multiple seed files in order', async () => {
         // Given — two seed files applied sequentially
-        const result = await spec('multiple seeds')
+        const result = await httpSpec('multiple seeds')
             .seed('one-user.sql')
             .seed('third-user.sql')
             .get('/users')

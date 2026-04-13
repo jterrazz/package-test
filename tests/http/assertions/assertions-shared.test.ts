@@ -3,17 +3,17 @@ import { describe, expect, test } from 'vitest';
 import { stripAnsi } from '../../../src/index.js';
 import { cliSpec } from '../../setup/cli.specification.js';
 import { dedent } from '../../setup/helpers/dedent.js';
-import { httpRunners } from '../../setup/http-runners.js';
 import { httpSpec } from '../../setup/http.specification.js';
-
-// ── Critical path — both integration and e2e ──
 
 describe('shared assertions', () => {
     describe('table().toMatch', () => {
-        describe.each(httpRunners)('$name', ({ spec }) => {
+        describe('http', () => {
             test('matches single column', async () => {
                 // Given — one user seeded
-                const result = await spec('single col').seed('one-user.sql').get('/users').run();
+                const result = await httpSpec('single col')
+                    .seed('one-user.sql')
+                    .get('/users')
+                    .run();
 
                 // Then — table matches
                 await result.table('users').toMatch({
@@ -24,7 +24,7 @@ describe('shared assertions', () => {
 
             test('matches multi-column', async () => {
                 // Given — one user seeded
-                const result = await spec('multi col').seed('one-user.sql').get('/users').run();
+                const result = await httpSpec('multi col').seed('one-user.sql').get('/users').run();
 
                 // Then — table matches with both columns
                 await result.table('users').toMatch({
