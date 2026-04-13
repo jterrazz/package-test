@@ -23,14 +23,10 @@ export function resolveProjectRoot(root: string | undefined): string {
             }
 
             const filePath = match[1];
-            if (filePath.includes('node_modules') || filePath.includes('/runner/')) {
+            if (filePath.includes('node_modules')) {
                 continue;
             }
-            // Skip framework code when installed as local symlink (no node_modules in path)
-            if (
-                filePath.includes('/package-test/dist/') ||
-                filePath.includes('/package-test/src/')
-            ) {
+            if (filePath.includes('/src/runner/') || filePath.includes('/dist/')) {
                 continue;
             }
 
