@@ -9,14 +9,15 @@ export default defineWorkspace([
     },
     {
         test: {
-            name: 'http-app',
-            fileParallelism: false,
+            name: 'http',
+            // Parallel: each worker gets isolated DB schema + Redis DB via IsolationStrategy
             include: ['tests/http/**/*.test.ts'],
         },
     },
     {
         test: {
             name: 'http-stack',
+            // Sequential: compose mode can't isolate per-worker
             fileParallelism: false,
             include: ['tests/http/**/*.test.ts'],
             env: { SPEC_RUNNER: 'stack' },
@@ -25,6 +26,7 @@ export default defineWorkspace([
     {
         test: {
             name: 'adapters',
+            // Sequential: tests container lifecycle (start/stop) — inherently serial
             fileParallelism: false,
             include: ['tests/adapters/**/*.test.ts'],
         },

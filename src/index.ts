@@ -28,6 +28,7 @@ export type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from './por
 export type { DatabasePort } from './ports/database.port.js';
 export type { ServerPort, ServerResponse } from './ports/server.port.js';
 export type { ContainerPort } from './ports/container.port.js';
+export type { IsolationStrategy } from './ports/isolation.port.js';
 export type { ServiceHandle } from './ports/service.port.js';
 
 // Adapters (advanced usage)

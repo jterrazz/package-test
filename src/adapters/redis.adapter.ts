@@ -1,4 +1,5 @@
 import type { DatabasePort } from '../ports/database.port.js';
+import type { IsolationStrategy } from '../ports/isolation.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
 
 export interface RedisOptions {
@@ -17,6 +18,8 @@ export class RedisHandle implements ServiceHandle {
 
     connectionString = '';
     started = false;
+
+    private dbIndex = 0;
 
     constructor(options: RedisOptions = {}) {
         this.composeName = options.compose ?? null;
@@ -58,13 +61,32 @@ export class RedisHandle implements ServiceHandle {
 
     async reset(): Promise<void> {
         const { createClient } = await import('redis');
-        const client = createClient({ url: this.connectionString });
+        const client = createClient({ url: this.connectionString, database: this.dbIndex });
         await client.connect();
         try {
-            await client.flushAll();
+            await client.flushDb();
         } finally {
             await client.disconnect();
         }
+    }
+
+    isolation(): IsolationStrategy {
+        return {
+            acquire: async (workerId: string) => {
+                // Use Redis database index 1-15 for workers (0 is default/shared)
+                const numericId = Number.parseInt(workerId, 10) || 0;
+                this.dbIndex = (numericId % 15) + 1;
+            },
+
+            reset: async () => {
+                await this.reset();
+            },
+
+            release: async () => {
+                await this.reset();
+                this.dbIndex = 0;
+            },
+        };
     }
 }
 

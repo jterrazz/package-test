@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { Client } from 'pg';
 
 import type { DatabasePort } from '../ports/database.port.js';
+import type { IsolationStrategy } from '../ports/isolation.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
 
 export interface PostgresOptions {
@@ -25,6 +26,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     started = false;
 
     private client: Client | null = null;
+    private schema = 'public';
 
     constructor(options: PostgresOptions = {}) {
         this.composeName = options.compose ?? null;
@@ -114,23 +116,66 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         await client.query(sql);
     }
 
-    async query(table: string, columns: string[]): Promise<unknown[][]> {
-        const client = await this.getClient();
-        const columnList = columns.join(', ');
-        const result = await client.query(`SELECT ${columnList} FROM "${table}" ORDER BY 1`);
-        return result.rows.map((row: Record<string, unknown>) => columns.map((col) => row[col]));
-    }
-
     async reset(): Promise<void> {
         const client = await this.getClient();
         const result = await client.query(`
             SELECT tablename FROM pg_tables
-            WHERE schemaname = 'public'
+            WHERE schemaname = '${this.schema}'
             AND tablename NOT LIKE '_prisma%'
         `);
         for (const row of result.rows) {
-            await client.query(`TRUNCATE "${row.tablename}" CASCADE`);
+            await client.query(`TRUNCATE "${this.schema}"."${row.tablename}" CASCADE`);
         }
+    }
+
+    async query(table: string, columns: string[]): Promise<unknown[][]> {
+        const client = await this.getClient();
+        const columnList = columns.join(', ');
+        const result = await client.query(
+            `SELECT ${columnList} FROM "${this.schema}"."${table}" ORDER BY 1`,
+        );
+        return result.rows.map((row: Record<string, unknown>) => columns.map((col) => row[col]));
+    }
+
+    isolation(): IsolationStrategy {
+        return {
+            acquire: async (workerId: string) => {
+                const workerSchema = `worker_${workerId}`;
+                const client = await this.getClient();
+
+                // Create schema by cloning all tables from public
+                await client.query(`DROP SCHEMA IF EXISTS "${workerSchema}" CASCADE`);
+                await client.query(`CREATE SCHEMA "${workerSchema}"`);
+
+                // Copy table structures (no data) from public
+                const tables = await client.query(`
+                    SELECT tablename FROM pg_tables
+                    WHERE schemaname = 'public'
+                    AND tablename NOT LIKE '_prisma%'
+                `);
+                for (const row of tables.rows) {
+                    await client.query(
+                        `CREATE TABLE "${workerSchema}"."${row.tablename}" (LIKE "public"."${row.tablename}" INCLUDING ALL)`,
+                    );
+                }
+
+                // Switch this handle to use the worker schema
+                this.schema = workerSchema;
+                await client.query(`SET search_path TO "${workerSchema}", public`);
+            },
+
+            reset: async () => {
+                await this.reset();
+            },
+
+            release: async () => {
+                const client = await this.getClient();
+                const workerSchema = this.schema;
+                this.schema = 'public';
+                await client.query(`SET search_path TO public`);
+                await client.query(`DROP SCHEMA IF EXISTS "${workerSchema}" CASCADE`);
+            },
+        };
     }
 }
 

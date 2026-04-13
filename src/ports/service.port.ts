@@ -1,4 +1,5 @@
 import type { DatabasePort } from './database.port.js';
+import type { IsolationStrategy } from './isolation.port.js';
 
 /**
  * A service handle — returned by factory functions like postgres(), redis().
@@ -40,4 +41,7 @@ export interface ServiceHandle {
 
     /** Reset state between tests (truncate tables, flush cache, etc.) */
     reset(): Promise<void>;
+
+    /** Get the isolation strategy for parallel test execution. */
+    isolation(): IsolationStrategy;
 }

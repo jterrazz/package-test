@@ -68,16 +68,37 @@ export async function spec(target: SpecTarget, options: SpecOptions = {}): Promi
     }
 }
 
+// ── Isolation helpers ──
+
+function getWorkerId(): string {
+    return process.env.VITEST_POOL_ID ?? '0';
+}
+
+async function acquireIsolation(services: ServiceHandle[]): Promise<void> {
+    const workerId = getWorkerId();
+    for (const service of services) {
+        await service.isolation().acquire(workerId);
+    }
+}
+
+async function releaseIsolation(services: ServiceHandle[]): Promise<void> {
+    for (const service of services) {
+        await service.isolation().release();
+    }
+}
+
 // ── Internal dispatchers ──
 
 async function startApp(target: AppTarget, options: SpecOptions): Promise<SpecRunner> {
+    const services = options.services ?? [];
     const orchestrator = new Orchestrator({
         mode: 'integration',
         root: resolveProjectRoot(options.root),
-        services: options.services ?? [],
+        services,
     });
 
     await orchestrator.start();
+    await acquireIsolation(services);
 
     const honoApp = target.factory();
     const database = orchestrator.getDatabase() ?? undefined;
@@ -89,7 +110,10 @@ async function startApp(target: AppTarget, options: SpecOptions): Promise<SpecRu
         server: new HonoAdapter(honoApp),
     }) as SpecRunner;
 
-    runner.cleanup = () => orchestrator.stop();
+    runner.cleanup = async () => {
+        await releaseIsolation(services);
+        await orchestrator.stop();
+    };
     runner.docker = (id: string) => new DockerAssertion(dockerContainer(id));
     runner.orchestrator = orchestrator;
 
@@ -132,18 +156,20 @@ async function startStack(target: StackTarget, options: SpecOptions): Promise<Sp
 async function startCommand(target: CommandTarget, options: SpecOptions): Promise<SpecRunner> {
     const root = resolveProjectRoot(options.root);
     const bin = resolveCommand(target.bin, root);
+    const services = options.services ?? [];
 
     let orchestrator: null | Orchestrator = null;
     let database: DatabasePort | undefined;
     let databases: Map<string, DatabasePort> | undefined;
 
-    if (options.services?.length) {
+    if (services.length) {
         orchestrator = new Orchestrator({
             mode: 'integration',
             root,
-            services: options.services,
+            services,
         });
         await orchestrator.start();
+        await acquireIsolation(services);
         database = orchestrator.getDatabase() ?? undefined;
         const dbMap = orchestrator.getDatabases();
         databases = dbMap.size > 0 ? dbMap : undefined;
@@ -157,6 +183,7 @@ async function startCommand(target: CommandTarget, options: SpecOptions): Promis
     }) as SpecRunner;
 
     runner.cleanup = async () => {
+        await releaseIsolation(services);
         if (orchestrator) {
             await orchestrator.stop();
         }
