@@ -332,10 +332,6 @@ function getCallerDir(): string {
         if (filePath.includes('/src/builder/') || filePath.includes('/src/runner/')) {
             continue;
         }
-        // Skip framework code when installed as local symlink (no node_modules in path)
-        if (filePath.includes('/package-test/dist/') || filePath.includes('/package-test/src/')) {
-            continue;
-        }
 
         return resolve(filePath, '..');
     }
