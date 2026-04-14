@@ -98,6 +98,13 @@ case "$COMMAND" in
         echo "  build   Build the project"
         echo "  check   Check code quality"
         ;;
+    status-on-stderr)
+        # Simulates the Unix convention where status banners go to
+        # stderr and exit code is zero. Used to verify the exec
+        # adapter captures stderr regardless of exit code.
+        echo "Operation succeeded" >&2
+        exit 0
+        ;;
     *)
         echo "Unknown command: $COMMAND" >&2
         exit 1

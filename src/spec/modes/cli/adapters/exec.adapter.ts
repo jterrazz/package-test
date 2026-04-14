@@ -1,4 +1,4 @@
-import { execSync, spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from '../command.port.js';
 
@@ -22,8 +22,13 @@ function buildEnv(extra?: CommandEnv): NodeJS.ProcessEnv {
 
 /**
  * Executes CLI commands via Node.js child_process.
- * Uses `execSync` for one-shot commands and `spawn` for long-running processes.
- * Used by the `cli()` specification runner.
+ * Uses `spawnSync` for one-shot commands and `spawn` for long-running processes.
+ * Used by the command() specification runner.
+ *
+ * `spawnSync` is used (over the simpler `execSync`) so stdout AND stderr are
+ * captured regardless of exit code. Many CLIs follow the Unix convention of
+ * writing status banners to stderr on success — `execSync` would silently
+ * discard them, leaving snapshot tests with no output to assert on.
  */
 export class ExecAdapter implements CommandPort {
     private command: string;
@@ -34,22 +39,18 @@ export class ExecAdapter implements CommandPort {
 
     async exec(args: string, cwd: string, extraEnv?: CommandEnv): Promise<CommandResult> {
         const env = buildEnv(extraEnv);
-
-        try {
-            const stdout = execSync(`${this.command} ${args}`, {
-                cwd,
-                encoding: 'utf8',
-                env,
-                stdio: ['pipe', 'pipe', 'pipe'],
-            });
-            return { exitCode: 0, stdout, stderr: '' };
-        } catch (error: any) {
-            return {
-                exitCode: error.status ?? 1,
-                stdout: error.stdout?.toString() ?? '',
-                stderr: error.stderr?.toString() ?? '',
-            };
-        }
+        const result = spawnSync(`${this.command} ${args}`, [], {
+            cwd,
+            encoding: 'utf8',
+            env,
+            shell: true,
+            stdio: ['pipe', 'pipe', 'pipe'],
+        });
+        return {
+            exitCode: result.status ?? 1,
+            stdout: result.stdout ?? '',
+            stderr: result.stderr ?? '',
+        };
     }
 
     async spawn(
