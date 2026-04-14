@@ -182,6 +182,7 @@ export const openai = {
                 output: [
                     {
                         type: 'message',
+                        id: 'msg-test',
                         role: 'assistant',
                         content: [{ type: 'output_text', text, annotations: [] }],
                     },
