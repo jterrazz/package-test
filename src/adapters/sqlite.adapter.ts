@@ -55,8 +55,27 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     }
 
     async initialize(): Promise<void> {
-        // Create the template database
-        this.templatePath = resolve(tmpdir(), `test-template-${Date.now()}.sqlite`);
+        // Each test run gets a fresh template; workers share it via lock
+        this.templatePath = resolve(tmpdir(), 'jterrazz-test-sqlite-template.sqlite');
+        const lockPath = `${this.templatePath}.lock`;
+
+        if (existsSync(lockPath)) {
+            // Another worker is creating it — wait for it
+            const start = Date.now();
+            while (existsSync(lockPath) && Date.now() - start < 30_000) {
+                await new Promise((r) => setTimeout(r, 100));
+            }
+        }
+
+        if (existsSync(this.templatePath)) {
+            this.connectionString = `file:${this.templatePath}`;
+            this.started = true;
+            return;
+        }
+
+        // Acquire lock
+        const { writeFileSync } = await import('node:fs');
+        writeFileSync(lockPath, process.pid.toString());
 
         if (this.prismaSchema) {
             // Use Prisma to create schema
@@ -69,6 +88,11 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
                 },
                 stdio: 'pipe',
             });
+
+            // Checkpoint WAL so the template is a single file (safe to copy)
+            const tmpDb = new Database(this.templatePath);
+            tmpDb.pragma('wal_checkpoint(TRUNCATE)');
+            tmpDb.close();
         } else if (this.initSql) {
             // Use raw SQL to create schema
             const sql = readFileSync(this.initSql, 'utf8');
@@ -79,6 +103,13 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
             // Empty database — consumer will seed
             const templateDb = new Database(this.templatePath);
             templateDb.close();
+        }
+
+        // Release lock
+        try {
+            unlinkSync(lockPath);
+        } catch {
+            /* Ignore */
         }
 
         this.connectionString = `file:${this.templatePath}`;
