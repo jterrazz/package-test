@@ -58,6 +58,14 @@ export interface SpecificationConfig {
     database?: DatabasePort;
     databases?: Map<string, DatabasePort>;
     dockerConfig?: DockerSpecConfig;
+    /**
+     * Unique id shared by every `.run()` from this runner instance.
+     * Stable for the runner's lifetime so multi-step tests (spawn in
+     * one run, inspect in another) see the same container scope. The
+     * public `createSpecificationRunner` auto-populates this when
+     * `dockerConfig` is present — callers should leave it unset.
+     */
+    dockerTestRunId?: string;
     fixturesRoot?: string;
     jobs?: JobHandle[];
     /**
@@ -528,9 +536,15 @@ export class SpecificationBuilder {
         }
 
         const dockerConfig = this.config.dockerConfig;
-        const testRunId = dockerConfig
-            ? `t-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`
-            : null;
+        // The test-run id is bound to the SpecificationConfig (i.e. to
+        // The runner), not to each .run() call. This means every spec
+        // From the same runner sees the same isolation scope — tests
+        // That spawn a world in one .run() and inspect/destroy it in
+        // A follow-up .run() see their own container, not a ghost.
+        // Vitest's fileParallelism gives each file its own process /
+        // Module load, so different test files get different ids
+        // Automatically (one createSpecificationRunner call each).
+        const testRunId = this.config.dockerTestRunId;
 
         // Merge dockerConfig env var in first, then user env (which wins).
         let env = this.resolveEnv(workDir);
@@ -610,8 +624,15 @@ export type SpecificationRunner = (label: string) => SpecificationBuilder;
  * The test file directory is auto-detected from the call stack.
  */
 export function createSpecificationRunner(config: SpecificationConfig): SpecificationRunner {
+    const resolved: SpecificationConfig =
+        config.dockerConfig && !config.dockerTestRunId
+            ? {
+                  ...config,
+                  dockerTestRunId: `t-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`,
+              }
+            : config;
     return (label: string) => {
         const testDir = getCallerDir();
-        return new SpecificationBuilder(config, testDir, label);
+        return new SpecificationBuilder(resolved, testDir, label);
     };
 }
