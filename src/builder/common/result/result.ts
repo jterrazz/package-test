@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { DatabasePort } from '../../../adapters/ports/database.port.js';
+import type { DatabasePort } from '../../../services/database.port.js';
 import type { SpecificationConfig } from '../../specification-builder.js';
 import { DirectoryAccessor } from './directory.js';
 import { TableAssertion } from './table.js';

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { TestcontainersAdapter } from '../../../src/infra/adapters/testcontainers.adapter.js';
+import { TestcontainersAdapter } from '../../../src/infra/containers/testcontainers.js';
 
 describe('container logs', () => {
     let container: TestcontainersAdapter;

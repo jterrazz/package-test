@@ -3,9 +3,9 @@ import { copyFileSync, existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
-import type { IsolationStrategy } from '../infra/ports/isolation.port.js';
-import type { ServiceHandle } from '../infra/ports/service.port.js';
-import type { DatabasePort } from './ports/database.port.js';
+import type { IsolationStrategy } from '../services/isolation.port.js';
+import type { ServiceHandle } from '../services/service.port.js';
+import type { DatabasePort } from './database.port.js';
 
 export interface SqliteOptions {
     /**

@@ -4,7 +4,7 @@ import {
     type SpecificationRunner,
 } from '../builder/specification-builder.js';
 import { Orchestrator } from '../infra/orchestrator.js';
-import type { ServiceHandle } from '../infra/ports/service.port.js';
+import type { ServiceHandle } from '../services/service.port.js';
 import { resolveProjectRoot } from './resolve.js';
 
 type HonoApp = {

@@ -41,11 +41,11 @@ export type {
     CommandResult,
     SpawnOptions,
 } from './builder/cli/command.port.js';
-export type { DatabasePort } from './adapters/ports/database.port.js';
+export type { DatabasePort } from './services/database.port.js';
 export type { ServerPort, ServerResponse } from './builder/http/server.port.js';
-export type { ContainerPort } from './infra/ports/container.port.js';
-export type { IsolationStrategy } from './infra/ports/isolation.port.js';
-export type { ServiceHandle } from './infra/ports/service.port.js';
+export type { ContainerPort } from './infra/containers/container.port.js';
+export type { IsolationStrategy } from './services/isolation.port.js';
+export type { ServiceHandle } from './services/service.port.js';
 
 // Adapters (advanced usage)
 export { ExecAdapter } from './builder/cli/adapters/exec.adapter.js';
@@ -54,9 +54,9 @@ export { HonoAdapter } from './builder/http/adapters/hono.adapter.js';
 export { Orchestrator } from './infra/orchestrator.js';
 
 // Services (also available via @jterrazz/test/services)
-export { postgres, type PostgresOptions } from './adapters/postgres.adapter.js';
-export { redis, type RedisOptions } from './adapters/redis.adapter.js';
-export { sqlite, type SqliteOptions } from './adapters/sqlite.adapter.js';
+export { postgres, type PostgresOptions } from './services/postgres.js';
+export { redis, type RedisOptions } from './services/redis.js';
+export { sqlite, type SqliteOptions } from './services/sqlite.js';
 
 // Legacy aliases (backward compatibility)
 export { cli, type CliOptions } from './spec/legacy-cli.js';
@@ -70,9 +70,9 @@ export {
 // Legacy re-exports (use result.grep() and runner.docker() instead)
 export { grep } from './builder/common/result/grep.js';
 export { normalizeOutput, stripAnsi } from './builder/common/reporter.js';
-export { dockerContainer } from './docker/docker-adapter.js';
-export { DockerAssertion } from './docker/docker-assertion.js';
-export type { DockerContainerPort, DockerInspectResult } from './docker/docker-port.js';
+export { dockerContainer } from './infra/docker/docker.js';
+export { DockerAssertion } from './infra/docker/docker-assertion.js';
+export type { DockerContainerPort, DockerInspectResult } from './infra/docker/docker.port.js';
 
 // Mock (also available via @jterrazz/test/mock)
 export * from './mock/index.js';

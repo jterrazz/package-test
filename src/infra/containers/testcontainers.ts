@@ -1,4 +1,4 @@
-import type { ContainerPort } from '../ports/container.port.js';
+import type { ContainerPort } from './container.port.js';
 
 /**
  * Container adapter using testcontainers.

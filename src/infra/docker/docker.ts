@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 
-import type { DockerContainerPort, DockerInspectResult } from './docker-port.js';
+import type { DockerContainerPort, DockerInspectResult } from './docker.port.js';
 
 /**
  * Implements {@link DockerContainerPort} by shelling out to the Docker CLI.

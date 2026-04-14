@@ -1,8 +1,8 @@
-import type { DatabasePort } from '../adapters/ports/database.port.js';
 import { ExecAdapter } from '../builder/cli/adapters/exec.adapter.js';
 import { createSpecificationRunner } from '../builder/specification-builder.js';
 import { Orchestrator } from '../infra/orchestrator.js';
-import type { ServiceHandle } from '../infra/ports/service.port.js';
+import type { DatabasePort } from '../services/database.port.js';
+import type { ServiceHandle } from '../services/service.port.js';
 import type { SpecificationRunnerWithCleanup } from './legacy-integration.js';
 import { resolveCommand, resolveProjectRoot } from './resolve.js';
 

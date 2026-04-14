@@ -1,4 +1,4 @@
-import type { DockerContainerPort } from './docker-port.js';
+import type { DockerContainerPort } from './docker.port.js';
 
 /**
  * Fluent assertion builder for Docker containers.

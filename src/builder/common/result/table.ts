@@ -1,4 +1,4 @@
-import type { DatabasePort } from '../../../adapters/ports/database.port.js';
+import type { DatabasePort } from '../../../services/database.port.js';
 import { formatTableDiff } from '../reporter.js';
 
 /** Assertion helper for verifying database table contents after a specification run. */
