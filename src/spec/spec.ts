@@ -110,8 +110,10 @@ async function startApp(target: AppTarget, options: SpecOptions): Promise<SpecRu
     const factoryResult = target.factory(servicesMap);
 
     // Normalize: bare HonoApp or { server, jobs }
-    const honoApp = 'server' in factoryResult ? factoryResult.server : factoryResult;
-    const jobs = 'jobs' in factoryResult ? factoryResult.jobs : undefined;
+    // Check for 'jobs' array (not 'server') to discriminate — bare apps may have a 'server' property
+    const isComposite = Array.isArray((factoryResult as any).jobs);
+    const honoApp = isComposite ? (factoryResult as any).server : factoryResult;
+    const jobs = isComposite ? (factoryResult as any).jobs : undefined;
 
     const database = orchestrator.getDatabase() ?? undefined;
     const databases = orchestrator.getDatabases();
