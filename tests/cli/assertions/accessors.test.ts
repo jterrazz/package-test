@@ -52,8 +52,8 @@ describe('cli — stdout accessor', () => {
         }
     });
 
-    test('toMatch resolves to expected/stdout/<name>.txt', async () => {
-        const fixtureName = `stdout-transient-${Date.now()}`;
+    test('toMatch resolves to expected/stdout/<name> (extension required)', async () => {
+        const fixtureName = `stdout-transient-${Date.now()}.txt`;
         try {
             const a = await cliSpec('stdout fixture seed').project('cli-app').exec('json').run();
             a.stdout.toMatch(fixtureName, { update: true });
@@ -61,7 +61,7 @@ describe('cli — stdout accessor', () => {
             const b = await cliSpec('stdout fixture verify').project('cli-app').exec('json').run();
             b.stdout.toMatch(fixtureName);
         } finally {
-            rmSync(resolve(import.meta.dirname, 'expected', 'stdout', `${fixtureName}.txt`), {
+            rmSync(resolve(import.meta.dirname, 'expected', 'stdout', fixtureName), {
                 force: true,
             });
         }
@@ -119,8 +119,8 @@ describe('cli — json accessor', () => {
         }
     });
 
-    test('toMatch resolves to expected/json/<name>.json', async () => {
-        const fixtureName = `json-transient-${Date.now()}`;
+    test('toMatch resolves to expected/json/<name> (extension required)', async () => {
+        const fixtureName = `json-transient-${Date.now()}.json`;
         try {
             const a = await cliSpec('json fixture seed').project('cli-app').exec('json').run();
             a.json.toMatch(fixtureName, { update: true });
@@ -128,7 +128,7 @@ describe('cli — json accessor', () => {
             const b = await cliSpec('json fixture verify').project('cli-app').exec('json').run();
             b.json.toMatch(fixtureName);
         } finally {
-            rmSync(resolve(import.meta.dirname, 'expected', 'json', `${fixtureName}.json`), {
+            rmSync(resolve(import.meta.dirname, 'expected', 'json', fixtureName), {
                 force: true,
             });
         }

@@ -84,11 +84,14 @@ export class JsonAccessor {
 
     /**
      * Assert the parsed JSON matches a convention-based fixture:
-     * `<test-file-dir>/expected/json/<name>.json`.
+     * `<test-file-dir>/expected/json/<name>`.
+     *
+     * The extension is part of the name and must be included by the caller —
+     * e.g. `toMatch('error.json')`, not `toMatch('error')`. Explicit extensions
+     * are clearer at the call site and remove magic from the resolution.
      */
     toMatch(name: string, options: JsonSnapshotOptions = {}): void {
-        const fileName = name.endsWith('.json') ? name : `${name}.json`;
-        const absPath = resolve(this.testDir, 'expected', 'json', fileName);
+        const absPath = resolve(this.testDir, 'expected', 'json', name);
         this.toMatchFile(absPath, options);
     }
 

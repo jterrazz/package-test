@@ -83,11 +83,14 @@ export class StreamAccessor {
 
     /**
      * Assert the captured text matches a convention-based fixture:
-     * `<test-file-dir>/expected/<stream>/<name>.txt`.
+     * `<test-file-dir>/expected/<stream>/<name>`.
+     *
+     * The extension is part of the name and must be included by the caller —
+     * e.g. `toMatch('valid.txt')`, not `toMatch('valid')`. Explicit extensions
+     * are clearer at the call site and remove magic from the resolution.
      */
     toMatch(name: string, options: StreamSnapshotOptions = {}): void {
-        const fileName = name.endsWith('.txt') ? name : `${name}.txt`;
-        const absPath = resolve(this.testDir, 'expected', this.streamName, fileName);
+        const absPath = resolve(this.testDir, 'expected', this.streamName, name);
         this.toMatchFile(absPath, options);
     }
 
