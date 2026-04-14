@@ -161,11 +161,24 @@ export class SpecificationBuilder {
      */
     intercept(trigger: InterceptTrigger, response: InterceptResponse | string): this {
         if (typeof response === 'string') {
-            // Load JSON from intercepts/ directory
+            // File path format: 'adapter/filename.json'
+            const slashIndex = response.indexOf('/');
+            if (slashIndex === -1) {
+                throw new Error(
+                    `.intercept(): file path must be 'adapter/filename.json' (e.g. 'openai/ingest-tech.json'), got '${response}'`,
+                );
+            }
+
+            const adapterName = response.slice(0, slashIndex);
+            if (adapterName !== trigger.adapter) {
+                throw new Error(
+                    `.intercept(): adapter mismatch - trigger uses '${trigger.adapter}' but file path starts with '${adapterName}/'`,
+                );
+            }
+
             const filePath = resolve(this.testDir, 'intercepts', response);
             const data = JSON.parse(readFileSync(filePath, 'utf8'));
-            // Use trigger's wrap() if available, otherwise use raw JSON as body
-            const resolved = trigger.wrap ? trigger.wrap(data) : { status: 200, body: data };
+            const resolved = trigger.wrap(data);
             this.intercepts.push({ trigger, response: resolved });
         } else {
             this.intercepts.push({ trigger, response });

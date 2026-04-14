@@ -162,6 +162,7 @@ export const openai = {
      */
     request(filter?: OpenAIChatFilter): InterceptTrigger {
         return {
+            adapter: 'openai',
             method: 'POST',
             url: OPENAI_CHAT_URL,
             match: filter ? (body: unknown) => matchesChatFilter(body, filter) : undefined,
@@ -182,6 +183,7 @@ export const openai = {
      */
     agent(filter?: OpenAIResponsesFilter, url?: string): InterceptTrigger {
         return {
+            adapter: 'openai',
             method: 'POST',
             url: url ?? OPENAI_RESPONSES_URL,
             match: filter ? (body: unknown) => matchesResponsesFilter(body, filter) : undefined,

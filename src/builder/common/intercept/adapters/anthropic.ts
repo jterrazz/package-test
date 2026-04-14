@@ -3,13 +3,9 @@ import type { InterceptResponse, InterceptTrigger } from '../types.js';
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
 export interface AnthropicMessagesFilter {
-    /** Match by model name. */
     model?: RegExp | string;
-    /** Match by system message content. */
     system?: RegExp | string;
-    /** Match by user message content. */
     user?: RegExp | string;
-    /** Match by tool names. */
     tools?: string[];
 }
 
@@ -23,7 +19,6 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
             return false;
         }
     }
-
     if (filter.system) {
         const system = typeof body?.system === 'string' ? body.system : '';
         if (typeof filter.system === 'string' && !system.includes(filter.system)) {
@@ -33,7 +28,6 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
             return false;
         }
     }
-
     if (filter.user) {
         const userMsg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
         const text = typeof userMsg === 'string' ? userMsg : JSON.stringify(userMsg);
@@ -44,15 +38,29 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
             return false;
         }
     }
-
     if (filter.tools) {
-        const requestTools = body?.tools?.map((t: any) => t.name).filter(Boolean) ?? [];
-        if (!filter.tools.every((t) => requestTools.includes(t))) {
+        const names = body?.tools?.map((t: any) => t.name).filter(Boolean) ?? [];
+        if (!filter.tools.every((t) => names.includes(t))) {
             return false;
         }
     }
-
     return true;
+}
+
+function buildReply(data: unknown): InterceptResponse {
+    const content = typeof data === 'string' ? data : JSON.stringify(data);
+    return {
+        status: 200,
+        body: {
+            id: 'msg-test',
+            type: 'message',
+            role: 'assistant',
+            content: [{ type: 'text', text: content }],
+            model: 'claude-sonnet-4-20250514',
+            stop_reason: 'end_turn',
+            usage: { input_tokens: 10, output_tokens: 10 },
+        },
+    };
 }
 
 /**
@@ -61,31 +69,23 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
 export const anthropic = {
     /**
      * Trigger: match Anthropic messages API requests.
+     *
+     * @example
+     *   anthropic.request()
+     *   anthropic.request({ system: /classify/ })
      */
-    messages(filter?: AnthropicMessagesFilter): InterceptTrigger {
+    request(filter?: AnthropicMessagesFilter): InterceptTrigger {
         return {
+            adapter: 'anthropic',
             method: 'POST',
             url: ANTHROPIC_MESSAGES_URL,
             match: filter ? (body: unknown) => matchesFilter(body, filter) : undefined,
+            wrap: buildReply,
         };
     },
 
     /** Response: wrap data in Anthropic messages format. */
-    response(data: unknown): InterceptResponse {
-        const content = typeof data === 'string' ? data : JSON.stringify(data);
-        return {
-            status: 200,
-            body: {
-                id: 'msg-test',
-                type: 'message',
-                role: 'assistant',
-                content: [{ type: 'text', text: content }],
-                model: 'claude-sonnet-4-20250514',
-                stop_reason: 'end_turn',
-                usage: { input_tokens: 10, output_tokens: 10 },
-            },
-        };
-    },
+    reply: buildReply,
 
     /** Response: return an Anthropic error. */
     error(status: number, message?: string): InterceptResponse {
@@ -105,4 +105,12 @@ export const anthropic = {
     timeout(): InterceptResponse {
         return { status: 200, body: {}, delay: 30_000 };
     },
+
+    // Legacy aliases
+    /** @deprecated Use anthropic.request() instead. */
+    messages(filter?: AnthropicMessagesFilter): InterceptTrigger {
+        return anthropic.request(filter);
+    },
+    /** @deprecated Use anthropic.reply() instead. */
+    response: buildReply,
 };

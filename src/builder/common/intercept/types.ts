@@ -2,6 +2,8 @@
  * An intercept trigger describes which HTTP request to match.
  */
 export interface InterceptTrigger {
+    /** Adapter name - must match the folder prefix in file-based intercepts. */
+    adapter: string;
     /** HTTP method to match. */
     method: string;
     /** URL pattern to match (string for exact prefix, RegExp for pattern). */
@@ -9,11 +11,10 @@ export interface InterceptTrigger {
     /** Optional request body matcher - the handler only fires if this returns true. */
     match?: (body: unknown) => boolean;
     /**
-     * Optional wrapper - transforms raw JSON data into a provider-specific response.
-     * Used when .intercept(trigger, 'file.json') loads a file: the raw data is
-     * passed through wrap() to produce the correct response envelope.
+     * Transform raw JSON data into a provider-specific response envelope.
+     * Called when .intercept(trigger, 'adapter/file.json') loads a file.
      */
-    wrap?: (data: unknown) => InterceptResponse;
+    wrap: (data: unknown) => InterceptResponse;
 }
 
 /**
