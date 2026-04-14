@@ -1,6 +1,6 @@
-import { FetchAdapter } from '../builder/http/adapters/fetch.adapter.js';
-import { createSpecificationRunner } from '../builder/specification-builder.js';
 import { Orchestrator } from '../infra/orchestrator.js';
+import { createSpecificationRunner } from '../spec/builder.js';
+import { FetchAdapter } from '../spec/http/adapters/fetch.adapter.js';
 import type { SpecificationRunnerWithCleanup } from './legacy-integration.js';
 import { resolveProjectRoot } from './resolve.js';
 

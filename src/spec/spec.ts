@@ -1,15 +1,12 @@
-import { ExecAdapter } from '../builder/cli/adapters/exec.adapter.js';
-import { FetchAdapter } from '../builder/http/adapters/fetch.adapter.js';
-import { HonoAdapter } from '../builder/http/adapters/hono.adapter.js';
-import {
-    createSpecificationRunner,
-    type SpecificationBuilder,
-} from '../builder/specification-builder.js';
 import { DockerAssertion } from '../infra/docker/docker-assertion.js';
 import { dockerContainer } from '../infra/docker/docker.js';
 import { Orchestrator } from '../infra/orchestrator.js';
-import type { DatabasePort } from '../services/database.port.js';
-import type { ServiceHandle } from '../services/service.port.js';
+import { createSpecificationRunner, type SpecificationBuilder } from '../spec/builder.js';
+import { ExecAdapter } from '../spec/cli/adapters/exec.adapter.js';
+import type { DatabasePort } from '../spec/common/ports/database.port.js';
+import type { ServiceHandle } from '../spec/common/ports/service.port.js';
+import { FetchAdapter } from '../spec/http/adapters/fetch.adapter.js';
+import { HonoAdapter } from '../spec/http/adapters/hono.adapter.js';
 import { resolveCommand, resolveProjectRoot } from './resolve.js';
 import type { AppTarget, CommandTarget, SpecTarget, StackTarget } from './targets.js';
 

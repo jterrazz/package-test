@@ -1,10 +1,7 @@
-import { HonoAdapter } from '../builder/http/adapters/hono.adapter.js';
-import {
-    createSpecificationRunner,
-    type SpecificationRunner,
-} from '../builder/specification-builder.js';
 import { Orchestrator } from '../infra/orchestrator.js';
-import type { ServiceHandle } from '../services/service.port.js';
+import { createSpecificationRunner, type SpecificationRunner } from '../spec/builder.js';
+import type { ServiceHandle } from '../spec/common/ports/service.port.js';
+import { HonoAdapter } from '../spec/http/adapters/hono.adapter.js';
 import { resolveProjectRoot } from './resolve.js';
 
 type HonoApp = {

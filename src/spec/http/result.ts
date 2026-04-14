@@ -1,6 +1,6 @@
+import type { SpecificationConfig } from '../builder.js';
 import { ResponseAccessor } from '../common/result/response.js';
 import { BaseResult } from '../common/result/result.js';
-import type { SpecificationConfig } from '../specification-builder.js';
 import type { ServerResponse } from './server.port.js';
 
 /** Result from an HTTP action (.get(), .post(), .put(), .delete()). */

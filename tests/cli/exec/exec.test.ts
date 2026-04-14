@@ -54,7 +54,7 @@ describe('cli — exec', () => {
 
     test('throws without command adapter', async () => {
         const { createSpecificationRunner } =
-            await import('../../../src/builder/specification-builder.js');
+            await import('../../../src/spec/builder.js');
         const badSpec = createSpecificationRunner({ server: undefined as any });
 
         await expect(badSpec('no adapter').exec('build').run()).rejects.toThrow(

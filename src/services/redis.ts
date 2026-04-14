@@ -1,6 +1,6 @@
-import type { IsolationStrategy } from '../services/isolation.port.js';
-import type { ServiceHandle } from '../services/service.port.js';
-import type { DatabasePort } from './database.port.js';
+import type { DatabasePort } from '../spec/common/ports/database.port.js';
+import type { IsolationStrategy } from '../spec/common/ports/isolation.port.js';
+import type { ServiceHandle } from '../spec/common/ports/service.port.js';
 
 export interface RedisOptions {
     /** Map to a service in docker-compose.test.yaml. */

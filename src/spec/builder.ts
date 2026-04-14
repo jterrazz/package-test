@@ -2,7 +2,7 @@ import { cpSync, existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
-import type { DatabasePort } from '../services/database.port.js';
+import type { DatabasePort } from '../spec/common/ports/database.port.js';
 import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from './cli/command.port.js';
 import { CliResult } from './cli/result.js';
 import type {

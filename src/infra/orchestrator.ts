@@ -1,14 +1,10 @@
 import { dirname } from 'node:path';
 
-import {
-    type AppInfo,
-    formatStartupReport,
-    type ServiceReport,
-} from '../builder/common/reporter.js';
-import type { DatabasePort } from '../services/database.port.js';
 import { postgres } from '../services/postgres.js';
 import { redis } from '../services/redis.js';
-import type { ServiceHandle } from '../services/service.port.js';
+import type { DatabasePort } from '../spec/common/ports/database.port.js';
+import type { ServiceHandle } from '../spec/common/ports/service.port.js';
+import { type AppInfo, formatStartupReport, type ServiceReport } from '../spec/common/reporter.js';
 import {
     detectServiceType,
     findComposeFile,
