@@ -16,5 +16,10 @@ export interface ServerResponse {
  */
 export interface ServerPort {
     /** Send an HTTP request and return the parsed response. */
-    request(method: string, path: string, body?: unknown): Promise<ServerResponse>;
+    request(
+        method: string,
+        path: string,
+        body?: unknown,
+        headers?: Record<string, string>,
+    ): Promise<ServerResponse>;
 }

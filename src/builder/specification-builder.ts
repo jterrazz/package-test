@@ -42,6 +42,7 @@ export interface MockEntry {
 /** An HTTP request to perform against the server adapter. */
 export interface RequestEntry {
     bodyFile?: string;
+    headers?: Record<string, string>;
     method: string;
     path: string;
 }
@@ -64,6 +65,7 @@ export class SpecificationBuilder {
     private mocks: MockEntry[] = [];
     private projectName: null | string = null;
     private request: null | RequestEntry = null;
+    private requestHeaders: Record<string, string> = {};
     private seeds: SeedEntry[] = [];
     private spawnConfig: null | { args: string; options: SpawnOptions } = null;
     private testDir: string;
@@ -117,6 +119,17 @@ export class SpecificationBuilder {
      */
     env(env: CommandEnv): this {
         this.commandEnv = { ...this.commandEnv, ...env };
+        return this;
+    }
+
+    /**
+     * Set HTTP headers for the request. Multiple calls merge.
+     *
+     * @example
+     *   spec("french").headers({ 'Accept-Language': 'fr' }).get("/articles").run();
+     */
+    headers(headers: Record<string, string>): this {
+        this.requestHeaders = { ...this.requestHeaders, ...headers };
         return this;
     }
 
@@ -313,10 +326,13 @@ export class SpecificationBuilder {
             );
         }
 
+        const headers =
+            Object.keys(this.requestHeaders).length > 0 ? this.requestHeaders : undefined;
         const response = await this.config.server.request(
             this.request!.method,
             this.request!.path,
             body,
+            headers,
         );
 
         return new SpecificationResult({

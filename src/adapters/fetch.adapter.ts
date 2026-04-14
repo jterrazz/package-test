@@ -11,10 +11,15 @@ export class FetchAdapter implements ServerPort {
         this.baseUrl = url.replace(/\/$/, '');
     }
 
-    async request(method: string, path: string, body?: unknown): Promise<ServerResponse> {
+    async request(
+        method: string,
+        path: string,
+        body?: unknown,
+        headers?: Record<string, string>,
+    ): Promise<ServerResponse> {
         const init: RequestInit = {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...headers },
         };
 
         if (body !== undefined) {
@@ -24,15 +29,15 @@ export class FetchAdapter implements ServerPort {
         const response = await fetch(`${this.baseUrl}${path}`, init);
         const responseBody = await response.json().catch(() => null);
 
-        const headers: Record<string, string> = {};
+        const responseHeaders: Record<string, string> = {};
         response.headers.forEach((value, key) => {
-            headers[key] = value;
+            responseHeaders[key] = value;
         });
 
         return {
             status: response.status,
             body: responseBody,
-            headers,
+            headers: responseHeaders,
         };
     }
 }

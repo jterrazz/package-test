@@ -15,10 +15,15 @@ export class HonoAdapter implements ServerPort {
         this.app = app;
     }
 
-    async request(method: string, path: string, body?: unknown): Promise<ServerResponse> {
+    async request(
+        method: string,
+        path: string,
+        body?: unknown,
+        headers?: Record<string, string>,
+    ): Promise<ServerResponse> {
         const init: RequestInit = {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...headers },
         };
 
         if (body !== undefined) {
@@ -28,15 +33,15 @@ export class HonoAdapter implements ServerPort {
         const response = await this.app.request(path, init);
         const responseBody = await response.json().catch(() => null);
 
-        const headers: Record<string, string> = {};
+        const responseHeaders: Record<string, string> = {};
         response.headers.forEach((value, key) => {
-            headers[key] = value;
+            responseHeaders[key] = value;
         });
 
         return {
             status: response.status,
             body: responseBody,
-            headers,
+            headers: responseHeaders,
         };
     }
 }
