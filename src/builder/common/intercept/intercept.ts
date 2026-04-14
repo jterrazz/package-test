@@ -1,8 +1,9 @@
 /**
  * MSW-based intercept server. Manages HTTP interception for spec.run().
  *
- * Intercepts are queued per trigger — the first matching handler is consumed,
- * then the next one in the queue is used for subsequent matching requests.
+ * Intercepts are matched in order — for each incoming request, the first
+ * unconsumed entry whose trigger matches (URL + optional body filter) is
+ * used and consumed. This supports body-based routing to the same URL.
  */
 import type { InterceptEntry } from './types.js';
 
@@ -33,7 +34,10 @@ export async function ensureInterceptServer(): Promise<void> {
 
 /**
  * Register intercept entries as MSW handlers. Returns a cleanup function.
- * Handlers are consumed in queue order — each trigger match pops one response.
+ *
+ * Each incoming request is matched against all unconsumed entries in order.
+ * The first entry whose URL and optional body filter match is consumed.
+ * This supports multiple entries for the same URL with different body matchers.
  */
 export async function registerIntercepts(entries: InterceptEntry[]): Promise<() => void> {
     if (entries.length === 0) {
@@ -43,45 +47,89 @@ export async function registerIntercepts(entries: InterceptEntry[]): Promise<() 
     await ensureInterceptServer();
     const { msw } = await loadMsw();
 
-    // Build a queue per unique trigger (same method+url+match combo)
-    const queues = new Map<string, InterceptEntry[]>();
+    // Track which entries have been consumed
+    const consumed = Array.from({ length: entries.length }, () => false);
+
+    // Collect unique URL patterns to register handlers for
+    const urls = new Set<RegExp | string>();
     for (const entry of entries) {
-        const key = `${entry.trigger.method}:${entry.trigger.url}`;
-        const existing = queues.get(key) ?? [];
-        existing.push(entry);
-        queues.set(key, existing);
+        urls.add(entry.trigger.url);
     }
 
     const handlers: any[] = [];
 
-    for (const [, queue] of queues) {
-        let index = 0;
-        const trigger = queue[0].trigger;
+    for (const url of urls) {
+        // Collect all methods for this URL
+        const methods = new Set<string>();
+        for (const entry of entries) {
+            if (entry.trigger.url === url || String(entry.trigger.url) === String(url)) {
+                methods.add(entry.trigger.method);
+            }
+        }
 
-        const handler =
-            trigger.method === '*'
-                ? msw.http.all(
-                      trigger.url instanceof RegExp ? trigger.url : trigger.url,
-                      createResolver(
-                          queue,
-                          () => index,
-                          () => {
-                              index++;
-                          },
-                      ),
-                  )
-                : (msw.http as any)[trigger.method.toLowerCase()](
-                      trigger.url instanceof RegExp ? trigger.url : trigger.url,
-                      createResolver(
-                          queue,
-                          () => index,
-                          () => {
-                              index++;
-                          },
-                      ),
-                  );
+        for (const method of methods) {
+            const handlerFn =
+                method === '*' ? msw.http.all : (msw.http as any)[method.toLowerCase()];
+            if (!handlerFn) {
+                continue;
+            }
 
-        handlers.push(handler);
+            const handler = handlerFn(url, async ({ request }: { request: Request }) => {
+                // Clone body once for all match checks
+                let body: unknown = null;
+                let bodyParsed = false;
+
+                for (let i = 0; i < entries.length; i++) {
+                    if (consumed[i]) {
+                        continue;
+                    }
+
+                    const entry = entries[i];
+
+                    // Check URL matches
+                    if (entry.trigger.url !== url && String(entry.trigger.url) !== String(url)) {
+                        continue;
+                    }
+
+                    // Check method matches
+                    if (entry.trigger.method !== method && entry.trigger.method !== '*') {
+                        continue;
+                    }
+
+                    // Check body matcher if present
+                    if (entry.trigger.match) {
+                        if (!bodyParsed) {
+                            try {
+                                body = await request.clone().json();
+                            } catch {
+                                // Not JSON
+                            }
+                            bodyParsed = true;
+                        }
+                        if (!entry.trigger.match(body)) {
+                            continue;
+                        }
+                    }
+
+                    // Match found — consume and respond
+                    consumed[i] = true;
+
+                    if (entry.response.delay) {
+                        await new Promise((r) => setTimeout(r, entry.response.delay));
+                    }
+
+                    return msw.HttpResponse.json(entry.response.body, {
+                        status: entry.response.status ?? 200,
+                        headers: entry.response.headers,
+                    });
+                }
+
+                // No match — passthrough
+                return undefined;
+            });
+
+            handlers.push(handler);
+        }
     }
 
     serverInstance.use(...handlers);
@@ -89,44 +137,6 @@ export async function registerIntercepts(entries: InterceptEntry[]): Promise<() 
     return () => {
         serverInstance.resetHandlers();
     };
-
-    function createResolver(queue: InterceptEntry[], getIndex: () => number, advance: () => void) {
-        return async ({ request }: { request: Request }) => {
-            const idx = getIndex();
-            if (idx >= queue.length) {
-                // Queue exhausted — passthrough
-                return undefined;
-            }
-
-            const entry = queue[idx];
-
-            // Check body matcher if present
-            if (entry.trigger.match) {
-                let body: unknown = null;
-                try {
-                    body = await request.clone().json();
-                } catch {
-                    // Not JSON — skip match
-                }
-                if (!entry.trigger.match(body)) {
-                    return undefined;
-                }
-            }
-
-            advance();
-
-            // Apply delay if specified
-            if (entry.response.delay) {
-                await new Promise((r) => setTimeout(r, entry.response.delay));
-            }
-
-            const { HttpResponse } = await loadMsw().then((m) => m.msw);
-            return HttpResponse.json(entry.response.body, {
-                status: entry.response.status ?? 200,
-                headers: entry.response.headers,
-            });
-        };
-    }
 }
 
 /**
