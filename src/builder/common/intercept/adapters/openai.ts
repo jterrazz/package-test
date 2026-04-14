@@ -3,20 +3,17 @@ import type { InterceptResponse, InterceptTrigger } from '../types.js';
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 
+// ── Chat Completions filters ──
+
 export interface OpenAIChatFilter {
-    /** Match by model name (exact string or regex). */
     model?: RegExp | string;
-    /** Match by system message content (regex or substring). */
     system?: RegExp | string;
-    /** Match by user message content (regex or substring). */
     user?: RegExp | string;
-    /** Match by tool/function names present in the request. */
     tools?: string[];
-    /** Match by temperature value. */
     temperature?: number;
 }
 
-function matchesFilter(body: any, filter: OpenAIChatFilter): boolean {
+function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
     if (filter.model) {
         const model = body?.model;
         if (typeof filter.model === 'string' && model !== filter.model) {
@@ -26,50 +23,42 @@ function matchesFilter(body: any, filter: OpenAIChatFilter): boolean {
             return false;
         }
     }
-
     if (filter.system) {
-        const systemMsg = body?.messages?.find((m: any) => m.role === 'system')?.content ?? '';
-        if (typeof filter.system === 'string' && !systemMsg.includes(filter.system)) {
+        const msg = body?.messages?.find((m: any) => m.role === 'system')?.content ?? '';
+        if (typeof filter.system === 'string' && !msg.includes(filter.system)) {
             return false;
         }
-        if (filter.system instanceof RegExp && !filter.system.test(systemMsg)) {
+        if (filter.system instanceof RegExp && !filter.system.test(msg)) {
             return false;
         }
     }
-
     if (filter.user) {
-        const userMsg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
-        if (typeof filter.user === 'string' && !userMsg.includes(filter.user)) {
+        const msg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
+        if (typeof filter.user === 'string' && !msg.includes(filter.user)) {
             return false;
         }
-        if (filter.user instanceof RegExp && !filter.user.test(userMsg)) {
+        if (filter.user instanceof RegExp && !filter.user.test(msg)) {
             return false;
         }
     }
-
     if (filter.tools) {
-        const requestTools = body?.tools?.map((t: any) => t.function?.name).filter(Boolean) ?? [];
-        if (!filter.tools.every((t) => requestTools.includes(t))) {
+        const names = body?.tools?.map((t: any) => t.function?.name).filter(Boolean) ?? [];
+        if (!filter.tools.every((t) => names.includes(t))) {
             return false;
         }
     }
-
     if (filter.temperature !== undefined && body?.temperature !== filter.temperature) {
         return false;
     }
-
     return true;
 }
 
-/** Responses API filter — uses `input` array instead of `messages`. */
+// ── Responses API filters ──
+
 export interface OpenAIResponsesFilter {
-    /** Match by model name. */
     model?: RegExp | string;
-    /** Match by system instruction content. */
     system?: RegExp | string;
-    /** Match by user input content. */
     user?: RegExp | string;
-    /** Match by tool names. */
     tools?: string[];
 }
 
@@ -83,147 +72,130 @@ function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boole
             return false;
         }
     }
-
     if (filter.system) {
         const instructions = body?.instructions ?? '';
         const systemInput = body?.input?.find?.((m: any) => m.role === 'system')?.content ?? '';
-        const systemText = instructions || systemInput;
-        if (typeof filter.system === 'string' && !systemText.includes(filter.system)) {
+        const text = instructions || systemInput;
+        if (typeof filter.system === 'string' && !text.includes(filter.system)) {
             return false;
         }
-        if (filter.system instanceof RegExp && !filter.system.test(systemText)) {
+        if (filter.system instanceof RegExp && !filter.system.test(text)) {
             return false;
         }
     }
-
     if (filter.user) {
-        const userInputs = (body?.input ?? [])
+        const msgs = (body?.input ?? [])
             .filter((m: any) => m.role === 'user')
             .map((m: any) =>
                 typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
             )
             .join(' ');
-        if (typeof filter.user === 'string' && !userInputs.includes(filter.user)) {
+        if (typeof filter.user === 'string' && !msgs.includes(filter.user)) {
             return false;
         }
-        if (filter.user instanceof RegExp && !filter.user.test(userInputs)) {
+        if (filter.user instanceof RegExp && !filter.user.test(msgs)) {
             return false;
         }
     }
-
     if (filter.tools) {
-        const requestTools =
+        const names =
             body?.tools?.map((t: any) => t.name ?? t.function?.name).filter(Boolean) ?? [];
-        if (!filter.tools.every((t) => requestTools.includes(t))) {
+        if (!filter.tools.every((t) => names.includes(t))) {
             return false;
         }
     }
-
     return true;
 }
+
+// ── Response builders ──
+
+function buildChatReply(data: unknown): InterceptResponse {
+    const content = typeof data === 'string' ? data : JSON.stringify(data);
+    return {
+        status: 200,
+        body: {
+            id: 'chatcmpl-test',
+            object: 'chat.completion',
+            created: Math.floor(Date.now() / 1000),
+            model: 'gpt-4o-test',
+            choices: [{ index: 0, message: { role: 'assistant', content }, finish_reason: 'stop' }],
+            usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
+        },
+    };
+}
+
+function buildResponsesReply(data: unknown): InterceptResponse {
+    const text = typeof data === 'string' ? data : JSON.stringify(data);
+    return {
+        status: 200,
+        body: {
+            id: 'resp-test',
+            object: 'response',
+            created_at: Math.floor(Date.now() / 1000),
+            model: 'gpt-4o-test',
+            output: [
+                {
+                    type: 'message',
+                    id: 'msg-test',
+                    role: 'assistant',
+                    content: [{ type: 'output_text', text, annotations: [] }],
+                },
+            ],
+            usage: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+        },
+    };
+}
+
+// ── Public API ──
 
 /**
  * OpenAI API intercept helpers.
  */
 export const openai = {
     /**
-     * Trigger: match OpenAI chat completion requests.
-     *
-     * @param filter - Optional filters to narrow which requests match.
+     * Trigger: match Chat Completions API requests.
      *
      * @example
-     *   openai.chat()                                    // any chat call
-     *   openai.chat({ model: 'gpt-4o' })                // specific model
-     *   openai.chat({ system: /classify/ })              // system prompt contains "classify"
-     *   openai.chat({ tools: ['extract_facts'] })        // function calling
+     *   openai.request()                         // any chat call
+     *   openai.request({ model: 'gpt-4o' })      // specific model
+     *   openai.request({ system: /classify/ })    // system prompt match
      */
-    chat(filter?: OpenAIChatFilter): InterceptTrigger {
+    request(filter?: OpenAIChatFilter): InterceptTrigger {
         return {
             method: 'POST',
             url: OPENAI_CHAT_URL,
-            match: filter ? (body: unknown) => matchesFilter(body, filter) : undefined,
+            match: filter ? (body: unknown) => matchesChatFilter(body, filter) : undefined,
+            wrap: buildChatReply,
         };
     },
 
     /**
-     * Trigger: match OpenAI Responses API requests (AI SDK v5+).
+     * Trigger: match Responses API requests (AI SDK v5+) with auto-wrapping.
+     * When used with a JSON file, the data is automatically wrapped in the
+     * Responses API envelope.
      *
-     * @param filter - Optional filters. Supports custom gateway URLs.
-     * @param url - Override URL for custom gateways (e.g. 'https://gateway.example.com/v1/responses').
+     * @param filter - Optional body filters.
+     * @param url - Custom gateway URL (default: api.openai.com).
      *
      * @example
-     *   openai.responses()                                                // default URL
-     *   openai.responses({ user: /Report Ingestion/ })                    // match by prompt content
-     *   openai.responses({ model: 'gpt-4o' }, 'https://my-gateway/v1/responses')  // custom gateway
+     *   openai.agent({ user: /Report Ingestion/ }, GATEWAY)
      */
-    responses(filter?: OpenAIResponsesFilter, url?: string): InterceptTrigger {
+    agent(filter?: OpenAIResponsesFilter, url?: string): InterceptTrigger {
         return {
             method: 'POST',
             url: url ?? OPENAI_RESPONSES_URL,
             match: filter ? (body: unknown) => matchesResponsesFilter(body, filter) : undefined,
+            wrap: buildResponsesReply,
         };
     },
 
     /**
-     * Response: wrap data in OpenAI Responses API format (AI SDK v5+).
+     * Response: wrap data in Chat Completions format.
      *
      * @example
-     *   openai.responsesResponse({ categories: ['TECH'] })
+     *   openai.reply({ categories: ['TECH'] })
      */
-    responsesResponse(data: unknown): InterceptResponse {
-        const text = typeof data === 'string' ? data : JSON.stringify(data);
-        return {
-            status: 200,
-            body: {
-                id: 'resp-test',
-                object: 'response',
-                created_at: Math.floor(Date.now() / 1000),
-                model: 'gpt-4o-test',
-                output: [
-                    {
-                        type: 'message',
-                        id: 'msg-test',
-                        role: 'assistant',
-                        content: [{ type: 'output_text', text, annotations: [] }],
-                    },
-                ],
-                usage: {
-                    input_tokens: 10,
-                    output_tokens: 10,
-                    total_tokens: 20,
-                },
-            },
-        };
-    },
-
-    /**
-     * Response: wrap data in OpenAI chat completion format.
-     *
-     * @param data - The content to return (will be JSON.stringified if not a string).
-     *
-     * @example
-     *   openai.response({ categories: ['TECH'] })
-     */
-    response(data: unknown): InterceptResponse {
-        const content = typeof data === 'string' ? data : JSON.stringify(data);
-        return {
-            status: 200,
-            body: {
-                id: 'chatcmpl-test',
-                object: 'chat.completion',
-                created: Math.floor(Date.now() / 1000),
-                model: 'gpt-4o-test',
-                choices: [
-                    {
-                        index: 0,
-                        message: { role: 'assistant', content },
-                        finish_reason: 'stop',
-                    },
-                ],
-                usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
-            },
-        };
-    },
+    reply: buildChatReply,
 
     /** Response: return an OpenAI error. */
     error(status: number, message?: string): InterceptResponse {
@@ -239,33 +211,31 @@ export const openai = {
         };
     },
 
-    /** Response: return malformed (non-JSON) content. */
+    /** Response: return malformed content. */
     malformed(content: string): InterceptResponse {
-        return {
-            status: 200,
-            body: {
-                id: 'chatcmpl-test',
-                object: 'chat.completion',
-                created: Math.floor(Date.now() / 1000),
-                model: 'gpt-4o-test',
-                choices: [
-                    {
-                        index: 0,
-                        message: { role: 'assistant', content },
-                        finish_reason: 'stop',
-                    },
-                ],
-                usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
-            },
-        };
+        return buildChatReply(content);
     },
 
-    /** Response: simulate a timeout (30s delay). */
+    /** Response: simulate a timeout. */
     timeout(): InterceptResponse {
-        return {
-            status: 200,
-            body: {},
-            delay: 30_000,
-        };
+        return { status: 200, body: {}, delay: 30_000 };
     },
+
+    // ── Legacy aliases ──
+
+    /** @deprecated Use openai.request() instead. */
+    chat(filter?: OpenAIChatFilter): InterceptTrigger {
+        return openai.request(filter);
+    },
+
+    /** @deprecated Use openai.reply() instead. */
+    response: buildChatReply,
+
+    /** @deprecated Use openai.agent() instead. */
+    responses(filter?: OpenAIResponsesFilter, url?: string): InterceptTrigger {
+        return openai.agent(filter, url);
+    },
+
+    /** @deprecated Use openai.reply() or .intercept(trigger, 'file.json') instead. */
+    responsesResponse: buildResponsesReply,
 };

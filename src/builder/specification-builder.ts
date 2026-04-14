@@ -147,18 +147,29 @@ export class SpecificationBuilder {
      * Uses MSW under the hood. Intercepts are queued — multiple calls with the
      * same trigger fire sequentially (first match consumed first).
      *
-     * @param trigger - What to match (use openai.chat(), anthropic.messages(), http.get(), etc.)
-     * @param response - What to return (use openai.response(), http.json(), etc.)
+     * @param trigger - What to match (use openai.agent(), http.get(), etc.)
+     * @param response - What to return: an InterceptResponse object, or a filename
+     *   from `intercepts/` (JSON loaded and auto-wrapped by the trigger).
      *
      * @example
-     *   spec('pipeline')
-     *       .intercept(openai.chat(), openai.response({ categories: ['TECH'] }))
-     *       .intercept(openai.chat(), openai.response({ headline: 'AI News' }))
-     *       .exec('process')
-     *       .run();
+     *   // With inline response
+     *   .intercept(openai.agent({...}), openai.reply({ categories: ['TECH'] }))
+     *
+     *   // With JSON fixture file (loaded from intercepts/ directory)
+     *   .intercept(openai.agent({...}), 'ingest-tech.json')
+     *   .intercept(http.get(url), 'world-news-tech.json')
      */
-    intercept(trigger: InterceptTrigger, response: InterceptResponse): this {
-        this.intercepts.push({ trigger, response });
+    intercept(trigger: InterceptTrigger, response: InterceptResponse | string): this {
+        if (typeof response === 'string') {
+            // Load JSON from intercepts/ directory
+            const filePath = resolve(this.testDir, 'intercepts', response);
+            const data = JSON.parse(readFileSync(filePath, 'utf8'));
+            // Use trigger's wrap() if available, otherwise use raw JSON as body
+            const resolved = trigger.wrap ? trigger.wrap(data) : { status: 200, body: data };
+            this.intercepts.push({ trigger, response: resolved });
+        } else {
+            this.intercepts.push({ trigger, response });
+        }
         return this;
     }
 

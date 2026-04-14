@@ -6,8 +6,14 @@ export interface InterceptTrigger {
     method: string;
     /** URL pattern to match (string for exact prefix, RegExp for pattern). */
     url: RegExp | string;
-    /** Optional request body matcher — the handler only fires if this returns true. */
+    /** Optional request body matcher - the handler only fires if this returns true. */
     match?: (body: unknown) => boolean;
+    /**
+     * Optional wrapper - transforms raw JSON data into a provider-specific response.
+     * Used when .intercept(trigger, 'file.json') loads a file: the raw data is
+     * passed through wrap() to produce the correct response envelope.
+     */
+    wrap?: (data: unknown) => InterceptResponse;
 }
 
 /**
