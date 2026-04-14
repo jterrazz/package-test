@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Client } from 'pg';
 
-import type { DatabasePort } from '../spec/common/ports/database.port.js';
-import type { IsolationStrategy } from '../spec/common/ports/isolation.port.js';
-import type { ServiceHandle } from '../spec/common/ports/service.port.js';
+import type { DatabasePort } from '../spec/ports/database.port.js';
+import type { IsolationStrategy } from '../spec/ports/isolation.port.js';
+import type { ServiceHandle } from '../spec/ports/service.port.js';
 
 export interface PostgresOptions {
     /** Map to a service in docker-compose.test.yaml. */

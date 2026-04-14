@@ -2,11 +2,11 @@ import { DockerAssertion } from '../infra/docker/docker-assertion.js';
 import { dockerContainer } from '../infra/docker/docker.js';
 import { Orchestrator } from '../infra/orchestrator.js';
 import { createSpecificationRunner, type SpecificationBuilder } from '../spec/builder.js';
-import { ExecAdapter } from '../spec/cli/adapters/exec.adapter.js';
-import type { DatabasePort } from '../spec/common/ports/database.port.js';
-import type { ServiceHandle } from '../spec/common/ports/service.port.js';
-import { FetchAdapter } from '../spec/http/adapters/fetch.adapter.js';
-import { HonoAdapter } from '../spec/http/adapters/hono.adapter.js';
+import { ExecAdapter } from '../spec/modes/cli/adapters/exec.adapter.js';
+import { FetchAdapter } from '../spec/modes/http/adapters/fetch.adapter.js';
+import { HonoAdapter } from '../spec/modes/http/adapters/hono.adapter.js';
+import type { DatabasePort } from '../spec/ports/database.port.js';
+import type { ServiceHandle } from '../spec/ports/service.port.js';
 import { resolveCommand, resolveProjectRoot } from './resolve.js';
 import type { AppTarget, CommandTarget, SpecTarget, StackTarget } from './targets.js';
 

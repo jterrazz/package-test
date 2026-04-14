@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { stripAnsi } from '../../../src/index.js';
+import { stripAnsi } from '../../../src/spec/reporter.js';
 import { cliSpec } from '../../setup/cli.specification.js';
 import { dedent } from '../../setup/helpers/dedent.js';
 import { httpSpec } from '../../setup/http.specification.js';

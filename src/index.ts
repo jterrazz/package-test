@@ -23,15 +23,12 @@ export {
 } from './spec/builder.js';
 
 // Results
-export { BaseResult, type FileAccessor } from './spec/common/result/result.js';
-export { CliResult } from './spec/cli/result.js';
-export { HttpResult } from './spec/http/result.js';
-export {
-    DirectoryAccessor,
-    type DirectorySnapshotOptions,
-} from './spec/common/result/directory.js';
-export { ResponseAccessor } from './spec/common/result/response.js';
-export { TableAssertion } from './spec/common/result/table.js';
+export { BaseResult, type FileAccessor } from './spec/result/result.js';
+export { CliResult } from './spec/modes/cli/result.js';
+export { HttpResult } from './spec/modes/http/result.js';
+export { DirectoryAccessor, type DirectorySnapshotOptions } from './spec/result/directory.js';
+export { ResponseAccessor } from './spec/result/response.js';
+export { TableAssertion } from './spec/result/table.js';
 
 // Ports
 export type {
@@ -39,17 +36,17 @@ export type {
     CommandPort,
     CommandResult,
     SpawnOptions,
-} from './spec/cli/command.port.js';
-export type { DatabasePort } from './spec/common/ports/database.port.js';
-export type { IsolationStrategy } from './spec/common/ports/isolation.port.js';
-export type { ServiceHandle } from './spec/common/ports/service.port.js';
-export type { ServerPort, ServerResponse } from './spec/http/server.port.js';
+} from './spec/modes/cli/command.port.js';
+export type { DatabasePort } from './spec/ports/database.port.js';
+export type { IsolationStrategy } from './spec/ports/isolation.port.js';
+export type { ServiceHandle } from './spec/ports/service.port.js';
+export type { ServerPort, ServerResponse } from './spec/modes/http/server.port.js';
 export type { ContainerPort } from './infra/containers/container.port.js';
 
 // Adapters (advanced usage)
-export { ExecAdapter } from './spec/cli/adapters/exec.adapter.js';
-export { FetchAdapter } from './spec/http/adapters/fetch.adapter.js';
-export { HonoAdapter } from './spec/http/adapters/hono.adapter.js';
+export { ExecAdapter } from './spec/modes/cli/adapters/exec.adapter.js';
+export { FetchAdapter } from './spec/modes/http/adapters/fetch.adapter.js';
+export { HonoAdapter } from './spec/modes/http/adapters/hono.adapter.js';
 export { Orchestrator } from './infra/orchestrator.js';
 
 // Services (also available via @jterrazz/test/services)

@@ -2,17 +2,18 @@ import { cpSync, existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
-import type { DatabasePort } from '../spec/common/ports/database.port.js';
-import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from './cli/command.port.js';
-import { CliResult } from './cli/result.js';
+import type { DatabasePort } from '../spec/ports/database.port.js';
+import type { InterceptEntry, InterceptResponse, InterceptTrigger } from './intercept/types.js';
 import type {
-    InterceptEntry,
-    InterceptResponse,
-    InterceptTrigger,
-} from './common/intercept/types.js';
-import { BaseResult } from './common/result/result.js';
-import { HttpResult } from './http/result.js';
-import type { ServerPort } from './http/server.port.js';
+    CommandEnv,
+    CommandPort,
+    CommandResult,
+    SpawnOptions,
+} from './modes/cli/command.port.js';
+import { CliResult } from './modes/cli/result.js';
+import { HttpResult } from './modes/http/result.js';
+import type { ServerPort } from './modes/http/server.port.js';
+import { BaseResult } from './result/result.js';
 
 // ── Types ──
 
@@ -339,7 +340,7 @@ export class SpecificationBuilder {
         // Register HTTP intercepts via MSW
         let cleanupIntercepts: (() => void) | null = null;
         if (this.intercepts.length > 0) {
-            const { registerIntercepts } = await import('./common/intercept/intercept.js');
+            const { registerIntercepts } = await import('./intercept/intercept.js');
             cleanupIntercepts = await registerIntercepts(this.intercepts);
         }
 

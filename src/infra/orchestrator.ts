@@ -2,9 +2,9 @@ import { dirname } from 'node:path';
 
 import { postgres } from '../services/postgres.js';
 import { redis } from '../services/redis.js';
-import type { DatabasePort } from '../spec/common/ports/database.port.js';
-import type { ServiceHandle } from '../spec/common/ports/service.port.js';
-import { type AppInfo, formatStartupReport, type ServiceReport } from '../spec/common/reporter.js';
+import type { DatabasePort } from '../spec/ports/database.port.js';
+import type { ServiceHandle } from '../spec/ports/service.port.js';
+import { type AppInfo, formatStartupReport, type ServiceReport } from '../spec/reporter.js';
 import {
     detectServiceType,
     findComposeFile,

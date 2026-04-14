@@ -1,6 +1,6 @@
-import type { SpecificationConfig } from '../builder.js';
-import { grep as grepUtil } from '../common/result/grep.js';
-import { BaseResult } from '../common/result/result.js';
+import type { SpecificationConfig } from '../../builder.js';
+import { grep as grepUtil } from '../../result/grep.js';
+import { BaseResult } from '../../result/result.js';
 import type { CommandResult } from './command.port.js';
 
 /** Result from a CLI action (.exec(), .spawn()). */

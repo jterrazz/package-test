@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-import { normalizeOutput, stripAnsi } from '../../../src/index.js';
+import { normalizeOutput, stripAnsi } from '../../../src/spec/reporter.js';
 import { Orchestrator } from '../../../src/infra/orchestrator.js';
 import { postgres } from '../../../src/services/postgres.js';
 import { redis } from '../../../src/services/redis.js';
