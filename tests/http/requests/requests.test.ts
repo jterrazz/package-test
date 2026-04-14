@@ -57,7 +57,7 @@ describe('integration — request errors', () => {
         } catch (error: any) {
             // Then - descriptive error with spec label
             expect(error.message).toBe(
-                'Specification "no request": no action defined. Call .get(), .post(), .exec(), etc. before .run()',
+                'Specification "no request": no action defined. Call .get(), .post(), .exec(), .job(), etc. before .run()',
             );
         }
     });
