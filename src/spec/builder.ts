@@ -56,6 +56,12 @@ export interface SpecificationConfig {
      */
     seedHandlers?: Record<string, SeedHandler>;
     server?: ServerPort;
+    /**
+     * Optional normaliser applied to CLI stdout/stderr before every
+     * .toMatch / .toMatchFile comparison. Does not mutate the raw
+     * `.text` accessor.
+     */
+    transform?: (text: string) => string;
 }
 
 /** A SQL seed file to execute before the action, optionally targeting a named database service. */
@@ -534,6 +540,7 @@ export class SpecificationBuilder {
             commandResult,
             config: this.config,
             testDir: this.testDir,
+            transform: this.config.transform,
             workDir,
         });
     }

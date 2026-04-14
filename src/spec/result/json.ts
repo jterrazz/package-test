@@ -30,14 +30,20 @@ function formatJson(value: unknown): string {
  * Lazily parses the JSON on first use; parse errors are deferred until an
  * assertion is performed so that callers can still read the raw stream text
  * without triggering a throw.
+ *
+ * When a `transform` is configured on the spec runner, it is applied to the
+ * raw stdout text BEFORE `JSON.parse`. This lets consumers strip ANSI codes,
+ * scrub machine-specific paths, etc. before structural comparison.
  */
 export class JsonAccessor {
     private readonly rawText: string;
     private readonly testDir: string;
+    private readonly transform?: (text: string) => string;
 
-    constructor(rawText: string, testDir: string) {
+    constructor(rawText: string, testDir: string, transform?: (text: string) => string) {
         this.rawText = rawText;
         this.testDir = testDir;
+        this.transform = transform;
     }
 
     /** The parsed JSON value. Throws if the text is not valid JSON. */
@@ -80,17 +86,18 @@ export class JsonAccessor {
      * Assert the parsed JSON matches a convention-based fixture:
      * `<test-file-dir>/expected/json/<name>.json`.
      */
-    toMatchFixture(name: string, options: JsonSnapshotOptions = {}): void {
+    toMatch(name: string, options: JsonSnapshotOptions = {}): void {
         const fileName = name.endsWith('.json') ? name : `${name}.json`;
         const absPath = resolve(this.testDir, 'expected', 'json', fileName);
         this.toMatchFile(absPath, options);
     }
 
     private parse(): unknown {
+        const source = this.transform ? this.transform(this.rawText) : this.rawText;
         try {
-            return JSON.parse(this.rawText);
+            return JSON.parse(source);
         } catch {
-            const preview = this.rawText.slice(0, 200);
+            const preview = source.slice(0, 200);
             throw new Error(`stdout is not valid JSON: ${preview}`);
         }
     }

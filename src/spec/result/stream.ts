@@ -31,12 +31,19 @@ export interface StreamSnapshotOptions {
 export class StreamAccessor {
     private readonly streamName: string;
     private readonly testDir: string;
+    private readonly transform?: (text: string) => string;
     readonly text: string;
 
-    constructor(text: string, streamName: string, testDir: string) {
+    constructor(
+        text: string,
+        streamName: string,
+        testDir: string,
+        transform?: (text: string) => string,
+    ) {
         this.text = text;
         this.streamName = streamName;
         this.testDir = testDir;
+        this.transform = transform;
     }
 
     /**
@@ -45,14 +52,19 @@ export class StreamAccessor {
      * Path is resolved relative to the test file directory unless absolute.
      * If `JTERRAZZ_TEST_UPDATE=1` (or vitest `-u`), the file is (re)written
      * with the actual text.
+     *
+     * When a `transform` is configured on the spec runner, it is applied to
+     * the actual text before comparison (and before writing in update mode).
+     * The fixture file is treated as authoritative and is NOT transformed.
      */
     toMatchFile(path: string, options: StreamSnapshotOptions = {}): void {
         const absPath = isAbsolute(path) ? path : resolve(this.testDir, path);
         const update = options.update ?? shouldUpdateSnapshots();
+        const actual = this.transform ? this.transform(this.text) : this.text;
 
         if (update) {
             mkdirSync(dirname(absPath), { recursive: true });
-            writeFileSync(absPath, this.text);
+            writeFileSync(absPath, actual);
             return;
         }
 
@@ -64,8 +76,8 @@ export class StreamAccessor {
         }
 
         const expected = readFileSync(absPath, 'utf8');
-        if (expected !== this.text) {
-            throw new Error(formatStdoutDiff(path, expected, this.text));
+        if (expected !== actual) {
+            throw new Error(formatStdoutDiff(path, expected, actual));
         }
     }
 
@@ -73,7 +85,7 @@ export class StreamAccessor {
      * Assert the captured text matches a convention-based fixture:
      * `<test-file-dir>/expected/<stream>/<name>.txt`.
      */
-    toMatchFixture(name: string, options: StreamSnapshotOptions = {}): void {
+    toMatch(name: string, options: StreamSnapshotOptions = {}): void {
         const fileName = name.endsWith('.txt') ? name : `${name}.txt`;
         const absPath = resolve(this.testDir, 'expected', this.streamName, fileName);
         this.toMatchFile(absPath, options);

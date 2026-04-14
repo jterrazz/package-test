@@ -26,6 +26,16 @@ export interface SpecOptions {
     seedHandlers?: Record<string, SeedHandler>;
     /** Infrastructure services to start via testcontainers. */
     services?: ServiceHandle[];
+    /**
+     * Optional normaliser applied to result.stdout.text and
+     * result.stderr.text before every .toMatch / .toMatchFile
+     * comparison. Useful for stripping ANSI codes, masking
+     * machine-specific paths, scrubbing timestamps, etc.
+     *
+     * The transform does NOT mutate the raw `.text` accessor —
+     * callers can still inspect the pristine output.
+     */
+    transform?: (text: string) => string;
 }
 
 /** A specification runner with teardown support and orchestrator access. */
@@ -207,6 +217,7 @@ async function startCommand(target: CommandTarget, options: SpecOptions): Promis
         databases,
         fixturesRoot: root,
         seedHandlers: options.seedHandlers,
+        transform: options.transform,
     }) as SpecRunner;
 
     runner.cleanup = async () => {

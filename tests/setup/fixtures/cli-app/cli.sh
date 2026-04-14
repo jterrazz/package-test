@@ -74,6 +74,12 @@ case "$COMMAND" in
     json)
         echo '{"name":"cli-app","version":"1.0.0","features":["build","check"]}'
         ;;
+    ansi)
+        printf '\x1b[31mred\x1b[0m plain \x1b[1mbold\x1b[0m\n'
+        ;;
+    ansi-json)
+        printf '\x1b[32m{"status":"ok","value":42}\x1b[0m\n'
+        ;;
     read-seed)
         if [ -f "spwn.yaml" ]; then
             cat spwn.yaml

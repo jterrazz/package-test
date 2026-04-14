@@ -47,7 +47,7 @@ export class FilesystemAccessor {
      * Assert the working directory matches a convention-based fixture tree:
      * `<test-file-dir>/expected/filesystem/<name>/`.
      */
-    async toMatchFixture(name: string, options: DirectorySnapshotOptions = {}): Promise<void> {
+    async toMatch(name: string, options: DirectorySnapshotOptions = {}): Promise<void> {
         const fixtureDir = resolve(this.testDir, 'expected', 'filesystem', name);
         const update = options.update ?? shouldUpdateSnapshots();
 

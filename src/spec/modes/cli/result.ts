@@ -9,15 +9,18 @@ import type { CommandResult } from './command.port.js';
 /** Result from a CLI action (.exec(), .spawn()). */
 export class CliResult extends BaseResult {
     private commandResult: CommandResult;
+    private readonly transform?: (text: string) => string;
 
     constructor(options: {
         commandResult: CommandResult;
         config: SpecificationConfig;
         testDir: string;
+        transform?: (text: string) => string;
         workDir: string;
     }) {
         super(options);
         this.commandResult = options.commandResult;
+        this.transform = options.transform;
     }
 
     /** The process exit code. */
@@ -27,17 +30,27 @@ export class CliResult extends BaseResult {
 
     /** Accessor for the captured standard output with file-based assertions. */
     get stdout(): StreamAccessor {
-        return new StreamAccessor(this.commandResult.stdout, 'stdout', this.testDir);
+        return new StreamAccessor(
+            this.commandResult.stdout,
+            'stdout',
+            this.testDir,
+            this.transform,
+        );
     }
 
     /** Accessor for the captured standard error with file-based assertions. */
     get stderr(): StreamAccessor {
-        return new StreamAccessor(this.commandResult.stderr, 'stderr', this.testDir);
+        return new StreamAccessor(
+            this.commandResult.stderr,
+            'stderr',
+            this.testDir,
+            this.transform,
+        );
     }
 
     /** Accessor for parsing stdout as JSON and asserting against JSON fixtures. */
     get json(): JsonAccessor {
-        return new JsonAccessor(this.commandResult.stdout, this.testDir);
+        return new JsonAccessor(this.commandResult.stdout, this.testDir, this.transform);
     }
 
     /** Accessor for the temporary working directory the command ran in. */

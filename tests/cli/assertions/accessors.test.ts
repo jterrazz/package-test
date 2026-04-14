@@ -52,14 +52,14 @@ describe('cli — stdout accessor', () => {
         }
     });
 
-    test('toMatchFixture resolves to expected/stdout/<name>.txt', async () => {
+    test('toMatch resolves to expected/stdout/<name>.txt', async () => {
         const fixtureName = `stdout-transient-${Date.now()}`;
         try {
             const a = await cliSpec('stdout fixture seed').project('cli-app').exec('json').run();
-            a.stdout.toMatchFixture(fixtureName, { update: true });
+            a.stdout.toMatch(fixtureName, { update: true });
 
             const b = await cliSpec('stdout fixture verify').project('cli-app').exec('json').run();
-            b.stdout.toMatchFixture(fixtureName);
+            b.stdout.toMatch(fixtureName);
         } finally {
             rmSync(resolve(import.meta.dirname, 'expected', 'stdout', `${fixtureName}.txt`), {
                 force: true,
@@ -119,14 +119,14 @@ describe('cli — json accessor', () => {
         }
     });
 
-    test('toMatchFixture resolves to expected/json/<name>.json', async () => {
+    test('toMatch resolves to expected/json/<name>.json', async () => {
         const fixtureName = `json-transient-${Date.now()}`;
         try {
             const a = await cliSpec('json fixture seed').project('cli-app').exec('json').run();
-            a.json.toMatchFixture(fixtureName, { update: true });
+            a.json.toMatch(fixtureName, { update: true });
 
             const b = await cliSpec('json fixture verify').project('cli-app').exec('json').run();
-            b.json.toMatchFixture(fixtureName);
+            b.json.toMatch(fixtureName);
         } finally {
             rmSync(resolve(import.meta.dirname, 'expected', 'json', `${fixtureName}.json`), {
                 force: true,
@@ -160,14 +160,14 @@ describe('cli — filesystem accessor', () => {
         expect([...files].sort()).toEqual(files);
     });
 
-    test('toMatchFixture round-trips the entire working dir', async () => {
+    test('toMatch round-trips the entire working dir', async () => {
         const fixtureName = `fs-transient-${Date.now()}`;
         try {
             const a = await cliSpec('fs fixture seed').project('cli-app').exec('scaffold').run();
-            await a.filesystem.toMatchFixture(fixtureName, { update: true });
+            await a.filesystem.toMatch(fixtureName, { update: true });
 
             const b = await cliSpec('fs fixture verify').project('cli-app').exec('scaffold').run();
-            await b.filesystem.toMatchFixture(fixtureName);
+            await b.filesystem.toMatch(fixtureName);
         } finally {
             rmSync(resolve(import.meta.dirname, 'expected', 'filesystem', fixtureName), {
                 force: true,
@@ -176,24 +176,135 @@ describe('cli — filesystem accessor', () => {
         }
     });
 
-    test('toMatchFixture detects a diff', async () => {
+    test('toMatch detects a diff', async () => {
         const fixtureName = `fs-diff-${Date.now()}`;
         try {
             const a = await cliSpec('fs diff seed').project('cli-app').exec('scaffold').run();
-            await a.filesystem.toMatchFixture(fixtureName, { update: true });
+            await a.filesystem.toMatch(fixtureName, { update: true });
 
             const b = await cliSpec('fs diff verify')
                 .project('cli-app')
                 .exec('scaffold-changed')
                 .run();
-            await expect(b.filesystem.toMatchFixture(fixtureName)).rejects.toThrow(
-                /Directory mismatch/,
-            );
+            await expect(b.filesystem.toMatch(fixtureName)).rejects.toThrow(/Directory mismatch/);
         } finally {
             rmSync(resolve(import.meta.dirname, 'expected', 'filesystem', fixtureName), {
                 force: true,
                 recursive: true,
             });
+        }
+    });
+});
+
+// eslint-disable-next-line no-control-regex
+const stripAnsi = (text: string): string => text.replace(/\x1b\[[0-9;]*m/g, '');
+
+describe('cli — transform option', () => {
+    test('transform strips ANSI from stdout before toMatchFile comparison', async () => {
+        const { command, spec } = await import('../../../src/index.js');
+        const cliBin = resolve(import.meta.dirname, '../../setup/fixtures/cli-app/cli.sh');
+        const customSpec = await spec(command(cliBin), { transform: stripAnsi });
+
+        const temp = mkdtempSync(resolve(tmpdir(), 'transform-stdout-'));
+        const fixturePath = resolve(temp, 'expected.txt');
+        try {
+            // Hand-write the fixture WITHOUT ANSI codes.
+            const { writeFileSync } = await import('node:fs');
+            writeFileSync(fixturePath, 'red plain bold\n');
+
+            const result = await customSpec('ansi stdout').exec('ansi').run();
+
+            // Raw .text still contains the original ANSI escapes.
+            expect(result.stdout.text).toContain('\x1b[31m');
+            expect(result.stdout.text).toContain('\x1b[0m');
+
+            // Comparison passes because the transform stripped ANSI from the actual.
+            expect(() => result.stdout.toMatchFile(fixturePath)).not.toThrow();
+        } finally {
+            rmSync(temp, { force: true, recursive: true });
+            await customSpec.cleanup();
+        }
+    });
+
+    test('transform does NOT mutate result.stdout.text', async () => {
+        const { command, spec } = await import('../../../src/index.js');
+        const cliBin = resolve(import.meta.dirname, '../../setup/fixtures/cli-app/cli.sh');
+        const customSpec = await spec(command(cliBin), { transform: stripAnsi });
+
+        try {
+            const result = await customSpec('ansi raw').exec('ansi').run();
+            // Pristine output preserved.
+            expect(result.stdout.text).toBe('\x1b[31mred\x1b[0m plain \x1b[1mbold\x1b[0m\n');
+        } finally {
+            await customSpec.cleanup();
+        }
+    });
+
+    test('transform only runs on actual, never on fixture', async () => {
+        const { command, spec } = await import('../../../src/index.js');
+        const cliBin = resolve(import.meta.dirname, '../../setup/fixtures/cli-app/cli.sh');
+        // Transform strips the word "plain" entirely.
+        const customSpec = await spec(command(cliBin), {
+            transform: (t) => t.replace(/ plain/g, ''),
+        });
+
+        const temp = mkdtempSync(resolve(tmpdir(), 'transform-asymmetric-'));
+        const fixturePath = resolve(temp, 'expected.txt');
+        try {
+            const { writeFileSync } = await import('node:fs');
+            // Fixture lacks " plain" — matches what the transform produces from actual.
+            writeFileSync(fixturePath, '\x1b[31mred\x1b[0m \x1b[1mbold\x1b[0m\n');
+
+            const result = await customSpec('asymmetric').exec('ansi').run();
+            // Passes only because fixture is authoritative — NOT transformed.
+            expect(() => result.stdout.toMatchFile(fixturePath)).not.toThrow();
+
+            // Prove the fixture is not transformed: if we re-read it, it still has " plain"-less
+            // Content which means our assertion succeeded against the raw (post-actual-transform) value.
+            const { readFileSync: rf } = await import('node:fs');
+            expect(rf(fixturePath, 'utf8')).not.toContain(' plain');
+        } finally {
+            rmSync(temp, { force: true, recursive: true });
+            await customSpec.cleanup();
+        }
+    });
+
+    test('transform writes the post-normalisation form when updating', async () => {
+        const { command, spec } = await import('../../../src/index.js');
+        const cliBin = resolve(import.meta.dirname, '../../setup/fixtures/cli-app/cli.sh');
+        const customSpec = await spec(command(cliBin), { transform: stripAnsi });
+
+        const temp = mkdtempSync(resolve(tmpdir(), 'transform-update-'));
+        const fixturePath = resolve(temp, 'expected.txt');
+        try {
+            const result = await customSpec('update mode').exec('ansi').run();
+            result.stdout.toMatchFile(fixturePath, { update: true });
+
+            const written = readFileSync(fixturePath, 'utf8');
+            // No ANSI in the fixture — transform ran before write.
+            expect(written).toBe('red plain bold\n');
+            expect(written).not.toContain('\x1b[');
+        } finally {
+            rmSync(temp, { force: true, recursive: true });
+            await customSpec.cleanup();
+        }
+    });
+
+    test('JsonAccessor applies transform before JSON.parse', async () => {
+        const { command, spec } = await import('../../../src/index.js');
+        const cliBin = resolve(import.meta.dirname, '../../setup/fixtures/cli-app/cli.sh');
+        const customSpec = await spec(command(cliBin), { transform: stripAnsi });
+
+        try {
+            const result = await customSpec('ansi json').exec('ansi-json').run();
+
+            // Raw stdout still has ANSI wrapping the JSON — would NOT parse.
+            expect(result.stdout.text).toContain('\x1b[32m');
+
+            // But .json.value works because the transform stripped ANSI before parse.
+            expect(result.json.value).toEqual({ status: 'ok', value: 42 });
+        } finally {
+            await customSpec.cleanup();
         }
     });
 });
