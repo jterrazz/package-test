@@ -2,6 +2,7 @@ import { cpSync, existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
+import type { InterceptEntry, InterceptResponse, InterceptTrigger } from '../intercept/types.js';
 import type {
     CommandEnv,
     CommandPort,
@@ -61,6 +62,7 @@ export class SpecificationBuilder {
     private commandEnv: CommandEnv = {};
     private config: SpecificationConfig;
     private fixtures: FixtureEntry[] = [];
+    private intercepts: InterceptEntry[] = [];
     private label: string;
     private mocks: MockEntry[] = [];
     private projectName: null | string = null;
@@ -130,6 +132,26 @@ export class SpecificationBuilder {
      */
     headers(headers: Record<string, string>): this {
         this.requestHeaders = { ...this.requestHeaders, ...headers };
+        return this;
+    }
+
+    /**
+     * Intercept an outgoing HTTP request and return a controlled response.
+     * Uses MSW under the hood. Intercepts are queued — multiple calls with the
+     * same trigger fire sequentially (first match consumed first).
+     *
+     * @param trigger - What to match (use openai.chat(), anthropic.messages(), http.get(), etc.)
+     * @param response - What to return (use openai.response(), http.json(), etc.)
+     *
+     * @example
+     *   spec('pipeline')
+     *       .intercept(openai.chat(), openai.response({ categories: ['TECH'] }))
+     *       .intercept(openai.chat(), openai.response({ headline: 'AI News' }))
+     *       .exec('process')
+     *       .run();
+     */
+    intercept(trigger: InterceptTrigger, response: InterceptResponse): this {
+        this.intercepts.push({ trigger, response });
         return this;
     }
 
@@ -263,19 +285,24 @@ export class SpecificationBuilder {
             }
         }
 
-        // Register MSW mocks
-        for (const entry of this.mocks) {
-            const _mockData = JSON.parse(
-                readFileSync(resolve(this.testDir, 'mock', entry.file), 'utf8'),
-            );
-            // TODO: Register MSW handler from mock data
+        // Register HTTP intercepts via MSW
+        let cleanupIntercepts: (() => void) | null = null;
+        if (this.intercepts.length > 0) {
+            const { registerIntercepts } = await import('../intercept/server.js');
+            cleanupIntercepts = await registerIntercepts(this.intercepts);
         }
 
         // Execute action
-        if (hasHttpAction) {
-            return this.runHttpAction();
+        try {
+            if (hasHttpAction) {
+                return await this.runHttpAction();
+            }
+            return await this.runCliAction(workDir!);
+        } finally {
+            if (cleanupIntercepts) {
+                cleanupIntercepts();
+            }
         }
-        return this.runCliAction(workDir!);
     }
 
     // ── Private ──

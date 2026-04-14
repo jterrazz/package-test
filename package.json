@@ -22,6 +22,10 @@
         "./mock": {
             "require": "./dist/mock.cjs",
             "import": "./dist/mock.js"
+        },
+        "./intercept": {
+            "require": "./dist/intercept.cjs",
+            "import": "./dist/intercept.js"
         }
     },
     "publishConfig": {
@@ -51,6 +55,7 @@
         "@types/node": "^25.5.0",
         "@types/pg": "^8.20.0",
         "hono": "^4.12.9",
+        "msw": "^2.13.3",
         "tsdown": "^0.21.8",
         "vitest": "^4.1.2"
     },
