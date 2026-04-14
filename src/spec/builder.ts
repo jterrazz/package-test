@@ -23,6 +23,23 @@ export interface JobHandle {
     execute: () => Promise<void>;
 }
 
+/**
+ * Context passed to a {@link SeedHandler} when a non-SQL seed is dispatched.
+ */
+export interface SeedHandlerContext {
+    /** Absolute path of the temporary working directory for the current spec. */
+    cwd: string;
+    /** Absolute path of the test file directory (where `seeds/` lives). */
+    testDir: string;
+}
+
+/**
+ * Handler invoked for a non-SQL seed entry. The first path segment of the
+ * seed file selects the handler; the handler is given the absolute path of
+ * the source fragment (file or directory) and the working directory to mutate.
+ */
+export type SeedHandler = (ctx: SeedHandlerContext, fragmentPath: string) => Promise<void> | void;
+
 /** Adapter configuration passed to the specification runner at setup time. */
 export interface SpecificationConfig {
     command?: CommandPort;
@@ -30,6 +47,14 @@ export interface SpecificationConfig {
     databases?: Map<string, DatabasePort>;
     fixturesRoot?: string;
     jobs?: JobHandle[];
+    /**
+     * Pluggable seed handlers for CLI-mode tests. Keys are leading path
+     * segments (e.g. `"spwn.yaml/"`, `"agent/"`). When `.seed(relPath)` is
+     * called with a path whose first segment matches, the handler is invoked
+     * with the full absolute path of the seed fragment under
+     * `<test-file-dir>/seeds/<relPath>`.
+     */
+    seedHandlers?: Record<string, SeedHandler>;
     server?: ServerPort;
 }
 
@@ -308,6 +333,20 @@ export class SpecificationBuilder {
 
         // Execute seeds
         for (const entry of this.seeds) {
+            // Pluggable seed handlers (CLI mode): dispatch based on leading path segment.
+            const handler = this.resolveSeedHandler(entry.file);
+            if (handler) {
+                if (!workDir) {
+                    throw new Error(
+                        `seed("${entry.file}"): pluggable seed handlers require a CLI working directory`,
+                    );
+                }
+                const fragmentPath = resolve(this.testDir, 'seeds', entry.file);
+                await handler({ cwd: workDir, testDir: this.testDir }, fragmentPath);
+                continue;
+            }
+
+            // Default: SQL seed against a database adapter.
             let db: DatabasePort | undefined;
             if (entry.service && this.config.databases) {
                 db = this.config.databases.get(entry.service);
@@ -361,6 +400,25 @@ export class SpecificationBuilder {
     }
 
     // ── Private ──
+
+    private resolveSeedHandler(file: string): SeedHandler | undefined {
+        const handlers = this.config.seedHandlers;
+        if (!handlers) {
+            return undefined;
+        }
+        // Prefer the longest matching prefix, so 'agent/neo/' can override 'agent/'.
+        const normalized = file.replaceAll('\\', '/');
+        let bestKey: string | undefined;
+        for (const key of Object.keys(handlers)) {
+            const prefix = key.endsWith('/') ? key : `${key}/`;
+            if (normalized === key || normalized.startsWith(prefix)) {
+                if (!bestKey || key.length > bestKey.length) {
+                    bestKey = key;
+                }
+            }
+        }
+        return bestKey ? handlers[bestKey] : undefined;
+    }
 
     private resolveEnv(workDir: string): CommandEnv | undefined {
         const keys = Object.keys(this.commandEnv);

@@ -13,14 +13,14 @@ describe('cli assertions', () => {
     describe('stdout', () => {
         test('passes when stdout contains string', async () => {
             const result = await cliSpec('stdout match').project('cli-app').exec('build').run();
-            expect(result.stdout).toContain('Build completed');
+            expect(result.stdout.text).toContain('Build completed');
         });
     });
 
     describe('stderr', () => {
         test('passes when stderr contains string', async () => {
             const result = await cliSpec('stderr match').project('cli-app').exec('fail').run();
-            expect(result.stderr).toContain('Fatal: something went wrong');
+            expect(result.stderr.text).toContain('Fatal: something went wrong');
         });
     });
 
@@ -35,14 +35,14 @@ describe('cli assertions', () => {
 
             // Then - check detected the invalid file
             expect(result.exitCode).toBe(1);
-            expect(result.stderr).toContain('unused-var');
+            expect(result.stderr.text).toContain('unused-var');
         });
 
         test('clean project has no invalid files', async () => {
             const result = await cliSpec('clean check').project('cli-app').exec('check').run();
 
             expect(result.exitCode).toBe(0);
-            expect(result.stdout).toContain('All checks passed');
+            expect(result.stdout.text).toContain('All checks passed');
         });
     });
 
@@ -51,7 +51,7 @@ describe('cli assertions', () => {
             const result = await cliSpec('chained').project('cli-app').exec('build').run();
 
             expect(result.exitCode).toBe(0);
-            expect(result.stdout).toContain('Build completed');
+            expect(result.stdout.text).toContain('Build completed');
             expect(result.file('dist/index.js').exists).toBe(true);
             expect(result.file('dist/manifest.json').exists).toBe(true);
             expect(result.file('dist/index.cjs').exists).toBe(false);

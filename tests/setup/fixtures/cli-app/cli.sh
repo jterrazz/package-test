@@ -71,6 +71,20 @@ case "$COMMAND" in
         echo "extra" > out/UNEXPECTED.txt
         echo "Scaffolded"
         ;;
+    json)
+        echo '{"name":"cli-app","version":"1.0.0","features":["build","check"]}'
+        ;;
+    read-seed)
+        if [ -f "spwn.yaml" ]; then
+            cat spwn.yaml
+        fi
+        if [ -d "spwn/agents" ]; then
+            echo "agents:"
+            find spwn/agents -type f | sort | while read -r f; do
+                echo "  $f"
+            done
+        fi
+        ;;
     help)
         echo "Usage: cli <command>"
         echo ""

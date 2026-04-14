@@ -1,7 +1,11 @@
 import { DockerAssertion } from '../infra/docker/docker-assertion.js';
 import { dockerContainer } from '../infra/docker/docker.js';
 import { Orchestrator } from '../infra/orchestrator.js';
-import { createSpecificationRunner, type SpecificationBuilder } from '../spec/builder.js';
+import {
+    createSpecificationRunner,
+    type SeedHandler,
+    type SpecificationBuilder,
+} from '../spec/builder.js';
 import { ExecAdapter } from '../spec/modes/cli/adapters/exec.adapter.js';
 import { FetchAdapter } from '../spec/modes/http/adapters/fetch.adapter.js';
 import { HonoAdapter } from '../spec/modes/http/adapters/hono.adapter.js';
@@ -14,6 +18,12 @@ import type { AppTarget, CommandTarget, SpecTarget, StackTarget } from './target
 export interface SpecOptions {
     /** Project root for fixture lookup and compose detection (relative paths supported). */
     root?: string;
+    /**
+     * Pluggable seed handlers for CLI-mode tests. Keys are leading path
+     * segments (e.g. `"spwn.yaml/"`); values receive the seed context and the
+     * absolute path of the source fragment under `<test-file-dir>/seeds/`.
+     */
+    seedHandlers?: Record<string, SeedHandler>;
     /** Infrastructure services to start via testcontainers. */
     services?: ServiceHandle[];
 }
@@ -196,6 +206,7 @@ async function startCommand(target: CommandTarget, options: SpecOptions): Promis
         database,
         databases,
         fixturesRoot: root,
+        seedHandlers: options.seedHandlers,
     }) as SpecRunner;
 
     runner.cleanup = async () => {

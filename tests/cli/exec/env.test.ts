@@ -13,7 +13,7 @@ describe('cli — env', () => {
 
         // Then - the CLI sees it
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('MY_VAR=hello');
+        expect(result.stdout.text).toContain('MY_VAR=hello');
     });
 
     test('merges multiple .env() calls', async () => {
@@ -24,8 +24,8 @@ describe('cli — env', () => {
             .exec('env')
             .run();
 
-        expect(result.stdout).toContain('MY_VAR=first');
-        expect(result.stdout).toContain('EXTRA=second');
+        expect(result.stdout.text).toContain('MY_VAR=first');
+        expect(result.stdout.text).toContain('EXTRA=second');
     });
 
     test('expands $WORKDIR token to the actual cwd', async () => {
@@ -38,7 +38,7 @@ describe('cli — env', () => {
 
         // Then - HOME points to a real (non-default) path
         expect(result.exitCode).toBe(0);
-        const homeLine = result.stdout.split('\n').find((l) => l.startsWith('HOME='));
+        const homeLine = result.stdout.text.split('\n').find((l) => l.startsWith('HOME='));
         expect(homeLine).toBeDefined();
         expect(homeLine).not.toBe('HOME=unset');
         expect(homeLine).toContain('/spec-cli-');
@@ -52,7 +52,7 @@ describe('cli — env', () => {
             .exec('env')
             .run();
 
-        expect(result.stdout).toContain('HOME=unset');
+        expect(result.stdout.text).toContain('HOME=unset');
     });
 
     test('env without .env() keeps process.env intact', async () => {
@@ -61,6 +61,6 @@ describe('cli — env', () => {
 
         expect(result.exitCode).toBe(0);
         // HOME should be the host's HOME, not "unset"
-        expect(result.stdout).not.toContain('HOME=unset');
+        expect(result.stdout.text).not.toContain('HOME=unset');
     });
 });

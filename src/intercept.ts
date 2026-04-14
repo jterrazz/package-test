@@ -1,4 +1,4 @@
-export { anthropic } from './spec/intercept/adapters/anthropic.js';
+export { anthropic, claude } from './spec/intercept/adapters/anthropic.js';
 export { http } from './spec/intercept/adapters/http.js';
 export { openai } from './spec/intercept/adapters/openai.js';
 export type {

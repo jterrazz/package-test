@@ -11,7 +11,7 @@ describe('cli — exec', () => {
     test('runs help command', async () => {
         const result = await cliSpec('help').project('cli-app').exec('help').run();
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('Usage: cli <command>');
+        expect(result.stdout.text).toContain('Usage: cli <command>');
     });
 
     test('captures non-zero exit code', async () => {
@@ -22,7 +22,7 @@ describe('cli — exec', () => {
     test('captures unknown command failure', async () => {
         const result = await cliSpec('unknown').project('cli-app').exec('nonexistent').run();
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('Unknown command');
+        expect(result.stderr.text).toContain('Unknown command');
     });
 
     describe('fresh working dir', () => {
@@ -71,7 +71,7 @@ describe('cli — exec', () => {
 
             // Then - start ran successfully (output from last command)
             expect(result.exitCode).toBe(0);
-            expect(result.stdout).toContain('Hello from CLI app');
+            expect(result.stdout.text).toContain('Hello from CLI app');
         });
 
         test('stops on first failure', async () => {
@@ -83,7 +83,7 @@ describe('cli — exec', () => {
 
             // Then - stopped at fail
             expect(result.exitCode).toBe(2);
-            expect(result.stderr).toContain('Fatal: something went wrong');
+            expect(result.stderr.text).toContain('Fatal: something went wrong');
         });
 
         test('preserves files between commands', async () => {
@@ -106,8 +106,8 @@ describe('cli — exec', () => {
                 .run();
 
             expect(result.exitCode).toBe(0);
-            expect(result.stdout).toContain('Starting dev mode');
-            expect(result.stdout).toContain('Hello from CLI app');
+            expect(result.stdout.text).toContain('Starting dev mode');
+            expect(result.stdout.text).toContain('Hello from CLI app');
         });
 
         test('returns non-zero when process exits without matching pattern', async () => {

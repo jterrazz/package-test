@@ -17,6 +17,8 @@ export {
 // Builder
 export {
     createSpecificationRunner,
+    type SeedHandler,
+    type SeedHandlerContext,
     SpecificationBuilder,
     type SpecificationConfig,
     type SpecificationRunner,
@@ -27,7 +29,10 @@ export { BaseResult, type FileAccessor } from './spec/result/result.js';
 export { CliResult } from './spec/modes/cli/result.js';
 export { HttpResult } from './spec/modes/http/result.js';
 export { DirectoryAccessor, type DirectorySnapshotOptions } from './spec/result/directory.js';
+export { FilesystemAccessor } from './spec/result/filesystem.js';
+export { JsonAccessor, type JsonSnapshotOptions } from './spec/result/json.js';
 export { ResponseAccessor } from './spec/result/response.js';
+export { StreamAccessor, type StreamSnapshotOptions } from './spec/result/stream.js';
 export { TableAssertion } from './spec/result/table.js';
 
 // Ports

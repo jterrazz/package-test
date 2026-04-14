@@ -84,6 +84,33 @@ export const anthropic = {
         };
     },
 
+    /**
+     * Trigger: match `messages.create` calls, optionally routed through a
+     * custom gateway URL. Mirrors `openai.agent()`. When used with a JSON
+     * fixture file, the data is returned as-is (no wrapping) because Anthropic
+     * fixtures are typically already in the `messages.create` response shape.
+     *
+     * @example
+     *   anthropic.message({ user: /classify/ }, GATEWAY)
+     *   claude.message({ system: /journal/ }, GATEWAY)
+     */
+    message(filter?: AnthropicMessagesFilter, url?: string): InterceptTrigger {
+        return {
+            adapter: 'anthropic',
+            method: 'POST',
+            url: url ?? ANTHROPIC_MESSAGES_URL,
+            match: filter ? (body: unknown) => matchesFilter(body, filter) : undefined,
+            // Fixture files are already in the messages.create response shape;
+            // Pass them through verbatim. Falls back to wrapping for strings.
+            wrap(data: unknown): InterceptResponse {
+                if (data && typeof data === 'object' && !Array.isArray(data)) {
+                    return { status: 200, body: data as Record<string, unknown> };
+                }
+                return buildReply(data);
+            },
+        };
+    },
+
     /** Response: wrap data in Anthropic messages format. */
     reply: buildReply,
 
@@ -106,3 +133,10 @@ export const anthropic = {
         return { status: 200, body: {}, delay: 30_000 };
     },
 };
+
+/**
+ * Alias for {@link anthropic} — matches consumers that call the vendor "claude".
+ * Re-exposed as a spread copy so downstream tooling (Knip, dts rollup) sees a
+ * distinct export and not a duplicate of `anthropic`.
+ */
+export const claude: typeof anthropic = { ...anthropic };
