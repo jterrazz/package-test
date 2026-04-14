@@ -39,6 +39,16 @@ export class ContainerAccessor {
     private readonly testDir: string;
     private readonly transform?: (text: string) => string;
 
+    /**
+     * Underlying Docker container ID, or `null` if no container was captured
+     * for this name. Useful when a follow-up CLI command needs to reference
+     * the container by id (e.g. `spwn world inspect <id>`). Prefer the other
+     * accessors for common reads — pulling the raw id is the escape hatch.
+     */
+    get id(): null | string {
+        return this.containerId;
+    }
+
     constructor(
         containerId: null | string,
         inspectData: unknown,
