@@ -45,11 +45,25 @@ export interface CommandTarget {
     readonly bin: string;
 }
 
+/**
+ * CLI binary that spawns Docker containers (e.g. `spwn up`). Created by
+ * {@link docker}. The runner stamps a unique test-run id into the configured
+ * env var so the binary can label spawned containers, then queries Docker for
+ * every container matching that label after the command exits.
+ */
+export interface DockerCommandTarget {
+    readonly kind: 'docker-command';
+    readonly bin: string;
+    readonly envVar: string;
+    readonly nameLabel: string;
+    readonly testRunLabel: string;
+}
+
 /** Any target that produces an HTTP interface (app or stack). */
 export type HttpTarget = AppTarget | StackTarget;
 
 /** Any valid spec target. */
-export type SpecTarget = AppTarget | CommandTarget | StackTarget;
+export type SpecTarget = AppTarget | CommandTarget | DockerCommandTarget | StackTarget;
 
 // ── Target factories ──
 
@@ -93,4 +107,36 @@ export function stack(root: string): StackTarget {
  */
 export function command(bin: string): CommandTarget {
     return { kind: 'command', bin };
+}
+
+/**
+ * Test a CLI binary that spawns Docker containers. After the command exits,
+ * every container labelled with `<testRunLabel>=<generated-id>` is captured,
+ * inspected, and exposed on the result via `.container(name)`. The runner
+ * auto-removes those containers when the result is disposed (`await using`).
+ *
+ * The binary is expected to read `opts.envVar` from its environment and stamp
+ * it onto every container it spawns as `<testRunLabel>=<value>`. Each
+ * container must also carry a `<nameLabel>=<friendly-name>` label so it can
+ * be looked up by name in assertions.
+ *
+ * @example
+ *   await using result = await dockerSpec('spawn world')
+ *       .project('world-a')
+ *       .exec('spawn test-a')
+ *       .run();
+ *   expect(result.container('test-a').running).toBe(true);
+ *   result.container('test-a').stdout.toContain('ready');
+ */
+export function docker(
+    bin: string,
+    opts: { envVar: string; nameLabel: string; testRunLabel: string },
+): DockerCommandTarget {
+    return {
+        kind: 'docker-command',
+        bin,
+        envVar: opts.envVar,
+        nameLabel: opts.nameLabel,
+        testRunLabel: opts.testRunLabel,
+    };
 }

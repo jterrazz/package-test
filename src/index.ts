@@ -7,6 +7,8 @@ export {
     type AppTarget,
     command,
     type CommandTarget,
+    docker,
+    type DockerCommandTarget,
     type HttpTarget,
     type JobHandle,
     type SpecTarget,
@@ -27,6 +29,17 @@ export {
 // Results
 export { BaseResult, type FileAccessor } from './spec/result/result.js';
 export { CliResult } from './spec/modes/cli/result.js';
+export { ContainerAccessor } from './spec/modes/cli/container-accessor.js';
+export {
+    type CapturedContainer,
+    DockerCliResult,
+    type DockerCliResultOptions,
+} from './spec/modes/cli/docker-cli-result.js';
+export {
+    findContainersByLabel,
+    inspectContainer,
+    removeContainers,
+} from './spec/modes/cli/docker-lookup.js';
 export { HttpResult } from './spec/modes/http/result.js';
 export { DirectoryAccessor, type DirectorySnapshotOptions } from './spec/result/directory.js';
 export { FilesystemAccessor } from './spec/result/filesystem.js';

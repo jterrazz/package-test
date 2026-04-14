@@ -10,6 +10,8 @@ import type {
     CommandResult,
     SpawnOptions,
 } from './modes/cli/command.port.js';
+import { DockerCliResult } from './modes/cli/docker-cli-result.js';
+import { findContainersByLabel, inspectContainer } from './modes/cli/docker-lookup.js';
 import { CliResult } from './modes/cli/result.js';
 import { HttpResult } from './modes/http/result.js';
 import type { ServerPort } from './modes/http/server.port.js';
@@ -40,11 +42,24 @@ export interface SeedHandlerContext {
  */
 export type SeedHandler = (ctx: SeedHandlerContext, fragmentPath: string) => Promise<void> | void;
 
+/**
+ * Configuration for the docker() spec mode. When set on
+ * {@link SpecificationConfig}, the CLI runner generates a test-run id, injects
+ * it into the child env under `envVar`, then queries Docker for every
+ * container carrying `testRunLabel=<id>` after the command exits.
+ */
+export interface DockerSpecConfig {
+    envVar: string;
+    nameLabel: string;
+    testRunLabel: string;
+}
+
 /** Adapter configuration passed to the specification runner at setup time. */
 export interface SpecificationConfig {
     command?: CommandPort;
     database?: DatabasePort;
     databases?: Map<string, DatabasePort>;
+    dockerConfig?: DockerSpecConfig;
     fixturesRoot?: string;
     jobs?: JobHandle[];
     /**
@@ -514,7 +529,16 @@ export class SpecificationBuilder {
             throw new Error('CLI actions require a command adapter (use cli())');
         }
 
-        const env = this.resolveEnv(workDir);
+        const dockerConfig = this.config.dockerConfig;
+        const testRunId = dockerConfig
+            ? `t-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`
+            : null;
+
+        // Merge dockerConfig env var in first, then user env (which wins).
+        let env = this.resolveEnv(workDir);
+        if (dockerConfig && testRunId) {
+            env = { [dockerConfig.envVar]: testRunId, ...env };
+        }
         let commandResult: CommandResult;
 
         if (this.spawnConfig) {
@@ -534,6 +558,36 @@ export class SpecificationBuilder {
             }
         } else {
             commandResult = await this.config.command.exec(this.commandArgs!, workDir, env);
+        }
+
+        if (dockerConfig && testRunId) {
+            const ids = findContainersByLabel(dockerConfig.testRunLabel, testRunId);
+            const containers = new Map<string, { id: string; inspect: unknown }>();
+            for (const id of ids) {
+                let inspect: unknown;
+                try {
+                    inspect = inspectContainer(id);
+                } catch {
+                    continue;
+                }
+                const labels =
+                    (inspect as any)?.Config?.Labels ?? (inspect as any)?.config?.labels ?? {};
+                const name = labels[dockerConfig.nameLabel];
+                const key = typeof name === 'string' && name.length > 0 ? name : id;
+                containers.set(key, { id, inspect });
+            }
+
+            return new DockerCliResult({
+                commandResult,
+                config: this.config,
+                containers,
+                nameLabel: dockerConfig.nameLabel,
+                testDir: this.testDir,
+                testRunId,
+                testRunLabel: dockerConfig.testRunLabel,
+                transform: this.config.transform,
+                workDir,
+            });
         }
 
         return new CliResult({
