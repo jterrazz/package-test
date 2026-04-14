@@ -14,12 +14,19 @@ import type { ServerPort } from './http/server.port.js';
 
 // ── Types ──
 
+/** A named job that can be triggered via .job(). */
+export interface JobHandle {
+    name: string;
+    execute: () => Promise<void>;
+}
+
 /** Adapter configuration passed to the specification runner at setup time. */
 export interface SpecificationConfig {
     command?: CommandPort;
     database?: DatabasePort;
     databases?: Map<string, DatabasePort>;
     fixturesRoot?: string;
+    jobs?: JobHandle[];
     server?: ServerPort;
 }
 
@@ -62,6 +69,7 @@ export class SpecificationBuilder {
     private config: SpecificationConfig;
     private fixtures: FixtureEntry[] = [];
     private intercepts: InterceptEntry[] = [];
+    private jobName: null | string = null;
     private label: string;
     private mocks: MockEntry[] = [];
     private projectName: null | string = null;
@@ -212,6 +220,21 @@ export class SpecificationBuilder {
         return this;
     }
 
+    // ── Job actions ──
+
+    /**
+     * Execute a named job registered via the app() factory.
+     *
+     * @param name - The job name to trigger (must match a registered JobHandle.name).
+     *
+     * @example
+     *   spec('pipeline').intercept(openai.chat(), openai.response({...})).job('report-refresh').run();
+     */
+    job(name: string): this {
+        this.jobName = name;
+        return this;
+    }
+
     // ── Run ──
 
     /**
@@ -226,16 +249,19 @@ export class SpecificationBuilder {
     async run(): Promise<SpecificationResult> {
         const hasHttpAction = this.request !== null;
         const hasCliAction = this.commandArgs !== null || this.spawnConfig !== null;
+        const hasJobAction = this.jobName !== null;
 
-        if (!hasHttpAction && !hasCliAction) {
+        const actionCount = [hasHttpAction, hasCliAction, hasJobAction].filter(Boolean).length;
+
+        if (actionCount === 0) {
             throw new Error(
-                `Specification "${this.label}": no action defined. Call .get(), .post(), .exec(), etc. before .run()`,
+                `Specification "${this.label}": no action defined. Call .get(), .post(), .exec(), .job(), etc. before .run()`,
             );
         }
 
-        if (hasHttpAction && hasCliAction) {
+        if (actionCount > 1) {
             throw new Error(
-                `Specification "${this.label}": cannot mix HTTP (.get/.post) and CLI (.exec/.spawn) actions`,
+                `Specification "${this.label}": cannot mix action types (.get/.post, .exec/.spawn, .job)`,
             );
         }
 
@@ -295,6 +321,9 @@ export class SpecificationBuilder {
         try {
             if (hasHttpAction) {
                 return await this.runHttpAction();
+            }
+            if (hasJobAction) {
+                return await this.runJobAction();
             }
             return await this.runCliAction(workDir!);
         } finally {
@@ -365,6 +394,27 @@ export class SpecificationBuilder {
             config: this.config,
             requestInfo: { body, method: this.request!.method, path: this.request!.path },
             response,
+            testDir: this.testDir,
+        });
+    }
+
+    private async runJobAction(): Promise<SpecificationResult> {
+        if (!this.config.jobs?.length) {
+            throw new Error(
+                'Job actions require jobs registered via app(() => ({ server, jobs }))',
+            );
+        }
+
+        const job = this.config.jobs.find((j) => j.name === this.jobName);
+        if (!job) {
+            const available = this.config.jobs.map((j) => j.name).join(', ');
+            throw new Error(`job("${this.jobName}"): not found. Available: ${available}`);
+        }
+
+        await job.execute();
+
+        return new SpecificationResult({
+            config: this.config,
             testDir: this.testDir,
         });
     }

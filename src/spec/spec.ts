@@ -107,13 +107,19 @@ async function startApp(target: AppTarget, options: SpecOptions): Promise<SpecRu
         servicesMap[key] = svc;
     }
 
-    const honoApp = target.factory(servicesMap);
+    const factoryResult = target.factory(servicesMap);
+
+    // Normalize: bare HonoApp or { server, jobs }
+    const honoApp = 'server' in factoryResult ? factoryResult.server : factoryResult;
+    const jobs = 'jobs' in factoryResult ? factoryResult.jobs : undefined;
+
     const database = orchestrator.getDatabase() ?? undefined;
     const databases = orchestrator.getDatabases();
 
     const runner = createSpecificationRunner({
         database,
         databases: databases.size > 0 ? databases : undefined,
+        jobs,
         server: new HonoAdapter(honoApp),
     }) as SpecRunner;
 

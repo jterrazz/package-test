@@ -10,15 +10,27 @@ type HonoApp = {
     request: (path: string, init?: RequestInit) => Promise<Response> | Response;
 };
 
+/** A named job that can be triggered via .job(). */
+export interface JobHandle {
+    name: string;
+    execute: () => Promise<void>;
+}
+
 /** Services map passed to the app factory after infrastructure starts. */
 export type AppServices = Record<string, ServiceHandle>;
+
+/**
+ * Return value from the app() factory. Either a bare server (backward compat)
+ * or an object with server + jobs for job-based testing.
+ */
+export type AppFactoryResult = HonoApp | { server: HonoApp; jobs: JobHandle[] };
 
 // ── Target types ──
 
 /** In-process Hono app target. Created by {@link app}. */
 export interface AppTarget {
     readonly kind: 'app';
-    readonly factory: (services: AppServices) => HonoApp;
+    readonly factory: (services: AppServices) => AppFactoryResult;
 }
 
 /** Docker compose stack target. Created by {@link stack}. */

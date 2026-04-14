@@ -2,11 +2,13 @@
 export { spec, type SpecOptions, type SpecRunner } from './spec/spec.js';
 export {
     app,
+    type AppFactoryResult,
     type AppServices,
     type AppTarget,
     command,
     type CommandTarget,
     type HttpTarget,
+    type JobHandle,
     type SpecTarget,
     stack,
     type StackTarget,
