@@ -1,4 +1,4 @@
-// ── Primary API ──
+// ── Core API ──
 export { spec, type SpecOptions, type SpecRunner } from './spec/spec.js';
 export {
     app,
@@ -21,12 +21,11 @@ export {
     type SpecificationConfig,
     type SpecificationRunner,
 } from './spec/builder.js';
+
+// Results
 export { BaseResult, type FileAccessor } from './spec/common/result/result.js';
 export { CliResult } from './spec/cli/result.js';
 export { HttpResult } from './spec/http/result.js';
-
-// Legacy alias
-export { BaseResult as SpecificationResult } from './spec/common/result/result.js';
 export {
     DirectoryAccessor,
     type DirectorySnapshotOptions,
@@ -42,10 +41,10 @@ export type {
     SpawnOptions,
 } from './spec/cli/command.port.js';
 export type { DatabasePort } from './spec/common/ports/database.port.js';
-export type { ServerPort, ServerResponse } from './spec/http/server.port.js';
-export type { ContainerPort } from './infra/containers/container.port.js';
 export type { IsolationStrategy } from './spec/common/ports/isolation.port.js';
 export type { ServiceHandle } from './spec/common/ports/service.port.js';
+export type { ServerPort, ServerResponse } from './spec/http/server.port.js';
+export type { ContainerPort } from './infra/containers/container.port.js';
 
 // Adapters (advanced usage)
 export { ExecAdapter } from './spec/cli/adapters/exec.adapter.js';
@@ -58,18 +57,7 @@ export { postgres, type PostgresOptions } from './services/postgres.js';
 export { redis, type RedisOptions } from './services/redis.js';
 export { sqlite, type SqliteOptions } from './services/sqlite.js';
 
-// Legacy aliases (backward compatibility)
-export { cli, type CliOptions } from './spec/legacy-cli.js';
-export { e2e, type E2eOptions } from './spec/legacy-e2e.js';
-export {
-    integration,
-    type IntegrationOptions,
-    type SpecificationRunnerWithCleanup,
-} from './spec/legacy-integration.js';
-
-// Legacy re-exports (use result.grep() and runner.docker() instead)
-export { grep } from './spec/common/result/grep.js';
-export { normalizeOutput, stripAnsi } from './spec/common/reporter.js';
+// Docker (advanced usage)
 export { dockerContainer } from './infra/docker/docker.js';
 export { DockerAssertion } from './infra/docker/docker-assertion.js';
 export type { DockerContainerPort, DockerInspectResult } from './infra/docker/docker.port.js';

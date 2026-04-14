@@ -222,22 +222,4 @@ export const openai = {
     timeout(): InterceptResponse {
         return { status: 200, body: {}, delay: 30_000 };
     },
-
-    // ── Legacy aliases ──
-
-    /** @deprecated Use openai.request() instead. */
-    chat(filter?: OpenAIChatFilter): InterceptTrigger {
-        return openai.request(filter);
-    },
-
-    /** @deprecated Use openai.reply() instead. */
-    response: buildChatReply,
-
-    /** @deprecated Use openai.agent() instead. */
-    responses(filter?: OpenAIResponsesFilter, url?: string): InterceptTrigger {
-        return openai.agent(filter, url);
-    },
-
-    /** @deprecated Use openai.reply() or .intercept(trigger, 'file.json') instead. */
-    responsesResponse: buildResponsesReply,
 };

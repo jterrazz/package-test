@@ -105,12 +105,4 @@ export const anthropic = {
     timeout(): InterceptResponse {
         return { status: 200, body: {}, delay: 30_000 };
     },
-
-    // Legacy aliases
-    /** @deprecated Use anthropic.request() instead. */
-    messages(filter?: AnthropicMessagesFilter): InterceptTrigger {
-        return anthropic.request(filter);
-    },
-    /** @deprecated Use anthropic.reply() instead. */
-    response: buildReply,
 };
