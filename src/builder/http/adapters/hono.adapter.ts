@@ -1,4 +1,4 @@
-import type { ServerPort, ServerResponse } from '../ports/server.port.js';
+import type { ServerPort, ServerResponse } from '../server.port.js';
 
 /**
  * Server adapter that dispatches requests in-process through a Hono app instance.

@@ -2,16 +2,15 @@ import { cpSync, existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
-import type { InterceptEntry, InterceptResponse, InterceptTrigger } from '../intercept/types.js';
+import type { DatabasePort } from '../adapters/ports/database.port.js';
+import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from './cli/command.port.js';
 import type {
-    CommandEnv,
-    CommandPort,
-    CommandResult,
-    SpawnOptions,
-} from '../ports/command.port.js';
-import type { DatabasePort } from '../ports/database.port.js';
-import type { ServerPort } from '../ports/server.port.js';
-import { SpecificationResult } from './specification-result.js';
+    InterceptEntry,
+    InterceptResponse,
+    InterceptTrigger,
+} from './common/intercept/types.js';
+import { SpecificationResult } from './common/result.js';
+import type { ServerPort } from './http/server.port.js';
 
 // ── Types ──
 
@@ -288,7 +287,7 @@ export class SpecificationBuilder {
         // Register HTTP intercepts via MSW
         let cleanupIntercepts: (() => void) | null = null;
         if (this.intercepts.length > 0) {
-            const { registerIntercepts } = await import('../intercept/server.js');
+            const { registerIntercepts } = await import('./common/intercept/intercept.js');
             cleanupIntercepts = await registerIntercepts(this.intercepts);
         }
 
@@ -426,7 +425,7 @@ function getCallerDir(): string {
         if (filePath.includes('node_modules')) {
             continue;
         }
-        if (filePath.includes('/src/builder/') || filePath.includes('/src/runner/')) {
+        if (filePath.includes('/src/builder/') || filePath.includes('/src/spec/')) {
             continue;
         }
 

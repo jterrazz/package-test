@@ -1,7 +1,7 @@
-import { FetchAdapter } from '../adapters/fetch.adapter.js';
+import { FetchAdapter } from '../builder/http/adapters/fetch.adapter.js';
 import { createSpecificationRunner } from '../builder/specification-builder.js';
-import { Orchestrator } from '../orchestrator/orchestrator.js';
-import type { SpecificationRunnerWithCleanup } from './integration.js';
+import { Orchestrator } from '../infra/orchestrator.js';
+import type { SpecificationRunnerWithCleanup } from './legacy-integration.js';
 import { resolveProjectRoot } from './resolve.js';
 
 export interface E2eOptions {

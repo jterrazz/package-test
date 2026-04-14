@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { formatResponseDiff } from '../utilities/reporter.js';
+import { formatResponseDiff } from './reporter.js';
 
 /** Accessor for an HTTP response body with file-based assertion support. */
 export class ResponseAccessor {

@@ -1,11 +1,6 @@
 import { execSync, spawn } from 'node:child_process';
 
-import type {
-    CommandEnv,
-    CommandPort,
-    CommandResult,
-    SpawnOptions,
-} from '../ports/command.port.js';
+import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from '../command.port.js';
 
 /**
  * Build a child-process env from the parent env plus user overrides.

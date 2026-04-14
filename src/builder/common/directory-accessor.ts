@@ -1,8 +1,8 @@
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { diffDirectories, type DirectoryDiff, walkDirectory } from '../utilities/directory.js';
-import { formatDirectoryDiff } from '../utilities/reporter.js';
+import { diffDirectories, type DirectoryDiff, walkDirectory } from './directory.js';
+import { formatDirectoryDiff } from './reporter.js';
 
 export interface DirectorySnapshotOptions {
     /** Extra path segments to ignore (in addition to default: .git, node_modules, etc.). */

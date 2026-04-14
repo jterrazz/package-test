@@ -26,16 +26,20 @@ Requires Docker running for HTTP and adapter tests.
 ```
 src/
 ├── index.ts                       # public entry - re-exports everything
-├── runner/                        # spec() + target factories (app, stack, command)
-│   ├── spec.ts                    # spec() entry point - dispatches to targets
-│   └── targets.ts                 # app(), stack(), command() factories
-├── builder/                       # core domain - fluent builder + result accessors
-├── ports/                         # all domain contracts
-├── adapters/                      # all implementations (exec, fetch, hono, testcontainers, compose, postgres, redis)
-├── orchestrator/                  # container lifecycle + compose parsing
-├── docker/                        # DockerContainerPort + DockerAssertion
-├── utilities/                     # reporter, directory walk/diff, grep
-└── mocking/                       # mockOf, mockOfDate
+├── spec/                          # spec() entry point + targets (app, stack, command)
+├── builder/
+│   ├── common/                    # universal: .seed(), .intercept(), .env(), result accessors
+│   │   └── intercept/             # MSW-based HTTP interception
+│   │       └── adapters/          # openai, anthropic, http providers
+│   ├── http/                      # HTTP-only: .get(), .post(), .headers() + adapters
+│   └── cli/                       # CLI-only: .exec(), .spawn(), .project() + adapters
+├── infra/                         # container lifecycle (orchestrator, compose, testcontainers)
+│   ├── ports/                     # container, service, isolation interfaces
+│   └── adapters/                  # compose + testcontainers implementations
+├── adapters/                      # database/cache service adapters (postgres, redis, sqlite)
+│   └── ports/                     # database port interface
+├── docker/                        # container introspection + assertions
+└── mock/                          # mockOf, mockOfDate
 tests/
 ├── http/                          # HTTP spec tests (run with both app and stack targets via SPEC_RUNNER env)
 ├── cli/                           # CLI spec tests (exec, env, directory snapshots)

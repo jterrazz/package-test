@@ -1,4 +1,4 @@
-import type { InterceptResponse, InterceptTrigger } from './types.js';
+import type { InterceptResponse, InterceptTrigger } from '../types.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 

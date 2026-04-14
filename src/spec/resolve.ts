@@ -23,7 +23,7 @@ export function resolveProjectRoot(root: string | undefined): string {
             }
 
             const filePath = match[1];
-            if (filePath.includes('node_modules') || filePath.includes('/src/runner/')) {
+            if (filePath.includes('node_modules') || filePath.includes('/src/spec/')) {
                 continue;
             }
 

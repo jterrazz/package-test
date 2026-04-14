@@ -4,7 +4,7 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { postgres } from '../../../src/adapters/postgres.adapter.js';
 import { redis } from '../../../src/adapters/redis.adapter.js';
 import { normalizeOutput, stripAnsi } from '../../../src/index.js';
-import { Orchestrator } from '../../../src/orchestrator/orchestrator.js';
+import { Orchestrator } from '../../../src/infra/orchestrator.js';
 
 const BROKEN_POSTGRES_INIT = resolve(
     import.meta.dirname,

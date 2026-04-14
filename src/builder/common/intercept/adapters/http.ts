@@ -1,4 +1,4 @@
-import type { InterceptResponse, InterceptTrigger } from './types.js';
+import type { InterceptResponse, InterceptTrigger } from '../types.js';
 
 /**
  * Generic HTTP intercept helpers for any URL.

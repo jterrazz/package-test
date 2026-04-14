@@ -1,4 +1,4 @@
-import type { InterceptResponse, InterceptTrigger } from './types.js';
+import type { InterceptResponse, InterceptTrigger } from '../types.js';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 

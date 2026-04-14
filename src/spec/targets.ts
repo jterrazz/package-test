@@ -3,7 +3,7 @@
  * and how the specification runner should connect to it.
  */
 
-import type { ServiceHandle } from '../ports/service.port.js';
+import type { ServiceHandle } from '../infra/ports/service.port.js';
 
 /** Any object with a request method compatible with Hono's app.request(). */
 type HonoApp = {

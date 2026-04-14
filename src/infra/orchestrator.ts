@@ -1,14 +1,18 @@
 import { dirname } from 'node:path';
 
-import { ComposeStackAdapter } from '../adapters/compose.adapter.js';
+import type { DatabasePort } from '../adapters/ports/database.port.js';
 import { postgres } from '../adapters/postgres.adapter.js';
 import { redis } from '../adapters/redis.adapter.js';
-import { TestcontainersAdapter } from '../adapters/testcontainers.adapter.js';
-import type { ContainerPort } from '../ports/container.port.js';
-import type { DatabasePort } from '../ports/database.port.js';
-import type { ServiceHandle } from '../ports/service.port.js';
-import { type AppInfo, formatStartupReport, type ServiceReport } from '../utilities/reporter.js';
+import {
+    type AppInfo,
+    formatStartupReport,
+    type ServiceReport,
+} from '../builder/common/reporter.js';
+import { ComposeStackAdapter } from './adapters/compose.adapter.js';
+import { TestcontainersAdapter } from './adapters/testcontainers.adapter.js';
 import { detectServiceType, findComposeFile, parseComposeFile } from './compose-parser.js';
+import type { ContainerPort } from './ports/container.port.js';
+import type { ServiceHandle } from './ports/service.port.js';
 
 interface RunningService {
     handle: ServiceHandle;

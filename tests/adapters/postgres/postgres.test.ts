@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { postgres } from '../../../src/adapters/postgres.adapter.js';
-import { TestcontainersAdapter } from '../../../src/adapters/testcontainers.adapter.js';
+import { TestcontainersAdapter } from '../../../src/infra/adapters/testcontainers.adapter.js';
 
 describe('postgres service', () => {
     const db = postgres();

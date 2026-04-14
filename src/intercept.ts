@@ -1,4 +1,8 @@
-export { anthropic } from './intercept/anthropic.js';
-export { http } from './intercept/http.js';
-export { openai } from './intercept/openai.js';
-export type { InterceptEntry, InterceptResponse, InterceptTrigger } from './intercept/types.js';
+export { anthropic } from './builder/common/intercept/adapters/anthropic.js';
+export { http } from './builder/common/intercept/adapters/http.js';
+export { openai } from './builder/common/intercept/adapters/openai.js';
+export type {
+    InterceptEntry,
+    InterceptResponse,
+    InterceptTrigger,
+} from './builder/common/intercept/types.js';

@@ -1,4 +1,4 @@
-import type { DatabasePort } from './database.port.js';
+import type { DatabasePort } from '../../adapters/ports/database.port.js';
 import type { IsolationStrategy } from './isolation.port.js';
 
 /**
