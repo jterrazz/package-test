@@ -94,6 +94,27 @@ export class StreamAccessor {
         this.toMatchFile(absPath, options);
     }
 
+    /**
+     * Assert the captured text contains the given substring. The runner's
+     * `transform` (if any) is applied before the check so callers can rely
+     * on the same normalised view as {@link toMatch}.
+     *
+     * Throws with a tight diff-style error on miss so tests read uniformly
+     * with the other accessor assertions (no reaching through `.text` into
+     * `expect(...).toContain(...)`).
+     */
+    toContain(substring: string): void {
+        const actual = this.transform ? this.transform(this.text) : this.text;
+        if (actual.includes(substring)) {
+            return;
+        }
+        throw new Error(
+            `${this.streamName} does not contain expected substring.\n` +
+                `  expected to contain: ${JSON.stringify(substring)}\n` +
+                `  actual: ${JSON.stringify(actual.length > 500 ? `${actual.slice(0, 500)}…` : actual)}`,
+        );
+    }
+
     toString(): string {
         return this.text;
     }
