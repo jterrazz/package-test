@@ -2,102 +2,36 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import type { DatabasePort } from '../../../adapters/ports/database.port.js';
-import type { CommandResult } from '../../cli/command.port.js';
-import type { ServerResponse } from '../../http/server.port.js';
 import type { SpecificationConfig } from '../../specification-builder.js';
 import { DirectoryAccessor } from './directory.js';
-import { grep as grepUtil } from './grep.js';
-import { ResponseAccessor } from './response.js';
 import { TableAssertion } from './table.js';
 
-/** Read-only handle to a single file produced by a CLI action. */
+/** Read-only handle to a single file produced by a spec action. */
 export interface FileAccessor {
     /** The UTF-8 text content. Throws if the file does not exist. */
     readonly content: string;
     readonly exists: boolean;
 }
 
-/**
- * The outcome of a single specification run.
- * Provides accessors for CLI output, HTTP responses, files, directories, and database tables.
- */
-export class SpecificationResult {
-    private commandResult?: CommandResult;
-    private config: SpecificationConfig;
-    private requestInfo?: { body?: unknown; method: string; path: string };
-    private responseData?: ServerResponse;
-    private testDir: string;
-    private workDir?: string;
+export interface BaseResultOptions {
+    config: SpecificationConfig;
+    testDir: string;
+    workDir?: string;
+}
 
-    constructor(options: {
-        commandResult?: CommandResult;
-        config: SpecificationConfig;
-        requestInfo?: { body?: unknown; method: string; path: string };
-        response?: ServerResponse;
-        testDir: string;
-        workDir?: string;
-    }) {
-        this.responseData = options.response;
-        this.commandResult = options.commandResult;
+/**
+ * Base result - common accessors available after any action type.
+ * Extended by HttpResult, CliResult, and used directly by JobResult.
+ */
+export class BaseResult {
+    protected config: SpecificationConfig;
+    protected testDir: string;
+    protected workDir?: string;
+
+    constructor(options: BaseResultOptions) {
         this.config = options.config;
         this.testDir = options.testDir;
-        this.requestInfo = options.requestInfo;
         this.workDir = options.workDir;
-    }
-
-    // ── Raw value accessors ──
-
-    /** The process exit code. Only available after a CLI action. */
-    get exitCode(): number {
-        if (!this.commandResult) {
-            throw new Error('.exitCode requires a CLI action (.exec())');
-        }
-        return this.commandResult.exitCode;
-    }
-
-    /** The HTTP response status code. Only available after an HTTP action. */
-    get status(): number {
-        if (!this.responseData) {
-            throw new Error('.status requires an HTTP action (.get(), .post(), etc.)');
-        }
-        return this.responseData.status;
-    }
-
-    /** The captured standard output. Only available after a CLI action. */
-    get stdout(): string {
-        if (!this.commandResult) {
-            throw new Error('.stdout requires a CLI action (.exec())');
-        }
-        return this.commandResult.stdout;
-    }
-
-    /** The captured standard error. Only available after a CLI action. */
-    get stderr(): string {
-        if (!this.commandResult) {
-            throw new Error('.stderr requires a CLI action (.exec())');
-        }
-        return this.commandResult.stderr;
-    }
-
-    /**
-     * Extract text blocks from stdout that contain a pattern.
-     * Useful for parsing structured CLI output (linters, compilers).
-     *
-     * @example
-     *   expect(result.grep('error.ts')).toContain('no-unused-vars');
-     */
-    grep(pattern: string): string {
-        return grepUtil(this.stdout, pattern);
-    }
-
-    // ── Structured accessors ──
-
-    /** Access the HTTP response body for assertions. Only available after an HTTP action. */
-    get response(): ResponseAccessor {
-        if (!this.responseData) {
-            throw new Error('.response requires an HTTP action (.get(), .post(), etc.)');
-        }
-        return new ResponseAccessor(this.responseData.body, this.testDir);
     }
 
     /** Access a directory (relative to the working directory) for snapshot assertions. */
@@ -134,8 +68,6 @@ export class SpecificationResult {
         }
         return new TableAssertion(tableName, db);
     }
-
-    // ── Private ──
 
     private resolveDatabase(serviceName?: string): DatabasePort | undefined {
         if (serviceName && this.config.databases) {

@@ -21,7 +21,12 @@ export {
     type SpecificationConfig,
     type SpecificationRunner,
 } from './builder/specification-builder.js';
-export { type FileAccessor, SpecificationResult } from './builder/common/result/result.js';
+export { BaseResult, type FileAccessor } from './builder/common/result/result.js';
+export { CliResult } from './builder/cli/result.js';
+export { HttpResult } from './builder/http/result.js';
+
+// Legacy alias
+export { BaseResult as SpecificationResult } from './builder/common/result/result.js';
 export {
     DirectoryAccessor,
     type DirectorySnapshotOptions,

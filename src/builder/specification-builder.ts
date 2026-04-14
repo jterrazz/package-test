@@ -4,12 +4,14 @@ import { resolve } from 'node:path';
 
 import type { DatabasePort } from '../adapters/ports/database.port.js';
 import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from './cli/command.port.js';
+import { CliResult } from './cli/result.js';
 import type {
     InterceptEntry,
     InterceptResponse,
     InterceptTrigger,
 } from './common/intercept/types.js';
-import { SpecificationResult } from './common/result/result.js';
+import { BaseResult } from './common/result/result.js';
+import { HttpResult } from './http/result.js';
 import type { ServerPort } from './http/server.port.js';
 
 // ── Types ──
@@ -270,7 +272,7 @@ export class SpecificationBuilder {
      *   const result = await spec("test").exec("status").run();
      *   expect(result.exitCode).toBe(0);
      */
-    async run(): Promise<SpecificationResult> {
+    async run(): Promise<BaseResult | CliResult | HttpResult> {
         const hasHttpAction = this.request !== null;
         const hasCliAction = this.commandArgs !== null || this.spawnConfig !== null;
         const hasJobAction = this.jobName !== null;
@@ -393,7 +395,7 @@ export class SpecificationBuilder {
         return tempDir;
     }
 
-    private async runHttpAction(): Promise<SpecificationResult> {
+    private async runHttpAction(): Promise<HttpResult> {
         if (!this.config.server) {
             throw new Error('HTTP actions require a server adapter (use integration() or e2e())');
         }
@@ -414,15 +416,14 @@ export class SpecificationBuilder {
             headers,
         );
 
-        return new SpecificationResult({
+        return new HttpResult({
             config: this.config,
-            requestInfo: { body, method: this.request!.method, path: this.request!.path },
             response,
             testDir: this.testDir,
         });
     }
 
-    private async runJobAction(): Promise<SpecificationResult> {
+    private async runJobAction(): Promise<BaseResult> {
         if (!this.config.jobs?.length) {
             throw new Error(
                 'Job actions require jobs registered via app(() => ({ server, jobs }))',
@@ -437,13 +438,13 @@ export class SpecificationBuilder {
 
         await job.execute();
 
-        return new SpecificationResult({
+        return new BaseResult({
             config: this.config,
             testDir: this.testDir,
         });
     }
 
-    private async runCliAction(workDir: string): Promise<SpecificationResult> {
+    private async runCliAction(workDir: string): Promise<CliResult> {
         if (!this.config.command) {
             throw new Error('CLI actions require a command adapter (use cli())');
         }
@@ -470,7 +471,7 @@ export class SpecificationBuilder {
             commandResult = await this.config.command.exec(this.commandArgs!, workDir, env);
         }
 
-        return new SpecificationResult({
+        return new CliResult({
             commandResult,
             config: this.config,
             testDir: this.testDir,
