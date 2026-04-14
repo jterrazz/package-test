@@ -27,20 +27,20 @@ describe('cli — exec', () => {
 
     describe('fresh working dir', () => {
         test('runs in a fresh empty temp dir when no .project() is set', async () => {
-            // Given — no .project() and no .fixture() — scaffold writes into the cwd
+            // Given - no .project() and no .fixture() — scaffold writes into the cwd
             const result = await cliSpec('fresh cwd').exec('scaffold').run();
 
-            // Then — the scaffold output exists in the temp workdir
+            // Then - the scaffold output exists in the temp workdir
             expect(result.exitCode).toBe(0);
             expect(result.file('out/main.go').exists).toBe(true);
         });
 
         test('two bare runs get independent temp dirs', async () => {
-            // Given — two independent runs without .project()
+            // Given - two independent runs without .project()
             const a = await cliSpec('run a').exec('scaffold').run();
             const b = await cliSpec('run b').exec('scaffold-extra').run();
 
-            // Then — a does NOT see b's UNEXPECTED.txt and vice versa
+            // Then - a does NOT see b's UNEXPECTED.txt and vice versa
             expect(a.file('out/UNEXPECTED.txt').exists).toBe(false);
             expect(b.file('out/UNEXPECTED.txt').exists).toBe(true);
         });
@@ -64,31 +64,31 @@ describe('cli — exec', () => {
 
     describe('multi-exec', () => {
         test('runs commands sequentially in same directory', async () => {
-            // Given — build then start (start needs dist/ from build)
+            // Given - build then start (start needs dist/ from build)
             const result = await cliSpec('build+start')
                 .project('cli-app')
                 .exec(['build', 'start'])
                 .run();
 
-            // Then — start ran successfully (output from last command)
+            // Then - start ran successfully (output from last command)
             expect(result.exitCode).toBe(0);
             expect(result.stdout).toContain('Hello from CLI app');
         });
 
         test('stops on first failure', async () => {
-            // Given — fail then build (fail exits non-zero, build should not run)
+            // Given - fail then build (fail exits non-zero, build should not run)
             const result = await cliSpec('fail+build')
                 .project('cli-app')
                 .exec(['fail', 'build'])
                 .run();
 
-            // Then — stopped at fail
+            // Then - stopped at fail
             expect(result.exitCode).toBe(2);
             expect(result.stderr).toContain('Fatal: something went wrong');
         });
 
         test('preserves files between commands', async () => {
-            // Given — build creates dist/, then we check it still exists
+            // Given - build creates dist/, then we check it still exists
             const result = await cliSpec('build+check')
                 .project('cli-app')
                 .exec(['build', 'check'])
@@ -112,24 +112,24 @@ describe('cli — exec', () => {
         });
 
         test('returns non-zero when process exits without matching pattern', async () => {
-            // Given — help exits immediately without matching pattern
+            // Given - help exits immediately without matching pattern
             const result = await cliSpec('spawn no match')
                 .project('cli-app')
                 .spawn('help', { waitFor: 'NONEXISTENT_PATTERN', timeout: 5000 })
                 .run();
 
-            // Then — exit code 1 (pattern not matched before process exited)
+            // Then - exit code 1 (pattern not matched before process exited)
             expect(result.exitCode).toBe(1);
         });
 
         test('times out on long-running process without match', async () => {
-            // Given — dev runs forever but pattern is never matched
+            // Given - dev runs forever but pattern is never matched
             const result = await cliSpec('dev timeout')
                 .project('cli-app')
                 .spawn('dev', { waitFor: 'NONEXISTENT_PATTERN', timeout: 2000 })
                 .run();
 
-            // Then — exit code 124 (timeout)
+            // Then - exit code 124 (timeout)
             expect(result.exitCode).toBe(124);
         });
     });

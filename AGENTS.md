@@ -1,4 +1,4 @@
-# Agent brief — `@jterrazz/test`
+# Agent brief - `@jterrazz/test`
 
 Declarative testing framework for APIs and CLIs. One entry point (`spec()`), three targets (`app()`, `stack()`, `command()`).
 
@@ -25,11 +25,11 @@ Requires Docker running for HTTP and adapter tests.
 
 ```
 src/
-├── index.ts                       # public entry — re-exports everything
+├── index.ts                       # public entry - re-exports everything
 ├── runner/                        # spec() + target factories (app, stack, command)
-│   ├── spec.ts                    # spec() entry point — dispatches to targets
+│   ├── spec.ts                    # spec() entry point - dispatches to targets
 │   └── targets.ts                 # app(), stack(), command() factories
-├── builder/                       # core domain — fluent builder + result accessors
+├── builder/                       # core domain - fluent builder + result accessors
 ├── ports/                         # all domain contracts
 ├── adapters/                      # all implementations (exec, fetch, hono, testcontainers, compose, postgres, redis)
 ├── orchestrator/                  # container lifecycle + compose parsing
@@ -50,15 +50,15 @@ tests/
 
 HTTP tests run against **two targets** via the vitest workspace:
 
-- `http-app` — in-process Hono via `spec(app(...))` with testcontainers
-- `http-stack` — docker compose via `spec(stack(...))` with `SPEC_RUNNER=stack`
+- `http-app` - in-process Hono via `spec(app(...))` with testcontainers
+- `http-stack` - docker compose via `spec(stack(...))` with `SPEC_RUNNER=stack`
 
 Same test code, two execution strategies. The `http-spec.ts` setup file switches based on `SPEC_RUNNER` env var.
 
 ## Conventions
 
-- Lint config (`@jterrazz/codestyle` — oxlint + oxfmt + knip + tsc)
-- Test writing convention (`// Given —` / `// Then —` comments, always both)
+- Lint config (`@jterrazz/codestyle` - oxlint + oxfmt + knip + tsc)
+- Test writing convention (`// Given -` / `// Then -` comments, always both)
 - Directory layout for tests (`seeds/`, `fixtures/`, `requests/`, `responses/`, `expected/`)
 
 ## Self-test on changes

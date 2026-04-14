@@ -7,22 +7,22 @@ import { cliSpec } from '../../setup/cli.specification.js';
 
 describe('cli — directory snapshot', () => {
     test('matches an identical fixture tree', async () => {
-        // Given — scaffold writes the exact tree committed under expected/cli-scaffold/
+        // Given - scaffold writes the exact tree committed under expected/cli-scaffold/
         const result = await cliSpec('scaffold match').project('cli-app').exec('scaffold').run();
 
-        // Then — the snapshot matches
+        // Then - the snapshot matches
         expect(result.exitCode).toBe(0);
         await result.directory('out').toMatchFixture('cli-scaffold/out');
     });
 
     test('detects a changed file', async () => {
-        // Given — scaffold-changed writes go.mod with different content
+        // Given - scaffold-changed writes go.mod with different content
         const result = await cliSpec('scaffold changed')
             .project('cli-app')
             .exec('scaffold-changed')
             .run();
 
-        // Then — diff surfaces the changed file
+        // Then - diff surfaces the changed file
         await expect(result.directory('out').toMatchFixture('cli-scaffold/out')).rejects.toThrow(
             /Directory mismatch/,
         );
@@ -32,13 +32,13 @@ describe('cli — directory snapshot', () => {
     });
 
     test('detects an extra file', async () => {
-        // Given — scaffold-extra writes an unexpected file
+        // Given - scaffold-extra writes an unexpected file
         const result = await cliSpec('scaffold extra')
             .project('cli-app')
             .exec('scaffold-extra')
             .run();
 
-        // Then — diff surfaces the added file
+        // Then - diff surfaces the added file
         await expect(result.directory('out').toMatchFixture('cli-scaffold/out')).rejects.toThrow(
             /UNEXPECTED\.txt/,
         );
@@ -64,15 +64,15 @@ describe('cli — directory snapshot', () => {
         });
 
         test('update: true writes the fixture', async () => {
-            // Given — fresh scaffold and a non-existent fixture name
+            // Given - fresh scaffold and a non-existent fixture name
             const fixtureName = `transient-fixture-${Date.now()}`;
 
             const result = await cliSpec('update write').project('cli-app').exec('scaffold').run();
 
-            // When — update writes the fixture
+            // When - update writes the fixture
             await result.directory('out').toMatchFixture(fixtureName, { update: true });
 
-            // Then — running again without update mode now matches
+            // Then - running again without update mode now matches
             const result2 = await cliSpec('update verify')
                 .project('cli-app')
                 .exec('scaffold')

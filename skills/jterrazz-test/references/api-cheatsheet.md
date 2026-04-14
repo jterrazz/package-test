@@ -1,4 +1,4 @@
-# `@jterrazz/test` — API cheat sheet
+# `@jterrazz/test` - API cheat sheet
 
 > For full reference with type signatures and examples, see <https://jterrazz.github.io/package-test/reference/>. This file is the agent-facing condensed view.
 
@@ -20,9 +20,9 @@ runner("label") -> setup -> action -> assertions
 
 | Pattern                                       | Description                                    |
 | --------------------------------------------- | ---------------------------------------------- |
-| `spec(app(() => myApp), { services, root })`  | Integration — testcontainers + in-process Hono |
-| `spec(stack(root))`                           | E2E — docker compose up + real HTTP            |
-| `spec(command('my-cli'), { root, services })` | CLI — child process in a fresh temp dir        |
+| `spec(app(() => myApp), { services, root })`  | Integration - testcontainers + in-process Hono |
+| `spec(stack(root))`                           | E2E - docker compose up + real HTTP            |
+| `spec(command('my-cli'), { root, services })` | CLI - child process in a fresh temp dir        |
 
 ## Setup methods (cross-mode)
 
@@ -52,7 +52,7 @@ runner("label") -> setup -> action -> assertions
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `.exec("args")`                        | Run command (blocking, via execSync)                                                                                |
 | `.exec(["build", "start"])`            | Run commands sequentially in same temp directory; stops on first failure                                            |
-| `.spawn("args", { waitFor, timeout })` | Long-lived process — resolves on pattern match (exit 0), process exit without match (exit 1), or timeout (exit 124) |
+| `.spawn("args", { waitFor, timeout })` | Long-lived process - resolves on pattern match (exit 0), process exit without match (exit 1), or timeout (exit 124) |
 
 ## Working directory
 
@@ -77,7 +77,7 @@ Every CLI spec runs in a **fresh empty `mkdtemp` directory**. `.project("name")`
 | `expect(result.file("dist/index.js").content).toContain("Hello")` | File content contains |
 | `expect(result.file("dist/index.cjs").exists).toBe(false)`        | File does not exist   |
 
-**Directories** (`result.directory(path)` — for codegen / scaffolding output):
+**Directories** (`result.directory(path)` - for codegen / scaffolding output):
 
 | Expression                                                           | Description                                                                                                                          |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -94,7 +94,7 @@ Update fixtures with `JTERRAZZ_TEST_UPDATE=1`, `UPDATE_SNAPSHOTS=1`, or `vitest 
 | `result.response.toMatchFile("expected.json")`  | Compare body to `responses/expected.json`; structured diff on mismatch |
 | `expect(result.response.body).toEqual({ ... })` | Raw body for vitest assertions                                         |
 
-**Tables (database — async):**
+**Tables (database - async):**
 
 | Expression                                                                      | Description                        |
 | ------------------------------------------------------------------------------- | ---------------------------------- |
@@ -102,7 +102,7 @@ Update fixtures with `JTERRAZZ_TEST_UPDATE=1`, `UPDATE_SNAPSHOTS=1`, or `vitest 
 | `await result.table("events", { service: "analytics-db" }).toMatch({ ... })`    | Assert against a specific database |
 | `await result.table("users").toBeEmpty()`                                       | Assert empty table                 |
 
-**Grep** (scoped text matching — instance method on result):
+**Grep** (scoped text matching - instance method on result):
 
 ```typescript
 expect(result.grep('unused-var.ts')).toContain('no-unused-vars');
@@ -111,7 +111,7 @@ expect(result.grep('valid/sorted.ts')).not.toContain('sort-imports');
 
 `result.grep(pattern)` filters multi-line stdout to the block matching `pattern`, returning a string for vitest assertions. Useful for linter / compiler output where errors come in blocks separated by blank lines.
 
-**Docker** (container assertions — via runner):
+**Docker** (container assertions - via runner):
 
 ```typescript
 const container = runner.docker('my-container-id');
@@ -177,6 +177,6 @@ docker/
 
 ## Requirements
 
-- **Docker** — testcontainers for `spec(app(...))`, docker compose for `spec(stack(...))`
-- **vitest** — peer dependency
-- **hono** — optional peer, only needed for `spec(app(...))` mode with in-process apps
+- **Docker** - testcontainers for `spec(app(...))`, docker compose for `spec(stack(...))`
+- **vitest** - peer dependency
+- **hono** - optional peer, only needed for `spec(app(...))` mode with in-process apps

@@ -26,14 +26,14 @@ describe('cli assertions', () => {
 
     describe('fixture setup', () => {
         test('copies fixture file into working dir before exec', async () => {
-            // Given — fixture file that triggers check failure
+            // Given - fixture file that triggers check failure
             const result = await cliSpec('fixture check')
                 .project('cli-app')
                 .fixture('invalid.ts')
                 .exec('check')
                 .run();
 
-            // Then — check detected the invalid file
+            // Then - check detected the invalid file
             expect(result.exitCode).toBe(1);
             expect(result.stderr).toContain('unused-var');
         });

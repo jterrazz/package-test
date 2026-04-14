@@ -33,11 +33,11 @@ describe('redis service', () => {
         });
 
         test('fails on unreachable host', async () => {
-            // Given — connection string pointing to closed port
+            // Given - connection string pointing to closed port
             const badCache = redis();
             badCache.connectionString = 'redis://localhost:1';
 
-            // Then — healthcheck fails with context
+            // Then - healthcheck fails with context
             await expect(badCache.healthcheck()).rejects.toThrow('healthcheck failed');
         });
 
@@ -48,17 +48,17 @@ describe('redis service', () => {
 
     describe('reset', () => {
         test('flushes all keys', async () => {
-            // Given — a key exists
+            // Given - a key exists
             const { createClient } = await import('redis');
             const client = createClient({ url: cache.connectionString });
             await client.connect();
             await client.set('test-key', 'test-value');
             await client.disconnect();
 
-            // When — reset
+            // When - reset
             await cache.reset();
 
-            // Then — key is gone
+            // Then - key is gone
             const client2 = createClient({ url: cache.connectionString });
             await client2.connect();
             const value = await client2.get('test-key');
@@ -67,7 +67,7 @@ describe('redis service', () => {
         });
 
         test('allows re-setting keys after reset', async () => {
-            // Given — key set, then reset, then new key set
+            // Given - key set, then reset, then new key set
             const { createClient } = await import('redis');
 
             const client1 = createClient({ url: cache.connectionString });
@@ -84,7 +84,7 @@ describe('redis service', () => {
             const oldValue = await client2.get('key1');
             await client2.disconnect();
 
-            // Then — new key exists, old key is gone
+            // Then - new key exists, old key is gone
             expect(value).toBe('value2');
             expect(oldValue).toBeNull();
         });
@@ -110,11 +110,11 @@ describe('redis service', () => {
 
     describe('failure scenarios', () => {
         test('healthcheck error includes connection context', async () => {
-            // Given — bad connection string
+            // Given - bad connection string
             const badCache = redis();
             badCache.connectionString = 'redis://localhost:1';
 
-            // Then — error message includes service name with detail
+            // Then - error message includes service name with detail
             try {
                 await badCache.healthcheck();
                 expect.fail('should have thrown');
@@ -127,19 +127,19 @@ describe('redis service', () => {
         });
 
         test('reset error when connection string is invalid', async () => {
-            // Given — redis handle with unreachable host
+            // Given - redis handle with unreachable host
             const badCache = redis();
             badCache.connectionString = 'redis://localhost:1';
 
-            // Then — reset fails with connection error
+            // Then - reset fails with connection error
             await expect(badCache.reset()).rejects.toThrow();
         });
 
         test('healthcheck error without connection string is descriptive', async () => {
-            // Given — fresh handle with no connection string
+            // Given - fresh handle with no connection string
             const freshCache = redis();
 
-            // Then — error explains what's missing
+            // Then - error explains what's missing
             try {
                 await freshCache.healthcheck();
                 expect.fail('should have thrown');

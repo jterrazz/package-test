@@ -24,13 +24,13 @@ The ecosystem's testing framework. One fluent builder, three target wrappers. Ha
 - Frontend component tests (use Vitest + Testing Library).
 - Browser e2e tests (use Playwright).
 
-## Decision matrix — which wrapper
+## Decision matrix - which wrapper
 
 | Question                                                                                   | Use this pattern                                                            |
 | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| Is the code under test a Hono app + database, and you want the fastest loop?               | **`spec(app(...), { services })`** — testcontainers + in-process Hono       |
-| Is the service in another language, OR do you need the full deployed stack with real HTTP? | **`spec(stack(root))`** — `docker compose up` + real HTTP                   |
-| Are you testing a CLI binary, scaffolding tool, code generator, or bundler?                | **`spec(command('my-cli'), { root })`** — child process in a fresh temp dir |
+| Is the code under test a Hono app + database, and you want the fastest loop?               | **`spec(app(...), { services })`** - testcontainers + in-process Hono       |
+| Is the service in another language, OR do you need the full deployed stack with real HTTP? | **`spec(stack(root))`** - `docker compose up` + real HTTP                   |
+| Are you testing a CLI binary, scaffolding tool, code generator, or bundler?                | **`spec(command('my-cli'), { root })`** - child process in a fresh temp dir |
 | Are you testing a Docker container's filesystem / mounts / network mode?                   | `runner.docker(id)` (separate API; see live docs)                           |
 
 For API services that use both `spec(app(...))` and `spec(stack(...))`, write specs once in an `http.specification.ts` file and select the runner via the `SPEC_RUNNER` env var.
@@ -62,13 +62,13 @@ afterAll(() => runner.cleanup());
 import { runner } from '../http.specification.js';
 
 test('creates a user', async () => {
-    // Given — one existing user
+    // Given - one existing user
     const result = await runner('creates user')
         .seed('initial-users.sql')
         .post('/users', 'new-user.json')
         .run();
 
-    // Then — user created, table has both
+    // Then - user created, table has both
     expect(result.status).toBe(201);
     await result.table('users').toMatch({ columns: ['name'], rows: [['Alice'], ['Bob']] });
 });
@@ -76,13 +76,13 @@ test('creates a user', async () => {
 
 ## MUST / MUST NOT
 
-- **MUST** include both `// Given —` and `// Then —` comments on every test. Always both, never one without the other. The spec builder chain (`.seed().post().run()` / `.project().exec().run()`) IS the `// When` — only add `// When —` if the action is non-obvious.
+- **MUST** include both `// Given -` and `// Then -` comments on every test. Always both, never one without the other. The spec builder chain (`.seed().post().run()` / `.project().exec().run()`) IS the `// When` - only add `// When -` if the action is non-obvious.
 - **MUST** put error tests in their domain folder (seeding errors in `seeding/`, not a separate `errors/`). Cover success, edge cases, AND error paths with their messages.
 - **MUST** use `toMatchFile` / `toMatchFixture` for multi-line or structural output (HTTP bodies, generated trees). Vitest `expect(...).toBe(...)` produces ugly diffs for those.
 - **MUST** declare every database via the `services` option in the `spec()` call; `result.table(...)` only works if the runner knows about the DB.
-- **MUST NOT** roll your own directory walk + per-file content loop for scaffolding tests — use `result.directory(path).toMatchFixture(name)`.
+- **MUST NOT** roll your own directory walk + per-file content loop for scaffolding tests - use `result.directory(path).toMatchFixture(name)`.
 - **MUST NOT** rely on a CLI spec running inside `fixturesRoot`. Every `.exec()` runs in a fresh `mkdtemp` directory; use `.project("name")` to seed it.
-- **MUST NOT** mix HTTP actions (`.get`, `.post`, ...) and CLI actions (`.exec`, `.spawn`) in the same spec — they're mutually exclusive.
+- **MUST NOT** mix HTTP actions (`.get`, `.post`, ...) and CLI actions (`.exec`, `.spawn`) in the same spec - they're mutually exclusive.
 
 ## Common pitfalls
 
@@ -94,8 +94,8 @@ test('creates a user', async () => {
 
 ## Deep references (loaded only when needed)
 
-- [api-cheatsheet.md](references/api-cheatsheet.md) — full builder + assertion tables (setup, actions, assertions, multi-db, mocking, grep).
-- [spec-driven-development.md](references/spec-driven-development.md) — coverage rules, runner pattern with `SPEC_RUNNER`, file naming, test structure.
+- [api-cheatsheet.md](references/api-cheatsheet.md) - full builder + assertion tables (setup, actions, assertions, multi-db, mocking, grep).
+- [spec-driven-development.md](references/spec-driven-development.md) - coverage rules, runner pattern with `SPEC_RUNNER`, file naming, test structure.
 
 ## Live docs (canonical)
 

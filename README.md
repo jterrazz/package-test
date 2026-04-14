@@ -35,13 +35,13 @@ afterAll(() => run.cleanup());
 import { run } from '../../setup/integration.specification.js';
 
 test('creates a user', async () => {
-    // Given — one existing user
+    // Given - one existing user
     const result = await run('creates user')
         .seed('initial-users.sql')
         .post('/users', 'new-user.json')
         .run();
 
-    // Then — user created
+    // Then - user created
     expect(result.status).toBe(201);
     await result.table('users').toMatch({
         columns: ['name'],
@@ -67,10 +67,10 @@ export const run = await spec(command(resolve(import.meta.dirname, '../../bin/my
 import { run } from '../../setup/cli.specification.js';
 
 test('builds the project', async () => {
-    // Given — sample app project
+    // Given - sample app project
     const result = await run('build').project('sample-app').exec('build').run();
 
-    // Then — ESM output with source maps
+    // Then - ESM output with source maps
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Build completed');
     expect(result.file('dist/index.js').exists).toBe(true);
@@ -83,7 +83,7 @@ test('builds the project', async () => {
 
 Three modes, same builder API. Each handles infrastructure and cleanup automatically.
 
-### `spec(app(...))` — testcontainers + in-process app
+### `spec(app(...))` - testcontainers + in-process app
 
 Starts real containers via testcontainers. App runs in-process (Hono). Fastest feedback loop.
 
@@ -103,7 +103,7 @@ export const run = await spec(
 );
 ```
 
-### `spec(stack(...))` — docker compose up + real HTTP
+### `spec(stack(...))` - docker compose up + real HTTP
 
 Starts the full `docker/compose.test.yaml` stack. App URL and databases auto-detected.
 
@@ -113,7 +113,7 @@ import { spec, stack } from '@jterrazz/test';
 export const run = await spec(stack('../../'));
 ```
 
-### `spec(command(...))` — local command execution
+### `spec(command(...))` - local command execution
 
 Runs CLI commands against fixture projects in temp directories. Optionally starts infrastructure.
 
@@ -331,13 +331,13 @@ Every test uses `// Given` and `// Then` comments. Always both, never one withou
 
 ```typescript
 test('creates a user and returns 201', async () => {
-    // Given — two existing users
+    // Given - two existing users
     const result = await run('creates user')
         .seed('initial-users.sql')
         .post('/users', 'new-user.json')
         .run();
 
-    // Then — user created with all three in table
+    // Then - user created with all three in table
     expect(result.status).toBe(201);
     await result.table('users').toMatch({
         columns: ['name'],

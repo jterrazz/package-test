@@ -8,18 +8,18 @@ import { httpSpec } from '../../setup/http.specification.js';
 
 describe('api assertions', () => {
     test('returns correct status code', async () => {
-        // Given — seeded data
+        // Given - seeded data
         const result = await httpSpec('correct status').seed('two-users.sql').get('/users').run();
 
-        // Then — 200 OK
+        // Then - 200 OK
         expect(result.status).toBe(200);
     });
 
     test('response matches expected file', async () => {
-        // Given — seeded data
+        // Given - seeded data
         const result = await httpSpec('matching body').seed('two-users.sql').get('/users').run();
 
-        // Then — body matches snapshot file
+        // Then - body matches snapshot file
         result.response.toMatchFile('all-users.response.json');
     });
 });
@@ -28,10 +28,10 @@ describe('api assertions', () => {
 
 describe('integration — api assertion details', () => {
     test('response.toMatchFile shows diff on mismatch', async () => {
-        // Given — response differs from expected file
+        // Given - response differs from expected file
         const result = await httpSpec('wrong body').seed('two-users.sql').get('/users').run();
 
-        // Then — error shows file name + -/+ diff
+        // Then - error shows file name + -/+ diff
         try {
             result.response.toMatchFile('wrong-body.response.json');
             expect.fail('should have thrown');
@@ -63,10 +63,10 @@ describe('integration — api assertion details', () => {
     });
 
     test('response.toMatchFile throws on nonexistent file', async () => {
-        // Given — valid request
+        // Given - valid request
         const result = await httpSpec('bad response').get('/users').run();
 
-        // Then — ENOENT error
+        // Then - ENOENT error
         expect(() => result.response.toMatchFile('nonexistent.json')).toThrow('ENOENT');
     });
 });

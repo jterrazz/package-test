@@ -9,13 +9,13 @@ describe('shared assertions', () => {
     describe('table().toMatch', () => {
         describe('http', () => {
             test('matches single column', async () => {
-                // Given — one user seeded
+                // Given - one user seeded
                 const result = await httpSpec('single col')
                     .seed('one-user.sql')
                     .get('/users')
                     .run();
 
-                // Then — table matches
+                // Then - table matches
                 await result.table('users').toMatch({
                     columns: ['name'],
                     rows: [['Alice']],
@@ -23,10 +23,10 @@ describe('shared assertions', () => {
             });
 
             test('matches multi-column', async () => {
-                // Given — one user seeded
+                // Given - one user seeded
                 const result = await httpSpec('multi col').seed('one-user.sql').get('/users').run();
 
-                // Then — table matches with both columns
+                // Then - table matches with both columns
                 await result.table('users').toMatch({
                     columns: ['name', 'email'],
                     rows: [['Alice', 'alice@test.com']],
@@ -39,13 +39,13 @@ describe('shared assertions', () => {
 
     describe('integration — table details', () => {
         test('queries a specific service by name', async () => {
-            // Given — seed analytics directly
+            // Given - seed analytics directly
             const result = await httpSpec('query analytics')
                 .seed('two-events.sql', { service: 'analytics-db' })
                 .get('/events')
                 .run();
 
-            // Then — multi-column check on analytics-db
+            // Then - multi-column check on analytics-db
             await result.table('events', { service: 'analytics-db' }).toMatch({
                 columns: ['type', 'payload'],
                 rows: [
@@ -56,13 +56,13 @@ describe('shared assertions', () => {
         });
 
         test('shows diff on multi-column mismatch', async () => {
-            // Given — two users in table, expecting wrong values
+            // Given - two users in table, expecting wrong values
             const result = await httpSpec('multi col diff')
                 .seed('two-users.sql')
                 .get('/users')
                 .run();
 
-            // Then — error shows both columns in diff
+            // Then - error shows both columns in diff
             try {
                 await result.table('users').toMatch({
                     columns: ['name', 'email'],
@@ -92,10 +92,10 @@ describe('shared assertions', () => {
         });
 
         test('shows diff on extra rows', async () => {
-            // Given — table has more rows than expected
+            // Given - table has more rows than expected
             const result = await httpSpec('extra rows').seed('two-users.sql').get('/users').run();
 
-            // Then — row count mismatch + extra rows with + marker
+            // Then - row count mismatch + extra rows with + marker
             try {
                 await result.table('users').toMatch({ columns: ['name'], rows: [['Alice']] });
                 expect.fail('should have thrown');
@@ -117,10 +117,10 @@ describe('shared assertions', () => {
         });
 
         test('shows diff on missing rows', async () => {
-            // Given — empty table, expecting rows
+            // Given - empty table, expecting rows
             const result = await httpSpec('missing rows').get('/users').run();
 
-            // Then — row count mismatch + missing rows with - marker
+            // Then - row count mismatch + missing rows with - marker
             try {
                 await result.table('users').toMatch({ columns: ['name'], rows: [['Alice']] });
                 expect.fail('should have thrown');
@@ -141,10 +141,10 @@ describe('shared assertions', () => {
         });
 
         test('throws on unknown service name', async () => {
-            // Given — valid request
+            // Given - valid request
             const result = await httpSpec('bad table service').get('/users').run();
 
-            // Then — table() with nonexistent service fails clearly
+            // Then - table() with nonexistent service fails clearly
             expect(() => result.table('users', { service: 'nonexistent-db' })).toThrow(
                 'requires database "nonexistent-db" but it was not found',
             );
@@ -155,19 +155,19 @@ describe('shared assertions', () => {
 
     describe('file', () => {
         test('exists check', async () => {
-            // Given — build creates files
+            // Given - build creates files
             const result = await cliSpec('file exists').project('cli-app').exec('build').run();
 
-            // Then — file exists and absent file doesn't
+            // Then - file exists and absent file doesn't
             expect(result.file('dist/index.js').exists).toBe(true);
             expect(result.file('dist/nonexistent.js').exists).toBe(false);
         });
 
         test('content check', async () => {
-            // Given — build creates files
+            // Given - build creates files
             const result = await cliSpec('file content').project('cli-app').exec('build').run();
 
-            // Then — file contains expected content
+            // Then - file contains expected content
             expect(result.file('dist/index.js').content).toContain('Hello from CLI app');
         });
     });
