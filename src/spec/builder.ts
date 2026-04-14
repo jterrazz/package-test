@@ -10,8 +10,6 @@ import type {
     CommandResult,
     SpawnOptions,
 } from './modes/cli/command.port.js';
-import { DockerCliResult } from './modes/cli/docker-cli-result.js';
-import { findContainersByLabel, inspectContainer } from './modes/cli/docker-lookup.js';
 import { CliResult } from './modes/cli/result.js';
 import { HttpResult } from './modes/http/result.js';
 import type { ServerPort } from './modes/http/server.port.js';
@@ -560,40 +558,12 @@ export class SpecificationBuilder {
             commandResult = await this.config.command.exec(this.commandArgs!, workDir, env);
         }
 
-        if (dockerConfig && testRunId) {
-            const ids = findContainersByLabel(dockerConfig.testRunLabel, testRunId);
-            const containers = new Map<string, { id: string; inspect: unknown }>();
-            for (const id of ids) {
-                let inspect: unknown;
-                try {
-                    inspect = inspectContainer(id);
-                } catch {
-                    continue;
-                }
-                const labels =
-                    (inspect as any)?.Config?.Labels ?? (inspect as any)?.config?.labels ?? {};
-                const name = labels[dockerConfig.nameLabel];
-                const key = typeof name === 'string' && name.length > 0 ? name : id;
-                containers.set(key, { id, inspect });
-            }
-
-            return new DockerCliResult({
-                commandResult,
-                config: this.config,
-                containers,
-                nameLabel: dockerConfig.nameLabel,
-                testDir: this.testDir,
-                testRunId,
-                testRunLabel: dockerConfig.testRunLabel,
-                transform: this.config.transform,
-                workDir,
-            });
-        }
-
         return new CliResult({
             commandResult,
             config: this.config,
+            dockerConfig: dockerConfig ?? undefined,
             testDir: this.testDir,
+            testRunId: testRunId ?? undefined,
             transform: this.config.transform,
             workDir,
         });

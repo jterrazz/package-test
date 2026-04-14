@@ -7,8 +7,6 @@ export {
     type AppTarget,
     command,
     type CommandTarget,
-    docker,
-    type DockerCommandTarget,
     type HttpTarget,
     type JobHandle,
     type SpecTarget,
@@ -19,6 +17,7 @@ export {
 // Builder
 export {
     createSpecificationRunner,
+    type DockerSpecConfig,
     type SeedHandler,
     type SeedHandlerContext,
     SpecificationBuilder,
@@ -30,11 +29,6 @@ export {
 export { BaseResult, type FileAccessor } from './spec/result/result.js';
 export { CliResult } from './spec/modes/cli/result.js';
 export { ContainerAccessor } from './spec/modes/cli/container-accessor.js';
-export {
-    type CapturedContainer,
-    DockerCliResult,
-    type DockerCliResultOptions,
-} from './spec/modes/cli/docker-cli-result.js';
 export {
     findContainersByLabel,
     inspectContainer,

@@ -3,6 +3,7 @@ import { dockerContainer } from '../infra/docker/docker.js';
 import { Orchestrator } from '../infra/orchestrator.js';
 import {
     createSpecificationRunner,
+    type DockerSpecConfig,
     type SeedHandler,
     type SpecificationBuilder,
 } from '../spec/builder.js';
@@ -12,16 +13,23 @@ import { HonoAdapter } from '../spec/modes/http/adapters/hono.adapter.js';
 import type { DatabasePort } from '../spec/ports/database.port.js';
 import type { ServiceHandle } from '../spec/ports/service.port.js';
 import { resolveCommand, resolveProjectRoot } from './resolve.js';
-import type {
-    AppTarget,
-    CommandTarget,
-    DockerCommandTarget,
-    SpecTarget,
-    StackTarget,
-} from './targets.js';
+import type { AppTarget, CommandTarget, SpecTarget, StackTarget } from './targets.js';
 
 /** Shared options for all spec targets. */
 export interface SpecOptions {
+    /**
+     * Opt-in Docker awareness for CLI-mode runners. When set, every
+     * `.run()` generates a unique test-run id, injects it into the
+     * child process env under `envVar`, and exposes `.container(name)`
+     * accessors on the result that lazily query Docker. A test that
+     * never calls `.container(...)` never touches the Docker daemon —
+     * CLI-only and container-asserting tests share one runner.
+     *
+     * Always wrap calls that may spawn containers with `await using`
+     * so leaked containers get force-removed at scope exit (the
+     * runner cleans up by label filter).
+     */
+    docker?: DockerSpecConfig;
     /** Project root for fixture lookup and compose detection (relative paths supported). */
     root?: string;
     /**
@@ -87,9 +95,6 @@ export async function spec(target: SpecTarget, options: SpecOptions = {}): Promi
         }
         case 'command': {
             return startCommand(target, options);
-        }
-        case 'docker-command': {
-            return startDockerCommand(target, options);
         }
     }
 }
@@ -198,57 +203,6 @@ async function startStack(target: StackTarget, options: SpecOptions): Promise<Sp
     return runner;
 }
 
-async function startDockerCommand(
-    target: DockerCommandTarget,
-    options: SpecOptions,
-): Promise<SpecRunner> {
-    const root = resolveProjectRoot(options.root);
-    const bin = resolveCommand(target.bin, root);
-    const services = options.services ?? [];
-
-    let orchestrator: null | Orchestrator = null;
-    let database: DatabasePort | undefined;
-    let databases: Map<string, DatabasePort> | undefined;
-
-    if (services.length) {
-        orchestrator = new Orchestrator({
-            mode: 'integration',
-            root,
-            services,
-        });
-        await orchestrator.start();
-        await acquireIsolation(services);
-        database = orchestrator.getDatabase() ?? undefined;
-        const dbMap = orchestrator.getDatabases();
-        databases = dbMap.size > 0 ? dbMap : undefined;
-    }
-
-    const runner = createSpecificationRunner({
-        command: new ExecAdapter(bin),
-        database,
-        databases,
-        dockerConfig: {
-            envVar: target.envVar,
-            nameLabel: target.nameLabel,
-            testRunLabel: target.testRunLabel,
-        },
-        fixturesRoot: root,
-        seedHandlers: options.seedHandlers,
-        transform: options.transform,
-    }) as SpecRunner;
-
-    runner.cleanup = async () => {
-        await releaseIsolation(services);
-        if (orchestrator) {
-            await orchestrator.stop();
-        }
-    };
-    runner.docker = (id: string) => new DockerAssertion(dockerContainer(id));
-    runner.orchestrator = orchestrator!;
-
-    return runner;
-}
-
 async function startCommand(target: CommandTarget, options: SpecOptions): Promise<SpecRunner> {
     const root = resolveProjectRoot(options.root);
     const bin = resolveCommand(target.bin, root);
@@ -275,6 +229,7 @@ async function startCommand(target: CommandTarget, options: SpecOptions): Promis
         command: new ExecAdapter(bin),
         database,
         databases,
+        dockerConfig: options.docker,
         fixturesRoot: root,
         seedHandlers: options.seedHandlers,
         transform: options.transform,
