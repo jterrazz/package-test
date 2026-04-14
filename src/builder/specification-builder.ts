@@ -9,7 +9,7 @@ import type {
     InterceptResponse,
     InterceptTrigger,
 } from './common/intercept/types.js';
-import { SpecificationResult } from './common/result.js';
+import { SpecificationResult } from './common/result/result.js';
 import type { ServerPort } from './http/server.port.js';
 
 // ── Types ──

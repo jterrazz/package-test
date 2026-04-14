@@ -1,14 +1,14 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { DatabasePort } from '../../adapters/ports/database.port.js';
-import type { CommandResult } from '../cli/command.port.js';
-import type { ServerResponse } from '../http/server.port.js';
-import type { SpecificationConfig } from '../specification-builder.js';
-import { DirectoryAccessor } from './directory-accessor.js';
+import type { DatabasePort } from '../../../adapters/ports/database.port.js';
+import type { CommandResult } from '../../cli/command.port.js';
+import type { ServerResponse } from '../../http/server.port.js';
+import type { SpecificationConfig } from '../../specification-builder.js';
+import { DirectoryAccessor } from './directory.js';
 import { grep as grepUtil } from './grep.js';
-import { ResponseAccessor } from './response-accessor.js';
-import { TableAssertion } from './table-assertion.js';
+import { ResponseAccessor } from './response.js';
+import { TableAssertion } from './table.js';
 
 /** Read-only handle to a single file produced by a CLI action. */
 export interface FileAccessor {

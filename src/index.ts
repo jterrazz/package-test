@@ -21,13 +21,13 @@ export {
     type SpecificationConfig,
     type SpecificationRunner,
 } from './builder/specification-builder.js';
-export { type FileAccessor, SpecificationResult } from './builder/common/result.js';
+export { type FileAccessor, SpecificationResult } from './builder/common/result/result.js';
 export {
     DirectoryAccessor,
     type DirectorySnapshotOptions,
-} from './builder/common/directory-accessor.js';
-export { ResponseAccessor } from './builder/common/response-accessor.js';
-export { TableAssertion } from './builder/common/table-assertion.js';
+} from './builder/common/result/directory.js';
+export { ResponseAccessor } from './builder/common/result/response.js';
+export { TableAssertion } from './builder/common/result/table.js';
 
 // Ports
 export type {
@@ -63,7 +63,7 @@ export {
 } from './spec/legacy-integration.js';
 
 // Legacy re-exports (use result.grep() and runner.docker() instead)
-export { grep } from './builder/common/grep.js';
+export { grep } from './builder/common/result/grep.js';
 export { normalizeOutput, stripAnsi } from './builder/common/reporter.js';
 export { dockerContainer } from './docker/docker-adapter.js';
 export { DockerAssertion } from './docker/docker-assertion.js';
