@@ -15,6 +15,6 @@ permissions:
 
 jobs:
     docs:
-        uses: jterrazz/jterrazz-workflows/.github/workflows/docs.yaml@main
+        uses: jterrazz/jterrazz-actions/.github/workflows/docs.yaml@main
         with:
             node-version: '24'
