@@ -1,23 +1,23 @@
 import { describe, expect, test } from 'vitest';
 
-import { cliSpec } from '../../setup/cli.specification.js';
+import { commandSpec } from '../../setup/command.specification.js';
 
-describe('cli — env', () => {
+describe('command — env', () => {
     test('passes user-supplied env vars to the process', async () => {
         // Given - a custom env var
-        const result = await cliSpec('env basic')
+        const result = await commandSpec('env basic')
             .project('cli-app')
             .env({ MY_VAR: 'hello' })
             .exec('env')
             .run();
 
-        // Then - the CLI sees it
+        // Then - the command sees it
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('MY_VAR=hello');
     });
 
     test('merges multiple .env() calls', async () => {
-        const result = await cliSpec('env merge')
+        const result = await commandSpec('env merge')
             .project('cli-app')
             .env({ MY_VAR: 'first' })
             .env({ EXTRA: 'second' })
@@ -30,7 +30,7 @@ describe('cli — env', () => {
 
     test('expands $WORKDIR token to the actual cwd', async () => {
         // Given - $WORKDIR placeholder for HOME (the typical isolation pattern)
-        const result = await cliSpec('env workdir')
+        const result = await commandSpec('env workdir')
             .project('cli-app')
             .env({ HOME: '$WORKDIR' })
             .exec('env')
@@ -41,12 +41,12 @@ describe('cli — env', () => {
         const homeLine = result.stdout.text.split('\n').find((l) => l.startsWith('HOME='));
         expect(homeLine).toBeDefined();
         expect(homeLine).not.toBe('HOME=unset');
-        expect(homeLine).toContain('/spec-cli-');
+        expect(homeLine).toContain('/spec-command-');
     });
 
     test('null value unsets a variable', async () => {
         // Given - set then unset (HOME is set on the host)
-        const result = await cliSpec('env unset')
+        const result = await commandSpec('env unset')
             .project('cli-app')
             .env({ HOME: null })
             .exec('env')
@@ -57,7 +57,7 @@ describe('cli — env', () => {
 
     test('env without .env() keeps process.env intact', async () => {
         // Given - no .env() — host PATH should still be available so the script runs
-        const result = await cliSpec('env default').project('cli-app').exec('env').run();
+        const result = await commandSpec('env default').project('cli-app').exec('env').run();
 
         expect(result.exitCode).toBe(0);
         // HOME should be the host's HOME, not "unset"

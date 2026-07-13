@@ -21,7 +21,7 @@ export interface BaseResultOptions {
 
 /**
  * Base result - common accessors available after any action type.
- * Extended by HttpResult, CliResult, and used directly by JobResult.
+ * Extended by HttpResult, CommandResult, and used directly by JobResult.
  */
 export class BaseResult {
     protected config: SpecificationConfig;

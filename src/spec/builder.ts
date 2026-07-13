@@ -6,11 +6,11 @@ import type { DatabasePort } from '../spec/ports/database.port.js';
 import type { InterceptEntry, InterceptResponse, InterceptTrigger } from './intercept/types.js';
 import type {
     CommandEnv,
+    CommandOutput,
     CommandPort,
-    CommandResult,
     SpawnOptions,
-} from './modes/cli/command.port.js';
-import { CliResult } from './modes/cli/result.js';
+} from './modes/command/command.port.js';
+import { CommandResult } from './modes/command/result.js';
 import { HttpResult } from './modes/http/result.js';
 import type { ServerPort } from './modes/http/server.port.js';
 import { BaseResult } from './result/result.js';
@@ -42,7 +42,7 @@ export type SeedHandler = (ctx: SeedHandlerContext, fragmentPath: string) => Pro
 
 /**
  * Configuration for the docker() spec mode. When set on
- * {@link SpecificationConfig}, the CLI runner generates a test-run id, injects
+ * {@link SpecificationConfig}, the command runner generates a test-run id, injects
  * it into the child env under `envVar`, then queries Docker for every
  * container carrying `testRunLabel=<id>` after the command exits.
  */
@@ -69,7 +69,7 @@ export interface SpecificationConfig {
     fixturesRoot?: string;
     jobs?: JobHandle[];
     /**
-     * Pluggable seed handlers for CLI-mode tests. Keys are leading path
+     * Pluggable seed handlers for command-mode tests. Keys are leading path
      * segments (e.g. `"spwn.yaml/"`, `"agent/"`). When `.seed(relPath)` is
      * called with a path whose first segment matches, the handler is invoked
      * with the full absolute path of the seed fragment under
@@ -78,7 +78,7 @@ export interface SpecificationConfig {
     seedHandlers?: Record<string, SeedHandler>;
     server?: ServerPort;
     /**
-     * Optional normaliser applied to CLI stdout/stderr before every
+     * Optional normaliser applied to command stdout/stderr before every
      * .toMatch / .toMatchFile comparison. Does not mutate the raw
      * `.text` accessor.
      */
@@ -172,7 +172,7 @@ export class SpecificationBuilder {
     }
 
     /**
-     * Set environment variables for the CLI process. Merged on top of process.env.
+     * Set environment variables for the command process. Merged on top of process.env.
      * Use `null` to unset a variable. Multiple calls merge.
      *
      * The token `$WORKDIR` (in any value) is replaced with the actual working
@@ -278,10 +278,10 @@ export class SpecificationBuilder {
         return this;
     }
 
-    // ── CLI actions ──
+    // ── Command actions ──
 
     /**
-     * Execute a CLI command (or a sequence of commands) in an isolated working directory.
+     * Execute a command (or a sequence of commands) in an isolated working directory.
      * When an array is passed, commands run sequentially and stop on the first non-zero exit code.
      *
      * @example
@@ -293,7 +293,7 @@ export class SpecificationBuilder {
         return this;
     }
 
-    /** Spawn a long-running CLI process with custom spawn options (e.g. timeout, signal). */
+    /** Spawn a long-running process with custom spawn options (e.g. timeout, signal). */
     spawn(args: string, options: SpawnOptions): this {
         this.spawnConfig = { args, options };
         return this;
@@ -318,19 +318,19 @@ export class SpecificationBuilder {
 
     /**
      * Execute the specification: run seeds, copy fixtures, then perform the
-     * configured action (HTTP or CLI).
+     * configured action (HTTP or command).
      *
      * @returns The result object used for assertions.
      * @example
      *   const result = await spec("test").exec("status").run();
      *   expect(result.exitCode).toBe(0);
      */
-    async run(): Promise<BaseResult | CliResult | HttpResult> {
+    async run(): Promise<BaseResult | CommandResult | HttpResult> {
         const hasHttpAction = this.request !== null;
-        const hasCliAction = this.commandArgs !== null || this.spawnConfig !== null;
+        const hasCommandAction = this.commandArgs !== null || this.spawnConfig !== null;
         const hasJobAction = this.jobName !== null;
 
-        const actionCount = [hasHttpAction, hasCliAction, hasJobAction].filter(Boolean).length;
+        const actionCount = [hasHttpAction, hasCommandAction, hasJobAction].filter(Boolean).length;
 
         if (actionCount === 0) {
             throw new Error(
@@ -345,7 +345,7 @@ export class SpecificationBuilder {
         }
 
         let workDir: null | string = null;
-        if (hasCliAction) {
+        if (hasCommandAction) {
             workDir = this.prepareWorkDir();
         }
 
@@ -360,12 +360,12 @@ export class SpecificationBuilder {
 
         // Execute seeds
         for (const entry of this.seeds) {
-            // Pluggable seed handlers (CLI mode): dispatch based on leading path segment.
+            // Pluggable seed handlers (command mode): dispatch based on leading path segment.
             const handler = this.resolveSeedHandler(entry.file);
             if (handler) {
                 if (!workDir) {
                     throw new Error(
-                        `seed("${entry.file}"): pluggable seed handlers require a CLI working directory`,
+                        `seed("${entry.file}"): pluggable seed handlers require a command working directory`,
                     );
                 }
                 const fragmentPath = resolve(this.testDir, 'seeds', entry.file);
@@ -418,7 +418,7 @@ export class SpecificationBuilder {
             if (hasJobAction) {
                 return await this.runJobAction();
             }
-            return await this.runCliAction(workDir!);
+            return await this.runCommandAction(workDir!);
         } finally {
             if (cleanupIntercepts) {
                 cleanupIntercepts();
@@ -463,10 +463,10 @@ export class SpecificationBuilder {
     }
 
     private prepareWorkDir(): string {
-        // Every CLI spec runs in a fresh, empty temp directory unless a project
+        // Every command spec runs in a fresh, empty temp directory unless a project
         // Fixture is explicitly copied in via .project() (or files via .fixture()).
         // This guarantees isolation — the runner never writes into fixturesRoot.
-        const tempDir = mkdtempSync(resolve(tmpdir(), 'spec-cli-'));
+        const tempDir = mkdtempSync(resolve(tmpdir(), 'spec-command-'));
 
         if (this.projectName && this.config.fixturesRoot) {
             const projectDir = resolve(this.config.fixturesRoot, this.projectName);
@@ -530,9 +530,9 @@ export class SpecificationBuilder {
         });
     }
 
-    private async runCliAction(workDir: string): Promise<CliResult> {
+    private async runCommandAction(workDir: string): Promise<CommandResult> {
         if (!this.config.command) {
-            throw new Error('CLI actions require a command adapter (use cli())');
+            throw new Error('Command actions require a command adapter');
         }
 
         const dockerConfig = this.config.dockerConfig;
@@ -551,29 +551,29 @@ export class SpecificationBuilder {
         if (dockerConfig && testRunId) {
             env = { [dockerConfig.envVar]: testRunId, ...env };
         }
-        let commandResult: CommandResult;
+        let commandOutput: CommandOutput;
 
         if (this.spawnConfig) {
-            commandResult = await this.config.command.spawn(
+            commandOutput = await this.config.command.spawn(
                 this.spawnConfig.args,
                 workDir,
                 this.spawnConfig.options,
                 env,
             );
         } else if (Array.isArray(this.commandArgs)) {
-            commandResult = { exitCode: 0, stderr: '', stdout: '' };
+            commandOutput = { exitCode: 0, stderr: '', stdout: '' };
             for (const args of this.commandArgs) {
-                commandResult = await this.config.command.exec(args, workDir, env);
-                if (commandResult.exitCode !== 0) {
+                commandOutput = await this.config.command.exec(args, workDir, env);
+                if (commandOutput.exitCode !== 0) {
                     break;
                 }
             }
         } else {
-            commandResult = await this.config.command.exec(this.commandArgs!, workDir, env);
+            commandOutput = await this.config.command.exec(this.commandArgs!, workDir, env);
         }
 
-        return new CliResult({
-            commandResult,
+        return new CommandResult({
+            commandOutput,
             config: this.config,
             dockerConfig: dockerConfig ?? undefined,
             testDir: this.testDir,
@@ -616,7 +616,7 @@ function getCallerDir(): string {
 
 // ── Factory functions ──
 
-/** Factory function returned by `cli()`, `integration()`, or `e2e()` that starts a new spec. */
+/** Factory function returned by `createSpecificationRunner()` that starts a new spec. */
 export type SpecificationRunner = (label: string) => SpecificationBuilder;
 
 /**

@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 
-import type { CommandEnv, CommandPort, CommandResult, SpawnOptions } from '../command.port.js';
+import type { CommandEnv, CommandOutput, CommandPort, SpawnOptions } from '../command.port.js';
 
 /**
  * Build a child-process env from the parent env plus user overrides.
@@ -21,7 +21,7 @@ function buildEnv(extra?: CommandEnv): NodeJS.ProcessEnv {
 }
 
 /**
- * Executes CLI commands via Node.js child_process.
+ * Executes commands via Node.js child_process.
  * Uses `spawnSync` for one-shot commands and `spawn` for long-running processes.
  * Used by the command() specification runner.
  *
@@ -37,7 +37,7 @@ export class ExecAdapter implements CommandPort {
         this.command = command;
     }
 
-    async exec(args: string, cwd: string, extraEnv?: CommandEnv): Promise<CommandResult> {
+    async exec(args: string, cwd: string, extraEnv?: CommandEnv): Promise<CommandOutput> {
         const env = buildEnv(extraEnv);
         const result = spawnSync(`${this.command} ${args}`, [], {
             cwd,
@@ -58,7 +58,7 @@ export class ExecAdapter implements CommandPort {
         cwd: string,
         options: SpawnOptions,
         extraEnv?: CommandEnv,
-    ): Promise<CommandResult> {
+    ): Promise<CommandOutput> {
         const env = buildEnv(extraEnv);
 
         return new Promise((resolve) => {

@@ -4,7 +4,7 @@ import { grep as grepUtil } from '../../result/grep.js';
 import { JsonAccessor } from '../../result/json.js';
 import { BaseResult } from '../../result/result.js';
 import { StreamAccessor } from '../../result/stream.js';
-import type { CommandResult } from './command.port.js';
+import type { CommandOutput } from './command.port.js';
 import { ContainerAccessor } from './container-accessor.js';
 import { findContainersByLabel, inspectContainer, removeContainers } from './docker-lookup.js';
 
@@ -14,12 +14,12 @@ interface CapturedContainer {
 }
 
 /**
- * Result from a CLI action (.exec(), .spawn()).
+ * Result from a command action (.exec(), .spawn()).
  *
  * When the runner was configured with a `docker` option, the result also
  * exposes container accessors and participates in `Symbol.asyncDispose`
  * cleanup. The Docker shell-outs are **lazy**: a test that never calls
- * `.container(...)` never queries the Docker daemon, so CLI-only tests
+ * `.container(...)` never queries the Docker daemon, so command-only tests
  * pay zero Docker cost even when the runner is Docker-aware.
  *
  * Dispose always runs one final label-filtered `docker ps` to catch
@@ -27,15 +27,15 @@ interface CapturedContainer {
  * tests still get leak-free cleanup even if they forget to reach into
  * a container.
  */
-export class CliResult extends BaseResult {
-    private readonly commandResult: CommandResult;
+export class CommandResult extends BaseResult {
+    private readonly commandOutput: CommandOutput;
     private containersCache: Map<string, CapturedContainer> | null = null;
     private readonly dockerConfig?: DockerSpecConfig;
     private readonly testRunId?: string;
     private readonly transform?: (text: string) => string;
 
     constructor(options: {
-        commandResult: CommandResult;
+        commandOutput: CommandOutput;
         config: SpecificationConfig;
         dockerConfig?: DockerSpecConfig;
         testDir: string;
@@ -44,7 +44,7 @@ export class CliResult extends BaseResult {
         workDir: string;
     }) {
         super(options);
-        this.commandResult = options.commandResult;
+        this.commandOutput = options.commandOutput;
         this.dockerConfig = options.dockerConfig;
         this.testRunId = options.testRunId;
         this.transform = options.transform;
@@ -52,13 +52,13 @@ export class CliResult extends BaseResult {
 
     /** The process exit code. */
     get exitCode(): number {
-        return this.commandResult.exitCode;
+        return this.commandOutput.exitCode;
     }
 
     /** Accessor for the captured standard output with file-based assertions. */
     get stdout(): StreamAccessor {
         return new StreamAccessor(
-            this.commandResult.stdout,
+            this.commandOutput.stdout,
             'stdout',
             this.testDir,
             this.transform,
@@ -68,7 +68,7 @@ export class CliResult extends BaseResult {
     /** Accessor for the captured standard error with file-based assertions. */
     get stderr(): StreamAccessor {
         return new StreamAccessor(
-            this.commandResult.stderr,
+            this.commandOutput.stderr,
             'stderr',
             this.testDir,
             this.transform,
@@ -77,19 +77,19 @@ export class CliResult extends BaseResult {
 
     /** Accessor for parsing stdout as JSON and asserting against JSON fixtures. */
     get json(): JsonAccessor {
-        return new JsonAccessor(this.commandResult.stdout, this.testDir, this.transform);
+        return new JsonAccessor(this.commandOutput.stdout, this.testDir, this.transform);
     }
 
     /** Accessor for the temporary working directory the command ran in. */
     get filesystem(): FilesystemAccessor {
         if (!this.workDir) {
-            throw new Error('CliResult.filesystem requires a working directory');
+            throw new Error('CommandResult.filesystem requires a working directory');
         }
         return new FilesystemAccessor(this.workDir, this.testDir);
     }
 
     /**
-     * Look up a container the CLI spawned during this run by the value of
+     * Look up a container the command spawned during this run by the value of
      * its name-label (as declared in `SpecOptions.docker.nameLabel`).
      * First access triggers a one-shot `docker ps` + `docker inspect`
      * query and caches the result for the rest of the result's lifetime.
@@ -137,13 +137,13 @@ export class CliResult extends BaseResult {
      *   expect(result.grep('error.ts')).toContain('no-unused-vars');
      */
     grep(pattern: string): string {
-        return grepUtil(this.commandResult.stdout, pattern);
+        return grepUtil(this.commandOutput.stdout, pattern);
     }
 
     private ensureDockerAware(member: string): void {
         if (!this.dockerConfig || !this.testRunId) {
             throw new Error(
-                `CliResult.${member}: runner was not configured with a docker option. ` +
+                `CommandResult.${member}: runner was not configured with a docker option. ` +
                     `Pass \`docker: { envVar, nameLabel, testRunLabel }\` in SpecOptions.`,
             );
         }

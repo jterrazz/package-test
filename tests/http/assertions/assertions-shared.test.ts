@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { stripAnsi } from '../../../src/spec/reporter.js';
-import { cliSpec } from '../../setup/cli.specification.js';
+import { commandSpec } from '../../setup/command.specification.js';
 import { dedent } from '../../setup/helpers/dedent.js';
 import { httpSpec } from '../../setup/http.specification.js';
 
@@ -151,12 +151,12 @@ describe('shared assertions', () => {
         });
     });
 
-    // ── File assertions (CLI mode) ──
+    // ── File assertions (command mode) ──
 
     describe('file', () => {
         test('exists check', async () => {
             // Given - build creates files
-            const result = await cliSpec('file exists').project('cli-app').exec('build').run();
+            const result = await commandSpec('file exists').project('cli-app').exec('build').run();
 
             // Then - file exists and absent file doesn't
             expect(result.file('dist/index.js').exists).toBe(true);
@@ -165,7 +165,7 @@ describe('shared assertions', () => {
 
         test('content check', async () => {
             // Given - build creates files
-            const result = await cliSpec('file content').project('cli-app').exec('build').run();
+            const result = await commandSpec('file content').project('cli-app').exec('build').run();
 
             // Then - file contains expected content
             expect(result.file('dist/index.js').content).toContain('Hello from CLI app');

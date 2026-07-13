@@ -1,7 +1,7 @@
 /**
- * Result of executing a CLI command, including exit code and captured output streams.
+ * Raw output from a command execution, including exit code and captured output streams.
  */
-export interface CommandResult {
+export interface CommandOutput {
     /** Process exit code (0 = success). */
     exitCode: number;
     /** Captured standard output. */
@@ -27,12 +27,12 @@ export interface SpawnOptions {
 export type CommandEnv = Record<string, null | string>;
 
 /**
- * Abstract CLI interface for specification runners.
+ * Abstract command interface for specification runners.
  * Implement this to plug in your command execution strategy.
  */
 export interface CommandPort {
-    /** Execute a CLI command with the given arguments in the given working directory. */
-    exec(args: string, cwd: string, env?: CommandEnv): Promise<CommandResult>;
+    /** Execute a command with the given arguments in the given working directory. */
+    exec(args: string, cwd: string, env?: CommandEnv): Promise<CommandOutput>;
 
     /** Spawn a long-running process and wait for a pattern or timeout. */
     spawn(
@@ -40,5 +40,5 @@ export interface CommandPort {
         cwd: string,
         options: SpawnOptions,
         env?: CommandEnv,
-    ): Promise<CommandResult>;
+    ): Promise<CommandOutput>;
 }

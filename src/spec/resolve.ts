@@ -35,7 +35,7 @@ export function resolveProjectRoot(root: string | undefined): string {
 }
 
 /**
- * Resolve a CLI command — checks node_modules/.bin, then treats as absolute/PATH.
+ * Resolve a command — checks node_modules/.bin, then treats as absolute/PATH.
  */
 export function resolveCommand(command: string, root: string): string {
     if (isAbsolute(command)) {

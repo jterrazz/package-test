@@ -3,8 +3,8 @@ import { execSync } from 'node:child_process';
 import { JsonAccessor } from '../../result/json.js';
 import type { FileAccessor } from '../../result/result.js';
 import { StreamAccessor } from '../../result/stream.js';
-import type { CommandResult } from './command.port.js';
-import { CliResult } from './result.js';
+import type { CommandOutput } from './command.port.js';
+import { CommandResult } from './result.js';
 
 const EXEC_TIMEOUT = 10_000;
 
@@ -21,9 +21,9 @@ function readInspectState(inspect: any): { running: boolean; status: string } {
 
 /**
  * Assertion accessor for a single Docker container captured by the docker()
- * spec mode. Mirrors the shape of {@link CliResult} so tests use the same
- * vocabulary (`stdout.toContain`, `file(...).content`, etc.) regardless of
- * where output came from.
+ * spec mode. Mirrors the shape of {@link CommandResult} so tests use the same
+ * vocabulary (`stdout.toContain`, `file(...).content`, etc.) regardless
+ * of where output came from.
  *
  * Sync state (`exists`, `running`, `status`) is derived from the `docker
  * inspect` payload captured at result-construction time. Logs are fetched
@@ -117,13 +117,13 @@ export class ContainerAccessor {
 
     /**
      * Run a shell command inside the container and get back the same
-     * {@link CliResult} used for host-side executions.
+     * {@link CommandResult} used for host-side executions.
      */
-    async exec(cmd: string): Promise<CliResult> {
+    async exec(cmd: string): Promise<CommandResult> {
         this.requireExists('exec');
-        const commandResult = this.containerExec(this.containerId!, ['sh', '-c', cmd]);
-        return new CliResult({
-            commandResult,
+        const commandOutput = this.containerExec(this.containerId!, ['sh', '-c', cmd]);
+        return new CommandResult({
+            commandOutput,
             config: {},
             testDir: this.testDir,
             transform: this.transform,
@@ -159,8 +159,8 @@ export class ContainerAccessor {
         return this.cachedLogs ?? '';
     }
 
-    private containerExec(id: string, argv: string[]): CommandResult {
-        // Piping stdio keeps a non-zero exit inside a CommandResult instead of throwing out.
+    private containerExec(id: string, argv: string[]): CommandOutput {
+        // Piping stdio keeps a non-zero exit inside a CommandOutput instead of throwing out.
         try {
             const quoted = argv.map((a) => JSON.stringify(a)).join(' ');
             const stdout = execSync(`docker exec ${id} ${quoted}`, {

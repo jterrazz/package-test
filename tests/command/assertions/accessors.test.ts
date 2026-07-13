@@ -3,17 +3,17 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { cliSpec } from '../../setup/cli.specification.js';
+import { commandSpec } from '../../setup/command.specification.js';
 
-describe('cli — stdout accessor', () => {
+describe('command — stdout accessor', () => {
     test('text exposes the raw string', async () => {
-        const result = await cliSpec('stdout text').project('cli-app').exec('help').run();
+        const result = await commandSpec('stdout text').project('cli-app').exec('help').run();
 
         expect(result.stdout.text).toContain('Usage: cli <command>');
     });
 
     test('coerces to primitive string via String()', async () => {
-        const result = await cliSpec('stdout coerce').project('cli-app').exec('help').run();
+        const result = await commandSpec('stdout coerce').project('cli-app').exec('help').run();
 
         expect(String(result.stdout)).toContain('Usage:');
         expect(`${result.stdout}`).toContain('Usage:');
@@ -23,11 +23,11 @@ describe('cli — stdout accessor', () => {
         const temp = mkdtempSync(resolve(tmpdir(), 'stdout-match-'));
         const expectedFile = resolve(temp, 'stdout.txt');
         try {
-            const a = await cliSpec('stdout file seed').project('cli-app').exec('json').run();
+            const a = await commandSpec('stdout file seed').project('cli-app').exec('json').run();
             // Seed the file using update mode, then verify.
             a.stdout.toMatchFile(expectedFile, { update: true });
 
-            const b = await cliSpec('stdout file verify').project('cli-app').exec('json').run();
+            const b = await commandSpec('stdout file verify').project('cli-app').exec('json').run();
             b.stdout.toMatchFile(expectedFile);
         } finally {
             rmSync(temp, { force: true, recursive: true });
@@ -38,14 +38,14 @@ describe('cli — stdout accessor', () => {
         const temp = mkdtempSync(resolve(tmpdir(), 'stdout-mismatch-'));
         const expectedFile = resolve(temp, 'stdout.txt');
         try {
-            const a = await cliSpec('stdout seed').project('cli-app').exec('json').run();
+            const a = await commandSpec('stdout seed').project('cli-app').exec('json').run();
             a.stdout.toMatchFile(expectedFile, { update: true });
 
             // Overwrite with something else, then verify should fail.
             const { writeFileSync } = await import('node:fs');
             writeFileSync(expectedFile, 'different\n');
 
-            const b = await cliSpec('stdout verify').project('cli-app').exec('json').run();
+            const b = await commandSpec('stdout verify').project('cli-app').exec('json').run();
             expect(() => b.stdout.toMatchFile(expectedFile)).toThrow(/Output mismatch/);
         } finally {
             rmSync(temp, { force: true, recursive: true });
@@ -55,10 +55,16 @@ describe('cli — stdout accessor', () => {
     test('toMatch resolves to expected/stdout/<name> (extension required)', async () => {
         const fixtureName = `stdout-transient-${Date.now()}.txt`;
         try {
-            const a = await cliSpec('stdout fixture seed').project('cli-app').exec('json').run();
+            const a = await commandSpec('stdout fixture seed')
+                .project('cli-app')
+                .exec('json')
+                .run();
             a.stdout.toMatch(fixtureName, { update: true });
 
-            const b = await cliSpec('stdout fixture verify').project('cli-app').exec('json').run();
+            const b = await commandSpec('stdout fixture verify')
+                .project('cli-app')
+                .exec('json')
+                .run();
             b.stdout.toMatch(fixtureName);
         } finally {
             rmSync(resolve(import.meta.dirname, 'expected', 'stdout', fixtureName), {
@@ -68,9 +74,9 @@ describe('cli — stdout accessor', () => {
     });
 });
 
-describe('cli — stderr accessor', () => {
+describe('command — stderr accessor', () => {
     test('text exposes stderr content', async () => {
-        const result = await cliSpec('stderr text').project('cli-app').exec('fail').run();
+        const result = await commandSpec('stderr text').project('cli-app').exec('fail').run();
 
         expect(result.stderr.text).toContain('Fatal: something went wrong');
     });
@@ -79,10 +85,10 @@ describe('cli — stderr accessor', () => {
         const temp = mkdtempSync(resolve(tmpdir(), 'stderr-'));
         const file = resolve(temp, 'stderr.txt');
         try {
-            const a = await cliSpec('stderr seed').project('cli-app').exec('fail').run();
+            const a = await commandSpec('stderr seed').project('cli-app').exec('fail').run();
             a.stderr.toMatchFile(file, { update: true });
 
-            const b = await cliSpec('stderr verify').project('cli-app').exec('fail').run();
+            const b = await commandSpec('stderr verify').project('cli-app').exec('fail').run();
             b.stderr.toMatchFile(file);
         } finally {
             rmSync(temp, { force: true, recursive: true });
@@ -90,9 +96,9 @@ describe('cli — stderr accessor', () => {
     });
 });
 
-describe('cli — json accessor', () => {
+describe('command — json accessor', () => {
     test('value exposes the parsed JSON', async () => {
-        const result = await cliSpec('json value').project('cli-app').exec('json').run();
+        const result = await commandSpec('json value').project('cli-app').exec('json').run();
 
         expect(result.json.value).toEqual({
             name: 'cli-app',
@@ -105,14 +111,14 @@ describe('cli — json accessor', () => {
         const temp = mkdtempSync(resolve(tmpdir(), 'json-match-'));
         const file = resolve(temp, 'expected.json');
         try {
-            const a = await cliSpec('json seed').project('cli-app').exec('json').run();
+            const a = await commandSpec('json seed').project('cli-app').exec('json').run();
             a.json.toMatchFile(file, { update: true });
 
             const written = readFileSync(file, 'utf8');
             expect(written).toMatch(/^\{\n {4}"name": "cli-app"/);
             expect(written.endsWith('\n')).toBe(true);
 
-            const b = await cliSpec('json verify').project('cli-app').exec('json').run();
+            const b = await commandSpec('json verify').project('cli-app').exec('json').run();
             b.json.toMatchFile(file);
         } finally {
             rmSync(temp, { force: true, recursive: true });
@@ -122,10 +128,13 @@ describe('cli — json accessor', () => {
     test('toMatch resolves to expected/json/<name> (extension required)', async () => {
         const fixtureName = `json-transient-${Date.now()}.json`;
         try {
-            const a = await cliSpec('json fixture seed').project('cli-app').exec('json').run();
+            const a = await commandSpec('json fixture seed').project('cli-app').exec('json').run();
             a.json.toMatch(fixtureName, { update: true });
 
-            const b = await cliSpec('json fixture verify').project('cli-app').exec('json').run();
+            const b = await commandSpec('json fixture verify')
+                .project('cli-app')
+                .exec('json')
+                .run();
             b.json.toMatch(fixtureName);
         } finally {
             rmSync(resolve(import.meta.dirname, 'expected', 'json', fixtureName), {
@@ -135,21 +144,21 @@ describe('cli — json accessor', () => {
     });
 
     test('throws a clear error when stdout is not JSON', async () => {
-        const result = await cliSpec('json bad').project('cli-app').exec('help').run();
+        const result = await commandSpec('json bad').project('cli-app').exec('help').run();
 
         expect(() => result.json.value).toThrow(/stdout is not valid JSON/);
     });
 });
 
-describe('cli — filesystem accessor', () => {
+describe('command — filesystem accessor', () => {
     test('cwd points to the temp working directory', async () => {
-        const result = await cliSpec('fs cwd').project('cli-app').exec('scaffold').run();
+        const result = await commandSpec('fs cwd').project('cli-app').exec('scaffold').run();
 
-        expect(result.filesystem.cwd).toMatch(/spec-cli-/);
+        expect(result.filesystem.cwd).toMatch(/spec-command-/);
     });
 
     test('files() lists the whole tree sorted, filtering defaults', async () => {
-        const result = await cliSpec('fs files').project('cli-app').exec('scaffold').run();
+        const result = await commandSpec('fs files').project('cli-app').exec('scaffold').run();
 
         const files = await result.filesystem.files();
         // Cli.sh is copied in via .project(), scaffold writes out/** — both appear.
@@ -163,10 +172,16 @@ describe('cli — filesystem accessor', () => {
     test('toMatch round-trips the entire working dir', async () => {
         const fixtureName = `fs-transient-${Date.now()}`;
         try {
-            const a = await cliSpec('fs fixture seed').project('cli-app').exec('scaffold').run();
+            const a = await commandSpec('fs fixture seed')
+                .project('cli-app')
+                .exec('scaffold')
+                .run();
             await a.filesystem.toMatch(fixtureName, { update: true });
 
-            const b = await cliSpec('fs fixture verify').project('cli-app').exec('scaffold').run();
+            const b = await commandSpec('fs fixture verify')
+                .project('cli-app')
+                .exec('scaffold')
+                .run();
             await b.filesystem.toMatch(fixtureName);
         } finally {
             rmSync(resolve(import.meta.dirname, 'expected', 'filesystem', fixtureName), {
@@ -179,10 +194,10 @@ describe('cli — filesystem accessor', () => {
     test('toMatch detects a diff', async () => {
         const fixtureName = `fs-diff-${Date.now()}`;
         try {
-            const a = await cliSpec('fs diff seed').project('cli-app').exec('scaffold').run();
+            const a = await commandSpec('fs diff seed').project('cli-app').exec('scaffold').run();
             await a.filesystem.toMatch(fixtureName, { update: true });
 
-            const b = await cliSpec('fs diff verify')
+            const b = await commandSpec('fs diff verify')
                 .project('cli-app')
                 .exec('scaffold-changed')
                 .run();
@@ -199,7 +214,7 @@ describe('cli — filesystem accessor', () => {
 // eslint-disable-next-line no-control-regex
 const stripAnsi = (text: string): string => text.replace(/\x1b\[[0-9;]*m/g, '');
 
-describe('cli — transform option', () => {
+describe('command — transform option', () => {
     test('transform strips ANSI from stdout before toMatchFile comparison', async () => {
         const { command, spec } = await import('../../../src/index.js');
         const cliBin = resolve(import.meta.dirname, '../../setup/fixtures/cli-app/cli.sh');
@@ -309,7 +324,7 @@ describe('cli — transform option', () => {
     });
 });
 
-describe('cli — seed handlers', () => {
+describe('command — seed handlers', () => {
     test('dispatches a seed to a user-provided handler by leading segment', async () => {
         // Given - a dedicated spec runner with seedHandlers that writes files into cwd
         const { command, spec } = await import('../../../src/index.js');

@@ -39,7 +39,7 @@ export interface StackTarget {
     readonly root: string;
 }
 
-/** CLI command target. Created by {@link command}. */
+/** Command target. Created by {@link command}. */
 export interface CommandTarget {
     readonly kind: 'command';
     readonly bin: string;
@@ -84,7 +84,7 @@ export function stack(root: string): StackTarget {
 }
 
 /**
- * Test a CLI binary. Each spec runs in a fresh temp directory.
+ * Test a command binary. Each spec runs in a fresh temp directory.
  *
  * Pass a `docker: { envVar, nameLabel, testRunLabel }` option on
  * {@link SpecOptions} to make the runner Docker-aware — the runner
@@ -92,13 +92,13 @@ export function stack(root: string): StackTarget {
  * `.container(name)` accessors that lazily query Docker. Tests that
  * never call `.container(...)` pay zero Docker cost.
  *
- * @param bin - Path to the CLI binary or command name (resolved from node_modules/.bin or PATH).
+ * @param bin - Path to the command binary (resolved from node_modules/.bin or PATH).
  *
  * @example
- *   // CLI-only
+ *   // Command-only
  *   await spec(command('my-cli'), { root: '../fixtures' });
  *
- *   // CLI binary that also spawns containers — same runner, just
+ *   // Command binary that also spawns containers — same runner, just
  *   // opt into container accessors via the docker option:
  *   await spec(command('my-cli'), {
  *       root: '../fixtures',

@@ -27,13 +27,13 @@ export {
 
 // Results
 export { BaseResult, type FileAccessor } from './spec/result/result.js';
-export { CliResult } from './spec/modes/cli/result.js';
-export { ContainerAccessor } from './spec/modes/cli/container-accessor.js';
+export { CommandResult } from './spec/modes/command/result.js';
+export { ContainerAccessor } from './spec/modes/command/container-accessor.js';
 export {
     findContainersByLabel,
     inspectContainer,
     removeContainers,
-} from './spec/modes/cli/docker-lookup.js';
+} from './spec/modes/command/docker-lookup.js';
 export { HttpResult } from './spec/modes/http/result.js';
 export { DirectoryAccessor, type DirectorySnapshotOptions } from './spec/result/directory.js';
 export { FilesystemAccessor } from './spec/result/filesystem.js';
@@ -45,10 +45,10 @@ export { TableAssertion } from './spec/result/table.js';
 // Ports
 export type {
     CommandEnv,
+    CommandOutput,
     CommandPort,
-    CommandResult,
     SpawnOptions,
-} from './spec/modes/cli/command.port.js';
+} from './spec/modes/command/command.port.js';
 export type { DatabasePort } from './spec/ports/database.port.js';
 export type { IsolationStrategy } from './spec/ports/isolation.port.js';
 export type { ServiceHandle } from './spec/ports/service.port.js';
@@ -56,7 +56,7 @@ export type { ServerPort, ServerResponse } from './spec/modes/http/server.port.j
 export type { ContainerPort } from './infra/containers/container.port.js';
 
 // Adapters (advanced usage)
-export { ExecAdapter } from './spec/modes/cli/adapters/exec.adapter.js';
+export { ExecAdapter } from './spec/modes/command/adapters/exec.adapter.js';
 export { FetchAdapter } from './spec/modes/http/adapters/fetch.adapter.js';
 export { HonoAdapter } from './spec/modes/http/adapters/hono.adapter.js';
 export { Orchestrator } from './infra/orchestrator.js';

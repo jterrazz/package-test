@@ -23,9 +23,9 @@ function shouldUpdateSnapshots(): boolean {
 }
 
 /**
- * Accessor for the whole temporary working directory used by a CLI spec.
+ * Accessor for the whole temporary working directory used by a command spec.
  *
- * Generalization of {@link DirectoryAccessor} that snapshots the entire CLI
+ * Generalization of {@link DirectoryAccessor} that snapshots the entire command
  * working directory into `<test-file-dir>/expected/filesystem/<name>/`.
  */
 export class FilesystemAccessor {

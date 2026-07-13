@@ -12,14 +12,14 @@ Requires Docker running for HTTP and adapter tests.
 
 ## Commands
 
-| Task                             | Command                         |
-| -------------------------------- | ------------------------------- |
-| Run all tests                    | `npm test`                      |
-| Run fast tests only (no infra)   | `npx vitest --run tests/cli/`   |
-| Build the bundle                 | `npm run build`                 |
-| Lint + format + typecheck + knip | `npm run lint`                  |
-| Auto-fix lint issues             | `npm run lint:fix`              |
-| Generate API docs + llms.txt     | `npm run docs` (or `make docs`) |
+| Task                             | Command                           |
+| -------------------------------- | --------------------------------- |
+| Run all tests                    | `npm test`                        |
+| Run fast tests only (no infra)   | `npx vitest --run tests/command/` |
+| Build the bundle                 | `npm run build`                   |
+| Lint + format + typecheck + knip | `npm run lint`                    |
+| Auto-fix lint issues             | `npm run lint:fix`                |
+| Generate API docs + llms.txt     | `npm run docs` (or `make docs`)   |
 
 ## Repo layout
 
@@ -32,7 +32,7 @@ src/
 │   │   └── intercept/             # MSW-based HTTP interception
 │   │       └── adapters/          # openai, anthropic, http providers
 │   ├── http/                      # HTTP-only: .get(), .post(), .headers() + adapters
-│   └── cli/                       # CLI-only: .exec(), .spawn(), .project() + adapters
+│   └── command/                    # command-only: .exec(), .spawn(), .project() + adapters
 ├── infra/                         # container lifecycle (orchestrator, compose, testcontainers)
 │   ├── ports/                     # container, service, isolation interfaces
 │   └── adapters/                  # compose + testcontainers implementations
@@ -42,12 +42,12 @@ src/
 └── mock/                          # mockOf, mockOfDate
 tests/
 ├── http/                          # HTTP spec tests (run with both app and stack targets via SPEC_RUNNER env)
-├── cli/                           # CLI spec tests (exec, env, directory snapshots)
+├── command/                       # command spec tests (exec, env, directory snapshots)
 ├── adapters/                      # adapter tests (postgres, redis, orchestrator, container-logs)
 └── setup/
     ├── http-spec.ts               # shared HTTP spec (app or stack based on SPEC_RUNNER)
-    ├── cli.specification.ts       # spec(command(...))
-    └── fixtures/                  # test apps, CLI fixtures
+    ├── command.specification.ts   # spec(command(...))
+    └── fixtures/                  # test apps, command fixtures
 ```
 
 ## Test runner modes
@@ -67,7 +67,7 @@ Same test code, two execution strategies. The `http-spec.ts` setup file switches
 
 ## Self-test on changes
 
-This package self-tests via its own framework. Tests under `tests/cli/` use `spec(command(...))` against a fixture CLI app. When you change `SpecificationBuilder` or `DirectoryAccessor`, these are the canonical regression coverage.
+This package self-tests via its own framework. Tests under `tests/command/` use `spec(command(...))` against a fixture CLI app. When you change `SpecificationBuilder` or `DirectoryAccessor`, these are the canonical regression coverage.
 
 ## Docs
 

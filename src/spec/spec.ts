@@ -7,7 +7,7 @@ import {
     type SeedHandler,
     type SpecificationBuilder,
 } from '../spec/builder.js';
-import { ExecAdapter } from '../spec/modes/cli/adapters/exec.adapter.js';
+import { ExecAdapter } from '../spec/modes/command/adapters/exec.adapter.js';
 import { FetchAdapter } from '../spec/modes/http/adapters/fetch.adapter.js';
 import { HonoAdapter } from '../spec/modes/http/adapters/hono.adapter.js';
 import type { DatabasePort } from '../spec/ports/database.port.js';
@@ -18,12 +18,12 @@ import type { AppTarget, CommandTarget, SpecTarget, StackTarget } from './target
 /** Shared options for all spec targets. */
 export interface SpecOptions {
     /**
-     * Opt-in Docker awareness for CLI-mode runners. When set, every
+     * Opt-in Docker awareness for command-mode runners. When set, every
      * `.run()` generates a unique test-run id, injects it into the
      * child process env under `envVar`, and exposes `.container(name)`
      * accessors on the result that lazily query Docker. A test that
      * never calls `.container(...)` never touches the Docker daemon —
-     * CLI-only and container-asserting tests share one runner.
+     * command-only and container-asserting tests share one runner.
      *
      * Always wrap calls that may spawn containers with `await using`
      * so leaked containers get force-removed at scope exit (the
@@ -33,7 +33,7 @@ export interface SpecOptions {
     /** Project root for fixture lookup and compose detection (relative paths supported). */
     root?: string;
     /**
-     * Pluggable seed handlers for CLI-mode tests. Keys are leading path
+     * Pluggable seed handlers for command-mode tests. Keys are leading path
      * segments (e.g. `"spwn.yaml/"`); values receive the seed context and the
      * absolute path of the source fragment under `<test-file-dir>/seeds/`.
      */
@@ -82,7 +82,7 @@ export interface SpecRunner {
  *   // HTTP — full docker compose stack
  *   const s = await spec(stack('../../'));
  *
- *   // CLI — command binary
+ *   // Command binary
  *   const s = await spec(command('my-cli'), { root: '../fixtures' });
  */
 export async function spec(target: SpecTarget, options: SpecOptions = {}): Promise<SpecRunner> {

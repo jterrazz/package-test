@@ -3,12 +3,15 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { cliSpec } from '../../setup/cli.specification.js';
+import { commandSpec } from '../../setup/command.specification.js';
 
-describe('cli — directory snapshot', () => {
+describe('command — directory snapshot', () => {
     test('matches an identical fixture tree', async () => {
         // Given - scaffold writes the exact tree committed under expected/cli-scaffold/
-        const result = await cliSpec('scaffold match').project('cli-app').exec('scaffold').run();
+        const result = await commandSpec('scaffold match')
+            .project('cli-app')
+            .exec('scaffold')
+            .run();
 
         // Then - the snapshot matches
         expect(result.exitCode).toBe(0);
@@ -17,7 +20,7 @@ describe('cli — directory snapshot', () => {
 
     test('detects a changed file', async () => {
         // Given - scaffold-changed writes go.mod with different content
-        const result = await cliSpec('scaffold changed')
+        const result = await commandSpec('scaffold changed')
             .project('cli-app')
             .exec('scaffold-changed')
             .run();
@@ -33,7 +36,7 @@ describe('cli — directory snapshot', () => {
 
     test('detects an extra file', async () => {
         // Given - scaffold-extra writes an unexpected file
-        const result = await cliSpec('scaffold extra')
+        const result = await commandSpec('scaffold extra')
             .project('cli-app')
             .exec('scaffold-extra')
             .run();
@@ -45,7 +48,10 @@ describe('cli — directory snapshot', () => {
     });
 
     test('detects a missing fixture', async () => {
-        const result = await cliSpec('missing fixture').project('cli-app').exec('scaffold').run();
+        const result = await commandSpec('missing fixture')
+            .project('cli-app')
+            .exec('scaffold')
+            .run();
 
         await expect(result.directory('out').toMatchFixture('does-not-exist')).rejects.toThrow(
             /does not exist/,
@@ -67,13 +73,16 @@ describe('cli — directory snapshot', () => {
             // Given - fresh scaffold and a non-existent fixture name
             const fixtureName = `transient-fixture-${Date.now()}`;
 
-            const result = await cliSpec('update write').project('cli-app').exec('scaffold').run();
+            const result = await commandSpec('update write')
+                .project('cli-app')
+                .exec('scaffold')
+                .run();
 
             // When - update writes the fixture
             await result.directory('out').toMatchFixture(fixtureName, { update: true });
 
             // Then - running again without update mode now matches
-            const result2 = await cliSpec('update verify')
+            const result2 = await commandSpec('update verify')
                 .project('cli-app')
                 .exec('scaffold')
                 .run();
@@ -90,7 +99,10 @@ describe('cli — directory snapshot', () => {
 
     describe('files() helper', () => {
         test('lists files recursively, sorted', async () => {
-            const result = await cliSpec('files list').project('cli-app').exec('scaffold').run();
+            const result = await commandSpec('files list')
+                .project('cli-app')
+                .exec('scaffold')
+                .run();
 
             const files = await result.directory('out').files();
             expect(files).toEqual(['docs/README.md', 'go.mod', 'main.go', 'src/index.txt']);

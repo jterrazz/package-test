@@ -1,25 +1,25 @@
 import { describe, expect, test } from 'vitest';
 
-import { cliSpec } from '../../setup/cli.specification.js';
+import { commandSpec } from '../../setup/command.specification.js';
 
-describe('cli assertions', () => {
+describe('command assertions', () => {
     describe('exitCode', () => {
         test('passes on correct exit code', async () => {
-            const result = await cliSpec('exit 0').project('cli-app').exec('build').run();
+            const result = await commandSpec('exit 0').project('cli-app').exec('build').run();
             expect(result.exitCode).toBe(0);
         });
     });
 
     describe('stdout', () => {
         test('passes when stdout contains string', async () => {
-            const result = await cliSpec('stdout match').project('cli-app').exec('build').run();
+            const result = await commandSpec('stdout match').project('cli-app').exec('build').run();
             expect(result.stdout.text).toContain('Build completed');
         });
     });
 
     describe('stderr', () => {
         test('passes when stderr contains string', async () => {
-            const result = await cliSpec('stderr match').project('cli-app').exec('fail').run();
+            const result = await commandSpec('stderr match').project('cli-app').exec('fail').run();
             expect(result.stderr.text).toContain('Fatal: something went wrong');
         });
     });
@@ -27,7 +27,7 @@ describe('cli assertions', () => {
     describe('fixture setup', () => {
         test('copies fixture file into working dir before exec', async () => {
             // Given - fixture file that triggers check failure
-            const result = await cliSpec('fixture check')
+            const result = await commandSpec('fixture check')
                 .project('cli-app')
                 .fixture('invalid.ts')
                 .exec('check')
@@ -39,7 +39,7 @@ describe('cli assertions', () => {
         });
 
         test('clean project has no invalid files', async () => {
-            const result = await cliSpec('clean check').project('cli-app').exec('check').run();
+            const result = await commandSpec('clean check').project('cli-app').exec('check').run();
 
             expect(result.exitCode).toBe(0);
             expect(result.stdout.text).toContain('All checks passed');
@@ -48,7 +48,7 @@ describe('cli assertions', () => {
 
     describe('chaining', () => {
         test('chains multiple assertions', async () => {
-            const result = await cliSpec('chained').project('cli-app').exec('build').run();
+            const result = await commandSpec('chained').project('cli-app').exec('build').run();
 
             expect(result.exitCode).toBe(0);
             expect(result.stdout.text).toContain('Build completed');

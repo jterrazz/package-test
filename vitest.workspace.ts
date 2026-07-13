@@ -4,7 +4,7 @@ export default defineWorkspace([
     {
         test: {
             name: 'fast',
-            include: ['src/**/*.test.ts', 'tests/cli/**/*.test.ts'],
+            include: ['src/**/*.test.ts', 'tests/command/**/*.test.ts'],
         },
     },
     {

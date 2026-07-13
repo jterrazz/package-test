@@ -1,26 +1,26 @@
 import { describe, expect, test } from 'vitest';
 
-import { cliSpec } from '../../setup/cli.specification.js';
+import { commandSpec } from '../../setup/command.specification.js';
 
-describe('cli — exec', () => {
+describe('command — exec', () => {
     test('runs a command successfully', async () => {
-        const result = await cliSpec('build').project('cli-app').exec('build').run();
+        const result = await commandSpec('build').project('cli-app').exec('build').run();
         expect(result.exitCode).toBe(0);
     });
 
     test('runs help command', async () => {
-        const result = await cliSpec('help').project('cli-app').exec('help').run();
+        const result = await commandSpec('help').project('cli-app').exec('help').run();
         expect(result.exitCode).toBe(0);
         result.stdout.toContain('Usage: cli <command>');
     });
 
     test('captures non-zero exit code', async () => {
-        const result = await cliSpec('fail').project('cli-app').exec('fail').run();
+        const result = await commandSpec('fail').project('cli-app').exec('fail').run();
         expect(result.exitCode).toBe(2);
     });
 
     test('captures unknown command failure', async () => {
-        const result = await cliSpec('unknown').project('cli-app').exec('nonexistent').run();
+        const result = await commandSpec('unknown').project('cli-app').exec('nonexistent').run();
         expect(result.exitCode).toBe(1);
         result.stderr.toContain('Unknown command');
     });
@@ -29,7 +29,7 @@ describe('cli — exec', () => {
         // Given - a command that prints to stderr and exits 0, mirroring the
         // Unix convention where status banners go to stderr while data goes
         // To stdout. spwn, gh, git, npm and many others follow this pattern.
-        const result = await cliSpec('stderr on success')
+        const result = await commandSpec('stderr on success')
             .project('cli-app')
             .exec('status-on-stderr')
             .run();
@@ -45,7 +45,7 @@ describe('cli — exec', () => {
     describe('fresh working dir', () => {
         test('runs in a fresh empty temp dir when no .project() is set', async () => {
             // Given - no .project() and no .fixture() — scaffold writes into the cwd
-            const result = await cliSpec('fresh cwd').exec('scaffold').run();
+            const result = await commandSpec('fresh cwd').exec('scaffold').run();
 
             // Then - the scaffold output exists in the temp workdir
             expect(result.exitCode).toBe(0);
@@ -54,8 +54,8 @@ describe('cli — exec', () => {
 
         test('two bare runs get independent temp dirs', async () => {
             // Given - two independent runs without .project()
-            const a = await cliSpec('run a').exec('scaffold').run();
-            const b = await cliSpec('run b').exec('scaffold-extra').run();
+            const a = await commandSpec('run a').exec('scaffold').run();
+            const b = await commandSpec('run b').exec('scaffold-extra').run();
 
             // Then - a does NOT see b's UNEXPECTED.txt and vice versa
             expect(a.file('out/UNEXPECTED.txt').exists).toBe(false);
@@ -64,7 +64,7 @@ describe('cli — exec', () => {
     });
 
     test('throws without action', async () => {
-        await expect(cliSpec('no action').project('cli-app').run()).rejects.toThrow(
+        await expect(commandSpec('no action').project('cli-app').run()).rejects.toThrow(
             'no action defined',
         );
     });
@@ -74,14 +74,14 @@ describe('cli — exec', () => {
         const badSpec = createSpecificationRunner({ server: undefined as any });
 
         await expect(badSpec('no adapter').exec('build').run()).rejects.toThrow(
-            'CLI actions require a command adapter',
+            'Command actions require a command adapter',
         );
     });
 
     describe('multi-exec', () => {
         test('runs commands sequentially in same directory', async () => {
             // Given - build then start (start needs dist/ from build)
-            const result = await cliSpec('build+start')
+            const result = await commandSpec('build+start')
                 .project('cli-app')
                 .exec(['build', 'start'])
                 .run();
@@ -93,7 +93,7 @@ describe('cli — exec', () => {
 
         test('stops on first failure', async () => {
             // Given - fail then build (fail exits non-zero, build should not run)
-            const result = await cliSpec('fail+build')
+            const result = await commandSpec('fail+build')
                 .project('cli-app')
                 .exec(['fail', 'build'])
                 .run();
@@ -105,7 +105,7 @@ describe('cli — exec', () => {
 
         test('preserves files between commands', async () => {
             // Given - build creates dist/, then we check it still exists
-            const result = await cliSpec('build+check')
+            const result = await commandSpec('build+check')
                 .project('cli-app')
                 .exec(['build', 'check'])
                 .run();
@@ -117,7 +117,7 @@ describe('cli — exec', () => {
 
     describe('spawn', () => {
         test('resolves when pattern is matched in stdout', async () => {
-            const result = await cliSpec('dev mode')
+            const result = await commandSpec('dev mode')
                 .project('cli-app')
                 .spawn('dev', { waitFor: 'Hello from CLI app', timeout: 10_000 })
                 .run();
@@ -129,7 +129,7 @@ describe('cli — exec', () => {
 
         test('returns non-zero when process exits without matching pattern', async () => {
             // Given - help exits immediately without matching pattern
-            const result = await cliSpec('spawn no match')
+            const result = await commandSpec('spawn no match')
                 .project('cli-app')
                 .spawn('help', { waitFor: 'NONEXISTENT_PATTERN', timeout: 5000 })
                 .run();
@@ -140,7 +140,7 @@ describe('cli — exec', () => {
 
         test('times out on long-running process without match', async () => {
             // Given - dev runs forever but pattern is never matched
-            const result = await cliSpec('dev timeout')
+            const result = await commandSpec('dev timeout')
                 .project('cli-app')
                 .spawn('dev', { waitFor: 'NONEXISTENT_PATTERN', timeout: 2000 })
                 .run();

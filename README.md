@@ -50,10 +50,10 @@ test('creates a user', async () => {
 });
 ```
 
-### CLI testing
+### Command testing
 
 ```typescript
-// tests/setup/cli.specification.ts
+// tests/setup/command.specification.ts
 import { resolve } from 'node:path';
 import { spec, command } from '@jterrazz/test';
 
@@ -64,7 +64,7 @@ export const run = await spec(command(resolve(import.meta.dirname, '../../bin/my
 
 ```typescript
 // tests/e2e/build/build.e2e.test.ts
-import { run } from '../../setup/cli.specification.js';
+import { run } from '../../setup/command.specification.js';
 
 test('builds the project', async () => {
     // Given - sample app project
