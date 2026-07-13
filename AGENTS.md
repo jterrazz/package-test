@@ -61,7 +61,7 @@ Same test code, two execution strategies. The `http-spec.ts` setup file switches
 
 ## Conventions
 
-- Lint config (`@jterrazz/codestyle` - oxlint + oxfmt + knip + tsc)
+- Lint config (`@jterrazz/typescript` - oxlint + oxfmt + knip + tsgo)
 - Test writing convention (`// Given -` / `// Then -` comments, always both)
 - Directory layout for tests (`seeds/`, `fixtures/`, `requests/`, `responses/`, `expected/`)
 
