@@ -18,7 +18,7 @@ export function dedent(strings: TemplateStringsArray, ...values: unknown[]): str
     const minIndent = lines
         .filter((l) => l.trim().length > 0)
         .reduce((min, line) => {
-            const indent = line.match(/^(\s*)/)?.[1].length ?? 0;
+            const indent = line.match(/^(?<indent>\s*)/)?.groups?.indent?.length ?? 0;
             return Math.min(min, indent);
         }, Infinity);
 

@@ -1,22 +1,22 @@
 /** Abstract interface for interacting with a Docker container (exec, inspect, file I/O). */
 export interface DockerContainerPort {
     /** Execute a command inside the container, return stdout */
-    exec(cmd: string[]): Promise<string>;
+    exec: (cmd: string[]) => Promise<string>;
 
     /** Read a file from inside the container */
-    file(path: string): Promise<{ exists: boolean; content: string }>;
+    file: (path: string) => Promise<{ exists: boolean; content: string }>;
 
     /** Check if container is running */
-    isRunning(): Promise<boolean>;
+    isRunning: () => Promise<boolean>;
 
     /** Get container logs */
-    logs(tail?: number): Promise<string>;
+    logs: (tail?: number) => Promise<string>;
 
     /** Get full docker inspect JSON */
-    inspect(): Promise<DockerInspectResult>;
+    inspect: () => Promise<DockerInspectResult>;
 
     /** Check if a file/directory exists */
-    exists(path: string): Promise<boolean>;
+    exists: (path: string) => Promise<boolean>;
 }
 
 /** Normalized subset of `docker inspect` output for assertion use. */

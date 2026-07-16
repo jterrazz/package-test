@@ -32,13 +32,13 @@ export type CommandEnv = Record<string, null | string>;
  */
 export interface CommandPort {
     /** Execute a command with the given arguments in the given working directory. */
-    exec(args: string, cwd: string, env?: CommandEnv): Promise<CommandOutput>;
+    exec: (args: string, cwd: string, env?: CommandEnv) => Promise<CommandOutput>;
 
     /** Spawn a long-running process and wait for a pattern or timeout. */
-    spawn(
+    spawn: (
         args: string,
         cwd: string,
         options: SpawnOptions,
         env?: CommandEnv,
-    ): Promise<CommandOutput>;
+    ) => Promise<CommandOutput>;
 }

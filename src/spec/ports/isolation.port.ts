@@ -16,17 +16,17 @@ export interface IsolationStrategy {
      *
      * @param workerId - Unique identifier for this vitest worker.
      */
-    acquire(workerId: string): Promise<void>;
+    acquire: (workerId: string) => Promise<void>;
 
     /**
      * Fast reset within the namespace between `spec.run()` calls.
      * E.g. truncate tables (without dropping the database).
      */
-    reset(): Promise<void>;
+    reset: () => Promise<void>;
 
     /**
      * Tear down the isolated namespace.
      * Called once when the worker shuts down — e.g. drop the cloned database.
      */
-    release(): Promise<void>;
+    release: () => Promise<void>;
 }

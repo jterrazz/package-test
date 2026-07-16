@@ -17,12 +17,15 @@ export function resolveProjectRoot(root: string | undefined): string {
     if (stack) {
         const lines = stack.split('\n');
         for (const line of lines) {
-            const match = line.match(/at\s+(?:.*?\()?(?:file:\/\/)?([^:)]+):\d+:\d+/);
+            const match = line.match(/at\s+(?:.*?\()?(?:file:\/\/)?(?<filePath>[^:)]+):\d+:\d+/);
             if (!match) {
                 continue;
             }
 
-            const filePath = match[1];
+            const filePath = match.groups?.filePath;
+            if (!filePath) {
+                continue;
+            }
             if (filePath.includes('node_modules') || filePath.includes('/src/spec/')) {
                 continue;
             }
