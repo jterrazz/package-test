@@ -1,31 +1,44 @@
 {
     "name": "@jterrazz/test",
-    "version": "8.0.0",
+    "version": "9.0.0",
+    "description": "Declarative testing framework for HTTP APIs, CLIs, and background jobs — one entry point, real infrastructure, golden-file assertions, plus an oxlint convention plugin.",
+    "keywords": [
+        "api-testing",
+        "cli-testing",
+        "e2e",
+        "golden-files",
+        "hexagonal",
+        "integration-testing",
+        "msw",
+        "oxlint",
+        "test-framework",
+        "testcontainers",
+        "testing",
+        "vitest"
+    ],
+    "license": "MIT",
     "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
     "repository": {
         "type": "git",
         "url": "https://github.com/jterrazz/package-test"
     },
+    "bin": {
+        "jterrazz-test-check": "dist/checker.js"
+    },
     "files": [
-        "dist"
+        "dist",
+        "!dist/catalog.*"
     ],
     "type": "module",
     "exports": {
         ".": {
-            "require": "./dist/index.cjs",
+            "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
         },
-        "./services": {
-            "require": "./dist/services.cjs",
-            "import": "./dist/services.js"
-        },
-        "./mock": {
-            "require": "./dist/mock.cjs",
-            "import": "./dist/mock.js"
-        },
-        "./intercept": {
-            "require": "./dist/intercept.cjs",
-            "import": "./dist/intercept.js"
+        "./oxlint": {
+            "types": "./dist/oxlint.d.ts",
+            "import": "./dist/oxlint.js",
+            "require": "./dist/oxlint.cjs"
         }
     },
     "publishConfig": {
@@ -33,14 +46,15 @@
     },
     "scripts": {
         "build": "tsdown --config tsdown.config.ts",
-        "docs": "typescript docs",
-        "lint": "typescript check",
+        "docs": "typescript docs && npm run build && node dist/catalog.js",
+        "lint": "typescript check && node dist/checker.js specs",
         "lint:fix": "typescript fix",
         "test": "vitest --run"
     },
     "dependencies": {
         "better-sqlite3": "^12.11.1",
         "mockdate": "^3.0.5",
+        "msw": "^2.15.0",
         "pg": "^8.22.0",
         "redis": "^6.1.0",
         "testcontainers": "^12.0.4",
@@ -54,21 +68,14 @@
         "@types/node": "^26.1.1",
         "@types/pg": "^8.20.0",
         "hono": "^4.12.30",
-        "msw": "^2.15.0",
+        "oxlint": "^1.74.0",
         "tsdown": "^0.22.7",
         "vitest": "^4.1.10"
     },
     "peerDependencies": {
-        "hono": "^4.12.30",
-        "msw": "^2.15.0",
         "vitest": "^4.1.10"
     },
-    "peerDependenciesMeta": {
-        "hono": {
-            "optional": true
-        },
-        "msw": {
-            "optional": true
-        }
+    "engines": {
+        "node": ">=20"
     }
 }

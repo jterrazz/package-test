@@ -1,0 +1,12 @@
+Directory mismatch: cli-scaffold/out
+  1 difference: 0 added, 0 removed, 1 changed
+
+- Expected (fixture)
++ Received (generated)
+
+~ changed  go.mod  (1 line differ)
+    line 1:
+    - module example
+    + module CHANGED
+
+Run with TEST_UPDATE=1 to update the fixture.

@@ -1,0 +1,5 @@
+Usage: cli <command>
+
+Commands:
+  build   Build the project
+  check   Check code quality

@@ -1,0 +1,9 @@
+HTTP/1.1 201 Created
+content-type: application/json
+
+{
+    "user": {
+        "name": "Charlie",
+        "email": "charlie@test.com"
+    }
+}

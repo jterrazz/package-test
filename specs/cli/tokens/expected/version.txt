@@ -1,0 +1,4 @@
+cli-app v{{semver}}
+run {{uuid}} started at {{iso8601}}
+cwd {{workdir}}
+done in {{duration}}

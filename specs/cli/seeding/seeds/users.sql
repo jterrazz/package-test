@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS "users" (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);
+INSERT INTO "users" (name) VALUES ('Ada');
+INSERT INTO "users" (name) VALUES ('Grace');

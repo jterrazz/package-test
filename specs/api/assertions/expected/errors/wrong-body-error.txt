@@ -1,0 +1,21 @@
+Response mismatch (wrong-body.http)
+
+- Expected
++ Received
+
+  {
+    "users": [
+      {
+-       "name": "Wrong1",
++       "name": "Alice",
+-       "email": "wrong1@test.com"
++       "email": "alice@test.com"
+      },
+      {
+-       "name": "Wrong2",
++       "name": "Bob",
+-       "email": "wrong2@test.com"
++       "email": "bob@test.com"
+      }
+    ]
+  }

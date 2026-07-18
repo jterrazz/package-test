@@ -1,0 +1,11 @@
+Table "users" mismatch
+  query: name
+  expected: 1 row
+  received: 2 rows
+
+- Expected
++ Received
+
+  name
+  Alice
++ Bob

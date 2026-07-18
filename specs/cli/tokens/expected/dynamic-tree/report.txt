@@ -1,0 +1,2 @@
+run {{uuid}}
+status ok

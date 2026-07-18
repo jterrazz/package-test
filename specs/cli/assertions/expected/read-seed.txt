@@ -1,0 +1,5 @@
+worlds:
+    - alpha
+    - beta
+agents:
+  spwn/agents/neo/journal/session-1.md

@@ -1,0 +1,10 @@
+services:
+    cache:
+        image: redis:7
+        ports:
+            - '6379'
+        healthcheck:
+            test: ['CMD-SHELL', 'redis-cli ping']
+            interval: 2s
+            timeout: 5s
+            retries: 5

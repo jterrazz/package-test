@@ -1,0 +1,3 @@
+[error] specs/widget/seeds/dead.sql: dead fixture — no test literal in widget references seeds/dead.sql (CONVENTIONS C9)
+
+conventions checker: 1 error(s) found under {{workdir}}

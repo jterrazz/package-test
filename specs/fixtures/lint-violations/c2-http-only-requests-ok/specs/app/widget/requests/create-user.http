@@ -1,0 +1,4 @@
+POST /users
+content-type: application/json
+
+{"name":"Alice"}

@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+
+{
+    "echo": { "sessionId": "{{uuid#val}}" },
+    "id": "{{uuid#val}}",
+    "startedAt": "{{string#val}}",
+    "ttl": "{{number}}"
+}

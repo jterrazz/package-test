@@ -1,0 +1,3 @@
+[error] specs/widget/expected/out.txt:1: unknown token {{string}} — the D4 vocabulary is frozen (known: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir)
+
+conventions checker: 1 error(s) found under {{workdir}}

@@ -1,0 +1,54 @@
+{
+    "categories": {
+        "correctness": "off"
+    },
+    "jsPlugins": ["../../../dist/oxlint.js"],
+    "rules": {
+        "jterrazz/a1-specification-file": "error",
+        "jterrazz/a10-duplicate-binding": "error",
+        "jterrazz/a2-known-constructors": "error",
+        "jterrazz/a3-no-destructure-alias": "error",
+        "jterrazz/a4-cleanup-afterall": "error",
+        "jterrazz/a5-mode-with-server": "error",
+        "jterrazz/a6w-redundant-compose-service": "warn",
+        "jterrazz/a9w-redundant-root": "warn",
+        "jterrazz/b2-known-fixture-marker": "error",
+        "jterrazz/b4-given-then": "error",
+        "jterrazz/b5-await-using": [
+            "error",
+            {
+                "runners": ["dockerCli"]
+            }
+        ],
+        "jterrazz/b6w-redundant-env-url": "warn",
+        "jterrazz/b8-kebab-trigger": "error",
+        "jterrazz/b9w-product-command": "warn",
+        "jterrazz/c1-domain-structure": "error",
+        "jterrazz/c2-http-only-requests": "error",
+        "jterrazz/c4-contract-shape": "error",
+        "jterrazz/c6-tomatch-extension": "error",
+        "jterrazz/c7-seeds-sql-only": "error",
+        "jterrazz/c8-referenced-fixture-exists": "error",
+        "jterrazz/d2-await-io-matcher": "error",
+        "jterrazz/d2w-await-sync-matcher": "warn",
+        "jterrazz/d6w-transform-token-equivalent": "warn",
+        "jterrazz/d8w-text-bypass": "warn",
+        "jterrazz/d9w-single-use-ref": "warn",
+        "jterrazz/d12w-response-body-probe": "warn",
+        "jterrazz/d13w-unfrozen-negative-fixture": "warn",
+        "jterrazz/d15w-status-only-probe": "warn",
+        "jterrazz/f1-no-subpath-import": "error",
+        "jterrazz/f2-no-test-imports-in-prod": "error",
+        "jterrazz/f3-specs-public-entry": "error",
+        "jterrazz/f4-no-test-to-test-import": "error",
+        "jterrazz/f5-fixtures-only-from-tests": "error",
+        "jterrazz/i1-layer-boundaries": "error",
+        "jterrazz/i2-sibling-test-naming": "error",
+        "jterrazz/i4-no-vi-mock-in-src": "error",
+        "jterrazz/j1-no-only-skip": "error",
+        "jterrazz/j2-no-sleep-in-specs": "error",
+        "jterrazz/j3-no-expectless-test": "error",
+        "jterrazz/j4-unique-test-names": "error",
+        "jterrazz/j5-lowercase-title": "error"
+    }
+}

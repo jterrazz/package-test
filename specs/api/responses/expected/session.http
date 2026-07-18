@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+content-type: {{string}}
+
+{
+    "echo": {
+        "sessionId": "{{uuid#session}}"
+    },
+    "id": "{{uuid#session}}",
+    "startedAt": "{{iso8601}}",
+    "ttl": 3600
+}

@@ -1,0 +1,1 @@
+conventions checker: all passes clean under {{workdir}} (D4/D4b/D10 grammar, C9 dead fixtures, B5 await-using, A7 database)

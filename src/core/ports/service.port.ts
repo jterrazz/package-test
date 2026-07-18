@@ -1,0 +1,54 @@
+import type { DatabasePort } from './database.port.js';
+import type { IsolationStrategy } from './isolation.port.js';
+
+/**
+ * A service handle — returned by factory functions like postgres(), redis().
+ * Mutable: connectionString is populated after the orchestrator starts containers.
+ */
+export interface ServiceHandle {
+    /** Service type identifier. */
+    readonly type: string;
+
+    /**
+     * Compose service name. Left `null` until the orchestrator binds it at
+     * start time (CONVENTIONS A6): a handle with no explicit `composeService`
+     * links to the compose service named exactly like its record key, else the
+     * kebab-case conversion of the key — so `{ analyticsDb: postgres() }` binds
+     * to the compose service `analytics-db` without any option. Set
+     * `composeService` explicitly only for names the key cannot derive.
+     */
+    composeName: null | string;
+
+    /** Default container port for this service type. */
+    readonly defaultPort: number;
+
+    /** Default Docker image for this service type. */
+    readonly defaultImage: string;
+
+    /** Environment variables to pass to the container. */
+    readonly environment: Record<string, string>;
+
+    /** Connection string — populated after start. */
+    connectionString: string;
+
+    /** Whether this service has been started. */
+    started: boolean;
+
+    /** Build the connection string from host and port. */
+    buildConnectionString: (host: string, port: number) => string;
+
+    /** Create a DatabasePort adapter (if this is a database). Returns null otherwise. */
+    createDatabaseAdapter: () => DatabasePort | null;
+
+    /** Verify the service is ready and accepting connections. Throws with context if not. */
+    healthcheck: () => Promise<void>;
+
+    /** Run initialization scripts (e.g., init.sql). Throws with SQL error context if it fails. */
+    initialize: (composeDir: string) => Promise<void>;
+
+    /** Reset state between tests (truncate tables, flush cache, etc.) */
+    reset: () => Promise<void>;
+
+    /** Get the isolation strategy for parallel test execution. */
+    isolation: () => IsolationStrategy;
+}

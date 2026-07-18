@@ -1,355 +1,334 @@
 # @jterrazz/test
 
-Declarative testing framework for APIs and CLIs. Same fluent builder API, three execution modes.
+Declarative testing framework for APIs, jobs, and CLIs. Three constructors — `specification.api()`, `specification.jobs()`, `specification.cli()` — and specs that read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
 
 ```bash
 npm install -D @jterrazz/test vitest
 ```
+
+Everything imports from `@jterrazz/test` — the one exception is the tool-facing `@jterrazz/test/oxlint` subpath (the zero-runtime lint plugin and its config fragment), which never loads any test runtime.
 
 ## Quick start
 
 ### API testing (HTTP)
 
 ```typescript
-// tests/setup/integration.specification.ts
+// specs/api/api.specification.ts
 import { afterAll } from 'vitest';
-import { spec, app } from '@jterrazz/test';
-import { postgres } from '@jterrazz/test/services';
+import { postgres, specification } from '@jterrazz/test';
 import { createApp } from '../../src/app.js';
 
-const db = postgres({ compose: 'db' });
+export const { api, cleanup } = await specification.api({
+    services: { db: postgres() }, // → compose service "db"
+    server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
+});
 
-export const run = await spec(
-    app(() => createApp({ databaseUrl: db.connectionString })),
-    {
-        services: [db],
-        root: '../../',
-    },
-);
-
-afterAll(() => run.cleanup());
+afterAll(cleanup);
 ```
 
 ```typescript
-// tests/e2e/users/users.e2e.test.ts
-import { run } from '../../setup/integration.specification.js';
+// specs/api/users/users.test.ts
+import { expect, test } from 'vitest';
+import { api } from '../api.specification.js';
 
 test('creates a user', async () => {
-    // Given - one existing user
-    const result = await run('creates user')
-        .seed('initial-users.sql')
-        .post('/users', 'new-user.json')
-        .run();
+    // Given - the complete request from requests/create-user.http
+    const result = await api.request('create-user.http');
 
-    // Then - user created
-    expect(result.status).toBe(201);
-    await result.table('users').toMatch({
+    // Then - status + headers + body from expected/user-created.http; row in db
+    expect(result.response).toMatch('user-created.http');
+    await expect(result.table('users')).toMatchRows({
         columns: ['name'],
-        rows: [['Alice'], ['Bob']],
+        rows: [['Alice']],
     });
 });
 ```
 
-### Command testing
+### CLI testing
 
 ```typescript
-// tests/setup/command.specification.ts
+// specs/cli/cli.specification.ts
 import { resolve } from 'node:path';
-import { spec, command } from '@jterrazz/test';
+import { afterAll } from 'vitest';
+import { specification } from '@jterrazz/test';
 
-export const run = await spec(command(resolve(import.meta.dirname, '../../bin/my-cli.sh')), {
-    root: '../fixtures',
-});
+export const { cli, cleanup } = await specification.cli(
+    resolve(import.meta.dirname, '../../bin/my-cli.sh'),
+);
+
+afterAll(cleanup);
 ```
 
 ```typescript
-// tests/e2e/build/build.e2e.test.ts
-import { run } from '../../setup/command.specification.js';
+// specs/cli/build/build.test.ts
+import { expect, test } from 'vitest';
+import { cli } from '../cli.specification.js';
 
 test('builds the project', async () => {
-    // Given - sample app project
-    const result = await run('build').project('sample-app').exec('build').run();
+    // Given - sample app project spread into the cwd
+    const result = await cli.fixture('$FIXTURES/sample-app/').exec('build');
 
-    // Then - ESM output with source maps
+    // Then - ESM output, no CJS
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Build completed');
     expect(result.file('dist/index.js').exists).toBe(true);
     expect(result.file('dist/index.cjs').exists).toBe(false);
-    expect(result.file('dist/index.js').content).toContain('Hello');
 });
 ```
 
-## Specification runners
+Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
 
-Three modes, same builder API. Each handles infrastructure and cleanup automatically.
+## The three constructors
 
-### `spec(app(...))` - testcontainers + in-process app
+One constructor per tested interface, each returning a record destructured with its canonical name:
 
-Starts real containers via testcontainers. App runs in-process (Hono). Fastest feedback loop.
+| Constructor                       | Returns                                  | Terminal actions                                             |
+| --------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
+| `specification.api(options)`      | `{ api, cleanup, docker, orchestrator }` | `.request(file)`, `.get()`, `.post()`, `.put()`, `.delete()` |
+| `specification.jobs(options)`     | `{ jobs, cleanup, orchestrator }`        | `.trigger(name)`                                             |
+| `specification.cli(bin, options)` | `{ cli, cleanup, docker, orchestrator }` | `.exec(args, { waitFor?, timeout? }?)`                       |
+
+### `specification.api({ services, server, mode?, root? })`
+
+One definition, two execution modes — the switch lives in `vitest.config.ts`, never in the specification file:
+
+- **`node`** (default): starts the declared services via testcontainers and runs the app in-process (Hono). Fastest feedback loop.
+- **`compose`**: runs `docker compose up` on `docker/compose.test.yaml` and sends real HTTP to the app service (`server` is ignored). Proves the shipped artifact.
+
+Resolution: `options.mode` > `TEST_MODE` env var > `'node'`. Only `.api()` has a mode.
 
 ```typescript
-import { spec, app } from '@jterrazz/test';
-import { postgres, redis } from '@jterrazz/test/services';
-
-const db = postgres({ compose: 'db' });
-const cache = redis({ compose: 'cache' });
-
-export const run = await spec(
-    app(() => createApp({ databaseUrl: db.connectionString })),
-    {
-        services: [db, cache],
-        root: '../../',
+// vitest.config.ts — the mode switch lives HERE
+export default defineConfig({
+    test: {
+        projects: [
+            { test: { name: 'http', include: ['specs/api/**/*.test.ts'] } },
+            {
+                test: {
+                    name: 'http-stack',
+                    include: ['specs/api/**/*.test.ts'],
+                    env: { TEST_MODE: 'compose' },
+                },
+            },
+        ],
     },
-);
-```
-
-### `spec(stack(...))` - docker compose up + real HTTP
-
-Starts the full `docker/compose.test.yaml` stack. App URL and databases auto-detected.
-
-```typescript
-import { spec, stack } from '@jterrazz/test';
-
-export const run = await spec(stack('../../'));
-```
-
-### `spec(command(...))` - local command execution
-
-Runs CLI commands against fixture projects in temp directories. Optionally starts infrastructure.
-
-```typescript
-import { spec, command } from '@jterrazz/test';
-import { postgres } from '@jterrazz/test/services';
-
-export const run = await spec(command(resolve(import.meta.dirname, '../../bin/my-cli.sh')), {
-    root: '../fixtures',
-});
-
-// With infrastructure (CLI that needs a database)
-const db = postgres({ compose: 'db' });
-
-export const run = await spec(command('my-migrate-tool'), {
-    root: '../fixtures',
-    services: [db],
 });
 ```
+
+`services` is a named record. Keys type the `server` factory parameters, name databases for `.seed()`/`.table()` (`{ database: 'analyticsDb' }`), and drive the compose binding — a handle with no `composeService` option links to the compose service named exactly like its key, else the kebab-case conversion of the key (`analyticsDb` → `analytics-db`). If both names exist the binding is ambiguous and throws; `composeService` is the escape hatch for non-derivable names.
+
+### `specification.jobs({ services, jobs, root? })`
+
+Background jobs run in-process by definition — no HTTP server, no mode:
+
+```typescript
+export const { jobs, cleanup } = await specification.jobs({
+    services: { db: postgres() },
+    jobs: ({ db }) => [nightlyReport(db)], // (services) => JobHandle[], or a static array
+});
+
+// In a test:
+const result = await jobs.seed('pending.sql').trigger('nightly-report');
+```
+
+A `JobHandle` is `{ name: string; execute: () => Promise<void> }`.
+
+### `specification.cli(bin, { root?, services?, docker?, transform? })`
+
+Runs a command binary against fixture projects in fresh temp directories. With `services`, connection URLs are injected into the child env automatically: `<KEY>_URL` per record key (CONSTANT_CASE at camelCase boundaries — `analyticsDb` → `ANALYTICS_DB_URL`), plus `DATABASE_URL` (exactly one SQL database) and `REDIS_URL` (exactly one redis). `.env()` overrides; `null` unsets.
+
+```typescript
+export const { cli, cleanup } = await specification.cli('my-migrate-tool', {
+    services: { db: postgres() },
+});
+
+// DATABASE_URL / DB_URL are already in the child env:
+const result = await cli.seed('legacy-schema.sql').exec('up');
+```
+
+### Root auto-discovery
+
+When `root` is absent, the framework walks up from the specification file to the first directory containing `docker/compose.test.yaml`, else the first containing `package.json`. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution) — it is not a fixtures root; `.fixture()` resolves its own paths.
 
 ## Builder API
 
-Every test follows the same pattern: `run("label") -> setup -> action -> assertions`.
+### Setup (chainable)
 
-### Setup (cross-mode)
+| Method                                  | Facets    | Description                                                                                            |
+| --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| `.seed("file.sql", { database? })`      | all       | Load SQL from `seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1) |
+| `.fixture("file")`                      | cli       | Copy the feature-local `fixtures/file` into the working directory                                      |
+| `.fixture("$FIXTURES/name/")`           | cli       | Spread the shared `specs/fixtures/name/` project into the cwd (trailing `/` = contents; layers)        |
+| `.env({ KEY: "value" })`                | cli       | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                             |
+| `.headers({ "Accept-Language": "fr" })` | api       | Set HTTP request headers (merge on top of `.http` file headers)                                        |
+| `.intercept(contract)`                  | api, jobs | Intercept an outgoing HTTP call with a declared contract                                               |
+| `.intercept(trigger, response)`         | api, jobs | Inline intercept for one-off cases                                                                     |
 
-| Method                                   | Description                                               |
-| ---------------------------------------- | --------------------------------------------------------- |
-| `.seed("file.sql")`                      | Load SQL from `seeds/file.sql` into the default database  |
-| `.seed("file.sql", { service: "name" })` | Load SQL into a specific database                         |
-| `.fixture("file")`                       | Copy `fixtures/file` into the CLI working directory       |
-| `.project("name")`                       | Copy `fixtures/name/` into a fresh temp dir and run there |
+### Actions (terminal)
 
-### Actions (one per spec, mutually exclusive)
+| Method                                     | Facet | Resolves to  | Description                                                                        |
+| ------------------------------------------ | ----- | ------------ | ---------------------------------------------------------------------------------- |
+| `.request("create-user.http")`             | api   | `HttpResult` | Send the COMPLETE request from `requests/<file>` (method, path, headers, raw body) |
+| `.get(path)` / `.delete(path)`             | api   | `HttpResult` | Inline requests for simple cases                                                   |
+| `.post(path, body?)` / `.put(path, body?)` | api   | `HttpResult` | Inline body: plain object, JSON-serialized                                         |
+| `.trigger("name")`                         | jobs  | `BaseResult` | Execute a registered job                                                           |
+| `.exec("args")`                            | cli   | `CliResult`  | Run the command                                                                    |
+| `.exec(["build", "start"])`                | cli   | `CliResult`  | Sequence in the same cwd; stops on first non-zero exit                             |
+| `.exec("dev", { waitFor, timeout? })`      | cli   | `CliResult`  | Long-running: resolves at the pattern, killed at `timeout` (default 10 s)          |
 
-**HTTP:**
+One chain = one terminal action; databases reset at the start of every chain. Every cli spec runs in a fresh, empty temp directory.
 
-| Method                     | Description                                   |
-| -------------------------- | --------------------------------------------- |
-| `.get(path)`               | HTTP GET request                              |
-| `.post(path, "body.json")` | HTTP POST with body from `requests/body.json` |
-| `.put(path, "body.json")`  | HTTP PUT with body from `requests/body.json`  |
-| `.delete(path)`            | HTTP DELETE request                           |
+## Assertions — everything through `expect()`
 
-**CLI:**
-
-| Method                                 | Description                                                                           |
-| -------------------------------------- | ------------------------------------------------------------------------------------- |
-| `.exec("args")`                        | Run command (blocking)                                                                |
-| `.exec(["build", "start"])`            | Run commands sequentially in same directory                                           |
-| `.spawn("args", { waitFor, timeout })` | Run long-lived process, resolve on pattern match or timeout                           |
-| `.env({ KEY: "value" })`               | Set env vars on the child process (`null` unsets, `$WORKDIR` expands to the temp cwd) |
-
-Every CLI spec runs in a **fresh, empty temp directory** by default. `.project("name")` starts from a copy of `fixtures/name/`; `.fixture("file")` seeds specific files into the temp dir.
-
-### Assertions
-
-Result properties are raw values -- use vitest `expect()` for assertions. Database and response file assertions use custom async methods.
-
-**Raw values (vitest expect):**
-
-| Expression                                   | Description                 |
-| -------------------------------------------- | --------------------------- |
-| `expect(result.exitCode).toBe(0)`            | CLI exit code               |
-| `expect(result.status).toBe(201)`            | HTTP status code            |
-| `expect(result.stdout).toContain("hello")`   | CLI stdout contains string  |
-| `expect(result.stderr).not.toContain("err")` | CLI stderr does not contain |
-
-**Files (result.file returns {exists, content}):**
-
-| Expression                                                        | Description                 |
-| ----------------------------------------------------------------- | --------------------------- |
-| `expect(result.file("dist/index.js").exists).toBe(true)`          | Assert file exists          |
-| `expect(result.file("dist/index.js").content).toContain("Hello")` | Assert file contains string |
-| `expect(result.file("dist/index.cjs").exists).toBe(false)`        | Assert file does not exist  |
-
-**Directories (CLI scaffolding / codegen output):**
-
-| Expression                                                        | Description                                                                    |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `await result.directory("out").toMatchFixture("go-api")`          | Snapshot the tree against `expected/go-api/`, structured diff on mismatch      |
-| `await result.directory().toMatchFixture("scaffold", { ignore })` | Pass extra ignore patterns; defaults already skip `.git`, `node_modules`, etc. |
-| `await result.directory("out").files()`                           | List all files (recursive, sorted) for ad-hoc assertions                       |
-
-Run with `JTERRAZZ_TEST_UPDATE=1` (or vitest `-u`) to overwrite fixtures with the current output.
-
-**Grep (scoped text matching):**
+Accessors are **read-only**; the framework registers subject-typed matchers on vitest's `expect` automatically. `await` is required exactly where IO happens (tables, trees, containers).
 
 ```typescript
-expect(result.grep('unused-var.ts')).toContain('no-unused-vars');
-expect(result.grep('valid/sorted.ts')).not.toContain('sort-imports');
+// HTTP
+expect(result.status).toBe(201);
+expect(result.response).toMatch('user-created.http'); // expected/<name> — status + header subset + body
+expect(result.response.body).toEqual({ error: 'User 999 not found' });
+
+// Tables (async — queries the database)
+await expect(result.table('orders', { database: 'db' })).toMatchRows({
+    columns: ['id', 'status', 'created_at'],
+    rows: [[match.uuid(), 'pending', match.iso8601()]],
+});
+await expect(result.table('orders', { database: 'db' })).toBeEmpty();
+
+// Streams (ANSI stripped by default; .text stays raw)
+expect(result.stdout).toContain('Build completed');
+expect(result.stdout).toMatch('help.txt'); // expected/help.txt — {{token}}-aware
+expect(result.json).toMatch('config.json'); // expected/config.json
+expect(result.json.value).toMatchObject({ name: 'shoply' });
+
+// Files & trees
+expect(result.file('my-shop/shoply.yaml').content).toContain('name: my-shop');
+await expect(result.directory('my-shop')).toMatch('shop-scaffold'); // expected/shop-scaffold/
+await expect(result.filesystem).toMatch('upgraded-shop'); // whole cwd
+
+// Containers (docker-aware cli)
+await expect(result.container('alpha')).toBeRunning();
 ```
 
-`result.grep(pattern)` filters multi-line output to the block matching `pattern`, returning a string for vitest assertions.
+`toMatch` always resolves against `expected/<name>` — every subject, no exceptions (only `.request()` reads `requests/`). The folder is flat: a slash in the name creates a subfolder; the extension is part of the name and required, except for tree snapshots which are directories.
 
-**Response (HTTP body):**
+**Updating snapshots:** `TEST_UPDATE=1` or `vitest -u`. Update mode writes **tokens**, not values — segments covered by an existing placeholder are preserved, and `{{workdir}}` is substituted automatically.
 
-| Expression                                      | Description                                                                  |
-| ----------------------------------------------- | ---------------------------------------------------------------------------- |
-| `result.response.toMatchFile("expected.json")`  | Custom -- compares body to `responses/expected.json`, shows diff on mismatch |
-| `expect(result.response.body).toEqual({ ... })` | Raw body object for vitest assertions                                        |
+## Dynamic values — one `{{token}}` grammar
 
-**Tables (custom async -- database queries):**
+The same vocabulary works in `expected/*.http` (body AND headers), `expected/*.json`, text snapshots, and tree-snapshot file contents — and in code via `match.*`:
 
-| Expression                                                                      | Description                    |
-| ------------------------------------------------------------------------------- | ------------------------------ |
-| `await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] })` | Assert database table contents |
-| `await result.table("events", { service: "analytics-db" }).toMatch({ ... })`    | Assert on a specific database  |
-| `await result.table("users").toBeEmpty()`                                       | Assert database table is empty |
+`uuid` `ulid` `iso8601` `date` `time` `duration` `number` `int` `float` `semver` `sha` `hex` `base64` `port` `ip` `url` `email` `path` `workdir` `string` `any`
 
-**Docker (container assertions):**
+Each token is capturable via `{{type#ref}}`: the first occurrence captures, later occurrences must be equal (scope: one spec). Code-side: `match.ref('order')`, `match.ref('intent', { not: 'order' })`, `match.regex(/…/)`.
 
-| Expression          | Description                     |
-| ------------------- | ------------------------------- |
-| `runner.docker(id)` | Access a docker container by id |
+```http
+### expected/order-created.http
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /orders/{{uuid#order}}
 
-## Multi-database support
+{
+    "id": "{{uuid#order}}",
+    "total": "{{number}}",
+    "createdAt": "{{iso8601}}"
+}
+```
 
-When multiple databases are declared, `seed()` and `result.table()` accept `{ service: "name" }` to target a specific database by its compose name. Without `service`, both default to the first postgres.
+See [docs/06-tokens.md](docs/06-tokens.md) for the canonical accepted form of every token.
+
+## Intercept contracts
+
+External interactions (LLM providers, third-party APIs) are declared as **contracts**: one file per interaction under `contracts/`, flat, with a provider suffix — `contracts/<name>.<provider>.ts`, `provider ∈ { openai, anthropic, http }`:
 
 ```typescript
-import { spec, app } from '@jterrazz/test';
-import { postgres } from '@jterrazz/test/services';
+// contracts/classify-product.openai.ts
+import { defineContract, openai } from '@jterrazz/test';
 
-const db = postgres({ compose: "db" });
-const analyticsDb = postgres({ compose: "analytics-db" });
-
-const run = await spec(app(() => createApp({ ... })), {
-  services: [db, analyticsDb],
-  root: '../../',
+export default defineContract({
+    trigger: openai.responses({ user: /Product Classification/, tools: ['classify'] }),
+    response: openai.reply({ category: 'ELECTRONICS', confidence: 0.97 }),
 });
+```
 
-const result = await run("cross-db")
-  .seed("users.sql")
-  .seed("events.sql", { service: "analytics-db" })
-  .post("/users", "request.json")
-  .run();
+```typescript
+const result = await jobs.intercept(classifyProduct).trigger('nightly-report');
+```
 
-expect(result.status).toBe(201);
-await result.table("users").toMatch({ columns: ["name"], rows: [["Alice"]] });
-await result.table("events", { service: "analytics-db" }).toMatch({
-  columns: ["type"],
-  rows: [["user_created"]],
+Inline `.intercept(trigger, response)` and JSON fixtures (`intercepts/<provider>/<name>.json`) remain for one-off cases. Failure simulation: `openai.error(429)`, `anthropic.timeout()`, `openai.malformed('not json')`. Intercepts queue FIFO per trigger. MSW ships as a direct dependency — no separate install.
+
+## Docker-aware CLIs
+
+For CLIs that spawn containers, declare `docker: { envVar, nameLabel, testRunLabel }`. The runner injects a unique test-run id into the child env; the tested binary must label its containers with `testRunLabel=<id>`. Results expose lazy `.container(name)` accessors — and must be bound with `await using` so leaked containers are force-removed at scope exit:
+
+```typescript
+test('deploy spawns a labelled container', async () => {
+    // Given
+    await using result = await cli.fixture('$FIXTURES/two-shops/').exec('deploy alpha');
+
+    // Then - property reads are sync; only the matcher is async
+    const shop = result.container('alpha');
+    expect(shop.exists).toBe(true);
+    await expect(shop).toBeRunning();
+    expect(shop.file('/app/shoply.yaml').content).toContain('name: alpha');
 });
 ```
 
 ## Service factories
 
-```typescript
-import { postgres, redis } from '@jterrazz/test/services';
+| Factory      | Options                          | Connection string                     |
+| ------------ | -------------------------------- | ------------------------------------- |
+| `postgres()` | `composeService`, `image`, `env` | `postgresql://user:pass@host:port/db` |
+| `redis()`    | `composeService`, `image`        | `redis://host:port`                   |
+| `sqlite()`   | `init` or `prismaSchema`         | `file:/tmp/....sqlite`                |
 
-const db = postgres({ compose: 'db' });
-const cache = redis({ compose: 'cache' });
-```
-
-Service handles read image and environment from `docker/compose.test.yaml`. After the runner starts, `.connectionString` is populated from the running container.
-
-| Factory      | Options                   | Connection string                     |
-| ------------ | ------------------------- | ------------------------------------- |
-| `postgres()` | `compose`, `image`, `env` | `postgresql://user:pass@host:port/db` |
-| `redis()`    | `compose`, `image`        | `redis://host:port`                   |
+`docker/compose.test.yaml` is the single source of truth for test infrastructure; `docker/<service>/init.sql` runs when the corresponding service starts. Parallel isolation is automatic per vitest worker: postgres clones a schema, redis assigns a database index, sqlite copies the template file, compose mode gets a dedicated project.
 
 ## Mocking utilities
 
 ```typescript
-import { mockOf, mockOfDate } from '@jterrazz/test/mock';
+import { mockOf, mockOfDate } from '@jterrazz/test';
 ```
 
-| Export        | Description                                  |
-| ------------- | -------------------------------------------- |
-| `mockOf<T>()` | Deep mock of any interface                   |
-| `mockOfDate`  | Date mocking via `.set(date)` and `.reset()` |
+| Export        | Description                                                  |
+| ------------- | ------------------------------------------------------------ |
+| `mockOf<T>()` | Deep mock of any interface (wraps `vitest-mock-extended`)    |
+| `mockOfDate`  | Freeze/reset the global Date via `.set(date)` and `.reset()` |
 
 ## Conventions
 
-### Docker
+Normative rules live in [CONVENTIONS.md](CONVENTIONS.md). A facet (`specs/<facet>/`) carries its runner(s) at its root and holds domain folders; the folder follows the assets:
 
 ```
-docker/
-├── compose.test.yaml       # Source of truth for test infrastructure
-├── postgres/
-│   └── init.sql            # Auto-run on container start
+specs/<facet>/                  # api | jobs | cli | integrations | lint
+├── <facet>.specification.ts    # runner(s) at the facet ROOT (rule C1)
+└── <domain>/                   # a product command/area — 1..n test files
+    ├── <aspect>.test.ts
+    ├── seeds/          # *.sql ONLY — database state
+    ├── requests/       # *.http — inputs: COMPLETE request (method, path, headers, body)
+    ├── contracts/      # <name>.<provider>.ts — declared external interactions
+    ├── intercepts/     # <provider>/<name>.json — inline intercept fixtures
+    ├── fixtures/       # domain-local files/dirs copied into the cwd (cli) — shared pool lives at specs/fixtures/
+    └── expected/       # ALL expected fixtures, FLAT (incl. response *.http) — a slash in the name creates a subfolder
 ```
 
-### Test structure
+A test with its OWN asset dirs gets its own domain folder; tests without local assets group as sibling `<aspect>.test.ts` files inside a named group folder (the folder follows the assets). `.fixture(path)` is the one verb that copies into the cwd: domain-local (`fixtures/…`) or shared (`$FIXTURES/…` → `specs/fixtures/…`), with rsync trailing-slash semantics and layering. `.seed()` is SQL-only.
 
-```
-tests/
-├── e2e/                    # Full-stack specification tests
-│   └── {feature}/
-│       ├── {feature}.e2e.test.ts
-│       ├── seeds/          # Database state setup
-│       ├── fixtures/       # Files copied into CLI working dir
-│       ├── requests/       # HTTP request bodies
-│       ├── responses/      # Expected HTTP responses
-│       └── expected/       # Expected CLI output
-├── integration/            # Infrastructure tests (containers)
-└── setup/                  # Specification runners, fixtures, helpers
-    ├── fixtures/           # Shared fixture projects
-    ├── helpers/            # Shared test utilities
-    └── *.specification.ts  # Runner setup files
-```
+Every test contains `// Given -` and `// Then -` comments (always both; `// When -` only if the action is not obvious — the chain IS the when). User-facing framework env vars: `TEST_MODE` and `TEST_UPDATE` — the only ones you set; the framework also reads vitest's `VITEST_POOL_ID` for per-worker isolation.
 
-### File naming
+### Convention enforcement — the shipped lint plugin
 
-| Type        | Suffix                 | Location              |
-| ----------- | ---------------------- | --------------------- |
-| Unit        | `.test.ts`             | Colocated with source |
-| Integration | `.integration.test.ts` | `tests/integration/`  |
-| E2E         | `.e2e.test.ts`         | `tests/e2e/`          |
-
-### Test writing
-
-Every test uses `// Given` and `// Then` comments. Always both, never one without the other.
-
-```typescript
-test('creates a user and returns 201', async () => {
-    // Given - two existing users
-    const result = await run('creates user')
-        .seed('initial-users.sql')
-        .post('/users', 'new-user.json')
-        .run();
-
-    // Then - user created with all three in table
-    expect(result.status).toBe(201);
-    await result.table('users').toMatch({
-        columns: ['name'],
-        rows: [['Alice'], ['Bob'], ['Charlie']],
-    });
-});
-```
-
-`// When` is only used if the action isn't obvious. The spec builder chain (`.seed().post().run()` / `.project().exec().run()`) IS the when.
+These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) with ~40 AST rules, plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full catalogue (each rule, its channel and rationale) lives in [CONVENTIONS-CATALOG.md](CONVENTIONS-CATALOG.md).
 
 ## Requirements
 
-- **Docker** -- testcontainers for `spec(app(...))`, docker compose for `spec(stack(...))`
-- **vitest** -- peer dependency
-- **hono** -- optional peer, only needed for `spec(app(...))` mode with in-process apps
+- **Docker** - testcontainers for node mode, docker compose for compose mode; not needed for `sqlite()` or plain cli specs
+- **vitest** - peer dependency
+- **msw** - bundled as a direct dependency (powers `.intercept()`); no separate install
+- **hono** (or any web framework) - supplied by your project for in-process apps; the adapter only needs an object with a `request()` method, so it is not a peer
+
+## Docs
+
+- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI specs, assertions, tokens, contracts, services, conventions
+- API reference + LLM-friendly docs: <https://jterrazz.github.io/package-test/>
+- Agent ingestion: <https://jterrazz.github.io/package-test/llms-full.txt>

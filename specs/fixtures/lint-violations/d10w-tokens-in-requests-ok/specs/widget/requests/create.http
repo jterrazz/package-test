@@ -1,0 +1,4 @@
+POST /widgets
+Content-Type: application/json
+
+{"name":"literal"}

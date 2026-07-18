@@ -1,0 +1,12 @@
+Output mismatch (stdout-wrong.txt)
+
+- Expected
++ Received
+
+  Usage: cli <command>
+  
+  Commands:
+-   build   Compile the project
++   build   Build the project
+    check   Check code quality
+  

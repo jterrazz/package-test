@@ -1,0 +1,10 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "entry": [
+        "src/index.ts",
+        "src/lint/plugin.ts",
+        "src/lint/checker-cli.ts",
+        "src/lint/catalog-cli.ts"
+    ],
+    "ignore": ["specs/fixtures/**"]
+}

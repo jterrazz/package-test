@@ -1,0 +1,5 @@
+const a = process.env.SECRET;
+const b = process.env['OTHER_SECRET'];
+const c = process.env[key];
+// env-sanction: deliberate dynamic read, exercised as the spared case
+const d = process.env[key.toUpperCase()];
