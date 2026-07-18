@@ -79,8 +79,8 @@ No `.run()`, no label — the vitest test name is the spec's description; every 
 
 **cli** (single execution method — `.spawn()` does not exist):
 
-| Method                                | Resolves to     | Notes                                                                                         |
-| ------------------------------------- | --------------- | --------------------------------------------------------------------------------------------- |
+| Method                                | Resolves to | Notes                                                                                         |
+| ------------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
 | `.exec("args")`                       | `CliResult` | Blocking                                                                                      |
 | `.exec(["build", "start"])`           | `CliResult` | Sequential in the same temp dir; stops on first failure                                       |
 | `.exec("dev", { waitFor, timeout? })` | `CliResult` | Long-running — resolves at the pattern (exit 0), killed at `timeout` (default 10 s, exit 124) |
