@@ -110,7 +110,7 @@ Actions are **terminal**: `.request()/.get()/.trigger()/.exec()` execute the spe
 - **"fixture "..." does not exist"** -> all expected fixtures — including response `.http` — live FLAT under `{test-file-dir}/expected/` (a slash in the name creates a subfolder). Run with `TEST_UPDATE=1` (or vitest `-u`) to create the baseline — tokens in existing fixtures are preserved.
 - **Test fails on a uuid/timestamp/path that changes every run** -> tokenize the fixture: `{{uuid}}`, `{{iso8601}}`, `{{workdir}}`; capture cross-references with `{{uuid#order}}`. In code, `match.uuid()`, `match.ref('order')`.
 - **Noisy stdout comparisons** -> ANSI is already stripped by default (`.text` stays raw); prefer tokens; `transform` is a last-resort escape hatch.
-- **`CommandResult.container: runner was not configured`** -> `.container(name)` needs `docker: { envVar, nameLabel, testRunLabel }` in the cli options.
+- **`CliResult.container: runner was not configured`** -> `.container(name)` needs `docker: { envVar, nameLabel, testRunLabel }` in the cli options.
 - **jobs.trigger fails in the compose project** -> it doesn't: `specification.jobs()` has no mode and always runs in-process, whatever `TEST_MODE` says.
 - **`Unmatched outgoing HTTP request during spec: ...`** -> strict intercepts (D7): the chain declared an intercept, and a request matched none (or its FIFO queue is exhausted). Add one `.intercept()` per expected call. The error lists every registered trigger and its consumption state.
 - **`.intercept(): intercepts are in-process (MSW) and not available in compose mode ...`** -> move the intercept spec into a node-only vitest project; `api-stack` (compose) must exclude it.

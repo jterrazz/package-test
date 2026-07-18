@@ -35,7 +35,7 @@ src/
 │   │   │   └── result/            # BaseResult + read-only accessors (stream, json, filesystem, directory, response, table, grep)
 │   │   ├── api/                   # startApi constructor + HttpResult + fetch adapter
 │   │   ├── jobs/                  # startJobs constructor
-│   │   └── cli/                   # startCli constructor + CommandResult + exec adapter
+│   │   └── cli/                   # startCli constructor + CliResult + exec adapter
 │   ├── matching/                  # match.* vocabulary + {{token}} structural comparison engine
 │   ├── http-files/                # requests/*.http + expected/*.http (responses) parser/serializer
 │   ├── contracts/                 # defineContract + intercept types + generic http provider (no external dep)

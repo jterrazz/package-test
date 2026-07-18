@@ -81,9 +81,9 @@ No `.run()`, no label — the vitest test name is the spec's description; every 
 
 | Method                                | Resolves to     | Notes                                                                                         |
 | ------------------------------------- | --------------- | --------------------------------------------------------------------------------------------- |
-| `.exec("args")`                       | `CommandResult` | Blocking                                                                                      |
-| `.exec(["build", "start"])`           | `CommandResult` | Sequential in the same temp dir; stops on first failure                                       |
-| `.exec("dev", { waitFor, timeout? })` | `CommandResult` | Long-running — resolves at the pattern (exit 0), killed at `timeout` (default 10 s, exit 124) |
+| `.exec("args")`                       | `CliResult` | Blocking                                                                                      |
+| `.exec(["build", "start"])`           | `CliResult` | Sequential in the same temp dir; stops on first failure                                       |
+| `.exec("dev", { waitFor, timeout? })` | `CliResult` | Long-running — resolves at the pattern (exit 0), killed at `timeout` (default 10 s, exit 124) |
 
 ## Auto-injected child env (cli + services, rule B6)
 
@@ -203,7 +203,7 @@ world.running;
 world.status;
 world.id; // sync reads
 expect(world.file('/workspace/out.txt').content).toContain('hello'); // docker exec cat
-const inside = await world.exec('ls /workspace'); // CommandResult from inside the container
+const inside = await world.exec('ls /workspace'); // CliResult from inside the container
 expect(world.stdout).toContain('ready'); // container logs
 await expect(world).toBeRunning(); // the async matcher
 result.containerIds; // all captured container ids
