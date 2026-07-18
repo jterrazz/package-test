@@ -36,7 +36,7 @@ const result = await jobs.seed('pending.sql').intercept(classifyProduct).trigger
 await expect(result.table('products')).toMatchRows({ columns: ['status'], rows: [['classified']] });
 ```
 
-`BaseResult` carries the shared accessors (`table`, `json`, `filesystem`, …) — see [docs/05-assertions.md](../../docs/05-assertions.md).
+`BaseResult` carries the shared accessors (`table`, `file`, `directory`) — see [docs/05-assertions.md](../../docs/05-assertions.md).
 
 ## Folder layout
 

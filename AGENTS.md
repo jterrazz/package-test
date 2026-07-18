@@ -69,7 +69,7 @@ specs/                             # ONLY product specifications (I2), written w
 
 | Project        | Includes                                                                             | Infra                                                                | Tests           |
 | -------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | --------------- |
-| `fast`         | `src/**/*.test.ts` (sibling module tests) + `specs/cli/**` + `specs/lint/**`         | none (docker specs self-skip; lint specs need `npm run build` first) | 477             |
+| `fast`         | `src/**/*.test.ts` (sibling module tests) + `specs/cli/**` + `specs/lint/**`         | none (docker specs self-skip; lint specs need `npm run build` first) | 722             |
 | `api`          | `specs/api/**` + `specs/jobs/**` — node mode, in-process Hono + testcontainers       | Docker                                                               | 52              |
 | `api-stack`    | same files, `env: { TEST_MODE: 'compose' }`, **excludes** `specs/api/intercepts/**`  | Docker compose                                                       | 38 (+1 skipped) |
 | `integrations` | `specs/integrations/**` — container lifecycle, sequential (`fileParallelism: false`) | Docker                                                               | 54              |
