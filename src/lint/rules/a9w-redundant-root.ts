@@ -6,7 +6,7 @@ import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
 /**
- * The root the convention would derive (CONVENTIONS A9): walk up from the
+ * The root the convention would derive (A9 — see docs/10-linting.md): walk up from the
  * specification file to the first directory containing
  * `docker/compose.test.yaml`, else the first containing `package.json`.
  */
@@ -61,7 +61,7 @@ export const a9wRedundantRoot: LintRule = {
         docs: RULE_DOCS['a9w-redundant-root'],
         messages: {
             redundant:
-                'root: "{{root}}" is redundant — walking up from the specification file already resolves to that directory (CONVENTIONS A9).',
+                'root: "{{root}}" is redundant — walking up from the specification file already resolves to that directory (A9 — see docs/10-linting.md).',
         },
         type: 'suggestion',
     },

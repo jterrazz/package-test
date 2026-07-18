@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.0] - 2026-07-18
+
+### Added
+
+- **`d15w-status-only-probe` lint rule** — a spec whose only assertions are HTTP-status
+  probes should pin a full response golden (`expect(result.response).toMatch('...')`)
+  instead of asserting the status alone.
+- **Generated agent-facing rule catalogue** at `skills/jterrazz-test/references/rules.md`.
+
+### Changed
+
+- **Docs architecture** — `CONVENTIONS.md` / `CONVENTIONS-CATALOG.md` are removed. The
+  hand-maintained constitution now lives in `docs/09-conventions.md`, and the full
+  four-channel mechanized catalogue is generated into `docs/10-linting.md`.
+- **Modular skill** — `skills/jterrazz-test/SKILL.md` is a one-screen core with
+  per-situation references (`api`, `cli`, `jobs`, `tokens`, `contracts`, `rules`,
+  `troubleshooting`).
+- **Committed `docs/reference/` API projection** via `@jterrazz/typescript` 7, with a
+  Docs sync pass in `npm run lint`.
+- Rule messages now cite `(X — see docs/10-linting.md)` instead of the removed
+  catalogue files.
+
+### Removed
+
+- `llms.txt` / `llms-full.txt` artifacts and the GitHub Pages docs deploy — the docs
+  are in-repo.
+
 ## [9.0.0] - 2026-07-18
 
 A ground-up redesign of the whole surface. The single `spec()` entry point and its
@@ -545,7 +572,8 @@ For most callers there is no migration step — you simply stop accidentally wri
 
 - Initial 5.x baseline with `integration()`, `e2e()`, `cli()` specification runners; `postgres()` and `redis()` service factories; `mockOf` / `mockOfDate` mocking helpers; Docker assertion port; full `SpecificationBuilder` fluent API (`seed`, `fixture`, `project`, `mock`, `get` / `post` / `put` / `delete`, `exec`, `spawn`).
 
-[Unreleased]: https://github.com/jterrazz/package-test/compare/v9.0.0...HEAD
+[Unreleased]: https://github.com/jterrazz/package-test/compare/v9.1.0...HEAD
+[9.1.0]: https://github.com/jterrazz/package-test/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/jterrazz/package-test/compare/v8.0.0...v9.0.0
 [8.0.0]: https://github.com/jterrazz/package-test/compare/v7.1.0...v8.0.0
 [7.1.0]: https://github.com/jterrazz/package-test/compare/v7.0.0...v7.1.0

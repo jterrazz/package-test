@@ -1,1 +1,1 @@
-[warn] specs/widget/seeds/orphaned.sql: dead fixture — no test literal in widget references seeds/orphaned.sql (CONVENTIONS C9)
+[warn] specs/widget/seeds/orphaned.sql: dead fixture — no test literal in widget references seeds/orphaned.sql (C9 — see docs/10-linting.md)

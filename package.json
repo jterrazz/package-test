@@ -1,6 +1,6 @@
 {
     "name": "@jterrazz/test",
-    "version": "9.0.0",
+    "version": "9.1.0",
     "description": "Declarative testing framework for HTTP APIs, CLIs, and background jobs — one entry point, real infrastructure, golden-file assertions, plus an oxlint convention plugin.",
     "keywords": [
         "api-testing",
@@ -46,7 +46,7 @@
     },
     "scripts": {
         "build": "tsdown --config tsdown.config.ts",
-        "docs": "typescript docs && npm run build && node dist/catalog.js",
+        "docs": "npm run build && node dist/catalog.js && typescript docs",
         "lint": "typescript check && node dist/checker.js specs",
         "lint:fix": "typescript fix",
         "test": "vitest --run"
@@ -63,7 +63,7 @@
     },
     "devDependencies": {
         "@hono/node-server": "^2.0.8",
-        "@jterrazz/typescript": "^6.1.0",
+        "@jterrazz/typescript": "^7.0.0",
         "@types/better-sqlite3": "^7.6.13",
         "@types/node": "^26.1.1",
         "@types/pg": "^8.20.0",

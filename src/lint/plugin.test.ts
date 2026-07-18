@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { TOKEN_KINDS } from '../core/matching/match.js';
-import { renderAnnex, spliceDocsTable } from './catalog.js';
+import { renderRules, spliceCatalog } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
 import { catalog, CHECKER_PASSES, PROCESS_RULES, RULE_DOCS, RUNTIME_RULES } from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
@@ -12,12 +12,13 @@ import plugin, { recommendedRules, testing } from './plugin.js';
  * Catalogue meta-test — the docs-as-code contract.
  *
  * `src/lint/manifest.ts` is the single source of truth for the mechanized rule
- * catalogue; `CONVENTIONS.md` is a hand-maintained constitution (principles +
- * non-mechanizable criteria) that points at the GENERATED catalogue. This test
- * guards two invariants:
+ * catalogue; `docs/09-conventions.md` is the hand-maintained constitution
+ * (principles + non-mechanizable criteria) and `docs/10-linting.md` carries the
+ * GENERATED catalogue. This test guards two invariants:
  *
  * - **freshness** — running the generator reproduces the committed
- *   `docs/10-linting.md` table and `CONVENTIONS-CATALOG.md` byte-for-byte;
+ *   `docs/10-linting.md` catalogue and `skills/jterrazz-test/references/rules.md`
+ *   byte-for-byte;
  * - **completeness** — every shipped rule carries `meta.docs`, and every manifest
  *   entry maps to an implementation (a plugin rule / a checker pass) or a
  *   documented review-borne rule.
@@ -45,18 +46,18 @@ const CHECKER_PASS_IDS = new Set<string>(CHECKER_PASS_REGISTRY);
 const CLI_CONTRACT_SPECS = new Set(['checker-cli', 'kitchen-sink']);
 
 describe('conventions catalogue — generation freshness (meta-test)', () => {
-    test('the docs/10 rule table is byte-identical to a fresh generation', () => {
+    test('the docs/10 catalogue is byte-identical to a fresh generation', () => {
         // Given - the committed docs/10-linting.md
         const committed = read('docs/10-linting.md');
 
-        // Then - re-splicing the generated table changes nothing (run `npm run docs`)
-        expect(spliceDocsTable(committed)).toBe(committed);
+        // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
+        expect(spliceCatalog(committed)).toBe(committed);
     });
 
-    test('the generated CONVENTIONS-CATALOG.md is byte-identical to a fresh generation', () => {
-        // Given - the committed annex
+    test('the generated skill rule reference is byte-identical to a fresh generation', () => {
+        // Given - the committed agent-facing rule reference
         // Then - the generator reproduces it exactly (run `npm run docs`)
-        expect(renderAnnex()).toBe(read('CONVENTIONS-CATALOG.md'));
+        expect(renderRules()).toBe(read('skills/jterrazz-test/references/rules.md'));
     });
 });
 

@@ -5,7 +5,7 @@ import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
 /**
- * One folder = one external dependency (CONVENTIONS I1): the packages each
+ * One folder = one external dependency (I1 — see docs/10-linting.md): the packages each
  * `src/integrations/<folder>/` may import.
  */
 const INTEGRATION_DEPS: Record<string, string[]> = {
@@ -158,13 +158,13 @@ export const i1LayerBoundaries: LintRule = {
         docs: RULE_DOCS['i1-layer-boundaries'],
         messages: {
             coreExternal:
-                'core/ imports nothing external — "{{source}}" is not allowed (CONVENTIONS I1).',
+                'core/ imports nothing external — "{{source}}" is not allowed (I1 — see docs/10-linting.md).',
             crossLayer:
-                'Layer "{{layer}}" must not import "{{source}}" — outside the sanctioned layer edges (CONVENTIONS I1).',
+                'Layer "{{layer}}" must not import "{{source}}" — outside the sanctioned layer edges (I1 — see docs/10-linting.md).',
             foreignDependency:
-                '"{{source}}" is not this folder\'s own dependency — one integrations folder = one external dependency (CONVENTIONS I1).',
+                '"{{source}}" is not this folder\'s own dependency — one integrations folder = one external dependency (I1 — see docs/10-linting.md).',
             lintRuntime:
-                'The lint layer imports nothing from the framework runtime — "{{source}}" is outside its pure-helper whitelist (CONVENTIONS I1).',
+                'The lint layer imports nothing from the framework runtime — "{{source}}" is outside its pure-helper whitelist (I1 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

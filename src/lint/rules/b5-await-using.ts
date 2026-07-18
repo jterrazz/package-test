@@ -52,7 +52,7 @@ export const b5AwaitUsing: LintRule = {
         defaultOptions: [{ runners: [] }],
         messages: {
             requireAwaitUsing:
-                'The result of docker-aware runner "{{runner}}" must be bound with `await using` so its containers are disposed (CONVENTIONS B5).',
+                'The result of docker-aware runner "{{runner}}" must be bound with `await using` so its containers are disposed (B5 — see docs/10-linting.md).',
         },
         schema: [
             {

@@ -56,11 +56,11 @@ export const c1DomainStructure: LintRule = {
         docs: RULE_DOCS['c1-domain-structure'],
         messages: {
             specNotAtFacetRoot:
-                'A `*.specification.ts` must sit at the facet root: `specs/<facet>/<name>.specification.ts` (CONVENTIONS C1).',
+                'A `*.specification.ts` must sit at the facet root: `specs/<facet>/<name>.specification.ts` (C1 — see docs/10-linting.md).',
             testAtFacetRoot:
-                'A `*.test.ts` must live in a domain folder: `specs/<facet>/<domain>/<aspect>.test.ts` — tests directly at the facet root are forbidden (CONVENTIONS C1).',
+                'A `*.test.ts` must live in a domain folder: `specs/<facet>/<domain>/<aspect>.test.ts` — tests directly at the facet root are forbidden (C1 — see docs/10-linting.md).',
             testTooDeep:
-                'A `*.test.ts` must sit at facet/domain depth: `specs/<facet>/<domain>/<aspect>.test.ts` — no deeper nesting (CONVENTIONS C1).',
+                'A `*.test.ts` must sit at facet/domain depth: `specs/<facet>/<domain>/<aspect>.test.ts` — no deeper nesting (C1 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

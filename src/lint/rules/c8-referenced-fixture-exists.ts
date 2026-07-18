@@ -114,7 +114,7 @@ export const c8ReferencedFixtureExists: LintRule = {
         docs: RULE_DOCS['c8-referenced-fixture-exists'],
         messages: {
             missing:
-                'Referenced fixture "{{path}}" does not exist on disk under its conventional {{root}}/ root (CONVENTIONS C8). Create it or fix the reference.',
+                'Referenced fixture "{{path}}" does not exist on disk under its conventional {{root}}/ root (C8 — see docs/10-linting.md). Create it or fix the reference.',
         },
         type: 'problem',
     },

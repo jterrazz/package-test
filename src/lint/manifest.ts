@@ -4,10 +4,10 @@ import type { RuleDoc } from './types.js';
  * The rule manifest — the single source of truth for the mechanized conventions
  * catalogue (docs-as-code inversion, phase 2).
  *
- * `CONVENTIONS.md` shrank to a constitution: principles, the enforcement
- * channels, process rules and design rationales. Every per-rule normative
- * sentence that used to live there now lives HERE, next to (or on) the code that
- * enforces it. Four channels are assembled into one {@link catalog}:
+ * The constitution (`docs/09-conventions.md`) holds only principles, the
+ * enforcement channels, process rules and design rationales. Every per-rule
+ * normative sentence lives HERE, next to (or on) the code that enforces it. Four
+ * channels are assembled into one {@link catalog}:
  *
  * - **statique** — the `jterrazz/*` oxlint rules (`RULE_DOCS`, attached to each
  *   rule's `meta.docs`);
@@ -19,8 +19,9 @@ import type { RuleDoc } from './types.js';
  *   (`PROCESS_RULES`).
  *
  * The catalogue generator (`catalog.ts` / `dist/catalog.js`) reads this manifest
- * to (re)write `docs/10-linting.md`'s rule table and the generated annex
- * `CONVENTIONS-CATALOG.md`. `plugin.test.ts` guards freshness and completeness.
+ * to (re)write the full four-channel catalogue in `docs/10-linting.md` and the
+ * agent-facing `skills/jterrazz-test/references/rules.md`. `plugin.test.ts`
+ * guards freshness and completeness.
  *
  * This module is pure data — it imports NOTHING but a type, so the lint layer
  * stays free of the framework runtime (CONVENTIONS I1) and the oxlint bundle

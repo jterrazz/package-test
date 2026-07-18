@@ -2,7 +2,7 @@ import { segments, stringValue } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-/** Providers a contract file may declare (CONVENTIONS C4). */
+/** Providers a contract file may declare (C4 — see docs/10-linting.md). */
 const PROVIDERS = new Set(['anthropic', 'http', 'openai']);
 
 const CONTRACT_NAME = /^[A-Za-z0-9][\w-]*\.(?<provider>[a-z]+)\.[cm]?ts$/;
@@ -85,17 +85,17 @@ export const c4ContractShape: LintRule = {
         docs: RULE_DOCS['c4-contract-shape'],
         messages: {
             badName:
-                'Contract file "{{base}}" must be named <name>.<provider>.ts with provider ∈ openai | anthropic | http (CONVENTIONS C4).',
+                'Contract file "{{base}}" must be named <name>.<provider>.ts with provider ∈ openai | anthropic | http (C4 — see docs/10-linting.md).',
             foreignImport:
-                'Contract imports "{{source}}" — a contract imports only from the public entry (@jterrazz/test) (CONVENTIONS C4).',
+                'Contract imports "{{source}}" — a contract imports only from the public entry (@jterrazz/test) (C4 — see docs/10-linting.md).',
             missingDefault:
-                'Contract file has no `export default defineContract(...)` (CONVENTIONS C4).',
+                'Contract file has no `export default defineContract(...)` (C4 — see docs/10-linting.md).',
             namedExport:
-                'Contract files have no named exports — only `export default defineContract(...)` (CONVENTIONS C4).',
+                'Contract files have no named exports — only `export default defineContract(...)` (C4 — see docs/10-linting.md).',
             notDefineContract:
-                'The default export of a contract file must be `defineContract(...)` syntactically (CONVENTIONS C4).',
+                'The default export of a contract file must be `defineContract(...)` syntactically (C4 — see docs/10-linting.md).',
             subfolder:
-                'Contract file "{{base}}" is nested — contracts/ is flat, no subfolders (CONVENTIONS C4).',
+                'Contract file "{{base}}" is nested — contracts/ is flat, no subfolders (C4 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

@@ -30,13 +30,13 @@ test('creates a user', async () => {
 | [06 — Tokens](06-tokens.md)                   | The `{{token}}` grammar: all 21 tokens, `#ref` captures, `match.*`, update mode                                 |
 | [07 — Contracts](07-contracts.md)             | `defineContract`, provider trigger/response builders, FIFO queueing, inline escape hatches                      |
 | [08 — Services](08-services.md)               | `postgres` / `redis` / `sqlite`, the services record, compose conventions, per-worker isolation                 |
-| [09 — Conventions](09-conventions.md)         | The normative rule set (`/CONVENTIONS.md`), the four enforcement channels, naming recap, retro-propagation (K)  |
+| [09 — Conventions](09-conventions.md)         | The constitution: principles, the four enforcement channels, process rules, naming recap, retro-propagation (K) |
 | [10 — Linting](10-linting.md)                 | The oxlint plugin (`@jterrazz/test/oxlint`): rule catalogue, `recommendedRules`, the D4 conventions checker     |
 
 ## How this documentation is organized
 
 - **Chapters 01–04** follow the three constructors: read 01, then the chapter matching what you test (API, jobs, or CLI).
 - **Chapters 05–08** are references shared by all three facets: assertions, the token grammar, intercept contracts, and infrastructure services. They are heavily cross-linked from the constructor chapters.
-- **Chapters 09–10** cover enforcement. Chapter 09 points at the normative rule set: every rule in `/CONVENTIONS.md` is authoritative, and the full mechanized set (each rule, its channel and text) lives in the generated [`/CONVENTIONS-CATALOG.md`](../CONVENTIONS-CATALOG.md); this documentation explains and illustrates those rules but never overrides them. Chapter 10 documents the static channel — the `@jterrazz/test/oxlint` plugin and the D4 conventions checker.
+- **Chapters 09–10** cover enforcement. Chapter 09 is the constitution — the principles, the four enforcement channels, and the process rules. Chapter 10 documents the static channel (the `@jterrazz/test/oxlint` plugin and the D4 conventions checker) and carries the **generated four-channel catalogue** — the normative sentence and channel of every mechanized rule, sourced from `src/lint/manifest.ts`. The chapters explain and illustrate; the generated catalogue decides.
 
 Every chapter ends with a **Pitfalls** section (the mistakes the framework is designed to catch) and a **Related** line linking to neighbouring chapters. All examples use the Given/Then comment convention that the framework itself enforces (rule B4).

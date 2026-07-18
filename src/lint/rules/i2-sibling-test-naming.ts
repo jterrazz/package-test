@@ -53,11 +53,11 @@ export const i2SiblingTestNaming: LintRule = {
         docs: RULE_DOCS['i2-sibling-test-naming'],
         messages: {
             orphanTest:
-                'A src/ module test must sit NEXT to the module it tests — no neighbour "{{expected}}" found (CONVENTIONS I2). A test needing more than its module is a specification: move it to specs/.',
+                'A src/ module test must sit NEXT to the module it tests — no neighbour "{{expected}}" found (I2 — see docs/10-linting.md). A test needing more than its module is a specification: move it to specs/.',
             rootTests:
-                'A root-level tests/ directory is banned — module tests are siblings under src/, product specifications live in specs/ (CONVENTIONS I2).',
+                'A root-level tests/ directory is banned — module tests are siblings under src/, product specifications live in specs/ (I2 — see docs/10-linting.md).',
             testsDir:
-                '__tests__/ directories are banned under src/ — the test of <file>.ts is its neighbour <file>.test.ts (CONVENTIONS I2).',
+                '__tests__/ directories are banned under src/ — the test of <file>.ts is its neighbour <file>.test.ts (I2 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

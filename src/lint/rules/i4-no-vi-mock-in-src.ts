@@ -65,10 +65,10 @@ export const i4NoViMockInSrc: LintRule = {
         docs: RULE_DOCS['i4-no-vi-mock-in-src'],
         messages: {
             assetImport:
-                'A src/ module test must not import the data asset "{{source}}" — inline it as code or move the test to specs/ (CONVENTIONS I4).',
+                'A src/ module test must not import the data asset "{{source}}" — inline it as code or move the test to specs/ (I4 — see docs/10-linting.md).',
             bannedDir:
-                '`{{dir}}/` directories are banned under src/ — mocks and data are code: mockOf/mockOfDate inline, payloads in a *.fixtures.ts neighbour (CONVENTIONS I4).',
-            viMock: '`vi.mock` is banned under src/ — use mockOf/mockOfDate (CONVENTIONS I4).',
+                '`{{dir}}/` directories are banned under src/ — mocks and data are code: mockOf/mockOfDate inline, payloads in a *.fixtures.ts neighbour (I4 — see docs/10-linting.md).',
+            viMock: '`vi.mock` is banned under src/ — use mockOf/mockOfDate (I4 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

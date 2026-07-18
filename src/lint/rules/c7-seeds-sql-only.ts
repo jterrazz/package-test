@@ -33,7 +33,7 @@ export const c7SeedsSqlOnly: LintRule = {
     meta: {
         docs: RULE_DOCS['c7-seeds-sql-only'],
         messages: {
-            notSql: 'seeds/{{entry}} is not a .sql file — seeds/ carries database state only; file state goes through .fixture() (CONVENTIONS C7).',
+            notSql: 'seeds/{{entry}} is not a .sql file — seeds/ carries database state only; file state goes through .fixture() (C7 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

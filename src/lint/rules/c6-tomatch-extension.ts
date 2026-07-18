@@ -75,7 +75,7 @@ export const c6ToMatchExtension: LintRule = {
         docs: RULE_DOCS['c6-tomatch-extension'],
         messages: {
             missingExtension:
-                'toMatch("{{name}}") is missing its extension — the extension is part of the fixture name ("help.txt", never "help"); only directory-tree snapshots (expected/<name>/) omit it (CONVENTIONS C6).',
+                'toMatch("{{name}}") is missing its extension — the extension is part of the fixture name ("help.txt", never "help"); only directory-tree snapshots (expected/<name>/) omit it (C6 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

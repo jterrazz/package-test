@@ -185,7 +185,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line: 1,
-                        message: `${rel}:1: a requests/*.http file must start with a request line "METHOD /path" (CONVENTIONS D4b)`,
+                        message: `${rel}:1: a requests/*.http file must start with a request line "METHOD /path" (D4b — see docs/10-linting.md)`,
                         severity: 'error',
                     });
                 }
@@ -193,7 +193,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line,
-                        message: `${rel}:${line}: token ${token} in a requests/ file — requests are inputs, never matched; tokens are not validated here (CONVENTIONS D10)`,
+                        message: `${rel}:${line}: token ${token} in a requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/10-linting.md)`,
                         severity: 'warn',
                         token,
                     });
@@ -210,7 +210,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line: 1,
-                    message: `${rel}:1: an expected/*.http file must start with a status line "HTTP/1.1 <status>" (CONVENTIONS D4b)`,
+                    message: `${rel}:1: an expected/*.http file must start with a status line "HTTP/1.1 <status>" (D4b — see docs/10-linting.md)`,
                     severity: 'error',
                 });
             }

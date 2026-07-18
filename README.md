@@ -297,7 +297,7 @@ import { mockOf, mockOfDate } from '@jterrazz/test';
 
 ## Conventions
 
-Normative rules live in [CONVENTIONS.md](CONVENTIONS.md). A facet (`specs/<facet>/`) carries its runner(s) at its root and holds domain folders; the folder follows the assets:
+Normative rules live in the constitution ([docs/09-conventions.md](docs/09-conventions.md)); the generated per-rule catalogue is [docs/10-linting.md](docs/10-linting.md). A facet (`specs/<facet>/`) carries its runner(s) at its root and holds domain folders; the folder follows the assets:
 
 ```
 specs/<facet>/                  # api | jobs | cli | integrations | lint
@@ -318,7 +318,7 @@ Every test contains `// Given -` and `// Then -` comments (always both; `// When
 
 ### Convention enforcement — the shipped lint plugin
 
-These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) with ~40 AST rules, plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full catalogue (each rule, its channel and rationale) lives in [CONVENTIONS-CATALOG.md](CONVENTIONS-CATALOG.md).
+These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) with ~40 AST rules, plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full four-channel catalogue (each rule, its channel and rationale) is generated into [docs/10-linting.md](docs/10-linting.md).
 
 ## Requirements
 
@@ -329,6 +329,6 @@ These conventions are not just prose: the package ships an oxlint plugin (`@jter
 
 ## Docs
 
-- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI specs, assertions, tokens, contracts, services, conventions
-- API reference + LLM-friendly docs: <https://jterrazz.github.io/package-test/>
-- Agent ingestion: <https://jterrazz.github.io/package-test/llms-full.txt>
+- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI specs, assertions, tokens, contracts, services, conventions, linting
+- API reference: committed under [docs/reference/](docs/reference/) — compiled from source by `npm run docs`
+- Agent skill: [skills/jterrazz-test/](skills/jterrazz-test/) — mental model, per-facet references, generated rule reference

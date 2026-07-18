@@ -513,7 +513,7 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line,
-                message: `${rel}:${line}: result of docker-aware runner "${runner}" must be bound with \`await using\` so its containers are disposed (CONVENTIONS B5)`,
+                message: `${rel}:${line}: result of docker-aware runner "${runner}" must be bound with \`await using\` so its containers are disposed (B5 — see docs/10-linting.md)`,
                 severity: 'error',
             });
         }
@@ -603,14 +603,14 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `${rel}:${line}: .${verb}() must pass { database } — ${count} SQL databases are declared (CONVENTIONS A7)`,
+                    message: `${rel}:${line}: .${verb}() must pass { database } — ${count} SQL databases are declared (A7 — see docs/10-linting.md)`,
                     severity: 'error',
                 });
             } else if (count === 1 && hasDatabase) {
                 violations.push({
                     file: rel,
                     line,
-                    message: `${rel}:${line}: .${verb}() must not pass { database } — a single SQL database is declared (CONVENTIONS A7)`,
+                    message: `${rel}:${line}: .${verb}() must not pass { database } — a single SQL database is declared (A7 — see docs/10-linting.md)`,
                     severity: 'error',
                 });
             }
@@ -697,7 +697,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `${rel}: domain directory has conventional subdirs (${convSubdirs.join(', ')}) but no *.test.ts (CONVENTIONS C9)`,
+                message: `${rel}: domain directory has conventional subdirs (${convSubdirs.join(', ')}) but no *.test.ts (C9 — see docs/10-linting.md)`,
                 severity: 'error',
             });
             continue;
@@ -725,7 +725,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `${relEntry}: dead fixture — no test literal in ${feature} references ${sub}/${entry.name} (CONVENTIONS C9)`,
+                    message: `${relEntry}: dead fixture — no test literal in ${feature} references ${sub}/${entry.name} (C9 — see docs/10-linting.md)`,
                     severity,
                 });
             }
@@ -758,7 +758,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `${relEntry}: dead pool fixture — no spec under ${relative(rootDir, specsRoot)} references $FIXTURES/${entry.name} (CONVENTIONS C9)`,
+                    message: `${relEntry}: dead pool fixture — no spec under ${relative(rootDir, specsRoot)} references $FIXTURES/${entry.name} (C9 — see docs/10-linting.md)`,
                     severity: 'error',
                 });
             }

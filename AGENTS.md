@@ -1,6 +1,6 @@
 # Agent brief - `@jterrazz/test`
 
-Declarative testing framework for APIs, jobs, and CLIs. Three constructors — `specification.api()`, `specification.jobs()`, `specification.cli()` — with terminal actions (`.get()`/`.request()`/`.trigger()`/`.exec()` execute and resolve to typed results) and all assertions via vitest `expect()` custom matchers. Normative rules live in `CONVENTIONS.md`; narrative docs in `docs/`.
+Declarative testing framework for APIs, jobs, and CLIs. Three constructors — `specification.api()`, `specification.jobs()`, `specification.cli()` — with terminal actions (`.get()`/`.request()`/`.trigger()`/`.exec()` execute and resolve to typed results) and all assertions via vitest `expect()` custom matchers. Normative rules: the constitution is `docs/09-conventions.md`, the generated per-rule catalogue is `docs/10-linting.md` (mirrored for agents in `skills/jterrazz-test/references/rules.md`); narrative docs in `docs/`.
 
 ## Setup
 
@@ -19,7 +19,7 @@ Requires Docker running for HTTP and adapter tests.
 | Build the bundle                 | `npm run build`                   |
 | Lint + format + typecheck + knip | `npm run lint`                    |
 | Auto-fix lint issues             | `npm run lint:fix`                |
-| Generate API docs + llms.txt     | `npm run docs` (or `make docs`)   |
+| Generate API docs + catalogue    | `npm run docs` (or `make docs`)   |
 
 ## Repo layout
 
@@ -48,7 +48,7 @@ src/
 │   ├── msw/                       # intercept registration engine
 │   └── openai/  └── anthropic/    # intercept providers
 ├── vitest/                        # ALL runner coupling: expect() matchers, TEST_UPDATE / -u detection, mockOf, mockOfDate
-└── lint/                          # tool-facing static channel (I1: zero runtime imports): oxlint plugin (dist/oxlint.js) — one file per jterrazz/<rule> under rules/ (each carries its normative text as meta.docs from manifest.ts) + ast/fs-cache helpers, D4 conventions checker (checker.ts + dist/checker.js CLI), catalogue manifest + generator (manifest.ts is the SOURCE OF TRUTH for the mechanized catalogue; catalog.ts → dist/catalog.js regenerates CONVENTIONS-CATALOG.md + the docs/10 table), catalogue freshness+completeness meta-test (plugin.test.ts)
+└── lint/                          # tool-facing static channel (I1: zero runtime imports): oxlint plugin (dist/oxlint.js) — one file per jterrazz/<rule> under rules/ (each carries its normative text as meta.docs from manifest.ts) + ast/fs-cache helpers, D4 conventions checker (checker.ts + dist/checker.js CLI), catalogue manifest + generator (manifest.ts is the SOURCE OF TRUTH for the mechanized catalogue; catalog.ts → dist/catalog.js regenerates the docs/10-linting.md catalogue + skills/jterrazz-test/references/rules.md), catalogue freshness+completeness meta-test (plugin.test.ts)
 specs/                             # ONLY product specifications (I2), written with @jterrazz/test
 # LAYOUT (rule C1'): specs/<facet>/ carries its runner(s) at the ROOT (specs/<facet>/<name>.specification.ts);
 # tests live one level down in DOMAIN folders (specs/<facet>/<domain>/<aspect>.test.ts). Tests at the facet
@@ -78,7 +78,7 @@ specs/                             # ONLY product specifications (I2), written w
 
 ## Conventions
 
-- **Docs-as-code split.** `CONVENTIONS.md` is the hand-maintained **constitution** — principles, the enforcement channels, non-mechanizable criteria, process rules (C1 grouping, D11 golden-file, K1 retro-propagation), design rationales — organized by family (A runners, B chains + `job` vocab, C files/folders, D assertions/tokens, E env, F imports, G infra, H naming, I architecture, J hygiene, K retro-propagation). The **mechanized per-rule catalogue is GENERATED from the code** (`src/lint/manifest.ts`) into `CONVENTIONS-CATALOG.md` + the `docs/10-linting.md` table — never edit those by hand; add a mechanized rule to the manifest + its implementation, then `npm run docs`. No duplication: a machine-checkable rule is written once, in the code.
+- **Docs-as-code split.** `docs/09-conventions.md` is the hand-maintained **constitution** — principles, the enforcement channels, non-mechanizable criteria, process rules (C1 grouping, D11 golden-file, K1 retro-propagation), design rationales — organized by family (A runners, B chains + `job` vocab, C files/folders, D assertions/tokens, E env, F imports, G infra, H naming, I architecture, J hygiene, K retro-propagation). The **mechanized per-rule catalogue is GENERATED from the code** (`src/lint/manifest.ts`) into the `docs/10-linting.md` catalogue + `skills/jterrazz-test/references/rules.md` — never edit those by hand; add a mechanized rule to the manifest + its implementation, then `npm run docs`. No duplication: a machine-checkable rule is written once, in the code. The broader corpus/projections doctrine lives in `@jterrazz/typescript`'s `docs/06-repo-structure.md`.
 - Each mechanized rule names one of **four enforcement channels** — **static** (`jterrazz/*` oxlint plugin + the D4 conventions checker `dist/checker.js`), **checker** (bundled cross-file/token passes: C9, B5-by-inference, A7, D4/D4b/D10), **runtime** (framework refuses misuse: A6, A7, B2, B6, D7, I3), **process** (review-borne: C1, D11, K1) — plus the **meta-test** channel (framework run on itself: every token has a +/- test in `src/core/matching/`; the catalogue stays fresh via `src/lint/plugin.test.ts`). Most enforcement is programmatic, not manual review.
 - Lint config (`@jterrazz/typescript` - oxlint + oxfmt + knip + tsgo); the tsconfig typechecks `src/` AND `specs/` (fixtures excluded) — keep it that way, it's what catches result-typing regressions
 - **Self-lint**: `oxlint.config.ts` loads `./dist/oxlint.js` via `jsPlugins` and spreads `recommendedRules` — so `npm run build` MUST precede `npm run lint`. E2E lint specs live in `specs/lint/**` (one violation/compliant fixture pair per rule under `specs/fixtures/lint-violations/`), the checker step is chained in `npm run lint`. Docs: `docs/10-linting.md`
@@ -96,7 +96,6 @@ This package self-tests via its own framework. Tests under `specs/cli/` use `spe
 ## Docs
 
 - `docs/` — narrative chapters, numbered: `01` getting-started, `02` api, `03` jobs, `04` cli, `05` assertions, `06` tokens, `07` contracts, `08` services, `09` conventions, `10` linting (each ends with Pitfalls + Related)
-- `npm run docs` generates API reference + `llms.txt` + `llms-full.txt` to `.docs/` (gitignored)
-- CI auto-deploys to GitHub Pages on push to main
-- Agent ingestion: <https://jterrazz.github.io/package-test/llms-full.txt>
-- **Standing instruction (rule K1): a discovery — new edge case, defect, behavior change — grows a guard (static rule / meta-test / runtime error) that stops it recurring, in the same change.** A mechanized rule goes into `src/lint/manifest.ts` (+ its implementation), then `npm run docs` regenerates `CONVENTIONS-CATALOG.md` + the docs/10 table; a new principle or non-mechanizable criterion goes into the `CONVENTIONS.md` constitution. Update `docs/` alongside. When the public API changes, also update `README.md`, `skills/jterrazz-test/SKILL.md` + its `references/`.
+- `npm run docs` regenerates the two committed projections: the API reference (`docs/reference/`, typedoc via `typescript docs` — a code → docs cross-layer projection) and the rule catalogue (`docs/10-linting.md` + `skills/jterrazz-test/references/rules.md`, spliced from `src/lint/manifest.ts`). Both are sync-checked: `npm run lint` runs `docs --check` (the Docs sync pass) + the catalogue freshness meta-test — both must hold after one `npm run docs`
+- Docs are committed and consumed in-repo (chapters under `docs/`, the API reference under `docs/reference/`, agent routing via `skills/jterrazz-test/`); there is no rendered site and nothing is published from `docs/`
+- **Standing instruction (rule K1): a discovery — new edge case, defect, behavior change — grows a guard (static rule / meta-test / runtime error) that stops it recurring, in the same change.** A mechanized rule goes into `src/lint/manifest.ts` (+ its implementation), then `npm run docs` regenerates the `docs/10-linting.md` catalogue + `skills/jterrazz-test/references/rules.md`; a new principle or non-mechanizable criterion goes into the `docs/09-conventions.md` constitution. Update `docs/` alongside. When the public API changes, also update `README.md`, `skills/jterrazz-test/SKILL.md` + its `references/`.

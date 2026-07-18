@@ -30,7 +30,7 @@ export const f1NoSubpathImport: LintRule = {
         docs: RULE_DOCS['f1-no-subpath-import'],
         messages: {
             subpath:
-                'Import from "@jterrazz/test", not "{{source}}" — subpaths do not exist (CONVENTIONS F1; only the tool-facing @jterrazz/test/oxlint is exempt).',
+                'Import from "@jterrazz/test", not "{{source}}" — subpaths do not exist (F1 — see docs/10-linting.md; only the tool-facing @jterrazz/test/oxlint is exempt).',
         },
         type: 'problem',
     },

@@ -66,7 +66,7 @@ export const d2AwaitIoMatcher: LintRule = {
         docs: RULE_DOCS['d2-await-io-matcher'],
         messages: {
             mustAwait:
-                'expect(…).{{matcher}}(…) is IO-backed and returns a promise — it must be awaited or returned, else the assertion never runs (CONVENTIONS D2).',
+                'expect(…).{{matcher}}(…) is IO-backed and returns a promise — it must be awaited or returned, else the assertion never runs (D2 — see docs/10-linting.md).',
         },
         type: 'problem',
     },
