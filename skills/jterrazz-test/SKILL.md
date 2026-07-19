@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Use when writing integration, e2e, or command/CLI tests with @jterrazz/test. Covers the specification.api/.jobs/.cli constructors, terminal actions, expect()-based matchers, the {{token}} grammar, database seeding, intercept contracts, Docker-aware CLIs, and the Given/Then convention.
+description: Testing conventions for @jterrazz projects — unit/integration/e2e structure, vitest, testcontainers, golden files, mocks. Use when writing, organizing, or debugging tests in a jterrazz repo.
 metadata:
     version: '9.0'
 ---
