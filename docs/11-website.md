@@ -282,7 +282,7 @@ No `seeds/`, `requests/`, or `contracts/` — `specification.website()` has no `
 
 ## Pitfalls
 
-- **Passing both `server` and `url`, or neither.** `specification.website(): exactly one of server (start the site locally) or url (target a running site) is required` — the two modes are mutually exclusive.
+- **Passing both `server` and `url`, or neither.** The options type makes the invalid combinations inexpressible — the compiler rejects them before anything runs.
 - **Using `expect()` inside a scenario callback.** Forbidden (rule W1) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
 - **Reaching for `testId()` as the default locator.** It exists as an escape hatch (rule W2 warns) — prefer `button`/`link`/`field`/`heading`/`content`, the same vocabulary a user's accessibility tree exposes.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.

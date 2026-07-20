@@ -68,7 +68,6 @@
 | [Visitor](interfaces/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
 | [WebsiteHandle](interfaces/WebsiteHandle.md) | The record returned by [specification.website](variables/specification.md#property-website). Destructure with the canonical names (CONVENTIONS A3): |
 | [WebsiteSpecification](interfaces/WebsiteSpecification.md) | The `website` facet — page chain entry handed out by `specification.website()`. Setup methods chain; action methods are terminal. `.visit()` renders the page in the shared browser; `.fetch()` performs one raw HTTP exchange and never follows redirects. |
-| [WebsiteSpecificationOptions](interfaces/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). |
 
 ## Type Aliases
 
@@ -84,6 +83,7 @@
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
 | [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
 | [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |
+| [WebsiteSpecificationOptions](type-aliases/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). `server` (start the site locally) and `url` (target a running site) are mutually exclusive BY TYPE — the union makes the invalid combinations inexpressible rather than runtime-checked. |
 
 ## Variables
 

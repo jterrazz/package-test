@@ -5,7 +5,7 @@
 function button(name): ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:11
+Defined in: [core/specification/website/elements.ts:11](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L11)
 
 A button (or element with the button role), by accessible name.
 

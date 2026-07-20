@@ -5,7 +5,7 @@
 function field(label): ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:14
+Defined in: [core/specification/website/elements.ts:14](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L14)
 
 A form field, by label.
 

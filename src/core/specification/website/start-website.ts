@@ -11,8 +11,13 @@ import { ServeAdapter, type ServeOptions } from './serve.adapter.js';
 
 // ── Types ──
 
-/** Options for {@link startWebsite | specification.website}. */
-export interface WebsiteSpecificationOptions {
+/**
+ * Options for {@link startWebsite | specification.website}. `server` (start
+ * the site locally) and `url` (target a running site) are mutually
+ * exclusive BY TYPE — the union makes the invalid combinations
+ * inexpressible rather than runtime-checked.
+ */
+export type WebsiteSpecificationOptions = {
     /**
      * Cross-origin request policy for visits. Default: `'block'` with a
      * local `server` (deterministic — analytics and CDNs never leave the
@@ -24,18 +29,21 @@ export interface WebsiteSpecificationOptions {
      * `server` command. Auto-discovered from the calling file when absent.
      */
     root?: string;
-    /**
-     * Start the site locally: a shell command receiving a free port as
-     * `PORT`, polled on `ready` (default `/`) until it answers HTTP.
-     * Exactly one of `server` / `url` is required.
-     */
-    server?: ServeOptions;
-    /**
-     * Target an already-running site (a deployed URL, a preview URL, a dev
-     * server). Exactly one of `server` / `url` is required.
-     */
-    url?: string;
-}
+} & (
+    | {
+          /**
+           * Start the site locally: a shell command receiving a free port
+           * as `PORT`, polled on `ready` (default `/`) until it answers.
+           */
+          server: ServeOptions;
+          url?: never;
+      }
+    | {
+          server?: never;
+          /** Target an already-running site (a deployed or preview URL). */
+          url: string;
+      }
+);
 
 /**
  * The record returned by {@link startWebsite | specification.website}.
@@ -59,12 +67,6 @@ export async function startWebsite(options: WebsiteSpecificationOptions): Promis
     const callerDir = getCallerDir();
     await registerMatchers();
 
-    if (Boolean(options.server) === Boolean(options.url)) {
-        throw new Error(
-            'specification.website(): exactly one of `server` (start the site locally) or `url` (target a running site) is required',
-        );
-    }
-
     let serve: null | ServeAdapter = null;
     let baseUrl: string;
     if (options.server) {
@@ -72,7 +74,7 @@ export async function startWebsite(options: WebsiteSpecificationOptions): Promis
         serve = new ServeAdapter(options.server, root);
         baseUrl = await serve.start();
     } else {
-        baseUrl = options.url!.replace(/\/$/, '');
+        baseUrl = options.url.replace(/\/$/, '');
     }
 
     // One browser per runner, launched lazily on the first `.visit()` so

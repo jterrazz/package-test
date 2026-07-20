@@ -5,7 +5,7 @@
 function heading(name): ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:17
+Defined in: [core/specification/website/elements.ts:17](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L17)
 
 A heading, by accessible name.
 

@@ -5,7 +5,7 @@
 function link(name): ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:20
+Defined in: [core/specification/website/elements.ts:20](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L20)
 
 A link, by accessible name.
 
