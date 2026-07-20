@@ -49,7 +49,8 @@
         "docs": "npm run build && node dist/catalog.js && typescript docs",
         "lint": "typescript check && node dist/checker.js specs",
         "lint:fix": "typescript fix",
-        "test": "vitest --run"
+        "test": "vitest --run",
+        "pretest": "playwright install chromium"
     },
     "dependencies": {
         "better-sqlite3": "^12.11.1",
