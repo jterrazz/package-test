@@ -41,6 +41,7 @@ export const FAMILIES: Record<string, string> = {
     C: 'Fichiers & dossiers',
     D: 'Assertions',
     F: 'Imports & protection de la prod',
+    W: 'Specs website',
     I: 'Architecture du code source',
     J: 'Hygiène',
     K: 'Rétro-propagation',
@@ -73,7 +74,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'a2-known-constructors': {
         channel: 'statique',
         convention:
-            'Trois constructeurs et seulement trois : `specification.api()`, `specification.jobs()`, `specification.cli(bin)` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur.',
+            'Quatre constructeurs et seulement quatre : `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.website()` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur.',
         family: 'A',
         id: 'A2',
         rationale:
@@ -414,6 +415,26 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
         id: 'J5',
         rationale:
             'Un titre est un fragment de prose, pas une phrase — la casse minuscule le garde fragmentaire ; minusculiser un symbole nommé le mal-orthographierait.',
+    },
+    'w1-scenario-pure': {
+        channel: 'statique',
+        convention:
+            'Un scénario de visite est le When : le visiteur agit, la capture reflète l’état final ; aucun `expect()` dans le callback — les assertions vivent dans le Then, sur le résultat retourné.',
+        facet: 'website',
+        family: 'W',
+        id: 'W1',
+        rationale:
+            'Séparer l’interaction de l’assertion garde la grammaire setup → action → résultat intacte et les scénarios rejouables.',
+    },
+    'w2w-user-facing-elements': {
+        channel: 'statique',
+        convention:
+            'Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content`) ; `testId()` est l’unique échappatoire et déclenche un avertissement.',
+        facet: 'website',
+        family: 'W',
+        id: 'W2',
+        rationale:
+            'Tester ce que l’utilisateur voit (rôles, labels) rend les specs robustes aux refontes DOM ; un test-id contourne cette garantie.',
     },
 };
 

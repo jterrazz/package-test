@@ -41,9 +41,10 @@ import {
 A **specification file** (`*.specification.ts`, under `specs/`) creates a runner once per suite. A **test file** imports the runner and writes specs. Every spec is one chain: zero or more setups, then exactly one terminal action, resolving to a typed result you assert on with `expect()`.
 
 ```
-specification.api(…)  → { api, cleanup, docker, orchestrator }
-specification.jobs(…) → { jobs, cleanup, orchestrator }         // no docker — jobs never spawn containers
-specification.cli(…)  → { cli, cleanup, docker, orchestrator }
+specification.api(…)     → { api, cleanup, docker, orchestrator }
+specification.jobs(…)    → { jobs, cleanup, orchestrator }         // no docker — jobs never spawn containers
+specification.cli(…)     → { cli, cleanup, docker, orchestrator }
+specification.website(…) → { website, cleanup, url }               // no docker, no orchestrator — a browser, not a container
 ```
 
 The destructured names are canonical — no aliasing (`{ api: myApi }` is an error, rule A3) — and every specification file registers `afterAll(cleanup)` (rule A4).
@@ -210,11 +211,11 @@ specs/
 ## Pitfalls
 
 - **Hardcoding `mode: 'compose'` in a specification file.** Forbidden when `server` is defined (rule A5) — put the switch in `vitest.config.ts`. The only exception: a non-Node app (no `server` possible), where `mode: 'compose'` is mandatory and permanent.
-- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `jobs`, `cli` are enforced (rule A3).
+- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `jobs`, `cli`, `website` are enforced (rule A3).
 - **Forgetting `afterAll(cleanup)`.** Infrastructure leaks across suites; rule A4 requires it in every specification file.
 - **Importing from a subpath** (`@jterrazz/test/services`). Subpaths do not exist in v9 — everything comes from `@jterrazz/test` (rule F1).
 - **Writing `// Given` without `// Then`** (or vice versa). Every test carries both comments (rule B4); `// When` only when the action is not obvious — the chain _is_ the when.
 
 ## Related
 
-[02 — API specs](02-api.md) · [04 — CLI specs](04-cli.md) · [05 — Assertions](05-assertions.md) · [09 — Conventions](09-conventions.md)
+[02 — API specs](02-api.md) · [04 — CLI specs](04-cli.md) · [05 — Assertions](05-assertions.md) · [09 — Conventions](09-conventions.md) · [11 — Website specs](11-website.md)

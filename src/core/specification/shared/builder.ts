@@ -12,12 +12,14 @@ import type {
     InterceptTrigger,
 } from '../../contracts/types.js';
 import { parseRequestFile } from '../../http-files/http-file.js';
+import type { BrowserPort, VisitScenario } from '../../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../../ports/cli.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
 import type { ServerPort } from '../../ports/server.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
 import { HttpResult } from '../api/result.js';
 import { CliResult } from '../cli/result.js';
+import { FetchResult, PageResult } from '../website/result.js';
 import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
@@ -45,6 +47,20 @@ export interface DockerSpecConfig {
 
 /** Adapter configuration passed to the specification facets at setup time. */
 export interface SpecificationConfig {
+    /** Base URL of the website under test (website facet only). */
+    baseUrl?: string;
+    /**
+     * Lazy browser accessor (website facet only). The first `.visit()`
+     * launches the shared browser instance; `.fetch()`-only spec files never
+     * pay the browser cost.
+     */
+    browser?: () => Promise<BrowserPort>;
+    /**
+     * Cross-origin request policy for visits (website facet only): `'block'`
+     * aborts requests leaving the site under test — the browser-side analog
+     * of strict intercepts.
+     */
+    external?: 'allow' | 'block';
     command?: CliPort;
     database?: DatabasePort;
     /**
@@ -192,6 +208,26 @@ export interface CliSpecification<DatabaseKey extends string = string> {
 }
 
 /**
+ * The `website` facet — page chain entry handed out by
+ * `specification.website()`. Setup methods chain; action methods are
+ * terminal. `.visit()` renders the page in the shared browser; `.fetch()`
+ * performs one raw HTTP exchange and never follows redirects.
+ */
+export interface WebsiteSpecification {
+    /** Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls merge. */
+    headers: (headers: Record<string, string>) => WebsiteSpecification;
+
+    /** Perform one raw HTTP GET — redirects surface as 3xx results, never followed. */
+    fetch: (path: string) => Promise<FetchResult>;
+    /**
+     * Render the page in the shared browser and resolve with the captured
+     * document. With a scenario, the visitor interacts first (the When) and
+     * the capture reflects the FINAL page state.
+     */
+    visit: (path: string, scenario?: VisitScenario) => Promise<PageResult>;
+}
+
+/**
  * Fluent builder for declaring a single test specification.
  *
  * Chain setup methods ({@link seed}, {@link fixture}, {@link env}), then call
@@ -204,7 +240,11 @@ export interface CliSpecification<DatabaseKey extends string = string> {
  * only surfaces the methods that make sense for it.
  */
 export class SpecificationBuilder
-    implements ApiSpecification<string>, CliSpecification<string>, JobsSpecification<string>
+    implements
+        ApiSpecification<string>,
+        CliSpecification<string>,
+        JobsSpecification<string>,
+        WebsiteSpecification
 {
     private commandEnv: CliEnv = {};
     private config: SpecificationConfig;
@@ -456,6 +496,42 @@ export class SpecificationBuilder
         return this.executeCommand({ args, options });
     }
 
+    // ── Website actions (terminal) ──
+
+    /**
+     * Perform one raw HTTP GET against the website under test and resolve
+     * with the exchange. Redirects are never followed — a 308 IS the result,
+     * with its `location` readable on the result. The scalpel for wire-level
+     * surfaces: robots.txt, sitemaps, llms.txt, redirect policies.
+     *
+     * @example
+     *   const result = await website.fetch('/robots.txt');
+     *   expect(result.status).toBe(200);
+     *   expect(result.body).toMatch('robots.txt');
+     */
+    fetch(path: string): Promise<FetchResult> {
+        return this.executeSetup(null, () => this.runFetchAction(path));
+    }
+
+    /**
+     * Render the page in the shared browser instance and resolve with the
+     * captured document — rendered title, head elements, JSON-LD blocks,
+     * body text, console errors. One browser per runner; each visit gets a
+     * fresh, isolated context.
+     *
+     * @example
+     *   const result = await website.visit('/articles');
+     *   expect(result.head).toMatch('articles.head.json');
+     *
+     *   const result = await website.visit('/', async (visitor) => {
+     *       await visitor.click(link('Articles'));
+     *   });
+     *   expect(result.url).toContain('/articles');
+     */
+    visit(path: string, scenario?: VisitScenario): Promise<PageResult> {
+        return this.executeSetup(null, () => this.runVisitAction(path, scenario));
+    }
+
     // ── Job actions (terminal) ──
 
     /**
@@ -614,6 +690,57 @@ export class SpecificationBuilder
             response,
             testDir: this.testDir,
         });
+    }
+
+    private async runFetchAction(path: string): Promise<FetchResult> {
+        const baseUrl = this.requireBaseUrl('fetch');
+
+        const headers =
+            Object.keys(this.requestHeaders).length > 0 ? this.requestHeaders : undefined;
+        const response = await fetch(`${baseUrl}${path}`, { headers, redirect: 'manual' });
+        const body = await response.text();
+        const responseHeaders: Record<string, string> = {};
+        response.headers.forEach((value, key) => {
+            responseHeaders[key] = value;
+        });
+
+        return new FetchResult({
+            config: this.config,
+            exchange: { body, headers: responseHeaders, status: response.status },
+            testDir: this.testDir,
+        });
+    }
+
+    private async runVisitAction(path: string, scenario?: VisitScenario): Promise<PageResult> {
+        const baseUrl = this.requireBaseUrl('visit');
+        if (!this.config.browser) {
+            throw new Error('.visit() requires a browser adapter (use specification.website())');
+        }
+
+        const browser = await this.config.browser();
+        const headers =
+            Object.keys(this.requestHeaders).length > 0 ? this.requestHeaders : undefined;
+        const page = await browser.open(`${baseUrl}${path}`, {
+            baseUrl,
+            external: this.config.external ?? 'allow',
+            headers,
+            scenario,
+        });
+
+        return new PageResult({
+            config: this.config,
+            page,
+            testDir: this.testDir,
+        });
+    }
+
+    private requireBaseUrl(method: string): string {
+        if (!this.config.baseUrl) {
+            throw new Error(
+                `.${method}() requires a website under test (use specification.website())`,
+            );
+        }
+        return this.config.baseUrl;
     }
 
     private async runJobAction(name: string): Promise<BaseResult> {
@@ -792,6 +919,19 @@ export function createJobsFacet(config: SpecificationConfig): JobsSpecification<
                   ),
         seed: (file, options) => start().seed(file, options),
         trigger: (name) => start().trigger(name),
+    };
+}
+
+/**
+ * Create the `website` facet bound to the given adapter configuration.
+ */
+export function createWebsiteFacet(config: SpecificationConfig): WebsiteSpecification {
+    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
+
+    return {
+        fetch: (path) => start().fetch(path),
+        headers: (headers) => start().headers(headers),
+        visit: (path, scenario) => start().visit(path, scenario),
     };
 }
 

@@ -9,11 +9,13 @@
 | [CliResult](classes/CliResult.md) | Result from a command action (`.exec()`). |
 | [ContainerAccessor](classes/ContainerAccessor.md) | Assertion accessor for a single Docker container captured by the docker() spec mode. Mirrors the shape of [CliResult](classes/CliResult.md) so tests use the same vocabulary (`stdout.toContain`, `file(...).content`, etc.) regardless of where output came from. |
 | [DirectoryAccessor](classes/DirectoryAccessor.md) | Read-only accessor for a directory produced by a spec action. |
+| [FetchResult](classes/FetchResult.md) | Result from a raw `.fetch()` action (robots.txt, sitemaps, redirects). |
 | [FilesystemAccessor](classes/FilesystemAccessor.md) | Read-only accessor for the whole temporary working directory used by a command spec. |
 | [HttpResult](classes/HttpResult.md) | Result from an HTTP action (.request(), .get(), .post(), .put(), .delete()). |
 | [JsonAccessor](classes/JsonAccessor.md) | Read-only accessor for a JSON payload parsed from a text stream (stdout). |
 | [Matcher](classes/Matcher.md) | A dynamic-value matcher. Created via the [match](variables/match.md) factories — never constructed directly by user code. |
 | [Orchestrator](classes/Orchestrator.md) | Orchestrator for test infrastructure. Integration: starts services via testcontainers. E2E: runs full docker compose up. |
+| [PageResult](classes/PageResult.md) | Result from a rendered `.visit()` action — the page as a browser saw it. |
 | [ResponseAccessor](classes/ResponseAccessor.md) | Read-only accessor for an HTTP response. |
 | [TableAccessor](classes/TableAccessor.md) | Read-only accessor for a database table after a specification run. |
 | [TextAccessor](classes/TextAccessor.md) | Read-only accessor for a captured text handle — THE universal one: stdout, stderr, container logs, and file text all surface as a `TextAccessor`. |
@@ -25,6 +27,12 @@
 | [ApiHandle](interfaces/ApiHandle.md) | The record returned by [specification.api](variables/specification.md#property-api). Destructure with the canonical names (CONVENTIONS A3): |
 | [ApiSpecification](interfaces/ApiSpecification.md) | The `api` facet — HTTP chain entry handed out by `specification.api()`. Setup methods chain; action methods are terminal: they execute the spec and resolve to the result. |
 | [ApiSpecificationOptions](interfaces/ApiSpecificationOptions.md) | Options for [specification.api](variables/specification.md#property-api). |
+| [BrowserConsoleMessage](interfaces/BrowserConsoleMessage.md) | A console message emitted while the page loaded or the scenario ran. |
+| [BrowserLinkElement](interfaces/BrowserLinkElement.md) | A `<link>` element captured from the rendered document's head. |
+| [BrowserMetaElement](interfaces/BrowserMetaElement.md) | A `<meta>` element captured from the rendered document's head. |
+| [BrowserOpenOptions](interfaces/BrowserOpenOptions.md) | Per-visit options forwarded to the browser context. |
+| [BrowserPage](interfaces/BrowserPage.md) | The rendered page captured by a browser visit — the FINAL state when a scenario ran. Extraction happens in-page (the browser IS the HTML parser); interpretation of the raw elements belongs to core. |
+| [BrowserPort](interfaces/BrowserPort.md) | Abstract browser interface for the website specification runner. One implementation lives in `integrations/playwright/` — a single shared browser instance per runner; each `open()` gets a fresh, isolated context. |
 | [CaptureScope](interfaces/CaptureScope.md) | Named captures recorded by `match.ref()` / `{{type#ref}}` placeholders. One scope lives on each spec result — every assertion chained off the same result shares it, and a new chain starts fresh. |
 | [CliHandle](interfaces/CliHandle.md) | The record returned by [specification.cli](variables/specification.md#property-cli). Destructure with the canonical names (CONVENTIONS A3): |
 | [CliOutput](interfaces/CliOutput.md) | Raw output from a command execution, including exit code and captured output streams. |
@@ -34,6 +42,7 @@
 | [ContainerPort](interfaces/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
 | [DatabasePort](interfaces/DatabasePort.md) | Abstract database interface for specification runners. Implement this to plug in your database stack (e.g. Postgres, SQLite). |
 | [DockerSpecConfig](interfaces/DockerSpecConfig.md) | Configuration for the docker-aware cli mode. When set on [SpecificationConfig](interfaces/SpecificationConfig.md), the cli runner generates a test-run id, injects it into the child env under `envVar`, then queries Docker for every container carrying `testRunLabel=<id>` after the command exits. |
+| [ElementRef](interfaces/ElementRef.md) | A user-facing element descriptor — pure data, built by the element vocabulary (`button()`, `link()`, `field()`, …) and translated into concrete locators by the browser integration. CSS/XPath selectors are deliberately not expressible: user-facing elements are the only surface. |
 | [ExecOptions](interfaces/ExecOptions.md) | Options for the long-running form of `.exec()` (CONVENTIONS B2). When either option is present the process is spawned and observed: it resolves as soon as `waitFor` appears in stdout/stderr, and is killed when `timeout` elapses (exit code 124). |
 | [FileAccessor](interfaces/FileAccessor.md) | Read-only handle to a single file produced by a spec action. |
 | [InterceptContract](interfaces/InterceptContract.md) | A declared external interaction: what to match and what to reply, together in one named artifact. Contracts live in flat TypeScript files under `contracts/` next to the tests that use them — `<name>.<provider>.ts` with `provider ∈ { openai, anthropic, http }` (CONVENTIONS C4) — so the business payload (prompts, JSON responses) is visible at a glance while the real HTTP call stays mocked underneath (MSW). |
@@ -50,11 +59,16 @@
 | [MockDatePort](interfaces/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
 | [PostgresOptions](interfaces/PostgresOptions.md) | - |
 | [RedisOptions](interfaces/RedisOptions.md) | - |
+| [ServeOptions](interfaces/ServeOptions.md) | Options for the local server started by `specification.website()`. |
 | [ServerPort](interfaces/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
 | [ServerResponse](interfaces/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
 | [ServiceHandle](interfaces/ServiceHandle.md) | A service handle — returned by factory functions like postgres(), redis(). Mutable: connectionString is populated after the orchestrator starts containers. |
 | [SpecificationConfig](interfaces/SpecificationConfig.md) | Adapter configuration passed to the specification facets at setup time. |
 | [SqliteOptions](interfaces/SqliteOptions.md) | - |
+| [Visitor](interfaces/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
+| [WebsiteHandle](interfaces/WebsiteHandle.md) | The record returned by [specification.website](variables/specification.md#property-website). Destructure with the canonical names (CONVENTIONS A3): |
+| [WebsiteSpecification](interfaces/WebsiteSpecification.md) | The `website` facet — page chain entry handed out by `specification.website()`. Setup methods chain; action methods are terminal. `.visit()` renders the page in the shared browser; `.fetch()` performs one raw HTTP exchange and never follows redirects. |
+| [WebsiteSpecificationOptions](interfaces/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). |
 
 ## Type Aliases
 
@@ -69,6 +83,7 @@
 | [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
 | [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
+| [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |
 
 ## Variables
 
@@ -86,11 +101,17 @@
 
 | Function | Description |
 | ------ | ------ |
+| [button](functions/button.md) | A button (or element with the button role), by accessible name. |
+| [content](functions/content.md) | An element containing the given text. |
 | [defineContract](functions/defineContract.md) | Declare an intercept contract. Identity function — its value is the enforced shape and the naming convention: |
+| [field](functions/field.md) | A form field, by label. |
 | [findContainersByLabel](functions/findContainersByLabel.md) | Return all container IDs (running or stopped) that carry `key=value`. |
+| [heading](functions/heading.md) | A heading, by accessible name. |
 | [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
+| [link](functions/link.md) | A link, by accessible name. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
 | [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |
 | [sqlite](functions/sqlite.md) | Create a SQLite service handle. Uses file-copy isolation for parallel tests. |
+| [testId](functions/testId.md) | The escape hatch: an element by `data-testid`. Prefer user-facing elements. |
 | [text](functions/text.md) | Wrap an arbitrary string into a [TextAccessor](classes/TextAccessor.md) anchored on the calling test's directory — the same caller-detection the builders use. |

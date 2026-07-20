@@ -6,19 +6,19 @@
 
 ## A — Création des runners
 
-| Code | Implementation                  | Channel  | Enforces                                                                                                                                                                             |
-| ---- | ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A1   | `a1-specification-file`         | statique | Un runner ne se crée que dans un fichier `*.specification.ts` sous `specs/` : appeler `specification.*` ailleurs est une erreur.                                                     |
-| A2   | `a2-known-constructors`         | statique | Trois constructeurs et seulement trois : `specification.api()`, `specification.jobs()`, `specification.cli(bin)` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur.    |
-| A3   | `a3-no-destructure-alias`       | statique | Le retour se destructure avec le nom canonique du constructeur, sans alias (`{ api, cleanup, docker }`) ; renommer (`{ api: monApi }`) est une erreur.                               |
-| A4   | `a4-cleanup-afterall`           | statique | Le fichier de specification passe `cleanup` à `afterAll` ; un `cleanup` destructuré mais jamais transmis est une erreur.                                                             |
-| A5   | `a5-mode-with-server`           | statique | `mode` n’existe que sur `specification.api()` et n’est jamais hardcodé quand `server` est défini — le switch vit dans `vitest.config.ts`.                                            |
-| A6   | `a6w-redundant-compose-service` | statique | `composeService:` dérivable de la clé (égal à la clé exacte ou à sa conversion kebab-case) est redondant → warning.                                                                  |
-| A9   | `a9w-redundant-root`            | statique | `root` pointant vers le dossier que la remontée automatique aurait trouvé est redondant → warning.                                                                                   |
-| A10  | `a10-duplicate-binding`         | statique | Dans un même record `services`, deux clés ne peuvent pas se lier au même service compose (même dérivation kebab-case, ou même `composeService`).                                     |
-| A7   | `a7-database-property`          | checker  | Avec ≥ 2 bases, `database:` est obligatoire sur chaque `.seed()`/`.table()` ; avec une seule, il est interdit — vérifié en croisant le record `services:` avec les appels des tests. |
-| A6   | `a6-ambiguous-binding`          | runtime  | Un binding ambigu (le compose déclare à la fois la clé exacte ET sa forme kebab-case) est refusé à l’exécution.                                                                      |
-| A7   | `a7-database-runtime`           | runtime  | Le framework lève à l’exécution si `database:` est absent avec ≥ 2 bases, ou présent avec une seule (double le canal checker).                                                       |
+| Code | Implementation                  | Channel  | Enforces                                                                                                                                                                                                       |
+| ---- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | `a1-specification-file`         | statique | Un runner ne se crée que dans un fichier `*.specification.ts` sous `specs/` : appeler `specification.*` ailleurs est une erreur.                                                                               |
+| A2   | `a2-known-constructors`         | statique | Quatre constructeurs et seulement quatre : `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.website()` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur. |
+| A3   | `a3-no-destructure-alias`       | statique | Le retour se destructure avec le nom canonique du constructeur, sans alias (`{ api, cleanup, docker }`) ; renommer (`{ api: monApi }`) est une erreur.                                                         |
+| A4   | `a4-cleanup-afterall`           | statique | Le fichier de specification passe `cleanup` à `afterAll` ; un `cleanup` destructuré mais jamais transmis est une erreur.                                                                                       |
+| A5   | `a5-mode-with-server`           | statique | `mode` n’existe que sur `specification.api()` et n’est jamais hardcodé quand `server` est défini — le switch vit dans `vitest.config.ts`.                                                                      |
+| A6   | `a6w-redundant-compose-service` | statique | `composeService:` dérivable de la clé (égal à la clé exacte ou à sa conversion kebab-case) est redondant → warning.                                                                                            |
+| A9   | `a9w-redundant-root`            | statique | `root` pointant vers le dossier que la remontée automatique aurait trouvé est redondant → warning.                                                                                                             |
+| A10  | `a10-duplicate-binding`         | statique | Dans un même record `services`, deux clés ne peuvent pas se lier au même service compose (même dérivation kebab-case, ou même `composeService`).                                                               |
+| A7   | `a7-database-property`          | checker  | Avec ≥ 2 bases, `database:` est obligatoire sur chaque `.seed()`/`.table()` ; avec une seule, il est interdit — vérifié en croisant le record `services:` avec les appels des tests.                           |
+| A6   | `a6-ambiguous-binding`          | runtime  | Un binding ambigu (le compose déclare à la fois la clé exacte ET sa forme kebab-case) est refusé à l’exécution.                                                                                                |
+| A7   | `a7-database-runtime`           | runtime  | Le framework lève à l’exécution si `database:` est absent avec ≥ 2 bases, ou présent avec une seule (double le canal checker).                                                                                 |
 
 ## B — Chaînes de spec
 
@@ -102,3 +102,10 @@
 | Code | Implementation         | Channel | Enforces                                                                                                                                                                                            |
 | ---- | ---------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | K1   | `k1-retro-propagation` | process | Toute classe de défaut découverte produit, dans le même change, la garde qui l’empêche de revenir (règle statique, meta-test ou erreur runtime) — ou documente pourquoi aucun canal n’est possible. |
+
+## W — Specs website
+
+| Code | Implementation             | Channel  | Enforces                                                                                                                                                                                  |
+| ---- | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1   | `w1-scenario-pure`         | statique | Un scénario de visite est le When : le visiteur agit, la capture reflète l’état final ; aucun `expect()` dans le callback — les assertions vivent dans le Then, sur le résultat retourné. |
+| W2   | `w2w-user-facing-elements` | statique | Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content`) ; `testId()` est l’unique échappatoire et déclenche un avertissement.                       |

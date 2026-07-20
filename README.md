@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Declarative testing framework for APIs, jobs, and CLIs. Three constructors — `specification.api()`, `specification.jobs()`, `specification.cli()` — and specs that read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
+Declarative testing framework for APIs, jobs, CLIs, and websites. Four constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()` — and specs that read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
 
 ```bash
 npm install -D @jterrazz/test vitest
@@ -76,9 +76,38 @@ test('builds the project', async () => {
 });
 ```
 
-Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
+### Website testing (browser)
 
-## The three constructors
+```typescript
+// specs/website/website.specification.ts
+import { specification } from '@jterrazz/test';
+import { afterAll } from 'vitest';
+
+export const { cleanup, website } = await specification.website({
+    server: { command: 'node specs/fixtures/website-app/server.mjs', ready: '/' },
+});
+
+afterAll(cleanup);
+```
+
+```typescript
+// specs/website/visit/head.test.ts
+import { expect, test } from 'vitest';
+import { website } from '../website.specification.js';
+
+test('captures the full head surface of a rendered page', async () => {
+    // Given - the fixture homepage
+    const result = await website.visit('/');
+
+    // Then - one golden covers title, canonical, alternates, and metas
+    expect(result.status).toBe(200);
+    expect(result.head).toMatch('home.head.json');
+});
+```
+
+Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.fetch()`, `.visit()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
+
+## The four constructors
 
 One constructor per tested interface, each returning a record destructured with its canonical name:
 
@@ -87,6 +116,7 @@ One constructor per tested interface, each returning a record destructured with 
 | `specification.api(options)`      | `{ api, cleanup, docker, orchestrator }` | `.request(file)`, `.get()`, `.post()`, `.put()`, `.delete()` |
 | `specification.jobs(options)`     | `{ jobs, cleanup, orchestrator }`        | `.trigger(name)`                                             |
 | `specification.cli(bin, options)` | `{ cli, cleanup, docker, orchestrator }` | `.exec(args, { waitFor?, timeout? }?)`                       |
+| `specification.website(options)`  | `{ website, cleanup, url }`              | `.fetch(path)`, `.visit(path, scenario?)`                    |
 
 ### `specification.api({ services, server, mode?, root? })`
 
@@ -146,35 +176,57 @@ export const { cli, cleanup } = await specification.cli('my-migrate-tool', {
 const result = await cli.seed('legacy-schema.sql').exec('up');
 ```
 
+### `specification.website({ server?, url?, external?, root? })`
+
+Tests a rendered website: `.fetch(path)` for a raw HTTP exchange (redirects never followed), `.visit(path, scenario?)` for a page rendered in a real chromium. Exactly one of `server` (start the site locally — a free port injected as `PORT`, polled on `ready`) or `url` (target a running site) is required.
+
+```typescript
+export const { website, cleanup } = await specification.website({
+    server: { command: 'node specs/fixtures/website-app/server.mjs', ready: '/' },
+});
+
+// Raw exchange — status + headers, redirects surface as 3xx
+const redirect = await website.fetch('/old');
+
+// Rendered page, optionally driven by a scenario (the When)
+const page = await website.visit('/', async (visitor) => {
+    await visitor.click(link('Articles'));
+});
+```
+
+The handle destructures to `{ website, cleanup, url }` — no `docker`, no `orchestrator`. `.visit()` needs playwright (`npm install -D playwright && npx playwright install chromium`) — an optional peer dependency, only loaded when a spec actually renders a page. Full reference: [docs/11-website.md](docs/11-website.md).
+
 ### Root auto-discovery
 
-When `root` is absent, the framework walks up from the specification file to the first directory containing `docker/compose.test.yaml`, else the first containing `package.json`. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution) — it is not a fixtures root; `.fixture()` resolves its own paths.
+When `root` is absent, the framework walks up from the specification file to the first directory containing `docker/compose.test.yaml`, else the first containing `package.json`. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
 
 ## Builder API
 
 ### Setup (chainable)
 
-| Method                                  | Facets    | Description                                                                                            |
-| --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
-| `.seed("file.sql", { database? })`      | all       | Load SQL from `seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1) |
-| `.fixture("file")`                      | cli       | Copy the feature-local `fixtures/file` into the working directory                                      |
-| `.fixture("$FIXTURES/name/")`           | cli       | Spread the shared `specs/fixtures/name/` project into the cwd (trailing `/` = contents; layers)        |
-| `.env({ KEY: "value" })`                | cli       | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                             |
-| `.headers({ "Accept-Language": "fr" })` | api       | Set HTTP request headers (merge on top of `.http` file headers)                                        |
-| `.intercept(contract)`                  | api, jobs | Intercept an outgoing HTTP call with a declared contract                                               |
-| `.intercept(trigger, response)`         | api, jobs | Inline intercept for one-off cases                                                                     |
+| Method                                  | Facets       | Description                                                                                            |
+| --------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------ |
+| `.seed("file.sql", { database? })`      | all          | Load SQL from `seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1) |
+| `.fixture("file")`                      | cli          | Copy the feature-local `fixtures/file` into the working directory                                      |
+| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/fixtures/name/` project into the cwd (trailing `/` = contents; layers)        |
+| `.env({ KEY: "value" })`                | cli          | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                             |
+| `.headers({ "Accept-Language": "fr" })` | api, website | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)             |
+| `.intercept(contract)`                  | api, jobs    | Intercept an outgoing HTTP call with a declared contract                                               |
+| `.intercept(trigger, response)`         | api, jobs    | Inline intercept for one-off cases                                                                     |
 
 ### Actions (terminal)
 
-| Method                                     | Facet | Resolves to  | Description                                                                        |
-| ------------------------------------------ | ----- | ------------ | ---------------------------------------------------------------------------------- |
-| `.request("create-user.http")`             | api   | `HttpResult` | Send the COMPLETE request from `requests/<file>` (method, path, headers, raw body) |
-| `.get(path)` / `.delete(path)`             | api   | `HttpResult` | Inline requests for simple cases                                                   |
-| `.post(path, body?)` / `.put(path, body?)` | api   | `HttpResult` | Inline body: plain object, JSON-serialized                                         |
-| `.trigger("name")`                         | jobs  | `BaseResult` | Execute a registered job                                                           |
-| `.exec("args")`                            | cli   | `CliResult`  | Run the command                                                                    |
-| `.exec(["build", "start"])`                | cli   | `CliResult`  | Sequence in the same cwd; stops on first non-zero exit                             |
-| `.exec("dev", { waitFor, timeout? })`      | cli   | `CliResult`  | Long-running: resolves at the pattern, killed at `timeout` (default 10 s)          |
+| Method                                     | Facet   | Resolves to   | Description                                                                           |
+| ------------------------------------------ | ------- | ------------- | ------------------------------------------------------------------------------------- |
+| `.request("create-user.http")`             | api     | `HttpResult`  | Send the COMPLETE request from `requests/<file>` (method, path, headers, raw body)    |
+| `.get(path)` / `.delete(path)`             | api     | `HttpResult`  | Inline requests for simple cases                                                      |
+| `.post(path, body?)` / `.put(path, body?)` | api     | `HttpResult`  | Inline body: plain object, JSON-serialized                                            |
+| `.trigger("name")`                         | jobs    | `BaseResult`  | Execute a registered job                                                              |
+| `.exec("args")`                            | cli     | `CliResult`   | Run the command                                                                       |
+| `.exec(["build", "start"])`                | cli     | `CliResult`   | Sequence in the same cwd; stops on first non-zero exit                                |
+| `.exec("dev", { waitFor, timeout? })`      | cli     | `CliResult`   | Long-running: resolves at the pattern, killed at `timeout` (default 10 s)             |
+| `.fetch(path)`                             | website | `FetchResult` | One raw HTTP exchange — redirects surface as 3xx, never followed                      |
+| `.visit(path, scenario?)`                  | website | `PageResult`  | Render the page in a shared chromium; with a scenario, the capture is the final state |
 
 One chain = one terminal action; databases reset at the start of every chain. Every cli spec runs in a fresh, empty temp directory.
 
@@ -322,13 +374,14 @@ These conventions are not just prose: the package ships an oxlint plugin (`@jter
 
 ## Requirements
 
-- **Docker** - testcontainers for node mode, docker compose for compose mode; not needed for `sqlite()` or plain cli specs
+- **Docker** - testcontainers for node mode, docker compose for compose mode; not needed for `sqlite()`, plain cli specs, or website specs
 - **vitest** - peer dependency
+- **playwright** - optional peer dependency, only needed for `.visit()`: `npm install -D playwright && npx playwright install chromium`
 - **msw** - bundled as a direct dependency (powers `.intercept()`); no separate install
 - **hono** (or any web framework) - supplied by your project for in-process apps; the adapter only needs an object with a `request()` method, so it is not a peer
 
 ## Docs
 
-- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI specs, assertions, tokens, contracts, services, conventions, linting
+- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI/website specs, assertions, tokens, contracts, services, conventions, linting
 - API reference: committed under [docs/reference/](docs/reference/) — compiled from source by `npm run docs`
 - Agent skill: [skills/jterrazz-test/](skills/jterrazz-test/) — mental model, per-facet references, generated rule reference

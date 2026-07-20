@@ -31,6 +31,7 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | D     | Assertions, tokens, snapshots, strict intercepts                     | [05](05-assertions.md), [06](06-tokens.md), [07](07-contracts.md)          |
 | E     | Framework environment variables                                      | [01](01-getting-started.md)                                                |
 | F     | Imports (single package root) & production protection                | [01](01-getting-started.md)                                                |
+| W     | Website specs (visit scenarios, user-facing elements)                | [11](11-website.md)                                                        |
 | G     | Infrastructure (compose, isolation, docker-aware)                    | [04](04-cli.md), [08](08-services.md)                                      |
 | H     | Naming recap                                                         | below                                                                      |
 | I     | Source-code architecture (four layers, sibling module tests)         | `AGENTS.md`                                                                |
@@ -67,9 +68,9 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 
 | Thing           | Rule                                                                                        |
 | --------------- | ------------------------------------------------------------------------------------------- |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `integrations/`, `lint/`, `fixtures/`)                   |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `integrations/`, `lint/`, `fixtures/`)       |
 | Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                 |
-| Instances       | `api`, `jobs`, `cli` — enforced by the destructuring (A3)                                   |
+| Instances       | `api`, `jobs`, `cli`, `website` — enforced by the destructuring (A3)                        |
 | Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                   |
 | Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                     |
 | Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                             |

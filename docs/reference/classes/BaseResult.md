@@ -13,6 +13,8 @@ and `{{type#ref}}` placeholders are scoped to one spec execution.
 
 - [`CliResult`](CliResult.md)
 - [`HttpResult`](HttpResult.md)
+- [`FetchResult`](FetchResult.md)
+- [`PageResult`](PageResult.md)
 
 ## Constructors
 

@@ -453,8 +453,21 @@ async function toMatchRows(
 }
 
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {
+    if (received instanceof TextAccessor) {
+        const content = received.comparableText;
+        const pass = content === '';
+        return {
+            message: () =>
+                pass
+                    ? `expected ${received.streamName} not to be empty`
+                    : `Expected ${received.streamName} to be empty, but it contains:\n${content}`,
+            pass,
+        };
+    }
     if (!(received instanceof TableAccessor)) {
-        throw new TypeError('toBeEmpty: unsupported subject — expected result.table(...).');
+        throw new TypeError(
+            'toBeEmpty: unsupported subject — expected result.table(...) or a text accessor.',
+        );
     }
 
     const rows = await received.query(['*']);

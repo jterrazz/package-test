@@ -15,6 +15,7 @@ const INTEGRATION_DEPS: Record<string, string[]> = {
     hono: ['hono', '@hono/node-server'],
     msw: ['msw'],
     openai: ['openai'],
+    playwright: ['playwright'],
     postgres: ['pg'],
     redis: ['redis'],
     sqlite: ['better-sqlite3'],
@@ -111,6 +112,12 @@ export const i1LayerBoundaries: LintRule = {
                     inside === 'core/specification/shared/builder.ts'
                 ) {
                     return null; // Sanctioned lazy seam: builder → integrations/msw.
+                }
+                if (
+                    target.startsWith('integrations/playwright/') &&
+                    inside === 'core/specification/website/start-website.ts'
+                ) {
+                    return null; // Sanctioned lazy seam: website runner → integrations/playwright.
                 }
                 return 'crossLayer';
             }

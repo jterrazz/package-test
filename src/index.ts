@@ -32,6 +32,11 @@ export {
     type JobsHandle,
     type JobsSpecificationOptions,
 } from './core/specification/jobs/start-jobs.js';
+export {
+    type WebsiteHandle,
+    type WebsiteSpecificationOptions,
+} from './core/specification/website/start-website.js';
+export { type ServeOptions } from './core/specification/website/serve.adapter.js';
 export { type DatabaseKeys, type ServiceRecord } from './core/specification/shared/services.js';
 
 // Facets
@@ -42,6 +47,7 @@ export type {
     JobHandle,
     JobsSpecification,
     SpecificationConfig,
+    WebsiteSpecification,
 } from './core/specification/shared/builder.js';
 
 // Match — dynamic values in assertions and fixtures
@@ -57,6 +63,7 @@ export {
     removeContainers,
 } from './integrations/docker/docker-lookup.js';
 export { HttpResult } from './core/specification/api/result.js';
+export { FetchResult, PageResult } from './core/specification/website/result.js';
 export { DirectoryAccessor } from './core/specification/shared/result/directory.js';
 export { FilesystemAccessor } from './core/specification/shared/result/filesystem.js';
 export { JsonAccessor } from './core/specification/shared/result/json.js';
@@ -71,6 +78,27 @@ export type { IsolationStrategy } from './core/ports/isolation.port.js';
 export type { ServiceHandle } from './core/ports/service.port.js';
 export type { ServerPort, ServerResponse } from './core/ports/server.port.js';
 export type { ContainerPort } from './core/ports/container.port.js';
+export type {
+    BrowserConsoleMessage,
+    BrowserLinkElement,
+    BrowserMetaElement,
+    BrowserOpenOptions,
+    BrowserPage,
+    BrowserPort,
+    ElementRef,
+    Visitor,
+    VisitScenario,
+} from './core/ports/browser.port.js';
+
+// The element vocabulary — user-facing descriptors for visit scenarios
+export {
+    button,
+    content,
+    field,
+    heading,
+    link,
+    testId,
+} from './core/specification/website/elements.js';
 
 // Advanced usage — the orchestrator is public; the Exec/Fetch/Hono adapters are
 // Internal wiring (driven by the constructors) and deliberately not re-exported.
@@ -126,8 +154,18 @@ registerComposeServiceFactory('redis', (service) => redis({ composeService: serv
 declare module 'vitest' {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     interface Matchers<T = any> {
-        /** Assert the table has zero rows. Async — queries the database. */
-        toBeEmpty: T extends TableAccessorType ? () => Promise<void> : never;
+        /**
+         * Assert the subject is empty — zero rows for a table (async), an
+         * empty stream for a text accessor (console, errors, stdout).
+         */
+        toBeEmpty: T extends TableAccessorType
+            ? () => Promise<void>
+            : // Structural marker rather than the class: the augmentation is
+              // Loaded twice (src + bundled dist) and CaptureScope's private
+              // State makes the class copies nominally distinct.
+              T extends { readonly comparableText: string }
+              ? () => Promise<void>
+              : never;
         /** Assert the container is running. Async — docker-backed subject. */
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**

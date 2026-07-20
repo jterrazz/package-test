@@ -1,0 +1,14 @@
+{
+    "alternates": {
+        "en": "https://site.test/",
+        "fr": "https://site.test/fr/",
+        "x-default": "https://site.test/"
+    },
+    "canonical": "https://site.test/",
+    "metas": {
+        "description": "A tiny site the specs can trust.",
+        "og:title": "Fixture — Home",
+        "og:image": "https://site.test/assets/card.png"
+    },
+    "title": "Fixture — Home"
+}

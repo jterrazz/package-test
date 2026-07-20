@@ -5,7 +5,7 @@
 const specification: object;
 ```
 
-Defined in: [core/specification/shared/specification.ts:29](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L29)
+Defined in: [core/specification/shared/specification.ts:30](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L30)
 
 The three specification constructors (CONVENTIONS A2) — created in a
 `*.specification.ts` file under `specs/`, destructured with canonical
@@ -15,9 +15,10 @@ names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4).
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-api"></a> `api()` | \<`Services`\>(`options`) => `Promise`\<[`ApiHandle`](../interfaces/ApiHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startApi` | Test an HTTP app. Mode `'node'` (default) starts the declared services via testcontainers and runs the app in-process; mode `'compose'` runs `docker compose up` on `docker/compose.test.yaml` and sends real HTTP requests to the app service. Resolution: `options.mode` > `TEST_MODE` env var > `'node'`. Only `.api()` has a mode. | [core/specification/shared/specification.ts:37](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L37) |
-| <a id="property-cli"></a> `cli()` | \<`Services`\>(`bin`, `options`) => `Promise`\<[`CliHandle`](../interfaces/CliHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startCli` | Test a command binary. Each spec runs in a fresh temp directory. | [core/specification/shared/specification.ts:43](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L43) |
-| <a id="property-jobs"></a> `jobs()` | \<`Services`\>(`options`) => `Promise`\<[`JobsHandle`](../interfaces/JobsHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startJobs` | Test background jobs. Jobs run in-process by definition — no HTTP server, no mode. `.trigger(name)` is the terminal action. | [core/specification/shared/specification.ts:48](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L48) |
+| <a id="property-api"></a> `api()` | \<`Services`\>(`options`) => `Promise`\<[`ApiHandle`](../interfaces/ApiHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startApi` | Test an HTTP app. Mode `'node'` (default) starts the declared services via testcontainers and runs the app in-process; mode `'compose'` runs `docker compose up` on `docker/compose.test.yaml` and sends real HTTP requests to the app service. Resolution: `options.mode` > `TEST_MODE` env var > `'node'`. Only `.api()` has a mode. | [core/specification/shared/specification.ts:38](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L38) |
+| <a id="property-cli"></a> `cli()` | \<`Services`\>(`bin`, `options`) => `Promise`\<[`CliHandle`](../interfaces/CliHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startCli` | Test a command binary. Each spec runs in a fresh temp directory. | [core/specification/shared/specification.ts:44](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L44) |
+| <a id="property-jobs"></a> `jobs()` | \<`Services`\>(`options`) => `Promise`\<[`JobsHandle`](../interfaces/JobsHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startJobs` | Test background jobs. Jobs run in-process by definition — no HTTP server, no mode. `.trigger(name)` is the terminal action. | [core/specification/shared/specification.ts:49](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L49) |
+| <a id="property-website"></a> `website()` | (`options`) => `Promise`\<[`WebsiteHandle`](../interfaces/WebsiteHandle.md)\> | `startWebsite` | Test a deployed or locally-served website. `server` starts the site (a shell command receiving `PORT`); `url` targets a running one. `.visit(path)` renders the page in a single shared browser instance; `.fetch(path)` performs one raw HTTP exchange (redirects never followed). | [core/specification/shared/specification.ts:57](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L57) |
 
 ## Example
 

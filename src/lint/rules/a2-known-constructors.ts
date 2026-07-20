@@ -2,13 +2,14 @@ import { memberPropertyName } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
-/** The three constructors, and only three (A2 — see docs/10-linting.md). */
-const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'jobs']);
+/** The four constructors, and only four (A2 — see docs/10-linting.md). */
+const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'jobs', 'website']);
 
 /**
- * CONVENTIONS A2 — `specification.api()`, `specification.jobs()` and
- * `specification.cli()` are the only members. Any other access
- * (`specification.app`, `.http`, `.stack`, …) is flagged at the member site.
+ * CONVENTIONS A2 — `specification.api()`, `specification.jobs()`,
+ * `specification.cli()` and `specification.website()` are the only members.
+ * Any other access (`specification.app`, `.http`, `.stack`, …) is flagged at
+ * the member site.
  */
 export const a2KnownConstructors: LintRule = {
     create(context: RuleContext) {
@@ -29,7 +30,7 @@ export const a2KnownConstructors: LintRule = {
         docs: RULE_DOCS['a2-known-constructors'],
         messages: {
             unknownConstructor:
-                'specification.{{member}} does not exist — the only constructors are specification.api(), specification.jobs() and specification.cli() (A2 — see docs/10-linting.md).',
+                'specification.{{member}} does not exist — the only constructors are specification.api(), specification.jobs(), specification.cli() and specification.website() (A2 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

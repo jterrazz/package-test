@@ -49,6 +49,8 @@
         "jterrazz/j2-no-sleep-in-specs": "error",
         "jterrazz/j3-no-expectless-test": "error",
         "jterrazz/j4-unique-test-names": "error",
-        "jterrazz/j5-lowercase-title": "error"
+        "jterrazz/j5-lowercase-title": "error",
+        "jterrazz/w1-scenario-pure": "error",
+        "jterrazz/w2w-user-facing-elements": "warn"
     }
 }

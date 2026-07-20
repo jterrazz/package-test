@@ -34,6 +34,13 @@ export default defineConfig({
             },
             {
                 test: {
+                    name: 'website',
+                    // Needs playwright + `npx playwright install chromium`; no Docker.
+                    include: ['specs/website/**/*.test.ts'],
+                },
+            },
+            {
+                test: {
                     name: 'integrations',
                     // Sequential: tests container lifecycle (start/stop) — inherently serial
                     fileParallelism: false,

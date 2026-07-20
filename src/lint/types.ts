@@ -67,6 +67,11 @@ export type RuleDoc = {
     channel: 'checker' | 'process' | 'runtime' | 'statique';
     /** The French normative sentence (the constitution's per-rule text, moved here). */
     convention: string;
+    /**
+     * The specification facet the rule guards — segments the catalogue like
+     * the constructors segment the API. `'shared'` for cross-facet rules.
+     */
+    facet?: 'api' | 'cli' | 'jobs' | 'shared' | 'website';
     /** Convention family letter, e.g. `'A'`. */
     family: string;
     /** Convention code, e.g. `'A1'`. */

@@ -1,0 +1,8 @@
+[
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Fixture",
+        "url": "https://site.test"
+    }
+]

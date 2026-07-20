@@ -69,11 +69,18 @@
         "@types/pg": "^8.20.0",
         "hono": "^4.12.30",
         "oxlint": "^1.74.0",
+        "playwright": "^1.49.0",
         "tsdown": "^0.22.7",
         "vitest": "^4.1.10"
     },
     "peerDependencies": {
+        "playwright": "^1.49.0",
         "vitest": "^4.1.10"
+    },
+    "peerDependenciesMeta": {
+        "playwright": {
+            "optional": true
+        }
     },
     "engines": {
         "node": ">=20"

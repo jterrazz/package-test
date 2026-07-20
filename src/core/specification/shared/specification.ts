@@ -1,6 +1,7 @@
 import { startApi } from '../api/start-api.js';
 import { startCli } from '../cli/start-cli.js';
 import { startJobs } from '../jobs/start-jobs.js';
+import { startWebsite } from '../website/start-website.js';
 
 /**
  * The three specification constructors (CONVENTIONS A2) — created in a
@@ -46,4 +47,12 @@ export const specification = {
      * server, no mode. `.trigger(name)` is the terminal action.
      */
     jobs: startJobs,
+    /**
+     * Test a deployed or locally-served website. `server` starts the site
+     * (a shell command receiving `PORT`); `url` targets a running one.
+     * `.visit(path)` renders the page in a single shared browser instance;
+     * `.fetch(path)` performs one raw HTTP exchange (redirects never
+     * followed).
+     */
+    website: startWebsite,
 };

@@ -39,6 +39,8 @@ import { j2NoSleepInSpecs } from './rules/j2-no-sleep-in-specs.js';
 import { j3NoExpectlessTest } from './rules/j3-no-expectless-test.js';
 import { j4UniqueTestNames } from './rules/j4-unique-test-names.js';
 import { j5LowercaseTitle } from './rules/j5-lowercase-title.js';
+import { w1ScenarioPure } from './rules/w1-scenario-pure.js';
+import { w2wUserFacingElements } from './rules/w2w-user-facing-elements.js';
 import type { LintPlugin } from './types.js';
 
 /**
@@ -99,6 +101,8 @@ const plugin: LintPlugin = {
         'j3-no-expectless-test': j3NoExpectlessTest,
         'j4-unique-test-names': j4UniqueTestNames,
         'j5-lowercase-title': j5LowercaseTitle,
+        'w1-scenario-pure': w1ScenarioPure,
+        'w2w-user-facing-elements': w2wUserFacingElements,
     },
 };
 
