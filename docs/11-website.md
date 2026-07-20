@@ -268,6 +268,8 @@ npm install -D playwright && npx playwright install chromium
 
 Calling `.visit()` without playwright installed throws exactly that guidance — there is nothing else to search for.
 
+Provisioning the environment is not this package's job. In CI, the shared validate workflow does it: `browsers: true` (jterrazz-actions) installs cached chromium, versioned from the caller's lockfile, between Build and Test. On a workstation, `j install` provisions `playwright-browsers` once.
+
 ## Folder layout
 
 ```

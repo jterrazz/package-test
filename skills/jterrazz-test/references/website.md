@@ -67,6 +67,7 @@ On a scenario failure, the error carries a full-page screenshot path — the ori
 
 ```bash
 npm install -D playwright && npx playwright install chromium
+# CI: `browsers: true` on the shared validate workflow provisions this.
 ```
 
 `.visit()` without it throws exactly that guidance. `.fetch()` never needs it.
