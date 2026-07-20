@@ -49,5 +49,10 @@ export function getCallerDir(): string {
         return resolve(filePath, '..');
     }
 
-    throw new Error('Cannot detect caller directory from stack trace');
+    // Every frame is framework- or package-internal: the chain was started
+    // By code living in node_modules (e.g. a published rule pack declaring
+    // Tests itself). There is no consumer test file to anchor on — fall back
+    // To the working directory; such packs assert on results directly and
+    // Never resolve `expected/` fixtures.
+    return process.cwd();
 }
