@@ -13,4 +13,7 @@ jobs:
         uses: jterrazz/jterrazz-actions/.github/workflows/release-npm.yaml@main
         with:
             node-version: '24'
+            # The website specs drive a real chromium — same input validate.yaml
+            # Takes, so the publish gate runs the suite the push gate ran.
+            browsers: true
         secrets: inherit
