@@ -10,9 +10,21 @@ import type {
     BrowserOpenOptions,
     BrowserPage,
     BrowserPort,
+    ElementMatch,
     ElementRef,
     Visitor,
 } from '../../core/ports/browser.port.js';
+import {
+    AmbiguousElementError,
+    describeAmbiguity,
+} from '../../core/specification/website/ambiguity.js';
+
+/**
+ * Anything a locator can be built from — the page root, or another locator
+ * when a descriptor carries a scope. Structural, so `locate()` recurses
+ * without caring which one it holds.
+ */
+type MatchScope = Locator | Page;
 
 /** The head/body extraction evaluated in-page — the browser IS the parser. */
 interface PageExtraction {
@@ -24,44 +36,126 @@ interface PageExtraction {
     title: string;
 }
 
-/** Translate a user-facing element descriptor into a playwright locator. */
-function locate(page: Page, element: ElementRef): Locator {
+/** How many candidates the ambiguity error enumerates before truncating. */
+const MAX_REPORTED_MATCHES = 10;
+
+/**
+ * Translate a user-facing descriptor into a playwright locator, resolving
+ * `scope` outside-in so `within(navigation(), link('X'))` searches the nav
+ * subtree. No `.first()` anywhere: playwright's strict mode is the mechanism
+ * behind CONVENTIONS W3, and swallowing it would reintroduce the silent
+ * wrong-element bug the rule exists to prevent.
+ */
+function locate(root: MatchScope, element: ElementRef): Locator {
+    const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
+    const options = { exact: element.exact, name: element.name };
     switch (element.kind) {
-        case 'button': {
-            return page.getByRole('button', { name: element.name });
+        case 'banner':
+        case 'complementary':
+        case 'contentinfo':
+        case 'form':
+        case 'main':
+        case 'navigation':
+        case 'region':
+        case 'search': {
+            return scope.getByRole(element.kind, options);
+        }
+        case 'button':
+        case 'heading':
+        case 'link': {
+            return scope.getByRole(element.kind, options);
         }
         case 'field': {
-            return page.getByLabel(element.name);
-        }
-        case 'heading': {
-            return page.getByRole('heading', { name: element.name });
-        }
-        case 'link': {
-            return page.getByRole('link', { name: element.name });
+            return scope.getByLabel(element.name ?? '', { exact: element.exact });
         }
         case 'testId': {
-            return page.getByTestId(element.name);
+            return scope.getByTestId(element.name ?? '');
         }
         case 'text': {
-            return page.getByText(element.name);
+            return scope.getByText(element.name ?? '', { exact: element.exact });
         }
     }
+}
+
+/** Playwright signals "more than one match" through this error text. */
+function isStrictViolation(error: unknown): boolean {
+    return error instanceof Error && error.message.includes('strict mode violation');
+}
+
+/** Capture the candidates in-page — the evidence the refusal enumerates. */
+async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
+    return locator.evaluateAll((nodes, limit) => {
+        const LANDMARKS = 'nav, header, footer, main, aside, section, form, [role]';
+        return nodes.slice(0, limit).map((node) => {
+            const element = node as HTMLElement;
+            const landmark = element.parentElement?.closest(LANDMARKS);
+            const context = landmark
+                ? (landmark.getAttribute('role') ?? landmark.tagName.toLowerCase())
+                : null;
+            const detail = element.getAttribute('href') ?? element.getAttribute('name');
+            return {
+                context: context ?? undefined,
+                detail: detail ?? undefined,
+                tag: element.tagName.toLowerCase(),
+                text: (element.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 80),
+            };
+        });
+    }, MAX_REPORTED_MATCHES);
+}
+
+/**
+ * Run one visitor action, converting a strict-mode violation into the W3
+ * refusal. The ambiguous level is identified before reporting: a scope that
+ * matches several landmarks is the real fault, and naming the target instead
+ * would send the author to fix the wrong descriptor.
+ */
+async function act<T>(
+    page: Page,
+    element: ElementRef,
+    action: (locator: Locator) => Promise<T>,
+): Promise<T> {
+    try {
+        return await action(locate(page, element));
+    } catch (error) {
+        if (!isStrictViolation(error)) {
+            throw error;
+        }
+        const culprit = await findAmbiguousLevel(page, element);
+        const matches = await captureMatches(locate(page, culprit));
+        throw new AmbiguousElementError(
+            describeAmbiguity({ element: culprit, matches, url: page.url() }),
+        );
+    }
+}
+
+/** Walk the scope chain outside-in; the outermost ambiguous level is the fault. */
+async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<ElementRef> {
+    const chain: ElementRef[] = [];
+    for (let current: ElementRef | undefined = element; current; current = current.scope) {
+        chain.unshift(current);
+    }
+    for (const level of chain.slice(0, -1)) {
+        if ((await locate(page, level).count()) > 1) {
+            return level;
+        }
+    }
+    return element;
 }
 
 /** The visitor implementation — every action auto-waits via playwright actionability. */
 function createVisitor(page: Page, baseUrl: string): Visitor {
     return {
-        check: (element) => locate(page, element).first().check(),
-        click: (element) => locate(page, element).first().click(),
-        fill: (element, value) => locate(page, element).first().fill(value),
+        check: (element) => act(page, element, (locator) => locator.check()),
+        click: (element) => act(page, element, (locator) => locator.click()),
+        fill: (element, value) => act(page, element, (locator) => locator.fill(value)),
         goto: async (path) => {
             await page.goto(`${baseUrl}${path}`, { waitUntil: 'load' });
         },
-        hover: (element) => locate(page, element).first().hover(),
+        hover: (element) => act(page, element, (locator) => locator.hover()),
         press: (key) => page.keyboard.press(key),
-        see: (element) => locate(page, element).first().waitFor({ state: 'visible' }),
+        see: (element) => act(page, element, (locator) => locator.waitFor({ state: 'visible' })),
         select: async (element, option) => {
-            await locate(page, element).first().selectOption(option);
+            await act(page, element, (locator) => locator.selectOption(option));
         },
     };
 }
@@ -122,8 +216,16 @@ export class PlaywrightAdapter implements BrowserPort {
                     // Evidence on failure: a screenshot of the state the
                     // Scenario died in, referenced from the error itself.
                     const evidence = await this.captureEvidence(page);
+                    const suffix = evidence ? `\nEvidence: ${evidence}` : '';
+                    // A W3 refusal is already a complete, self-explaining
+                    // Message — re-wrapping it would print the whole thing
+                    // Twice (once inline, once as the cause).
+                    if (error instanceof AmbiguousElementError) {
+                        error.message += suffix;
+                        throw error;
+                    }
                     throw new Error(
-                        `visit scenario failed: ${error instanceof Error ? error.message : String(error)}${evidence ? `\nEvidence: ${evidence}` : ''}`,
+                        `visit scenario failed: ${error instanceof Error ? error.message : String(error)}${suffix}`,
                         { cause: error },
                     );
                 }

@@ -105,7 +105,8 @@
 
 ## W — Specs website
 
-| Code | Implementation             | Channel  | Enforces                                                                                                                                                                                  |
-| ---- | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| W1   | `w1-scenario-pure`         | statique | Un scénario de visite est le When : le visiteur agit, la capture reflète l’état final ; aucun `expect()` dans le callback — les assertions vivent dans le Then, sur le résultat retourné. |
-| W2   | `w2w-user-facing-elements` | statique | Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content`) ; `testId()` est l’unique échappatoire et déclenche un avertissement.                       |
+| Code | Implementation             | Channel  | Enforces                                                                                                                                                                                                                                                                |
+| ---- | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1   | `w1-scenario-pure`         | statique | Un scénario de visite est le When : le visiteur agit, la capture reflète l’état final ; aucun `expect()` dans le callback — les assertions vivent dans le Then, sur le résultat retourné.                                                                               |
+| W2   | `w2w-user-facing-elements` | statique | Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content`) ; `testId()` est l’unique échappatoire et déclenche un avertissement.                                                                                                     |
+| W3   | `w3-unambiguous-element`   | runtime  | Un descripteur d’élément doit désigner exactement UN élément : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, `{ exact: true }`). Le framework n’agit jamais sur « le premier ». |

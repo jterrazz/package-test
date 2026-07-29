@@ -37,6 +37,19 @@ const pages = {
     </head><body><h1>All articles</h1><a href="/">Home</a></body></html>`,
     '/noisy': `<!doctype html><html lang="en"><head><title>Fixture — Noisy</title></head>
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
+    // The ambiguity fixture: "Articles" appears three times — twice verbatim
+    // In two landmarks, once as a substring — which is exactly the shape that
+    // Used to resolve silently to whichever came first in the DOM (W3).
+    '/ambiguous': `<!doctype html><html lang="en"><head>${head('Fixture — Ambiguous', '/ambiguous')}
+    </head><body>
+    <nav aria-label="Main"><a href="/articles">Articles</a></nav>
+    <main>
+        <h1>Ambiguous</h1>
+        <a href="/articles">Read Articles</a>
+        <section aria-label="Series"><a href="/articles/2">Part 2</a></section>
+    </main>
+    <footer><a href="/articles">Articles</a></footer>
+    </body></html>`,
 };
 
 const server = createServer((request, response) => {

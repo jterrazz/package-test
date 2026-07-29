@@ -85,19 +85,32 @@ export type {
     BrowserOpenOptions,
     BrowserPage,
     BrowserPort,
+    ElementKind,
+    ElementMatch,
     ElementRef,
+    LandmarkKind,
     Visitor,
     VisitScenario,
 } from './core/ports/browser.port.js';
 
 // The element vocabulary — user-facing descriptors for visit scenarios
 export {
+    banner,
     button,
+    complementary,
     content,
+    contentinfo,
+    type ElementOptions,
     field,
+    form,
     heading,
     link,
+    main,
+    navigation,
+    region,
+    search,
     testId,
+    within,
 } from './core/specification/website/elements.js';
 
 // Advanced usage — the orchestrator is public; the Exec/Fetch/Hono adapters are

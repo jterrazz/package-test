@@ -1,12 +1,61 @@
 /**
+ * The landmark roles — the standard set of page regions, and the only
+ * containers a scope can name. Closed on purpose: ARIA defines exactly these,
+ * so `within()` never becomes a second selector language.
+ */
+export type LandmarkKind =
+    | 'banner'
+    | 'complementary'
+    | 'contentinfo'
+    | 'form'
+    | 'main'
+    | 'navigation'
+    | 'region'
+    | 'search';
+
+/** The interactive//textual element kinds — what a visitor actually acts on. */
+export type ElementKind = 'button' | 'field' | 'heading' | 'link' | 'testId' | 'text';
+
+/**
  * A user-facing element descriptor — pure data, built by the element
  * vocabulary (`button()`, `link()`, `field()`, …) and translated into
  * concrete locators by the browser integration. CSS/XPath selectors are
  * deliberately not expressible: user-facing elements are the only surface.
+ *
+ * A descriptor must designate exactly ONE element at action time; see
+ * {@link ElementMatch} and CONVENTIONS W3.
  */
 export interface ElementRef {
-    kind: 'button' | 'field' | 'heading' | 'link' | 'testId' | 'text';
-    name: string;
+    /**
+     * Match the accessible name as a whole string rather than a substring.
+     * Default (`false`) mirrors playwright: `link('Articles')` also matches
+     * "Read Articles".
+     */
+    exact?: boolean;
+    kind: ElementKind | LandmarkKind;
+    /** Landmarks may be anonymous (`main()`, `banner()`); everything else is named. */
+    name?: string;
+    /**
+     * Restrict the search to the elements of another descriptor — built by
+     * `within(scope, target)`. Chains: a scope may itself carry a scope.
+     */
+    scope?: ElementRef;
+}
+
+/**
+ * One candidate captured when a descriptor matched more than one element —
+ * the evidence the ambiguity error enumerates so the author can disambiguate
+ * without opening a browser.
+ */
+export interface ElementMatch {
+    /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
+    context?: string;
+    /** The attribute that disambiguates most — `href` for links, `name` for fields. */
+    detail?: string;
+    /** Tag name, lower-cased. */
+    tag: string;
+    /** Text content, whitespace-collapsed and truncated. */
+    text: string;
 }
 
 /** A `<link>` element captured from the rendered document's head. */

@@ -146,6 +146,73 @@ Elements are **user-facing by construction** (rule W2) — there is no CSS/XPath
 | `content(text)` | any element containing the text                  |
 | `testId(id)`    | `data-testid` — the escape hatch (rule W2 warns) |
 
+## Designating exactly one element
+
+**A descriptor must match exactly one element (rule W3).** When several match, the framework refuses the action instead of taking the first one:
+
+```
+Ambiguous element: link("Articles") matched 3 elements on http://site.test/ambiguous.
+
+A spec must designate exactly one element. Acting on the first match would let
+this test keep passing while the visitor interacts with something else.
+
+Matched:
+  1. <a href="/articles">Articles</a>  in <nav>
+  2. <a href="/articles">Read Articles</a>  in <main>
+  3. <a href="/articles">Articles</a>  in <footer>
+
+Disambiguate with one of:
+  • scope it       within(navigation(), link("Articles"))   [also here: contentinfo()]
+  • exact name     link("Articles", { exact: true })   [leaves 2 of 3]
+  • other element  a heading(), button() or field() may name one thing where this does not
+
+Docs: docs/11-website.md#designating-exactly-one-element (CONVENTIONS W3)
+```
+
+Taking "the first match" is the failure this rule exists to prevent: the spec stays green while the visitor acts on a different element, and nothing ever reports it. Ambiguity is an authoring mistake, not something DOM order should arbitrate.
+
+### `within(scope, target)` — the preferred fix
+
+Search inside a landmark, the way a person would say _"the Articles link **in the nav**"_:
+
+```typescript
+await visitor.click(within(navigation(), link('Articles')));
+```
+
+Scopes compose outside-in, and any descriptor works as one — including `testId()` when a container has no landmark role to stand on:
+
+```typescript
+await visitor.click(within(main(), within(region('Series'), link('Part 2'))));
+await visitor.click(within(testId('row-3'), button('Delete')));
+```
+
+The scope is checked first: if it is the ambiguous level, the refusal names **it** rather than the target, so the fix lands on the right descriptor.
+
+The landmarks are the ARIA landmark set and nothing more — a closed vocabulary keeps `within()` from becoming a second selector language. Each takes an optional accessible name, for pages carrying several of the same region:
+
+| Landmark               | Matches                               |
+| ---------------------- | ------------------------------------- |
+| `banner()`             | the page header                       |
+| `navigation(name?)`    | a `<nav>` — name it when several      |
+| `main()`               | the primary content                   |
+| `complementary(name?)` | an `<aside>`, a sidebar               |
+| `contentinfo()`        | the page footer                       |
+| `region(name)`         | a `<section>` with an accessible name |
+| `form(name)`           | a named form landmark                 |
+| `search()`             | the search landmark                   |
+
+### `{ exact: true }` — when two names genuinely overlap
+
+Name matching is a **substring** by default, mirroring playwright: `link('Articles')` also matches "Read Articles". When the overlap is the whole problem, match the name whole:
+
+```typescript
+await visitor.click(link('Articles', { exact: true }));
+```
+
+Every named descriptor accepts it — `button`, `link`, `field`, `heading`, `content`, and the named landmarks.
+
+Prefer scoping. `exact` fixes an accidental substring collision; it says nothing about _where_ on the page the element is, so it leaves a spec that still breaks the day the same label appears twice.
+
 Navigating within a scenario changes what the capture describes:
 
 ```typescript
@@ -287,6 +354,8 @@ No `seeds/`, `requests/`, or `contracts/` — `specification.website()` has no `
 - **Passing both `server` and `url`, or neither.** The options type makes the invalid combinations inexpressible — the compiler rejects them before anything runs.
 - **Using `expect()` inside a scenario callback.** Forbidden (rule W1) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
 - **Reaching for `testId()` as the default locator.** It exists as an escape hatch (rule W2 warns) — prefer `button`/`link`/`field`/`heading`/`content`, the same vocabulary a user's accessibility tree exposes.
+- **Reaching for `testId()` to escape an ambiguity.** It silences the refusal without answering it: the test stops asserting the role and the accessible name, which is most of what a user-facing element was buying. Scope it with `within()` instead — that is the fix rule W3 is pointing at.
+- **Assuming a name matches whole.** It is a substring by default: `link('Articles')` also matches "Read Articles". Pass `{ exact: true }` when that is what you meant.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.

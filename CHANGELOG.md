@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.0.0] - 2026-07-29
+
+### Changed
+
+- **BREAKING — a visit descriptor must designate exactly one element (CONVENTIONS W3).**
+  Visitor actions no longer resolve an ambiguous descriptor to its first match: the
+  framework refuses, with an error naming the descriptor in the caller's own
+  vocabulary, enumerating every candidate with its landmark, and proposing the
+  rewrites that would resolve it. Acting on "the first match" let a spec stay green
+  while the visitor interacted with a different element, and nothing ever reported it.
+  Specs relying on that behaviour must scope the descriptor with `within()` or pass
+  `{ exact: true }`.
+
+### Added
+
+- **`within(scope, target)`** — restrict a descriptor to the inside of another. Scopes
+  compose outside-in, and any descriptor works as one, including `testId()` for
+  containers with no landmark role.
+- **The ARIA landmark vocabulary** — `banner()`, `complementary()`, `contentinfo()`,
+  `form()`, `main()`, `navigation()`, `region()`, `search()`. A closed, standard set,
+  so `within()` never becomes a second selector language. Each takes an optional
+  accessible name for pages carrying several of the same region.
+- **`{ exact: true }`** on every named descriptor (`button`, `link`, `field`,
+  `heading`, `content`, and the named landmarks) — match the accessible name whole
+  rather than as a substring.
+
 ## [9.1.0] - 2026-07-18
 
 ### Added

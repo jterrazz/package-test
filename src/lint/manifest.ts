@@ -582,6 +582,17 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
+            'Un descripteur d’élément doit désigner exactement UN élément : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, `{ exact: true }`). Le framework n’agit jamais sur « le premier ».',
+        facet: 'website',
+        family: 'W',
+        id: 'W3',
+        name: 'w3-unambiguous-element',
+        rationale:
+            'Agir sur le premier match rend le spec vert alors que le visiteur clique autre chose, et rien ne le signale jamais — une ambiguïté est une faute d’écriture, pas un cas à arbitrer par l’ordre du DOM. Le comptage n’existe qu’à l’exécution : aucune analyse statique ne peut le faire, d’où le canal runtime.',
+    },
+    {
+        channel: 'runtime',
+        convention:
             '`.intercept()` n’existe que sur `api`/`jobs` et lève immédiatement en mode compose (MSW est in-process).',
         family: 'I',
         id: 'I3',

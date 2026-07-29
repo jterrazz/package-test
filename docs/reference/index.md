@@ -42,6 +42,8 @@
 | [ContainerPort](interfaces/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
 | [DatabasePort](interfaces/DatabasePort.md) | Abstract database interface for specification runners. Implement this to plug in your database stack (e.g. Postgres, SQLite). |
 | [DockerSpecConfig](interfaces/DockerSpecConfig.md) | Configuration for the docker-aware cli mode. When set on [SpecificationConfig](interfaces/SpecificationConfig.md), the cli runner generates a test-run id, injects it into the child env under `envVar`, then queries Docker for every container carrying `testRunLabel=<id>` after the command exits. |
+| [ElementMatch](interfaces/ElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening a browser. |
+| [ElementOptions](interfaces/ElementOptions.md) | Options accepted by every named descriptor. |
 | [ElementRef](interfaces/ElementRef.md) | A user-facing element descriptor — pure data, built by the element vocabulary (`button()`, `link()`, `field()`, …) and translated into concrete locators by the browser integration. CSS/XPath selectors are deliberately not expressible: user-facing elements are the only surface. |
 | [ExecOptions](interfaces/ExecOptions.md) | Options for the long-running form of `.exec()` (CONVENTIONS B2). When either option is present the process is spawned and observed: it resolves as soon as `waitFor` appears in stdout/stderr, and is killed when `timeout` elapses (exit code 124). |
 | [FileAccessor](interfaces/FileAccessor.md) | Read-only handle to a single file produced by a spec action. |
@@ -75,9 +77,11 @@
 | ------ | ------ |
 | [CliEnv](type-aliases/CliEnv.md) | Extra environment variables to set for the child process. Values are merged on top of process.env. A `null` value unsets the variable. |
 | [DatabaseKeys](type-aliases/DatabaseKeys.md) | Keys of a services record whose handles are databases. |
+| [ElementKind](type-aliases/ElementKind.md) | The interactive//textual element kinds — what a visitor actually acts on. |
 | [HonoApp](type-aliases/HonoApp.md) | Any object with a request method compatible with Hono's app.request(). |
 | [InterceptResponder](type-aliases/InterceptResponder.md) | A dynamic response: computed from the observed request at the moment the intercept is consumed, rather than fixed ahead of time. Handed the same [MatchableRequest](interfaces/MatchableRequest.md) the trigger matched on, so the reply can echo or derive from the request body/headers/url. |
 | [InterceptResponseValue](type-aliases/InterceptResponseValue.md) | What an intercept replies with: either a fixed [InterceptResponse](interfaces/InterceptResponse.md) or an [InterceptResponder](type-aliases/InterceptResponder.md) evaluated per consumed request. |
+| [LandmarkKind](type-aliases/LandmarkKind.md) | The landmark roles — the standard set of page regions, and the only containers a scope can name. Closed on purpose: ARIA defines exactly these, so `within()` never becomes a second selector language. |
 | [MatcherKind](type-aliases/MatcherKind.md) | The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds. |
 | [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
@@ -90,28 +94,37 @@
 | Variable | Description |
 | ------ | ------ |
 | [anthropic](variables/anthropic.md) | Anthropic API intercept helpers. |
+| [banner](variables/banner.md) | The `banner` landmark — the page header. |
+| [button](variables/button.md) | A button (or element with the button role), by accessible name. |
+| [complementary](variables/complementary.md) | The `complementary` landmark — an `<aside>`, a sidebar. |
+| [content](variables/content.md) | An element containing the given text. |
+| [contentinfo](variables/contentinfo.md) | The `contentinfo` landmark — the page footer. |
+| [field](variables/field.md) | A form field, by label. |
+| [form](variables/form.md) | The `form` landmark — a form carrying an accessible name. |
+| [heading](variables/heading.md) | A heading, by accessible name. |
 | [http](variables/http.md) | Generic HTTP intercept helpers for any URL. An optional HttpInterceptFilter narrows matching by request body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict intercepts, CONVENTIONS D7). |
+| [link](variables/link.md) | A link, by accessible name. |
+| [main](variables/main.md) | The `main` landmark — the primary content of the document. |
 | [match](variables/match.md) | Dynamic-value matchers for structural comparisons — the code-side mirror of the `{{token}}` fixture grammar (CONVENTIONS D4). |
 | [mockOf](variables/mockOf.md) | Create a deep mock proxy for a given type. Wraps `vitest-mock-extended`'s `mockDeep` for convenient port mocking. |
 | [mockOfDate](variables/mockOfDate.md) | Freeze or reset the global Date for deterministic time-dependent tests. Wraps the `mockdate` package. |
+| [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
+| [region](variables/region.md) | The `region` landmark — a `<section>` carrying an accessible name. |
+| [search](variables/search.md) | The `search` landmark. |
 | [specification](variables/specification.md) | The three specification constructors (CONVENTIONS A2) — created in a `*.specification.ts` file under `specs/`, destructured with canonical names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4). |
 
 ## Functions
 
 | Function | Description |
 | ------ | ------ |
-| [button](functions/button.md) | A button (or element with the button role), by accessible name. |
-| [content](functions/content.md) | An element containing the given text. |
 | [defineContract](functions/defineContract.md) | Declare an intercept contract. Identity function — its value is the enforced shape and the naming convention: |
-| [field](functions/field.md) | A form field, by label. |
 | [findContainersByLabel](functions/findContainersByLabel.md) | Return all container IDs (running or stopped) that carry `key=value`. |
-| [heading](functions/heading.md) | A heading, by accessible name. |
 | [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
-| [link](functions/link.md) | A link, by accessible name. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
 | [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |
 | [sqlite](functions/sqlite.md) | Create a SQLite service handle. Uses file-copy isolation for parallel tests. |
 | [testId](functions/testId.md) | The escape hatch: an element by `data-testid`. Prefer user-facing elements. |
 | [text](functions/text.md) | Wrap an arbitrary string into a [TextAccessor](classes/TextAccessor.md) anchored on the calling test's directory — the same caller-detection the builders use. |
+| [within](functions/within.md) | Restrict a descriptor to the inside of another — the answer to ambiguity, and the one the framework prefers over a test id. |
