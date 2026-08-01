@@ -63,7 +63,7 @@
     },
     "devDependencies": {
         "@hono/node-server": "^2.0.8",
-        "@jterrazz/typescript": "^7.0.0",
+        "@jterrazz/typescript": "^7.1.1",
         "@types/better-sqlite3": "^7.6.13",
         "@types/node": "^26.1.1",
         "@types/pg": "^8.20.0",

@@ -29,7 +29,6 @@ export default defineConfig({
         },
     ],
     rules: {
-        'import/exports-last': 'off',
         ...recommendedRules,
         // Docker-aware runner names used across specs (CONVENTIONS B5).
         'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }],
