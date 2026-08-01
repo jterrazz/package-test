@@ -1,0 +1,98 @@
+import Database from 'better-sqlite3';
+import { existsSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
+import { afterAll, describe, expect, test } from 'vitest';
+
+import { isValidSqliteTemplate, sqlite } from './sqlite.js';
+
+describe('isValidSqliteTemplate (regression guard)', () => {
+    const workdir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-guard-'));
+
+    afterAll(() => {
+        rmSync(workdir, { force: true, recursive: true });
+    });
+
+    test('rejects a path that does not exist', () => {
+        // Given - a path nothing was ever written to
+        const missing = resolve(workdir, 'missing.sqlite');
+
+        // Then - it is not treated as a usable template
+        expect(existsSync(missing)).toBe(false);
+        expect(isValidSqliteTemplate(missing)).toBe(false);
+    });
+
+    test('rejects a 0-byte file — the exact shape a crashed run leaves behind', () => {
+        // Given - a stale, empty file (e.g. a worker crashed right after `touch`-ing
+        // The template but before better-sqlite3 ever wrote the format header)
+        const stale = resolve(workdir, 'stale-empty.sqlite');
+        writeFileSync(stale, '');
+
+        // Then - the guard refuses to treat it as a real template
+        expect(isValidSqliteTemplate(stale)).toBe(false);
+    });
+
+    test('rejects a short file that is not a SQLite database at all', () => {
+        // Given - some unrelated, too-short content at the template path
+        const garbage = resolve(workdir, 'garbage.sqlite');
+        writeFileSync(garbage, 'not a database');
+
+        // Then - the guard refuses it (fails the magic-header check)
+        expect(isValidSqliteTemplate(garbage)).toBe(false);
+    });
+
+    test('accepts a real SQLite database file', () => {
+        // Given - an actual SQLite file created by better-sqlite3
+        const real = resolve(workdir, 'real.sqlite');
+        const db = new Database(real);
+        db.exec('CREATE TABLE "t" (id INTEGER PRIMARY KEY)');
+        db.close();
+
+        // Then - the header check passes
+        expect(isValidSqliteTemplate(real)).toBe(true);
+    });
+});
+
+describe('sqlite() initialize() — stale template recovery', () => {
+    test('rebuilds instead of reusing a pre-existing 0-byte template', async () => {
+        // Given - the shared template path a crashed earlier run left behind as a
+        // 0-byte file (this is the exact real-world failure: initialize() used to
+        // Early-return on `existsSync()` alone and never ran the init SQL, so every
+        // Later run hit "no such table" against the empty file forever after).
+        const templatePath = resolve(tmpdir(), 'jterrazz-test-sqlite-template.sqlite');
+        const lockPath = `${templatePath}.lock`;
+        try {
+            unlinkSync(lockPath);
+        } catch {
+            /* Ignore — no stale lock to clear */
+        }
+        writeFileSync(templatePath, '');
+        expect(isValidSqliteTemplate(templatePath)).toBe(false);
+
+        const initSqlDir = mkdtempSync(resolve(tmpdir(), 'sqlite-guard-init-'));
+        const initSqlPath = resolve(initSqlDir, 'init.sql');
+        writeFileSync(
+            initSqlPath,
+            'CREATE TABLE "regression_guard" (id INTEGER PRIMARY KEY, label TEXT NOT NULL);',
+        );
+
+        // When - a fresh handle initializes against that poisoned path
+        const db = sqlite({ init: initSqlPath });
+        await db.initialize();
+
+        // Then - the template was detected as invalid, deleted, and rebuilt: the
+        // Schema from init.sql is actually present (proving the file was NOT
+        // Reused as-is) and the file now passes the validity guard.
+        expect(db.started).toBe(true);
+        expect(isValidSqliteTemplate(templatePath)).toBe(true);
+
+        const check = new Database(templatePath, { readonly: true });
+        try {
+            const query = `SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'regression_guard'`;
+            const tables = check.prepare(query).all();
+            expect(tables).toHaveLength(1);
+        } finally {
+            check.close();
+        }
+    });
+});

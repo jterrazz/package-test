@@ -1,11 +1,54 @@
 import Database from 'better-sqlite3';
-import { copyFileSync, existsSync, readFileSync, unlinkSync } from 'node:fs';
+import {
+    closeSync,
+    copyFileSync,
+    existsSync,
+    openSync,
+    readFileSync,
+    readSync,
+    unlinkSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
 import type { DatabasePort } from '../../core/ports/database.port.js';
 import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
 import type { ServiceHandle } from '../../core/ports/service.port.js';
+
+// The first 16 bytes of every well-formed SQLite database file (see the
+// SQLite file format spec). A crashed earlier run can leave a stale/partial
+// Template behind (e.g. 0 bytes) — this is the cheap, dependency-free check
+// Used to tell "real template" from "leftover from a crash".
+const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
+
+/**
+ * Whether `path` looks like a usable SQLite database file: it exists, is at
+ * least as long as the format header, and begins with the SQLite magic
+ * bytes. Does not validate anything beyond the header — good enough to
+ * reject a 0-byte or truncated leftover without opening the file.
+ */
+export function isValidSqliteTemplate(path: string): boolean {
+    if (!existsSync(path)) {
+        return false;
+    }
+
+    let fd: number;
+    try {
+        fd = openSync(path, 'r');
+    } catch {
+        return false;
+    }
+
+    try {
+        const header = Buffer.alloc(SQLITE_FILE_HEADER.length);
+        const bytesRead = readSync(fd, header, 0, header.length, 0);
+        return bytesRead === SQLITE_FILE_HEADER.length && header.equals(SQLITE_FILE_HEADER);
+    } catch {
+        return false;
+    } finally {
+        closeSync(fd);
+    }
+}
 
 export interface SqliteOptions {
     /**
@@ -68,9 +111,20 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         }
 
         if (existsSync(this.templatePath)) {
-            this.connectionString = `file:${this.templatePath}`;
-            this.started = true;
-            return;
+            if (isValidSqliteTemplate(this.templatePath)) {
+                this.connectionString = `file:${this.templatePath}`;
+                this.started = true;
+                return;
+            }
+
+            // Stale leftover from a crashed earlier run (e.g. a 0-byte file) —
+            // Treat it as absent so the block below rebuilds a fresh template
+            // Instead of poisoning every subsequent run with "no such table".
+            try {
+                unlinkSync(this.templatePath);
+            } catch {
+                /* Ignore — another worker may have already replaced it */
+            }
         }
 
         // Acquire lock
