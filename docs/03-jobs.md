@@ -44,16 +44,14 @@ Setups: `.seed()`, `.intercept()`. Terminal action: `.trigger(name)` (rule B2). 
 ```typescript
 // specs/jobs/reports/reports.test.ts
 import { expect, test } from 'vitest';
-import classifyProduct from './contracts/classify-product.openai.js';
-import draftSupportReply from './contracts/draft-support-reply.anthropic.js';
-import exchangeRates from './contracts/exchange-rates.http.js';
 import { jobs } from '../jobs.specification.js';
+import pipeline from './contracts/pipeline.contracts.js';
 
 test('nightly report classifies, prices and drafts', async () => {
-    // Given - pending articles + the three external dependencies under contract
+    // Given - pending articles + the world the pipeline reaches out to
     const result = await jobs
         .seed('pending-articles.sql', { database: 'db' })
-        .intercept([classifyProduct, exchangeRates, draftSupportReply])
+        .intercept(pipeline)
         .trigger('nightly-report');
 
     // Then - the pipeline produced a classified, priced report
@@ -66,19 +64,21 @@ test('nightly report classifies, prices and drafts', async () => {
 
 Everything a pipeline reads from the outside world is declared: seeds set the database state, contracts pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [contracts](07-contracts.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
 
-Because jobs run in-process by definition, `.intercept()` is always available (there is no compose mode to disable it). It is **strict** (rule D7): once a chain declares one intercept, any outgoing request that matches nothing — including a trigger whose queue is exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every registered trigger's consumption state (see [contracts](07-contracts.md#strict-intercepts-rule-d7)). A chain with no intercepts is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available (there is no compose mode to disable it). It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every declared route with its consumption state (see [contracts](07-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
 
-## Seeding and intercepts for pipelines
+## Seeding and sequences for pipelines
 
-A pipeline test typically stacks several intercepts. They queue **FIFO per trigger**: two intercepts with the same trigger fire in registration order, first match consumed first. That is how you script multi-call scenarios:
+Selection is **first non-exhausted match wins**, so a multi-call scenario is a finite contract in front of an unlimited tail — `times` says how many calls the first one answers:
 
 ```typescript
 test('retries then recovers from provider rate-limit', async () => {
-    // Given - 1st call 429, 2nd call OK (FIFO queue: same trigger, registration order)
+    // Given - the first call is rate-limited, everything after it succeeds
     const result = await jobs
         .seed('pending-articles.sql', { database: 'db' })
-        .intercept(openai.chat(), openai.error(429))
-        .intercept(openai.chat(), openai.reply({ category: 'BOOKS' }))
+        .intercept([
+            { request: openai.chat(), response: openai.error(429), times: 1 },
+            { request: openai.chat(), response: openai.reply({ category: 'BOOKS' }) },
+        ])
         .trigger('nightly-report');
 
     // Then - the retry succeeded
@@ -88,6 +88,8 @@ test('retries then recovers from provider rate-limit', async () => {
     });
 });
 ```
+
+The number in `times` IS the assertion: it says the job retries exactly once. A contract with no `times` is unlimited, which is what you want for a route the pipeline may hit any number of times.
 
 ## Error-case testing
 
@@ -139,10 +141,10 @@ With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and 
 
 - **Looking for a `mode` or `server` option.** They exist only on `specification.api()` — jobs are in-process by definition (rules A5, A8).
 - **Asserting on a job's return value.** The result surface is the observable state (tables); jobs are specified by their effects.
-- **Registering intercepts in the wrong order for a retry scenario.** The FIFO queue makes registration order load-bearing: the first `.intercept()` answers the first matching call.
+- **Forgetting `times` on the leading contract of a sequence.** With no `times` the first contract is unlimited, so it answers every call and the recovery contract behind it is never reached.
 - **One giant spec that triggers two jobs.** A chain has exactly one terminal action (rule B1); sequence scenarios are expressed by seeding the state the second job would have found (rule B7).
 - **Forgetting `await` on table expectations.** `expect(result.table(…))` without `await` never runs the SQL — table matchers are IO matchers (rule D2).
-- **Leaving a queue one intercept short in a retry test.** After the first `.intercept()`, strict mode (rule D7) fails the spec on the extra call the retry makes — register one intercept per expected call.
+- **Bounding the tail of a sequence.** The last contract of a sequence should stay unlimited; a `times` there turns one extra retry into an "unmatched outgoing request" failure (rule D7).
 
 ## Related
 

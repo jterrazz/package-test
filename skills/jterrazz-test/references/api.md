@@ -42,11 +42,11 @@ In compose mode `server` is ignored (the app runs in the stack); the services-re
 
 ## Setup (chainable)
 
-| Method                                         | Description                                                                                                |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })`             | Load SQL from `seeds/` (SQL only). `database` = record key — MANDATORY with ≥ 2 DBs, FORBIDDEN with 1 (A7) |
-| `.headers({ "Accept-Language": "fr" })`        | Merge HTTP headers on top of the `.http` file's (chain wins)                                               |
-| `.intercept(contract)` / `(trigger, response)` | Stub an outgoing HTTP/LLM call — see [contracts.md](contracts.md). STRICT (D7)                             |
+| Method                                          | Description                                                                                                |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `.seed("file.sql", { database? })`              | Load SQL from `seeds/` (SQL only). `database` = record key — MANDATORY with ≥ 2 DBs, FORBIDDEN with 1 (A7) |
+| `.headers({ "Accept-Language": "fr" })`         | Merge HTTP headers on top of the `.http` file's (chain wins)                                               |
+| `.intercept(contracts)` / `(request, response)` | Declare what the outside world replies — see [contracts.md](contracts.md). STRICT (D7)                     |
 
 ## Actions (terminal)
 
@@ -95,11 +95,11 @@ Location: /users/{{uuid#user}}
 ```
 specs/api/
 ├── api.specification.ts        # runner at the facet ROOT
-├── intercepts/                 # strict-intercept specs (D7) — node-only; api-stack EXCLUDES this
+├── intercepts/                 # strict-contract specs (D7) — node-only; api-stack EXCLUDES this
 └── <feature>/
     ├── <feature>.test.ts
     ├── seeds/                  # *.sql ONLY
     ├── requests/               # *.http — inputs (complete request)
-    ├── contracts/              # <name>.<provider>.ts
+    ├── contracts/              # <name>.contracts.ts facade + <provider>/<name>.ts units + data
     └── expected/               # ALL expected fixtures, FLAT (incl. response *.http)
 ```

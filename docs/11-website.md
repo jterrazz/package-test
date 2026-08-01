@@ -324,12 +324,14 @@ afterAll(cleanup);
 
 `backend` requires `server` mode — with `url` it refuses (the type already forbids the combination): a deployed site cannot be pointed at a local stub. The **ownership boundary**: the framework owns the server child, so it injects the env var itself — that is the whole wiring.
 
-What the stub serves is declared per chain, as [`.http` intercept files](07-contracts.md#http-intercept-files--declared-exchanges) — flat under the feature's `intercepts/` folder:
+What the stub serves is declared per chain, as [contracts](07-contracts.md) — the feature's `contracts/` facade, exactly the form `api`/`jobs` use:
 
 ```typescript
+import newsroom from './contracts/newsroom.contracts.js';
+
 test('renders the events feed from the declared backend', async () => {
     // Given - the backend under contract for this chain
-    const result = await website.intercept('two-events.http').visit('/events');
+    const result = await website.intercept(newsroom).visit('/events');
 
     // Then - the page rendered what the stub declared
     expect(result.content).toContain('Enquête Fauci COVID-19');
@@ -337,9 +339,9 @@ test('renders the events feed from the declared backend', async () => {
 });
 ```
 
-The stub **resets between chains** the way databases do: one chain = one terminal action, and its `.intercept()` exchanges replace the previous chain's wholesale. Same-route entries consume FIFO; once a route's queue is exhausted its **last entry stays sticky** — a page re-fetching the same endpoint (re-render, retry) replays the final reply.
+The stub **resets between chains** the way databases do: one chain = one terminal action, and its contracts replace the previous chain's wholesale. Selection is the shared one: the first declared contract that matches and is not exhausted wins, and a contract with no `times` is unlimited — so a page re-fetching the same endpoint (re-render, retry) replays it.
 
-Strictness is the analog of `external: 'block'`: a request matching no declared exchange is answered **501** (a JSON body naming the path and listing the declared routes) and **recorded** — when the `.visit()` completes, the action **throws** an error enumerating every unmatched request (method, path, count). The failure evidence (screenshot on a scenario error) is captured first, as always. A chain with **zero** intercepts leaves the stub unguarded — the same boundary as MSW never mounting without an `.intercept()`.
+Strictness is the analog of `external: 'block'`: a request matching no declared contract is answered **501** (a JSON body naming the path and listing the declared routes) and **recorded** — when the `.visit()` completes, the action **throws** an error enumerating every unmatched request (method, path, count). The failure evidence (screenshot on a scenario error) is captured first, as always. A chain with **zero** intercepts leaves the stub unguarded — the same boundary as MSW never mounting without an `.intercept()`.
 
 Two pieces of plumbing are handled for you:
 
@@ -391,10 +393,12 @@ specs/website/
 └── <domain>/
     ├── <aspect>.test.ts
     ├── expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
-    └── intercepts/              # declared backend exchanges, FLAT (<name>.http) — with the `backend` option
+    └── contracts/               # what the declared backend serves — with the `backend` option
+        ├── newsroom.contracts.ts
+        └── http/…
 ```
 
-No `seeds/`, `requests/`, or `contracts/` — `specification.website()` has no `services` option and no request-file format; `.fetch()`/`.visit()` calls are inline, and the golden is always `expected/<name>`.
+No `seeds/` or `requests/` — `specification.website()` has no `services` option and no request-file format; `.fetch()`/`.visit()` calls are inline, and the golden is always `expected/<name>`.
 
 ## Pitfalls
 

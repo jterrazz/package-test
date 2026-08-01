@@ -133,7 +133,7 @@ test('returns 404 with a useful body', async () => {
 | `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](07-contracts.md)                             |
 | `.intercept(trigger, response)`   | Inline intercept for one-off cases                                                                 |
 
-Intercepts are **strict** (rule D7): once a chain declares one, every outgoing request must match a registered intercept or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](07-contracts.md#strict-intercepts-rule-d7)). `.intercept()` is **node-only** — a compose-mode runner throws immediately, so keep intercept specs in a node-only vitest project (the `api-stack` project excludes `specs/api/intercepts/**`).
+Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](07-contracts.md#strict-by-construction-rule-d7)). `.intercept()` is **node-only** — a compose-mode runner throws immediately, so keep intercept specs in a node-only vitest project (the `api-stack` project excludes `specs/api/intercepts/**`).
 
 ```typescript
 test('serves french content', async () => {

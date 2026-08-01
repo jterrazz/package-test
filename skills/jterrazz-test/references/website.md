@@ -79,7 +79,8 @@ specs/website/
 ├── website.specification.ts    # runner at the facet ROOT
 └── <domain>/
     ├── <aspect>.test.ts
-    └── expected/                # *.head.json, *.jsonld.json, *.console.txt, … — FLAT
+    ├── expected/                # *.head.json, *.jsonld.json, *.console.txt, … — FLAT
+    └── contracts/               # what the declared `backend` stub serves — see contracts.md
 ```
 
-No `seeds/`, `requests/`, or `contracts/` — no services, no request-file format.
+No `seeds/` or `requests/` — no services, no request-file format.

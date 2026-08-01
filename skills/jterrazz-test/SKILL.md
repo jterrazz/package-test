@@ -21,7 +21,7 @@ The ecosystem's declarative testing framework for HTTP APIs, background jobs, CL
 
 ## When to use this skill
 
-**Trigger on:** imports of `@jterrazz/test`; edits to `*.test.ts` / `*.specification.ts` in a repo using it; prompts about specification runners, seeds, fixtures, contracts, intercepts, tokens, directory snapshots, rendered-page visit scenarios, simulator screen scenarios, or the Given/Then convention.
+**Trigger on:** imports of `@jterrazz/test`; edits to `*.test.ts` / `*.specification.ts` in a repo using it; prompts about specification runners, seeds, fixtures, contracts, tokens, directory snapshots, rendered-page visit scenarios, simulator screen scenarios, or the Given/Then convention.
 
 **Do NOT use for:** plain `vitest` unit tests of a pure function; frontend component tests (Vitest + Testing Library). Rendered-page/browser testing IS covered — through `specification.website()`, not raw Playwright. Native-app testing IS covered — through `specification.mobile()`, not raw appium/webdriverio.
 
@@ -37,7 +37,7 @@ Load the one reference that matches the task; each also names the docs chapter c
 | Writing **website** specs (fetch, visit, scenarios) | [references/website.md](references/website.md)                 | [docs/11-website.md](../../docs/11-website.md)                                |
 | Writing **mobile** specs (open, simulator, screens) | [references/mobile.md](references/mobile.md)                   | [docs/12-mobile.md](../../docs/12-mobile.md)                                  |
 | **Dynamic values** / the `{{token}}` grammar        | [references/tokens.md](references/tokens.md)                   | [docs/06-tokens.md](../../docs/06-tokens.md)                                  |
-| **Mocking** an LLM / HTTP call (contracts)          | [references/contracts.md](references/contracts.md)             | [docs/07-contracts.md](../../docs/07-contracts.md)                            |
+| **Declaring** what an LLM / HTTP call replies       | [references/contracts.md](references/contracts.md)             | [docs/07-contracts.md](../../docs/07-contracts.md)                            |
 | Weird failures / **pitfalls**                       | [references/troubleshooting.md](references/troubleshooting.md) | Pitfalls sections of each chapter                                             |
 | **Rule ids** (lint plugin + checker)                | [references/rules.md](references/rules.md) (generated)         | [docs/09](../../docs/09-conventions.md) · [docs/10](../../docs/10-linting.md) |
 

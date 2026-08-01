@@ -47,6 +47,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.intercept(request, 'adapter/file.json')` string fixture paths and the adapter-prefix
   check — a contract imports its JSON payload itself.
 
+### Conventions
+
+- **BREAKING — the `contracts/` layout is a tree, not a flat folder (rule C4, reworked).**
+  The root holds only `*.contracts.ts` facades (default export = a `defineContracts`
+  composition, named exports = scenario factories) and the provider directories `http` /
+  `openai` / `anthropic`. A unit contract is `contracts/<provider>/<kebab-name>.ts`, its
+  `request` builder must name its own folder, and a provider folder is flat, holding only
+  `*.ts` and `*.response.json`. The old `contracts/<name>.<provider>.ts` form, the
+  "no named exports" restriction and the "imports only from `@jterrazz/test`" restriction
+  are gone — a unit may import its neighbours and the app's own source (its real prompt
+  builders).
+- **NEW — C10 contracts boundary.** Outside `specs/**/contracts/`, importing a module from
+  a provider folder is an error: a test imports only `*.contracts.ts` facades.
+- **NEW — C11 contract data pairing.** Inside a provider folder every `*.response.json` and
+  `*.request.ts` must have its sibling `<stem>.ts` owner, where the stem is the name up to
+  the FIRST dot (`events.fr.response.json` → `events.ts`). Orphan data is an error.
+- The C9 dead-fixture pass no longer walks `intercepts/` (the directory no longer exists).
+
 ## [10.0.0] - 2026-07-29
 
 ### Changed

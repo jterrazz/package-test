@@ -208,7 +208,7 @@ const result = await cli.seed('legacy-schema.sql').exec('up');
 
 ### `specification.website({ server?, url?, backend?, external?, root? })`
 
-Tests a rendered website: `.fetch(path)` for a raw HTTP exchange (redirects never followed), `.visit(path, scenario?)` for a page rendered in a real chromium. Exactly one of `server` (start the site locally — a free port injected as `PORT`, polled on `ready`) or `url` (target a running site) is required. `backend: { env, port? }` (server mode only) additionally starts a declared stub backend and injects its URL into the server child under `env`; each chain declares what it serves via `.intercept('<name>.http')`.
+Tests a rendered website: `.fetch(path)` for a raw HTTP exchange (redirects never followed), `.visit(path, scenario?)` for a page rendered in a real chromium. Exactly one of `server` (start the site locally — a free port injected as `PORT`, polled on `ready`) or `url` (target a running site) is required. `backend: { env, port? }` (server mode only) additionally starts a declared stub backend and injects its URL into the server child under `env`; each chain declares what it serves with `.intercept(contracts)`, the same contracts form `api`/`jobs` use.
 
 ```typescript
 export const { website, cleanup } = await specification.website({
@@ -253,16 +253,16 @@ When `root` is absent, the framework walks up from the specification file to the
 
 ### Setup (chainable)
 
-| Method                                  | Facets       | Description                                                                                            |
-| --------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------ |
-| `.seed("file.sql", { database? })`      | all          | Load SQL from `seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1) |
-| `.fixture("file")`                      | cli          | Copy the feature-local `fixtures/file` into the working directory                                      |
-| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/fixtures/name/` project into the cwd (trailing `/` = contents; layers)        |
-| `.env({ KEY: "value" })`                | cli          | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                             |
-| `.headers({ "Accept-Language": "fr" })` | api, website | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)             |
-| `.intercept(contract)`                  | api, jobs    | Intercept an outgoing HTTP call with a declared contract                                               |
-| `.intercept(trigger, response)`         | api, jobs    | Inline intercept for one-off cases                                                                     |
-| `.intercept("two-events.http")`         | all but cli  | Declared exchanges from `intercepts/<name>.http` — MSW on api/jobs, the stub backend on website/mobile |
+| Method                                  | Facets       | Description                                                                                                 |
+| --------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
+| `.seed("file.sql", { database? })`      | all          | Load SQL from `seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1)      |
+| `.fixture("file")`                      | cli          | Copy the feature-local `fixtures/file` into the working directory                                           |
+| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/fixtures/name/` project into the cwd (trailing `/` = contents; layers)             |
+| `.env({ KEY: "value" })`                | cli          | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                                  |
+| `.headers({ "Accept-Language": "fr" })` | api, website | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)                  |
+| `.intercept(contracts)`                 | all but cli  | Declare the world: a `defineContracts(...)` composite — MSW on api/jobs, the stub backend on website/mobile |
+| `.intercept(contract)` / `([a, b])`     | all but cli  | A single contract, or an ordered list                                                                       |
+| `.intercept(request, response)`         | all but cli  | Inline pair, for one-off plumbing                                                                           |
 
 ### Actions (terminal)
 
@@ -340,12 +340,12 @@ Location: /orders/{{uuid#order}}
 
 See [docs/06-tokens.md](docs/06-tokens.md) for the canonical accepted form of every token.
 
-## Intercept contracts
+## Contracts
 
-External interactions (LLM providers, third-party APIs) are declared as **contracts**: one file per interaction under `contracts/`, flat, with a provider suffix — `contracts/<name>.<provider>.ts`, `provider ∈ { openai, anthropic, http }`:
+Everything the outside world replies is a **contract** — a request to match and a response to serve, declared together. A feature owns a `contracts/` folder: a public `<name>.contracts.ts` facade (default export = the world, named exports = its scenarios) over internal `<provider>/<name>.ts` units, `provider ∈ { http, openai, anthropic }`.
 
 ```typescript
-// contracts/classify-product.openai.ts
+// contracts/openai/classify-product.ts
 import { defineContract, openai } from '@jterrazz/test';
 
 export default defineContract({
@@ -355,10 +355,25 @@ export default defineContract({
 ```
 
 ```typescript
-const result = await jobs.intercept(classifyProduct).trigger('nightly-report');
+// contracts/pipeline.contracts.ts
+import { defineContracts, http } from '@jterrazz/test';
+
+import classifyProduct from './openai/classify-product.js';
+import exchangeRates from './http/exchange-rates.js';
+
+const pipeline = defineContracts(classifyProduct, exchangeRates);
+
+export default pipeline;
+
+export const withRatesDown = () =>
+    pipeline.with({ request: http.get('/rates'), response: http.error(503) });
 ```
 
-Inline `.intercept(trigger, response)` and JSON fixtures (`intercepts/<provider>/<name>.json`) remain for one-off cases; `.intercept('<name>.http')` loads declared exchanges from a bi-block `intercepts/<name>.http` file — the form website/mobile chains use, served by the declared `backend` stub. Failure simulation: `openai.error(429)`, `anthropic.timeout()`, `openai.malformed('not json')`. Intercepts queue FIFO per trigger. MSW ships as a direct dependency — no separate install.
+```typescript
+const result = await jobs.intercept(pipeline).trigger('nightly-report');
+```
+
+Selection is first-match, one queue for every facet: `times` bounds how often a contract serves (omitted = unlimited, so retries and re-renders replay it), `required: true` fails the chain if it was never requested. Provider string filters are **exact** — the loose forms are explicit (`RegExp`, `match.includes('…')`). Failure simulation: `openai.error(429)`, `anthropic.timeout()`, `openai.malformed('not json')`. MSW ships as a direct dependency — no separate install. Full chapter: [docs/07-contracts.md](docs/07-contracts.md).
 
 ## Docker-aware CLIs
 
@@ -409,8 +424,7 @@ specs/<facet>/                  # api | jobs | cli | integrations | lint
     ├── <aspect>.test.ts
     ├── seeds/          # *.sql ONLY — database state
     ├── requests/       # *.http — inputs: COMPLETE request (method, path, headers, body)
-    ├── contracts/      # <name>.<provider>.ts — declared external interactions
-    ├── intercepts/     # <provider>/<name>.json — inline intercept fixtures; <name>.http — declared exchanges (flat)
+    ├── contracts/      # <name>.contracts.ts facade + <provider>/<name>.ts units + their .response.json / .request.ts data
     ├── fixtures/       # domain-local files/dirs copied into the cwd (cli) — shared pool lives at specs/fixtures/
     └── expected/       # ALL expected fixtures, FLAT (incl. response *.http) — a slash in the name creates a subfolder
 ```

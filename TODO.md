@@ -87,7 +87,7 @@ le trigger compose ET des assertions de déclaration. Découpage par valeur déc
 LLM (contrats OpenAI/Anthropic) ; les intercepts étant in-process, le mode compose leur est
 inutilisable, et api-stack garde un test skippé (frontière I3/D7).
 
-**L'idée :** servir les MÊMES `contracts/*.openai.ts` depuis un **vrai container stub
+**L'idée :** servir les MÊMES `contracts/openai/*.ts` depuis un **vrai container stub
 HTTP** que le framework démarre en mode compose ; la stack pointe sa gateway LLM vers le
 stub (une env var, injectée par la convention B6).
 

@@ -14,10 +14,10 @@ Each mechanized rule names **one of four enforcement channels**:
 
 - **static** — the `jterrazz/*` oxlint plugin (one `jterrazz/<rule>` per rule, AST analysis) plus the `conventions` checker step (`dist/checker.js`) for the data fixtures oxlint never visits.
 - **checker** — passes of the same bundled binary that read what oxlint cannot: the `{{token}}` grammar of `expected/`/`requests/` fixtures (D4/D4b/D10) and cross-file analyses (a `*.specification.ts` crossed with its tests, or a whole feature tree: C9, B5-by-inference, A7).
-- **runtime** — the framework refuses incorrect usage at execution time, where static analysis abstains (a non-literal argument) or cannot reach (network, container lifecycle): A6 ambiguous binding, A7, B2, B6 injection, D7 strict intercepts, I3 `.intercept()` in compose.
+- **runtime** — the framework refuses incorrect usage at execution time, where static analysis abstains (a non-literal argument) or cannot reach (network, container lifecycle): A6 ambiguous binding, A7, B2, B6 injection, D7 strict contracts, I3 `.intercept()` in compose.
 - **process** — review judgement no channel can settle alone: C1 asset-driven grouping, D11 golden-file, K1 retro-propagation.
 
-The **meta-test** channel doubles several of these by running the framework on itself: every `match.*` token has a positive and a negative test (`src/core/matching/`); every fixture written by `TEST_UPDATE=1` round-trips on the next run; the catalogue stays byte-fresh (`src/lint/plugin.test.ts`). The **type channel** covers what the type system guarantees without a dedicated rule (C4 trigger members, D1 read-only accessors).
+The **meta-test** channel doubles several of these by running the framework on itself: every `match.*` token has a positive and a negative test (`src/core/matching/`); every fixture written by `TEST_UPDATE=1` round-trips on the next run; the catalogue stays byte-fresh (`src/lint/plugin.test.ts`). The **type channel** covers what the type system guarantees without a dedicated rule (C4 `request`/`response` members, D1 read-only accessors).
 
 ## The rule families
 
@@ -28,7 +28,7 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | A     | Runner creation (constructors, services, root)                       | [01](01-getting-started.md), [02](02-api.md), [08](08-services.md)         |
 | B     | Spec chains (setups, terminal actions, Given/Then, `job` vocabulary) | [02](02-api.md), [03](03-jobs.md), [04](04-cli.md)                         |
 | C     | Files & folders per feature                                          | [01](01-getting-started.md), [05](05-assertions.md), [07](07-contracts.md) |
-| D     | Assertions, tokens, snapshots, strict intercepts                     | [05](05-assertions.md), [06](06-tokens.md), [07](07-contracts.md)          |
+| D     | Assertions, tokens, snapshots, strict contracts                      | [05](05-assertions.md), [06](06-tokens.md), [07](07-contracts.md)          |
 | E     | Framework environment variables                                      | [01](01-getting-started.md)                                                |
 | F     | Imports (single package root) & production protection                | [01](01-getting-started.md)                                                |
 | W     | Website & mobile specs (scenarios, user-facing elements)             | [11](11-website.md), [12](12-mobile.md)                                    |
@@ -66,20 +66,20 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 
 ## H — Naming recap
 
-| Thing           | Rule                                                                                                 |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`)     |
-| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                          |
-| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                       |
-| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                            |
-| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                              |
-| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                      |
-| Contracts       | `contracts/<name>.<provider>.ts`                                                                     |
-| Intercepts      | `intercepts/<provider>/<name>.json` (provider payloads) · `intercepts/<name>.http` (exchanges, flat) |
-| Requests        | `requests/<name>.http` (inputs)                                                                      |
-| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)                  |
-| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)          |
-| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                           |
+| Thing           | Rule                                                                                                                   |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`)                       |
+| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                            |
+| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                         |
+| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                              |
+| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                |
+| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                        |
+| Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic) |
+| Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                     |
+| Requests        | `requests/<name>.http` (inputs)                                                                                        |
+| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)                                    |
+| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)                            |
+| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                                             |
 
 ## Maintaining the constitution
 

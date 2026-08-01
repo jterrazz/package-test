@@ -18,18 +18,18 @@ Returns `{ jobs, cleanup, orchestrator }`. A `JobHandle` is `{ name: string; exe
 
 ## Setup + action
 
-| Method                                         | Description                                                                              |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })`             | Load SQL from `seeds/` — `database` = record key (MANDATORY ≥ 2 DBs, else forbidden, A7) |
-| `.intercept(contract)` / `(trigger, response)` | Stub an outgoing provider/HTTP call — [contracts.md](contracts.md). STRICT (D7)          |
-| `.trigger("name")` → `BaseResult`              | **Terminal.** Execute the registered job named `name`                                    |
+| Method                                          | Description                                                                              |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `.seed("file.sql", { database? })`              | Load SQL from `seeds/` — `database` = record key (MANDATORY ≥ 2 DBs, else forbidden, A7) |
+| `.intercept(contracts)` / `(request, response)` | Declare what a provider/HTTP call replies — [contracts.md](contracts.md). STRICT (D7)    |
+| `.trigger("name")` → `BaseResult`               | **Terminal.** Execute the registered job named `name`                                    |
 
 - `.trigger(name)` takes a stable **kebab-case** identifier (`nightly-report`) — it is a contract between the app and its tests (B8). No competing vocabulary (`task`, `worker`, `cron`).
-- Intercepts always work here (jobs are always node) — the natural home for provider-failure specs (`openai.error(429)`, `anthropic.timeout()`).
+- Contracts always work here (jobs are always node) — the natural home for provider-failure specs (`openai.error(429)`, `anthropic.timeout()`).
 
 ## Assertions
 
-Assert the resulting database state and any intercept consumption:
+Assert the resulting database state; a contract that MUST be called carries `required: true`:
 
 ```typescript
 const result = await jobs.seed('pending.sql').intercept(classifyProduct).trigger('nightly-report');
@@ -47,6 +47,6 @@ specs/jobs/
 └── triggering/
     ├── triggering.test.ts
     ├── seeds/
-    ├── contracts/
+    ├── contracts/               # <name>.contracts.ts facade + <provider>/<name>.ts units + data
     └── expected/
 ```

@@ -1,283 +1,330 @@
-# 07 — Contracts: intercepting the outside world
+# 07 — Contracts: the outside world, declared
 
-External interactions — LLM providers, third-party APIs — are declared as **contracts**: one TypeScript file per interaction, holding the request trigger and the response together, so the business payload (prompts, JSON replies) is visible at a glance. Underneath, the real outgoing HTTP call is intercepted (MSW — a direct dependency, installed automatically with the framework).
+Everything the outside world replies is declared as a **contract**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Contracts are the whole vocabulary, on all four facets that reach the network.
 
-Contracts are consumed by `.intercept()` on both [api](02-api.md) and [jobs](03-jobs.md) chains (rule B2). A fourth intercept form — [`.http` intercept files](#http-intercept-files--declared-exchanges) — additionally works on [website](11-website.md) and [mobile](12-mobile.md) chains, where the exchanges are served by the declared stub backend instead of MSW.
+## The principle
 
-## `defineContract` and the file convention
+> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`requests/`, `expected/`) — never a mock format.
 
-One file per interaction, **flat** under the feature's `contracts/` folder, named `<name>.<provider>.ts` with `provider ∈ { openai, anthropic, http }` (rule C4). The file default-exports `defineContract({ trigger, response })` — no subfolders, no named exports.
+A contract is behavior: it decides what matches and what is served, it can count, it can be required, it can compose. That belongs in TypeScript, where the type checker and the app's own builders are reachable. A 200-line payload is not behavior — it is data, and it goes to a sibling `.json` the contract imports. And `.http` keeps the one role it is good at: a complete, readable document of a request your api receives or a response your api returns.
 
-```typescript
-// contracts/classify-product.openai.ts
-import { defineContract, openai } from '@jterrazz/test';
-
-export default defineContract({
-    request: openai.responses(
-        { user: /Product Classification/, tools: ['classify'] },
-        'https://gateway.shoply.dev/v1/responses',
-    ),
-    response: openai.reply({ category: 'ELECTRONICS', confidence: 0.97 }),
-});
-```
+## `defineContract`
 
 ```typescript
-// contracts/draft-support-reply.anthropic.ts
-import { defineContract, anthropic } from '@jterrazz/test';
-
-export default defineContract({
-    request: anthropic.messages({ system: /support agent/, model: /claude/ }),
-    response: anthropic.reply('Bonjour, votre commande arrive demain.'),
-});
-```
-
-```typescript
-// contracts/exchange-rates.http.ts
 import { defineContract, http } from '@jterrazz/test';
 
 export default defineContract({
-    request: http.get('https://rates.example.com/v1/latest'),
-    response: http.json({ base: 'EUR', rates: { USD: 1.09 } }),
+    request: http.get('/articles/{{uuid}}'),
+    response: http.json({ id: 'a-1', title: 'Fauci and the lab leak' }),
 });
 ```
 
-Usage — import the default export, pass it to `.intercept()`. A single contract, or an array of them (registered in order — same-trigger entries queue FIFO), both work:
+| Field       | Meaning                                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `request`   | What outgoing call this contract speaks for — a provider builder (`http.*`, `openai.*`, `anthropic.*`)                      |
+| `response`  | The reply: a fixed value, or `(request) => ContractResponse` evaluated per served request                                   |
+| `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves. |
+| `required?` | The chain FAILS unless it was actually requested — at least once, or exactly `times` times when `times` is set.             |
+
+### Selection
+
+One engine-agnostic queue serves every facet. An observed request matches a contract when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, and the `match` predicate — if any — passes on the body.
+
+**The first contract in list order that matches AND is not exhausted wins.** That single rule covers the two shapes you need:
 
 ```typescript
-import classifyProduct from './contracts/classify-product.openai.js';
-import exchangeRates from './contracts/exchange-rates.http.js';
+import { defineContracts, http } from '@jterrazz/test';
 
-test('nightly report classifies and prices', async () => {
-    // Given - external dependencies under contract (array === chained calls)
-    const result = await jobs
-        .seed('pending-articles.sql', { database: 'db' })
-        .intercept([classifyProduct, exchangeRates])
-        .trigger('nightly-report');
+// A retry sequence: three failures, then an unlimited tail.
+export default defineContracts(
+    { request: http.get('/quote'), response: http.error(500), times: 3 },
+    { request: http.get('/quote'), response: http.json({ quote: 'recovered' }) },
+);
+```
 
-    // Then
-    await expect(result.table('reports', { database: 'analyticsDb' })).toMatchRows({
-        columns: ['category', 'usd_price'],
-        rows: [['ELECTRONICS', 109]],
-    });
+If every matching contract is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction-rule-d7)). A chain that declares **no** contract is not guarded at all: strictness begins with the first `.intercept()`.
+
+### `times` and `required` — saying what you mean
+
+`times` is how a spec asserts a **call count** without reaching for a spy: `times: 3` on a failing contract plus an unlimited success tail says "the app retries exactly three times before it succeeds". `required: true` is the other half — it turns a declaration nobody exercised into a failure:
+
+```typescript
+import { defineContract, http } from '@jterrazz/test';
+
+// If the screen never asks for the 1M range, the spec fails — instead of
+// passing green on a chart that silently rendered the default range.
+export default defineContract({
+    request: http.get('/indicators', { query: { range: '1M' } }),
+    required: true,
+    response: http.json({ points: [] }),
 });
 ```
 
-## Trigger builders
+Without `required`, a contract nobody calls is invisible: the test passes, and the assertion it was supposed to protect never ran.
 
-Provider triggers are named after the provider's own official API. Filters accept exact strings or RegExps; an omitted filter matches any request of that provider.
+## `defineContracts` — it's contracts all the way down
 
-### `openai.*`
+A test imports **one** artifact: the world its feature lives in. `defineContracts` composes contracts, lists, and other composites into it, recursively, order preserved.
 
-| Trigger                           | Targets                                                                        | Filters                                               |
-| --------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| `openai.chat(filter?)`            | Chat Completions API                                                           | `model`, `system`, `user`, `tools`, `temperature`     |
-| `openai.responses(filter?, url?)` | Responses API (AI-SDK style); `url` overrides the endpoint for custom gateways | `model`, `system`, `user`, `tools` (no `temperature`) |
+```typescript
+import { defineContracts, http } from '@jterrazz/test';
 
-### `anthropic.*`
+const events = defineContracts({
+    request: http.get('/events'),
+    response: http.json({ items: [] }),
+});
 
-| Trigger                             | Targets                                                                                               | Filters                            |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `anthropic.messages(filter?, url?)` | Messages API; `url` overrides the endpoint for custom gateways. Object fixtures pass through verbatim | `model`, `system`, `user`, `tools` |
+// A composite extends a composite — same function, all the way down.
+export default defineContracts(events, {
+    request: http.get('/articles/{{uuid}}'),
+    response: http.json({ id: 'a-1' }),
+});
+```
+
+### `.with()` — replacement by route, then prepend
+
+`.with(...)` derives a **variant** without mutating the base. Two steps, in this order:
+
+1. Every base contract whose **route** an override claims is removed. Same route = same `method` + the same declared url pattern (string equality of the declared path, `.source` equality for a RegExp).
+2. The overrides are **prepended**, keeping their own order.
+
+The prepend is what makes a _more specific_ override work without deleting the generic route it lives beside: `/articles/gone-1` does not claim the route `/articles/{{uuid}}`, so the generic contract survives — but the override is checked first, so the one article that is gone answers 410 while every other article still answers 200.
+
+```typescript
+import { defineContract, defineContracts, http } from '@jterrazz/test';
+
+const newsroom = defineContracts(
+    { request: http.get('/events'), response: http.json({ items: [] }) },
+    { request: http.get('/articles/{{uuid}}'), response: http.json({ id: 'a-1' }) },
+);
+
+export default newsroom;
+
+// A scenario: one article is gone, the rest of the world is unchanged.
+export const withArticleGone = (id: string) =>
+    newsroom.with(
+        defineContract({
+            request: http.get(`/articles/${id}`),
+            response: http.error(410, { error: 'gone' }),
+        }),
+    );
+```
+
+## The facade pattern
+
+The file layout follows the same split: a **public facade** per feature, **internal units** under it.
+
+```
+specs/<facet>/<feature>/
+├── <feature>.test.ts
+└── contracts/
+    ├── newsroom.contracts.ts              PUBLIC — default export = the world,
+    │                                      named exports = its scenarios
+    ├── http/
+    │   ├── events.ts                      a unit contract
+    │   ├── events.response.json           the payload it serves
+    │   ├── events.fr.response.json        a qualified payload — same owner
+    │   └── article-gone.ts                a factory: (id) => Contract
+    ├── openai/
+    │   ├── classify-article.ts
+    │   └── classify-article.request.ts    the exact prompt it matches
+    └── anthropic/
+        └── draft-reply.ts
+```
+
+The rules, enforced by [C4, C10 and C11](10-linting.md):
+
+- The **root** holds only `*.contracts.ts` facades and the provider directories `http`, `openai`, `anthropic`. The folder carries the provider — filenames drop it and go back to being business names.
+- A facade default-exports a `defineContracts(...)` composition; its **named exports are scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world.
+- A unit contract is `<provider>/<kebab-name>.ts` and default-exports `defineContract(...)` or a factory returning one. Its `request` builder must name its own folder.
+- Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its contract: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
+- **Tests import only `*.contracts.ts`.** Provider folders are internal — reaching into one from a test is an error (C10). A scenario belongs in the facade, not in the test.
+- Shared data has ONE owner: a second contract imports `./events.response.json` directly. No copies, no `shared/` folder.
+
+A unit contract may import `@jterrazz/test`, its neighbours inside `contracts/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
+
+```typescript
+// contracts/newsroom.contracts.ts — the facade a test imports
+import { defineContracts } from '@jterrazz/test';
+
+import articleGone from './http/article-gone.js';
+import events from './http/events.js';
+
+const newsroom = defineContracts(events);
+
+export default newsroom;
+
+export const withArticleGone = (id: string) => newsroom.with(articleGone(id));
+```
+
+```typescript
+// contracts/http/events.ts — a unit, with its payload beside it
+import { defineContract, http } from '@jterrazz/test';
+
+import payload from './events.response.json' with { type: 'json' };
+
+export default defineContract({
+    request: http.get('/events'),
+    response: http.json(payload),
+});
+```
+
+## Using them: `.intercept()`
+
+Every facet that reaches the network takes the same three forms:
+
+| Form                                | Use                                                        |
+| ----------------------------------- | ---------------------------------------------------------- |
+| `.intercept(contracts)`             | A composite — the normal case, one import per feature      |
+| `.intercept(contract)` / `([a, b])` | A single contract or a list                                |
+| `.intercept(request, response)`     | An inline pair, for one-off plumbing that deserves no name |
+
+```typescript
+import { http } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+import { api } from '../api.specification.js';
+import newsroom from './contracts/newsroom.contracts.js';
+
+test('serves the declared world', async () => {
+    // Given - a one-off inline pair alongside the feature's world
+    const result = await api
+        .intercept(newsroom)
+        .intercept(http.any(/analytics\.example/), http.json({ ok: true }))
+        .get('/report');
+
+    // Then - the report rendered
+    expect(result.status).toBe(200);
+});
+```
+
+Repeated `.intercept()` calls **append**. Composition and override semantics live in `defineContracts` / `.with()`, never in call order.
+
+## Two engines, one queue
+
+| Facets              | Engine                                            | Notes                                                                               |
+| ------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `api`, `jobs`       | **MSW**, in-process                               | Node-only: a compose-mode runner refuses `.intercept()` (rule I3)                   |
+| `website`, `mobile` | the **declared stub backend** (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
+
+Both consume the **same** selection queue, so a contract behaves identically on either side: first match wins, `times` exhausts, `required` verifies at chain end. The old divergence — consume-once on MSW, sticky-last on the stub — is gone; "sticky" is now just the default (`times` omitted), written down.
+
+The stub resets between chains, the way databases do: one chain = one terminal action, and its contracts replace the previous chain's wholesale.
+
+## Request builders
 
 ### `http.*` — any URL
 
-Every `http` trigger takes an optional `HttpInterceptFilter` — `{ body?, headers?, query? }` — narrowing beyond method + URL:
+```typescript
+import { http } from '@jterrazz/test';
 
-- `body`: an object is a deep **subset** match (toMatchObject-style) whose leaves may be `match.*` matchers; a string is a containment test and a RegExp a `test()` over the raw text body.
-- `headers`: subset match, header names case-insensitive; string = exact value, RegExp = `test()`.
-- `query`: subset of the URL search params; string = exact value, RegExp = `test()`.
+http.get('https://rates.example.com/v1/latest');
+http.get('/articles/{{uuid}}'); // path form: any origin, structural segment
+http.post('https://api.shoply.dev/orders', {
+    body: { user: { role: 'admin' } },
+    headers: { 'x-tenant': 'acme' },
+    query: { lang: 'en' },
+});
+```
 
-A request that hits the URL/method but fails the filter counts as unmatched (strict intercepts, rule D7).
+`http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** — the app's real host does not matter — and `{{token}}` segments match structurally ([06 — Tokens](06-tokens.md)).
 
-| Trigger                                                                                                       | Matches                                   |
-| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `http.get(url, filter?)` / `http.post(url, filter?)` / `http.put(url, filter?)` / `http.delete(url, filter?)` | That method on the URL (string or RegExp) |
-| `http.any(url, filter?)`                                                                                      | Any method on the URL                     |
+The optional `filter` narrows beyond method + URL, and these are **filters**, so subset is the right default:
+
+- `body`: an object is a deep **subset** match whose leaves may be `match.*` matchers; a string is a containment test; a RegExp is a `test()` over the raw text body.
+- `headers` / `query`: subset match (header names case-insensitive); a string value is **exact**, a RegExp is `test()`.
+
+### `openai.*` / `anthropic.*`
+
+| Builder                             | Targets                                                         | Filters                                           |
+| ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------- |
+| `openai.chat(filter?)`              | Chat Completions API                                            | `model`, `system`, `user`, `tools`, `temperature` |
+| `openai.responses(filter?, url?)`   | Responses API (AI-SDK style); `url` overrides the endpoint      | `model`, `system`, `user`, `tools`                |
+| `anthropic.messages(filter?, url?)` | Messages API; `url` overrides the endpoint for a custom gateway | `model`, `system`, `user`, `tools`                |
+
+### Matching: strings are EXACT
+
+A string filter on a provider builder means **exact equality**. Looser matching is explicit — a RegExp, or the code-only matcher `match.includes(...)`:
 
 ```typescript
-.intercept(http.any(/analytics\.example/), http.json({ ok: true }))
+import { defineContract, match, openai } from '@jterrazz/test';
 
-// Filtered: only a POST whose body carries this subset, header, and query param
-.intercept(
-    http.post('https://api.shoply.dev/orders', {
-        body: { user: { role: 'admin' } },
-        headers: { 'x-tenant': 'acme' },
-        query: { lang: 'en' },
-    }),
-    http.json({ accepted: true }),
-)
+// Exact — the app's own builder produces the prompt, so it cannot drift.
+const PROMPT = 'Classify the article into one of: TECH, POLITICS, SPORT.';
+
+export default defineContract({
+    request: openai.chat({ user: PROMPT }),
+    response: openai.reply({ category: 'TECH' }),
+});
+
+// Looser, on purpose: per-run data makes an exact prompt impractical.
+export const byPrefix = defineContract({
+    request: openai.chat({ user: match.includes('Classify the article') }),
+    response: openai.reply({ category: 'TECH' }),
+});
 ```
+
+Exactness is the default because a substring filter silently cross-matches: two prompts sharing a preamble both match the first contract, and the spec goes green on the wrong reply. `match.includes` is a code-only matcher, like `match.regex` — the `{{token}}` file vocabulary does not grow.
 
 ## Response builders
 
-### Success
+| Response                                   | Produces                                                                      |
+| ------------------------------------------ | ----------------------------------------------------------------------------- |
+| `http.json(body, init?)`                   | JSON response — `init: { status?, headers?, delay? }`                         |
+| `http.text(body, init?)`                   | `text/plain` response                                                         |
+| `http.error(status, body?)`                | HTTP error, optional JSON body                                                |
+| `http.empty(status = 204)`                 | Empty response                                                                |
+| `openai.reply(data)`                       | `data` wrapped in a valid Chat Completions envelope                           |
+| `anthropic.reply(data)`                    | `data` (object or text) wrapped in a Messages envelope                        |
+| `openai.error(status)` / `anthropic.error` | Provider HTTP error (e.g. `429` rate limit)                                   |
+| `openai.timeout()` / `anthropic.timeout()` | A provider that never answers within the caller's timeout                     |
+| `openai.malformed(text)`                   | HTTP 200 whose assistant content is `text` — an unparseable payload to handle |
 
-| Response                 | Produces                                                     |
-| ------------------------ | ------------------------------------------------------------ |
-| `openai.reply(data)`     | `data` wrapped in a valid Chat Completions envelope          |
-| `anthropic.reply(data)`  | `data` (object or plain text) wrapped in a Messages envelope |
-| `http.json(body, init?)` | Plain JSON response, `init: { status?, headers?, delay? }`   |
+The point: your contract states the **business payload** (`{ category: 'TECH' }`) and the builder produces the provider's full wire format around it.
 
-The point: your contract file states the **business payload** (`{ category: 'ELECTRONICS' }`), and the builder produces the provider's full wire format around it.
+### Dynamic responses
 
-### Failure
-
-| Response                                   | Simulates                                                                                                                          |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `openai.error(status)`                     | Provider HTTP error (e.g. `429` rate limit)                                                                                        |
-| `anthropic.error(status)`                  | Same, Anthropic envelope                                                                                                           |
-| `http.error(status)`                       | Plain HTTP error                                                                                                                   |
-| `openai.timeout()` / `anthropic.timeout()` | A provider that never answers within the caller's timeout                                                                          |
-| `openai.malformed(text)`                   | HTTP 200: a valid Chat Completions envelope whose assistant message content is `text` (an unparseable payload the app must handle) |
-
-## Dynamic responses
-
-A `response` is usually a fixed value, but it can also be a **function of the incoming request** — `(request: MatchableRequest) => InterceptResponse`. It is evaluated **per consumed request**, at the moment the intercept is taken from the queue, so the reply can echo or derive from the request body, headers, or URL. The function works everywhere a response does: inside `defineContract`, and inline on `.intercept(trigger, fn)`.
-
-The `request` handed to it is the same [`MatchableRequest`](#trigger-builders) the trigger matched on: `{ body, headers, url }`, with `body` already parsed as JSON when the payload is JSON.
+A `response` may be a function of the incoming request — `(request: MatchableRequest) => ContractResponse` — evaluated per served request:
 
 ```typescript
-// In a contract — the reply mirrors the request payload
+import { defineContract, http } from '@jterrazz/test';
+
 export default defineContract({
     request: http.post('https://gateway.shoply.dev/v1/echo'),
     response: (request) => http.json({ received: request.body }),
 });
-
-// Inline — derive status and body from the observed request
-const result = await api
-    .intercept(http.post(url), (request) => {
-        const tenant = request.headers['x-tenant'];
-        return http.json({ quote: `hello ${tenant}` }, { status: 201 });
-    })
-    .get('/submit');
 ```
 
-Prefer a fixed response whenever the reply is known ahead of time — a dynamic response is for the cases where the mock genuinely depends on what was sent (echo endpoints, request-derived ids, per-call variation).
+The `request` handed to it is the same `MatchableRequest` the match ran on: `{ body, headers, url }`, with `body` already parsed when the payload is JSON. Prefer a fixed response whenever the reply is known ahead of time — a dynamic one is for echo endpoints, request-derived ids, and per-call variation.
 
-## FIFO queueing
+## Strict by construction (rule D7)
 
-Intercepts **queue per trigger**: several intercepts whose triggers match the same request fire sequentially, in registration order, each consumed once. This is the mechanism for retry and multi-call scenarios. Passing an **array** to `.intercept([a, b])` is identical to two consecutive calls — array order is the queue order:
-
-```typescript
-test('retries then recovers from provider rate-limit', async () => {
-    // Given - 1st call 429, 2nd call OK (FIFO: same trigger, registration order)
-    const result = await jobs
-        .seed('pending-articles.sql', { database: 'db' })
-        .intercept(openai.chat(), openai.error(429))
-        .intercept(openai.chat(), openai.reply({ category: 'BOOKS' }))
-        .trigger('nightly-report');
-
-    // Then
-    await expect(result.table('reports', { database: 'analyticsDb' })).toMatchRows({
-        columns: ['category'],
-        rows: [['BOOKS']],
-    });
-});
-```
-
-## Escape hatches
-
-Contracts are the convention; two lighter forms exist for one-off technical cases (rule B2 allows both on `.intercept()`):
-
-**Inline trigger + response** — when the interaction is pure plumbing and a named file would add nothing:
-
-```typescript
-.intercept(http.any(/analytics\.example/), http.json({ ok: true }))
-.intercept(openai.chat(), openai.malformed('not json at all'))
-```
-
-**JSON fixture files** — when the response payload is large or captured from a real exchange. Files live under `intercepts/<provider>/<name>.json` in the feature folder, and are referenced by that relative path:
-
-```typescript
-.intercept(openai.responses({ user: /Ingestion/ }), 'openai/ingest-tech.json')
-// → resolves intercepts/openai/ingest-tech.json
-```
-
-The fixture is the provider-shaped response body, passed through verbatim.
-
-## `.http` intercept files — declared exchanges
-
-When a spec needs several plain HTTP exchanges — a backend feed, then its detail routes — a **bi-block `.http` file** declares them all in one place: a sequence of `###`-separated exchanges, each a REQUEST block (method + path line, optional headers — never a body), a blank line, then a RESPONSE block (status line, headers, body):
-
-```
-### two events, then their articles
-
-GET /events
-
-HTTP/1.1 200 OK
-content-type: application/json
-
-{ "items": [ { "id": 1 }, { "id": 2 } ] }
-
-###
-
-GET /articles?event_id=00000000-0000-4000-8000-000000000001
-
-HTTP/1.1 200 OK
-content-type: application/json
-
-{ "items": [] }
-```
-
-Files live **flat** in the feature's `intercepts/` directory — `intercepts/<name>.http`, alongside the `intercepts/<provider>/<name>.json` convention, which stays. `.intercept('<name>.http')` (any single string ending in `.http`) resolves the file relative to the calling test's feature folder, the same resolution `.seed()` / `.request()` use:
-
-```typescript
-const result = await api.intercept('two-events.http').get('/report');
-```
-
-Each exchange becomes a generic-http contract: the request block is the trigger, the response block the reply.
-
-### Matching semantics
-
-- **Method** — exact.
-- **Pathname** — exact, on **any origin** (the app's real host does not matter). A `{{token}}` segment matches structurally: `GET /articles/{{uuid}}` accepts any UUID ([06 — Tokens](06-tokens.md)); the same grammar works in declared query and header values.
-- **Query params** — the declared ones are a **subset** of the observed ones: the app may add extra params (a `locale`, a cache-buster), which are ignored; every declared param must match.
-- **Headers** — declared headers subset-match, names case-insensitive.
-
-The response block is the **stubbed reply, not an expectation** — its status must be numeric and its body is served verbatim ({{token}}s have no place there; the parser refuses a tokenized status).
-
-### Queueing per facet
-
-Same method + path declared twice queues **FIFO** — the file order is the consumption order. What happens when the queue runs out depends on where the entries are served:
-
-- **api/jobs** — the exchanges feed the **MSW engine** unchanged: each entry is consumed once, and a request beyond the queue is a strict D7 failure, exactly like every other intercept form.
-- **website/mobile** — the exchanges feed the **declared stub backend** ([11 — Website specs](11-website.md#declared-backend), [12 — Mobile specs](12-mobile.md#declared-backend)), where the **last matching entry stays sticky**: a page re-fetching the same endpoint (re-render, retry) replays the final reply instead of failing an honest screen. Unmatched requests remain strict — 501 + a recorded failure.
-
-## Strict intercepts (rule D7)
-
-Intercepts are **strict by construction**. The moment a chain declares at least one `.intercept()`, MSW is mounted and every outgoing HTTP request during the action must match a registered, unconsumed intercept. A request that matches nothing — including one whose queue is already **exhausted** (all intercepts for that trigger consumed) — fails the spec with an explicit error that rejects the action promise (never an unhandled rejection):
+The moment a chain declares one contract, the network is guarded: every outgoing request during the action must match a declared, non-exhausted contract. Anything else fails the spec with an explicit error that rejects the action promise (never an unhandled rejection):
 
 ```
 Unmatched outgoing HTTP request during spec: POST https://api.openai.com/v1/chat/completions
-Registered intercepts:
-  - POST https://api.openai.com/v1/chat/completions (already consumed)
-Every outgoing request of a chain that declares intercepts must match one — add an .intercept() for it (or one more if its queue is exhausted).
+Declared contracts:
+  - POST https://api.openai.com/v1/chat/completions (exhausted)
+Every outgoing request of a chain that declares contracts must match one — declare it, or raise `times`.
 ```
 
-The error names the offending method + URL and lists every registered trigger with its consumption state (`(already consumed)` where applicable). Two scoping notes:
+At chain end the same channel verifies `required` contracts: one that was declared and never requested fails the spec, naming its route.
 
-- **A chain with zero intercepts does not mount MSW, so its network is not guarded** (a deliberate, documented boundary). Strictness begins with the first `.intercept()`.
-- **`.intercept()` is not available in compose mode.** MSW is in-process; a compose-mode `specification.api()` runner throws immediately: `.intercept(): intercepts are in-process (MSW) and not available in compose mode — keep intercept specs in node-only vitest projects.` The practical pattern: keep intercept specs in a **node-only** vitest project. This repo does exactly that — the `api-stack` (compose) project excludes `specs/api/intercepts/**`.
+Two scoping notes:
 
-## Choosing the form
-
-| Situation                                          | Form                                   |
-| -------------------------------------------------- | -------------------------------------- |
-| A named business interaction, reused or reviewable | `contracts/<name>.<provider>.ts`       |
-| Failure-mode plumbing in one test                  | inline `.intercept(trigger, response)` |
-| Bulky captured payload                             | `intercepts/<provider>/<name>.json`    |
-| A sequence of plain HTTP exchanges; website/mobile | `intercepts/<name>.http`               |
+- **A chain with zero contracts does not guard its network** — a deliberate, documented boundary.
+- **`.intercept()` is not available in compose mode** on `api`: MSW is in-process, so a compose-mode runner throws immediately. Keep contract specs in a node-only vitest project — this repo does exactly that (`api-stack` excludes `specs/api/intercepts/**`).
 
 ## Pitfalls
 
-- **Wrong file name shape.** `contracts/openai/classify.ts` (subfolder) or `contracts/classify.ts` (no provider suffix) violate rule C4 — the flat `<name>.<provider>.ts` form with a `defineContract` default export is checked.
-- **Relying on trigger specificity instead of order.** When two intercepts match the same request, registration order decides — FIFO, not "most specific wins".
-- **Testing prompt internals through over-tight filters.** Filter on the stable business marker (`user: /Product Classification/`), not on the full prompt text — contracts pin interactions, not wording.
-- **Letting a pipeline hit the network.** Every outgoing call in a spec should be under contract; an unintercepted call is a test escaping the sandbox, not extra realism. Once a chain declares one intercept, strict mode (rule D7) turns any stray call into a failure — but a chain with **no** intercepts is not guarded at all.
-- **Reaching for `.intercept()` in a compose-mode project.** It throws immediately — MSW cannot reach an app running in its own container. Keep intercept specs in a node-only vitest project (rule I3/D7).
-- **Declaring a request body in a `.http` exchange.** The request block is a trigger — method + path + headers only; the parser refuses a body. Body-based routing stays with `http.post(url, { body })` filters.
-- **Expecting sticky-last replay on api/jobs.** The `.http` file feeds the MSW engine there — consume-once, strict D7. Sticky-last is the stub backend's semantic (website/mobile), where a page legitimately re-fetches.
+- **Reaching into a provider folder from a test.** `import events from './contracts/http/events.js'` is an error (C10). Add a named scenario export to the facade instead — that is what facades are for.
+- **Pinning a prompt by copying it.** A 550-line prompt pasted into a contract is a fossil. Import the app's real builder, or match a stable prefix with `match.includes` — the contract pins the _interaction_, not the wording.
+- **Expecting a substring to match.** Provider string filters are exact. A prompt that "should obviously match" but does not is almost always a whitespace or a template difference — use `match.includes` if that is genuinely what you mean.
+- **Writing a call count as a loop.** `for (…) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.
+- **Relying on declaration specificity instead of order.** Selection is first-match. `.with()` prepends precisely so an override wins without deleting the generic route — outside `.with()`, order is yours to get right.
+- **Letting a pipeline hit the network.** An unintercepted call is a test escaping the sandbox, not extra realism. Once one contract is declared, D7 turns a stray call into a failure.
+- **Duplicating a payload.** The 45-line article exists ONCE, as a `.response.json`; the second contract imports it.
 
 ## Related
 
-[03 — Jobs specs](03-jobs.md) · [02 — API specs](02-api.md) · [09 — Conventions](09-conventions.md)
+[02 — API specs](02-api.md) · [03 — Jobs specs](03-jobs.md) · [11 — Website specs](11-website.md) · [12 — Mobile specs](12-mobile.md) · [09 — Conventions](09-conventions.md)

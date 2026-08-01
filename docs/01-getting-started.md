@@ -200,8 +200,7 @@ specs/
 │       ├── users.test.ts          # <aspect>.test.ts inside its domain (rule C1)
 │       ├── seeds/                 # *.sql
 │       ├── requests/              # *.http — complete requests (inputs)
-│       ├── contracts/             # <name>.<provider>.ts — declared external interactions
-│       ├── intercepts/            # <provider>/<name>.json — inline intercept fixtures
+│       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
 │       └── expected/              # all expected fixtures, flat — incl. response *.http (a slash in the name creates a subfolder)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)

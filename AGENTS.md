@@ -40,7 +40,7 @@ src/
 │   │   └── mobile/                # startMobile constructor + ScreenResult + simctl simulator resolution + appium server spawn + page-source projection + mobile ambiguity
 │   ├── matching/                  # match.* vocabulary + {{token}} structural comparison engine
 │   ├── http-files/                # requests/*.http + expected/*.http (responses) parser/serializer
-│   ├── contracts/                 # defineContract/defineContracts + contract types + ContractQueue (the ONE selection engine) + generic http provider (no external dep)
+│   ├── contracts/                 # defineContract/defineContracts + contract types + ContractQueue (the ONE selection engine) + generic http provider + provider text filters (no external dep)
 │   └── ports/                     # ALL interfaces: database, service, isolation, container, server, command, browser, device
 ├── integrations/                  # one folder = one external dependency (I1), each imports only its own dep + core
 │   ├── postgres/  ├── redis/  ├── sqlite/        # service handles
@@ -89,7 +89,7 @@ specs/                             # ONLY product specifications (I2), written w
 - Lint config (`@jterrazz/typescript` - oxlint + oxfmt + knip + tsgo); the tsconfig typechecks `src/` AND `specs/` (fixtures excluded) — keep it that way, it's what catches result-typing regressions
 - **Self-lint**: `oxlint.config.ts` loads `./dist/oxlint.js` via `jsPlugins` and spreads `recommendedRules` — so `npm run build` MUST precede `npm run lint`. E2E lint specs live in `specs/lint/**` (one violation/compliant fixture pair per rule under `specs/fixtures/lint-violations/`), the checker step is chained in `npm run lint`. Docs: `docs/10-linting.md`
 - Test writing convention (`// Given -` / `// Then -` comments, always both)
-- Directory layout per feature (`seeds/` SQL-only, `fixtures/` feature-local, `requests/` inputs, `contracts/`, `intercepts/`, `expected/` — all expected fixtures incl. response `.http`, flat, extension in the name); shared fixtures live in `specs/fixtures/`, reached via `.fixture('$FIXTURES/…')`. One file-state verb `.fixture(path)` (no `.project()`, no `seedHandlers`); `.seed()` is SQL-only (C7)
+- Directory layout per feature (`seeds/` SQL-only, `fixtures/` feature-local, `requests/` inputs, `contracts/` — a `*.contracts.ts` facade over `<provider>/` units and their data (C4/C10/C11), `expected/` — all expected fixtures incl. response `.http`, flat, extension in the name); shared fixtures live in `specs/fixtures/`, reached via `.fixture('$FIXTURES/…')`. One file-state verb `.fixture(path)` (no `.project()`, no `seedHandlers`); `.seed()` is SQL-only (C7)
 - Runners are created in `*.specification.ts` files and destructured with canonical names: `{ api, cleanup }`, `{ jobs, cleanup }`, `{ cli, cleanup }` — always `afterAll(cleanup)`
 - Accessors are read-only; ALL assertions go through `expect()` — `expect(result.stdout).toContain(...)`, `expect(result.response).toMatch('created.http')`, `await expect(result.table('users', { database: 'db' })).toMatchRows(...)`
 - Dynamic values: the `{{token}}` grammar in fixtures, `match.*` in code (same vocabulary; see `docs/06-tokens.md`)

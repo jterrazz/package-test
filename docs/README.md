@@ -28,7 +28,7 @@ test('creates a user', async () => {
 | [04 — CLI specs](04-cli.md)                   | `specification.cli()`: `.exec()`, `.env()`, fixtures and projects, services, Docker-aware mode                        |
 | [05 — Assertions](05-assertions.md)           | The reference: every matcher, grouped by subject, sync/async rules, `toMatch` resolution, diffs                       |
 | [06 — Tokens](06-tokens.md)                   | The `{{token}}` grammar: all 21 tokens, `#ref` captures, `match.*`, update mode                                       |
-| [07 — Contracts](07-contracts.md)             | `defineContract`, provider trigger/response builders, FIFO queueing, inline escape hatches                            |
+| [07 — Contracts](07-contracts.md)             | `defineContract` / `defineContracts`, the facade layout, selection (`times`, `required`), provider builders           |
 | [08 — Services](08-services.md)               | `postgres` / `redis` / `sqlite`, the services record, compose conventions, per-worker isolation                       |
 | [09 — Conventions](09-conventions.md)         | The constitution: principles, the four enforcement channels, process rules, naming recap, retro-propagation (K)       |
 | [10 — Linting](10-linting.md)                 | The oxlint plugin (`@jterrazz/test/oxlint`): rule catalogue, `recommendedRules`, the D4 conventions checker           |
@@ -38,7 +38,7 @@ test('creates a user', async () => {
 ## How this documentation is organized
 
 - **Chapters 01–04, 11 and 12** follow the five constructors: read 01, then the chapter matching what you test (API, jobs, CLI, website, or mobile).
-- **Chapters 05–08** are shared references — assertions and the token grammar apply to every facet; intercept contracts and infrastructure services apply where the facet has a database or an outgoing call (not the website or mobile facets, which have neither). They are heavily cross-linked from the constructor chapters.
+- **Chapters 05–08** are shared references — assertions and the token grammar apply to every facet; contracts apply wherever a facet reaches the network (api, jobs, and — with the `backend` option — website and mobile), infrastructure services where it has a database. They are heavily cross-linked from the constructor chapters.
 - **Chapters 09–10** cover enforcement. Chapter 09 is the constitution — the principles, the four enforcement channels, and the process rules. Chapter 10 documents the static channel (the `@jterrazz/test/oxlint` plugin and the D4 conventions checker) and carries the **generated four-channel catalogue** — the normative sentence and channel of every mechanized rule, sourced from `src/lint/manifest.ts`. The chapters explain and illustrate; the generated catalogue decides.
 
 Every chapter ends with a **Pitfalls** section (the mistakes the framework is designed to catch) and a **Related** line linking to neighbouring chapters. All examples use the Given/Then comment convention that the framework itself enforces (rule B4).

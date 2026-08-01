@@ -28,13 +28,13 @@ Operative index. Each fix names the rule and the chapter whose **Pitfalls** sect
 
 ## Intercepts, docker, modes
 
-| Symptom                                            | Fix                                                                                                    |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `Unmatched outgoing HTTP request during spec: ...` | Strict intercepts (D7) — add one `.intercept()` per outgoing call; the error lists registered triggers |
-| `.intercept(): ... not available in compose mode`  | Intercepts are in-process MSW (I3) — move the spec to a node-only project; `api-stack` must exclude it |
-| `jobs.trigger` fails in the compose project        | It doesn't — `specification.jobs()` has no mode, always runs in-process whatever `TEST_MODE` says      |
-| `CliResult.container: runner was not configured`   | `.container(name)` needs `docker: { envVar, nameLabel, testRunLabel }` in the cli options              |
-| Leaked containers after a docker-aware spec        | Bind the result with `await using` (B5) so containers are force-removed at scope exit                  |
+| Symptom                                            | Fix                                                                                                       |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `Unmatched outgoing HTTP request during spec: ...` | Strict contracts (D7) — declare the call (or raise its `times`); the error lists every declared route     |
+| `.intercept(): ... not available in compose mode`  | Contracts run through in-process MSW (I3) — move the spec to a node-only project; `api-stack` excludes it |
+| `jobs.trigger` fails in the compose project        | It doesn't — `specification.jobs()` has no mode, always runs in-process whatever `TEST_MODE` says         |
+| `CliResult.container: runner was not configured`   | `.container(name)` needs `docker: { envVar, nameLabel, testRunLabel }` in the cli options                 |
+| Leaked containers after a docker-aware spec        | Bind the result with `await using` (B5) so containers are force-removed at scope exit                     |
 
 ## Layout & architecture
 
