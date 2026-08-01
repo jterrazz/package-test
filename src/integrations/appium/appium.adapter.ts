@@ -59,7 +59,10 @@ function escapePredicate(value: string): string {
  * have no XCUITest analog — the shared vocabulary is wider than a screen,
  * and the boundary is named rather than silently approximated.
  */
-function compilePredicate(element: MobileElementRef, options?: { anyVisibility?: boolean }): string {
+function compilePredicate(
+    element: MobileElementRef,
+    options?: { anyVisibility?: boolean },
+): string {
     const name = escapePredicate(element.name ?? '');
     const contains = (attribute: string): string =>
         element.exact ? `${attribute} == '${name}'` : `${attribute} CONTAINS '${name}'`;
@@ -270,8 +273,8 @@ export class AppiumAdapter implements DevicePort {
                     if ((await offscreen.length) > 0) {
                         try {
                             // Scroll the FOUND element into view directly (by
-                            // id) — a predicate-driven `mobile: scroll` would
-                            // start its own slow native scroll-search instead.
+                            // Id) — a predicate-driven `mobile: scroll` would
+                            // Start its own slow native scroll-search instead.
                             await driver.executeScript('mobile: scroll', [
                                 { elementId: offscreen[0].elementId, toVisible: true },
                             ]);
