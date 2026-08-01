@@ -41,7 +41,7 @@ export const FAMILIES: Record<string, string> = {
     C: 'Fichiers & dossiers',
     D: 'Assertions',
     F: 'Imports & protection de la prod',
-    W: 'Specs website',
+    W: 'Specs website & mobile',
     I: 'Architecture du code source',
     J: 'Hygiène',
     K: 'Rétro-propagation',
@@ -74,7 +74,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'a2-known-constructors': {
         channel: 'statique',
         convention:
-            'Quatre constructeurs et seulement quatre : `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.website()` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur.',
+            'Cinq constructeurs et seulement cinq : `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.website()`, `specification.mobile()` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur.',
         family: 'A',
         id: 'A2',
         rationale:
@@ -419,8 +419,8 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'w1-scenario-pure': {
         channel: 'statique',
         convention:
-            'Un scénario de visite est le When : le visiteur agit, la capture reflète l’état final ; aucun `expect()` dans le callback — les assertions vivent dans le Then, sur le résultat retourné.',
-        facet: 'website',
+            'Un scénario (`.visit()` website, `.open()` mobile) est le When : le visiteur agit, la capture reflète l’état final ; aucun `expect()` dans le callback — les assertions vivent dans le Then, sur le résultat retourné.',
+        facet: 'shared',
         family: 'W',
         id: 'W1',
         rationale:
@@ -429,8 +429,8 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'w2w-user-facing-elements': {
         channel: 'statique',
         convention:
-            'Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content`) ; `testId()` est l’unique échappatoire et déclenche un avertissement.',
-        facet: 'website',
+            'Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content` ; côté mobile `button`, `field`, `content`) ; `testId()` est l’unique échappatoire et déclenche un avertissement.',
+        facet: 'shared',
         family: 'W',
         id: 'W2',
         rationale:
@@ -582,13 +582,24 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            'Un descripteur d’élément doit désigner exactement UN élément : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, `{ exact: true }`). Le framework n’agit jamais sur « le premier ».',
-        facet: 'website',
+            'Un descripteur d’élément doit désigner exactement UN élément : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, `{ exact: true }`). Le framework n’agit jamais sur « le premier ». Vaut pour les deux facettes à scénario : website et mobile.',
+        facet: 'shared',
         family: 'W',
         id: 'W3',
         name: 'w3-unambiguous-element',
         rationale:
             'Agir sur le premier match rend le spec vert alors que le visiteur clique autre chose, et rien ne le signale jamais — une ambiguïté est une faute d’écriture, pas un cas à arbitrer par l’ordre du DOM. Le comptage n’existe qu’à l’exécution : aucune analyse statique ne peut le faire, d’où le canal runtime.',
+    },
+    {
+        channel: 'runtime',
+        convention:
+            'Le vocabulaire d’éléments est UNIQUE entre les facettes website et mobile ; un landmark ARIA (`main()`, `navigation()`…) passé à un verbe mobile est refusé à l’exécution — un écran iOS n’a pas de régions ARIA ; scoper avec `within(testId(…), …)`.',
+        facet: 'mobile',
+        family: 'W',
+        id: 'W4',
+        name: 'w4-no-landmarks-on-mobile',
+        rationale:
+            'Un seul vocabulaire garde l’API mémorisable ; refuser explicitement la partie sans équivalent iOS évite une approximation silencieuse.',
     },
     {
         channel: 'runtime',

@@ -71,14 +71,23 @@
         "oxlint": "^1.74.0",
         "playwright": "^1.49.0",
         "tsdown": "^0.22.7",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.10",
+        "webdriverio": "^9.30.0"
     },
     "peerDependencies": {
+        "appium": "^3.0.0",
         "playwright": "^1.49.0",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.10",
+        "webdriverio": "^9.30.0"
     },
     "peerDependenciesMeta": {
+        "appium": {
+            "optional": true
+        },
         "playwright": {
+            "optional": true
+        },
+        "webdriverio": {
             "optional": true
         }
     },

@@ -1,0 +1,328 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
+import type { remote } from 'webdriverio';
+
+import type {
+    DeviceOpenOptions,
+    DevicePort,
+    DeviceScreen,
+    MobileElementMatch,
+    MobileElementRef,
+    MobileVisitor,
+} from '../../core/ports/device.port.js';
+import { describeMobileAmbiguity } from '../../core/specification/mobile/ambiguity.js';
+import { projectScreen } from '../../core/specification/mobile/projection.js';
+import {
+    AmbiguousElementError,
+    formatElement,
+} from '../../core/specification/website/ambiguity.js';
+
+/** The driver session type, derived so webdriverio stays a type-only import. */
+type Driver = Awaited<ReturnType<typeof remote>>;
+
+/** The element list a predicate search resolves to. */
+type ElementList = Awaited<ReturnType<Driver['$$']>>;
+
+/** One element resolved by a predicate search. */
+type DriverElement = ElementList[number];
+
+/**
+ * Anything a predicate can search from — the session root, or a resolved
+ * element when a descriptor carries a scope. Structural, so the resolution
+ * loop recurses without caring which one it holds.
+ */
+type MatchScope = Driver | DriverElement;
+
+/** How long every verb polls for at least one visible match. */
+const ACTION_TIMEOUT_MS = 15_000;
+const POLL_INTERVAL_MS = 500;
+/** How many candidates the ambiguity error enumerates before truncating. */
+const MAX_REPORTED_MATCHES = 10;
+/** WebDriverAgent builds once per simulator — the first session is the slow one. */
+const WDA_LAUNCH_TIMEOUT_MS = 240_000;
+
+const delay = (ms: number): Promise<void> =>
+    new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
+
+/** Escape a name for an NSPredicate single-quoted string literal. */
+function escapePredicate(value: string): string {
+    return value.replaceAll('\\', String.raw`\\`).replaceAll("'", String.raw`\'`);
+}
+
+/**
+ * Translate a user-facing descriptor into an iOS predicate string. Landmarks
+ * have no XCUITest analog — the shared vocabulary is wider than a screen,
+ * and the boundary is named rather than silently approximated.
+ */
+function compilePredicate(element: MobileElementRef): string {
+    const name = escapePredicate(element.name ?? '');
+    const contains = (attribute: string): string =>
+        element.exact ? `${attribute} == '${name}'` : `${attribute} CONTAINS '${name}'`;
+
+    switch (element.kind) {
+        case 'button': {
+            return `type == 'XCUIElementTypeButton' AND ${contains('label')} AND visible == 1`;
+        }
+        case 'field': {
+            return (
+                `type IN {'XCUIElementTypeTextField','XCUIElementTypeSecureTextField'}` +
+                ` AND (${contains('label')} OR ${contains('value')}) AND visible == 1`
+            );
+        }
+        case 'testId': {
+            return `name == '${name}' AND visible == 1`;
+        }
+        case 'text': {
+            return `(${contains('label')} OR ${contains('value')}) AND visible == 1`;
+        }
+        default: {
+            throw new Error(
+                `${formatElement(element)}: landmarks are a website concept — an iOS screen has no '${element.kind}' region. Scope with within(testId('…'), …) instead.`,
+            );
+        }
+    }
+}
+
+/** The outside-in scope chain of a descriptor, ending on the target itself. */
+function scopeChain(element: MobileElementRef): MobileElementRef[] {
+    const chain: MobileElementRef[] = [];
+    for (let current: MobileElementRef | undefined = element; current; current = current.scope) {
+        chain.unshift(current);
+    }
+    return chain;
+}
+
+/** Capture one candidate's evidence for the ambiguity refusal. */
+async function captureMatch(element: DriverElement): Promise<MobileElementMatch> {
+    const [type, label, value, identifier] = await Promise.all([
+        element.getAttribute('type'),
+        element.getAttribute('label'),
+        element.getAttribute('value'),
+        element.getAttribute('name'),
+    ]);
+    const shortLabel = label ? label.replaceAll(/\s+/g, ' ').trim().slice(0, 80) : undefined;
+    return {
+        type: (type ?? 'Unknown').replace(/^XCUIElementType/, ''),
+        ...(shortLabel === undefined ? {} : { label: shortLabel }),
+        ...(value && value !== label ? { value } : {}),
+        ...(identifier && identifier !== label ? { identifier } : {}),
+    };
+}
+
+/**
+ * Device adapter backed by appium's XCUITest driver over webdriverio.
+ *
+ * ONE driver session per adapter (= per runner = per vitest worker), created
+ * lazily on the first `open()` and reused — WebDriverAgent startup is the
+ * expensive part, not the app relaunch. Every `open()` terminates and
+ * relaunches the app, so each spec starts from a deterministic fresh state.
+ *
+ * Webdriverio is an optional peer dependency: it is only imported here, and
+ * this module is only loaded when a spec calls `.open()`.
+ */
+export class AppiumAdapter implements DevicePort {
+    private driver: Driver | null = null;
+    private readonly options: { serverUrl: string; udid: string };
+
+    constructor(options: { serverUrl: string; udid: string }) {
+        this.options = options;
+    }
+
+    async close(): Promise<void> {
+        if (this.driver) {
+            await this.driver.deleteSession();
+            this.driver = null;
+        }
+    }
+
+    async open(options: DeviceOpenOptions): Promise<DeviceScreen> {
+        const driver = await this.session(options.bundleId);
+
+        // Deterministic fresh state: every open terminates the app first,
+        // Then relaunches it — plainly, or straight onto the deep link.
+        try {
+            await driver.executeScript('mobile: terminateApp', [{ bundleId: options.bundleId }]);
+        } catch {
+            // The app was not running — a fresh state already.
+        }
+        await (options.deepLink === undefined
+            ? driver.executeScript('mobile: activateApp', [{ bundleId: options.bundleId }])
+            : driver.executeScript('mobile: deepLink', [
+                  { bundleId: options.bundleId, url: options.deepLink },
+              ]));
+
+        if (options.scenario) {
+            try {
+                await options.scenario(this.createVisitor(driver));
+            } catch (error) {
+                // Evidence on failure: a screenshot of the state the
+                // Scenario died in, referenced from the error itself.
+                const evidence = await this.captureEvidence(driver);
+                const suffix = evidence ? `\nEvidence: ${evidence}` : '';
+                // A W3 refusal is already a complete, self-explaining
+                // Message — re-wrapping it would print the whole thing
+                // Twice (once inline, once as the cause).
+                if (error instanceof AmbiguousElementError) {
+                    error.message += suffix;
+                    throw error;
+                }
+                throw new Error(
+                    `open scenario failed: ${error instanceof Error ? error.message : String(error)}${suffix}`,
+                    { cause: error },
+                );
+            }
+        }
+
+        return projectScreen(await driver.getPageSource());
+    }
+
+    /** The visitor implementation — every verb polls until exactly one visible match. */
+    private createVisitor(driver: Driver): MobileVisitor {
+        return {
+            fill: async (element, value) => {
+                const match = await this.resolveOne(driver, element, 'fill');
+                await match.setValue(value);
+            },
+            see: async (element) => {
+                await this.resolveOne(driver, element, 'see');
+            },
+            tap: async (element) => {
+                const match = await this.resolveOne(driver, element, 'tap');
+                await match.click();
+            },
+        };
+    }
+
+    /**
+     * Resolve a descriptor to exactly ONE element: poll until at least one
+     * visible match exists, then enforce uniqueness (CONVENTIONS W3). The
+     * scope chain resolves outside-in, so an ambiguous scope names ITSELF as
+     * the fault rather than sending the author to fix the target.
+     */
+    private async resolveOne(
+        driver: Driver,
+        element: MobileElementRef,
+        verb: string,
+    ): Promise<DriverElement> {
+        const chain = scopeChain(element);
+        const deadline = Date.now() + ACTION_TIMEOUT_MS;
+
+        for (;;) {
+            const resolved = await this.resolveChain(driver, chain);
+            if (resolved) {
+                return resolved;
+            }
+            if (Date.now() > deadline) {
+                throw await this.timeoutError(driver, element, verb);
+            }
+            await delay(POLL_INTERVAL_MS);
+        }
+    }
+
+    /** One resolution pass over the chain — `null` means "nothing yet, keep polling". */
+    private async resolveChain(
+        driver: Driver,
+        chain: MobileElementRef[],
+    ): Promise<DriverElement | null> {
+        let scope: MatchScope = driver;
+        for (const level of chain) {
+            const matches: ElementList = await scope.$$(
+                `-ios predicate string:${compilePredicate(level)}`,
+            );
+            const count = await matches.length;
+            if (count === 0) {
+                return null;
+            }
+            if (count > 1) {
+                throw new AmbiguousElementError(
+                    describeMobileAmbiguity({
+                        element: level,
+                        matches: await this.captureMatches(matches),
+                    }),
+                );
+            }
+            scope = matches[0];
+        }
+        return scope as DriverElement;
+    }
+
+    /** Enumerate the candidates' evidence, truncated. */
+    private async captureMatches(matches: ElementList): Promise<MobileElementMatch[]> {
+        const count = Math.min(await matches.length, MAX_REPORTED_MATCHES);
+        const evidence: MobileElementMatch[] = [];
+        for (let index = 0; index < count; index++) {
+            evidence.push(await captureMatch(matches[index]));
+        }
+        return evidence;
+    }
+
+    /** Screenshot the failing state into a temp file; never masks the original error. */
+    private async captureEvidence(driver: Driver): Promise<null | string> {
+        try {
+            const dir = mkdtempSync(resolve(tmpdir(), 'spec-mobile-'));
+            const path = resolve(dir, 'failure.png');
+            writeFileSync(path, Buffer.from(await driver.takeScreenshot(), 'base64'));
+            return path;
+        } catch {
+            return null;
+        }
+    }
+
+    /** The timeout refusal, with a compact excerpt of what IS on screen to aid diagnosis. */
+    private async timeoutError(
+        driver: Driver,
+        element: MobileElementRef,
+        verb: string,
+    ): Promise<Error> {
+        let excerpt = '';
+        try {
+            const source = await driver.getPageSource();
+            const labels = [
+                ...new Set(
+                    [...source.matchAll(/label="(?<label>[^"]{2,60})"/g)].map(
+                        (match) => match.groups?.['label'] ?? '',
+                    ),
+                ),
+            ].slice(0, 15);
+            if (labels.length > 0) {
+                excerpt = `\nCurrently on screen: ${labels.join(' | ')}`;
+            }
+        } catch {
+            // The excerpt is best-effort evidence — never mask the timeout.
+        }
+        return new Error(
+            `${verb}(${formatElement(element)}) timed out after ${ACTION_TIMEOUT_MS}ms — no visible match.${excerpt}`,
+        );
+    }
+
+    /** Create the shared driver session (once), with an actionable error when webdriverio is absent. */
+    private async session(bundleId: string): Promise<Driver> {
+        if (this.driver) {
+            return this.driver;
+        }
+        let remoteFn: typeof remote;
+        try {
+            ({ remote: remoteFn } = await import('webdriverio'));
+        } catch {
+            throw new Error(
+                '.open() requires webdriverio (optional peer dependency): npm install -D appium webdriverio && npx appium driver install xcuitest',
+            );
+        }
+        const url = new URL(this.options.serverUrl);
+        this.driver = await remoteFn({
+            capabilities: {
+                'appium:automationName': 'XCUITest',
+                'appium:bundleId': bundleId,
+                'appium:noReset': true,
+                'appium:udid': this.options.udid,
+                'appium:wdaLaunchTimeout': WDA_LAUNCH_TIMEOUT_MS,
+                platformName: 'iOS',
+            },
+            hostname: url.hostname,
+            logLevel: 'error',
+            port: Number(url.port),
+        });
+        return this.driver;
+    }
+}

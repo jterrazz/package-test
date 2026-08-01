@@ -17,6 +17,7 @@
 | [Orchestrator](classes/Orchestrator.md) | Orchestrator for test infrastructure. Integration: starts services via testcontainers. E2E: runs full docker compose up. |
 | [PageResult](classes/PageResult.md) | Result from a rendered `.visit()` action — the page as a browser saw it. |
 | [ResponseAccessor](classes/ResponseAccessor.md) | Read-only accessor for an HTTP response. |
+| [ScreenResult](classes/ScreenResult.md) | Result from a `.open()` action — the screen as the device saw it, final state. |
 | [TableAccessor](classes/TableAccessor.md) | Read-only accessor for a database table after a specification run. |
 | [TextAccessor](classes/TextAccessor.md) | Read-only accessor for a captured text handle — THE universal one: stdout, stderr, container logs, and file text all surface as a `TextAccessor`. |
 
@@ -41,6 +42,9 @@
 | [CliSpecificationOptions](interfaces/CliSpecificationOptions.md) | Options for [specification.cli](variables/specification.md#property-cli). |
 | [ContainerPort](interfaces/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
 | [DatabasePort](interfaces/DatabasePort.md) | Abstract database interface for specification runners. Implement this to plug in your database stack (e.g. Postgres, SQLite). |
+| [DeviceOpenOptions](interfaces/DeviceOpenOptions.md) | Per-open options forwarded to the device session. |
+| [DevicePort](interfaces/DevicePort.md) | Abstract device interface for the mobile specification runner. One implementation lives in `integrations/appium/` — a single driver session per runner, created on the first `open()` and reused; each open terminates and relaunches the app for a deterministic fresh state. |
+| [DeviceScreen](interfaces/DeviceScreen.md) | The screen captured by a device open — the FINAL state when a scenario ran. The tree is the projected page source; `texts` are the visible labels/values in document order, consecutive duplicates collapsed. |
 | [DockerSpecConfig](interfaces/DockerSpecConfig.md) | Configuration for the docker-aware cli mode. When set on [SpecificationConfig](interfaces/SpecificationConfig.md), the cli runner generates a test-run id, injects it into the child env under `envVar`, then queries Docker for every container carrying `testRunLabel=<id>` after the command exits. |
 | [ElementMatch](interfaces/ElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening a browser. |
 | [ElementOptions](interfaces/ElementOptions.md) | Options accepted by every named descriptor. |
@@ -58,9 +62,15 @@
 | [JobsSpecificationOptions](interfaces/JobsSpecificationOptions.md) | Options for [specification.jobs](variables/specification.md#property-jobs). |
 | [MatchableRequest](interfaces/MatchableRequest.md) | The observed outgoing request, reduced to what trigger matchers inspect. Built once per request by the MSW integration and handed to [InterceptTrigger.match](interfaces/InterceptTrigger.md#match). |
 | [MatchFixtureOptions](interfaces/MatchFixtureOptions.md) | Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a single fixture OUT of update-mode rewriting: a frozen fixture is NEVER written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen mismatch still throws its diff, and a frozen missing fixture still throws its "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the subject of a negative test that asserts the mismatch/error rendering) survivable across update runs instead of being silently overwritten with the actual output. |
+| [MobileElementMatch](interfaces/MobileElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening the simulator. |
+| [MobileHandle](interfaces/MobileHandle.md) | The record returned by [specification.mobile](variables/specification.md#property-mobile). Destructure with the canonical names (CONVENTIONS A3): |
+| [MobileSpecification](interfaces/MobileSpecification.md) | The `mobile` facet — screen chain entry handed out by `specification.mobile()`. `.open()` is the single, terminal action: it terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen. |
+| [MobileSpecificationOptions](interfaces/MobileSpecificationOptions.md) | Options for [specification.mobile](variables/specification.md#property-mobile). |
+| [MobileVisitor](interfaces/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until at least one visible match exists; `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
 | [MockDatePort](interfaces/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
 | [PostgresOptions](interfaces/PostgresOptions.md) | - |
 | [RedisOptions](interfaces/RedisOptions.md) | - |
+| [ScreenNode](interfaces/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
 | [ServeOptions](interfaces/ServeOptions.md) | Options for the local server started by `specification.website()`. |
 | [ServerPort](interfaces/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
 | [ServerResponse](interfaces/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
@@ -83,6 +93,9 @@
 | [InterceptResponseValue](type-aliases/InterceptResponseValue.md) | What an intercept replies with: either a fixed [InterceptResponse](interfaces/InterceptResponse.md) or an [InterceptResponder](type-aliases/InterceptResponder.md) evaluated per consumed request. |
 | [LandmarkKind](type-aliases/LandmarkKind.md) | The landmark roles — the standard set of page regions, and the only containers a scope can name. Closed on purpose: ARIA defines exactly these, so `within()` never becomes a second selector language. |
 | [MatcherKind](type-aliases/MatcherKind.md) | The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds. |
+| [MobileElementKind](type-aliases/MobileElementKind.md) | The element kinds a mobile screen can designate — the structural subset of [ElementRef](interfaces/ElementRef.md) kinds that map onto the XCUITest accessibility tree. There is ONE element vocabulary across facets: `button('Bookmark')` works in a visit scenario and a mobile scenario alike. Landmarks have no iOS analog — passing one to a mobile verb refuses at runtime. |
+| [MobileElementRef](type-aliases/MobileElementRef.md) | A user-facing element descriptor for mobile scenarios — pure data, built by the shared element vocabulary (`button()`, `field()`, `content()`, `testId()`, `within()`) and translated into iOS predicate strings by the device integration. Structurally the same ref type as the browser's, so the vocabulary stays single; kinds outside [MobileElementKind](type-aliases/MobileElementKind.md) (the ARIA landmarks) are refused at runtime with a message naming the boundary. |
+| [MobileScenario](type-aliases/MobileScenario.md) | The behavior of an open — the When of the spec; assertions stay in the Then. |
 | [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
 | [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
@@ -112,7 +125,7 @@
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
 | [region](variables/region.md) | The `region` landmark — a `<section>` carrying an accessible name. |
 | [search](variables/search.md) | The `search` landmark. |
-| [specification](variables/specification.md) | The three specification constructors (CONVENTIONS A2) — created in a `*.specification.ts` file under `specs/`, destructured with canonical names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4). |
+| [specification](variables/specification.md) | The five specification constructors (CONVENTIONS A2) — created in a `*.specification.ts` file under `specs/`, destructured with canonical names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4). |
 
 ## Functions
 

@@ -1,10 +1,11 @@
 import { startApi } from '../api/start-api.js';
 import { startCli } from '../cli/start-cli.js';
 import { startJobs } from '../jobs/start-jobs.js';
+import { startMobile } from '../mobile/start-mobile.js';
 import { startWebsite } from '../website/start-website.js';
 
 /**
- * The three specification constructors (CONVENTIONS A2) — created in a
+ * The five specification constructors (CONVENTIONS A2) — created in a
  * `*.specification.ts` file under `specs/`, destructured with canonical
  * names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4).
  *
@@ -47,6 +48,13 @@ export const specification = {
      * server, no mode. `.trigger(name)` is the terminal action.
      */
     jobs: startJobs,
+    /**
+     * Test a native app on the iOS simulator. `device` names the simulator
+     * (resolved and booted via `simctl`); `app` names the bundle under
+     * test. `.open(deepLink?, scenario?)` relaunches the app fresh, runs
+     * the scenario, and captures the final screen.
+     */
+    mobile: startMobile,
     /**
      * Test a deployed or locally-served website. `server` starts the site
      * (a shell command receiving `PORT`); `url` targets a running one.

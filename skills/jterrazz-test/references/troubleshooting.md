@@ -19,7 +19,7 @@ Operative index. Each fix names the rule and the chapter whose **Pitfalls** sect
 
 | Symptom                                                                      | Fix                                                                                                                                   |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `specification.app does not exist`                                           | Only three constructors: `.api()`, `.jobs()`, `.cli()` (A2)                                                                           |
+| `specification.app does not exist`                                           | Only five constructors: `.api()`, `.jobs()`, `.cli()`, `.website()`, `.mobile()` (A2)                                                 |
 | `seed() targets database "..." not found`                                    | `database` takes the services RECORD KEY (`{ analyticsDb: ... }` → `'analyticsDb'`), not the compose name                             |
 | `N databases are declared — pass { database }` / `redundant database option` | A7 cuts both ways: mandatory with ≥ 2 DBs, forbidden with 1                                                                           |
 | Service ignores compose image/env                                            | A handle binds to the compose service named like its key, else kebab-case; use `composeService` only for non-derivable names          |

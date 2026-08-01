@@ -33,6 +33,10 @@ export {
     type JobsSpecificationOptions,
 } from './core/specification/jobs/start-jobs.js';
 export {
+    type MobileHandle,
+    type MobileSpecificationOptions,
+} from './core/specification/mobile/start-mobile.js';
+export {
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
 } from './core/specification/website/start-website.js';
@@ -46,6 +50,7 @@ export type {
     DockerSpecConfig,
     JobHandle,
     JobsSpecification,
+    MobileSpecification,
     SpecificationConfig,
     WebsiteSpecification,
 } from './core/specification/shared/builder.js';
@@ -63,6 +68,7 @@ export {
     removeContainers,
 } from './integrations/docker/docker-lookup.js';
 export { HttpResult } from './core/specification/api/result.js';
+export { ScreenResult } from './core/specification/mobile/result.js';
 export { FetchResult, PageResult } from './core/specification/website/result.js';
 export { DirectoryAccessor } from './core/specification/shared/result/directory.js';
 export { FilesystemAccessor } from './core/specification/shared/result/filesystem.js';
@@ -92,8 +98,21 @@ export type {
     Visitor,
     VisitScenario,
 } from './core/ports/browser.port.js';
+export type {
+    DeviceOpenOptions,
+    DevicePort,
+    DeviceScreen,
+    MobileElementKind,
+    MobileElementMatch,
+    MobileElementRef,
+    MobileScenario,
+    MobileVisitor,
+    ScreenNode,
+} from './core/ports/device.port.js';
 
-// The element vocabulary — user-facing descriptors for visit scenarios
+// The element vocabulary — user-facing descriptors, shared by visit (website)
+// And open (mobile) scenarios: ONE vocabulary, two facets. Landmarks are
+// Website-only and refuse at runtime on a mobile verb.
 export {
     banner,
     button,

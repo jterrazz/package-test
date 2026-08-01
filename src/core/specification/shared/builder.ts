@@ -15,10 +15,12 @@ import { parseRequestFile } from '../../http-files/http-file.js';
 import type { BrowserPort, VisitScenario } from '../../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../../ports/cli.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
+import type { DevicePort, MobileScenario } from '../../ports/device.port.js';
 import type { ServerPort } from '../../ports/server.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
 import { HttpResult } from '../api/result.js';
 import { CliResult } from '../cli/result.js';
+import { ScreenResult } from '../mobile/result.js';
 import { FetchResult, PageResult } from '../website/result.js';
 import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
@@ -61,6 +63,8 @@ export interface SpecificationConfig {
      * of strict intercepts.
      */
     external?: 'allow' | 'block';
+    /** Bundle id of the app under test (mobile facet only) — the app `.open()` relaunches. */
+    bundleId?: string;
     command?: CliPort;
     database?: DatabasePort;
     /**
@@ -70,6 +74,13 @@ export interface SpecificationConfig {
      */
     databaseKeys?: string[];
     databases?: Map<string, DatabasePort>;
+    /**
+     * Lazy device accessor (mobile facet only). The first `.open()` creates
+     * the shared driver session; the appium/webdriverio integration stays a
+     * lazy import so the optional peer is only loaded when a spec opens the
+     * app.
+     */
+    device?: () => Promise<DevicePort>;
     dockerConfig?: DockerSpecConfig;
     /**
      * Unique id shared by every spec from this runner instance.
@@ -228,6 +239,21 @@ export interface WebsiteSpecification {
 }
 
 /**
+ * The `mobile` facet — screen chain entry handed out by
+ * `specification.mobile()`. `.open()` is the single, terminal action: it
+ * terminates and relaunches the app (deterministic fresh state), applies the
+ * deep link, runs the scenario, and captures the final screen.
+ */
+export interface MobileSpecification {
+    /**
+     * Relaunch the app and resolve with the captured screen. With a deep
+     * link, the app opens on it; with a scenario, the visitor interacts
+     * first (the When) and the capture reflects the FINAL screen state.
+     */
+    open: (deepLink?: string, scenario?: MobileScenario) => Promise<ScreenResult>;
+}
+
+/**
  * Fluent builder for declaring a single test specification.
  *
  * Chain setup methods ({@link seed}, {@link fixture}, {@link env}), then call
@@ -244,6 +270,7 @@ export class SpecificationBuilder
         ApiSpecification<string>,
         CliSpecification<string>,
         JobsSpecification<string>,
+        MobileSpecification,
         WebsiteSpecification
 {
     private commandEnv: CliEnv = {};
@@ -532,6 +559,27 @@ export class SpecificationBuilder
         return this.executeSetup(null, () => this.runVisitAction(path, scenario));
     }
 
+    // ── Mobile actions (terminal) ──
+
+    /**
+     * Terminate and relaunch the app on the simulator, apply the deep link,
+     * run the scenario, and resolve with the captured final screen — the
+     * projected accessibility tree and the visible texts. One driver session
+     * per runner; every open starts from a deterministic fresh app state.
+     *
+     * @example
+     *   const result = await mobile.open('news://events');
+     *   expect(result.screen).toMatch('events.screen.json');
+     *
+     *   const result = await mobile.open('news://events', async (visitor) => {
+     *       await visitor.tap(button('Enquête Fauci COVID-19'));
+     *       await visitor.see(content('rapports'));
+     *   });
+     */
+    open(deepLink?: string, scenario?: MobileScenario): Promise<ScreenResult> {
+        return this.executeSetup(null, () => this.runOpenAction(deepLink, scenario));
+    }
+
     // ── Job actions (terminal) ──
 
     /**
@@ -734,6 +782,28 @@ export class SpecificationBuilder
         });
     }
 
+    private async runOpenAction(
+        deepLink?: string,
+        scenario?: MobileScenario,
+    ): Promise<ScreenResult> {
+        if (!this.config.device || this.config.bundleId === undefined) {
+            throw new Error('.open() requires a device adapter (use specification.mobile())');
+        }
+
+        const device = await this.config.device();
+        const screen = await device.open({
+            bundleId: this.config.bundleId,
+            deepLink,
+            scenario,
+        });
+
+        return new ScreenResult({
+            config: this.config,
+            screen,
+            testDir: this.testDir,
+        });
+    }
+
     private requireBaseUrl(method: string): string {
         if (!this.config.baseUrl) {
             throw new Error(
@@ -932,6 +1002,17 @@ export function createWebsiteFacet(config: SpecificationConfig): WebsiteSpecific
         fetch: (path) => start().fetch(path),
         headers: (headers) => start().headers(headers),
         visit: (path, scenario) => start().visit(path, scenario),
+    };
+}
+
+/**
+ * Create the `mobile` facet bound to the given adapter configuration.
+ */
+export function createMobileFacet(config: SpecificationConfig): MobileSpecification {
+    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
+
+    return {
+        open: (deepLink, scenario) => start().open(deepLink, scenario),
     };
 }
 

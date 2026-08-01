@@ -7,12 +7,12 @@ metadata:
 
 # `@jterrazz/test`
 
-The ecosystem's declarative testing framework for HTTP APIs, background jobs, CLIs, and rendered websites. A spec reads as a sentence — `await api.seed('users.sql').request('create-user.http')` — and the vitest test name is its only description. Infrastructure (Postgres/Redis/SQLite/Docker, or a real chromium) is started, isolated per worker, and cleaned up for you.
+The ecosystem's declarative testing framework for HTTP APIs, background jobs, CLIs, rendered websites, and native mobile apps. A spec reads as a sentence — `await api.seed('users.sql').request('create-user.http')` — and the vitest test name is its only description. Infrastructure (Postgres/Redis/SQLite/Docker, a real chromium, or an iOS simulator) is started, isolated per worker, and cleaned up for you.
 
 ## Mental model (read once)
 
-- **Four constructors, only four** — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`. Created in a `*.specification.ts` file at the facet root, destructured with the canonical name (`{ api, cleanup }` / `{ jobs, cleanup }` / `{ cli, cleanup }` / `{ website, cleanup }`, no aliasing), always `afterAll(cleanup)`.
-- **Terminal actions** — `.request()` / `.get()` (api), `.trigger()` (jobs), `.exec()` (cli), `.fetch()` / `.visit()` (website) execute the chain and resolve to a typed result. Setups (`.seed()`, `.fixture()`, `.env()`, `.headers()`, `.intercept()`) chain before them. No `.run()`, no label, no `.spawn()`. One chain = one action; databases reset each chain.
+- **Five constructors, only five** — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()`. Created in a `*.specification.ts` file at the facet root, destructured with the canonical name (`{ api, cleanup }` / `{ jobs, cleanup }` / `{ cli, cleanup }` / `{ website, cleanup }` / `{ mobile, cleanup }`, no aliasing), always `afterAll(cleanup)`.
+- **Terminal actions** — `.request()` / `.get()` (api), `.trigger()` (jobs), `.exec()` (cli), `.fetch()` / `.visit()` (website), `.open()` (mobile) execute the chain and resolve to a typed result. Setups (`.seed()`, `.fixture()`, `.env()`, `.headers()`, `.intercept()`) chain before them. No `.run()`, no label, no `.spawn()`. One chain = one action; databases reset each chain.
 - **Every assertion goes through `expect()`** — accessors (`result.stdout`, `result.response`, `result.table(...)`, `result.file(...)`) are read-only; the matchers are registered on vitest's `expect`. `await` exactly the IO matchers (`toMatchRows`, `toBeEmpty`, `toBeRunning`, `toMatch` on tree subjects); everything else is sync.
 - **Goldens first (D11)** — snapshot the whole surface per scoped use case (`expect(x).toMatch('case.http'|'case.txt')`, tokens for volatile parts, `TEST_UPDATE=1` to generate). `.grep()` / `toContain` are the scalpel for targeted probes, not the default.
 - **One verb per state** — `.seed()` is SQL-only (database state); `.fixture(path)` is the one file-state verb (copies into the cwd). No `.project()`, no seed handlers.
@@ -21,9 +21,9 @@ The ecosystem's declarative testing framework for HTTP APIs, background jobs, CL
 
 ## When to use this skill
 
-**Trigger on:** imports of `@jterrazz/test`; edits to `*.test.ts` / `*.specification.ts` in a repo using it; prompts about specification runners, seeds, fixtures, contracts, intercepts, tokens, directory snapshots, rendered-page visit scenarios, or the Given/Then convention.
+**Trigger on:** imports of `@jterrazz/test`; edits to `*.test.ts` / `*.specification.ts` in a repo using it; prompts about specification runners, seeds, fixtures, contracts, intercepts, tokens, directory snapshots, rendered-page visit scenarios, simulator screen scenarios, or the Given/Then convention.
 
-**Do NOT use for:** plain `vitest` unit tests of a pure function; frontend component tests (Vitest + Testing Library). Rendered-page/browser testing IS covered — through `specification.website()`, not raw Playwright.
+**Do NOT use for:** plain `vitest` unit tests of a pure function; frontend component tests (Vitest + Testing Library). Rendered-page/browser testing IS covered — through `specification.website()`, not raw Playwright. Native-app testing IS covered — through `specification.mobile()`, not raw appium/webdriverio.
 
 ## Routing table
 
@@ -35,6 +35,7 @@ Load the one reference that matches the task; each also names the docs chapter c
 | Writing **jobs** specs (background pipelines)       | [references/jobs.md](references/jobs.md)                       | [docs/03-jobs.md](../../docs/03-jobs.md)                                      |
 | Writing **CLI** specs (exec, env, fixtures, docker) | [references/cli.md](references/cli.md)                         | [docs/04-cli.md](../../docs/04-cli.md)                                        |
 | Writing **website** specs (fetch, visit, scenarios) | [references/website.md](references/website.md)                 | [docs/11-website.md](../../docs/11-website.md)                                |
+| Writing **mobile** specs (open, simulator, screens) | [references/mobile.md](references/mobile.md)                   | [docs/12-mobile.md](../../docs/12-mobile.md)                                  |
 | **Dynamic values** / the `{{token}}` grammar        | [references/tokens.md](references/tokens.md)                   | [docs/06-tokens.md](../../docs/06-tokens.md)                                  |
 | **Mocking** an LLM / HTTP call (contracts)          | [references/contracts.md](references/contracts.md)             | [docs/07-contracts.md](../../docs/07-contracts.md)                            |
 | Weird failures / **pitfalls**                       | [references/troubleshooting.md](references/troubleshooting.md) | Pitfalls sections of each chapter                                             |

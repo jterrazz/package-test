@@ -1,6 +1,6 @@
 # Agent brief - `@jterrazz/test`
 
-Declarative testing framework for APIs, jobs, CLIs, and websites. Four constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()` — with terminal actions (`.get()`/`.request()`/`.trigger()`/`.exec()`/`.fetch()`/`.visit()` execute and resolve to typed results) and all assertions via vitest `expect()` custom matchers. Normative rules: the constitution is `docs/09-conventions.md`, the generated per-rule catalogue is `docs/10-linting.md` (mirrored for agents in `skills/jterrazz-test/references/rules.md`); narrative docs in `docs/`.
+Declarative testing framework for APIs, jobs, CLIs, websites, and mobile apps. Five constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()` — with terminal actions (`.get()`/`.request()`/`.trigger()`/`.exec()`/`.fetch()`/`.visit()`/`.open()` execute and resolve to typed results) and all assertions via vitest `expect()` custom matchers. Normative rules: the constitution is `docs/09-conventions.md`, the generated per-rule catalogue is `docs/10-linting.md` (mirrored for agents in `skills/jterrazz-test/references/rules.md`); narrative docs in `docs/`.
 
 ## Setup
 
@@ -36,17 +36,19 @@ src/
 │   │   ├── api/                   # startApi constructor + HttpResult + fetch adapter
 │   │   ├── jobs/                  # startJobs constructor
 │   │   ├── cli/                   # startCli constructor + CliResult + exec adapter
-│   │   └── website/               # startWebsite constructor + FetchResult/PageResult + serve adapter (local server) + element vocabulary
+│   │   ├── website/               # startWebsite constructor + FetchResult/PageResult + serve adapter (local server) + element vocabulary (SHARED with mobile)
+│   │   └── mobile/                # startMobile constructor + ScreenResult + simctl simulator resolution + appium server spawn + page-source projection + mobile ambiguity
 │   ├── matching/                  # match.* vocabulary + {{token}} structural comparison engine
 │   ├── http-files/                # requests/*.http + expected/*.http (responses) parser/serializer
 │   ├── contracts/                 # defineContract + intercept types + generic http provider (no external dep)
-│   └── ports/                     # ALL interfaces: database, service, isolation, container, server, command, browser
+│   └── ports/                     # ALL interfaces: database, service, isolation, container, server, command, browser, device
 ├── integrations/                  # one folder = one external dependency (I1), each imports only its own dep + core
 │   ├── postgres/  ├── redis/  ├── sqlite/        # service handles
 │   ├── testcontainers/  ├── compose/             # container runtimes (compose owns the yaml parser)
 │   ├── docker/                    # docker CLI shell-outs: ContainerAccessor, docker-lookup
 │   ├── hono/                      # in-process server adapter
 │   ├── playwright/                # chromium browser adapter for specification.website() — optional peer dep, lazily imported
+│   ├── appium/                    # XCUITest device adapter (webdriverio) for specification.mobile() — optional peer dep, lazily imported
 │   ├── msw/                       # intercept registration engine
 │   └── openai/  └── anthropic/    # intercept providers
 ├── vitest/                        # ALL runner coupling: expect() matchers, TEST_UPDATE / -u detection, mockOf, mockOfDate
@@ -72,7 +74,7 @@ specs/                             # ONLY product specifications (I2), written w
 
 | Project        | Includes                                                                             | Infra                                                                | Tests           |
 | -------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | --------------- |
-| `fast`         | `src/**/*.test.ts` (sibling module tests) + `specs/cli/**` + `specs/lint/**`         | none (docker specs self-skip; lint specs need `npm run build` first) | 722             |
+| `fast`         | `src/**/*.test.ts` (sibling module tests) + `specs/cli/**` + `specs/lint/**`         | none (docker specs self-skip; lint specs need `npm run build` first) | 773             |
 | `api`          | `specs/api/**` + `specs/jobs/**` — node mode, in-process Hono + testcontainers       | Docker                                                               | 52              |
 | `api-stack`    | same files, `env: { TEST_MODE: 'compose' }`, **excludes** `specs/api/intercepts/**`  | Docker compose                                                       | 38 (+1 skipped) |
 | `website`      | `specs/website/**`                                                                   | none — needs playwright + `npx playwright install chromium`          | 10              |
@@ -99,7 +101,7 @@ This package self-tests via its own framework. Tests under `specs/cli/` use `spe
 
 ## Docs
 
-- `docs/` — narrative chapters, numbered: `01` getting-started, `02` api, `03` jobs, `04` cli, `05` assertions, `06` tokens, `07` contracts, `08` services, `09` conventions, `10` linting, `11` website (each ends with Pitfalls + Related)
+- `docs/` — narrative chapters, numbered: `01` getting-started, `02` api, `03` jobs, `04` cli, `05` assertions, `06` tokens, `07` contracts, `08` services, `09` conventions, `10` linting, `11` website, `12` mobile (each ends with Pitfalls + Related)
 - `npm run docs` regenerates the two committed projections: the API reference (`docs/reference/`, typedoc via `typescript docs` — a code → docs cross-layer projection) and the rule catalogue (`docs/10-linting.md` + `skills/jterrazz-test/references/rules.md`, spliced from `src/lint/manifest.ts`). Both are sync-checked: `npm run lint` runs `docs --check` (the Docs sync pass) + the catalogue freshness meta-test — both must hold after one `npm run docs`
 - Docs are committed and consumed in-repo (chapters under `docs/`, the API reference under `docs/reference/`, agent routing via `skills/jterrazz-test/`); there is no rendered site and nothing is published from `docs/`
 - **Standing instruction (rule K1): a discovery — new edge case, defect, behavior change — grows a guard (static rule / meta-test / runtime error) that stops it recurring, in the same change.** A mechanized rule goes into `src/lint/manifest.ts` (+ its implementation), then `npm run docs` regenerates the `docs/10-linting.md` catalogue + `skills/jterrazz-test/references/rules.md`; a new principle or non-mechanizable criterion goes into the `docs/09-conventions.md` constitution. Update `docs/` alongside. When the public API changes, also update `README.md`, `skills/jterrazz-test/SKILL.md` + its `references/`.

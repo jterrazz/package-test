@@ -31,7 +31,7 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | D     | Assertions, tokens, snapshots, strict intercepts                     | [05](05-assertions.md), [06](06-tokens.md), [07](07-contracts.md)          |
 | E     | Framework environment variables                                      | [01](01-getting-started.md)                                                |
 | F     | Imports (single package root) & production protection                | [01](01-getting-started.md)                                                |
-| W     | Website specs (visit scenarios, user-facing elements)                | [11](11-website.md)                                                        |
+| W     | Website & mobile specs (scenarios, user-facing elements)             | [11](11-website.md), [12](12-mobile.md)                                    |
 | G     | Infrastructure (compose, isolation, docker-aware)                    | [04](04-cli.md), [08](08-services.md)                                      |
 | H     | Naming recap                                                         | below                                                                      |
 | I     | Source-code architecture (four layers, sibling module tests)         | `AGENTS.md`                                                                |
@@ -66,19 +66,19 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 
 ## H — Naming recap
 
-| Thing           | Rule                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `integrations/`, `lint/`, `fixtures/`)       |
-| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                 |
-| Instances       | `api`, `jobs`, `cli`, `website` — enforced by the destructuring (A3)                        |
-| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                   |
-| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                     |
-| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                             |
-| Contracts       | `contracts/<name>.<provider>.ts`                                                            |
-| Requests        | `requests/<name>.http` (inputs)                                                             |
-| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)         |
-| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`) |
-| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                  |
+| Thing           | Rule                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------ |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`) |
+| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                      |
+| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                   |
+| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                        |
+| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                          |
+| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                  |
+| Contracts       | `contracts/<name>.<provider>.ts`                                                                 |
+| Requests        | `requests/<name>.http` (inputs)                                                                  |
+| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)              |
+| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)      |
+| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                       |
 
 ## Maintaining the constitution
 

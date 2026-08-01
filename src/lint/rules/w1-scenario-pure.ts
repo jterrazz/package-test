@@ -2,17 +2,22 @@ import { memberPropertyName, walk } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
+/** The scenario-carrying terminal actions: `.visit()` (website) and `.open()` (mobile). */
+const SCENARIO_ACTIONS = new Set(['open', 'visit']);
+
 /**
- * CONVENTIONS W1 — a visit scenario is the When: the visitor interacts, the
- * capture reflects the final state, and assertions live in the Then on the
- * returned result. An `expect()` inside the scenario callback is flagged.
+ * CONVENTIONS W1 — a visit (or mobile open) scenario is the When: the
+ * visitor interacts, the capture reflects the final state, and assertions
+ * live in the Then on the returned result. An `expect()` inside the scenario
+ * callback is flagged.
  */
 export const w1ScenarioPure: LintRule = {
     create(context: RuleContext) {
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;
-                if (!callee || memberPropertyName(callee) !== 'visit') {
+                const member = callee ? memberPropertyName(callee) : undefined;
+                if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
                     return;
                 }
                 const args = node.arguments as AstNode[] | undefined;
@@ -39,7 +44,7 @@ export const w1ScenarioPure: LintRule = {
         docs: RULE_DOCS['w1-scenario-pure'],
         messages: {
             expectInScenario:
-                'No expect() inside a visit scenario — the scenario is the When; assert the final state on the returned result in the Then (W1 — see docs/10-linting.md).',
+                'No expect() inside a scenario — the scenario is the When; assert the final state on the returned result in the Then (W1 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

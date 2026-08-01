@@ -50,11 +50,14 @@ function findFreePort(): Promise<number> {
  */
 export class ServeAdapter {
     private child: ChildProcess | null = null;
+    /** The constructor named in error messages — `website`, or `mobile` (appium server). */
+    private readonly facet: string;
     private readonly options: ServeOptions;
     private output = '';
     private readonly root: string;
 
-    constructor(options: ServeOptions, root: string) {
+    constructor(options: ServeOptions, root: string, facet = 'website') {
+        this.facet = facet;
         this.options = options;
         this.root = root;
     }
@@ -89,7 +92,7 @@ export class ServeAdapter {
         for (;;) {
             if (exited) {
                 throw new Error(
-                    `specification.website(): server command exited before answering HTTP.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                    `specification.${this.facet}(): server command exited before answering HTTP.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
                 );
             }
             try {
@@ -99,7 +102,7 @@ export class ServeAdapter {
                 if (Date.now() >= deadline) {
                     await this.stop();
                     throw new Error(
-                        `specification.website(): server did not answer on ${readyUrl} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                        `specification.${this.facet}(): server did not answer on ${readyUrl} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
                     );
                 }
                 await delay(READY_POLL_INTERVAL_MS);

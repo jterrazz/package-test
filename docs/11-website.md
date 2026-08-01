@@ -146,6 +146,8 @@ Elements are **user-facing by construction** (rule W2) — there is no CSS/XPath
 | `content(text)` | any element containing the text                  |
 | `testId(id)`    | `data-testid` — the escape hatch (rule W2 warns) |
 
+The vocabulary is shared with the mobile facet — `button`, `field`, `content`, `testId`, `within` work identically in an `.open()` scenario ([12 — Mobile specs](12-mobile.md)); the landmarks below are website-only.
+
 ## Designating exactly one element
 
 **A descriptor must match exactly one element (rule W3).** When several match, the framework refuses the action instead of taking the first one:
@@ -363,4 +365,4 @@ No `seeds/`, `requests/`, or `contracts/` — `specification.website()` has no `
 
 ## Related
 
-[01 — Getting started](01-getting-started.md) · [05 — Assertions](05-assertions.md) · [06 — Tokens](06-tokens.md)
+[01 — Getting started](01-getting-started.md) · [05 — Assertions](05-assertions.md) · [06 — Tokens](06-tokens.md) · [12 — Mobile specs](12-mobile.md)

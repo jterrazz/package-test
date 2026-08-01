@@ -10,6 +10,7 @@ import type { LintRule, RuleContext, Visitor } from '../types.js';
  */
 const INTEGRATION_DEPS: Record<string, string[]> = {
     anthropic: ['@anthropic-ai/sdk'],
+    appium: ['webdriverio'],
     compose: ['yaml'],
     docker: [],
     hono: ['hono', '@hono/node-server'],
@@ -118,6 +119,12 @@ export const i1LayerBoundaries: LintRule = {
                     inside === 'core/specification/website/start-website.ts'
                 ) {
                     return null; // Sanctioned lazy seam: website runner → integrations/playwright.
+                }
+                if (
+                    target.startsWith('integrations/appium/') &&
+                    inside === 'core/specification/mobile/start-mobile.ts'
+                ) {
+                    return null; // Sanctioned lazy seam: mobile runner → integrations/appium.
                 }
                 return 'crossLayer';
             }

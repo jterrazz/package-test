@@ -2,17 +2,21 @@ import { memberPropertyName, walk } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
+/** The scenario-carrying terminal actions: `.visit()` (website) and `.open()` (mobile). */
+const SCENARIO_ACTIONS = new Set(['open', 'visit']);
+
 /**
  * CONVENTIONS W2 — elements are user-facing (`button`, `link`, `field`,
  * `heading`, `content`); `testId()` is the escape hatch and gets a warning
- * where it appears inside a visit scenario.
+ * where it appears inside a visit or mobile open scenario.
  */
 export const w2wUserFacingElements: LintRule = {
     create(context: RuleContext) {
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;
-                if (!callee || memberPropertyName(callee) !== 'visit') {
+                const member = callee ? memberPropertyName(callee) : undefined;
+                if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
                     return;
                 }
                 const args = node.arguments as AstNode[] | undefined;

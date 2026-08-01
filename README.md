@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Declarative testing framework for APIs, jobs, CLIs, and websites. Four constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()` — and specs that read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
+Declarative testing framework for APIs, jobs, CLIs, websites, and mobile apps. Five constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()` — and specs that read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
 
 ```bash
 npm install -D @jterrazz/test vitest
@@ -105,9 +105,38 @@ test('captures the full head surface of a rendered page', async () => {
 });
 ```
 
-Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.fetch()`, `.visit()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
+### Mobile testing (iOS simulator)
 
-## The four constructors
+```typescript
+// specs/mobile/mobile.specification.ts
+import { specification } from '@jterrazz/test';
+import { afterAll } from 'vitest';
+
+export const { cleanup, mobile } = await specification.mobile({
+    app: { bundleId: 'com.jterrazz.fakenews' },
+    device: { name: 'iPhone 17', os: '26.5' },
+});
+
+afterAll(cleanup);
+```
+
+```typescript
+// specs/mobile/events/feed.test.ts
+import { expect, test } from 'vitest';
+import { mobile } from '../mobile.specification.js';
+
+test('shows the events feed behind its deep link', async () => {
+    // Given - the events screen
+    const result = await mobile.open('news://events');
+
+    // Then - one golden covers the whole projected accessibility tree
+    expect(result.screen).toMatch('events.screen.json');
+});
+```
+
+Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.fetch()`, `.visit()`, `.open()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
+
+## The five constructors
 
 One constructor per tested interface, each returning a record destructured with its canonical name:
 
@@ -117,6 +146,7 @@ One constructor per tested interface, each returning a record destructured with 
 | `specification.jobs(options)`     | `{ jobs, cleanup, orchestrator }`        | `.trigger(name)`                                             |
 | `specification.cli(bin, options)` | `{ cli, cleanup, docker, orchestrator }` | `.exec(args, { waitFor?, timeout? }?)`                       |
 | `specification.website(options)`  | `{ website, cleanup, url }`              | `.fetch(path)`, `.visit(path, scenario?)`                    |
+| `specification.mobile(options)`   | `{ mobile, cleanup, udid }`              | `.open(deepLink?, scenario?)`                                |
 
 ### `specification.api({ services, server, mode?, root? })`
 
@@ -196,6 +226,25 @@ const page = await website.visit('/', async (visitor) => {
 
 The handle destructures to `{ website, cleanup, url }` — no `docker`, no `orchestrator`. `.visit()` needs playwright (`npm install -D playwright && npx playwright install chromium`) — an optional peer dependency, only loaded when a spec actually renders a page. Full reference: [docs/11-website.md](docs/11-website.md).
 
+### `specification.mobile({ app, device, root? })`
+
+Tests a native app on the iOS simulator through a real XCUITest session (appium): `.open(deepLink?, scenario?)` terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen — the projected accessibility tree plus the visible texts. The simulator is resolved by `device: { name, os?, udid? }` via `xcrun simctl` (refusing on zero or several matches) and booted when shut down; the appium server is spawned from the caller project on a free port.
+
+```typescript
+export const { mobile, cleanup, udid } = await specification.mobile({
+    app: { bundleId: 'com.jterrazz.fakenews' },
+    device: { name: 'iPhone 17', os: '26.5' },
+});
+
+// A screen behind its deep link, driven by a scenario (the When)
+const result = await mobile.open('news://events', async (visitor) => {
+    await visitor.tap(button('Enquête Fauci COVID-19'));
+    await visitor.see(content('rapports'));
+});
+```
+
+The handle destructures to `{ mobile, cleanup, udid }`. The element vocabulary is the website facet's, unchanged — `button`, `field`, `content`, `testId`, `within` — landmarks excepted (an iOS screen has no ARIA regions; they refuse at runtime). Requires the app installed on the simulator plus the optional peers: `npm install -D appium webdriverio && npx appium driver install xcuitest`. Full reference: [docs/12-mobile.md](docs/12-mobile.md).
+
 ### Root auto-discovery
 
 When `root` is absent, the framework walks up from the specification file to the first directory containing `docker/compose.test.yaml`, else the first containing `package.json`. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
@@ -216,17 +265,18 @@ When `root` is absent, the framework walks up from the specification file to the
 
 ### Actions (terminal)
 
-| Method                                     | Facet   | Resolves to   | Description                                                                           |
-| ------------------------------------------ | ------- | ------------- | ------------------------------------------------------------------------------------- |
-| `.request("create-user.http")`             | api     | `HttpResult`  | Send the COMPLETE request from `requests/<file>` (method, path, headers, raw body)    |
-| `.get(path)` / `.delete(path)`             | api     | `HttpResult`  | Inline requests for simple cases                                                      |
-| `.post(path, body?)` / `.put(path, body?)` | api     | `HttpResult`  | Inline body: plain object, JSON-serialized                                            |
-| `.trigger("name")`                         | jobs    | `BaseResult`  | Execute a registered job                                                              |
-| `.exec("args")`                            | cli     | `CliResult`   | Run the command                                                                       |
-| `.exec(["build", "start"])`                | cli     | `CliResult`   | Sequence in the same cwd; stops on first non-zero exit                                |
-| `.exec("dev", { waitFor, timeout? })`      | cli     | `CliResult`   | Long-running: resolves at the pattern, killed at `timeout` (default 10 s)             |
-| `.fetch(path)`                             | website | `FetchResult` | One raw HTTP exchange — redirects surface as 3xx, never followed                      |
-| `.visit(path, scenario?)`                  | website | `PageResult`  | Render the page in a shared chromium; with a scenario, the capture is the final state |
+| Method                                     | Facet   | Resolves to    | Description                                                                              |
+| ------------------------------------------ | ------- | -------------- | ---------------------------------------------------------------------------------------- |
+| `.request("create-user.http")`             | api     | `HttpResult`   | Send the COMPLETE request from `requests/<file>` (method, path, headers, raw body)       |
+| `.get(path)` / `.delete(path)`             | api     | `HttpResult`   | Inline requests for simple cases                                                         |
+| `.post(path, body?)` / `.put(path, body?)` | api     | `HttpResult`   | Inline body: plain object, JSON-serialized                                               |
+| `.trigger("name")`                         | jobs    | `BaseResult`   | Execute a registered job                                                                 |
+| `.exec("args")`                            | cli     | `CliResult`    | Run the command                                                                          |
+| `.exec(["build", "start"])`                | cli     | `CliResult`    | Sequence in the same cwd; stops on first non-zero exit                                   |
+| `.exec("dev", { waitFor, timeout? })`      | cli     | `CliResult`    | Long-running: resolves at the pattern, killed at `timeout` (default 10 s)                |
+| `.fetch(path)`                             | website | `FetchResult`  | One raw HTTP exchange — redirects surface as 3xx, never followed                         |
+| `.visit(path, scenario?)`                  | website | `PageResult`   | Render the page in a shared chromium; with a scenario, the capture is the final state    |
+| `.open(deepLink?, scenario?)`              | mobile  | `ScreenResult` | Relaunch the app fresh on the simulator; with a scenario, the capture is the final state |
 
 One chain = one terminal action; databases reset at the start of every chain. Every cli spec runs in a fresh, empty temp directory.
 
@@ -374,14 +424,15 @@ These conventions are not just prose: the package ships an oxlint plugin (`@jter
 
 ## Requirements
 
-- **Docker** - testcontainers for node mode, docker compose for compose mode; not needed for `sqlite()`, plain cli specs, or website specs
+- **Docker** - testcontainers for node mode, docker compose for compose mode; not needed for `sqlite()`, plain cli specs, website specs, or mobile specs
 - **vitest** - peer dependency
 - **playwright** - optional peer dependency, only needed for `.visit()`: `npm install -D playwright && npx playwright install chromium`
+- **appium + webdriverio** - optional peer dependencies, only needed for `specification.mobile()`: `npm install -D appium webdriverio && npx appium driver install xcuitest` — plus Xcode, a simulator, and the app installed on it
 - **msw** - bundled as a direct dependency (powers `.intercept()`); no separate install
 - **hono** (or any web framework) - supplied by your project for in-process apps; the adapter only needs an object with a `request()` method, so it is not a peer
 
 ## Docs
 
-- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI/website specs, assertions, tokens, contracts, services, conventions, linting
+- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI/website/mobile specs, assertions, tokens, contracts, services, conventions, linting
 - API reference: committed under [docs/reference/](docs/reference/) — compiled from source by `npm run docs`
 - Agent skill: [skills/jterrazz-test/](skills/jterrazz-test/) — mental model, per-facet references, generated rule reference
