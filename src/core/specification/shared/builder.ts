@@ -12,6 +12,11 @@ import type {
     InterceptTrigger,
 } from '../../contracts/types.js';
 import { parseRequestFile } from '../../http-files/http-file.js';
+import {
+    interceptEntriesOf,
+    type InterceptExchange,
+    parseInterceptFile,
+} from '../../http-files/intercept-file.js';
 import type { BrowserPort, VisitScenario } from '../../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../../ports/cli.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
@@ -26,6 +31,7 @@ import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
 import { BaseResult, validateDatabaseOption } from './result/result.js';
+import type { StubBackend } from './stub-backend.js';
 
 // ── Types ──
 
@@ -49,6 +55,16 @@ export interface DockerSpecConfig {
 
 /** Adapter configuration passed to the specification facets at setup time. */
 export interface SpecificationConfig {
+    /**
+     * The declared stub backend (website/mobile facets) — armed with the
+     * chain's `.http` intercept exchanges before every terminal action.
+     */
+    backend?: StubBackend;
+    /**
+     * Base URL of the running stub backend — allow-listed through the
+     * browser's `external: 'block'` policy so client-side fetches reach it.
+     */
+    backendUrl?: string;
     /** Base URL of the website under test (website facet only). */
     baseUrl?: string;
     /**
@@ -146,9 +162,9 @@ export interface RequestEntry {
 export interface ApiSpecification<DatabaseKey extends string = string> {
     /** Set HTTP headers for the request. Multiple calls merge. */
     headers: (headers: Record<string, string>) => ApiSpecification<DatabaseKey>;
-    /** Intercept an outgoing HTTP call — a contract, an array of contracts, or a trigger + response pair. */
+    /** Intercept an outgoing HTTP call — a contract, an array of contracts, an `intercepts/*.http` file, or a trigger + response pair. */
     intercept: ((
-        contractOrContracts: InterceptContract | InterceptContract[],
+        contractOrContracts: InterceptContract | InterceptContract[] | string,
     ) => ApiSpecification<DatabaseKey>) &
         ((
             trigger: InterceptTrigger,
@@ -174,9 +190,9 @@ export interface ApiSpecification<DatabaseKey extends string = string> {
  * Jobs run in-process by definition (CONVENTIONS A5/A8).
  */
 export interface JobsSpecification<DatabaseKey extends string = string> {
-    /** Intercept an outgoing HTTP call — a contract, an array of contracts, or a trigger + response pair. */
+    /** Intercept an outgoing HTTP call — a contract, an array of contracts, an `intercepts/*.http` file, or a trigger + response pair. */
     intercept: ((
-        contractOrContracts: InterceptContract | InterceptContract[],
+        contractOrContracts: InterceptContract | InterceptContract[] | string,
     ) => JobsSpecification<DatabaseKey>) &
         ((
             trigger: InterceptTrigger,
@@ -227,6 +243,12 @@ export interface CliSpecification<DatabaseKey extends string = string> {
 export interface WebsiteSpecification {
     /** Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls merge. */
     headers: (headers: Record<string, string>) => WebsiteSpecification;
+    /**
+     * Declare the chain's backend exchanges from an `intercepts/<name>.http`
+     * file — served by the declared stub backend (requires the runner's
+     * `backend` option). Multiple calls layer in order.
+     */
+    intercept: (file: string) => WebsiteSpecification;
 
     /** Perform one raw HTTP GET — redirects surface as 3xx results, never followed. */
     fetch: (path: string) => Promise<FetchResult>;
@@ -245,6 +267,13 @@ export interface WebsiteSpecification {
  * deep link, runs the scenario, and captures the final screen.
  */
 export interface MobileSpecification {
+    /**
+     * Declare the chain's backend exchanges from an `intercepts/<name>.http`
+     * file — served by the declared stub backend (requires the runner's
+     * `backend` option). Multiple calls layer in order.
+     */
+    intercept: (file: string) => MobileSpecification;
+
     /**
      * Relaunch the app and resolve with the captured screen. With a deep
      * link, the app opens on it; with a scenario, the visitor interacts
@@ -273,6 +302,7 @@ export class SpecificationBuilder
         MobileSpecification,
         WebsiteSpecification
 {
+    private backendExchanges: InterceptExchange[] = [];
     private commandEnv: CliEnv = {};
     private config: SpecificationConfig;
     private fixtures: FixtureEntry[] = [];
@@ -380,18 +410,25 @@ export class SpecificationBuilder
      *
      *   // JSON fixture file (loaded from intercepts/ directory)
      *   .intercept(http.get(url), 'http/world-news-tech.json')
+     *
+     *   // Declared exchanges — a bi-block intercepts/<name>.http file
+     *   .intercept('two-events.http')
      */
-    intercept(contractOrContracts: InterceptContract | InterceptContract[]): this;
+    intercept(contractOrContracts: InterceptContract | InterceptContract[] | string): this;
     intercept(
         trigger: InterceptTrigger,
         response: InterceptResponder | InterceptResponse | string,
     ): this;
     intercept(
-        triggerOrContracts: InterceptContract | InterceptContract[] | InterceptTrigger,
+        triggerOrContracts: InterceptContract | InterceptContract[] | InterceptTrigger | string,
         maybeResponse?: InterceptResponder | InterceptResponse | string,
     ): this {
         if (this.config.interceptDisabledReason) {
             throw new Error(`.intercept(): ${this.config.interceptDisabledReason}`);
+        }
+
+        if (typeof triggerOrContracts === 'string') {
+            return this.interceptFile(triggerOrContracts);
         }
 
         if (Array.isArray(triggerOrContracts)) {
@@ -441,6 +478,43 @@ export class SpecificationBuilder
         } else {
             this.intercepts.push({ trigger, response });
         }
+    }
+
+    /**
+     * Register the exchanges of an `intercepts/<name>.http` file — flat in
+     * the calling test's `intercepts/` directory, the same resolution
+     * `.seed()` / `.request()` use. Website/mobile chains feed the declared
+     * stub backend; api/jobs chains feed the MSW engine (same contract list).
+     */
+    private interceptFile(file: string): this {
+        if (!file.endsWith('.http')) {
+            throw new Error(
+                `.intercept(): a single string argument must name an intercepts/*.http file (e.g. 'two-events.http'), got '${file}'`,
+            );
+        }
+
+        // Website/mobile chains have no in-process network to intercept — the
+        // App under test runs in its own process (server child, simulator).
+        // Their exchanges are served by the declared stub backend instead.
+        const stubFacet = this.config.baseUrl !== undefined || this.config.device !== undefined;
+        if (stubFacet && !this.config.backend) {
+            const facet = this.config.device === undefined ? 'website' : 'mobile';
+            throw new Error(
+                `.intercept(): this runner has no declared backend — add \`backend\` to the specification options ` +
+                    `(specification.${facet}({ …, backend: { … } })) so the chain's .http intercepts have a stub to serve them.`,
+            );
+        }
+
+        const content = readFileSync(resolve(this.testDir, 'intercepts', file), 'utf8');
+        const exchanges = parseInterceptFile(content, `intercepts/${file}`);
+
+        if (stubFacet) {
+            this.backendExchanges.push(...exchanges);
+            return this;
+        }
+
+        this.intercepts.push(...interceptEntriesOf(exchanges));
+        return this;
     }
 
     // ── HTTP actions (terminal) ──
@@ -664,10 +738,16 @@ export class SpecificationBuilder
             registration = await registerIntercepts(this.intercepts);
         }
 
+        // Arm the declared stub backend (website/mobile). The stub resets
+        // Between chains the way databases do: this chain's exchanges replace
+        // The previous chain's, and the unmatched log clears. Chains with
+        // Zero intercepts leave the stub unguarded — the MSW boundary.
+        this.config.backend?.beginChain(this.backendExchanges);
+
         // Execute action
         try {
             const value = await action();
-            const violation = registration?.violation();
+            const violation = registration?.violation() ?? this.config.backend?.violation();
             if (violation) {
                 throw violation;
             }
@@ -675,7 +755,7 @@ export class SpecificationBuilder
         } catch (error) {
             // The strict-intercept error is the actionable failure — prefer
             // It over the app-level fallout of the 501 the request received.
-            throw registration?.violation() ?? error;
+            throw registration?.violation() ?? this.config.backend?.violation() ?? error;
         } finally {
             registration?.cleanup();
         }
@@ -769,6 +849,9 @@ export class SpecificationBuilder
         const headers =
             Object.keys(this.requestHeaders).length > 0 ? this.requestHeaders : undefined;
         const page = await browser.open(`${baseUrl}${path}`, {
+            allowedOrigins: this.config.backendUrl
+                ? [new URL(this.config.backendUrl).origin]
+                : undefined,
             baseUrl,
             external: this.config.external ?? 'allow',
             headers,
@@ -954,10 +1037,10 @@ export function createApiFacet(config: SpecificationConfig): ApiSpecification<st
         get: (path) => start().get(path),
         headers: (headers) => start().headers(headers),
         intercept: (
-            triggerOrContracts: InterceptContract | InterceptContract[] | InterceptTrigger,
+            triggerOrContracts: InterceptContract | InterceptContract[] | InterceptTrigger | string,
             response?: InterceptResponder | InterceptResponse | string,
         ) =>
-            Array.isArray(triggerOrContracts)
+            Array.isArray(triggerOrContracts) || typeof triggerOrContracts === 'string'
                 ? start().intercept(triggerOrContracts)
                 : start().intercept(
                       triggerOrContracts as InterceptTrigger,
@@ -978,10 +1061,10 @@ export function createJobsFacet(config: SpecificationConfig): JobsSpecification<
 
     return {
         intercept: (
-            triggerOrContracts: InterceptContract | InterceptContract[] | InterceptTrigger,
+            triggerOrContracts: InterceptContract | InterceptContract[] | InterceptTrigger | string,
             response?: InterceptResponder | InterceptResponse | string,
         ) =>
-            Array.isArray(triggerOrContracts)
+            Array.isArray(triggerOrContracts) || typeof triggerOrContracts === 'string'
                 ? start().intercept(triggerOrContracts)
                 : start().intercept(
                       triggerOrContracts as InterceptTrigger,
@@ -1001,6 +1084,7 @@ export function createWebsiteFacet(config: SpecificationConfig): WebsiteSpecific
     return {
         fetch: (path) => start().fetch(path),
         headers: (headers) => start().headers(headers),
+        intercept: (file) => start().intercept(file),
         visit: (path, scenario) => start().visit(path, scenario),
     };
 }
@@ -1012,6 +1096,7 @@ export function createMobileFacet(config: SpecificationConfig): MobileSpecificat
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
+        intercept: (file) => start().intercept(file),
         open: (deepLink, scenario) => start().open(deepLink, scenario),
     };
 }

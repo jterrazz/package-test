@@ -1,11 +1,16 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { http } from '../../contracts/http.js';
-import type { InterceptTrigger } from '../../contracts/types.js';
+import type { InterceptEntry, InterceptTrigger } from '../../contracts/types.js';
+import type { InterceptExchange } from '../../http-files/intercept-file.js';
 import type { CliEnv, CliOutput, CliPort } from '../../ports/cli.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
 import { createApiFacet, createCliFacet, SpecificationBuilder } from './builder.js';
+import { StubBackend } from './stub-backend.js';
 
 // ── Fakes — mocks are code (CONVENTIONS I4) ──
 
@@ -194,6 +199,92 @@ describe('builder — intercepts in compose mode (CONVENTIONS I3)', () => {
 
         // Then - registering an inline intercept chains normally
         expect(() => builder.intercept(http.get('https://x.test/'), http.json({}))).not.toThrow();
+    });
+});
+
+// ── .http intercept files ──
+
+/** A temp test dir carrying one intercepts/<name>.http fixture. */
+function dirWithInterceptFile(content: string, name = 'stub.http'): string {
+    const dir = mkdtempSync(join(tmpdir(), 'builder-intercepts-'));
+    mkdirSync(join(dir, 'intercepts'));
+    writeFileSync(join(dir, 'intercepts', name), content);
+    return dir;
+}
+
+const STUB_FILE =
+    'GET /events\n\nHTTP/1.1 200 OK\n\n{ "items": [] }\n\n###\n\nGET /articles\n\nHTTP/1.1 200 OK\n\n{ "items": [] }\n';
+
+describe('builder — .http intercept files', () => {
+    test('routes a website chain to the declared stub backend, not msw', () => {
+        // Given - a website-shaped config carrying a stub backend
+        const builder = new SpecificationBuilder(
+            { backend: new StubBackend(), baseUrl: 'http://127.0.0.1:9' },
+            dirWithInterceptFile(STUB_FILE),
+        );
+
+        // When - the chain declares a .http intercept file
+        builder.intercept('stub.http');
+
+        // Then - the exchanges queue for the stub; the msw list stays empty
+        const internals = builder as unknown as {
+            backendExchanges: InterceptExchange[];
+            intercepts: InterceptEntry[];
+        };
+        expect(internals.backendExchanges).toHaveLength(2);
+        expect(internals.backendExchanges[0].request.path).toBe('/events');
+        expect(internals.intercepts).toHaveLength(0);
+    });
+
+    test('routes an api chain to msw as generic-http entries', () => {
+        // Given - an api-shaped config (no baseUrl, no device)
+        const builder = new SpecificationBuilder({}, dirWithInterceptFile(STUB_FILE));
+
+        // When
+        builder.intercept('stub.http');
+
+        // Then - the exchanges become FIFO msw entries (CONVENTIONS D7 applies)
+        const internals = builder as unknown as {
+            backendExchanges: InterceptExchange[];
+            intercepts: InterceptEntry[];
+        };
+        expect(internals.intercepts).toHaveLength(2);
+        expect(internals.intercepts[0].trigger.adapter).toBe('http');
+        expect(internals.backendExchanges).toHaveLength(0);
+    });
+
+    test('a website chain without a backend option names the fix', () => {
+        // Given - a website-shaped config with no stub backend declared
+        const builder = new SpecificationBuilder(
+            { baseUrl: 'http://127.0.0.1:9' },
+            dirWithInterceptFile(STUB_FILE),
+        );
+
+        // Then - the error points at the specification options
+        expect(() => builder.intercept('stub.http')).toThrow(
+            '.intercept(): this runner has no declared backend — add `backend` to the specification options (specification.website({ …, backend: { … } }))',
+        );
+    });
+
+    test('a mobile chain without a backend option names its own constructor', () => {
+        // Given - a mobile-shaped config (a device accessor, no backend)
+        const builder = new SpecificationBuilder(
+            { device: () => Promise.reject(new Error('unused')) },
+            dirWithInterceptFile(STUB_FILE),
+        );
+
+        // Then - the fix names specification.mobile
+        expect(() => builder.intercept('stub.http')).toThrow('specification.mobile({ …, backend');
+    });
+
+    test('a single string argument must end in .http', () => {
+        // Given - a plain builder
+        const builder = new SpecificationBuilder({}, import.meta.dirname);
+
+        // Then - the legacy adapter/file.json form stays a two-argument affair
+        expect(() => builder.intercept('openai/ingest.json')).toThrow(
+            ".intercept(): a single string argument must name an intercepts/*.http file (e.g. 'two-events.http'), got 'openai/ingest.json'",
+        );
     });
 });
 

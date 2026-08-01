@@ -4,25 +4,29 @@
 ```ts
 type WebsiteSpecificationOptions = object & 
   | {
+  backend?: WebsiteBackendOptions;
   server: ServeOptions;
   url?: never;
 }
   | {
+  backend?: never;
   server?: never;
   url: string;
 };
 ```
 
-Defined in: [core/specification/website/start-website.ts:20](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L20)
+Defined in: [core/specification/website/start-website.ts:36](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L36)
 
 Options for [specification.website](../variables/specification.md#property-website). `server` (start
 the site locally) and `url` (target a running site) are mutually
 exclusive BY TYPE — the union makes the invalid combinations
-inexpressible rather than runtime-checked.
+inexpressible rather than runtime-checked. `backend` requires `server`
+mode for the same reason: a deployed site cannot be pointed at a local
+stub.
 
 ## Type Declaration
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | [core/specification/website/start-website.ts:26](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L26) |
-| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | [core/specification/website/start-website.ts:31](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L31) |
+| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | [core/specification/website/start-website.ts:42](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L42) |
+| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | [core/specification/website/start-website.ts:47](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L47) |

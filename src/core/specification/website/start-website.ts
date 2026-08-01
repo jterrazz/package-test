@@ -7,15 +7,31 @@ import {
 } from '../shared/builder.js';
 import { getCallerDir } from '../shared/caller.js';
 import { resolveRoot } from '../shared/resolve.js';
+import { StubBackend } from '../shared/stub-backend.js';
 import { ServeAdapter, type ServeOptions } from './serve.adapter.js';
 
 // ── Types ──
 
 /**
+ * The declared stub backend behind the site under test — started before the
+ * server command, torn down with the runner. Its URL is injected into the
+ * server child's environment under `env`; the chain's
+ * `.intercept('<name>.http')` exchanges are what it serves.
+ */
+export interface WebsiteBackendOptions {
+    /** Env var receiving the stub's URL in the server child (e.g. `'API_URL'`). */
+    env: string;
+    /** Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port. */
+    port?: number;
+}
+
+/**
  * Options for {@link startWebsite | specification.website}. `server` (start
  * the site locally) and `url` (target a running site) are mutually
  * exclusive BY TYPE — the union makes the invalid combinations
- * inexpressible rather than runtime-checked.
+ * inexpressible rather than runtime-checked. `backend` requires `server`
+ * mode for the same reason: a deployed site cannot be pointed at a local
+ * stub.
  */
 export type WebsiteSpecificationOptions = {
     /**
@@ -32,6 +48,12 @@ export type WebsiteSpecificationOptions = {
 } & (
     | {
           /**
+           * Declared stub backend: started BEFORE the server command, its
+           * URL injected into the child env under `backend.env`. Serves the
+           * exchanges each chain declares via `.intercept('<name>.http')`.
+           */
+          backend?: WebsiteBackendOptions;
+          /**
            * Start the site locally: a shell command receiving a free port
            * as `PORT`, polled on `ready` (default `/`) until it answers.
            */
@@ -39,6 +61,7 @@ export type WebsiteSpecificationOptions = {
           url?: never;
       }
     | {
+          backend?: never;
           server?: never;
           /** Target an already-running site (a deployed or preview URL). */
           url: string;
@@ -67,12 +90,42 @@ export async function startWebsite(options: WebsiteSpecificationOptions): Promis
     const callerDir = getCallerDir();
     await registerMatchers();
 
+    // The type already forbids `backend` with `url`; the runtime check covers
+    // Untyped callers with the same sentence.
+    if (options.backend && !options.server) {
+        throw new Error(
+            'specification.website(): `backend` requires `server` mode — a deployed `url` cannot be pointed at a local stub.',
+        );
+    }
+
+    // The stub starts BEFORE the server command, so the child finds its URL
+    // In the environment from the very first request it makes.
+    let backend: null | StubBackend = null;
+    let backendUrl: string | undefined;
+    if (options.backend) {
+        backend = new StubBackend({ port: options.backend.port });
+        backendUrl = await backend.start();
+    }
+
     let serve: null | ServeAdapter = null;
     let baseUrl: string;
     if (options.server) {
         const root = resolveRoot(options.root, callerDir);
-        serve = new ServeAdapter(options.server, root);
-        baseUrl = await serve.start();
+        serve = new ServeAdapter(
+            options.server,
+            root,
+            'website',
+            options.backend && backendUrl !== undefined
+                ? { [options.backend.env]: backendUrl }
+                : {},
+        );
+        try {
+            baseUrl = await serve.start();
+        } catch (error) {
+            // A server that never came up must not orphan the stub.
+            await backend?.stop();
+            throw error;
+        }
     } else {
         baseUrl = options.url.replace(/\/$/, '');
     }
@@ -92,6 +145,8 @@ export async function startWebsite(options: WebsiteSpecificationOptions): Promis
     };
 
     const config: SpecificationConfig = {
+        backend: backend ?? undefined,
+        backendUrl,
         baseUrl,
         browser: getBrowser,
         external: options.external ?? (options.server ? 'block' : 'allow'),
@@ -105,6 +160,9 @@ export async function startWebsite(options: WebsiteSpecificationOptions): Promis
             }
             if (serve) {
                 await serve.stop();
+            }
+            if (backend) {
+                await backend.stop();
             }
         },
         url: baseUrl,

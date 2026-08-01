@@ -7,10 +7,27 @@ import {
 } from '../shared/builder.js';
 import { getCallerDir } from '../shared/caller.js';
 import { resolveRoot } from '../shared/resolve.js';
+import { StubBackend } from '../shared/stub-backend.js';
 import { startAppiumServer } from './appium-server.js';
 import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
 
 // ── Types ──
+
+/**
+ * The declared stub backend behind the app under test. The framework owns
+ * the simulator and appium but NOT the JS bundler (Metro belongs to the
+ * caller's repo, like `next build` belongs to a website's) — so nothing is
+ * injected: the handle exposes `backendUrl` and the CALLER wires it into its
+ * own bundler env.
+ */
+export interface MobileBackendOptions {
+    /**
+     * Fixed port — pins a stable stub URL across runs. Metro inlines
+     * `EXPO_PUBLIC_*` values at bundle-serve time; a stable port lets a warm
+     * Metro survive between runs. Default: a free OS-assigned port.
+     */
+    port?: number;
+}
 
 /** Options for {@link startMobile | specification.mobile}. */
 export interface MobileSpecificationOptions {
@@ -19,6 +36,12 @@ export interface MobileSpecificationOptions {
         /** Bundle id of the installed app (`com.example.app`). */
         bundleId: string;
     };
+    /**
+     * Declared stub backend: started with the runner, serving the exchanges
+     * each chain declares via `.intercept('<name>.http')`. The handle gains
+     * `backendUrl` — inject it into your bundler env yourself.
+     */
+    backend?: MobileBackendOptions;
     /** The simulator to run on — resolved through `xcrun simctl`. */
     device: {
         /** Simulator name, matched exactly (`iPhone 17`). */
@@ -43,7 +66,13 @@ export interface MobileSpecificationOptions {
  *     const { mobile, cleanup, udid } = await specification.mobile(…);
  */
 export interface MobileHandle {
-    /** End the driver session and stop the appium server. */
+    /**
+     * Base URL of the declared stub backend — present only with the
+     * `backend` option. The caller injects it into its own bundler env
+     * (e.g. `EXPO_PUBLIC_API_URL`); the framework never touches the bundler.
+     */
+    backendUrl?: string;
+    /** End the driver session, stop the appium server and the stub backend. */
     cleanup: () => Promise<void>;
     mobile: MobileSpecification;
     /** The resolved simulator UDID the specs run against. */
@@ -63,6 +92,15 @@ export async function startMobile(options: MobileSpecificationOptions): Promise<
     await ensureBooted(udid);
     const appium = await startAppiumServer(root);
 
+    // The stub starts last (nothing can fail after it), so a constructor
+    // Refusal never leaves an orphaned server keeping the process alive.
+    let backend: null | StubBackend = null;
+    let backendUrl: string | undefined;
+    if (options.backend) {
+        backend = new StubBackend({ port: options.backend.port });
+        backendUrl = await backend.start();
+    }
+
     // One driver session per runner, created lazily on the first `.open()`.
     // The appium/webdriverio integration stays a lazy import (CONVENTIONS
     // I1) — the dependency is optional and only loaded when a spec actually
@@ -78,17 +116,23 @@ export async function startMobile(options: MobileSpecificationOptions): Promise<
     };
 
     const config: SpecificationConfig = {
+        backend: backend ?? undefined,
+        backendUrl,
         bundleId: options.app.bundleId,
         device: getDevice,
     };
 
     return {
+        backendUrl,
         cleanup: async () => {
             if (device) {
                 await device.close();
                 device = null;
             }
             await appium.stop();
+            if (backend) {
+                await backend.stop();
+            }
         },
         mobile: createMobileFacet(config),
         udid,

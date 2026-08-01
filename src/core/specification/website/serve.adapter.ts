@@ -50,13 +50,21 @@ function findFreePort(): Promise<number> {
  */
 export class ServeAdapter {
     private child: ChildProcess | null = null;
+    /** Extra environment injected into the child (e.g. the stub backend URL). */
+    private readonly extraEnv: Record<string, string>;
     /** The constructor named in error messages — `website`, or `mobile` (appium server). */
     private readonly facet: string;
     private readonly options: ServeOptions;
     private output = '';
     private readonly root: string;
 
-    constructor(options: ServeOptions, root: string, facet = 'website') {
+    constructor(
+        options: ServeOptions,
+        root: string,
+        facet = 'website',
+        extraEnv: Record<string, string> = {},
+    ) {
+        this.extraEnv = extraEnv;
         this.facet = facet;
         this.options = options;
         this.root = root;
@@ -72,7 +80,7 @@ export class ServeAdapter {
         this.child = spawn(this.options.command, [], {
             cwd: this.root,
             detached: process.platform !== 'win32',
-            env: { ...process.env, PORT: String(port) },
+            env: { ...process.env, ...this.extraEnv, PORT: String(port) },
             shell: true,
             stdio: ['ignore', 'pipe', 'pipe'],
         });

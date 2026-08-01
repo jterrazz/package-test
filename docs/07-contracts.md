@@ -2,7 +2,7 @@
 
 External interactions — LLM providers, third-party APIs — are declared as **contracts**: one TypeScript file per interaction, holding the request trigger and the response together, so the business payload (prompts, JSON replies) is visible at a glance. Underneath, the real outgoing HTTP call is intercepted (MSW — a direct dependency, installed automatically with the framework).
 
-Contracts are consumed by `.intercept()` on both [api](02-api.md) and [jobs](03-jobs.md) chains (rule B2).
+Contracts are consumed by `.intercept()` on both [api](02-api.md) and [jobs](03-jobs.md) chains (rule B2). A fourth intercept form — [`.http` intercept files](#http-intercept-files--declared-exchanges) — additionally works on [website](11-website.md) and [mobile](12-mobile.md) chains, where the exchanges are served by the declared stub backend instead of MSW.
 
 ## `defineContract` and the file convention
 
@@ -195,6 +195,54 @@ Contracts are the convention; two lighter forms exist for one-off technical case
 
 The fixture is the provider-shaped response body, passed through verbatim.
 
+## `.http` intercept files — declared exchanges
+
+When a spec needs several plain HTTP exchanges — a backend feed, then its detail routes — a **bi-block `.http` file** declares them all in one place: a sequence of `###`-separated exchanges, each a REQUEST block (method + path line, optional headers — never a body), a blank line, then a RESPONSE block (status line, headers, body):
+
+```
+### two events, then their articles
+
+GET /events
+
+HTTP/1.1 200 OK
+content-type: application/json
+
+{ "items": [ { "id": 1 }, { "id": 2 } ] }
+
+###
+
+GET /articles?event_id=00000000-0000-4000-8000-000000000001
+
+HTTP/1.1 200 OK
+content-type: application/json
+
+{ "items": [] }
+```
+
+Files live **flat** in the feature's `intercepts/` directory — `intercepts/<name>.http`, alongside the `intercepts/<provider>/<name>.json` convention, which stays. `.intercept('<name>.http')` (any single string ending in `.http`) resolves the file relative to the calling test's feature folder, the same resolution `.seed()` / `.request()` use:
+
+```typescript
+const result = await api.intercept('two-events.http').get('/report');
+```
+
+Each exchange becomes a generic-http contract: the request block is the trigger, the response block the reply.
+
+### Matching semantics
+
+- **Method** — exact.
+- **Pathname** — exact, on **any origin** (the app's real host does not matter). A `{{token}}` segment matches structurally: `GET /articles/{{uuid}}` accepts any UUID ([06 — Tokens](06-tokens.md)); the same grammar works in declared query and header values.
+- **Query params** — the declared ones are a **subset** of the observed ones: the app may add extra params (a `locale`, a cache-buster), which are ignored; every declared param must match.
+- **Headers** — declared headers subset-match, names case-insensitive.
+
+The response block is the **stubbed reply, not an expectation** — its status must be numeric and its body is served verbatim ({{token}}s have no place there; the parser refuses a tokenized status).
+
+### Queueing per facet
+
+Same method + path declared twice queues **FIFO** — the file order is the consumption order. What happens when the queue runs out depends on where the entries are served:
+
+- **api/jobs** — the exchanges feed the **MSW engine** unchanged: each entry is consumed once, and a request beyond the queue is a strict D7 failure, exactly like every other intercept form.
+- **website/mobile** — the exchanges feed the **declared stub backend** ([11 — Website specs](11-website.md#declared-backend), [12 — Mobile specs](12-mobile.md#declared-backend)), where the **last matching entry stays sticky**: a page re-fetching the same endpoint (re-render, retry) replays the final reply instead of failing an honest screen. Unmatched requests remain strict — 501 + a recorded failure.
+
 ## Strict intercepts (rule D7)
 
 Intercepts are **strict by construction**. The moment a chain declares at least one `.intercept()`, MSW is mounted and every outgoing HTTP request during the action must match a registered, unconsumed intercept. A request that matches nothing — including one whose queue is already **exhausted** (all intercepts for that trigger consumed) — fails the spec with an explicit error that rejects the action promise (never an unhandled rejection):
@@ -218,6 +266,7 @@ The error names the offending method + URL and lists every registered trigger wi
 | A named business interaction, reused or reviewable | `contracts/<name>.<provider>.ts`       |
 | Failure-mode plumbing in one test                  | inline `.intercept(trigger, response)` |
 | Bulky captured payload                             | `intercepts/<provider>/<name>.json`    |
+| A sequence of plain HTTP exchanges; website/mobile | `intercepts/<name>.http`               |
 
 ## Pitfalls
 
@@ -226,6 +275,8 @@ The error names the offending method + URL and lists every registered trigger wi
 - **Testing prompt internals through over-tight filters.** Filter on the stable business marker (`user: /Product Classification/`), not on the full prompt text — contracts pin interactions, not wording.
 - **Letting a pipeline hit the network.** Every outgoing call in a spec should be under contract; an unintercepted call is a test escaping the sandbox, not extra realism. Once a chain declares one intercept, strict mode (rule D7) turns any stray call into a failure — but a chain with **no** intercepts is not guarded at all.
 - **Reaching for `.intercept()` in a compose-mode project.** It throws immediately — MSW cannot reach an app running in its own container. Keep intercept specs in a node-only vitest project (rule I3/D7).
+- **Declaring a request body in a `.http` exchange.** The request block is a trigger — method + path + headers only; the parser refuses a body. Body-based routing stays with `http.post(url, { body })` filters.
+- **Expecting sticky-last replay on api/jobs.** The `.http` file feeds the MSW engine there — consume-once, strict D7. Sticky-last is the stub backend's semantic (website/mobile), where a page legitimately re-fetches.
 
 ## Related
 

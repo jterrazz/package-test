@@ -110,6 +110,11 @@ export type VisitScenario = (visitor: Visitor) => Promise<void>;
 /** Per-visit options forwarded to the browser context. */
 export interface BrowserOpenOptions {
     /**
+     * Extra origins the `external: 'block'` policy lets through — the
+     * declared stub backend the page legitimately fetches from.
+     */
+    allowedOrigins?: string[];
+    /**
      * Base URL of the site under test — the origin `goto()` resolves against
      * and the boundary of the `external` policy.
      */

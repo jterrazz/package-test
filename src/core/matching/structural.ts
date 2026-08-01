@@ -197,6 +197,8 @@ interface ParsedPlaceholderString {
     /** Embedded form — regex over the string with one group per placeholder. */
     pattern: RegExp;
     refs: { index: number; kind: MatcherKind; ref?: string }[];
+    /** Unanchored source of {@link pattern} — for embedding in a larger regex. */
+    source: string;
 }
 
 function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
@@ -219,7 +221,7 @@ function escapeRegExp(text: string): string {
 function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPlaceholderString {
     PLACEHOLDER_RE.lastIndex = 0;
     const refs: ParsedPlaceholderString['refs'] = [];
-    let pattern = '^';
+    let source = '';
     let lastIndex = 0;
     let single: ParsedPlaceholderString['single'] = null;
     let count = 0;
@@ -227,8 +229,8 @@ function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPl
     for (const found of expected.matchAll(PLACEHOLDER_RE)) {
         const kind = found.groups!.kind as MatcherKind;
         const ref = found.groups!.ref;
-        pattern += escapeRegExp(expected.slice(lastIndex, found.index));
-        pattern += `(${placeholderSource(kind, scope)})`;
+        source += escapeRegExp(expected.slice(lastIndex, found.index));
+        source += `(${placeholderSource(kind, scope)})`;
         refs.push({ index: count, kind, ref });
         count++;
         lastIndex = found.index + found[0].length;
@@ -236,9 +238,18 @@ function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPl
             single = { kind, ref };
         }
     }
-    pattern += `${escapeRegExp(expected.slice(lastIndex))}$`;
+    source += escapeRegExp(expected.slice(lastIndex));
 
-    return { pattern: new RegExp(pattern), refs, single };
+    return { pattern: new RegExp(`^${source}$`), refs, single, source };
+}
+
+/**
+ * Unanchored regex source matching a fixture string — plain text escaped
+ * verbatim, each `{{token}}` expanded to its embedded grammar. Used to route
+ * declared `.http` intercept paths (`/articles/{{uuid}}`) as URL patterns.
+ */
+export function placeholderPatternSource(expected: string): string {
+    return parsePlaceholderString(expected, new CaptureScope()).source;
 }
 
 function placeholderStringMatches(expected: string, actual: unknown, scope: CaptureScope): boolean {

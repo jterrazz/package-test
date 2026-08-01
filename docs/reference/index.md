@@ -62,6 +62,7 @@
 | [JobsSpecificationOptions](interfaces/JobsSpecificationOptions.md) | Options for [specification.jobs](variables/specification.md#property-jobs). |
 | [MatchableRequest](interfaces/MatchableRequest.md) | The observed outgoing request, reduced to what trigger matchers inspect. Built once per request by the MSW integration and handed to [InterceptTrigger.match](interfaces/InterceptTrigger.md#match). |
 | [MatchFixtureOptions](interfaces/MatchFixtureOptions.md) | Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a single fixture OUT of update-mode rewriting: a frozen fixture is NEVER written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen mismatch still throws its diff, and a frozen missing fixture still throws its "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the subject of a negative test that asserts the mismatch/error rendering) survivable across update runs instead of being silently overwritten with the actual output. |
+| [MobileBackendOptions](interfaces/MobileBackendOptions.md) | The declared stub backend behind the app under test. The framework owns the simulator and appium but NOT the JS bundler (Metro belongs to the caller's repo, like `next build` belongs to a website's) — so nothing is injected: the handle exposes `backendUrl` and the CALLER wires it into its own bundler env. |
 | [MobileElementMatch](interfaces/MobileElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening the simulator. |
 | [MobileHandle](interfaces/MobileHandle.md) | The record returned by [specification.mobile](variables/specification.md#property-mobile). Destructure with the canonical names (CONVENTIONS A3): |
 | [MobileSpecification](interfaces/MobileSpecification.md) | The `mobile` facet — screen chain entry handed out by `specification.mobile()`. `.open()` is the single, terminal action: it terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen. |
@@ -78,6 +79,7 @@
 | [SpecificationConfig](interfaces/SpecificationConfig.md) | Adapter configuration passed to the specification facets at setup time. |
 | [SqliteOptions](interfaces/SqliteOptions.md) | - |
 | [Visitor](interfaces/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
+| [WebsiteBackendOptions](interfaces/WebsiteBackendOptions.md) | The declared stub backend behind the site under test — started before the server command, torn down with the runner. Its URL is injected into the server child's environment under `env`; the chain's `.intercept('<name>.http')` exchanges are what it serves. |
 | [WebsiteHandle](interfaces/WebsiteHandle.md) | The record returned by [specification.website](variables/specification.md#property-website). Destructure with the canonical names (CONVENTIONS A3): |
 | [WebsiteSpecification](interfaces/WebsiteSpecification.md) | The `website` facet — page chain entry handed out by `specification.website()`. Setup methods chain; action methods are terminal. `.visit()` renders the page in the shared browser; `.fetch()` performs one raw HTTP exchange and never follows redirects. |
 
@@ -100,7 +102,7 @@
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
 | [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
 | [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |
-| [WebsiteSpecificationOptions](type-aliases/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). `server` (start the site locally) and `url` (target a running site) are mutually exclusive BY TYPE — the union makes the invalid combinations inexpressible rather than runtime-checked. |
+| [WebsiteSpecificationOptions](type-aliases/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). `server` (start the site locally) and `url` (target a running site) are mutually exclusive BY TYPE — the union makes the invalid combinations inexpressible rather than runtime-checked. `backend` requires `server` mode for the same reason: a deployed site cannot be pointed at a local stub. |
 
 ## Variables
 

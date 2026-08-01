@@ -66,19 +66,20 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 
 ## H — Naming recap
 
-| Thing           | Rule                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------ |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`) |
-| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                      |
-| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                   |
-| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                        |
-| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                          |
-| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                  |
-| Contracts       | `contracts/<name>.<provider>.ts`                                                                 |
-| Requests        | `requests/<name>.http` (inputs)                                                                  |
-| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)              |
-| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)      |
-| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                       |
+| Thing           | Rule                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`)     |
+| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                          |
+| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                       |
+| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                            |
+| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                              |
+| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                      |
+| Contracts       | `contracts/<name>.<provider>.ts`                                                                     |
+| Intercepts      | `intercepts/<provider>/<name>.json` (provider payloads) · `intercepts/<name>.http` (exchanges, flat) |
+| Requests        | `requests/<name>.http` (inputs)                                                                      |
+| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)                  |
+| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)          |
+| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                           |
 
 ## Maintaining the constitution
 

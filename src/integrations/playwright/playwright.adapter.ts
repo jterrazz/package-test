@@ -189,10 +189,15 @@ export class PlaywrightAdapter implements BrowserPort {
         // Cross-origin policy: with 'block', any request leaving the site
         // Under test is aborted — analytics and CDNs never make the visit
         // Non-deterministic (the browser-side analog of strict intercepts).
+        // The declared stub backend is a legitimate cross-origin target and
+        // Stays reachable through `allowedOrigins`.
         if (options.external === 'block') {
-            const origin = new URL(options.baseUrl).origin;
+            const allowed = new Set([
+                new URL(options.baseUrl).origin,
+                ...(options.allowedOrigins ?? []),
+            ]);
             await context.route('**/*', (route) => {
-                if (new URL(route.request().url()).origin === origin) {
+                if (allowed.has(new URL(route.request().url()).origin)) {
                     void route.continue();
                 } else {
                     void route.abort();

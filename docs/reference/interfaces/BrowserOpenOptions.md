@@ -7,13 +7,26 @@ Per-visit options forwarded to the browser context.
 
 ## Properties
 
+### allowedOrigins?
+
+```ts
+optional allowedOrigins?: string[];
+```
+
+Defined in: [core/ports/browser.port.ts:116](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L116)
+
+Extra origins the `external: 'block'` policy lets through — the
+declared stub backend the page legitimately fetches from.
+
+***
+
 ### baseUrl
 
 ```ts
 baseUrl: string;
 ```
 
-Defined in: [core/ports/browser.port.ts:116](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L116)
+Defined in: [core/ports/browser.port.ts:121](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L121)
 
 Base URL of the site under test — the origin `goto()` resolves against
 and the boundary of the `external` policy.
@@ -26,7 +39,7 @@ and the boundary of the `external` policy.
 external: "allow" | "block";
 ```
 
-Defined in: [core/ports/browser.port.ts:122](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L122)
+Defined in: [core/ports/browser.port.ts:127](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L127)
 
 Cross-origin request policy. `'block'` aborts every request leaving
 the site under test (analytics, CDNs) — the browser-side analog of
@@ -40,7 +53,7 @@ strict intercepts. `'allow'` lets them through (deployed-site mode).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: [core/ports/browser.port.ts:124](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L124)
+Defined in: [core/ports/browser.port.ts:129](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L129)
 
 Extra HTTP headers sent with every request of the visit (incl. User-Agent overrides).
 
@@ -52,6 +65,6 @@ Extra HTTP headers sent with every request of the visit (incl. User-Agent overri
 optional scenario?: VisitScenario;
 ```
 
-Defined in: [core/ports/browser.port.ts:126](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L126)
+Defined in: [core/ports/browser.port.ts:131](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L131)
 
 The interaction scenario to run after load; the capture reflects the final state.

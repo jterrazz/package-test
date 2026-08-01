@@ -206,9 +206,9 @@ export const { cli, cleanup } = await specification.cli('my-migrate-tool', {
 const result = await cli.seed('legacy-schema.sql').exec('up');
 ```
 
-### `specification.website({ server?, url?, external?, root? })`
+### `specification.website({ server?, url?, backend?, external?, root? })`
 
-Tests a rendered website: `.fetch(path)` for a raw HTTP exchange (redirects never followed), `.visit(path, scenario?)` for a page rendered in a real chromium. Exactly one of `server` (start the site locally — a free port injected as `PORT`, polled on `ready`) or `url` (target a running site) is required.
+Tests a rendered website: `.fetch(path)` for a raw HTTP exchange (redirects never followed), `.visit(path, scenario?)` for a page rendered in a real chromium. Exactly one of `server` (start the site locally — a free port injected as `PORT`, polled on `ready`) or `url` (target a running site) is required. `backend: { env, port? }` (server mode only) additionally starts a declared stub backend and injects its URL into the server child under `env`; each chain declares what it serves via `.intercept('<name>.http')`.
 
 ```typescript
 export const { website, cleanup } = await specification.website({
@@ -226,7 +226,7 @@ const page = await website.visit('/', async (visitor) => {
 
 The handle destructures to `{ website, cleanup, url }` — no `docker`, no `orchestrator`. `.visit()` needs playwright (`npm install -D playwright && npx playwright install chromium`) — an optional peer dependency, only loaded when a spec actually renders a page. Full reference: [docs/11-website.md](docs/11-website.md).
 
-### `specification.mobile({ app, device, root? })`
+### `specification.mobile({ app, device, backend?, root? })`
 
 Tests a native app on the iOS simulator through a real XCUITest session (appium): `.open(deepLink?, scenario?)` terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen — the projected accessibility tree plus the visible texts. The simulator is resolved by `device: { name, os?, udid? }` via `xcrun simctl` (refusing on zero or several matches) and booted when shut down; the appium server is spawned from the caller project on a free port.
 
@@ -243,7 +243,7 @@ const result = await mobile.open('news://events', async (visitor) => {
 });
 ```
 
-The handle destructures to `{ mobile, cleanup, udid }`. The element vocabulary is the website facet's, unchanged — `button`, `field`, `content`, `testId`, `within` — landmarks excepted (an iOS screen has no ARIA regions; they refuse at runtime). Requires the app installed on the simulator plus the optional peers: `npm install -D appium webdriverio && npx appium driver install xcuitest`. Full reference: [docs/12-mobile.md](docs/12-mobile.md).
+The handle destructures to `{ mobile, cleanup, udid }` (plus `backendUrl` with `backend: { port? }` — a declared stub backend whose URL the CALLER wires into its own bundler env; the framework never touches Metro). The element vocabulary is the website facet's, unchanged — `button`, `field`, `content`, `testId`, `within` — landmarks excepted (an iOS screen has no ARIA regions; they refuse at runtime). Requires the app installed on the simulator plus the optional peers: `npm install -D appium webdriverio && npx appium driver install xcuitest`. Full reference: [docs/12-mobile.md](docs/12-mobile.md).
 
 ### Root auto-discovery
 
@@ -262,6 +262,7 @@ When `root` is absent, the framework walks up from the specification file to the
 | `.headers({ "Accept-Language": "fr" })` | api, website | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)             |
 | `.intercept(contract)`                  | api, jobs    | Intercept an outgoing HTTP call with a declared contract                                               |
 | `.intercept(trigger, response)`         | api, jobs    | Inline intercept for one-off cases                                                                     |
+| `.intercept("two-events.http")`         | all but cli  | Declared exchanges from `intercepts/<name>.http` — MSW on api/jobs, the stub backend on website/mobile |
 
 ### Actions (terminal)
 
@@ -357,7 +358,7 @@ export default defineContract({
 const result = await jobs.intercept(classifyProduct).trigger('nightly-report');
 ```
 
-Inline `.intercept(trigger, response)` and JSON fixtures (`intercepts/<provider>/<name>.json`) remain for one-off cases. Failure simulation: `openai.error(429)`, `anthropic.timeout()`, `openai.malformed('not json')`. Intercepts queue FIFO per trigger. MSW ships as a direct dependency — no separate install.
+Inline `.intercept(trigger, response)` and JSON fixtures (`intercepts/<provider>/<name>.json`) remain for one-off cases; `.intercept('<name>.http')` loads declared exchanges from a bi-block `intercepts/<name>.http` file — the form website/mobile chains use, served by the declared `backend` stub. Failure simulation: `openai.error(429)`, `anthropic.timeout()`, `openai.malformed('not json')`. Intercepts queue FIFO per trigger. MSW ships as a direct dependency — no separate install.
 
 ## Docker-aware CLIs
 
@@ -409,7 +410,7 @@ specs/<facet>/                  # api | jobs | cli | integrations | lint
     ├── seeds/          # *.sql ONLY — database state
     ├── requests/       # *.http — inputs: COMPLETE request (method, path, headers, body)
     ├── contracts/      # <name>.<provider>.ts — declared external interactions
-    ├── intercepts/     # <provider>/<name>.json — inline intercept fixtures
+    ├── intercepts/     # <provider>/<name>.json — inline intercept fixtures; <name>.http — declared exchanges (flat)
     ├── fixtures/       # domain-local files/dirs copied into the cwd (cli) — shared pool lives at specs/fixtures/
     └── expected/       # ALL expected fixtures, FLAT (incl. response *.http) — a slash in the name creates a subfolder
 ```

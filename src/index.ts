@@ -33,10 +33,12 @@ export {
     type JobsSpecificationOptions,
 } from './core/specification/jobs/start-jobs.js';
 export {
+    type MobileBackendOptions,
     type MobileHandle,
     type MobileSpecificationOptions,
 } from './core/specification/mobile/start-mobile.js';
 export {
+    type WebsiteBackendOptions,
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
 } from './core/specification/website/start-website.js';

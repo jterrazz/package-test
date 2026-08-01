@@ -33,6 +33,7 @@ export const { cleanup, website } = await specification.website({
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `server`   | `{ command, ready?, port?, timeout? }` — start the site as a child process. Exactly one of `server` / `url`                                                                 |
 | `url`      | Target an already-running site (deployed, preview, dev server). Exactly one of `server` / `url`                                                                             |
+| `backend`  | `{ env, port? }` — start a declared stub backend and inject its URL into the server child. Requires `server` mode — see [Declared backend](#declared-backend)               |
 | `external` | `'allow' \| 'block'` — cross-origin policy for `.visit()`. Default `'block'` with `server`, `'allow'` with `url` — see [Cross-origin policy](#cross-origin-policy-external) |
 | `root`     | **Project-root override** (rule A9): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                |
 
@@ -302,6 +303,49 @@ test('separates console errors from the full stream', async () => {
 });
 ```
 
+## Declared backend
+
+A site under test usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) BEFORE the server command and injects its URL into the server child's environment under `backend.env` — the site reads it the same way it would in production:
+
+```typescript
+// specs/website/website.specification.ts
+export const { cleanup, website } = await specification.website({
+    server: { command: 'npm run start', ready: '/' },
+    backend: { env: 'API_URL' },
+});
+
+afterAll(cleanup);
+```
+
+| `backend` field | Description                                                                       |
+| --------------- | --------------------------------------------------------------------------------- |
+| `env`           | Env var receiving the stub's URL in the server child (e.g. `'API_URL'`)           |
+| `port`          | Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port |
+
+`backend` requires `server` mode — with `url` it refuses (the type already forbids the combination): a deployed site cannot be pointed at a local stub. The **ownership boundary**: the framework owns the server child, so it injects the env var itself — that is the whole wiring.
+
+What the stub serves is declared per chain, as [`.http` intercept files](07-contracts.md#http-intercept-files--declared-exchanges) — flat under the feature's `intercepts/` folder:
+
+```typescript
+test('renders the events feed from the declared backend', async () => {
+    // Given - the backend under contract for this chain
+    const result = await website.intercept('two-events.http').visit('/events');
+
+    // Then - the page rendered what the stub declared
+    expect(result.content).toContain('Enquête Fauci COVID-19');
+    await expect(result.errors).toBeEmpty();
+});
+```
+
+The stub **resets between chains** the way databases do: one chain = one terminal action, and its `.intercept()` exchanges replace the previous chain's wholesale. Same-route entries consume FIFO; once a route's queue is exhausted its **last entry stays sticky** — a page re-fetching the same endpoint (re-render, retry) replays the final reply.
+
+Strictness is the analog of `external: 'block'`: a request matching no declared exchange is answered **501** (a JSON body naming the path and listing the declared routes) and **recorded** — when the `.visit()` completes, the action **throws** an error enumerating every unmatched request (method, path, count). The failure evidence (screenshot on a scenario error) is captured first, as always. A chain with **zero** intercepts leaves the stub unguarded — the same boundary as MSW never mounting without an `.intercept()`.
+
+Two pieces of plumbing are handled for you:
+
+- **CORS** — the stub answers the `OPTIONS` preflight and stamps permissive `Access-Control-Allow-*` headers on every response, so client-side fetches from the site's origin just work.
+- **`external: 'block'`** — the stub's origin is allow-listed automatically; declared-backend fetches are never aborted as third-party noise.
+
 ## Cross-origin policy (`external`)
 
 `external: 'block'` aborts every request leaving the site under test during a `.visit()` — analytics beacons, third-party CDNs, ad scripts never fire, so a visit stays deterministic. `'allow'` lets them through.
@@ -346,7 +390,8 @@ specs/website/
 ├── website.specification.ts    # runner at the facet ROOT (rule C1)
 └── <domain>/
     ├── <aspect>.test.ts
-    └── expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
+    ├── expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
+    └── intercepts/              # declared backend exchanges, FLAT (<name>.http) — with the `backend` option
 ```
 
 No `seeds/`, `requests/`, or `contracts/` — `specification.website()` has no `services` option and no request-file format; `.fetch()`/`.visit()` calls are inline, and the golden is always `expected/<name>`.
@@ -362,6 +407,8 @@ No `seeds/`, `requests/`, or `contracts/` — `specification.website()` has no `
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.
 - **Reading `result.head` field-by-field instead of snapshotting it.** It is designed as the one golden per page (`toMatch('home.head.json')`) — use the direct accessors (`canonical`, `alternates`, `meta()`) only for a single targeted probe.
+- **Calling `.intercept()` without the `backend` option.** It throws immediately, naming the fix: add `backend: { env: '…' }` to the `specification.website()` options — a chain's `.http` exchanges need a stub to serve them.
+- **Combining `backend` with `url` mode.** The type forbids it and the runtime refuses: a deployed site reads its API URL at its own deploy time — there is nothing a local stub could inject into.
 
 ## Related
 
