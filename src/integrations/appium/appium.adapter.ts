@@ -34,8 +34,12 @@ type DriverElement = ElementList[number];
  */
 type MatchScope = Driver | DriverElement;
 
-/** How long every verb polls for at least one visible match. */
-const ACTION_TIMEOUT_MS = 15_000;
+/*
+ * How long every verb polls for at least one visible match. 30s absorbs a
+ * cold app boot (first launch after an install or a state wipe) — the same
+ * default playwright chose for its actionability timeout.
+ */
+const ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
 /** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
@@ -55,26 +59,27 @@ function escapePredicate(value: string): string {
  * have no XCUITest analog — the shared vocabulary is wider than a screen,
  * and the boundary is named rather than silently approximated.
  */
-function compilePredicate(element: MobileElementRef): string {
+function compilePredicate(element: MobileElementRef, options?: { anyVisibility?: boolean }): string {
     const name = escapePredicate(element.name ?? '');
     const contains = (attribute: string): string =>
         element.exact ? `${attribute} == '${name}'` : `${attribute} CONTAINS '${name}'`;
+    const visible = options?.anyVisibility ? '1 == 1' : 'visible == 1';
 
     switch (element.kind) {
         case 'button': {
-            return `type == 'XCUIElementTypeButton' AND ${contains('label')} AND visible == 1`;
+            return `type == 'XCUIElementTypeButton' AND ${contains('label')} AND ${visible}`;
         }
         case 'field': {
             return (
                 `type IN {'XCUIElementTypeTextField','XCUIElementTypeSecureTextField'}` +
-                ` AND (${contains('label')} OR ${contains('value')}) AND visible == 1`
+                ` AND (${contains('label')} OR ${contains('value')}) AND ${visible}`
             );
         }
         case 'testId': {
-            return `name == '${name}' AND visible == 1`;
+            return `name == '${name}' AND ${visible}`;
         }
         case 'text': {
-            return `(${contains('label')} OR ${contains('value')}) AND visible == 1`;
+            return `(${contains('label')} OR ${contains('value')}) AND ${visible}`;
         }
         default: {
             throw new Error(
@@ -218,8 +223,17 @@ export class AppiumAdapter implements DevicePort {
         const chain = scopeChain(element);
         const deadline = Date.now() + ACTION_TIMEOUT_MS;
 
+        /*
+         * The scroll-into-view fallback queries the tree WITHOUT the
+         * visibility filter — an expensive full snapshot on busy screens —
+         * so it runs once, on the first miss, not on every poll.
+         */
+        let scrollAttempted = false;
         for (;;) {
-            const resolved = await this.resolveChain(driver, chain, cardinality);
+            const resolved = await this.resolveChain(driver, chain, cardinality, {
+                tryScroll: !scrollAttempted,
+            });
+            scrollAttempted = true;
             if (resolved) {
                 return resolved;
             }
@@ -235,6 +249,7 @@ export class AppiumAdapter implements DevicePort {
         driver: Driver,
         chain: MobileElementRef[],
         cardinality: 'any' | 'one',
+        options?: { tryScroll?: boolean },
     ): Promise<DriverElement | null> {
         let scope: MatchScope = driver;
         for (const [index, level] of chain.entries()) {
@@ -243,6 +258,28 @@ export class AppiumAdapter implements DevicePort {
             );
             const count = await matches.length;
             if (count === 0) {
+                /*
+                 * Actionability includes scroll-into-view: an element that
+                 * exists below the fold is brought on screen, and the outer
+                 * poll re-resolves it as visible on the next pass.
+                 */
+                if (options?.tryScroll) {
+                    const offscreen: ElementList = await scope.$$(
+                        `-ios predicate string:${compilePredicate(level, { anyVisibility: true })}`,
+                    );
+                    if ((await offscreen.length) > 0) {
+                        try {
+                            // Scroll the FOUND element into view directly (by
+                            // id) — a predicate-driven `mobile: scroll` would
+                            // start its own slow native scroll-search instead.
+                            await driver.executeScript('mobile: scroll', [
+                                { elementId: offscreen[0].elementId, toVisible: true },
+                            ]);
+                        } catch {
+                            // Not scrollable (or already settling) — keep polling.
+                        }
+                    }
+                }
                 return null;
             }
             const isTarget = index === chain.length - 1;

@@ -113,7 +113,7 @@ test('bookmarks an event from its detail screen', async () => {
 
 **No `expect()` inside a scenario (rule W1).** A scenario is pure interaction — assertions live in the Then, on the returned result.
 
-Visitor verbs — every verb polls until at least one visible match exists (default 15 s), then enforces exactly-one; there are no sleeps anywhere in the framework:
+Visitor verbs — every verb polls until at least one visible match exists (default 30 s, sized for a cold app boot), then enforces the verb's cardinality; there are no sleeps anywhere in the framework. Actionability includes **scroll-into-view**: when a descriptor matches nothing visible but an off-screen element exists, the adapter scrolls it into view once (directly by element id) and keeps polling — elements buried in very heavy screens (a full-page WebView) may still be out of reach, prefer a deep link then:
 
 | Verb                   | Description                                                                         |
 | ---------------------- | ----------------------------------------------------------------------------------- |
