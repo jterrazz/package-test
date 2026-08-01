@@ -1,3 +1,4 @@
+import { matchesText, type TextFilter } from '../../core/contracts/filters.js';
 import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
@@ -6,40 +7,32 @@ const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 // ── Chat Completions filters ──
 
 export interface OpenAIChatFilter {
-    model?: RegExp | string;
-    system?: RegExp | string;
-    user?: RegExp | string;
+    model?: TextFilter;
+    system?: TextFilter;
+    user?: TextFilter;
     tools?: string[];
     temperature?: number;
 }
 
 function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
-    if (filter.model) {
-        const model = body?.model;
-        if (typeof filter.model === 'string' && model !== filter.model) {
-            return false;
-        }
-        if (filter.model instanceof RegExp && !filter.model.test(model ?? '')) {
-            return false;
-        }
+    if (!matchesText(filter.model, body?.model ?? '')) {
+        return false;
     }
-    if (filter.system) {
-        const msg = body?.messages?.find((m: any) => m.role === 'system')?.content ?? '';
-        if (typeof filter.system === 'string' && msg !== filter.system) {
-            return false;
-        }
-        if (filter.system instanceof RegExp && !filter.system.test(msg)) {
-            return false;
-        }
+    if (
+        !matchesText(
+            filter.system,
+            body?.messages?.find((m: any) => m.role === 'system')?.content ?? '',
+        )
+    ) {
+        return false;
     }
-    if (filter.user) {
-        const msg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
-        if (typeof filter.user === 'string' && msg !== filter.user) {
-            return false;
-        }
-        if (filter.user instanceof RegExp && !filter.user.test(msg)) {
-            return false;
-        }
+    if (
+        !matchesText(
+            filter.user,
+            body?.messages?.find((m: any) => m.role === 'user')?.content ?? '',
+        )
+    ) {
+        return false;
     }
     if (filter.tools) {
         const names = body?.tools?.map((t: any) => t.function?.name).filter(Boolean) ?? [];
@@ -56,46 +49,26 @@ function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
 // ── Responses API filters ──
 
 export interface OpenAIResponsesFilter {
-    model?: RegExp | string;
-    system?: RegExp | string;
-    user?: RegExp | string;
+    model?: TextFilter;
+    system?: TextFilter;
+    user?: TextFilter;
     tools?: string[];
 }
 
 function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boolean {
-    if (filter.model) {
-        const model = body?.model;
-        if (typeof filter.model === 'string' && model !== filter.model) {
-            return false;
-        }
-        if (filter.model instanceof RegExp && !filter.model.test(model ?? '')) {
-            return false;
-        }
+    if (!matchesText(filter.model, body?.model ?? '')) {
+        return false;
     }
-    if (filter.system) {
-        const instructions = body?.instructions ?? '';
-        const systemInput = body?.input?.find?.((m: any) => m.role === 'system')?.content ?? '';
-        const text = instructions || systemInput;
-        if (typeof filter.system === 'string' && text !== filter.system) {
-            return false;
-        }
-        if (filter.system instanceof RegExp && !filter.system.test(text)) {
-            return false;
-        }
+    const systemInput = body?.input?.find?.((m: any) => m.role === 'system')?.content ?? '';
+    if (!matchesText(filter.system, body?.instructions || systemInput)) {
+        return false;
     }
-    if (filter.user) {
-        const msgs = (body?.input ?? [])
-            .filter((m: any) => m.role === 'user')
-            .map((m: any) =>
-                typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
-            )
-            .join(' ');
-        if (typeof filter.user === 'string' && msgs !== filter.user) {
-            return false;
-        }
-        if (filter.user instanceof RegExp && !filter.user.test(msgs)) {
-            return false;
-        }
+    const userText = (body?.input ?? [])
+        .filter((m: any) => m.role === 'user')
+        .map((m: any) => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content)))
+        .join(' ');
+    if (!matchesText(filter.user, userText)) {
+        return false;
     }
     if (filter.tools) {
         const names =

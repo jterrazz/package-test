@@ -104,6 +104,7 @@
 | [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
 | [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
+| [TextFilter](type-aliases/TextFilter.md) | A text filter on a provider request builder (`openai.chat({ user })`, `anthropic.messages({ system })`, …). |
 | [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |
 | [WebsiteSpecificationOptions](type-aliases/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). `server` (start the site locally) and `url` (target a running site) are mutually exclusive BY TYPE — the union makes the invalid combinations inexpressible rather than runtime-checked. `backend` requires `server` mode for the same reason: a deployed site cannot be pointed at a local stub. |
 

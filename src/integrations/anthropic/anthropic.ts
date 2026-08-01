@@ -1,42 +1,27 @@
+import { matchesText, type TextFilter } from '../../core/contracts/filters.js';
 import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
 export interface AnthropicMessagesFilter {
-    model?: RegExp | string;
-    system?: RegExp | string;
-    user?: RegExp | string;
+    model?: TextFilter;
+    system?: TextFilter;
+    user?: TextFilter;
     tools?: string[];
 }
 
 function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
-    if (filter.model) {
-        const model = body?.model;
-        if (typeof filter.model === 'string' && model !== filter.model) {
-            return false;
-        }
-        if (filter.model instanceof RegExp && !filter.model.test(model ?? '')) {
-            return false;
-        }
+    if (!matchesText(filter.model, body?.model ?? '')) {
+        return false;
     }
-    if (filter.system) {
-        const system = typeof body?.system === 'string' ? body.system : '';
-        if (typeof filter.system === 'string' && system !== filter.system) {
-            return false;
-        }
-        if (filter.system instanceof RegExp && !filter.system.test(system)) {
-            return false;
-        }
+    if (!matchesText(filter.system, typeof body?.system === 'string' ? body.system : '')) {
+        return false;
     }
-    if (filter.user) {
-        const userMsg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
-        const text = typeof userMsg === 'string' ? userMsg : JSON.stringify(userMsg);
-        if (typeof filter.user === 'string' && text !== filter.user) {
-            return false;
-        }
-        if (filter.user instanceof RegExp && !filter.user.test(text)) {
-            return false;
-        }
+    const userMsg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
+    if (
+        !matchesText(filter.user, typeof userMsg === 'string' ? userMsg : JSON.stringify(userMsg))
+    ) {
+        return false;
     }
     if (filter.tools) {
         const names = body?.tools?.map((t: any) => t.name).filter(Boolean) ?? [];

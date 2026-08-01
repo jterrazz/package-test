@@ -146,6 +146,7 @@ export { sqlite, type SqliteOptions } from './integrations/sqlite/sqlite.js';
 // Contracts — the ONE way to declare what the outside world replies
 export { anthropic } from './integrations/anthropic/anthropic.js';
 export { http, type HttpContractFilter, type HttpResponseInit } from './core/contracts/http.js';
+export { type TextFilter } from './core/contracts/filters.js';
 export { openai } from './integrations/openai/openai.js';
 export {
     type Contract,
