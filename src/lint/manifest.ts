@@ -582,7 +582,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            'Un descripteur d’élément doit désigner exactement UN élément : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, `{ exact: true }`). Le framework n’agit jamais sur « le premier ». Vaut pour les deux facettes à scénario : website et mobile.',
+            'Un descripteur d’élément doit désigner exactement UN élément quand un verbe AGIT dessus (`click`/`tap`/`fill`) : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, `{ exact: true }`). Le framework n’agit jamais sur « le premier ». Vaut pour les deux facettes à scénario : website et mobile ; sur mobile, `see()` — qui n’agit sur rien — est satisfait par n’importe quel match visible (l’arbre XCUITest duplique légitimement un label entre conteneur et enfant).',
         facet: 'shared',
         family: 'W',
         id: 'W3',

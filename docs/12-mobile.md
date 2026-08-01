@@ -101,7 +101,7 @@ Names match as **substrings** by default; pass `{ exact: true }` to match whole.
 
 ## Designating exactly one element
 
-**A descriptor must match exactly one element (rule W3).** When several match, the framework refuses the action instead of taking the first one:
+**A descriptor must match exactly one element when a verb ACTS on it (rule W3).** When several match, `tap` and `fill` refuse instead of taking the first one. `see()` is the exception by design: it acts on nothing, so any visible match satisfies it — an XCUITest tree legitimately exposes the same text twice (a container and its child both carry the label), and a synchronization primitive refusing on that would punish honest screens.
 
 ```
 Ambiguous element: button("Bookmark") matched 3 elements on the screen.

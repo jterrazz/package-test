@@ -17,8 +17,10 @@ export type MobileElementKind = 'button' | 'field' | 'testId' | 'text';
  * vocabulary stays single; kinds outside {@link MobileElementKind} (the ARIA
  * landmarks) are refused at runtime with a message naming the boundary.
  *
- * A descriptor must designate exactly ONE element at action time; see
- * {@link MobileElementMatch} and CONVENTIONS W3.
+ * A descriptor must designate exactly ONE element when a verb ACTS on it
+ * (`tap`, `fill`) — see {@link MobileElementMatch} and CONVENTIONS W3.
+ * `see()` acts on nothing, so any visible match satisfies it: XCUITest trees
+ * legitimately duplicate a label across container and child.
  */
 export type MobileElementRef = ElementRef;
 
@@ -40,10 +42,10 @@ export interface MobileElementMatch {
 
 /**
  * The visitor — the interaction vocabulary handed to a mobile scenario.
- * Every verb auto-waits by polling until at least one visible match exists;
- * `see()` is the single synchronization primitive: it retries until the
- * element is visible and fails at the timeout. There is no sleep and no
- * conditional helper.
+ * Every verb auto-waits by polling until a visible match exists; acting
+ * verbs then enforce exactly-one (W3), while `see()` — the single
+ * synchronization primitive — is satisfied by any visible match. There is
+ * no sleep and no conditional helper.
  */
 export interface MobileVisitor {
     /** Fill a text field with a value. */

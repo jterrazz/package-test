@@ -177,39 +177,49 @@ export class AppiumAdapter implements DevicePort {
         return projectScreen(await driver.getPageSource());
     }
 
-    /** The visitor implementation — every verb polls until exactly one visible match. */
+    /**
+     * The visitor implementation. Acting verbs (tap/fill) poll until exactly
+     * one visible match exists (CONVENTIONS W3); `see()` acts on nothing, so
+     * ANY visible match satisfies it — XCUITest trees legitimately expose the
+     * same text more than once (container/child label duplication), and a
+     * synchronization primitive refusing on that would punish honest screens.
+     */
     private createVisitor(driver: Driver): MobileVisitor {
         return {
             fill: async (element, value) => {
-                const match = await this.resolveOne(driver, element, 'fill');
+                const match = await this.resolveOne(driver, element, 'fill', 'one');
                 await match.setValue(value);
             },
             see: async (element) => {
-                await this.resolveOne(driver, element, 'see');
+                await this.resolveOne(driver, element, 'see', 'any');
             },
             tap: async (element) => {
-                const match = await this.resolveOne(driver, element, 'tap');
+                const match = await this.resolveOne(driver, element, 'tap', 'one');
                 await match.click();
             },
         };
     }
 
     /**
-     * Resolve a descriptor to exactly ONE element: poll until at least one
-     * visible match exists, then enforce uniqueness (CONVENTIONS W3). The
-     * scope chain resolves outside-in, so an ambiguous scope names ITSELF as
-     * the fault rather than sending the author to fix the target.
+     * Resolve a descriptor: poll until at least one visible match exists,
+     * then enforce the verb's cardinality — `'one'` refuses ambiguity
+     * (CONVENTIONS W3), `'any'` settles for the first match. Scopes stay
+     * strict in BOTH modes: "within one of several containers" designates
+     * nothing, whatever the verb. The chain resolves outside-in, so an
+     * ambiguous scope names ITSELF as the fault rather than sending the
+     * author to fix the target.
      */
     private async resolveOne(
         driver: Driver,
         element: MobileElementRef,
         verb: string,
+        cardinality: 'any' | 'one',
     ): Promise<DriverElement> {
         const chain = scopeChain(element);
         const deadline = Date.now() + ACTION_TIMEOUT_MS;
 
         for (;;) {
-            const resolved = await this.resolveChain(driver, chain);
+            const resolved = await this.resolveChain(driver, chain, cardinality);
             if (resolved) {
                 return resolved;
             }
@@ -224,9 +234,10 @@ export class AppiumAdapter implements DevicePort {
     private async resolveChain(
         driver: Driver,
         chain: MobileElementRef[],
+        cardinality: 'any' | 'one',
     ): Promise<DriverElement | null> {
         let scope: MatchScope = driver;
-        for (const level of chain) {
+        for (const [index, level] of chain.entries()) {
             const matches: ElementList = await scope.$$(
                 `-ios predicate string:${compilePredicate(level)}`,
             );
@@ -234,7 +245,8 @@ export class AppiumAdapter implements DevicePort {
             if (count === 0) {
                 return null;
             }
-            if (count > 1) {
+            const isTarget = index === chain.length - 1;
+            if (count > 1 && (cardinality === 'one' || !isTarget)) {
                 throw new AmbiguousElementError(
                     describeMobileAmbiguity({
                         element: level,

@@ -66,7 +66,7 @@
 | [MobileHandle](interfaces/MobileHandle.md) | The record returned by [specification.mobile](variables/specification.md#property-mobile). Destructure with the canonical names (CONVENTIONS A3): |
 | [MobileSpecification](interfaces/MobileSpecification.md) | The `mobile` facet — screen chain entry handed out by `specification.mobile()`. `.open()` is the single, terminal action: it terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen. |
 | [MobileSpecificationOptions](interfaces/MobileSpecificationOptions.md) | Options for [specification.mobile](variables/specification.md#property-mobile). |
-| [MobileVisitor](interfaces/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until at least one visible match exists; `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
+| [MobileVisitor](interfaces/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until a visible match exists; acting verbs then enforce exactly-one (W3), while `see()` — the single synchronization primitive — is satisfied by any visible match. There is no sleep and no conditional helper. |
 | [MockDatePort](interfaces/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
 | [PostgresOptions](interfaces/PostgresOptions.md) | - |
 | [RedisOptions](interfaces/RedisOptions.md) | - |
