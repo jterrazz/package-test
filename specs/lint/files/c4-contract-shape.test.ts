@@ -4,8 +4,8 @@ import { cli } from '../lint.specification.js';
 
 describe('lint — c4-contract-shape (CONVENTIONS C4)', () => {
     // Scalpel (D11): targeted rule-id presence/absence probe — a full-output snapshot would couple this rule test to the tool's diagnostic formatting.
-    test('rejects a contract file with an unknown provider suffix', async () => {
-        // Given - a project violating C4
+    test('rejects a malformed contracts/ tree', async () => {
+        // Given - a contracts/ root holding a unit contract, a stray payload and a non-provider folder
         const result = await cli.fixture('$FIXTURES/lint-violations/c4-contract-shape/').exec('.');
 
         // Then - oxlint reports the c4-contract-shape diagnostic
@@ -13,8 +13,8 @@ describe('lint — c4-contract-shape (CONVENTIONS C4)', () => {
         expect(result.stdout).toContain('c4-contract-shape');
     });
 
-    test('accepts a well-formed contract file', async () => {
-        // Given - the compliant twin
+    test('accepts a well-formed contracts/ tree', async () => {
+        // Given - the compliant twin: a *.contracts.ts facade over provider folders
         const result = await cli
             .fixture('$FIXTURES/lint-violations/c4-contract-shape-ok/')
             .exec('.');

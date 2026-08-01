@@ -1,7 +1,7 @@
 import { defineContract, http } from '@jterrazz/test';
 
-// Provider suffix "grpc" is not one of openai | anthropic | http (C4).
+// A unit contract is named <kebab-name>.ts (C4).
 export default defineContract({
+    request: http.get('https://example.test/bad'),
     response: http.json({ ok: true }),
-    trigger: http.get('https://example.test/latest'),
 });

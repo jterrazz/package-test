@@ -24,6 +24,8 @@
         "jterrazz/b8-kebab-trigger": "error",
         "jterrazz/b9w-product-command": "warn",
         "jterrazz/c1-domain-structure": "error",
+        "jterrazz/c10-contracts-boundary": "error",
+        "jterrazz/c11-contract-data-pairing": "error",
         "jterrazz/c2-http-only-requests": "error",
         "jterrazz/c4-contract-shape": "error",
         "jterrazz/c6-tomatch-extension": "error",

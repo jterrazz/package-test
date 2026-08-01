@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { defineContract, defineContracts, http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
-import latestNews from './contracts/latest-news.http.js';
+import latestNews from './contracts/latest-news.contracts.js';
 
 describe('contracts — selection', () => {
     test('a finite contract plays before the unlimited tail (retry path)', async () => {

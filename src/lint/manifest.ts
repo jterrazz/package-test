@@ -188,6 +188,24 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
         rationale:
             'Une profondeur fixe rend la place de chaque fichier prévisible et détectable statiquement.',
     },
+    'c10-contracts-boundary': {
+        channel: 'statique',
+        convention:
+            'Hors de `specs/**/contracts/`, un import qui résout dans un dossier de provider (`contracts/{http,openai,anthropic}/…`) est une erreur : un test n’importe que les façades `*.contracts.ts`.',
+        family: 'C',
+        id: 'C10',
+        rationale:
+            'Les contrats unitaires sont des détails de composition ; passer par la façade garde chaque scénario nommé au même endroit que le monde dont il dérive.',
+    },
+    'c11-contract-data-pairing': {
+        channel: 'statique',
+        convention:
+            'Dans un dossier de provider, tout `*.response.json` et tout `*.request.ts` a un frère `<souche>.ts` — la souche est le nom jusqu’au PREMIER point (`events.fr.response.json` → `events.ts`) ; une donnée orpheline est une erreur.',
+        family: 'C',
+        id: 'C11',
+        rationale:
+            'Une donnée n’existe que servie par un contrat — un fichier sans propriétaire est du poids mort qu’aucun test ne charge.',
+    },
     'c2-http-only-requests': {
         channel: 'statique',
         convention:
@@ -200,11 +218,11 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'c4-contract-shape': {
         channel: 'statique',
         convention:
-            'Un fichier de `contracts/` respecte `<nom>.<provider>.ts` (provider ∈ openai|anthropic|http), à plat, `export default defineContract(...)`, imports depuis le point d’entrée public.',
+            'Sous `specs/**/contracts/` : la RACINE ne porte que des façades `*.contracts.ts` (export default construit par `defineContracts(...)` ou une re-export de composition ; exports nommés = scénarios) et les dossiers de provider `http` | `openai` | `anthropic`. Un contrat unitaire est `<provider>/<nom-kebab>.ts` avec un `export default defineContract(...)` (ou une factory qui en retourne un), et son builder de `request` doit désigner le provider de son dossier. Un dossier de provider est plat et ne contient que des `*.ts` et des `*.response.json`.',
         family: 'C',
         id: 'C4',
         rationale:
-            'Une forme figée rend les contrats découvrables et typables sans convention locale.',
+            'Une arborescence figée sépare la façade publique des unités internes et fait porter le provider par le DOSSIER — les noms de fichiers redeviennent du métier, et la donnée volumineuse se range à côté du contrat qui la sert.',
     },
     'c6-tomatch-extension': {
         channel: 'statique',
@@ -487,7 +505,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Aucune fixture morte : tout fichier sous `seeds/`/`requests/`/`intercepts/`/`fixtures/` et toute entrée de premier niveau de `expected/` doit être référencée ; un dossier de feature sans `*.test.ts` est orphelin (warning si argument non littéral).',
+            'Aucune fixture morte : tout fichier sous `seeds/`/`requests/`/`fixtures/` et toute entrée de premier niveau de `expected/` doit être référencée ; un dossier de feature sans `*.test.ts` est orphelin (warning si argument non littéral).',
         family: 'C',
         id: 'C9',
         name: 'c9-dead-fixtures',

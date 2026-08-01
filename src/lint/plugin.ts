@@ -13,6 +13,8 @@ import { b6wRedundantEnvUrl } from './rules/b6w-redundant-env-url.js';
 import { b8KebabTrigger } from './rules/b8-kebab-trigger.js';
 import { b9wProductCommand } from './rules/b9w-product-command.js';
 import { c1DomainStructure } from './rules/c1-domain-structure.js';
+import { c10ContractsBoundary } from './rules/c10-contracts-boundary.js';
+import { c11ContractDataPairing } from './rules/c11-contract-data-pairing.js';
 import { c2HttpOnlyRequests } from './rules/c2-http-only-requests.js';
 import { c4ContractShape } from './rules/c4-contract-shape.js';
 import { c6ToMatchExtension } from './rules/c6-tomatch-extension.js';
@@ -75,6 +77,8 @@ const plugin: LintPlugin = {
         'b8-kebab-trigger': b8KebabTrigger,
         'b9w-product-command': b9wProductCommand,
         'c1-domain-structure': c1DomainStructure,
+        'c10-contracts-boundary': c10ContractsBoundary,
+        'c11-contract-data-pairing': c11ContractDataPairing,
         'c2-http-only-requests': c2HttpOnlyRequests,
         'c4-contract-shape': c4ContractShape,
         'c6-tomatch-extension': c6ToMatchExtension,

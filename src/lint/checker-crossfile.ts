@@ -31,7 +31,7 @@ import type { Severity, TokenViolation } from './checker.js';
 const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 
 /** Conventional per-feature subdirectories whose files are assertion fixtures. */
-const CONVENTIONAL_SUBDIRS = new Set(['expected', 'fixtures', 'intercepts', 'requests', 'seeds']);
+const CONVENTIONAL_SUBDIRS = new Set(['expected', 'fixtures', 'requests', 'seeds']);
 
 /** Destructured names that are never a runner (so never the A7/B5 subject). */
 const NON_RUNNER_BINDINGS = new Set(['cleanup', 'docker', 'orchestrator']);
