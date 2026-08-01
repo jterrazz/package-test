@@ -17,6 +17,7 @@ export type MatcherKind =
     | 'email'
     | 'float'
     | 'hex'
+    | 'includes'
     | 'int'
     | 'ip'
     | 'iso8601'
@@ -34,7 +35,7 @@ export type MatcherKind =
     | 'uuid'
     | 'workdir';
 
-/** Every kind usable as a `{{token}}` in fixture files (all but ref/regex). */
+/** Every kind usable as a `{{token}}` in fixture files (all but ref/regex/includes). */
 export const TOKEN_KINDS = [
     'any',
     'base64',
@@ -67,6 +68,8 @@ export type TokenKind = (typeof TOKEN_KINDS)[number];
  * constructed directly by user code.
  */
 export class Matcher {
+    /** For kind 'includes': the substring the actual value must contain. */
+    readonly includes?: string;
     readonly kind: MatcherKind;
     /** For kind 'ref': the capture to assert inequality against. */
     readonly notRef?: string;
@@ -77,8 +80,9 @@ export class Matcher {
 
     constructor(
         kind: MatcherKind,
-        options: { notRef?: string; refName?: string; regex?: RegExp } = {},
+        options: { includes?: string; notRef?: string; refName?: string; regex?: RegExp } = {},
     ) {
+        this.includes = options.includes;
         this.kind = kind;
         this.notRef = options.notRef;
         this.refName = options.refName;
@@ -88,6 +92,9 @@ export class Matcher {
     /** Placeholder-style rendering used in failure diffs and serialization. */
     toString(): string {
         switch (this.kind) {
+            case 'includes': {
+                return `{{includes:${this.includes}}}`;
+            }
             case 'ref': {
                 return this.notRef
                     ? `{{ref#${this.refName}!${this.notRef}}}`
@@ -138,6 +145,13 @@ export const match = {
     float: typed('float'),
     /** Matches a hexadecimal string. */
     hex: typed('hex'),
+    /**
+     * Matches a string CONTAINING the given substring. Code-only, like
+     * {@link match.regex} — the `{{token}}` fixture vocabulary does not grow.
+     * The explicit escape hatch now that contract string filters
+     * (`openai.chat({ user })`) mean exact equality.
+     */
+    includes: (substring: string): Matcher => new Matcher('includes', { includes: substring }),
     /** Matches an integer (or an integer string in text contexts). */
     int: typed('int'),
     /** Matches an IPv4 address. */

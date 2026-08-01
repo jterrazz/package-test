@@ -40,7 +40,7 @@ src/
 │   │   └── mobile/                # startMobile constructor + ScreenResult + simctl simulator resolution + appium server spawn + page-source projection + mobile ambiguity
 │   ├── matching/                  # match.* vocabulary + {{token}} structural comparison engine
 │   ├── http-files/                # requests/*.http + expected/*.http (responses) parser/serializer
-│   ├── contracts/                 # defineContract + intercept types + generic http provider (no external dep)
+│   ├── contracts/                 # defineContract/defineContracts + contract types + ContractQueue (the ONE selection engine) + generic http provider (no external dep)
 │   └── ports/                     # ALL interfaces: database, service, isolation, container, server, command, browser, device
 ├── integrations/                  # one folder = one external dependency (I1), each imports only its own dep + core
 │   ├── postgres/  ├── redis/  ├── sqlite/        # service handles
@@ -49,7 +49,7 @@ src/
 │   ├── hono/                      # in-process server adapter
 │   ├── playwright/                # chromium browser adapter for specification.website() — optional peer dep, lazily imported
 │   ├── appium/                    # XCUITest device adapter (webdriverio) for specification.mobile() — optional peer dep, lazily imported
-│   ├── msw/                       # intercept registration engine
+│   ├── msw/                       # contract registration engine (drives core's ContractQueue)
 │   └── openai/  └── anthropic/    # intercept providers
 ├── vitest/                        # ALL runner coupling: expect() matchers, TEST_UPDATE / -u detection, mockOf, mockOfDate
 └── lint/                          # tool-facing static channel (I1: zero runtime imports): oxlint plugin (dist/oxlint.js) — one file per jterrazz/<rule> under rules/ (each carries its normative text as meta.docs from manifest.ts) + ast/fs-cache helpers, D4 conventions checker (checker.ts + dist/checker.js CLI), catalogue manifest + generator (manifest.ts is the SOURCE OF TRUTH for the mechanized catalogue; catalog.ts → dist/catalog.js regenerates the docs/10-linting.md catalogue + skills/jterrazz-test/references/rules.md), catalogue freshness+completeness meta-test (plugin.test.ts)

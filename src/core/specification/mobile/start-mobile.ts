@@ -37,8 +37,8 @@ export interface MobileSpecificationOptions {
         bundleId: string;
     };
     /**
-     * Declared stub backend: started with the runner, serving the exchanges
-     * each chain declares via `.intercept('<name>.http')`. The handle gains
+     * Declared stub backend: started with the runner, serving the contracts
+     * each chain declares via `.intercept(...)`. The handle gains
      * `backendUrl` — inject it into your bundler env yourself.
      */
     backend?: MobileBackendOptions;

@@ -33,6 +33,21 @@ describe('match — typed matchers', () => {
         expect(structuralEquals(match.regex(/^user-\d+$/), 'admin-42', scope)).toBe(false);
     });
 
+    test('includes matches a string containing the substring — code-only, never a token', () => {
+        // Given - a fresh capture scope
+        const scope = new CaptureScope();
+
+        // Then - containment gates the value, and non-strings never pass
+        expect(structuralEquals(match.includes('classify'), 'please classify this', scope)).toBe(
+            true,
+        );
+        expect(structuralEquals(match.includes('classify'), 'please rank this', scope)).toBe(false);
+        expect(structuralEquals(match.includes('42'), 42, scope)).toBe(false);
+
+        // And - it renders as its own form, outside the `{{token}}` vocabulary
+        expect(String(match.includes('classify'))).toBe('{{includes:classify}}');
+    });
+
     test('matchers compose inside structures', () => {
         // Given - a structure mixing literals and matchers
         const scope = new CaptureScope();

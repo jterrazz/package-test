@@ -38,6 +38,7 @@ describe('intercept — anthropic', () => {
                     system: 'You are a journal agent.',
                 },
                 headers: {},
+                method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
         ).toBe(true);
@@ -50,6 +51,7 @@ describe('intercept — anthropic', () => {
                     system: 'You are a coding agent.',
                 },
                 headers: {},
+                method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
         ).toBe(false);
@@ -64,6 +66,7 @@ describe('intercept — anthropic', () => {
             trigger.match!({
                 body: { messages: [{ content: 'Please classify this article', role: 'user' }] },
                 headers: {},
+                method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
         ).toBe(true);
@@ -72,6 +75,7 @@ describe('intercept — anthropic', () => {
             trigger.match!({
                 body: { messages: [{ content: 'hello', role: 'user' }] },
                 headers: {},
+                method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
         ).toBe(false);
@@ -113,6 +117,7 @@ describe('intercept — anthropic', () => {
         const request = (model: string): Parameters<NonNullable<typeof trigger.match>>[0] => ({
             body: { messages: [{ content: 'hi', role: 'user' }], model },
             headers: {},
+            method: 'POST',
             url: ANTHROPIC_MESSAGES_URL,
         });
 
@@ -131,6 +136,7 @@ describe('intercept — anthropic', () => {
                 tools: names.map((name) => ({ name })),
             },
             headers: {},
+            method: 'POST',
             url: ANTHROPIC_MESSAGES_URL,
         });
 
@@ -140,26 +146,32 @@ describe('intercept — anthropic', () => {
         expect(trigger.match!(withTools([]))).toBe(false);
     });
 
-    test('anthropic.messages() string-form system/user filters match by substring', () => {
-        // Given - string (not RegExp) system and user filters
-        const trigger = anthropic.messages({ system: 'journal', user: 'classify' });
+    test('anthropic.messages() string-form system/user filters match by EXACT equality', () => {
+        // Given - string (not RegExp) system and user filters — v11 makes them exact
+        const trigger = anthropic.messages({
+            system: 'You are a journal agent.',
+            user: 'please classify this',
+        });
         const request = (
             system: string,
             user: string,
         ): Parameters<NonNullable<typeof trigger.match>>[0] => ({
             body: { messages: [{ content: user, role: 'user' }], system },
             headers: {},
+            method: 'POST',
             url: ANTHROPIC_MESSAGES_URL,
         });
 
-        // Then - both substrings must be present; missing either fails
+        // Then - both must match whole; a superstring is NOT a match anymore
         expect(trigger.match!(request('You are a journal agent.', 'please classify this'))).toBe(
             true,
         );
+        expect(
+            trigger.match!(request('You are a journal agent.', 'please classify this article')),
+        ).toBe(false);
         expect(trigger.match!(request('You are a coding agent.', 'please classify this'))).toBe(
             false,
         );
-        expect(trigger.match!(request('You are a journal agent.', 'summarize this'))).toBe(false);
     });
 
     test('anthropic.error() returns rate_limit_error for 429 and api_error otherwise', () => {

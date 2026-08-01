@@ -35,8 +35,8 @@ optional backend?: MobileBackendOptions;
 
 Defined in: [core/specification/mobile/start-mobile.ts:44](https://github.com/jterrazz/package-test/blob/main/src/core/specification/mobile/start-mobile.ts#L44)
 
-Declared stub backend: started with the runner, serving the exchanges
-each chain declares via `.intercept('<name>.http')`. The handle gains
+Declared stub backend: started with the runner, serving the contracts
+each chain declares via `.intercept(...)`. The handle gains
 `backendUrl` — inject it into your bundler env yourself.
 
 ***

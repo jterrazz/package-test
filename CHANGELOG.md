@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING — contracts everywhere.** `InterceptContract` is `Contract`, and its `trigger`
+  field is `request`; `InterceptTrigger` / `InterceptResponse` / `InterceptResponder` are
+  `ContractRequest` / `ContractResponse` / `ContractResponder`. No deprecated aliases.
+- **BREAKING — ONE selection queue for every engine.** The MSW engine (api/jobs) and the
+  declared stub backend (website/mobile) now share `ContractQueue`: the first contract in
+  declaration order that matches and is not exhausted serves the request. No `times` means
+  unlimited (the old website/mobile sticky tail, now explicit); the old api/jobs
+  consume-once behaviour is written as `times: 1`.
+- **BREAKING — provider string filters are EXACT.** `openai.chat({ user, system, model })`
+  and `anthropic.messages({ ... })` compare strings whole. Loosen deliberately with a
+  RegExp or the new `match.includes(substring)`.
+- **BREAKING — `http.json(body, init?)`** takes `{ status?, headers?, delay? }` instead of a
+  positional status; `http.error(status, body?)` takes a body, not a message.
+- **BREAKING — `MatchableRequest` carries `method`.**
+
+### Added
+
+- **`times`** on a contract — serve exactly n times, then exhaust. Sequences are finite
+  contracts before an unlimited tail (`[error500 ×3, ok]`).
+- **`required`** on a contract — the chain fails when the call never happened (or did not
+  happen exactly `times` times), on both engines.
+- **`defineContracts(...)`** — a `Contracts` composite (recursive flattening, order
+  preserved) with `.with(...)`: replacement-by-route plus prepend, immutable.
+- **Path-form contract urls** — `http.get('/articles/{{uuid}}')` matches that path on any
+  origin, `{{token}}` segments structural, declared query params a subset.
+- **`http.patch`, `http.text`, `http.empty`**, and `match.includes(substring)` (code-only,
+  the `{{token}}` vocabulary does not grow).
+- The declared stub backend reads request bodies, so `match` predicates and body filters
+  work on website/mobile chains too.
+
+### Removed
+
+- `.intercept('<name>.http')` intercept files and the whole `intercepts/*.http` format
+  (`parseInterceptFile`, `exchangeMatches`, `interceptEntriesOf`). `.http` stays what it
+  always was at the boundary of your own API: `requests/` and `expected/`.
+- `.intercept(request, 'adapter/file.json')` string fixture paths and the adapter-prefix
+  check — a contract imports its JSON payload itself.
+
 ## [10.0.0] - 2026-07-29
 
 ### Changed

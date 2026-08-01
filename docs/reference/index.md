@@ -41,6 +41,10 @@
 | [CliSpecification](interfaces/CliSpecification.md) | The `cli` facet — command chain entry handed out by `specification.cli()`. Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS B2) — `{ waitFor?, timeout? }` covers long-running processes. |
 | [CliSpecificationOptions](interfaces/CliSpecificationOptions.md) | Options for [specification.cli](variables/specification.md#property-cli). |
 | [ContainerPort](interfaces/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
+| [Contract](interfaces/Contract.md) | A declared external interaction: what to match (`request`) and what to reply (`response`), together in one named artifact. Contracts live in TypeScript files under `contracts/` next to the tests that use them, so the business payload (prompts, JSON responses) is visible at a glance while the real HTTP call stays mocked underneath. |
+| [ContractRequest](interfaces/ContractRequest.md) | The request half of a contract: which outgoing call it speaks for. |
+| [ContractResponse](interfaces/ContractResponse.md) | The response half of a contract: what to reply when the request matches. |
+| [Contracts](interfaces/Contracts.md) | A composite of contracts — the unit tests import. Flat, ordered, immutable; `.with()` derives a variant without touching the original. |
 | [DatabasePort](interfaces/DatabasePort.md) | Abstract database interface for specification runners. Implement this to plug in your database stack (e.g. Postgres, SQLite). |
 | [DeviceOpenOptions](interfaces/DeviceOpenOptions.md) | Per-open options forwarded to the device session. |
 | [DevicePort](interfaces/DevicePort.md) | Abstract device interface for the mobile specification runner. One implementation lives in `integrations/appium/` — a single driver session per runner, created on the first `open()` and reused; each open terminates and relaunches the app for a deterministic fresh state. |
@@ -51,16 +55,14 @@
 | [ElementRef](interfaces/ElementRef.md) | A user-facing element descriptor — pure data, built by the element vocabulary (`button()`, `link()`, `field()`, …) and translated into concrete locators by the browser integration. CSS/XPath selectors are deliberately not expressible: user-facing elements are the only surface. |
 | [ExecOptions](interfaces/ExecOptions.md) | Options for the long-running form of `.exec()` (CONVENTIONS B2). When either option is present the process is spawned and observed: it resolves as soon as `waitFor` appears in stdout/stderr, and is killed when `timeout` elapses (exit code 124). |
 | [FileAccessor](interfaces/FileAccessor.md) | Read-only handle to a single file produced by a spec action. |
-| [InterceptContract](interfaces/InterceptContract.md) | A declared external interaction: what to match and what to reply, together in one named artifact. Contracts live in flat TypeScript files under `contracts/` next to the tests that use them — `<name>.<provider>.ts` with `provider ∈ { openai, anthropic, http }` (CONVENTIONS C4) — so the business payload (prompts, JSON responses) is visible at a glance while the real HTTP call stays mocked underneath (MSW). |
-| [InterceptEntry](interfaces/InterceptEntry.md) | A fully resolved intercept entry ready to be registered with MSW. |
-| [InterceptResponse](interfaces/InterceptResponse.md) | An intercept response describes what to return when the trigger matches. |
-| [InterceptTrigger](interfaces/InterceptTrigger.md) | An intercept trigger describes which HTTP request to match. |
+| [HttpContractFilter](interfaces/HttpContractFilter.md) | Request filters for the generic HTTP provider. Every field is a subset constraint — a request matches when all provided fields match. |
+| [HttpResponseInit](interfaces/HttpResponseInit.md) | Init options shared by the response builders. |
 | [IsolationStrategy](interfaces/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |
 | [JobHandle](interfaces/JobHandle.md) | A named job that can be triggered via jobs.trigger(). |
 | [JobsHandle](interfaces/JobsHandle.md) | The record returned by [specification.jobs](variables/specification.md#property-jobs). Destructure with the canonical names (CONVENTIONS A3): |
 | [JobsSpecification](interfaces/JobsSpecification.md) | The `jobs` facet — job chain entry handed out by `specification.jobs()`. Jobs run in-process by definition (CONVENTIONS A5/A8). |
 | [JobsSpecificationOptions](interfaces/JobsSpecificationOptions.md) | Options for [specification.jobs](variables/specification.md#property-jobs). |
-| [MatchableRequest](interfaces/MatchableRequest.md) | The observed outgoing request, reduced to what trigger matchers inspect. Built once per request by the MSW integration and handed to [InterceptTrigger.match](interfaces/InterceptTrigger.md#match). |
+| [MatchableRequest](interfaces/MatchableRequest.md) | The observed outgoing request, reduced to what contract matchers inspect. Built once per request by the engine (MSW on api/jobs, the stub backend on website/mobile) and handed to [ContractRequest.match](interfaces/ContractRequest.md#match) and to a [ContractResponder](type-aliases/ContractResponder.md). |
 | [MatchFixtureOptions](interfaces/MatchFixtureOptions.md) | Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a single fixture OUT of update-mode rewriting: a frozen fixture is NEVER written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen mismatch still throws its diff, and a frozen missing fixture still throws its "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the subject of a negative test that asserts the mismatch/error rendering) survivable across update runs instead of being silently overwritten with the actual output. |
 | [MobileBackendOptions](interfaces/MobileBackendOptions.md) | The declared stub backend behind the app under test. The framework owns the simulator and appium but NOT the JS bundler (Metro belongs to the caller's repo, like `next build` belongs to a website's) — so nothing is injected: the handle exposes `backendUrl` and the CALLER wires it into its own bundler env. |
 | [MobileElementMatch](interfaces/MobileElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening the simulator. |
@@ -79,7 +81,7 @@
 | [SpecificationConfig](interfaces/SpecificationConfig.md) | Adapter configuration passed to the specification facets at setup time. |
 | [SqliteOptions](interfaces/SqliteOptions.md) | - |
 | [Visitor](interfaces/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
-| [WebsiteBackendOptions](interfaces/WebsiteBackendOptions.md) | The declared stub backend behind the site under test — started before the server command, torn down with the runner. Its URL is injected into the server child's environment under `env`; the chain's `.intercept('<name>.http')` exchanges are what it serves. |
+| [WebsiteBackendOptions](interfaces/WebsiteBackendOptions.md) | The declared stub backend behind the site under test — started before the server command, torn down with the runner. Its URL is injected into the server child's environment under `env`; the contracts each chain declares via `.intercept(...)` are what it serves. |
 | [WebsiteHandle](interfaces/WebsiteHandle.md) | The record returned by [specification.website](variables/specification.md#property-website). Destructure with the canonical names (CONVENTIONS A3): |
 | [WebsiteSpecification](interfaces/WebsiteSpecification.md) | The `website` facet — page chain entry handed out by `specification.website()`. Setup methods chain; action methods are terminal. `.visit()` renders the page in the shared browser; `.fetch()` performs one raw HTTP exchange and never follows redirects. |
 
@@ -88,11 +90,12 @@
 | Type Alias | Description |
 | ------ | ------ |
 | [CliEnv](type-aliases/CliEnv.md) | Extra environment variables to set for the child process. Values are merged on top of process.env. A `null` value unsets the variable. |
+| [ContractInput](type-aliases/ContractInput.md) | Any accepted contract input: one, a list, or a composite. |
+| [ContractResponder](type-aliases/ContractResponder.md) | A dynamic response: computed from the observed request at the moment the contract is served, rather than fixed ahead of time. Handed the same [MatchableRequest](interfaces/MatchableRequest.md) the request half matched on, so the reply can echo or derive from the body/headers/url. |
+| [ContractResponseValue](type-aliases/ContractResponseValue.md) | What a contract replies with: either a fixed [ContractResponse](interfaces/ContractResponse.md) or a [ContractResponder](type-aliases/ContractResponder.md) evaluated per served request. |
 | [DatabaseKeys](type-aliases/DatabaseKeys.md) | Keys of a services record whose handles are databases. |
 | [ElementKind](type-aliases/ElementKind.md) | The interactive//textual element kinds — what a visitor actually acts on. |
 | [HonoApp](type-aliases/HonoApp.md) | Any object with a request method compatible with Hono's app.request(). |
-| [InterceptResponder](type-aliases/InterceptResponder.md) | A dynamic response: computed from the observed request at the moment the intercept is consumed, rather than fixed ahead of time. Handed the same [MatchableRequest](interfaces/MatchableRequest.md) the trigger matched on, so the reply can echo or derive from the request body/headers/url. |
-| [InterceptResponseValue](type-aliases/InterceptResponseValue.md) | What an intercept replies with: either a fixed [InterceptResponse](interfaces/InterceptResponse.md) or an [InterceptResponder](type-aliases/InterceptResponder.md) evaluated per consumed request. |
 | [LandmarkKind](type-aliases/LandmarkKind.md) | The landmark roles — the standard set of page regions, and the only containers a scope can name. Closed on purpose: ARIA defines exactly these, so `within()` never becomes a second selector language. |
 | [MatcherKind](type-aliases/MatcherKind.md) | The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds. |
 | [MobileElementKind](type-aliases/MobileElementKind.md) | The element kinds a mobile screen can designate — the structural subset of [ElementRef](interfaces/ElementRef.md) kinds that map onto the XCUITest accessibility tree. There is ONE element vocabulary across facets: `button('Bookmark')` works in a visit scenario and a mobile scenario alike. Landmarks have no iOS analog — passing one to a mobile verb refuses at runtime. |
@@ -117,7 +120,7 @@
 | [field](variables/field.md) | A form field, by label. |
 | [form](variables/form.md) | The `form` landmark — a form carrying an accessible name. |
 | [heading](variables/heading.md) | A heading, by accessible name. |
-| [http](variables/http.md) | Generic HTTP intercept helpers for any URL. An optional HttpInterceptFilter narrows matching by request body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict intercepts, CONVENTIONS D7). |
+| [http](variables/http.md) | Generic HTTP contract helpers for any URL. The url is absolute (string or RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')` matches that path on ANY origin, which is what an app calling its own backend needs. An optional [HttpContractFilter](interfaces/HttpContractFilter.md) narrows matching by body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict contracts, CONVENTIONS D7). |
 | [link](variables/link.md) | A link, by accessible name. |
 | [main](variables/main.md) | The `main` landmark — the primary content of the document. |
 | [match](variables/match.md) | Dynamic-value matchers for structural comparisons — the code-side mirror of the `{{token}}` fixture grammar (CONVENTIONS D4). |
@@ -133,7 +136,8 @@
 
 | Function | Description |
 | ------ | ------ |
-| [defineContract](functions/defineContract.md) | Declare an intercept contract. Identity function — its value is the enforced shape and the naming convention: |
+| [defineContract](functions/defineContract.md) | Declare one contract. Identity function — its value is the enforced shape and the naming convention: |
+| [defineContracts](functions/defineContracts.md) | Compose contracts into the artifact a test imports — it's contracts all the way down: a composite may extend contracts, lists, and other composites, recursively, order preserved. |
 | [findContainersByLabel](functions/findContainersByLabel.md) | Return all container IDs (running or stopped) that carry `key=value`. |
 | [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |

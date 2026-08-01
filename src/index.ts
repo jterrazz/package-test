@@ -143,17 +143,22 @@ export { postgres, type PostgresOptions } from './integrations/postgres/postgres
 export { redis, type RedisOptions } from './integrations/redis/redis.js';
 export { sqlite, type SqliteOptions } from './integrations/sqlite/sqlite.js';
 
-// Intercepts
+// Contracts — the ONE way to declare what the outside world replies
 export { anthropic } from './integrations/anthropic/anthropic.js';
-export { http } from './core/contracts/http.js';
+export { http, type HttpContractFilter, type HttpResponseInit } from './core/contracts/http.js';
 export { openai } from './integrations/openai/openai.js';
-export { defineContract, type InterceptContract } from './core/contracts/contract.js';
+export {
+    type Contract,
+    type ContractInput,
+    type Contracts,
+    defineContract,
+    defineContracts,
+} from './core/contracts/contract.js';
 export type {
-    InterceptEntry,
-    InterceptResponder,
-    InterceptResponse,
-    InterceptResponseValue,
-    InterceptTrigger,
+    ContractRequest,
+    ContractResponder,
+    ContractResponse,
+    ContractResponseValue,
     MatchableRequest,
 } from './core/contracts/types.js';
 

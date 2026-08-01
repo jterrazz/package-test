@@ -2,43 +2,38 @@
 # Function: defineContract()
 
 ```ts
-function defineContract(contract): InterceptContract;
+function defineContract(contract): Contract;
 ```
 
-Defined in: [core/contracts/contract.ts:45](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L45)
+Defined in: [core/contracts/contract.ts:71](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L71)
 
-Declare an intercept contract. Identity function — its value is the
-enforced shape and the naming convention:
+Declare one contract. Identity function — its value is the enforced shape
+and the naming convention:
 
 ## Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `contract` | [`InterceptContract`](../interfaces/InterceptContract.md) |
+| `contract` | [`Contract`](../interfaces/Contract.md) |
 
 ## Returns
 
-[`InterceptContract`](../interfaces/InterceptContract.md)
+[`Contract`](../interfaces/Contract.md)
 
 ## Example
 
 ```ts
-// specs/api/reports/contracts/classify-article.openai.ts
+// specs/api/reports/contracts/openai/classify-article.ts
   import { defineContract, openai } from '@jterrazz/test';
 
   export default defineContract({
-      trigger: openai.responses({ user: /Report Ingestion/, tools: ['classify'] }),
+      request: openai.responses({ user: PROMPT, tools: ['classify'] }),
       response: openai.reply({ categories: ['TECH'] }),
   });
 
   // Dynamic — the response is computed from the observed request:
   export default defineContract({
-      trigger: http.post('https://api.example.com/echo'),
+      request: http.post('https://api.example.com/echo'),
       response: (request) => http.json({ received: request.body }),
   });
-
-  // specs/api/reports/reports.test.ts
-  import classifyArticle from '../../spec/intercept/contracts/classify-article.openai.js';
-
-  const result = await jobs.intercept(classifyArticle).trigger('report-ingestion');
 ```

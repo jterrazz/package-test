@@ -349,7 +349,7 @@ External interactions (LLM providers, third-party APIs) are declared as **contra
 import { defineContract, openai } from '@jterrazz/test';
 
 export default defineContract({
-    trigger: openai.responses({ user: /Product Classification/, tools: ['classify'] }),
+    request: openai.responses({ user: /Product Classification/, tools: ['classify'] }),
     response: openai.reply({ category: 'ELECTRONICS', confidence: 0.97 }),
 });
 ```

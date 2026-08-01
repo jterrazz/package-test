@@ -16,7 +16,7 @@ optional backend?: StubBackend;
 Defined in: [core/specification/shared/builder.ts:62](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/builder.ts#L62)
 
 The declared stub backend (website/mobile facets) — armed with the
-chain's `.http` intercept exchanges before every terminal action.
+chain's contracts before every terminal action.
 
 ***
 

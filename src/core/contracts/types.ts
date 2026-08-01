@@ -1,43 +1,48 @@
 /**
- * The observed outgoing request, reduced to what trigger matchers inspect.
- * Built once per request by the MSW integration and handed to
- * {@link InterceptTrigger.match}.
+ * The observed outgoing request, reduced to what contract matchers inspect.
+ * Built once per request by the engine (MSW on api/jobs, the stub backend on
+ * website/mobile) and handed to {@link ContractRequest.match} and to a
+ * {@link ContractResponder}.
  */
 export interface MatchableRequest {
     /** Parsed JSON body when the payload is JSON, the raw text otherwise, or `null` when absent. */
     body: unknown;
     /** Request headers, keyed by lowercased header name. */
     headers: Record<string, string>;
-    /** The fully-qualified request URL (including any query string). */
+    /** Uppercased HTTP method of the observed request. */
+    method: string;
+    /** The request URL — fully-qualified, or origin-relative for the stub backend. */
     url: string;
 }
 
 /**
- * An intercept trigger describes which HTTP request to match.
+ * The request half of a contract: which outgoing call it speaks for.
+ *
+ * `url` is either an absolute URL (string or RegExp), or a PATH FORM starting
+ * with `/` (`/articles/{{uuid}}`) which matches any origin — the shape a
+ * website/mobile app's own backend calls take. `{{token}}` segments compare
+ * structurally, declared query params are a subset of the observed ones.
  */
-export interface InterceptTrigger {
-    /** Adapter name - must match the folder prefix in file-based intercepts. */
+export interface ContractRequest {
+    /** Adapter name — `http` | `openai` | `anthropic`. */
     adapter: string;
-    /** HTTP method to match. */
+    /** HTTP method to match. `*` matches any method. */
     method: string;
-    /** URL pattern to match (string for exact prefix, RegExp for pattern). */
+    /** Absolute URL (string | RegExp) or an any-origin path form (`/articles/{{uuid}}`). */
     url: RegExp | string;
-    /** Optional request matcher - the handler only fires if this returns true. */
+    /** Optional request matcher — the contract only fires if this returns true. */
     match?: (request: MatchableRequest) => boolean;
-    /**
-     * Transform raw JSON data into a provider-specific response envelope.
-     * Called when .intercept(trigger, 'adapter/file.json') loads a file.
-     */
-    wrap: (data: unknown) => InterceptResponse;
+    /** Transform raw data into a provider-specific response envelope. */
+    wrap: (data: unknown) => ContractResponse;
 }
 
 /**
- * An intercept response describes what to return when the trigger matches.
+ * The response half of a contract: what to reply when the request matches.
  */
-export interface InterceptResponse {
+export interface ContractResponse {
     /** HTTP status code (default: 200). */
     status?: number;
-    /** Response body (will be JSON.stringified). */
+    /** Response body — an object is JSON, a string is text, `null`/`undefined` is empty. */
     body: unknown;
     /** Response headers. */
     headers?: Record<string, string>;
@@ -47,22 +52,14 @@ export interface InterceptResponse {
 
 /**
  * A dynamic response: computed from the observed request at the moment the
- * intercept is consumed, rather than fixed ahead of time. Handed the same
- * {@link MatchableRequest} the trigger matched on, so the reply can echo or
- * derive from the request body/headers/url.
+ * contract is served, rather than fixed ahead of time. Handed the same
+ * {@link MatchableRequest} the request half matched on, so the reply can echo
+ * or derive from the body/headers/url.
  */
-export type InterceptResponder = (request: MatchableRequest) => InterceptResponse;
+export type ContractResponder = (request: MatchableRequest) => ContractResponse;
 
 /**
- * What an intercept replies with: either a fixed {@link InterceptResponse} or
- * an {@link InterceptResponder} evaluated per consumed request.
+ * What a contract replies with: either a fixed {@link ContractResponse} or a
+ * {@link ContractResponder} evaluated per served request.
  */
-export type InterceptResponseValue = InterceptResponder | InterceptResponse;
-
-/**
- * A fully resolved intercept entry ready to be registered with MSW.
- */
-export interface InterceptEntry {
-    trigger: InterceptTrigger;
-    response: InterceptResponseValue;
-}
+export type ContractResponseValue = ContractResponder | ContractResponse;

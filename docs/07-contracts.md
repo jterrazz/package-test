@@ -13,7 +13,7 @@ One file per interaction, **flat** under the feature's `contracts/` folder, name
 import { defineContract, openai } from '@jterrazz/test';
 
 export default defineContract({
-    trigger: openai.responses(
+    request: openai.responses(
         { user: /Product Classification/, tools: ['classify'] },
         'https://gateway.shoply.dev/v1/responses',
     ),
@@ -26,7 +26,7 @@ export default defineContract({
 import { defineContract, anthropic } from '@jterrazz/test';
 
 export default defineContract({
-    trigger: anthropic.messages({ system: /support agent/, model: /claude/ }),
+    request: anthropic.messages({ system: /support agent/, model: /claude/ }),
     response: anthropic.reply('Bonjour, votre commande arrive demain.'),
 });
 ```
@@ -36,7 +36,7 @@ export default defineContract({
 import { defineContract, http } from '@jterrazz/test';
 
 export default defineContract({
-    trigger: http.get('https://rates.example.com/v1/latest'),
+    request: http.get('https://rates.example.com/v1/latest'),
     response: http.json({ base: 'EUR', rates: { USD: 1.09 } }),
 });
 ```
@@ -112,11 +112,11 @@ A request that hits the URL/method but fails the filter counts as unmatched (str
 
 ### Success
 
-| Response                   | Produces                                                     |
-| -------------------------- | ------------------------------------------------------------ |
-| `openai.reply(data)`       | `data` wrapped in a valid Chat Completions envelope          |
-| `anthropic.reply(data)`    | `data` (object or plain text) wrapped in a Messages envelope |
-| `http.json(data, status?)` | Plain JSON response, default status 200                      |
+| Response                 | Produces                                                     |
+| ------------------------ | ------------------------------------------------------------ |
+| `openai.reply(data)`     | `data` wrapped in a valid Chat Completions envelope          |
+| `anthropic.reply(data)`  | `data` (object or plain text) wrapped in a Messages envelope |
+| `http.json(body, init?)` | Plain JSON response, `init: { status?, headers?, delay? }`   |
 
 The point: your contract file states the **business payload** (`{ category: 'ELECTRONICS' }`), and the builder produces the provider's full wire format around it.
 
@@ -139,7 +139,7 @@ The `request` handed to it is the same [`MatchableRequest`](#trigger-builders) t
 ```typescript
 // In a contract — the reply mirrors the request payload
 export default defineContract({
-    trigger: http.post('https://gateway.shoply.dev/v1/echo'),
+    request: http.post('https://gateway.shoply.dev/v1/echo'),
     response: (request) => http.json({ received: request.body }),
 });
 
@@ -147,7 +147,7 @@ export default defineContract({
 const result = await api
     .intercept(http.post(url), (request) => {
         const tenant = request.headers['x-tenant'];
-        return http.json({ quote: `hello ${tenant}` }, 201);
+        return http.json({ quote: `hello ${tenant}` }, { status: 201 });
     })
     .get('/submit');
 ```

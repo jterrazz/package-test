@@ -1,4 +1,4 @@
-import type { InterceptResponse, InterceptTrigger } from '../../core/contracts/types.js';
+import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
@@ -25,7 +25,7 @@ function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
     }
     if (filter.system) {
         const msg = body?.messages?.find((m: any) => m.role === 'system')?.content ?? '';
-        if (typeof filter.system === 'string' && !msg.includes(filter.system)) {
+        if (typeof filter.system === 'string' && msg !== filter.system) {
             return false;
         }
         if (filter.system instanceof RegExp && !filter.system.test(msg)) {
@@ -34,7 +34,7 @@ function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
     }
     if (filter.user) {
         const msg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
-        if (typeof filter.user === 'string' && !msg.includes(filter.user)) {
+        if (typeof filter.user === 'string' && msg !== filter.user) {
             return false;
         }
         if (filter.user instanceof RegExp && !filter.user.test(msg)) {
@@ -76,7 +76,7 @@ function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boole
         const instructions = body?.instructions ?? '';
         const systemInput = body?.input?.find?.((m: any) => m.role === 'system')?.content ?? '';
         const text = instructions || systemInput;
-        if (typeof filter.system === 'string' && !text.includes(filter.system)) {
+        if (typeof filter.system === 'string' && text !== filter.system) {
             return false;
         }
         if (filter.system instanceof RegExp && !filter.system.test(text)) {
@@ -90,7 +90,7 @@ function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boole
                 typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
             )
             .join(' ');
-        if (typeof filter.user === 'string' && !msgs.includes(filter.user)) {
+        if (typeof filter.user === 'string' && msgs !== filter.user) {
             return false;
         }
         if (filter.user instanceof RegExp && !filter.user.test(msgs)) {
@@ -109,7 +109,7 @@ function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boole
 
 // ── Response builders ──
 
-function buildChatReply(data: unknown): InterceptResponse {
+function buildChatReply(data: unknown): ContractResponse {
     const content = typeof data === 'string' ? data : JSON.stringify(data);
     return {
         status: 200,
@@ -124,7 +124,7 @@ function buildChatReply(data: unknown): InterceptResponse {
     };
 }
 
-function buildResponsesReply(data: unknown): InterceptResponse {
+function buildResponsesReply(data: unknown): ContractResponse {
     const text = typeof data === 'string' ? data : JSON.stringify(data);
     return {
         status: 200,
@@ -153,14 +153,17 @@ function buildResponsesReply(data: unknown): InterceptResponse {
  */
 export const openai = {
     /**
-     * Trigger: match Chat Completions API requests.
+     * Request: match Chat Completions API calls. STRING filters mean EXACT
+     * equality (pass the app's own prompt builder); loosen deliberately with a
+     * RegExp or `match.includes(...)`.
      *
      * @example
-     *   openai.chat()                         // any chat call
-     *   openai.chat({ model: 'gpt-4o' })      // specific model
-     *   openai.chat({ system: /classify/ })    // system prompt match
+     *   openai.chat()                            // any chat call
+     *   openai.chat({ model: 'gpt-4o' })         // exact model
+     *   openai.chat({ system: buildPrompt() })   // exact system prompt
+     *   openai.chat({ system: /classify/ })      // pattern
      */
-    chat(filter?: OpenAIChatFilter): InterceptTrigger {
+    chat(filter?: OpenAIChatFilter): ContractRequest {
         return {
             adapter: 'openai',
             method: 'POST',
@@ -171,7 +174,8 @@ export const openai = {
     },
 
     /**
-     * Trigger: match Responses API requests (AI SDK v5+) with auto-wrapping.
+     * Request: match Responses API calls (AI SDK v5+) with auto-wrapping.
+     * String filters mean EXACT equality (see {@link openai.chat}).
      * When used with a JSON file, the data is automatically wrapped in the
      * Responses API envelope.
      *
@@ -181,7 +185,7 @@ export const openai = {
      * @example
      *   openai.responses({ user: /Report Ingestion/ }, GATEWAY)
      */
-    responses(filter?: OpenAIResponsesFilter, url?: string): InterceptTrigger {
+    responses(filter?: OpenAIResponsesFilter, url?: string): ContractRequest {
         return {
             adapter: 'openai',
             method: 'POST',
@@ -200,7 +204,7 @@ export const openai = {
     reply: buildChatReply,
 
     /** Response: return an OpenAI error. */
-    error(status: number, message?: string): InterceptResponse {
+    error(status: number, message?: string): ContractResponse {
         return {
             status,
             body: {
@@ -214,12 +218,12 @@ export const openai = {
     },
 
     /** Response: return malformed content. */
-    malformed(content: string): InterceptResponse {
+    malformed(content: string): ContractResponse {
         return buildChatReply(content);
     },
 
     /** Response: simulate a timeout. */
-    timeout(): InterceptResponse {
+    timeout(): ContractResponse {
         return { status: 200, body: {}, delay: 30_000 };
     },
 };

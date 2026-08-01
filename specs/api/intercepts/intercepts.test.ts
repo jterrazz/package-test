@@ -1,28 +1,38 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineContract, http } from '../../../src/index.js';
+import { defineContract, defineContracts, http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
 import latestNews from './contracts/latest-news.http.js';
 
-describe('intercepts — FIFO queue', () => {
-    test('same trigger declared twice fires in order: 429 then 200 (retry path)', async () => {
-        // Given - a rate-limit first, a success second, passed as a single
-        // Array of contracts (array order === consecutive-call FIFO), and an
-        // App that retries once on 429
+describe('contracts — selection', () => {
+    test('a finite contract plays before the unlimited tail (retry path)', async () => {
+        // Given - a rate-limit allowed exactly once, then a success with no
+        // Times (unlimited), passed as one list, and an app that retries on 429
         const result = await api
             .intercept([
-                { response: http.error(429), trigger: http.get(QUOTES_URL) },
-                { response: http.json({ quote: 'after retry' }), trigger: http.get(QUOTES_URL) },
+                { request: http.get(QUOTES_URL), response: http.error(429), times: 1 },
+                { request: http.get(QUOTES_URL), response: http.json({ quote: 'after retry' }) },
             ])
             .get('/quote');
 
-        // Then - the retry consumed the second entry
+        // Then - the retry was served by the tail contract
         expect(result.status).toBe(200);
         expect(result.response.body).toEqual({ quote: 'after retry' });
     });
 
-    test('a contract and an inline intercept mix in one chain', async () => {
-        // Given - a declared contract plus a one-off inline intercept
+    test('a contract with no times keeps serving every call', async () => {
+        // Given - ONE contract for a route the app calls twice
+        const result = await api
+            .intercept(http.get(QUOTES_URL), http.json({ quote: 'sticky' }))
+            .get('/quote-twice');
+
+        // Then - both calls were served (no times = unlimited, no exhaustion)
+        expect(result.status).toBe(200);
+        expect(result.response.body).toEqual({ first: 200, second: 200 });
+    });
+
+    test('a contract and an inline pair mix in one chain', async () => {
+        // Given - a declared contract plus a one-off inline pair
         const result = await api
             .intercept(latestNews)
             .intercept(http.get(QUOTES_URL), http.json({ quote: 'inline' }))
@@ -35,39 +45,91 @@ describe('intercepts — FIFO queue', () => {
             quote: { quote: 'inline' },
         });
     });
+
+    test('a composite scenario overrides one route of the declared world', async () => {
+        // Given - a two-route composite, with the quotes route overridden
+        const world = defineContracts(latestNews, {
+            request: http.get(QUOTES_URL),
+            response: http.json({ quote: 'nominal' }),
+        });
+        const result = await api
+            .intercept(
+                world.with({ request: http.get(QUOTES_URL), response: http.json({ quote: 'x' }) }),
+            )
+            .get('/combo');
+
+        // Then - the override answered, the untouched route still did
+        expect(result.response.body).toEqual({
+            news: { headline: 'Contract headline' },
+            quote: { quote: 'x' },
+        });
+    });
+
+    test('a path-form url matches the call whatever its origin', async () => {
+        // Given - the route declared as a path, not an absolute URL
+        const result = await api
+            .intercept(http.get('/api/quote'), http.json({ quote: 'by path' }))
+            .get('/quote');
+
+        // Then - the origin was ignored and the contract served the call
+        expect(result.response.body).toEqual({ quote: 'by path' });
+    });
 });
 
-describe('intercepts — strict failures (CONVENTIONS D7)', () => {
-    test('an exhausted queue rejects the action with method, URL, and trigger list', async () => {
-        // Given - ONE intercept while the app calls the provider twice
+describe('contracts — strict failures (CONVENTIONS D7)', () => {
+    test('an exhausted contract rejects the action with method, URL, and the declared list', async () => {
+        // Given - a contract allowed exactly once while the app calls twice
         const chain = api
-            .intercept(http.get(QUOTES_URL), http.json({ quote: 'only one' }))
+            .intercept([
+                {
+                    request: http.get(QUOTES_URL),
+                    response: http.json({ quote: 'only one' }),
+                    times: 1,
+                },
+            ])
             .get('/quote-twice');
 
         // Then - the spec fails with the offending request and the queue state
         await expect(chain).rejects.toThrow(
             `Unmatched outgoing HTTP request during spec: GET ${QUOTES_URL}`,
         );
-        await expect(chain).rejects.toThrow(`- GET ${QUOTES_URL} (already consumed)`);
+        await expect(chain).rejects.toThrow(`- GET ${QUOTES_URL} (exhausted after 1)`);
     });
 
-    test('a request no intercept was declared for rejects the action', async () => {
-        // Given - an intercept for the quotes provider only, while the app
+    test('a request no contract was declared for rejects the action', async () => {
+        // Given - a contract for the quotes provider only, while the app
         // Calls an entirely different host
         const chain = api.intercept(http.get(QUOTES_URL), http.json({})).get('/other');
 
-        // Then - the error names the offending request and the registered triggers
+        // Then - the error names the offending request and the declared routes
         await expect(chain).rejects.toThrow(
             'Unmatched outgoing HTTP request during spec: GET https://unregistered.spec.test/thing',
         );
         await expect(chain).rejects.toThrow(`- GET ${QUOTES_URL}`);
     });
+
+    test('a required contract the app never calls rejects the action', async () => {
+        // Given - a contract the spec claims the route MUST call, on an
+        // Action that never reaches the network
+        const chain = api
+            .intercept({
+                request: http.get(QUOTES_URL),
+                response: http.json({ quote: 'never' }),
+                required: true,
+            })
+            .get('/health');
+
+        // Then - the silent omission is the failure, naming the route
+        await expect(chain).rejects.toThrow(
+            `- GET ${QUOTES_URL} — declared and required but never requested`,
+        );
+    });
 });
 
-describe('intercepts — http trigger filters', () => {
-    test('a body/header/query-filtered http trigger matches the outgoing POST', async () => {
-        // Given - a filtered trigger narrowing on a body subset, a header, and
-        // A query param — all of which the /submit route satisfies
+describe('contracts — http request filters', () => {
+    test('a body/header/query-filtered request matches the outgoing POST', async () => {
+        // Given - a filtered request half narrowing on a body subset, a header,
+        // And a query param — all of which the /submit route satisfies
         const result = await api
             .intercept(
                 http.post(QUOTES_URL, {
@@ -100,18 +162,18 @@ describe('intercepts — http trigger filters', () => {
     });
 });
 
-describe('intercepts — dynamic responses', () => {
+describe('contracts — dynamic responses', () => {
     test('a contract computes its response body from the request body', async () => {
-        // Given - a contract whose response is a function of the observed request:
+        // Given - a contract whose response derives from the observed request:
         // The /submit route POSTs { action, user: { role: 'admin' } }
         const result = await api
             .intercept(
                 defineContract({
+                    request: http.post(QUOTES_URL),
                     response: (request) => {
                         const body = request.body as { action: string; user: { role: string } };
                         return http.json({ echoedAction: body.action, forRole: body.user.role });
                     },
-                    trigger: http.post(QUOTES_URL),
                 }),
             )
             .get('/submit');
@@ -121,35 +183,35 @@ describe('intercepts — dynamic responses', () => {
         expect(result.response.body).toEqual({ echoedAction: 'quote', forRole: 'admin' });
     });
 
-    test('an inline .intercept(trigger, fn) responder derives status and body per request', async () => {
+    test('an inline .intercept(request, fn) responder derives status and body per request', async () => {
         // Given - an inline responder reading a header off the observed request
         const result = await api
             .intercept(http.post(QUOTES_URL), (request) => {
                 const tenant = request.headers['x-tenant'];
-                return http.json({ quote: `hello ${tenant}` }, 201);
+                return http.json({ quote: `hello ${tenant}` }, { status: 201 });
             })
             .get('/submit');
 
-        // Then - the function ran at consumption time, shaping status and body
+        // Then - the function ran at serve time, shaping status and body
         expect(result.status).toBe(201);
         expect(result.response.body).toEqual({ quote: 'hello acme' });
     });
 });
 
-describe('intercepts — chain isolation', () => {
-    test('an unconsumed intercept from one chain does not leak into the next', async () => {
-        // Given - a first chain declaring an intercept its action never consumes
+describe('contracts — chain isolation', () => {
+    test('an unused contract from one chain does not leak into the next', async () => {
+        // Given - a first chain declaring a contract its action never uses
         const first = await api
             .intercept(http.get(QUOTES_URL), http.json({ quote: 'FIRST' }))
             .get('/health');
         expect(first.status).toBe(200);
 
-        // When - a second chain declares its own intercept for the same trigger
+        // When - a second chain declares its own contract for the same route
         const second = await api
             .intercept(http.get(QUOTES_URL), http.json({ quote: 'SECOND' }))
             .get('/quote');
 
-        // Then - the second chain consumed ITS intercept, not the leftover
+        // Then - the second chain served ITS contract, not the leftover
         expect(second.status).toBe(200);
         expect(second.response.body).toEqual({ quote: 'SECOND' });
     });

@@ -5,27 +5,33 @@
 const http: object;
 ```
 
-Defined in: [core/contracts/http.ts:94](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L94)
+Defined in: [core/contracts/http.ts:116](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L116)
 
-Generic HTTP intercept helpers for any URL. An optional HttpInterceptFilter narrows matching by request body, headers, or query —
-a request that hits the URL/method but fails the filter counts as unmatched
-(strict intercepts, CONVENTIONS D7).
+Generic HTTP contract helpers for any URL. The url is absolute (string or
+RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')`
+matches that path on ANY origin, which is what an app calling its own
+backend needs. An optional [HttpContractFilter](../interfaces/HttpContractFilter.md) narrows matching by
+body, headers, or query — a request that hits the URL/method but fails the
+filter counts as unmatched (strict contracts, CONVENTIONS D7).
 
 ## Type Declaration
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `any()` | (`url`, `filter?`) => [`InterceptTrigger`](../interfaces/InterceptTrigger.md) | - | [core/contracts/http.ts:117](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L117) |
-| `delete()` | (`url`, `filter?`) => [`InterceptTrigger`](../interfaces/InterceptTrigger.md) | - | [core/contracts/http.ts:107](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L107) |
-| `error()` | (`status`, `message?`) => [`InterceptResponse`](../interfaces/InterceptResponse.md) | Response: error with message. | [core/contracts/http.ts:127](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L127) |
-| `get()` | (`url`, `filter?`) => [`InterceptTrigger`](../interfaces/InterceptTrigger.md) | - | [core/contracts/http.ts:95](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L95) |
-| `json()` | (`data`, `status?`) => [`InterceptResponse`](../interfaces/InterceptResponse.md) | Response: simple JSON success. | [core/contracts/http.ts:122](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L122) |
-| `post()` | (`url`, `filter?`) => [`InterceptTrigger`](../interfaces/InterceptTrigger.md) | - | [core/contracts/http.ts:99](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L99) |
-| `put()` | (`url`, `filter?`) => [`InterceptTrigger`](../interfaces/InterceptTrigger.md) | - | [core/contracts/http.ts:103](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L103) |
+| `any()` | (`url`, `filter?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | [core/contracts/http.ts:117](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L117) |
+| `delete()` | (`url`, `filter?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | [core/contracts/http.ts:121](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L121) |
+| `empty()` | (`status?`) => [`ContractResponse`](../interfaces/ContractResponse.md) | Response: a body-less reply (204 by default). | [core/contracts/http.ts:142](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L142) |
+| `error()` | (`status`, `body?`) => [`ContractResponse`](../interfaces/ContractResponse.md) | Response: an error status. Without a body, `{ error: 'HTTP <status>' }`. | [core/contracts/http.ts:147](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L147) |
+| `get()` | (`url`, `filter?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | [core/contracts/http.ts:125](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L125) |
+| `json()` | (`body`, `init?`) => [`ContractResponse`](../interfaces/ContractResponse.md) | Response: a JSON body (200 by default). | [core/contracts/http.ts:152](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L152) |
+| `patch()` | (`url`, `filter?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | [core/contracts/http.ts:129](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L129) |
+| `post()` | (`url`, `filter?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | [core/contracts/http.ts:133](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L133) |
+| `put()` | (`url`, `filter?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | [core/contracts/http.ts:137](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L137) |
+| `text()` | (`body`, `init?`) => [`ContractResponse`](../interfaces/ContractResponse.md) | Response: a text body, served as `text/plain` (200 by default). | [core/contracts/http.ts:162](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L162) |
 
 ## Example
 
 ```ts
-.intercept(http.get('https://api.example.com/data'), 'http/response.json')
-  .intercept(http.post(URL, { body: { user: 'alice' } }), http.json({ ok: true }))
+defineContract({ request: http.get('/articles/{{uuid}}'), response: http.json(article) })
+  defineContract({ request: http.post(URL, { body: { user: 'alice' } }), response: http.empty() })
 ```

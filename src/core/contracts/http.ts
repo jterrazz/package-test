@@ -1,16 +1,18 @@
 import { CaptureScope } from '../matching/match.js';
 import { structuralSubset } from '../matching/structural.js';
-import type { InterceptResponse, InterceptTrigger, MatchableRequest } from './types.js';
+import type { ContractRequest, ContractResponse, MatchableRequest } from './types.js';
 
-function wrapJson(data: unknown): InterceptResponse {
+function wrapJson(data: unknown): ContractResponse {
     return { status: 200, body: data };
 }
+
+const TEXT_CONTENT_TYPE = 'text/plain; charset=utf-8';
 
 /**
  * Request filters for the generic HTTP provider. Every field is a subset
  * constraint — a request matches when all provided fields match.
  */
-export interface HttpInterceptFilter {
+export interface HttpContractFilter {
     /**
      * Body constraint. An object is a deep SUBSET match (toMatchObject-style)
      * whose leaf values may be `match.*` matchers; a string is a containment
@@ -23,7 +25,17 @@ export interface HttpInterceptFilter {
     query?: Record<string, RegExp | string>;
 }
 
-function matchesBody(body: unknown, expected: NonNullable<HttpInterceptFilter['body']>): boolean {
+/** Init options shared by the response builders. */
+export interface HttpResponseInit {
+    /** Delay in ms before responding (for timeout testing). */
+    delay?: number;
+    /** Response headers, merged over the builder's own. */
+    headers?: Record<string, string>;
+    /** HTTP status code. */
+    status?: number;
+}
+
+function matchesBody(body: unknown, expected: NonNullable<HttpContractFilter['body']>): boolean {
     if (typeof expected === 'string') {
         const text = typeof body === 'string' ? body : JSON.stringify(body ?? '');
         return text.includes(expected);
@@ -49,10 +61,10 @@ function matchesEntries(
 }
 
 /**
- * Build the `match` predicate for an HTTP trigger filter, or `undefined` when
+ * Build the `match` predicate for an HTTP request filter, or `undefined` when
  * no filter is supplied (fires on any URL/method match).
  */
-function buildMatch(filter?: HttpInterceptFilter): InterceptTrigger['match'] {
+function buildMatch(filter?: HttpContractFilter): ContractRequest['match'] {
     if (!filter) {
         return undefined;
     }
@@ -69,7 +81,7 @@ function buildMatch(filter?: HttpInterceptFilter): InterceptTrigger['match'] {
         if (filter.query) {
             let params: URLSearchParams;
             try {
-                params = new URL(request.url).searchParams;
+                params = new URL(request.url, 'http://contract.invalid').searchParams;
             } catch {
                 return false;
             }
@@ -81,50 +93,78 @@ function buildMatch(filter?: HttpInterceptFilter): InterceptTrigger['match'] {
     };
 }
 
+function declare(
+    method: string,
+    url: RegExp | string,
+    filter?: HttpContractFilter,
+): ContractRequest {
+    return { adapter: 'http', match: buildMatch(filter), method, url, wrap: wrapJson };
+}
+
 /**
- * Generic HTTP intercept helpers for any URL. An optional {@link
- * HttpInterceptFilter} narrows matching by request body, headers, or query —
- * a request that hits the URL/method but fails the filter counts as unmatched
- * (strict intercepts, CONVENTIONS D7).
+ * Generic HTTP contract helpers for any URL. The url is absolute (string or
+ * RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')`
+ * matches that path on ANY origin, which is what an app calling its own
+ * backend needs. An optional {@link HttpContractFilter} narrows matching by
+ * body, headers, or query — a request that hits the URL/method but fails the
+ * filter counts as unmatched (strict contracts, CONVENTIONS D7).
  *
  * @example
- *   .intercept(http.get('https://api.example.com/data'), 'http/response.json')
- *   .intercept(http.post(URL, { body: { user: 'alice' } }), http.json({ ok: true }))
+ *   defineContract({ request: http.get('/articles/{{uuid}}'), response: http.json(article) })
+ *   defineContract({ request: http.post(URL, { body: { user: 'alice' } }), response: http.empty() })
  */
 export const http = {
-    get(url: RegExp | string, filter?: HttpInterceptFilter): InterceptTrigger {
-        return { adapter: 'http', match: buildMatch(filter), method: 'GET', url, wrap: wrapJson };
+    any(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+        return declare('*', url, filter);
     },
 
-    post(url: RegExp | string, filter?: HttpInterceptFilter): InterceptTrigger {
-        return { adapter: 'http', match: buildMatch(filter), method: 'POST', url, wrap: wrapJson };
+    delete(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+        return declare('DELETE', url, filter);
     },
 
-    put(url: RegExp | string, filter?: HttpInterceptFilter): InterceptTrigger {
-        return { adapter: 'http', match: buildMatch(filter), method: 'PUT', url, wrap: wrapJson };
+    get(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+        return declare('GET', url, filter);
     },
 
-    delete(url: RegExp | string, filter?: HttpInterceptFilter): InterceptTrigger {
+    patch(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+        return declare('PATCH', url, filter);
+    },
+
+    post(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+        return declare('POST', url, filter);
+    },
+
+    put(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+        return declare('PUT', url, filter);
+    },
+
+    /** Response: a body-less reply (204 by default). */
+    empty(status = 204): ContractResponse {
+        return { status, body: null };
+    },
+
+    /** Response: an error status. Without a body, `{ error: 'HTTP <status>' }`. */
+    error(status: number, body?: unknown): ContractResponse {
+        return { status, body: body === undefined ? { error: `HTTP ${status}` } : body };
+    },
+
+    /** Response: a JSON body (200 by default). */
+    json(body: unknown, init?: HttpResponseInit): ContractResponse {
         return {
-            adapter: 'http',
-            match: buildMatch(filter),
-            method: 'DELETE',
-            url,
-            wrap: wrapJson,
+            status: init?.status ?? 200,
+            body,
+            delay: init?.delay,
+            headers: init?.headers,
         };
     },
 
-    any(url: RegExp | string, filter?: HttpInterceptFilter): InterceptTrigger {
-        return { adapter: 'http', match: buildMatch(filter), method: '*', url, wrap: wrapJson };
-    },
-
-    /** Response: simple JSON success. */
-    json(data: unknown, status = 200): InterceptResponse {
-        return { status, body: data };
-    },
-
-    /** Response: error with message. */
-    error(status: number, message?: string): InterceptResponse {
-        return { status, body: { error: message ?? `HTTP ${status}` } };
+    /** Response: a text body, served as `text/plain` (200 by default). */
+    text(body: string, init?: HttpResponseInit): ContractResponse {
+        return {
+            status: init?.status ?? 200,
+            body,
+            delay: init?.delay,
+            headers: { 'content-type': TEXT_CONTENT_TYPE, ...init?.headers },
+        };
     },
 };

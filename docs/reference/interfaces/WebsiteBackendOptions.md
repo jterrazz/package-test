@@ -5,8 +5,8 @@ Defined in: [core/specification/website/start-website.ts:21](https://github.com/
 
 The declared stub backend behind the site under test — started before the
 server command, torn down with the runner. Its URL is injected into the
-server child's environment under `env`; the chain's
-`.intercept('<name>.http')` exchanges are what it serves.
+server child's environment under `env`; the contracts each chain declares
+via `.intercept(...)` are what it serves.
 
 ## Properties
 

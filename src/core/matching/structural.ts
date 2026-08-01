@@ -175,6 +175,9 @@ function kindMatches(kind: MatcherKind, actual: unknown, scope: CaptureScope): b
 }
 
 function matcherMatches(matcher: Matcher, actual: unknown, scope: CaptureScope): boolean {
+    if (matcher.kind === 'includes') {
+        return typeof actual === 'string' && actual.includes(matcher.includes!);
+    }
     if (matcher.kind === 'regex') {
         return typeof actual === 'string' && matcher.regex!.test(actual);
     }

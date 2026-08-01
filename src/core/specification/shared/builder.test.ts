@@ -1,11 +1,7 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { type Contract, defineContracts } from '../../contracts/contract.js';
 import { http } from '../../contracts/http.js';
-import type { InterceptEntry, InterceptTrigger } from '../../contracts/types.js';
-import type { InterceptExchange } from '../../http-files/intercept-file.js';
 import type { CliEnv, CliOutput, CliPort } from '../../ports/cli.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
@@ -62,13 +58,6 @@ function fakeService(options: {
         type: options.type,
     };
 }
-
-const openaiTrigger: InterceptTrigger = {
-    adapter: 'openai',
-    method: 'POST',
-    url: 'https://api.openai.com/v1/responses',
-    wrap: (data) => ({ body: data }),
-};
 
 describe('builder — exec argument validation', () => {
     test('exec([]) is rejected with a clear error', () => {
@@ -157,23 +146,53 @@ describe('builder — service env injection (CONVENTIONS B6)', () => {
     });
 });
 
-describe('builder — intercept array form (FIFO)', () => {
-    test('registers an array of contracts in order — same-trigger entries queue FIFO', () => {
-        // Given - two contracts sharing one trigger, distinguishable by response body
+/** The contracts a chain accumulated, tagged by their response body number. */
+function declaredNumbers(builder: SpecificationBuilder): number[] {
+    const internals = builder as unknown as {
+        contracts: { response: { body: { n: number } } }[];
+    };
+    return internals.contracts.map((contract) => contract.response.body.n);
+}
+
+describe('builder — intercept input forms', () => {
+    test('a list of contracts registers in declaration order', () => {
+        // Given - two contracts on one route, distinguishable by response body
         const builder = new SpecificationBuilder({}, import.meta.dirname);
-        const trigger = http.get('https://x.test/');
-        const first = { response: http.json({ n: 1 }), trigger };
-        const second = { response: http.json({ n: 2 }), trigger };
+        const request = http.get('https://x.test/');
+        const first: Contract = { request, response: http.json({ n: 1 }) };
+        const second: Contract = { request, response: http.json({ n: 2 }) };
 
         // When - registered as a single array call
         builder.intercept([first, second]);
 
-        // Then - the queue holds both, in array order (identical to two calls)
-        const queue = (
-            builder as unknown as { intercepts: { response: { body: { n: number } } }[] }
-        ).intercepts;
-        expect(queue).toHaveLength(2);
-        expect(queue.map((entry) => entry.response.body.n)).toEqual([1, 2]);
+        // Then - both are queued, in array order (identical to two calls)
+        expect(declaredNumbers(builder)).toEqual([1, 2]);
+    });
+
+    test('a composite is flattened, and .with() lands its override first', () => {
+        // Given - a composite and a scenario derived from it
+        const builder = new SpecificationBuilder({}, import.meta.dirname);
+        const request = http.get('https://x.test/');
+        const base = defineContracts(
+            { request, response: http.json({ n: 1 }) },
+            { request: http.get('https://y.test/'), response: http.json({ n: 2 }) },
+        );
+
+        // When - the chain declares the scenario
+        builder.intercept(base.with({ request, response: http.json({ n: 9 }) }));
+
+        // Then - the override replaced its route and leads the queue
+        expect(declaredNumbers(builder)).toEqual([9, 2]);
+    });
+
+    test('a bare request half without its response is refused', () => {
+        // Given - a chain handed only the request half
+        const builder = new SpecificationBuilder({}, import.meta.dirname);
+
+        // Then - the error names both accepted forms
+        expect(() => builder.intercept(http.get('https://x.test/') as never)).toThrow(
+            '.intercept(): a bare request needs its response',
+        );
     });
 });
 
@@ -202,66 +221,37 @@ describe('builder — intercepts in compose mode (CONVENTIONS I3)', () => {
     });
 });
 
-// ── .http intercept files ──
+// ── Stub-backend facets ──
 
-/** A temp test dir carrying one intercepts/<name>.http fixture. */
-function dirWithInterceptFile(content: string, name = 'stub.http'): string {
-    const dir = mkdtempSync(join(tmpdir(), 'builder-intercepts-'));
-    mkdirSync(join(dir, 'intercepts'));
-    writeFileSync(join(dir, 'intercepts', name), content);
-    return dir;
-}
-
-const STUB_FILE =
-    'GET /events\n\nHTTP/1.1 200 OK\n\n{ "items": [] }\n\n###\n\nGET /articles\n\nHTTP/1.1 200 OK\n\n{ "items": [] }\n';
-
-describe('builder — .http intercept files', () => {
-    test('routes a website chain to the declared stub backend, not msw', () => {
+describe('builder — contracts on the stub facets', () => {
+    test('a website chain queues its contracts for the declared stub backend', () => {
         // Given - a website-shaped config carrying a stub backend
         const builder = new SpecificationBuilder(
             { backend: new StubBackend(), baseUrl: 'http://127.0.0.1:9' },
-            dirWithInterceptFile(STUB_FILE),
+            import.meta.dirname,
         );
 
-        // When - the chain declares a .http intercept file
-        builder.intercept('stub.http');
+        // When - the chain declares two contracts
+        builder.intercept([
+            { request: http.get('/events'), response: http.json({ n: 1 }) },
+            { request: http.get('/articles'), response: http.json({ n: 2 }) },
+        ]);
 
-        // Then - the exchanges queue for the stub; the msw list stays empty
-        const internals = builder as unknown as {
-            backendExchanges: InterceptExchange[];
-            intercepts: InterceptEntry[];
-        };
-        expect(internals.backendExchanges).toHaveLength(2);
-        expect(internals.backendExchanges[0].request.path).toBe('/events');
-        expect(internals.intercepts).toHaveLength(0);
-    });
-
-    test('routes an api chain to msw as generic-http entries', () => {
-        // Given - an api-shaped config (no baseUrl, no device)
-        const builder = new SpecificationBuilder({}, dirWithInterceptFile(STUB_FILE));
-
-        // When
-        builder.intercept('stub.http');
-
-        // Then - the exchanges become FIFO msw entries (CONVENTIONS D7 applies)
-        const internals = builder as unknown as {
-            backendExchanges: InterceptExchange[];
-            intercepts: InterceptEntry[];
-        };
-        expect(internals.intercepts).toHaveLength(2);
-        expect(internals.intercepts[0].trigger.adapter).toBe('http');
-        expect(internals.backendExchanges).toHaveLength(0);
+        // Then - both are held for the stub, in declaration order
+        expect(declaredNumbers(builder)).toEqual([1, 2]);
     });
 
     test('a website chain without a backend option names the fix', () => {
         // Given - a website-shaped config with no stub backend declared
         const builder = new SpecificationBuilder(
             { baseUrl: 'http://127.0.0.1:9' },
-            dirWithInterceptFile(STUB_FILE),
+            import.meta.dirname,
         );
 
         // Then - the error points at the specification options
-        expect(() => builder.intercept('stub.http')).toThrow(
+        expect(() =>
+            builder.intercept({ request: http.get('/events'), response: http.empty() }),
+        ).toThrow(
             '.intercept(): this runner has no declared backend — add `backend` to the specification options (specification.website({ …, backend: { … } }))',
         );
     });
@@ -270,21 +260,13 @@ describe('builder — .http intercept files', () => {
         // Given - a mobile-shaped config (a device accessor, no backend)
         const builder = new SpecificationBuilder(
             { device: () => Promise.reject(new Error('unused')) },
-            dirWithInterceptFile(STUB_FILE),
+            import.meta.dirname,
         );
 
         // Then - the fix names specification.mobile
-        expect(() => builder.intercept('stub.http')).toThrow('specification.mobile({ …, backend');
-    });
-
-    test('a single string argument must end in .http', () => {
-        // Given - a plain builder
-        const builder = new SpecificationBuilder({}, import.meta.dirname);
-
-        // Then - the legacy adapter/file.json form stays a two-argument affair
-        expect(() => builder.intercept('openai/ingest.json')).toThrow(
-            ".intercept(): a single string argument must name an intercepts/*.http file (e.g. 'two-events.http'), got 'openai/ingest.json'",
-        );
+        expect(() =>
+            builder.intercept({ request: http.get('/events'), response: http.empty() }),
+        ).toThrow('specification.mobile({ …, backend');
     });
 });
 
@@ -411,29 +393,5 @@ describe('builder — service env injection', () => {
         // Also gets the unambiguous DATABASE_URL alias
         expect(command.lastEnv?.DB_MAIN_URL).toBe('file:main.sqlite');
         expect(command.lastEnv?.DATABASE_URL).toBe('file:main.sqlite');
-    });
-});
-
-// ── Intercept fixture-path validation ──
-
-describe('builder — intercept fixture paths', () => {
-    test('requires the adapter/filename.json form', () => {
-        // Given - a fixture path with no slash
-        const api = createApiFacet({});
-
-        // Then - the error shows the expected form
-        expect(() => api.intercept(openaiTrigger, 'ingest.json')).toThrow(
-            ".intercept(): file path must be 'adapter/filename.json' (e.g. 'openai/ingest-tech.json'), got 'ingest.json'",
-        );
-    });
-
-    test('rejects a prefix that does not match the trigger adapter', () => {
-        // Given - an openai trigger with an anthropic/ fixture path
-        const api = createApiFacet({});
-
-        // Then - the adapter mismatch is called out
-        expect(() => api.intercept(openaiTrigger, 'anthropic/ingest.json')).toThrow(
-            ".intercept(): adapter mismatch - trigger uses 'openai' but file path starts with 'anthropic/'",
-        );
     });
 });

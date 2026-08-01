@@ -15,8 +15,8 @@ import { ServeAdapter, type ServeOptions } from './serve.adapter.js';
 /**
  * The declared stub backend behind the site under test — started before the
  * server command, torn down with the runner. Its URL is injected into the
- * server child's environment under `env`; the chain's
- * `.intercept('<name>.http')` exchanges are what it serves.
+ * server child's environment under `env`; the contracts each chain declares
+ * via `.intercept(...)` are what it serves.
  */
 export interface WebsiteBackendOptions {
     /** Env var receiving the stub's URL in the server child (e.g. `'API_URL'`). */
@@ -50,7 +50,7 @@ export type WebsiteSpecificationOptions = {
           /**
            * Declared stub backend: started BEFORE the server command, its
            * URL injected into the child env under `backend.env`. Serves the
-           * exchanges each chain declares via `.intercept('<name>.http')`.
+           * contracts each chain declares via `.intercept(...)`.
            */
           backend?: WebsiteBackendOptions;
           /**

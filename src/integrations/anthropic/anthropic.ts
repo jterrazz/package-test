@@ -1,4 +1,4 @@
-import type { InterceptResponse, InterceptTrigger } from '../../core/contracts/types.js';
+import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -21,7 +21,7 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
     }
     if (filter.system) {
         const system = typeof body?.system === 'string' ? body.system : '';
-        if (typeof filter.system === 'string' && !system.includes(filter.system)) {
+        if (typeof filter.system === 'string' && system !== filter.system) {
             return false;
         }
         if (filter.system instanceof RegExp && !filter.system.test(system)) {
@@ -31,7 +31,7 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
     if (filter.user) {
         const userMsg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
         const text = typeof userMsg === 'string' ? userMsg : JSON.stringify(userMsg);
-        if (typeof filter.user === 'string' && !text.includes(filter.user)) {
+        if (typeof filter.user === 'string' && text !== filter.user) {
             return false;
         }
         if (filter.user instanceof RegExp && !filter.user.test(text)) {
@@ -47,7 +47,7 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
     return true;
 }
 
-function buildReply(data: unknown): InterceptResponse {
+function buildReply(data: unknown): ContractResponse {
     const content = typeof data === 'string' ? data : JSON.stringify(data);
     return {
         status: 200,
@@ -68,7 +68,7 @@ function buildReply(data: unknown): InterceptResponse {
  */
 export const anthropic = {
     /**
-     * Trigger: match Messages API requests, optionally routed through a
+     * Request: match Messages API calls, optionally routed through a
      * custom gateway URL. When used with a JSON fixture file, the data is
      * returned as-is (no wrapping) because Anthropic fixtures are typically
      * already in the Messages API response shape.
@@ -76,9 +76,10 @@ export const anthropic = {
      * @example
      *   anthropic.messages()
      *   anthropic.messages({ system: /classify/ })
+     *   anthropic.messages({ user: buildPrompt() })   // string = EXACT equality
      *   anthropic.messages({ user: /classify/ }, GATEWAY)
      */
-    messages(filter?: AnthropicMessagesFilter, url?: string): InterceptTrigger {
+    messages(filter?: AnthropicMessagesFilter, url?: string): ContractRequest {
         return {
             adapter: 'anthropic',
             method: 'POST',
@@ -86,7 +87,7 @@ export const anthropic = {
             match: filter ? ({ body }) => matchesFilter(body, filter) : undefined,
             // Fixture files are already in the messages.create response shape;
             // Pass them through verbatim. Falls back to wrapping for strings.
-            wrap(data: unknown): InterceptResponse {
+            wrap(data: unknown): ContractResponse {
                 if (data && typeof data === 'object' && !Array.isArray(data)) {
                     return { status: 200, body: data as Record<string, unknown> };
                 }
@@ -99,7 +100,7 @@ export const anthropic = {
     reply: buildReply,
 
     /** Response: return an Anthropic error. */
-    error(status: number, message?: string): InterceptResponse {
+    error(status: number, message?: string): ContractResponse {
         return {
             status,
             body: {
@@ -113,7 +114,7 @@ export const anthropic = {
     },
 
     /** Response: simulate a timeout. */
-    timeout(): InterceptResponse {
+    timeout(): ContractResponse {
         return { status: 200, body: {}, delay: 30_000 };
     },
 };

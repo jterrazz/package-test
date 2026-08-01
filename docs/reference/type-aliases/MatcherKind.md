@@ -10,6 +10,7 @@ type MatcherKind =
   | "email"
   | "float"
   | "hex"
+  | "includes"
   | "int"
   | "ip"
   | "iso8601"
