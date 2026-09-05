@@ -44,7 +44,15 @@
         "jterrazz/f3-specs-public-entry": "error",
         "jterrazz/f4-no-test-to-test-import": "error",
         "jterrazz/f5-fixtures-only-from-tests": "error",
-        "jterrazz/i1-layer-boundaries": "error",
+        "jterrazz/i1-layer-boundaries": [
+            "error",
+            {
+                "layers": {
+                    "core": { "imports": ["core/"] },
+                    "integrations": { "folders": { "postgres": ["pg"] }, "imports": ["core/"] }
+                }
+            }
+        ],
         "jterrazz/i2-sibling-test-naming": "error",
         "jterrazz/i4-no-vi-mock-in-src": "error",
         "jterrazz/j1-no-only-skip": "error",

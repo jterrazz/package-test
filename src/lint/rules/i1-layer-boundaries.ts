@@ -4,36 +4,29 @@ import { importSourceVisitor, segments } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
-/**
- * One folder = one external dependency (I1 — see docs/10-linting.md): the packages each
- * `src/integrations/<folder>/` may import.
- */
-const INTEGRATION_DEPS: Record<string, string[]> = {
-    anthropic: ['@anthropic-ai/sdk'],
-    appium: ['webdriverio'],
-    compose: ['yaml'],
-    docker: [],
-    hono: ['hono', '@hono/node-server'],
-    msw: ['msw'],
-    openai: ['openai'],
-    playwright: ['playwright'],
-    postgres: ['pg'],
-    redis: ['redis'],
-    sqlite: ['better-sqlite3'],
-    testcontainers: ['testcontainers'],
+/** What one layer under `src/` may import. */
+export type LayerOptions = {
+    /**
+     * One folder = one external dependency: each key is a direct child folder of
+     * the layer, its value the packages THAT folder may import. A folder may
+     * always import from itself, and from `imports`.
+     */
+    folders?: Record<string, string[]>;
+    /**
+     * Paths inside `src/` this layer may import — a prefix when it ends with
+     * `/` (`core/`), an exact module path otherwise (`vitest/matchers`).
+     */
+    imports?: string[];
+    /** External packages this layer may import (whole name, or `<name>/…`). */
+    packages?: string[];
+    /**
+     * Per-module escape hatches: a module path inside `src/` → the extra
+     * `imports` that one file may make. For the lazy seam a layer opens once.
+     */
+    seams?: Record<string, string[]>;
 };
 
-/** External packages the vitest layer (ALL runner coupling) may import. */
-const VITEST_DEPS = ['vitest', 'vitest-mock-extended', 'mockdate'];
-
-/** The pure core helpers the tool-facing lint layer may reach (I1). */
-const LINT_CORE_WHITELIST = new Set([
-    'core/matching/match',
-    'core/specification/shared/binding',
-    'core/specification/shared/fixtures',
-    // A9's rule must derive the root with the framework's own walk, not a copy.
-    'core/specification/shared/resolve',
-]);
+type Options = { layers?: Record<string, LayerOptions> };
 
 const TEST_OR_FIXTURES = /\.(?:test|fixtures)\.[cm]?[jt]sx?$/;
 
@@ -48,108 +41,77 @@ function pathInsideSrc(path: string): string | undefined {
     return srcIndex === -1 ? undefined : parts.slice(srcIndex + 1).join('/');
 }
 
-/** Strip a `.js`/`.ts`-style extension for whitelist comparison. */
+/** Strip a `.js`/`.ts`-style extension for exact-path comparison. */
 function withoutExtension(path: string): string {
     return path.replace(/\.[cm]?[jt]sx?$/, '');
 }
 
+/** Does `target` match one of the declared paths (prefix, or exact module)? */
+function matchesPath(target: string, patterns: string[]): boolean {
+    return patterns.some((pattern) =>
+        pattern.endsWith('/')
+            ? target.startsWith(pattern)
+            : withoutExtension(target) === withoutExtension(pattern),
+    );
+}
+
 /**
- * CONVENTIONS I1 — the four layers under `src/` and their sanctioned edges:
+ * CONVENTIONS I1 — the layers under `src/` and their sanctioned edges, DECLARED
+ * by the project:
  *
- * - `core/` — zero external imports; may reach `integrations/docker`,
- *   `integrations/hono`, `vitest/matchers`, and (from `builder.ts` only, the
- *   lazy MSW seam) `integrations/msw`.
- * - `integrations/<dep>/` — its own external dependency and `core/` only.
- * - `vitest/` — the runner coupling: `vitest`, `vitest-mock-extended`,
- *   `mockdate`, plus `core/` and `integrations/docker` (the matchers recognise
- *   the zero-dependency ContainerAccessor subject).
- * - `lint/` — zero runtime imports: no external packages, and from `core/`
- *   only the pure helpers (token list, case conversions, fixture markers, the
- *   root walk a rule must share with the runner).
+ *     'jterrazz/i1-layer-boundaries': ['error', {
+ *         layers: {
+ *             core: { imports: ['core/', 'integrations/docker/'] },
+ *             integrations: { folders: { postgres: ['pg'] }, imports: ['core/'] },
+ *         },
+ *     }]
  *
- * Module tests and fixtures files are exempt (their imports are governed by
- * F2/I4); `src/index.ts` is the composition root and lives above the layers.
+ * With no layer map the rule is INERT. It used to ship the framework's own
+ * architecture as its law — four layers named `core` / `integrations` / `lint`
+ * / `vitest`, and the framework's own dependency table — and applied it to every
+ * consumer that enabled the catalogue. A consumer with those directory names
+ * was judged against a map describing a different package; a consumer with any
+ * other architecture got a rule that could never say anything true. An
+ * architecture is the project's to state.
+ *
+ * Per layer: `packages` are the external dependencies it may import, `imports`
+ * the paths inside `src/` it may reach (a `foo/` prefix, or an exact module
+ * path), `folders` expresses "one folder = one external dependency" (each child
+ * folder may import its own packages and its own files), and `seams` opens a
+ * named module to an extra edge — the lazy import a layer allows exactly once.
+ *
+ * A file under a layer the map does not name is out of scope, as are module
+ * tests and `*.fixtures.ts` files (F2/I4 govern those), and any file outside
+ * `src/`.
  */
 export const i1LayerBoundaries: LintRule = {
-    create(context: RuleContext) {
+    create(context: RuleContext): Visitor {
+        const layers = (context.options[0] as Options | undefined)?.layers;
+        if (layers === undefined || Object.keys(layers).length === 0) {
+            return {};
+        }
         const file = context.physicalFilename;
         if (TEST_OR_FIXTURES.test(file)) {
             return {};
         }
         const inside = pathInsideSrc(file);
         const layer = inside?.split('/')[0];
-        if (
-            inside === undefined ||
-            layer === undefined ||
-            !['core', 'integrations', 'lint', 'vitest'].includes(layer)
-        ) {
+        const rules = layer === undefined ? undefined : layers[layer];
+        if (inside === undefined || layer === undefined || rules === undefined) {
             return {};
         }
-        const integrationFolder = layer === 'integrations' ? inside.split('/')[1] : undefined;
+        const folder = rules.folders === undefined ? undefined : inside.split('/')[1];
+        const ownPackages = [...(rules.packages ?? []), ...(rules.folders?.[folder ?? ''] ?? [])];
+        const ownImports = [...(rules.imports ?? []), ...(rules.seams?.[inside] ?? [])];
 
-        const checkExternal = (source: string): null | string => {
-            if (layer === 'core') {
-                return 'coreExternal';
-            }
-            if (layer === 'lint') {
-                return 'lintRuntime';
-            }
-            if (layer === 'vitest') {
-                return matchesPackage(source, VITEST_DEPS) ? null : 'foreignDependency';
-            }
-            const own = INTEGRATION_DEPS[integrationFolder ?? ''] ?? [];
-            return matchesPackage(source, own) ? null : 'foreignDependency';
-        };
+        const allowsExternal = (source: string): boolean => matchesPackage(source, ownPackages);
 
-        const checkInternal = (target: string): null | string => {
-            if (layer === 'core') {
-                if (
-                    target.startsWith('core/') ||
-                    target.startsWith('integrations/docker/') ||
-                    target.startsWith('integrations/hono/') ||
-                    withoutExtension(target) === 'vitest/matchers'
-                ) {
-                    return null;
-                }
-                if (
-                    target.startsWith('integrations/msw/') &&
-                    inside === 'core/specification/shared/builder.ts'
-                ) {
-                    return null; // Sanctioned lazy seam: builder → integrations/msw.
-                }
-                if (
-                    target.startsWith('integrations/playwright/') &&
-                    inside === 'core/specification/website/start-website.ts'
-                ) {
-                    return null; // Sanctioned lazy seam: website runner → integrations/playwright.
-                }
-                if (
-                    target.startsWith('integrations/appium/') &&
-                    inside === 'core/specification/mobile/start-mobile.ts'
-                ) {
-                    return null; // Sanctioned lazy seam: mobile runner → integrations/appium.
-                }
-                return 'crossLayer';
+        const allowsInternal = (target: string): boolean => {
+            if (matchesPath(target, ownImports)) {
+                return true;
             }
-            if (layer === 'integrations') {
-                return target.startsWith('core/') ||
-                    target.startsWith(`integrations/${integrationFolder}/`)
-                    ? null
-                    : 'crossLayer';
-            }
-            if (layer === 'vitest') {
-                // Integrations/docker is sanctioned (zero-dependency, structural
-                // Coupling): the matchers recognise the ContainerAccessor subject.
-                return target.startsWith('core/') ||
-                    target.startsWith('vitest/') ||
-                    target.startsWith('integrations/docker/')
-                    ? null
-                    : 'crossLayer';
-            }
-            // Lint layer: itself + the pure core helpers only.
-            return target.startsWith('lint/') || LINT_CORE_WHITELIST.has(withoutExtension(target))
-                ? null
-                : 'lintRuntime';
+            // A folder always owns its own files (`integrations/redis/*`).
+            return folder !== undefined && target.startsWith(`${layer}/${folder}/`);
         };
 
         const visitor: Visitor = {
@@ -160,9 +122,10 @@ export const i1LayerBoundaries: LintRule = {
                 let messageId: null | string;
                 if (source.startsWith('.')) {
                     const target = pathInsideSrc(resolve(dirname(file), source));
-                    messageId = target === undefined ? 'crossLayer' : checkInternal(target);
+                    messageId =
+                        target === undefined || !allowsInternal(target) ? 'crossLayer' : null;
                 } else {
-                    messageId = checkExternal(source);
+                    messageId = allowsExternal(source) ? null : 'foreignDependency';
                 }
                 if (messageId !== null) {
                     context.report({ data: { layer, source }, messageId, node });
@@ -172,17 +135,47 @@ export const i1LayerBoundaries: LintRule = {
         return visitor;
     },
     meta: {
+        defaultOptions: [{ layers: {} }],
         docs: RULE_DOCS['i1-layer-boundaries'],
         messages: {
-            coreExternal:
-                'core/ imports nothing external — "{{source}}" is not allowed (I1 — see docs/10-linting.md).',
             crossLayer:
-                'Layer "{{layer}}" must not import "{{source}}" — outside the sanctioned layer edges (I1 — see docs/10-linting.md).',
+                'Layer "{{layer}}" must not import "{{source}}" — outside the edges its layer map declares (I1 — see docs/10-linting.md).',
             foreignDependency:
-                '"{{source}}" is not this folder\'s own dependency — one integrations folder = one external dependency (I1 — see docs/10-linting.md).',
-            lintRuntime:
-                'The lint layer imports nothing from the framework runtime — "{{source}}" is outside its pure-helper whitelist (I1 — see docs/10-linting.md).',
+                '"{{source}}" is not a dependency layer "{{layer}}" declares — one layer states the packages it may import (I1 — see docs/10-linting.md).',
         },
+        schema: [
+            {
+                additionalProperties: false,
+                properties: {
+                    layers: {
+                        additionalProperties: {
+                            additionalProperties: false,
+                            properties: {
+                                folders: {
+                                    additionalProperties: {
+                                        items: { type: 'string' },
+                                        type: 'array',
+                                    },
+                                    type: 'object',
+                                },
+                                imports: { items: { type: 'string' }, type: 'array' },
+                                packages: { items: { type: 'string' }, type: 'array' },
+                                seams: {
+                                    additionalProperties: {
+                                        items: { type: 'string' },
+                                        type: 'array',
+                                    },
+                                    type: 'object',
+                                },
+                            },
+                            type: 'object',
+                        },
+                        type: 'object',
+                    },
+                },
+                type: 'object',
+            },
+        ],
         type: 'problem',
     },
 };
