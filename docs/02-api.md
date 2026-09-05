@@ -42,7 +42,7 @@ afterAll(cleanup);
 
 ### Root resolution (rule A9)
 
-Without `root`, the framework walks **up from the specification file** to the first directory containing `docker/compose.test.yaml`, falling back to the first directory containing `package.json`. Passing a `root` that points at the directory the walk would have found anyway is redundant (future lint warning).
+Without `root`, the framework walks **up from the specification file** to the **nearest** directory carrying `package.json` or `docker/compose.test.yaml` — the package being tested, not the repository around it. Passing a `root` that points at the directory the walk would have found anyway is redundant (future lint warning).
 
 ## Node vs compose — deep dive
 

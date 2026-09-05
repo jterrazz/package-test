@@ -30,6 +30,17 @@ ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule,
             errors: [{ messageId: 'assetImport' }],
             filename: SRC_TEST,
         },
+        {
+            code: 'import config from "./compose.test.yaml";',
+            errors: [{ messageId: 'assetImport' }],
+            filename: SRC_TEST,
+        },
+        // A bundler suffix does not launder a data asset.
+        {
+            code: 'import raw from "./payload.json?raw";',
+            errors: [{ messageId: 'assetImport' }],
+            filename: SRC_TEST,
+        },
         // Banned directories.
         {
             code: 'export {};',
@@ -48,6 +59,11 @@ ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule,
         // Code imports are fine, with or without extension.
         { code: 'import { match } from "./match.js";', filename: SRC_TEST },
         { code: 'import { helper } from "./helper";', filename: SRC_TEST },
+        // A dotted `<subject>.<role>` module name is CODE, not a data asset.
+        { code: 'import { Post } from "../entities/dashboard.post";', filename: SRC_TEST },
+        { code: 'import { registry } from "@scope/kernel/plugin.registry";', filename: SRC_TEST },
+        { code: 'import { schema } from "./user.schema.js";', filename: SRC_TEST },
+        { code: 'import { version } from "node:process";', filename: SRC_TEST },
         // Non-test src files may import what F2/I1 allow — assets are not
         // Checked there (only vi.mock and banned dirs apply).
         { code: 'import data from "./payload.json";', filename: '/repo/src/core/config.ts' },

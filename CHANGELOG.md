@@ -7,8 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING — root discovery walks ONCE, probing both markers at each ancestor.** It ran
+  two full walks, `docker/compose.test.yaml` first and `package.json` second, so the
+  FURTHER marker decided: in a workspace, a compose file at the repository root outranked
+  the `package.json` of the very package being tested, and every path the runner resolved
+  was measured from the wrong unit. The root is now the NEAREST ancestor carrying either
+  marker. A single-package repo is unaffected (both markers sit in the same directory);
+  a workspace member now resolves to itself. `a9w-redundant-root` no longer keeps its own
+  copy of the walk — the rule and the runner call one function, so they cannot drift.
+- **One `specs/` anchor for every specs-aware lint rule.** C1, F2, F3, J2 and C8 each
+  hand-rolled the search and disagreed: `lastIndexOf('specs')` (C1) took the innermost
+  match, `indexOf('specs')` (F3) the outermost, and the bare "is `specs` a segment" test
+  (F2, J2, C8) matched a directory anywhere above the project — a checkout under
+  `~/specs/` read as one giant specs tree and silently switched F2's protection of
+  production code off. They now share `specsAnchor(filename)`: the nearest ancestor named
+  `specs`, searched no higher than the nearest `package.json`.
+
+### Added
+
+- **`c1-domain-structure` takes a `depth` option** — `['error', { depth: 'facet-domain' |
+'mirror' | 'off' }]`, default `facet-domain` (today's behaviour, unchanged). `mirror` is
+  for a tree that mirrors a structure outside itself — a command tree, a source tree: a
+  `*.test.ts` at any depth of at least one directory under `specs/`, named after the
+  directory holding it (`<dir>/<dir>.test.ts`), and specification files unconstrained. A
+  project whose spec tree has a deliberate shape of its own can now DECLARE it and keep a
+  checked tree, instead of switching the rule off and keeping none.
+
 ### Fixed
 
+- **`sqlite({ prismaSchema })` reaches the Prisma CLI.** The option was stored and never
+  passed: the template build ran a bare `npx prisma db push --force-reset` and relied on
+  Prisma's own discovery from the cwd. A consumer whose `prisma.config.ts` does not sit at
+  the cwd failed with "Could not find Prisma Schema that is required for this command" —
+  and only on a machine without a cached template, so local runs stayed green while CI
+  broke. The declared path is now resolved against `process.cwd()` and passed as
+  `--schema <absolute path>`. No `prismaSchema`, no flag: discovery still applies.
+- **The sqlite template file is keyed on the schema, not machine-global.** It resolved to a
+  single `$TMPDIR/jterrazz-test-sqlite-template.sqlite` for every project on the machine,
+  and any header-valid file found there was reused as-is — so the first project to run
+  built the template and every other project silently inherited its tables. The name is
+  now `jterrazz-test-sqlite-template-<sha8>.sqlite`, the digest taken over the kind of
+  schema, its resolved path and its content; the build lock is per-key too. Editing a
+  schema builds a new template instead of reusing the stale one.
+- **I4 classifies data assets by a known extension list, not by "has a dot".** A
+  `<subject>.<role>` module specifier — `../entities/dashboard.post`,
+  `@scope/kernel/plugin.registry` — was read as a data asset and flagged in every
+  `src/**/*.test.ts`. Only `.json`, `.sql`, `.yaml`, `.png`, … (and their `?raw`
+  suffixed forms) are assets now; anything else is code, dotted or not.
 - **Caller detection recognises framework frames by identity, not by path substring.** It
   skipped any stack frame whose path contained `/src/core/`, `/src/integrations/` or
   `/src/vitest/` — the framework's own layout, and a perfectly ordinary layout for a

@@ -1,6 +1,6 @@
-import { basename, dirname, join } from 'node:path';
+import { dirname, join } from 'node:path';
 
-import { memberPropertyName, segments, stringValue } from '../ast.js';
+import { memberPropertyName, specsAnchor, stringValue } from '../ast.js';
 import { isDirectory, isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
@@ -23,26 +23,14 @@ function looksLikePath(value: string): boolean {
     return value.length > 0 && !/\s/u.test(value);
 }
 
-/** Nearest ancestor directory named `specs` — the pool root for `$FIXTURES/`. */
-function specsRoot(file: string): string | undefined {
-    let dir = dirname(file);
-    for (;;) {
-        if (basename(dir) === 'specs') {
-            return dir;
-        }
-        const parent = dirname(dir);
-        if (parent === dir) {
-            return undefined;
-        }
-        dir = parent;
-    }
-}
-
 /** Resolve the on-disk target a `.fixture()` literal points at, if determinable. */
-function resolveFixture(argument: string, featureDir: string, file: string): string | undefined {
+function resolveFixture(
+    argument: string,
+    featureDir: string,
+    specsDir: string,
+): string | undefined {
     if (argument.startsWith('$FIXTURES/')) {
-        const root = specsRoot(file);
-        return root === undefined ? undefined : join(root, 'fixtures', argument.slice(10));
+        return join(specsDir, 'fixtures', argument.slice(10));
     }
     if (argument.startsWith('$')) {
         return undefined; // Unknown marker — B2's concern, not existence.
@@ -61,7 +49,8 @@ function resolveFixture(argument: string, featureDir: string, file: string): str
 export const c8ReferencedFixtureExists: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        if (!TEST_FILE.test(file) || !segments(file).includes('specs')) {
+        const anchor = specsAnchor(file);
+        if (!TEST_FILE.test(file) || anchor === undefined) {
             return {};
         }
         const featureDir = dirname(file);
@@ -78,7 +67,11 @@ export const c8ReferencedFixtureExists: LintRule = {
                     if (value === undefined || !looksLikePath(value)) {
                         return;
                     }
-                    const target = resolveFixture(value.replace(/\/+$/, ''), featureDir, file);
+                    const target = resolveFixture(
+                        value.replace(/\/+$/, ''),
+                        featureDir,
+                        anchor.directory,
+                    );
                     if (target !== undefined && !isFile(target) && !isDirectory(target)) {
                         context.report({
                             data: { path: value, root: 'fixtures' },
