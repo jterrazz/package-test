@@ -5,6 +5,34 @@ All notable changes to `@jterrazz/test` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **BREAKING — `i1-layer-boundaries` takes the layer map as an option, and ships INERT.** The
+  rule carried the framework's own architecture — four layers named `core`, `integrations`,
+  `lint`, `vitest`, and the framework's own dependency table — and applied it to every
+  consumer that enabled the catalogue. A consumer whose directories happen to carry those
+  names was judged against a map describing a different package; a consumer with any other
+  architecture got a rule that could never say anything true. A project now declares its
+  own layers:
+
+    ```jsonc
+    "jterrazz/i1-layer-boundaries": ["error", {
+        "layers": {
+            "domain": { "imports": ["domain/"] },
+            "application": { "imports": ["application/", "domain/"] },
+            "infrastructure": { "folders": { "postgres": ["pg"] }, "imports": ["domain/"] }
+        }
+    }]
+    ```
+
+    Per layer: `packages` (external dependencies it may import), `imports` (paths inside
+    `src/` — a `foo/` prefix or an exact module path), `folders` (one folder = one external
+    dependency), `seams` (a named module's extra edge — the lazy import a layer allows
+    exactly once). With no map the rule reports nothing. The `coreExternal` and `lintRuntime`
+    message ids are gone, folded into the general `foreignDependency` / `crossLayer` pair.
+
 ## [11.0.0] - 2026-08-01
 
 ### Changed

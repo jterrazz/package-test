@@ -82,12 +82,12 @@
 
 ## I — Architecture du code source
 
-| Code | Implementation           | Channel  | Enforces                                                                                                                                                                                                                   |
-| ---- | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| I1   | `i1-layer-boundaries`    | statique | Quatre couches sous `src/` (core/integrations/vitest/lint) ; un import externe depuis `core/`, une integration important une dépendance qui n’est pas la sienne, ou un import hors whitelist entre couches est une erreur. |
-| I2   | `i2-sibling-test-naming` | statique | Le test de `<fichier>.ts` est `<fichier>.test.ts` à côté de lui ; un `.test.ts` mal nommé, ou un dossier `__tests__/`, est une erreur.                                                                                     |
-| I4   | `i4-no-vi-mock-in-src`   | statique | Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset non-`.ts` depuis un `.test.ts` sont interdits.                                                                                                |
-| I3   | `i3-intercept-compose`   | runtime  | `.intercept()` n’existe que sur `api`/`jobs` et lève immédiatement en mode compose (MSW est in-process).                                                                                                                   |
+| Code | Implementation           | Channel  | Enforces                                                                                                                                                                                                                                      |
+| ---- | ------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I1   | `i1-layer-boundaries`    | statique | Le projet DÉCLARE ses couches sous `src/` via l’option `layers` (paquets autorisés, imports internes, un dossier = une dépendance, seams) ; tout import hors des arêtes déclarées est une erreur. Sans carte de couches, la règle est inerte. |
+| I2   | `i2-sibling-test-naming` | statique | Le test de `<fichier>.ts` est `<fichier>.test.ts` à côté de lui ; un `.test.ts` mal nommé, ou un dossier `__tests__/`, est une erreur.                                                                                                        |
+| I4   | `i4-no-vi-mock-in-src`   | statique | Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset non-`.ts` depuis un `.test.ts` sont interdits.                                                                                                                   |
+| I3   | `i3-intercept-compose`   | runtime  | `.intercept()` n’existe que sur `api`/`jobs` et lève immédiatement en mode compose (MSW est in-process).                                                                                                                                      |
 
 ## J — Hygiène
 

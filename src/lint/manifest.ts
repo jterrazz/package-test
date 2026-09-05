@@ -367,11 +367,11 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'i1-layer-boundaries': {
         channel: 'statique',
         convention:
-            'Quatre couches sous `src/` (core/integrations/vitest/lint) ; un import externe depuis `core/`, une integration important une dépendance qui n’est pas la sienne, ou un import hors whitelist entre couches est une erreur.',
+            'Le projet DÉCLARE ses couches sous `src/` via l’option `layers` (paquets autorisés, imports internes, un dossier = une dépendance, seams) ; tout import hors des arêtes déclarées est une erreur. Sans carte de couches, la règle est inerte.',
         family: 'I',
         id: 'I1',
         rationale:
-            'Des frontières strictes gardent `core/` pur et chaque intégration confinée à sa dépendance.',
+            'Une architecture appartient au projet : des frontières déclarées se vérifient, une architecture supposée se contourne.',
     },
     'i2-sibling-test-naming': {
         channel: 'statique',

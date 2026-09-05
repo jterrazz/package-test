@@ -6,6 +6,62 @@ import { defineConfig } from 'oxlint';
 // `.js` specifiers to `.ts` sources, so `npm run build` must precede lint.
 import { recommendedRules } from './dist/oxlint.js';
 
+/**
+ * The four layers of this package and their sanctioned edges (CONVENTIONS I1).
+ *
+ * - `core/` — zero external imports; may reach `integrations/docker`,
+ *   `integrations/hono`, `vitest/matchers`, plus three lazy seams, each opened
+ *   for the one module that owns it.
+ * - `integrations/<dep>/` — one folder = one external dependency, plus `core/`.
+ * - `vitest/` — the runner coupling: `vitest`, `vitest-mock-extended`,
+ *   `mockdate`, plus `core/` and `integrations/docker` (the matchers recognise
+ *   the zero-dependency ContainerAccessor subject).
+ * - `lint/` — zero runtime imports: no external packages, and from `core/` only
+ *   the pure helpers (the token list, the case conversions, fixture markers).
+ *
+ * `src/index.ts` is the composition root and names no layer, so it is out of
+ * scope; module tests and `*.fixtures.ts` files are governed by F2/I4.
+ */
+const FRAMEWORK_LAYERS = {
+    core: {
+        imports: ['core/', 'integrations/docker/', 'integrations/hono/', 'vitest/matchers'],
+        seams: {
+            'core/specification/mobile/start-mobile.ts': ['integrations/appium/'],
+            'core/specification/shared/builder.ts': ['integrations/msw/'],
+            'core/specification/website/start-website.ts': ['integrations/playwright/'],
+        },
+    },
+    integrations: {
+        folders: {
+            anthropic: ['@anthropic-ai/sdk'],
+            appium: ['webdriverio'],
+            compose: ['yaml'],
+            docker: [],
+            hono: ['hono', '@hono/node-server'],
+            msw: ['msw'],
+            openai: ['openai'],
+            playwright: ['playwright'],
+            postgres: ['pg'],
+            redis: ['redis'],
+            sqlite: ['better-sqlite3'],
+            testcontainers: ['testcontainers'],
+        },
+        imports: ['core/'],
+    },
+    lint: {
+        imports: [
+            'lint/',
+            'core/matching/match',
+            'core/specification/shared/binding',
+            'core/specification/shared/fixtures',
+        ],
+    },
+    vitest: {
+        imports: ['core/', 'vitest/', 'integrations/docker/'],
+        packages: ['vitest', 'vitest-mock-extended', 'mockdate'],
+    },
+};
+
 export default defineConfig({
     extends: [oxlint.node],
     ignorePatterns: ['specs/**/fixtures/**'],
@@ -32,5 +88,9 @@ export default defineConfig({
         ...recommendedRules,
         // Docker-aware runner names used across specs (CONVENTIONS B5).
         'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }],
+        // THIS package's architecture (CONVENTIONS I1), stated where the
+        // Package configures itself. The rule ships inert: an architecture is
+        // The project's to declare, not the linter's to assume.
+        'jterrazz/i1-layer-boundaries': ['error', { layers: FRAMEWORK_LAYERS }],
     },
 });
