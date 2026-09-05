@@ -113,6 +113,8 @@ export const { cli, cleanup } = await specification.cli('shoply', {
 
 `sqlite()` builds a template database once (from `init` SQL or by running `prisma db push` on `prismaSchema`), then hands each worker its own copy. `.seed()` and `result.table()` work identically to Postgres.
 
+`prismaSchema` is resolved against the **current working directory** and passed to the CLI as `npx prisma db push --force-reset --schema <absolute path>` — the schema is named explicitly, so it does not have to be the one Prisma would discover from a `prisma.config.ts` at the cwd. Declare no `prismaSchema` and the bare invocation runs, leaving discovery to Prisma.
+
 ## Pitfalls
 
 - **Declaring image/env in TypeScript.** Container configuration lives in `compose.test.yaml`; the factories only _bind_ to it. If you need a different image, change the compose file.
@@ -120,6 +122,7 @@ export const { cli, cleanup } = await specification.cli('shoply', {
 - **Naming the `init.sql` folder after the record key.** The folder matches the **compose service name**: key `analyticsDb` binds to `analytics-db`, so its schema reads `docker/analytics-db/init.sql`.
 - **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule B1), and workers are isolated (rule G2).
 - **Passing `root` that auto-discovery would have found.** Redundant override (rule A9).
+- **Reading a green local run as proof that `prismaSchema` is wired.** The template is cached in the OS tmpdir across runs, so a machine that built it once never re-runs `db push` — a schema path that would fail on a fresh machine (or in CI) stays invisible. Delete `$TMPDIR/jterrazz-test-sqlite-template.sqlite` to test the cold path.
 - **Counting `sqlite()` + `redis()` as "2 databases" for rule A7.** The rule counts **databases**; with one SQL database and one redis, `database:` stays forbidden on `.seed()`/`.table()` and `DATABASE_URL`/`REDIS_URL` are both unambiguous for CLI injection (rule B6).
 
 ## Related

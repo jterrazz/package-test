@@ -5,6 +5,18 @@ All notable changes to `@jterrazz/test` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`sqlite({ prismaSchema })` reaches the Prisma CLI.** The option was stored and never
+  passed: the template build ran a bare `npx prisma db push --force-reset` and relied on
+  Prisma's own discovery from the cwd. A consumer whose `prisma.config.ts` does not sit at
+  the cwd failed with "Could not find Prisma Schema that is required for this command" —
+  and only on a machine without a cached template, so local runs stayed green while CI
+  broke. The declared path is now resolved against `process.cwd()` and passed as
+  `--schema <absolute path>`. No `prismaSchema`, no flag: discovery still applies.
+
 ## [11.0.0] - 2026-08-01
 
 ### Changed

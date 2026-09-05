@@ -50,6 +50,28 @@ export function isValidSqliteTemplate(path: string): boolean {
     }
 }
 
+/** The invocation used when no `prismaSchema` is declared — Prisma discovers its own schema. */
+const PRISMA_PUSH = 'npx prisma db push --force-reset';
+
+/**
+ * The `prisma db push` command line for a `prismaSchema` option.
+ *
+ * The declared path is resolved against `process.cwd()` and handed to the CLI
+ * as `--schema`. Without the flag Prisma falls back to its own discovery
+ * (`prisma.config.ts` / `package.json#prisma` at the cwd), which silently
+ * ignores the option: a repo whose config does not sit at the cwd then fails
+ * with "Could not find Prisma Schema that is required for this command" — but
+ * only on a machine without a cached template, so the divergence hides until CI.
+ *
+ * `null` (no option) keeps the bare invocation, discovery and all.
+ */
+export function prismaPushCommand(prismaSchema: null | string): string {
+    if (!prismaSchema) {
+        return PRISMA_PUSH;
+    }
+    return `${PRISMA_PUSH} --schema ${JSON.stringify(resolve(prismaSchema))}`;
+}
+
 export interface SqliteOptions {
     /**
      * Path to a SQL file used to initialize the database schema.
@@ -57,8 +79,9 @@ export interface SqliteOptions {
      */
     init?: string;
     /**
-     * Path to a Prisma schema directory or file.
-     * The adapter runs `prisma db push` to create the template.
+     * Path to a Prisma schema directory or file, resolved against the current
+     * working directory. The adapter runs `prisma db push --schema <path>` to
+     * create the template, so the schema needs no Prisma config at the cwd.
      * Mutually exclusive with `init`.
      */
     prismaSchema?: string;
@@ -134,7 +157,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         if (this.prismaSchema) {
             // Use Prisma to create schema
             const { execSync } = await import('node:child_process');
-            execSync('npx prisma db push --force-reset', {
+            execSync(prismaPushCommand(this.prismaSchema), {
                 env: {
                     ...process.env,
                     DATABASE_URL: `file:${this.templatePath}`,
