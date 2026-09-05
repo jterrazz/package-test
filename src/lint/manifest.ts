@@ -182,7 +182,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'Un `*.test.ts` vit à la profondeur facet/domain, un `*.specification.ts` au root de la facette ; toute autre profondeur est une erreur.',
+            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`.',
         family: 'C',
         id: 'C1',
         rationale:

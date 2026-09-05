@@ -44,7 +44,21 @@ Three rules cannot be mechanized — they turn on judgement no single channel ca
 
 ### C1 — the folder follows the assets
 
-The grouping criterion: a test that owns **its own** asset directories (`fixtures/`, `expected/`, `seeds/`, …) gets **its own** domain folder; tests **without local assets** (or sharing the `$FIXTURES/` pool) group as sibling `<aspect>.test.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `c1-domain-structure` checks only the depth (a `*.test.ts` at facet/domain depth, a `*.specification.ts` at the facet root); which of the two shapes is right is the review call.
+The grouping criterion: a test that owns **its own** asset directories (`fixtures/`, `expected/`, `seeds/`, …) gets **its own** domain folder; tests **without local assets** (or sharing the `$FIXTURES/` pool) group as sibling `<aspect>.test.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `c1-domain-structure` checks only placement; which of the two shapes is right is the review call.
+
+Placement itself is **declared**, because a spec tree may legitimately have a shape this package cannot know:
+
+```jsonc
+"jterrazz/c1-domain-structure": ["error", { "depth": "facet-domain" }] // the default
+```
+
+| `depth`          | The tree                                                                                                                          |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `'facet-domain'` | the default and the historical rule — `specs/<facet>/<domain>/<aspect>.test.ts`, `*.specification.ts` at the facet root           |
+| `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a test at any depth ≥ 1, named `<dir>/<dir>.test.ts` |
+| `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                 |
+
+A project with a mirrored spec tree states `mirror` and keeps a checked shape, instead of switching the rule off and keeping none.
 
 ### D11 — golden-file, not a cluster of greps
 
