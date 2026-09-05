@@ -247,7 +247,7 @@ The handle destructures to `{ mobile, cleanup, udid }` (plus `backendUrl` with `
 
 ### Root auto-discovery
 
-When `root` is absent, the framework walks up from the specification file to the first directory containing `docker/compose.test.yaml`, else the first containing `package.json`. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
+When `root` is absent, the framework walks up from the specification file to the **nearest** directory carrying `package.json` or `docker/compose.test.yaml`. In a workspace that is the member being tested, not the repository root above it. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
 
 ## Builder API
 

@@ -18,7 +18,7 @@ Returns `{ api, cleanup, docker, orchestrator }`. Checklist:
 - `services` — named record. Keys type `server`'s param, name the `database:` option, and drive the compose binding: exact name, else kebab-case of the key (`analyticsDb` → `analytics-db`); both present → ambiguity error (A6); `composeService` is the escape hatch.
 - `server: (services) => honoApp` — required in node mode, ignored in compose mode (any object with a `request()` method works).
 - `mode` (`'node' | 'compose'`) exists ONLY on `.api()`. Resolution: option > `TEST_MODE` env > `'node'`. Keep it OUT of the spec file — the switch lives in `vitest.config.ts` via `env: { TEST_MODE: 'compose' }` (A5).
-- `root` auto-discovered (walk up to `docker/compose.test.yaml`, else `package.json`); override only when the convention does not fit. It is the project root, NOT a fixtures root.
+- `root` auto-discovered (walk up to the NEAREST directory carrying `package.json` or `docker/compose.test.yaml` — the package, not the repository); override only when the convention does not fit. It is the project root, NOT a fixtures root.
 
 ### node vs compose (one definition, two projects)
 

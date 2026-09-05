@@ -3,10 +3,58 @@ import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
-/** Module-ish sources a src test may import; anything else with an extension is a data asset. */
-const CODE_IMPORT = /\.[cm]?[jt]sx?$/;
-/** Does this import path even carry an extension? Bare/extension-less ones are code. */
-const HAS_EXTENSION = /\.[a-z0-9]+$/i;
+
+/**
+ * Known DATA extensions — the closed list of what counts as a file asset. The
+ * classification is an allowlist, never "has a dot": a module specifier is
+ * routinely dotted for reasons that have nothing to do with a file type
+ * (`../entities/dashboard.post`, `@scope/kernel/plugin.registry`), and reading
+ * those as assets flagged perfectly ordinary code imports.
+ */
+const DATA_EXTENSIONS = [
+    'avif',
+    'bin',
+    'bmp',
+    'csv',
+    'gif',
+    'graphql',
+    'gql',
+    'gz',
+    'htm',
+    'html',
+    'ico',
+    'ini',
+    'jpeg',
+    'jpg',
+    'json',
+    'json5',
+    'jsonc',
+    'jsonl',
+    'md',
+    'mdx',
+    'ndjson',
+    'pdf',
+    'png',
+    'proto',
+    'sql',
+    'svg',
+    'tar',
+    'toml',
+    'tsv',
+    'txt',
+    'wasm',
+    'webp',
+    'xml',
+    'yaml',
+    'yml',
+    'zip',
+];
+const DATA_ASSET = new RegExp(`\\.(?:${DATA_EXTENSIONS.join('|')})$`, 'i');
+
+/** A bundler suffix (`./payload.json?raw`, `./doc.md#frag`) is not part of the extension. */
+function withoutSuffix(source: string): string {
+    return source.replace(/[?#].*$/, '');
+}
 
 /**
  * CONVENTIONS I4 — in module tests under `src/`, mocks and data are CODE:
@@ -15,8 +63,11 @@ const HAS_EXTENSION = /\.[a-z0-9]+$/i;
  *
  * - `vi.mock(…)` calls (module mocking) in any file;
  * - files living in a `__mocks__/` or `__fixtures__/` directory;
- * - a `*.test.ts` importing a non-code asset (`.json`, `.txt`, `.sql`, …) —
+ * - a `*.test.ts` importing a known data asset (`.json`, `.txt`, `.sql`, …) —
  *   a test needing a real file is a specification and belongs in `specs/`.
+ *
+ * A specifier whose extension is not on the data list is CODE, dotted or not:
+ * `<subject>.<role>` module names are a naming convention, not a file type.
  */
 export const i4NoViMockInSrc: LintRule = {
     create(context: RuleContext) {
@@ -53,7 +104,7 @@ export const i4NoViMockInSrc: LintRule = {
             Object.assign(
                 visitor,
                 importSourceVisitor(({ node, source }) => {
-                    if (HAS_EXTENSION.test(source) && !CODE_IMPORT.test(source)) {
+                    if (DATA_ASSET.test(withoutSuffix(source))) {
                         context.report({ data: { source }, messageId: 'assetImport', node });
                     }
                 }),

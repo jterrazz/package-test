@@ -9,12 +9,92 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING — `i1-layer-boundaries` takes the layer map as an option, and ships INERT.** The
+  rule carried the framework's own architecture — four layers named `core`, `integrations`,
+  `lint`, `vitest`, and the framework's own dependency table — and applied it to every
+  consumer that enabled the catalogue. A consumer whose directories happen to carry those
+  names was judged against a map describing a different package; a consumer with any other
+  architecture got a rule that could never say anything true. A project now declares its
+  own layers:
+
+    ```jsonc
+    "jterrazz/i1-layer-boundaries": ["error", {
+        "layers": {
+            "domain": { "imports": ["domain/"] },
+            "application": { "imports": ["application/", "domain/"] },
+            "infrastructure": { "folders": { "postgres": ["pg"] }, "imports": ["domain/"] }
+        }
+    }]
+    ```
+
+    Per layer: `packages` (external dependencies it may import), `imports` (paths inside
+    `src/` — a `foo/` prefix or an exact module path), `folders` (one folder = one external
+    dependency), `seams` (a named module's extra edge — the lazy import a layer allows
+    exactly once). With no map the rule reports nothing. The `coreExternal` and `lintRuntime`
+    message ids are gone, folded into the general `foreignDependency` / `crossLayer` pair.
+
+- **BREAKING — root discovery walks ONCE, probing both markers at each ancestor.** It ran
+  two full walks, `docker/compose.test.yaml` first and `package.json` second, so the
+  FURTHER marker decided: in a workspace, a compose file at the repository root outranked
+  the `package.json` of the very package being tested, and every path the runner resolved
+  was measured from the wrong unit. The root is now the NEAREST ancestor carrying either
+  marker. A single-package repo is unaffected (both markers sit in the same directory);
+  a workspace member now resolves to itself. `a9w-redundant-root` no longer keeps its own
+  copy of the walk — the rule and the runner call one function, so they cannot drift.
 - **BREAKING — `OrchestratorOptions.root` is required.** It fell back to `process.cwd()`
   while every constructor resolves the root by walking up from the calling specification
   file (A9) — one silent second opinion about what the project is, and in a workspace the
   cwd is rarely the same directory. Every call site inside the framework already passed a
   resolved root; the default only ever applied to a direct `new Orchestrator(…)` that
   omitted it, which now fails to compile.
+- **One `specs/` anchor for every specs-aware lint rule.** C1, F2, F3, J2 and C8 each
+  hand-rolled the search and disagreed: `lastIndexOf('specs')` (C1) took the innermost
+  match, `indexOf('specs')` (F3) the outermost, and the bare "is `specs` a segment" test
+  (F2, J2, C8) matched a directory anywhere above the project — a checkout under
+  `~/specs/` read as one giant specs tree and silently switched F2's protection of
+  production code off. They now share `specsAnchor(filename)`: the nearest ancestor named
+  `specs`, searched no higher than the nearest `package.json`.
+
+### Added
+
+- **`c1-domain-structure` takes a `depth` option** — `['error', { depth: 'facet-domain' |
+'mirror' | 'off' }]`, default `facet-domain` (today's behaviour, unchanged). `mirror` is
+  for a tree that mirrors a structure outside itself — a command tree, a source tree: a
+  `*.test.ts` at any depth of at least one directory under `specs/`, named after the
+  directory holding it (`<dir>/<dir>.test.ts`), and specification files unconstrained. A
+  project whose spec tree has a deliberate shape of its own can now DECLARE it and keep a
+  checked tree, instead of switching the rule off and keeping none.
+
+### Fixed
+
+- **`sqlite({ prismaSchema })` reaches the Prisma CLI.** The option was stored and never
+  passed: the template build ran a bare `npx prisma db push --force-reset` and relied on
+  Prisma's own discovery from the cwd. A consumer whose `prisma.config.ts` does not sit at
+  the cwd failed with "Could not find Prisma Schema that is required for this command" —
+  and only on a machine without a cached template, so local runs stayed green while CI
+  broke. The declared path is now resolved against `process.cwd()` and passed as
+  `--schema <absolute path>`. No `prismaSchema`, no flag: discovery still applies.
+- **The sqlite template file is keyed on the schema, not machine-global.** It resolved to a
+  single `$TMPDIR/jterrazz-test-sqlite-template.sqlite` for every project on the machine,
+  and any header-valid file found there was reused as-is — so the first project to run
+  built the template and every other project silently inherited its tables. The name is
+  now `jterrazz-test-sqlite-template-<sha8>.sqlite`, the digest taken over the kind of
+  schema, its resolved path and its content; the build lock is per-key too. Editing a
+  schema builds a new template instead of reusing the stale one.
+- **I4 classifies data assets by a known extension list, not by "has a dot".** A
+  `<subject>.<role>` module specifier — `../entities/dashboard.post`,
+  `@scope/kernel/plugin.registry` — was read as a data asset and flagged in every
+  `src/**/*.test.ts`. Only `.json`, `.sql`, `.yaml`, `.png`, … (and their `?raw`
+  suffixed forms) are assets now; anything else is code, dotted or not.
+- **Caller detection recognises framework frames by identity, not by path substring.** It
+  skipped any stack frame whose path contained `/src/core/`, `/src/integrations/` or
+  `/src/vitest/` — the framework's own layout, and a perfectly ordinary layout for a
+  consumer too. A consumer's file under its own `src/core/` was read as framework-internal
+  and skipped, so fixture resolution anchored on the next frame down (or fell through to
+  the working directory) with nothing reported. A frame is now framework-internal when it
+  is really inside the framework's own directory — real paths on both sides, so a `file:`
+  link or a symlinked install still compares equal to itself. Sibling `*.test.ts` module
+  tests stay callers (I2).
 
 ## [11.0.0] - 2026-08-01
 

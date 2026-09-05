@@ -1,4 +1,4 @@
-import { importSourceVisitor, segments } from '../ast.js';
+import { importSourceVisitor, specsAnchor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
@@ -29,12 +29,11 @@ const FRAMEWORK_LAYERS = new Set(['core', 'integrations', 'lint', 'vitest']);
  */
 export const f3SpecsPublicEntry: LintRule = {
     create(context: RuleContext) {
-        const parts = segments(context.filename);
-        const specsIndex = parts.indexOf('specs');
-        if (specsIndex === -1) {
+        const anchor = specsAnchor(context.filename);
+        if (anchor === undefined) {
             return {};
         }
-        const underIntegrations = parts[specsIndex + 1] === 'integrations';
+        const underIntegrations = anchor.relative[0] === 'integrations';
         const visitor: Visitor = {
             ...importSourceVisitor(({ node, source }) => {
                 // Framework subpath imports (overlaps F1, kept specs-specific).
