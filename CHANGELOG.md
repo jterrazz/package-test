@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`c1-domain-structure` takes a `depth` option** — `['error', { depth: 'facet-domain' |
+'mirror' | 'off' }]`, default `facet-domain` (today's behaviour, unchanged). `mirror` is
+  for a tree that mirrors a structure outside itself — a command tree, a source tree: a
+  `*.test.ts` at any depth of at least one directory under `specs/`, named after the
+  directory holding it (`<dir>/<dir>.test.ts`), and specification files unconstrained. A
+  project whose spec tree has a deliberate shape of its own can now DECLARE it and keep a
+  checked tree, instead of switching the rule off and keeping none.
+
 ### Changed
 
 - **One `specs/` anchor for every specs-aware lint rule.** C1, F2, F3, J2 and C8 each
