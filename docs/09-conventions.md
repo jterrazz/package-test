@@ -34,9 +34,17 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | W     | Website & mobile specs (scenarios, user-facing elements)             | [11](11-website.md), [12](12-mobile.md)                                    |
 | G     | Infrastructure (compose, isolation, docker-aware)                    | [04](04-cli.md), [08](08-services.md)                                      |
 | H     | Naming recap                                                         | below                                                                      |
-| I     | Source-code architecture (four layers, sibling module tests)         | `AGENTS.md`                                                                |
+| I     | Source-code architecture (four layers, sibling module tests)         | below · [`AGENTS.md`](../AGENTS.md) for this repo's own layer map          |
 | J     | Hygiene (no `.only`/`.skip`, no arbitrary sleeps)                    | [10](10-linting.md)                                                        |
 | K     | Retro-propagation — every defect class grows its own guard           | below                                                                      |
+
+## The reach of the conventions
+
+The framework and the conventions do not have the same scope, and confusing the two is the commonest misreading of this constitution. `specification.*` — with its seeds, fixtures, contracts, goldens and containers — is for specifying a **surface**: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function, or a frontend component test, has no such surface and needs none of it.
+
+The conventions bind **every test file of the repository**, that plain unit test included, whether or not `@jterrazz/test` is imported in it. A test is a test: it sits beside the module it covers (I2), it narrates its Given then its Then (B4), it keeps its doubles out of `src/` (I4), and it stays honest under the J hygiene rules — no committed `.only`/`.skip`, an assertion in every test, no two literal titles alike in a file. Only J2, the arbitrary-sleep ban, is narrowed to `specs/**`, where waiting is a real temptation. Every one of these is mechanized, so its normative sentence lives in the catalogue ([10 — Linting](10-linting.md)) and not here.
+
+The reason for the wide reach: a repository has **one** way to write a test, so a reader moving between a sibling module test and a spec of a surface reads the same shape and the tooling has a single target. A rule that applied only to framework tests would leave the majority of test files — the plain ones — unguarded.
 
 ## Process rules (review-borne)
 
@@ -94,6 +102,14 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 | Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)                                    |
 | Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)                            |
 | Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                                             |
+
+## I — Source-code architecture
+
+Family I governs the source tree rather than the spec tree, and it splits in two.
+
+**The layer map is the project's to declare.** `i1-layer-boundaries` ships **inert**: this package cannot know another repository's architecture, so the rule enforces nothing until the project states its own layers in `oxlint.config.ts`. This repository declares `FRAMEWORK_LAYERS` there — `core/` with zero external imports, `integrations/` each importing only its own dependency plus core, `vitest/` holding all runner coupling, `lint/` with zero runtime imports — and documents that layout in [`AGENTS.md`](../AGENTS.md), the brief a session reads before touching `src/`.
+
+**The test-file rules need no declaration.** I2 (a module's test is its sibling) and I4 (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 
 ## Maintaining the constitution
 
