@@ -1,3 +1,6 @@
+import { basename, dirname, join } from 'node:path';
+
+import { isFile } from './fs-cache.js';
 import type { AstNode } from './types.js';
 
 /**
@@ -9,6 +12,52 @@ import type { AstNode } from './types.js';
 /** Split a path into its non-empty segments (posix or win separators). */
 export function segments(path: string): string[] {
     return path.split(/[/\\]/).filter(Boolean);
+}
+
+/** Where a file sits relative to the `specs/` tree that owns it. */
+export type SpecsAnchor = {
+    /** The anchoring `specs` directory itself. */
+    directory: string;
+    /** Segments from the anchor down to the file — `[facet, domain, basename]`. */
+    relative: string[];
+};
+
+/**
+ * The `specs/` directory a file belongs to: the NEAREST ancestor named `specs`,
+ * searched no higher than the nearest `package.json`. `undefined` when the file
+ * is not under one.
+ *
+ * One anchor for every specs-aware rule. Rules used to hand-roll the search and
+ * disagreed with each other — `lastIndexOf('specs')` (C1) took the innermost
+ * match, `indexOf('specs')` (F3) the outermost, so one nested tree read as two
+ * different facets. And any bare "is `specs` a segment of this path" test
+ * matched directories that have nothing to do with the project: a checkout
+ * living under `~/specs/` turned the whole repository into a specs tree, which
+ * silently disabled F2's protection of production code. The package boundary
+ * makes the search stop where the project does.
+ */
+export function specsAnchor(filename: string): SpecsAnchor | undefined {
+    const relative = [basename(filename)];
+    let directory = dirname(filename);
+    for (;;) {
+        if (basename(directory) === 'specs') {
+            return { directory, relative };
+        }
+        if (isFile(join(directory, 'package.json'))) {
+            return undefined; // The package root, and no `specs/` under it.
+        }
+        const parent = dirname(directory);
+        if (parent === directory) {
+            return undefined;
+        }
+        relative.unshift(basename(directory));
+        directory = parent;
+    }
+}
+
+/** Is this file inside a `specs/` tree? — the predicate form of {@link specsAnchor}. */
+export function isUnderSpecs(filename: string): boolean {
+    return specsAnchor(filename) !== undefined;
 }
 
 /** The string value of a plain string literal (or a template with no holes). */
