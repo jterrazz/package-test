@@ -41,6 +41,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   marker. A single-package repo is unaffected (both markers sit in the same directory);
   a workspace member now resolves to itself. `a9w-redundant-root` no longer keeps its own
   copy of the walk — the rule and the runner call one function, so they cannot drift.
+- **BREAKING — `OrchestratorOptions.root` is required.** It fell back to `process.cwd()`
+  while every constructor resolves the root by walking up from the calling specification
+  file (A9) — one silent second opinion about what the project is, and in a workspace the
+  cwd is rarely the same directory. Every call site inside the framework already passed a
+  resolved root; the default only ever applied to a direct `new Orchestrator(…)` that
+  omitted it, which now fails to compile.
 - **One `specs/` anchor for every specs-aware lint rule.** C1, F2, F3, J2 and C8 each
   hand-rolled the search and disagreed: `lastIndexOf('specs')` (C1) took the innermost
   match, `indexOf('specs')` (F3) the outermost, and the bare "is `specs` a segment" test
