@@ -96,7 +96,7 @@ On top of worker isolation, **every chain resets the databases** (rule B1): a sp
 
 ## Root auto-discovery (rule A9)
 
-The framework locates the project root by walking **up from the specification file** to the first directory containing `docker/compose.test.yaml`, falling back to the first directory containing `package.json`. The `root` option is an override for the cases where the convention cannot work (e.g. fixtures deliberately kept outside the package) — pointing `root` at the directory the walk would find anyway is redundant (future lint warning).
+The framework locates the project root by walking **up from the specification file** to the **nearest** directory carrying `package.json` or `docker/compose.test.yaml` — both markers probed at each ancestor, so in a workspace the member being tested wins over the repository root above it. The `root` option is an override for the cases where the convention cannot work (e.g. fixtures deliberately kept outside the package) — pointing `root` at the directory the walk would find anyway is redundant (future lint warning).
 
 ## SQLite without Docker
 

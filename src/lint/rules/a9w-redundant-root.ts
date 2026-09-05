@@ -1,30 +1,19 @@
-import { dirname, join, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
+import { findRoot } from '../../core/specification/shared/resolve.js';
 import { findProperty, specificationMember, stringValue } from '../ast.js';
 import { isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
 /**
- * The root the convention would derive (A9 — see docs/10-linting.md): walk up from the
- * specification file to the first directory containing
- * `docker/compose.test.yaml`, else the first containing `package.json`.
+ * The root the convention would derive (A9 — see docs/10-linting.md): the
+ * framework's own walk-up, run against this layer's cached fs probe. The rule
+ * flags a `root` that the runner would have found by itself, so the two MUST
+ * be the same function — a private copy of the walk drifted from it before.
  */
 function derivedRoot(startDir: string): string | undefined {
-    for (const probe of ['docker/compose.test.yaml', 'package.json']) {
-        let dir = startDir;
-        for (;;) {
-            if (isFile(join(dir, probe))) {
-                return dir;
-            }
-            const parent = dirname(dir);
-            if (parent === dir) {
-                break;
-            }
-            dir = parent;
-        }
-    }
-    return undefined;
+    return findRoot(startDir, isFile);
 }
 
 /**

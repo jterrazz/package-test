@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING — root discovery walks ONCE, probing both markers at each ancestor.** It ran
+  two full walks, `docker/compose.test.yaml` first and `package.json` second, so the
+  FURTHER marker decided: in a workspace, a compose file at the repository root outranked
+  the `package.json` of the very package being tested, and every path the runner resolved
+  was measured from the wrong unit. The root is now the NEAREST ancestor carrying either
+  marker. A single-package repo is unaffected (both markers sit in the same directory);
+  a workspace member now resolves to itself. `a9w-redundant-root` no longer keeps its own
+  copy of the walk — the rule and the runner call one function, so they cannot drift.
 - **One `specs/` anchor for every specs-aware lint rule.** C1, F2, F3, J2 and C8 each
   hand-rolled the search and disagreed: `lastIndexOf('specs')` (C1) took the innermost
   match, `indexOf('specs')` (F3) the outermost, and the bare "is `specs` a segment" test

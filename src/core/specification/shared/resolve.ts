@@ -1,27 +1,45 @@
 import { existsSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
 
+/** What makes a directory a project root — a manifest, or a test stack. */
+const ROOT_MARKERS = ['package.json', 'docker/compose.test.yaml'];
+
+/**
+ * The NEAREST ancestor of `startDir` (itself included) carrying a root marker,
+ * `undefined` when none does.
+ *
+ * Both markers are probed at each ancestor, in ONE walk. Two walks — the
+ * compose file all the way up, then `package.json` all the way up — made the
+ * further directory win: in a workspace, a `docker/compose.test.yaml` at the
+ * repository root outranked the `package.json` of the very package being
+ * tested, and every path the runner resolved was measured from the wrong unit.
+ * The unit is the nearest thing that declares itself a project.
+ *
+ * The existence probe is injected so the lint layer can pass its cached one
+ * (A9's `a9w-redundant-root` derives the same root, and must derive it the
+ * same way).
+ */
+export function findRoot(startDir: string, exists: (path: string) => boolean): string | undefined {
+    let dir = startDir;
+    for (;;) {
+        if (ROOT_MARKERS.some((marker) => exists(resolve(dir, marker)))) {
+            return dir;
+        }
+        const parent = dirname(dir);
+        if (parent === dir) {
+            return undefined;
+        }
+        dir = parent;
+    }
+}
+
 /**
  * Auto-discover the project root from a starting directory (CONVENTIONS A9):
- * walk up to the first directory containing `docker/compose.test.yaml`;
- * if none, walk up to the first directory containing `package.json`;
- * if none, the starting directory itself.
+ * walk up to the first directory that carries `package.json` or
+ * `docker/compose.test.yaml`; if none does, the starting directory itself.
  */
 export function discoverRoot(startDir: string): string {
-    for (const marker of ['docker/compose.test.yaml', 'package.json']) {
-        let dir = startDir;
-        for (;;) {
-            if (existsSync(resolve(dir, marker))) {
-                return dir;
-            }
-            const parent = dirname(dir);
-            if (parent === dir) {
-                break;
-            }
-            dir = parent;
-        }
-    }
-    return startDir;
+    return findRoot(startDir, existsSync) ?? startDir;
 }
 
 /**

@@ -31,6 +31,8 @@ const LINT_CORE_WHITELIST = new Set([
     'core/matching/match',
     'core/specification/shared/binding',
     'core/specification/shared/fixtures',
+    // A9's rule must derive the root with the framework's own walk, not a copy.
+    'core/specification/shared/resolve',
 ]);
 
 const TEST_OR_FIXTURES = /\.(?:test|fixtures)\.[cm]?[jt]sx?$/;
@@ -62,7 +64,8 @@ function withoutExtension(path: string): string {
  *   `mockdate`, plus `core/` and `integrations/docker` (the matchers recognise
  *   the zero-dependency ContainerAccessor subject).
  * - `lint/` — zero runtime imports: no external packages, and from `core/`
- *   only the pure helpers (token list, case conversions, fixture markers).
+ *   only the pure helpers (token list, case conversions, fixture markers, the
+ *   root walk a rule must share with the runner).
  *
  * Module tests and fixtures files are exempt (their imports are governed by
  * F2/I4); `src/index.ts` is the composition root and lives above the layers.
