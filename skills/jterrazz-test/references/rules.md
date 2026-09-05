@@ -86,7 +86,7 @@
 | ---- | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | I1   | `i1-layer-boundaries`    | statique | Quatre couches sous `src/` (core/integrations/vitest/lint) ; un import externe depuis `core/`, une integration important une dépendance qui n’est pas la sienne, ou un import hors whitelist entre couches est une erreur. |
 | I2   | `i2-sibling-test-naming` | statique | Le test de `<fichier>.ts` est `<fichier>.test.ts` à côté de lui ; un `.test.ts` mal nommé, ou un dossier `__tests__/`, est une erreur.                                                                                     |
-| I4   | `i4-no-vi-mock-in-src`   | statique | Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset non-`.ts` depuis un `.test.ts` sont interdits.                                                                                                |
+| I4   | `i4-no-vi-mock-in-src`   | statique | Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset de données (`.json`, `.sql`, `.yaml`, …) depuis un `.test.ts` sont interdits ; un spécifieur pointé (`./dashboard.post`) reste du code.       |
 | I3   | `i3-intercept-compose`   | runtime  | `.intercept()` n’existe que sur `api`/`jobs` et lève immédiatement en mode compose (MSW est in-process).                                                                                                                   |
 
 ## J — Hygiène
