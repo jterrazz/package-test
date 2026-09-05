@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Testing conventions for @jterrazz projects — unit/integration/e2e structure, vitest, testcontainers, golden files, mocks. Use when writing, organizing, or debugging tests in a jterrazz repo.
+description: Testing conventions for @jterrazz projects — unit/integration/e2e structure, vitest, testcontainers, golden files, mocks. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain unit test included.
 metadata:
     version: '9.0'
 ---
@@ -21,9 +21,22 @@ The ecosystem's declarative testing framework for HTTP APIs, background jobs, CL
 
 ## When to use this skill
 
-**Trigger on:** imports of `@jterrazz/test`; edits to `*.test.ts` / `*.specification.ts` in a repo using it; prompts about specification runners, seeds, fixtures, contracts, tokens, directory snapshots, rendered-page visit scenarios, simulator screen scenarios, or the Given/Then convention.
+Two things travel under one name, and their scopes are not the same: the framework is for a surface, the conventions are for every test file.
 
-**Do NOT use for:** plain `vitest` unit tests of a pure function; frontend component tests (Vitest + Testing Library). Rendered-page/browser testing IS covered — through `specification.website()`, not raw Playwright. Native-app testing IS covered — through `specification.mobile()`, not raw appium/webdriverio.
+**The FRAMEWORK specifies a surface.** `specification.*` and everything hanging off it — runners, seeds, fixtures, contracts, goldens, the sandbox a spec runs in — exist to specify something a caller reaches: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function and a frontend component test (Vitest + Testing Library) have no such surface; they need vitest alone, and reaching for a runner there is the mistake to avoid.
+
+**The CONVENTIONS bind EVERY test file of a jterrazz repository** — that plain unit test and that component test included. They are the repository's rules, not the framework's, and they hold with no `@jterrazz/test` import in the file:
+
+- **Sibling naming (I2)** — the test of `<file>.ts` is `<file>.test.ts` next to it; a misnamed `.test.ts`, or a `__tests__/` folder, is an error.
+- **Given/Then (B4)** — every test carries a `// Given -` line then a `// Then -` line, both, in that order. Two `--fix` hazards mangle a marker while the lint stays green: a marker is EXACTLY one line (`capitalized-comments` capitalises a wrapped continuation mid-sentence), and it goes between STATEMENTS, never between two `const` declarations `one-var` can fuse into one chain. Both are worked in [docs/10](../../docs/10-linting.md).
+- **No test doubles under `src/` (I4)** — `vi.mock`, `__mocks__/`, `__fixtures__/` and data-asset imports from a `.test.ts` are forbidden there; a module's typed fixtures are a sibling `<file>.fixtures.ts`.
+- **Hygiene (J)** — no committed `.only` / `.skip`, at least one `expect()` per `test()`, no two literal test names alike in a file, a lowercase title.
+
+The full list, with ids to cite, is [references/rules.md](references/rules.md); the reasoning is the constitution, [docs/09](../../docs/09-conventions.md).
+
+**Trigger on:** writing or editing any `*.test.ts` / `*.specification.ts` in a jterrazz repository, a plain unit test included; imports of `@jterrazz/test`; prompts about specification runners, seeds, fixtures, contracts, tokens, directory snapshots, rendered-page visit scenarios, simulator screen scenarios, or the Given/Then convention.
+
+**Do NOT use for:** tests written on another runner (jest, mocha, ava, node:test, playwright's own runner) or in another language — the conventions above are a vitest-and-TypeScript dialect and do not transfer. Rendered-page/browser testing IS covered — through `specification.website()`, not raw Playwright. Native-app testing IS covered — through `specification.mobile()`, not raw appium/webdriverio.
 
 ## Routing table
 
