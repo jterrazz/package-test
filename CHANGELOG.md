@@ -5,6 +5,20 @@ All notable changes to `@jterrazz/test` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Caller detection recognises framework frames by identity, not by path substring.** It
+  skipped any stack frame whose path contained `/src/core/`, `/src/integrations/` or
+  `/src/vitest/` — the framework's own layout, and a perfectly ordinary layout for a
+  consumer too. A consumer's file under its own `src/core/` was read as framework-internal
+  and skipped, so fixture resolution anchored on the next frame down (or fell through to
+  the working directory) with nothing reported. A frame is now framework-internal when it
+  is really inside the framework's own directory — real paths on both sides, so a `file:`
+  link or a symlinked install still compares equal to itself. Sibling `*.test.ts` module
+  tests stay callers (I2).
+
 ## [11.0.0] - 2026-08-01
 
 ### Changed

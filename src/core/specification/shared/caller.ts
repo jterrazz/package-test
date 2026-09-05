@@ -1,5 +1,21 @@
-import { dirname, resolve } from 'node:path';
+import { realpathSync } from 'node:fs';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+/** Sibling module tests are callers, not internals (CONVENTIONS I2). */
+const TEST_FILE = /\.test\.[cm]?[jt]s$/;
+
+/** Where this very module sits inside the framework's SOURCE tree. */
+const SOURCE_LOCATION = join('core', 'specification', 'shared');
+
+/** The real path of `path`, or `path` itself when it cannot be resolved. */
+function realPath(path: string): string {
+    try {
+        return realpathSync(path);
+    } catch {
+        return path;
+    }
+}
 
 /**
  * Directory of the running framework module itself. From the built package
@@ -7,7 +23,46 @@ import { fileURLToPath } from 'node:url';
  * `file:` link, where the real path carries neither `node_modules` nor
  * `/src/…` and would otherwise be mistaken for a caller frame.
  */
-const FRAMEWORK_DIR = dirname(fileURLToPath(import.meta.url));
+const FRAMEWORK_DIR = realPath(dirname(fileURLToPath(import.meta.url)));
+
+/**
+ * The directory holding the framework's OWN modules: `<package>/dist` for a
+ * built install (everything is bundled there), `<repo>/src` when the framework
+ * runs from source — this module's known location inside that tree is what
+ * tells the two apart.
+ */
+const FRAMEWORK_TREE = FRAMEWORK_DIR.endsWith(`${sep}${SOURCE_LOCATION}`)
+    ? resolve(FRAMEWORK_DIR, '../../..')
+    : FRAMEWORK_DIR;
+
+/** Is `path` inside `directory` (strictly — a directory is not inside itself)? */
+function isInside(directory: string, path: string): boolean {
+    const rest = relative(directory, path);
+    return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);
+}
+
+/**
+ * Is this stack frame a module of the framework itself, rather than of the code
+ * calling it?
+ *
+ * Answered by IDENTITY: the frame is inside the framework's own directory.
+ * Answering it by substring — `/src/core/`, `/src/integrations/`, `/src/vitest/`
+ * — was answering a different question, "does this path look like the framework's
+ * layout", and a consumer that happens to have its own `src/core/` matched it.
+ * Its files were then skipped as framework internals, and fixture resolution
+ * anchored on the wrong directory (or fell through to the cwd) with nothing
+ * reported.
+ *
+ * @internal
+ */
+export function isFrameworkFrame(filePath: string, frameworkTree = FRAMEWORK_TREE): boolean {
+    if (TEST_FILE.test(filePath)) {
+        return false;
+    }
+    // Both sides go through realpath: an install reached by symlink (a `file:`
+    // Link, a pnpm store, a worktree) must still compare equal to itself.
+    return isInside(realPath(frameworkTree), realPath(filePath));
+}
 
 /**
  * Detect the directory of the first stack frame that lives outside this
@@ -34,15 +89,7 @@ export function getCallerDir(): string {
         if (filePath.includes('node_modules')) {
             continue;
         }
-        // Framework-internal frames are skipped.
-        // Sibling module tests (`src/**/<file>.test.ts`) are callers, not internals (I2).
-        if (
-            (filePath.includes('/src/core/') ||
-                filePath.includes('/src/integrations/') ||
-                filePath.includes('/src/vitest/') ||
-                resolve(filePath, '..') === FRAMEWORK_DIR) &&
-            !/\.test\.[cm]?[jt]s$/.test(filePath)
-        ) {
+        if (isFrameworkFrame(filePath)) {
             continue;
         }
 
