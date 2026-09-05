@@ -1,4 +1,4 @@
-import { importSourceVisitor, segments } from '../ast.js';
+import { importSourceVisitor, isUnderSpecs } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
@@ -23,7 +23,7 @@ const TOOL_SUBPATH = '@jterrazz/test/oxlint';
 export const f2NoTestImportsInProd: LintRule = {
     create(context: RuleContext) {
         const file = context.filename;
-        if (TEST_FILE.test(file) || CONFIG_FILE.test(file) || segments(file).includes('specs')) {
+        if (TEST_FILE.test(file) || CONFIG_FILE.test(file) || isUnderSpecs(file)) {
             return {};
         }
         const visitor: Visitor = {

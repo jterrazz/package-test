@@ -5,6 +5,18 @@ All notable changes to `@jterrazz/test` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **One `specs/` anchor for every specs-aware lint rule.** C1, F2, F3, J2 and C8 each
+  hand-rolled the search and disagreed: `lastIndexOf('specs')` (C1) took the innermost
+  match, `indexOf('specs')` (F3) the outermost, and the bare "is `specs` a segment" test
+  (F2, J2, C8) matched a directory anywhere above the project — a checkout under
+  `~/specs/` read as one giant specs tree and silently switched F2's protection of
+  production code off. They now share `specsAnchor(filename)`: the nearest ancestor named
+  `specs`, searched no higher than the nearest `package.json`.
+
 ## [11.0.0] - 2026-08-01
 
 ### Changed

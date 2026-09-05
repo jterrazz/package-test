@@ -1,4 +1,4 @@
-import { segments } from '../ast.js';
+import { specsAnchor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
@@ -27,14 +27,13 @@ export const c1DomainStructure: LintRule = {
     create(context: RuleContext) {
         return {
             Program(node: AstNode) {
-                const parts = segments(context.filename);
-                const base = parts.at(-1) ?? '';
-                const specsIndex = parts.lastIndexOf('specs');
-                if (specsIndex === -1) {
+                const anchor = specsAnchor(context.filename);
+                if (anchor === undefined) {
                     return;
                 }
+                const base = anchor.relative.at(-1) ?? '';
                 // Segments strictly between `specs` and the file: [facet, domain, …].
-                const depth = parts.length - 1 - (specsIndex + 1);
+                const depth = anchor.relative.length - 1;
 
                 if (base.endsWith(TEST_SUFFIX)) {
                     if (depth < 2) {
