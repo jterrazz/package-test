@@ -223,6 +223,68 @@ test('deploys from a shaped workspace', async () => {
 
 Prefer feature-local fixtures for one-off shapes; promote shared projects to `specs/fixtures/` and reach them via `$FIXTURES/`.
 
+## The chain never reaches a real system
+
+A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a chain proves must come out of its fixture, never out of the machine that happened to run it. A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network connection, or reads the operator's home directory is **a test escaping the sandbox, not extra realism** — it passes on the one laptop where those tools are installed and configured, fails everywhere else, and either way it proves something about that laptop rather than about the binary under test. The HTTP half of the same rule is D7, in [contracts](07-contracts.md).
+
+The framework supplies the ground; the chain states the sandbox, in three verbs:
+
+| Verb                                           | What it closes                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `.fixture('$FIXTURES/<name>/')`                | spreads a `bin/` of stub binaries into the spec's temp cwd                                 |
+| `.env({ PATH: '$WORKDIR/bin:/usr/bin:/bin' })` | puts those stubs FIRST — the binary finds the stub, never the tool installed on the host   |
+| `.env({ HOME: '$WORKDIR' })`                   | moves config dirs, caches and credential stores onto the temp cwd, off the operator's home |
+
+`PATH` is not rewritten for you: `.fixture()` lays the tree down, `.env()` decides what the child is allowed to find. Pin the tail of `PATH` too — inheriting the developer's own `PATH` re-opens the door the stub was there to close.
+
+```typescript
+test('reports what the cluster holds', async () => {
+    // Given - stubs first on PATH, HOME on the temp cwd: nothing can reach out
+    const result = await cli
+        .fixture('$FIXTURES/cluster-stub/')
+        .env({ HOME: '$WORKDIR', PATH: '$WORKDIR/bin:/usr/bin:/bin', TZ: 'UTC' })
+        .exec('cluster pods');
+
+    // Then
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toMatch('pods.txt');
+});
+```
+
+### The shape of a stub fixture
+
+A stub fixture is a `bin/` holding one script per binary the run must not find for real:
+
+```
+specs/fixtures/cluster-stub/
+└── bin/
+    ├── kubectl
+    └── helm
+```
+
+Each script answers **by argv** and refuses everything else. The executable bit survives the copy, so a stub committed `chmod +x` is executable in the cwd:
+
+```bash
+#!/bin/sh
+# Every invocation this suite cans. Anything else is a chain reaching for an
+# answer nobody wrote — fail loudly rather than improvise one.
+case "$*" in
+  "get pods -A -o json")
+    cat <<'JSON'
+{"items":[{"metadata":{"name":"api-abc12","namespace":"prod"},"status":{"phase":"Running"}}]}
+JSON
+    ;;
+  *)
+    echo "cluster-stub kubectl: unexpected invocation: $*" >&2
+    exit 64
+    ;;
+esac
+```
+
+The catch-all matters as much as the canned cases: a stub that shrugs at an unknown invocation hands the chain an empty success, and the spec goes green on a command nobody described.
+
+**One fixture per ANSWER of the system, not one per test.** A cluster with things in it, that same cluster holding nothing, and a cluster whose API server is down are three fixtures, not three settings of one — they are three answers to the same question, and choosing between them is choosing what the chain proves. So a new answer is a NEW fixture, never a flag threaded through an existing stub: fixtures layer (a drift stub over a healthy one), which is how one is extended without being made conditional.
+
 ## Streams, JSON, grep
 
 ```typescript
@@ -323,6 +385,7 @@ The runner handle also destructures to `{ cli, cleanup, docker, orchestrator }`.
 - **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `expected/*.txt` — `transform` is a last resort (rule D6).
 - **Assigning a Docker-aware result without `await using`.** Error (rule B5) — that is the leak-cleanup mechanism.
 - **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection — override only to _change_ it, `null` to remove it.
+- **Letting the chain find the real binary.** Mounting a stub fixture without pinning `PATH` (or pinning it with the developer's own `PATH` on the tail) leaves the installed `kubectl`/`gh` reachable — the spec then tests the operator's machine. Pin `PATH` and `HOME` on `$WORKDIR`.
 - **Writing into fixture folders from a test.** The cwd is a copy; feature-local `fixtures/` and the shared `specs/fixtures/` pool are templates and stay pristine.
 - **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files (`.fixture(path)`, feature-local or `$FIXTURES/`), and `.seed()` is SQL-only (rule C7).
 - **Forgetting the extension in `toMatch('help')`.** The extension is part of the name (rule C6) — except for tree snapshots, which are directories.

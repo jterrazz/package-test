@@ -5,6 +5,29 @@ All notable changes to `@jterrazz/test` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **The CLI sandbox is written down** (`docs/04-cli.md` — _The chain never reaches a real
+  system_). A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network
+  connection, or reads the operator's home is a test escaping the sandbox, not extra
+  realism — the CLI counterpart of what D7 says about HTTP. The chapter names the three
+  verbs that close it (`.fixture('$FIXTURES/<name>/')` for a `bin/` of stubs,
+  `.env({ PATH: '$WORKDIR/bin:…' })` to put them first, `.env({ HOME: '$WORKDIR' })` for
+  the config the binary reads), the shape of a stub folder (`fixtures/<name>/bin/<binary>`,
+  a script answering by argv with a catch-all that fails loudly), and the rule that governs
+  the pool: one fixture per ANSWER of the system — a new answer is a new fixture, never a
+  flag on an existing stub.
+- **B4's two operating hazards** (`docs/10-linting.md` — _Writing B4 markers under
+  `--fix`_). With `capitalized-comments` on, a marker wrapped onto a second line has that
+  line capitalised mid-sentence by the fixer; with `one-var` on, the fixer fuses adjacent
+  `const` statements and swallows a marker standing between them into the declaration
+  chain. B4 passes on the result, which is what makes both worth knowing — a marker is
+  exactly one line, and it goes between STATEMENTS.
+- Both rules mirrored for agents: `skills/jterrazz-test/references/cli.md` gains the
+  sandbox section, `references/troubleshooting.md` three symptom rows.
+
 ## [12.0.0] - 2026-09-05
 
 ### Changed

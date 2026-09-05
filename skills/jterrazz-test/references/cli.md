@@ -30,6 +30,19 @@ afterAll(cleanup);
 
 There is no `.project()` and no seed handler — `.fixture()` is the one file-state verb, `.seed()` is SQL-only (C7).
 
+## Sandbox — the chain reaches nothing real
+
+Reaching a real `kubectl` / `helm` / `gh`, the network, or the operator's `$HOME` is a test escaping the sandbox, not extra realism — D7's rule for HTTP, with no mechanism to enforce it here: the chain states it, in three verbs.
+
+```typescript
+await cli
+    .fixture('$FIXTURES/cluster-stub/') // bin/<binary> stubs into the temp cwd
+    .env({ HOME: '$WORKDIR', PATH: '$WORKDIR/bin:/usr/bin:/bin' }) // stubs first; pin the tail
+    .exec('cluster pods');
+```
+
+A stub is `fixtures/<name>/bin/<binary>`: a `case "$*"` script answering by argv, with a catch-all that exits non-zero on any invocation nobody canned. **One fixture per ANSWER of the system** (a cluster populated / empty / unreachable) — a new answer is a new fixture, never a flag on an existing stub. Chained fixtures layer, which is how one is extended.
+
 ## Action (terminal) — one execution method, no `.spawn()`
 
 | Method                                | Notes                                                                                                   |

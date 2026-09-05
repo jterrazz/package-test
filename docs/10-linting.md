@@ -178,6 +178,39 @@ Conventions with no oxlint rule are covered by another channel — the catalogue
 
 Rules marked _fs-checked_ probe the filesystem, anchored on files oxlint is already visiting (a feature's sibling `requests/`, `seeds/`, `expected/`, a module test's neighbour), with per-run caching — they never scan the tree blindly.
 
+## Writing B4 markers under `--fix`
+
+B4 asks every test for a `// Given -` line and a `// Then -` line, in that order. Two rules of the `@jterrazz/typescript` base preset rewrite comments when the fixer runs, and both can turn a well-placed marker into something that means nothing — with the lint green afterwards, because the marker text is still in the file. They are the two hazards to know before writing the narration.
+
+**A marker is EXACTLY one line.** `capitalized-comments` is on, so the fixer capitalises the first word of every `//` line. Wrap a marker onto a second line and that continuation is capitalised mid-sentence:
+
+```typescript
+// Given - a runner primed with a fixture and a seeded database,
+// and the command line that asks for the second shop
+
+// After `oxlint --fix`
+// Given - a runner primed with a fixture and a seeded database,
+// And the command line that asks for the second shop
+```
+
+If the reasoning does not fit on one line, it is not a marker: keep the marker short and put the reasoning in a docblock above the test.
+
+**A marker goes between STATEMENTS, never between two declarations of one chain.** `one-var` asks for one `const` statement per scope, and the fixer satisfies it by FUSING adjacent declarations — swallowing whatever comment stood between them into the chain, where it now separates two declarators instead of two steps of the test:
+
+```typescript
+// Given - the seeded row
+const before = await cli.exec('seed');
+// Then - the row the command wrote
+const after = await cli.exec('read');
+
+// After `oxlint --fix` — the marker has been pulled inside a declaration chain
+const before = await cli.exec('seed'),
+    // Then - the row the command wrote
+    after = await cli.exec('read');
+```
+
+B4 still passes on the second form, which is what makes it worth knowing: nothing fails, the narration has simply stopped separating anything. Both preset rules are documented on their own side, in `@jterrazz/typescript`'s Lint presets chapter; what belongs here is only what they do to a marker.
+
 ## The conventions checker (D4)
 
 Oxlint only parses JS/TS. The D4 token grammar also constrains **data fixtures** under `requests/**` and `expected/**`, so that channel ships as a separate step, bundled as `dist/checker.js` and exposed as the `jterrazz-test-check` bin:

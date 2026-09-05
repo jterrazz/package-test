@@ -17,14 +17,15 @@ Operative index. Each fix names the rule and the chapter whose **Pitfalls** sect
 
 ## Runners, services, seeding
 
-| Symptom                                                                      | Fix                                                                                                                                   |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `specification.app does not exist`                                           | Only five constructors: `.api()`, `.jobs()`, `.cli()`, `.website()`, `.mobile()` (A2)                                                 |
-| `seed() targets database "..." not found`                                    | `database` takes the services RECORD KEY (`{ analyticsDb: ... }` → `'analyticsDb'`), not the compose name                             |
-| `N databases are declared — pass { database }` / `redundant database option` | A7 cuts both ways: mandatory with ≥ 2 DBs, forbidden with 1                                                                           |
-| Service ignores compose image/env                                            | A handle binds to the compose service named like its key, else kebab-case; use `composeService` only for non-derivable names          |
-| `Ambiguous compose binding for service key "..."`                            | Compose declares both the exact key and its kebab-case form — rename one or set `composeService` (A6)                                 |
-| cli spec can't find its files                                                | Every `.exec()` runs in a fresh temp dir — populate it with `.fixture('$FIXTURES/name/')` or `.fixture('file')`. No `.project()` (C7) |
+| Symptom                                                                      | Fix                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `specification.app does not exist`                                           | Only five constructors: `.api()`, `.jobs()`, `.cli()`, `.website()`, `.mobile()` (A2)                                                                  |
+| `seed() targets database "..." not found`                                    | `database` takes the services RECORD KEY (`{ analyticsDb: ... }` → `'analyticsDb'`), not the compose name                                              |
+| `N databases are declared — pass { database }` / `redundant database option` | A7 cuts both ways: mandatory with ≥ 2 DBs, forbidden with 1                                                                                            |
+| Service ignores compose image/env                                            | A handle binds to the compose service named like its key, else kebab-case; use `composeService` only for non-derivable names                           |
+| `Ambiguous compose binding for service key "..."`                            | Compose declares both the exact key and its kebab-case form — rename one or set `composeService` (A6)                                                  |
+| cli spec can't find its files                                                | Every `.exec()` runs in a fresh temp dir — populate it with `.fixture('$FIXTURES/name/')` or `.fixture('file')`. No `.project()` (C7)                  |
+| cli spec green on one machine, red on another / needs a real `kubectl`, `gh` | The chain is escaping the sandbox — mount a stub fixture and pin `PATH: '$WORKDIR/bin:/usr/bin:/bin'` + `HOME: '$WORKDIR'`. [04](../../docs/04-cli.md) |
 
 ## Intercepts, docker, modes
 
@@ -38,9 +39,11 @@ Operative index. Each fix names the rule and the chapter whose **Pitfalls** sect
 
 ## Layout & architecture
 
-| Symptom                                              | Fix                                                                                                                               |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| A `src/` module test needs a real file or real infra | It's a specification, not a unit test — move it to `specs/` (I2/I4). Under `src/`, mocks/data are CODE (`mockOf`, `.fixtures.ts`) |
-| Lint error on runner placement                       | Runner → facet root (`specs/<facet>/<name>.specification.ts`); tests → facet/domain depth (C1)                                    |
-| Uppercase test title rejected                        | Titles start lowercase (J5) — a prose fragment, not a sentence (titles opening on a non-letter are exempt)                        |
-| Rule id / channel lookup                             | [references/rules.md](rules.md) (generated) · [docs/10-linting.md](../../docs/10-linting.md)                                      |
+| Symptom                                                                            | Fix                                                                                                                                                  |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A `src/` module test needs a real file or real infra                               | It's a specification, not a unit test — move it to `specs/` (I2/I4). Under `src/`, mocks/data are CODE (`mockOf`, `.fixtures.ts`)                    |
+| Lint error on runner placement                                                     | Runner → facet root (`specs/<facet>/<name>.specification.ts`); tests → facet/domain depth (C1)                                                       |
+| Uppercase test title rejected                                                      | Titles start lowercase (J5) — a prose fragment, not a sentence (titles opening on a non-letter are exempt)                                           |
+| A `// Then -` marker ended up inside a `const a = …, b = …` chain after `lint:fix` | `one-var`'s fixer fused the declarations and swallowed the marker — a marker goes between STATEMENTS. [10](../../docs/10-linting.md)                 |
+| The second line of a marker was capitalised mid-sentence                           | `capitalized-comments` capitalises every `//` line — a marker is EXACTLY one line; long reasoning goes in a docblock. [10](../../docs/10-linting.md) |
+| Rule id / channel lookup                                                           | [references/rules.md](rules.md) (generated) · [docs/10-linting.md](../../docs/10-linting.md)                                                         |
