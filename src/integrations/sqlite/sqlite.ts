@@ -1,15 +1,18 @@
 import Database from 'better-sqlite3';
+import { createHash } from 'node:crypto';
 import {
     closeSync,
     copyFileSync,
     existsSync,
     openSync,
+    readdirSync,
     readFileSync,
     readSync,
+    statSync,
     unlinkSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import type { DatabasePort } from '../../core/ports/database.port.js';
 import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
@@ -87,6 +90,56 @@ export interface SqliteOptions {
     prismaSchema?: string;
 }
 
+/** Every template file this package writes carries that prefix, then its key. */
+const TEMPLATE_PREFIX = 'jterrazz-test-sqlite-template';
+
+/**
+ * The schema source as bytes: a file's content, or every file under a
+ * directory in a stable order (a Prisma `schema/` folder is a directory). Each
+ * entry carries its own path, so moving a schema changes the fingerprint.
+ * Anything unreadable degrades to a marker rather than throwing — the path is
+ * already in the key, so two projects still never collide.
+ */
+function schemaBytes(path: string): string {
+    try {
+        if (statSync(path).isDirectory()) {
+            return readdirSync(path)
+                .sort()
+                .map((entry) => schemaBytes(join(path, entry)))
+                .join('\0');
+        }
+        return `${path}\0${readFileSync(path, 'utf8')}`;
+    } catch {
+        return `${path}\0<unreadable>`;
+    }
+}
+
+/**
+ * The name of the template database for a set of options — `<prefix>-<sha8>`,
+ * the digest taken over the schema KIND, its resolved path and its content.
+ *
+ * The template lives in the machine-global OS tmpdir, so the name is the only
+ * thing keeping two projects apart. A single fixed name meant the first project
+ * to run on a machine built the template and every other project that day
+ * silently inherited its tables — the file is header-valid, so the staleness
+ * check accepts it and the schema never gets built. Keying on the schema makes
+ * reuse mean "the same schema", which is what the cache was ever for.
+ */
+export function sqliteTemplateName(options: SqliteOptions = {}): string {
+    let fingerprint: string;
+    if (options.prismaSchema) {
+        const path = resolve(options.prismaSchema);
+        fingerprint = `prisma\0${path}\0${schemaBytes(path)}`;
+    } else if (options.init) {
+        const path = resolve(options.init);
+        fingerprint = `init\0${path}\0${schemaBytes(path)}`;
+    } else {
+        fingerprint = 'empty';
+    }
+    const key = createHash('sha256').update(fingerprint).digest('hex').slice(0, 8);
+    return `${TEMPLATE_PREFIX}-${key}.sqlite`;
+}
+
 export class SqliteHandle implements DatabasePort, ServiceHandle {
     readonly type = 'sqlite';
     composeName: null | string = null;
@@ -102,8 +155,10 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     private workerDbPath = '';
     private initSql: null | string;
     private prismaSchema: null | string;
+    private readonly options: SqliteOptions;
 
     constructor(options: SqliteOptions = {}) {
+        this.options = options;
         this.initSql = options.init ?? null;
         this.prismaSchema = options.prismaSchema ?? null;
     }
@@ -121,8 +176,10 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     }
 
     async initialize(): Promise<void> {
-        // Each test run gets a fresh template; workers share it via lock
-        this.templatePath = resolve(tmpdir(), 'jterrazz-test-sqlite-template.sqlite');
+        // One template per SCHEMA, shared by this project's workers via a lock
+        // Keyed on the same digest — a project never waits on, or inherits,
+        // Another project's template (they are different files).
+        this.templatePath = resolve(tmpdir(), sqliteTemplateName(this.options));
         const lockPath = `${this.templatePath}.lock`;
 
         if (existsSync(lockPath)) {
