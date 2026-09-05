@@ -6,7 +6,7 @@ const TEST_SUFFIX = '.test.ts';
 const SPECIFICATION_SUFFIX = '.specification.ts';
 
 /** The shapes a spec tree may declare. */
-export type SpecsDepth = 'facet-domain' | 'mirror' | 'off';
+export type SpecsDepth = 'facet' | 'facet-domain' | 'mirror' | 'off';
 
 type Options = { depth?: SpecsDepth };
 
@@ -33,6 +33,16 @@ const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
  *   (or nested deeper than a domain) is rejected.
  * - a `*.specification.ts` sits at the facet root — exactly
  *   `specs/<facet>/<file>.specification.ts`, never inside a domain.
+ *
+ * `depth: 'facet'`
+ *
+ * The same facet root, one degree looser: the folder follows the assets. A
+ * `*.test.ts` sits EITHER at the facet root (`specs/<facet>/<aspect>.test.ts`)
+ * or one domain folder down (`specs/<facet>/<domain>/<aspect>.test.ts`) — a
+ * test earns a domain folder when it carries assets of its own, and sits
+ * beside its siblings when it does not. Anything deeper is rejected, and so is
+ * a test loose at the specs root. A `*.specification.ts` sits at the facet
+ * root, exactly as in `facet-domain`.
  *
  * `depth: 'mirror'`
  *
@@ -64,6 +74,21 @@ export const c1DomainStructure: LintRule = {
                 const base = anchor.relative.at(-1) ?? '';
                 // Segments strictly between `specs` and the file: [facet, domain, …].
                 const nesting = anchor.relative.length - 1;
+
+                if (depth === 'facet') {
+                    if (base.endsWith(TEST_SUFFIX)) {
+                        if (nesting < 1) {
+                            context.report({ messageId: 'testOutsideFacet', node });
+                        } else if (nesting > 2) {
+                            context.report({ messageId: 'testTooDeepForFacet', node });
+                        }
+                        return;
+                    }
+                    if (base.endsWith(SPECIFICATION_SUFFIX) && nesting !== 1) {
+                        context.report({ messageId: 'specNotAtFacetRoot', node });
+                    }
+                    return;
+                }
 
                 if (depth === 'mirror') {
                     if (!base.endsWith(TEST_SUFFIX)) {
@@ -112,14 +137,18 @@ export const c1DomainStructure: LintRule = {
                 'A `*.test.ts` must live in a directory under specs/ — with `depth: "mirror"` the tree mirrors a structure, and the specs root mirrors nothing (C1 — see docs/10-linting.md).',
             testNotMirroringDirectory:
                 'A `*.test.ts` must be named after the directory holding it — `{{directory}}/{{directory}}.test.ts` — with `depth: "mirror"` (C1 — see docs/10-linting.md).',
+            testOutsideFacet:
+                'A `*.test.ts` must live in a facet folder — `specs/<facet>/<aspect>.test.ts`, or one domain deeper: with `depth: "facet"` the specs root holds facets, not tests (C1 — see docs/10-linting.md).',
             testTooDeep:
                 'A `*.test.ts` must sit at facet/domain depth: `specs/<facet>/<domain>/<aspect>.test.ts` — no deeper nesting (C1 — see docs/10-linting.md).',
+            testTooDeepForFacet:
+                'A `*.test.ts` must sit at the facet root or one domain folder down — `specs/<facet>/<aspect>.test.ts` or `specs/<facet>/<domain>/<aspect>.test.ts`: with `depth: "facet"` nothing nests deeper (C1 — see docs/10-linting.md).',
         },
         schema: [
             {
                 additionalProperties: false,
                 properties: {
-                    depth: { enum: ['facet-domain', 'mirror', 'off'], type: 'string' },
+                    depth: { enum: ['facet', 'facet-domain', 'mirror', 'off'], type: 'string' },
                 },
                 type: 'object',
             },
