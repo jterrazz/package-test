@@ -27,7 +27,15 @@ export interface OrchestratorOptions {
      */
     services: Record<string, ServiceHandle>;
     mode: 'e2e' | 'integration';
-    root?: string;
+    /**
+     * The project root, already resolved. REQUIRED: the constructors derive it
+     * by walking up from the calling specification file (CONVENTIONS A9), and
+     * the orchestrator is handed the answer. Defaulting to `process.cwd()` here
+     * meant one silent second opinion about what the project is — the runner
+     * resolving from the caller, this from wherever the runner happened to be
+     * launched, which in a workspace is rarely the same directory.
+     */
+    root: string;
     /** Compose project name — used for per-worker stack isolation. */
     projectName?: string;
 }
@@ -50,7 +58,7 @@ export class Orchestrator {
     constructor(options: OrchestratorOptions) {
         this.services = options.services;
         this.mode = options.mode;
-        this.root = options.root ?? process.cwd();
+        this.root = options.root;
         this.projectName = options.projectName;
     }
 
