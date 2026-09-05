@@ -385,7 +385,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'i4-no-vi-mock-in-src': {
         channel: 'statique',
         convention:
-            'Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset non-`.ts` depuis un `.test.ts` sont interdits.',
+            'Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset de données (`.json`, `.sql`, `.yaml`, …) depuis un `.test.ts` sont interdits ; un spécifieur pointé (`./dashboard.post`) reste du code.',
         family: 'I',
         id: 'I4',
         rationale:

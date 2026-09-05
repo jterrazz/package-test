@@ -5,6 +5,16 @@ All notable changes to `@jterrazz/test` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **I4 classifies data assets by a known extension list, not by "has a dot".** A
+  `<subject>.<role>` module specifier — `../entities/dashboard.post`,
+  `@scope/kernel/plugin.registry` — was read as a data asset and flagged in every
+  `src/**/*.test.ts`. Only `.json`, `.sql`, `.yaml`, `.png`, … (and their `?raw`
+  suffixed forms) are assets now; anything else is code, dotted or not.
+
 ## [11.0.0] - 2026-08-01
 
 ### Changed
