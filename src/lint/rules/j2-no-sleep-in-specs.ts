@@ -1,4 +1,4 @@
-import { importSourceVisitor, memberPropertyName, segments } from '../ast.js';
+import { importSourceVisitor, isUnderSpecs, memberPropertyName } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
@@ -10,7 +10,7 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
  */
 export const j2NoSleepInSpecs: LintRule = {
     create(context: RuleContext) {
-        if (!segments(context.filename).includes('specs')) {
+        if (!isUnderSpecs(context.filename)) {
             return {};
         }
         const visitor: Visitor = {
