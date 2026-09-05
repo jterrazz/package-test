@@ -182,7 +182,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'Un `*.test.ts` vit à la profondeur facet/domain, un `*.specification.ts` au root de la facette ; toute autre profondeur est une erreur.',
+            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`.',
         family: 'C',
         id: 'C1',
         rationale:
@@ -385,7 +385,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'i4-no-vi-mock-in-src': {
         channel: 'statique',
         convention:
-            'Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset non-`.ts` depuis un `.test.ts` sont interdits.',
+            'Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset de données (`.json`, `.sql`, `.yaml`, …) depuis un `.test.ts` sont interdits ; un spécifieur pointé (`./dashboard.post`) reste du code.',
         family: 'I',
         id: 'I4',
         rationale:

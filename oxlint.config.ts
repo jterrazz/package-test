@@ -17,7 +17,8 @@ import { recommendedRules } from './dist/oxlint.js';
  *   `mockdate`, plus `core/` and `integrations/docker` (the matchers recognise
  *   the zero-dependency ContainerAccessor subject).
  * - `lint/` — zero runtime imports: no external packages, and from `core/` only
- *   the pure helpers (the token list, the case conversions, fixture markers).
+ *   the pure helpers (the token list, the case conversions, fixture markers, the
+ *   root walk a rule must share with the runner).
  *
  * `src/index.ts` is the composition root and names no layer, so it is out of
  * scope; module tests and `*.fixtures.ts` files are governed by F2/I4.
@@ -54,6 +55,8 @@ const FRAMEWORK_LAYERS = {
             'core/matching/match',
             'core/specification/shared/binding',
             'core/specification/shared/fixtures',
+            // A9's rule must derive the root with the framework's own walk, not a copy.
+            'core/specification/shared/resolve',
         ],
     },
     vitest: {
