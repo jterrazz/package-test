@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now `jterrazz-test-sqlite-template-<sha8>.sqlite`, the digest taken over the kind of
   schema, its resolved path and its content; the build lock is per-key too. Editing a
   schema builds a new template instead of reusing the stale one.
+- **I4 classifies data assets by a known extension list, not by "has a dot".** A
+  `<subject>.<role>` module specifier — `../entities/dashboard.post`,
+  `@scope/kernel/plugin.registry` — was read as a data asset and flagged in every
+  `src/**/*.test.ts`. Only `.json`, `.sql`, `.yaml`, `.png`, … (and their `?raw`
+  suffixed forms) are assets now; anything else is code, dotted or not.
 
 ## [11.0.0] - 2026-08-01
 
