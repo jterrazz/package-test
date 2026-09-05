@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and only on a machine without a cached template, so local runs stayed green while CI
   broke. The declared path is now resolved against `process.cwd()` and passed as
   `--schema <absolute path>`. No `prismaSchema`, no flag: discovery still applies.
+- **The sqlite template file is keyed on the schema, not machine-global.** It resolved to a
+  single `$TMPDIR/jterrazz-test-sqlite-template.sqlite` for every project on the machine,
+  and any header-valid file found there was reused as-is — so the first project to run
+  built the template and every other project silently inherited its tables. The name is
+  now `jterrazz-test-sqlite-template-<sha8>.sqlite`, the digest taken over the kind of
+  schema, its resolved path and its content; the build lock is per-key too. Editing a
+  schema builds a new template instead of reusing the stale one.
 
 ## [11.0.0] - 2026-08-01
 
