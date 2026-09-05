@@ -4,7 +4,47 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
 
-import { isValidSqliteTemplate, sqlite } from './sqlite.js';
+import { isValidSqliteTemplate, prismaPushCommand, sqlite } from './sqlite.js';
+
+describe('prismaPushCommand (regression guard)', () => {
+    test('carries --schema with the path resolved against the cwd', () => {
+        // Given - a prismaSchema declared relative to the project root, in a repo whose
+        // Prisma config does NOT sit at the cwd (the exact shape that made the option a
+        // Lie: db push discovered nothing and died with "Could not find Prisma Schema")
+        const declared = 'apps/dashboard/prisma/schema.prisma';
+        const absolute = resolve(process.cwd(), declared);
+
+        // Then - the CLI is told the schema explicitly, as an absolute path
+        const command = prismaPushCommand(declared);
+        expect(command).toBe(`npx prisma db push --force-reset --schema "${absolute}"`);
+        expect(command).toContain('--schema');
+        expect(command).toContain(absolute);
+    });
+
+    test('leaves an already absolute path untouched', () => {
+        // Given - a consumer that resolved the path itself
+        const absolute = resolve(tmpdir(), 'somewhere', 'schema.prisma');
+
+        // Then - resolve() is idempotent: the same absolute path reaches the CLI
+        expect(prismaPushCommand(absolute)).toBe(
+            `npx prisma db push --force-reset --schema "${absolute}"`,
+        );
+    });
+
+    test('quotes a path containing spaces', () => {
+        // Given - a checkout under a directory with a space (execSync runs a shell)
+        const spaced = resolve(tmpdir(), 'my apps', 'schema.prisma');
+
+        // Then - the argument survives as one token
+        expect(prismaPushCommand(spaced)).toContain(`--schema "${spaced}"`);
+    });
+
+    test('without the option, keeps the bare invocation Prisma discovers for itself', () => {
+        // Given - no prismaSchema declared
+        // Then - the command is unchanged, so discovery-based setups keep working
+        expect(prismaPushCommand(null)).toBe('npx prisma db push --force-reset');
+    });
+});
 
 describe('isValidSqliteTemplate (regression guard)', () => {
     const workdir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-guard-'));
