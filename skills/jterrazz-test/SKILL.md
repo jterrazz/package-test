@@ -46,4 +46,4 @@ Assertions in depth: [docs/05-assertions.md](../../docs/05-assertions.md). Servi
 ## Docs (canonical, in-repo)
 
 - Guide chapters under `docs/` and the committed API reference `docs/reference/`.
-- Changelog: <https://github.com/jterrazz/package-test/blob/main/CHANGELOG.md>
+- Releases: <https://github.com/jterrazz/package-test/releases>

@@ -18,35 +18,17 @@ import {
 const ROOT = resolve(import.meta.dirname, '../..');
 const DOCS = resolve(ROOT, 'docs');
 const README = resolve(ROOT, 'README.md');
-const CHANGELOG = resolve(ROOT, 'CHANGELOG.md');
 const INDEX_MODULE = resolve(ROOT, 'src/index.js');
 const TSC_BIN = resolve(ROOT, 'node_modules/typescript/bin/tsc');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 
 /**
- * The body of the newest (top) CHANGELOG release section — the entry documenting
- * the current major's surface. Sliced from its `## [x.y.z]` heading to the next
- * `## [` so historical entries (which describe long-gone APIs) are not checked.
- */
-function latestChangelogSection(): string {
-    const markdown = readFileSync(CHANGELOG, 'utf8');
-    const headings = [...markdown.matchAll(/^## \[[^\]]+\][^\n]*$/gm)];
-    // Skip an `## [Unreleased]` placeholder to reach the first real release.
-    const start = headings.find((match) => !/\[unreleased\]/i.test(match[0]));
-    if (start?.index === undefined) {
-        return '';
-    }
-    const next = headings.find((match) => (match.index ?? 0) > (start.index ?? 0));
-    return markdown.slice(start.index, next?.index ?? markdown.length);
-}
-
-/**
- * Every framework code block published to a consumer: the `docs/` reference, the
- * README headline samples, and the current CHANGELOG release notes. All three
- * are surfaces a stale sample would ship through, so all three are guarded.
+ * Every framework code block published to a consumer: the `docs/` reference and
+ * the README headline samples. Both are surfaces a stale sample would ship
+ * through, so both are guarded.
  */
 function frameworkBlocks(): string[] {
-    const markdowns: string[] = [readFileSync(README, 'utf8'), latestChangelogSection()];
+    const markdowns: string[] = [readFileSync(README, 'utf8')];
     for (const file of readdirSync(DOCS)) {
         if (file.endsWith('.md')) {
             markdowns.push(readFileSync(resolve(DOCS, file), 'utf8'));
@@ -126,7 +108,5 @@ describe('docs-typecheck — harness', () => {
         expect(existsSync(TSC_BIN)).toBe(true);
         expect(existsSync(DOCS)).toBe(true);
         expect(existsSync(README)).toBe(true);
-        expect(existsSync(CHANGELOG)).toBe(true);
-        expect(latestChangelogSection()).not.toBe('');
     });
 });

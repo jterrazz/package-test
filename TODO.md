@@ -1,7 +1,8 @@
 # TODO — roadmap post-v9
 
 Validé avec Jean-Baptiste le 2026-07-18, à la clôture de la campagne v9. Ce fichier est la
-source de vérité du backlog produit ; chaque item livré en sort et entre au CHANGELOG.
+source de vérité du backlog produit ; chaque item livré en sort et entre dans les notes de
+la release GitHub qui le porte.
 
 ---
 
