@@ -234,7 +234,63 @@ export function formatExitCodeError(
 
 // ── Stdout/stderr diff ──
 
-export function formatStdoutDiff(file: string, expected: string, actual: string): string {
+/** Line-level equality for the diff. Defaults to strict string equality. */
+type LineEquals = (expected: string, actual: string) => boolean;
+
+const strictEquals: LineEquals = (expected, actual) => expected === actual;
+
+function renderLines(
+    expectedLines: string[],
+    actualLines: string[],
+    equals: LineEquals,
+): { marked: number; rendered: string[] } {
+    const rendered: string[] = [];
+    let marked = 0;
+    const maxLines = Math.max(expectedLines.length, actualLines.length);
+
+    for (let i = 0; i < maxLines; i++) {
+        const exp = expectedLines[i];
+        const act = actualLines[i];
+
+        if (exp !== undefined && act !== undefined && equals(exp, act)) {
+            // The line MATCHED — render the expected form, which is the one
+            // Carrying the token, and mark nothing.
+            rendered.push(`  ${exp}`);
+            continue;
+        }
+        marked++;
+        if (exp !== undefined) {
+            rendered.push(`${GREEN}- ${exp}${RESET}`);
+        }
+        if (act !== undefined) {
+            rendered.push(`${RED}+ ${act}${RESET}`);
+        }
+    }
+
+    return { marked, rendered };
+}
+
+/**
+ * Render an expected/received diff over two texts.
+ *
+ * `equals` is how a line is judged EQUAL. Callers that compare through the
+ * `{{token}}` grammar pass a token-aware predicate, so a `{{url}}` line that
+ * matched is shown as equal — with its token, not as a `-`/`+` pair against
+ * the concrete URL. Marking a line the comparison ACCEPTED buries the one it
+ * rejected: the reader then has to work out which of the differences is the
+ * actual cause.
+ *
+ * Safety net: if the token-aware pass marks nothing at all, the whole diff
+ * would render as a clean block against a failure that really happened (a
+ * `#ref` captured inconsistently across lines, say). The strict rendering is
+ * used instead, so a diff always shows the reader something.
+ */
+export function formatStdoutDiff(
+    file: string,
+    expected: string,
+    actual: string,
+    options?: { equals?: LineEquals },
+): string {
     const lines: string[] = [];
 
     lines.push(`Output mismatch (${file})`);
@@ -245,25 +301,15 @@ export function formatStdoutDiff(file: string, expected: string, actual: string)
 
     const expectedLines = expected.split('\n');
     const actualLines = actual.split('\n');
-    const maxLines = Math.max(expectedLines.length, actualLines.length);
+    const equals = options?.equals ?? strictEquals;
 
-    for (let i = 0; i < maxLines; i++) {
-        const exp = expectedLines[i];
-        const act = actualLines[i];
+    const first = renderLines(expectedLines, actualLines, equals);
+    const rendered =
+        first.marked === 0 && equals !== strictEquals
+            ? renderLines(expectedLines, actualLines, strictEquals).rendered
+            : first.rendered;
 
-        if (exp === act) {
-            lines.push(`  ${exp}`);
-        } else {
-            if (exp !== undefined) {
-                lines.push(`${GREEN}- ${exp}${RESET}`);
-            }
-            if (act !== undefined) {
-                lines.push(`${RED}+ ${act}${RESET}`);
-            }
-        }
-    }
-
-    return lines.join('\n');
+    return [...lines, ...rendered].join('\n');
 }
 
 // ── Directory diff ──

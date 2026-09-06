@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import { LiterateSyntaxError, parseLiterateFile } from '../core/literate/literate-file.js';
 import { TOKEN_KINDS } from '../core/matching/match.js';
 import {
     checkDatabaseProperty,
@@ -20,7 +21,10 @@ import {
  * - the **HTTP first-line grammar** of depth-1 `requests/*.http` (a request line)
  *   and `expected/*.http` (a status line) (D4b);
  * - **tokens leaking into `requests/`** — requests are inputs, never matched, so
- *   a `{{token}}` there is almost always a mistake (D10, warning).
+ *   a `{{token}}` there is almost always a mistake (D10, warning);
+ * - the **literate `.cli` grammar** wherever a scenario file sits: its narrative
+ *   (B4) and its shape (D4b), read through the runner's own parser, plus the
+ *   token vocabulary of its blocks (D4).
  *
  * It shares TOKEN_KINDS with the runtime matcher so the channels cannot drift.
  */
@@ -53,11 +57,13 @@ const SKIPPED_DIRS = new Set(['.git', 'dist', 'fixtures', 'node_modules']);
  */
 export const CHECKER_PASS_IDS = [
     'a7-database-property',
+    'b4-cli-header',
     'b5-await-using-inference',
     'c9-dead-fixtures',
     'd10w-tokens-in-requests',
     'd4-malformed-ref',
     'd4-unknown-token',
+    'd4b-cli-shape',
     'd4b-http-first-line',
 ] as const;
 
@@ -142,6 +148,49 @@ const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) \/\S*/;
 const STATUS_LINE = /^HTTP\/\d(?:\.\d)? \d{3}\b/;
 
 /**
+ * Check one literate `<case>.cli` file — B4's narrative and D4b's shape
+ * through the SAME parser the runner uses (one grammar, no drift), then D4's
+ * token vocabulary over its BODY only: a `{{token}}` in the header is text,
+ * never a placeholder.
+ *
+ * Precision over recall, as everywhere in this channel: the parser refuses at
+ * the first defect, so one file reports one grammar violation per run.
+ */
+export function checkLiterateFile(text: string, rel: string): TokenViolation[] {
+    const violations: TokenViolation[] = [];
+    let bodyStart = 0;
+    try {
+        const spec = parseLiterateFile(text, rel);
+        bodyStart = spec.headerText.split('\n').length - 1;
+    } catch (error) {
+        if (!(error instanceof LiterateSyntaxError)) {
+            throw error;
+        }
+        const rule = error.defect === 'narrative' ? 'B4' : 'D4b';
+        return [
+            {
+                file: rel,
+                line: error.line,
+                message: `${error.message} (${rule} — see docs/10-linting.md)`,
+                severity: 'error',
+            },
+        ];
+    }
+
+    const body = text.split('\n').slice(bodyStart).join('\n');
+    for (const { line, token } of findUnknownTokens(body)) {
+        violations.push({
+            file: rel,
+            line: line + bodyStart,
+            message: `${rel}:${line + bodyStart}: unknown token ${token} — the D4 vocabulary is frozen (known: ${[...TOKEN_KINDS].join(', ')})`,
+            severity: 'error',
+            token,
+        });
+    }
+    return violations;
+}
+
+/**
  * Walk `rootDir` and check every fixture file. Paths in the result are relative
  * to `rootDir`. Errors fail the checker; warnings are advisory.
  */
@@ -165,6 +214,16 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     ? (entry.name as 'expected' | 'requests')
                     : inside;
                 visit(path, next);
+                continue;
+            }
+            // A literate spec lives BESIDE its test, not under `expected/` —
+            // It is the scenario, not a golden — so it is checked wherever the
+            // Walk finds it.
+            if (entry.name.endsWith('.cli')) {
+                const text = decodeText(path);
+                if (text !== null) {
+                    violations.push(...checkLiterateFile(text, rel));
+                }
                 continue;
             }
             if (inside === null) {

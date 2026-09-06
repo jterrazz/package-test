@@ -1,0 +1,5 @@
+test: a literate spec that forgot to say what it proves
+given: only two of the three narrative lines
+
+$ widget build
+exit: 0

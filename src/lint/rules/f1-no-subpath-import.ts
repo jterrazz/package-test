@@ -1,27 +1,37 @@
 import { importSourceVisitor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
+import { declaredSubpaths } from '../package-exports.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
 const PACKAGE = '@jterrazz/test';
-const TOOL_SUBPATH = '@jterrazz/test/oxlint';
 
 /**
- * CONVENTIONS F1 — everything is imported from `@jterrazz/test`; subpaths do
- * not exist. Sanctioned exception: `@jterrazz/test/oxlint`, the tool-facing,
- * zero-runtime plugin entry — exempt from any file (an oxlint config, a shared
- * preset, whatever wires the lint layer).
+ * CONVENTIONS F1 — everything a SPEC needs is imported from `@jterrazz/test`;
+ * internal subpaths do not exist.
+ *
+ * The exception is not a list kept here: it is the package's own `exports` map
+ * (`/oxlint`, the tool-facing plugin entry; `/vitest`, the runner-config
+ * surface `vitest.config.ts` imports). A published subpath IS the public
+ * contract, so reading the manifest is what keeps the rule from outlawing an
+ * import the package itself prescribes. Each is exempt from any file — an
+ * oxlint config, a shared preset, a vitest config.
  */
 export const f1NoSubpathImport: LintRule = {
     create(context: RuleContext) {
+        const allowed = new Set(declaredSubpaths());
         const visitor: Visitor = {
             ...importSourceVisitor(({ node, source }) => {
-                if (!source.startsWith(`${PACKAGE}/`)) {
+                if (!source.startsWith(`${PACKAGE}/`) || allowed.has(source)) {
                     return;
                 }
-                if (source === TOOL_SUBPATH) {
-                    return;
-                }
-                context.report({ data: { source }, messageId: 'subpath', node });
+                context.report({
+                    data: {
+                        published: allowed.size === 0 ? 'none' : [...allowed].sort().join(', '),
+                        source,
+                    },
+                    messageId: 'subpath',
+                    node,
+                });
             }),
         };
         return visitor;
@@ -30,7 +40,7 @@ export const f1NoSubpathImport: LintRule = {
         docs: RULE_DOCS['f1-no-subpath-import'],
         messages: {
             subpath:
-                'Import from "@jterrazz/test", not "{{source}}" — subpaths do not exist (F1 — see docs/10-linting.md; only the tool-facing @jterrazz/test/oxlint is exempt).',
+                'Import from "@jterrazz/test", not "{{source}}" — internal subpaths do not exist (F1 — see docs/10-linting.md). Published subpaths, exempt everywhere: {{published}}.',
         },
         type: 'problem',
     },

@@ -1,6 +1,6 @@
 import { cpSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../../integrations/msw/intercept.js';
@@ -24,6 +24,11 @@ import type { DevicePort, MobileScenario } from '../../ports/device.port.js';
 import type { ServerPort } from '../../ports/server.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
 import { HttpResult } from '../api/result.js';
+import {
+    type LiterateRunFlags,
+    type LiterateServeRegistration,
+    runLiterateSpec,
+} from '../cli/literate.js';
 import { CliResult } from '../cli/result.js';
 import { ScreenResult } from '../mobile/result.js';
 import { FetchResult, PageResult } from '../website/result.js';
@@ -106,12 +111,24 @@ export interface SpecificationConfig {
      */
     dockerTestRunId?: string;
     /**
+     * Named environment SETS a literate `.cli` header may name by bare word
+     * (`env: frozen`). Declared once per app in `specification.cli()`.
+     */
+    envSets?: Record<string, CliEnv>;
+    /**
      * When set, `.intercept()` is unavailable on this runner and throws this
      * reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
      */
     interceptDisabledReason?: string;
     jobs?: JobHandle[];
+    /** The project root — the working directory a literate `serve:` command runs from. */
+    root?: string;
     server?: ServerPort;
+    /**
+     * Named servers a literate `.cli` header may start (`serve: mcp KEY=value`).
+     * Declared once per app in `specification.cli()`.
+     */
+    serveRegistry?: Record<string, LiterateServeRegistration>;
     /**
      * The declared services record. In cli mode, drives the automatic
      * connection-URL injection into the child env (CONVENTIONS B6):
@@ -227,6 +244,14 @@ export interface CliSpecification<DatabaseKey extends string = string> {
      * timeout.
      */
     exec: (args?: string | string[], options?: ExecOptions) => Promise<CliResult>;
+    /**
+     * Run a literate `<case>.cli` spec — its header (fixtures, env sets,
+     * servers) and every `$` block, each asserted — and resolve with the LAST
+     * block's result, so a `.test.ts` can add an assertion the file cannot
+     * express (a directory golden, a grep). The path is relative to the test
+     * file's own directory, where the `.cli` lives.
+     */
+    run: (file: string, options?: LiterateRunFlags) => Promise<CliResult>;
 }
 
 /**
@@ -519,6 +544,26 @@ export class SpecificationBuilder
             );
         }
         return this.executeCommand({ args, options });
+    }
+
+    /**
+     * Run a literate `<case>.cli` spec and resolve with the LAST block's
+     * result. The whole file runs in ONE working directory with ONE set of
+     * servers, and every block is asserted — unlike `.exec([...])`, a non-zero
+     * exit does not stop the sequence, because here each exit code is part of
+     * what the file states.
+     *
+     * Setup chained BEFORE the call layers underneath the file's own header: a
+     * chained `.fixture()` is copied first, the header's `fixture:` lines over
+     * it, and the header's `env:` wins over a chained `.env()`.
+     *
+     * @example
+     *   const result = await cli.run('no-estate.cli');
+     *   await expect(result.directory('out')).toMatch('scaffold');
+     */
+    run(file: string, options?: LiterateRunFlags): Promise<CliResult> {
+        const workDir = this.prepareWorkDir();
+        return this.executeSetup(workDir, () => this.runLiterateAction(workDir, file, options));
     }
 
     // ── Website actions (terminal) ──
@@ -876,6 +921,41 @@ export class SpecificationBuilder
         return env;
     }
 
+    /**
+     * The environment every child of this chain starts with. Merge order:
+     * injected service URLs (CONVENTIONS B6), then the docker run-id var, then
+     * the chain's own `.env()` — which always wins, `null` unsetting.
+     */
+    private childEnv(workDir: string): CliEnv | undefined {
+        let env: CliEnv | undefined = this.serviceEnv();
+        const dockerConfig = this.config.dockerConfig;
+        if (dockerConfig && this.config.dockerTestRunId) {
+            env = { ...env, [dockerConfig.envVar]: this.config.dockerTestRunId };
+        }
+        const userEnv = this.resolveEnv(workDir);
+        if (userEnv) {
+            env = { ...env, ...userEnv };
+        }
+        return env;
+    }
+
+    private runLiterateAction(
+        workDir: string,
+        file: string,
+        options?: LiterateRunFlags,
+    ): Promise<CliResult> {
+        const filePath = resolve(this.testDir, file);
+        return runLiterateSpec({
+            baseEnv: this.childEnv(workDir),
+            frozen: options?.frozen,
+            config: this.config,
+            displayPath: relative(process.cwd(), filePath) || file,
+            filePath,
+            testDir: this.testDir,
+            workDir,
+        });
+    }
+
     private async runCommandAction(
         workDir: string,
         action: { args: string | string[]; options?: ExecOptions },
@@ -894,16 +974,7 @@ export class SpecificationBuilder
         // Test files get different ids automatically.
         const testRunId = this.config.dockerTestRunId;
 
-        // Merge order: injected service URLs, then the docker run-id env
-        // Var, then user env (which always wins — null unsets).
-        let env: CliEnv | undefined = this.serviceEnv();
-        if (dockerConfig && testRunId) {
-            env = { ...env, [dockerConfig.envVar]: testRunId };
-        }
-        const userEnv = this.resolveEnv(workDir);
-        if (userEnv) {
-            env = { ...env, ...userEnv };
-        }
+        const env = this.childEnv(workDir);
         let commandOutput: CliOutput;
 
         if (action.options) {
@@ -1035,6 +1106,7 @@ export function createCliFacet(config: SpecificationConfig): CliSpecification<st
         env: (env) => start().env(env),
         exec: (args, options) => start().exec(args, options),
         fixture: (path) => start().fixture(path),
+        run: (file, options) => start().run(file, options),
         seed: (file, options) => start().seed(file, options),
     };
 }

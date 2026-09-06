@@ -60,6 +60,11 @@ case "$COMMAND" in
         echo "Fatal: something went wrong" >&2
         exit 2
         ;;
+    backend)
+        # Echoes the URL a literate `serve:` line bound into the child env,
+        # plus the greeting that server was started with.
+        echo "backend ${LITERATE_BACKEND_URL:-unset}"
+        ;;
     env)
         echo "MY_VAR=${MY_VAR:-unset}"
         echo "HOME=${HOME:-unset}"

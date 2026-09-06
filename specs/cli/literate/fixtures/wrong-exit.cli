@@ -1,0 +1,9 @@
+test: a block whose golden exit code is deliberately wrong
+given: a command that fails, and a golden claiming it succeeds
+then: the failure names both codes and shows what stderr carried
+
+$ fail
+exit: 0
+--- stderr
+Starting...
+Fatal: something went wrong

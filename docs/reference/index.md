@@ -62,6 +62,11 @@
 | [JobsHandle](interfaces/JobsHandle.md) | The record returned by [specification.jobs](variables/specification.md#property-jobs). Destructure with the canonical names (CONVENTIONS A3): |
 | [JobsSpecification](interfaces/JobsSpecification.md) | The `jobs` facet — job chain entry handed out by `specification.jobs()`. Jobs run in-process by definition (CONVENTIONS A5/A8). |
 | [JobsSpecificationOptions](interfaces/JobsSpecificationOptions.md) | Options for [specification.jobs](variables/specification.md#property-jobs). |
+| [LiterateBlock](interfaces/LiterateBlock.md) | One `$ <argv>` block: the command, its exit code, and both streams verbatim. |
+| [LiterateHeader](interfaces/LiterateHeader.md) | The header of a literate spec — everything before the first blank line. |
+| [LiterateRunFlags](interfaces/LiterateRunFlags.md) | Per-call options for runLiterateSpec / `cli.run()`. |
+| [LiterateServeRegistration](interfaces/LiterateServeRegistration.md) | A server a literate header may start by name (`serve: mcp KEY=value`), registered once per app in the `serve` option of `specification.cli()`. |
+| [LiterateSpec](interfaces/LiterateSpec.md) | A parsed `<case>.cli` file. |
 | [MatchableRequest](interfaces/MatchableRequest.md) | The observed outgoing request, reduced to what contract matchers inspect. Built once per request by the engine (MSW on api/jobs, the stub backend on website/mobile) and handed to [ContractRequest.match](interfaces/ContractRequest.md#match) and to a [ContractResponder](type-aliases/ContractResponder.md). |
 | [MatchFixtureOptions](interfaces/MatchFixtureOptions.md) | Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a single fixture OUT of update-mode rewriting: a frozen fixture is NEVER written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen mismatch still throws its diff, and a frozen missing fixture still throws its "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the subject of a negative test that asserts the mismatch/error rendering) survivable across update runs instead of being silently overwritten with the actual output. |
 | [MobileBackendOptions](interfaces/MobileBackendOptions.md) | The declared stub backend behind the app under test. The framework owns the simulator and appium but NOT the JS bundler (Metro belongs to the caller's repo, like `next build` belongs to a website's) — so nothing is injected: the handle exposes `backendUrl` and the CALLER wires it into its own bundler env. |
@@ -74,7 +79,7 @@
 | [PostgresOptions](interfaces/PostgresOptions.md) | - |
 | [RedisOptions](interfaces/RedisOptions.md) | - |
 | [ScreenNode](interfaces/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
-| [ServeOptions](interfaces/ServeOptions.md) | Options for the local server started by `specification.website()`. |
+| [ServeOptions](interfaces/ServeOptions.md) | Options for a local server started by the framework. |
 | [ServerPort](interfaces/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
 | [ServerResponse](interfaces/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
 | [ServiceHandle](interfaces/ServiceHandle.md) | A service handle — returned by factory functions like postgres(), redis(). Mutable: connectionString is populated after the orchestrator starts containers. |

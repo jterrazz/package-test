@@ -19,6 +19,7 @@ export default defineConfig([
             catalog: 'src/lint/catalog-cli.ts',
             checker: 'src/lint/checker-cli.ts',
             index: 'src/index.ts',
+            vitest: 'src/vitest/index.ts',
         },
         format: ['esm'],
         hash: false,

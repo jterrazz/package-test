@@ -35,9 +35,10 @@ src/
 │   │   │   └── result/            # BaseResult + read-only accessors (stream, json, filesystem, directory, response, table, grep)
 │   │   ├── api/                   # startApi constructor + HttpResult + fetch adapter
 │   │   ├── jobs/                  # startJobs constructor
-│   │   ├── cli/                   # startCli constructor + CliResult + exec adapter
+│   │   ├── cli/                   # startCli constructor + CliResult + exec adapter + the literate `.cli` engine
 │   │   ├── website/               # startWebsite constructor + FetchResult/PageResult + serve adapter (local server) + element vocabulary (SHARED with mobile)
 │   │   └── mobile/                # startMobile constructor + ScreenResult + simctl simulator resolution + appium server spawn + page-source projection + mobile ambiguity
+│   ├── literate/                  # the `<case>.cli` grammar (parser + serializer) — pure text, read by the runner AND by the lint checker
 │   ├── matching/                  # match.* vocabulary + {{token}} structural comparison engine
 │   ├── http-files/                # requests/*.http + expected/*.http (responses) parser/serializer
 │   ├── contracts/                 # defineContract/defineContracts + contract types + ContractQueue (the ONE selection engine) + generic http provider + provider text filters (no external dep)
@@ -51,7 +52,7 @@ src/
 │   ├── appium/                    # XCUITest device adapter (webdriverio) for specification.mobile() — optional peer dep, lazily imported
 │   ├── msw/                       # contract registration engine (drives core's ContractQueue)
 │   └── openai/  └── anthropic/    # intercept providers
-├── vitest/                        # ALL runner coupling: expect() matchers, TEST_UPDATE / -u detection, mockOf, mockOfDate
+├── vitest/                        # ALL runner coupling: expect() matchers, TEST_UPDATE / -u detection, mockOf, mockOfDate + index.ts, the `@jterrazz/test/vitest` subpath exporting the literate() vite plugin (imported by vitest.config.ts, never by a spec)
 └── lint/                          # tool-facing static channel (I1: zero runtime imports): oxlint plugin (dist/oxlint.js) — one file per jterrazz/<rule> under rules/ (each carries its normative text as meta.docs from manifest.ts) + ast/fs-cache helpers, D4 conventions checker (checker.ts + dist/checker.js CLI), catalogue manifest + generator (manifest.ts is the SOURCE OF TRUTH for the mechanized catalogue; catalog.ts → dist/catalog.js regenerates the docs/10-linting.md catalogue + skills/jterrazz-test/references/rules.md), catalogue freshness+completeness meta-test (plugin.test.ts)
 specs/                             # ONLY product specifications (I2), written with @jterrazz/test
 # LAYOUT (rule C1'): specs/<facet>/ carries its runner(s) at the ROOT (specs/<facet>/<name>.specification.ts);
@@ -61,7 +62,7 @@ specs/                             # ONLY product specifications (I2), written w
 # named GROUP folder (e.g. specs/lint/hygiene/j5-lowercase-title.test.ts).
 ├── api/                           # api facet: api.specification.ts + intercepts.specification.ts at root; domains: assertions, intercepts (D7, node-only), lifecycle, requests, responses, seeding
 ├── jobs/                          # jobs facet: jobs.specification.ts (factory) + static-jobs.specification.ts (array) at root; domain: triggering
-├── cli/                           # cli facet: cli.specification.ts + db/docker/transform/asymmetric-transform runners at root; domains: assertions, directory, docker, env, exec, seeding, tokens
+├── cli/                           # cli facet: cli.specification.ts + db/docker/transform/asymmetric-transform/literate runners at root; domains: assertions, directory, docker, env, exec, literate (the .cli format, run through BOTH doors), seeding, tokens
 ├── website/                       # website facet: website.specification.ts at root; domains: behavior (visit scenarios), visit (head/jsonLd goldens), fetch (raw exchanges), console (streams) — needs playwright chromium, no Docker
 ├── integrations/                  # per-dependency tests: container-logs, initiation-errors, orchestrator, postgres, redis — Docker required, sequential
 ├── lint/                          # E2E lint facet: lint.specification.ts + checker.specification.ts at root; tests grouped by CONVENTIONS family: runners/ chains/ files/ assertions/ imports/ architecture/ hygiene/ checker/ (needs npm run build first)
@@ -101,7 +102,7 @@ This package self-tests via its own framework. Tests under `specs/cli/` use `spe
 
 ## Docs
 
-- `docs/` — narrative chapters, numbered: `01` getting-started, `02` api, `03` jobs, `04` cli, `05` assertions, `06` tokens, `07` contracts, `08` services, `09` conventions, `10` linting, `11` website, `12` mobile (each ends with Pitfalls + Related)
+- `docs/` — narrative chapters, numbered: `01` getting-started, `02` api, `03` jobs, `04` cli (incl. the literate `<case>.cli` format), `05` assertions, `06` tokens, `07` contracts, `08` services, `09` conventions, `10` linting, `11` website, `12` mobile (each ends with Pitfalls + Related)
 - `npm run docs` regenerates the two committed projections: the API reference (`docs/reference/`, typedoc via `typescript docs` — a code → docs cross-layer projection) and the rule catalogue (`docs/10-linting.md` + `skills/jterrazz-test/references/rules.md`, spliced from `src/lint/manifest.ts`). Both are sync-checked: `npm run lint` runs `docs --check` (the Docs sync pass) + the catalogue freshness meta-test — both must hold after one `npm run docs`
 - Docs are committed and consumed in-repo (chapters under `docs/`, the API reference under `docs/reference/`, agent routing via `skills/jterrazz-test/`); there is no rendered site and nothing is published from `docs/`
 - **Standing instruction (rule K1): a discovery — new edge case, defect, behavior change — grows a guard (static rule / meta-test / runtime error) that stops it recurring, in the same change.** A mechanized rule goes into `src/lint/manifest.ts` (+ its implementation), then `npm run docs` regenerates the `docs/10-linting.md` catalogue + `skills/jterrazz-test/references/rules.md`; a new principle or non-mechanizable criterion goes into the `docs/09-conventions.md` constitution. Update `docs/` alongside. When the public API changes, also update `README.md`, `skills/jterrazz-test/SKILL.md` + its `references/`.

@@ -2,7 +2,7 @@
 name: jterrazz-test
 description: Testing conventions for @jterrazz projects — unit/integration/e2e structure, vitest, testcontainers, golden files, mocks. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain unit test included.
 metadata:
-    version: '9.0'
+    version: '9.1'
 ---
 
 # `@jterrazz/test`
@@ -11,8 +11,10 @@ The ecosystem's declarative testing framework for HTTP APIs, background jobs, CL
 
 ## Mental model (read once)
 
+- **One import point** — everything a spec needs comes from `@jterrazz/test` (F1). The only other importable specifiers are the two TOOL subpaths the package publishes: `@jterrazz/test/oxlint` (lint plugin) and `@jterrazz/test/vitest` (what `vitest.config.ts` imports). Piloting an unreleased branch: install a `npm pack` tarball, never a `file:` link.
 - **Five constructors, only five** — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()`. Created in a `*.specification.ts` file at the facet root, destructured with the canonical name (`{ api, cleanup }` / `{ jobs, cleanup }` / `{ cli, cleanup }` / `{ website, cleanup }` / `{ mobile, cleanup }`, no aliasing), always `afterAll(cleanup)`.
-- **Terminal actions** — `.request()` / `.get()` (api), `.trigger()` (jobs), `.exec()` (cli), `.fetch()` / `.visit()` (website), `.open()` (mobile) execute the chain and resolve to a typed result. Setups (`.seed()`, `.fixture()`, `.env()`, `.headers()`, `.intercept()`) chain before them. No `.run()`, no label, no `.spawn()`. One chain = one action; databases reset each chain.
+- **Terminal actions** — `.request()` / `.get()` (api), `.trigger()` (jobs), `.exec()` and `.run()` (cli), `.fetch()` / `.visit()` (website), `.open()` (mobile) execute the chain and resolve to a typed result. Setups (`.seed()`, `.fixture()`, `.env()`, `.headers()`, `.intercept()`) chain before them. No label, no `.spawn()`. One chain = one action; databases reset each chain.
+- **A CLI session can BE the file** — a literate `<case>.cli` states one scenario (a `test:`/`given:`/`then:` header, then `$ <argv>` blocks with their exit codes and streams) and runs either as a test file of its own (the `literate()` vite plugin) or through `cli.run('case.cli')`. Same engine as the chain, same tokens, same `TEST_UPDATE=1`.
 - **Every assertion goes through `expect()`** — accessors (`result.stdout`, `result.response`, `result.table(...)`, `result.file(...)`) are read-only; the matchers are registered on vitest's `expect`. `await` exactly the IO matchers (`toMatchRows`, `toBeEmpty`, `toBeRunning`, `toMatch` on tree subjects); everything else is sync.
 - **Goldens first (D11)** — snapshot the whole surface per scoped use case (`expect(x).toMatch('case.http'|'case.txt')`, tokens for volatile parts, `TEST_UPDATE=1` to generate). `.grep()` / `toContain` are the scalpel for targeted probes, not the default.
 - **One verb per state** — `.seed()` is SQL-only (database state); `.fixture(path)` is the one file-state verb (copies into the cwd). No `.project()`, no seed handlers.
@@ -47,6 +49,7 @@ Load the one reference that matches the task; each also names the docs chapter c
 | Writing **API** specs (HTTP, node vs compose)       | [references/api.md](references/api.md)                         | [docs/02-api.md](../../docs/02-api.md)                                        |
 | Writing **jobs** specs (background pipelines)       | [references/jobs.md](references/jobs.md)                       | [docs/03-jobs.md](../../docs/03-jobs.md)                                      |
 | Writing **CLI** specs (exec, env, fixtures, docker) | [references/cli.md](references/cli.md)                         | [docs/04-cli.md](../../docs/04-cli.md)                                        |
+| Writing **literate** CLI scenarios (`<case>.cli`)   | [references/cli.md](references/cli.md)                         | [docs/04-cli.md](../../docs/04-cli.md)                                        |
 | Writing **website** specs (fetch, visit, scenarios) | [references/website.md](references/website.md)                 | [docs/11-website.md](../../docs/11-website.md)                                |
 | Writing **mobile** specs (open, simulator, screens) | [references/mobile.md](references/mobile.md)                   | [docs/12-mobile.md](../../docs/12-mobile.md)                                  |
 | **Dynamic values** / the `{{token}}` grammar        | [references/tokens.md](references/tokens.md)                   | [docs/06-tokens.md](../../docs/06-tokens.md)                                  |

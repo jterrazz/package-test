@@ -108,7 +108,15 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
     if (textEquals(expected, actual, accessor.captures)) {
         return PASS(`expected ${accessor.streamName} not to match expected/${name}`);
     }
-    return FAIL(formatStdoutDiff(name, expected, actual));
+    // The diff judges each line through the SAME grammar the comparison used,
+    // So a token line that matched is shown as equal instead of competing with
+    // The real mismatch for the reader's attention.
+    return FAIL(
+        formatStdoutDiff(name, expected, actual, {
+            equals: (expectedLine, actualLine) =>
+                textEquals(expectedLine, actualLine, new CaptureScope(accessor.captures.workdir)),
+        }),
+    );
 }
 
 function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): MatcherResult {

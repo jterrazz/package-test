@@ -56,8 +56,9 @@ const cliMatrix = {
     env: 'setup',
     fixture: 'setup',
     seed: 'setup',
-    // Action (terminal).
+    // Actions (terminal).
     exec: 'action',
+    run: 'action',
 } satisfies Record<keyof CliSpecification, FacetRole>;
 
 describe('facet capability matrix (K1 guard)', () => {
@@ -84,6 +85,6 @@ describe('facet capability matrix (K1 guard)', () => {
             'request',
         ]);
         expect(methodsByRole(jobsMatrix, 'action')).toEqual(['trigger']);
-        expect(methodsByRole(cliMatrix, 'action')).toEqual(['exec']);
+        expect(methodsByRole(cliMatrix, 'action')).toEqual(['exec', 'run']);
     });
 });

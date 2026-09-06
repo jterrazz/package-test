@@ -1,0 +1,12 @@
+test: start runs what build wrote in the same working directory
+given: the shared cli app spread into one working directory
+then: build succeeds, then start finds the bundle build left behind
+fixture: $FIXTURES/cli-app/
+
+$ build
+exit: 0
+Build completed
+
+$ start
+exit: 0
+Hello from CLI app

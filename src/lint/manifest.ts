@@ -137,7 +137,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'b4-given-then': {
         channel: 'statique',
         convention:
-            'Chaque test contient `// Given -` puis `// Then -` (les deux, dans cet ordre) ; Given déclaré après Then est une erreur.',
+            'Chaque test contient `// Given -` puis `// Then -` (les deux, dans cet ordre) ; Given déclaré après Then est une erreur. Dans un spec littéraire `<cas>.cli`, les deux marqueurs sont les lignes `given:` et `then:` de l’en-tête (passe checker `b4-cli-header`).',
         family: 'B',
         id: 'B4',
         rationale:
@@ -324,7 +324,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'f1-no-subpath-import': {
         channel: 'statique',
         convention:
-            'Tout s’importe depuis `@jterrazz/test` ; un import de `@jterrazz/test/<subpath>` est une erreur, sauf le subpath tool-facing `@jterrazz/test/oxlint` (exempté partout).',
+            'Tout s’importe depuis `@jterrazz/test` ; un import de `@jterrazz/test/<subpath>` est une erreur, sauf les subpaths que la map `exports` du paquet publie — `@jterrazz/test/oxlint` (plugin de lint) et `@jterrazz/test/vitest` (surface de configuration du runner) — exemptés partout. La liste est LUE du manifeste, jamais recopiée dans la règle.',
         family: 'F',
         id: 'F1',
         rationale:
@@ -465,7 +465,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Tout `{{token}}` dans une fixture `expected/` appartient au vocabulaire figé ; un token inconnu est une erreur.',
+            'Tout `{{token}}` dans une fixture `expected/` — ou dans les blocs d’un spec littéraire `<cas>.cli` — appartient au vocabulaire figé ; un token inconnu est une erreur.',
         family: 'D',
         id: 'D4',
         name: 'd4-unknown-token',
@@ -495,6 +495,26 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            'Un spec littéraire `<cas>.cli` respecte sa grammaire : clés d’en-tête fermées (`test`, `given`, `then`, `fixture`, `env`, `serve`), première ligne de corps en `$ <commande>`, `exit: <entier>` juste après.',
+        family: 'D',
+        id: 'D4b',
+        name: 'd4b-cli-shape',
+        rationale:
+            'La grammaire est lue par le parseur du runner lui-même : le fichier que le lint accepte est exactement celui que le runner exécute.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Un spec littéraire `<cas>.cli` porte les trois lignes narratives `test:`, `given:` et `then:` ; il en manque une est une erreur.',
+        family: 'B',
+        id: 'B4',
+        name: 'b4-cli-header',
+        rationale:
+            'Le format littéraire est un test : la narration Given/Then y vit dans l’en-tête, pas dans des commentaires.',
+    },
+    {
+        channel: 'checker',
+        convention:
             'Un token connu dans un fichier sous `requests/` → warning : les requêtes sont des entrées, jamais matchées.',
         family: 'D',
         id: 'D10',
@@ -505,7 +525,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Aucune fixture morte : tout fichier sous `seeds/`/`requests/`/`fixtures/` et toute entrée de premier niveau de `expected/` doit être référencée ; un dossier de feature sans `*.test.ts` est orphelin (warning si argument non littéral).',
+            'Aucune fixture morte : tout fichier sous `seeds/`/`requests/`/`fixtures/` et toute entrée de premier niveau de `expected/` doit être référencée ; un dossier de feature sans `*.test.ts` ni `*.cli` est orphelin (warning si argument non littéral). Un `<cas>.cli` référence les fixtures nommées par ses lignes `fixture:`.',
         family: 'C',
         id: 'C9',
         name: 'c9-dead-fixtures',
