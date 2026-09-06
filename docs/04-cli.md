@@ -26,8 +26,8 @@ afterAll(cleanup);
 | `root`      | **Project-root override** only (rule A9): anchors compose detection + local-bin resolution. It is _not_ a fixtures root — `.fixture()` resolves paths on its own. Auto-discovery applies when omitted                                         |
 | `services`  | Named record of infrastructure services (`postgres()`, `redis()`, `sqlite()`) — connection URLs are auto-injected into the child env (rule B6)                                                                                                |
 | `docker`    | Opt-in Docker awareness: `{ envVar, nameLabel, testRunLabel }` — see [Docker-aware mode](#docker-aware-mode)                                                                                                                                  |
-| `env`       | Named **environment sets** a literate `.cli` header names by bare word (`env: frozen`) — see [Literate specs](#literate-specs--casecli)                                                                                                       |
-| `serve`     | Named **servers** a literate `.cli` header starts (`serve: mcp`): `{ command, ready, url, env }` — see [Literate specs](#literate-specs--casecli)                                                                                             |
+| `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`) — see [Spec documents](#spec-documents--casespecyaml)                                                                                                         |
+| `serve`     | Named **servers** a spec document starts (`serve: [mcp]`): `{ command, ready, url, env }` — see [Spec documents](#spec-documents--casespecyaml)                                                                                               |
 | `transform` | **Escape hatch only** (rule D6): a normalizer applied to streams before comparison, for application noise not covered by tokens. ANSI stripping is already the default; a transform that only re-implements standard tokens is a lint warning |
 
 ## `.exec()` — the single execution method
