@@ -131,18 +131,26 @@ Verify the service is ready and accepting connections. Throws with context if no
 ### initialize
 
 ```ts
-initialize: (composeDir) => Promise<void>;
+initialize: (composeDir, root) => Promise<void>;
 ```
 
-Defined in: [core/ports/service.port.ts:47](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L47)
+Defined in: [core/ports/service.port.ts:56](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L56)
 
-Run initialization scripts (e.g., init.sql). Throws with SQL error context if it fails.
+Run initialization scripts (e.g., init.sql). Throws with SQL error
+context if it fails.
+
+`composeDir` is where the compose file lives — where a service reads its
+`init.sql` from. `root` is the project root the specification resolved
+(A9), handed down so a service that CACHES something writes it under the
+project's own `.artifacts/`, never in a machine-global directory two
+checkouts would share.
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
 | `composeDir` | `string` |
+| `root` | `string` |
 
 #### Returns
 
@@ -156,7 +164,7 @@ Run initialization scripts (e.g., init.sql). Throws with SQL error context if it
 isolation: () => IsolationStrategy;
 ```
 
-Defined in: [core/ports/service.port.ts:53](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L53)
+Defined in: [core/ports/service.port.ts:62](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L62)
 
 Get the isolation strategy for parallel test execution.
 
@@ -172,7 +180,7 @@ Get the isolation strategy for parallel test execution.
 reset: () => Promise<void>;
 ```
 
-Defined in: [core/ports/service.port.ts:50](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L50)
+Defined in: [core/ports/service.port.ts:59](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L59)
 
 Reset state between tests (truncate tables, flush cache, etc.)
 

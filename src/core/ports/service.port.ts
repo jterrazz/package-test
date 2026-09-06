@@ -43,8 +43,17 @@ export interface ServiceHandle {
     /** Verify the service is ready and accepting connections. Throws with context if not. */
     healthcheck: () => Promise<void>;
 
-    /** Run initialization scripts (e.g., init.sql). Throws with SQL error context if it fails. */
-    initialize: (composeDir: string) => Promise<void>;
+    /**
+     * Run initialization scripts (e.g., init.sql). Throws with SQL error
+     * context if it fails.
+     *
+     * `composeDir` is where the compose file lives — where a service reads its
+     * `init.sql` from. `root` is the project root the specification resolved
+     * (A9), handed down so a service that CACHES something writes it under the
+     * project's own `.artifacts/`, never in a machine-global directory two
+     * checkouts would share.
+     */
+    initialize: (composeDir: string, root: string) => Promise<void>;
 
     /** Reset state between tests (truncate tables, flush cache, etc.) */
     reset: () => Promise<void>;

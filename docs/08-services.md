@@ -115,7 +115,19 @@ export const { cli, cleanup } = await specification.cli('shoply', {
 
 `prismaSchema` is resolved against the **current working directory** and passed to the CLI as `npx prisma db push --force-reset --schema <absolute path>` — the schema is named explicitly, so it does not have to be the one Prisma would discover from a `prisma.config.ts` at the cwd. Declare no `prismaSchema` and the bare invocation runs, leaving discovery to Prisma.
 
-The template file lives in the OS tmpdir, and its name is **keyed on the schema**: `jterrazz-test-sqlite-template-<sha8>.sqlite`, the digest taken over the kind of schema (`init` / `prismaSchema`), its resolved path and its content. Every project on the machine therefore builds its own template, editing a schema builds a new one, and the lock that serialises the build is per-key too.
+### Where the template lives
+
+The template is a **project** artefact: `<root>/.artifacts/vitest/sqlite/template-<sha8>.sqlite`, under the root A9 discovered ([above](#root-auto-discovery-rule-a9)) and covered by the same `.gitignore` line as everything else in `.artifacts/` ([01 — Getting started](01-getting-started.md#artefacts-live-under-artifacts)).
+
+It used to live in the machine-global OS tmpdir, where two checkouts of one repository shared a single file: whichever ran first built it, the other silently inherited that schema, and a branch that changed the schema poisoned the branch beside it. A path under the project root cannot be reached from another checkout at all. Deleting `.artifacts/` is how you force a cold rebuild.
+
+The file name stays **keyed on the schema** — the digest taken over the kind of schema (`init` / `prismaSchema`), its resolved path and its content. Within one project that is what makes reuse mean "the same schema": edit a schema and the next run builds a new template instead of reading the old one, whose header is perfectly valid and whose tables are wrong.
+
+### One worker builds, the others wait
+
+Workers race for a cold cache, so the build is serialised by a lock beside the template — and a worker that loses the race **waits** for the winner rather than building too. It is taken with an exclusive create, so exactly one worker can win it; the check-then-write it replaced let several believe they had won, and the concurrent `prisma db push` calls that followed died on `database is locked`. A suite kept sequential (`fileParallelism: false`) only for that reason can go parallel again.
+
+Two more properties fall out of it: the winner builds on a private path and **renames** the finished file into place, so a reader never sees a half-built template (the SQLite header is written long before the tables are); and a lock nobody has touched for two minutes is treated as a crashed holder's and broken, so a killed worker cannot wedge the suite.
 
 ## Pitfalls
 
@@ -124,7 +136,7 @@ The template file lives in the OS tmpdir, and its name is **keyed on the schema*
 - **Naming the `init.sql` folder after the record key.** The folder matches the **compose service name**: key `analyticsDb` binds to `analytics-db`, so its schema reads `docker/analytics-db/init.sql`.
 - **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule B1), and workers are isolated (rule G2).
 - **Passing `root` that auto-discovery would have found.** Redundant override (rule A9).
-- **Reading a green local run as proof that `prismaSchema` is wired.** The template is cached in the OS tmpdir across runs, so a machine that built it once never re-runs `db push` — a schema path that would fail on a fresh machine (or in CI) stays invisible. Delete `$TMPDIR/jterrazz-test-sqlite-template-*.sqlite` to test the cold path.
+- **Reading a green local run as proof that `prismaSchema` is wired.** The template is cached across runs, so a checkout that built it once never re-runs `db push` — a schema path that would fail on a fresh clone (or in CI) stays invisible. Delete `.artifacts/vitest/sqlite/` to test the cold path.
 - **Counting `sqlite()` + `redis()` as "2 databases" for rule A7.** The rule counts **databases**; with one SQL database and one redis, `database:` stays forbidden on `.seed()`/`.table()` and `DATABASE_URL`/`REDIS_URL` are both unambiguous for CLI injection (rule B6).
 
 ## Related

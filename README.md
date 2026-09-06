@@ -438,9 +438,11 @@ test('deploy spawns a labelled container', async () => {
 | ------------ | -------------------------------- | ------------------------------------- |
 | `postgres()` | `composeService`, `image`, `env` | `postgresql://user:pass@host:port/db` |
 | `redis()`    | `composeService`, `image`        | `redis://host:port`                   |
-| `sqlite()`   | `init` or `prismaSchema`         | `file:/tmp/....sqlite`                |
+| `sqlite()`   | `init` or `prismaSchema`         | `file:/…/….sqlite`                    |
 
 `docker/compose.test.yaml` is the single source of truth for test infrastructure; `docker/<service>/init.sql` runs when the corresponding service starts. Parallel isolation is automatic per vitest worker: postgres clones a schema, redis assigns a database index, sqlite copies the template file, compose mode gets a dedicated project.
+
+`sqlite()` caches its schema template inside the project — `.artifacts/vitest/sqlite/template-<key>.sqlite` — so two checkouts never share one, and workers racing for a cold cache wait for the one that is building rather than all building at once. Details: [docs/08-services.md](docs/08-services.md#where-the-template-lives).
 
 ## Mocking utilities
 
