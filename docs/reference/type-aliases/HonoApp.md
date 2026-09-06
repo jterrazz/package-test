@@ -5,7 +5,7 @@
 type HonoApp = object;
 ```
 
-Defined in: core/specification/api/start-api.ts:26
+Defined in: [core/specification/api/start-api.ts:26](https://github.com/jterrazz/package-test/blob/main/src/core/specification/api/start-api.ts#L26)
 
 Any object with a request method compatible with Hono's app.request().
 
@@ -17,7 +17,7 @@ Any object with a request method compatible with Hono's app.request().
 request: (path, init?) => Promise<Response> | Response;
 ```
 
-Defined in: core/specification/api/start-api.ts:27
+Defined in: [core/specification/api/start-api.ts:27](https://github.com/jterrazz/package-test/blob/main/src/core/specification/api/start-api.ts#L27)
 
 #### Parameters
 

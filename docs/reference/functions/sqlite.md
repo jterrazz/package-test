@@ -5,7 +5,7 @@
 function sqlite(options?): SqliteHandle;
 ```
 
-Defined in: integrations/sqlite/sqlite.ts:334
+Defined in: [integrations/sqlite/sqlite.ts:334](https://github.com/jterrazz/package-test/blob/main/src/integrations/sqlite/sqlite.ts#L334)
 
 Create a SQLite service handle. Uses file-copy isolation for parallel tests.
 

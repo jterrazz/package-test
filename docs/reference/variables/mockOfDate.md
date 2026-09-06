@@ -5,7 +5,7 @@
 const mockOfDate: MockDatePort = MockDatePackage;
 ```
 
-Defined in: vitest/mock-of-date.ts:15
+Defined in: [vitest/mock-of-date.ts:15](https://github.com/jterrazz/package-test/blob/main/src/vitest/mock-of-date.ts#L15)
 
 Freeze or reset the global Date for deterministic time-dependent tests.
 Wraps the `mockdate` package.

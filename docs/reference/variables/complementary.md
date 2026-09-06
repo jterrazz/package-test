@@ -5,7 +5,7 @@
 const complementary: (name?, options?) => ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:72
+Defined in: [core/specification/website/elements.ts:72](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L72)
 
 The `complementary` landmark — an `<aside>`, a sidebar.
 

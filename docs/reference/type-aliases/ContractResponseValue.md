@@ -7,7 +7,7 @@ type ContractResponseValue =
   | ContractResponse;
 ```
 
-Defined in: core/contracts/types.ts:65
+Defined in: [core/contracts/types.ts:65](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L65)
 
 What a contract replies with: either a fixed [ContractResponse](../interfaces/ContractResponse.md) or a
 [ContractResponder](ContractResponder.md) evaluated per served request.

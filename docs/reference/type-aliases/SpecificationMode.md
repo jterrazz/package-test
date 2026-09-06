@@ -5,6 +5,6 @@
 type SpecificationMode = "compose" | "node";
 ```
 
-Defined in: core/specification/api/start-api.ts:31
+Defined in: [core/specification/api/start-api.ts:31](https://github.com/jterrazz/package-test/blob/main/src/core/specification/api/start-api.ts#L31)
 
 Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5).

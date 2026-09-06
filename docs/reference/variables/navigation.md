@@ -5,7 +5,7 @@
 const navigation: (name?, options?) => ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:84
+Defined in: [core/specification/website/elements.ts:84](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L84)
 
 The `navigation` landmark — a `<nav>`. Name it when a page has several.
 

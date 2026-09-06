@@ -5,7 +5,7 @@
 const contentinfo: (name?, options?) => ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:75
+Defined in: [core/specification/website/elements.ts:75](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L75)
 
 The `contentinfo` landmark — the page footer.
 

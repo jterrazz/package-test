@@ -5,7 +5,7 @@
 type MockPort = <T>() => DeepMockProxy<T>;
 ```
 
-Defined in: vitest/mock-of.ts:4
+Defined in: [vitest/mock-of.ts:4](https://github.com/jterrazz/package-test/blob/main/src/vitest/mock-of.ts#L4)
 
 Factory signature that creates a deep mock proxy for any interface.
 

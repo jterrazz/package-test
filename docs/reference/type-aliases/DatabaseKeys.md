@@ -5,7 +5,7 @@
 type DatabaseKeys<Services> = { [K in keyof Services]: Services[K] extends DatabasePort ? K & string : never }[keyof Services];
 ```
 
-Defined in: core/specification/shared/services.ts:15
+Defined in: [core/specification/shared/services.ts:15](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/services.ts#L15)
 
 Keys of a services record whose handles are databases.
 

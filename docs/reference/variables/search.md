@@ -5,7 +5,7 @@
 const search: (name?, options?) => ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:90
+Defined in: [core/specification/website/elements.ts:90](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L90)
 
 The `search` landmark.
 

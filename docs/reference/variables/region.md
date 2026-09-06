@@ -5,7 +5,7 @@
 const region: (name?, options?) => ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:87
+Defined in: [core/specification/website/elements.ts:87](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L87)
 
 The `region` landmark — a `<section>` carrying an accessible name.
 

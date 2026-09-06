@@ -5,7 +5,7 @@
 const button: (name, options?) => ElementRef;
 ```
 
-Defined in: core/specification/website/elements.ts:36
+Defined in: [core/specification/website/elements.ts:36](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L36)
 
 A button (or element with the button role), by accessible name.
 

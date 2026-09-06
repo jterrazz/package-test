@@ -5,7 +5,7 @@
 function removeContainers(ids): void;
 ```
 
-Defined in: integrations/docker/docker-lookup.ts:39
+Defined in: [integrations/docker/docker-lookup.ts:39](https://github.com/jterrazz/package-test/blob/main/src/integrations/docker/docker-lookup.ts#L39)
 
 Force-remove the given container IDs in a single call. Errors are swallowed.
 
