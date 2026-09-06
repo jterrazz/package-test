@@ -1,0 +1,6 @@
+description: runs a command and proves nothing about it
+runs:
+    - command: widget build
+      exit: 0
+      stdout: |
+          {{any}}

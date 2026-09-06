@@ -48,7 +48,11 @@ describe('package-exports — F1 reads the published contract', () => {
         // Given - the framework linting itself, resolved from this module
         const subpaths = declaredSubpaths();
 
-        // Then - both published surfaces are exempt, and nothing else is
-        expect(subpaths).toEqual(['@jterrazz/test/oxlint', '@jterrazz/test/vitest']);
+        // Then - every published surface is exempt, and nothing else is
+        expect(subpaths).toEqual([
+            '@jterrazz/test/oxlint',
+            '@jterrazz/test/schema',
+            '@jterrazz/test/vitest',
+        ]);
     });
 });

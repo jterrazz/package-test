@@ -1,0 +1,7 @@
+description: carries a key outside the closed set
+when: the widget is built
+runs:
+    - command: widget build
+      exit: 0
+      stdout: |
+          Built.

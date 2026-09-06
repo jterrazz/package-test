@@ -4,12 +4,12 @@ Real systems generate UUIDs, timestamps, ports, and paths. The framework handles
 
 ## Where tokens work
 
-| Fixture kind   | Files                                                                   | Coverage                                                           |
-| -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| HTTP responses | `expected/*.http`                                                       | **body and headers**                                               |
-| JSON snapshots | `expected/*.json`                                                       | any string value                                                   |
-| Text snapshots | `expected/*.txt` (and other text files under `expected/`)               | anywhere in the text                                               |
-| Literate specs | `<case>.cli`, beside the spec ([04](04-cli.md#literate-specs--casecli)) | both streams of every block — **never the header**, which is prose |
+| Fixture kind   | Files                                                                              | Coverage                                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| HTTP responses | `expected/*.http`                                                                  | **body and headers**                                                                                           |
+| JSON snapshots | `expected/*.json`                                                                  | any string value                                                                                               |
+| Text snapshots | `expected/*.txt` (and other text files under `expected/`)                          | anywhere in the text                                                                                           |
+| Spec documents | `<case>.spec.yaml`, beside the spec ([04](04-cli.md#spec-documents--casespecyaml)) | both streams of every run, and `files:` assertions — **never the description or the command**, which are prose |
 
 ```http
 ### expected/order-created.http — tokens in a header AND the body
@@ -163,7 +163,7 @@ Done in {{duration}}
 
 `TEST_UPDATE=1` leaves the fixture byte-identical: every changed segment was already covered by a token. If the CLI adds a new line `Cache dir: /tmp/shoply-spec-x9y8z7/.cache`, the update writes `Cache dir: {{workdir}}/.cache` — `{{workdir}}` is substituted automatically; a timestamp in a _new_ line would be written literally, for you to tokenize by hand (or it will fail on the next run, which is the signal).
 
-The same preservation and `{{workdir}}` substitution apply identically across every fixture kind — text snapshots (`expected/*.txt`), JSON goldens (`expected/*.json`), `.http` response bodies (`expected/*.http`), and the streams of a literate `<case>.cli` (whose HEADER an update never rewrites). A cwd embedded in a JSON string value is written back as `{{workdir}}` exactly as it is in a text line, so an updated JSON golden matches the next run's (different) cwd instead of pinning a run-specific temp path.
+The same preservation and `{{workdir}}` substitution apply identically across every fixture kind — text snapshots (`expected/*.txt`), JSON goldens (`expected/*.json`), `.http` response bodies (`expected/*.http`), and the streams of a `<case>.spec.yaml` (whose ground, commands and `files:` an update never rewrites). A cwd embedded in a JSON string value is written back as `{{workdir}}` exactly as it is in a text line, so an updated JSON golden matches the next run's (different) cwd instead of pinning a run-specific temp path.
 
 This is why `transform` on `specification.cli` is only an escape hatch (rule D6): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is a future lint warning.
 

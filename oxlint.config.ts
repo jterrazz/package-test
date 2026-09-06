@@ -18,7 +18,7 @@ import { recommendedRules } from './dist/oxlint.js';
  *   the zero-dependency ContainerAccessor subject).
  * - `lint/` — zero runtime imports: no external packages, and from `core/` only
  *   the pure helpers (the token list, the case conversions, fixture markers, the
- *   root walk a rule must share with the runner, the literate `.cli` parser).
+ *   root walk a rule must share with the runner, the spec-document parser).
  *
  * `src/index.ts` is the composition root and names no layer, so it is out of
  * scope; module tests and `*.fixtures.ts` files are governed by F2/I4.
@@ -29,6 +29,7 @@ const FRAMEWORK_LAYERS = {
             'core/',
             'integrations/docker/',
             'integrations/hono/',
+            'integrations/yaml/',
             'vitest/matchers',
             // Update-mode detection is a pure env read the literate runner
             // Shares with the matchers — one answer to "are we rewriting?".
@@ -54,15 +55,17 @@ const FRAMEWORK_LAYERS = {
             redis: ['redis'],
             sqlite: ['better-sqlite3'],
             testcontainers: ['testcontainers'],
+            yaml: ['yaml'],
         },
         imports: ['core/'],
     },
     lint: {
         imports: [
             'lint/',
-            // The .cli grammar is read by the runner AND by the checker — one
-            // Parser, so the file lint accepts is the file the runner executes.
-            'core/literate/literate-file',
+            // The .spec.yaml grammar is read by the runner AND by the checker —
+            // One parser, so the file lint accepts is the one the runner runs.
+            'core/literate/spec-document',
+            'integrations/yaml/document',
             'core/matching/match',
             'core/specification/shared/binding',
             'core/specification/shared/fixtures',

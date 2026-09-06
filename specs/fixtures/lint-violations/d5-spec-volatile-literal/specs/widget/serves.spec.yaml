@@ -1,0 +1,6 @@
+description: pins the port the machine happened to have free
+runs:
+    - command: widget serve
+      exit: 0
+      stdout: |
+          listening on http://127.0.0.1:52341/

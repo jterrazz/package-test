@@ -6,13 +6,14 @@ export default defineConfig({
     test: {
         projects: [
             {
-                // The framework eats its own literate format: `specs/cli/literate/*.cli`
-                // Are collected as TEST FILES and run through the registered runner.
-                // The glob stops at depth 1 so the deliberately-broken twins under
-                // `literate/fixtures/` stay inputs to the negative specs, never tests.
+                // The framework eats its own document format:
+                // `specs/cli/literate/*.spec.yaml` are collected as TEST FILES and run
+                // Through the registered runner. The glob stops at depth 1 so the
+                // Deliberately-wrong twins under `literate/fixtures/` stay inputs to
+                // The negative specs, never tests.
                 plugins: [
                     literate({
-                        include: ['specs/cli/literate/*.cli'],
+                        include: ['specs/cli/literate/*.spec.yaml'],
                         specification: './specs/cli/literate-cli.specification.ts',
                     }),
                 ],

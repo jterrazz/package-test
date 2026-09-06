@@ -33,10 +33,15 @@ export {
     type LiterateServeRegistration,
 } from './core/specification/cli/literate.js';
 export {
-    type LiterateBlock,
-    type LiterateHeader,
-    type LiterateSpec,
-} from './core/literate/literate-file.js';
+    type SpecDocument,
+    type SpecEnvToken,
+    type SpecFileAssertion,
+    type SpecFixture,
+    type SpecKind,
+    type SpecRun,
+    type SpecServeEntry,
+    type SpecStream,
+} from './core/literate/spec-document.js';
 export {
     type JobsHandle,
     type JobsSpecificationOptions,
@@ -89,7 +94,7 @@ export { text, TextAccessor } from './core/specification/shared/result/text.js';
 export { TableAccessor } from './core/specification/shared/result/table.js';
 
 // Ports
-export type { CliEnv, CliOutput, CliPort, ExecOptions } from './core/ports/cli.port.js';
+export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './core/ports/cli.port.js';
 export type { DatabasePort } from './core/ports/database.port.js';
 export type { IsolationStrategy } from './core/ports/isolation.port.js';
 export type { ServiceHandle } from './core/ports/service.port.js';

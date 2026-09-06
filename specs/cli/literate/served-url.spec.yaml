@@ -1,0 +1,8 @@
+description: reads the URL of the server the document started, whatever port was free
+serve:
+    - echo: { LITERATE_GREETING: bonjour }
+runs:
+    - command: backend
+      exit: 0
+      stdout: |
+          backend {{url}}

@@ -1,0 +1,6 @@
+description: builds the widget
+runs:
+    - command: widget build --force
+      exit: 0
+      stdout: |
+          Built.

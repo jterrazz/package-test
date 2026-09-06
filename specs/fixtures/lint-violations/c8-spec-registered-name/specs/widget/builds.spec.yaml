@@ -1,0 +1,10 @@
+description: names a server and an env set nobody registered
+env:
+    - frozn
+serve:
+    - dashbord
+runs:
+    - command: widget build
+      exit: 0
+      stdout: |
+          Built.

@@ -1,5 +1,0 @@
-test: a header missing its then line
-given: only two of the three narrative lines
-
-$ help
-exit: 0

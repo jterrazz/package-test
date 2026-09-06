@@ -1,0 +1,6 @@
+description: pins a timestamp nothing fixed
+runs:
+    - command: widget stamp
+      exit: 0
+      stdout: |
+          built at 2026-07-17T10:00:00.000Z

@@ -1,0 +1,12 @@
+description: builds the widget and names what it wrote
+env:
+    - frozen
+serve:
+    - api
+runs:
+    - command: widget build
+      exit: 0
+      stdout: |
+          Built {{path}} in {{duration}}
+      files:
+          dist/widget.js: exists

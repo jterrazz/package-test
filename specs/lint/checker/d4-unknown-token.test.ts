@@ -15,16 +15,16 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
         expect(result.stderr).toMatch('d4-unknown-token.txt');
     });
 
-    test('rejects an unknown token in a literate .cli block, never in its header', async () => {
-        // Given - a <case>.cli whose header prose AND whose block golden both
-        // Spell {{widget}} — only the block carries the placeholder grammar
+    test('rejects an unknown token in a document stream, never in its description', async () => {
+        // Given - a <case>.spec.yaml whose description prose AND whose stdout
+        // Golden both spell {{widget}} — only a stream carries the grammar
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/d4-unknown-token-cli/')
+            .fixture('$FIXTURES/lint-violations/d4-unknown-token-spec/')
             .exec('.');
 
-        // Then - one finding, on the block line: the header is text, not tokens
+        // Then - one finding, on the stream line: a description is text, not tokens
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch('d4-unknown-token-cli.txt');
+        expect(result.stderr).toMatch('d4-unknown-token-spec.txt');
     });
 
     test('accepts fixtures using only the frozen vocabulary', async () => {

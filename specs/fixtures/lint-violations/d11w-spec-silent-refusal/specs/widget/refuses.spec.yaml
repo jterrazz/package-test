@@ -1,0 +1,4 @@
+description: refuses without saying why
+runs:
+    - command: widget build
+      exit: 1

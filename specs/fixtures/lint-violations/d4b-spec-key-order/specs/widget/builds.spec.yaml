@@ -1,0 +1,8 @@
+description: meets the session before its setup
+runs:
+    - command: widget build
+      exit: 0
+      stdout: |
+          Built.
+env:
+    - frozen

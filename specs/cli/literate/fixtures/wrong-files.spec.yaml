@@ -1,0 +1,10 @@
+description: a run whose files assertions are deliberately wrong
+runs:
+    - command: scaffold
+      exit: 0
+      stdout: |
+          Scaffolded
+      files:
+          out/main.go: { contains: 'package rust' }
+          out/go.mod: absent
+          out/nothing.txt: exists

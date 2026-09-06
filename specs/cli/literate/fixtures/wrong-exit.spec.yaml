@@ -1,0 +1,7 @@
+description: a run whose golden exit code is deliberately wrong
+runs:
+    - command: fail
+      exit: 0
+      stderr: |
+          Starting...
+          Fatal: something went wrong

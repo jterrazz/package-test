@@ -1,8 +1,0 @@
-test: the command reads the URL of the server the header started
-given: the echo server live, its URL bound into the child environment
-then: the binary prints the URL it was handed, whatever port was free
-serve: echo LITERATE_GREETING=bonjour
-
-$ backend
-exit: 0
-backend {{url}}

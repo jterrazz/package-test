@@ -76,20 +76,18 @@ test('builds the project', async () => {
 });
 ```
 
-A CLI session can also BE the spec file. A literate `<case>.cli` states one scenario — the narrative in its header, the session in its blocks — and runs either as a test file of its own (the `literate()` vite plugin) or through `cli.run('case.cli')`:
+A CLI session can also BE the spec file. A `<case>.spec.yaml` document states one scenario — its ground, then its runs — and executes either as a test file of its own (the `literate()` vite plugin) or through `cli.run('case.spec.yaml')`:
 
-```
-test: refuses to build without a manifest
-given: an empty working directory
-then: the error names the file it wanted
-
-$ build
-exit: 1
---- stderr
-Error: no my-cli.yaml in the current directory
+```yaml
+description: refuses to build without a manifest
+runs:
+    - command: build
+      exit: 1
+      stderr: |
+          Error: no my-cli.yaml in the current directory
 ```
 
-Same engine as the chain, same `{{token}}` grammar, same `TEST_UPDATE=1` — which rewrites only what follows each `$`, never the header. Full grammar: [docs/04-cli.md](docs/04-cli.md#literate-specs--casecli).
+Same engine as the chain, same `{{token}}` grammar, same `TEST_UPDATE=1` — which rewrites each run's exit code and streams, and nothing else. A JSON Schema ships at `@jterrazz/test/schema` so an editor validates as you type. Full grammar: [docs/04-cli.md](docs/04-cli.md#spec-documents--casespecyaml).
 
 ### Website testing (browser)
 
@@ -210,7 +208,7 @@ A `JobHandle` is `{ name: string; execute: () => Promise<void> }`.
 
 ### `specification.cli(bin, { root?, services?, docker?, transform?, env?, serve? })`
 
-Runs a command binary against fixture projects in fresh temp directories. `env` (named environment sets) and `serve` (named servers) are the registries a [literate `<case>.cli`](docs/04-cli.md#literate-specs--casecli) names by word. With `services`, connection URLs are injected into the child env automatically: `<KEY>_URL` per record key (CONSTANT_CASE at camelCase boundaries — `analyticsDb` → `ANALYTICS_DB_URL`), plus `DATABASE_URL` (exactly one SQL database) and `REDIS_URL` (exactly one redis). `.env()` overrides; `null` unsets.
+Runs a command binary against fixture projects in fresh temp directories. `env` (named environment sets) and `serve` (named servers) are the registries a [`<case>.spec.yaml`](docs/04-cli.md#spec-documents--casespecyaml) names by word. With `services`, connection URLs are injected into the child env automatically: `<KEY>_URL` per record key (CONSTANT_CASE at camelCase boundaries — `analyticsDb` → `ANALYTICS_DB_URL`), plus `DATABASE_URL` (exactly one SQL database) and `REDIS_URL` (exactly one redis). `.env()` overrides; `null` unsets.
 
 ```typescript
 export const { cli, cleanup } = await specification.cli('my-migrate-tool', {
@@ -290,7 +288,7 @@ When `root` is absent, the framework walks up from the specification file to the
 | `.exec("args")`                            | cli     | `CliResult`    | Run the command                                                                          |
 | `.exec(["build", "start"])`                | cli     | `CliResult`    | Sequence in the same cwd; stops on first non-zero exit                                   |
 | `.exec("dev", { waitFor, timeout? })`      | cli     | `CliResult`    | Long-running: resolves at the pattern, killed at `timeout` (default 10 s)                |
-| `.run("case.cli")`                         | cli     | `CliResult`    | Run a literate `<case>.cli` — its header and EVERY block asserted; the last one returns  |
+| `.run("case.spec.yaml")`                   | cli     | `CliResult`    | Run a `<case>.spec.yaml` — its ground and EVERY run asserted; the last one returns       |
 | `.fetch(path)`                             | website | `FetchResult`  | One raw HTTP exchange — redirects surface as 3xx, never followed                         |
 | `.visit(path, scenario?)`                  | website | `PageResult`   | Render the page in a shared chromium; with a scenario, the capture is the final state    |
 | `.open(deepLink?, scenario?)`              | mobile  | `ScreenResult` | Relaunch the app fresh on the simulator; with a scenario, the capture is the final state |

@@ -1,0 +1,5 @@
+description: a document with a key outside the closed set
+when: something happens
+runs:
+    - command: help
+      exit: 0

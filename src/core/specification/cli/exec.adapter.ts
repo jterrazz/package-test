@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 
-import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../../ports/cli.port.js';
+import type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from '../../ports/cli.port.js';
 
 const DEFAULT_WATCH_TIMEOUT = 10_000;
 /** Grace period between SIGTERM and the SIGKILL escalation. */
@@ -144,17 +144,24 @@ export class ExecAdapter implements CliPort {
         this.command = command;
     }
 
-    async exec(args: string, cwd: string, extraEnv?: CliEnv): Promise<CliOutput> {
+    async exec(args: string, cwd: string, extraEnv?: CliEnv, input?: CliInput): Promise<CliOutput> {
         const env = buildEnv(extraEnv);
         const result = spawnSync(`${this.command} ${args}`, [], {
             cwd,
             encoding: 'utf8',
             env,
+            // Absent `input` still closes stdin immediately — the child reads
+            // EOF rather than blocking, and never sees a TTY.
+            input: input?.stdin,
             shell: true,
             stdio: ['pipe', 'pipe', 'pipe'],
+            timeout: input?.timeout,
         });
+        // A killed run reports 124, the same code the long-running path uses
+        // For a timeout — one answer to "the command ran out of time".
+        const timedOut = (result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT';
         return {
-            exitCode: result.status ?? 1,
+            exitCode: timedOut ? 124 : (result.status ?? 1),
             stderr: result.stderr ?? '',
             stdout: result.stdout ?? '',
         };

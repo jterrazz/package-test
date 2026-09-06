@@ -1,13 +1,19 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { LiterateSyntaxError, parseLiterateFile } from '../core/literate/literate-file.js';
+import {
+    assertedStreams,
+    readSpecFile,
+    SPEC_EXTENSION,
+    SpecSyntaxError,
+} from '../core/literate/spec-document.js';
 import { TOKEN_KINDS } from '../core/matching/match.js';
 import {
     checkDatabaseProperty,
     checkDeadFixtures,
     checkDockerRunnerAwaitUsing,
 } from './checker-crossfile.js';
+import { checkSpecConventions, checkSpecDescriptionsUnique } from './checker-spec.js';
 
 /**
  * The conventions checker — the non-oxlint static channel.
@@ -22,9 +28,11 @@ import {
  *   and `expected/*.http` (a status line) (D4b);
  * - **tokens leaking into `requests/`** — requests are inputs, never matched, so
  *   a `{{token}}` there is almost always a mistake (D10, warning);
- * - the **literate `.cli` grammar** wherever a scenario file sits: its narrative
- *   (B4) and its shape (D4b), read through the runner's own parser, plus the
- *   token vocabulary of its blocks (D4).
+ * - the **`<case>.spec.yaml` grammar** wherever a scenario document sits: its
+ *   shape (D4b), read through the runner's own parser, plus the token
+ *   vocabulary of its streams (D4);
+ * - the **document conventions** — key order, naming, description, block
+ *   scalars, pinned values, registered names — bundled in `checker-spec.ts`.
  *
  * It shares TOKEN_KINDS with the runtime matcher so the channels cannot drift.
  */
@@ -57,14 +65,23 @@ const SKIPPED_DIRS = new Set(['.git', 'dist', 'fixtures', 'node_modules']);
  */
 export const CHECKER_PASS_IDS = [
     'a7-database-property',
-    'b4-cli-header',
     'b5-await-using-inference',
+    'c12-spec-file-name',
+    'c8-spec-registered-name',
     'c9-dead-fixtures',
     'd10w-tokens-in-requests',
+    'd11w-spec-silent-refusal',
     'd4-malformed-ref',
     'd4-unknown-token',
-    'd4b-cli-shape',
     'd4b-http-first-line',
+    'd4b-spec-block-scalar',
+    'd4b-spec-key-order',
+    'd4b-spec-shape',
+    'd5-spec-volatile-literal',
+    'd5w-spec-pinned-value',
+    'j3w-spec-empty-assertion',
+    'j4-spec-description-unique',
+    'j5-spec-description',
 ] as const;
 
 export type Severity = 'error' | 'warn';
@@ -148,44 +165,44 @@ const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) \/\S*/;
 const STATUS_LINE = /^HTTP\/\d(?:\.\d)? \d{3}\b/;
 
 /**
- * Check one literate `<case>.cli` file — B4's narrative and D4b's shape
- * through the SAME parser the runner uses (one grammar, no drift), then D4's
- * token vocabulary over its BODY only: a `{{token}}` in the header is text,
- * never a placeholder.
+ * Check one `<case>.spec.yaml` — D4b's shape through the SAME parser the runner
+ * uses (one grammar, no drift), then D4's token vocabulary over the STREAMS
+ * only: a `{{token}}` in a description or a command is text, never a
+ * placeholder, and `stdin:` is an input the comparison never reads.
  *
  * Precision over recall, as everywhere in this channel: the parser refuses at
- * the first defect, so one file reports one grammar violation per run.
+ * the first defect, so one document reports one grammar violation per run.
  */
-export function checkLiterateFile(text: string, rel: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
-    let bodyStart = 0;
+export function checkSpecFile(text: string, rel: string): TokenViolation[] {
+    let document;
     try {
-        const spec = parseLiterateFile(text, rel);
-        bodyStart = spec.headerText.split('\n').length - 1;
+        document = readSpecFile(text, rel).document;
     } catch (error) {
-        if (!(error instanceof LiterateSyntaxError)) {
+        if (!(error instanceof SpecSyntaxError)) {
             throw error;
         }
-        const rule = error.defect === 'narrative' ? 'B4' : 'D4b';
         return [
             {
                 file: rel,
                 line: error.line,
-                message: `${error.message} (${rule} — see docs/10-linting.md)`,
+                message: `${error.message} (D4b — see docs/10-linting.md)`,
                 severity: 'error',
             },
         ];
     }
 
-    const body = text.split('\n').slice(bodyStart).join('\n');
-    for (const { line, token } of findUnknownTokens(body)) {
-        violations.push({
-            file: rel,
-            line: line + bodyStart,
-            message: `${rel}:${line + bodyStart}: unknown token ${token} — the D4 vocabulary is frozen (known: ${[...TOKEN_KINDS].join(', ')})`,
-            severity: 'error',
-            token,
-        });
+    const violations: TokenViolation[] = [];
+    for (const stream of assertedStreams(document)) {
+        for (const { line, token } of findUnknownTokens(stream.text)) {
+            const at = stream.line + line - 1;
+            violations.push({
+                file: rel,
+                line: at,
+                message: `${rel}:${at}: unknown token ${token} — the D4 vocabulary is frozen (known: ${[...TOKEN_KINDS].join(', ')})`,
+                severity: 'error',
+                token,
+            });
+        }
     }
     return violations;
 }
@@ -216,13 +233,14 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 visit(path, next);
                 continue;
             }
-            // A literate spec lives BESIDE its test, not under `expected/` —
+            // A spec document lives BESIDE its test, not under `expected/` —
             // It is the scenario, not a golden — so it is checked wherever the
             // Walk finds it.
-            if (entry.name.endsWith('.cli')) {
+            if (entry.name.endsWith(SPEC_EXTENSION)) {
                 const text = decodeText(path);
                 if (text !== null) {
-                    violations.push(...checkLiterateFile(text, rel));
+                    violations.push(...checkSpecFile(text, rel));
+                    violations.push(...checkSpecConventions(text, rel, path));
                 }
                 continue;
             }
@@ -296,6 +314,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
 export function runAllChecks(rootDir: string): TokenViolation[] {
     return [
         ...checkConventionFiles(rootDir),
+        ...checkSpecDescriptionsUnique(rootDir),
         ...checkDeadFixtures(rootDir),
         ...checkDockerRunnerAwaitUsing(rootDir),
         ...checkDatabaseProperty(rootDir),
