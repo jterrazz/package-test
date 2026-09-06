@@ -72,7 +72,8 @@ Error: no directory with home/ and apps/ above the current directory
 
 - Header keys are CLOSED (`test`, `given`, `then`, `fixture`, `env`, `serve`); `#` lines are comments; anything else is an error naming the line (checker passes `b4-cli-header`, `d4b-cli-shape`).
 - `exit: <integer>` is mandatory and is the first line after `$`. Then stdout verbatim, then optionally `--- stderr` and stderr verbatim. A block ends at the next `$ ` or EOF; the blank line before a `$` is the separator, not output.
-- Both streams are compared totally — no `--- stderr` asserts an EMPTY stderr. `{{token}}` works in both streams (D4), never in the header.
+- Both streams are compared totally — no `--- stderr` asserts an EMPTY stderr. `{{token}}` works in both streams (D4), never in the header. Use `{{string}}` for wording that varies within a LINE; `{{any}}` only for a span that crosses lines.
+- On a mismatch the diff marks only the real cause: a token line that matched renders as equal, and the stack carries one frame — the block's line in the `.cli`.
 - All blocks share ONE cwd and the same servers, and **every** block is asserted — unlike `.exec([...])`, a non-zero exit does not stop the sequence.
 - `TEST_UPDATE=1` rewrites only what follows each `$`; the header comes back byte-identical.
 
@@ -84,6 +85,8 @@ await specification.cli(bin, {
     serve: {
         mcp: {
             command: 'bun specs/harness/mcp-server.ts',
+            // cwd = the PROJECT root (A9: nearest package.json above the spec file) —
+            // In a workspace that is apps/<pkg>/, not the repo root
             env: 'SHOPLY_MCP_ORIGIN', // the var the URL is bound to in every block
             ready: /listening on port (?<port>\d+)/, // group 1 = the port the server announces
             url: (port) => `http://127.0.0.1:${port}/mcp`,

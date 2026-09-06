@@ -4,6 +4,7 @@ import { shouldUpdateSnapshots } from '../../../vitest/update.js';
 import {
     type LiterateBlock,
     type LiterateSpec,
+    LiterateSyntaxError,
     parseLiterateFile,
     serializeLiterateFile,
 } from '../../literate/literate-file.js';
@@ -109,14 +110,34 @@ function narrative(spec: LiterateSpec): string {
 }
 
 /**
+ * Line equality AS THE COMPARISON JUDGED IT — a `{{url}}` line that matched is
+ * equal, whatever port the run picked. Each line is judged on its own fresh
+ * scope: this is a rendering, and a ref captured by an earlier line must not
+ * decide how a later one is displayed.
+ */
+function tokenAwareEquals(scope: CaptureScope): (expected: string, actual: string) => boolean {
+    return (expected, actual) => textEquals(expected, actual, new CaptureScope(scope.workdir));
+}
+
+/**
  * The failure a mismatching block throws: the narrative, the command that ran,
  * the diff, and where to open the file. The header is named as never-rewritten
  * so the update hint cannot be read as "this will re-generate my `given:`".
+ *
+ * The stack is REPLACED by the block's own line. Left alone it would carry the
+ * engine's frames and end inside the module the plugin generates — pointing the
+ * reader at `<case>.cli:<the $ line of the module>` while the message already
+ * names the block. One frame, on the block, is the whole truth here.
  */
-function failure(spec: LiterateSpec, run: BlockRun, displayPath: string, detail: string): Error {
-    return new Error(
+function failure(
+    spec: LiterateSpec,
+    run: BlockRun,
+    context: { displayPath: string; filePath: string },
+    detail: string,
+): Error {
+    const error = new Error(
         [
-            `Literate spec mismatch (${displayPath}:${run.block.line})`,
+            `Literate spec mismatch (${context.displayPath}:${run.block.line})`,
             '',
             narrative(spec),
             '',
@@ -127,21 +148,33 @@ function failure(spec: LiterateSpec, run: BlockRun, displayPath: string, detail:
             'Run with TEST_UPDATE=1 to rewrite the blocks (exit code and streams). The header is never rewritten.',
         ].join('\n'),
     );
+    return atBlock(error, context.filePath, run.block.line);
+}
+
+/**
+ * Point an error's stack at one frame: the line of the `.cli` file that owns
+ * the failure. The framework's own frames carry nothing a reader of a literate
+ * spec can act on, and the generated module's frame actively misleads.
+ */
+function atBlock(error: Error, filePath: string, line: number): Error {
+    error.stack = `${error.name}: ${error.message}\n    at ${filePath}:${line}:1`;
+    return error;
 }
 
 /** Compare one block against what the command actually did. */
 function assertBlock(
     spec: LiterateSpec,
     run: BlockRun,
-    displayPath: string,
+    context: { displayPath: string; filePath: string },
     scope: CaptureScope,
 ): void {
     const { actual, block } = run;
+    const equals = tokenAwareEquals(scope);
     if (actual.exitCode !== block.exitCode) {
         throw failure(
             spec,
             run,
-            displayPath,
+            context,
             [
                 'exit code mismatch',
                 `  expected: ${block.exitCode}`,
@@ -151,15 +184,20 @@ function assertBlock(
         );
     }
     if (!textEquals(block.stdout, run.stdout, scope)) {
-        throw failure(spec, run, displayPath, formatStdoutDiff('stdout', block.stdout, run.stdout));
+        throw failure(
+            spec,
+            run,
+            context,
+            formatStdoutDiff('stdout', block.stdout, run.stdout, { equals }),
+        );
     }
     const expectedStderr = block.stderr ?? '';
     if (!textEquals(expectedStderr, run.stderr, scope)) {
         throw failure(
             spec,
             run,
-            displayPath,
-            formatStdoutDiff('stderr', expectedStderr, run.stderr),
+            context,
+            formatStdoutDiff('stderr', expectedStderr, run.stderr, { equals }),
         );
     }
 }
@@ -291,7 +329,14 @@ export async function runLiterateSpec(options: LiterateRunOptions): Promise<CliR
         );
     }
 
-    const spec = parseLiterateFile(readFileSync(filePath, 'utf8'), displayPath);
+    let spec: LiterateSpec;
+    try {
+        spec = parseLiterateFile(readFileSync(filePath, 'utf8'), displayPath);
+    } catch (error) {
+        // A grammar refusal is about the FILE, not about the engine that read
+        // It: the message already names the line, so the stack says the same.
+        throw error instanceof LiterateSyntaxError ? atBlock(error, filePath, error.line) : error;
+    }
     const fileDir = filePath.replace(/[/\\][^/\\]*$/, '');
 
     // `fixture:` layers on top of whatever the chain already copied, in
@@ -332,7 +377,7 @@ export async function runLiterateSpec(options: LiterateRunOptions): Promise<CliR
         writeFileSync(filePath, serializeLiterateFile(spec.headerText, updatedBlocks(runs, scope)));
     } else {
         for (const run of runs) {
-            assertBlock(spec, run, displayPath, scope);
+            assertBlock(spec, run, { displayPath, filePath }, scope);
         }
     }
 

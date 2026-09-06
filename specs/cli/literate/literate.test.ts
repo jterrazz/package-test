@@ -28,12 +28,25 @@ function scratchFile(content: string): string {
 }
 
 async function failureOf(run: Promise<unknown>): Promise<string> {
+    const error = await errorOf(run);
+    return error.message;
+}
+
+async function errorOf(run: Promise<unknown>): Promise<Error> {
     try {
         await run;
     } catch (error) {
-        return (error as Error).message;
+        return error as Error;
     }
     throw new Error('expected the literate spec to fail, but it passed');
+}
+
+/** The `at …` frames of an error's stack, trimmed. */
+function frames(error: Error): string[] {
+    return (error.stack ?? '')
+        .split('\n')
+        .filter((line) => line.trimStart().startsWith('at '))
+        .map((line) => line.trim());
 }
 
 afterEach(() => {
@@ -109,6 +122,44 @@ describe('literate — refusals', () => {
 
         // Then - the whole rendering, stderr included
         expect(text(message)).toMatch('wrong-exit-error.txt');
+    });
+
+    test('the stack carries ONE frame, on the block that failed', async () => {
+        // Given - a golden whose block is deliberately wrong
+        const error = await errorOf(cli.run('fixtures/wrong-stdout.cli', { frozen: true }));
+
+        // Then - no engine frames, no generated-module frame: the `.cli` block
+        // Line, which is what the message names too
+        expect(frames(error)).toEqual([
+            `at ${resolve(import.meta.dirname, 'fixtures/wrong-stdout.cli')}:5:1`,
+        ]);
+        expect(error.message).toContain('fixtures/wrong-stdout.cli:5');
+    });
+
+    test('a grammar refusal points at the offending header line, not at the engine', async () => {
+        // Given - a header carrying a key outside the closed set (line 4)
+        const error = await errorOf(cli.run('fixtures/unknown-key.cli'));
+
+        // Then - the frame is the header line, not a parser frame
+        expect(frames(error)).toEqual([
+            `at ${resolve(import.meta.dirname, 'fixtures/unknown-key.cli')}:4:1`,
+        ]);
+    });
+
+    test('a matched token line is not marked as a difference beside the real one', async () => {
+        // Given - a block whose {{url}} matched and whose next line did not
+        const path = scratchFile(
+            'test: renders only the real cause\n' +
+                'given: a golden whose url token matched and whose second line did not\n' +
+                'then: the diff marks the second line alone\n' +
+                'serve: echo\n\n$ backend\nexit: 0\nbackend {{url}}\nnot printed at all\n',
+        );
+
+        // Then - the token line is shown as equal, with its token
+        const message = await failureOf(cli.run(path));
+        expect(message).toContain('  backend {{url}}');
+        expect(message).not.toContain('- backend {{url}}');
+        expect(message).toContain('- not printed at all');
     });
 
     test('an unregistered server name lists what the runner declares', async () => {

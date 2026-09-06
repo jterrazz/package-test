@@ -352,14 +352,14 @@ exit: 0
 
 Everything up to the **first blank line**. `#` lines are comments anywhere in it; any key outside the table below is an error naming the line.
 
-| Key        | Cardinality | Meaning                                                                                                                                                          |
-| ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `test:`    | exactly one | The vitest test title                                                                                                                                            |
-| `given:`   | exactly one | Rule B4's first marker — the ground the run stands on                                                                                                            |
-| `then:`    | exactly one | Rule B4's second marker — what the file proves                                                                                                                   |
-| `fixture:` | repeatable  | Identical to `.fixture()`: `$FIXTURES/…` or feature-local, trailing slash = spread, executable bits preserved. Repeats **layer** in order                        |
-| `env:`     | repeatable  | Whitespace-separated tokens, each either `KEY=value` (`$WORKDIR` expands as in `.env()`) or a **bare word** naming an env set registered in code                 |
-| `serve:`   | repeatable  | `<name> [KEY=value…]` — a server registered in code, started before the first `$` block with those extra variables. Several lines = several servers live at once |
+| Key        | Cardinality | Meaning                                                                                                                                                                                                 |
+| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test:`    | exactly one | The vitest test title                                                                                                                                                                                   |
+| `given:`   | exactly one | Rule B4's first marker — the ground the run stands on                                                                                                                                                   |
+| `then:`    | exactly one | Rule B4's second marker — what the file proves                                                                                                                                                          |
+| `fixture:` | repeatable  | Identical to `.fixture()`: `$FIXTURES/…` or feature-local, trailing slash = spread, executable bits preserved. Repeats **layer** in order                                                               |
+| `env:`     | repeatable  | Whitespace-separated tokens, each either `KEY=value` (`$WORKDIR` expands as in `.env()`) or a **bare word** naming an env set registered in code                                                        |
+| `serve:`   | repeatable  | `<name> [KEY=value…]` — a server registered in code, started before the first `$` block with those extra variables, **from the project root** (see below). Several lines = several servers live at once |
 
 ### The blocks
 
@@ -370,6 +370,7 @@ After the blank line, one or more `$ <argv>` blocks. `argv` goes to the same ada
 - A block ends at the next `$ ` line or at EOF. The blank line before a `$` belongs to the **separator**, not to the previous block's stream — a blank line _inside_ a stream survives.
 - Both streams are compared **exactly and totally**: an absent `--- stderr` asserts an empty stderr, and empty stdout is an empty section. One trailing newline is normalised away on both sides, so a command that ends its output with `\n` needs no empty last line in the file.
 - The whole [token vocabulary](06-tokens.md) works in both streams — `{{url}}`, `{{int}}`, `{{workdir}}`, `{{any}}`, `#ref` captures — and **never in the header**, which is prose.
+- For runtime wording that varies WITHIN a line (a duration phrase, a hostname, a count in a sentence), reach for `{{string}}`, which stops at the end of the line; keep `{{any}}` for a span that genuinely crosses lines, since it swallows every line until the next literal it can anchor on.
 
 All blocks share **ONE working directory** and the same servers, and **every** block is asserted. This is where the format goes past `.exec([...])`, which stops at the first non-zero exit and keeps only the last output: here a non-zero exit does not end the run, because each exit code is part of what the file states.
 
@@ -378,12 +379,14 @@ All blocks share **ONE working directory** and the same servers, and **every** b
 The header names ground by WORD; the code says what those words mean, in the `specification.cli()` options:
 
 ```typescript
+// apps/cli/specs/cli/cli.specification.ts, in a workspace
 export const { cli, cleanup } = await specification.cli(bin, {
     env: {
         frozen: { HOME: '$WORKDIR', TZ: 'UTC' },
     },
     serve: {
         mcp: {
+            // Relative to apps/cli/ — the project root, not the repo root
             command: 'bun specs/harness/mcp-server.ts',
             env: 'SHOPLY_MCP_ORIGIN',
             ready: /listening on port (?<port>\d+)/,
@@ -393,7 +396,9 @@ export const { cli, cleanup } = await specification.cli(bin, {
 });
 ```
 
-A `serve` entry is spawned from the project root with the header's extra `KEY=value` merged into its environment. `ready` is a regex over the child's output whose **first capture group** is the port the server chose (named or not — it is group 1 either way); the framework injects no `PORT`, the server announces one. `url(port)` builds the URL, and `env` names the variable it is bound to in every block's child. Servers start once **per file** and are killed when it ends.
+A `serve` entry is spawned with the header's extra `KEY=value` merged into its environment, and its **cwd is the project root** — rule A9's root, the nearest ancestor of the specification file carrying a `package.json` or a `docker/compose.test.yaml`. **In a workspace that is the package's own directory, not the repository root**: a spec at `apps/cli/specs/cli/cli.specification.ts` gives `apps/cli/`, so `command` reads `'bun specs/harness/mcp-server.ts'` and not `'bun apps/cli/specs/harness/mcp-server.ts'`. Pass the runner's `root` option to move it.
+
+`ready` is a regex over the child's output whose **first capture group** is the port the server chose (named or not — it is group 1 either way); the framework injects no `PORT`, the server announces one. `url(port)` builds the URL, and `env` names the variable it is bound to in every block's child. Servers start once **per file** and are killed when it ends.
 
 ### The three doors, one engine
 
@@ -447,6 +452,8 @@ $ shoply repositories
 Output mismatch (stdout)
 …
 ```
+
+A line the comparison ACCEPTED is rendered as equal, with its token — a `{{url}}` that matched is never shown as a `-`/`+` pair against the concrete URL — so the marked lines are the mismatch and nothing else. The stack carries one frame: the block's own line in the `.cli` file.
 
 `TEST_UPDATE=1` rewrites **only what follows each `$`** — exit code and streams. The header is never touched, comments included. Placeholders survive by **pattern match**, not by line index, so a token stays a token wherever the line moved to: see [update mode](06-tokens.md#update-mode-tokens-are-preserved).
 
