@@ -7,6 +7,7 @@ import type {
     DeviceOpenOptions,
     DevicePort,
     DeviceScreen,
+    DeviceTimeouts,
     MobileElementMatch,
     MobileElementRef,
     MobileVisitor,
@@ -18,8 +19,11 @@ import {
     formatElement,
 } from '../../core/specification/website/ambiguity.js';
 
+/** The session factory — webdriverio's `remote`, the adapter's single seam onto it. */
+type RemoteFn = typeof remote;
+
 /** The driver session type, derived so webdriverio stays a type-only import. */
-type Driver = Awaited<ReturnType<typeof remote>>;
+type Driver = Awaited<ReturnType<RemoteFn>>;
 
 /** The element list a predicate search resolves to. */
 type ElementList = Awaited<ReturnType<Driver['$$']>>;
@@ -37,14 +41,16 @@ type MatchScope = Driver | DriverElement;
 /*
  * How long every verb polls for at least one visible match. 30s absorbs a
  * cold app boot (first launch after an install or a state wipe) — the same
- * default playwright chose for its actionability timeout.
+ * default playwright chose for its actionability timeout. A project whose
+ * app boots slower than that (a dev bundle building on demand) raises it
+ * with the runner's `timeouts` option rather than sleeping in its specs.
  */
-const ACTION_TIMEOUT_MS = 30_000;
+const DEFAULT_ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
 /** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
 /** WebDriverAgent builds once per simulator — the first session is the slow one. */
-const WDA_LAUNCH_TIMEOUT_MS = 240_000;
+const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
 
 const delay = (ms: number): Promise<void> =>
     new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
@@ -101,6 +107,22 @@ function scopeChain(element: MobileElementRef): MobileElementRef[] {
     return chain;
 }
 
+/**
+ * Load webdriverio's session factory, naming the install when the optional
+ * peer dependency is absent. Lazy: the dependency is only required by a spec
+ * that actually opens the app.
+ */
+async function loadRemote(): Promise<RemoteFn> {
+    try {
+        const { remote: remoteFn } = await import('webdriverio');
+        return remoteFn;
+    } catch {
+        throw new Error(
+            '.open() requires webdriverio (optional peer dependency): npm install -D appium webdriverio && npx appium driver install xcuitest',
+        );
+    }
+}
+
 /** Capture one candidate's evidence for the ambiguity refusal. */
 async function captureMatch(element: DriverElement): Promise<MobileElementMatch> {
     const [type, label, value, identifier] = await Promise.all([
@@ -130,11 +152,30 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
  * this module is only loaded when a spec calls `.open()`.
  */
 export class AppiumAdapter implements DevicePort {
+    /** The verb poll budget — the runner's `timeouts.action`, or the default. */
+    private readonly actionTimeoutMs: number;
     private driver: Driver | null = null;
+    /** The WebDriverAgent launch budget — the runner's `timeouts.launch`, or the default. */
+    private readonly launchTimeoutMs: number;
     private readonly options: { serverUrl: string; udid: string };
+    /**
+     * The session factory. Absent in production — webdriverio is then loaded
+     * lazily on the first `open()`. Injected by this module's own unit test,
+     * which drives the waits over a stub driver with no simulator in reach
+     * (mocks are CODE here, CONVENTIONS I4).
+     */
+    private readonly remote?: RemoteFn;
 
-    constructor(options: { serverUrl: string; udid: string }) {
-        this.options = options;
+    constructor(options: {
+        remote?: RemoteFn;
+        serverUrl: string;
+        timeouts?: DeviceTimeouts;
+        udid: string;
+    }) {
+        this.options = { serverUrl: options.serverUrl, udid: options.udid };
+        this.remote = options.remote;
+        this.actionTimeoutMs = options.timeouts?.action ?? DEFAULT_ACTION_TIMEOUT_MS;
+        this.launchTimeoutMs = options.timeouts?.launch ?? DEFAULT_WDA_LAUNCH_TIMEOUT_MS;
     }
 
     async close(): Promise<void> {
@@ -224,7 +265,7 @@ export class AppiumAdapter implements DevicePort {
         cardinality: 'any' | 'one',
     ): Promise<DriverElement> {
         const chain = scopeChain(element);
-        const deadline = Date.now() + ACTION_TIMEOUT_MS;
+        const deadline = Date.now() + this.actionTimeoutMs;
 
         /*
          * The scroll-into-view fallback queries the tree WITHOUT the
@@ -344,7 +385,7 @@ export class AppiumAdapter implements DevicePort {
             // The excerpt is best-effort evidence — never mask the timeout.
         }
         return new Error(
-            `${verb}(${formatElement(element)}) timed out after ${ACTION_TIMEOUT_MS}ms — no visible match.${excerpt}`,
+            `${verb}(${formatElement(element)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
         );
     }
 
@@ -353,14 +394,7 @@ export class AppiumAdapter implements DevicePort {
         if (this.driver) {
             return this.driver;
         }
-        let remoteFn: typeof remote;
-        try {
-            ({ remote: remoteFn } = await import('webdriverio'));
-        } catch {
-            throw new Error(
-                '.open() requires webdriverio (optional peer dependency): npm install -D appium webdriverio && npx appium driver install xcuitest',
-            );
-        }
+        const remoteFn = this.remote ?? (await loadRemote());
         const url = new URL(this.options.serverUrl);
         this.driver = await remoteFn({
             capabilities: {
@@ -368,7 +402,7 @@ export class AppiumAdapter implements DevicePort {
                 'appium:bundleId': bundleId,
                 'appium:noReset': true,
                 'appium:udid': this.options.udid,
-                'appium:wdaLaunchTimeout': WDA_LAUNCH_TIMEOUT_MS,
+                'appium:wdaLaunchTimeout': this.launchTimeoutMs,
                 platformName: 'iOS',
             },
             hostname: url.hostname,

@@ -118,6 +118,7 @@ export type {
     DeviceOpenOptions,
     DevicePort,
     DeviceScreen,
+    DeviceTimeouts,
     MobileElementKind,
     MobileElementMatch,
     MobileElementRef,

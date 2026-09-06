@@ -21,12 +21,13 @@ afterAll(cleanup);
 
 ### Options
 
-| Option    | Description                                                                                                                                              |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app`     | `{ bundleId }` — the installed app under test. Every `.open()` terminates and relaunches it                                                              |
-| `device`  | `{ name, os?, udid? }` — the simulator to run on, resolved through `xcrun simctl` and booted when shut down                                              |
-| `backend` | `{ port? }` — start a declared stub backend; the handle gains `backendUrl` — see [Declared backend](#declared-backend)                                   |
-| `root`    | **Project-root override** (rule A9): where the `appium` binary is resolved from (`node_modules/.bin`). Auto-discovered from the calling file when absent |
+| Option     | Description                                                                                                                                              |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app`      | `{ bundleId }` — the installed app under test. Every `.open()` terminates and relaunches it                                                              |
+| `device`   | `{ name, os?, udid? }` — the simulator to run on, resolved through `xcrun simctl` and booted when shut down                                              |
+| `backend`  | `{ port? }` — start a declared stub backend; the handle gains `backendUrl` — see [Declared backend](#declared-backend)                                   |
+| `root`     | **Project-root override** (rule A9): where the `appium` binary is resolved from (`node_modules/.bin`). Auto-discovered from the calling file when absent |
+| `timeouts` | `{ action?, launch? }` in ms — how long this runner waits. Each field falls back to the framework's default; see [Declared timeouts](#declared-timeouts) |
 
 `device` itself takes:
 
@@ -41,6 +42,32 @@ Resolution refuses rather than guesses: zero matches and several matches both fa
 The appium server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](11-website.md) serve adapter.
 
 The handle destructures to `{ mobile, cleanup, udid }` (rule A3) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session. With the `backend` option it additionally carries `backendUrl`.
+
+## Declared timeouts
+
+Every verb auto-waits — there is no sleep and no conditional helper. `timeouts` states how long, for the two waits a project legitimately needs to move:
+
+| `timeouts` field | The wait it budgets                                                                         | Default   |
+| ---------------- | ------------------------------------------------------------------------------------------- | --------- |
+| `action`         | one visible match, on every verb — the whole `see`/`tap`/`fill` budget, polled every 500 ms | `30_000`  |
+| `launch`         | WebDriverAgent to build and launch, on a run's first session                                | `240_000` |
+
+The defaults suit a **release** bundle: 30 s absorbs a cold app boot, the same figure playwright chose for its actionability timeout. A project driving a **dev** build pays its bundler's cold boot on top — a Metro cold start to first content measures 31–32 s, over the default — and states that wait once, on the runner, rather than sleeping inside its scenarios:
+
+```typescript
+// specs/mobile/mobile.specification.ts
+export const { cleanup, mobile } = await specification.mobile({
+    app: { bundleId: 'com.jterrazz.fakenews' },
+    device: { name: 'iPhone 17', os: '26.5' },
+    // Dev-mode Metro cold boot measured at 31-32s — over the 30s default.
+    // 45s covers the cold path with margin without hiding a real hang.
+    timeouts: { action: 45_000 },
+});
+
+afterAll(cleanup);
+```
+
+Raise it to the slowest **honest** path and no further: the timeout is what turns a hang into a legible refusal naming the element and what was on screen instead.
 
 ## Declared backend
 
@@ -260,6 +287,7 @@ No `_seeds/` or `_requests/` — `specification.mobile()` has no `services` opti
 - **Calling `specification.mobile()` without appium installed.** The error names the exact fix — `npm install -D appium webdriverio && npx appium driver install xcuitest` — there is no silent fallback.
 - **Pointing `device.name` at an ambiguous simulator.** When the same name exists on several OS runtimes the constructor refuses with the listing — narrow with `os:` (or pin `udid:`), do not delete simulators to make it pass.
 - **Calling `.intercept()` without the `backend` option.** It throws immediately, naming the fix: add `backend: { … }` to the `specification.mobile()` options — a chain's `.http` exchanges need a stub to serve them.
+- **Sleeping around a slow boot instead of declaring it.** A dev bundle that boots past the 30 s default makes every verb refuse; the answer is `timeouts: { action: … }` on the runner, once — an arbitrary wait inside a scenario is untyped, per-spec, and hides the next regression.
 - **Expecting the framework to point the app at the stub.** It never touches the bundler — that is the caller's territory. Wire `backendUrl` into your own bundler env (`EXPO_PUBLIC_API_URL`), and pin `port` so a warm Metro keeps its inlined URL.
 
 ## Related
