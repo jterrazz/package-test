@@ -10,6 +10,12 @@ case "$COMMAND" in
         echo "console.log('Hello from CLI app');" > dist/index.js
         echo '{"name":"cli-app"}' > dist/manifest.json
         ;;
+    clean)
+        # The inverse of build — the second half of "what this run left on
+        # Disk", where the file a previous run wrote is gone again.
+        rm -rf dist
+        echo "Cleaned"
+        ;;
     start)
         if [ ! -f "dist/index.js" ]; then
             echo "Error: dist/index.js not found. Run build first." >&2
