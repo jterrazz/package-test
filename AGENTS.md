@@ -1,6 +1,6 @@
 # Agent brief - `@jterrazz/test`
 
-Declarative testing framework for APIs, jobs, CLIs, websites, and mobile apps. Five constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()` — with terminal actions (`.get()`/`.request()`/`.trigger()`/`.exec()`/`.fetch()`/`.visit()`/`.open()` execute and resolve to typed results) and all assertions via vitest `expect()` custom matchers. Normative rules: the constitution is `docs/09-conventions.md`, the generated per-rule catalogue is `docs/10-linting.md` (mirrored for agents in `skills/jterrazz-test/references/rules.md`); narrative docs in `docs/`.
+Declarative testing framework for APIs, jobs, CLIs, websites, and mobile apps. Five constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()` — with terminal actions (`.get()`/`.request()`/`.trigger()`/`.exec()`/`.fetch()`/`.visit()`/`.open()` execute and resolve to typed results) and all assertions via vitest `expect()` custom matchers. Normative rules: the constitution is `docs/09-conventions.md`, the generated per-rule catalogue is `docs/10-linting.md` (mirrored for agents in `skills/jterrazz-test/references/rules.md`); narrative docs in `docs/`, mapped by `docs/README.md`; decisions this package alone took are in `docs/decisions/`.
 
 ## Setup
 

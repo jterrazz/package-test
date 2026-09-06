@@ -35,6 +35,10 @@ test('creates a user', async () => {
 | [11 — Website specs](11-website.md)           | `specification.website()`: `.fetch()` / `.visit()`, visit scenarios, the element vocabulary, the `head` golden        |
 | [12 — Mobile specs](12-mobile.md)             | `specification.mobile()`: `.open()`, simulator resolution, open scenarios, the shared vocabulary, the `screen` golden |
 
+## Decisions
+
+The records of decisions this package alone took are in [`decisions/`](decisions/), numbered in the order they were taken. A decision spanning several repositories is recorded by the corpus that spans them.
+
 ## How this documentation is organized
 
 - **Chapters 01–04, 11 and 12** follow the five constructors: read 01, then the chapter matching what you test (API, jobs, CLI, website, or mobile).

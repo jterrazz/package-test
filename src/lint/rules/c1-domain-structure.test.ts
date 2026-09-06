@@ -52,6 +52,58 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
     ],
 });
 
+ruleTester.run('c1-domain-structure (depth: facet)', c1DomainStructure as unknown as OxlintRule, {
+    invalid: [
+        // A test loose at the specs root belongs to no facet.
+        {
+            code: 'const x = 1;',
+            errors: [{ messageId: 'testOutsideFacet' }],
+            filename: '/repo/specs/row-names.test.ts',
+            options: [{ depth: 'facet' }],
+        },
+        // A test nested below the one domain folder the mode allows.
+        {
+            code: 'const x = 1;',
+            errors: [{ messageId: 'testTooDeepForFacet' }],
+            filename: '/repo/specs/tree/rows/names/names.test.ts',
+            options: [{ depth: 'facet' }],
+        },
+        // A specification inside a domain rather than at the facet root.
+        {
+            code: 'const x = 1;',
+            errors: [{ messageId: 'specNotAtFacetRoot' }],
+            filename: '/repo/specs/tree/rows/tree.specification.ts',
+            options: [{ depth: 'facet' }],
+        },
+    ],
+    valid: [
+        // At the facet root — the asset-less sibling shape.
+        {
+            code: 'const x = 1;',
+            filename: '/repo/specs/tree/row-names.test.ts',
+            options: [{ depth: 'facet' }],
+        },
+        // One domain down — the shape a test with its own assets earns.
+        {
+            code: 'const x = 1;',
+            filename: '/repo/specs/source/import-paths/import-paths.test.ts',
+            options: [{ depth: 'facet' }],
+        },
+        // Specifications sit at the facet root, exactly as in facet-domain.
+        {
+            code: 'const x = 1;',
+            filename: '/repo/specs/tree/tree.specification.ts',
+            options: [{ depth: 'facet' }],
+        },
+        // Still out of scope under src/.
+        {
+            code: 'const x = 1;',
+            filename: '/repo/src/core/matching/match.test.ts',
+            options: [{ depth: 'facet' }],
+        },
+    ],
+});
+
 ruleTester.run('c1-domain-structure (depth: mirror)', c1DomainStructure as unknown as OxlintRule, {
     invalid: [
         // A test loose at the specs root mirrors nothing.

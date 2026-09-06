@@ -60,13 +60,14 @@ Placement itself is **declared**, because a spec tree may legitimately have a sh
 "jterrazz/c1-domain-structure": ["error", { "depth": "facet-domain" }] // the default
 ```
 
-| `depth`          | The tree                                                                                                                          |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `'facet-domain'` | the default and the historical rule — `specs/<facet>/<domain>/<aspect>.test.ts`, `*.specification.ts` at the facet root           |
-| `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a test at any depth ≥ 1, named `<dir>/<dir>.test.ts` |
-| `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                 |
+| `depth`          | The tree                                                                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'facet-domain'` | the default and the historical rule — `specs/<facet>/<domain>/<aspect>.test.ts`, `*.specification.ts` at the facet root                                             |
+| `'facet'`        | the assets decide the folder — a test at the facet root (`specs/<facet>/<aspect>.test.ts`) OR one domain down, never deeper; `*.specification.ts` at the facet root |
+| `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a test at any depth ≥ 1, named `<dir>/<dir>.test.ts`                                   |
+| `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                                                   |
 
-A project with a mirrored spec tree states `mirror` and keeps a checked shape, instead of switching the rule off and keeping none.
+A project states the shape it has — `facet` when asset-less tests sit beside their siblings at the facet root, `mirror` when the tree mirrors something outside itself — and keeps a checked shape, instead of switching the rule off and keeping none.
 
 ### D11 — golden-file, not a cluster of greps
 
