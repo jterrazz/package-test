@@ -91,8 +91,34 @@ const HEADER_LINE = /^(?<key>[a-z]+):(?<value>.*)$/;
 const EXIT_LINE = /^exit:\s*(?<code>-?\d+)\s*$/;
 const KEY_SET = new Set<string>(HEADER_KEYS);
 
-function fail(fileName: string, line: number, message: string): never {
-    throw new Error(`${fileName}:${line}: ${message}`);
+/**
+ * What a malformed `.cli` file broke — the two static rules the format is
+ * bound by. `narrative` is B4's (the three mandatory lines a test narrates
+ * itself with); `shape` is D4b's (the closed header keys, the `$` block, the
+ * `exit:` that follows it).
+ */
+export type LiterateDefect = 'narrative' | 'shape';
+
+/** A refusal from the grammar, carrying where it happened and which rule it is. */
+export class LiterateSyntaxError extends Error {
+    readonly defect: LiterateDefect;
+    readonly line: number;
+
+    constructor(fileName: string, line: number, message: string, defect: LiterateDefect) {
+        super(`${fileName}:${line}: ${message}`);
+        this.defect = defect;
+        this.line = line;
+        this.name = 'LiterateSyntaxError';
+    }
+}
+
+function fail(
+    fileName: string,
+    line: number,
+    message: string,
+    defect: LiterateDefect = 'shape',
+): never {
+    throw new LiterateSyntaxError(fileName, line, message, defect);
 }
 
 /** Is this line the start of a block? `$ cmd`, or a bare `$` (no arguments). */
@@ -213,6 +239,7 @@ function parseHeader(lines: string[], fileName: string): { header: LiterateHeade
                 fileName,
                 1,
                 `missing "${key}:" in the header — test, given and then are mandatory`,
+                'narrative',
             );
         }
     }
