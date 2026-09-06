@@ -5,6 +5,7 @@ import {
     parseDocument,
     Scalar,
     type ScalarTag,
+    visit,
 } from 'yaml';
 
 /**
@@ -15,7 +16,8 @@ import {
  * judge its shape. The document form is what update mode needs, because it is
  * the only one that survives a round trip: comments, key order and block-scalar
  * styles come back as they were written, so a rewrite touches the streams it
- * refreshed and nothing else.
+ * refreshed and nothing else. The one thing the writer restyles on its own —
+ * a flow collection — is put back from the source by {@link renderYamlSource}.
  *
  * The node types and guards are re-exported rather than imported by each
  * consumer: one folder owns one external dependency (CONVENTIONS I1), and this
@@ -32,6 +34,8 @@ export interface YamlSource {
     indent: number;
     /** 1-based line of a source offset. */
     lineAt: (offset: number) => number;
+    /** The text it was parsed from — what a rewrite gives back where it changed nothing. */
+    text: string;
 }
 
 /** A line that opens a mapping key — `  key:` or `  - key:`, never block-scalar text. */
@@ -133,6 +137,7 @@ export function parseYamlSource(text: string): YamlSource {
         document,
         indent: detectIndent(text),
         lineAt: (offset) => lineCounter.linePos(offset).line,
+        text,
     };
 }
 
@@ -158,11 +163,123 @@ export function blockScalar(text: string): Scalar<string> {
     return scalar;
 }
 
+// ── What a rewrite leaves alone ──
+
+/**
+ * One flow collection as a file spells it. The span starts at the WHITESPACE
+ * that separates it from the key or dash above it, because a spelling broken
+ * over several lines begins with the newline the writer would not have written.
+ */
+interface FlowCollection {
+    /** The indentation of the line its owner — the key, or the dash — sits on. */
+    ownerIndent: number;
+    range: [number, number];
+    text: string;
+    /** The value it holds, which is what makes two spellings the SAME collection. */
+    value: string;
+}
+
+/** The first offset of the line `offset` sits on. */
+function lineStart(text: string, offset: number): number {
+    return text.lastIndexOf('\n', offset - 1) + 1;
+}
+
+/** Back over the whitespace before `offset`, to just past the `:` or `-` that owns it. */
+function afterOwner(text: string, offset: number): number {
+    let at = offset;
+    while (at > 0 && /\s/.test(text[at - 1])) {
+        at -= 1;
+    }
+    return at;
+}
+
+/** How many spaces a line opens with. */
+function indentOf(text: string, offset: number): number {
+    const start = lineStart(text, offset);
+    return /^ */.exec(text.slice(start))![0].length;
+}
+
+/**
+ * Every OUTERMOST flow collection of a document, in source order. A nested one
+ * is part of its parent's text and is restored with it, so descending past a
+ * flow collection would splice the same span twice.
+ */
+function flowCollections(text: string): FlowCollection[] {
+    const found: FlowCollection[] = [];
+    const take = (node: { flow?: boolean; range?: null | number[]; toJSON: () => unknown }) => {
+        if (node.flow !== true || !node.range) {
+            return undefined;
+        }
+        const from = afterOwner(text, node.range[0]);
+        found.push({
+            ownerIndent: indentOf(text, from === 0 ? 0 : from - 1),
+            range: [from, node.range[1]],
+            text: text.slice(from, node.range[1]),
+            value: JSON.stringify(node.toJSON()),
+        });
+        return visit.SKIP;
+    };
+    visit(parseDocument(text), {
+        Map: (_key, node) => take(node),
+        Seq: (_key, node) => take(node),
+    });
+    return found;
+}
+
+/**
+ * Give every flow collection the rewrite did not change back exactly as it was
+ * written — padding, quotes and line breaks included.
+ *
+ * The `yaml` writer has ONE house style for `{ … }` and `[ … ]`, and it is not
+ * the repository formatter's: oxfmt pads a flow mapping and not a flow sequence,
+ * and explodes a long one over several lines, while the writer emits `[ 'a' ]`
+ * on one line whatever its width. Re-emitting an untouched collection therefore
+ * hands the formatter something to undo, and `check --fix` and `oxfmt` rewrite
+ * each other for ever. A collection nobody touched belongs to its author, not to
+ * either tool.
+ *
+ * A rendered collection is matched to a source one by VALUE and by the
+ * INDENTATION of the line that owns it: the same content under the same key is
+ * the same collection, and the indentation guard is what keeps the inner lines
+ * of a multi-line spelling true where a fix moved that key. Anything unmatched
+ * — added, removed, edited — keeps the writer's rendering.
+ */
+function restoreUntouchedFlow(rendered: string, text: string): string {
+    const sources = flowCollections(text);
+    if (sources.length === 0) {
+        return rendered;
+    }
+    const taken = new Set<number>();
+    const splices: { range: [number, number]; text: string }[] = [];
+    for (const target of flowCollections(rendered)) {
+        const at = sources.findIndex(
+            (candidate, index) =>
+                !taken.has(index) &&
+                candidate.value === target.value &&
+                candidate.ownerIndent === target.ownerIndent,
+        );
+        if (at === -1) {
+            continue;
+        }
+        taken.add(at);
+        splices.push({ range: target.range, text: sources[at].text });
+    }
+    let out = rendered;
+    for (const splice of splices.toReversed()) {
+        out = out.slice(0, splice.range[0]) + splice.text + out.slice(splice.range[1]);
+    }
+    return out;
+}
+
 /**
  * Render a document back to text, in the indentation it was read with.
  * `lineWidth: 0` disables the folding of long lines — a golden is compared byte
  * for byte, so nothing may decide on its own where to break one.
+ *
+ * What the caller did not change comes back as it was written — see
+ * {@link restoreUntouchedFlow} for the one construct the writer restyles.
  */
 export function renderYamlSource(source: YamlSource): string {
-    return source.document.toString({ indent: source.indent, lineWidth: 0 });
+    const rendered = source.document.toString({ indent: source.indent, lineWidth: 0 });
+    return restoreUntouchedFlow(rendered, source.text);
 }

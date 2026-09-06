@@ -182,7 +182,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `facet` (test au root de la facette OU un dossier domaine plus bas, jamais plus profond), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`. Dans tous les modes, `off` compris : un dossier à underscore initial est du SOL, jamais un domaine — aucune spec ne vit dedans.',
+            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `facet` (test au root de la facette OU un dossier domaine plus bas, jamais plus profond), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`. Dans tous les modes, `off` compris : un dossier à underscore initial est du SOL, jamais un domaine — aucune spec ne vit dedans. Une exception, et une seule : le sol peut être du CODE, et un `<module>.test.ts` posé À CÔTÉ du `<module>.ts` qu’il teste y est légal (c’est la loi I2) ; un test sans module voisin, ou un `*.specification.ts`, reste une violation.',
         family: 'C',
         id: 'C1',
         rationale:

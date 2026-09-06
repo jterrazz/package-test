@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
@@ -155,6 +158,64 @@ ruleTester.run('c1-domain-structure (depth: mirror)', c1DomainStructure as unkno
         {
             code: 'const x = 1;',
             filename: '/repo/src/core/matching/match.test.ts',
+            options: [{ depth: 'mirror' }],
+        },
+    ],
+});
+
+/**
+ * A ground folder on disk, since the clause asks the filesystem whether the
+ * test it is looking at has a module beside it. Returns the specs root.
+ */
+function groundTree(files: Record<string, string>): string {
+    const prefix = resolve(tmpdir(), 'c1-ground-');
+    const root = resolve(mkdtempSync(prefix), 'specs');
+    for (const [path, content] of Object.entries(files)) {
+        const full = resolve(root, path);
+        mkdirSync(full.slice(0, full.lastIndexOf('/')), { recursive: true });
+        writeFileSync(full, content);
+    }
+    return root;
+}
+
+const CODE_GROUND = groundTree({
+    // Ground that is CODE: the build of the subject under test, with its own
+    // Unit test beside it — and a spec that only wandered in.
+    'cli/_binary/binary.test.ts': '',
+    'cli/_binary/binary.ts': '',
+    'cli/_binary/orphan.test.ts': '',
+    'cli/_binary/binary.specification.ts': '',
+});
+
+ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as OxlintRule, {
+    invalid: [
+        // A test in ground with no module beside it is a spec that wandered in.
+        {
+            code: 'const x = 1;',
+            errors: [{ messageId: 'specInGround' }],
+            filename: `${CODE_GROUND}/cli/_binary/orphan.test.ts`,
+        },
+        // A runner never belongs to the ground, module beside it or not.
+        {
+            code: 'const x = 1;',
+            errors: [{ messageId: 'specInGround' }],
+            filename: `${CODE_GROUND}/cli/_binary/binary.specification.ts`,
+        },
+        // The clause holds in every mode, `off` included.
+        {
+            code: 'const x = 1;',
+            errors: [{ messageId: 'specInGround' }],
+            filename: `${CODE_GROUND}/cli/_binary/orphan.test.ts`,
+            options: [{ depth: 'off' }],
+        },
+    ],
+    valid: [
+        // `binary.ts` + `binary.test.ts`: I2's pairing, inside the ground it
+        // Belongs to — the depth rules never reach it.
+        { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/_binary/binary.test.ts` },
+        {
+            code: 'const x = 1;',
+            filename: `${CODE_GROUND}/cli/_binary/binary.test.ts`,
             options: [{ depth: 'mirror' }],
         },
     ],

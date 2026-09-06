@@ -83,3 +83,64 @@ describe('yaml document — a block scalar states its indentation', () => {
         );
     });
 });
+
+/** A document spelling its flow collections the way the repository formatter does. */
+const FORMATTED = [
+    '# the ground of the case',
+    'description: writes what it was told to',
+    'runs:',
+    '    - command: scaffold',
+    '      exit: 0',
+    '      files:',
+    "          out/main.go: { contains: 'package main' }",
+    "          out/docs/README.md: { contains: ['# Docs', 'second needle'] }",
+    '          out/long.txt:',
+    '              {',
+    "                  contains: ['a needle long enough that the formatter broke it over lines'],",
+    '              }',
+    '',
+].join('\n');
+
+describe('yaml document — a rewrite leaves alone what it did not change', () => {
+    test('a document nobody edited comes back byte for byte', () => {
+        // Given - unpadded flow sequences, a padded flow mapping, one broken
+        // Over several lines, and a comment
+        const source = parseYamlSource(FORMATTED);
+
+        // Then - the render is the file, not the writer's house style
+        expect(renderYamlSource(source)).toBe(FORMATTED);
+    });
+
+    test('an edited stream is rewritten and its neighbours are not', () => {
+        // Given - one stream written into the run, next to the flow collections
+        const source = parseYamlSource(FORMATTED);
+        source.document.setIn(['runs', 0, 'stdout'], blockScalar('Scaffolded\n'));
+
+        // Then - the new key is there, spelled by the writer
+        const rendered = renderYamlSource(source);
+        expect(rendered).toContain('      stdout: |\n          Scaffolded\n');
+
+        // Then - and every collection it did not touch is untouched, padding,
+        // Quotes and line breaks included
+        expect(rendered).toContain("out/docs/README.md: { contains: ['# Docs', 'second needle'] }");
+        expect(rendered).toContain(
+            [
+                '          out/long.txt:',
+                '              {',
+                "                  contains: ['a needle long enough that the formatter broke it over lines'],",
+                '              }',
+            ].join('\n'),
+        );
+    });
+
+    test('a collection whose value changed is written by the writer, not restored', () => {
+        // Given - a needle rewritten inside a flow collection
+        const source = parseYamlSource(FORMATTED);
+        source.document.setIn(['runs', 0, 'files', 'out/main.go', 'contains'], 'package rust');
+
+        // Then - the change is what the file says; the untouched sibling stays
+        const rendered = renderYamlSource(source);
+        expect(rendered).toContain("out/main.go: { contains: 'package rust' }");
+        expect(rendered).toContain("out/docs/README.md: { contains: ['# Docs', 'second needle'] }");
+    });
+});

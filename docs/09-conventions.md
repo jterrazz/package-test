@@ -71,6 +71,8 @@ A project states the shape it has — `facet` when asset-less tests sit beside t
 
 One clause of the rule is not the project's to declare, and holds in every mode, `off` included: **a folder whose name carries a leading underscore is ground, never a domain**, so no spec lives inside one. Depth is a shape a tree may choose; the ground/member split is the naming law recapped under [H](#h--naming-recap).
 
+Ground is not always inert. It may be **code** the specs stand on — the build of the subject under test, a harness the runner spawns — and code carries its unit test as a sibling under [I2](#i--architecture). So the clause lets exactly one pairing through: `<module>.test.ts` NEXT to the `<module>.ts` it is named after, inside the ground it belongs to. A test with no module beside it, or a `*.specification.ts`, is a spec that wandered in and is still reported — which is why the clause needs no `off`, and why no project has to switch off a rule it cannot switch off.
+
 ### D11 — golden-file, not a cluster of greps
 
 A tool's output (a linter, a compiler, a product CLI) is asserted as a **full snapshot per scoped use case**. Each case gets **its own fixture project** (its small valid/invalid files) — the fixture IS the Given, no shared `beforeAll` state — and the assertion is the whole snapshot (`expect(result.stdout).toMatch('<use-case>.txt')` + `exitCode`), volatile parts covered by tokens, generated with `TEST_UPDATE=1`.

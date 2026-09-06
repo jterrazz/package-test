@@ -1,4 +1,5 @@
 import { specsAnchor } from '../ast.js';
+import { isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
@@ -11,6 +12,15 @@ export type SpecsDepth = 'facet' | 'facet-domain' | 'mirror' | 'off';
 type Options = { depth?: SpecsDepth };
 
 const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
+
+/**
+ * Whether a file is the unit test of the module it sits beside — `x.test.ts`
+ * next to `x.ts`, which is the whole of I2's pairing. This is what tells a
+ * ground MODULE's test from a spec that wandered into the ground.
+ */
+function testsItsNeighbour(filename: string): boolean {
+    return filename.endsWith(TEST_SUFFIX) && isFile(`${filename.slice(0, -TEST_SUFFIX.length)}.ts`);
+}
 
 /**
  * CONVENTIONS C1' — the shape of a spec tree, DECLARED by the consumer.
@@ -58,8 +68,14 @@ const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
  *
  * The ground clause holds in every mode, `off` included: a directory whose name
  * carries a LEADING UNDERSCORE is ground — what the specs of a row stand on —
- * and never a domain, so no spec may live inside one. That is not a question of
+ * and never a domain, so no SPEC may live inside one. That is not a question of
  * depth, which is why no project's declared shape switches it off.
+ *
+ * Ground is not always inert, though: it may be CODE the specs stand on — the
+ * build of the subject under test, a harness the runner spawns. A `<module>.ts`
+ * there keeps its own unit test under I2's law, `<module>.test.ts` NEXT to it,
+ * and the clause lets that one pair through. Nothing else: a test with no module
+ * beside it, or a `*.specification.ts`, is a spec that wandered into the ground.
  *
  * Module tests under `src/` follow the neighbour rule (I2) and are out of scope
  * in every mode.
@@ -82,7 +98,10 @@ export const c1DomainStructure: LintRule = {
                         .slice(0, -1)
                         .find((segment) => segment.startsWith('_'));
                     if (ground !== undefined) {
-                        context.report({ data: { ground }, messageId: 'specInGround', node });
+                        if (!testsItsNeighbour(context.filename)) {
+                            context.report({ data: { ground }, messageId: 'specInGround', node });
+                        }
+                        // A ground module's test answers to I2, not to depth.
                         return;
                     }
                 }
@@ -145,7 +164,7 @@ export const c1DomainStructure: LintRule = {
         docs: RULE_DOCS['c1-domain-structure'],
         messages: {
             specInGround:
-                'A spec must not live under "{{ground}}/" — a leading underscore marks GROUND (what the specs of a row stand on: _fixtures/, _expected/, _requests/, _seeds/), never a domain (C1 — see docs/10-linting.md).',
+                'A spec must not live under "{{ground}}/" — a leading underscore marks GROUND (what the specs of a row stand on: _fixtures/, _expected/, _requests/, _seeds/), never a domain (C1 — see docs/10-linting.md). Ground that is CODE keeps its own unit test: `<module>.test.ts` NEXT to the `<module>.ts` it tests (I2), and nothing else.',
             specNotAtFacetRoot:
                 'A `*.specification.ts` must sit at the facet root: `specs/<facet>/<name>.specification.ts` (C1 — see docs/10-linting.md).',
             testAtFacetRoot:

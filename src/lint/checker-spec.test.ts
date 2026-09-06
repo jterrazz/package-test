@@ -60,6 +60,33 @@ describe('fixSpecDocument — key order and block scalars', () => {
         expect(fixSpecDocument(source, 'case.spec.yaml')).toBeNull();
     });
 
+    test('a document the repository formatter already styled is left untouched', () => {
+        // Given - canonical keys and block scalars, with the flow collections
+        // Spelled as oxfmt spells them: a padded mapping, an unpadded sequence,
+        // And a long one broken over lines
+        const source = [
+            '# the ground of the case',
+            'description: scaffolds the module',
+            'runs:',
+            '    - command: scaffold',
+            '      exit: 0',
+            '      stdout: |',
+            '          Scaffolded',
+            '      files:',
+            "          out/main.go: { contains: 'package main' }",
+            "          out/docs/README.md: { contains: ['# Docs', 'second needle'] }",
+            '          out/long.txt:',
+            '              {',
+            "                  contains: ['a needle long enough that the formatter broke it over lines'],",
+            '              }',
+            '',
+        ].join('\n');
+
+        // Then - `null`: the fixer has nothing to say, so the formatter has
+        // Nothing to undo and `lint:fix` converges on the first pass
+        expect(fixSpecDocument(source, 'case.spec.yaml')).toBeNull();
+    });
+
     test('a document the grammar refuses is never rewritten', () => {
         // Given - a file that is not a spec document at all
         // Then - the fixer declines; d4b-spec-shape is what reports it
