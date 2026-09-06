@@ -29,7 +29,7 @@ src/
 ├── core/                          # zero external imports (node builtins allowed) — CONVENTIONS I1; module unit tests are SIBLINGS: `<file>.test.ts` next to `<file>.ts` (I2)
 │   ├── specification/
 │   │   ├── shared/                # specification.{api,jobs,cli} object, SpecificationBuilder + facets (builder.ts),
-│   │   │   │                      #   caller.ts (test-file detection), resolve.ts (root discovery A9), reporter.ts,
+│   │   │   │                      #   caller.ts (test-file detection), resolve.ts (root discovery A9 + realpath/`$WORKDIR` expansion), reporter.ts,
 │   │   │   │                      #   orchestrator.ts (container lifecycle), registry.ts (integration seam),
 │   │   │   │                      #   compose-file.ts (compose types + detection), services.ts (isolation/startup helpers)
 │   │   │   └── result/            # BaseResult + read-only accessors (stream, json, filesystem, directory, response, table, grep)

@@ -36,6 +36,7 @@ import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
 import { GROUND_REQUESTS, GROUND_SEEDS } from './ground.js';
+import { expandWorkdir } from './resolve.js';
 import { BaseResult, validateDatabaseOption } from './result/result.js';
 import type { StubBackend } from './stub-backend.js';
 
@@ -374,8 +375,10 @@ export class SpecificationBuilder
      * Set environment variables for the command process. Merged on top of process.env.
      * Use `null` to unset a variable. Multiple calls merge.
      *
-     * The token `$WORKDIR` (in any value) is replaced with the actual working
-     * directory at run-time — useful for tests that need a fully isolated `HOME`.
+     * The token `$WORKDIR` (in any value) is replaced at run-time with the
+     * spec's working directory in its resolved form — the same string
+     * `{{workdir}}` asserts against — so a path handed to the child comes back
+     * matchable. Useful for tests that need a fully isolated `HOME`.
      *
      * @example
      *   cli.env({ HOME: "$WORKDIR", TZ: "UTC" }).exec("status");
@@ -734,18 +737,10 @@ export class SpecificationBuilder
     // ── Private ──
 
     private resolveEnv(workDir: string): CliEnv | undefined {
-        const keys = Object.keys(this.commandEnv);
-        if (keys.length === 0) {
+        if (Object.keys(this.commandEnv).length === 0) {
             return undefined;
         }
-
-        const resolved: CliEnv = {};
-        for (const key of keys) {
-            const value = this.commandEnv[key];
-            resolved[key] =
-                typeof value === 'string' ? value.replace(/\$WORKDIR/g, workDir) : value;
-        }
-        return resolved;
+        return expandWorkdir(this.commandEnv, workDir);
     }
 
     private prepareWorkDir(): string {

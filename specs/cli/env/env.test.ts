@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -14,6 +17,33 @@ import { cli as dbCli } from '../db-cli.specification.js';
 /* oxlint-disable jterrazz/d8w-text-bypass -- A full-output golden is unstable here
    (the env dump carries ephemeral ports/paths, see the note above); grepping the one
    variable under test via `.text` is the sanctioned scalpel, not a bypass. */
+
+/**
+ * Run `action` with the runner's temp root reached through a SYMLINK — macOS's
+ * own `$TMPDIR` shape (`/var` → `/private/var`), made explicit so the guard
+ * holds on Linux too. Every workdir minted inside it then has two spellings,
+ * and only the resolved one is what a child process reports.
+ */
+async function underSymlinkedTmp<T>(action: () => Promise<T>): Promise<T> {
+    const realTmp = realpathSync(tmpdir());
+    const base = mkdtempSync(resolve(realTmp, 'spec-symlinked-'));
+    const target = resolve(base, 'real');
+    const link = resolve(base, 'link');
+    mkdirSync(target);
+    symlinkSync(target, link, 'dir');
+    const previous = process.env.TMPDIR;
+    process.env.TMPDIR = link;
+    try {
+        return await action();
+    } finally {
+        if (previous === undefined) {
+            delete process.env.TMPDIR;
+        } else {
+            process.env.TMPDIR = previous;
+        }
+        rmSync(base, { force: true, recursive: true });
+    }
+}
 
 describe('command — env', () => {
     test('passes user-supplied env vars to the process', async () => {
@@ -64,6 +94,30 @@ describe('command — env', () => {
         expect(homeLine).toBeDefined();
         expect(homeLine).not.toBe('HOME=unset');
         expect(homeLine).toContain('/spec-command-');
+    });
+
+    test('$WORKDIR expands to the path {{workdir}} holds, symlinked tmp or not', async () => {
+        // Given - a nested path handed to the child through .env(), under a
+        // Temp root whose raw spelling differs from its resolved one
+        const result = await underSymlinkedTmp(() =>
+            cli
+                .fixture('$FIXTURES/cli-app/')
+                .env({ CACHE_DIR: '$WORKDIR/sub' })
+                .exec('workdir-var'),
+        );
+
+        // Then - what the child echoes back matches the {{workdir}} golden
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch('workdir-var.txt');
+    });
+
+    test('$WORKDIR in a document env: expands to that same path', async () => {
+        // Given - the same pair declared inline in a spec document, whose
+        // Stdout block asserts {{workdir}}/sub
+        const result = await underSymlinkedTmp(() => cli.run('expanded-workdir.spec.yaml'));
+
+        // Then - the document passed through the other door too
+        expect(result.exitCode).toBe(0);
     });
 
     test('null value unsets a variable', async () => {

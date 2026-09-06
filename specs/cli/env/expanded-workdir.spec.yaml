@@ -1,0 +1,7 @@
+description: expands $WORKDIR in an inline env pair to the path {{workdir}} holds
+env: CACHE_DIR=$WORKDIR/sub
+runs:
+    - command: workdir-var
+      exit: 0
+      stdout: |
+          CACHE_DIR={{workdir}}/sub
