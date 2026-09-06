@@ -1,10 +1,19 @@
 import Database from 'better-sqlite3';
-import { existsSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
 
-import { isValidSqliteTemplate, prismaPushCommand, sqlite, sqliteTemplateName } from './sqlite.js';
+import {
+    acquireTemplateLock,
+    isStaleTemplateLock,
+    isValidSqliteTemplate,
+    prismaPushCommand,
+    releaseTemplateLock,
+    sqlite,
+    sqliteTemplateDir,
+    sqliteTemplateName,
+} from './sqlite.js';
 
 describe('sqliteTemplateName (regression guard)', () => {
     const workdir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-key-'));
@@ -70,9 +79,9 @@ describe('sqliteTemplateName (regression guard)', () => {
 
     test('an empty database has one stable, prefixed name', () => {
         // Given - no schema at all (the consumer seeds it)
-        // Then - a stable key, and the file is still recognisably ours
+        // Then - a stable key; the folder it lands in already says whose it is
         expect(sqliteTemplateName()).toBe(sqliteTemplateName({}));
-        expect(sqliteTemplateName()).toMatch(/^jterrazz-test-sqlite-template-[\da-f]{8}\.sqlite$/);
+        expect(sqliteTemplateName()).toMatch(/^template-[\da-f]{8}\.sqlite$/);
     });
 
     test('an unreadable schema still keys on its path', () => {
@@ -175,34 +184,31 @@ describe('isValidSqliteTemplate (regression guard)', () => {
 
 describe('sqlite() initialize() — stale template recovery', () => {
     test('rebuilds instead of reusing a pre-existing 0-byte template', async () => {
-        // Given - the shared template path a crashed earlier run left behind as a
+        // Given - the template path a crashed earlier run left behind as a
         // 0-byte file (this is the exact real-world failure: initialize() used to
         // Early-return on `existsSync()` alone and never ran the init SQL, so every
         // Later run hit "no such table" against the empty file forever after).
-        const initSqlDir = mkdtempSync(resolve(tmpdir(), 'sqlite-guard-init-'));
-        const initSqlPath = resolve(initSqlDir, 'init.sql');
+        const root = mkdtempSync(resolve(tmpdir(), 'sqlite-guard-root-'));
+        const initSqlPath = resolve(root, 'init.sql');
         writeFileSync(
             initSqlPath,
             'CREATE TABLE "regression_guard" (id INTEGER PRIMARY KEY, label TEXT NOT NULL);',
         );
 
-        const templatePath = resolve(tmpdir(), sqliteTemplateName({ init: initSqlPath }));
-        const lockPath = `${templatePath}.lock`;
-        try {
-            unlinkSync(lockPath);
-        } catch {
-            /* Ignore — no stale lock to clear */
-        }
+        const templatePath = resolve(
+            sqliteTemplateDir(root),
+            sqliteTemplateName({ init: initSqlPath }),
+        );
         writeFileSync(templatePath, '');
         expect(isValidSqliteTemplate(templatePath)).toBe(false);
 
         // When - a fresh handle initializes against that poisoned path
         const db = sqlite({ init: initSqlPath });
-        await db.initialize();
+        await db.initialize(root, root);
 
-        // Then - the template was detected as invalid, deleted, and rebuilt: the
-        // Schema from init.sql is actually present (proving the file was NOT
-        // Reused as-is) and the file now passes the validity guard.
+        // Then - the template was detected as invalid and rebuilt: the schema
+        // From init.sql is actually present (proving the file was NOT reused
+        // As-is) and the file now passes the validity guard.
         expect(db.started).toBe(true);
         expect(isValidSqliteTemplate(templatePath)).toBe(true);
 
@@ -214,5 +220,127 @@ describe('sqlite() initialize() — stale template recovery', () => {
         } finally {
             check.close();
         }
+
+        rmSync(root, { force: true, recursive: true });
+    });
+});
+
+describe('sqlite() initialize() — the template is a PROJECT artefact', () => {
+    test('caches under <root>/.artifacts/vitest/sqlite, never the OS tmpdir', async () => {
+        // Given - two checkouts of one project: same schema content, two roots.
+        // A machine-global tmpdir gave them ONE file, so whichever ran first
+        // Built it and the other silently inherited that schema.
+        const [one, two] = ['a', 'b'].map((suffix) =>
+            mkdtempSync(resolve(tmpdir(), `sqlite-checkout-${suffix}-`)),
+        );
+        const schema = 'CREATE TABLE "shared_schema" (id INTEGER PRIMARY KEY);';
+        const roots = [one, two].map((root) => {
+            const initSqlPath = resolve(root, 'init.sql');
+            writeFileSync(initSqlPath, schema);
+            return { initSqlPath, root };
+        });
+
+        // When - each checkout initializes its own handle
+        const templates: string[] = [];
+        for (const { initSqlPath, root } of roots) {
+            const db = sqlite({ init: initSqlPath });
+            await db.initialize(root, root);
+            templates.push(db.connectionString.replace('file:', ''));
+        }
+
+        // Then - each template sits inside its own project, and the two are
+        // Different files that both exist
+        for (const [index, templatePath] of templates.entries()) {
+            const expected = resolve(roots[index].root, '.artifacts/vitest/sqlite');
+            expect(templatePath.startsWith(`${expected}/`)).toBe(true);
+            expect(isValidSqliteTemplate(templatePath)).toBe(true);
+        }
+        expect(templates[0]).not.toBe(templates[1]);
+
+        for (const { root } of roots) {
+            rmSync(root, { force: true, recursive: true });
+        }
+    });
+});
+
+describe('the template build lock (regression guard)', () => {
+    const workdir = mkdtempSync(resolve(tmpdir(), 'sqlite-lock-'));
+
+    afterAll(() => {
+        rmSync(workdir, { force: true, recursive: true });
+    });
+
+    test('exactly one caller wins it — the loser is told, not let through', () => {
+        // Given - a free lock path. The defect: a check-then-write pair let two
+        // Workers both believe they had won, and both ran `prisma db push`
+        // Against the same file — "database is locked".
+        const lockPath = resolve(workdir, 'exclusive.lock');
+
+        // Then - the exclusive create hands the lock to one caller only
+        expect(acquireTemplateLock(lockPath)).toBe(true);
+        expect(acquireTemplateLock(lockPath)).toBe(false);
+
+        // And - releasing hands it to the next caller
+        releaseTemplateLock(lockPath);
+        expect(acquireTemplateLock(lockPath)).toBe(true);
+        releaseTemplateLock(lockPath);
+    });
+
+    test('a lock nobody has touched for minutes is breakable, a fresh one is not', () => {
+        // Given - a lock just taken
+        const lockPath = resolve(workdir, 'stale.lock');
+        acquireTemplateLock(lockPath);
+
+        // Then - its holder is presumed alive, so a waiter waits
+        expect(isStaleTemplateLock(lockPath)).toBe(false);
+
+        // And - long past the build budget, the holder is presumed dead: a
+        // Crashed worker must not wedge the suite forever
+        expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBe(true);
+        releaseTemplateLock(lockPath);
+    });
+
+    test('a lock that is gone is not stale — the waiter just retries', () => {
+        // Given - no lock at all
+        const lockPath = resolve(workdir, 'absent.lock');
+
+        // Then - nothing to break
+        expect(isStaleTemplateLock(lockPath)).toBe(false);
+        expect(existsSync(lockPath)).toBe(false);
+    });
+
+    test('concurrent handles on a cold cache all end up with the schema', async () => {
+        // Given - a fresh project root, no template yet, and four handles
+        // Initializing at once — the cold-cache race that made a consumer keep
+        // `fileParallelism: false`
+        const root = mkdtempSync(resolve(tmpdir(), 'sqlite-race-'));
+        const initSqlPath = resolve(root, 'init.sql');
+        writeFileSync(initSqlPath, 'CREATE TABLE "raced" (id INTEGER PRIMARY KEY);');
+
+        // When - they all initialize together
+        const handles = [0, 1, 2, 3].map(() => sqlite({ init: initSqlPath }));
+        await Promise.all(handles.map((db) => db.initialize(root, root)));
+
+        // Then - every one of them points at the same finished template, and it
+        // Carries the schema: no partial build was ever observable
+        const templatePath = resolve(
+            root,
+            '.artifacts/vitest/sqlite',
+            sqliteTemplateName({ init: initSqlPath }),
+        );
+        for (const db of handles) {
+            expect(db.started).toBe(true);
+            expect(db.connectionString).toBe(`file:${templatePath}`);
+        }
+
+        const check = new Database(templatePath, { readonly: true });
+        try {
+            const query = `SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'raced'`;
+            expect(check.prepare(query).all()).toHaveLength(1);
+        } finally {
+            check.close();
+        }
+
+        rmSync(root, { force: true, recursive: true });
     });
 });

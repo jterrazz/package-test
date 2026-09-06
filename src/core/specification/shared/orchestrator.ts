@@ -131,7 +131,7 @@ export class Orchestrator {
         await Promise.all([
             ...containerServices.map(({ container }) => container.start()),
             ...embeddedServices.map(async (handle) => {
-                await handle.initialize(composeDir);
+                await handle.initialize(composeDir, this.root);
                 handle.started = true;
                 this.running.push({ handle, container: null });
             }),
@@ -149,7 +149,7 @@ export class Orchestrator {
                 handle.connectionString = handle.buildConnectionString(host, port);
 
                 await handle.healthcheck();
-                await handle.initialize(composeDir);
+                await handle.initialize(composeDir, this.root);
                 handle.started = true;
 
                 reports.push({
@@ -235,7 +235,7 @@ export class Orchestrator {
         for (const handle of Object.values(this.services)) {
             if (handle.defaultPort === 0) {
                 // Embedded service (e.g. SQLite) — no compose container.
-                await handle.initialize(composeDir);
+                await handle.initialize(composeDir, this.root);
                 handle.started = true;
                 continue;
             }
@@ -254,7 +254,7 @@ export class Orchestrator {
             handle.connectionString = handle.buildConnectionString('localhost', port);
 
             await handle.healthcheck();
-            await handle.initialize(composeDir);
+            await handle.initialize(composeDir, this.root);
             handle.started = true;
         }
 
@@ -276,7 +276,7 @@ export class Orchestrator {
             const port = this.composeStack.getMappedPort(service.name, handle.defaultPort);
             handle.connectionString = handle.buildConnectionString('localhost', port);
 
-            await handle.initialize(composeDir);
+            await handle.initialize(composeDir, this.root);
             handle.started = true;
 
             this.composeHandles.push(handle);
