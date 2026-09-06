@@ -7,5 +7,5 @@
         "src/lint/checker-cli.ts",
         "src/lint/catalog-cli.ts"
     ],
-    "ignore": ["specs/fixtures/**"]
+    "ignore": ["specs/_fixtures/**"]
 }

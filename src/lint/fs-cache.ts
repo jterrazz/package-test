@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
  * Cached filesystem probes for the fs-anchored rules (a9w, c2, c6, c7, i2).
  *
  * Rules only ever look at directories NEXT TO files oxlint is already
- * visiting (a feature's `requests/`, `seeds/`, `expected/`, a sibling module
+ * visiting (a feature's `_requests/`, `_seeds/`, `_expected/`, a sibling module
  * file), so the probe set is small — but several rules probe the same feature
  * directory, and oxlint lints many files per process. A module-level cache
  * keeps each `readdir`/`stat` to one syscall per lint run.

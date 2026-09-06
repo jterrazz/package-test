@@ -12,7 +12,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 /** The layout half is fs-anchored — it runs against the shared fixture trees. */
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const FIXTURES = resolve(import.meta.dirname, '../../../specs/_fixtures/lint-violations');
 
 const FEATURE = '/repo/specs/api/feature/contracts';
 const FACADE = `${FEATURE}/newsroom.contracts.ts`;

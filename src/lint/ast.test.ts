@@ -17,8 +17,8 @@ const root = mkdtempSync(resolve(tmpdir(), 'specs-anchor-'));
 const project = join(root, 'project');
 /** `<root>/specs/project/` — the same package, checked out under a `specs/` dir. */
 const underSpecs = join(root, 'specs', 'project');
-/** `<root>/project/specs/fixtures/lint-violations/case/specs/` — a nested tree. */
-const nested = join(project, 'specs', 'fixtures', 'lint-violations', 'case', 'specs');
+/** `<root>/project/specs/_fixtures/lint-violations/case/specs/` — a nested tree. */
+const nested = join(project, 'specs', '_fixtures', 'lint-violations', 'case', 'specs');
 
 for (const dir of [
     join(project, 'specs', 'api', 'requests'),

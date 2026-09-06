@@ -69,6 +69,9 @@ const FRAMEWORK_LAYERS = {
             'core/matching/match',
             'core/specification/shared/binding',
             'core/specification/shared/fixtures',
+            // The four ground names have ONE home; a rule that probed for its
+            // Own copy of them could drift from what the runner resolves.
+            'core/specification/shared/ground',
             // A9's rule must derive the root with the framework's own walk, not a copy.
             'core/specification/shared/resolve',
         ],
@@ -81,7 +84,7 @@ const FRAMEWORK_LAYERS = {
 
 export default defineConfig({
     extends: [oxlint.node],
-    ignorePatterns: ['specs/**/fixtures/**'],
+    ignorePatterns: ['specs/**/_fixtures/**'],
     jsPlugins: ['./dist/oxlint.js'],
     overrides: [
         {

@@ -1,5 +1,6 @@
 import { dirname, join } from 'node:path';
 
+import { GROUND_EXPECTED } from '../../core/specification/shared/ground.js';
 import { memberPropertyName, segments, stringValue, walk } from '../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
@@ -48,7 +49,7 @@ function refsInFixture(target: string): string[] {
  * `{{uuid#order}}`) earns its keep only when it is asserted more than once (the
  * point of a capture is the equality check on later occurrences). Aggregating
  * per file — code `match.ref` literals plus the `{{kind#ref}}` tokens of the
- * `expected/` fixtures the file references — a ref that appears exactly once
+ * `_expected/` fixtures the file references — a ref that appears exactly once
  * everywhere is a plain matcher wearing a name.
  */
 export const d9wSingleUseRef: LintRule = {
@@ -64,7 +65,7 @@ export const d9wSingleUseRef: LintRule = {
                 const codeNodes = new Map<string, AstNode>();
                 // Fallback report site for a ref that lives ONLY in a fixture:
                 // The `toMatch(...)` node that pulled it in. Per D9's normative
-                // Text the count aggregates code + referenced `expected/`
+                // Text the count aggregates code + referenced `_expected/`
                 // Fixtures, so a fixture-only ref used once must still warn —
                 // Attached to its referencing node since it has no code site.
                 const fixtureNodes = new Map<string, AstNode>();
@@ -89,7 +90,11 @@ export const d9wSingleUseRef: LintRule = {
                     if (memberPropertyName(node.callee as AstNode) === 'toMatch') {
                         const name = stringValue((node.arguments as AstNode[] | undefined)?.[0]);
                         if (name !== undefined) {
-                            const target = join(featureDir, 'expected', name.replace(/\/+$/, ''));
+                            const target = join(
+                                featureDir,
+                                GROUND_EXPECTED,
+                                name.replace(/\/+$/, ''),
+                            );
                             for (const ref of refsInFixture(target)) {
                                 bump(ref);
                                 if (!fixtureNodes.has(ref)) {

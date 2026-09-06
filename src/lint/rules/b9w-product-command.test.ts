@@ -41,7 +41,7 @@ ruleTester.run('b9w-product-command', b9wProductCommand as unknown as OxlintRule
         },
         // A local fixture binary, not a dependency.
         {
-            code: "const { cli } = await specification.cli('../fixtures/cli-app/cli.sh');",
+            code: "const { cli } = await specification.cli('../_fixtures/cli-app/cli.sh');",
             filename: '/repo/specs/cli/cli.specification.ts',
         },
         // Not a cli() constructor.

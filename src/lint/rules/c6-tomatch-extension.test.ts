@@ -14,14 +14,14 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the shared E2E fixture trees (the -ok
-// Twin ships an expected/tree/ directory snapshot).
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+// Twin ships an _expected/tree/ directory snapshot).
+const FIXTURES = resolve(import.meta.dirname, '../../../specs/_fixtures/lint-violations');
 const VIOLATION = `${FIXTURES}/c6-tomatch-extension/specs/app/widget/widget.test.ts`;
 const COMPLIANT = `${FIXTURES}/c6-tomatch-extension-ok/specs/app/widget/widget.test.ts`;
 
 ruleTester.run('c6-tomatch-extension', c6ToMatchExtension as unknown as OxlintRule, {
     invalid: [
-        // No extension, no expected/help/ directory.
+        // No extension, no _expected/help/ directory.
         {
             code: 'expect(result.stdout).toMatch("help");',
             errors: 1,
@@ -42,7 +42,7 @@ ruleTester.run('c6-tomatch-extension', c6ToMatchExtension as unknown as OxlintRu
             code: 'await expect(result.directory("out")).toMatch("missing-tree");',
             filename: VIOLATION,
         },
-        // Directory snapshot resolved on disk (expected/tree/ exists).
+        // Directory snapshot resolved on disk (_expected/tree/ exists).
         {
             code: 'await expect(snapshot).toMatch("tree");',
             filename: COMPLIANT,

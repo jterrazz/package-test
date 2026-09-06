@@ -11,6 +11,7 @@ import {
     type SpecFile,
 } from '../core/literate/spec-document.js';
 import { resolveFixtureSource } from '../core/specification/shared/fixtures.js';
+import { GROUND_FIXTURES } from '../core/specification/shared/ground.js';
 import {
     isMap,
     isScalar,
@@ -59,8 +60,8 @@ function finding(
     return { line, message, rule, severity };
 }
 
-/** Directories the walks never enter — `fixtures/` holds INPUTS, never scenarios. */
-const PRUNED = new Set(['.git', 'dist', 'fixtures', 'node_modules']);
+/** Directories the walks never enter — `_fixtures/` holds INPUTS, never scenarios. */
+const PRUNED = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
 function listSpecFiles(dir: string): string[] {
     const out: string[] = [];
