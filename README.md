@@ -6,7 +6,7 @@ Declarative testing framework for APIs, jobs, CLIs, websites, and mobile apps. F
 npm install -D @jterrazz/test vitest
 ```
 
-Everything imports from `@jterrazz/test` — the one exception is the tool-facing `@jterrazz/test/oxlint` subpath (the zero-runtime lint plugin and its config fragment), which never loads any test runtime.
+Everything a spec needs imports from `@jterrazz/test`. The exceptions are the two TOOL subpaths, which no spec ever imports: `@jterrazz/test/oxlint` (the zero-runtime lint plugin and its config fragment, loading no test runtime) and `@jterrazz/test/vitest` (what `vitest.config.ts` imports — the `defineSpecConfig()` preset and the `literate()` plugin).
 
 ## Quick start
 
@@ -172,7 +172,9 @@ Resolution: `options.mode` > `TEST_MODE` env var > `'node'`. Only `.api()` has a
 
 ```typescript
 // vitest.config.ts — the mode switch lives HERE
-export default defineConfig({
+import { defineSpecConfig } from '@jterrazz/test/vitest';
+
+export default defineSpecConfig({
     test: {
         projects: [
             { test: { name: 'http', include: ['specs/api/**/*.test.ts'] } },
@@ -261,6 +263,30 @@ The handle destructures to `{ mobile, cleanup, udid }` (plus `backendUrl` with `
 ### Root auto-discovery
 
 When `root` is absent, the framework walks up from the specification file to the **nearest** directory carrying `package.json` or `docker/compose.test.yaml`. In a workspace that is the member being tested, not the repository root above it. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
+
+## vitest config — `defineSpecConfig()`
+
+`@jterrazz/test/vitest` is the subpath `vitest.config.ts` imports, never a spec. Beside `literate()` it exports the shared preset: what you pass is a plain vite/vitest config merged **over** its defaults, and `literate:` adds the plugin.
+
+```typescript
+import { defineSpecConfig } from '@jterrazz/test/vitest';
+
+export default defineSpecConfig({
+    literate: { specification: './specs/cli/cli.specification.ts' },
+    test: { include: ['specs/**/*.test.ts'] },
+});
+```
+
+| Sets                               | To                                                     |
+| ---------------------------------- | ------------------------------------------------------ |
+| `cacheDir`                         | `.artifacts/vitest`                                    |
+| `test.coverage.reportsDirectory`   | `.artifacts/vitest/coverage` (bring your own provider) |
+| `test.testTimeout` / `hookTimeout` | `30_000`                                               |
+| `test.exclude`                     | vitest's defaults **+** `**/_fixtures/**`              |
+
+Nothing else: `fileParallelism`, `reporters`, `environment` and every `include` stay yours. Inline `projects` inherit the same defaults (vitest gives a project nothing from the root), arrays are concatenated rather than replaced, and scalars you state win. Full walkthrough, including migrating a hand-rolled config: [docs/01-getting-started.md](docs/01-getting-started.md#vitest-config-the-preset).
+
+Every artefact a run produces lands under `.artifacts/<tool>/` — one `.gitignore` line, one `rm -rf`. Per-run scratch (a CLI spec's temp cwd, a browser profile) stays in the OS temp dir.
 
 ## Builder API
 

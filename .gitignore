@@ -1,5 +1,8 @@
 node_modules/
 .idea
 .DS_Store
+# Every build/test artefact lives under `.artifacts/<tool>/` — the vitest cache,
+# Its coverage report, the sqlite schema templates. `dist` is the one exception.
+.artifacts/
 dist
 *.tgz

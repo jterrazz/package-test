@@ -7,3 +7,4 @@
  */
 
 export { literate, type LiterateOptions, type LiteratePlugin } from './literate-plugin.js';
+export { defineSpecConfig, type SpecConfig } from './preset.js';

@@ -1,8 +1,11 @@
-import { configDefaults, defineConfig } from 'vitest/config';
+import { defineSpecConfig, literate } from './src/vitest/index.js';
 
-import { literate } from './src/vitest/index.js';
-
-export default defineConfig({
+/**
+ * The package eats its own preset: `defineSpecConfig()` sets the artefact
+ * paths, the budgets and the `_fixtures/` exclusion, and every project below
+ * states only what makes it different.
+ */
+export default defineSpecConfig({
     test: {
         projects: [
             {
@@ -11,6 +14,9 @@ export default defineConfig({
                 // Through the registered runner. The glob stops at depth 1 so the
                 // Deliberately-wrong twins under `literate/_fixtures/` stay inputs to
                 // The negative specs, never tests.
+                //
+                // The plugin sits in THIS project, not at the root: its glob has
+                // To join the include of the project that collects those documents.
                 plugins: [
                     literate({
                         include: ['specs/cli/literate/*.spec.yaml'],
@@ -40,8 +46,9 @@ export default defineConfig({
                     name: 'api-stack',
                     // Parallel: each worker gets its own compose project (test-worker-N)
                     include: ['specs/api/**/*.test.ts', 'specs/jobs/**/*.test.ts'],
-                    // Intercepts are in-process (MSW) — node-only (CONVENTIONS I3/D7)
-                    exclude: [...configDefaults.exclude, 'specs/api/intercepts/**'],
+                    // Intercepts are in-process (MSW) — node-only (CONVENTIONS I3/D7).
+                    // Added to the preset's list, not replacing it: vite concatenates.
+                    exclude: ['specs/api/intercepts/**'],
                     env: { TEST_MODE: 'compose' },
                 },
             },
