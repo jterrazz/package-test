@@ -6,7 +6,7 @@ import type { ServerResponse } from '../../../ports/server.port.js';
  *
  * Assertions go through `expect()`:
  * `expect(result.response).toMatch('created.http')` compares status,
- * a subset of headers, and the JSON body against `expected/<name>` —
+ * a subset of headers, and the JSON body against `_expected/<name>` —
  * with `{{placeholder}}` support in all three.
  */
 export class ResponseAccessor {

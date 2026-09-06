@@ -35,6 +35,7 @@ import { FetchResult, PageResult } from '../website/result.js';
 import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
+import { GROUND_REQUESTS, GROUND_SEEDS } from './ground.js';
 import { BaseResult, validateDatabaseOption } from './result/result.js';
 import type { StubBackend } from './stub-backend.js';
 
@@ -158,11 +159,11 @@ export interface FixtureEntry {
 export interface RequestEntry {
     /** Inline body value — objects are JSON-serialized, strings sent raw. */
     body?: unknown;
-    /** Headers parsed from a `requests/*.http` file (chain headers win). */
+    /** Headers parsed from a `_requests/*.http` file (chain headers win). */
     fileHeaders?: Record<string, string>;
     method: string;
     path: string;
-    /** A `requests/*.http` file to load method/path/headers/body from. */
+    /** A `_requests/*.http` file to load method/path/headers/body from. */
     requestFile?: string;
 }
 
@@ -188,7 +189,7 @@ export interface ApiSpecification<DatabaseKey extends string = string> {
     headers: (headers: Record<string, string>) => ApiSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<ApiSpecification<DatabaseKey>>;
-    /** Queue a SQL seed file from `seeds/` to run before the action. */
+    /** Queue a SQL seed file from `_seeds/` to run before the action. */
     seed: (file: string, options?: { database?: DatabaseKey }) => ApiSpecification<DatabaseKey>;
 
     /** Send a DELETE request and resolve with the result. */
@@ -199,7 +200,7 @@ export interface ApiSpecification<DatabaseKey extends string = string> {
     post: (path: string, body?: unknown) => Promise<HttpResult>;
     /** Send a PUT request (optional inline JSON body) and resolve with the result. */
     put: (path: string, body?: unknown) => Promise<HttpResult>;
-    /** Send the complete request described by `requests/<file>` (.http format). */
+    /** Send the complete request described by `_requests/<file>` (.http format). */
     request: (file: string) => Promise<HttpResult>;
 }
 
@@ -210,7 +211,7 @@ export interface ApiSpecification<DatabaseKey extends string = string> {
 export interface JobsSpecification<DatabaseKey extends string = string> {
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
-    /** Queue a SQL seed file from `seeds/` to run before the action. */
+    /** Queue a SQL seed file from `_seeds/` to run before the action. */
     seed: (file: string, options?: { database?: DatabaseKey }) => JobsSpecification<DatabaseKey>;
 
     /** Execute the named job registered via the `jobs` option and resolve with the result. */
@@ -233,7 +234,7 @@ export interface CliSpecification<DatabaseKey extends string = string> {
      * directory (or file) is copied under its own name. Chained calls layer.
      */
     fixture: (path: string) => CliSpecification<DatabaseKey>;
-    /** Queue a SQL seed file from `seeds/` to run against a database before the action. */
+    /** Queue a SQL seed file from `_seeds/` to run against a database before the action. */
     seed: (file: string, options?: { database?: DatabaseKey }) => CliSpecification<DatabaseKey>;
 
     /**
@@ -386,7 +387,7 @@ export class SpecificationBuilder
 
     /**
      * Set HTTP headers for the request. Multiple calls merge; chain headers
-     * win over headers from a `requests/*.http` file.
+     * win over headers from a `_requests/*.http` file.
      *
      * @example
      *   api.headers({ 'Accept-Language': 'fr' }).get("/articles");
@@ -469,7 +470,7 @@ export class SpecificationBuilder
     // ── HTTP actions (terminal) ──
 
     /**
-     * Send the complete request described by `requests/<file>` — first line
+     * Send the complete request described by `_requests/<file>` — first line
      * `METHOD /path`, then headers until a blank line, then the body.
      * Headers set via `.headers()` merge on top of the file's headers.
      *
@@ -682,7 +683,7 @@ export class SpecificationBuilder
                 throw new Error('seed() requires a database adapter');
             }
 
-            const sql = readFileSync(resolve(this.testDir, 'seeds', entry.file), 'utf8');
+            const sql = readFileSync(resolve(this.testDir, GROUND_SEEDS, entry.file), 'utf8');
             await db.seed(sql);
         }
 
@@ -764,10 +765,10 @@ export class SpecificationBuilder
 
         if (request.requestFile) {
             const raw = readFileSync(
-                resolve(this.testDir, 'requests', request.requestFile),
+                resolve(this.testDir, GROUND_REQUESTS, request.requestFile),
                 'utf8',
             );
-            const parsed = parseRequestFile(raw, `requests/${request.requestFile}`);
+            const parsed = parseRequestFile(raw, `${GROUND_REQUESTS}/${request.requestFile}`);
             body = parsed.body;
             fileHeaders = parsed.headers;
             method = parsed.method;

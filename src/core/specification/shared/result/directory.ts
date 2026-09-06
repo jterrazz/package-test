@@ -92,7 +92,7 @@ export async function diffDirectories(
  *
  * Assertions go through `expect()` (async — they walk the disk):
  * `await expect(result.directory('out')).toMatch('scaffold/out')`
- * compares the tree against the fixture directory `expected/<name>/`.
+ * compares the tree against the fixture directory `_expected/<name>/`.
  */
 export class DirectoryAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */

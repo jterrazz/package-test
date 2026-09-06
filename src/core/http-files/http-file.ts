@@ -1,14 +1,14 @@
 /**
  * Parser / serializer for `.http` fixture files.
  *
- * Requests (`requests/*.http`) hold a COMPLETE request:
+ * Requests (`_requests/*.http`) hold a COMPLETE request:
  *
  *     POST /users
  *     content-type: application/json
  *
  *     { "name": "Charlie" }
  *
- * Responses (`expected/*.http`) hold the expected status, a SUBSET of
+ * Responses (`_expected/*.http`) hold the expected status, a SUBSET of
  * headers, and the expected JSON body. Status, headers, and body support
  * `{{placeholder}}` forms:
  *
@@ -76,7 +76,7 @@ function parseHeaders(headerLines: string[], fileName: string): Record<string, s
     return headers;
 }
 
-/** Parse a `requests/*.http` file. First line must be `METHOD /path`. */
+/** Parse a `_requests/*.http` file. First line must be `METHOD /path`. */
 export function parseRequestFile(content: string, fileName: string): ParsedRequestFile {
     const { body, headerLines, startLine } = splitSections(content);
 

@@ -7,8 +7,8 @@
  * - strings containing `{{placeholder}}` forms (file-side fixtures)
  *
  * One unified `{{token}}` grammar (CONVENTIONS D4) — the same vocabulary
- * works in `expected/*.http` (body and headers), `expected/*.json`, and
- * text snapshots (`expected/*.txt`).
+ * works in `_expected/*.http` (body and headers), `_expected/*.json`, and
+ * text snapshots (`_expected/*.txt`).
  *
  * Ref captures (`match.ref(name)` / `{{type#name}}`) are recorded in the
  * {@link CaptureScope} supplied by the caller.
@@ -362,7 +362,7 @@ export function structuralSubset(expected: unknown, actual: unknown, scope: Capt
 
 /**
  * Multi-line text comparison with `{{token}}` support — used by text
- * snapshots (`expected/*.txt`). Without placeholders this is strict equality.
+ * snapshots (`_expected/*.txt`). Without placeholders this is strict equality.
  */
 export function textEquals(expected: string, actual: string, scope: CaptureScope): boolean {
     if (!hasPlaceholders(expected)) {
