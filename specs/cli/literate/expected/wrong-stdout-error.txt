@@ -1,0 +1,21 @@
+Literate spec mismatch (specs/cli/literate/fixtures/wrong-stdout.cli:5)
+
+test: a block whose golden stdout is deliberately wrong
+given: the help command and a golden nobody updated
+then: the failure renders the narrative, the command and a line diff
+
+$ help
+
+Output mismatch (stdout)
+
+- Expected
++ Received
+
+  Usage: cli <command>
+  
+  Commands:
+    build   Build the project
+-   lint    A command this binary does not have
++   check   Check code quality
+
+Run with TEST_UPDATE=1 to rewrite the blocks (exit code and streams). The header is never rewritten.

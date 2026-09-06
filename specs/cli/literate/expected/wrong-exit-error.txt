@@ -1,0 +1,17 @@
+Literate spec mismatch (specs/cli/literate/fixtures/wrong-exit.cli:5)
+
+test: a block whose golden exit code is deliberately wrong
+given: a command that fails, and a golden claiming it succeeds
+then: the failure names both codes and shows what stderr carried
+
+$ fail
+
+exit code mismatch
+  expected: 0
+  received: 2
+
+stderr was:
+Starting...
+Fatal: something went wrong
+
+Run with TEST_UPDATE=1 to rewrite the blocks (exit code and streams). The header is never rewritten.

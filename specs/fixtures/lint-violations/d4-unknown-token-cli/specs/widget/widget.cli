@@ -1,0 +1,7 @@
+test: a literate spec inventing a token
+given: a block golden carrying {{widget}}
+then: the frozen D4 vocabulary rejects it
+
+$ widget build
+exit: 0
+built {{widget}}

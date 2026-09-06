@@ -42,7 +42,7 @@ describe('literate() — the vite plugin door', () => {
             specification: './specs/cli/cli.specification.ts',
         });
 
-        // Then
+        // Then - the plugin narrows nothing on its own; it passes the glob on
         expect(plugin.config()).toEqual({ test: { include: ['specs/cli/literate/*.cli'] } });
     });
 

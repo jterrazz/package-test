@@ -28,7 +28,10 @@ export {
     type CliHandle,
     type CliSpecificationOptions,
 } from './core/specification/cli/start-cli.js';
-export { type LiterateServeRegistration } from './core/specification/cli/literate.js';
+export {
+    type LiterateRunFlags,
+    type LiterateServeRegistration,
+} from './core/specification/cli/literate.js';
 export {
     type LiterateBlock,
     type LiterateHeader,

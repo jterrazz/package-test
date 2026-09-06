@@ -1,0 +1,7 @@
+test: a literate spec that narrates itself
+given: an empty working directory
+then: the build banner is printed once
+
+$ widget build
+exit: 0
+Built.

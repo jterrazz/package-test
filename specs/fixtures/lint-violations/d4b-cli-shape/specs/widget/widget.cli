@@ -1,0 +1,7 @@
+test: a literate spec with a key outside the closed set
+given: a when: line
+then: the checker names the line and lists the vocabulary
+when: the widget is built
+
+$ widget build
+exit: 0

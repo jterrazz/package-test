@@ -1,9 +1,21 @@
 import { configDefaults, defineConfig } from 'vitest/config';
 
+import { literate } from './src/vitest/index.js';
+
 export default defineConfig({
     test: {
         projects: [
             {
+                // The framework eats its own literate format: `specs/cli/literate/*.cli`
+                // Are collected as TEST FILES and run through the registered runner.
+                // The glob stops at depth 1 so the deliberately-broken twins under
+                // `literate/fixtures/` stay inputs to the negative specs, never tests.
+                plugins: [
+                    literate({
+                        include: ['specs/cli/literate/*.cli'],
+                        specification: './specs/cli/literate-cli.specification.ts',
+                    }),
+                ],
                 test: {
                     name: 'fast',
                     // Specs/lint E2E-lints fixture projects through the real

@@ -67,7 +67,7 @@ describe('literate-file — header grammar', () => {
         // Given - a header without `then:`
         const source = 'test: a title\ngiven: some ground\n\n$ run\nexit: 0\n';
 
-        // Then
+        // Then - the message names the key B4 asks every test for
         expect(() => parseLiterateFile(source, FILE)).toThrow('missing "then:" in the header');
     });
 
@@ -75,7 +75,7 @@ describe('literate-file — header grammar', () => {
         // Given - a stray prose line inside the header
         const source = `${HEADER}\njust prose\n\n$ run\nexit: 0\n`;
 
-        // Then
+        // Then - the line is quoted back, with the shape it should have had
         expect(() => parseLiterateFile(source, FILE)).toThrow(
             `${FILE}:4: "just prose" is not a header line`,
         );
@@ -85,7 +85,7 @@ describe('literate-file — header grammar', () => {
         // Given - two `test:` lines
         const source = `${HEADER}\ntest: again\n\n$ run\nexit: 0\n`;
 
-        // Then
+        // Then - a single-line key takes exactly one line
         expect(() => parseLiterateFile(source, FILE)).toThrow('test: is declared twice');
     });
 });
@@ -124,7 +124,7 @@ describe('literate-file — block grammar', () => {
         // Given - a block whose second line is output, not an exit code
         const source = `${HEADER}\n\n$ run\nhello\n`;
 
-        // Then
+        // Then - the refusal names the command whose exit code is missing
         expect(() => parseLiterateFile(source, FILE)).toThrow(
             'the line after "$ run" must be "exit: <integer>", got "hello"',
         );
@@ -134,7 +134,7 @@ describe('literate-file — block grammar', () => {
         // Given - a header and nothing else
         const source = `${HEADER}\n\n`;
 
-        // Then
+        // Then - a scenario that runs nothing proves nothing
         expect(() => parseLiterateFile(source, FILE)).toThrow('no "$ <command>" block');
     });
 
@@ -142,7 +142,7 @@ describe('literate-file — block grammar', () => {
         // Given - prose between the header and the first block
         const source = `${HEADER}\n\nstray\n$ run\nexit: 0\n`;
 
-        // Then
+        // Then - every body line belongs to a block
         expect(() => parseLiterateFile(source, FILE)).toThrow('sits outside a block');
     });
 });
@@ -169,7 +169,7 @@ describe('literate-file — serialization', () => {
             stdout: 'ok',
         });
 
-        // Then
+        // Then - an empty stream leaves no section behind
         expect(rendered).toBe('$ run\nexit: 0\nok');
     });
 });

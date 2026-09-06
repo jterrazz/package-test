@@ -24,7 +24,11 @@ import type { DevicePort, MobileScenario } from '../../ports/device.port.js';
 import type { ServerPort } from '../../ports/server.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
 import { HttpResult } from '../api/result.js';
-import { type LiterateServeRegistration, runLiterateSpec } from '../cli/literate.js';
+import {
+    type LiterateRunFlags,
+    type LiterateServeRegistration,
+    runLiterateSpec,
+} from '../cli/literate.js';
 import { CliResult } from '../cli/result.js';
 import { ScreenResult } from '../mobile/result.js';
 import { FetchResult, PageResult } from '../website/result.js';
@@ -247,7 +251,7 @@ export interface CliSpecification<DatabaseKey extends string = string> {
      * express (a directory golden, a grep). The path is relative to the test
      * file's own directory, where the `.cli` lives.
      */
-    run: (file: string) => Promise<CliResult>;
+    run: (file: string, options?: LiterateRunFlags) => Promise<CliResult>;
 }
 
 /**
@@ -557,9 +561,9 @@ export class SpecificationBuilder
      *   const result = await cli.run('no-estate.cli');
      *   await expect(result.directory('out')).toMatch('scaffold');
      */
-    run(file: string): Promise<CliResult> {
+    run(file: string, options?: LiterateRunFlags): Promise<CliResult> {
         const workDir = this.prepareWorkDir();
-        return this.executeSetup(workDir, () => this.runLiterateAction(workDir, file));
+        return this.executeSetup(workDir, () => this.runLiterateAction(workDir, file, options));
     }
 
     // ── Website actions (terminal) ──
@@ -935,10 +939,15 @@ export class SpecificationBuilder
         return env;
     }
 
-    private runLiterateAction(workDir: string, file: string): Promise<CliResult> {
+    private runLiterateAction(
+        workDir: string,
+        file: string,
+        options?: LiterateRunFlags,
+    ): Promise<CliResult> {
         const filePath = resolve(this.testDir, file);
         return runLiterateSpec({
             baseEnv: this.childEnv(workDir),
+            frozen: options?.frozen,
             config: this.config,
             displayPath: relative(process.cwd(), filePath) || file,
             filePath,
@@ -1097,7 +1106,7 @@ export function createCliFacet(config: SpecificationConfig): CliSpecification<st
         env: (env) => start().env(env),
         exec: (args, options) => start().exec(args, options),
         fixture: (path) => start().fixture(path),
-        run: (file) => start().run(file),
+        run: (file, options) => start().run(file, options),
         seed: (file, options) => start().seed(file, options),
     };
 }

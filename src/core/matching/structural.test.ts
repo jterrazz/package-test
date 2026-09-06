@@ -215,11 +215,7 @@ describe('structural — update-mode merges', () => {
 
         // Then - the first actual line keeps the token; the second is literal
         expect(
-            mergeTextPreservingPlaceholders(
-                'id {{uuid}}',
-                `id ${UUID_A}\nid ${UUID_B}`,
-                scope,
-            ),
+            mergeTextPreservingPlaceholders('id {{uuid}}', `id ${UUID_A}\nid ${UUID_B}`, scope),
         ).toBe(`id {{uuid}}\nid ${UUID_B}`);
     });
 

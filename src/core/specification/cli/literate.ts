@@ -41,14 +41,30 @@ export interface LiterateServeRegistration {
     command: string;
     /** The variable the resolved URL is bound to in every block's child env. */
     env: string;
-    /** Matched against the server's output; capture group 1 is the port it chose. */
+    /**
+     * Matched against the server's output; the FIRST capture group is the port
+     * it chose — named (`(?<port>\d+)`) or not, it is group 1 either way.
+     */
     ready: RegExp;
     /** Builds the URL bound to {@link env} from the announced port. */
     url: (port: number) => string;
 }
 
+/** Per-call options for {@link runLiterateSpec} / `cli.run()`. */
+export interface LiterateRunFlags {
+    /**
+     * Opt this file OUT of the update-mode rewrite. A frozen file is NEVER
+     * written under `TEST_UPDATE=1`: its mismatch still throws its diff. That
+     * is what makes a DELIBERATELY-WRONG `.cli` — one whose failure rendering
+     * is the subject of a negative test — survive an update run instead of
+     * being silently corrected into a passing file. The `.cli` mirror of
+     * `toMatch(name, { frozen: true })`.
+     */
+    frozen?: boolean;
+}
+
 /** Everything the engine needs to run one file. Assembled by the chain. */
-export interface LiterateRunOptions {
+export interface LiterateRunOptions extends LiterateRunFlags {
     /** Env the chain already resolved: service URLs, docker run id, `.env()`. */
     baseEnv?: CliEnv;
     config: SpecificationConfig;
@@ -312,7 +328,7 @@ export async function runLiterateSpec(options: LiterateRunOptions): Promise<CliR
         await servers.stop();
     }
 
-    if (shouldUpdateSnapshots()) {
+    if (shouldUpdateSnapshots() && options.frozen !== true) {
         writeFileSync(filePath, serializeLiterateFile(spec.headerText, updatedBlocks(runs, scope)));
     } else {
         for (const run of runs) {
