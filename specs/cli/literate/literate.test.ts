@@ -354,6 +354,42 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         expect(readFileSync(path, 'utf8')).toContain('out/main.go: { contains: package rust }');
     });
 
+    test('an update that changes nothing gives the file back byte for byte', async () => {
+        // Given - a true golden, spelled the way the repository formatter
+        // Spells it: a padded flow mapping, an unpadded flow sequence, one
+        // Broken over lines, and a comment
+        const source = [
+            '# the ground of the case',
+            'description: rewrites nothing when nothing moved',
+            'runs:',
+            '    - command: scaffold',
+            '      exit: 0',
+            '      stdout: |',
+            '          Scaffolded',
+            '      files:',
+            "          out/main.go: { contains: 'package main' }",
+            "          out/docs/README.md: { contains: ['# Docs'] }",
+            '          out/go.mod:',
+            '              {',
+            "                  contains: ['module example'],",
+            '              }',
+            '',
+        ].join('\n');
+        const path = scratchFile(source);
+
+        // Given - one update run
+        process.env.TEST_UPDATE = '1';
+        try {
+            await cli.run(path);
+        } finally {
+            delete process.env.TEST_UPDATE;
+        }
+
+        // Then - not one byte moved: a rewrite restates the streams, and a
+        // Collection it never read is not the writer's to restyle
+        expect(readFileSync(path, 'utf8')).toBe(source);
+    });
+
     test('a frozen document is never rewritten under TEST_UPDATE', async () => {
         // Given - a deliberately-wrong golden, run in update mode
         const target = resolve(import.meta.dirname, '_fixtures/wrong-stdout.spec.yaml');
