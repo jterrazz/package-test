@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
 
 describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
     test('matches dynamic values via typed tokens including {{workdir}}', async () => {

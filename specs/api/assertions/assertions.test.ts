@@ -23,7 +23,7 @@ describe('api assertions', () => {
         // Given - seeded data
         const result = await api.seed('two-users.sql', { database: 'db' }).get('/users');
 
-        // Then - status + body match expected/all-users.http
+        // Then - status + body match _expected/all-users.http
         expect(result.response).toMatch('all-users.http');
     });
 });
@@ -33,7 +33,7 @@ describe('api assertions', () => {
 /*
  * These probe the framework's OWN mismatch-diff error messages — the diff
  * formatting IS the product surface under test, so it is goldened in full
- * (expected/*-error.txt) rather than reconstructed line-by-line via probes.
+ * (_expected/*-error.txt) rather than reconstructed line-by-line via probes.
  * The passing paths already assert whole-response correctness via .toMatch('<file>.http').
  */
 

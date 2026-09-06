@@ -1,3 +1,0 @@
-[error] specs/widget: domain directory has conventional subdirs (expected) but no *.test.ts or *.spec.yaml (C9 — see docs/10-linting.md)
-
-conventions checker: 1 error(s) found under {{workdir}}

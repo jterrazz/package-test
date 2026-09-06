@@ -6,7 +6,7 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
     // Apply — the whole stderr is asserted, tokens covering the run cwd.
-    test('rejects an unknown token in an expected/ fixture', async () => {
+    test('rejects an unknown token in an _expected/ fixture', async () => {
         // Given - a specs tree whose text snapshot uses a token outside the frozen vocabulary
         const result = await cli.fixture('$FIXTURES/lint-violations/d4-unknown-token/').exec('.');
 

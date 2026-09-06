@@ -12,7 +12,7 @@ import { specification } from '../../src/index.js';
  * environment sets) and `serve` (named servers). A scenario states WHICH ground
  * it stands on; how that ground is built stays in code, once.
  */
-const CLI_BIN = resolve(import.meta.dirname, '../fixtures/cli-app/cli.sh');
+const CLI_BIN = resolve(import.meta.dirname, '../_fixtures/cli-app/cli.sh');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     env: {
@@ -20,7 +20,7 @@ export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     },
     serve: {
         echo: {
-            command: 'node specs/fixtures/literate-server/server.mjs',
+            command: 'node specs/_fixtures/literate-server/server.mjs',
             env: 'LITERATE_BACKEND_URL',
             ready: /listening on port (?<port>\d+)/,
             url: (port) => `http://127.0.0.1:${port}/`,

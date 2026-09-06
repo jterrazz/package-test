@@ -1,0 +1,14 @@
+Spec mismatch
+
+a run whose files assertions are deliberately wrong
+
+$ scaffold
+
+files mismatch
+
+  out/main.go: expected to contain "package rust", got "package main\n"
+  out/go.mod: expected absent, got a file
+  out/nothing.txt: expected to exist, got nothing at that path
+
+specs/cli/literate/_fixtures/wrong-files.spec.yaml:3
+Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.

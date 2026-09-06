@@ -1,0 +1,2 @@
+conventions checker: moved specs/_fixtures/lonely-stub → specs/widget/_fixtures/lonely-stub (C14) — stage the rename
+conventions checker: all passes clean under {{workdir}} (D4/D4b/D10 grammar, spec documents, C9 dead fixtures, C14/C15 fixture placement, B5 await-using, A7 database)

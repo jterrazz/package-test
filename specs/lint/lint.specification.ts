@@ -9,7 +9,7 @@ import { specification } from '../../src/index.js';
  * plugin. Specs copy violation fixtures into the cwd and lint them for real.
  * Requires `npm run build` first (the plugin loads from dist/).
  */
-const LINT_BIN = resolve(import.meta.dirname, '../fixtures/lint-cli/lint.sh');
+const LINT_BIN = resolve(import.meta.dirname, '../_fixtures/lint-cli/lint.sh');
 
 export const { cleanup, cli } = await specification.cli(LINT_BIN);
 

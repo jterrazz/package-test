@@ -7,7 +7,7 @@ import { cli as asymmetricCli } from '../asymmetric-transform-cli.specification.
 import { cli } from '../cli.specification.js';
 import { cli as transformCli } from '../transform-cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
 
 /** Run a block with TEST_UPDATE=1 so toMatch writes the fixture. */
 function inUpdateMode(block: () => void): void {
@@ -64,7 +64,7 @@ describe('command — stdout accessor', () => {
             const a = await cli.fixture('$FIXTURES/cli-app/').exec('json');
             inUpdateMode(() => expect(a.stdout).toMatch(fixtureName));
 
-            // Then - a second identical run matches expected/<name> (flat)
+            // Then - a second identical run matches _expected/<name> (flat)
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('json');
             expect(b.stdout).toMatch(fixtureName);
         } finally {
@@ -135,14 +135,14 @@ describe('command — stdout accessor', () => {
         );
     });
 
-    test('a slash in the fixture name creates a subfolder under expected/', async () => {
+    test('a slash in the fixture name creates a subfolder under _expected/', async () => {
         // Given - a fixture written via update mode with a slash in its name
         const fixtureName = `sub/help-${Date.now()}.txt`;
         try {
             const a = await cli.fixture('$FIXTURES/cli-app/').exec('help');
             inUpdateMode(() => expect(a.stdout).toMatch(fixtureName));
 
-            // Then - the file landed at expected/sub/<name> and matches on re-run
+            // Then - the file landed at _expected/sub/<name> and matches on re-run
             expect(existsSync(resolve(EXPECTED_DIR, fixtureName))).toBe(true);
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('help');
             expect(b.stdout).toMatch(fixtureName);
@@ -318,7 +318,7 @@ describe('command — filesystem accessor', () => {
     });
 
     test('toMatch round-trips the entire working dir', async () => {
-        // Given - a tree fixture created via update mode (flat under expected/)
+        // Given - a tree fixture created via update mode (flat under _expected/)
         const fixtureName = `fs-transient-${Date.now()}`;
         try {
             const a = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
