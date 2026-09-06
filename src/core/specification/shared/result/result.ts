@@ -1,9 +1,10 @@
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { CaptureScope } from '../../../matching/match.js';
 import type { DatabasePort } from '../../../ports/database.port.js';
 import type { SpecificationConfig } from '../builder.js';
+import { safeRealpath } from '../resolve.js';
 import { DirectoryAccessor } from './directory.js';
 import { TableAccessor } from './table.js';
 import { TextAccessor } from './text.js';
@@ -100,21 +101,6 @@ export class BaseResult {
             return this.config.databases.get(databaseKey);
         }
         return this.config.database;
-    }
-}
-
-/**
- * The realpath form of a working directory — what a child process prints as
- * `$PWD` (macOS resolves the tmpdir symlink), and therefore what `{{workdir}}`
- * compares against. Falls back to the path itself when it cannot be resolved.
- *
- * @internal Shared with the literate runner, which builds its own file-wide scope.
- */
-export function safeRealpath(path: string): string {
-    try {
-        return realpathSync(path);
-    } catch {
-        return path;
     }
 }
 

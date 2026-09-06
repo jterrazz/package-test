@@ -79,6 +79,13 @@ case "$COMMAND" in
         echo "DATABASE_URL=${DATABASE_URL:-unset}"
         echo "REDIS_URL=${REDIS_URL:-unset}"
         ;;
+    workdir-var)
+        # Echoes back the one path the runner handed over through the
+        # environment — the CHILD's spelling of it, which is what the workdir
+        # token in a golden is compared against. (No token is written here:
+        # this file is itself copied into a workdir some goldens snapshot.)
+        echo "CACHE_DIR=${CACHE_DIR:-unset}"
+        ;;
     version)
         echo "cli-app v1.2.3"
         echo "run 7f9c2ba4-33ab-4d5e-9c1d-2a6b7c8d9e0f started at 2026-07-17T10:00:00.000Z"

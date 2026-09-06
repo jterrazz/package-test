@@ -1,5 +1,5 @@
 import { registerMatchers } from '../../../vitest/matchers.js';
-import type { DevicePort } from '../../ports/device.port.js';
+import type { DevicePort, DeviceTimeouts } from '../../ports/device.port.js';
 import {
     createMobileFacet,
     type MobileSpecification,
@@ -57,6 +57,13 @@ export interface MobileSpecificationOptions {
      * file when absent.
      */
     root?: string;
+    /**
+     * How long this runner's session waits, in milliseconds — every field
+     * optional, each falling back to the framework's default. A project
+     * driving a DEV build states the wait its bundler's cold boot needs
+     * (`{ action: 45_000 }`) instead of sleeping inside its scenarios.
+     */
+    timeouts?: DeviceTimeouts;
 }
 
 /**
@@ -110,7 +117,11 @@ export async function startMobile(options: MobileSpecificationOptions): Promise<
         if (!device) {
             const { AppiumAdapter } =
                 await import('../../../integrations/appium/appium.adapter.js');
-            device = new AppiumAdapter({ serverUrl: appium.url, udid });
+            device = new AppiumAdapter({
+                serverUrl: appium.url,
+                timeouts: options.timeouts,
+                udid,
+            });
         }
         return device;
     };

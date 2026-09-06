@@ -96,6 +96,25 @@ export interface DeviceOpenOptions {
 }
 
 /**
+ * How long a device session waits, in milliseconds. Every field is optional
+ * and falls back to the framework's own default, so a runner states only the
+ * wait it needs to move — the defaults suit a release build, and a project
+ * that drives a DEV build pays for its bundler's cold boot.
+ */
+export interface DeviceTimeouts {
+    /**
+     * How long every verb polls for a visible match before refusing.
+     * Default: `30_000` — enough for a cold app boot on a release bundle.
+     */
+    action?: number;
+    /**
+     * How long the FIRST session waits for WebDriverAgent to build and
+     * launch on the simulator. Default: `240_000`.
+     */
+    launch?: number;
+}
+
+/**
  * Abstract device interface for the mobile specification runner.
  * One implementation lives in `integrations/appium/` — a single driver
  * session per runner, created on the first `open()` and reused; each open

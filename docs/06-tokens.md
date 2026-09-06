@@ -81,6 +81,8 @@ Every token matches one value of its family at its position. The normative defin
 | `{{path}}`    | Filesystem path                                                                                                                        | `/tmp/x/dist/index.js`    |
 | `{{workdir}}` | **The exact cwd of the current spec** — the framework knows the temp directory it created, so this is an equality check, not a pattern | `/tmp/shoply-spec-a1b2c3` |
 
+`{{workdir}}` holds the **resolved** cwd — the spelling a child process reports, after any symlink on the way (macOS's `$TMPDIR` sits under `/var`, a link to `/private/var`). The `$WORKDIR` token that `.env()` and a document's `env:` expand is that same resolved path, so a directory the runner hands to the binary comes back in its output matching the token: `.env({ CACHE_DIR: '$WORKDIR/cache' })` is asserted as `{{workdir}}/cache`.
+
 ### Generic
 
 | Token        | Matches                                                                                                                                                                                           |

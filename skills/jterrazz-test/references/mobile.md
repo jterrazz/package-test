@@ -19,6 +19,7 @@ Returns `{ mobile, cleanup, udid }` — no `docker`, no `orchestrator`. Checklis
 - `app: { bundleId }` — the installed app; `.open()` launches by bundle id, it does not build or install.
 - `device: { name, os?, udid? }` — resolved via `xcrun simctl` and booted when shut down. Zero or several matches refuse with the device listing; narrow with `os:` or pin `udid:`.
 - `root` — where `node_modules/.bin/appium` is resolved from (A9 override); auto-discovered when absent.
+- `timeouts: { action?, launch? }` in ms — the verb poll budget (default `30_000`) and the WebDriverAgent launch budget (default `240_000`). A DEV bundle whose cold boot outlasts 30 s declares `{ action: 45_000 }` here instead of sleeping in a scenario.
 - The appium server is spawned on a free port, polled on `/status`; teardown kills its process group (SIGTERM → SIGKILL, same escalation as the website serve adapter).
 
 ## One terminal action
@@ -40,7 +41,7 @@ const result = await mobile.open('news://events', async (visitor) => {
 ```
 
 - **No `expect()` inside a scenario (W1).** The scenario is pure interaction; assertions live in the Then, on the returned result.
-- Visitor verbs: `tap`, `fill`, `see(element)`. Every verb polls until ≥ 1 visible match (default 15 s) then enforces exactly-one (W3); `see()` is the ONLY synchronization primitive. There are no sleeps.
+- Visitor verbs: `tap`, `fill`, `see(element)`. Every verb polls until ≥ 1 visible match (default 30 s, raise with `timeouts: { action }`) then enforces exactly-one (W3); `see()` is the ONLY synchronization primitive. There are no sleeps.
 - Elements are the **same vocabulary as the website facet** (W2): `button(name)`, `field(label)`, `content(text)`; `testId(id)` is the escape hatch and warns. Substring match by default; `{ exact: true }` matches whole.
 - **Landmarks are website-only** — `main()`/`navigation()` on a mobile verb refuse at runtime. A mobile scope is any descriptor: `within(testId('event-list'), button('Bookmark'))`; every scope level must itself be unambiguous.
 

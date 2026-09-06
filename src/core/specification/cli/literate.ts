@@ -21,7 +21,7 @@ import type { CliEnv, CliOutput } from '../../ports/cli.port.js';
 import type { SpecificationConfig } from '../shared/builder.js';
 import { copyPlan } from '../shared/fixtures.js';
 import { formatStdoutDiff } from '../shared/reporter.js';
-import { safeRealpath } from '../shared/result/result.js';
+import { expandWorkdir, safeRealpath } from '../shared/resolve.js';
 import { stripAnsiCodes } from '../shared/result/text.js';
 import { ServeAdapter } from '../website/serve.adapter.js';
 import { CliResult } from './result.js';
@@ -389,14 +389,6 @@ function documentEnv(
         env[token.key] = token.value;
     }
     return env;
-}
-
-function expandWorkdir(env: CliEnv, workDir: string): CliEnv {
-    const resolved: CliEnv = {};
-    for (const [key, value] of Object.entries(env)) {
-        resolved[key] = typeof value === 'string' ? value.replace(/\$WORKDIR/g, workDir) : value;
-    }
-    return resolved;
 }
 
 // ── Engine ──

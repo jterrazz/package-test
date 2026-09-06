@@ -80,7 +80,7 @@ The HTTP response status code.
 directory(path?): DirectoryAccessor;
 ```
 
-Defined in: [core/specification/shared/result/result.ts:54](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/result/result.ts#L54)
+Defined in: [core/specification/shared/result/result.ts:55](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/result/result.ts#L55)
 
 Access a directory (relative to the working directory) for snapshot assertions.
 
@@ -106,7 +106,7 @@ Access a directory (relative to the working directory) for snapshot assertions.
 file(path): FileAccessor;
 ```
 
-Defined in: [core/specification/shared/result/result.ts:60](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/result/result.ts#L60)
+Defined in: [core/specification/shared/result/result.ts:61](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/result/result.ts#L61)
 
 Access a single file (relative to the working directory) for content assertions.
 
@@ -132,7 +132,7 @@ Access a single file (relative to the working directory) for content assertions.
 table(tableName, options?): TableAccessor;
 ```
 
-Defined in: [core/specification/shared/result/result.ts:85](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/result/result.ts#L85)
+Defined in: [core/specification/shared/result/result.ts:86](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/result/result.ts#L86)
 
 Access a database table for row-level assertions via expect() matchers.
 

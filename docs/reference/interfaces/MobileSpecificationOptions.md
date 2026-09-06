@@ -88,3 +88,18 @@ Defined in: [core/specification/mobile/start-mobile.ts:59](https://github.com/jt
 Project-root override (CONVENTIONS A9): where the appium binary is
 resolved from (`node_modules/.bin`). Auto-discovered from the calling
 file when absent.
+
+***
+
+### timeouts?
+
+```ts
+optional timeouts?: DeviceTimeouts;
+```
+
+Defined in: [core/specification/mobile/start-mobile.ts:66](https://github.com/jterrazz/package-test/blob/main/src/core/specification/mobile/start-mobile.ts#L66)
+
+How long this runner's session waits, in milliseconds — every field
+optional, each falling back to the framework's default. A project
+driving a DEV build states the wait its bundler's cold boot needs
+(`{ action: 45_000 }`) instead of sleeping inside its scenarios.
