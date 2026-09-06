@@ -25,7 +25,15 @@ import { recommendedRules } from './dist/oxlint.js';
  */
 const FRAMEWORK_LAYERS = {
     core: {
-        imports: ['core/', 'integrations/docker/', 'integrations/hono/', 'vitest/matchers'],
+        imports: [
+            'core/',
+            'integrations/docker/',
+            'integrations/hono/',
+            'vitest/matchers',
+            // Update-mode detection is a pure env read the literate runner
+            // Shares with the matchers — one answer to "are we rewriting?".
+            'vitest/update',
+        ],
         seams: {
             'core/specification/mobile/start-mobile.ts': ['integrations/appium/'],
             'core/specification/shared/builder.ts': ['integrations/msw/'],

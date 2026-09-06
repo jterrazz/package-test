@@ -103,7 +103,14 @@ export class BaseResult {
     }
 }
 
-function safeRealpath(path: string): string {
+/**
+ * The realpath form of a working directory — what a child process prints as
+ * `$PWD` (macOS resolves the tmpdir symlink), and therefore what `{{workdir}}`
+ * compares against. Falls back to the path itself when it cannot be resolved.
+ *
+ * @internal Shared with the literate runner, which builds its own file-wide scope.
+ */
+export function safeRealpath(path: string): string {
     try {
         return realpathSync(path);
     } catch {

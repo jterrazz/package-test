@@ -196,6 +196,33 @@ describe('structural — update-mode merges', () => {
         ).toBe('id {{uuid}}\nfresh\ncount 3\ntail');
     });
 
+    test('a mid-file insertion re-pairs previous placeholders by pattern, not by index', () => {
+        // Given - a golden whose tokens sit on lines 1 and 3, and an actual run
+        // That inserted a new line above them (every token line shifted by one)
+        const scope = new CaptureScope();
+        const previous = 'id {{uuid}}\nstatic\ndone in {{duration}}';
+        const actual = `header\nid ${UUID_A}\nstatic\ndone in 1.24s`;
+
+        // Then - the shifted token lines are recognised where they landed
+        expect(mergeTextPreservingPlaceholders(previous, actual, scope)).toBe(
+            'header\nid {{uuid}}\nstatic\ndone in {{duration}}',
+        );
+    });
+
+    test('each previous placeholder line is spent once — twins do not collapse', () => {
+        // Given - one token line in the golden and two lines it could cover
+        const scope = new CaptureScope();
+
+        // Then - the first actual line keeps the token; the second is literal
+        expect(
+            mergeTextPreservingPlaceholders(
+                'id {{uuid}}',
+                `id ${UUID_A}\nid ${UUID_B}`,
+                scope,
+            ),
+        ).toBe(`id {{uuid}}\nid ${UUID_B}`);
+    });
+
     test('mergePreservingPlaceholders follows array growth and shrinkage', () => {
         // Given - a previous fixture array with a placeholder per slot
         const previous = ['{{uuid}}', '{{number}}'];

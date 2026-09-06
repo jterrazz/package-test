@@ -455,10 +455,19 @@ export function mergePreservingPlaceholders(
 }
 
 /**
- * Update-mode merge for text snapshots: line-by-line, a previous line whose
- * placeholders still match the actual line is preserved; every other line is
- * taken from the actual output. Values the framework knows to be dynamic
- * (`{{workdir}}`) are substituted automatically (CONVENTIONS D5).
+ * Update-mode merge for text snapshots: a previous line whose placeholders
+ * still match an actual line is preserved; every other line is taken from the
+ * actual output. Values the framework knows to be dynamic (`{{workdir}}`) are
+ * substituted automatically (CONVENTIONS D5).
+ *
+ * Pairing is by **pattern, not by line index**. The aligned line is tried
+ * first, so a golden that still lines up comes back byte-identical; what is
+ * left over is then re-paired by matching each remaining previous placeholder
+ * line against each unresolved actual line, in file order. That is what makes a
+ * MID-FILE INSERTION safe: inserting a line shifts everything below it, and the
+ * shifted `{{duration}}` / `{{uuid}}` lines are recognised where they landed
+ * instead of being rewritten as raw values. Each previous line is used at most
+ * once, so two identical placeholder lines cannot collapse into one.
  */
 export function mergeTextPreservingPlaceholders(
     previous: null | string,
@@ -474,17 +483,44 @@ export function mergeTextPreservingPlaceholders(
 
     const prevLines = previous.split('\n');
     const actualLines = substituted.split('\n');
-    const merged = actualLines.map((line, i) => {
-        const prev = prevLines[i];
+    const rawLines = actual.split('\n');
+    const consumed = new Set<number>();
+
+    // A previous line covers an actual one when, read as a placeholder
+    // Pattern, it matches it — either the substituted form (a `{{workdir}}`
+    // Token against the token) or the raw one (the token against the real cwd).
+    const covers = (prevIndex: number, actualIndex: number): boolean => {
+        const prev = prevLines[prevIndex];
         if (prev === undefined || !hasPlaceholders(prev)) {
-            return line;
+            return false;
         }
-        // Compare against the raw actual line (workdir already substituted —
-        // Placeholders match the substituted form via the literal token).
-        return textEquals(prev, line, new CaptureScope(scope.workdir)) ||
-            textEquals(prev, actual.split('\n')[i] ?? line, new CaptureScope(scope.workdir))
-            ? prev
-            : line;
-    });
+        const line = actualLines[actualIndex];
+        return (
+            textEquals(prev, line, new CaptureScope(scope.workdir)) ||
+            textEquals(prev, rawLines[actualIndex] ?? line, new CaptureScope(scope.workdir))
+        );
+    };
+
+    const merged: (string | undefined)[] = actualLines.map(() => undefined);
+    for (const [index] of actualLines.entries()) {
+        if (covers(index, index)) {
+            merged[index] = prevLines[index];
+            consumed.add(index);
+        }
+    }
+    for (const [index, line] of actualLines.entries()) {
+        if (merged[index] !== undefined) {
+            continue;
+        }
+        for (const [prevIndex] of prevLines.entries()) {
+            if (consumed.has(prevIndex) || !covers(prevIndex, index)) {
+                continue;
+            }
+            merged[index] = prevLines[prevIndex];
+            consumed.add(prevIndex);
+            break;
+        }
+        merged[index] ??= line;
+    }
     return merged.join('\n');
 }

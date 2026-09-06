@@ -28,6 +28,12 @@ export {
     type CliHandle,
     type CliSpecificationOptions,
 } from './core/specification/cli/start-cli.js';
+export { type LiterateServeRegistration } from './core/specification/cli/literate.js';
+export {
+    type LiterateBlock,
+    type LiterateHeader,
+    type LiterateSpec,
+} from './core/literate/literate-file.js';
 export {
     type JobsHandle,
     type JobsSpecificationOptions,
