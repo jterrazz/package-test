@@ -42,25 +42,25 @@ In compose mode `server` is ignored (the app runs in the stack); the services-re
 
 ## Setup (chainable)
 
-| Method                                          | Description                                                                                                |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })`              | Load SQL from `seeds/` (SQL only). `database` = record key — MANDATORY with ≥ 2 DBs, FORBIDDEN with 1 (A7) |
-| `.headers({ "Accept-Language": "fr" })`         | Merge HTTP headers on top of the `.http` file's (chain wins)                                               |
-| `.intercept(contracts)` / `(request, response)` | Declare what the outside world replies — see [contracts.md](contracts.md). STRICT (D7)                     |
+| Method                                          | Description                                                                                                 |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `.seed("file.sql", { database? })`              | Load SQL from `_seeds/` (SQL only). `database` = record key — MANDATORY with ≥ 2 DBs, FORBIDDEN with 1 (A7) |
+| `.headers({ "Accept-Language": "fr" })`         | Merge HTTP headers on top of the `.http` file's (chain wins)                                                |
+| `.intercept(contracts)` / `(request, response)` | Declare what the outside world replies — see [contracts.md](contracts.md). STRICT (D7)                      |
 
 ## Actions (terminal)
 
-| Method                                     | Resolves to  | Notes                                                   |
-| ------------------------------------------ | ------------ | ------------------------------------------------------- |
-| `.request("create-user.http")`             | `HttpResult` | COMPLETE request from `requests/<file>` — body sent raw |
-| `.get(path)` / `.delete(path)`             | `HttpResult` | Inline                                                  |
-| `.post(path, body?)` / `.put(path, body?)` | `HttpResult` | Inline body = plain object, JSON-serialized             |
+| Method                                     | Resolves to  | Notes                                                    |
+| ------------------------------------------ | ------------ | -------------------------------------------------------- |
+| `.request("create-user.http")`             | `HttpResult` | COMPLETE request from `_requests/<file>` — body sent raw |
+| `.get(path)` / `.delete(path)`             | `HttpResult` | Inline                                                   |
+| `.post(path, body?)` / `.put(path, body?)` | `HttpResult` | Inline body = plain object, JSON-serialized              |
 
 ## Assertions (via `expect()`)
 
 ```typescript
 expect(result.status).toBe(201);
-expect(result.response).toMatch('user-created.http'); // expected/<name> — status + header SUBSET + body, {{token}}-aware
+expect(result.response).toMatch('user-created.http'); // _expected/<name> — status + header SUBSET + body, {{token}}-aware
 expect(result.response.body).toEqual({ error: 'User 999 not found' });
 await expect(result.table('users', { database: 'db' })).toMatchRows({
     columns: ['name'],
@@ -70,12 +70,12 @@ await expect(result.table('users', { database: 'db' })).toBeEmpty();
 ```
 
 - `.response` golden is the default (whole shape, tokens for volatile parts). A lone status probe (`d15w`) or an amas of `.response.body` probes (`d12w`) is a warning — golden it instead.
-- `toMatch` always resolves against `expected/<name>` (flat; a slash makes a subfolder; extension required). Only `.request()` reads `requests/`.
+- `toMatch` always resolves against `_expected/<name>` (flat; a slash makes a subfolder; extension required). Only `.request()` reads `_requests/`.
 
 ## `.http` files
 
 ```http
-### requests/create-user.http — the COMPLETE request
+### _requests/create-user.http — the COMPLETE request
 POST /users
 Content-Type: application/json
 
@@ -83,7 +83,7 @@ Content-Type: application/json
 ```
 
 ```http
-### expected/user-created.http — status + header SUBSET + body
+### _expected/user-created.http — status + header SUBSET + body
 HTTP/1.1 201 Created
 Location: /users/{{uuid#user}}
 
@@ -98,8 +98,8 @@ specs/api/
 ├── intercepts/                 # strict-contract specs (D7) — node-only; api-stack EXCLUDES this
 └── <feature>/
     ├── <feature>.test.ts
-    ├── seeds/                  # *.sql ONLY
-    ├── requests/               # *.http — inputs (complete request)
+    ├── _seeds/                  # *.sql ONLY
+    ├── _requests/               # *.http — inputs (complete request)
     ├── contracts/              # <name>.contracts.ts facade + <provider>/<name>.ts units + data
-    └── expected/               # ALL expected fixtures, FLAT (incl. response *.http)
+    └── _expected/               # ALL expected fixtures, FLAT (incl. response *.http)
 ```

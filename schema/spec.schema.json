@@ -136,7 +136,7 @@
                     "type": "array"
                 }
             ],
-            "description": "Fixture paths copied into the working directory, layering in order."
+            "description": "Fixture paths copied into the working directory, layering in order. `$FIXTURES/<name>` is the shared pool at `<specs-root>/_fixtures/`; a bare path is the ground beside this document, at `_fixtures/<name>`."
         },
         "kind": {
             "default": "cli",

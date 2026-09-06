@@ -8,7 +8,7 @@ command spec.
 
 Assertions go through `expect()` (async — they walk the disk):
 `await expect(result.filesystem).toMatch('scaffolded')` compares the
-tree against the fixture directory `expected/<name>/`.
+tree against the fixture directory `_expected/<name>/`.
 
 ## Constructors
 

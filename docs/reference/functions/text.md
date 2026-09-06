@@ -16,7 +16,7 @@ output, and reports; those deserve the same goldening as any other output.
 
 ```typescript
 const message = await catchMessage(() => expect(result.response).toMatch('wrong-body.http'));
-expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to expected/
+expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to _expected/
 ```
 
 ANSI is stripped before every comparison (the raw form stays on `.text`),

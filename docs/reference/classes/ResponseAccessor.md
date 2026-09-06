@@ -7,7 +7,7 @@ Read-only accessor for an HTTP response.
 
 Assertions go through `expect()`:
 `expect(result.response).toMatch('created.http')` compares status,
-a subset of headers, and the JSON body against `expected/<name>` —
+a subset of headers, and the JSON body against `_expected/<name>` —
 with `{{placeholder}}` support in all three.
 
 ## Constructors

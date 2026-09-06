@@ -40,7 +40,7 @@ src/
 │   │   └── mobile/                # startMobile constructor + ScreenResult + simctl simulator resolution + appium server spawn + page-source projection + mobile ambiguity
 │   ├── literate/                  # the `<case>.spec.yaml` grammar (parser + update writer + JSON Schema) — read by the runner AND by the lint checker
 │   ├── matching/                  # match.* vocabulary + {{token}} structural comparison engine
-│   ├── http-files/                # requests/*.http + expected/*.http (responses) parser/serializer
+│   ├── http-files/                # _requests/*.http + _expected/*.http (responses) parser/serializer
 │   ├── contracts/                 # defineContract/defineContracts + contract types + ContractQueue (the ONE selection engine) + generic http provider + provider text filters (no external dep)
 │   └── ports/                     # ALL interfaces: database, service, isolation, container, server, command, browser, device
 ├── integrations/                  # one folder = one external dependency (I1), each imports only its own dep + core
@@ -58,7 +58,7 @@ specs/                             # ONLY product specifications (I2), written w
 # LAYOUT (rule C1'): specs/<facet>/ carries its runner(s) at the ROOT (specs/<facet>/<name>.specification.ts);
 # tests live one level down in DOMAIN folders (specs/<facet>/<domain>/<aspect>.test.ts). Tests at the facet
 # root are forbidden; specs inside a domain are forbidden. "The folder follows the assets": a test with its
-# OWN asset dirs (seeds/expected/…) gets its own domain; asset-less tests group as sibling <id>.test.ts in a
+# OWN asset dirs (_seeds/, _expected/, …) gets its own domain; asset-less tests group as sibling <id>.test.ts in a
 # named GROUP folder (e.g. specs/lint/hygiene/j5-lowercase-title.test.ts).
 ├── api/                           # api facet: api.specification.ts + intercepts.specification.ts at root; domains: assertions, intercepts (D7, node-only), lifecycle, requests, responses, seeding
 ├── jobs/                          # jobs facet: jobs.specification.ts (factory) + static-jobs.specification.ts (array) at root; domain: triggering
@@ -66,7 +66,7 @@ specs/                             # ONLY product specifications (I2), written w
 ├── website/                       # website facet: website.specification.ts at root; domains: behavior (visit scenarios), visit (head/jsonLd goldens), fetch (raw exchanges), console (streams) — needs playwright chromium, no Docker
 ├── integrations/                  # per-dependency tests: container-logs, initiation-errors, orchestrator, postgres, redis — Docker required, sequential
 ├── lint/                          # E2E lint facet: lint.specification.ts + checker.specification.ts at root; tests grouped by CONVENTIONS family: runners/ chains/ files/ assertions/ imports/ architecture/ hygiene/ checker/ (needs npm run build first)
-└── fixtures/                      # SHARED fixture pool (reached via .fixture('$FIXTURES/…')): app, cli-app, docker-cli, broken-* infra fixtures, and lint-violations/ (per-rule violation+ok twins for the E2E lint specs)
+└── _fixtures/                     # SHARED fixture pool (reached via .fixture('$FIXTURES/…')): app, cli-app, docker-cli, broken-* infra fixtures, and lint-violations/ (per-rule violation+ok twins for the E2E lint specs)
 ```
 
 ## Test runner modes
@@ -88,9 +88,9 @@ specs/                             # ONLY product specifications (I2), written w
 - **Docs-as-code split.** `docs/09-conventions.md` is the hand-maintained **constitution** — principles, the enforcement channels, non-mechanizable criteria, process rules (C1 grouping, D11 golden-file, K1 retro-propagation), design rationales — organized by family (A runners, B chains + `job` vocab, C files/folders, D assertions/tokens, E env, F imports, G infra, H naming, I architecture, J hygiene, K retro-propagation). The **mechanized per-rule catalogue is GENERATED from the code** (`src/lint/manifest.ts`) into the `docs/10-linting.md` catalogue + `skills/jterrazz-test/references/rules.md` — never edit those by hand; add a mechanized rule to the manifest + its implementation, then `npm run docs`. No duplication: a machine-checkable rule is written once, in the code. The broader corpus/projections doctrine lives in `@jterrazz/typescript`'s `docs/06-repo-structure.md`.
 - Each mechanized rule names one of **four enforcement channels** — **static** (`jterrazz/*` oxlint plugin + the D4 conventions checker `dist/checker.js`), **checker** (bundled cross-file/token/document passes: C9, B5-by-inference, A7, D4/D4b/D10, and the `<case>.spec.yaml` family), **runtime** (framework refuses misuse: A6, A7, B2, B6, D7, I3), **process** (review-borne: C1, D11, K1) — plus the **meta-test** channel (framework run on itself: every token has a +/- test in `src/core/matching/`; the catalogue stays fresh via `src/lint/plugin.test.ts`). Most enforcement is programmatic, not manual review.
 - Lint config (`@jterrazz/typescript` - oxlint + oxfmt + knip + tsgo); the tsconfig typechecks `src/` AND `specs/` (fixtures excluded) — keep it that way, it's what catches result-typing regressions
-- **Self-lint**: `oxlint.config.ts` loads `./dist/oxlint.js` via `jsPlugins`, spreads `recommendedRules`, and DECLARES this package's I1 layer map (`FRAMEWORK_LAYERS`) — the rule ships inert, an architecture is the project's to state — so `npm run build` MUST precede `npm run lint`. E2E lint specs live in `specs/lint/**` (one violation/compliant fixture pair per rule under `specs/fixtures/lint-violations/`), the checker step is chained in `npm run lint`. Docs: `docs/10-linting.md`
+- **Self-lint**: `oxlint.config.ts` loads `./dist/oxlint.js` via `jsPlugins`, spreads `recommendedRules`, and DECLARES this package's I1 layer map (`FRAMEWORK_LAYERS`) — the rule ships inert, an architecture is the project's to state — so `npm run build` MUST precede `npm run lint`. E2E lint specs live in `specs/lint/**` (one violation/compliant fixture pair per rule under `specs/_fixtures/lint-violations/`), the checker step is chained in `npm run lint`. Docs: `docs/10-linting.md`
 - Test writing convention (`// Given -` / `// Then -` comments, always both)
-- Directory layout per feature (`seeds/` SQL-only, `fixtures/` feature-local, `requests/` inputs, `contracts/` — a `*.contracts.ts` facade over `<provider>/` units and their data (C4/C10/C11), `expected/` — all expected fixtures incl. response `.http`, flat, extension in the name); shared fixtures live in `specs/fixtures/`, reached via `.fixture('$FIXTURES/…')`. One file-state verb `.fixture(path)` (no `.project()`, no `seedHandlers`); `.seed()` is SQL-only (C7)
+- Directory layout per feature (`_seeds/` SQL-only, `_fixtures/` feature-local, `_requests/` inputs, `contracts/` — a `*.contracts.ts` facade over `<provider>/` units and their data (C4/C10/C11), `_expected/` — all expected fixtures incl. response `.http`, flat, extension in the name); shared fixtures live in `specs/_fixtures/`, reached via `.fixture('$FIXTURES/…')`. One file-state verb `.fixture(path)` (no `.project()`, no `seedHandlers`); `.seed()` is SQL-only (C7)
 - Runners are created in `*.specification.ts` files and destructured with canonical names: `{ api, cleanup }`, `{ jobs, cleanup }`, `{ cli, cleanup }` — always `afterAll(cleanup)`
 - Accessors are read-only; ALL assertions go through `expect()` — `expect(result.stdout).toContain(...)`, `expect(result.response).toMatch('created.http')`, `await expect(result.table('users', { database: 'db' })).toMatchRows(...)`
 - Dynamic values: the `{{token}}` grammar in fixtures, `match.*` in code (same vocabulary; see `docs/06-tokens.md`)

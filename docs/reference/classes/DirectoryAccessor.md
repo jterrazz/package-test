@@ -7,7 +7,7 @@ Read-only accessor for a directory produced by a spec action.
 
 Assertions go through `expect()` (async — they walk the disk):
 `await expect(result.directory('out')).toMatch('scaffold/out')`
-compares the tree against the fixture directory `expected/<name>/`.
+compares the tree against the fixture directory `_expected/<name>/`.
 
 ## Constructors
 

@@ -19,7 +19,7 @@ failures.
 
 v9 is specification-first: three constructors (`specification.api/jobs/cli`),
 one `{{token}}` grammar across every fixture kind, and golden files (`.http`
-requests/responses, full-output text snapshots) as the default assertion — a
+_requests/responses, full-output text snapshots) as the default assertion — a
 partial probe must earn its place as a deliberate scalpel.
 
 Crucially, every convention is enforced on one of THREE channels, or
