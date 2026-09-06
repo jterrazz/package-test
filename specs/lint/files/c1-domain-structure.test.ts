@@ -15,6 +15,17 @@ describe('lint — c1-domain-structure (CONVENTIONS C1)', () => {
         expect(result.stdout.grep('widget.test.ts')).toContain('c1-domain-structure');
     });
 
+    test('rejects a test in a ground folder with no module beside it', async () => {
+        // Given - specs/widget/_binary/scenarios.test.ts, and no scenarios.ts
+        const result = await cli
+            .fixture('$FIXTURES/lint-violations/c1-domain-structure/')
+            .exec('.');
+
+        // Then - the ground clause reports it: a spec wandered into the ground
+        expect(result.exitCode).toBe(1);
+        expect(result.stdout.grep('scenarios.test.ts')).toContain('c1-domain-structure');
+    });
+
     test('accepts a test nested at facet/domain depth', async () => {
         // Given - the compliant twin, specs/widget/status/status.test.ts
         const result = await cli
@@ -24,5 +35,18 @@ describe('lint — c1-domain-structure (CONVENTIONS C1)', () => {
         // Then - clean exit, no C1 diagnostic
         expect(result.exitCode).toBe(0);
         expect(result.stdout).not.toContain('c1-domain-structure');
+    });
+
+    test('accepts a ground module carrying its own unit test beside it', async () => {
+        // Given - the same compliant project, whose ground is CODE:
+        // Specs/widget/_binary/binary.ts with binary.test.ts next to it (I2)
+        const result = await cli
+            .fixture('$FIXTURES/lint-violations/c1-domain-structure-ok/')
+            .exec('.');
+
+        // Then - the pairing is legal in ground, so nothing is reported and no
+        // Project has to switch a clause off that no project may switch off
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).not.toContain('binary.test.ts');
     });
 });
