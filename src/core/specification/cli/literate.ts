@@ -35,8 +35,9 @@ import { CliResult } from './result.js';
  * for each run, {@link ServeAdapter} for `serve:`, the `{{token}}` engine for
  * every comparison, and {@link mergeTextPreservingPlaceholders} for the
  * rewrite. What is new here is only the ORCHESTRATION the chain cannot express:
- * several commands sharing one working directory, each asserted, none stopping
- * the run.
+ * several commands sharing one working directory, each judged the moment it
+ * ends — so what a run states about that directory is what IT left there, and
+ * the first run to disagree is the one the failure names.
  */
 
 // ── Types ──
@@ -237,7 +238,11 @@ function atLine(error: Error, filePath: string, line: number): Error {
     return error;
 }
 
-/** Compare one run against what the command actually did. */
+/**
+ * Compare one run against what the command actually did — its exit code, its
+ * streams and its `files:`, all read at the same instant: the moment that
+ * command returned.
+ */
 function assertRun(
     document: SpecDocument,
     outcome: RunOutcome,
@@ -442,9 +447,11 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         workDir,
     );
 
-    let outcomes: RunOutcome[];
+    // A rewrite states what the runs DID, so it asserts nothing and needs every
+    // Run to have executed; a normal session judges each run where it stands.
+    const rewriting = shouldUpdateSnapshots() && options.frozen !== true;
+    const outcomes: RunOutcome[] = [];
     try {
-        outcomes = [];
         for (const run of document.runs) {
             const actual =
                 run.waitFor === null
@@ -458,23 +465,28 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
                           { timeout: run.timeout ?? undefined, waitFor: run.waitFor },
                           env,
                       );
-            outcomes.push({
+            const outcome: RunOutcome = {
                 actual,
                 run,
                 stderr: comparable(actual.stderr, config.transform),
                 stdout: comparable(actual.stdout, config.transform),
-            });
+            };
+            outcomes.push(outcome);
+            // HERE, before the next command runs. A run's `files:` describes
+            // The working directory as THIS run left it — a lock file the next
+            // Command creates, a build output the next one removes — and a
+            // Working directory only ever holds its latest state. Judging the
+            // Whole session at the end would ask every run about the same tree.
+            if (!rewriting) {
+                assertRun(document, outcome, { displayPath, filePath }, workDir, scope);
+            }
         }
     } finally {
         await servers.stop();
     }
 
-    if (shouldUpdateSnapshots() && options.frozen !== true) {
+    if (rewriting) {
         writeFileSync(filePath, updateSpecFile(file, updates(outcomes, scope)));
-    } else {
-        for (const outcome of outcomes) {
-            assertRun(document, outcome, { displayPath, filePath }, workDir, scope);
-        }
     }
 
     return new CliResult({

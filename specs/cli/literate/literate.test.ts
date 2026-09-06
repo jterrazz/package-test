@@ -112,6 +112,22 @@ describe('spec documents — the bridge door (cli.run)', () => {
         // Then - the document passed, and the tree it judged is the result's cwd
         expect(result.file('out/go.mod').content).toBe('module example\n');
     });
+
+    test('an absent: holds against the cwd of ITS run, not of the last one', async () => {
+        // Given - run 1 states dist/index.js is not there yet, run 2 builds it
+        const result = await cli.run('absent-then-written.spec.yaml');
+
+        // Then - the absent passed although the session ends with the file there
+        expect(result.file('dist/index.js').exists).toBe(true);
+    });
+
+    test('an exists: holds against the cwd of ITS run, not of the last one', async () => {
+        // Given - run 1 builds dist/index.js, run 2 removes it again
+        const result = await cli.run('written-then-removed.spec.yaml');
+
+        // Then - the exists passed although the session ends with the file gone
+        expect(result.file('dist/index.js').exists).toBe(false);
+    });
 });
 
 describe('spec documents — refusals', () => {

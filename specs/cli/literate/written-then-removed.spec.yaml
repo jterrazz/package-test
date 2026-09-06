@@ -1,0 +1,14 @@
+description: a file written by the first run is judged before the second removes it
+runs:
+    - command: build
+      exit: 0
+      stdout: |
+          Build completed
+      files:
+          dist/index.js: exists
+    - command: clean
+      exit: 0
+      stdout: |
+          Cleaned
+      files:
+          dist/index.js: absent

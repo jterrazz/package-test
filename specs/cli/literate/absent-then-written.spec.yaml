@@ -1,0 +1,14 @@
+description: a file absent at the first run is judged before the second writes it
+runs:
+    - command: echo-line
+      exit: 0
+      stdout: |
+          one line
+      files:
+          dist/index.js: absent
+    - command: build
+      exit: 0
+      stdout: |
+          Build completed
+      files:
+          dist/index.js: { contains: 'Hello from CLI app' }

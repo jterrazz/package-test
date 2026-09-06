@@ -373,6 +373,8 @@ Everything above `runs:`. Any key outside the table below is a refusal naming th
 
 `runs:` is a list of at least one run, executed **in order**, all in ONE working directory, and **every** one asserted. This is where the format goes past `.exec([...])`, which stops at the first non-zero exit and keeps only the last output: here a non-zero exit does not end the session, because each exit code is part of what the document states.
 
+**A run is judged the moment it ends**, before the next command starts — its exit code, its streams and its `files:` all read at that one instant. So a document states the working directory as it was BETWEEN two commands, not only as the session left it. A run that disagrees throws there and then, and the runs below it do not execute: once the sequence has diverged, what the rest would print is a consequence, not a fact about the program.
+
 | Key        | Shape                         | Meaning                                                                                                                     |
 | ---------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `command:` | **mandatory**                 | The argv line, handed to the same adapter as `.exec('…')` — the full line through the shell, so quoting behaves identically |
@@ -382,7 +384,7 @@ Everything above `runs:`. Any key outside the table below is a refusal naming th
 | `exit:`    | **mandatory** literal integer | The exit code the command must return                                                                                       |
 | `stdout:`  | optional block scalar         | Expected stdout, **byte-exact**. Absent asserts an EMPTY stream                                                             |
 | `stderr:`  | optional block scalar         | Expected stderr, byte-exact. Absent asserts an EMPTY stream                                                                 |
-| `files:`   | optional mapping              | On-disk assertions under the working directory, after the run (below)                                                       |
+| `files:`   | optional mapping              | On-disk assertions under the working directory, read the moment THIS run ends (below)                                       |
 
 **`|` and `|-` are the whole newline story.** A block scalar written `|` keeps the final newline of its text; `|-` drops it. The comparison is byte-exact against that, so a command whose output ends with `\n` is written `|`, and one that ends mid-line is written `|-`. There is no normalisation to remember, and no empty last line to spell.
 
@@ -403,6 +405,23 @@ files:
 ```
 
 `contains` and `equals` are token-aware: `{ contains: 'wrote {{path}}' }` finds the line whatever the path turned out to be.
+
+Each run's mapping is read against the working directory **as that run left it**, so a file may be `absent` for one run and there for the next — which is how a lock, a cache or a build output is described:
+
+```yaml
+description: the lock appears with the first apply and is released by the second
+runs:
+    - command: spwn status
+      exit: 0
+      files:
+          .spwn/lock: absent # nothing has claimed the tree yet
+    - command: spwn apply --hold
+      exit: 0
+      files:
+          .spwn/lock: { contains: 'pid: {{int}}' } # the same path, one command later
+```
+
+Written as one mapping at the end of the session, that pair could not be stated at all: a working directory only ever holds its latest state.
 
 ### Registration — once per app
 
