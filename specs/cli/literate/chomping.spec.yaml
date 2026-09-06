@@ -1,0 +1,10 @@
+description: a stream keeps its final newline with | and drops it with |-
+runs:
+    - command: echo-line
+      exit: 0
+      stdout: |
+          one line
+    - command: no-newline
+      exit: 0
+      stdout: |-
+          ends here

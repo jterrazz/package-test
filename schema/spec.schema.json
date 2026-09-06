@@ -1,0 +1,179 @@
+{
+    "$defs": {
+        "fileAssertion": {
+            "oneOf": [
+                {
+                    "enum": [
+                        "absent",
+                        "exists"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                        "contains": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                }
+                            ]
+                        },
+                        "equals": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
+        },
+        "run": {
+            "additionalProperties": false,
+            "properties": {
+                "command": {
+                    "description": "The argv line, run through the shell.",
+                    "type": "string"
+                },
+                "exit": {
+                    "description": "The exit code the command must return.",
+                    "type": "integer"
+                },
+                "files": {
+                    "additionalProperties": {
+                        "$ref": "#/$defs/fileAssertion"
+                    },
+                    "description": "On-disk assertions, keyed by a path under the working directory.",
+                    "type": "object"
+                },
+                "stderr": {
+                    "description": "Expected stderr, byte-exact. Absent asserts an empty stream.",
+                    "type": "string"
+                },
+                "stdin": {
+                    "description": "Written to the child, then closed.",
+                    "type": "string"
+                },
+                "stdout": {
+                    "description": "Expected stdout, byte-exact. Absent asserts an empty stream.",
+                    "type": "string"
+                },
+                "timeout": {
+                    "description": "Milliseconds before the run is killed.",
+                    "type": "integer"
+                },
+                "waitFor": {
+                    "description": "Resolve when this text appears. Only on the last run.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "command",
+                "exit"
+            ],
+            "type": "object"
+        },
+        "serveEntry": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "additionalProperties": {
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "type": "object"
+                    },
+                    "maxProperties": 1,
+                    "minProperties": 1,
+                    "type": "object"
+                }
+            ]
+        }
+    },
+    "$id": "https://jterrazz.com/schema/jterrazz-test/spec.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "description": "One scenario of the @jterrazz/test literate format: the ground a session stands on, then the session itself.",
+    "properties": {
+        "description": {
+            "description": "The vitest test title — one lowercase line, no trailing period.",
+            "type": "string"
+        },
+        "env": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                }
+            ],
+            "description": "A bare word names an env set registered in code; KEY=value is inline. $WORKDIR expands."
+        },
+        "fixture": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                }
+            ],
+            "description": "Fixture paths copied into the working directory, layering in order."
+        },
+        "kind": {
+            "default": "cli",
+            "description": "The facet this document describes.",
+            "enum": [
+                "cli"
+            ],
+            "type": "string"
+        },
+        "runs": {
+            "description": "The session: one or more runs, sequential, sharing one working directory.",
+            "items": {
+                "$ref": "#/$defs/run"
+            },
+            "minItems": 1,
+            "type": "array"
+        },
+        "serve": {
+            "description": "Servers registered in code, started once per file.",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "items": {
+                        "$ref": "#/$defs/serveEntry"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                }
+            ]
+        }
+    },
+    "required": [
+        "description",
+        "runs"
+    ],
+    "title": "@jterrazz/test spec document",
+    "type": "object"
+}

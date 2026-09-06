@@ -1,0 +1,14 @@
+description: names an environment set registered in code, plus one inline pair
+env:
+    - frozen
+    - EXTRA=inline
+runs:
+    - command: env
+      exit: 0
+      stdout: |
+          MY_VAR=from-the-frozen-set
+          HOME={{any}}
+          EXTRA=inline
+          DB_URL=unset
+          DATABASE_URL=unset
+          REDIS_URL=unset

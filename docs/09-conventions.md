@@ -89,21 +89,21 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 
 ## H — Naming recap
 
-| Thing           | Rule                                                                                                                   |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`)                       |
-| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                            |
-| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                         |
-| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                              |
-| Literate spec   | `<case>.cli`, beside the spec it belongs to — never under `expected/` ([04](04-cli.md#literate-specs--casecli))        |
-| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                |
-| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                        |
-| Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic) |
-| Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                     |
-| Requests        | `requests/<name>.http` (inputs)                                                                                        |
-| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)                                    |
-| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)                            |
-| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                                             |
+| Thing           | Rule                                                                                                                       |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`)                           |
+| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                |
+| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                             |
+| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                                  |
+| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([04](04-cli.md#spec-documents--casespecyaml)) |
+| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                    |
+| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                            |
+| Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic)     |
+| Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                         |
+| Requests        | `requests/<name>.http` (inputs)                                                                                            |
+| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)                                        |
+| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)                                |
+| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                                                 |
 
 ## I — Source-code architecture
 

@@ -14,7 +14,7 @@ export const { cli, cleanup } = await specification.cli(
 afterAll(cleanup);
 ```
 
-`specification.cli(bin, { root?, services?, docker?, transform?, env?, serve? })` → `{ cli, cleanup, docker, orchestrator }`. `env` / `serve` are the two registries a [literate spec](#literate-specs--casecli) names by word.
+`specification.cli(bin, { root?, services?, docker?, transform?, env?, serve? })` → `{ cli, cleanup, docker, orchestrator }`. `env` / `serve` are the two registries a [spec document](#spec-documents--casespecyaml) names by word.
 
 - Exercise the **product command**, not a third-party binary — `specification.cli()` on a `node_modules/.bin` binary is a B9 warning. Drive `cli.exec('build')`, `cli.exec('check')`, … and assert via the real output. Suppress with a reason only when the product genuinely IS that binary.
 - `transform` is a last-resort escape hatch for output noise not covered by tokens (D6) — a token-equivalent transform is a warning.
@@ -45,37 +45,47 @@ A stub is `fixtures/<name>/bin/<binary>`: a `case "$*"` script answering by argv
 
 ## Action (terminal) — one execution method, no `.spawn()`
 
-| Method                                | Notes                                                                                                                |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `.exec("args")`                       | Blocking → `CliResult`                                                                                               |
-| `.exec(["build", "start"])`           | Sequential in the same cwd; stops on first non-zero exit                                                             |
-| `.exec("dev", { waitFor, timeout? })` | Long-running — resolves at the `waitFor` pattern (exit 0), killed at `timeout` (default 10 s, exit 124)              |
-| `.run("case.cli")`                    | Runs a [literate spec](#literate-specs--casecli): its header and EVERY block asserted → the last block's `CliResult` |
+| Method                                | Notes                                                                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `.exec("args")`                       | Blocking → `CliResult`                                                                                                |
+| `.exec(["build", "start"])`           | Sequential in the same cwd; stops on first non-zero exit                                                              |
+| `.exec("dev", { waitFor, timeout? })` | Long-running — resolves at the `waitFor` pattern (exit 0), killed at `timeout` (default 10 s, exit 124)               |
+| `.run("case.spec.yaml")`              | Runs a [spec document](#spec-documents--casespecyaml): its ground and EVERY run asserted → the last run's `CliResult` |
 
-## Literate specs — `<case>.cli`
+## Spec documents — `<case>.spec.yaml`
 
-One scenario per file, **beside the spec** (never under `expected/`, which holds goldens). The header is prose, the blocks are the session.
+One scenario per document, **beside the spec** (never under `expected/`, which holds goldens). The ground first, then the runs.
 
+```yaml
+description: refuses to guess when it is run outside the checkout # the vitest title, lowercase, no period
+fixture: $FIXTURES/repositories-stub/ # string or list; layers, .fixture() semantics
+env: # bare word = a set registered in code; KEY=value inline; $WORKDIR expands
+    - frozen
+    - SHOPLY_ORIGIN=http://127.0.0.1:9
+serve: # servers registered in code; the mapping form adds env to that server
+    - mcp: { MCP_STUB_WITHHOLD: get-article }
+runs:
+    - command: shoply repositories
+      exit: 1
+      stderr: |
+          Error: no directory with home/ and apps/ above the current directory
 ```
-test: refuses to guess when it is run outside the checkout   # the vitest title
-given: a workdir with no home/ + apps/ pair above it         # B4, mandatory
-then: the error names where the command has to be run        # B4, mandatory
-fixture: $FIXTURES/repositories-stub/                        # repeats, layers, .fixture() semantics
-env: frozen SHOPLY_ORIGIN=http://127.0.0.1:9                 # bare word = registered set; KEY=value; $WORKDIR expands
-serve: mcp MCP_STUB_WITHHOLD=get-article                     # repeats; a server registered in code
 
-$ shoply repositories
-exit: 1
---- stderr
-Error: no directory with home/ and apps/ above the current directory
+- Document keys are CLOSED (`kind`, `description`, `fixture`, `env`, `serve`, `runs`) and so are a run's (`command`, `stdin`, `timeout`, `waitFor`, `exit`, `stdout`, `stderr`, `files`); anything else is a refusal naming the key and its line (`d4b-spec-shape`). `description:` and `runs:` are mandatory, `command:` and `exit:` are mandatory in every run.
+- **`|` keeps the final newline, `|-` drops it** — the comparison is byte-exact against exactly that. An ABSENT `stdout:`/`stderr:` asserts an EMPTY stream. Streams are always block scalars, never quoted strings with `\n` (`d4b-spec-block-scalar`, fixable).
+- `{{token}}` works in `stdout`, `stderr` and the `files:` texts (D4), never in `description`, `command` or `exit`. Use `{{string}}` for wording that varies within a LINE; `{{any}}` only for a span that crosses lines — a stream that is ONLY `{{any}}` asserts nothing (`j3w-spec-empty-assertion`).
+- `files:` asserts what the run left under the cwd: `{ contains: … }` (one needle or a list), `{ equals: … }`, `absent`, `exists`. Relative paths only.
+- `stdin:` is written then closed; `timeout:` is per run; `waitFor:` is the long-running form and is allowed on the LAST run only.
+- All runs share ONE cwd and the same servers, and **every** run is asserted — unlike `.exec([...])`, a non-zero exit does not stop the sequence.
+- On a mismatch the diff marks only the real cause: a token line that matched renders as equal, and the stack carries one frame — the run's `command:` line.
+- `TEST_UPDATE=1` rewrites each run's `exit`, `stdout` and `stderr`, and nothing else: the ground, the commands, `files:`, comments and key order all come back byte-identical.
+- Keys are written in the canonical order (`d4b-spec-key-order`, fixable); the file is `<case>.spec.yaml` with `<case>` in kebab-case, never the bare name of its directory (`c12-spec-file-name`). The whole document family is in [rules.md](rules.md).
+
+The JSON Schema ships at `@jterrazz/test/schema` (`schema/spec.schema.json`) — point an editor at it:
+
+```yaml
+# yaml-language-server: $schema=./node_modules/@jterrazz/test/schema/spec.schema.json
 ```
-
-- Header keys are CLOSED (`test`, `given`, `then`, `fixture`, `env`, `serve`); `#` lines are comments; anything else is an error naming the line (checker passes `b4-cli-header`, `d4b-cli-shape`).
-- `exit: <integer>` is mandatory and is the first line after `$`. Then stdout verbatim, then optionally `--- stderr` and stderr verbatim. A block ends at the next `$ ` or EOF; the blank line before a `$` is the separator, not output.
-- Both streams are compared totally — no `--- stderr` asserts an EMPTY stderr. `{{token}}` works in both streams (D4), never in the header. Use `{{string}}` for wording that varies within a LINE; `{{any}}` only for a span that crosses lines.
-- On a mismatch the diff marks only the real cause: a token line that matched renders as equal, and the stack carries one frame — the block's line in the `.cli`.
-- All blocks share ONE cwd and the same servers, and **every** block is asserted — unlike `.exec([...])`, a non-zero exit does not stop the sequence.
-- `TEST_UPDATE=1` rewrites only what follows each `$`; the header comes back byte-identical.
 
 Registration, once per app:
 
@@ -87,7 +97,7 @@ await specification.cli(bin, {
             command: 'bun specs/harness/mcp-server.ts',
             // cwd = the PROJECT root (A9: nearest package.json above the spec file) —
             // In a workspace that is apps/<pkg>/, not the repo root
-            env: 'SHOPLY_MCP_ORIGIN', // the var the URL is bound to in every block
+            env: 'SHOPLY_MCP_ORIGIN', // the var the URL is bound to in every run
             ready: /listening on port (?<port>\d+)/, // group 1 = the port the server announces
             url: (port) => `http://127.0.0.1:${port}/mcp`,
         },
@@ -97,13 +107,13 @@ await specification.cli(bin, {
 
 Three doors, one engine:
 
-| Door       | How                                                                                                                                                     |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **plugin** | `literate({ specification: './specs/cli/cli.specification.ts' })` from `@jterrazz/test/vitest` in `vitest.config.ts` — the `.cli` file IS the test file |
-| **bridge** | `const result = await cli.run('case.cli')` from a `.test.ts` — runs the whole file, returns the LAST block's `CliResult` for one extra assertion        |
-| **chain**  | unchanged — reach for it for containers, parallel fan-out, long-running processes, structural JSON, database state                                      |
+| Door       | How                                                                                                                                                      |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **plugin** | `literate({ specification: './specs/cli/cli.specification.ts' })` from `@jterrazz/test/vitest` in `vitest.config.ts` — the document IS the test file     |
+| **bridge** | `const result = await cli.run('case.spec.yaml')` from a `.test.ts` — runs the whole document, returns the LAST run's `CliResult` for one extra assertion |
+| **chain**  | unchanged — reach for it for containers, parallel fan-out, host shell-outs, structural JSON, database state                                              |
 
-`cli.run(file, { frozen: true })` opts a deliberately-wrong `.cli` out of the update rewrite (the `.cli` mirror of `toMatch(name, { frozen: true })`).
+`cli.run(file, { frozen: true })` opts a deliberately-wrong document out of the update rewrite (the document's mirror of `toMatch(name, { frozen: true })`).
 
 ## Assertions
 
@@ -144,7 +154,7 @@ specs/cli/
 ├── cli.specification.ts        # runner(s) at the facet ROOT
 └── <domain>/                   # a product command/area — the folder follows the assets
     ├── <aspect>.test.ts        # 1..n test files per domain
-    ├── <case>.cli              # literate specs, BESIDE the tests (never under expected/)
+    ├── <case>.spec.yaml        # spec documents, BESIDE the tests (never under expected/)
     ├── fixtures/               # domain-local, copied into the cwd via .fixture('name')
     ├── seeds/                  # *.sql ONLY
     └── expected/               # snapshots, FLAT ('help.txt', 'config.json', 'tree-name/')

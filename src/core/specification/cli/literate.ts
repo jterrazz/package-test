@@ -1,15 +1,22 @@
-import { cpSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { isAbsolute, relative, resolve } from 'node:path';
 
 import { shouldUpdateSnapshots } from '../../../vitest/update.js';
 import {
-    type LiterateBlock,
-    type LiterateSpec,
-    LiterateSyntaxError,
-    parseLiterateFile,
-    serializeLiterateFile,
-} from '../../literate/literate-file.js';
+    readSpecFile,
+    type SpecDocument,
+    type SpecFile,
+    type SpecFileAssertion,
+    type SpecRun,
+    SpecSyntaxError,
+    updateSpecFile,
+} from '../../literate/spec-document.js';
 import { CaptureScope } from '../../matching/match.js';
-import { mergeTextPreservingPlaceholders, textEquals } from '../../matching/structural.js';
+import {
+    mergeTextPreservingPlaceholders,
+    textContains,
+    textEquals,
+} from '../../matching/structural.js';
 import type { CliEnv, CliOutput } from '../../ports/cli.port.js';
 import type { SpecificationConfig } from '../shared/builder.js';
 import { copyPlan } from '../shared/fixtures.js';
@@ -20,27 +27,28 @@ import { ServeAdapter } from '../website/serve.adapter.js';
 import { CliResult } from './result.js';
 
 /**
- * Running a literate `<case>.cli` spec: one scenario, one workdir, one set of
- * servers, every `$` block executed and asserted.
+ * Running a `<case>.spec.yaml` document: one scenario, one working directory,
+ * one set of servers, every run executed and asserted.
  *
  * The engine composes pieces that already exist rather than adding a second of
  * anything — {@link copyPlan} for `fixture:`, the runner's own command adapter
- * for each block, {@link ServeAdapter} for `serve:`, the `{{token}}` engine for
- * the comparison, and {@link mergeTextPreservingPlaceholders} for the rewrite.
- * What is new here is only the ORCHESTRATION the chain cannot express: several
- * commands sharing one working directory, each asserted, none stopping the run.
+ * for each run, {@link ServeAdapter} for `serve:`, the `{{token}}` engine for
+ * every comparison, and {@link mergeTextPreservingPlaceholders} for the
+ * rewrite. What is new here is only the ORCHESTRATION the chain cannot express:
+ * several commands sharing one working directory, each asserted, none stopping
+ * the run.
  */
 
 // ── Types ──
 
 /**
- * A server a literate header may start by name (`serve: mcp KEY=value`),
- * registered once per app in the `serve` option of `specification.cli()`.
+ * A server a document may start by name (`serve: mcp`), registered once per app
+ * in the `serve` option of `specification.cli()`.
  */
 export interface LiterateServeRegistration {
     /** Shell command that starts the server, run from the project root. */
     command: string;
-    /** The variable the resolved URL is bound to in every block's child env. */
+    /** The variable the resolved URL is bound to in every run's child env. */
     env: string;
     /**
      * Matched against the server's output; the FIRST capture group is the port
@@ -51,62 +59,60 @@ export interface LiterateServeRegistration {
     url: (port: number) => string;
 }
 
-/** Per-call options for {@link runLiterateSpec} / `cli.run()`. */
+/** Per-call options for {@link runSpecDocument} / `cli.run()`. */
 export interface LiterateRunFlags {
     /**
-     * Opt this file OUT of the update-mode rewrite. A frozen file is NEVER
-     * written under `TEST_UPDATE=1`: its mismatch still throws its diff. That
-     * is what makes a DELIBERATELY-WRONG `.cli` — one whose failure rendering
-     * is the subject of a negative test — survive an update run instead of
-     * being silently corrected into a passing file. The `.cli` mirror of
-     * `toMatch(name, { frozen: true })`.
+     * Opt this document OUT of the update-mode rewrite. A frozen document is
+     * NEVER written under `TEST_UPDATE=1`: its mismatch still throws its diff.
+     * That is what makes a DELIBERATELY-WRONG `.spec.yaml` — one whose failure
+     * rendering is the subject of a negative test — survive an update run
+     * instead of being silently corrected into a passing file. The document's
+     * mirror of `toMatch(name, { frozen: true })`.
      */
     frozen?: boolean;
 }
 
-/** Everything the engine needs to run one file. Assembled by the chain. */
+/** Everything the engine needs to run one document. Assembled by the chain. */
 export interface LiterateRunOptions extends LiterateRunFlags {
     /** Env the chain already resolved: service URLs, docker run id, `.env()`. */
     baseEnv?: CliEnv;
     config: SpecificationConfig;
-    /** Absolute path of the `.cli` file. */
-    filePath: string;
     /** The path failures name — as the reader would open it. */
     displayPath: string;
+    /** Absolute path of the `.spec.yaml` file. */
+    filePath: string;
     /** Directory `expected/` fixtures of follow-up assertions resolve against. */
     testDir: string;
-    /** The shared working directory every block runs in. */
+    /** The shared working directory every run executes in. */
     workDir: string;
 }
 
-/** One block's outcome, kept for the failure rendering and the rewrite. */
-interface BlockRun {
+/** One run's outcome, kept for the failure rendering and the rewrite. */
+interface RunOutcome {
     actual: CliOutput;
-    block: LiterateBlock;
-    /** Streams as compared: ANSI stripped, `transform` applied, one trailing newline dropped. */
+    run: SpecRun;
+    /** Streams as compared: ANSI stripped and `transform` applied, byte for byte. */
     stderr: string;
     stdout: string;
+}
+
+/** Where a failure is rendered against — the two forms of the same path. */
+interface FailureContext {
+    displayPath: string;
+    filePath: string;
 }
 
 // ── Comparison ──
 
 /**
- * The form a stream is compared in: ANSI stripped (rule D6), the runner's
- * `transform` applied, and ONE trailing newline dropped — a `.cli` section is
- * written as lines, and a command that ends its output with a newline must not
- * be forced to spell an empty last line.
+ * The form a stream is compared in: ANSI stripped (rule D6) and the runner's
+ * `transform` applied. Nothing else — a block scalar states its own final
+ * newline (`|` keeps it, `|-` drops it), so the comparison is byte-exact and
+ * has no normalisation to hide behind.
  */
 function comparable(raw: string, transform?: (text: string) => string): string {
     const stripped = stripAnsiCodes(raw);
-    return (transform ? transform(stripped) : stripped).replace(/\n$/, '');
-}
-
-function narrative(spec: LiterateSpec): string {
-    return [
-        `test: ${spec.header.test}`,
-        `given: ${spec.header.given}`,
-        `then: ${spec.header.then}`,
-    ].join('\n');
+    return transform ? transform(stripped) : stripped;
 }
 
 /**
@@ -119,117 +125,191 @@ function tokenAwareEquals(scope: CaptureScope): (expected: string, actual: strin
     return (expected, actual) => textEquals(expected, actual, new CaptureScope(scope.workdir));
 }
 
+// ── Files ──
+
+/** A path under the working directory, refusing anything that would escape it. */
+function resolveUnderWorkDir(path: string, workDir: string, context: FailureContext): string {
+    const target = resolve(workDir, path);
+    const inside = relative(workDir, target);
+    if (isAbsolute(path) || inside.startsWith('..') || isAbsolute(inside)) {
+        throw new Error(
+            `${context.displayPath}: files: "${path}" leaves the working directory — a files: key is a relative path under the cwd`,
+        );
+    }
+    return target;
+}
+
+/** A one-line preview of a file's content for the failure rendering. */
+function preview(text: string): string {
+    const flat = JSON.stringify(text.length > 160 ? `${text.slice(0, 160)}…` : text);
+    return flat;
+}
+
+function readIfPresent(path: string): null | string {
+    try {
+        return statSync(path).isFile() ? readFileSync(path, 'utf8') : null;
+    } catch {
+        return null;
+    }
+}
+
+/** Check one `files:` entry and render its failure, or `null` when it holds. */
+function checkFile(
+    assertion: SpecFileAssertion,
+    workDir: string,
+    context: FailureContext,
+    scope: CaptureScope,
+): null | string {
+    const target = resolveUnderWorkDir(assertion.path, workDir, context);
+    let exists;
+    try {
+        exists = statSync(target) !== undefined;
+    } catch {
+        exists = false;
+    }
+    if (assertion.kind === 'absent') {
+        return exists ? `${assertion.path}: expected absent, got a file` : null;
+    }
+    if (!exists) {
+        return `${assertion.path}: expected to exist, got nothing at that path`;
+    }
+    if (assertion.kind === 'exists') {
+        return null;
+    }
+    const content = readIfPresent(target);
+    if (content === null) {
+        return `${assertion.path}: expected a readable file, got a directory`;
+    }
+    for (const needle of assertion.contains) {
+        if (!textContains(needle.text, content, scope)) {
+            return `${assertion.path}: expected to contain ${preview(needle.text)}, got ${preview(content)}`;
+        }
+    }
+    if (assertion.equals !== null && !textEquals(assertion.equals.text, content, scope)) {
+        return `${assertion.path}: expected ${preview(assertion.equals.text)}, got ${preview(content)}`;
+    }
+    return null;
+}
+
+// ── Failure ──
+
 /**
- * The failure a mismatching block throws: the narrative, the command that ran,
- * the diff, and where to open the file. The header is named as never-rewritten
- * so the update hint cannot be read as "this will re-generate my `given:`".
+ * The failure a mismatching run throws: the description, the command that ran,
+ * every detail the comparison rejected, and where to open the document. The
+ * update hint names exactly what a rewrite touches, so it cannot be read as
+ * "this will re-generate my `files:`".
  *
- * The stack is REPLACED by the block's own line. Left alone it would carry the
+ * The stack is REPLACED by the run's own line. Left alone it would carry the
  * engine's frames and end inside the module the plugin generates — pointing the
- * reader at `<case>.cli:<the $ line of the module>` while the message already
- * names the block. One frame, on the block, is the whole truth here.
+ * reader at a line of a file they never wrote. One frame, on the `command:` key,
+ * is the whole truth here.
  */
 function failure(
-    spec: LiterateSpec,
-    run: BlockRun,
-    context: { displayPath: string; filePath: string },
-    detail: string,
+    document: SpecDocument,
+    run: SpecRun,
+    context: FailureContext,
+    details: string[],
 ): Error {
     const error = new Error(
         [
-            `Literate spec mismatch (${context.displayPath}:${run.block.line})`,
+            'Spec mismatch',
             '',
-            narrative(spec),
+            document.description,
             '',
-            `$ ${run.block.argv}`,
+            `$ ${run.command}`,
             '',
-            detail,
+            details.join('\n\n'),
             '',
-            'Run with TEST_UPDATE=1 to rewrite the blocks (exit code and streams). The header is never rewritten.',
+            `${context.displayPath}:${run.commandLine}`,
+            'Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.',
         ].join('\n'),
     );
-    return atBlock(error, context.filePath, run.block.line);
+    return atLine(error, context.filePath, run.commandLine);
 }
 
 /**
- * Point an error's stack at one frame: the line of the `.cli` file that owns
- * the failure. The framework's own frames carry nothing a reader of a literate
- * spec can act on, and the generated module's frame actively misleads.
+ * Point an error's stack at one frame: the line of the `.spec.yaml` that owns
+ * the failure. The framework's own frames carry nothing a reader of a spec
+ * document can act on, and the generated module's frame actively misleads.
  */
-function atBlock(error: Error, filePath: string, line: number): Error {
+function atLine(error: Error, filePath: string, line: number): Error {
     error.stack = `${error.name}: ${error.message}\n    at ${filePath}:${line}:1`;
     return error;
 }
 
-/** Compare one block against what the command actually did. */
-function assertBlock(
-    spec: LiterateSpec,
-    run: BlockRun,
-    context: { displayPath: string; filePath: string },
+/** Compare one run against what the command actually did. */
+function assertRun(
+    document: SpecDocument,
+    outcome: RunOutcome,
+    context: FailureContext,
+    workDir: string,
     scope: CaptureScope,
 ): void {
-    const { actual, block } = run;
-    const equals = tokenAwareEquals(scope);
-    if (actual.exitCode !== block.exitCode) {
-        throw failure(
-            spec,
-            run,
-            context,
+    const { actual, run } = outcome;
+    // An exit-code mismatch is reported ALONE: when the command did something
+    // Else entirely, its stream diffs are consequences, not causes.
+    if (actual.exitCode !== run.exitCode) {
+        throw failure(document, run, context, [
             [
                 'exit code mismatch',
-                `  expected: ${block.exitCode}`,
+                `  expected: ${run.exitCode}`,
                 `  received: ${actual.exitCode}`,
-                ...(run.stderr.length > 0 ? ['', 'stderr was:', run.stderr] : []),
+                // The stream is byte-exact, so it carries its own final
+                // Newline; the joiner adds the separator, not the stream.
+                ...(outcome.stderr.length > 0
+                    ? ['', 'stderr was:', outcome.stderr.replace(/\n$/, '')]
+                    : []),
             ].join('\n'),
-        );
+        ]);
     }
-    if (!textEquals(block.stdout, run.stdout, scope)) {
-        throw failure(
-            spec,
-            run,
-            context,
-            formatStdoutDiff('stdout', block.stdout, run.stdout, { equals }),
-        );
+
+    const equals = tokenAwareEquals(scope);
+    const details: string[] = [];
+    for (const [name, expected, received] of [
+        ['stdout', run.stdout?.text ?? '', outcome.stdout],
+        ['stderr', run.stderr?.text ?? '', outcome.stderr],
+    ] as const) {
+        if (!textEquals(expected, received, scope)) {
+            details.push(formatStdoutDiff(name, expected, received, { equals }));
+        }
     }
-    const expectedStderr = block.stderr ?? '';
-    if (!textEquals(expectedStderr, run.stderr, scope)) {
-        throw failure(
-            spec,
-            run,
-            context,
-            formatStdoutDiff('stderr', expectedStderr, run.stderr, { equals }),
-        );
+
+    const fileFailures = run.files
+        .map((assertion) => checkFile(assertion, workDir, context, scope))
+        .filter((line): line is string => line !== null);
+    if (fileFailures.length > 0) {
+        details.push(['files mismatch', '', ...fileFailures.map((line) => `  ${line}`)].join('\n'));
+    }
+
+    if (details.length > 0) {
+        throw failure(document, run, context, details);
     }
 }
 
 // ── Update ──
 
 /**
- * The rewritten blocks: exit codes and streams from the run, placeholders of
- * the previous golden preserved by pattern (rule D5). A `--- stderr` section
- * that ends up empty is dropped, so a rewritten file passes the next run.
+ * The rewritten runs: exit codes and streams from the run, placeholders of the
+ * previous golden preserved by pattern (rule D5). A stream that ends up empty
+ * loses its key, so a rewritten document passes the next run.
  */
-function updatedBlocks(runs: BlockRun[], scope: CaptureScope): LiterateBlock[] {
-    return runs.map(({ actual, block, stderr, stdout }) => {
-        const mergedStderr = mergeTextPreservingPlaceholders(block.stderr, stderr, scope);
-        return {
-            ...block,
-            exitCode: actual.exitCode,
-            stderr: mergedStderr.length > 0 ? mergedStderr : null,
-            stdout: mergeTextPreservingPlaceholders(block.stdout, stdout, scope),
-        };
-    });
+function updates(outcomes: RunOutcome[], scope: CaptureScope) {
+    return outcomes.map(({ actual, run, stderr, stdout }) => ({
+        exitCode: actual.exitCode,
+        stderr: mergeTextPreservingPlaceholders(run.stderr?.text ?? null, stderr, scope),
+        stdout: mergeTextPreservingPlaceholders(run.stdout?.text ?? null, stdout, scope),
+    }));
 }
 
 // ── Servers ──
 
 /**
- * Start every server the header names, in declaration order, before the first
- * block. They all stay live for the whole file and are stopped together — one
- * `.cli` file is one scenario, and its servers are part of its ground.
+ * Start every server the document names, in declaration order, before the first
+ * run. They all stay live for the whole file and are stopped together — one
+ * document is one scenario, and its servers are part of its ground.
  */
 async function startServers(
-    spec: LiterateSpec,
+    document: SpecDocument,
     config: SpecificationConfig,
     displayPath: string,
 ): Promise<{ env: CliEnv; stop: () => Promise<void> }> {
@@ -243,7 +323,7 @@ async function startServers(
         }
     };
 
-    for (const entry of spec.header.serve) {
+    for (const entry of document.serve) {
         const registration = registry[entry.name];
         if (!registration) {
             await stop();
@@ -277,17 +357,21 @@ async function startServers(
 
 // ── Environment ──
 
-/** Resolve the header's `env:` tokens against the registered sets. `$WORKDIR` expands. */
-function headerEnv(spec: LiterateSpec, config: SpecificationConfig, displayPath: string): CliEnv {
+/** Resolve the document's `env:` entries against the registered sets. `$WORKDIR` expands. */
+function documentEnv(
+    document: SpecDocument,
+    config: SpecificationConfig,
+    displayPath: string,
+): CliEnv {
     const sets = config.envSets ?? {};
     const env: CliEnv = {};
-    for (const token of spec.header.env) {
+    for (const token of document.env) {
         if (token.kind === 'set') {
             const declared = sets[token.name];
             if (!declared) {
                 const known = Object.keys(sets);
                 throw new Error(
-                    `${displayPath}: env: "${token.name}" is not a registered env set — ${
+                    `${displayPath}:${token.line}: env: "${token.name}" is not a registered env set — ${
                         known.length === 0
                             ? 'specification.cli() declares no `env` option.'
                             : `registered sets: ${known.join(', ')}.`
@@ -313,58 +397,70 @@ function expandWorkdir(env: CliEnv, workDir: string): CliEnv {
 // ── Engine ──
 
 /**
- * Run one literate spec end to end and resolve with the LAST block's result —
+ * Run one spec document end to end and resolve with the LAST run's result —
  * the handle a `.test.ts` adds its own assertion to (a directory golden, a
- * grep) after `cli.run('<case>.cli')`.
+ * grep) after `cli.run('<case>.spec.yaml')`.
  *
- * Under `TEST_UPDATE=1` nothing is asserted: every block runs, and what follows
- * each `$` is rewritten from the actual output with the previous golden's
- * placeholders preserved.
+ * Under `TEST_UPDATE=1` nothing is asserted: every run executes, and each one's
+ * exit code and streams are rewritten from the actual output with the previous
+ * golden's placeholders preserved.
  */
-export async function runLiterateSpec(options: LiterateRunOptions): Promise<CliResult> {
+export async function runSpecDocument(options: LiterateRunOptions): Promise<CliResult> {
     const { config, displayPath, filePath, testDir, workDir } = options;
     if (!config.command) {
         throw new Error(
-            '.run(): literate specs require a command adapter (use specification.cli())',
+            '.run(): spec documents require a command adapter (use specification.cli())',
         );
     }
 
-    let spec: LiterateSpec;
+    let file: SpecFile;
     try {
-        spec = parseLiterateFile(readFileSync(filePath, 'utf8'), displayPath);
+        file = readSpecFile(readFileSync(filePath, 'utf8'), displayPath);
     } catch (error) {
         // A grammar refusal is about the FILE, not about the engine that read
         // It: the message already names the line, so the stack says the same.
-        throw error instanceof LiterateSyntaxError ? atBlock(error, filePath, error.line) : error;
+        throw error instanceof SpecSyntaxError ? atLine(error, filePath, error.line) : error;
     }
+    const document = file.document;
     const fileDir = filePath.replace(/[/\\][^/\\]*$/, '');
 
     // `fixture:` layers on top of whatever the chain already copied, in
     // Declaration order — identical semantics to chained `.fixture()` calls.
-    for (const path of spec.header.fixtures) {
-        const { dest, src } = copyPlan(path, fileDir, workDir);
+    for (const fixture of document.fixtures) {
+        const { dest, src } = copyPlan(fixture.path, fileDir, workDir);
         cpSync(src, dest, { recursive: true });
     }
 
-    const servers = await startServers(spec, config, displayPath);
+    const servers = await startServers(document, config, displayPath);
     const scope = new CaptureScope(safeRealpath(workDir));
     const env: CliEnv = expandWorkdir(
         {
             ...options.baseEnv,
             ...servers.env,
-            ...headerEnv(spec, config, displayPath),
+            ...documentEnv(document, config, displayPath),
         },
         workDir,
     );
 
-    let runs: BlockRun[];
+    let outcomes: RunOutcome[];
     try {
-        runs = [];
-        for (const block of spec.blocks) {
-            const actual = await config.command.exec(block.argv, workDir, env);
-            runs.push({
+        outcomes = [];
+        for (const run of document.runs) {
+            const actual =
+                run.waitFor === null
+                    ? await config.command.exec(run.command, workDir, env, {
+                          stdin: run.stdin ?? undefined,
+                          timeout: run.timeout ?? undefined,
+                      })
+                    : await config.command.watch(
+                          run.command,
+                          workDir,
+                          { timeout: run.timeout ?? undefined, waitFor: run.waitFor },
+                          env,
+                      );
+            outcomes.push({
                 actual,
-                block,
+                run,
                 stderr: comparable(actual.stderr, config.transform),
                 stdout: comparable(actual.stdout, config.transform),
             });
@@ -374,15 +470,15 @@ export async function runLiterateSpec(options: LiterateRunOptions): Promise<CliR
     }
 
     if (shouldUpdateSnapshots() && options.frozen !== true) {
-        writeFileSync(filePath, serializeLiterateFile(spec.headerText, updatedBlocks(runs, scope)));
+        writeFileSync(filePath, updateSpecFile(file, updates(outcomes, scope)));
     } else {
-        for (const run of runs) {
-            assertBlock(spec, run, { displayPath, filePath }, scope);
+        for (const outcome of outcomes) {
+            assertRun(document, outcome, { displayPath, filePath }, workDir, scope);
         }
     }
 
     return new CliResult({
-        commandOutput: runs.at(-1)!.actual,
+        commandOutput: outcomes.at(-1)!.actual,
         config,
         dockerConfig: config.dockerConfig,
         testDir,
@@ -392,7 +488,7 @@ export async function runLiterateSpec(options: LiterateRunOptions): Promise<CliR
     });
 }
 
-/** The title a transformed `.cli` module runs under — the header's `test:` line. */
-export function literateTitle(content: string, displayPath: string): string {
-    return parseLiterateFile(content, displayPath).header.test;
+/** The title a transformed `.spec.yaml` module runs under — the `description:` line. */
+export function specDescription(content: string, displayPath: string): string {
+    return readSpecFile(content, displayPath).document.description;
 }

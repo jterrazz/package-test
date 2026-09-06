@@ -1,16 +1,17 @@
 import { readFileSync } from 'node:fs';
 import { isAbsolute, resolve } from 'node:path';
 
-import { literateTitle } from '../core/specification/cli/literate.js';
+import { specDescription } from '../core/specification/cli/literate.js';
 
 /**
- * The `literate()` vite plugin — door one of the literate format.
+ * The `literate()` vite plugin — door one of the spec-document format.
  *
- * It makes a `<case>.cli` file a TEST FILE: the glob joins the project's test
- * include, and each `.cli` is transformed into a one-test module that runs the
- * file through the registered `cli` runner. The runner shows the `.cli` path as
- * the file and the header's `test:` line as the title, so a failing scenario is
- * opened where it is written — not in a `.test.ts` that merely points at it.
+ * It makes a `<case>.spec.yaml` file a TEST FILE: the glob joins the project's
+ * test include, and each document is transformed into a one-test module that
+ * runs the file through the registered `cli` runner. The runner shows the
+ * document's path as the file and its `description:` as the title, so a failing
+ * scenario is opened where it is written — not in a `.test.ts` that merely
+ * points at it.
  *
  * ```typescript
  * // vitest.config.ts
@@ -23,14 +24,14 @@ import { literateTitle } from '../core/specification/cli/literate.js';
  * ```
  */
 
-/** The `.cli` extension, matched on the id vite hands the plugin. */
-const CLI_FILE = /\.cli(?:\?.*)?$/;
+/** The `.spec.yaml` extension, matched on the id vite hands the plugin. */
+const SPEC_FILE = /\.spec\.yaml(?:\?.*)?$/;
 
 export interface LiterateOptions {
     /**
-     * Globs added to the project's test include. Default: every `.cli` file.
-     * Narrow it when a tree holds `.cli` files that are INPUTS to other specs
-     * (a deliberately-broken header) rather than scenarios to run.
+     * Globs added to the project's test include. Default: every `.spec.yaml`
+     * file. Narrow it when a tree holds documents that are INPUTS to other
+     * specs (a deliberately-wrong golden) rather than scenarios to run.
      */
     include?: string[];
     /**
@@ -60,9 +61,9 @@ export interface LiteratePlugin {
 }
 
 /**
- * The module a `.cli` file becomes: one `test()` whose title is the header's
- * `test:` line and whose body runs the whole file — header, servers, every
- * block asserted.
+ * The module a `<case>.spec.yaml` becomes: one `test()` whose title is the
+ * document's `description:` and whose body runs the whole file — its ground,
+ * its servers, every run asserted.
  *
  * @internal Exported for unit tests.
  */
@@ -71,7 +72,7 @@ export function literateModule(
     filePath: string,
     specificationPath: string,
 ): string {
-    const title = literateTitle(content, filePath);
+    const title = specDescription(content, filePath);
     return [
         "import { test } from 'vitest';",
         `import { cli } from ${JSON.stringify(specificationPath)};`,
@@ -89,7 +90,7 @@ function cleanId(id: string): string {
 }
 
 export function literate(options: LiterateOptions): LiteratePlugin {
-    const include = options.include ?? ['**/*.cli'];
+    const include = options.include ?? ['**/*.spec.yaml'];
     let root = process.cwd();
 
     return {
@@ -99,7 +100,7 @@ export function literate(options: LiterateOptions): LiteratePlugin {
         },
         enforce: 'pre',
         load: (id) => {
-            if (!CLI_FILE.test(id)) {
+            if (!SPEC_FILE.test(id)) {
                 return null;
             }
             const filePath = cleanId(id);

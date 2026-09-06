@@ -1,0 +1,14 @@
+description: asserts what the scaffold left on disk beside what it printed
+runs:
+    - command: scaffold
+      exit: 0
+      stdout: |
+          Scaffolded
+      files:
+          out/main.go: { contains: 'package main' }
+          out/docs/README.md: { contains: ['# Docs'] }
+          out/go.mod:
+              equals: |
+                  module example
+          out/src: exists
+          out/UNEXPECTED.txt: absent

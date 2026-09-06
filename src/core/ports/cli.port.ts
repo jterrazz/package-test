@@ -33,9 +33,21 @@ export type CliEnv = Record<string, null | string>;
  * Abstract command interface for specification runners.
  * Implement this to plug in your command execution strategy.
  */
+/**
+ * What one invocation is handed beyond its arguments — the two per-run inputs a
+ * spec document may state. Both are absent by default: the child gets an
+ * immediately-closed stdin (never a TTY) and the adapter's own timeout.
+ */
+export interface CliInput {
+    /** Written to the child's stdin, which is then closed. */
+    stdin?: string;
+    /** Milliseconds after which the run is killed (exit code 124). */
+    timeout?: number;
+}
+
 export interface CliPort {
     /** Execute a command with the given arguments in the given working directory. */
-    exec: (args: string, cwd: string, env?: CliEnv) => Promise<CliOutput>;
+    exec: (args: string, cwd: string, env?: CliEnv, input?: CliInput) => Promise<CliOutput>;
 
     /** Run a long-running process and wait for a pattern or timeout. */
     watch: (args: string, cwd: string, options: ExecOptions, env?: CliEnv) => Promise<CliOutput>;

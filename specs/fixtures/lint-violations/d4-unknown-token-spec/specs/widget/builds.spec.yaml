@@ -1,0 +1,6 @@
+description: invents {{widget}} in prose, where no grammar reads it
+runs:
+    - command: widget build
+      exit: 0
+      stdout: |
+          built {{widget}}

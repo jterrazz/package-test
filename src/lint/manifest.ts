@@ -137,7 +137,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'b4-given-then': {
         channel: 'statique',
         convention:
-            'Chaque test contient `// Given -` puis `// Then -` (les deux, dans cet ordre) ; Given déclaré après Then est une erreur. Dans un spec littéraire `<cas>.cli`, les deux marqueurs sont les lignes `given:` et `then:` de l’en-tête (passe checker `b4-cli-header`).',
+            'Chaque test contient `// Given -` puis `// Then -` (les deux, dans cet ordre) ; Given déclaré après Then est une erreur. Un document `<cas>.spec.yaml` n’a pas de commentaires : sa narration est sa `description:`.',
         family: 'B',
         id: 'B4',
         rationale:
@@ -465,7 +465,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Tout `{{token}}` dans une fixture `expected/` — ou dans les blocs d’un spec littéraire `<cas>.cli` — appartient au vocabulaire figé ; un token inconnu est une erreur.',
+            'Tout `{{token}}` dans une fixture `expected/` — ou dans un flux attendu d’un document `<cas>.spec.yaml` — appartient au vocabulaire figé ; un token inconnu est une erreur.',
         family: 'D',
         id: 'D4',
         name: 'd4-unknown-token',
@@ -495,22 +495,111 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Un spec littéraire `<cas>.cli` respecte sa grammaire : clés d’en-tête fermées (`test`, `given`, `then`, `fixture`, `env`, `serve`), première ligne de corps en `$ <commande>`, `exit: <entier>` juste après.',
+            'Un document `<cas>.spec.yaml` respecte sa grammaire : clés fermées au niveau du document (`kind`, `description`, `fixture`, `env`, `serve`, `runs`) comme dans un run (`command`, `stdin`, `timeout`, `waitFor`, `exit`, `stdout`, `stderr`, `files`), `description:` et `runs:` obligatoires, `command:` et `exit:` obligatoires dans chaque run, `exit:` entier littéral, `waitFor:` seulement sur le dernier run et jamais avec `stdin:`, chemin `files:` relatif et sous le workdir.',
         family: 'D',
         id: 'D4b',
-        name: 'd4b-cli-shape',
+        name: 'd4b-spec-shape',
         rationale:
-            'La grammaire est lue par le parseur du runner lui-même : le fichier que le lint accepte est exactement celui que le runner exécute.',
+            'La grammaire est lue par le parseur du runner lui-même : le document que le lint accepte est exactement celui que le runner exécute.',
     },
     {
         channel: 'checker',
         convention:
-            'Un spec littéraire `<cas>.cli` porte les trois lignes narratives `test:`, `given:` et `then:` ; il en manque une est une erreur.',
-        family: 'B',
-        id: 'B4',
-        name: 'b4-cli-header',
+            'Les clés d’un `<cas>.spec.yaml` suivent l’ordre canonique — `kind, description, fixture, env, serve, runs` au niveau du document, `command, stdin, timeout, waitFor, exit, stdout, stderr, files` dans un run. Corrigeable (`--fix`).',
+        family: 'D',
+        id: 'D4b',
+        name: 'd4b-spec-key-order',
         rationale:
-            'Le format littéraire est un test : la narration Given/Then y vit dans l’en-tête, pas dans des commentaires.',
+            'Le décor avant la session, l’entrée avant la sortie : un ordre unique rend les documents comparables et supprime les diffs qui ne changent rien.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            '`stdout`, `stderr`, `stdin` et `files.*.equals` d’un `<cas>.spec.yaml` s’écrivent en scalaire bloc (`|` garde le saut de ligne final, `|-` le supprime), jamais en chaîne entre guillemets avec des `\\n`. Corrigeable (`--fix`).',
+        family: 'D',
+        id: 'D4b',
+        name: 'd4b-spec-block-scalar',
+        rationale:
+            'Une sortie attendue doit ressembler à une sortie — une golden sur une ligne est illisible et aucun diff ne peut la montrer.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Un document se nomme `<cas>.spec.yaml` : `<cas>` en kebab-case, sans les mots `test`/`spec`/`cli` que le suffixe porte déjà, et jamais le nom nu de son dossier.',
+        family: 'C',
+        id: 'C12',
+        name: 'c12-spec-file-name',
+        rationale:
+            'Le nom du fichier est la première phrase que le lecteur lit ; `rm/rm.spec.yaml` ne dit rien deux fois.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'La `description:` d’un document est un titre : une seule ligne, initiale minuscule (identifiant tout en majuscules exempté), sans point final, moins de 100 caractères.',
+        family: 'J',
+        id: 'J5',
+        name: 'j5-spec-description',
+        rationale:
+            'La description EST le titre vitest — les règles du titre s’y appliquent, pas celles d’un paragraphe.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Deux `<cas>.spec.yaml` d’un même dossier ne partagent pas leur `description:`.',
+        family: 'J',
+        id: 'J4',
+        name: 'j4-spec-description-unique',
+        rationale:
+            'Le rapporteur nomme le titre : deux titres identiques laissent deux fichiers à ouvrir.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Un flux attendu ne contient pas de valeur volatile littérale : origine loopback avec port (`127.0.0.1:8080`, `localhost:3000`), chemin temporaire absolu (`/tmp/`, `/private/tmp/`, `/var/folders/`) ou chemin home (`/Users/…`, `/home/…`). Le message nomme le token à écrire.',
+        family: 'D',
+        id: 'D5',
+        name: 'd5-spec-volatile-literal',
+        rationale:
+            'C’est exactement la forme qu’un `TEST_UPDATE` aurait tokenisée : en trouver une signifie qu’un token a été écrasé à la main.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Un horodatage ISO-8601 ou un uuid littéral dans un flux attendu → warning, sauf si la même valeur apparaît dans un `fixture:` ou un `stdin:` du même document (elle est alors fixée, pas volatile).',
+        family: 'D',
+        id: 'D5',
+        name: 'd5w-spec-pinned-value',
+        rationale: 'Le défaut n’est pas le littéral : c’est le littéral que rien n’a fixé.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Un flux attendu dont tout le contenu est `{{any}}` → warning : le run s’exécute et ne prouve rien.',
+        family: 'J',
+        id: 'J3',
+        name: 'j3w-spec-empty-assertion',
+        rationale:
+            'Le miroir de J3 pour les documents — une assertion qui accepte tout est une assertion absente.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Un run dont `exit:` est non nul sans `stdout:` ni `stderr:` → warning : le document ne dit pas pourquoi la commande a refusé.',
+        family: 'D',
+        id: 'D11',
+        name: 'd11w-spec-silent-refusal',
+        rationale:
+            'Un refus muet est soit un défaut du produit, soit une golden qui a oublié que les mots partaient sur stderr.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Les mots nus d’`env:` et les noms de `serve:` d’un document sont des clés des objets `env`/`serve` d’un `specification.cli(…)` du plus proche dossier portant des `*.specification.ts` (lecture statique des littéraux ; ignoré sinon).',
+        family: 'C',
+        id: 'C8',
+        name: 'c8-spec-registered-name',
+        rationale:
+            'Une faute de frappe (`serve: dashbord`) échoue aujourd’hui à l’exécution, un fichier de test plus tard ; ici c’est une ligne de lint.',
     },
     {
         channel: 'checker',
@@ -525,7 +614,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Aucune fixture morte : tout fichier sous `seeds/`/`requests/`/`fixtures/` et toute entrée de premier niveau de `expected/` doit être référencée ; un dossier de feature sans `*.test.ts` ni `*.cli` est orphelin (warning si argument non littéral). Un `<cas>.cli` référence les fixtures nommées par ses lignes `fixture:`.',
+            'Aucune fixture morte : tout fichier sous `seeds/`/`requests/`/`fixtures/` et toute entrée de premier niveau de `expected/` doit être référencée ; un dossier de feature sans `*.test.ts` ni `*.spec.yaml` est orphelin (warning si argument non littéral). Un `<cas>.spec.yaml` référence les fixtures nommées par ses entrées `fixture:`.',
         family: 'C',
         id: 'C9',
         name: 'c9-dead-fixtures',

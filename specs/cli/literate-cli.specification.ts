@@ -4,13 +4,13 @@ import { afterAll } from 'vitest';
 import { specification } from '../../src/index.js';
 
 /**
- * The runner the literate `<case>.cli` specs are bound to — the one the
+ * The runner the `<case>.spec.yaml` documents are bound to — the one the
  * `literate()` plugin names in `vitest.config.ts`, and the one
  * `specs/cli/literate/literate.test.ts` drives through the `cli.run()` bridge.
  *
- * It declares the two registries a `.cli` header names by WORD: `env` (named
- * environment sets) and `serve` (named servers). A scenario file states WHICH
- * ground it stands on; how that ground is built stays in code, once.
+ * It declares the two registries a document names by WORD: `env` (named
+ * environment sets) and `serve` (named servers). A scenario states WHICH ground
+ * it stands on; how that ground is built stays in code, once.
  */
 const CLI_BIN = resolve(import.meta.dirname, '../fixtures/cli-app/cli.sh');
 

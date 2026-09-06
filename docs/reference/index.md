@@ -36,8 +36,9 @@
 | [BrowserPort](interfaces/BrowserPort.md) | Abstract browser interface for the website specification runner. One implementation lives in `integrations/playwright/` — a single shared browser instance per runner; each `open()` gets a fresh, isolated context. |
 | [CaptureScope](interfaces/CaptureScope.md) | Named captures recorded by `match.ref()` / `{{type#ref}}` placeholders. One scope lives on each spec result — every assertion chained off the same result shares it, and a new chain starts fresh. |
 | [CliHandle](interfaces/CliHandle.md) | The record returned by [specification.cli](variables/specification.md#property-cli). Destructure with the canonical names (CONVENTIONS A3): |
+| [CliInput](interfaces/CliInput.md) | What one invocation is handed beyond its arguments — the two per-run inputs a spec document may state. Both are absent by default: the child gets an immediately-closed stdin (never a TTY) and the adapter's own timeout. |
 | [CliOutput](interfaces/CliOutput.md) | Raw output from a command execution, including exit code and captured output streams. |
-| [CliPort](interfaces/CliPort.md) | Abstract command interface for specification runners. Implement this to plug in your command execution strategy. |
+| [CliPort](interfaces/CliPort.md) | - |
 | [CliSpecification](interfaces/CliSpecification.md) | The `cli` facet — command chain entry handed out by `specification.cli()`. Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS B2) — `{ waitFor?, timeout? }` covers long-running processes. |
 | [CliSpecificationOptions](interfaces/CliSpecificationOptions.md) | Options for [specification.cli](variables/specification.md#property-cli). |
 | [ContainerPort](interfaces/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
@@ -62,11 +63,8 @@
 | [JobsHandle](interfaces/JobsHandle.md) | The record returned by [specification.jobs](variables/specification.md#property-jobs). Destructure with the canonical names (CONVENTIONS A3): |
 | [JobsSpecification](interfaces/JobsSpecification.md) | The `jobs` facet — job chain entry handed out by `specification.jobs()`. Jobs run in-process by definition (CONVENTIONS A5/A8). |
 | [JobsSpecificationOptions](interfaces/JobsSpecificationOptions.md) | Options for [specification.jobs](variables/specification.md#property-jobs). |
-| [LiterateBlock](interfaces/LiterateBlock.md) | One `$ <argv>` block: the command, its exit code, and both streams verbatim. |
-| [LiterateHeader](interfaces/LiterateHeader.md) | The header of a literate spec — everything before the first blank line. |
-| [LiterateRunFlags](interfaces/LiterateRunFlags.md) | Per-call options for runLiterateSpec / `cli.run()`. |
-| [LiterateServeRegistration](interfaces/LiterateServeRegistration.md) | A server a literate header may start by name (`serve: mcp KEY=value`), registered once per app in the `serve` option of `specification.cli()`. |
-| [LiterateSpec](interfaces/LiterateSpec.md) | A parsed `<case>.cli` file. |
+| [LiterateRunFlags](interfaces/LiterateRunFlags.md) | Per-call options for runSpecDocument / `cli.run()`. |
+| [LiterateServeRegistration](interfaces/LiterateServeRegistration.md) | A server a document may start by name (`serve: mcp`), registered once per app in the `serve` option of `specification.cli()`. |
 | [MatchableRequest](interfaces/MatchableRequest.md) | The observed outgoing request, reduced to what contract matchers inspect. Built once per request by the engine (MSW on api/jobs, the stub backend on website/mobile) and handed to [ContractRequest.match](interfaces/ContractRequest.md#match) and to a [ContractResponder](type-aliases/ContractResponder.md). |
 | [MatchFixtureOptions](interfaces/MatchFixtureOptions.md) | Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a single fixture OUT of update-mode rewriting: a frozen fixture is NEVER written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen mismatch still throws its diff, and a frozen missing fixture still throws its "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the subject of a negative test that asserts the mismatch/error rendering) survivable across update runs instead of being silently overwritten with the actual output. |
 | [MobileBackendOptions](interfaces/MobileBackendOptions.md) | The declared stub backend behind the app under test. The framework owns the simulator and appium but NOT the JS bundler (Metro belongs to the caller's repo, like `next build` belongs to a website's) — so nothing is injected: the handle exposes `backendUrl` and the CALLER wires it into its own bundler env. |
@@ -83,7 +81,12 @@
 | [ServerPort](interfaces/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
 | [ServerResponse](interfaces/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
 | [ServiceHandle](interfaces/ServiceHandle.md) | A service handle — returned by factory functions like postgres(), redis(). Mutable: connectionString is populated after the orchestrator starts containers. |
+| [SpecDocument](interfaces/SpecDocument.md) | A parsed `<case>.spec.yaml`. |
+| [SpecFixture](interfaces/SpecFixture.md) | One `fixture:` entry — a path with the line it was declared on. |
 | [SpecificationConfig](interfaces/SpecificationConfig.md) | Adapter configuration passed to the specification facets at setup time. |
+| [SpecRun](interfaces/SpecRun.md) | One run: a command, what it must exit with, and what it must have produced. |
+| [SpecServeEntry](interfaces/SpecServeEntry.md) | One `serve:` entry — a registered server plus the extra env it is started with. |
+| [SpecStream](interfaces/SpecStream.md) | An expected stream: its text, and the first line of that text in the file. |
 | [SqliteOptions](interfaces/SqliteOptions.md) | - |
 | [Visitor](interfaces/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
 | [WebsiteBackendOptions](interfaces/WebsiteBackendOptions.md) | The declared stub backend behind the site under test — started before the server command, torn down with the runner. Its URL is injected into the server child's environment under `env`; the contracts each chain declares via `.intercept(...)` are what it serves. |
@@ -108,7 +111,10 @@
 | [MobileScenario](type-aliases/MobileScenario.md) | The behavior of an open — the When of the spec; assertions stay in the Then. |
 | [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
+| [SpecEnvToken](type-aliases/SpecEnvToken.md) | One `env:` entry — a bare word naming a registered set, or a `KEY=value` pair. |
+| [SpecFileAssertion](type-aliases/SpecFileAssertion.md) | One `files:` assertion, keyed by a workdir-relative path. |
 | [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
+| [SpecKind](type-aliases/SpecKind.md) | - |
 | [TextFilter](type-aliases/TextFilter.md) | A text filter on a provider request builder (`openai.chat({ user })`, `anthropic.messages({ system })`, …). |
 | [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |
 | [WebsiteSpecificationOptions](type-aliases/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). `server` (start the site locally) and `url` (target a running site) are mutually exclusive BY TYPE — the union makes the invalid combinations inexpressible rather than runtime-checked. `backend` requires `server` mode for the same reason: a deployed site cannot be pointed at a local stub. |

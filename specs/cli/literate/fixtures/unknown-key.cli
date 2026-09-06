@@ -1,7 +1,0 @@
-test: a header with a key outside the closed set
-given: a when: line, which the grammar does not know
-then: the parser names the line and lists the vocabulary
-when: something happens
-
-$ help
-exit: 0

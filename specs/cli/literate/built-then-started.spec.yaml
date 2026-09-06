@@ -1,0 +1,11 @@
+description: start runs what build wrote in the same working directory
+fixture: $FIXTURES/cli-app/
+runs:
+    - command: build
+      exit: 0
+      stdout: |
+          Build completed
+    - command: start
+      exit: 0
+      stdout: |
+          Hello from CLI app

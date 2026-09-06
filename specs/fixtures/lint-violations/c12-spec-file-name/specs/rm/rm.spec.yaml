@@ -1,0 +1,6 @@
+description: names its directory again instead of naming the case
+runs:
+    - command: widget rm
+      exit: 0
+      stdout: |
+          Removed.

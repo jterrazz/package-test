@@ -98,11 +98,11 @@ run: (file, options?) => Promise<CliResult>;
 
 Defined in: [core/specification/shared/builder.ts:254](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/builder.ts#L254)
 
-Run a literate `<case>.cli` spec — its header (fixtures, env sets,
-servers) and every `$` block, each asserted — and resolve with the LAST
-block's result, so a `.test.ts` can add an assertion the file cannot
-express (a directory golden, a grep). The path is relative to the test
-file's own directory, where the `.cli` lives.
+Run a `<case>.spec.yaml` document — its ground (fixtures, env sets,
+servers) and every run, each asserted — and resolve with the LAST run's
+result, so a `.test.ts` can add an assertion the document cannot express
+(a directory golden, a grep). The path is relative to the test file's own
+directory, where the document lives.
 
 #### Parameters
 

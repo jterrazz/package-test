@@ -1,0 +1,8 @@
+description: writes stdin to the child and closes it
+runs:
+    - command: upper
+      stdin: |
+          shout this
+      exit: 0
+      stdout: |
+          SHOUT THIS

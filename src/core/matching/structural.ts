@@ -372,6 +372,27 @@ export function textEquals(expected: string, actual: string, scope: CaptureScope
 }
 
 /**
+ * Substring comparison with `{{token}}` support — the `contains` half of the
+ * `files:` assertions of a spec document. Without placeholders this is
+ * `String.includes`; with them the fixture text becomes an UNANCHORED pattern,
+ * so `wrote {{path}}` is found inside a larger file, and its `#ref` captures are
+ * recorded exactly as a whole-text comparison records them.
+ */
+export function textContains(expected: string, actual: string, scope: CaptureScope): boolean {
+    if (!hasPlaceholders(expected)) {
+        return actual.includes(expected);
+    }
+    const parsed = parsePlaceholderString(expected, scope);
+    const found = new RegExp(parsed.source).exec(actual);
+    if (!found) {
+        return false;
+    }
+    return parsed.refs.every(
+        (entry) => !entry.ref || recordRef(entry.ref, found[entry.index + 1], scope),
+    );
+}
+
+/**
  * Render an expected value for failure diffs and serialization: Matcher
  * instances become their placeholder text, everything else is untouched.
  */

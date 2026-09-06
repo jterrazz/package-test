@@ -1,0 +1,10 @@
+description: a run whose golden stdout is deliberately wrong
+runs:
+    - command: help
+      exit: 0
+      stdout: |
+          Usage: cli <command>
+
+          Commands:
+            build   Build the project
+            lint    A command this binary does not have

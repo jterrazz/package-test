@@ -171,7 +171,7 @@ optional envSets?: Record<string, CliEnv>;
 
 Defined in: [core/specification/shared/builder.ts:117](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/builder.ts#L117)
 
-Named environment SETS a literate `.cli` header may name by bare word
+Named environment SETS a spec document may name by bare word
 (`env: frozen`). Declared once per app in `specification.cli()`.
 
 ***
@@ -221,7 +221,7 @@ optional root?: string;
 
 Defined in: [core/specification/shared/builder.ts:125](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/builder.ts#L125)
 
-The project root — the working directory a literate `serve:` command runs from.
+The project root — the working directory a document's `serve:` command runs from.
 
 ***
 
@@ -243,8 +243,8 @@ optional serveRegistry?: Record<string, LiterateServeRegistration>;
 
 Defined in: [core/specification/shared/builder.ts:131](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/builder.ts#L131)
 
-Named servers a literate `.cli` header may start (`serve: mcp KEY=value`).
-Declared once per app in `specification.cli()`.
+Named servers a spec document may start (`serve: [mcp]`). Declared once
+per app in `specification.cli()`.
 
 ***
 

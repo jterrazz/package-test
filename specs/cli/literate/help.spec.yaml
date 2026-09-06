@@ -1,0 +1,11 @@
+# The plainest document: no ground to state, one run, one golden.
+description: prints the command list when asked for help
+runs:
+    - command: help
+      exit: 0
+      stdout: |
+          Usage: cli <command>
+
+          Commands:
+            build   Build the project
+            check   Check code quality

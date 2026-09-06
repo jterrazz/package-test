@@ -138,6 +138,19 @@ case "$COMMAND" in
             done
         fi
         ;;
+    echo-line)
+        echo "one line"
+        ;;
+    no-newline)
+        # Output that does NOT end with a newline — the `|-` half of a
+        # Block scalar's byte-exactness.
+        printf 'ends here'
+        ;;
+    upper)
+        # Reads stdin to EOF and shouts it back. With no `stdin:` the pipe is
+        # Closed immediately, so this prints an empty line either way.
+        tr '[:lower:]' '[:upper:]'
+        ;;
     help)
         echo "Usage: cli <command>"
         echo ""

@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { parseLiterateFile } from '../core/literate/literate-file.js';
+import { parseSpecDocument, SPEC_EXTENSION } from '../core/literate/spec-document.js';
 import type { Severity, TokenViolation } from './checker.js';
 
 /**
@@ -18,9 +18,9 @@ import type { Severity, TokenViolation } from './checker.js';
  *
  * - **C9 dead fixtures** — per feature dir, a fixture file no test literal
  *   references is dead weight; a feature dir with conventional subdirs but no
- *   `<feature>.test.ts` is an orphan. A literate `<case>.cli` counts as a test
- *   AND as a referrer: the paths on its `fixture:` lines keep those trees alive
- *   exactly as a `.fixture('…')` literal does.
+ *   `<feature>.test.ts` is an orphan. A `<case>.spec.yaml` counts as a test
+ *   AND as a referrer: the paths of its `fixture:` entries keep those trees
+ *   alive exactly as a `.fixture('…')` literal does.
  * - **B5 await-using (inference)** — the docker-aware runners of a spec file
  *   are derived from its `docker:` option, then every `<runner>….exec()` bound
  *   without `await using` in an importing test is flagged. The primary B5
@@ -185,14 +185,16 @@ function readSource(path: string): string {
 }
 
 /**
- * The fixture paths a literate `<case>.cli` names — its referrer literals. The
+ * The fixture paths a `<case>.spec.yaml` names — its referrer literals. The
  * runner's own parser reads them, so the two channels cannot disagree about
- * what the file says; an unparseable file vouches for nothing (the D4b/B4 pass
- * is what reports it).
+ * what the document says; an unparseable file vouches for nothing (the
+ * `d4b-spec-shape` pass is what reports it).
  */
-function collectLiterateLiterals(path: string): Set<string> {
+function collectSpecLiterals(path: string): Set<string> {
     try {
-        return new Set(parseLiterateFile(readText(path), path).header.fixtures);
+        return new Set(
+            parseSpecDocument(readText(path), path).fixtures.map((fixture) => fixture.path),
+        );
     } catch {
         return new Set();
     }
@@ -200,7 +202,7 @@ function collectLiterateLiterals(path: string): Set<string> {
 
 /** Is this a file a domain's assets may be referenced from? */
 function isReferrer(name: string): boolean {
-    return name.endsWith('.test.ts') || name.endsWith('.cli');
+    return name.endsWith('.test.ts') || name.endsWith(SPEC_EXTENSION);
 }
 
 function isDir(path: string): boolean {
@@ -719,7 +721,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `${rel}: domain directory has conventional subdirs (${convSubdirs.join(', ')}) but no *.test.ts or *.cli (C9 — see docs/10-linting.md)`,
+                message: `${rel}: domain directory has conventional subdirs (${convSubdirs.join(', ')}) but no *.test.ts or *.spec.yaml (C9 — see docs/10-linting.md)`,
                 severity: 'error',
             });
             continue;
@@ -728,8 +730,8 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
         const literals = new Set<string>();
         let downgrade = false;
         for (const testFile of testFiles) {
-            if (testFile.endsWith('.cli')) {
-                for (const literal of collectLiterateLiterals(testFile)) {
+            if (testFile.endsWith(SPEC_EXTENSION)) {
+                for (const literal of collectSpecLiterals(testFile)) {
                     literals.add(literal);
                 }
                 continue;
@@ -773,13 +775,13 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
         const literals = new Set<string>();
         for (const file of listFiles(
             specsRoot,
-            (path) => path.endsWith('.ts') || path.endsWith('.cli'),
+            (path) => path.endsWith('.ts') || path.endsWith(SPEC_EXTENSION),
         )) {
             if (file.startsWith(`${pool}/`) || file.startsWith(`${pool}\\`)) {
                 continue;
             }
-            const found = file.endsWith('.cli')
-                ? collectLiterateLiterals(file)
+            const found = file.endsWith(SPEC_EXTENSION)
+                ? collectSpecLiterals(file)
                 : collectLiterals(readSource(file));
             for (const literal of found) {
                 literals.add(literal);

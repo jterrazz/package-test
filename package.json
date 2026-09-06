@@ -27,7 +27,8 @@
     },
     "files": [
         "dist",
-        "!dist/catalog.*"
+        "!dist/catalog.*",
+        "schema"
     ],
     "type": "module",
     "exports": {
@@ -43,7 +44,8 @@
             "types": "./dist/oxlint.d.ts",
             "import": "./dist/oxlint.js",
             "require": "./dist/oxlint.cjs"
-        }
+        },
+        "./schema": "./schema/spec.schema.json"
     },
     "publishConfig": {
         "registry": "https://registry.npmjs.org/"
@@ -52,7 +54,7 @@
         "build": "tsdown --config tsdown.config.ts",
         "docs": "npm run build && node dist/catalog.js && typescript docs",
         "lint": "typescript check && node dist/checker.js specs",
-        "lint:fix": "typescript fix",
+        "lint:fix": "typescript fix && node dist/checker.js specs --fix",
         "test": "vitest --run"
     },
     "dependencies": {
