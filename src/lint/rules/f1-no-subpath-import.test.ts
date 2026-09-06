@@ -37,6 +37,12 @@ ruleTester.run('f1-no-subpath-import', f1NoSubpathImport as unknown as OxlintRul
             code: 'import { testing } from "@jterrazz/test/oxlint";',
             filename: '/repo/presets/oxlint/base.js',
         },
+        // Every subpath the package's own `exports` map publishes is exempt —
+        // `/vitest` is what a vitest.config.ts imports the literate() plugin from.
+        {
+            code: 'import { literate } from "@jterrazz/test/vitest";',
+            filename: '/repo/vitest.config.ts',
+        },
         // Other scoped packages are untouched.
         {
             code: 'import { thing } from "@jterrazz/http/client";',

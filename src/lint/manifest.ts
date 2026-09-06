@@ -324,7 +324,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'f1-no-subpath-import': {
         channel: 'statique',
         convention:
-            'Tout s’importe depuis `@jterrazz/test` ; un import de `@jterrazz/test/<subpath>` est une erreur, sauf le subpath tool-facing `@jterrazz/test/oxlint` (exempté partout).',
+            'Tout s’importe depuis `@jterrazz/test` ; un import de `@jterrazz/test/<subpath>` est une erreur, sauf les subpaths que la map `exports` du paquet publie — `@jterrazz/test/oxlint` (plugin de lint) et `@jterrazz/test/vitest` (surface de configuration du runner) — exemptés partout. La liste est LUE du manifeste, jamais recopiée dans la règle.',
         family: 'F',
         id: 'F1',
         rationale:

@@ -201,8 +201,24 @@ registerComposeServiceFactory('redis', (service) => redis({ composeService: serv
 // Shipped from the entry point so the built types always carry it.
 
 declare module 'vitest' {
+    // ONE interface carries all four matchers, and it is `Assertion`.
+    //
+    // `toMatch` has no choice: it is a BUILT-IN declared on `JestAssertion`,
+    // Which `Assertion` also extends, so a `Matchers`-only override is shadowed
+    // By the native 1-arg signature — only a DIRECT member of `Assertion`
+    // Overrides the inherited one, which is what makes `{ frozen }` type. The
+    // Other three would work on either interface, and splitting them across the
+    // Two was the defect: a setup that resolves `vitest`'s types twice (a nested
+    // Or duplicated install, a `file:` link) picks up one augmentation and not
+    // The other, so `toMatch` types while `toBeEmpty` does not — a failure that
+    // Reads as a regression in the package rather than as a resolution problem.
+    // Declared together, they are present together or absent together.
+    //
+    // The `toMatch` override must stay ASSIGNABLE to the native
+    // `(expected: string | RegExp) => void`, so every branch keeps the
+    // `RegExp | string` parameter and a void-compatible return.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    interface Matchers<T = any> {
+    interface Assertion<T = any> {
         /**
          * Assert the subject is empty — zero rows for a table (async), an
          * empty stream for a text accessor (console, errors, stdout).
@@ -217,28 +233,6 @@ declare module 'vitest' {
               : never;
         /** Assert the container is running. Async — docker-backed subject. */
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
-        /**
-         * Assert the table contains exactly the given rows for the given
-         * columns. Cells accept `match.*` dynamic-value matchers. Async —
-         * queries the database.
-         */
-        toMatchRows: T extends TableAccessorType
-            ? (expected: {
-                  columns: string[];
-                  rows: readonly (readonly unknown[])[];
-              }) => Promise<void>
-            : never;
-    }
-
-    // `toMatch` is a BUILT-IN vitest matcher declared on `JestAssertion`, which
-    // `Assertion` also extends — a `Matchers`-only override is shadowed by the
-    // Native 1-arg signature. Redeclaring it DIRECTLY on `Assertion` (where a
-    // Direct member overrides the inherited one) is what makes the `{ frozen }`
-    // Option type. The override must stay ASSIGNABLE to the native
-    // `(expected: string | RegExp) => void`, so every branch keeps the
-    // `RegExp | string` parameter and a void-compatible return.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    interface Assertion<T = any> {
         /**
          * On `@jterrazz/test` accessors: assert the subject matches a fixture
          * file under `expected/<name>` (flat — a slash creates a subfolder;
@@ -257,5 +251,16 @@ declare module 'vitest' {
             : T extends JsonAccessorType | ResponseAccessorType | TextAccessorType
               ? (name: RegExp | string, options?: MatchFixtureOptionsType) => void
               : (expected: RegExp | string, options?: MatchFixtureOptionsType) => void;
+        /**
+         * Assert the table contains exactly the given rows for the given
+         * columns. Cells accept `match.*` dynamic-value matchers. Async —
+         * queries the database.
+         */
+        toMatchRows: T extends TableAccessorType
+            ? (expected: {
+                  columns: string[];
+                  rows: readonly (readonly unknown[])[];
+              }) => Promise<void>
+            : never;
     }
 }
