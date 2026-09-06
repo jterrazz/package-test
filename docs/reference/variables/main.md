@@ -5,7 +5,7 @@
 const main: (name?, options?) => ElementRef;
 ```
 
-Defined in: [core/specification/website/elements.ts:81](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L81)
+Defined in: core/specification/website/elements.ts:81
 
 The `main` landmark — the primary content of the document.
 

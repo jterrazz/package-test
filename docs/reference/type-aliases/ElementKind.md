@@ -5,6 +5,6 @@
 type ElementKind = "button" | "field" | "heading" | "link" | "testId" | "text";
 ```
 
-Defined in: [core/ports/browser.port.ts:17](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L17)
+Defined in: core/ports/browser.port.ts:17
 
 The interactive//textual element kinds — what a visitor actually acts on.

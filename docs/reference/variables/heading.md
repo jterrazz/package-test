@@ -5,7 +5,7 @@
 const heading: (name, options?) => ElementRef;
 ```
 
-Defined in: [core/specification/website/elements.ts:42](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L42)
+Defined in: core/specification/website/elements.ts:42
 
 A heading, by accessible name.
 

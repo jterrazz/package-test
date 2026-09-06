@@ -5,7 +5,7 @@
 const form: (name?, options?) => ElementRef;
 ```
 
-Defined in: [core/specification/website/elements.ts:78](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L78)
+Defined in: core/specification/website/elements.ts:78
 
 The `form` landmark — a form carrying an accessible name.
 

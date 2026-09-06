@@ -5,7 +5,7 @@
 const banner: (name?, options?) => ElementRef;
 ```
 
-Defined in: [core/specification/website/elements.ts:69](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L69)
+Defined in: core/specification/website/elements.ts:69
 
 The `banner` landmark — the page header.
 

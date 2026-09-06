@@ -4,11 +4,12 @@ Real systems generate UUIDs, timestamps, ports, and paths. The framework handles
 
 ## Where tokens work
 
-| Fixture kind   | Files                                                     | Coverage             |
-| -------------- | --------------------------------------------------------- | -------------------- |
-| HTTP responses | `expected/*.http`                                         | **body and headers** |
-| JSON snapshots | `expected/*.json`                                         | any string value     |
-| Text snapshots | `expected/*.txt` (and other text files under `expected/`) | anywhere in the text |
+| Fixture kind   | Files                                                                   | Coverage                                                           |
+| -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| HTTP responses | `expected/*.http`                                                       | **body and headers**                                               |
+| JSON snapshots | `expected/*.json`                                                       | any string value                                                   |
+| Text snapshots | `expected/*.txt` (and other text files under `expected/`)               | anywhere in the text                                               |
+| Literate specs | `<case>.cli`, beside the spec ([04](04-cli.md#literate-specs--casecli)) | both streams of every block — **never the header**, which is prose |
 
 ```http
 ### expected/order-created.http — tokens in a header AND the body
@@ -162,7 +163,7 @@ Done in {{duration}}
 
 `TEST_UPDATE=1` leaves the fixture byte-identical: every changed segment was already covered by a token. If the CLI adds a new line `Cache dir: /tmp/shoply-spec-x9y8z7/.cache`, the update writes `Cache dir: {{workdir}}/.cache` — `{{workdir}}` is substituted automatically; a timestamp in a _new_ line would be written literally, for you to tokenize by hand (or it will fail on the next run, which is the signal).
 
-The same preservation and `{{workdir}}` substitution apply identically across all three fixture kinds — text snapshots (`expected/*.txt`), JSON goldens (`expected/*.json`), and `.http` response bodies (`expected/*.http`). A cwd embedded in a JSON string value is written back as `{{workdir}}` exactly as it is in a text line, so an updated JSON golden matches the next run's (different) cwd instead of pinning a run-specific temp path.
+The same preservation and `{{workdir}}` substitution apply identically across every fixture kind — text snapshots (`expected/*.txt`), JSON goldens (`expected/*.json`), `.http` response bodies (`expected/*.http`), and the streams of a literate `<case>.cli` (whose HEADER an update never rewrites). A cwd embedded in a JSON string value is written back as `{{workdir}}` exactly as it is in a text line, so an updated JSON golden matches the next run's (different) cwd instead of pinning a run-specific temp path.
 
 This is why `transform` on `specification.cli` is only an escape hatch (rule D6): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is a future lint warning.
 
@@ -186,7 +187,7 @@ A frozen fixture is **never written** in update mode — a frozen mismatch still
 The grammar is deliberately small; three edges are worth knowing:
 
 - **No escaping for literal `{{…}}` text.** There is no escape sequence. A `{{uuid}}` written in a fixture is _always_ interpreted as the token — you cannot assert a literal, un-substituted `{{uuid}}` string in expected output. (An unknown name like `{{widget}}` is caught by the conventions checker (rule D4) as an error — the vocabulary is frozen, so an unknown token is never a usable literal escape.) For genuinely custom shapes, use `match.regex()` in code.
-- **Update-merge is line-aligned.** `mergeTextPreservingPlaceholders` preserves a previous line's placeholders only when it lines up by **index** with the actual output. Inserting a new line in the middle of the output shifts every line below it by one, so their placeholders no longer align and `TEST_UPDATE` rewrites them from the raw values — you re-tokenize the shifted lines by hand. Append-only changes are safe; mid-file insertions are not.
+- **Update-merge pairs one previous line with one actual line.** Placeholder preservation is by **pattern**: the aligned line is tried first, then what is left over is re-paired by matching each remaining placeholder line against each unresolved actual line, in file order. A mid-file insertion is therefore safe — the shifted `{{duration}}` line is recognised where it landed. What stays out of reach: a previous line is spent **once**, so when the output grows a SECOND line the same placeholder could cover, the first keeps the token and the new one is written as a raw value, for you to tokenize.
 - **`{{float}}` cannot require a decimal on a JSON number.** In JSON there is no distinction between `42` and `42.0`, so as a whole JSON value `{{float}}` accepts any finite number (an integer passes). The decimal requirement only holds in **text** contexts (`4.2` matches, `42` does not). This is a JSON limitation, not a token choice.
 
 ## Appendix — canonical accepted forms (normative, as implemented)

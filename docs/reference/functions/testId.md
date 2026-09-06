@@ -5,7 +5,7 @@
 function testId(id): ElementRef;
 ```
 
-Defined in: [core/specification/website/elements.ts:51](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L51)
+Defined in: core/specification/website/elements.ts:51
 
 The escape hatch: an element by `data-testid`. Prefer user-facing elements.
 

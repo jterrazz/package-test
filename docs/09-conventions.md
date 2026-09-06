@@ -95,6 +95,7 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 | Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                            |
 | Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                         |
 | Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                              |
+| Literate spec   | `<case>.cli`, beside the spec it belongs to — never under `expected/` ([04](04-cli.md#literate-specs--casecli))        |
 | Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                |
 | Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                        |
 | Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic) |

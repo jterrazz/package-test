@@ -26,6 +26,8 @@ afterAll(cleanup);
 | `root`      | **Project-root override** only (rule A9): anchors compose detection + local-bin resolution. It is _not_ a fixtures root — `.fixture()` resolves paths on its own. Auto-discovery applies when omitted                                         |
 | `services`  | Named record of infrastructure services (`postgres()`, `redis()`, `sqlite()`) — connection URLs are auto-injected into the child env (rule B6)                                                                                                |
 | `docker`    | Opt-in Docker awareness: `{ envVar, nameLabel, testRunLabel }` — see [Docker-aware mode](#docker-aware-mode)                                                                                                                                  |
+| `env`       | Named **environment sets** a literate `.cli` header names by bare word (`env: frozen`) — see [Literate specs](#literate-specs--casecli)                                                                                                       |
+| `serve`     | Named **servers** a literate `.cli` header starts (`serve: mcp`): `{ command, ready, url, env }` — see [Literate specs](#literate-specs--casecli)                                                                                             |
 | `transform` | **Escape hatch only** (rule D6): a normalizer applied to streams before comparison, for application noise not covered by tokens. ANSI stripping is already the default; a transform that only re-implements standard tokens is a lint warning |
 
 ## `.exec()` — the single execution method
@@ -321,6 +323,145 @@ test('lints a shop and reports per-file blocks', async () => {
 
 **Tool output → snapshot per scoped use case (rule D11).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch('<use-case>.txt')` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](05-assertions.md).
 
+## Literate specs — `<case>.cli`
+
+A terminal session is already a specification: a command, its exit code, what it printed. The **literate format** writes it as that — one scenario per `<case>.cli` file, living **beside the spec** (never under `expected/`, which holds goldens, not scenarios). Nothing here is new capability: it is the chain's semantics in the shape a reader already knows.
+
+```
+test: refuses to guess when it is run outside the checkout
+given: a workdir with no home/ + apps/ pair anywhere above it
+then: the error names where the command has to be run
+fixture: $FIXTURES/repositories-stub/
+env: frozen SHOPLY_ORIGIN=http://127.0.0.1:9
+serve: mcp MCP_STUB_WITHHOLD=get-article
+
+$ shoply repositories
+exit: 1
+--- stderr
+Error: no directory with home/ and apps/ above the current directory
+Hint: run inside the shoply checkout
+
+$ shoply repositories --json
+exit: 0
+{
+    "data": []
+}
+```
+
+### The header
+
+Everything up to the **first blank line**. `#` lines are comments anywhere in it; any key outside the table below is an error naming the line.
+
+| Key        | Cardinality | Meaning                                                                                                                                                          |
+| ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test:`    | exactly one | The vitest test title                                                                                                                                            |
+| `given:`   | exactly one | Rule B4's first marker — the ground the run stands on                                                                                                            |
+| `then:`    | exactly one | Rule B4's second marker — what the file proves                                                                                                                   |
+| `fixture:` | repeatable  | Identical to `.fixture()`: `$FIXTURES/…` or feature-local, trailing slash = spread, executable bits preserved. Repeats **layer** in order                        |
+| `env:`     | repeatable  | Whitespace-separated tokens, each either `KEY=value` (`$WORKDIR` expands as in `.env()`) or a **bare word** naming an env set registered in code                 |
+| `serve:`   | repeatable  | `<name> [KEY=value…]` — a server registered in code, started before the first `$` block with those extra variables. Several lines = several servers live at once |
+
+### The blocks
+
+After the blank line, one or more `$ <argv>` blocks. `argv` goes to the same adapter as `.exec('…')` — the full command line through the shell, so quoting behaves identically.
+
+- `exit: <integer>` is **mandatory** and is the first line after `$`.
+- Then stdout verbatim, then optionally a line `--- stderr` and stderr verbatim.
+- A block ends at the next `$ ` line or at EOF. The blank line before a `$` belongs to the **separator**, not to the previous block's stream — a blank line _inside_ a stream survives.
+- Both streams are compared **exactly and totally**: an absent `--- stderr` asserts an empty stderr, and empty stdout is an empty section. One trailing newline is normalised away on both sides, so a command that ends its output with `\n` needs no empty last line in the file.
+- The whole [token vocabulary](06-tokens.md) works in both streams — `{{url}}`, `{{int}}`, `{{workdir}}`, `{{any}}`, `#ref` captures — and **never in the header**, which is prose.
+
+All blocks share **ONE working directory** and the same servers, and **every** block is asserted. This is where the format goes past `.exec([...])`, which stops at the first non-zero exit and keeps only the last output: here a non-zero exit does not end the run, because each exit code is part of what the file states.
+
+### Registration — once per app
+
+The header names ground by WORD; the code says what those words mean, in the `specification.cli()` options:
+
+```typescript
+export const { cli, cleanup } = await specification.cli(bin, {
+    env: {
+        frozen: { HOME: '$WORKDIR', TZ: 'UTC' },
+    },
+    serve: {
+        mcp: {
+            command: 'bun specs/harness/mcp-server.ts',
+            env: 'SHOPLY_MCP_ORIGIN',
+            ready: /listening on port (?<port>\d+)/,
+            url: (port) => `http://127.0.0.1:${port}/mcp`,
+        },
+    },
+});
+```
+
+A `serve` entry is spawned from the project root with the header's extra `KEY=value` merged into its environment. `ready` is a regex over the child's output whose **first capture group** is the port the server chose (named or not — it is group 1 either way); the framework injects no `PORT`, the server announces one. `url(port)` builds the URL, and `env` names the variable it is bound to in every block's child. Servers start once **per file** and are killed when it ends.
+
+### The three doors, one engine
+
+| Door       | Use it when                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------- |
+| **plugin** | The file IS the test — the common case                                                         |
+| **bridge** | The file is the scenario, but one assertion needs code (a directory golden, a grep)            |
+| **chain**  | Everything the format cannot say — see [when to reach for code](#when-to-reach-for-code) below |
+
+**The plugin.** `literate()` from `@jterrazz/test/vitest` adds the `.cli` glob to the test include and transforms each file into a one-test module. The runner then shows the `.cli` path as the test file and `test:` as the title, so a failing scenario opens where it is written:
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import { literate } from '@jterrazz/test/vitest';
+
+export default defineConfig({
+    plugins: [literate({ specification: './specs/cli/cli.specification.ts' })],
+});
+```
+
+`specification` points at the `*.specification.ts` whose exported `cli` runs the files. It is **stated, never guessed**: a repository may declare several cli runners — different binaries, different service records — and no convention could pick the right one without silently binding a scenario to the wrong command. `include` (default `['**/*.cli']`) narrows the glob when a tree also holds `.cli` files that are _inputs_ to other specs rather than scenarios to run.
+
+**The bridge.** `cli.run('<case>.cli')` runs the file — header, servers, every block asserted — and resolves with the **last** block's `CliResult`, so code adds what the file cannot express:
+
+```typescript
+test('scaffolds a shop and leaves the tree we expect', async () => {
+    // Given - the whole session, stated in the file
+    const result = await cli.run('scaffold.cli');
+
+    // Then - one assertion the format has no vocabulary for
+    await expect(result.directory('my-shop')).toMatch('shop-scaffold');
+});
+```
+
+The path is relative to the test file's directory, where the `.cli` lives. Setup chained before the call layers **underneath** the header: a chained `.fixture()` is copied first, the header's `fixture:` lines over it, and the header's `env:` wins over a chained `.env()`. `{ frozen: true }` opts one file out of the update rewrite — the same guard as `toMatch(name, { frozen: true })`, for a deliberately-wrong `.cli` whose failure rendering is the subject of a negative test.
+
+### Failure and update
+
+On a mismatch the failure renders the narrative, the block, a line diff, and the `file:line` of the block:
+
+```
+Literate spec mismatch (specs/cli/no-estate.cli:8)
+
+test: refuses to guess when it is run outside the checkout
+given: a workdir with no home/ + apps/ pair anywhere above it
+then: the error names where the command has to be run
+
+$ shoply repositories
+
+Output mismatch (stdout)
+…
+```
+
+`TEST_UPDATE=1` rewrites **only what follows each `$`** — exit code and streams. The header is never touched, comments included. Placeholders survive by **pattern match**, not by line index, so a token stays a token wherever the line moved to: see [update mode](06-tokens.md#update-mode-tokens-are-preserved).
+
+### When to reach for code
+
+The format states one binary, one working directory, one linear session. Reach for the chain when the spec needs:
+
+- **containers** — `docker`-aware runs, `await using`, `result.container(name)`;
+- **parallel fan-out** — several commands that must run at once, or an interleaving;
+- **host shell-outs and long-running processes** — `.exec(args, { waitFor, timeout })`;
+- **structural JSON** — `result.json` against an `expected/*.json` golden, where the comparison is by shape rather than by text;
+- **database state** — `.seed()` and `result.table(…)`.
+
+A file that starts growing conditionals is a chain wearing a header. Write it in code.
+
 ## Docker-aware mode
 
 For CLIs that spawn Docker containers, declare the `docker` option (rule G3):
@@ -382,6 +523,8 @@ The runner handle also destructures to `{ cli, cleanup, docker, orchestrator }`.
 ## Pitfalls
 
 - **Reaching for `.spawn()`.** It does not exist — `.exec(args, { waitFor, timeout })` is the unified execution method (rule B2).
+- **Putting a `<case>.cli` under `expected/`.** A literate spec is the SCENARIO, not a golden — it lives beside the spec it belongs to. `expected/` holds what an assertion resolves against.
+- **Writing a token in a `.cli` header.** The header is prose; placeholders only work inside the blocks' streams.
 - **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `expected/*.txt` — `transform` is a last resort (rule D6).
 - **Assigning a Docker-aware result without `await using`.** Error (rule B5) — that is the leak-cleanup mechanism.
 - **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection — override only to _change_ it, `null` to remove it.

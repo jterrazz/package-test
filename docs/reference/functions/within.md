@@ -5,7 +5,7 @@
 function within(scope, target): ElementRef;
 ```
 
-Defined in: [core/specification/website/elements.ts:103](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L103)
+Defined in: core/specification/website/elements.ts:103
 
 Restrict a descriptor to the inside of another — the answer to ambiguity,
 and the one the framework prefers over a test id.

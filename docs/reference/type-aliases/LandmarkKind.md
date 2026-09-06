@@ -13,7 +13,7 @@ type LandmarkKind =
   | "search";
 ```
 
-Defined in: [core/ports/browser.port.ts:6](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L6)
+Defined in: core/ports/browser.port.ts:6
 
 The landmark roles — the standard set of page regions, and the only
 containers a scope can name. Closed on purpose: ARIA defines exactly these,

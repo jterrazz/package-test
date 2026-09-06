@@ -15,7 +15,7 @@ type WebsiteSpecificationOptions = object &
 };
 ```
 
-Defined in: [core/specification/website/start-website.ts:36](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L36)
+Defined in: core/specification/website/start-website.ts:36
 
 Options for [specification.website](../variables/specification.md#property-website). `server` (start
 the site locally) and `url` (target a running site) are mutually
@@ -28,5 +28,5 @@ stub.
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | [core/specification/website/start-website.ts:42](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L42) |
-| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | [core/specification/website/start-website.ts:47](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/start-website.ts#L47) |
+| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | core/specification/website/start-website.ts:42 |
+| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | core/specification/website/start-website.ts:47 |

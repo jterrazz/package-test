@@ -5,7 +5,7 @@
 const match: object;
 ```
 
-Defined in: [core/matching/match.ts:129](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L129)
+Defined in: core/matching/match.ts:129
 
 Dynamic-value matchers for structural comparisons — the code-side mirror of
 the `{{token}}` fixture grammar (CONVENTIONS D4).
@@ -14,30 +14,30 @@ the `{{token}}` fixture grammar (CONVENTIONS D4).
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="property-any"></a> `any()` | () => [`Matcher`](../classes/Matcher.md) | Matches anything. | [core/matching/match.ts:131](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L131) |
-| <a id="property-base64"></a> `base64()` | () => [`Matcher`](../classes/Matcher.md) | Matches a base64 string. | [core/matching/match.ts:133](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L133) |
-| <a id="property-date"></a> `date()` | () => [`Matcher`](../classes/Matcher.md) | Matches a calendar date (`YYYY-MM-DD`). | [core/matching/match.ts:135](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L135) |
-| <a id="property-duration"></a> `duration()` | () => [`Matcher`](../classes/Matcher.md) | Matches a human duration (`12ms`, `1.5s`, `2m`, `3h`). | [core/matching/match.ts:137](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L137) |
-| <a id="property-email"></a> `email()` | () => [`Matcher`](../classes/Matcher.md) | Matches an email address. | [core/matching/match.ts:139](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L139) |
-| <a id="property-float"></a> `float()` | () => [`Matcher`](../classes/Matcher.md) | Matches a float. In JSON contexts any finite number passes (JSON does not distinguish `42` from `42.0`); in text contexts the decimal part is required (`4.2`, never `42`). | [core/matching/match.ts:145](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L145) |
-| <a id="property-hex"></a> `hex()` | () => [`Matcher`](../classes/Matcher.md) | Matches a hexadecimal string. | [core/matching/match.ts:147](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L147) |
-| <a id="property-includes"></a> `includes()` | (`substring`) => [`Matcher`](../classes/Matcher.md) | Matches a string CONTAINING the given substring. Code-only, like [match.regex](#property-regex) — the `{{token}}` fixture vocabulary does not grow. The explicit escape hatch now that contract string filters (`openai.chat({ user })`) mean exact equality. | [core/matching/match.ts:154](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L154) |
-| <a id="property-int"></a> `int()` | () => [`Matcher`](../classes/Matcher.md) | Matches an integer (or an integer string in text contexts). | [core/matching/match.ts:156](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L156) |
-| <a id="property-ip"></a> `ip()` | () => [`Matcher`](../classes/Matcher.md) | Matches an IPv4 address. | [core/matching/match.ts:158](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L158) |
-| <a id="property-iso8601"></a> `iso8601()` | () => [`Matcher`](../classes/Matcher.md) | Matches an ISO-8601 timestamp string. | [core/matching/match.ts:160](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L160) |
-| <a id="property-number"></a> `number()` | () => [`Matcher`](../classes/Matcher.md) | Matches a number (or a numeric string in text contexts). | [core/matching/match.ts:162](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L162) |
-| <a id="property-path"></a> `path()` | () => [`Matcher`](../classes/Matcher.md) | Matches a filesystem path (`/...` or `./...`). | [core/matching/match.ts:164](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L164) |
-| <a id="property-port"></a> `port()` | () => [`Matcher`](../classes/Matcher.md) | Matches a TCP/UDP port number (0-65535). | [core/matching/match.ts:166](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L166) |
-| <a id="property-ref"></a> `ref()` | (`name`, `options?`) => [`Matcher`](../classes/Matcher.md) | Capture-and-compare. The first occurrence of `ref(name)` captures the actual value; every later occurrence must strictly equal the capture. `{ not: other }` additionally asserts inequality with the capture named `other`. Scope: the current spec execution (reset per chain). | [core/matching/match.ts:173](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L173) |
-| <a id="property-regex"></a> `regex()` | (`regex`) => [`Matcher`](../classes/Matcher.md) | Matches a string against the given regular expression. | [core/matching/match.ts:176](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L176) |
-| <a id="property-semver"></a> `semver()` | () => [`Matcher`](../classes/Matcher.md) | Matches a semantic version (`1.2.3`, `2.0.0-rc.1`). | [core/matching/match.ts:178](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L178) |
-| <a id="property-sha"></a> `sha()` | () => [`Matcher`](../classes/Matcher.md) | Matches a git SHA (7-64 hex chars). | [core/matching/match.ts:180](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L180) |
-| <a id="property-string"></a> `string()` | () => [`Matcher`](../classes/Matcher.md) | Matches any string. | [core/matching/match.ts:182](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L182) |
-| <a id="property-time"></a> `time()` | () => [`Matcher`](../classes/Matcher.md) | Matches a wall-clock time (`HH:MM` or `HH:MM:SS`). | [core/matching/match.ts:184](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L184) |
-| <a id="property-ulid"></a> `ulid()` | () => [`Matcher`](../classes/Matcher.md) | Matches a ULID. | [core/matching/match.ts:186](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L186) |
-| <a id="property-url"></a> `url()` | () => [`Matcher`](../classes/Matcher.md) | Matches an http(s) URL. | [core/matching/match.ts:188](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L188) |
-| <a id="property-uuid"></a> `uuid()` | () => [`Matcher`](../classes/Matcher.md) | Matches a UUID string. | [core/matching/match.ts:190](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L190) |
-| <a id="property-workdir"></a> `workdir()` | () => [`Matcher`](../classes/Matcher.md) | Matches the exact working directory of the current spec. | [core/matching/match.ts:192](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L192) |
+| <a id="property-any"></a> `any()` | () => [`Matcher`](../classes/Matcher.md) | Matches anything. | core/matching/match.ts:131 |
+| <a id="property-base64"></a> `base64()` | () => [`Matcher`](../classes/Matcher.md) | Matches a base64 string. | core/matching/match.ts:133 |
+| <a id="property-date"></a> `date()` | () => [`Matcher`](../classes/Matcher.md) | Matches a calendar date (`YYYY-MM-DD`). | core/matching/match.ts:135 |
+| <a id="property-duration"></a> `duration()` | () => [`Matcher`](../classes/Matcher.md) | Matches a human duration (`12ms`, `1.5s`, `2m`, `3h`). | core/matching/match.ts:137 |
+| <a id="property-email"></a> `email()` | () => [`Matcher`](../classes/Matcher.md) | Matches an email address. | core/matching/match.ts:139 |
+| <a id="property-float"></a> `float()` | () => [`Matcher`](../classes/Matcher.md) | Matches a float. In JSON contexts any finite number passes (JSON does not distinguish `42` from `42.0`); in text contexts the decimal part is required (`4.2`, never `42`). | core/matching/match.ts:145 |
+| <a id="property-hex"></a> `hex()` | () => [`Matcher`](../classes/Matcher.md) | Matches a hexadecimal string. | core/matching/match.ts:147 |
+| <a id="property-includes"></a> `includes()` | (`substring`) => [`Matcher`](../classes/Matcher.md) | Matches a string CONTAINING the given substring. Code-only, like [match.regex](#property-regex) — the `{{token}}` fixture vocabulary does not grow. The explicit escape hatch now that contract string filters (`openai.chat({ user })`) mean exact equality. | core/matching/match.ts:154 |
+| <a id="property-int"></a> `int()` | () => [`Matcher`](../classes/Matcher.md) | Matches an integer (or an integer string in text contexts). | core/matching/match.ts:156 |
+| <a id="property-ip"></a> `ip()` | () => [`Matcher`](../classes/Matcher.md) | Matches an IPv4 address. | core/matching/match.ts:158 |
+| <a id="property-iso8601"></a> `iso8601()` | () => [`Matcher`](../classes/Matcher.md) | Matches an ISO-8601 timestamp string. | core/matching/match.ts:160 |
+| <a id="property-number"></a> `number()` | () => [`Matcher`](../classes/Matcher.md) | Matches a number (or a numeric string in text contexts). | core/matching/match.ts:162 |
+| <a id="property-path"></a> `path()` | () => [`Matcher`](../classes/Matcher.md) | Matches a filesystem path (`/...` or `./...`). | core/matching/match.ts:164 |
+| <a id="property-port"></a> `port()` | () => [`Matcher`](../classes/Matcher.md) | Matches a TCP/UDP port number (0-65535). | core/matching/match.ts:166 |
+| <a id="property-ref"></a> `ref()` | (`name`, `options?`) => [`Matcher`](../classes/Matcher.md) | Capture-and-compare. The first occurrence of `ref(name)` captures the actual value; every later occurrence must strictly equal the capture. `{ not: other }` additionally asserts inequality with the capture named `other`. Scope: the current spec execution (reset per chain). | core/matching/match.ts:173 |
+| <a id="property-regex"></a> `regex()` | (`regex`) => [`Matcher`](../classes/Matcher.md) | Matches a string against the given regular expression. | core/matching/match.ts:176 |
+| <a id="property-semver"></a> `semver()` | () => [`Matcher`](../classes/Matcher.md) | Matches a semantic version (`1.2.3`, `2.0.0-rc.1`). | core/matching/match.ts:178 |
+| <a id="property-sha"></a> `sha()` | () => [`Matcher`](../classes/Matcher.md) | Matches a git SHA (7-64 hex chars). | core/matching/match.ts:180 |
+| <a id="property-string"></a> `string()` | () => [`Matcher`](../classes/Matcher.md) | Matches any string. | core/matching/match.ts:182 |
+| <a id="property-time"></a> `time()` | () => [`Matcher`](../classes/Matcher.md) | Matches a wall-clock time (`HH:MM` or `HH:MM:SS`). | core/matching/match.ts:184 |
+| <a id="property-ulid"></a> `ulid()` | () => [`Matcher`](../classes/Matcher.md) | Matches a ULID. | core/matching/match.ts:186 |
+| <a id="property-url"></a> `url()` | () => [`Matcher`](../classes/Matcher.md) | Matches an http(s) URL. | core/matching/match.ts:188 |
+| <a id="property-uuid"></a> `uuid()` | () => [`Matcher`](../classes/Matcher.md) | Matches a UUID string. | core/matching/match.ts:190 |
+| <a id="property-workdir"></a> `workdir()` | () => [`Matcher`](../classes/Matcher.md) | Matches the exact working directory of the current spec. | core/matching/match.ts:192 |
 
 ## Example
 

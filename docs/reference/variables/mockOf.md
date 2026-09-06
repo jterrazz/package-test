@@ -5,7 +5,7 @@
 const mockOf: MockPort = mockDeep;
 ```
 
-Defined in: [vitest/mock-of.ts:10](https://github.com/jterrazz/package-test/blob/main/src/vitest/mock-of.ts#L10)
+Defined in: vitest/mock-of.ts:10
 
 Create a deep mock proxy for a given type.
 Wraps `vitest-mock-extended`'s `mockDeep` for convenient port mocking.
