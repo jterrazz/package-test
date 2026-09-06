@@ -37,10 +37,10 @@ optional env?: Record<string, CliEnv>;
 
 Defined in: [core/specification/cli/start-cli.ts:43](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L43)
 
-Named environment SETS for literate `.cli` specs. A header line
-`env: frozen` applies the whole `frozen` record; `$WORKDIR` expands and
-`null` unsets, exactly as in `.env()`. Declared once per app so a
-scenario file states WHICH ground it stands on, not how to build it.
+Named environment SETS for `<case>.spec.yaml` documents. An `env:` entry
+`frozen` applies the whole `frozen` record; `$WORKDIR` expands and `null`
+unsets, exactly as in `.env()`. Declared once per app so a document
+states WHICH ground it stands on, not how to build it.
 
 ***
 
@@ -50,7 +50,7 @@ scenario file states WHICH ground it stands on, not how to build it.
 optional root?: string;
 ```
 
-Defined in: [core/specification/cli/start-cli.ts:57](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L57)
+Defined in: [core/specification/cli/start-cli.ts:58](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L58)
 
 Project-root override (CONVENTIONS A9) — the single meaning of `root`:
 it anchors compose detection and local-bin resolution for the tested
@@ -65,12 +65,13 @@ or `$FIXTURES/` paths on its own.
 optional serve?: Record<string, LiterateServeRegistration>;
 ```
 
-Defined in: [core/specification/cli/start-cli.ts:50](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L50)
+Defined in: [core/specification/cli/start-cli.ts:51](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L51)
 
-Named servers a literate `.cli` header may start (`serve: mcp KEY=value`).
-Each entry names the shell `command`, the `ready` regex whose capture
-group holds the port the server announces, the `url(port)` builder, and
-the `env` variable that URL is bound to in every block's child.
+Named servers a `<case>.spec.yaml` document may start (`serve: [mcp]`, or
+`- mcp: { KEY: value }` to add env to that one). Each entry names the
+shell `command`, the `ready` regex whose capture group holds the port the
+server announces, the `url(port)` builder, and the `env` variable that
+URL is bound to in every run's child.
 
 ***
 
@@ -80,7 +81,7 @@ the `env` variable that URL is bound to in every block's child.
 optional services?: Services;
 ```
 
-Defined in: [core/specification/cli/start-cli.ts:64](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L64)
+Defined in: [core/specification/cli/start-cli.ts:65](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L65)
 
 Named infrastructure record started via testcontainers. Connection
 URLs are injected automatically into the child env: `<KEY>_URL` per
@@ -95,7 +96,7 @@ service, plus `DATABASE_URL` / `REDIS_URL` when unambiguous
 optional transform?: (text) => string;
 ```
 
-Defined in: [core/specification/cli/start-cli.ts:71](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L71)
+Defined in: [core/specification/cli/start-cli.ts:72](https://github.com/jterrazz/package-test/blob/main/src/core/specification/cli/start-cli.ts#L72)
 
 Escape hatch: normaliser applied to result.stdout / result.stderr
 before every comparison, AFTER the default ANSI strip (CONVENTIONS

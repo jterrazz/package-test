@@ -35,17 +35,18 @@ export interface CliSpecificationOptions<Services extends ServiceRecord = Servic
      */
     docker?: DockerSpecConfig;
     /**
-     * Named environment SETS for literate `.cli` specs. A header line
-     * `env: frozen` applies the whole `frozen` record; `$WORKDIR` expands and
-     * `null` unsets, exactly as in `.env()`. Declared once per app so a
-     * scenario file states WHICH ground it stands on, not how to build it.
+     * Named environment SETS for `<case>.spec.yaml` documents. An `env:` entry
+     * `frozen` applies the whole `frozen` record; `$WORKDIR` expands and `null`
+     * unsets, exactly as in `.env()`. Declared once per app so a document
+     * states WHICH ground it stands on, not how to build it.
      */
     env?: Record<string, CliEnv>;
     /**
-     * Named servers a literate `.cli` header may start (`serve: mcp KEY=value`).
-     * Each entry names the shell `command`, the `ready` regex whose capture
-     * group holds the port the server announces, the `url(port)` builder, and
-     * the `env` variable that URL is bound to in every block's child.
+     * Named servers a `<case>.spec.yaml` document may start (`serve: [mcp]`, or
+     * `- mcp: { KEY: value }` to add env to that one). Each entry names the
+     * shell `command`, the `ready` regex whose capture group holds the port the
+     * server announces, the `url(port)` builder, and the `env` variable that
+     * URL is bound to in every run's child.
      */
     serve?: Record<string, LiterateServeRegistration>;
     /**
