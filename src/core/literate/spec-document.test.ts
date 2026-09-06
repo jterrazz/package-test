@@ -23,6 +23,28 @@ const MINIMAL = [
     '',
 ].join('\n');
 
+/** The same scenario at each of the two steps a formatter writes YAML with. */
+const TWO_SPACE_DOCUMENT = [
+    'description: reads back as it was written',
+    'runs:',
+    '  - command: check',
+    '    exit: 0',
+    '',
+].join('\n');
+
+const FOUR_SPACE_DOCUMENT = [
+    'description: reads back as it was written',
+    'runs:',
+    '    - command: check',
+    '      exit: 0',
+    '',
+].join('\n');
+
+/** The text a rewritten document gives back when it is read again. */
+function streamOf(written: string, key: 'stderr' | 'stdout'): string {
+    return parseSpecDocument(written, 'case.spec.yaml').runs[0]?.[key]?.text ?? '';
+}
+
 function refusalOf(content: string): SpecSyntaxError {
     try {
         parseSpecDocument(content, 'case.spec.yaml');
@@ -296,6 +318,101 @@ describe('spec document — update', () => {
         // Then - stdout sits between exit and files, where the canonical order puts it
         expect(written.indexOf('stdout')).toBeGreaterThan(written.indexOf('exit'));
         expect(written.indexOf('stdout')).toBeLessThan(written.indexOf('files'));
+    });
+});
+
+describe('spec document — update at the document’s own indentation', () => {
+    test('a stdout opening on a space reads back byte for byte in a four-space document', () => {
+        // Given - a document formatted at four spaces, the step oxfmt writes YAML at
+        const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
+
+        // Given - a run whose stdout opens on a space
+        const stdout = ' TYPESCRIPT  src/index.ts\n2 files\n';
+        const written = updateSpecFile(file, [{ exitCode: 0, stderr: '', stdout }]);
+
+        // Then - the indicator names the four spaces the content sits at, and the
+        // Golden reads back as the bytes the command printed
+        expect(written).toContain('stdout: |4\n');
+        expect(streamOf(written, 'stdout')).toBe(stdout);
+    });
+
+    test('the same stdout reads back byte for byte in a two-space document', () => {
+        // Given - a two-space document, YAML's own default step
+        const file = readSpecFile(TWO_SPACE_DOCUMENT, 'case.spec.yaml');
+
+        // Given - the same leading space
+        const stdout = ' TYPESCRIPT  src/index.ts\n2 files\n';
+        const written = updateSpecFile(file, [{ exitCode: 0, stderr: '', stdout }]);
+
+        // Then - two is what the indicator names there
+        expect(written).toContain('stdout: |2\n');
+        expect(streamOf(written, 'stdout')).toBe(stdout);
+    });
+
+    test('a stdout opening on several spaces keeps every one of them', () => {
+        // Given - a four-space document and a stream indented on its own
+        const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
+
+        // Given - four spaces of the command's own making
+        const stdout = '    indented by the command\nback\n';
+        const written = updateSpecFile(file, [{ exitCode: 0, stderr: '', stdout }]);
+
+        // Then - the indicator names the document's step; the command's spaces are content
+        expect(written).toContain('stdout: |4\n');
+        expect(streamOf(written, 'stdout')).toBe(stdout);
+    });
+
+    test('a stdout opening on a tab survives without an indicator', () => {
+        // Given - a four-space document and a tab-started stream, which YAML never
+        // Reads as indentation
+        const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
+        const stdout = '\tTABBED\nback\n';
+        const written = updateSpecFile(file, [{ exitCode: 0, stderr: '', stdout }]);
+
+        // Then - no indicator is stated, and the tab comes back
+        expect(written).toContain('stdout: |\n');
+        expect(streamOf(written, 'stdout')).toBe(stdout);
+    });
+
+    test('stderr states its indentation as stdout does', () => {
+        // Given - a four-space document and a warning that opens on a space
+        const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
+        const stderr = ' WARN  deprecated flag\n';
+        const written = updateSpecFile(file, [{ exitCode: 0, stderr, stdout: 'done\n' }]);
+
+        // Then - the same digit, and the same byte-exact round trip
+        expect(written).toContain('stderr: |4\n');
+        expect(streamOf(written, 'stderr')).toBe(stderr);
+    });
+
+    test('the stdin and files: blocks an author wrote survive the rewrite unchanged', () => {
+        // Given - a four-space document whose stdin and files.equals both open on
+        // A space, each stating the four spaces it is written at
+        const source = [
+            'description: keeps what it did not write',
+            'runs:',
+            '    - command: format',
+            '      stdin: |4',
+            '           piped in',
+            '      exit: 0',
+            '      files:',
+            '          out.txt:',
+            '              equals: |4',
+            '                   written out',
+            '',
+        ].join('\n');
+        const file = readSpecFile(source, 'case.spec.yaml');
+
+        // Given - an update that touches the streams only
+        const written = updateSpecFile(file, [{ exitCode: 0, stderr: '', stdout: 'done\n' }]);
+
+        // Then - the two blocks the writer never wrote still read as their own bytes
+        const run = parseSpecDocument(written, 'case.spec.yaml').runs[0];
+        expect(run?.stdin).toBe(' piped in\n');
+        const assertion = run?.files[0];
+        expect(assertion?.kind === 'content' ? assertion.equals?.text : null).toBe(
+            ' written out\n',
+        );
     });
 });
 

@@ -1,4 +1,11 @@
-import { type Document, LineCounter, parseDocument, Scalar } from 'yaml';
+import {
+    type CollectionTag,
+    type Document,
+    LineCounter,
+    parseDocument,
+    Scalar,
+    type ScalarTag,
+} from 'yaml';
 
 /**
  * The `yaml` dependency, wrapped once.
@@ -47,6 +54,64 @@ function detectIndent(text: string): number {
     return smallest === 0 ? 2 : smallest;
 }
 
+// ── The indentation a block scalar states ──
+
+/** The tag every string goes out through — key, plain value and block scalar alike. */
+const STRING_TAG = 'tag:yaml.org,2002:str';
+
+/** An indentation indicator is ONE digit, so nine spaces is the deepest step statable. */
+const DEEPEST_STATABLE_STEP = 9;
+
+/** What the `yaml` writer hands a tag: where the node lands, and the step it lands by. */
+type StringifyContext = Parameters<NonNullable<ScalarTag['stringify']>>[1];
+
+/**
+ * Restate a block scalar's indentation indicator from the indentation its
+ * content is actually written at.
+ *
+ * A block scalar whose first line opens on a space NEEDS that indicator: without
+ * it a reader takes the space for indentation and gives back a string shorter
+ * than the one that was written. The `yaml` writer knows when one is called for
+ * and adds it — but it always writes the digit `2`, its own default step, never
+ * the step it was asked to indent with. In a four-space document (oxfmt formats
+ * YAML at four) `|2` puts every line back two spaces short, so the golden update
+ * mode just wrote fails on its very next run.
+ *
+ * The digit belongs to the block, not to the writer's default: content sits one
+ * step below its key, so the file's step is what the indicator names — and `1`
+ * at the root, which YAML counts from -1.
+ */
+function stateIndentation(written: string, ctx: StringifyContext): string {
+    if (!/^[|>][1-9]/.test(written)) {
+        return written;
+    }
+    const step = ctx.indent === '' ? 1 : ctx.indentStep.length;
+    if (step > DEEPEST_STATABLE_STEP) {
+        throw new Error(
+            `A block scalar indented by ${step} spaces cannot state its indentation: YAML writes that indicator as a single digit, so ${DEEPEST_STATABLE_STEP} spaces is the deepest step a document may be written with.`,
+        );
+    }
+    return `${written[0]}${step}${written.slice(2)}`;
+}
+
+/** A scalar tag among the schema's, told from a collection one by what it may hold. */
+function isScalarTag(tag: CollectionTag | ScalarTag | string): tag is ScalarTag {
+    return typeof tag !== 'string' && tag.collection === undefined;
+}
+
+/** The string tag, wrapped so every block scalar it writes states its own indentation. */
+function statingItsIndentation(tag: ScalarTag): ScalarTag {
+    const write = tag.stringify;
+    if (write === undefined) {
+        return tag;
+    }
+    return {
+        ...tag,
+        stringify: (item, ctx, onComment, onChompKeep) =>
+            stateIndentation(write(item, ctx, onComment, onChompKeep), ctx),
+    };
+}
+
 /** One refusal from the YAML parser itself, before any grammar is applied. */
 export interface YamlSyntaxError {
     line: number;
@@ -56,7 +121,14 @@ export interface YamlSyntaxError {
 /** Parse a YAML file into its document form, keeping comments and key order. */
 export function parseYamlSource(text: string): YamlSource {
     const lineCounter = new LineCounter();
-    const document = parseDocument(text, { keepSourceTokens: true, lineCounter });
+    const document = parseDocument(text, {
+        customTags: (tags) =>
+            tags.map((tag) =>
+                isScalarTag(tag) && tag.tag === STRING_TAG ? statingItsIndentation(tag) : tag,
+            ),
+        keepSourceTokens: true,
+        lineCounter,
+    });
     return {
         document,
         indent: detectIndent(text),
@@ -75,8 +147,10 @@ export function yamlSyntaxErrors(source: YamlSource): YamlSyntaxError[] {
 /**
  * A literal block scalar. The `yaml` writer picks the chomping indicator from
  * the value itself — `|` when the text ends with a newline, `|-` when it does
- * not — and adds the indentation indicator (`|2`) when the first line starts
- * with a space, which is exactly the byte-exactness the format promises.
+ * not — and decides whether an indentation indicator is called for, which is
+ * when the first line opens on a space. What that indicator SAYS is restated on
+ * the way out by `stateIndentation` above, and together the two are the
+ * byte-exactness the format promises.
  */
 export function blockScalar(text: string): Scalar<string> {
     const scalar = new Scalar(text);
