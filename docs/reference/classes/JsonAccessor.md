@@ -15,7 +15,7 @@ runs on the stripped text — an escape hatch for application noise not
 covered by the `{{token}}` grammar.
 
 Assertions go through `expect()`: `expect(result.json).toMatch('name.json')`
-(deep-equal against `expected/<name>`, with `{{placeholder}}` support).
+(deep-equal against `_expected/<name>`, with `{{placeholder}}` support).
 
 ## Constructors
 

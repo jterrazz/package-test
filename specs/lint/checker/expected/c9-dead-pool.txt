@@ -1,3 +1,0 @@
-[error] specs/fixtures/orphan.sql: dead pool fixture — no spec under specs references $FIXTURES/orphan.sql (C9 — see docs/10-linting.md)
-
-conventions checker: 1 error(s) found under {{workdir}}

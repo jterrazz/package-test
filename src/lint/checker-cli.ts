@@ -2,6 +2,7 @@
 import { existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { fixPoolFixtures } from './checker-crossfile.js';
 import { fixSpecFiles } from './checker-spec.js';
 import { formatViolations, runAllChecks } from './checker.js';
 
@@ -12,12 +13,15 @@ import { formatViolations, runAllChecks } from './checker.js';
  *
  * Runs every checker pass — the token/HTTP grammar (D4 / D4b / D10), the
  * `<case>.spec.yaml` document conventions, and the cross-file passes (C9 dead
- * fixtures, B5 await-using inference, A7 database property). Exit 1 on any
- * ERROR-level violation; warnings (D10, a downgraded C9 feature) are printed
- * but do not fail the run.
+ * fixtures, C14/C15 fixture placement, B5 await-using inference, A7 database
+ * property). Exit 1 on any ERROR-level violation; warnings (D10, a downgraded C9
+ * feature) are printed but do not fail the run.
  *
- * `--fix` first applies the two rewritable document passes (key order and block
- * scalars), then checks what is left — so a run that fixes everything exits 0.
+ * `--fix` applies the rewritable passes — the two document ones (key order and
+ * block scalars) and C14, which MOVES a single-reader pool fixture beside its
+ * leaf and rewrites the literals that named it — then checks what is left, so a
+ * run that fixes everything exits 0. The move is a plain rename: the checker
+ * never runs git, and the author stages what the working tree now shows.
  */
 const fix = process.argv.includes('--fix');
 const root = resolve(process.argv.slice(2).find((arg) => !arg.startsWith('--')) ?? '.');
@@ -33,6 +37,9 @@ if (fix) {
     const written = fixSpecFiles(root);
     if (written.length > 0) {
         console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
+    }
+    for (const move of fixPoolFixtures(root)) {
+        console.log(`conventions checker: moved ${move} (C14) — stage the rename`);
     }
 }
 
@@ -52,5 +59,5 @@ if (errors.length > 0) {
 // The success line names what actually ran — every pass, not just the token
 // Scan (the old "no unknown tokens" wording under-reported the C9/B5/A7 passes).
 console.log(
-    `conventions checker: all passes clean under ${root} (D4/D4b/D10 grammar, spec documents, C9 dead fixtures, B5 await-using, A7 database)${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
+    `conventions checker: all passes clean under ${root} (D4/D4b/D10 grammar, spec documents, C9 dead fixtures, C14/C15 fixture placement, B5 await-using, A7 database)${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
 );

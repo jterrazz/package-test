@@ -1,0 +1,16 @@
+Spec mismatch
+
+a run whose golden exit code is deliberately wrong
+
+$ fail
+
+exit code mismatch
+  expected: 0
+  received: 2
+
+stderr was:
+Starting...
+Fatal: something went wrong
+
+specs/cli/literate/_fixtures/wrong-exit.spec.yaml:3
+Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.

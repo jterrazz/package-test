@@ -14,7 +14,7 @@ describe('requests', () => {
     });
 
     test('sends the complete request from a .http file', async () => {
-        // Given - method, path, headers, and body loaded from requests/create-user.http
+        // Given - method, path, headers, and body loaded from _requests/create-user.http
         const result = await api.request('create-user.http');
 
         // Then - the full created-user response
@@ -79,7 +79,7 @@ describe('requests', () => {
     });
 
     test('sends POST with an inline body', async () => {
-        // Given - inline JSON body (no requests/ file)
+        // Given - inline JSON body (no _requests/ file)
         const result = await api.post('/users', { email: 'dora@test.com', name: 'Dora' });
 
         // Then - 201 Created

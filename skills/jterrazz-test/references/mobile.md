@@ -72,8 +72,8 @@ specs/mobile/
 ├── mobile.specification.ts     # runner at the facet ROOT
 └── <domain>/
     ├── <aspect>.test.ts
-    ├── expected/                # *.screen.json, … — FLAT
+    ├── _expected/                # *.screen.json, … — FLAT
     └── contracts/               # what the declared `backend` stub serves — see contracts.md
 ```
 
-No `seeds/` or `requests/` — no services, no request-file format.
+No `_seeds/` or `_requests/` — no services, no request-file format.

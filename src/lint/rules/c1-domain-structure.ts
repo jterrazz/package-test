@@ -54,7 +54,12 @@ const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
  * specs root. Specification files are unconstrained: a mirror has no facet
  * level to anchor them to.
  *
- * `depth: 'off'` — no placement check; the tree's shape is guarded elsewhere.
+ * `depth: 'off'` — no DEPTH check; the tree's shape is guarded elsewhere.
+ *
+ * The ground clause holds in every mode, `off` included: a directory whose name
+ * carries a LEADING UNDERSCORE is ground — what the specs of a row stand on —
+ * and never a domain, so no spec may live inside one. That is not a question of
+ * depth, which is why no project's declared shape switches it off.
  *
  * Module tests under `src/` follow the neighbour rule (I2) and are out of scope
  * in every mode.
@@ -62,9 +67,6 @@ const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
 export const c1DomainStructure: LintRule = {
     create(context: RuleContext): Visitor {
         const depth = (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
-        if (depth === 'off') {
-            return {};
-        }
         return {
             Program(node: AstNode) {
                 const anchor = specsAnchor(context.filename);
@@ -74,6 +76,19 @@ export const c1DomainStructure: LintRule = {
                 const base = anchor.relative.at(-1) ?? '';
                 // Segments strictly between `specs` and the file: [facet, domain, …].
                 const nesting = anchor.relative.length - 1;
+
+                if (base.endsWith(TEST_SUFFIX) || base.endsWith(SPECIFICATION_SUFFIX)) {
+                    const ground = anchor.relative
+                        .slice(0, -1)
+                        .find((segment) => segment.startsWith('_'));
+                    if (ground !== undefined) {
+                        context.report({ data: { ground }, messageId: 'specInGround', node });
+                        return;
+                    }
+                }
+                if (depth === 'off') {
+                    return;
+                }
 
                 if (depth === 'facet') {
                     if (base.endsWith(TEST_SUFFIX)) {
@@ -129,6 +144,8 @@ export const c1DomainStructure: LintRule = {
         defaultOptions: [{ depth: DEFAULT_DEPTH }],
         docs: RULE_DOCS['c1-domain-structure'],
         messages: {
+            specInGround:
+                'A spec must not live under "{{ground}}/" — a leading underscore marks GROUND (what the specs of a row stand on: _fixtures/, _expected/, _requests/, _seeds/), never a domain (C1 — see docs/10-linting.md).',
             specNotAtFacetRoot:
                 'A `*.specification.ts` must sit at the facet root: `specs/<facet>/<name>.specification.ts` (C1 — see docs/10-linting.md).',
             testAtFacetRoot:

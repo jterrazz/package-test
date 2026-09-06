@@ -21,12 +21,12 @@ afterAll(cleanup);
 
 ## Setup (chainable)
 
-| Method                             | Description                                                                                                                                    |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })` | SQL from `seeds/` (A7 rules apply)                                                                                                             |
-| `.fixture("file")`                 | Copy the feature-local `fixtures/file` into the cwd                                                                                            |
-| `.fixture("$FIXTURES/name/")`      | Shared `specs/fixtures/name/`. Trailing `/` (rsync) = spread contents into cwd; no slash = nest under `name/`. Chained calls layer (last wins) |
-| `.env({ KEY: "value" })`           | Child env vars. `null` unsets, `$WORKDIR` expands to the cwd, calls merge. Overrides B6 injection                                              |
+| Method                             | Description                                                                                                                                     |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.seed("file.sql", { database? })` | SQL from `_seeds/` (A7 rules apply)                                                                                                             |
+| `.fixture("file")`                 | Copy the feature-local `_fixtures/file` into the cwd                                                                                            |
+| `.fixture("$FIXTURES/name/")`      | Shared `specs/_fixtures/name/`. Trailing `/` (rsync) = spread contents into cwd; no slash = nest under `name/`. Chained calls layer (last wins) |
+| `.env({ KEY: "value" })`           | Child env vars. `null` unsets, `$WORKDIR` expands to the cwd, calls merge. Overrides B6 injection                                               |
 
 There is no `.project()` and no seed handler — `.fixture()` is the one file-state verb, `.seed()` is SQL-only (C7).
 
@@ -41,7 +41,7 @@ await cli
     .exec('cluster pods');
 ```
 
-A stub is `fixtures/<name>/bin/<binary>`: a `case "$*"` script answering by argv, with a catch-all that exits non-zero on any invocation nobody canned. **One fixture per ANSWER of the system** (a cluster populated / empty / unreachable) — a new answer is a new fixture, never a flag on an existing stub. Chained fixtures layer, which is how one is extended.
+A stub is `_fixtures/<name>/bin/<binary>`: a `case "$*"` script answering by argv, with a catch-all that exits non-zero on any invocation nobody canned. **One fixture per ANSWER of the system** (a cluster populated / empty / unreachable) — a new answer is a new fixture, never a flag on an existing stub. Chained fixtures layer, which is how one is extended.
 
 ## Action (terminal) — one execution method, no `.spawn()`
 
@@ -54,7 +54,7 @@ A stub is `fixtures/<name>/bin/<binary>`: a `case "$*"` script answering by argv
 
 ## Spec documents — `<case>.spec.yaml`
 
-One scenario per document, **beside the spec** (never under `expected/`, which holds goldens). The ground first, then the runs.
+One scenario per document, **beside the spec** (never under `_expected/`, which holds goldens). The ground first, then the runs.
 
 ```yaml
 description: refuses to guess when it is run outside the checkout # the vitest title, lowercase, no period
@@ -120,9 +120,9 @@ Three doors, one engine:
 ```typescript
 expect(result.exitCode).toBe(0);
 expect(result.stdout).toContain('Build completed'); // scalpel probe
-expect(result.stdout).toMatch('help.txt'); // golden — expected/help.txt, {{token}}-aware
+expect(result.stdout).toMatch('help.txt'); // golden — _expected/help.txt, {{token}}-aware
 expect(result.file('dist/index.js').exists).toBe(true);
-await expect(result.directory('out')).toMatch('scaffold'); // expected/scaffold/ (directory)
+await expect(result.directory('out')).toMatch('scaffold'); // _expected/scaffold/ (directory)
 await expect(result.filesystem).toMatch('upgraded'); // whole cwd
 ```
 
@@ -154,8 +154,8 @@ specs/cli/
 ├── cli.specification.ts        # runner(s) at the facet ROOT
 └── <domain>/                   # a product command/area — the folder follows the assets
     ├── <aspect>.test.ts        # 1..n test files per domain
-    ├── <case>.spec.yaml        # spec documents, BESIDE the tests (never under expected/)
-    ├── fixtures/               # domain-local, copied into the cwd via .fixture('name')
-    ├── seeds/                  # *.sql ONLY
-    └── expected/               # snapshots, FLAT ('help.txt', 'config.json', 'tree-name/')
+    ├── <case>.spec.yaml        # spec documents, BESIDE the tests (never under _expected/)
+    ├── _fixtures/               # domain-local, copied into the cwd via .fixture('name')
+    ├── _seeds/                  # *.sql ONLY
+    └── _expected/               # snapshots, FLAT ('help.txt', 'config.json', 'tree-name/')
 ```

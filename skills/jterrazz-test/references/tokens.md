@@ -2,7 +2,7 @@
 
 Operative reference. Prose + the canonical accepted form of every token: [docs/06-tokens.md](../../docs/06-tokens.md).
 
-One vocabulary, one engine — the same tokens work in `expected/*.http` (body AND headers), `expected/*.json`, text snapshots, tree-snapshot file contents, and in code via `match.*`. The vocabulary is frozen (shared with the runtime matcher, so the fixture and code channels cannot drift).
+One vocabulary, one engine — the same tokens work in `_expected/*.http` (body AND headers), `_expected/*.json`, text snapshots, tree-snapshot file contents, and in code via `match.*`. The vocabulary is frozen (shared with the runtime matcher, so the fixture and code channels cannot drift).
 
 ## The frozen vocabulary
 
@@ -34,7 +34,7 @@ Code-side: `match.ref('order')`, `match.ref('intent', { not: 'order' })` (inequa
 
 ## Rules & pitfalls
 
-- Tokens live only in `expected/` fixtures. A token in a `requests/` file is a `d10w` warning — requests are inputs, never matched.
-- An unknown `{{token}}` or a malformed capture (`{{uuid#}}`, `{{uuid #id}}`) in an `expected/` fixture is a checker error (D4).
+- Tokens live only in `_expected/` fixtures. A token in a `_requests/` file is a `d10w` warning — requests are inputs, never matched.
+- An unknown `{{token}}` or a malformed capture (`{{uuid#}}`, `{{uuid #id}}`) in an `_expected/` fixture is a checker error (D4).
 - Prefer tokens over widening with a regex or a `transform` — `transform` is an escape hatch for noise no token covers (D6).
 - `toMatch` on an accessor takes a fixture NAME (with extension), never a RegExp — pass a RegExp only to `expect(x.text).toMatch(/re/)` (D14).

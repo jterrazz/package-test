@@ -240,7 +240,7 @@ declare module 'vitest' {
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**
          * On `@jterrazz/test` accessors: assert the subject matches a fixture
-         * file under `expected/<name>` (flat — a slash creates a subfolder;
+         * file under `_expected/<name>` (flat — a slash creates a subfolder;
          * `.http` format for `result.response`). Async for filesystem/directory
          * subjects (tree compare on disk). Other subjects keep vitest-native
          * `toMatch` semantics (string substring / regexp).

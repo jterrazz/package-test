@@ -17,7 +17,7 @@ async function catchMessage(assertion: () => Promise<unknown>): Promise<string> 
 
 describe('command — directory snapshot', () => {
     test('matches an identical fixture tree', async () => {
-        // Given - scaffold writes the exact tree committed under expected/cli-scaffold/
+        // Given - scaffold writes the exact tree committed under _expected/cli-scaffold/
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
 
         // Then - the snapshot matches (a slash in the name creates a subfolder)
@@ -94,7 +94,7 @@ describe('command — directory snapshot', () => {
             await expect(result2.directory('out')).toMatch(fixtureName);
 
             // Cleanup committed transient fixture
-            rmSync(resolve(import.meta.dirname, 'expected', fixtureName), {
+            rmSync(resolve(import.meta.dirname, '_expected', fixtureName), {
                 force: true,
                 recursive: true,
             });

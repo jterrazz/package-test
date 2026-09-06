@@ -3,9 +3,9 @@
  * by every assertion of a single spec execution.
  *
  * Matchers are used inside `toMatchRows` rows and any structural comparison;
- * their file-side twins are the `{{placeholder}}` forms in `expected/*.http`
- * fixtures (body AND headers), `expected/*.json` files, and text snapshots
- * (`expected/*.txt`). One grammar, one vocabulary (CONVENTIONS D4).
+ * their file-side twins are the `{{placeholder}}` forms in `_expected/*.http`
+ * fixtures (body AND headers), `_expected/*.json` files, and text snapshots
+ * (`_expected/*.txt`). One grammar, one vocabulary (CONVENTIONS D4).
  */
 
 /** The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds. */

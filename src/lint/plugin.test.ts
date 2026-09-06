@@ -139,8 +139,8 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         for (const id of pluginRules) {
             // Then - its E2E spec file and violation/compliant fixture twin exist
             expect(e2eSpecIds.has(id), `${id} has no E2E spec`).toBe(true);
-            expect(existsSync(resolve(ROOT, 'specs/fixtures/lint-violations', id))).toBe(true);
-            expect(existsSync(resolve(ROOT, 'specs/fixtures/lint-violations', `${id}-ok`))).toBe(
+            expect(existsSync(resolve(ROOT, 'specs/_fixtures/lint-violations', id))).toBe(true);
+            expect(existsSync(resolve(ROOT, 'specs/_fixtures/lint-violations', `${id}-ok`))).toBe(
                 true,
             );
         }
@@ -160,7 +160,7 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
     test('the E2E lint config (oxlint.e2e.json) enables exactly the shipped rule set', () => {
         // Given - the standalone oxlint config the checker E2E specs lint their
         // Violation fixtures with
-        const config = JSON.parse(read('specs/fixtures/lint-cli/oxlint.e2e.json')) as {
+        const config = JSON.parse(read('specs/_fixtures/lint-cli/oxlint.e2e.json')) as {
             rules: Record<string, unknown>;
         };
 

@@ -16,14 +16,14 @@ an escape hatch for application noise not covered by the `{{token}}`
 grammar.
 
 Text operations are **closed** over the type: `.grep(pattern)` returns a
-`TextAccessor` (not a bare string), preserving the `expected/`-resolution
+`TextAccessor` (not a bare string), preserving the `_expected/`-resolution
 context and the `transform`, so results are chainable
 (`result.stdout.grep(a).grep(b)`) and snapshot-able
 (`expect(result.stdout.grep('users.ts')).toMatch('block.txt')`).
 
 Assertions go through `expect()` matchers: `expect(result.stdout).toContain(...)`
 and `expect(result.stdout).toMatch('name.txt')` (resolved against
-`expected/<name>`, flat — with `{{token}}` support, CONVENTIONS D4).
+`_expected/<name>`, flat — with `{{token}}` support, CONVENTIONS D4).
 
 ## Constructors
 

@@ -14,7 +14,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the shared E2E fixture trees.
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const FIXTURES = resolve(import.meta.dirname, '../../../specs/_fixtures/lint-violations');
 
 ruleTester.run('c2-http-only-requests', c2HttpOnlyRequests as unknown as OxlintRule, {
     invalid: [
@@ -31,7 +31,7 @@ ruleTester.run('c2-http-only-requests', c2HttpOnlyRequests as unknown as OxlintR
             code: 'test("x", () => {});',
             filename: `${FIXTURES}/c2-http-only-requests-ok/specs/app/widget/widget.test.ts`,
         },
-        // No requests/ directory at this level (the feature has no requests/ sibling).
+        // No _requests/ directory at this level (the feature has no _requests/ sibling).
         {
             code: 'test("x", () => {});',
             filename: `${FIXTURES}/c2-http-only-requests-ok/specs/app/app.test.ts`,

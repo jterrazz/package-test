@@ -9,7 +9,7 @@ import {
 } from './checker.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees.
-const FIXTURES = resolve(import.meta.dirname, '../../specs/fixtures/lint-violations');
+const FIXTURES = resolve(import.meta.dirname, '../../specs/_fixtures/lint-violations');
 
 describe('conventions checker — findUnknownTokens (D4)', () => {
     test('flags an identifier-shaped token outside the vocabulary', () => {
@@ -53,7 +53,7 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
 });
 
 describe('conventions checker — findKnownTokens (D10)', () => {
-    test('reports known tokens (the requests/ leak signal)', () => {
+    test('reports known tokens (the _requests/ leak signal)', () => {
         // Given - a request body carrying a token
         // Then - the known token is surfaced (an unknown one is not this signal)
         expect(findKnownTokens('{"id": "{{uuid}}", "x": "{{userid}}"}')).toEqual([
@@ -64,13 +64,13 @@ describe('conventions checker — findKnownTokens (D10)', () => {
 
 describe('conventions checker — checkConventionFiles (D4)', () => {
     test('walks a specs tree and reports unknown tokens in fixture files', () => {
-        // Given - the violation fixture tree ({{userid}} in expected/out.txt)
+        // Given - the violation fixture tree ({{userid}} in _expected/out.txt)
         const violations = checkConventionFiles(resolve(FIXTURES, 'd4-unknown-token'));
 
         // Then - the finding names the relative file, line, token and severity
         expect(violations).toEqual([
             expect.objectContaining({
-                file: 'specs/widget/expected/out.txt',
+                file: 'specs/widget/_expected/out.txt',
                 line: 1,
                 severity: 'error',
                 token: '{{userid}}',
@@ -79,7 +79,7 @@ describe('conventions checker — checkConventionFiles (D4)', () => {
 
         // Then - the rendering carries file, token and the known vocabulary
         const rendered = formatViolations(violations);
-        expect(rendered).toContain('specs/widget/expected/out.txt:1');
+        expect(rendered).toContain('specs/widget/_expected/out.txt:1');
         expect(rendered).toContain('{{userid}}');
         expect(rendered).toContain('uuid');
     });

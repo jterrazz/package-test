@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
-// ── Placeholders in expected/*.http — both modes ──
+// ── Placeholders in _expected/*.http — both modes ──
 
 describe('responses', () => {
     test('matches dynamic values via placeholders', async () => {

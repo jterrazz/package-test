@@ -3,7 +3,7 @@ import { afterAll, describe, expect, test } from 'vitest';
 
 import { specification, sqlite } from '../../../../index.js';
 
-const CLI_BIN = resolve(import.meta.dirname, '../../../../../specs/fixtures/cli-app/cli.sh');
+const CLI_BIN = resolve(import.meta.dirname, '../../../../../specs/_fixtures/cli-app/cli.sh');
 
 // Given - a runner with exactly ONE database in the services record
 const { cleanup, cli } = await specification.cli(CLI_BIN, {

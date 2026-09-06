@@ -15,6 +15,7 @@ import { b9wProductCommand } from './rules/b9w-product-command.js';
 import { c1DomainStructure } from './rules/c1-domain-structure.js';
 import { c10ContractsBoundary } from './rules/c10-contracts-boundary.js';
 import { c11ContractDataPairing } from './rules/c11-contract-data-pairing.js';
+import { c13UnderscoredGround } from './rules/c13-underscored-ground.js';
 import { c2HttpOnlyRequests } from './rules/c2-http-only-requests.js';
 import { c4ContractShape } from './rules/c4-contract-shape.js';
 import { c6ToMatchExtension } from './rules/c6-tomatch-extension.js';
@@ -79,6 +80,7 @@ const plugin: LintPlugin = {
         'c1-domain-structure': c1DomainStructure,
         'c10-contracts-boundary': c10ContractsBoundary,
         'c11-contract-data-pairing': c11ContractDataPairing,
+        'c13-underscored-ground': c13UnderscoredGround,
         'c2-http-only-requests': c2HttpOnlyRequests,
         'c4-contract-shape': c4ContractShape,
         'c6-tomatch-extension': c6ToMatchExtension,

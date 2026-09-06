@@ -182,7 +182,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `facet` (test au root de la facette OU un dossier domaine plus bas, jamais plus profond), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`.',
+            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `facet` (test au root de la facette OU un dossier domaine plus bas, jamais plus profond), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`. Dans tous les modes, `off` compris : un dossier à underscore initial est du SOL, jamais un domaine — aucune spec ne vit dedans.',
         family: 'C',
         id: 'C1',
         rationale:
@@ -206,10 +206,19 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
         rationale:
             'Une donnée n’existe que servie par un contrat — un fichier sans propriétaire est du poids mort qu’aucun test ne charge.',
     },
+    'c13-underscored-ground': {
+        channel: 'statique',
+        convention:
+            'Sous `specs/`, le sol d’une spec porte un underscore initial : `_fixtures/`, `_expected/`, `_requests/`, `_seeds/`. Un dossier `fixtures/`, `expected/`, `requests/` ou `seeds/` est un nom d’avant la 14 — erreur nommant le renommage.',
+        family: 'C',
+        id: 'C13',
+        rationale:
+            'Aucun résolveur ne lit plus le nom sans underscore : gardé tel quel, l’arbre devient invisible plutôt que faux, et l’échec arrive une étape plus loin que sa cause.',
+    },
     'c2-http-only-requests': {
         channel: 'statique',
         convention:
-            '`requests/` ne contient que des fichiers `.http` ; toute autre extension est une erreur.',
+            '`_requests/` ne contient que des fichiers `.http` ; toute autre extension est une erreur.',
         family: 'C',
         id: 'C2',
         rationale:
@@ -231,11 +240,11 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
         family: 'C',
         id: 'C6',
         rationale:
-            'L’extension fait partie du nom du fichier attendu — l’omettre casse la résolution `expected/`.',
+            'L’extension fait partie du nom du fichier attendu — l’omettre casse la résolution `_expected/`.',
     },
     'c7-seeds-sql-only': {
         channel: 'statique',
-        convention: '`seeds/` ne contient que des `*.sql` ; tout autre fichier est une erreur.',
+        convention: '`_seeds/` ne contient que des `*.sql` ; tout autre fichier est une erreur.',
         family: 'C',
         id: 'C7',
         rationale:
@@ -288,7 +297,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
     'd9w-single-use-ref': {
         channel: 'statique',
         convention:
-            'Une ref de capture (`match.ref`, `{{kind#ref}}`) qui n’apparaît qu’une seule fois dans tout le fichier (code + fixtures `expected/` référencées) porte un nom inutilement → warning.',
+            'Une ref de capture (`match.ref`, `{{kind#ref}}`) qui n’apparaît qu’une seule fois dans tout le fichier (code + fixtures `_expected/` référencées) porte un nom inutilement → warning.',
         family: 'D',
         id: 'D9',
         rationale:
@@ -465,7 +474,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Tout `{{token}}` dans une fixture `expected/` — ou dans un flux attendu d’un document `<cas>.spec.yaml` — appartient au vocabulaire figé ; un token inconnu est une erreur.',
+            'Tout `{{token}}` dans une fixture `_expected/` — ou dans un flux attendu d’un document `<cas>.spec.yaml` — appartient au vocabulaire figé ; un token inconnu est une erreur.',
         family: 'D',
         id: 'D4',
         name: 'd4-unknown-token',
@@ -475,7 +484,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Une ref malformée d’un kind connu (`{{iso8601#}}`, `{{uuid #id}}`) dans un fichier texte sous `expected/` est une erreur.',
+            'Une ref malformée d’un kind connu (`{{iso8601#}}`, `{{uuid #id}}`) dans un fichier texte sous `_expected/` est une erreur.',
         family: 'D',
         id: 'D4',
         name: 'd4-malformed-ref',
@@ -485,7 +494,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'La première ligne d’un `.http` de profondeur 1 suit sa grammaire : requête (`MÉTHODE /path`) sous `requests/`, statut (`HTTP/1.1 <status>`) sous `expected/`.',
+            'La première ligne d’un `.http` de profondeur 1 suit sa grammaire : requête (`MÉTHODE /path`) sous `_requests/`, statut (`HTTP/1.1 <status>`) sous `_expected/`.',
         family: 'D',
         id: 'D4b',
         name: 'd4b-http-first-line',
@@ -604,7 +613,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Un token connu dans un fichier sous `requests/` → warning : les requêtes sont des entrées, jamais matchées.',
+            'Un token connu dans un fichier sous `_requests/` → warning : les requêtes sont des entrées, jamais matchées.',
         family: 'D',
         id: 'D10',
         name: 'd10w-tokens-in-requests',
@@ -614,12 +623,32 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Aucune fixture morte : tout fichier sous `seeds/`/`requests/`/`fixtures/` et toute entrée de premier niveau de `expected/` doit être référencée ; un dossier de feature sans `*.test.ts` ni `*.spec.yaml` est orphelin (warning si argument non littéral). Un `<cas>.spec.yaml` référence les fixtures nommées par ses entrées `fixture:`.',
+            'Aucune fixture morte : tout fichier sous `_seeds/`/`_requests/`/`_fixtures/` et toute entrée de premier niveau de `_expected/` doit être référencée ; un dossier de feature sans `*.test.ts` ni `*.spec.yaml` est orphelin (warning si argument non littéral). Un `<cas>.spec.yaml` référence les fixtures nommées par ses entrées `fixture:`.',
         family: 'C',
         id: 'C9',
         name: 'c9-dead-fixtures',
         rationale:
             'Le miroir de C8 — une fixture que rien ne référence est du poids mort qui trompe le lecteur.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Une fixture du pool est PARTAGÉE, ou elle est locale : un dossier de `<specs>/_fixtures/` référencé (`$FIXTURES/<nom>`) depuis un seul dossier de spec — deux documents d’une même feuille comptent pour un — doit vivre à côté de cette feuille, en `<feuille>/_fixtures/<nom>/`, référencé par la forme relative. Zéro référence reste l’erreur de fixture morte (C9). Corrigé par `--fix` : le dossier est déplacé et les littéraux réécrits.',
+        family: 'C',
+        id: 'C14',
+        name: 'c14-pool-fixture-shared',
+        rationale:
+            'Une fixture d’un seul scénario garée dans le pool se lit comme du sol partagé : chacun suppose qu’un autre en dépend et personne n’ose y toucher.',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Une fixture locale ne se lit que depuis son propre dossier : un chemin `fixture:`/`.fixture()` contenant `..`, ou dont la cible sort du `_fixtures/` de la spec qui le nomme, est une erreur — le sol partagé par plusieurs feuilles va dans le pool `$FIXTURES`.',
+        family: 'C',
+        id: 'C15',
+        name: 'c15-local-fixture-reach',
+        rationale:
+            'Une feuille qui pioche dans les fixtures d’une voisine, c’est le pool par une autre porte, sans la visibilité du pool : la voisine casse une spec à deux dossiers de là sans le savoir.',
     },
     {
         channel: 'checker',

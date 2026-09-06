@@ -5,11 +5,11 @@
  */
 import { afterAll } from 'vitest';
 
+import { createApp } from '../_fixtures/app/app.js';
 import { postgres, redis, specification } from '../../src/index.js';
-import { createApp } from '../fixtures/app/app.js';
 
 export const { api, cleanup } = await specification.api({
-    root: '../fixtures/app',
+    root: '../_fixtures/app',
     server: ({ analyticsDb, cache, db }) =>
         createApp({
             analyticsDatabaseUrl: analyticsDb.connectionString,
@@ -18,7 +18,7 @@ export const { api, cleanup } = await specification.api({
         }),
     services: {
         // Insertion order matters: the first database handle is the default
-        // Target of internal resets; seeds/tables always name their database
+        // Target of internal resets; _seeds/tables always name their database
         // Explicitly here because two postgres handles are declared (A7).
         // The `analyticsDb` key auto-binds to the `analytics-db` compose
         // Service via kebab-case derivation — no composeService needed (A6).

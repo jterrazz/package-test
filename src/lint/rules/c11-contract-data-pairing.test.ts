@@ -12,7 +12,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The rule is fs-anchored — the cases run against the shared fixture trees.
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const FIXTURES = resolve(import.meta.dirname, '../../../specs/_fixtures/lint-violations');
 
 ruleTester.run('c11-contract-data-pairing', c11ContractDataPairing as unknown as OxlintRule, {
     invalid: [

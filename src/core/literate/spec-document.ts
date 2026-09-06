@@ -498,7 +498,7 @@ export function readSpecFile(content: string, fileName: string): SpecFile {
 /**
  * Every text of a document the `{{token}}` grammar governs: the streams a
  * comparison judges, and the `files:` texts it judges them with. `stdin:` is an
- * INPUT — like a `requests/` fixture, it is never matched — and a description or
+ * INPUT — like a `_requests/` fixture, it is never matched — and a description or
  * a command is prose, so neither appears here.
  */
 export function assertedStreams(document: SpecDocument): SpecStream[] {
@@ -677,7 +677,8 @@ export const SPEC_SCHEMA = {
         },
         fixture: {
             ...STRING_OR_LIST,
-            description: 'Fixture paths copied into the working directory, layering in order.',
+            description:
+                'Fixture paths copied into the working directory, layering in order. `$FIXTURES/<name>` is the shared pool at `<specs-root>/_fixtures/`; a bare path is the ground beside this document, at `_fixtures/<name>`.',
         },
         kind: {
             default: 'cli',

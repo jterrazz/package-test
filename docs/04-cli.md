@@ -95,11 +95,11 @@ Two disjoint verbs shape a spec's state (rule C7): **`.fixture()` carries file s
 
 `.fixture(path)` resolves in one of two ways and copies with rsync's trailing-slash semantics:
 
-| Path                     | Resolves to                                    | Copy effect                                     |
-| ------------------------ | ---------------------------------------------- | ----------------------------------------------- |
-| `'config.toml'`          | `<domain>/fixtures/config.toml` (domain-local) | `<cwd>/config.toml`                             |
-| `'$FIXTURES/base-shop/'` | `specs/fixtures/base-shop/` (shared pool)      | **contents spread** into `<cwd>` (trailing `/`) |
-| `'$FIXTURES/base-shop'`  | `specs/fixtures/base-shop/` (shared pool)      | `<cwd>/base-shop/` (dir under its own name)     |
+| Path                     | Resolves to                                   | Copy effect                                     |
+| ------------------------ | --------------------------------------------- | ----------------------------------------------- |
+| `'config.toml'`          | `<domain>/_fixtures/config.toml` (leaf-local) | `<cwd>/config.toml`                             |
+| `'$FIXTURES/base-shop/'` | `specs/_fixtures/base-shop/` (shared pool)    | **contents spread** into `<cwd>` (trailing `/`) |
+| `'$FIXTURES/base-shop'`  | `specs/_fixtures/base-shop/` (shared pool)    | `<cwd>/base-shop/` (dir under its own name)     |
 
 > **⚠️ Trailing slash = spread vs. nest.** For a directory fixture, the trailing `/` is load-bearing — it is exactly rsync's semantics, and it changes where files land:
 >
@@ -110,13 +110,13 @@ Two disjoint verbs shape a spec's state (rule C7): **`.fixture()` carries file s
 >
 > Almost always you want the **trailing slash** (spread the project into the cwd, so the tool runs at the root). Drop it only when the command expects the project one level down.
 
-`$FIXTURES` points at `specs/fixtures/` (the nearest ancestor `specs/` dir + `fixtures/`); any other `$…` marker is an error. Chained `.fixture()` calls **layer** in order — a later fixture overwrites files from an earlier one.
+`$FIXTURES` points at `specs/_fixtures/` (the nearest ancestor `specs/` dir + `_fixtures/`); any other `$…` marker is an error. Chained `.fixture()` calls **layer** in order — a later fixture overwrites files from an earlier one.
 
 | Setup                              | Effect on the cwd                                                    |
 | ---------------------------------- | -------------------------------------------------------------------- |
 | _(nothing)_                        | Empty directory                                                      |
 | `.fixture('$FIXTURES/base-shop/')` | Spread a whole shared project into the cwd                           |
-| `.fixture('config.toml')`          | Copy the feature-local `fixtures/config.toml` into the cwd           |
+| `.fixture('config.toml')`          | Copy the feature-local `_fixtures/config.toml` into the cwd          |
 | `.seed('…')`                       | SQL into a service database (rule A7 governs the `database:` option) |
 
 ```typescript
@@ -152,7 +152,7 @@ test('seeds a single fixture file', async () => {
 });
 ```
 
-Tree snapshots are directories under `expected/` (`expected/shop-scaffold/`) — the one `toMatch` argument that takes no extension (rule C6).
+Tree snapshots are directories under `_expected/` (`_expected/shop-scaffold/`) — the one `toMatch` argument that takes no extension (rule C6).
 
 ## `.env()` — child process environment
 
@@ -223,7 +223,15 @@ test('deploys from a shaped workspace', async () => {
 });
 ```
 
-Prefer feature-local fixtures for one-off shapes; promote shared projects to `specs/fixtures/` and reach them via `$FIXTURES/`.
+### Where a fixture lives
+
+The two doors are not interchangeable, and the question that picks between them is **how many leaves read this tree**.
+
+The POOL — `specs/_fixtures/`, reached by `$FIXTURES/` — is for what SEVERAL leaves share. That is the whole of its meaning: an entry there announces "other specs depend on me, change me with care". A tree only one spec directory reaches for is not shared ground, whatever folder it sits in; parked in the pool it collects the pool's caution without earning it, and the one spec that actually owns it is a directory away, invisible to the next reader. It is an error (C15's twin, **C14**), and `jterrazz-test-check --fix` moves it beside its leaf and rewrites the reference.
+
+A LEAF'S OWN ground sits beside it, as `<domain>/_fixtures/<name>/`, and is reached by the plain relative form — `.fixture('config.toml')`, `.fixture('base-shop/')`. It is read from that leaf and nowhere else: a path that climbs out of its own `_fixtures/` (a `../`, a sibling's tree) is the pool by another door, with none of the pool's visibility — the neighbour's author has no way to know you depend on them, edits their ground, and breaks a spec two folders away. That is **C15**; the repair is to promote the tree to the pool, where its sharing is declared.
+
+So: one reader, beside the leaf. Two or more, in the pool. Write it local first — promotion is a `--fix` away, and demotion is the rule the checker enforces.
 
 ## The chain never reaches a real system
 
@@ -258,7 +266,7 @@ test('reports what the cluster holds', async () => {
 A stub fixture is a `bin/` holding one script per binary the run must not find for real:
 
 ```
-specs/fixtures/cluster-stub/
+specs/_fixtures/cluster-stub/
 └── bin/
     ├── kubectl
     └── helm
@@ -306,7 +314,7 @@ test('emits machine-readable config', async () => {
 
     // Then
     expect(result.json.value).toMatchObject({ name: 'shoply' }); // read + native matcher
-    expect(result.json).toMatch('config.json'); // expected/config.json
+    expect(result.json).toMatch('config.json'); // _expected/config.json
 });
 
 test('lints a shop and reports per-file blocks', async () => {
@@ -325,7 +333,7 @@ test('lints a shop and reports per-file blocks', async () => {
 
 ## Spec documents — `<case>.spec.yaml`
 
-A terminal session is already a specification: a command, its exit code, what it printed, what it left on disk. A **spec document** writes it as that — one scenario per `<case>.spec.yaml`, living **beside the spec** (never under `expected/`, which holds goldens, not scenarios). Nothing here is new capability: it is the chain's semantics in the shape of a data file an editor can validate.
+A terminal session is already a specification: a command, its exit code, what it printed, what it left on disk. A **spec document** writes it as that — one scenario per `<case>.spec.yaml`, living **beside the spec** (never under `_expected/`, which holds goldens, not scenarios). Nothing here is new capability: it is the chain's semantics in the shape of a data file an editor can validate.
 
 ```yaml
 description: refuses to guess when it is run outside the checkout
@@ -504,7 +512,7 @@ The format states one binary, one working directory, one linear session. Reach f
 - **containers** — `docker`-aware runs, `await using`, `result.container(name)`;
 - **parallel fan-out** — several commands that must run at once, or an interleaving;
 - **host shell-outs** the binary under test is not — a `git` call, a build step staged by hand;
-- **structural JSON** — `result.json` against an `expected/*.json` golden, where the comparison is by shape rather than by text;
+- **structural JSON** — `result.json` against an `_expected/*.json` golden, where the comparison is by shape rather than by text;
 - **database state** — `.seed()` and `result.table(…)`.
 
 A document that starts wanting a conditional is a chain wearing a header. Write it in code.
@@ -570,14 +578,14 @@ The runner handle also destructures to `{ cli, cleanup, docker, orchestrator }`.
 ## Pitfalls
 
 - **Reaching for `.spawn()`.** It does not exist — `.exec(args, { waitFor, timeout })` is the unified execution method (rule B2).
-- **Putting a `<case>.spec.yaml` under `expected/`.** A spec document is the SCENARIO, not a golden — it lives beside the spec it belongs to. `expected/` holds what an assertion resolves against.
+- **Putting a `<case>.spec.yaml` under `_expected/`.** A spec document is the SCENARIO, not a golden — it lives beside the spec it belongs to. `_expected/` holds what an assertion resolves against.
 - **Writing a token in a `description:` or a `command:`.** Those are prose and data; placeholders only work in the streams and the `files:` texts.
 - **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — `d4b-spec-block-scalar` rejects it and `--fix` rewrites it.
-- **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `expected/*.txt` — `transform` is a last resort (rule D6).
+- **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `_expected/*.txt` — `transform` is a last resort (rule D6).
 - **Assigning a Docker-aware result without `await using`.** Error (rule B5) — that is the leak-cleanup mechanism.
 - **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection — override only to _change_ it, `null` to remove it.
 - **Letting the chain find the real binary.** Mounting a stub fixture without pinning `PATH` (or pinning it with the developer's own `PATH` on the tail) leaves the installed `kubectl`/`gh` reachable — the spec then tests the operator's machine. Pin `PATH` and `HOME` on `$WORKDIR`.
-- **Writing into fixture folders from a test.** The cwd is a copy; feature-local `fixtures/` and the shared `specs/fixtures/` pool are templates and stay pristine.
+- **Writing into fixture folders from a test.** The cwd is a copy; feature-local `_fixtures/` and the shared `specs/_fixtures/` pool are templates and stay pristine.
 - **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files (`.fixture(path)`, feature-local or `$FIXTURES/`), and `.seed()` is SQL-only (rule C7).
 - **Forgetting the extension in `toMatch('help')`.** The extension is part of the name (rule C6) — except for tree snapshots, which are directories.
 

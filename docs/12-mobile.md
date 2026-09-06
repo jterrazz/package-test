@@ -240,13 +240,13 @@ specs/mobile/
 ├── mobile.specification.ts     # runner at the facet ROOT (rule C1)
 └── <domain>/
     ├── <aspect>.test.ts
-    ├── expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
+    ├── _expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
     └── contracts/               # what the declared backend serves — with the `backend` option
         ├── newsroom.contracts.ts
         └── http/…
 ```
 
-No `seeds/` or `requests/` — `specification.mobile()` has no `services` option and no request-file format; `.open()` calls are inline, and the golden is always `expected/<name>`.
+No `_seeds/` or `_requests/` — `specification.mobile()` has no `services` option and no request-file format; `.open()` calls are inline, and the golden is always `_expected/<name>`.
 
 ## Pitfalls
 

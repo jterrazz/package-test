@@ -68,7 +68,7 @@ describe('postgres service', () => {
         test('executes multiple statements from file', async () => {
             // Given - SQL file with two inserts
             await db.reset();
-            const sql = readFileSync(resolve(import.meta.dirname, 'seeds/two-users.sql'), 'utf8');
+            const sql = readFileSync(resolve(import.meta.dirname, '_seeds/two-users.sql'), 'utf8');
             await db.seed(sql);
 
             // Then - both rows exist

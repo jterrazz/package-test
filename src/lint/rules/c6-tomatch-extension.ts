@@ -1,5 +1,6 @@
 import { dirname, join } from 'node:path';
 
+import { GROUND_EXPECTED } from '../../core/specification/shared/ground.js';
 import { memberPropertyName, segments, stringValue, walk } from '../ast.js';
 import { isDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
@@ -34,11 +35,11 @@ function subjectIsDirectory(toMatchCallee: AstNode): boolean {
 /**
  * CONVENTIONS C6 — the extension is part of the fixture name and mandatory in
  * `toMatch` (`'help.txt'`, never `'help'`) — except for directory-tree
- * snapshots, which are directories under `expected/`.
+ * snapshots, which are directories under `_expected/`.
  *
  * The directory exception is resolved two ways: statically, when the expect
  * subject visibly chains `.directory(…)`; else on disk, when
- * `expected/<name>/` exists next to the spec (cached stat).
+ * `_expected/<name>/` exists next to the spec (cached stat).
  */
 export const c6ToMatchExtension: LintRule = {
     create(context: RuleContext): Visitor {
@@ -64,7 +65,7 @@ export const c6ToMatchExtension: LintRule = {
                 if (subjectIsDirectory(callee)) {
                     return; // Directory-tree snapshot, statically visible.
                 }
-                if (isDirectory(join(dirname(file), 'expected', name))) {
+                if (isDirectory(join(dirname(file), GROUND_EXPECTED, name))) {
                     return; // Directory-tree snapshot on disk.
                 }
                 context.report({ data: { name }, messageId: 'missingExtension', node: argument });
@@ -75,7 +76,7 @@ export const c6ToMatchExtension: LintRule = {
         docs: RULE_DOCS['c6-tomatch-extension'],
         messages: {
             missingExtension:
-                'toMatch("{{name}}") is missing its extension — the extension is part of the fixture name ("help.txt", never "help"); only directory-tree snapshots (expected/<name>/) omit it (C6 — see docs/10-linting.md).',
+                'toMatch("{{name}}") is missing its extension — the extension is part of the fixture name ("help.txt", never "help"); only directory-tree snapshots (_expected/<name>/) omit it (C6 — see docs/10-linting.md).',
         },
         type: 'problem',
     },

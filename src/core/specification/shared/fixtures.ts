@@ -1,14 +1,17 @@
 import { basename, dirname, resolve } from 'node:path';
 
+import { GROUND_FIXTURES } from './ground.js';
+
 /**
  * Fixture path resolution + copy semantics for the `cli` facet's `.fixture()`.
  *
  * A fixture path is one of two shapes:
  *
- *  - `$FIXTURES/<rest>` — the shared pool at `<specs-root>/fixtures/<rest>`,
+ *  - `$FIXTURES/<rest>` — the shared pool at `<specs-root>/_fixtures/<rest>`,
  *    where `<specs-root>` is the nearest ancestor directory named `specs`.
- *  - `<path>` (no marker) — feature-local, at `<test-dir>/fixtures/<path>`.
+ *  - `<path>` (no marker) — feature-local, at `<test-dir>/_fixtures/<path>`.
  *
+ * The leading underscore is the ground rule of a spec tree ({@link GROUND_FIXTURES}).
  * Any other `$`-prefixed marker is a usage error (listed against the known
  * markers). Copy semantics mirror rsync's trailing-slash rule (see
  * {@link copyPlan}).
@@ -39,9 +42,10 @@ export function discoverSpecsRoot(startDir: string): string {
         dir = parent;
     }
     throw new Error(
-        `.fixture(): the $FIXTURES marker resolves to <specs-root>/fixtures, but no directory ` +
-            `named "specs" was found walking up from ${startDir}. Move the specification under a ` +
-            `specs/ directory, or use a feature-local fixtures/ path (no $FIXTURES marker).`,
+        `.fixture(): the $FIXTURES marker resolves to <specs-root>/${GROUND_FIXTURES}, but no ` +
+            `directory named "specs" was found walking up from ${startDir}. Move the ` +
+            `specification under a specs/ directory, or use a feature-local ` +
+            `${GROUND_FIXTURES}/ path (no $FIXTURES marker).`,
     );
 }
 
@@ -54,17 +58,17 @@ export function resolveFixtureSource(path: string, testDir: string): string {
     const clean = path.replace(/\/+$/, '');
     if (clean === '$FIXTURES' || path.startsWith('$FIXTURES/')) {
         const rest = clean.slice('$FIXTURES'.length).replace(/^\/+/, '');
-        return resolve(discoverSpecsRoot(testDir), 'fixtures', rest);
+        return resolve(discoverSpecsRoot(testDir), GROUND_FIXTURES, rest);
     }
     if (path.startsWith('$')) {
         const marker = clean.split('/')[0];
         throw new Error(
             `.fixture("${path}"): unknown marker "${marker}". Known markers: ` +
                 `${KNOWN_FIXTURE_MARKERS.join(', ')}. A path without a marker is feature-local ` +
-                `(resolved under <test-dir>/fixtures/).`,
+                `(resolved under <test-dir>/${GROUND_FIXTURES}/).`,
         );
     }
-    return resolve(testDir, 'fixtures', clean);
+    return resolve(testDir, GROUND_FIXTURES, clean);
 }
 
 /** A resolved copy operation: where to read from, where to write to. */

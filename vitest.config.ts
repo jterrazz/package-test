@@ -9,7 +9,7 @@ export default defineConfig({
                 // The framework eats its own document format:
                 // `specs/cli/literate/*.spec.yaml` are collected as TEST FILES and run
                 // Through the registered runner. The glob stops at depth 1 so the
-                // Deliberately-wrong twins under `literate/fixtures/` stay inputs to
+                // Deliberately-wrong twins under `literate/_fixtures/` stay inputs to
                 // The negative specs, never tests.
                 plugins: [
                     literate({

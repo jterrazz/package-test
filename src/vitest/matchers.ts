@@ -26,6 +26,7 @@ import {
     structuralEquals,
     textEquals,
 } from '../core/matching/structural.js';
+import { GROUND_EXPECTED } from '../core/specification/shared/ground.js';
 import {
     formatDirectoryDiff,
     formatResponseDiff,
@@ -83,7 +84,7 @@ function formatJson(value: unknown): string {
 
 function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'stream');
-    const filePath = resolve(accessor.testDir, 'expected', name);
+    const filePath = resolve(accessor.testDir, GROUND_EXPECTED, name);
     const actual = accessor.comparableText;
 
     if (shouldUpdateSnapshots() && !frozen) {
@@ -94,7 +95,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
         const merged = mergeTextPreservingPlaceholders(previous, actual, accessor.captures);
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, merged);
-        return PASS(`updated expected/${name}`);
+        return PASS(`updated ${GROUND_EXPECTED}/${name}`);
     }
 
     if (!existsSync(filePath)) {
@@ -106,7 +107,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
     // Text snapshots share the unified {{token}} grammar (CONVENTIONS D4).
     const expected = readFileSync(filePath, 'utf8');
     if (textEquals(expected, actual, accessor.captures)) {
-        return PASS(`expected ${accessor.streamName} not to match expected/${name}`);
+        return PASS(`expected ${accessor.streamName} not to match ${GROUND_EXPECTED}/${name}`);
     }
     // The diff judges each line through the SAME grammar the comparison used,
     // So a token line that matched is shown as equal instead of competing with
@@ -121,7 +122,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
 
 function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'json');
-    const filePath = resolve(accessor.testDir, 'expected', name);
+    const filePath = resolve(accessor.testDir, GROUND_EXPECTED, name);
     const actual = accessor.value;
 
     if (shouldUpdateSnapshots() && !frozen) {
@@ -137,7 +138,7 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
             : mergePreservingPlaceholders(null, actual, accessor.captures.workdir);
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, formatJson(merged));
-        return PASS(`updated expected/${name}`);
+        return PASS(`updated ${GROUND_EXPECTED}/${name}`);
     }
 
     if (!existsSync(filePath)) {
@@ -146,7 +147,7 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
 
     const expected = JSON.parse(readFileSync(filePath, 'utf8'));
     if (structuralEquals(expected, actual, accessor.captures)) {
-        return PASS(`expected JSON not to match expected/${name}`);
+        return PASS(`expected JSON not to match ${GROUND_EXPECTED}/${name}`);
     }
     return FAIL(formatResponseDiff(name, renderExpected(expected), actual));
 }
@@ -160,7 +161,7 @@ interface ActualResponse {
 }
 
 /**
- * Build the updated `expected/*.http` fixture content from the previous
+ * Build the updated `_expected/*.http` fixture content from the previous
  * fixture and the actual response (CONVENTIONS D5). Headers are the
  * INTERSECTION with the actual response: placeholders still matching are
  * preserved, stale values are replaced, headers absent from the actual
@@ -204,7 +205,7 @@ export function buildUpdatedResponse(
 }
 
 /**
- * Compare a parsed `expected/*.http` fixture against an actual response.
+ * Compare a parsed `_expected/*.http` fixture against an actual response.
  * Returns the failure message, or null when everything matches.
  *
  * @internal Exported for unit tests.
@@ -254,27 +255,30 @@ function matchResponseFile(
     frozen: boolean,
 ): MatcherResult {
     requireExtension(name, 'response');
-    const filePath = resolve(accessor.testDir, 'expected', name);
+    const filePath = resolve(accessor.testDir, GROUND_EXPECTED, name);
 
     if (shouldUpdateSnapshots() && !frozen) {
         const previous = existsSync(filePath)
-            ? parseResponseFile(readFileSync(filePath, 'utf8'), `expected/${name}`)
+            ? parseResponseFile(readFileSync(filePath, 'utf8'), `${GROUND_EXPECTED}/${name}`)
             : null;
 
         const updated = buildUpdatedResponse(previous, accessor, accessor.captures.workdir);
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, serializeResponseFile(updated));
-        return PASS(`updated expected/${name}`);
+        return PASS(`updated ${GROUND_EXPECTED}/${name}`);
     }
 
     if (!existsSync(filePath)) {
         return FAIL(`Response fixture "${name}" does not exist at ${filePath}.\n${UPDATE_HINT}`);
     }
 
-    const expected = parseResponseFile(readFileSync(filePath, 'utf8'), `expected/${name}`);
+    const expected = parseResponseFile(
+        readFileSync(filePath, 'utf8'),
+        `${GROUND_EXPECTED}/${name}`,
+    );
     const failure = compareResponse(name, expected, accessor, accessor.captures);
     return failure === null
-        ? PASS(`expected response not to match expected/${name}`)
+        ? PASS(`expected response not to match ${GROUND_EXPECTED}/${name}`)
         : FAIL(failure);
 }
 
@@ -287,7 +291,7 @@ async function matchTreeFile(
     scope: CaptureScope,
     frozen: boolean,
 ): Promise<MatcherResult> {
-    const fixtureDir = resolve(testDir, 'expected', name);
+    const fixtureDir = resolve(testDir, GROUND_EXPECTED, name);
 
     if (shouldUpdateSnapshots() && !frozen) {
         // Preserve placeholder-covered file contents from the previous
@@ -310,7 +314,7 @@ async function matchTreeFile(
                 writeFileSync(resolve(fixtureDir, file), merged);
             }
         }
-        return PASS(`updated expected/${name}/`);
+        return PASS(`updated ${GROUND_EXPECTED}/${name}/`);
     }
 
     if (!existsSync(fixtureDir)) {
@@ -319,7 +323,7 @@ async function matchTreeFile(
 
     const diff = await diffDirectories(fixtureDir, actualRoot, { scope });
     if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
-        return PASS(`expected directory not to match expected/${name}/`);
+        return PASS(`expected directory not to match ${GROUND_EXPECTED}/${name}/`);
     }
 
     return FAIL(formatDirectoryDiff(name, diff, 'Run with TEST_UPDATE=1 to update the fixture.'));

@@ -32,10 +32,10 @@ import { expect, test } from 'vitest';
 import { api } from '../api.specification.js';
 
 test('creates a user', async () => {
-    // Given - the complete request from requests/create-user.http
+    // Given - the complete request from _requests/create-user.http
     const result = await api.request('create-user.http');
 
-    // Then - status + headers + body from expected/user-created.http; row in db
+    // Then - status + headers + body from _expected/user-created.http; row in db
     expect(result.response).toMatch('user-created.http');
     await expect(result.table('users')).toMatchRows({
         columns: ['name'],
@@ -97,7 +97,7 @@ import { specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
 export const { cleanup, website } = await specification.website({
-    server: { command: 'node specs/fixtures/website-app/server.mjs', ready: '/' },
+    server: { command: 'node specs/_fixtures/website-app/server.mjs', ready: '/' },
 });
 
 afterAll(cleanup);
@@ -225,7 +225,7 @@ Tests a rendered website: `.fetch(path)` for a raw HTTP exchange (redirects neve
 
 ```typescript
 export const { website, cleanup } = await specification.website({
-    server: { command: 'node specs/fixtures/website-app/server.mjs', ready: '/' },
+    server: { command: 'node specs/_fixtures/website-app/server.mjs', ready: '/' },
 });
 
 // Raw exchange — status + headers, redirects surface as 3xx
@@ -268,9 +268,9 @@ When `root` is absent, the framework walks up from the specification file to the
 
 | Method                                  | Facets       | Description                                                                                                 |
 | --------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })`      | all          | Load SQL from `seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1)      |
-| `.fixture("file")`                      | cli          | Copy the feature-local `fixtures/file` into the working directory                                           |
-| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/fixtures/name/` project into the cwd (trailing `/` = contents; layers)             |
+| `.seed("file.sql", { database? })`      | all          | Load SQL from `_seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1)     |
+| `.fixture("file")`                      | cli          | Copy the feature-local `_fixtures/file` into the working directory                                          |
+| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/_fixtures/name/` project into the cwd (trailing `/` = contents; layers)            |
 | `.env({ KEY: "value" })`                | cli          | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                                  |
 | `.headers({ "Accept-Language": "fr" })` | api, website | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)                  |
 | `.intercept(contracts)`                 | all but cli  | Declare the world: a `defineContracts(...)` composite — MSW on api/jobs, the stub backend on website/mobile |
@@ -281,7 +281,7 @@ When `root` is absent, the framework walks up from the specification file to the
 
 | Method                                     | Facet   | Resolves to    | Description                                                                              |
 | ------------------------------------------ | ------- | -------------- | ---------------------------------------------------------------------------------------- |
-| `.request("create-user.http")`             | api     | `HttpResult`   | Send the COMPLETE request from `requests/<file>` (method, path, headers, raw body)       |
+| `.request("create-user.http")`             | api     | `HttpResult`   | Send the COMPLETE request from `_requests/<file>` (method, path, headers, raw body)      |
 | `.get(path)` / `.delete(path)`             | api     | `HttpResult`   | Inline requests for simple cases                                                         |
 | `.post(path, body?)` / `.put(path, body?)` | api     | `HttpResult`   | Inline body: plain object, JSON-serialized                                               |
 | `.trigger("name")`                         | jobs    | `BaseResult`   | Execute a registered job                                                                 |
@@ -302,7 +302,7 @@ Accessors are **read-only**; the framework registers subject-typed matchers on v
 ```typescript
 // HTTP
 expect(result.status).toBe(201);
-expect(result.response).toMatch('user-created.http'); // expected/<name> — status + header subset + body
+expect(result.response).toMatch('user-created.http'); // _expected/<name> — status + header subset + body
 expect(result.response.body).toEqual({ error: 'User 999 not found' });
 
 // Tables (async — queries the database)
@@ -314,33 +314,33 @@ await expect(result.table('orders', { database: 'db' })).toBeEmpty();
 
 // Streams (ANSI stripped by default; .text stays raw)
 expect(result.stdout).toContain('Build completed');
-expect(result.stdout).toMatch('help.txt'); // expected/help.txt — {{token}}-aware
-expect(result.json).toMatch('config.json'); // expected/config.json
+expect(result.stdout).toMatch('help.txt'); // _expected/help.txt — {{token}}-aware
+expect(result.json).toMatch('config.json'); // _expected/config.json
 expect(result.json.value).toMatchObject({ name: 'shoply' });
 
 // Files & trees
 expect(result.file('my-shop/shoply.yaml').content).toContain('name: my-shop');
-await expect(result.directory('my-shop')).toMatch('shop-scaffold'); // expected/shop-scaffold/
+await expect(result.directory('my-shop')).toMatch('shop-scaffold'); // _expected/shop-scaffold/
 await expect(result.filesystem).toMatch('upgraded-shop'); // whole cwd
 
 // Containers (docker-aware cli)
 await expect(result.container('alpha')).toBeRunning();
 ```
 
-`toMatch` always resolves against `expected/<name>` — every subject, no exceptions (only `.request()` reads `requests/`). The folder is flat: a slash in the name creates a subfolder; the extension is part of the name and required, except for tree snapshots which are directories.
+`toMatch` always resolves against `_expected/<name>` — every subject, no exceptions (only `.request()` reads `_requests/`). The folder is flat: a slash in the name creates a subfolder; the extension is part of the name and required, except for tree snapshots which are directories.
 
 **Updating snapshots:** `TEST_UPDATE=1` or `vitest -u`. Update mode writes **tokens**, not values — segments covered by an existing placeholder are preserved, and `{{workdir}}` is substituted automatically.
 
 ## Dynamic values — one `{{token}}` grammar
 
-The same vocabulary works in `expected/*.http` (body AND headers), `expected/*.json`, text snapshots, and tree-snapshot file contents — and in code via `match.*`:
+The same vocabulary works in `_expected/*.http` (body AND headers), `_expected/*.json`, text snapshots, and tree-snapshot file contents — and in code via `match.*`:
 
 `uuid` `ulid` `iso8601` `date` `time` `duration` `number` `int` `float` `semver` `sha` `hex` `base64` `port` `ip` `url` `email` `path` `workdir` `string` `any`
 
 Each token is capturable via `{{type#ref}}`: the first occurrence captures, later occurrences must be equal (scope: one spec). Code-side: `match.ref('order')`, `match.ref('intent', { not: 'order' })`, `match.regex(/…/)`.
 
 ```http
-### expected/order-created.http
+### _expected/order-created.http
 HTTP/1.1 201 Created
 Content-Type: application/json
 Location: /orders/{{uuid#order}}
@@ -436,14 +436,14 @@ specs/<facet>/                  # api | jobs | cli | integrations | lint
 ├── <facet>.specification.ts    # runner(s) at the facet ROOT (rule C1)
 └── <domain>/                   # a product command/area — 1..n test files
     ├── <aspect>.test.ts
-    ├── seeds/          # *.sql ONLY — database state
-    ├── requests/       # *.http — inputs: COMPLETE request (method, path, headers, body)
+    ├── _seeds/          # *.sql ONLY — database state
+    ├── _requests/       # *.http — inputs: COMPLETE request (method, path, headers, body)
     ├── contracts/      # <name>.contracts.ts facade + <provider>/<name>.ts units + their .response.json / .request.ts data
-    ├── fixtures/       # domain-local files/dirs copied into the cwd (cli) — shared pool lives at specs/fixtures/
-    └── expected/       # ALL expected fixtures, FLAT (incl. response *.http) — a slash in the name creates a subfolder
+    ├── _fixtures/       # domain-local files/dirs copied into the cwd (cli) — shared pool lives at specs/_fixtures/
+    └── _expected/       # ALL expected fixtures, FLAT (incl. response *.http) — a slash in the name creates a subfolder
 ```
 
-A test with its OWN asset dirs gets its own domain folder; tests without local assets group as sibling `<aspect>.test.ts` files inside a named group folder (the folder follows the assets). `.fixture(path)` is the one verb that copies into the cwd: domain-local (`fixtures/…`) or shared (`$FIXTURES/…` → `specs/fixtures/…`), with rsync trailing-slash semantics and layering. `.seed()` is SQL-only.
+A test with its OWN asset dirs gets its own domain folder; tests without local assets group as sibling `<aspect>.test.ts` files inside a named group folder (the folder follows the assets). `.fixture(path)` is the one verb that copies into the cwd: domain-local (`_fixtures/…`) or shared (`$FIXTURES/…` → `specs/_fixtures/…`), with rsync trailing-slash semantics and layering. `.seed()` is SQL-only.
 
 Every test contains `// Given -` and `// Then -` comments (always both; `// When -` only if the action is not obvious — the chain IS the when). User-facing framework env vars: `TEST_MODE` and `TEST_UPDATE` — the only ones you set; the framework also reads vitest's `VITEST_POOL_ID` for per-worker isolation.
 

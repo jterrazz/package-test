@@ -16,12 +16,12 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // D9 aggregates capture-ref uses across code (`match.ref`) AND the `{{kind#ref}}`
-// Tokens of the `expected/` fixtures a test references — so the cases need a
+// Tokens of the `_expected/` fixtures a test references — so the cases need a
 // Real feature dir with real fixtures on disk. Built once at module load (before
 // Vitest executes the collected cases) so the rule can read them.
 const featureDir = mkdtempSync(join(tmpdir(), 'd9w-'));
 const specsFeatureDir = join(featureDir, 'specs', 'app', 'widget');
-const expectedDir = join(specsFeatureDir, 'expected');
+const expectedDir = join(specsFeatureDir, '_expected');
 mkdirSync(expectedDir, { recursive: true });
 // A fixture whose only capture ref appears exactly once, nowhere in code.
 writeFileSync(join(expectedDir, 'lonely.txt'), 'id: {{uuid#lonely}}\n');

@@ -13,7 +13,7 @@ Guiding aim: **most enforcement is programmatic, not manual review.**
 Each mechanized rule names **one of four enforcement channels**:
 
 - **static** — the `jterrazz/*` oxlint plugin (one `jterrazz/<rule>` per rule, AST analysis) plus the `conventions` checker step (`dist/checker.js`) for the data fixtures oxlint never visits.
-- **checker** — passes of the same bundled binary that read what oxlint cannot: the `{{token}}` grammar of `expected/`/`requests/` fixtures (D4/D4b/D10) and cross-file analyses (a `*.specification.ts` crossed with its tests, or a whole feature tree: C9, B5-by-inference, A7).
+- **checker** — passes of the same bundled binary that read what oxlint cannot: the `{{token}}` grammar of `_expected/`/`_requests/` fixtures (D4/D4b/D10) and cross-file analyses (a `*.specification.ts` crossed with its tests, or a whole feature tree: C9, B5-by-inference, A7).
 - **runtime** — the framework refuses incorrect usage at execution time, where static analysis abstains (a non-literal argument) or cannot reach (network, container lifecycle): A6 ambiguous binding, A7, B2, B6 injection, D7 strict contracts, I3 `.intercept()` in compose.
 - **process** — review judgement no channel can settle alone: C1 asset-driven grouping, D11 golden-file, K1 retro-propagation.
 
@@ -52,7 +52,7 @@ Three rules cannot be mechanized — they turn on judgement no single channel ca
 
 ### C1 — the folder follows the assets
 
-The grouping criterion: a test that owns **its own** asset directories (`fixtures/`, `expected/`, `seeds/`, …) gets **its own** domain folder; tests **without local assets** (or sharing the `$FIXTURES/` pool) group as sibling `<aspect>.test.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `c1-domain-structure` checks only placement; which of the two shapes is right is the review call.
+The grouping criterion: a test that owns **its own** asset directories (`_fixtures/`, `_expected/`, `_seeds/`, …) gets **its own** domain folder; tests **without local assets** (or sharing the `$FIXTURES/` pool) group as sibling `<aspect>.test.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `c1-domain-structure` checks only placement; which of the two shapes is right is the review call.
 
 Placement itself is **declared**, because a spec tree may legitimately have a shape this package cannot know:
 
@@ -68,6 +68,8 @@ Placement itself is **declared**, because a spec tree may legitimately have a sh
 | `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                                                   |
 
 A project states the shape it has — `facet` when asset-less tests sit beside their siblings at the facet root, `mirror` when the tree mirrors something outside itself — and keeps a checked shape, instead of switching the rule off and keeping none.
+
+One clause of the rule is not the project's to declare, and holds in every mode, `off` included: **a folder whose name carries a leading underscore is ground, never a domain**, so no spec lives inside one. Depth is a shape a tree may choose; the ground/member split is the naming law recapped under [H](#h--naming-recap).
 
 ### D11 — golden-file, not a cluster of greps
 
@@ -89,21 +91,27 @@ Every defect class discovered (review, bug, migration) grows, **in the same chan
 
 ## H — Naming recap
 
-| Thing           | Rule                                                                                                                       |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `fixtures/`)                           |
-| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                |
-| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                             |
-| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                                  |
-| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([04](04-cli.md#spec-documents--casespecyaml)) |
-| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                    |
-| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                            |
-| Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic)     |
-| Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                         |
-| Requests        | `requests/<name>.http` (inputs)                                                                                            |
-| Snapshots       | `expected/<name>` (all expected, flat, extension included — incl. response `.http`)                                        |
-| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)                                |
-| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                                                 |
+One rule decides every folder of a spec tree: **what a spec stands on carries the underscore; a spec's own folder never does.** The four names are `_fixtures/`, `_expected/`, `_requests/` and `_seeds/` — inert material the framework resolves by path. A facet, a domain, and `contracts/` are members of the row, not ground: a contract is TypeScript a spec imports, so it stays bare. `docker/` sits at the project root, outside any row of specs, and is untouched by the rule.
+
+Two further rules decide WHERE a fixture lives, and they are the same question asked twice. **The pool is for what several leaves share**: a directory of `specs/_fixtures/` that exactly one spec directory reaches for belongs beside that leaf, as `<leaf>/_fixtures/<name>/` (C14, autofixed by `jterrazz-test-check --fix`). **A leaf's own ground is reached only from that leaf**: a `.fixture()` path that climbs out of the referring spec's `_fixtures/` is an error, and the sharing it wants is what the pool declares (C15).
+
+| Thing           | Rule                                                                                                                        |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `_fixtures/`)                           |
+| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                 |
+| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                              |
+| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                                   |
+| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `_expected/` ([04](04-cli.md#spec-documents--casespecyaml)) |
+| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                     |
+| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                             |
+| Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic)      |
+| Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                          |
+| Requests        | `_requests/<name>.http` (inputs)                                                                                            |
+| Seeds           | `_seeds/<name>.sql` (database state)                                                                                        |
+| Fixtures        | `_fixtures/<name>` (file state) — the leaf's own; the shared pool is `specs/_fixtures/`, reached by `$FIXTURES/`            |
+| Snapshots       | `_expected/<name>` (all expected, flat, extension included — incl. response `.http`)                                        |
+| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)                                 |
+| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                                                  |
 
 ## I — Source-code architecture
 

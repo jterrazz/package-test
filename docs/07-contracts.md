@@ -4,7 +4,7 @@ Everything the outside world replies is declared as a **contract**: a request to
 
 ## The principle
 
-> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`requests/`, `expected/`) — never a mock format.
+> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`_requests/`, `_expected/`) — never a mock format.
 
 A contract is behavior: it decides what matches and what is served, it can count, it can be required, it can compose. That belongs in TypeScript, where the type checker and the app's own builders are reachable. A 200-line payload is not behavior — it is data, and it goes to a sibling `.json` the contract imports. And `.http` keeps the one role it is good at: a complete, readable document of a request your api receives or a response your api returns.
 

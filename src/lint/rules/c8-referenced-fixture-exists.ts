@@ -1,5 +1,11 @@
 import { dirname, join } from 'node:path';
 
+import {
+    GROUND_EXPECTED,
+    GROUND_FIXTURES,
+    GROUND_REQUESTS,
+    GROUND_SEEDS,
+} from '../../core/specification/shared/ground.js';
 import { memberPropertyName, specsAnchor, stringValue } from '../ast.js';
 import { isDirectory, isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
@@ -7,11 +13,11 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
 
-/** The conventional sibling directory each fixture-referencing verb reads from. */
+/** The ground directory each fixture-referencing verb reads from. */
 const VERB_ROOTS: Record<string, string> = {
-    request: 'requests',
-    seed: 'seeds',
-    toMatch: 'expected',
+    request: GROUND_REQUESTS,
+    seed: GROUND_SEEDS,
+    toMatch: GROUND_EXPECTED,
 };
 
 /**
@@ -30,19 +36,19 @@ function resolveFixture(
     specsDir: string,
 ): string | undefined {
     if (argument.startsWith('$FIXTURES/')) {
-        return join(specsDir, 'fixtures', argument.slice(10));
+        return join(specsDir, GROUND_FIXTURES, argument.slice(10));
     }
     if (argument.startsWith('$')) {
         return undefined; // Unknown marker — B2's concern, not existence.
     }
-    return join(featureDir, 'fixtures', argument);
+    return join(featureDir, GROUND_FIXTURES, argument);
 }
 
 /**
  * CONVENTIONS C8 — a fixture referenced by a literal must exist on disk under
- * its conventional root: `.request(x)`→`requests/x`, `.seed(x)`→`seeds/x`,
- * `.fixture(x)`→feature `fixtures/` (or the `$FIXTURES/` pool at the nearest
- * `specs/fixtures/`), `toMatch(x)`→`expected/x` (file or tree snapshot). A typo
+ * its ground root: `.request(x)`→`_requests/x`, `.seed(x)`→`_seeds/x`,
+ * `.fixture(x)`→the leaf's `_fixtures/` (or the `$FIXTURES/` pool at the nearest
+ * `specs/_fixtures/`), `toMatch(x)`→`_expected/x` (file or tree snapshot). A typo
  * that would fail only at runtime is caught statically. Non-literal arguments
  * are out of static reach and skipped.
  */
@@ -74,7 +80,7 @@ export const c8ReferencedFixtureExists: LintRule = {
                     );
                     if (target !== undefined && !isFile(target) && !isDirectory(target)) {
                         context.report({
-                            data: { path: value, root: 'fixtures' },
+                            data: { path: value, root: GROUND_FIXTURES },
                             messageId: 'missing',
                             node: args[0],
                         });
@@ -107,7 +113,7 @@ export const c8ReferencedFixtureExists: LintRule = {
         docs: RULE_DOCS['c8-referenced-fixture-exists'],
         messages: {
             missing:
-                'Referenced fixture "{{path}}" does not exist on disk under its conventional {{root}}/ root (C8 — see docs/10-linting.md). Create it or fix the reference.',
+                'Referenced fixture "{{path}}" does not exist on disk under its ground {{root}}/ root (C8 — see docs/10-linting.md). Create it or fix the reference.',
         },
         type: 'problem',
     },

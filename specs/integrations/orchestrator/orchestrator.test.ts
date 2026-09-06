@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 // (container runtimes + service factories) the Orchestrator consumes.
 import { Orchestrator, postgres } from '../../../src/index.js';
 
-const FIXTURES_DIR = resolve(import.meta.dirname, '../../fixtures/app');
+const FIXTURES_DIR = resolve(import.meta.dirname, '../../_fixtures/app');
 
 describe('orchestrator', () => {
     describe('integration mode', () => {

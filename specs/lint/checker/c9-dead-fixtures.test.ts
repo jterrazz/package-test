@@ -6,7 +6,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (third-party linters) does not apply.
     test('rejects a fixture file no test literal references', async () => {
-        // Given - a feature whose seeds/ holds a file no test string references
+        // Given - a feature whose _seeds/ holds a file no test string references
         const result = await cli.fixture('$FIXTURES/lint-violations/c9-dead-fixtures/').exec('.');
 
         // Then - the checker fails with the full diagnostic naming the dead fixture
@@ -26,7 +26,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
     });
 
     test('reports a feature dir with conventional subdirs but no *.test.ts as an orphan', async () => {
-        // Given - a feature whose expected/ subdir exists with no test file beside it
+        // Given - a feature whose _expected/ subdir exists with no test file beside it
         const result = await cli.fixture('$FIXTURES/lint-violations/c9-orphan-dir/').exec('.');
 
         // Then - the orphan directory is flagged (the no-test branch)

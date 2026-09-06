@@ -132,7 +132,7 @@ test('shows help', async () => {
     // Given
     const result = await cli.exec('--help');
 
-    // Then - full snapshot of stdout against expected/help.txt
+    // Then - full snapshot of stdout against _expected/help.txt
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toMatch('help.txt');
 });
@@ -200,10 +200,10 @@ specs/
 │   ├── api.specification.ts
 │   └── users/
 │       ├── users.test.ts          # <aspect>.test.ts inside its domain (rule C1)
-│       ├── seeds/                 # *.sql
-│       ├── requests/              # *.http — complete requests (inputs)
+│       ├── _seeds/                 # *.sql
+│       ├── _requests/              # *.http — complete requests (inputs)
 │       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
-│       └── expected/              # all expected fixtures, flat — incl. response *.http (a slash in the name creates a subfolder)
+│       └── _expected/              # all expected fixtures, flat — incl. response *.http (a slash in the name creates a subfolder)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)
     └── help/

@@ -2,7 +2,7 @@
 
 > **Maintenance note** — This documentation is living: when implementation or usage reveals a new edge case, document it in the relevant chapter in the same change.
 
-`@jterrazz/test` is a declarative testing framework for APIs, background jobs, CLIs, rendered websites, and native mobile apps. You describe a spec — seeds, intercepts, one terminal action — and assert on a precisely typed result with `expect()`. Fixtures are files (`requests/*.http`, `expected/*`, `contracts/*.ts`), dynamic values are matched with one unified `{{token}}` grammar, and infrastructure (Postgres, Redis, SQLite, Docker Compose, a real chromium, or an iOS simulator) is started, isolated per vitest worker, and cleaned up for you. Five constructors, and only five: `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()`.
+`@jterrazz/test` is a declarative testing framework for APIs, background jobs, CLIs, rendered websites, and native mobile apps. You describe a spec — seeds, intercepts, one terminal action — and assert on a precisely typed result with `expect()`. Fixtures are files (`_requests/*.http`, `_expected/*`, `contracts/*.ts`), dynamic values are matched with one unified `{{token}}` grammar, and infrastructure (Postgres, Redis, SQLite, Docker Compose, a real chromium, or an iOS simulator) is started, isolated per vitest worker, and cleaned up for you. Five constructors, and only five: `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()`.
 
 ```typescript
 test('creates a user', async () => {

@@ -5,7 +5,7 @@ import { cli } from '../checker.specification.js';
 describe('lint — d10w tokens in requests (CONVENTIONS D10)', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (third-party linters) does not apply.
-    test('warns when a token leaks into a requests/ file', async () => {
+    test('warns when a token leaks into a _requests/ file', async () => {
         // Given - a request body carrying a {{uuid}} token
         const result = await cli
             .fixture('$FIXTURES/lint-violations/d10w-tokens-in-requests/')

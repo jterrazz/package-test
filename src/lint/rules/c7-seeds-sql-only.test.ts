@@ -14,7 +14,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the shared E2E fixture trees.
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const FIXTURES = resolve(import.meta.dirname, '../../../specs/_fixtures/lint-violations');
 
 ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
     invalid: [
@@ -31,7 +31,7 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
             code: 'test("x", () => {});',
             filename: `${FIXTURES}/c7-seeds-sql-only-ok/specs/app/widget/widget.test.ts`,
         },
-        // No seeds/ directory at this level (the feature has no seeds/ sibling).
+        // No _seeds/ directory at this level (the feature has no _seeds/ sibling).
         {
             code: 'test("x", () => {});',
             filename: `${FIXTURES}/c7-seeds-sql-only-ok/specs/app/app.test.ts`,

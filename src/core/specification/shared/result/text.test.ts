@@ -8,8 +8,8 @@ describe('text() — ad-hoc string as a golden subject', () => {
         await registerMatchers();
     });
 
-    test('toMatch resolves against expected/ next to the calling test', () => {
-        // Given - a message goldened at expected/text-basic.txt
+    test('toMatch resolves against _expected/ next to the calling test', () => {
+        // Given - a message goldened at _expected/text-basic.txt
         // Then - the fixture next to THIS test file resolves via caller detection
         expect(text('the operation could not complete\n')).toMatch('text-basic.txt');
     });

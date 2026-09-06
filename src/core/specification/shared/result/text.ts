@@ -24,14 +24,14 @@ export function stripAnsiCodes(value: string): string {
  * grammar.
  *
  * Text operations are **closed** over the type: `.grep(pattern)` returns a
- * `TextAccessor` (not a bare string), preserving the `expected/`-resolution
+ * `TextAccessor` (not a bare string), preserving the `_expected/`-resolution
  * context and the `transform`, so results are chainable
  * (`result.stdout.grep(a).grep(b)`) and snapshot-able
  * (`expect(result.stdout.grep('users.ts')).toMatch('block.txt')`).
  *
  * Assertions go through `expect()` matchers: `expect(result.stdout).toContain(...)`
  * and `expect(result.stdout).toMatch('name.txt')` (resolved against
- * `expected/<name>`, flat — with `{{token}}` support, CONVENTIONS D4).
+ * `_expected/<name>`, flat — with `{{token}}` support, CONVENTIONS D4).
  */
 export class TextAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */
@@ -97,7 +97,7 @@ export class TextAccessor {
  *
  * ```typescript
  * const message = await catchMessage(() => expect(result.response).toMatch('wrong-body.http'));
- * expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to expected/
+ * expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to _expected/
  * ```
  *
  * ANSI is stripped before every comparison (the raw form stays on `.text`),

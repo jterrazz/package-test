@@ -2,7 +2,7 @@
 
 Operative reference. Prose + examples: [docs/07-contracts.md](../../docs/07-contracts.md). Available on `api`, `jobs` (in-process MSW) and — with the `backend` option — `website`, `mobile` (declared stub backend). One selection queue serves all four.
 
-**Principle: TypeScript is behavior, `.json` is data, `.http` is a document at the boundary of YOUR OWN api (`requests/`, `expected/`) — never a mock format.** There is no other intercept form: no `.http` intercept file, no `'adapter/file.json'` response path.
+**Principle: TypeScript is behavior, `.json` is data, `.http` is a document at the boundary of YOUR OWN api (`_requests/`, `_expected/`) — never a mock format.** There is no other intercept form: no `.http` intercept file, no `'adapter/file.json'` response path.
 
 ## File layout (rules C4 / C10 / C11)
 

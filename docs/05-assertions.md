@@ -20,9 +20,9 @@ Everything else is synchronous — `await`-ing it is harmless but wrong-by-conve
 
 ### `toMatch` resolution (rule D3)
 
-`.request(file)` reads `requests/<file>`. Everything else is expected output: `expect(...).toMatch(name)` **always** resolves against `expected/<name>`, for every subject — `response`, `stdout`, `stderr`, `json`, `directory`, `filesystem`. There is no per-subject resolution.
+`.request(file)` reads `_requests/<file>`. Everything else is expected output: `expect(...).toMatch(name)` **always** resolves against `_expected/<name>`, for every subject — `response`, `stdout`, `stderr`, `json`, `directory`, `filesystem`. There is no per-subject resolution.
 
-`expected/` is flat: `toMatch('help.txt')` → `expected/help.txt`. A slash in the name creates a subfolder: `toMatch('build/verbose.txt')` → `expected/build/verbose.txt` (rule C5). The extension is part of the name and mandatory (`'help.txt'`, never `'help'`) — except for tree snapshots, which are directories: `toMatch('shop-scaffold')` → `expected/shop-scaffold/` (rule C6).
+`_expected/` is flat: `toMatch('help.txt')` → `_expected/help.txt`. A slash in the name creates a subfolder: `toMatch('build/verbose.txt')` → `_expected/build/verbose.txt` (rule C5). The extension is part of the name and mandatory (`'help.txt'`, never `'help'`) — except for tree snapshots, which are directories: `toMatch('shop-scaffold')` → `_expected/shop-scaffold/` (rule C6).
 
 All file-based comparisons understand the [`{{token}}` grammar](06-tokens.md); all code-side dynamic values use `match.*`.
 
@@ -47,9 +47,9 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 
 ## `result.response` — HTTP response (api)
 
-| Matcher             | Sync/async | Resolves against  | Example                                                |
-| ------------------- | ---------- | ----------------- | ------------------------------------------------------ |
-| `toMatch('x.http')` | sync       | `expected/x.http` | `expect(result.response).toMatch('user-created.http')` |
+| Matcher             | Sync/async | Resolves against   | Example                                                |
+| ------------------- | ---------- | ------------------ | ------------------------------------------------------ |
+| `toMatch('x.http')` | sync       | `_expected/x.http` | `expect(result.response).toMatch('user-created.http')` |
 
 Checks, in order: the status line, the listed headers (**subset** — unlisted response headers are unconstrained, rule C3), then the body. Placeholders apply in headers _and_ body, with `#ref` captures shared across both:
 
@@ -107,10 +107,10 @@ A failing `toMatchRows` prints the expected grid against the actual rows for the
 
 Streams are compared **after ANSI stripping** (rule D6); the raw capture stays available as `.text`.
 
-| Matcher               | Sync/async | Resolves against | Example                                                           |
-| --------------------- | ---------- | ---------------- | ----------------------------------------------------------------- |
-| `toMatch('x.txt')`    | sync       | `expected/x.txt` | `expect(result.stdout).toMatch('help.txt')`                       |
-| `toContain('needle')` | sync       | —                | `expect(result.stderr).toContain("Unknown command 'frobnicate'")` |
+| Matcher               | Sync/async | Resolves against  | Example                                                           |
+| --------------------- | ---------- | ----------------- | ----------------------------------------------------------------- |
+| `toMatch('x.txt')`    | sync       | `_expected/x.txt` | `expect(result.stdout).toMatch('help.txt')`                       |
+| `toContain('needle')` | sync       | —                 | `expect(result.stderr).toContain("Unknown command 'frobnicate'")` |
 
 `toMatch` on a stream is a full-text snapshot; the fixture may contain any [token](06-tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
 
@@ -120,7 +120,7 @@ Streams are compared **after ANSI stripping** (rule D6); the raw capture stays a
 
 ```typescript
 // .grep() returns a TextAccessor — chainable and snapshot-able, so the same
-// Token grammar and expected/ resolution apply as on the stream itself.
+// Token grammar and _expected/ resolution apply as on the stream itself.
 expect(result.stdout.grep('products/ok.yaml')).not.toContain('error'); // absence probe
 expect(result.stdout.grep('products/broken.yaml')).toMatch('broken-block.txt'); // snapshot a block
 ```
@@ -131,10 +131,10 @@ expect(result.stdout.grep('products/broken.yaml')).toMatch('broken-block.txt'); 
 
 The product surface of a test framework **is** its error messages and reports; golden them in full instead of reconstructing them with a cluster of `toContain` probes.
 
-| Matcher               | Sync/async | Resolves against | Example                                            |
-| --------------------- | ---------- | ---------------- | -------------------------------------------------- |
-| `toMatch('x.txt')`    | sync       | `expected/x.txt` | `expect(text(message)).toMatch('parse-error.txt')` |
-| `toContain('needle')` | sync       | —                | `expect(text(message)).toContain('did you mean')`  |
+| Matcher               | Sync/async | Resolves against  | Example                                            |
+| --------------------- | ---------- | ----------------- | -------------------------------------------------- |
+| `toMatch('x.txt')`    | sync       | `_expected/x.txt` | `expect(text(message)).toMatch('parse-error.txt')` |
+| `toContain('needle')` | sync       | —                 | `expect(text(message)).toContain('did you mean')`  |
 
 ```typescript
 import { text } from '@jterrazz/test';
@@ -156,9 +156,9 @@ expect(text(message)).toMatch('errors/wrong-body-error.txt');
 
 ## `result.json` — parsed stdout (cli)
 
-| Matcher             | Sync/async | Resolves against  | Example                                      |
-| ------------------- | ---------- | ----------------- | -------------------------------------------- |
-| `toMatch('x.json')` | sync       | `expected/x.json` | `expect(result.json).toMatch('config.json')` |
+| Matcher             | Sync/async | Resolves against   | Example                                      |
+| ------------------- | ---------- | ------------------ | -------------------------------------------- |
+| `toMatch('x.json')` | sync       | `_expected/x.json` | `expect(result.json).toMatch('config.json')` |
 
 Deep-equal against the JSON fixture; the fixture may embed tokens (`"id": "{{uuid}}"`). Failure prints a structural object diff (missing keys, extra keys, per-key value mismatches). For partial checks, read `.value` and use native `toMatchObject`.
 
@@ -173,17 +173,17 @@ A pure read accessor — no framework matcher; assert on its properties with nat
 
 ## `result.directory(name)` — tree snapshots (cli)
 
-| Matcher          | Sync/async | Resolves against              | Example                                                              |
-| ---------------- | ---------- | ----------------------------- | -------------------------------------------------------------------- |
-| `toMatch('dir')` | **async**  | `expected/dir/` (a directory) | `await expect(result.directory('my-shop')).toMatch('shop-scaffold')` |
+| Matcher          | Sync/async | Resolves against               | Example                                                              |
+| ---------------- | ---------- | ------------------------------ | -------------------------------------------------------------------- |
+| `toMatch('dir')` | **async**  | `_expected/dir/` (a directory) | `await expect(result.directory('my-shop')).toMatch('shop-scaffold')` |
 
-Compares the tree rooted at `<cwd>/name` against the fixture directory `expected/shop-scaffold/` — structure _and_ file contents (contents honour tokens). Failure is a structured diff in three groups: `added` (on disk, not in fixture), `removed` (in fixture, not on disk), `changed` (content mismatch, with a per-file diff). No extension on the argument — tree snapshots are directories (rule C6).
+Compares the tree rooted at `<cwd>/name` against the fixture directory `_expected/shop-scaffold/` — structure _and_ file contents (contents honour tokens). Failure is a structured diff in three groups: `added` (on disk, not in fixture), `removed` (in fixture, not on disk), `changed` (content mismatch, with a per-file diff). No extension on the argument — tree snapshots are directories (rule C6).
 
 ## `result.filesystem` — the whole cwd (cli)
 
 | Matcher / accessor | Sync/async | Resolves against | Example                                                            |
 | ------------------ | ---------- | ---------------- | ------------------------------------------------------------------ |
-| `toMatch('dir')`   | **async**  | `expected/dir/`  | `await expect(result.filesystem).toMatch('upgraded-shop')`         |
+| `toMatch('dir')`   | **async**  | `_expected/dir/` | `await expect(result.filesystem).toMatch('upgraded-shop')`         |
 | `.files()`         | async read | —                | `expect(await result.filesystem.files()).toContain('shoply.lock')` |
 
 Same semantics as `result.directory(…)`, rooted at the cwd itself. `.files()` returns the sorted recursive file list — a read, so follow it with native matchers.
@@ -210,7 +210,7 @@ The runner handle itself also exposes a `docker(containerId)` reader (returned b
 
 | Matcher       | Valid subjects                                                                                                                                      | Sync/async                                | Fixture root |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------ |
-| `toMatch`     | `response`, `stdout`, `stderr`, `json`, `directory(…)`, `filesystem`                                                                                | sync, except directory/filesystem (async) | `expected/`  |
+| `toMatch`     | `response`, `stdout`, `stderr`, `json`, `directory(…)`, `filesystem`                                                                                | sync, except directory/filesystem (async) | `_expected/` |
 | `toMatchRows` | `table(…)`                                                                                                                                          | async                                     | — (inline)   |
 | `toBeEmpty`   | `table(…)`                                                                                                                                          | async                                     | —            |
 | `toContain`   | `stdout`, `stderr` (host and container-exec streams), container logs                                                                                | sync                                      | —            |
@@ -241,7 +241,7 @@ expect(text(message)).toMatch('errors/wrong-body-error.txt'); // the error golde
 - **Missing `await` on IO matchers.** `expect(result.table('users')).toMatchRows(…)` without `await` never queries the database and the test passes vacuously (rule D2).
 - **`await`-ing sync matchers.** `await expect(result.stdout).toMatch(…)` runs, but violates D2 — the sync/async split is part of the readable contract.
 - **`toMatch('help')` without extension.** The extension is part of the name (rule C6). The only extensionless arguments are tree-snapshot directory names.
-- **Expecting a per-subject fixture root.** Every `toMatch` subject — response, stream, JSON, or tree — resolves against `expected/`; only `.request()` reads from `requests/` (rule D3).
+- **Expecting a per-subject fixture root.** Every `toMatch` subject — response, stream, JSON, or tree — resolves against `_expected/`; only `.request()` reads from `_requests/` (rule D3).
 - **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.text` is for (rule D6).
 - **`database:` on a single-database project** (or missing on a multi-database one) — rule A7 cuts both ways.
 - **Using `.not.toMatch` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.

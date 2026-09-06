@@ -5,7 +5,7 @@ import { cli } from '../checker.specification.js';
 describe('lint — d4b http first line (CONVENTIONS D4b)', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (third-party linters) does not apply.
-    test('rejects a requests/*.http without a request line', async () => {
+    test('rejects a _requests/*.http without a request line', async () => {
         // Given - a request fixture whose first line is not "METHOD /path"
         const result = await cli
             .fixture('$FIXTURES/lint-violations/d4b-http-first-line/')

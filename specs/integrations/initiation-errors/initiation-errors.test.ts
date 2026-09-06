@@ -13,13 +13,13 @@ import { Orchestrator, postgres, redis, specification } from '../../../src/index
 // eslint-disable-next-line no-control-regex
 const stripAnsi = (text: string): string => text.replace(/\x1b\[[0-9;]*m/g, '');
 
-const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, '../../fixtures/broken-postgres-init');
-const BROKEN_MULTI_INIT = resolve(import.meta.dirname, '../../fixtures/broken-multi-init');
+const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, '../../_fixtures/broken-postgres-init');
+const BROKEN_MULTI_INIT = resolve(import.meta.dirname, '../../_fixtures/broken-multi-init');
 const BROKEN_SECOND_POSTGRES = resolve(
     import.meta.dirname,
-    '../../fixtures/broken-second-postgres',
+    '../../_fixtures/broken-second-postgres',
 );
-const BROKEN_COMPOSE = resolve(import.meta.dirname, '../../fixtures/broken-compose');
+const BROKEN_COMPOSE = resolve(import.meta.dirname, '../../_fixtures/broken-compose');
 
 /*
  * Scalpel by design: the captured console report interleaves the orchestrator's own
