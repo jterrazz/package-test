@@ -1,5 +1,5 @@
-import { oxfmt } from '@jterrazz/typescript';
-import { defineConfig } from 'oxfmt';
+import { base, defineConfig } from '@jterrazz/typescript/oxfmt';
+import type { OxfmtConfig } from '@jterrazz/typescript/oxfmt';
 
 /**
  * `schema/spec.schema.json` joins `docs/reference/` in the ignore list: both are
@@ -7,7 +7,9 @@ import { defineConfig } from 'oxfmt';
  * a freshness meta-test. A formatter pass over one of them would only make the
  * generator and the formatter disagree about the same file.
  */
-export default defineConfig({
-    ...oxfmt,
-    ignorePatterns: [...oxfmt.ignorePatterns, 'schema'],
+const config: OxfmtConfig = defineConfig({
+    ...base,
+    ignorePatterns: [...(base.ignorePatterns ?? []), 'schema'],
 });
+
+export default config;

@@ -1,5 +1,3 @@
 {
-    "extends": "@jterrazz/typescript/tsconfig/node",
-    "include": ["src/", "specs/"],
-    "exclude": ["specs/**/_fixtures/**"]
+    "extends": "@jterrazz/typescript/tsconfig/node"
 }

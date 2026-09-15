@@ -1,10 +1,10 @@
-import { oxlint } from '@jterrazz/typescript';
-import { defineConfig } from 'oxlint';
+import { compose, defineConfig, library } from '@jterrazz/typescript/oxlint';
+import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 // Self-lint with our own plugin (the tool-facing lint layer under src/lint/),
 // Loaded from the built bundle. Node's TS type-stripping does not resolve
 // `.js` specifiers to `.ts` sources, so `npm run build` must precede lint.
-import { recommendedRules } from './dist/oxlint.js';
+import { testing } from './dist/oxlint.js';
 
 /**
  * The four layers of this package and their sanctioned edges (CONVENTIONS I1).
@@ -82,35 +82,49 @@ const FRAMEWORK_LAYERS = {
     },
 };
 
-export default defineConfig({
-    extends: [oxlint.node],
-    ignorePatterns: ['specs/**/_fixtures/**'],
-    jsPlugins: ['./dist/oxlint.js'],
-    overrides: [
-        {
-            // The framework's own module tests unit-test the constructors —
-            // Creating runners (and exercising the mode option) outside a
-            // *.specification.ts file is their purpose.
-            files: ['src/**/*.test.ts'],
-            rules: {
-                'jterrazz/a1-specification-file': 'off',
-                'jterrazz/a5-mode-with-server': 'off',
+/**
+ * The published `testing` fragment wires the plugin by its package name; this
+ * repository is that package, and lints itself from the bundle it just built.
+ */
+const selfTesting = { ...testing, jsPlugins: ['./dist/oxlint.js'] };
+
+const config: OxlintConfig = defineConfig(
+    compose(library, selfTesting, {
+        overrides: [
+            {
+                // The framework's own module tests unit-test the constructors —
+                // Creating runners (and exercising the mode option) outside a
+                // *.specification.ts file is their purpose.
+                files: ['src/**/*.test.ts'],
+                rules: {
+                    'jterrazz/a1-specification-file': 'off',
+                    'jterrazz/a5-mode-with-server': 'off',
+                },
             },
+            {
+                // The vitest layer IS the sanctioned runner coupling (I1) — its
+                // `vitest` imports are the framework's own seam, not prod leakage.
+                files: ['src/vitest/**'],
+                rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
+            },
+        ],
+        rules: {
+            // reason: `verbatimModuleSyntax` keeps the statement of an inline
+            // Type specifier — `import { type X } from 'm'` emits `import {}
+            // From 'm'`, a runtime edge, where `import type` is erased whole.
+            // The rulebook's default (`prefer-inline`) therefore turns every
+            // Type-only import into a real one, and turned this package's
+            // Builder/result type cycle into a load-order crash. The rule stays
+            // ON, at the spelling the compiler erases.
+            'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+            // Docker-aware runner names used across specs (CONVENTIONS B5).
+            'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }],
+            // THIS package's architecture (CONVENTIONS I1), stated where the
+            // Package configures itself. The rule ships inert: an architecture is
+            // The project's to declare, not the linter's to assume.
+            'jterrazz/i1-layer-boundaries': ['error', { layers: FRAMEWORK_LAYERS }],
         },
-        {
-            // The vitest layer IS the sanctioned runner coupling (I1) — its
-            // `vitest` imports are the framework's own seam, not prod leakage.
-            files: ['src/vitest/**'],
-            rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
-        },
-    ],
-    rules: {
-        ...recommendedRules,
-        // Docker-aware runner names used across specs (CONVENTIONS B5).
-        'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }],
-        // THIS package's architecture (CONVENTIONS I1), stated where the
-        // Package configures itself. The rule ships inert: an architecture is
-        // The project's to declare, not the linter's to assume.
-        'jterrazz/i1-layer-boundaries': ['error', { layers: FRAMEWORK_LAYERS }],
-    },
-});
+    }),
+);
+
+export default config;

@@ -7,5 +7,11 @@
         "src/lint/checker-cli.ts",
         "src/lint/catalog-cli.ts"
     ],
-    "ignore": ["specs/_fixtures/**"]
+    "ignore": ["specs/_fixtures/**"],
+    "ignoreDependencies": [
+        // `oxlint/plugins-dev` (RuleTester) is what every rule test stands on, and
+        // Oxlint arrives with @jterrazz/typescript — the one devDependency this
+        // Repository declares (its docs/07-lint-presets.md).
+        "oxlint"
+    ]
 }
