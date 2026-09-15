@@ -58,10 +58,11 @@ export const FAMILIES: Record<string, string> = {
  * preset gets it without wiring. Four hygiene rules left the channel on that
  * ground (J1, J3, J4, J5 → `vitest/no-focused-tests` + `vitest/no-disabled-tests`,
  * `vitest/expect-expect`, `vitest/no-identical-title`, `vitest/prefer-lowercase-title`).
- * `prefer-lowercase-title` needs `allowedPrefixes` to keep J5's exemption for an
- * all-caps first word (`VALID_CATEGORIES`, `HTTP`, `DI`); the rest are
- * behaviour-identical on this package's own fixtures. Only J2 (the arbitrary-sleep
- * ban, which has no upstream counterpart) stays statique.
+ * `prefer-lowercase-title` is stricter than J5 was: a title opening on an all-caps
+ * identifier (`HTTP 404 …`, `DI …`) now fails, and the rulebook carries no
+ * `allowedPrefixes` — a title starts lowercase, whatever its first word. The
+ * rest are behaviour-identical on this package's own fixtures. Only J2 (the
+ * arbitrary-sleep ban, which has no upstream counterpart) stays statique.
  *
  * **Severity.** The estate's rulebook has no warn tier: a rule is on at `error`
  * or off with a recorded reason, and that law binds `@jterrazz/typescript`'s
