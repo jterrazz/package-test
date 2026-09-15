@@ -51,6 +51,17 @@ export const FAMILIES: Record<string, string> = {
  * The **statique** channel — one entry per shipped `jterrazz/*` rule. Each rule
  * file attaches its entry as `meta.docs`, so a rule and its normative text can
  * never drift (the completeness meta-test asserts every rule carries one).
+ *
+ * **What this channel does NOT own.** A convention oxlint's own `vitest` plugin
+ * already enforces belongs to that plugin, not here — `@jterrazz/typescript` v10
+ * turns the plugin on over the test globs in every profile, so a consumer of the
+ * preset gets it without wiring. Four hygiene rules left the channel on that
+ * ground (J1, J3, J4, J5 → `vitest/no-focused-tests` + `vitest/no-disabled-tests`,
+ * `vitest/expect-expect`, `vitest/no-identical-title`, `vitest/prefer-lowercase-title`).
+ * `prefer-lowercase-title` needs `allowedPrefixes` to keep J5's exemption for an
+ * all-caps first word (`VALID_CATEGORIES`, `HTTP`, `DI`); the rest are
+ * behaviour-identical on this package's own fixtures. Only J2 (the arbitrary-sleep
+ * ban, which has no upstream counterpart) stays statique.
  */
 export const RULE_DOCS: Record<string, RuleDoc> = {
     'a1-specification-file': {
@@ -400,13 +411,6 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
         rationale:
             'Dans les tests de module, mocks et données sont du CODE (`mockOf`, `*.fixtures.ts`) ; un vrai fichier appelle une spec.',
     },
-    'j1-no-only-skip': {
-        channel: 'statique',
-        convention: 'Aucun `.only` / `.skip` committé (`describe.only`, `test.only`, `test.skip`).',
-        family: 'J',
-        id: 'J1',
-        rationale: 'Un `.only`/`.skip` oublié désactive silencieusement une partie de la suite.',
-    },
     'j2-no-sleep-in-specs': {
         channel: 'statique',
         convention:
@@ -415,33 +419,6 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
         id: 'J2',
         rationale:
             'Un sleep fixe rend les tests lents et instables ; attendre une condition est déterministe.',
-    },
-    'j3-no-expectless-test': {
-        channel: 'statique',
-        convention:
-            'Un `test(...)` avec callback contient au moins un `expect(…)` ; `test.todo` (sans callback) est ignoré.',
-        family: 'J',
-        id: 'J3',
-        rationale:
-            'Un test sans assertion est mort ou muet — il passe toujours sans rien vérifier.',
-    },
-    'j4-unique-test-names': {
-        channel: 'statique',
-        convention:
-            'Deux tests d’un même fichier ne partagent pas un nom littéral (`.each` ignoré).',
-        family: 'J',
-        id: 'J4',
-        rationale:
-            'Le nom du test est son unique description — deux noms identiques rendent un échec ambigu.',
-    },
-    'j5-lowercase-title': {
-        channel: 'statique',
-        convention:
-            'La première lettre d’un titre `test()`/`describe()`/`it()` littéral est en minuscule. Exemptés : les titres dont le premier MOT est un identifiant tout en majuscules/underscores (`VALID_CATEGORIES`, `HTTP`, `DI`) et ceux démarrant sur un non-lettre — seuls les premiers mots de prose minusculisables sont contraints.',
-        family: 'J',
-        id: 'J5',
-        rationale:
-            'Un titre est un fragment de prose, pas une phrase — la casse minuscule le garde fragmentaire ; minusculiser un symbole nommé le mal-orthographierait.',
     },
     'w1-scenario-pure': {
         channel: 'statique',

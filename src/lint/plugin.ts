@@ -37,11 +37,7 @@ import { f5FixturesOnlyFromTests } from './rules/f5-fixtures-only-from-tests.js'
 import { i1LayerBoundaries } from './rules/i1-layer-boundaries.js';
 import { i2SiblingTestNaming } from './rules/i2-sibling-test-naming.js';
 import { i4NoViMockInSrc } from './rules/i4-no-vi-mock-in-src.js';
-import { j1NoOnlySkip } from './rules/j1-no-only-skip.js';
 import { j2NoSleepInSpecs } from './rules/j2-no-sleep-in-specs.js';
-import { j3NoExpectlessTest } from './rules/j3-no-expectless-test.js';
-import { j4UniqueTestNames } from './rules/j4-unique-test-names.js';
-import { j5LowercaseTitle } from './rules/j5-lowercase-title.js';
 import { w1ScenarioPure } from './rules/w1-scenario-pure.js';
 import { w2wUserFacingElements } from './rules/w2w-user-facing-elements.js';
 import type { LintPlugin } from './types.js';
@@ -52,7 +48,7 @@ import type { LintPlugin } from './types.js';
  *
  * Registered in a consumer's (or this repo's own) `oxlint.config.ts` via
  * `jsPlugins: ['@jterrazz/test/oxlint']` and referenced as `jterrazz/<rule>` in
- * the `rules` map, e.g. `'jterrazz/j1-no-only-skip': 'error'` — or enabled
+ * the `rules` map, e.g. `'jterrazz/j2-no-sleep-in-specs': 'error'` — or enabled
  * wholesale by spreading {@link recommendedRules}.
  *
  * This entry is bundled by tsdown (`dist/oxlint.js`); rules import nothing from
@@ -102,11 +98,7 @@ const plugin: LintPlugin = {
         'i1-layer-boundaries': i1LayerBoundaries,
         'i2-sibling-test-naming': i2SiblingTestNaming,
         'i4-no-vi-mock-in-src': i4NoViMockInSrc,
-        'j1-no-only-skip': j1NoOnlySkip,
         'j2-no-sleep-in-specs': j2NoSleepInSpecs,
-        'j3-no-expectless-test': j3NoExpectlessTest,
-        'j4-unique-test-names': j4UniqueTestNames,
-        'j5-lowercase-title': j5LowercaseTitle,
         'w1-scenario-pure': w1ScenarioPure,
         'w2w-user-facing-elements': w2wUserFacingElements,
     },

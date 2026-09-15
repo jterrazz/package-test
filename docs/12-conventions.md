@@ -26,14 +26,14 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | G     | Infrastructure (compose, isolation, docker-aware)                    | [07](07-cli.md), [11](11-services.md)                                 |
 | H     | Naming recap                                                         | below                                                                 |
 | I     | Source-code architecture (four layers, sibling module tests)         | below · [01](01-architecture.md) for this repo's own layer map        |
-| J     | Hygiene (no `.only`/`.skip`, no arbitrary sleeps)                    | [13](13-linting.md)                                                   |
+| J     | Hygiene (no arbitrary sleeps, honest spec documents)                 | [13](13-linting.md)                                                   |
 | K     | Retro-propagation — every defect class grows its own guard           | below                                                                 |
 
 ## The reach of the conventions
 
 The framework and the conventions do not have the same scope, and confusing the two is the commonest misreading of this constitution. `specification.*` — with its seeds, fixtures, contracts, goldens and containers — is for specifying a **surface**: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function, or a frontend component test, has no such surface and needs none of it.
 
-The conventions bind **every test file of the repository**, that plain unit test included, whether or not `@jterrazz/test` is imported in it. A test is a test: it sits beside the module it covers (I2), it narrates its Given then its Then (B4), it keeps its doubles out of `src/` (I4), and it stays honest under the J hygiene rules — no committed `.only`/`.skip`, an assertion in every test, no two literal titles alike in a file. Only J2, the arbitrary-sleep ban, is narrowed to `specs/**`, where waiting is a real temptation. Every one of these is mechanized, so its normative sentence lives in the catalogue ([13 — Linting](13-linting.md)) and not here.
+The conventions bind **every test file of the repository**, that plain unit test included, whether or not `@jterrazz/test` is imported in it. A test is a test: it sits beside the module it covers (I2), it narrates its Given then its Then (B4), it keeps its doubles out of `src/` (I4), and it stays honest under the J hygiene floor — no committed `.only`/`.skip`, an assertion in every test, no two literal titles alike in a file, a lowercase title. That floor is oxlint's own `vitest` plugin, which `@jterrazz/typescript` turns on over the test globs in every profile; this package's J family keeps only what the plugin has no counterpart for — the arbitrary-sleep ban (J2), narrowed to `specs/**` where waiting is a real temptation, and the spec-document mirrors. Every one of these is mechanized, so its normative sentence lives in the catalogue ([13 — Linting](13-linting.md)) and not here.
 
 The reason for the wide reach: a repository has **one** way to write a test, so a reader moving between a sibling module test and a spec of a surface reads the same shape and the tooling has a single target. A rule that applied only to framework tests would leave the majority of test files — the plain ones — unguarded.
 

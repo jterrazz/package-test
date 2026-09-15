@@ -34,7 +34,8 @@ Two things travel under one name, and their scopes are not the same: the framewo
 - **Sibling naming (I2)** — the test of `<file>.ts` is `<file>.test.ts` next to it; a misnamed `.test.ts`, or a `__tests__/` folder, is an error.
 - **Given/Then (B4)** — every test carries a `// Given -` line then a `// Then -` line, both, in that order. Two `--fix` hazards mangle a marker while the lint stays green: a marker is EXACTLY one line (`capitalized-comments` capitalises a wrapped continuation mid-sentence), and it goes between STATEMENTS, never between two `const` declarations `one-var` can fuse into one chain. Both are worked in [docs/13](../../docs/13-linting.md).
 - **No test doubles under `src/` (I4)** — `vi.mock`, `__mocks__/`, `__fixtures__/` and data-asset imports from a `.test.ts` are forbidden there; a module's typed fixtures are a sibling `<file>.fixtures.ts`.
-- **Hygiene (J)** — no committed `.only` / `.skip`, at least one `expect()` per `test()`, no two literal test names alike in a file, a lowercase title.
+- **Hygiene** — no committed `.only` / `.skip`, at least one `expect()` per `test()`, no two literal test names alike in a file, a lowercase title. This floor is oxlint's own `vitest` plugin, wired by `@jterrazz/typescript` over the test globs; cite its ids (`vitest/no-focused-tests`, `vitest/expect-expect`, `vitest/no-identical-title`, `vitest/prefer-lowercase-title`), not a `jterrazz/j*` id.
+- **No arbitrary sleep (J2)** — under `specs/**`, `setTimeout` / `setInterval` / `Atomics.wait` are forbidden; synchronise with `waitFor`.
 
 The full list, with ids to cite, is [references/rules.md](references/rules.md); the reasoning is the constitution, [docs/12](../../docs/12-conventions.md).
 
