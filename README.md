@@ -296,7 +296,7 @@ Every artefact a run produces lands under `.artifacts/<tool>/` — one `.gitigno
 | --------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
 | `.seed("file.sql", { database? })`      | all          | Load SQL from `_seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1)     |
 | `.fixture("file")`                      | cli          | Copy the feature-local `_fixtures/file` into the working directory                                          |
-| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/_fixtures/name/` project into the cwd (trailing `/` = contents; layers)            |
+| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/_fixtures/<name>/` project into the cwd (trailing `/` = contents; layers)          |
 | `.env({ KEY: "value" })`                | cli          | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                                  |
 | `.headers({ "Accept-Language": "fr" })` | api, website | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)                  |
 | `.intercept(contracts)`                 | all but cli  | Declare the world: a `defineContracts(...)` composite — MSW on api/jobs, the stub backend on website/mobile |

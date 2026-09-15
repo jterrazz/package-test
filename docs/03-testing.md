@@ -29,7 +29,7 @@ npx vitest --run --project website  # after npx playwright install chromium
 
 `api` and `api-stack` run the same test files and the mode switch lives ONLY in `vitest.config.ts` — that is rule A5 applied to this repository, and it is also the point of the two projects: fast feedback in-process, end-to-end confidence against the real stack, from one set of specs. `api-stack` excludes the intercept domain because `.intercept()` is in-process MSW, which compose mode has no access to.
 
-There is no `specs/mobile/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/core/specification/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
+There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/core/specification/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
 
 ## How a spec tree is laid out
 

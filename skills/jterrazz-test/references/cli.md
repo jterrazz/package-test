@@ -1,6 +1,6 @@
 # CLI specs — `specification.cli()`
 
-Operative reference. Prose + examples: [docs/07-cli.md](../../docs/07-cli.md). Assertions: [docs/08-assertions.md](../../docs/08-assertions.md). Tokens: [references/tokens.md](tokens.md).
+Operative reference. Prose + examples: [docs/07-cli.md](../../../docs/07-cli.md). Assertions: [docs/08-assertions.md](../../../docs/08-assertions.md). Tokens: [references/tokens.md](tokens.md).
 
 Runs a command binary against fixture projects in fresh, empty temp directories. Inherently e2e — no node/compose split.
 
@@ -21,12 +21,12 @@ afterAll(cleanup);
 
 ## Setup (chainable)
 
-| Method                             | Description                                                                                                                                     |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })` | SQL from `_seeds/` (A7 rules apply)                                                                                                             |
-| `.fixture("file")`                 | Copy the feature-local `_fixtures/file` into the cwd                                                                                            |
-| `.fixture("$FIXTURES/name/")`      | Shared `specs/_fixtures/name/`. Trailing `/` (rsync) = spread contents into cwd; no slash = nest under `name/`. Chained calls layer (last wins) |
-| `.env({ KEY: "value" })`           | Child env vars. `null` unsets, `$WORKDIR` expands to the cwd, calls merge. Overrides B6 injection                                               |
+| Method                             | Description                                                                                                                                       |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.seed("file.sql", { database? })` | SQL from `_seeds/` (A7 rules apply)                                                                                                               |
+| `.fixture("file")`                 | Copy the feature-local `_fixtures/file` into the cwd                                                                                              |
+| `.fixture("$FIXTURES/name/")`      | Shared `specs/_fixtures/<name>/`. Trailing `/` (rsync) = spread contents into cwd; no slash = nest under `name/`. Chained calls layer (last wins) |
+| `.env({ KEY: "value" })`           | Child env vars. `null` unsets, `$WORKDIR` expands to the cwd, calls merge. Overrides B6 injection                                                 |
 
 There is no `.project()` and no seed handler — `.fixture()` is the one file-state verb, `.seed()` is SQL-only (C7).
 

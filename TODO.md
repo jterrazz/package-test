@@ -147,7 +147,7 @@ avec des chiffres. Par ROI attendu décroissant :
 
 - **Mécanisation des guards spwn** : les règles interdites (`no-restricted-syntax`)
   attendent le support oxlint (absent en 1.60, vérifié) ; les guards vivent en
-  `specs/lint/guards/` en attendant.
+  `<specs>/lint/guards/` en attendant.
 - **Codemod b4** : auto-insertion des squelettes `// Given -` / `// Then -` manquants
   (idée notée pendant la campagne, valeur à réévaluer).
 - **Bug produit signews (hors framework)** : le promoter tournait dans un handler

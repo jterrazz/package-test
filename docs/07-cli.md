@@ -100,8 +100,8 @@ Two disjoint verbs shape a spec's state (rule C7): **`.fixture()` carries file s
 | Path                     | Resolves to                                   | Copy effect                                     |
 | ------------------------ | --------------------------------------------- | ----------------------------------------------- |
 | `'config.toml'`          | `<domain>/_fixtures/config.toml` (leaf-local) | `<cwd>/config.toml`                             |
-| `'$FIXTURES/base-shop/'` | `specs/_fixtures/base-shop/` (shared pool)    | **contents spread** into `<cwd>` (trailing `/`) |
-| `'$FIXTURES/base-shop'`  | `specs/_fixtures/base-shop/` (shared pool)    | `<cwd>/base-shop/` (dir under its own name)     |
+| `'$FIXTURES/base-shop/'` | `<specs-root>/_fixtures/base-shop/` (pool)    | **contents spread** into `<cwd>` (trailing `/`) |
+| `'$FIXTURES/base-shop'`  | `<specs-root>/_fixtures/base-shop/` (pool)    | `<cwd>/base-shop/` (dir under its own name)     |
 
 > **⚠️ Trailing slash = spread vs. nest.** For a directory fixture, the trailing `/` is load-bearing — it is exactly rsync's semantics, and it changes where files land:
 >
@@ -367,6 +367,7 @@ env:
     - SHOPLY_ORIGIN=http://127.0.0.1:9
 serve:
     - mcp: { MCP_STUB_WITHHOLD: get-article }
+
 runs:
     - command: shoply repositories
       exit: 1
@@ -469,7 +470,7 @@ export const { cli, cleanup } = await specification.cli(bin, {
 });
 ```
 
-A `serve` entry is spawned with the document's extra `KEY: value` merged into its environment, and its **cwd is the project root** — rule A9's root, the nearest ancestor of the specification file carrying a `package.json` or a `docker/compose.test.yaml`. **In a workspace that is the package's own directory, not the repository root**: a spec at `apps/cli/specs/cli/cli.specification.ts` gives `apps/cli/`, so `command` reads `'bun specs/harness/mcp-server.ts'` and not `'bun apps/cli/specs/harness/mcp-server.ts'`. Pass the runner's `root` option to move it.
+A `serve` entry is spawned with the document's extra `KEY: value` merged into its environment, and its **cwd is the project root** — rule A9's root, the nearest ancestor of the specification file carrying a `package.json` or a `docker/compose.test.yaml`. **In a workspace that is the package's own directory, not the repository root**: a spec at `<repo>/apps/cli/specs/cli/cli.specification.ts` gives `<repo>/apps/cli/`, so `command` reads `'bun specs/harness/mcp-server.ts'` and not `'bun apps/cli/specs/harness/mcp-server.ts'`. Pass the runner's `root` option to move it.
 
 `ready` is a regex over the child's output whose **first capture group** is the port the server chose (named or not — it is group 1 either way); the framework injects no `PORT`, the server announces one. `url(port)` builds the URL, and `env` names the variable it is bound to in every run's child.
 

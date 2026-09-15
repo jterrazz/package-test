@@ -271,6 +271,7 @@ Swap the import, drop what the preset already says, keep what is yours:
      test: {
 -        testTimeout: 30_000,
 -        hookTimeout: 30_000,
+
          projects: [
              {
                  test: {
