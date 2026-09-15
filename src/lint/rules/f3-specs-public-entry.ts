@@ -13,12 +13,12 @@ const TOOL_SUBPATH = '@jterrazz/test/oxlint';
  * spec-to-app imports stay allowed (that IS the documented pattern:
  * `server: () => createApp()` importing `../../src/app.js`).
  */
-const FRAMEWORK_LAYERS = new Set(['core', 'integrations', 'lint', 'vitest']);
+const FRAMEWORK_LAYERS = new Set(['integrations', 'lint', 'specification', 'vitest']);
 
 /**
  * CONVENTIONS F3 — from `specs/`, deep-importing the FRAMEWORK's internals is
  * forbidden: a relative path resolving inside the framework repo's
- * `src/{core,integrations,vitest,lint}/`, or any `@jterrazz/test/<subpath>`
+ * `src/{specification,integrations,vitest,lint}/`, or any `@jterrazz/test/<subpath>`
  * other than the sanctioned tool-facing `@jterrazz/test/oxlint`. A consumer's
  * imports of its OWN app source are always allowed — that is the pattern.
  *

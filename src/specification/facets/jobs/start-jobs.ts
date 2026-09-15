@@ -1,11 +1,11 @@
 import { registerMatchers } from '../../../vitest/matchers.js';
-import { createJobsFacet } from '../shared/builder.js';
-import type { JobHandle, JobsSpecification, SpecificationConfig } from '../shared/builder.js';
-import { getCallerDir } from '../shared/caller.js';
-import type { Orchestrator } from '../shared/orchestrator.js';
-import { resolveRoot } from '../shared/resolve.js';
-import { declaredDatabaseKeys, releaseIsolation, startServices } from '../shared/services.js';
-import type { DatabaseKeys, ServiceRecord, StartedServices } from '../shared/services.js';
+import { createJobsFacet } from '../_common/builder.js';
+import type { JobHandle, JobsSpecification, SpecificationConfig } from '../_common/builder.js';
+import { getCallerDir } from '../_common/caller.js';
+import type { Orchestrator } from '../_common/orchestrator.js';
+import { resolveRoot } from '../_common/resolve.js';
+import { declaredDatabaseKeys, releaseIsolation, startServices } from '../_common/services.js';
+import type { DatabaseKeys, ServiceRecord, StartedServices } from '../_common/services.js';
 
 // ── Types ──
 

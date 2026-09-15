@@ -52,7 +52,7 @@ ruleTester.run('c10-contracts-boundary', c10ContractsBoundary as unknown as Oxli
         // Outside specs/ the rule is inert.
         {
             code: `import events from './contracts/http/events.js';`,
-            filename: '/repo/src/core/contracts/queue.ts',
+            filename: '/repo/src/specification/contracts/queue.ts',
         },
     ],
 });

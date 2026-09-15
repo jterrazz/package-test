@@ -17,11 +17,11 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-import { SQLITE_TEMPLATE_DIR } from '../../core/artifacts/artifacts.js';
-import type { DatabasePort } from '../../core/ports/database.port.js';
-import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
-import type { ServiceHandle } from '../../core/ports/service.port.js';
-import { discoverRoot } from '../../core/specification/shared/resolve.js';
+import { SQLITE_TEMPLATE_DIR } from '../../specification/artifacts/artifacts.js';
+import { discoverRoot } from '../../specification/facets/_common/resolve.js';
+import type { DatabasePort } from '../../specification/ports/database.port.js';
+import type { IsolationStrategy } from '../../specification/ports/isolation.port.js';
+import type { ServiceHandle } from '../../specification/ports/service.port.js';
 
 // The first 16 bytes of every well-formed SQLite database file (see the
 // SQLite file format spec). A crashed earlier run can leave a stale/partial

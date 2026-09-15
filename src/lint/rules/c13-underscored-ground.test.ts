@@ -41,7 +41,7 @@ ruleTester.run('c13-underscored-ground', c13UnderscoredGround as unknown as Oxli
         // Outside a specs/ tree the rule is inert.
         {
             code: 'test("x", () => {});',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],
 });

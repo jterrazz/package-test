@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path';
 
-import { GROUND_REQUESTS } from '../../core/specification/shared/ground.js';
+import { GROUND_REQUESTS } from '../../specification/facets/_common/ground.js';
 import { segments } from '../ast.js';
 import { listDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';

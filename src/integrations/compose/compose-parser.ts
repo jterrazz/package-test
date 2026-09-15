@@ -4,7 +4,7 @@ import { parse as parseYaml } from 'yaml';
 import type {
     ComposeConfig,
     ComposeService,
-} from '../../core/specification/shared/compose-file.js';
+} from '../../specification/facets/_common/compose-file.js';
 
 /**
  * Parse a docker-compose file and extract service definitions.

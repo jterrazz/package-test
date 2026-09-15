@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Client } from 'pg';
 
-import type { DatabasePort } from '../../core/ports/database.port.js';
-import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
-import type { ServiceHandle } from '../../core/ports/service.port.js';
+import type { DatabasePort } from '../../specification/ports/database.port.js';
+import type { IsolationStrategy } from '../../specification/ports/isolation.port.js';
+import type { ServiceHandle } from '../../specification/ports/service.port.js';
 
 export type PostgresOptions = {
     /**

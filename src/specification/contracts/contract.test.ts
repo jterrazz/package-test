@@ -49,7 +49,7 @@ describe('contracts — defineContract', () => {
 
     test('builder .intercept() accepts a contract as a single argument', async () => {
         // Given - a facet with no adapters and a declared contract
-        const { createApiFacet } = await import('../specification/shared/builder.js');
+        const { createApiFacet } = await import('../facets/_common/builder.js');
         const api = createApiFacet({});
 
         const contract = defineContract({

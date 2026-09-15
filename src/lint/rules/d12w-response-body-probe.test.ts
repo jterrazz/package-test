@@ -92,7 +92,7 @@ ruleTester.run('d12w-response-body-probe', d12wResponseBodyProbe as unknown as O
                 expect(body.next_cursor).toBeNull();
                 expect(body.items).toHaveLength(2);
             });`,
-            filename: '/repo/src/core/thing.ts',
+            filename: '/repo/src/specification/thing.ts',
         },
     ],
 });

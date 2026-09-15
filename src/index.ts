@@ -1,37 +1,37 @@
-import {
-    registerComposeServiceFactory,
-    registerContainerIntegrations,
-} from './core/specification/shared/registry.js';
-import type { DirectoryAccessor as DirectoryAccessorType } from './core/specification/shared/result/directory.js';
-import type { FilesystemAccessor as FilesystemAccessorType } from './core/specification/shared/result/filesystem.js';
-import type { JsonAccessor as JsonAccessorType } from './core/specification/shared/result/json.js';
-import type { ResponseAccessor as ResponseAccessorType } from './core/specification/shared/result/response.js';
-import type { TableAccessor as TableAccessorType } from './core/specification/shared/result/table.js';
-import type { TextAccessor as TextAccessorType } from './core/specification/shared/result/text.js';
 import { parseComposeFile } from './integrations/compose/compose-parser.js';
 import { ComposeStackAdapter } from './integrations/compose/compose.js';
 import type { ContainerAccessor as ContainerAccessorType } from './integrations/docker/container-accessor.js';
 import { postgres } from './integrations/postgres/postgres.js';
 import { redis } from './integrations/redis/redis.js';
 import { TestcontainersAdapter } from './integrations/testcontainers/testcontainers.js';
+import {
+    registerComposeServiceFactory,
+    registerContainerIntegrations,
+} from './specification/facets/_common/registry.js';
+import type { DirectoryAccessor as DirectoryAccessorType } from './specification/facets/_common/result/directory.js';
+import type { FilesystemAccessor as FilesystemAccessorType } from './specification/facets/_common/result/filesystem.js';
+import type { JsonAccessor as JsonAccessorType } from './specification/facets/_common/result/json.js';
+import type { ResponseAccessor as ResponseAccessorType } from './specification/facets/_common/result/response.js';
+import type { TableAccessor as TableAccessorType } from './specification/facets/_common/result/table.js';
+import type { TextAccessor as TextAccessorType } from './specification/facets/_common/result/text.js';
 import type { MatchFixtureOptions as MatchFixtureOptionsType } from './vitest/matchers.js';
 
 // ── Core API — the single import point (CONVENTIONS F1) ──
-export { specification } from './core/specification/shared/specification.js';
+export { specification } from './specification/facets/_common/specification.js';
 export {
     type ApiHandle,
     type ApiSpecificationOptions,
     type HonoApp,
     type SpecificationMode,
-} from './core/specification/api/start-api.js';
+} from './specification/facets/api/start-api.js';
 export {
     type CliHandle,
     type CliSpecificationOptions,
-} from './core/specification/cli/start-cli.js';
+} from './specification/facets/cli/start-cli.js';
 export {
     type LiterateRunFlags,
     type LiterateServeRegistration,
-} from './core/specification/cli/literate.js';
+} from './specification/facets/cli/literate.js';
 export {
     type SpecDocument,
     type SpecEnvToken,
@@ -41,23 +41,23 @@ export {
     type SpecRun,
     type SpecServeEntry,
     type SpecStream,
-} from './core/literate/spec-document.js';
+} from './specification/literate/spec-document.js';
 export {
     type JobsHandle,
     type JobsSpecificationOptions,
-} from './core/specification/jobs/start-jobs.js';
+} from './specification/facets/jobs/start-jobs.js';
 export {
     type MobileBackendOptions,
     type MobileHandle,
     type MobileSpecificationOptions,
-} from './core/specification/mobile/start-mobile.js';
+} from './specification/facets/mobile/start-mobile.js';
 export {
     type WebsiteBackendOptions,
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
-} from './core/specification/website/start-website.js';
-export { type ServeOptions } from './core/specification/website/serve.adapter.js';
-export { type DatabaseKeys, type ServiceRecord } from './core/specification/shared/services.js';
+} from './specification/facets/website/start-website.js';
+export { type ServeOptions } from './specification/facets/website/serve.adapter.js';
+export { type DatabaseKeys, type ServiceRecord } from './specification/facets/_common/services.js';
 
 // Facets
 export type {
@@ -69,37 +69,48 @@ export type {
     MobileSpecification,
     SpecificationConfig,
     WebsiteSpecification,
-} from './core/specification/shared/builder.js';
+} from './specification/facets/_common/builder.js';
 
 // Match — dynamic values in assertions and fixtures
-export { type CaptureScope, match, Matcher, type MatcherKind } from './core/matching/match.js';
+export {
+    type CaptureScope,
+    match,
+    Matcher,
+    type MatcherKind,
+} from './specification/matching/match.js';
 
 // Results
-export { BaseResult, type FileAccessor } from './core/specification/shared/result/result.js';
-export { CliResult } from './core/specification/cli/result.js';
+export { BaseResult, type FileAccessor } from './specification/facets/_common/result/result.js';
+export { CliResult } from './specification/facets/cli/result.js';
 export { ContainerAccessor } from './integrations/docker/container-accessor.js';
 export {
     findContainersByLabel,
     inspectContainer,
     removeContainers,
 } from './integrations/docker/docker-lookup.js';
-export { HttpResult } from './core/specification/api/result.js';
-export { ScreenResult } from './core/specification/mobile/result.js';
-export { FetchResult, PageResult } from './core/specification/website/result.js';
-export { DirectoryAccessor } from './core/specification/shared/result/directory.js';
-export { FilesystemAccessor } from './core/specification/shared/result/filesystem.js';
-export { JsonAccessor } from './core/specification/shared/result/json.js';
-export { ResponseAccessor } from './core/specification/shared/result/response.js';
-export { text, TextAccessor } from './core/specification/shared/result/text.js';
-export { TableAccessor } from './core/specification/shared/result/table.js';
+export { HttpResult } from './specification/facets/api/result.js';
+export { ScreenResult } from './specification/facets/mobile/result.js';
+export { FetchResult, PageResult } from './specification/facets/website/result.js';
+export { DirectoryAccessor } from './specification/facets/_common/result/directory.js';
+export { FilesystemAccessor } from './specification/facets/_common/result/filesystem.js';
+export { JsonAccessor } from './specification/facets/_common/result/json.js';
+export { ResponseAccessor } from './specification/facets/_common/result/response.js';
+export { text, TextAccessor } from './specification/facets/_common/result/text.js';
+export { TableAccessor } from './specification/facets/_common/result/table.js';
 
 // Ports
-export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './core/ports/cli.port.js';
-export type { DatabasePort } from './core/ports/database.port.js';
-export type { IsolationStrategy } from './core/ports/isolation.port.js';
-export type { ServiceHandle } from './core/ports/service.port.js';
-export type { ServerPort, ServerResponse } from './core/ports/server.port.js';
-export type { ContainerPort } from './core/ports/container.port.js';
+export type {
+    CliEnv,
+    CliInput,
+    CliOutput,
+    CliPort,
+    ExecOptions,
+} from './specification/ports/cli.port.js';
+export type { DatabasePort } from './specification/ports/database.port.js';
+export type { IsolationStrategy } from './specification/ports/isolation.port.js';
+export type { ServiceHandle } from './specification/ports/service.port.js';
+export type { ServerPort, ServerResponse } from './specification/ports/server.port.js';
+export type { ContainerPort } from './specification/ports/container.port.js';
 export type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -113,7 +124,7 @@ export type {
     LandmarkKind,
     Visitor,
     VisitScenario,
-} from './core/ports/browser.port.js';
+} from './specification/ports/browser.port.js';
 export type {
     DeviceOpenOptions,
     DevicePort,
@@ -125,7 +136,7 @@ export type {
     MobileScenario,
     MobileVisitor,
     ScreenNode,
-} from './core/ports/device.port.js';
+} from './specification/ports/device.port.js';
 
 // The element vocabulary — user-facing descriptors, shared by visit (website)
 // And open (mobile) scenarios: ONE vocabulary, two facets. Landmarks are
@@ -147,11 +158,11 @@ export {
     search,
     testId,
     within,
-} from './core/specification/website/elements.js';
+} from './specification/facets/website/elements.js';
 
 // Advanced usage — the orchestrator is public; the Exec/Fetch/Hono adapters are
 // Internal wiring (driven by the constructors) and deliberately not re-exported.
-export { Orchestrator } from './core/specification/shared/orchestrator.js';
+export { Orchestrator } from './specification/facets/_common/orchestrator.js';
 
 // Services
 export { postgres, type PostgresOptions } from './integrations/postgres/postgres.js';
@@ -160,8 +171,12 @@ export { sqlite, type SqliteOptions } from './integrations/sqlite/sqlite.js';
 
 // Contracts — the ONE way to declare what the outside world replies
 export { anthropic } from './integrations/anthropic/anthropic.js';
-export { http, type HttpContractFilter, type HttpResponseInit } from './core/contracts/http.js';
-export { type TextFilter } from './core/contracts/filters.js';
+export {
+    http,
+    type HttpContractFilter,
+    type HttpResponseInit,
+} from './specification/contracts/http.js';
+export { type TextFilter } from './specification/contracts/filters.js';
 export { openai } from './integrations/openai/openai.js';
 export {
     type Contract,
@@ -169,14 +184,14 @@ export {
     type Contracts,
     defineContract,
     defineContracts,
-} from './core/contracts/contract.js';
+} from './specification/contracts/contract.js';
 export type {
     ContractRequest,
     ContractResponder,
     ContractResponse,
     ContractResponseValue,
     MatchableRequest,
-} from './core/contracts/types.js';
+} from './specification/contracts/types.js';
 
 // Mock
 export { mockOf, type MockPort } from './vitest/mock-of.js';
@@ -186,7 +201,7 @@ export { type MockDatePort, mockOfDate } from './vitest/mock-of-date.js';
 export type { MatchFixtureOptions } from './vitest/matchers.js';
 
 // ── Composition root (CONVENTIONS I1) ──
-// `core/` never imports an external dependency: the orchestrator reaches the
+// `specification/` never imports an external dependency: the orchestrator reaches the
 // Container runtimes (testcontainers, docker compose + yaml parser) and the
 // Service auto-detection factories (postgres, redis) through the integration
 // Registry, wired here — the single entry point every consumer imports (F1).

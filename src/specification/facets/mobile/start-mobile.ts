@@ -1,10 +1,10 @@
 import { registerMatchers } from '../../../vitest/matchers.js';
 import type { DevicePort, DeviceTimeouts } from '../../ports/device.port.js';
-import { createMobileFacet } from '../shared/builder.js';
-import type { MobileSpecification, SpecificationConfig } from '../shared/builder.js';
-import { getCallerDir } from '../shared/caller.js';
-import { resolveRoot } from '../shared/resolve.js';
-import { StubBackend } from '../shared/stub-backend.js';
+import { createMobileFacet } from '../_common/builder.js';
+import type { MobileSpecification, SpecificationConfig } from '../_common/builder.js';
+import { getCallerDir } from '../_common/caller.js';
+import { resolveRoot } from '../_common/resolve.js';
+import { StubBackend } from '../_common/stub-backend.js';
 import { startAppiumServer } from './appium-server.js';
 import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
 

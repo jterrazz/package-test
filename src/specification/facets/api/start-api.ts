@@ -1,19 +1,19 @@
 import type { ContainerAccessor } from '../../../integrations/docker/container-accessor.js';
 import { HonoAdapter } from '../../../integrations/hono/hono.adapter.js';
 import { registerMatchers } from '../../../vitest/matchers.js';
-import { createApiFacet } from '../shared/builder.js';
-import type { ApiSpecification, SpecificationConfig } from '../shared/builder.js';
-import { getCallerDir } from '../shared/caller.js';
-import { createDockerReader } from '../shared/docker-reader.js';
-import { Orchestrator } from '../shared/orchestrator.js';
-import { resolveRoot } from '../shared/resolve.js';
+import { createApiFacet } from '../_common/builder.js';
+import type { ApiSpecification, SpecificationConfig } from '../_common/builder.js';
+import { getCallerDir } from '../_common/caller.js';
+import { createDockerReader } from '../_common/docker-reader.js';
+import { Orchestrator } from '../_common/orchestrator.js';
+import { resolveRoot } from '../_common/resolve.js';
 import {
     declaredDatabaseKeys,
     getWorkerId,
     releaseIsolation,
     startServices,
-} from '../shared/services.js';
-import type { DatabaseKeys, ServiceRecord } from '../shared/services.js';
+} from '../_common/services.js';
+import type { DatabaseKeys, ServiceRecord } from '../_common/services.js';
 import { FetchAdapter } from './fetch.adapter.js';
 
 // ── Types ──

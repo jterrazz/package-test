@@ -37,7 +37,7 @@ ruleTester.run('c11-contract-data-pairing', c11ContractDataPairing as unknown as
         // Outside specs/ the rule is inert.
         {
             code: 'test("x", () => {});',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],
 });

@@ -30,7 +30,7 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
         {
             code: 'export {};',
             errors: [{ messageId: 'testsDir' }],
-            filename: '/repo/src/core/__tests__/match.test.ts',
+            filename: '/repo/src/specification/__tests__/match.test.ts',
         },
         // A root-level tests/ dir (guarded by a real package.json at that root) is banned.
         {

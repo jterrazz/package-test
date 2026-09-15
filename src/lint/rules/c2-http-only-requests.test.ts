@@ -39,7 +39,7 @@ ruleTester.run('c2-http-only-requests', c2HttpOnlyRequests as unknown as OxlintR
         // Outside specs/ the rule is inert.
         {
             code: 'test("x", () => {});',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],
 });

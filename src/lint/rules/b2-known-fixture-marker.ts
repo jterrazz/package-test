@@ -1,4 +1,4 @@
-import { KNOWN_FIXTURE_MARKERS } from '../../core/specification/shared/fixtures.js';
+import { KNOWN_FIXTURE_MARKERS } from '../../specification/facets/_common/fixtures.js';
 import { memberPropertyName, stringValue } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';

@@ -1,7 +1,7 @@
 import type { ServerResponse } from '../../ports/server.port.js';
-import type { SpecificationConfig } from '../shared/builder.js';
-import { ResponseAccessor } from '../shared/result/response.js';
-import { BaseResult } from '../shared/result/result.js';
+import type { SpecificationConfig } from '../_common/builder.js';
+import { ResponseAccessor } from '../_common/result/response.js';
+import { BaseResult } from '../_common/result/result.js';
 
 /** Result from an HTTP action (.request(), .get(), .post(), .put(), .delete()). */
 export class HttpResult extends BaseResult {

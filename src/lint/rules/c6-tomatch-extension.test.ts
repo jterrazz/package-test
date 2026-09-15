@@ -52,7 +52,7 @@ ruleTester.run('c6-tomatch-extension', c6ToMatchExtension as unknown as OxlintRu
         // Outside specs/ the rule is inert.
         {
             code: 'expect(text).toMatch("substring");',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],
 });

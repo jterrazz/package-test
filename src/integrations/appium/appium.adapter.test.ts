@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import { button } from '../../core/specification/website/elements.js';
+import { button } from '../../specification/facets/website/elements.js';
 import { AppiumAdapter } from './appium.adapter.js';
 
 /**

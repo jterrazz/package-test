@@ -45,7 +45,7 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
         { code: 'const x = 1;', filename: '/repo/specs/api/api.specification.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/cli/cli.specification.ts' },
         // Module tests under src/ follow the neighbour rule (I2), not C1.
-        { code: 'const x = 1;', filename: '/repo/src/core/matching/match.test.ts' },
+        { code: 'const x = 1;', filename: '/repo/src/specification/matching/match.test.ts' },
         // The default is explicit-equivalent: stating it changes nothing.
         {
             code: 'const x = 1;',
@@ -101,7 +101,7 @@ ruleTester.run('c1-domain-structure (depth: facet)', c1DomainStructure as unknow
         // Still out of scope under src/.
         {
             code: 'const x = 1;',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
             options: [{ depth: 'facet' }],
         },
     ],
@@ -157,7 +157,7 @@ ruleTester.run('c1-domain-structure (depth: mirror)', c1DomainStructure as unkno
         // Still out of scope under src/.
         {
             code: 'const x = 1;',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
             options: [{ depth: 'mirror' }],
         },
     ],

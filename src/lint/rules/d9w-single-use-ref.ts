@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path';
 
-import { GROUND_EXPECTED } from '../../core/specification/shared/ground.js';
+import { GROUND_EXPECTED } from '../../specification/facets/_common/ground.js';
 import { memberPropertyName, segments, stringValue, walk } from '../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';

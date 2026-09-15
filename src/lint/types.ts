@@ -5,7 +5,7 @@
  * (only `RuleTester`, from `oxlint/plugins-dev`), so we describe the exact subset
  * we depend on here. Declaring them locally keeps the rules layer importing
  * NOTHING from the framework runtime — only these ambient shapes and, where a
- * rule needs it, pure helpers from `core/` (e.g. the token list, the kebab-case
+ * rule needs it, pure helpers from `specification/` (e.g. the token list, the kebab-case
  * utilities). The API is ESLint-compatible, so these shapes mirror ESTree.
  */
 

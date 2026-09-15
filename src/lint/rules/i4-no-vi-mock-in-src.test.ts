@@ -12,7 +12,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-const SRC_TEST = '/repo/src/core/matching/match.test.ts';
+const SRC_TEST = '/repo/src/specification/matching/match.test.ts';
 
 ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule, {
     invalid: [
@@ -45,12 +45,12 @@ ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule,
         {
             code: 'export {};',
             errors: [{ messageId: 'bannedDir' }],
-            filename: '/repo/src/core/__mocks__/match.ts',
+            filename: '/repo/src/specification/__mocks__/match.ts',
         },
         {
             code: 'export {};',
             errors: [{ messageId: 'bannedDir' }],
-            filename: '/repo/src/core/__fixtures__/data.ts',
+            filename: '/repo/src/specification/__fixtures__/data.ts',
         },
     ],
     valid: [
@@ -66,7 +66,10 @@ ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule,
         { code: 'import { version } from "node:process";', filename: SRC_TEST },
         // Non-test src files may import what F2/I1 allow — assets are not
         // Checked there (only vi.mock and banned dirs apply).
-        { code: 'import data from "./payload.json";', filename: '/repo/src/core/config.ts' },
+        {
+            code: 'import data from "./payload.json";',
+            filename: '/repo/src/specification/config.ts',
+        },
         // Outside src/ the rule is inert (specs read real files by design).
         { code: 'vi.mock("./x.js");', filename: '/repo/specs/cli/exec/exec.test.ts' },
     ],

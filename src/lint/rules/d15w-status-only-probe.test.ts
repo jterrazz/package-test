@@ -78,7 +78,7 @@ ruleTester.run('d15w-status-only-probe', d15wStatusOnlyProbe as unknown as Oxlin
             code: `test('not a spec', async () => {
                 expect(result.status).toBe(422);
             });`,
-            filename: '/repo/src/core/thing.ts',
+            filename: '/repo/src/specification/thing.ts',
         },
         // Not inside a test callback — a bare status probe at module scope.
         {

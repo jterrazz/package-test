@@ -13,34 +13,34 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { parseResponseFile, serializeResponseFile } from '../core/http-files/http-file.js';
-import type { ParsedResponseFile } from '../core/http-files/http-file.js';
-import { CaptureScope } from '../core/matching/match.js';
+import { ContainerAccessor } from '../integrations/docker/container-accessor.js';
+import { GROUND_EXPECTED } from '../specification/facets/_common/ground.js';
+import {
+    formatDirectoryDiff,
+    formatResponseDiff,
+    formatStdoutDiff,
+    formatTableDiff,
+} from '../specification/facets/_common/reporter.js';
+import {
+    diffDirectories,
+    DirectoryAccessor,
+    walkDirectory,
+} from '../specification/facets/_common/result/directory.js';
+import { FilesystemAccessor } from '../specification/facets/_common/result/filesystem.js';
+import { JsonAccessor } from '../specification/facets/_common/result/json.js';
+import { ResponseAccessor } from '../specification/facets/_common/result/response.js';
+import { TableAccessor } from '../specification/facets/_common/result/table.js';
+import { TextAccessor } from '../specification/facets/_common/result/text.js';
+import { parseResponseFile, serializeResponseFile } from '../specification/http-files/http-file.js';
+import type { ParsedResponseFile } from '../specification/http-files/http-file.js';
+import { CaptureScope } from '../specification/matching/match.js';
 import {
     mergePreservingPlaceholders,
     mergeTextPreservingPlaceholders,
     renderExpected,
     structuralEquals,
     textEquals,
-} from '../core/matching/structural.js';
-import { GROUND_EXPECTED } from '../core/specification/shared/ground.js';
-import {
-    formatDirectoryDiff,
-    formatResponseDiff,
-    formatStdoutDiff,
-    formatTableDiff,
-} from '../core/specification/shared/reporter.js';
-import {
-    diffDirectories,
-    DirectoryAccessor,
-    walkDirectory,
-} from '../core/specification/shared/result/directory.js';
-import { FilesystemAccessor } from '../core/specification/shared/result/filesystem.js';
-import { JsonAccessor } from '../core/specification/shared/result/json.js';
-import { ResponseAccessor } from '../core/specification/shared/result/response.js';
-import { TableAccessor } from '../core/specification/shared/result/table.js';
-import { TextAccessor } from '../core/specification/shared/result/text.js';
-import { ContainerAccessor } from '../integrations/docker/container-accessor.js';
+} from '../specification/matching/structural.js';
 import { shouldUpdateSnapshots, UPDATE_HINT } from './update.js';
 
 type MatcherResult = {

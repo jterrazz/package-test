@@ -3,13 +3,13 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 
-import { parseResponseFile, serializeResponseFile } from '../core/http-files/http-file.js';
-import { CaptureScope } from '../core/matching/match.js';
-import { DirectoryAccessor } from '../core/specification/shared/result/directory.js';
-import { FilesystemAccessor } from '../core/specification/shared/result/filesystem.js';
-import { JsonAccessor } from '../core/specification/shared/result/json.js';
-import { ResponseAccessor } from '../core/specification/shared/result/response.js';
-import { TextAccessor } from '../core/specification/shared/result/text.js';
+import { DirectoryAccessor } from '../specification/facets/_common/result/directory.js';
+import { FilesystemAccessor } from '../specification/facets/_common/result/filesystem.js';
+import { JsonAccessor } from '../specification/facets/_common/result/json.js';
+import { ResponseAccessor } from '../specification/facets/_common/result/response.js';
+import { TextAccessor } from '../specification/facets/_common/result/text.js';
+import { parseResponseFile, serializeResponseFile } from '../specification/http-files/http-file.js';
+import { CaptureScope } from '../specification/matching/match.js';
 import { buildUpdatedResponse, compareResponse, registerMatchers } from './matchers.js';
 
 const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';

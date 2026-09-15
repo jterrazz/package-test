@@ -3,7 +3,7 @@ import type { ServiceHandle } from '../../ports/service.port.js';
 import type { ComposeConfig, ComposeService } from './compose-file.js';
 
 /**
- * Integration registry — the seam that keeps `core/` free of external
+ * Integration registry — the seam that keeps `specification/` free of external
  * dependencies (CONVENTIONS I1). Core code (the orchestrator) consumes
  * container runtimes, the compose parser, and service auto-detection through
  * this registry; the concrete implementations live under `integrations/`

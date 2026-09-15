@@ -7,7 +7,7 @@ import { getCallerDir, isFrameworkFrame } from './caller.js';
 
 describe('caller detection', () => {
     test('returns the directory of the calling test file', () => {
-        // Given - a direct call from this sibling test file (under src/core/)
+        // Given - a direct call from this sibling test file (under src/specification/)
         const dir = getCallerDir();
 
         // Then - sibling .test.ts frames are callers, not framework internals (CONVENTIONS I2)

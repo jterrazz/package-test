@@ -56,7 +56,7 @@ ruleTester.run('j2-no-sleep-in-specs', j2NoSleepInSpecs as unknown as OxlintRule
         // Outside specs/ the rule is inert.
         {
             code: 'setTimeout(tick, 100);',
-            filename: '/repo/src/core/specification/shared/orchestrator.ts',
+            filename: '/repo/src/specification/facets/_common/orchestrator.ts',
         },
     ],
 });

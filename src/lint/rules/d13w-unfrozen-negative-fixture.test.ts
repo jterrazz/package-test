@@ -66,7 +66,7 @@ ruleTester.run(
             // Outside specs/ the rule is inert.
             {
                 code: `test('t', () => { expect(() => expect(result.response).toMatch('wrong.http')).toThrow(); });`,
-                filename: '/repo/src/core/thing.ts',
+                filename: '/repo/src/specification/thing.ts',
             },
         ],
     },

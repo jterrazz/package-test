@@ -10,9 +10,9 @@
  * the spec with an explicit error. Chains with zero contracts never start MSW:
  * their network is not guarded (known scope).
  */
-import type { Contract } from '../../core/contracts/contract.js';
-import { ContractQueue } from '../../core/contracts/queue.js';
-import type { ContractResponse, MatchableRequest } from '../../core/contracts/types.js';
+import type { Contract } from '../../specification/contracts/contract.js';
+import { ContractQueue } from '../../specification/contracts/queue.js';
+import type { ContractResponse, MatchableRequest } from '../../specification/contracts/types.js';
 
 let mswModule: any = null;
 let mswHttp: any = null;

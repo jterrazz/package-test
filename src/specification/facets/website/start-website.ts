@@ -1,10 +1,10 @@
 import { registerMatchers } from '../../../vitest/matchers.js';
 import type { BrowserPort } from '../../ports/browser.port.js';
-import { createWebsiteFacet } from '../shared/builder.js';
-import type { SpecificationConfig, WebsiteSpecification } from '../shared/builder.js';
-import { getCallerDir } from '../shared/caller.js';
-import { resolveRoot } from '../shared/resolve.js';
-import { StubBackend } from '../shared/stub-backend.js';
+import { createWebsiteFacet } from '../_common/builder.js';
+import type { SpecificationConfig, WebsiteSpecification } from '../_common/builder.js';
+import { getCallerDir } from '../_common/caller.js';
+import { resolveRoot } from '../_common/resolve.js';
+import { StubBackend } from '../_common/stub-backend.js';
 import { ServeAdapter } from './serve.adapter.js';
 import type { ServeOptions } from './serve.adapter.js';
 

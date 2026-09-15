@@ -1,14 +1,18 @@
 import type { ContainerAccessor } from '../../../integrations/docker/container-accessor.js';
 import { registerMatchers } from '../../../vitest/matchers.js';
 import type { CliEnv } from '../../ports/cli.port.js';
-import { createCliFacet } from '../shared/builder.js';
-import type { CliSpecification, DockerSpecConfig, SpecificationConfig } from '../shared/builder.js';
-import { getCallerDir } from '../shared/caller.js';
-import { createDockerReader } from '../shared/docker-reader.js';
-import type { Orchestrator } from '../shared/orchestrator.js';
-import { resolveCommand, resolveRoot } from '../shared/resolve.js';
-import { declaredDatabaseKeys, releaseIsolation, startServices } from '../shared/services.js';
-import type { DatabaseKeys, ServiceRecord, StartedServices } from '../shared/services.js';
+import { createCliFacet } from '../_common/builder.js';
+import type {
+    CliSpecification,
+    DockerSpecConfig,
+    SpecificationConfig,
+} from '../_common/builder.js';
+import { getCallerDir } from '../_common/caller.js';
+import { createDockerReader } from '../_common/docker-reader.js';
+import type { Orchestrator } from '../_common/orchestrator.js';
+import { resolveCommand, resolveRoot } from '../_common/resolve.js';
+import { declaredDatabaseKeys, releaseIsolation, startServices } from '../_common/services.js';
+import type { DatabaseKeys, ServiceRecord, StartedServices } from '../_common/services.js';
 import { ExecAdapter } from './exec.adapter.js';
 import type { LiterateServeRegistration } from './literate.js';
 

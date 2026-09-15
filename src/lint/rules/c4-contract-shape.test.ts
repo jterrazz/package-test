@@ -109,7 +109,7 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
         // The framework's own contracts module is not a feature tree.
         {
             code: `export const x = 1;`,
-            filename: '/repo/src/core/contracts/contract.ts',
+            filename: '/repo/src/specification/contracts/contract.ts',
         },
     ],
 });

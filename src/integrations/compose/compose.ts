@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import { dirname } from 'node:path';
 
-import type { ContainerPort } from '../../core/ports/container.port.js';
+import type { ContainerPort } from '../../specification/ports/container.port.js';
 
 /**
  * Container adapter using docker compose — runs full compose stack.

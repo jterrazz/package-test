@@ -72,7 +72,7 @@ ruleTester.run('d9w-single-use-ref', d9wSingleUseRef as unknown as OxlintRule, {
         // Outside specs/ the rule is inert.
         {
             code: 'expect(result.value).toEqual({ id: match.ref("order") });',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],
 });

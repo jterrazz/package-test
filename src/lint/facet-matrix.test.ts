@@ -27,7 +27,7 @@ import type { FacetRole } from './facet-matrix.js';
  * the cross-facet claims and keeps the records referenced.
  *
  * On a failure here: reconcile the record with the facet interface in
- * `src/core/specification/shared/builder.ts`, then update the README
+ * `src/specification/facets/_common/builder.ts`, then update the README
  * "Builder API" Setup/Actions tables (and docs/02–04) to match.
  */
 

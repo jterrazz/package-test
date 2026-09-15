@@ -5,11 +5,11 @@ import {
     removeContainers,
 } from '../../../integrations/docker/docker-lookup.js';
 import type { CliOutput } from '../../ports/cli.port.js';
-import type { DockerSpecConfig, SpecificationConfig } from '../shared/builder.js';
-import { FilesystemAccessor } from '../shared/result/filesystem.js';
-import { JsonAccessor } from '../shared/result/json.js';
-import { BaseResult } from '../shared/result/result.js';
-import { TextAccessor } from '../shared/result/text.js';
+import type { DockerSpecConfig, SpecificationConfig } from '../_common/builder.js';
+import { FilesystemAccessor } from '../_common/result/filesystem.js';
+import { JsonAccessor } from '../_common/result/json.js';
+import { BaseResult } from '../_common/result/result.js';
+import { TextAccessor } from '../_common/result/text.js';
 
 type CapturedContainer = {
     id: string;

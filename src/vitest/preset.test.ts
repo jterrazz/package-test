@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { COVERAGE_DIR, VITEST_ARTIFACTS_DIR } from '../core/artifacts/artifacts.js';
+import { COVERAGE_DIR, VITEST_ARTIFACTS_DIR } from '../specification/artifacts/artifacts.js';
 import { defineSpecConfig } from './preset.js';
 
 describe('defineSpecConfig() — artefact paths', () => {

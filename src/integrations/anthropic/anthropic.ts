@@ -1,6 +1,6 @@
-import { matchesText } from '../../core/contracts/filters.js';
-import type { TextFilter } from '../../core/contracts/filters.js';
-import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
+import { matchesText } from '../../specification/contracts/filters.js';
+import type { TextFilter } from '../../specification/contracts/filters.js';
+import type { ContractRequest, ContractResponse } from '../../specification/contracts/types.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 

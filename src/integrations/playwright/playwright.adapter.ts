@@ -3,6 +3,10 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import type { Browser, BrowserType, Locator, Page } from 'playwright';
 
+import {
+    AmbiguousElementError,
+    describeAmbiguity,
+} from '../../specification/facets/website/ambiguity.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -13,11 +17,7 @@ import type {
     ElementMatch,
     ElementRef,
     Visitor,
-} from '../../core/ports/browser.port.js';
-import {
-    AmbiguousElementError,
-    describeAmbiguity,
-} from '../../core/specification/website/ambiguity.js';
+} from '../../specification/ports/browser.port.js';
 
 /**
  * Anything a locator can be built from — the page root, or another locator

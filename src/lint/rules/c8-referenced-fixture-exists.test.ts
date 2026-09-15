@@ -85,7 +85,7 @@ ruleTester.run('c8-referenced-fixture-exists', c8ReferencedFixtureExists as unkn
         // Outside specs/ the rule is inert.
         {
             code: 'expect(x).toMatch("nope.txt");',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],
 });

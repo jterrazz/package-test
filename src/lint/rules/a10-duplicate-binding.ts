@@ -1,4 +1,4 @@
-import { toKebabCase } from '../../core/specification/shared/binding.js';
+import { toKebabCase } from '../../specification/facets/_common/binding.js';
 import { findProperty, propertyKeyName, specificationMember, stringValue } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';

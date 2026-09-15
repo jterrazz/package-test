@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'node:path';
 
-import { findRoot } from '../../core/specification/shared/resolve.js';
+import { findRoot } from '../../specification/facets/_common/resolve.js';
 import { findProperty, specificationMember, stringValue } from '../ast.js';
 import { isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';

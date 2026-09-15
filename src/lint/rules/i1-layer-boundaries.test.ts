@@ -14,19 +14,24 @@ const ruleTester = new RuleTester();
 
 /** This package's own architecture — the map its `oxlint.config.ts` declares. */
 const FRAMEWORK_LAYERS = {
-    core: {
-        imports: ['core/', 'integrations/docker/', 'integrations/hono/', 'vitest/matchers'],
+    specification: {
+        imports: [
+            'specification/',
+            'integrations/docker/',
+            'integrations/hono/',
+            'vitest/matchers',
+        ],
         seams: {
-            'core/specification/shared/builder.ts': ['integrations/msw/'],
+            'specification/facets/_common/builder.ts': ['integrations/msw/'],
         },
     },
     integrations: {
         folders: { postgres: ['pg'], redis: ['redis'] },
-        imports: ['core/'],
+        imports: ['specification/'],
     },
-    lint: { imports: ['lint/', 'core/specification/shared/binding'] },
+    lint: { imports: ['lint/', 'specification/facets/_common/binding'] },
     vitest: {
-        imports: ['core/', 'vitest/', 'integrations/docker/'],
+        imports: ['specification/', 'vitest/', 'integrations/docker/'],
         packages: ['vitest', 'vitest-mock-extended', 'mockdate'],
     },
 };
@@ -39,7 +44,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         {
             code: 'import { Client } from "pg";',
             errors: [{ messageId: 'foreignDependency' }],
-            filename: '/repo/src/core/matching/match.ts',
+            filename: '/repo/src/specification/matching/match.ts',
             options: framework,
         },
         // A folder only imports its own declared dependency.
@@ -60,12 +65,12 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         {
             code: 'import { registerIntercepts } from "../../../integrations/msw/intercept.js";',
             errors: [{ messageId: 'crossLayer' }],
-            filename: '/repo/src/core/specification/shared/orchestrator.ts',
+            filename: '/repo/src/specification/facets/_common/orchestrator.ts',
             options: framework,
         },
         // A layer whose imports list names only pure helpers.
         {
-            code: 'import { SpecificationBuilder } from "../../core/specification/shared/builder.js";',
+            code: 'import { SpecificationBuilder } from "../../specification/facets/_common/builder.js";',
             errors: [{ messageId: 'crossLayer' }],
             filename: '/repo/src/lint/rules/some-rule.ts',
             options: framework,
@@ -81,31 +86,31 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         // Node builtins are allowed everywhere.
         {
             code: 'import { join } from "node:path";',
-            filename: '/repo/src/core/specification/shared/fixtures.ts',
+            filename: '/repo/src/specification/facets/_common/fixtures.ts',
             options: framework,
         },
         // In-layer relative imports.
         {
             code: 'import { TOKEN_KINDS } from "./match.js";',
-            filename: '/repo/src/core/matching/structural.ts',
+            filename: '/repo/src/specification/matching/structural.ts',
             options: framework,
         },
         // A declared prefix edge.
         {
             code: 'import { ContainerAccessor } from "../../../integrations/docker/container-accessor.js";',
-            filename: '/repo/src/core/specification/cli/result.ts',
+            filename: '/repo/src/specification/facets/cli/result.ts',
             options: framework,
         },
         // A declared EXACT module edge (not a prefix).
         {
             code: 'import { registerMatchers } from "../../../vitest/matchers.js";',
-            filename: '/repo/src/core/specification/cli/start-cli.ts',
+            filename: '/repo/src/specification/facets/cli/start-cli.ts',
             options: framework,
         },
         // The seam, from the module that owns it.
         {
             code: 'import type { InterceptRegistration } from "../../../integrations/msw/intercept.js";',
-            filename: '/repo/src/core/specification/shared/builder.ts',
+            filename: '/repo/src/specification/facets/_common/builder.ts',
             options: framework,
         },
         // A folder importing its own dependency, and the layer's imports.
@@ -115,7 +120,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
             options: framework,
         },
         {
-            code: 'import type { DatabasePort } from "../../core/ports/database.port.js";',
+            code: 'import type { DatabasePort } from "../../specification/ports/database.port.js";',
             filename: '/repo/src/integrations/postgres/postgres.ts',
             options: framework,
         },
@@ -127,14 +132,14 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         },
         // An exact-module edge reached with its extension.
         {
-            code: 'import { toKebabCase } from "../../core/specification/shared/binding.js";',
+            code: 'import { toKebabCase } from "../../specification/facets/_common/binding.js";',
             filename: '/repo/src/lint/rules/a6w-redundant-compose-service.ts',
             options: framework,
         },
         // Module tests are exempt (F2/I4 govern them).
         {
             code: 'import { describe } from "vitest";',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/specification/matching/match.test.ts',
             options: framework,
         },
         // A file under no declared layer is out of scope — here, the

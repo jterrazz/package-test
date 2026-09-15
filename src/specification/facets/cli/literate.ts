@@ -16,11 +16,11 @@ import {
     textEquals,
 } from '../../matching/structural.js';
 import type { CliEnv, CliOutput } from '../../ports/cli.port.js';
-import type { SpecificationConfig } from '../shared/builder.js';
-import { copyPlan } from '../shared/fixtures.js';
-import { formatStdoutDiff } from '../shared/reporter.js';
-import { expandWorkdir, safeRealpath } from '../shared/resolve.js';
-import { stripAnsiCodes } from '../shared/result/text.js';
+import type { SpecificationConfig } from '../_common/builder.js';
+import { copyPlan } from '../_common/fixtures.js';
+import { formatStdoutDiff } from '../_common/reporter.js';
+import { expandWorkdir, safeRealpath } from '../_common/resolve.js';
+import { stripAnsiCodes } from '../_common/result/text.js';
 import { ServeAdapter } from '../website/serve.adapter.js';
 import { CliResult } from './result.js';
 

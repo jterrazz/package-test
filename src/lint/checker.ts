@@ -2,17 +2,17 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import {
+    GROUND_EXPECTED,
+    GROUND_FIXTURES,
+    GROUND_REQUESTS,
+} from '../specification/facets/_common/ground.js';
+import {
     assertedStreams,
     readSpecFile,
     SPEC_EXTENSION,
     SpecSyntaxError,
-} from '../core/literate/spec-document.js';
-import { TOKEN_KINDS } from '../core/matching/match.js';
-import {
-    GROUND_EXPECTED,
-    GROUND_FIXTURES,
-    GROUND_REQUESTS,
-} from '../core/specification/shared/ground.js';
+} from '../specification/literate/spec-document.js';
+import { TOKEN_KINDS } from '../specification/matching/match.js';
 import {
     checkDatabaseProperty,
     checkDeadFixtures,

@@ -9,14 +9,14 @@ import { testing } from './dist/oxlint.js';
 /**
  * The four layers of this package and their sanctioned edges (CONVENTIONS I1).
  *
- * - `core/` — zero external imports; may reach `integrations/docker`,
+ * - `specification/` — zero external imports; may reach `integrations/docker`,
  *   `integrations/hono`, `vitest/matchers`, plus three lazy seams, each opened
  *   for the one module that owns it.
- * - `integrations/<dep>/` — one folder = one external dependency, plus `core/`.
+ * - `integrations/<dep>/` — one folder = one external dependency, plus `specification/`.
  * - `vitest/` — the runner coupling: `vitest`, `vitest-mock-extended`,
- *   `mockdate`, plus `core/` and `integrations/docker` (the matchers recognise
+ *   `mockdate`, plus `specification/` and `integrations/docker` (the matchers recognise
  *   the zero-dependency ContainerAccessor subject).
- * - `lint/` — zero runtime imports: no external packages, and from `core/` only
+ * - `lint/` — zero runtime imports: no external packages, and from `specification/` only
  *   the pure helpers (the token list, the case conversions, fixture markers, the
  *   root walk a rule must share with the runner, the spec-document parser).
  *
@@ -24,9 +24,9 @@ import { testing } from './dist/oxlint.js';
  * scope; module tests and `*.fixtures.ts` files are governed by F2/I4.
  */
 const FRAMEWORK_LAYERS = {
-    core: {
+    specification: {
         imports: [
-            'core/',
+            'specification/',
             'integrations/docker/',
             'integrations/hono/',
             'integrations/yaml/',
@@ -36,9 +36,9 @@ const FRAMEWORK_LAYERS = {
             'vitest/update',
         ],
         seams: {
-            'core/specification/mobile/start-mobile.ts': ['integrations/appium/'],
-            'core/specification/shared/builder.ts': ['integrations/msw/'],
-            'core/specification/website/start-website.ts': ['integrations/playwright/'],
+            'specification/facets/mobile/start-mobile.ts': ['integrations/appium/'],
+            'specification/facets/_common/builder.ts': ['integrations/msw/'],
+            'specification/facets/website/start-website.ts': ['integrations/playwright/'],
         },
     },
     integrations: {
@@ -57,27 +57,27 @@ const FRAMEWORK_LAYERS = {
             testcontainers: ['testcontainers'],
             yaml: ['yaml'],
         },
-        imports: ['core/'],
+        imports: ['specification/'],
     },
     lint: {
         imports: [
             'lint/',
             // The .spec.yaml grammar is read by the runner AND by the checker —
             // One parser, so the file lint accepts is the one the runner runs.
-            'core/literate/spec-document',
+            'specification/literate/spec-document',
             'integrations/yaml/document',
-            'core/matching/match',
-            'core/specification/shared/binding',
-            'core/specification/shared/fixtures',
+            'specification/matching/match',
+            'specification/facets/_common/binding',
+            'specification/facets/_common/fixtures',
             // The four ground names have ONE home; a rule that probed for its
             // Own copy of them could drift from what the runner resolves.
-            'core/specification/shared/ground',
+            'specification/facets/_common/ground',
             // A9's rule must derive the root with the framework's own walk, not a copy.
-            'core/specification/shared/resolve',
+            'specification/facets/_common/resolve',
         ],
     },
     vitest: {
-        imports: ['core/', 'vitest/', 'integrations/docker/'],
+        imports: ['specification/', 'vitest/', 'integrations/docker/'],
         packages: ['vitest', 'vitest-mock-extended', 'mockdate'],
     },
 };

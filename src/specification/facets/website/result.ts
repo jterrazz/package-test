@@ -3,10 +3,10 @@ import type {
     BrowserMetaElement,
     BrowserPage,
 } from '../../ports/browser.port.js';
-import type { SpecificationConfig } from '../shared/builder.js';
-import { JsonAccessor } from '../shared/result/json.js';
-import { BaseResult } from '../shared/result/result.js';
-import { TextAccessor } from '../shared/result/text.js';
+import type { SpecificationConfig } from '../_common/builder.js';
+import { JsonAccessor } from '../_common/result/json.js';
+import { BaseResult } from '../_common/result/result.js';
+import { TextAccessor } from '../_common/result/text.js';
 
 /** A raw HTTP exchange captured by `.fetch()` — redirects are NOT followed. */
 export type FetchExchange = {

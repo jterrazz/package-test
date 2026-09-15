@@ -2,7 +2,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { renderSchema } from '../core/literate/spec-document.js';
+import { renderSchema } from '../specification/literate/spec-document.js';
 import { renderRules, spliceCatalog } from './catalog.js';
 
 /**

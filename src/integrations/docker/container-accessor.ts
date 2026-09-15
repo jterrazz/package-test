@@ -1,10 +1,10 @@
 import { execSync } from 'node:child_process';
 
-import type { CliOutput } from '../../core/ports/cli.port.js';
-import { CliResult } from '../../core/specification/cli/result.js';
-import { JsonAccessor } from '../../core/specification/shared/result/json.js';
-import type { FileAccessor } from '../../core/specification/shared/result/result.js';
-import { TextAccessor } from '../../core/specification/shared/result/text.js';
+import { JsonAccessor } from '../../specification/facets/_common/result/json.js';
+import type { FileAccessor } from '../../specification/facets/_common/result/result.js';
+import { TextAccessor } from '../../specification/facets/_common/result/text.js';
+import { CliResult } from '../../specification/facets/cli/result.js';
+import type { CliOutput } from '../../specification/ports/cli.port.js';
 
 const EXEC_TIMEOUT = 10_000;
 

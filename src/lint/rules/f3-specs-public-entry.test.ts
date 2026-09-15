@@ -14,9 +14,9 @@ const ruleTester = new RuleTester();
 
 ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintRule, {
     invalid: [
-        // Deep core import from a spec.
+        // Deep specification-layer import from a spec.
         {
-            code: 'import { match } from "../../src/core/matching/match.js";',
+            code: 'import { match } from "../../src/specification/matching/match.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
@@ -68,7 +68,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
         },
         // Outside specs/ the rule is inert.
         {
-            code: 'import { match } from "../core/matching/match.js";',
+            code: 'import { match } from "../specification/matching/match.js";',
             filename: '/repo/src/vitest/matchers.ts',
         },
         // Consumer form — package imports carry no src path.

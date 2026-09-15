@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { isAbsolute, resolve } from 'node:path';
 
-import { specDescription } from '../core/specification/cli/literate.js';
+import { specDescription } from '../specification/facets/cli/literate.js';
 
 /**
  * The `literate()` vite plugin — door one of the spec-document format.
