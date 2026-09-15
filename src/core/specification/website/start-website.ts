@@ -1,14 +1,12 @@
 import { registerMatchers } from '../../../vitest/matchers.js';
 import type { BrowserPort } from '../../ports/browser.port.js';
-import {
-    createWebsiteFacet,
-    type SpecificationConfig,
-    type WebsiteSpecification,
-} from '../shared/builder.js';
+import { createWebsiteFacet } from '../shared/builder.js';
+import type { SpecificationConfig, WebsiteSpecification } from '../shared/builder.js';
 import { getCallerDir } from '../shared/caller.js';
 import { resolveRoot } from '../shared/resolve.js';
 import { StubBackend } from '../shared/stub-backend.js';
-import { ServeAdapter, type ServeOptions } from './serve.adapter.js';
+import { ServeAdapter } from './serve.adapter.js';
+import type { ServeOptions } from './serve.adapter.js';
 
 // ── Types ──
 
@@ -18,12 +16,12 @@ import { ServeAdapter, type ServeOptions } from './serve.adapter.js';
  * server child's environment under `env`; the contracts each chain declares
  * via `.intercept(...)` are what it serves.
  */
-export interface WebsiteBackendOptions {
+export type WebsiteBackendOptions = {
     /** Env var receiving the stub's URL in the server child (e.g. `'API_URL'`). */
     env: string;
     /** Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port. */
     port?: number;
-}
+};
 
 /**
  * Options for {@link startWebsite | specification.website}. `server` (start
@@ -74,13 +72,13 @@ export type WebsiteSpecificationOptions = {
  *
  *     const { website, cleanup } = await specification.website(…);
  */
-export interface WebsiteHandle {
+export type WebsiteHandle = {
     /** Stop the server process and the shared browser instance. */
     cleanup: () => Promise<void>;
     /** The base URL the specs run against. */
     url: string;
     website: WebsiteSpecification;
-}
+};
 
 // ── Constructor ──
 
@@ -127,7 +125,7 @@ export async function startWebsite(options: WebsiteSpecificationOptions): Promis
             throw error;
         }
     } else {
-        baseUrl = options.url.replace(/\/$/, '');
+        baseUrl = options.url.replace(/\/$/u, '');
     }
 
     // One browser per runner, launched lazily on the first `.visit()` so

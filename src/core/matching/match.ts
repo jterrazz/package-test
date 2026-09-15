@@ -69,18 +69,23 @@ export type TokenKind = (typeof TOKEN_KINDS)[number];
  */
 export class Matcher {
     /** For kind 'includes': the substring the actual value must contain. */
-    readonly includes?: string;
+    readonly includes?: string | undefined;
     readonly kind: MatcherKind;
     /** For kind 'ref': the capture to assert inequality against. */
-    readonly notRef?: string;
+    readonly notRef?: string | undefined;
     /** For kind 'ref': the capture name. */
-    readonly refName?: string;
+    readonly refName?: string | undefined;
     /** For kind 'regex': the pattern the actual value must match. */
-    readonly regex?: RegExp;
+    readonly regex?: RegExp | undefined;
 
     constructor(
         kind: MatcherKind,
-        options: { includes?: string; notRef?: string; refName?: string; regex?: RegExp } = {},
+        options: {
+            includes?: string | undefined;
+            notRef?: string | undefined;
+            refName?: string | undefined;
+            regex?: RegExp | undefined;
+        } = {},
     ) {
         this.includes = options.includes;
         this.kind = kind;
@@ -114,7 +119,13 @@ export class Matcher {
     }
 }
 
-const typed = (kind: MatcherKind) => (): Matcher => new Matcher(kind);
+/** A no-argument matcher factory — what every typed entry of `match` is. */
+type TypedMatcher = () => Matcher;
+
+const typed =
+    (kind: MatcherKind): TypedMatcher =>
+    (): Matcher =>
+        new Matcher(kind);
 
 /**
  * Dynamic-value matchers for structural comparisons — the code-side mirror of
@@ -126,7 +137,17 @@ const typed = (kind: MatcherKind) => (): Matcher => new Matcher(kind);
  *       rows: [[match.uuid(), 'Alice']],
  *   });
  */
-export const match = {
+/**
+ * The matcher roster: one no-argument factory per token kind, plus the three
+ * code-only forms the `{{token}}` grammar does not carry.
+ */
+export type MatchFactories = Record<TokenKind, TypedMatcher> & {
+    includes: (substring: string) => Matcher;
+    ref: (name: string, options?: { not?: string }) => Matcher;
+    regex: (regex: RegExp) => Matcher;
+};
+
+export const match: MatchFactories = {
     /** Matches anything. */
     any: typed('any'),
     /** Matches a base64 string. */
@@ -203,7 +224,7 @@ export class CaptureScope {
      * The exact working directory of the current spec, when the framework
      * knows it (cli mode). Drives the `{{workdir}}` token / `match.workdir()`.
      */
-    workdir?: string;
+    workdir?: string | undefined;
 
     constructor(workdir?: string) {
         this.workdir = workdir;

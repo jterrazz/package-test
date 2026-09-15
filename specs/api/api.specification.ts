@@ -5,8 +5,8 @@
  */
 import { afterAll } from 'vitest';
 
-import { createApp } from '../_fixtures/app/app.js';
 import { postgres, redis, specification } from '../../src/index.js';
+import { createApp } from '../_fixtures/app/app.js';
 
 export const { api, cleanup } = await specification.api({
     root: '../_fixtures/app',

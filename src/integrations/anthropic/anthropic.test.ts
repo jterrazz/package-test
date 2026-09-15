@@ -26,7 +26,7 @@ describe('intercept — anthropic', () => {
 
     test('anthropic.messages() filter matches system prompt', () => {
         // Given - a system-prompt filter
-        const trigger = anthropic.messages({ system: /journal/ });
+        const trigger = anthropic.messages({ system: /journal/u });
 
         // Then - only bodies with a matching system prompt pass
         expect(trigger.match).toBeDefined();
@@ -41,7 +41,7 @@ describe('intercept — anthropic', () => {
                 method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
-        ).toBe(true);
+        ).toBeTruthy();
 
         expect(
             trigger.match!({
@@ -54,12 +54,12 @@ describe('intercept — anthropic', () => {
                 method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
-        ).toBe(false);
+        ).toBeFalsy();
     });
 
     test('anthropic.messages() filter matches first user message', () => {
         // Given - a user-message filter
-        const trigger = anthropic.messages({ user: /classify/ });
+        const trigger = anthropic.messages({ user: /classify/u });
 
         // Then - only bodies whose first user message matches pass
         expect(
@@ -69,7 +69,7 @@ describe('intercept — anthropic', () => {
                 method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
-        ).toBe(true);
+        ).toBeTruthy();
 
         expect(
             trigger.match!({
@@ -78,7 +78,7 @@ describe('intercept — anthropic', () => {
                 method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
             }),
-        ).toBe(false);
+        ).toBeFalsy();
     });
 
     test('anthropic.messages() wrap passes fixture objects through verbatim', () => {
@@ -122,9 +122,9 @@ describe('intercept — anthropic', () => {
         });
 
         // Then - only the exact model passes; a prefix or a different model does not
-        expect(trigger.match!(request('claude-sonnet-4-20250514'))).toBe(true);
-        expect(trigger.match!(request('claude-sonnet-4'))).toBe(false);
-        expect(trigger.match!(request('claude-opus-4-20250514'))).toBe(false);
+        expect(trigger.match!(request('claude-sonnet-4-20250514'))).toBeTruthy();
+        expect(trigger.match!(request('claude-sonnet-4'))).toBeFalsy();
+        expect(trigger.match!(request('claude-opus-4-20250514'))).toBeFalsy();
     });
 
     test('anthropic.messages() tools filter matches a subset of declared tool names', () => {
@@ -141,9 +141,9 @@ describe('intercept — anthropic', () => {
         });
 
         // Then - present (even among others) passes; absent or no-tools fails
-        expect(trigger.match!(withTools(['get_weather', 'get_time']))).toBe(true);
-        expect(trigger.match!(withTools(['get_time']))).toBe(false);
-        expect(trigger.match!(withTools([]))).toBe(false);
+        expect(trigger.match!(withTools(['get_weather', 'get_time']))).toBeTruthy();
+        expect(trigger.match!(withTools(['get_time']))).toBeFalsy();
+        expect(trigger.match!(withTools([]))).toBeFalsy();
     });
 
     test('anthropic.messages() string-form system/user filters match by EXACT equality', () => {
@@ -163,15 +163,15 @@ describe('intercept — anthropic', () => {
         });
 
         // Then - both must match whole; a superstring is NOT a match anymore
-        expect(trigger.match!(request('You are a journal agent.', 'please classify this'))).toBe(
-            true,
-        );
+        expect(
+            trigger.match!(request('You are a journal agent.', 'please classify this')),
+        ).toBeTruthy();
         expect(
             trigger.match!(request('You are a journal agent.', 'please classify this article')),
-        ).toBe(false);
-        expect(trigger.match!(request('You are a coding agent.', 'please classify this'))).toBe(
-            false,
-        );
+        ).toBeFalsy();
+        expect(
+            trigger.match!(request('You are a coding agent.', 'please classify this')),
+        ).toBeFalsy();
     });
 
     test('anthropic.error() returns rate_limit_error for 429 and api_error otherwise', () => {
@@ -196,7 +196,7 @@ describe('intercept — anthropic', () => {
 
         // Then - it resolves 200 with an empty body but only after a 30s delay
         expect(response.status).toBe(200);
-        expect(response.body).toEqual({});
+        expect(response.body).toStrictEqual({});
         expect(response.delay).toBe(30_000);
     });
 });

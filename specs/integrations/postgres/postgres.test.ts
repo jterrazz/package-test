@@ -36,7 +36,7 @@ describe('postgres service', () => {
         test('builds a valid postgresql connection string', () => {
             // Given - the handle wired to the started container
             // Then - the string carries credentials and database name
-            expect(db.connectionString).toMatch(/^postgresql:\/\/test:test@/);
+            expect(db.connectionString).toMatch(/^postgresql:\/\/test:test@/u);
             expect(db.connectionString).toContain('/test');
         });
     });
@@ -62,7 +62,7 @@ describe('postgres service', () => {
             await db.seed("INSERT INTO \"users\" (name, email) VALUES ('Alice', 'alice@test.com')");
 
             // Then - row exists
-            expect(await db.query('users', ['name'])).toEqual([['Alice']]);
+            await expect(db.query('users', ['name'])).resolves.toStrictEqual([['Alice']]);
         });
 
         test('executes multiple statements from file', async () => {
@@ -72,7 +72,7 @@ describe('postgres service', () => {
             await db.seed(sql);
 
             // Then - both rows exist
-            expect(await db.query('users', ['name'])).toEqual([['Alice'], ['Bob']]);
+            await expect(db.query('users', ['name'])).resolves.toStrictEqual([['Alice'], ['Bob']]);
         });
     });
 
@@ -95,7 +95,7 @@ describe('postgres service', () => {
             await initDb.initialize(tmpDir);
 
             // Then - init script executed
-            expect(await db.query('init_test', ['val'])).toEqual([['ok']]);
+            await expect(db.query('init_test', ['val'])).resolves.toStrictEqual([['ok']]);
             await db.seed('DROP TABLE "init_test"');
         });
     });
@@ -107,7 +107,7 @@ describe('postgres service', () => {
             await db.seed("INSERT INTO \"users\" (name, email) VALUES ('Alice', 'alice@test.com')");
 
             // Then - rows come back as value arrays, not objects
-            expect(await db.query('users', ['name', 'email'])).toEqual([
+            await expect(db.query('users', ['name', 'email'])).resolves.toStrictEqual([
                 ['Alice', 'alice@test.com'],
             ]);
         });
@@ -117,7 +117,7 @@ describe('postgres service', () => {
             await db.reset();
 
             // Then - the query yields an empty array
-            expect(await db.query('users', ['name'])).toEqual([]);
+            await expect(db.query('users', ['name'])).resolves.toStrictEqual([]);
         });
 
         test('respects column order', async () => {
@@ -126,7 +126,7 @@ describe('postgres service', () => {
             await db.seed("INSERT INTO \"users\" (name, email) VALUES ('Alice', 'alice@test.com')");
 
             // Then - columns returned in requested order
-            expect(await db.query('users', ['email', 'name'])).toEqual([
+            await expect(db.query('users', ['email', 'name'])).resolves.toStrictEqual([
                 ['alice@test.com', 'Alice'],
             ]);
         });
@@ -144,7 +144,7 @@ describe('postgres service', () => {
             await db.reset();
 
             // Then - table is empty
-            expect(await db.query('users', ['name'])).toEqual([]);
+            await expect(db.query('users', ['name'])).resolves.toStrictEqual([]);
         });
 
         test('allows re-inserting after reset', async () => {
@@ -157,7 +157,7 @@ describe('postgres service', () => {
             );
 
             // Then - only second insert remains
-            expect(await db.query('users', ['name'])).toEqual([['Second']]);
+            await expect(db.query('users', ['name'])).resolves.toStrictEqual([['Second']]);
         });
     });
 

@@ -22,7 +22,7 @@ export const { cleanup, cli } = await specification.cli(CLI_BIN, {
         echo: {
             command: 'node specs/_fixtures/literate-server/server.mjs',
             env: 'LITERATE_BACKEND_URL',
-            ready: /listening on port (?<port>\d+)/,
+            ready: /listening on port (?<port>\d+)/u,
             url: (port) => `http://127.0.0.1:${port}/`,
         },
     },

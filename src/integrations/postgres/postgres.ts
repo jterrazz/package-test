@@ -6,7 +6,7 @@ import type { DatabasePort } from '../../core/ports/database.port.js';
 import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
 import type { ServiceHandle } from '../../core/ports/service.port.js';
 
-export interface PostgresOptions {
+export type PostgresOptions = {
     /**
      * Map to a service in docker/compose.test.yaml. Defaults to the handle's
      * key in the declared services record.
@@ -16,7 +16,7 @@ export interface PostgresOptions {
     image?: string;
     /** Override environment variables. */
     env?: Record<string, string>;
-}
+};
 
 export class PostgresHandle implements DatabasePort, ServiceHandle {
     readonly type = 'postgres';

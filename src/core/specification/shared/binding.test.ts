@@ -24,7 +24,7 @@ describe('resolveComposeBinding (CONVENTIONS A6)', () => {
         // Then - the binding is refused, listing both candidates
         expect(() =>
             resolveComposeBinding('analyticsDb', null, ['analyticsDb', 'analytics-db']),
-        ).toThrow(/Ambiguous compose binding.*"analyticsDb".*"analytics-db"/s);
+        ).toThrow(/Ambiguous compose binding.*"analyticsDb".*"analytics-db"/su);
     });
 
     test('composeService escape hatch takes precedence over derivation', () => {

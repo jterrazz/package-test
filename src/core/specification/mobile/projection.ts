@@ -14,15 +14,15 @@ import type { DeviceScreen, ScreenNode } from '../../ports/device.port.js';
  */
 
 /** One parsed XML element — tag, attributes, children (page sources carry no text nodes). */
-interface RawNode {
+type RawNode = {
     attributes: Record<string, string>;
     children: RawNode[];
     tag: string;
-}
+};
 
 const TAG_PATTERN =
-    /<(?<openTag>[A-Za-z][\w.]*)(?<rawAttributes>(?:\s+[\w:.-]+="[^"]*")*)\s*(?<selfClosing>\/?)>|<\/(?<closeTag>[\w.]*)\s*>/g;
-const ATTRIBUTE_PATTERN = /(?<key>[\w:.-]+)="(?<value>[^"]*)"/g;
+    /<(?<openTag>[A-Za-z][\w.]*)(?<rawAttributes>(?:\s+[\w:.-]+="[^"]*")*)\s*(?<selfClosing>\/?)>|<\/(?<closeTag>[\w.]*)\s*>/gu;
+const ATTRIBUTE_PATTERN = /(?<key>[\w:.-]+)="(?<value>[^"]*)"/gu;
 
 const NAMED_ENTITIES: Record<string, string> = {
     '&amp;': '&',
@@ -34,8 +34,8 @@ const NAMED_ENTITIES: Record<string, string> = {
 
 /** Decode the XML entities an attribute value can carry. */
 function decodeEntities(value: string): string {
-    return value.replace(
-        /&(?:#x(?<hex>[\dA-Fa-f]+)|#(?<decimal>\d+)|(?<named>amp|apos|gt|lt|quot));/g,
+    return value.replaceAll(
+        /&(?:#x(?<hex>[\dA-Fa-f]+)|#(?<decimal>\d+)|(?<named>amp|apos|gt|lt|quot));/gu,
         (entity, hex: string | undefined, decimal: string | undefined) => {
             if (hex) {
                 return String.fromCodePoint(Number.parseInt(hex, 16));
@@ -67,10 +67,11 @@ function parsePageSource(xml: string): RawNode {
             }
         }
         const node: RawNode = { attributes, children: [], tag: openTag };
-        if (stack.length === 0) {
+        const parent = stack.at(-1);
+        if (parent === undefined) {
             root = node;
         } else {
-            stack[stack.length - 1].children.push(node);
+            parent.children.push(node);
         }
         if (!selfClosing) {
             stack.push(node);
@@ -85,11 +86,11 @@ function parsePageSource(xml: string): RawNode {
 
 /** The substance of a node — what survives projection, or nothing. */
 function substance(node: RawNode): Omit<ScreenNode, 'children'> {
-    const label = node.attributes['label'] || undefined;
-    const value = node.attributes['value'] || undefined;
-    const identifier = node.attributes['name'] || undefined;
+    const label = node.attributes.label || undefined;
+    const value = node.attributes.value || undefined;
+    const identifier = node.attributes.name || undefined;
     return {
-        type: node.tag.replace(/^XCUIElementType/, ''),
+        type: node.tag.replace(/^XCUIElementType/u, ''),
         ...(label === undefined ? {} : { label }),
         // A value or identifier merely echoing the label is XCUITest noise.
         ...(value === undefined || value === label ? {} : { value }),
@@ -127,9 +128,9 @@ function projectNode(node: RawNode): ScreenNode[] {
 
 /** Collect the visible texts in document order, collapsing consecutive repeats. */
 function collectTexts(node: RawNode, texts: string[]): void {
-    if (node.attributes['visible'] === 'true') {
-        const text = node.attributes['label'] || node.attributes['value'] || undefined;
-        if (text !== undefined && texts[texts.length - 1] !== text) {
+    if (node.attributes.visible === 'true') {
+        const text = node.attributes.label || node.attributes.value || undefined;
+        if (text !== undefined && texts.at(-1) !== text) {
             texts.push(text);
         }
     }
@@ -146,8 +147,9 @@ function collectTexts(node: RawNode, texts: string[]): void {
 export function projectScreen(xml: string): DeviceScreen {
     let root = parsePageSource(xml);
     // The page source wraps the application in an `AppiumAUT` envelope.
-    if (root.tag === 'AppiumAUT' && root.children.length === 1) {
-        root = root.children[0];
+    const [onlyChild] = root.children;
+    if (root.tag === 'AppiumAUT' && root.children.length === 1 && onlyChild !== undefined) {
+        root = onlyChild;
     }
 
     // Texts start below the application node — the app's own label is chrome,

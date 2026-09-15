@@ -28,7 +28,7 @@ export type LayerOptions = {
 
 type Options = { layers?: Record<string, LayerOptions> };
 
-const TEST_OR_FIXTURES = /\.(?:test|fixtures)\.[cm]?[jt]sx?$/;
+const TEST_OR_FIXTURES = /\.(?:test|fixtures)\.[cm]?[jt]sx?$/u;
 
 function matchesPackage(source: string, packages: string[]): boolean {
     return packages.some((name) => source === name || source.startsWith(`${name}/`));
@@ -43,7 +43,7 @@ function pathInsideSrc(path: string): string | undefined {
 
 /** Strip a `.js`/`.ts`-style extension for exact-path comparison. */
 function withoutExtension(path: string): string {
-    return path.replace(/\.[cm]?[jt]sx?$/, '');
+    return path.replace(/\.[cm]?[jt]sx?$/u, '');
 }
 
 /** Does `target` match one of the declared paths (prefix, or exact module)? */

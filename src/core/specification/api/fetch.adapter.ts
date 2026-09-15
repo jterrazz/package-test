@@ -29,17 +29,19 @@ function isTransientConnectionError(error: unknown): boolean {
     );
 }
 
-const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = async (ms: number): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 /**
  * Server adapter that sends real HTTP requests via the Fetch API.
  * Used by the `e2e()` specification runner to hit a live server.
  */
 export class FetchAdapter implements ServerPort {
-    private baseUrl: string;
+    private readonly baseUrl: string;
 
     constructor(url: string) {
-        this.baseUrl = url.replace(/\/$/, '');
+        this.baseUrl = url.replace(/\/$/u, '');
     }
 
     async request(

@@ -11,8 +11,8 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
         // Then - oxlint reports one diagnostic per missing marker (1 + 1 + 2)
         expect(result.exitCode).toBe(1);
         expect(result.stdout.grep('scenario.test.ts')).toContain('b4-given-then');
-        const missing = result.stdout.text.match(/b4-given-then/g) ?? [];
-        expect(missing.length).toBe(4);
+        const missing = result.stdout.text.match(/b4-given-then/gu) ?? [];
+        expect(missing).toHaveLength(4);
     });
 
     test('rejects Given declared after Then', async () => {
@@ -23,8 +23,8 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
 
         // Then - the position upgrade reports one diagnostic per test (2)
         expect(result.exitCode).toBe(1);
-        const hits = result.stdout.text.match(/b4-given-then/g) ?? [];
-        expect(hits.length).toBe(2);
+        const hits = result.stdout.text.match(/b4-given-then/gu) ?? [];
+        expect(hits).toHaveLength(2);
     });
 
     test('accepts both markers, optional When, and skipIf wrappers', async () => {

@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
 import type { ApiSpecification, CliSpecification, JobsSpecification } from '../index.js';
-import { type FacetRole, methodsByRole } from './facet-matrix.js';
+import { methodsByRole } from './facet-matrix.js';
+import type { FacetRole } from './facet-matrix.js';
 
 /**
  * Meta-test (K1 guard) — the documented facet capability matrix must equal the
@@ -65,26 +66,26 @@ describe('facet capability matrix (K1 guard)', () => {
     test('setup methods sit on exactly the documented facets', () => {
         // Given - the documented matrix, keyed by each facet's real keyof
         // Then - the cross-facet Setup claims from the README table hold
-        expect('seed' in apiMatrix && 'seed' in jobsMatrix && 'seed' in cliMatrix).toBe(true); // All facets
-        expect('intercept' in apiMatrix && 'intercept' in jobsMatrix).toBe(true); // Api + jobs
-        expect('intercept' in cliMatrix).toBe(false); // Not cli
-        expect('headers' in apiMatrix).toBe(true); // Api only
-        expect('headers' in jobsMatrix || 'headers' in cliMatrix).toBe(false);
-        expect('fixture' in cliMatrix && 'env' in cliMatrix).toBe(true); // Cli only
-        expect('fixture' in apiMatrix || 'env' in apiMatrix).toBe(false);
+        expect('seed' in apiMatrix && 'seed' in jobsMatrix && 'seed' in cliMatrix).toBeTruthy(); // All facets
+        expect('intercept' in apiMatrix && 'intercept' in jobsMatrix).toBeTruthy(); // Api + jobs
+        expect('intercept' in cliMatrix).toBeFalsy(); // Not cli
+        expect('headers' in apiMatrix).toBeTruthy(); // Api only
+        expect('headers' in jobsMatrix || 'headers' in cliMatrix).toBeFalsy();
+        expect('fixture' in cliMatrix && 'env' in cliMatrix).toBeTruthy(); // Cli only
+        expect('fixture' in apiMatrix || 'env' in apiMatrix).toBeFalsy();
     });
 
     test('each facet exposes exactly the documented terminal actions', () => {
         // Given - the same matrix, split by role via the sibling helper
         // Then - the terminal actions match the README "Actions" table per facet
-        expect(methodsByRole(apiMatrix, 'action')).toEqual([
+        expect(methodsByRole(apiMatrix, 'action')).toStrictEqual([
             'delete',
             'get',
             'post',
             'put',
             'request',
         ]);
-        expect(methodsByRole(jobsMatrix, 'action')).toEqual(['trigger']);
-        expect(methodsByRole(cliMatrix, 'action')).toEqual(['exec', 'run']);
+        expect(methodsByRole(jobsMatrix, 'action')).toStrictEqual(['trigger']);
+        expect(methodsByRole(cliMatrix, 'action')).toStrictEqual(['exec', 'run']);
     });
 });

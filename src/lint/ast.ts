@@ -11,7 +11,7 @@ import type { AstNode } from './types.js';
 
 /** Split a path into its non-empty segments (posix or win separators). */
 export function segments(path: string): string[] {
-    return path.split(/[/\\]/).filter(Boolean);
+    return path.split(/[/\\]/u).filter(Boolean);
 }
 
 /** Where a file sits relative to the `specs/` tree that owns it. */
@@ -71,8 +71,9 @@ export function stringValue(node: AstNode | undefined): string | undefined {
     if (node.type === 'TemplateLiteral') {
         const expressions = node.expressions as AstNode[] | undefined;
         const quasis = node.quasis as AstNode[] | undefined;
-        if (expressions?.length === 0 && quasis?.length === 1) {
-            return (quasis[0].value as undefined | { cooked?: string })?.cooked;
+        const onlyQuasi = quasis?.[0];
+        if (expressions?.length === 0 && quasis?.length === 1 && onlyQuasi !== undefined) {
+            return (onlyQuasi.value as undefined | { cooked?: string })?.cooked;
         }
     }
     return undefined;

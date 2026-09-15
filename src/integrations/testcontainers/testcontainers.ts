@@ -5,10 +5,10 @@ import type { ContainerPort } from '../../core/ports/container.port.js';
  * Wraps a GenericContainer for programmatic container lifecycle.
  */
 export class TestcontainersAdapter implements ContainerPort {
-    private image: string;
-    private containerPort: number;
-    private env: Record<string, string>;
-    private reuse: boolean;
+    private readonly image: string;
+    private readonly containerPort: number;
+    private readonly env: Record<string, string>;
+    private readonly reuse: boolean;
     private container: any = null;
 
     constructor(options: {
@@ -34,7 +34,7 @@ export class TestcontainersAdapter implements ContainerPort {
 
         if (this.image.startsWith('postgres')) {
             builder = builder.withWaitStrategy(
-                Wait.forLogMessage(/database system is ready to accept connections/, 2),
+                Wait.forLogMessage(/database system is ready to accept connections/u, 2),
             );
         }
 
@@ -76,7 +76,7 @@ export class TestcontainersAdapter implements ContainerPort {
         }
 
         const stream = await this.container.logs();
-        return new Promise((resolve) => {
+        return await new Promise((resolve) => {
             let output = '';
             stream.on('data', (chunk: Buffer) => {
                 output += chunk.toString();

@@ -29,7 +29,7 @@ export type MobileElementRef = ElementRef;
  * the evidence the ambiguity error enumerates so the author can disambiguate
  * without opening the simulator.
  */
-export interface MobileElementMatch {
+export type MobileElementMatch = {
     /** The accessibility identifier (`testId()` target), when one is set. */
     identifier?: string;
     /** The accessible label, whitespace-collapsed and truncated. */
@@ -38,7 +38,7 @@ export interface MobileElementMatch {
     type: string;
     /** The element value (text-field content, adjustable value), when present. */
     value?: string;
-}
+};
 
 /**
  * The visitor — the interaction vocabulary handed to a mobile scenario.
@@ -47,14 +47,14 @@ export interface MobileElementMatch {
  * synchronization primitive — is satisfied by any visible match. There is
  * no sleep and no conditional helper.
  */
-export interface MobileVisitor {
+export type MobileVisitor = {
     /** Fill a text field with a value. */
     fill: (element: MobileElementRef, value: string) => Promise<void>;
     /** Wait until the element is visible — the only synchronization primitive. */
     see: (element: MobileElementRef) => Promise<void>;
     /** Tap the element. */
     tap: (element: MobileElementRef) => Promise<void>;
-}
+};
 
 /** The behavior of an open — the When of the spec; assertions stay in the Then. */
 export type MobileScenario = (visitor: MobileVisitor) => Promise<void>;
@@ -65,7 +65,7 @@ export type MobileScenario = (visitor: MobileVisitor) => Promise<void>;
  * nodes are dropped and their children hoisted, so the projection stays
  * stable and golden-friendly. Type names lose the `XCUIElementType` prefix.
  */
-export interface ScreenNode {
+export type ScreenNode = {
     children?: ScreenNode[];
     /** The accessibility identifier, only when it differs from the label. */
     identifier?: string;
@@ -73,27 +73,27 @@ export interface ScreenNode {
     /** Element type without the `XCUIElementType` prefix — `Button`, `StaticText`. */
     type: string;
     value?: string;
-}
+};
 
 /**
  * The screen captured by a device open — the FINAL state when a scenario
  * ran. The tree is the projected page source; `texts` are the visible
  * labels/values in document order, consecutive duplicates collapsed.
  */
-export interface DeviceScreen {
+export type DeviceScreen = {
     texts: string[];
     tree: ScreenNode;
-}
+};
 
 /** Per-open options forwarded to the device session. */
-export interface DeviceOpenOptions {
+export type DeviceOpenOptions = {
     /** The app under test — terminated and relaunched for a fresh, deterministic state. */
     bundleId: string;
     /** Deep link applied after the relaunch (`news://events`); absent opens the app plainly. */
-    deepLink?: string;
+    deepLink?: string | undefined;
     /** The interaction scenario to run after launch; the capture reflects the final state. */
-    scenario?: MobileScenario;
-}
+    scenario?: MobileScenario | undefined;
+};
 
 /**
  * How long a device session waits, in milliseconds. Every field is optional
@@ -101,18 +101,18 @@ export interface DeviceOpenOptions {
  * wait it needs to move — the defaults suit a release build, and a project
  * that drives a DEV build pays for its bundler's cold boot.
  */
-export interface DeviceTimeouts {
+export type DeviceTimeouts = {
     /**
      * How long every verb polls for a visible match before refusing.
      * Default: `30_000` — enough for a cold app boot on a release bundle.
      */
-    action?: number;
+    action?: number | undefined;
     /**
      * How long the FIRST session waits for WebDriverAgent to build and
      * launch on the simulator. Default: `240_000`.
      */
-    launch?: number;
-}
+    launch?: number | undefined;
+};
 
 /**
  * Abstract device interface for the mobile specification runner.
@@ -120,9 +120,9 @@ export interface DeviceTimeouts {
  * session per runner, created on the first `open()` and reused; each open
  * terminates and relaunches the app for a deterministic fresh state.
  */
-export interface DevicePort {
+export type DevicePort = {
     /** End the driver session (idempotent). */
     close: () => Promise<void>;
     /** Relaunch the app, apply the deep link, run the scenario, capture the final screen. */
     open: (options: DeviceOpenOptions) => Promise<DeviceScreen>;
-}
+};

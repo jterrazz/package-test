@@ -2,7 +2,7 @@
  * Abstract database interface for specification runners.
  * Implement this to plug in your database stack (e.g. Postgres, SQLite).
  */
-export interface DatabasePort {
+export type DatabasePort = {
     /** Execute raw SQL (for seeding test data). */
     seed: (sql: string) => Promise<void>;
 
@@ -11,4 +11,4 @@ export interface DatabasePort {
 
     /** Reset database to clean state between tests. */
     reset: () => Promise<void>;
-}
+};

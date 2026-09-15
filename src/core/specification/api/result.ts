@@ -5,7 +5,7 @@ import { BaseResult } from '../shared/result/result.js';
 
 /** Result from an HTTP action (.request(), .get(), .post(), .put(), .delete()). */
 export class HttpResult extends BaseResult {
-    private responseData: ServerResponse;
+    private readonly responseData: ServerResponse;
 
     constructor(options: {
         config: SpecificationConfig;

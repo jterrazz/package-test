@@ -12,7 +12,7 @@ const TEXT_CONTENT_TYPE = 'text/plain; charset=utf-8';
  * Request filters for the generic HTTP provider. Every field is a subset
  * constraint — a request matches when all provided fields match.
  */
-export interface HttpContractFilter {
+export type HttpContractFilter = {
     /**
      * Body constraint. An object is a deep SUBSET match (toMatchObject-style)
      * whose leaf values may be `match.*` matchers; a string is a containment
@@ -23,17 +23,17 @@ export interface HttpContractFilter {
     headers?: Record<string, RegExp | string>;
     /** Query-param subset. string = exact value, RegExp = `test()`. */
     query?: Record<string, RegExp | string>;
-}
+};
 
 /** Init options shared by the response builders. */
-export interface HttpResponseInit {
+export type HttpResponseInit = {
     /** Delay in ms before responding (for timeout testing). */
     delay?: number;
     /** Response headers, merged over the builder's own. */
     headers?: Record<string, string>;
     /** HTTP status code. */
     status?: number;
-}
+};
 
 function matchesBody(body: unknown, expected: NonNullable<HttpContractFilter['body']>): boolean {
     if (typeof expected === 'string') {

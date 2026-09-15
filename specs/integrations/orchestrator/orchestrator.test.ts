@@ -28,8 +28,8 @@ describe('orchestrator', () => {
         test('starts services with a postgresql connection string', () => {
             // Given - the started orchestrator (image resolved from the compose file)
             // Then - the service is up and its connection string is well-formed
-            expect(db.started).toBe(true);
-            expect(db.connectionString).toMatch(/^postgresql:\/\//);
+            expect(db.started).toBeTruthy();
+            expect(db.connectionString).toMatch(/^postgresql:\/\//u);
         });
 
         test('getDatabase returns the database handle', () => {
@@ -44,7 +44,7 @@ describe('orchestrator', () => {
             await db.seed('INSERT INTO "test_orch" (val) VALUES (\'hello\')');
 
             // Then - data is queryable
-            expect(await db.query('test_orch', ['val'])).toEqual([['hello']]);
+            await expect(db.query('test_orch', ['val'])).resolves.toStrictEqual([['hello']]);
 
             // Cleanup
             await db.seed('DROP TABLE "test_orch"');
@@ -74,7 +74,7 @@ describe('orchestrator', () => {
             await orchestrator.startCompose();
 
             // Then - app URL detected from compose ports
-            expect(orchestrator.getAppUrl()).toMatch(/^http:\/\/localhost:\d+/);
+            expect(orchestrator.getAppUrl()).toMatch(/^http:\/\/localhost:\d+/u);
         }, 60_000);
 
         test('auto-detects database service', () => {
@@ -102,7 +102,7 @@ describe('orchestrator', () => {
             );
 
             // Then - data is queryable
-            expect(await database.query('users', ['name'])).toEqual([['TestUser']]);
+            await expect(database.query('users', ['name'])).resolves.toStrictEqual([['TestUser']]);
         });
     });
 

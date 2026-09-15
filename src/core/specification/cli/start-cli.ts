@@ -1,31 +1,21 @@
 import type { ContainerAccessor } from '../../../integrations/docker/container-accessor.js';
 import { registerMatchers } from '../../../vitest/matchers.js';
 import type { CliEnv } from '../../ports/cli.port.js';
-import {
-    type CliSpecification,
-    createCliFacet,
-    type DockerSpecConfig,
-    type SpecificationConfig,
-} from '../shared/builder.js';
+import { createCliFacet } from '../shared/builder.js';
+import type { CliSpecification, DockerSpecConfig, SpecificationConfig } from '../shared/builder.js';
 import { getCallerDir } from '../shared/caller.js';
 import { createDockerReader } from '../shared/docker-reader.js';
 import type { Orchestrator } from '../shared/orchestrator.js';
 import { resolveCommand, resolveRoot } from '../shared/resolve.js';
-import {
-    type DatabaseKeys,
-    declaredDatabaseKeys,
-    releaseIsolation,
-    type ServiceRecord,
-    type StartedServices,
-    startServices,
-} from '../shared/services.js';
+import { declaredDatabaseKeys, releaseIsolation, startServices } from '../shared/services.js';
+import type { DatabaseKeys, ServiceRecord, StartedServices } from '../shared/services.js';
 import { ExecAdapter } from './exec.adapter.js';
 import type { LiterateServeRegistration } from './literate.js';
 
 // ── Types ──
 
 /** Options for {@link startCli | specification.cli}. */
-export interface CliSpecificationOptions<Services extends ServiceRecord = ServiceRecord> {
+export type CliSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /**
      * Opt-in Docker awareness. When set, every spec generates a unique
      * test-run id, injects it into the child process env under `envVar`,
@@ -69,8 +59,8 @@ export interface CliSpecificationOptions<Services extends ServiceRecord = Servic
      * D6). Does NOT mutate the raw `.text` accessor. Prefer `{{token}}`
      * placeholders in fixtures.
      */
-    transform?: (text: string) => string;
-}
+    transform?: ((text: string) => string) | undefined;
+};
 
 /**
  * The record returned by {@link startCli | specification.cli}. Destructure
@@ -78,7 +68,7 @@ export interface CliSpecificationOptions<Services extends ServiceRecord = Servic
  *
  *     const { cli, cleanup, docker } = await specification.cli(…);
  */
-export interface CliHandle<DatabaseKey extends string = string> {
+export type CliHandle<DatabaseKey extends string = string> = {
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;
     cli: CliSpecification<DatabaseKey>;
@@ -89,7 +79,7 @@ export interface CliHandle<DatabaseKey extends string = string> {
     docker: (containerId: string) => ContainerAccessor;
     /** The orchestrator managing the test infrastructure lifecycle. */
     orchestrator: null | Orchestrator;
-}
+};
 
 // ── Constructor ──
 
@@ -131,7 +121,7 @@ export async function startCli<Services extends ServiceRecord>(
                 await started.orchestrator.stop();
             }
         },
-        cli: createCliFacet(config) as CliSpecification<DatabaseKeys<Services>>,
+        cli: createCliFacet(config),
         docker: createDockerReader(callerDir),
         orchestrator: started?.orchestrator ?? null,
     };

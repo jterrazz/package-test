@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
 import { anthropic } from '../../integrations/anthropic/anthropic.js';
-import { type Contract, defineContract, defineContracts } from './contract.js';
+import { defineContract, defineContracts } from './contract.js';
+import type { Contract } from './contract.js';
 import { http } from './http.js';
 
 /** A contract for one route, tagged by response body so order is observable. */
@@ -32,7 +33,7 @@ describe('contracts — defineContract', () => {
 
         // Then - the response is stored as the function, evaluable per request,
         // And the produced reply echoes the observed request into the envelope
-        expect(typeof contract.response).toBe('function');
+        expect(contract.response).toBeTypeOf('function');
         const produced =
             typeof contract.response === 'function'
                 ? contract.response({
@@ -42,8 +43,8 @@ describe('contracts — defineContract', () => {
                       url: 'https://x.test/',
                   })
                 : contract.response;
-        const content = (produced.body as { content: { text: string }[] }).content;
-        expect(content[0].text).toBe('echo:hi');
+        const { content } = produced.body as { content: { text: string }[] };
+        expect(content[0]?.text).toBe('echo:hi');
     });
 
     test('builder .intercept() accepts a contract as a single argument', async () => {
@@ -74,7 +75,7 @@ describe('contracts — defineContracts composition', () => {
         );
 
         // Then - one flat ordered list, contracts all the way down
-        expect(tagsOf(composite.contracts)).toEqual(['a', 'b', 'c', 'd']);
+        expect(tagsOf(composite.contracts)).toStrictEqual(['a', 'b', 'c', 'd']);
     });
 
     test('.with() replaces same-route contracts and prepends the overrides', () => {
@@ -85,7 +86,7 @@ describe('contracts — defineContracts composition', () => {
         const scenario = base.with(route('GET', '/events', 'events-empty'));
 
         // Then - the base entry is gone and the override leads the list
-        expect(tagsOf(scenario.contracts)).toEqual(['events-empty', 'a']);
+        expect(tagsOf(scenario.contracts)).toStrictEqual(['events-empty', 'a']);
     });
 
     test('.with() keeps a generic route but the more specific override wins first-match', () => {
@@ -96,21 +97,21 @@ describe('contracts — defineContracts composition', () => {
         const scenario = base.with(route('GET', '/articles/a-1', 'gone'));
 
         // Then - both survive; the specific one is selected first
-        expect(tagsOf(scenario.contracts)).toEqual(['gone', 'generic']);
+        expect(tagsOf(scenario.contracts)).toStrictEqual(['gone', 'generic']);
     });
 
     test('same-route is method + declared url source, RegExp compared by source', () => {
         // Given - one route declared as a RegExp, plus a same-url POST
         const base = defineContracts(
-            route('GET', /articles\/\d+/, 'get-re'),
-            route('POST', /articles\/\d+/, 'post-re'),
+            route('GET', /articles\/\d+/u, 'get-re'),
+            route('POST', /articles\/\d+/u, 'post-re'),
         );
 
         // When - an override reuses an equal (but not identical) RegExp on GET
-        const scenario = base.with(route('GET', /articles\/\d+/, 'override'));
+        const scenario = base.with(route('GET', /articles\/\d+/u, 'override'));
 
         // Then - only the GET was replaced; the POST on the same url stays
-        expect(tagsOf(scenario.contracts)).toEqual(['override', 'post-re']);
+        expect(tagsOf(scenario.contracts)).toStrictEqual(['override', 'post-re']);
     });
 
     test('.with() is immutable — the base composite is untouched', () => {
@@ -121,8 +122,8 @@ describe('contracts — defineContracts composition', () => {
         const scenario = base.with(route('GET', '/events', 'other'));
 
         // Then - the base still declares its own world, and composites nest
-        expect(tagsOf(base.contracts)).toEqual(['events']);
+        expect(tagsOf(base.contracts)).toStrictEqual(['events']);
         const nested = scenario.with(route('GET', '/x', 'x'));
-        expect(tagsOf(nested.contracts)).toEqual(['x', 'other']);
+        expect(tagsOf(nested.contracts)).toStrictEqual(['x', 'other']);
     });
 });

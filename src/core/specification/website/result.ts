@@ -9,11 +9,11 @@ import { BaseResult } from '../shared/result/result.js';
 import { TextAccessor } from '../shared/result/text.js';
 
 /** A raw HTTP exchange captured by `.fetch()` — redirects are NOT followed. */
-export interface FetchExchange {
+export type FetchExchange = {
     body: string;
     headers: Record<string, string>;
     status: number;
-}
+};
 
 /** Result from a raw `.fetch()` action (robots.txt, sitemaps, redirects). */
 export class FetchResult extends BaseResult {
@@ -47,7 +47,7 @@ export class FetchResult extends BaseResult {
 
     /** The `location` header of a redirect response, or undefined. */
     get location(): string | undefined {
-        return this.exchange.headers['location'];
+        return this.exchange.headers.location;
     }
 
     /** The HTTP response status code — redirects surface as 3xx, never followed. */
@@ -60,12 +60,12 @@ export class FetchResult extends BaseResult {
  * The head summary snapshotted by `expect(result.head).toMatch('home.head.json')`
  * — the stable, assertion-friendly projection of the document head.
  */
-interface HeadSummary {
+type HeadSummary = {
     alternates: Record<string, string>;
     canonical: null | string;
     metas: Record<string, string>;
     title: string;
-}
+};
 
 /** Result from a rendered `.visit()` action — the page as a browser saw it. */
 export class PageResult extends BaseResult {

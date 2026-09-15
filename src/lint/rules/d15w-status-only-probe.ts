@@ -23,7 +23,7 @@ function isStatusLiteral(node: AstNode | undefined): boolean {
     if (node?.type !== 'Literal' || typeof node.value !== 'number') {
         return false;
     }
-    const value = node.value;
+    const { value } = node;
     return Number.isInteger(value) && value >= MIN_STATUS && value <= MAX_STATUS;
 }
 

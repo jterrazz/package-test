@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { buildEnv, type ObservableProcess, observeProcess } from './exec.adapter.js';
+import { buildEnv, observeProcess } from './exec.adapter.js';
+import type { ObservableProcess } from './exec.adapter.js';
 
 /** In-code fake child (CONVENTIONS I4) — emits scripted output and records kills. */
 class FakeChild implements ObservableProcess {
     exitListeners: ((code: null | number) => void)[] = [];
     killed: (NodeJS.Signals | number | undefined)[] = [];
-    private stderrListeners: ((data: Buffer | string) => void)[] = [];
-    private stdoutListeners: ((data: Buffer | string) => void)[] = [];
+    private readonly stderrListeners: ((data: Buffer | string) => void)[] = [];
+    private readonly stdoutListeners: ((data: Buffer | string) => void)[] = [];
 
     stderr = {
         on: (_event: 'data', listener: (data: Buffer | string) => void) =>
@@ -57,7 +58,7 @@ describe('exec adapter — buildEnv', () => {
 
             // Then - null deletes, additions land, INIT_CWD never leaks
             expect(env.ADDED).toBe('yes');
-            expect('EXEC_ADAPTER_TEST_VAR' in env).toBe(false);
+            expect('EXEC_ADAPTER_TEST_VAR' in env).toBeFalsy();
             expect(env.INIT_CWD).toBeUndefined();
         } finally {
             delete process.env.EXEC_ADAPTER_TEST_VAR;
@@ -87,12 +88,12 @@ describe('exec adapter — observeProcess', () => {
         child.emitStdout('server ready on :3000\n');
 
         // Then - resolved at the pattern with the output so far, SIGTERM sent
-        await expect(promise).resolves.toEqual({
+        await expect(promise).resolves.toStrictEqual({
             exitCode: 0,
             stderr: '',
             stdout: 'starting...\nserver ready on :3000\n',
         });
-        expect(child.killed).toEqual(['SIGTERM']);
+        expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 
     test('escalates SIGTERM to SIGKILL after the 2s grace period', async () => {
@@ -105,7 +106,7 @@ describe('exec adapter — observeProcess', () => {
         vi.advanceTimersByTime(2000);
 
         // Then - SIGKILL follows SIGTERM
-        expect(child.killed).toEqual(['SIGTERM', 'SIGKILL']);
+        expect(child.killed).toStrictEqual(['SIGTERM', 'SIGKILL']);
     });
 
     test('does not SIGKILL a child that exits within the grace period', async () => {
@@ -119,7 +120,7 @@ describe('exec adapter — observeProcess', () => {
         vi.advanceTimersByTime(10_000);
 
         // Then - only the SIGTERM was ever sent
-        expect(child.killed).toEqual(['SIGTERM']);
+        expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 
     test('resolves 124 at the timeout when the pattern never appears', async () => {
@@ -131,7 +132,7 @@ describe('exec adapter — observeProcess', () => {
 
         // Then - exit code 124, child terminated
         await expect(promise).resolves.toMatchObject({ exitCode: 124 });
-        expect(child.killed).toEqual(['SIGTERM']);
+        expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 
     test('an exit before the pattern is a failure even with code 0', async () => {
@@ -154,7 +155,7 @@ describe('exec adapter — observeProcess', () => {
         child.emitExit(7);
 
         // Then - the code is passed through with the captured streams
-        await expect(promise).resolves.toEqual({ exitCode: 7, stderr: 'done\n', stdout: '' });
+        await expect(promise).resolves.toStrictEqual({ exitCode: 7, stderr: 'done\n', stdout: '' });
     });
 
     test('the timeout never fires after an early resolution', async () => {
@@ -169,6 +170,6 @@ describe('exec adapter — observeProcess', () => {
 
         // Then - the resolution stands and no extra kills happened
         expect(result.exitCode).toBe(0);
-        expect(child.killed).toEqual(['SIGTERM']);
+        expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 });

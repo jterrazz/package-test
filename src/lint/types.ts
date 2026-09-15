@@ -36,10 +36,10 @@ export type SourceCode = {
 
 /** A diagnostic accepted by `context.report`. */
 export type Diagnostic = {
-    data?: Record<string, number | string>;
-    messageId?: string;
-    message?: string;
-    node?: AstNode;
+    data?: Record<string, number | string> | undefined;
+    messageId?: string | undefined;
+    message?: string | undefined;
+    node?: AstNode | undefined;
 };
 
 /** Rule context passed to `create`. */

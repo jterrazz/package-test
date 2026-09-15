@@ -4,7 +4,7 @@
  * website/mobile) and handed to {@link ContractRequest.match} and to a
  * {@link ContractResponder}.
  */
-export interface MatchableRequest {
+export type MatchableRequest = {
     /** Parsed JSON body when the payload is JSON, the raw text otherwise, or `null` when absent. */
     body: unknown;
     /** Request headers, keyed by lowercased header name. */
@@ -13,7 +13,7 @@ export interface MatchableRequest {
     method: string;
     /** The request URL — fully-qualified, or origin-relative for the stub backend. */
     url: string;
-}
+};
 
 /**
  * The request half of a contract: which outgoing call it speaks for.
@@ -23,7 +23,7 @@ export interface MatchableRequest {
  * website/mobile app's own backend calls take. `{{token}}` segments compare
  * structurally, declared query params are a subset of the observed ones.
  */
-export interface ContractRequest {
+export type ContractRequest = {
     /** Adapter name — `http` | `openai` | `anthropic`. */
     adapter: string;
     /** HTTP method to match. `*` matches any method. */
@@ -31,24 +31,24 @@ export interface ContractRequest {
     /** Absolute URL (string | RegExp) or an any-origin path form (`/articles/{{uuid}}`). */
     url: RegExp | string;
     /** Optional request matcher — the contract only fires if this returns true. */
-    match?: (request: MatchableRequest) => boolean;
+    match?: ((request: MatchableRequest) => boolean) | undefined;
     /** Transform raw data into a provider-specific response envelope. */
     wrap: (data: unknown) => ContractResponse;
-}
+};
 
 /**
  * The response half of a contract: what to reply when the request matches.
  */
-export interface ContractResponse {
+export type ContractResponse = {
     /** HTTP status code (default: 200). */
     status?: number;
     /** Response body — an object is JSON, a string is text, `null`/`undefined` is empty. */
     body: unknown;
     /** Response headers. */
-    headers?: Record<string, string>;
+    headers?: Record<string, string> | undefined;
     /** Delay in ms before responding (for timeout testing). */
-    delay?: number;
-}
+    delay?: number | undefined;
+};
 
 /**
  * A dynamic response: computed from the observed request at the moment the

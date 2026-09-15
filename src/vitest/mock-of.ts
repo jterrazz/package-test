@@ -1,4 +1,5 @@
-import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
+import type { DeepMockProxy } from 'vitest-mock-extended';
 
 /** Factory signature that creates a deep mock proxy for any interface. */
 export type MockPort = <T>() => DeepMockProxy<T>;

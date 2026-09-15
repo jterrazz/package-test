@@ -130,7 +130,7 @@ describe('contract queue — url forms', () => {
 
     test('a RegExp url tests the full observed url', () => {
         // Given - a pattern contract
-        const queue = new ContractQueue([contract(http.get(/example\.com\/a/), 're')]);
+        const queue = new ContractQueue([contract(http.get(/example\.com\/a/u), 're')]);
 
         // Then - it matches by pattern, and shares one route with its twin
         expect(serve(queue)).toBe('re');
@@ -147,8 +147,8 @@ describe('contract queue — url forms', () => {
 
         // Then - one route per pattern, carrying every declared method
         expect(queue.routes).toHaveLength(2);
-        expect(queue.routes[0].methods).toEqual(['GET', 'POST']);
-        expect(queue.routes[1].url).toBe(URL_A);
+        expect(queue.routes[0]?.methods).toStrictEqual(['GET', 'POST']);
+        expect(queue.routes[1]?.url).toBe(URL_A);
     });
 });
 

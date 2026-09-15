@@ -27,7 +27,7 @@ export class TableAccessor {
     }
 
     /** @internal Query the table — used by the toMatchRows / toBeEmpty matchers. */
-    query(columns: string[]): Promise<unknown[][]> {
-        return this.db.query(this.name, columns);
+    async query(columns: string[]): Promise<unknown[][]> {
+        return await this.db.query(this.name, columns);
     }
 }

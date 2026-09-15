@@ -7,21 +7,12 @@ import {
     readSpecFile,
     RUN_KEYS,
     SPEC_EXTENSION,
-    type SpecDocument,
-    type SpecFile,
 } from '../core/literate/spec-document.js';
+import type { SpecDocument, SpecFile } from '../core/literate/spec-document.js';
 import { resolveFixtureSource } from '../core/specification/shared/fixtures.js';
 import { GROUND_FIXTURES } from '../core/specification/shared/ground.js';
-import {
-    isMap,
-    isScalar,
-    isSeq,
-    type Node,
-    type Pair,
-    renderYamlSource,
-    Scalar,
-    type YAMLMap,
-} from '../integrations/yaml/document.js';
+import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../integrations/yaml/document.js';
+import type { Node, Pair, YAMLMap } from '../integrations/yaml/document.js';
 import type { Severity, TokenViolation } from './checker.js';
 
 /**
@@ -43,13 +34,13 @@ import type { Severity, TokenViolation } from './checker.js';
 // ── Shared ──
 
 /** A violation before it knows its file — the passes below return these. */
-interface Finding {
+type Finding = {
     line: number;
     message: string;
     /** The catalogue pass this finding belongs to, named in the message. */
     rule: string;
     severity: Severity;
-}
+};
 
 function finding(
     rule: string,
@@ -224,7 +215,7 @@ function checkBlockScalars(file: SpecFile, lineOf: (scalar: Scalar) => number): 
 
 // ── c12-spec-file-name ──
 
-const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 /** Words the `.spec.yaml` suffix already says — a case name repeating one says nothing. */
 const REDUNDANT_WORDS = new Set(['cli', 'spec', 'test']);
 
@@ -275,7 +266,7 @@ function checkFileName(rel: string): Finding[] {
 
 const MAX_DESCRIPTION = 100;
 /** A first word that is an identifier, not prose — exempt from the lowercase rule. */
-const SYMBOL_WORD = /^[A-Z0-9_]+$/;
+const SYMBOL_WORD = /^[A-Z0-9_]+$/u;
 
 /**
  * The description IS the vitest test title, and it is held to the title rules:
@@ -301,8 +292,8 @@ function checkDescription(document: SpecDocument): Finding[] {
             at('description: ends with a period — a title is a fragment, not a sentence'),
         );
     }
-    const first = text.split(/\s+/)[0] ?? '';
-    if (/^[A-Z]/.test(text) && !SYMBOL_WORD.test(first)) {
+    const first = text.split(/\s+/u)[0] ?? '';
+    if (/^[A-Z]/u.test(text) && !SYMBOL_WORD.test(first)) {
         findings.push(at('description: starts with a capital — a title is lowercase prose'));
     }
     return findings;
@@ -313,12 +304,12 @@ function checkDescription(document: SpecDocument): Finding[] {
 /** The literals the update writer must have failed to tokenise, and their token. */
 const VOLATILE = [
     {
-        pattern: /\b(?:127\.0\.0\.1|localhost|0\.0\.0\.0):\d{2,5}\b/,
+        pattern: /\b(?:127\.0\.0\.1|localhost|0\.0\.0\.0):\d{2,5}\b/u,
         token: '{{url}} (or {{port}})',
     },
-    { pattern: /(?:^|[\s"'(=])(?:\/private)?\/tmp\//, token: '{{workdir}}' },
-    { pattern: /(?:^|[\s"'(=])\/var\/folders\//, token: '{{workdir}}' },
-    { pattern: /(?:^|[\s"'(=])\/(?:Users|home)\/[^\s"'/]+\//, token: '{{workdir}} or {{path}}' },
+    { pattern: /(?:^|[\s"'(=])(?:\/private)?\/tmp\//u, token: '{{workdir}}' },
+    { pattern: /(?:^|[\s"'(=])\/var\/folders\//u, token: '{{workdir}}' },
+    { pattern: /(?:^|[\s"'(=])\/(?:Users|home)\/[^\s"'/]+\//u, token: '{{workdir}} or {{path}}' },
 ] as const;
 
 /**
@@ -353,8 +344,8 @@ function checkVolatileLiterals(document: SpecDocument): Finding[] {
 
 // ── d5w-spec-pinned-value ──
 
-const ISO8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/;
-const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+const ISO8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/u;
+const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/u;
 
 /** Everything the document itself FIXED: what it feeds in, and what its fixtures hold. */
 function fixedData(document: SpecDocument, dir: string): string {
@@ -482,7 +473,7 @@ function objectKeys(source: string, from: number): { end: number; keys: string[]
     let depth = 0;
     let quote = '';
     for (let index = from; index < source.length; index += 1) {
-        const char = source[index];
+        const char = source[index] ?? '';
         if (quote !== '') {
             if (char === quote && source[index - 1] !== '\\') {
                 quote = '';
@@ -504,12 +495,13 @@ function objectKeys(source: string, from: number): { end: number; keys: string[]
             }
             continue;
         }
-        if (depth === 1 && /[A-Za-z_$'"]/.test(char)) {
-            const rest = /^(?<quote>['"]?)(?<name>[A-Za-z_$][\w$]*)\k<quote>\s*:/.exec(
+        if (depth === 1 && /[A-Za-z_$'"]/u.test(char)) {
+            const rest = /^(?<quote>['"]?)(?<name>[A-Za-z_$][\w$]*)\k<quote>\s*:/u.exec(
                 source.slice(index),
             );
-            if (rest?.groups) {
-                keys.push(rest.groups.name);
+            const name = rest?.groups?.name;
+            if (rest !== null && name !== undefined) {
+                keys.push(name);
                 index += rest[0].length - 1;
             }
         }
@@ -538,7 +530,7 @@ function registeredNames(dir: string): null | { env: Set<string>; serve: Set<str
             const serve = new Set<string>();
             for (const entry of entries) {
                 const text = readText(join(current, entry));
-                for (const call of text.matchAll(/specification\.cli\s*\(/g)) {
+                for (const call of text.matchAll(/specification\.cli\s*\(/gu)) {
                     const open = text.indexOf('{', call.index + call[0].length);
                     if (open === -1) {
                         continue;
@@ -548,7 +540,7 @@ function registeredNames(dir: string): null | { env: Set<string>; serve: Set<str
                         ['env', env],
                         ['serve', serve],
                     ] as const) {
-                        const marker = new RegExp(String.raw`\b${key}\s*:\s*\{`).exec(
+                        const marker = new RegExp(String.raw`\b${key}\s*:\s*\{`, 'u').exec(
                             text.slice(open, options.end),
                         );
                         if (marker === null) {
@@ -627,7 +619,7 @@ export function checkSpecConventions(text: string, rel: string, path: string): T
     }
     const lineAt = (node: Pair<Node, Node> | Scalar): number => {
         const range = 'range' in node && Array.isArray(node.range) ? node.range : undefined;
-        const key = (node as Pair<Node, Node>).key;
+        const { key } = node as Pair<Node, Node>;
         const target = range ?? (isScalar(key) && Array.isArray(key.range) ? key.range : undefined);
         return target === undefined ? 1 : file.source.lineAt(target[0]);
     };
@@ -705,8 +697,8 @@ export function fixSpecDocument(text: string, rel: string): null | string {
             (a, b) => order.indexOf(keyName(a)!) - order.indexOf(keyName(b)!),
         );
         let cursor = 0;
-        map.items = pairsOf(map).map((pair) =>
-            order.includes(keyName(pair) ?? '') ? sorted[cursor++] : pair,
+        map.items = pairsOf(map).map(
+            (pair) => (order.includes(keyName(pair) ?? '') ? sorted[cursor++] : pair) ?? pair,
         );
     };
     const map = documentMap(file);

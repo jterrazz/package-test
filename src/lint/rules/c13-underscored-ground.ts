@@ -6,7 +6,7 @@ import { isDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /**
  * CONVENTIONS C13 — the ground of a spec carries a leading underscore. A
@@ -45,7 +45,7 @@ export const c13UnderscoredGround: LintRule = {
                     }
                     seen.add(path);
                     context.report({
-                        data: { ground: RENAMED_GROUND_DIRS[legacy], legacy },
+                        data: { ground: RENAMED_GROUND_DIRS[legacy] ?? legacy, legacy },
                         messageId: 'notUnderscored',
                         node,
                     });

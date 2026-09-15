@@ -72,7 +72,7 @@ export const FAMILIES: Record<string, string> = {
  * would block a legitimate shape if it failed the build. Every hard convention
  * here is an `error`; `plugin.test.ts` holds the split.
  */
-export const RULE_DOCS: Record<string, RuleDoc> = {
+export const RULE_DOCS = {
     'a1-specification-file': {
         channel: 'statique',
         convention:
@@ -449,7 +449,7 @@ export const RULE_DOCS: Record<string, RuleDoc> = {
         rationale:
             'Tester ce que l’utilisateur voit (rôles, labels) rend les specs robustes aux refontes DOM ; un test-id contourne cette garantie.',
     },
-};
+} satisfies Record<string, RuleDoc>;
 
 /**
  * The **checker** channel — the non-oxlint static passes bundled as

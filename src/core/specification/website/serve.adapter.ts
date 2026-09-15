@@ -1,4 +1,5 @@
-import { type ChildProcess, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 
 /** Grace period between SIGTERM and the SIGKILL escalation. */
@@ -7,7 +8,7 @@ const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
 
 /** Options for a local server started by the framework. */
-export interface ServeOptions {
+export type ServeOptions = {
     /** Shell command that starts the site. Receives the chosen port as `PORT`. */
     command: string;
     /** Fixed port. Default: an OS-assigned free port, injected as `PORT`. */
@@ -26,13 +27,15 @@ export interface ServeOptions {
     ready?: RegExp | string;
     /** Readiness budget in milliseconds. Default 30 000. */
     timeout?: number;
-}
+};
 
-const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = async (ms: number): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 /** Ask the OS for a free TCP port. */
-function findFreePort(): Promise<number> {
-    return new Promise((resolve, reject) => {
+async function findFreePort(): Promise<number> {
+    return await new Promise((resolve, reject) => {
         const server = createServer();
         server.listen(0, () => {
             const address = server.address();
@@ -42,7 +45,9 @@ function findFreePort(): Promise<number> {
                 return;
             }
             const { port } = address;
-            server.close(() => resolve(port));
+            server.close(() => {
+                resolve(port);
+            });
         });
         server.on('error', reject);
     });
@@ -173,7 +178,7 @@ export class ServeAdapter {
 
     /** Terminate the server process group (idempotent). */
     async stop(): Promise<void> {
-        const child = this.child;
+        const { child } = this;
         if (!child) {
             return;
         }

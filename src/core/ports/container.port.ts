@@ -2,7 +2,7 @@
  * Abstract container interface.
  * Represents a running service (database, cache, etc.)
  */
-export interface ContainerPort {
+export type ContainerPort = {
     /** Start the container and wait until ready. */
     start: () => Promise<void>;
 
@@ -20,4 +20,4 @@ export interface ContainerPort {
 
     /** Get container logs (stdout + stderr). */
     getLogs: () => Promise<string>;
-}
+};

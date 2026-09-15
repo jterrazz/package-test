@@ -14,25 +14,27 @@ const run = promisify(execFile);
 const BOOT_TIMEOUT_MS = 120_000;
 
 /** One simulator known to `simctl`, flattened out of the per-runtime listing. */
-export interface SimulatorDevice {
+export type SimulatorDevice = {
     name: string;
     /** Human OS label derived from the runtime key — `iOS 26.5`. */
     os: string;
     state: string;
     udid: string;
-}
+};
 
 /** The shape of `xcrun simctl list devices --json` this module reads. */
-interface SimctlList {
+type SimctlList = {
     devices: Record<string, { isAvailable?: boolean; name: string; state: string; udid: string }[]>;
-}
+};
 
 /** `com.apple.CoreSimulator.SimRuntime.iOS-26-5` → `iOS 26.5`. */
 function runtimeLabel(runtime: string): string {
-    const match = /SimRuntime\.(?<platform>[A-Za-z]+)-(?<version>[\d-]+)$/.exec(runtime);
-    return match?.groups
-        ? `${match.groups['platform']} ${match.groups['version'].replaceAll('-', '.')}`
-        : runtime;
+    const match = /SimRuntime\.(?<platform>[A-Za-z]+)-(?<version>[\d-]+)$/u.exec(runtime);
+    const platform = match?.groups?.platform;
+    const version = match?.groups?.version;
+    return platform === undefined || version === undefined
+        ? runtime
+        : `${platform} ${version.replaceAll('-', '.')}`;
 }
 
 /** Flatten the per-runtime record into one available-device list. */
@@ -80,7 +82,8 @@ export function selectSimulator(
 
     const wanted =
         criteria.os === undefined ? `"${criteria.name}"` : `"${criteria.name}" on ${criteria.os}`;
-    if (matches.length === 0) {
+    const [only] = matches;
+    if (only === undefined) {
         throw new Error(
             `specification.mobile(): no simulator matches ${wanted}.\nAvailable devices:\n${formatListing(available)}`,
         );
@@ -90,7 +93,7 @@ export function selectSimulator(
             `specification.mobile(): ${matches.length} simulators match ${wanted} — add \`os:\` or \`udid:\` to pick one.\nMatched:\n${formatListing(matches)}`,
         );
     }
-    return matches[0];
+    return only;
 }
 
 /** Resolve `device: { name, os? }` to a UDID via `xcrun simctl`. */

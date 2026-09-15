@@ -45,11 +45,11 @@ import { checkSpecConventions, checkSpecDescriptionsUnique } from './checker-spe
  */
 
 /** A well-formed token: `{{word}}` / `{{word#ref}}`. */
-const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/;
+const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
 /** Any `{{ … }}` block (no nested braces) — classified by the scanner below. */
-const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/g;
+const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;
 /** The leading identifier of a brace block, for malformed-ref classification. */
-const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/;
+const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/u;
 
 const KNOWN = new Set<string>(TOKEN_KINDS);
 
@@ -116,7 +116,7 @@ export function findUnknownTokens(text: string): { line: number; token: string }
         for (const match of lineText.matchAll(BRACE_BLOCK)) {
             const inner = match.groups?.inner ?? '';
             if (VALID_TOKEN.test(inner)) {
-                if (!KNOWN.has(inner.split('#')[0])) {
+                if (!KNOWN.has(inner.split('#')[0] ?? '')) {
                     violations.push({ line: index + 1, token: match[0] });
                 }
                 continue;
@@ -139,7 +139,7 @@ export function findKnownTokens(text: string): { line: number; token: string }[]
     for (const [index, lineText] of lines.entries()) {
         for (const match of lineText.matchAll(BRACE_BLOCK)) {
             const inner = match.groups?.inner ?? '';
-            if (VALID_TOKEN.test(inner) && KNOWN.has(inner.split('#')[0])) {
+            if (VALID_TOKEN.test(inner) && KNOWN.has(inner.split('#')[0] ?? '')) {
                 found.push({ line: index + 1, token: match[0] });
             }
         }
@@ -170,8 +170,8 @@ function firstLine(text: string): string {
     return '';
 }
 
-const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) \/\S*/;
-const STATUS_LINE = /^HTTP\/\d(?:\.\d)? \d{3}\b/;
+const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) \/\S*/u;
+const STATUS_LINE = /^HTTP\/\d(?:\.\d)? \d{3}\b/u;
 
 /**
  * Check one `<case>.spec.yaml` — D4b's shape through the SAME parser the runner
@@ -251,8 +251,10 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
             if (entry.name.endsWith(SPEC_EXTENSION)) {
                 const text = decodeText(path);
                 if (text !== null) {
-                    violations.push(...checkSpecFile(text, rel));
-                    violations.push(...checkSpecConventions(text, rel, path));
+                    violations.push(
+                        ...checkSpecFile(text, rel),
+                        ...checkSpecConventions(text, rel, path),
+                    );
                 }
                 continue;
             }

@@ -4,20 +4,19 @@ import type { ContainerPort } from '../../ports/container.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
 import { resolveComposeBinding } from './binding.js';
-import { type ComposeConfig, detectServiceType, findComposeFile } from './compose-file.js';
-import {
-    type ComposeStackPort,
-    getComposeServiceFactory,
-    getContainerIntegrations,
-} from './registry.js';
-import { type AppInfo, formatStartupReport, type ServiceReport } from './reporter.js';
+import { detectServiceType, findComposeFile } from './compose-file.js';
+import type { ComposeConfig } from './compose-file.js';
+import { getComposeServiceFactory, getContainerIntegrations } from './registry.js';
+import type { ComposeStackPort } from './registry.js';
+import { formatStartupReport } from './reporter.js';
+import type { AppInfo, ServiceReport } from './reporter.js';
 
-interface RunningService {
+type RunningService = {
     handle: ServiceHandle;
     container: ContainerPort | null;
-}
+};
 
-export interface OrchestratorOptions {
+export type OrchestratorOptions = {
     /**
      * Named infrastructure record. Keys become the database vocabulary of the
      * spec (`.seed()` / `.table()` `database` option) and drive the compose
@@ -38,7 +37,7 @@ export interface OrchestratorOptions {
     root: string;
     /** Compose project name — used for per-worker stack isolation. */
     projectName?: string;
-}
+};
 
 /**
  * Orchestrator for test infrastructure.
@@ -46,10 +45,10 @@ export interface OrchestratorOptions {
  * E2E: runs full docker compose up.
  */
 export class Orchestrator {
-    private services: Record<string, ServiceHandle>;
-    private mode: 'e2e' | 'integration';
-    private root: string;
-    private projectName: string | undefined;
+    private readonly services: Record<string, ServiceHandle>;
+    private readonly mode: 'e2e' | 'integration';
+    private readonly root: string;
+    private readonly projectName: string | undefined;
     private running: RunningService[] = [];
     private composeStack: ComposeStackPort | null = null;
     private composeHandles: ServiceHandle[] = [];
@@ -129,7 +128,9 @@ export class Orchestrator {
 
         // Phase 1: start containers in parallel + initialize embedded services
         await Promise.all([
-            ...containerServices.map(({ container }) => container.start()),
+            ...containerServices.map(async ({ container }) => {
+                await container.start();
+            }),
             ...embeddedServices.map(async (handle) => {
                 await handle.initialize(composeDir, this.root);
                 handle.started = true;
@@ -358,16 +359,14 @@ export class Orchestrator {
         }
 
         const config = getContainerIntegrations().parseComposeFile(composePath);
-        const appService = config.appService;
+        const { appService } = config;
+        const [firstPort] = appService?.ports ?? [];
 
-        if (!appService || appService.ports.length === 0) {
+        if (!appService || firstPort === undefined) {
             return null;
         }
 
-        const port = this.composeStack.getMappedPort(
-            appService.name,
-            appService.ports[0].container,
-        );
+        const port = this.composeStack.getMappedPort(appService.name, firstPort.container);
         return `http://localhost:${port}`;
     }
 }

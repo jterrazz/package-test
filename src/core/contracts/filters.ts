@@ -1,4 +1,5 @@
-import { CaptureScope, type Matcher } from '../matching/match.js';
+import { CaptureScope } from '../matching/match.js';
+import type { Matcher } from '../matching/match.js';
 import { structuralEquals } from '../matching/structural.js';
 
 /**

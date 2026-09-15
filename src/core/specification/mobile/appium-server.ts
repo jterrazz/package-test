@@ -13,10 +13,10 @@ export const APPIUM_INSTALL_HINT =
     'specification.mobile() requires appium and webdriverio (optional peer dependencies): npm install -D appium webdriverio && npx appium driver install xcuitest';
 
 /** A running appium server: its base URL and a group-killing stop. */
-export interface AppiumServer {
+export type AppiumServer = {
     stop: () => Promise<void>;
     url: string;
-}
+};
 
 /**
  * Start the caller project's appium server as a child process on a free port
@@ -40,5 +40,10 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
         'mobile',
     );
     const url = await serve.start();
-    return { stop: () => serve.stop(), url };
+    return {
+        stop: async () => {
+            await serve.stop();
+        },
+        url,
+    };
 }

@@ -2,14 +2,12 @@ import { cpSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 import { shouldUpdateSnapshots } from '../../../vitest/update.js';
-import {
-    readSpecFile,
-    type SpecDocument,
-    type SpecFile,
-    type SpecFileAssertion,
-    type SpecRun,
-    SpecSyntaxError,
-    updateSpecFile,
+import { readSpecFile, SpecSyntaxError, updateSpecFile } from '../../literate/spec-document.js';
+import type {
+    SpecDocument,
+    SpecFile,
+    SpecFileAssertion,
+    SpecRun,
 } from '../../literate/spec-document.js';
 import { CaptureScope } from '../../matching/match.js';
 import {
@@ -46,7 +44,7 @@ import { CliResult } from './result.js';
  * A server a document may start by name (`serve: mcp`), registered once per app
  * in the `serve` option of `specification.cli()`.
  */
-export interface LiterateServeRegistration {
+export type LiterateServeRegistration = {
     /** Shell command that starts the server, run from the project root. */
     command: string;
     /** The variable the resolved URL is bound to in every run's child env. */
@@ -58,10 +56,10 @@ export interface LiterateServeRegistration {
     ready: RegExp;
     /** Builds the URL bound to {@link env} from the announced port. */
     url: (port: number) => string;
-}
+};
 
 /** Per-call options for {@link runSpecDocument} / `cli.run()`. */
-export interface LiterateRunFlags {
+export type LiterateRunFlags = {
     /**
      * Opt this document OUT of the update-mode rewrite. A frozen document is
      * NEVER written under `TEST_UPDATE=1`: its mismatch still throws its diff.
@@ -70,13 +68,13 @@ export interface LiterateRunFlags {
      * instead of being silently corrected into a passing file. The document's
      * mirror of `toMatch(name, { frozen: true })`.
      */
-    frozen?: boolean;
-}
+    frozen?: boolean | undefined;
+};
 
 /** Everything the engine needs to run one document. Assembled by the chain. */
-export interface LiterateRunOptions extends LiterateRunFlags {
+export type LiterateRunOptions = {
     /** Env the chain already resolved: service URLs, docker run id, `.env()`. */
-    baseEnv?: CliEnv;
+    baseEnv?: CliEnv | undefined;
     config: SpecificationConfig;
     /** The path failures name — as the reader would open it. */
     displayPath: string;
@@ -86,22 +84,22 @@ export interface LiterateRunOptions extends LiterateRunFlags {
     testDir: string;
     /** The shared working directory every run executes in. */
     workDir: string;
-}
+} & LiterateRunFlags;
 
 /** One run's outcome, kept for the failure rendering and the rewrite. */
-interface RunOutcome {
+type RunOutcome = {
     actual: CliOutput;
     run: SpecRun;
     /** Streams as compared: ANSI stripped and `transform` applied, byte for byte. */
     stderr: string;
     stdout: string;
-}
+};
 
 /** Where a failure is rendered against — the two forms of the same path. */
-interface FailureContext {
+type FailureContext = {
     displayPath: string;
     filePath: string;
-}
+};
 
 // ── Comparison ──
 
@@ -262,7 +260,7 @@ function assertRun(
                 // The stream is byte-exact, so it carries its own final
                 // Newline; the joiner adds the separator, not the stream.
                 ...(outcome.stderr.length > 0
-                    ? ['', 'stderr was:', outcome.stderr.replace(/\n$/, '')]
+                    ? ['', 'stderr was:', outcome.stderr.replace(/\n$/u, '')]
                     : []),
             ].join('\n'),
         ]);
@@ -427,8 +425,8 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         // It: the message already names the line, so the stack says the same.
         throw error instanceof SpecSyntaxError ? atLine(error, filePath, error.line) : error;
     }
-    const document = file.document;
-    const fileDir = filePath.replace(/[/\\][^/\\]*$/, '');
+    const { document } = file;
+    const fileDir = filePath.replace(/[/\\][^/\\]*$/u, '');
 
     // `fixture:` layers on top of whatever the chain already copied, in
     // Declaration order — identical semantics to chained `.fixture()` calls.

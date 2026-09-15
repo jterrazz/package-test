@@ -52,8 +52,9 @@ const MAX_REPORTED_MATCHES = 10;
 /** WebDriverAgent builds once per simulator — the first session is the slow one. */
 const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
 
-const delay = (ms: number): Promise<void> =>
-    new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
+const delay = async (ms: number): Promise<void> => {
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
+};
 
 /** Escape a name for an NSPredicate single-quoted string literal. */
 function escapePredicate(value: string): string {
@@ -131,9 +132,9 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
         element.getAttribute('value'),
         element.getAttribute('name'),
     ]);
-    const shortLabel = label ? label.replaceAll(/\s+/g, ' ').trim().slice(0, 80) : undefined;
+    const shortLabel = label ? label.replaceAll(/\s+/gu, ' ').trim().slice(0, 80) : undefined;
     return {
-        type: (type ?? 'Unknown').replace(/^XCUIElementType/, ''),
+        type: (type ?? 'Unknown').replace(/^XCUIElementType/u, ''),
         ...(shortLabel === undefined ? {} : { label: shortLabel }),
         ...(value && value !== label ? { value } : {}),
         ...(identifier && identifier !== label ? { identifier } : {}),
@@ -164,12 +165,12 @@ export class AppiumAdapter implements DevicePort {
      * which drives the waits over a stub driver with no simulator in reach
      * (mocks are CODE here, CONVENTIONS I4).
      */
-    private readonly remote?: RemoteFn;
+    private readonly remote?: RemoteFn | undefined;
 
     constructor(options: {
-        remote?: RemoteFn;
+        remote?: RemoteFn | undefined;
         serverUrl: string;
-        timeouts?: DeviceTimeouts;
+        timeouts?: DeviceTimeouts | undefined;
         udid: string;
     }) {
         this.options = { serverUrl: options.serverUrl, udid: options.udid };
@@ -311,13 +312,14 @@ export class AppiumAdapter implements DevicePort {
                     const offscreen: ElementList = await scope.$$(
                         `-ios predicate string:${compilePredicate(level, { anyVisibility: true })}`,
                     );
-                    if ((await offscreen.length) > 0) {
+                    const first = offscreen[0];
+                    if (first !== undefined) {
                         try {
                             // Scroll the FOUND element into view directly (by
                             // Id) — a predicate-driven `mobile: scroll` would
                             // Start its own slow native scroll-search instead.
                             await driver.executeScript('mobile: scroll', [
-                                { elementId: offscreen[0].elementId, toVisible: true },
+                                { elementId: first.elementId, toVisible: true },
                             ]);
                         } catch {
                             // Not scrollable (or already settling) — keep polling.
@@ -335,7 +337,11 @@ export class AppiumAdapter implements DevicePort {
                     }),
                 );
             }
-            scope = matches[0];
+            const next = matches[0];
+            if (next === undefined) {
+                return null;
+            }
+            scope = next;
         }
         return scope as DriverElement;
     }
@@ -345,7 +351,10 @@ export class AppiumAdapter implements DevicePort {
         const count = Math.min(await matches.length, MAX_REPORTED_MATCHES);
         const evidence: MobileElementMatch[] = [];
         for (let index = 0; index < count; index++) {
-            evidence.push(await captureMatch(matches[index]));
+            const match = matches[index];
+            if (match !== undefined) {
+                evidence.push(await captureMatch(match));
+            }
         }
         return evidence;
     }
@@ -373,8 +382,8 @@ export class AppiumAdapter implements DevicePort {
             const source = await driver.getPageSource();
             const labels = [
                 ...new Set(
-                    [...source.matchAll(/label="(?<label>[^"]{2,60})"/g)].map(
-                        (match) => match.groups?.['label'] ?? '',
+                    [...source.matchAll(/label="(?<label>[^"]{2,60})"/gu)].map(
+                        (match) => match.groups?.label ?? '',
                     ),
                 ),
             ].slice(0, 15);

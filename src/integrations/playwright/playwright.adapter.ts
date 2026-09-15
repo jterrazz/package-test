@@ -27,14 +27,14 @@ import {
 type MatchScope = Locator | Page;
 
 /** The head/body extraction evaluated in-page — the browser IS the parser. */
-interface PageExtraction {
+type PageExtraction = {
     html: string;
     jsonLdBlocks: string[];
     links: BrowserLinkElement[];
     metas: BrowserMetaElement[];
     text: string;
     title: string;
-}
+};
 
 /** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
@@ -48,7 +48,12 @@ const MAX_REPORTED_MATCHES = 10;
  */
 function locate(root: MatchScope, element: ElementRef): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
-    const options = { exact: element.exact, name: element.name };
+    // Playwright's own option bags are exact-optional: an absent `name` is no
+    // Name filter at all, and `exact` defaults to false where it is unstated.
+    const options =
+        element.name === undefined
+            ? { exact: element.exact ?? false }
+            : { exact: element.exact ?? false, name: element.name };
     switch (element.kind) {
         case 'banner':
         case 'complementary':
@@ -66,13 +71,13 @@ function locate(root: MatchScope, element: ElementRef): Locator {
             return scope.getByRole(element.kind, options);
         }
         case 'field': {
-            return scope.getByLabel(element.name ?? '', { exact: element.exact });
+            return scope.getByLabel(element.name ?? '', { exact: element.exact ?? false });
         }
         case 'testId': {
             return scope.getByTestId(element.name ?? '');
         }
         case 'text': {
-            return scope.getByText(element.name ?? '', { exact: element.exact });
+            return scope.getByText(element.name ?? '', { exact: element.exact ?? false });
         }
     }
 }
@@ -84,7 +89,7 @@ function isStrictViolation(error: unknown): boolean {
 
 /** Capture the candidates in-page — the evidence the refusal enumerates. */
 async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
-    return locator.evaluateAll((nodes, limit) => {
+    return await locator.evaluateAll((nodes, limit) => {
         const LANDMARKS = 'nav, header, footer, main, aside, section, form, [role]';
         return nodes.slice(0, limit).map((node) => {
             const element = node as HTMLElement;
@@ -97,7 +102,7 @@ async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
                 context: context ?? undefined,
                 detail: detail ?? undefined,
                 tag: element.tagName.toLowerCase(),
-                text: (element.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 80),
+                text: (element.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80),
             };
         });
     }, MAX_REPORTED_MATCHES);
@@ -145,17 +150,39 @@ async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<Elem
 /** The visitor implementation — every action auto-waits via playwright actionability. */
 function createVisitor(page: Page, baseUrl: string): Visitor {
     return {
-        check: (element) => act(page, element, (locator) => locator.check()),
-        click: (element) => act(page, element, (locator) => locator.click()),
-        fill: (element, value) => act(page, element, (locator) => locator.fill(value)),
+        check: async (element) => {
+            await act(page, element, async (locator) => {
+                await locator.check();
+            });
+        },
+        click: async (element) => {
+            await act(page, element, async (locator) => {
+                await locator.click();
+            });
+        },
+        fill: async (element, value) => {
+            await act(page, element, async (locator) => {
+                await locator.fill(value);
+            });
+        },
         goto: async (path) => {
             await page.goto(`${baseUrl}${path}`, { waitUntil: 'load' });
         },
-        hover: (element) => act(page, element, (locator) => locator.hover()),
-        press: (key) => page.keyboard.press(key),
-        see: (element) => act(page, element, (locator) => locator.waitFor({ state: 'visible' })),
+        hover: async (element) => {
+            await act(page, element, async (locator) => {
+                await locator.hover();
+            });
+        },
+        press: async (key) => {
+            await page.keyboard.press(key);
+        },
+        see: async (element) => {
+            await act(page, element, async (locator) => {
+                await locator.waitFor({ state: 'visible' });
+            });
+        },
         select: async (element, option) => {
-            await act(page, element, (locator) => locator.selectOption(option));
+            await act(page, element, async (locator) => await locator.selectOption(option));
         },
     };
 }
@@ -183,7 +210,7 @@ export class PlaywrightAdapter implements BrowserPort {
     async open(url: string, options: BrowserOpenOptions): Promise<BrowserPage> {
         const browser = await this.launch();
         const context = await browser.newContext({
-            extraHTTPHeaders: options.headers,
+            extraHTTPHeaders: options.headers ?? {},
         });
 
         // Cross-origin policy: with 'block', any request leaving the site
@@ -256,7 +283,7 @@ export class PlaywrightAdapter implements BrowserPort {
                     jsonLdBlocks,
                     links,
                     metas,
-                    // eslint-disable-next-line unicorn/prefer-dom-node-text-content -- rendered text is the point; textContent would leak script bodies
+                    // oxlint-disable-next-line unicorn/prefer-dom-node-text-content -- rendered text is the point; textContent would leak script bodies
                     text: document.body?.innerText ?? '',
                     title: document.title,
                 };

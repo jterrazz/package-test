@@ -40,12 +40,12 @@ export async function ensureContractServer(): Promise<void> {
 }
 
 /** Handle returned by {@link registerContracts} for the chain's lifetime. */
-export interface ContractRegistration {
+export type ContractRegistration = {
     /** Remove the chain's handlers from the shared MSW server. */
     cleanup: () => void;
     /** The strict-contract violation observed during the chain, if any. */
     violation: () => Error | null;
-}
+};
 
 /** Turn a contract response into the MSW reply, body kind by body kind. */
 function toMswResponse(msw: any, response: ContractResponse): unknown {
@@ -92,8 +92,7 @@ export async function registerContracts(
 
     for (const route of queue.routes) {
         for (const method of route.methods) {
-            const handlerFn =
-                method === '*' ? msw.http.all : (msw.http as any)[method.toLowerCase()];
+            const handlerFn = method === '*' ? msw.http.all : msw.http[method.toLowerCase()];
             if (!handlerFn) {
                 continue;
             }

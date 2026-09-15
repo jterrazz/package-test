@@ -18,15 +18,15 @@
  *     { "id": "{{uuid#user}}" }
  */
 
-export interface ParsedRequestFile {
+export type ParsedRequestFile = {
     /** Raw body text (already serialized), or undefined when absent. */
-    body?: string;
+    body?: string | undefined;
     headers: Record<string, string>;
     method: string;
     path: string;
-}
+};
 
-export interface ParsedResponseFile {
+export type ParsedResponseFile = {
     /** Parsed JSON body — or the raw text when the body is not valid JSON. */
     body: unknown;
     /** True when a body section is present. */
@@ -34,26 +34,28 @@ export interface ParsedResponseFile {
     headers: Record<string, string>;
     /** Status token as written — usually numeric, may be a placeholder. */
     status: string;
-}
+};
 
 function splitSections(content: string): {
     body: string;
     headerLines: string[];
     startLine: string;
 } {
-    const lines = content.split(/\r?\n/);
+    const lines = content.split(/\r?\n/u);
 
     let index = 0;
-    while (index < lines.length && lines[index].trim() === '') {
+    while (lines[index]?.trim() === '') {
         index++;
     }
     const startLine = lines[index] ?? '';
     index++;
 
     const headerLines: string[] = [];
-    while (index < lines.length && lines[index].trim() !== '') {
-        headerLines.push(lines[index]);
+    let header = lines[index];
+    while (header !== undefined && header.trim() !== '') {
+        headerLines.push(header);
         index++;
+        header = lines[index];
     }
 
     const body = lines
@@ -80,8 +82,10 @@ function parseHeaders(headerLines: string[], fileName: string): Record<string, s
 export function parseRequestFile(content: string, fileName: string): ParsedRequestFile {
     const { body, headerLines, startLine } = splitSections(content);
 
-    const start = /^(?<method>[A-Z]+)\s+(?<path>\S+)$/.exec(startLine.trim());
-    if (!start?.groups) {
+    const start = /^(?<method>[A-Z]+)\s+(?<path>\S+)$/u.exec(startLine.trim());
+    const method = start?.groups?.method;
+    const path = start?.groups?.path;
+    if (method === undefined || path === undefined) {
         throw new Error(
             `${fileName}: first line must be "METHOD /path" (e.g. "POST /users"), got "${startLine}"`,
         );
@@ -90,8 +94,8 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
     return {
         body: body.length > 0 ? body : undefined,
         headers: parseHeaders(headerLines, fileName),
-        method: start.groups.method,
-        path: start.groups.path,
+        method,
+        path,
     };
 }
 
@@ -99,8 +103,9 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
 export function parseResponseFile(content: string, fileName: string): ParsedResponseFile {
     const { body, headerLines, startLine } = splitSections(content);
 
-    const start = /^HTTP\/1\.1\s+(?<status>\S+)(?:\s+.*)?$/.exec(startLine.trim());
-    if (!start?.groups) {
+    const start = /^HTTP\/1\.1\s+(?<status>\S+)(?:\s+.*)?$/u.exec(startLine.trim());
+    const status = start?.groups?.status;
+    if (status === undefined) {
         throw new Error(
             `${fileName}: first line must be "HTTP/1.1 <status>" (e.g. "HTTP/1.1 200 OK"), got "${startLine}"`,
         );
@@ -119,7 +124,7 @@ export function parseResponseFile(content: string, fileName: string): ParsedResp
         body: parsedBody,
         hasBody: body.length > 0,
         headers: parseHeaders(headerLines, fileName),
-        status: start.groups.status,
+        status,
     };
 }
 
@@ -159,8 +164,8 @@ export function serializeResponseFile(response: {
     }
 
     if (response.hasBody) {
-        lines.push('');
         lines.push(
+            '',
             typeof response.body === 'string' && !isJsonLike(response.body)
                 ? response.body
                 : JSON.stringify(response.body, null, 4),

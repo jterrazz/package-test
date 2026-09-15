@@ -8,9 +8,9 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 /** The only directories a `contracts/` root may hold — the provider carriers. */
 const PROVIDERS = new Set(['anthropic', 'http', 'openai']);
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 /** A file oxlint itself visits — the AST half of the rule reports on those. */
-const SOURCE_FILE = /\.[cm]?[jt]sx?$/;
+const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;
 /** The public facade of a feature: `contracts/<kebab>.contracts.ts`. */
 const COMPOSITE_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.contracts\.[cm]?ts$/u;
 /** An internal unit contract: `contracts/<provider>/<kebab>.ts`. */
@@ -18,7 +18,7 @@ const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
 /** Matched data next to its contract: `contracts/<provider>/<stem>.request.ts`. */
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
 /** Served data next to its contract: `contracts/<provider>/<stem>[.<qualifier>].response.json`. */
-const RESPONSE_DATA_FILE = /\.response\.json$/;
+const RESPONSE_DATA_FILE = /\.response\.json$/u;
 
 /** The name a specifier/declaration exports under, when it is `default`. */
 function exportsDefault(node: AstNode): boolean {
@@ -105,7 +105,7 @@ function checkLayout(context: RuleContext, node: AstNode, contractsDir: string):
                     messageId: 'providerSubfolder',
                     node,
                 });
-            } else if (!/\.[cm]?ts$/u.test(child) && !RESPONSE_DATA_FILE.test(child)) {
+            } else if (!/\.[cm]?ts$/u.test(child) && !child.endsWith('.response.json')) {
                 context.report({
                     data: { child, provider: entry },
                     messageId: 'providerEntry',
@@ -238,7 +238,7 @@ export const c4ContractShape: LintRule = {
             };
         }
         if (depth === 2) {
-            const provider = parts[contractsIndex + 1];
+            const provider = parts[contractsIndex + 1] ?? '';
             // A non-provider directory is reported once, by the layout half.
             return PROVIDERS.has(provider)
                 ? {

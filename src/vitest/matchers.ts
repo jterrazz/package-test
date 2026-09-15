@@ -13,11 +13,8 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import {
-    type ParsedResponseFile,
-    parseResponseFile,
-    serializeResponseFile,
-} from '../core/http-files/http-file.js';
+import { parseResponseFile, serializeResponseFile } from '../core/http-files/http-file.js';
+import type { ParsedResponseFile } from '../core/http-files/http-file.js';
 import { CaptureScope } from '../core/matching/match.js';
 import {
     mergePreservingPlaceholders,
@@ -46,10 +43,10 @@ import { TextAccessor } from '../core/specification/shared/result/text.js';
 import { ContainerAccessor } from '../integrations/docker/container-accessor.js';
 import { shouldUpdateSnapshots, UPDATE_HINT } from './update.js';
 
-interface MatcherResult {
+type MatcherResult = {
     message: () => string;
     pass: boolean;
-}
+};
 
 /**
  * Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a
@@ -61,15 +58,15 @@ interface MatcherResult {
  * survivable across update runs instead of being silently overwritten with the
  * actual output.
  */
-export interface MatchFixtureOptions {
+export type MatchFixtureOptions = {
     frozen?: boolean;
-}
+};
 
 const PASS = (label: string): MatcherResult => ({ message: () => label, pass: true });
 const FAIL = (message: string): MatcherResult => ({ message: () => message, pass: false });
 
 function requireExtension(name: string, subject: string): void {
-    if (!/\.[A-Za-z0-9]+$/.test(name)) {
+    if (!/\.[A-Za-z0-9]+$/u.test(name)) {
         throw new Error(
             `toMatch("${name}"): the extension is part of the name and is required for ${subject} subjects (e.g. "help.txt").`,
         );
@@ -153,12 +150,12 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
 }
 
 /** The parts of a response a fixture is checked against. */
-interface ActualResponse {
+type ActualResponse = {
     body: unknown;
     /** Flat, lower-cased key-value map. */
     headers: Record<string, string>;
     status: number;
-}
+};
 
 /**
  * Build the updated `_expected/*.http` fixture content from the previous
@@ -217,7 +214,7 @@ export function compareResponse(
     scope: CaptureScope,
 ): null | string {
     // Status — supports placeholders ("HTTP/1.1 {{number}}").
-    const statusOk = /^\d+$/.test(expected.status)
+    const statusOk = /^\d+$/u.test(expected.status)
         ? Number(expected.status) === actual.status
         : structuralEquals(expected.status, String(actual.status), scope);
     if (!statusOk) {
@@ -444,11 +441,14 @@ async function toMatchRows(
     const actual = await received.query(expected.columns);
     const pass =
         actual.length === expected.rows.length &&
-        expected.rows.every(
-            (row, i) =>
-                row.length === actual[i].length &&
-                row.every((cell, j) => structuralEquals(cell, actual[i][j], received.captures)),
-        );
+        expected.rows.every((row, i) => {
+            const actualRow = actual[i];
+            return (
+                actualRow !== undefined &&
+                row.length === actualRow.length &&
+                row.every((cell, j) => structuralEquals(cell, actualRow[j], received.captures))
+            );
+        });
 
     return {
         message: () =>

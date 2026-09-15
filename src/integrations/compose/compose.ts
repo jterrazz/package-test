@@ -8,8 +8,8 @@ import type { ContainerPort } from '../../core/ports/container.port.js';
  * Used by e2e() to start all services including the app.
  */
 export class ComposeAdapter implements ContainerPort {
-    private composeFile: string;
-    private serviceName: string;
+    private readonly composeFile: string;
+    private readonly serviceName: string;
     private started = false;
 
     constructor(composeFile: string, serviceName: string) {
@@ -76,8 +76,8 @@ export class ComposeAdapter implements ContainerPort {
  * Supports per-worker project names for parallel execution.
  */
 export class ComposeStackAdapter {
-    private composeFile: string;
-    private projectName: null | string;
+    private readonly composeFile: string;
+    private readonly projectName: null | string;
     private started = false;
 
     constructor(composeFile: string, projectName?: string) {

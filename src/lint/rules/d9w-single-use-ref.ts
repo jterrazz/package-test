@@ -6,10 +6,10 @@ import { isDirectory, isFile, listDirectory, readFileCached } from '../fs-cache.
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /** A captured-ref token: `{{kind#ref}}`. Captures the ref name. */
-const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/g;
+const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/gu;
 
 /** Is this call `match.ref(...)`? */
 function isMatchRef(node: AstNode): boolean {
@@ -93,7 +93,7 @@ export const d9wSingleUseRef: LintRule = {
                             const target = join(
                                 featureDir,
                                 GROUND_EXPECTED,
-                                name.replace(/\/+$/, ''),
+                                name.replace(/\/+$/u, ''),
                             );
                             for (const ref of refsInFixture(target)) {
                                 bump(ref);

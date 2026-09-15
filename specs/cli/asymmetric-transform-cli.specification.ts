@@ -11,7 +11,7 @@ import { specification } from '../../src/index.js';
 const CLI_BIN = resolve(import.meta.dirname, '../_fixtures/cli-app/cli.sh');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {
-    transform: (text) => text.replace(/ plain/g, ''),
+    transform: (text) => text.replaceAll(' plain', ''),
 });
 
 afterAll(cleanup);

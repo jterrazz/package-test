@@ -223,7 +223,7 @@ declare module 'vitest' {
     // The `toMatch` override must stay ASSIGNABLE to the native
     // `(expected: string | RegExp) => void`, so every branch keeps the
     // `RegExp | string` parameter and a void-compatible return.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-explicit-any -- a module augmentation MERGES only as an interface (a type alias redeclares the name and every matcher is lost), and `T = any` is the default vitest's own `Assertion` declares
     interface Assertion<T = any> {
         /**
          * Assert the subject is empty — zero rows for a table (async), an

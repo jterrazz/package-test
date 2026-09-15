@@ -5,8 +5,7 @@ import { textEquals } from '../../matching/structural.js';
 import { formatStdoutDiff } from './reporter.js';
 
 /** The diff as a reader sees it, ANSI stripped. */
-// eslint-disable-next-line no-control-regex
-const plain = (text: string): string[] => text.replace(/\x1b\[[0-9;]*m/g, '').split('\n');
+const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, '').split('\n');
 
 const tokenAware = (expected: string, actual: string): boolean =>
     textEquals(expected, actual, new CaptureScope());

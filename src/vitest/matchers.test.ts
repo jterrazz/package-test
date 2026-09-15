@@ -24,8 +24,8 @@ describe('toMatch — native string behavior preserved (D3)', () => {
     test('a plain string still matches a regexp', () => {
         // Given - a plain string subject (not an accessor)
         // Then - native regexp semantics survive the override
-        expect('abc').toMatch(/b/);
-        expect('abc').not.toMatch(/z/);
+        expect('abc').toMatch(/b/u);
+        expect('abc').not.toMatch(/z/u);
     });
 
     test('a plain string still matches a substring', () => {
@@ -54,7 +54,7 @@ describe('response update mode — buildUpdatedResponse (CONVENTIONS D5)', () =>
         const updated = buildUpdatedResponse(previous, actual);
 
         // Then - placeholder preserved, stale value refreshed, absent header dropped
-        expect(updated.headers).toEqual({ 'content-type': '{{string}}', 'x-stale': 'new' });
+        expect(updated.headers).toStrictEqual({ 'content-type': '{{string}}', 'x-stale': 'new' });
     });
 
     test('a fresh fixture records only the content-type header', () => {
@@ -67,8 +67,8 @@ describe('response update mode — buildUpdatedResponse (CONVENTIONS D5)', () =>
 
         // Then - status + content-type + body, nothing speculative
         expect(updated.status).toBe('201');
-        expect(updated.headers).toEqual({ 'content-type': 'application/json' });
-        expect(updated.body).toEqual({ id: UUID });
+        expect(updated.headers).toStrictEqual({ 'content-type': 'application/json' });
+        expect(updated.body).toStrictEqual({ id: UUID });
     });
 
     test('preserves a still-matching status placeholder and body placeholders', () => {
@@ -87,7 +87,7 @@ describe('response update mode — buildUpdatedResponse (CONVENTIONS D5)', () =>
 
         // Then - matching tokens survive, stale literals are replaced
         expect(updated.status).toBe('{{number}}');
-        expect(updated.body).toEqual({ id: '{{uuid}}', name: 'Alice' });
+        expect(updated.body).toStrictEqual({ id: '{{uuid}}', name: 'Alice' });
     });
 
     test('meta: a freshly updated fixture passes the next comparison run', () => {
@@ -126,7 +126,10 @@ describe('response body update mode — workdir substitution (CONVENTIONS D5, te
         );
 
         // Then - the body stores tokens, not the run-specific temp path
-        expect(updated.body).toEqual({ cwd: '{{workdir}}', log: 'wrote {{workdir}}/out.txt' });
+        expect(updated.body).toStrictEqual({
+            cwd: '{{workdir}}',
+            log: 'wrote {{workdir}}/out.txt',
+        });
     });
 
     test('a previous {{workdir}} placeholder in the body is preserved', () => {
@@ -144,7 +147,7 @@ describe('response body update mode — workdir substitution (CONVENTIONS D5, te
         );
 
         // Then - the token survives, the stale literal refreshes
-        expect(updated.body).toEqual({ cwd: '{{workdir}}', name: 'Alice' });
+        expect(updated.body).toStrictEqual({ cwd: '{{workdir}}', name: 'Alice' });
     });
 
     test('meta: a workdir-substituted body passes the next comparison run', () => {
@@ -186,13 +189,15 @@ describe('toMatch — accessor subjects reject a regex argument (runtime guard, 
             const subject = make();
 
             // Then - the throw names the subject kind, the rule, and the escape hatch
-            expect(() => expect(subject).toMatch(/re/)).toThrow(kind);
-            expect(() => expect(subject).toMatch(/re/)).toThrow(
-                'toMatch on accessors takes a fixture name (extension included)',
-            );
-            expect(() => expect(subject).toMatch(/re/)).toThrow(
-                'use expect(x.text).toMatch(/re/) for regex matching',
-            );
+            expect(() => {
+                expect(subject).toMatch(/re/u);
+            }).toThrow(kind);
+            expect(() => {
+                expect(subject).toMatch(/re/u);
+            }).toThrow('toMatch on accessors takes a fixture name (extension included)');
+            expect(() => {
+                expect(subject).toMatch(/re/u);
+            }).toThrow('use expect(x.text).toMatch(/re/) for regex matching');
         });
     }
 
@@ -201,9 +206,9 @@ describe('toMatch — accessor subjects reject a regex argument (runtime guard, 
         const subject = new TextAccessor('out', 'stdout', '/tmp');
 
         // Then - the guard still fires with the fixture-name guidance
-        expect(() => expect(subject).toMatch(42 as unknown as string)).toThrow(
-            'toMatch on accessors takes a fixture name (extension included)',
-        );
+        expect(() => {
+            expect(subject).toMatch(42 as unknown as string);
+        }).toThrow('toMatch on accessors takes a fixture name (extension included)');
     });
 });
 
@@ -243,10 +248,10 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixturePath = resolve(scratch, '_expected', 'frozen.json');
 
         // Then - update mode is bypassed: it throws the does-not-exist error, no write
-        expect(() => expect(accessor).toMatch('frozen.json', { frozen: true })).toThrow(
-            /does not exist[\s\S]*TEST_UPDATE=1/,
-        );
-        expect(existsSync(fixturePath)).toBe(false);
+        expect(() => {
+            expect(accessor).toMatch('frozen.json', { frozen: true });
+        }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
+        expect(existsSync(fixturePath)).toBeFalsy();
     });
 
     test('json: a frozen wrong fixture keeps its content and throws its diff', () => {
@@ -257,7 +262,9 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const accessor = new JsonAccessor('{ "id": 1 }', scratch);
 
         // Then - frozen mismatch still throws and never overwrites
-        expect(() => expect(accessor).toMatch('wrong.json', { frozen: true })).toThrow();
+        expect(() => {
+            expect(accessor).toMatch('wrong.json', { frozen: true });
+        }).toThrow();
         expect(readFileSync(fixturePath, 'utf8')).toBe('{\n    "id": 999\n}\n');
     });
 
@@ -268,7 +275,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - update mode writes it and passes
         expect(accessor).toMatch('written.json');
-        expect(existsSync(fixturePath)).toBe(true);
+        expect(existsSync(fixturePath)).toBeTruthy();
     });
 
     test('response: a frozen missing fixture throws instead of being written', () => {
@@ -280,10 +287,10 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixturePath = resolve(scratch, '_expected', 'frozen.http');
 
         // Then - frozen bypasses the write, throwing the does-not-exist error
-        expect(() => expect(accessor).toMatch('frozen.http', { frozen: true })).toThrow(
-            /does not exist[\s\S]*TEST_UPDATE=1/,
-        );
-        expect(existsSync(fixturePath)).toBe(false);
+        expect(() => {
+            expect(accessor).toMatch('frozen.http', { frozen: true });
+        }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
+        expect(existsSync(fixturePath)).toBeFalsy();
     });
 
     test('response: without frozen, update mode writes the fixture (control)', () => {
@@ -296,7 +303,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - update mode writes and passes
         expect(accessor).toMatch('written.http');
-        expect(existsSync(fixturePath)).toBe(true);
+        expect(existsSync(fixturePath)).toBeTruthy();
     });
 
     test('tree: a frozen missing fixture throws instead of being written', async () => {
@@ -309,9 +316,9 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - frozen bypasses the write (async matcher rejects), nothing created
         await expect(expect(accessor).toMatch('frozen-tree', { frozen: true })).rejects.toThrow(
-            /does not exist[\s\S]*TEST_UPDATE=1/,
+            /does not exist[\s\S]*TEST_UPDATE=1/u,
         );
-        expect(existsSync(fixtureDir)).toBe(false);
+        expect(existsSync(fixtureDir)).toBeFalsy();
     });
 
     test('tree: without frozen, update mode writes the fixture tree (control)', async () => {
@@ -324,7 +331,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - update mode copies the tree and passes
         await expect(accessor).toMatch('written-tree');
-        expect(existsSync(fixtureFile)).toBe(true);
+        expect(existsSync(fixtureFile)).toBeTruthy();
     });
 });
 

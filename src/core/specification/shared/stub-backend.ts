@@ -21,27 +21,28 @@
  * to the stub by construction.
  */
 
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { createServer } from 'node:http';
+import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 import type { Contract } from '../../contracts/contract.js';
 import { ContractQueue } from '../../contracts/queue.js';
 import type { MatchableRequest } from '../../contracts/types.js';
 
 /** Options for the stub backend server. */
-interface StubBackendOptions {
+type StubBackendOptions = {
     /**
      * Fixed port — pins a stable stub URL across runs (a bundler that inlines
      * the URL at serve time survives warm). Default: a free OS-assigned port.
      */
-    port?: number;
-}
+    port?: number | undefined;
+};
 
 /** One unmatched request family recorded during a chain. */
-interface UnmatchedStubRequest {
+type UnmatchedStubRequest = {
     count: number;
     method: string;
     path: string;
-}
+};
 
 const CORS_METHODS = 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS';
 const PREFLIGHT_MAX_AGE = '600';
@@ -68,7 +69,9 @@ export class StubBackend {
 
         await new Promise<void>((resolve, reject) => {
             server.once('error', reject);
-            server.listen(this.options.port ?? 0, '127.0.0.1', () => resolve());
+            server.listen(this.options.port ?? 0, '127.0.0.1', () => {
+                resolve();
+            });
         });
 
         const address = server.address();
@@ -81,14 +84,16 @@ export class StubBackend {
 
     /** Stop the server (idempotent). */
     async stop(): Promise<void> {
-        const server = this.server;
+        const { server } = this;
         if (!server) {
             return;
         }
         this.server = null;
         server.closeAllConnections();
         await new Promise<void>((resolve) => {
-            server.close(() => resolve());
+            server.close(() => {
+                resolve();
+            });
         });
     }
 
@@ -136,7 +141,7 @@ export class StubBackend {
     private corsHeaders(request: IncomingMessage): Record<string, string> {
         return {
             'access-control-allow-headers':
-                (request.headers['access-control-request-headers'] as string | undefined) ?? '*',
+                request.headers['access-control-request-headers'] ?? '*',
             'access-control-allow-methods': CORS_METHODS,
             'access-control-allow-origin': '*',
             'access-control-max-age': PREFLIGHT_MAX_AGE,

@@ -70,7 +70,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
         const result = await cli.run('built-then-started.spec.yaml');
 
         // Then - the document proved the sequence; the cwd is readable afterwards
-        expect(result.file('dist/index.js').exists).toBe(true);
+        expect(result.file('dist/index.js').exists).toBeTruthy();
     });
 
     test('an env set and an inline pair both reach the child', async () => {
@@ -86,7 +86,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
         const result = await cli.run('served-url.spec.yaml');
 
         // Then - the document matched the URL by token; the raw value is a real one
-        expect(result.stdout.comparableText).toMatch(/backend http:\/\/127\.0\.0\.1:\d+\//);
+        expect(result.stdout.comparableText).toMatch(/backend http:\/\/127\.0\.0\.1:\d+\//u);
     });
 
     test('a served stub answers out of the workdir the document laid down', async () => {
@@ -150,7 +150,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
         const result = await cli.run('absent-then-written.spec.yaml');
 
         // Then - the absent passed although the session ends with the file there
-        expect(result.file('dist/index.js').exists).toBe(true);
+        expect(result.file('dist/index.js').exists).toBeTruthy();
     });
 
     test('an exists: holds against the cwd of ITS run, not of the last one', async () => {
@@ -158,7 +158,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
         const result = await cli.run('written-then-removed.spec.yaml');
 
         // Then - the exists passed although the session ends with the file gone
-        expect(result.file('dist/index.js').exists).toBe(false);
+        expect(result.file('dist/index.js').exists).toBeFalsy();
     });
 });
 
@@ -210,7 +210,7 @@ describe('spec documents — refusals', () => {
 
         // Then - no engine frames, no generated-module frame: the `command:`
         // Line, which is what the message names too
-        expect(frames(error)).toEqual([
+        expect(frames(error)).toStrictEqual([
             `at ${resolve(import.meta.dirname, '_fixtures/wrong-stdout.spec.yaml')}:3:1`,
         ]);
         expect(error.message).toContain('_fixtures/wrong-stdout.spec.yaml:3');
@@ -221,7 +221,7 @@ describe('spec documents — refusals', () => {
         const error = await errorOf(cli.run('_fixtures/unknown-key.spec.yaml'));
 
         // Then - the frame is that line, not a parser frame
-        expect(frames(error)).toEqual([
+        expect(frames(error)).toStrictEqual([
             `at ${resolve(import.meta.dirname, '_fixtures/unknown-key.spec.yaml')}:2:1`,
         ]);
     });
@@ -256,7 +256,7 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the refusal lists what specification.cli() actually declares
-        expect(await failureOf(cli.run(path))).toContain('registered servers: echo');
+        await expect(failureOf(cli.run(path))).resolves.toContain('registered servers: echo');
     });
 });
 

@@ -11,10 +11,10 @@ import { JsonAccessor } from '../shared/result/json.js';
 import { BaseResult } from '../shared/result/result.js';
 import { TextAccessor } from '../shared/result/text.js';
 
-interface CapturedContainer {
+type CapturedContainer = {
     id: string;
     inspect: unknown;
-}
+};
 
 /**
  * Result from a command action (`.exec()`).
@@ -33,17 +33,17 @@ interface CapturedContainer {
 export class CliResult extends BaseResult {
     private readonly commandOutput: CliOutput;
     private containersCache: Map<string, CapturedContainer> | null = null;
-    private readonly dockerConfig?: DockerSpecConfig;
-    private readonly testRunId?: string;
-    private readonly transform?: (text: string) => string;
+    private readonly dockerConfig?: DockerSpecConfig | undefined;
+    private readonly testRunId?: string | undefined;
+    private readonly transform?: ((text: string) => string) | undefined;
 
     constructor(options: {
         commandOutput: CliOutput;
         config: SpecificationConfig;
-        dockerConfig?: DockerSpecConfig;
+        dockerConfig?: DockerSpecConfig | undefined;
         testDir: string;
-        testRunId?: string;
-        transform?: (text: string) => string;
+        testRunId?: string | undefined;
+        transform?: ((text: string) => string) | undefined;
         workDir: string;
     }) {
         super(options);
@@ -129,9 +129,9 @@ export class CliResult extends BaseResult {
         // That the test never asserted on — still clean them up so tests
         // Running in parallel never collide.
         const ids =
-            this.containersCache !== null
-                ? [...this.containersCache.values()].map((c) => c.id)
-                : findContainersByLabel(this.dockerConfig.testRunLabel, this.testRunId);
+            this.containersCache === null
+                ? findContainersByLabel(this.dockerConfig.testRunLabel, this.testRunId)
+                : [...this.containersCache.values()].map((c) => c.id);
         removeContainers(ids);
     }
 

@@ -22,7 +22,10 @@ describe('package-exports — F1 reads the published contract', () => {
         mkdirSync(dist, { recursive: true });
 
         // Then - the root export is not a subpath; the other two are, specifier-formed
-        expect(declaredSubpaths(dist)).toEqual(['@jterrazz/test/oxlint', '@jterrazz/test/vitest']);
+        expect(declaredSubpaths(dist)).toStrictEqual([
+            '@jterrazz/test/oxlint',
+            '@jterrazz/test/vitest',
+        ]);
     });
 
     test('the walk stops at the first manifest — a host project vouches for nothing', () => {
@@ -33,7 +36,7 @@ describe('package-exports — F1 reads the published contract', () => {
         mkdirSync(nested, { recursive: true });
 
         // Then - a foreign manifest ends the search: no exemption is inherited
-        expect(declaredSubpaths(nested)).toEqual([]);
+        expect(declaredSubpaths(nested)).toStrictEqual([]);
     });
 
     test('no manifest at all yields no exemption — F1 applies plainly', () => {
@@ -41,7 +44,7 @@ describe('package-exports — F1 reads the published contract', () => {
         const orphan = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
 
         // Then - with no contract to read, no subpath can be vouched for
-        expect(declaredSubpaths(orphan)).toEqual([]);
+        expect(declaredSubpaths(orphan)).toStrictEqual([]);
     });
 
     test("this package's own manifest is what the rule actually reads", () => {
@@ -49,7 +52,7 @@ describe('package-exports — F1 reads the published contract', () => {
         const subpaths = declaredSubpaths();
 
         // Then - every published surface is exempt, and nothing else is
-        expect(subpaths).toEqual([
+        expect(subpaths).toStrictEqual([
             '@jterrazz/test/oxlint',
             '@jterrazz/test/schema',
             '@jterrazz/test/vitest',

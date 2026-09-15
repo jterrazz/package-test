@@ -33,10 +33,10 @@ describe('command — directory snapshot', () => {
         // Here against a changed tree — TEST_UPDATE must not overwrite it with the changed output
         await expect(
             expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
-        ).rejects.toThrow(/Directory mismatch/);
+        ).rejects.toThrow(/Directory mismatch/u);
         await expect(
             expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
-        ).rejects.toThrow(/go\.mod/);
+        ).rejects.toThrow(/go\.mod/u);
     });
 
     test('detects an extra file', async () => {
@@ -46,7 +46,7 @@ describe('command — directory snapshot', () => {
         // Then - diff surfaces the added file (frozen: shared golden asserted negatively)
         await expect(
             expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
-        ).rejects.toThrow(/UNEXPECTED\.txt/);
+        ).rejects.toThrow(/UNEXPECTED\.txt/u);
     });
 
     test('the directory mismatch diff is goldened in full (failure-message quality is the product)', async () => {
@@ -56,9 +56,9 @@ describe('command — directory snapshot', () => {
         // Then - the whole directory diff (counts + per-file line diff) is captured and goldened.
         // Frozen - the shared cli-scaffold/out golden is asserted negatively here; TEST_UPDATE must
         // Not overwrite it, and only the error golden updates
-        const message = await catchMessage(() =>
-            expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
-        );
+        const message = await catchMessage(async () => {
+            await expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true });
+        });
         expect(text(message)).toMatch('errors/directory-diff-error.txt');
     });
 
@@ -71,7 +71,7 @@ describe('command — directory snapshot', () => {
         await expect(
             // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing snapshot IS the behaviour under test
             expect(result.directory('out')).toMatch('does-not-exist', { frozen: true }),
-        ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/);
+        ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 
     describe('update mode', () => {
@@ -108,7 +108,7 @@ describe('command — directory snapshot', () => {
 
             // Then - the tree listing is complete and sorted
             const files = await result.directory('out').files();
-            expect(files).toEqual(['docs/README.md', 'go.mod', 'main.go', 'src/index.txt']);
+            expect(files).toStrictEqual(['docs/README.md', 'go.mod', 'main.go', 'src/index.txt']);
         });
     });
 });

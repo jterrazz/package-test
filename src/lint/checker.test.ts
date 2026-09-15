@@ -17,7 +17,7 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         const violations = findUnknownTokens('user {{userid}} created at {{iso8601}}');
 
         // Then - only the unknown token is reported, with its line
-        expect(violations).toEqual([{ line: 1, token: '{{userid}}' }]);
+        expect(violations).toStrictEqual([{ line: 1, token: '{{userid}}' }]);
     });
 
     test('accepts every known token, with and without capture refs', () => {
@@ -25,14 +25,18 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         const text = '{{uuid}} {{uuid#id}} {{iso8601}} {{workdir}} {{any}} {{int#count}}';
 
         // Then - clean
-        expect(findUnknownTokens(text)).toEqual([]);
+        expect(findUnknownTokens(text)).toStrictEqual([]);
     });
 
     test('flags a malformed ref on a known kind (empty ref, spaced)', () => {
         // Given - two malformed captures of otherwise-known kinds
         // Then - both are reported (they are not well-formed tokens)
-        expect(findUnknownTokens('{{iso8601#}}')).toEqual([{ line: 1, token: '{{iso8601#}}' }]);
-        expect(findUnknownTokens('{{uuid #id}}')).toEqual([{ line: 1, token: '{{uuid #id}}' }]);
+        expect(findUnknownTokens('{{iso8601#}}')).toStrictEqual([
+            { line: 1, token: '{{iso8601#}}' },
+        ]);
+        expect(findUnknownTokens('{{uuid #id}}')).toStrictEqual([
+            { line: 1, token: '{{uuid #id}}' },
+        ]);
     });
 
     test('reports the 1-based line of each finding', () => {
@@ -40,7 +44,7 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         const violations = findUnknownTokens('ok\nok {{sha}}\nbad {{sha256}}');
 
         // Then - line 3
-        expect(violations).toEqual([{ line: 3, token: '{{sha256}}' }]);
+        expect(violations).toStrictEqual([{ line: 3, token: '{{sha256}}' }]);
     });
 
     test('ignores structural template noise like Go templates', () => {
@@ -48,7 +52,7 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         const text = 'docker {{.Server.Version}} and {{ spaced }} and {{123}}';
 
         // Then - out of the grammar, not flagged
-        expect(findUnknownTokens(text)).toEqual([]);
+        expect(findUnknownTokens(text)).toStrictEqual([]);
     });
 });
 
@@ -56,7 +60,7 @@ describe('conventions checker — findKnownTokens (D10)', () => {
     test('reports known tokens (the _requests/ leak signal)', () => {
         // Given - a request body carrying a token
         // Then - the known token is surfaced (an unknown one is not this signal)
-        expect(findKnownTokens('{"id": "{{uuid}}", "x": "{{userid}}"}')).toEqual([
+        expect(findKnownTokens('{"id": "{{uuid}}", "x": "{{userid}}"}')).toStrictEqual([
             { line: 1, token: '{{uuid}}' },
         ]);
     });
@@ -68,7 +72,7 @@ describe('conventions checker — checkConventionFiles (D4)', () => {
         const violations = checkConventionFiles(resolve(FIXTURES, 'd4-unknown-token'));
 
         // Then - the finding names the relative file, line, token and severity
-        expect(violations).toEqual([
+        expect(violations).toStrictEqual([
             expect.objectContaining({
                 file: 'specs/widget/_expected/out.txt',
                 line: 1,
@@ -89,6 +93,6 @@ describe('conventions checker — checkConventionFiles (D4)', () => {
         const violations = checkConventionFiles(resolve(FIXTURES, 'd4-unknown-token-ok'));
 
         // Then - clean
-        expect(violations).toEqual([]);
+        expect(violations).toStrictEqual([]);
     });
 });

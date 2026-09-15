@@ -26,7 +26,7 @@ async function started(contracts: Contract[]): Promise<string> {
 
 async function fetchJson(url: string): Promise<unknown> {
     const response = await fetch(url);
-    return response.json();
+    return await response.json();
 }
 
 describe('stub backend — serving declared contracts', () => {
@@ -41,7 +41,7 @@ describe('stub backend — serving declared contracts', () => {
         expect(response.status).toBe(200);
         expect(response.headers.get('access-control-allow-origin')).toBe('*');
         expect(response.headers.get('content-type')).toBe('application/json');
-        expect(await response.json()).toEqual({ items: [] });
+        await expect(response.json()).resolves.toStrictEqual({ items: [] });
     });
 
     test('a contract without times keeps replying; times plays a sequence', async () => {
@@ -52,9 +52,9 @@ describe('stub backend — serving declared contracts', () => {
         ]);
 
         // Then - first the finite one, then the tail — for every re-render
-        expect(await fetchJson(`${url}/events`)).toEqual({ n: 1 });
-        expect(await fetchJson(`${url}/events`)).toEqual({ n: 2 });
-        expect(await fetchJson(`${url}/events`)).toEqual({ n: 2 });
+        await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 1 });
+        await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });
+        await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });
     });
 
     test('declared query params subset-match — the app may add extras', async () => {
@@ -66,7 +66,7 @@ describe('stub backend — serving declared contracts', () => {
 
         // Then - the declared subset matches
         expect(response.status).toBe(200);
-        expect(await response.json()).toEqual({ items: [1] });
+        await expect(response.json()).resolves.toStrictEqual({ items: [1] });
     });
 
     test('a token segment matches structurally, whatever the id', async () => {
@@ -103,8 +103,8 @@ describe('stub backend — serving declared contracts', () => {
         });
 
         // Then - the body-filtered contract answered the first, the bare one the second
-        expect(await matched.json()).toEqual({ hits: 1 });
-        expect(await fallback.json()).toEqual({ hits: 0 });
+        await expect(matched.json()).resolves.toStrictEqual({ hits: 1 });
+        await expect(fallback.json()).resolves.toStrictEqual({ hits: 0 });
     });
 
     test('a responder computes the reply from the observed request', async () => {
@@ -124,7 +124,7 @@ describe('stub backend — serving declared contracts', () => {
         });
 
         // Then - the reply derives from it
-        expect(await response.json()).toEqual({ echoed: { a: 1 } });
+        await expect(response.json()).resolves.toStrictEqual({ echoed: { a: 1 } });
     });
 
     test('answers the cors preflight for any route', async () => {
@@ -157,7 +157,7 @@ describe('stub backend — serving declared contracts', () => {
 
         const text = await fetch(`${url}/block.txt`);
         expect(text.headers.get('content-type')).toContain('text/plain');
-        expect(await text.text()).toBe('anchored');
+        await expect(text.text()).resolves.toBe('anchored');
     });
 });
 
@@ -173,7 +173,7 @@ describe('stub backend — strictness (the external-block analog)', () => {
         expect(response.status).toBe(501);
         const body = await response.json();
         expect(body.error).toContain('no contract matches GET /articles?x=1');
-        expect(body.declared).toEqual(['GET /events']);
+        expect(body.declared).toStrictEqual(['GET /events']);
     });
 
     test('violation() enumerates unmatched requests with their counts', async () => {
@@ -230,6 +230,6 @@ describe('stub backend — strictness (the external-block analog)', () => {
 
         // Then - the previous chain's state is gone
         expect(backend!.violation()).toBeNull();
-        expect(await fetchJson(`${url}/events`)).toEqual({ n: 2 });
+        await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });
     });
 });

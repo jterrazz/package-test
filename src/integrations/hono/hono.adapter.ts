@@ -5,7 +5,7 @@ import type { ServerPort, ServerResponse } from '../../core/ports/server.port.js
  * Used by the `integration()` specification runner -- no network overhead.
  */
 export class HonoAdapter implements ServerPort {
-    private app: {
+    private readonly app: {
         request: (path: string, init?: RequestInit) => Promise<Response> | Response;
     };
 

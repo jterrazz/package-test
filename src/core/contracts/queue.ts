@@ -17,7 +17,8 @@
 
 import { CaptureScope } from '../matching/match.js';
 import { hasPlaceholders, placeholderPatternSource, textEquals } from '../matching/structural.js';
-import { type Contract, describeRoute } from './contract.js';
+import { describeRoute } from './contract.js';
+import type { Contract } from './contract.js';
 import type { MatchableRequest } from './types.js';
 
 /** Base used to parse origin-relative observed URLs (`/events?x=1`). */
@@ -115,32 +116,46 @@ export function routePatternOf(declared: RegExp | string): RegExp | string {
     if (base.startsWith('/')) {
         return new RegExp(
             String.raw`^https?:\/\/[^/?#]+${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`,
+            'u',
         );
     }
     if (hasPlaceholders(base)) {
-        return new RegExp(String.raw`^${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`);
+        return new RegExp(String.raw`^${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`, 'u');
     }
     return base;
 }
 
 /** One route to register with an out-of-process router. */
-export interface ContractRoute {
+export type ContractRoute = {
     methods: string[];
     url: RegExp | string;
+};
+
+/** One declared contract and how often the chain has served it. */
+type ContractEntry = {
+    contract: Contract;
+    served: number;
+};
+
+/** How a declared contract reads in a failure message: spent, served, or silent. */
+function stateOf({ contract, served }: ContractEntry): string {
+    const { times } = contract;
+    if (times !== undefined && served >= times) {
+        return ` (exhausted after ${times})`;
+    }
+    return served === 0 ? '' : ` (served ${served} time(s))`;
 }
 
 export class ContractQueue {
-    private readonly contracts: readonly Contract[];
-    private readonly served: number[];
+    private readonly entries: ContractEntry[];
 
     constructor(contracts: readonly Contract[]) {
-        this.contracts = contracts;
-        this.served = contracts.map(() => 0);
+        this.entries = contracts.map((contract) => ({ contract, served: 0 }));
     }
 
     /** How many contracts the chain declared. */
     get size(): number {
-        return this.contracts.length;
+        return this.entries.length;
     }
 
     /**
@@ -149,7 +164,7 @@ export class ContractQueue {
      */
     get routes(): ContractRoute[] {
         const routes = new Map<string, ContractRoute>();
-        for (const contract of this.contracts) {
+        for (const { contract } of this.entries) {
             const url = routePatternOf(contract.request.url);
             const key = String(url);
             const route = routes.get(key) ?? { methods: [], url };
@@ -163,7 +178,7 @@ export class ContractQueue {
 
     /** The declared routes, in order — the enumeration a 501 body carries. */
     declaredRoutes(): string[] {
-        return this.contracts.map((contract) => describeRoute(contract));
+        return this.entries.map(({ contract }) => describeRoute(contract));
     }
 
     /**
@@ -172,17 +187,16 @@ export class ContractQueue {
      * matches is spent") — the strict-violation signal.
      */
     take(request: MatchableRequest): Contract | null {
-        for (let i = 0; i < this.contracts.length; i++) {
-            const contract = this.contracts[i];
-            const { times } = contract;
-            if (times !== undefined && this.served[i] >= times) {
+        for (const entry of this.entries) {
+            const { times } = entry.contract;
+            if (times !== undefined && entry.served >= times) {
                 continue;
             }
-            if (!contractMatches(contract, request)) {
+            if (!contractMatches(entry.contract, request)) {
                 continue;
             }
-            this.served[i] += 1;
-            return contract;
+            entry.served += 1;
+            return entry.contract;
         }
         return null;
     }
@@ -194,11 +208,10 @@ export class ContractQueue {
      */
     requiredError(): Error | null {
         const unmet: string[] = [];
-        for (const [i, contract] of this.contracts.entries()) {
+        for (const { contract, served } of this.entries) {
             if (!contract.required) {
                 continue;
             }
-            const served = this.served[i];
             const { times } = contract;
             if (times === undefined) {
                 if (served === 0) {
@@ -229,10 +242,10 @@ export class ContractQueue {
      */
     unmatchedError(method: string, url: string): Error {
         const declared =
-            this.contracts.length === 0
+            this.entries.length === 0
                 ? '  (no contracts declared)'
-                : this.contracts
-                      .map((contract, i) => `  - ${describeRoute(contract)}${this.stateOf(i)}`)
+                : this.entries
+                      .map((entry) => `  - ${describeRoute(entry.contract)}${stateOf(entry)}`)
                       .join('\n');
         return new Error(
             `Unmatched outgoing HTTP request during spec: ${method} ${url}\n` +
@@ -240,14 +253,5 @@ export class ContractQueue {
                 `Every outgoing request of a chain that declares contracts must match one — ` +
                 `add a contract for it (or raise its \`times\` when it is exhausted).`,
         );
-    }
-
-    private stateOf(index: number): string {
-        const served = this.served[index];
-        const { times } = this.contracts[index];
-        if (times !== undefined && served >= times) {
-            return ` (exhausted after ${times})`;
-        }
-        return served === 0 ? '' : ` (served ${served} time(s))`;
     }
 }

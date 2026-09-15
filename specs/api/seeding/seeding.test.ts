@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { describe, expect, test } from 'vitest';
 
-import { type ApiSpecification, specification } from '../../../src/index.js';
+import { specification } from '../../../src/index.js';
+import type { ApiSpecification } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 // ── Critical paths — both node and compose ──
@@ -87,7 +88,7 @@ describe('seeding details', () => {
 
     test('throws on unknown database key', async () => {
         // Given - reference to nonexistent database service (bypass the typed keys on purpose)
-        const untypedApi = api as ApiSpecification<string>;
+        const untypedApi = api as ApiSpecification;
 
         // Then - the chain rejects naming the unknown key
         await expect(

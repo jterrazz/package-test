@@ -51,31 +51,31 @@ describe('framework frames are recognised by identity', () => {
     test('a module inside the framework directory is a framework frame', () => {
         // Given - the framework's own bundle
         // Then - its frames are skipped when looking for the caller
-        expect(isFrameworkFrame(join(framework, 'index.js'), framework)).toBe(true);
+        expect(isFrameworkFrame(join(framework, 'index.js'), framework)).toBeTruthy();
     });
 
     test("a consumer's own src/core file is a CALLER, not an internal", () => {
         // Given - an app with its own src/core/, which the substring check
         // (`filePath.includes('/src/core/')`) read as framework-internal
         // Then - identity says otherwise: the frame anchors fixture resolution
-        expect(isFrameworkFrame(join(app, 'src', 'core', 'container.ts'), framework)).toBe(false);
+        expect(isFrameworkFrame(join(app, 'src', 'core', 'container.ts'), framework)).toBeFalsy();
     });
 
     test("a consumer's own src/integrations and src/vitest files are callers too", () => {
         // Given - the other two layer names the old check claimed
         // Then - neither belongs to the framework
-        expect(isFrameworkFrame(join(app, 'src', 'integrations', 'stripe.ts'), framework)).toBe(
-            false,
-        );
-        expect(isFrameworkFrame(join(app, 'src', 'vitest', 'setup.ts'), framework)).toBe(false);
+        expect(
+            isFrameworkFrame(join(app, 'src', 'integrations', 'stripe.ts'), framework),
+        ).toBeFalsy();
+        expect(isFrameworkFrame(join(app, 'src', 'vitest', 'setup.ts'), framework)).toBeFalsy();
     });
 
     test('a specification file is a caller', () => {
         // Given - the file that creates the runner
         // Then - it anchors fixture resolution
-        expect(isFrameworkFrame(join(app, 'specs', 'api', 'api.specification.ts'), framework)).toBe(
-            false,
-        );
+        expect(
+            isFrameworkFrame(join(app, 'specs', 'api', 'api.specification.ts'), framework),
+        ).toBeFalsy();
     });
 
     test('a sibling module test stays a caller wherever it lives (I2)', () => {
@@ -83,12 +83,12 @@ describe('framework frames are recognised by identity', () => {
         writeFileSync(join(framework, 'match.test.js'), '');
 
         // Then - module tests are callers, so they resolve fixtures on themselves
-        expect(isFrameworkFrame(join(framework, 'match.test.js'), framework)).toBe(false);
+        expect(isFrameworkFrame(join(framework, 'match.test.js'), framework)).toBeFalsy();
     });
 
     test('the framework directory itself is not inside itself', () => {
         // Given - the directory, not a file within it
         // Then - the containment test is strict
-        expect(isFrameworkFrame(framework, framework)).toBe(false);
+        expect(isFrameworkFrame(framework, framework)).toBeFalsy();
     });
 });

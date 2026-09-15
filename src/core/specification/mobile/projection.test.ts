@@ -9,7 +9,7 @@ describe('projectScreen', () => {
         const { tree } = projectScreen(EVENTS_SCREEN_SOURCE);
 
         // Then - only the application root and the labeled nodes survive
-        expect(tree).toEqual({
+        expect(tree).toStrictEqual({
             children: [
                 { label: 'Signals', type: 'StaticText' },
                 { label: 'Événements', type: 'Other' },
@@ -31,7 +31,7 @@ describe('projectScreen', () => {
         // Then - types read as their bare role names
         expect(tree.type).toBe('Application');
         const prefixed = tree.children?.filter((node) => node.type.includes('XCUIElementType'));
-        expect(prefixed).toEqual([]);
+        expect(prefixed).toStrictEqual([]);
     });
 
     test('drops a child that merely repeats its parent accessibility element', () => {
@@ -40,7 +40,7 @@ describe('projectScreen', () => {
 
         // Then - it survives once, childless
         const signals = tree.children?.filter((node) => node.label === 'Signals');
-        expect(signals).toEqual([{ label: 'Signals', type: 'StaticText' }]);
+        expect(signals).toStrictEqual([{ label: 'Signals', type: 'StaticText' }]);
     });
 
     test('keeps off-screen rows — the tree describes the whole mounted list', () => {
@@ -58,7 +58,7 @@ describe('projectScreen', () => {
         const { texts } = projectScreen(EVENTS_SCREEN_SOURCE);
 
         // Then - one entry per rendered text, app chrome excluded
-        expect(texts).toEqual([
+        expect(texts).toStrictEqual([
             'Signals',
             'Événements',
             'Articles',
@@ -73,7 +73,7 @@ describe('projectScreen', () => {
         const { tree } = projectScreen(FORM_SCREEN_SOURCE);
 
         // Then - both travel; the button keeps its identifier, labels stay decoded
-        expect(tree.children).toEqual([
+        expect(tree.children).toStrictEqual([
             {
                 identifier: 'email-field',
                 label: 'Email & login',

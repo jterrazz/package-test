@@ -99,11 +99,12 @@ describe('command — env', () => {
     test('$WORKDIR expands to the path {{workdir}} holds, symlinked tmp or not', async () => {
         // Given - a nested path handed to the child through .env(), under a
         // Temp root whose raw spelling differs from its resolved one
-        const result = await underSymlinkedTmp(() =>
-            cli
-                .fixture('$FIXTURES/cli-app/')
-                .env({ CACHE_DIR: '$WORKDIR/sub' })
-                .exec('workdir-var'),
+        const result = await underSymlinkedTmp(
+            async () =>
+                await cli
+                    .fixture('$FIXTURES/cli-app/')
+                    .env({ CACHE_DIR: '$WORKDIR/sub' })
+                    .exec('workdir-var'),
         );
 
         // Then - what the child echoes back matches the {{workdir}} golden
@@ -114,7 +115,9 @@ describe('command — env', () => {
     test('$WORKDIR in a document env: expands to that same path', async () => {
         // Given - the same pair declared inline in a spec document, whose
         // Stdout block asserts {{workdir}}/sub
-        const result = await underSymlinkedTmp(() => cli.run('expanded-workdir.spec.yaml'));
+        const result = await underSymlinkedTmp(
+            async () => await cli.run('expanded-workdir.spec.yaml'),
+        );
 
         // Then - the document passed through the other door too
         expect(result.exitCode).toBe(0);
@@ -145,7 +148,7 @@ describe('command — automatic service env injection (CONVENTIONS B6)', () => {
 
         // Then - DB_URL carries the connection string
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toMatch(/DB_URL=file:/);
+        expect(result.stdout.text).toMatch(/DB_URL=file:/u);
     });
 
     test('injects the DATABASE_URL alias when exactly one SQL database is declared', async () => {

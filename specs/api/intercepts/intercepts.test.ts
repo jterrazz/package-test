@@ -17,7 +17,7 @@ describe('contracts — selection', () => {
 
         // Then - the retry was served by the tail contract
         expect(result.status).toBe(200);
-        expect(result.response.body).toEqual({ quote: 'after retry' });
+        expect(result.response.body).toStrictEqual({ quote: 'after retry' });
     });
 
     test('a contract with no times keeps serving every call', async () => {
@@ -28,7 +28,7 @@ describe('contracts — selection', () => {
 
         // Then - both calls were served (no times = unlimited, no exhaustion)
         expect(result.status).toBe(200);
-        expect(result.response.body).toEqual({ first: 200, second: 200 });
+        expect(result.response.body).toStrictEqual({ first: 200, second: 200 });
     });
 
     test('a contract and an inline pair mix in one chain', async () => {
@@ -40,7 +40,7 @@ describe('contracts — selection', () => {
 
         // Then - each outgoing call got its declared response
         expect(result.status).toBe(200);
-        expect(result.response.body).toEqual({
+        expect(result.response.body).toStrictEqual({
             news: { headline: 'Contract headline' },
             quote: { quote: 'inline' },
         });
@@ -59,7 +59,7 @@ describe('contracts — selection', () => {
             .get('/combo');
 
         // Then - the override answered, the untouched route still did
-        expect(result.response.body).toEqual({
+        expect(result.response.body).toStrictEqual({
             news: { headline: 'Contract headline' },
             quote: { quote: 'x' },
         });
@@ -72,7 +72,7 @@ describe('contracts — selection', () => {
             .get('/quote');
 
         // Then - the origin was ignored and the contract served the call
-        expect(result.response.body).toEqual({ quote: 'by path' });
+        expect(result.response.body).toStrictEqual({ quote: 'by path' });
     });
 });
 
@@ -143,7 +143,7 @@ describe('contracts — http request filters', () => {
 
         // Then - the filter accepted the request and returned its response
         expect(result.status).toBe(200);
-        expect(result.response.body).toEqual({ quote: 'filtered' });
+        expect(result.response.body).toStrictEqual({ quote: 'filtered' });
     });
 
     test('a request that fails the body filter counts as unmatched (D7)', async () => {
@@ -180,7 +180,7 @@ describe('contracts — dynamic responses', () => {
 
         // Then - the reply was derived from the outgoing request body
         expect(result.status).toBe(200);
-        expect(result.response.body).toEqual({ echoedAction: 'quote', forRole: 'admin' });
+        expect(result.response.body).toStrictEqual({ echoedAction: 'quote', forRole: 'admin' });
     });
 
     test('an inline .intercept(request, fn) responder derives status and body per request', async () => {
@@ -194,7 +194,7 @@ describe('contracts — dynamic responses', () => {
 
         // Then - the function ran at serve time, shaping status and body
         expect(result.status).toBe(201);
-        expect(result.response.body).toEqual({ quote: 'hello acme' });
+        expect(result.response.body).toStrictEqual({ quote: 'hello acme' });
     });
 });
 
@@ -213,6 +213,6 @@ describe('contracts — chain isolation', () => {
 
         // Then - the second chain served ITS contract, not the leftover
         expect(second.status).toBe(200);
-        expect(second.response.body).toEqual({ quote: 'SECOND' });
+        expect(second.response.body).toStrictEqual({ quote: 'SECOND' });
     });
 });

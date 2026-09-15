@@ -24,7 +24,7 @@ describe('command — seeding', () => {
             .exec('help');
 
         // Then - the fixture landed in the cwd AND the SQL seed reached the db
-        expect(result.file('note.txt').exists).toBe(true);
+        expect(result.file('note.txt').exists).toBeTruthy();
         expect(result.file('note.txt').content).toContain('hello from seed');
         await expect(result.table('users')).toMatchRows({
             columns: ['name'],

@@ -3,7 +3,7 @@ import { isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /**
  * CONVENTIONS I2 — module tests are NEIGHBOURS: the test of `<file>.ts` is
@@ -32,7 +32,9 @@ export const i2SiblingTestNaming: LintRule = {
                         );
                         if (!neighbours.some(isFile)) {
                             context.report({
-                                data: { expected: neighbours[0].split(/[/\\]/).at(-1) ?? '' },
+                                data: {
+                                    expected: neighbours[0]?.split(/[/\\]/u).at(-1) ?? '',
+                                },
                                 messageId: 'orphanTest',
                                 node,
                             });

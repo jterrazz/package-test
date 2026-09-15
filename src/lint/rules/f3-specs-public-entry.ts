@@ -50,7 +50,7 @@ export const f3SpecsPublicEntry: LintRule = {
                     return;
                 }
                 const internal = marker === -1 ? source.slice(4) : source.slice(marker + 5);
-                const layer = internal.split('/')[0];
+                const layer = internal.split('/')[0] ?? '';
                 if (!FRAMEWORK_LAYERS.has(layer)) {
                     return; // Consumer's own app source (e.g. src/app.js) — the pattern.
                 }

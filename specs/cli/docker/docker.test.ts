@@ -43,12 +43,12 @@ describe('command — docker option (lazy container accessors)', () => {
 
                 // Then - the container accessor reads state and files
                 const neo = result.container('test-a');
-                expect(neo.exists).toBe(true);
+                expect(neo.exists).toBeTruthy();
                 expect(neo.status).toBe('running');
                 await expect(neo).toBeRunning();
 
                 const file = neo.file('/workspace/out.txt');
-                expect(file.exists).toBe(true);
+                expect(file.exists).toBeTruthy();
                 expect(file.content.trim()).toBe('hello-from-test-a');
 
                 const inside = await neo.exec('ls /workspace');
@@ -56,9 +56,9 @@ describe('command — docker option (lazy container accessors)', () => {
                 expect(inside.stdout).toContain('out.txt');
 
                 // Absent container name → accessor with exists=false, no throw.
-                expect(result.container('nope').exists).toBe(false);
+                expect(result.container('nope').exists).toBeFalsy();
                 await expect(expect(result.container('nope')).toBeRunning()).rejects.toThrow(
-                    /does not exist/,
+                    /does not exist/u,
                 );
 
                 trackedId = result.containerIds[0];
@@ -73,7 +73,7 @@ describe('command — docker option (lazy container accessors)', () => {
             // Then - scope exit disposed the container: the same label query the
             // Runner uses now comes back empty, proving async-dispose removed it.
             expect(findContainersByLabel('fake.test.run', runId)).not.toContain(trackedId);
-            expect(findContainersByLabel('fake.test.run', runId)).toEqual([]);
+            expect(findContainersByLabel('fake.test.run', runId)).toStrictEqual([]);
         },
         60_000,
     );
@@ -101,7 +101,7 @@ describe('command — docker option (lazy container accessors)', () => {
 
             // Then - the container's stdout accessor supports the stream matchers
             const shop = result.container('shop');
-            expect(shop.exists).toBe(true);
+            expect(shop.exists).toBeTruthy();
             expect(shop.stdout).toContain('booting-shop');
         },
         60_000,
@@ -122,7 +122,7 @@ describe('command — docker option (lazy container accessors)', () => {
             }
 
             // Then - scope exit removed every container carrying the run label
-            expect(findContainersByLabel('fake.test.run', runId)).toEqual([]);
+            expect(findContainersByLabel('fake.test.run', runId)).toStrictEqual([]);
         },
         60_000,
     );
@@ -132,6 +132,6 @@ describe('command — docker option (lazy container accessors)', () => {
         const ids = findContainersByLabel('nonexistent.label.key', 'definitely-not-a-real-run-id');
 
         // Then - empty result, no throw
-        expect(ids).toEqual([]);
+        expect(ids).toStrictEqual([]);
     });
 });

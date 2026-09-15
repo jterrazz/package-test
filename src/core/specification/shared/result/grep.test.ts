@@ -13,7 +13,7 @@ describe('grep', () => {
 
     test('strips ANSI codes before matching', () => {
         // Given - a block whose pattern is wrapped in ANSI escapes
-        const output = '\x1b[31mbroken.ts\x1b[0m\n  no-unused-vars';
+        const output = '\u001B[31mbroken.ts\u001B[0m\n  no-unused-vars';
 
         // Then - the pattern matches the clean text and the result is clean
         expect(grep(output, 'broken.ts')).toBe('broken.ts\n  no-unused-vars');

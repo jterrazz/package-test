@@ -60,7 +60,7 @@ describe('fixtures — source resolution', () => {
         // Given - a path with a bogus marker
         // Then - the error names the marker and the known set
         expect(() => resolveFixtureSource('$SHARED/x.txt', testDir)).toThrow(
-            /unknown marker "\$SHARED".*Known markers: \$FIXTURES/s,
+            /unknown marker "\$SHARED".*Known markers: \$FIXTURES/su,
         );
     });
 
@@ -70,7 +70,7 @@ describe('fixtures — source resolution', () => {
         try {
             // Then - the error explains the marker needs a specs root
             expect(() => resolveFixtureSource('$FIXTURES/x.txt', bare)).toThrow(
-                /no directory named "specs"/,
+                /no directory named "specs"/u,
             );
         } finally {
             rmSync(bare, { force: true, recursive: true });

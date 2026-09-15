@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 /**
  * A parsed service from docker-compose.test.yaml.
  */
-export interface ComposeService {
+export type ComposeService = {
     name: string;
     image?: string;
     build?: string;
@@ -12,16 +12,16 @@ export interface ComposeService {
     environment: Record<string, string>;
     volumes: string[];
     dependsOn: string[];
-}
+};
 
 /**
  * Result of parsing a compose file.
  */
-export interface ComposeConfig {
+export type ComposeConfig = {
     services: ComposeService[];
     appService: ComposeService | null;
     infraServices: ComposeService[];
-}
+};
 
 /**
  * Detect the service type from the image name.

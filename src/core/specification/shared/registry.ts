@@ -12,14 +12,14 @@ import type { ComposeConfig, ComposeService } from './compose-file.js';
  */
 
 /** A running compose stack — implemented by the compose integration. */
-export interface ComposeStackPort {
+export type ComposeStackPort = {
     start: () => Promise<void>;
     stop: () => Promise<void>;
     getMappedPort: (serviceName: string, containerPort: number) => number;
-}
+};
 
 /** Container-runtime factories provided by the compose and testcontainers integrations. */
-export interface ContainerIntegrations {
+export type ContainerIntegrations = {
     /** Start a single container programmatically (testcontainers). */
     createContainer: (options: {
         image: string;
@@ -30,7 +30,7 @@ export interface ContainerIntegrations {
     createComposeStack: (composeFile: string, projectName?: string) => ComposeStackPort;
     /** Parse a compose file (yaml dependency lives in the compose integration). */
     parseComposeFile: (filePath: string) => ComposeConfig;
-}
+};
 
 /**
  * Factory creating a {@link ServiceHandle} for a compose service that was

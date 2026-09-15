@@ -7,7 +7,7 @@ import type { ContractRequest, ContractResponseValue } from './types.js';
  * payload (prompts, JSON responses) is visible at a glance while the real HTTP
  * call stays mocked underneath.
  */
-export interface Contract {
+export type Contract = {
     /** Which outgoing call this contract speaks for. */
     request: ContractRequest;
     /**
@@ -28,13 +28,13 @@ export interface Contract {
      * silently-unused declaration into a spec failure.
      */
     required?: boolean;
-}
+};
 
 /**
  * A composite of contracts — the unit tests import. Flat, ordered, immutable;
  * `.with()` derives a variant without touching the original.
  */
-export interface Contracts {
+export type Contracts = {
     /** The flattened contracts, in selection order. */
     readonly contracts: readonly Contract[];
     /**
@@ -44,7 +44,7 @@ export interface Contracts {
      * route it does not replace.
      */
     with: (...overrides: (Contract | Contract[] | Contracts)[]) => Contracts;
-}
+};
 
 /** Any accepted contract input: one, a list, or a composite. */
 export type ContractInput = Contract | Contract[] | Contracts;

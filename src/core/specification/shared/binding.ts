@@ -14,7 +14,7 @@
  * `-`, everything is lowercased. `analyticsDb` → `analytics-db`, `db` → `db`.
  */
 export function toKebabCase(key: string): string {
-    return key.replace(/(?<lower>[a-z0-9])(?<upper>[A-Z])/g, '$<lower>-$<upper>').toLowerCase();
+    return key.replaceAll(/(?<lower>[a-z0-9])(?<upper>[A-Z])/gu, '$<lower>-$<upper>').toLowerCase();
 }
 
 /**
@@ -24,8 +24,8 @@ export function toKebabCase(key: string): string {
  */
 export function toConstantCase(key: string): string {
     return key
-        .replace(/(?<lower>[a-z0-9])(?<upper>[A-Z])/g, '$<lower>_$<upper>')
-        .replace(/[^A-Za-z0-9]/g, '_')
+        .replaceAll(/(?<lower>[a-z0-9])(?<upper>[A-Z])/gu, '$<lower>_$<upper>')
+        .replaceAll(/[^A-Za-z0-9]/gu, '_')
         .toUpperCase();
 }
 

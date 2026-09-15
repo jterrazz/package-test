@@ -6,7 +6,7 @@ import { listDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /**
  * CONVENTIONS C7 — `.seed()` carries DATABASE state only: `_seeds/` contains

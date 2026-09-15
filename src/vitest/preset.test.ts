@@ -10,7 +10,7 @@ describe('defineSpecConfig() — artefact paths', () => {
 
         // Then - both writers point inside the one artefact folder
         expect(config.cacheDir).toBe(VITEST_ARTIFACTS_DIR);
-        expect(config.test?.coverage).toEqual({ reportsDirectory: COVERAGE_DIR });
+        expect(config.test?.coverage).toStrictEqual({ reportsDirectory: COVERAGE_DIR });
     });
 
     test('gives every inline project the cache dir too', () => {
@@ -104,7 +104,7 @@ describe('defineSpecConfig() — what the consumer states wins', () => {
         const config = defineSpecConfig({ test: { projects: ['packages/*'] } });
 
         // Then - there is no object to merge into, so nothing is invented
-        expect(config.test?.projects).toEqual(['packages/*']);
+        expect(config.test?.projects).toStrictEqual(['packages/*']);
     });
 });
 

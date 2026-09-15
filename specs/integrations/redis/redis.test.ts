@@ -25,7 +25,7 @@ describe('redis service', () => {
         test('builds a valid redis connection string', () => {
             // Given - the handle wired to the started container
             // Then - the string uses the redis:// scheme
-            expect(cache.connectionString).toMatch(/^redis:\/\//);
+            expect(cache.connectionString).toMatch(/^redis:\/\//u);
         });
     });
 

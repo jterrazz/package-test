@@ -2,8 +2,8 @@ import { importSourceVisitor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
-const FIXTURES_IMPORT = /\.fixtures(?:\.[cm]?[jt]sx?)?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
+const FIXTURES_IMPORT = /\.fixtures(?:\.[cm]?[jt]sx?)?$/u;
 
 /**
  * CONVENTIONS F5 — a `*.fixtures.ts` module is only importable from

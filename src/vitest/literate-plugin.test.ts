@@ -33,7 +33,7 @@ describe('literate() — the vite plugin door', () => {
         const plugin = literate({ specification: './specs/cli/cli.specification.ts' });
 
         // Then - vitest is told to collect documents as test files
-        expect(plugin.config()).toEqual({ test: { include: ['**/*.spec.yaml'] } });
+        expect(plugin.config()).toStrictEqual({ test: { include: ['**/*.spec.yaml'] } });
         expect(plugin.enforce).toBe('pre');
     });
 
@@ -45,7 +45,9 @@ describe('literate() — the vite plugin door', () => {
         });
 
         // Then - the plugin narrows nothing on its own; it passes the glob on
-        expect(plugin.config()).toEqual({ test: { include: ['specs/cli/literate/*.spec.yaml'] } });
+        expect(plugin.config()).toStrictEqual({
+            test: { include: ['specs/cli/literate/*.spec.yaml'] },
+        });
     });
 
     test('only .spec.yaml ids are loaded; the specification path resolves against the vite root', () => {

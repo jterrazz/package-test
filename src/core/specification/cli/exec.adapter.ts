@@ -27,12 +27,12 @@ export function buildEnv(extra?: CliEnv): NodeJS.ProcessEnv {
 }
 
 /** The minimal child-process surface {@link observeProcess} drives. */
-export interface ObservableProcess {
+export type ObservableProcess = {
     kill: (signal?: NodeJS.Signals | number) => boolean;
     on: (event: 'exit', listener: (code: null | number) => void) => unknown;
     stderr: null | { on: (event: 'data', listener: (data: Buffer | string) => void) => unknown };
     stdout: null | { on: (event: 'data', listener: (data: Buffer | string) => void) => unknown };
-}
+};
 
 /**
  * Observe a long-running child (`.exec(args, { waitFor, timeout })`):
@@ -44,11 +44,14 @@ export interface ObservableProcess {
  *
  * @internal Exported for unit tests (driven with a fake child).
  */
-export function observeProcess(child: ObservableProcess, options: ExecOptions): Promise<CliOutput> {
+export async function observeProcess(
+    child: ObservableProcess,
+    options: ExecOptions,
+): Promise<CliOutput> {
     const timeout = options.timeout ?? DEFAULT_WATCH_TIMEOUT;
-    const waitFor = options.waitFor;
+    const { waitFor } = options;
 
-    return new Promise((resolve) => {
+    return await new Promise((resolve) => {
         let stdout = '';
         let stderr = '';
         let resolved = false;
@@ -56,7 +59,9 @@ export function observeProcess(child: ObservableProcess, options: ExecOptions): 
         let patternMatched = false;
         let killTimer: NodeJS.Timeout | null = null;
 
-        const timeoutTimer = setTimeout(() => finish(124), timeout);
+        const timeoutTimer = setTimeout(() => {
+            finish(124);
+        }, timeout);
         timeoutTimer.unref?.();
 
         const terminate = () => {
@@ -138,7 +143,7 @@ export function observeProcess(child: ObservableProcess, options: ExecOptions): 
  * discard them, leaving snapshot tests with no output to assert on.
  */
 export class ExecAdapter implements CliPort {
-    private command: string;
+    private readonly command: string;
 
     constructor(command: string) {
         this.command = command;
@@ -159,6 +164,7 @@ export class ExecAdapter implements CliPort {
         });
         // A killed run reports 124, the same code the long-running path uses
         // For a timeout — one answer to "the command ran out of time".
+        // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- `spawnSync` types `error` as `Error`, which carries no `code`; the assertion is what reaches it
         const timedOut = (result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT';
         return {
             exitCode: timedOut ? 124 : (result.status ?? 1),
@@ -203,7 +209,7 @@ export class ExecAdapter implements CliPort {
             }
             return child.kill(signal);
         };
-        return observeProcess(
+        return await observeProcess(
             { kill, on: child.on.bind(child), stderr: child.stderr, stdout: child.stdout },
             options,
         );

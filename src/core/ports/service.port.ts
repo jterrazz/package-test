@@ -5,7 +5,7 @@ import type { IsolationStrategy } from './isolation.port.js';
  * A service handle — returned by factory functions like postgres(), redis().
  * Mutable: connectionString is populated after the orchestrator starts containers.
  */
-export interface ServiceHandle {
+export type ServiceHandle = {
     /** Service type identifier. */
     readonly type: string;
 
@@ -60,4 +60,4 @@ export interface ServiceHandle {
 
     /** Get the isolation strategy for parallel test execution. */
     isolation: () => IsolationStrategy;
-}
+};

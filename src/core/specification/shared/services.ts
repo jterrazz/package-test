@@ -38,14 +38,16 @@ export async function releaseIsolation(services: ServiceRecord): Promise<void> {
 // ── Startup helpers ──
 
 export function declaredDatabaseKeys(services: ServiceRecord): string[] {
-    return Object.keys(services).filter((key) => services[key].createDatabaseAdapter() !== null);
+    return Object.entries(services)
+        .filter(([, service]) => service.createDatabaseAdapter() !== null)
+        .map(([key]) => key);
 }
 
-export interface StartedServices {
-    database?: DatabasePort;
-    databases?: Map<string, DatabasePort>;
+export type StartedServices = {
+    database?: DatabasePort | undefined;
+    databases?: Map<string, DatabasePort> | undefined;
     orchestrator: Orchestrator;
-}
+};
 
 /** Start a services record via testcontainers and acquire worker isolation. */
 export async function startServices(

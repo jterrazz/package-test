@@ -1,23 +1,19 @@
 import type { ContainerAccessor } from '../../../integrations/docker/container-accessor.js';
 import { HonoAdapter } from '../../../integrations/hono/hono.adapter.js';
 import { registerMatchers } from '../../../vitest/matchers.js';
-import {
-    type ApiSpecification,
-    createApiFacet,
-    type SpecificationConfig,
-} from '../shared/builder.js';
+import { createApiFacet } from '../shared/builder.js';
+import type { ApiSpecification, SpecificationConfig } from '../shared/builder.js';
 import { getCallerDir } from '../shared/caller.js';
 import { createDockerReader } from '../shared/docker-reader.js';
 import { Orchestrator } from '../shared/orchestrator.js';
 import { resolveRoot } from '../shared/resolve.js';
 import {
-    type DatabaseKeys,
     declaredDatabaseKeys,
     getWorkerId,
     releaseIsolation,
-    type ServiceRecord,
     startServices,
 } from '../shared/services.js';
+import type { DatabaseKeys, ServiceRecord } from '../shared/services.js';
 import { FetchAdapter } from './fetch.adapter.js';
 
 // ── Types ──
@@ -31,7 +27,7 @@ export type HonoApp = {
 export type SpecificationMode = 'compose' | 'node';
 
 /** Options for {@link startApi | specification.api}. */
-export interface ApiSpecificationOptions<Services extends ServiceRecord = ServiceRecord> {
+export type ApiSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /**
      * Execution mode override. Resolution: `options.mode` >
      * `process.env.TEST_MODE` > `'node'`. Never hardcode this in a
@@ -60,7 +56,7 @@ export interface ApiSpecificationOptions<Services extends ServiceRecord = Servic
      * its key, else the kebab-case conversion of the key (CONVENTIONS A6).
      */
     services?: Services;
-}
+};
 
 /**
  * The record returned by {@link startApi | specification.api}. Destructure
@@ -68,7 +64,7 @@ export interface ApiSpecificationOptions<Services extends ServiceRecord = Servic
  *
  *     const { api, cleanup, docker } = await specification.api(…);
  */
-export interface ApiHandle<DatabaseKey extends string = string> {
+export type ApiHandle<DatabaseKey extends string = string> = {
     api: ApiSpecification<DatabaseKey>;
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;
@@ -79,7 +75,7 @@ export interface ApiHandle<DatabaseKey extends string = string> {
     docker: (containerId: string) => ContainerAccessor;
     /** The orchestrator managing the test infrastructure lifecycle. */
     orchestrator: Orchestrator;
-}
+};
 
 // ── Mode resolution ──
 
@@ -126,7 +122,7 @@ export async function startApi<Services extends ServiceRecord>(
         };
 
         return {
-            api: createApiFacet(config) as ApiSpecification<DatabaseKeys<Services>>,
+            api: createApiFacet(config),
             cleanup: async () => {
                 await releaseIsolation(services);
                 await orchestrator.stop();
@@ -167,8 +163,10 @@ export async function startApi<Services extends ServiceRecord>(
     };
 
     return {
-        api: createApiFacet(config) as ApiSpecification<DatabaseKeys<Services>>,
-        cleanup: () => orchestrator.stopCompose(),
+        api: createApiFacet(config),
+        cleanup: async () => {
+            await orchestrator.stopCompose();
+        },
         docker: createDockerReader(callerDir),
         orchestrator,
     };

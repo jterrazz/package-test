@@ -10,19 +10,19 @@ import { TableAccessor } from './table.js';
 import { TextAccessor } from './text.js';
 
 /** Read-only handle to a single file produced by a spec action. */
-export interface FileAccessor {
+export type FileAccessor = {
     /** The UTF-8 text content. Throws if the file does not exist. */
     readonly content: string;
     readonly exists: boolean;
     /** The file text as a {@link TextAccessor}, keeping only blocks matching `pattern`. */
     grep: (pattern: string) => TextAccessor;
-}
+};
 
-export interface BaseResultOptions {
+export type BaseResultOptions = {
     config: SpecificationConfig;
     testDir: string;
-    workDir?: string;
-}
+    workDir?: string | undefined;
+};
 
 /**
  * Base result - common accessors available after any action type.
@@ -36,7 +36,7 @@ export class BaseResult {
     readonly captures: CaptureScope;
     protected config: SpecificationConfig;
     protected testDir: string;
-    protected workDir?: string;
+    protected workDir?: string | undefined;
 
     constructor(options: BaseResultOptions) {
         this.config = options.config;

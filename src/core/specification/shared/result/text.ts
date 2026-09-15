@@ -2,8 +2,8 @@ import { CaptureScope } from '../../../matching/match.js';
 import { getCallerDir } from '../caller.js';
 import { grep as grepBlocks } from './grep.js';
 
-// eslint-disable-next-line no-control-regex
-const ANSI_RE = /\x1b\[[0-9;]*m/g;
+// oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: stripping it is the point
+const ANSI_RE = /\u001B\[[0-9;]*m/gu;
 
 /** Strip ANSI escape sequences from a string. */
 export function stripAnsiCodes(value: string): string {
@@ -43,13 +43,16 @@ export class TextAccessor {
     /** The raw captured text (never transformed, ANSI preserved). */
     readonly text: string;
     /** @internal Normaliser applied before comparisons, never to fixtures. */
-    readonly transform?: (text: string) => string;
+    readonly transform?: ((text: string) => string) | undefined;
 
     constructor(
         value: string,
         streamName: string,
         testDir: string,
-        options: { captures?: CaptureScope; transform?: (text: string) => string } = {},
+        options: {
+            captures?: CaptureScope | undefined;
+            transform?: ((text: string) => string) | undefined;
+        } = {},
     ) {
         this.text = value;
         this.streamName = streamName;

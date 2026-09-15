@@ -66,7 +66,7 @@ describe('command — exec', () => {
 
             // Then - the scaffold output exists in the temp workdir
             expect(result.exitCode).toBe(0);
-            expect(result.file('out/main.go').exists).toBe(true);
+            expect(result.file('out/main.go').exists).toBeTruthy();
         });
 
         test('two bare runs get independent temp dirs', async () => {
@@ -75,8 +75,8 @@ describe('command — exec', () => {
             const b = await cli.exec('scaffold-extra');
 
             // Then - a does NOT see b's UNEXPECTED.txt and vice versa
-            expect(a.file('out/UNEXPECTED.txt').exists).toBe(false);
-            expect(b.file('out/UNEXPECTED.txt').exists).toBe(true);
+            expect(a.file('out/UNEXPECTED.txt').exists).toBeFalsy();
+            expect(b.file('out/UNEXPECTED.txt').exists).toBeTruthy();
         });
     });
 
@@ -105,7 +105,7 @@ describe('command — exec', () => {
 
             // Then - the sequence shares one working directory
             expect(result.exitCode).toBe(0);
-            expect(result.file('dist/index.js').exists).toBe(true);
+            expect(result.file('dist/index.js').exists).toBeTruthy();
         });
     });
 
@@ -190,12 +190,13 @@ describe('command — exec', () => {
                 .toBe(false);
         });
 
-        test('rejects waitFor options on a command sequence', () => {
+        test('rejects waitFor options on a command sequence', async () => {
             // Given - an array of commands plus long-running options
-            // Then - the combination is rejected synchronously
-            expect(() =>
+            // Then - the combination is refused: `.exec()` answers a promise, so
+            // The refusal arrives as a rejection
+            await expect(
                 cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start'], { waitFor: 'x' }),
-            ).toThrow('not supported with a command sequence');
+            ).rejects.toThrow('not supported with a command sequence');
         });
     });
 });

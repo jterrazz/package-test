@@ -44,7 +44,7 @@ describe('specsAnchor', () => {
         // [facet, domain, basename] — the depth C1 measures
         const anchor = specsAnchor(file);
         expect(anchor?.directory).toBe(join(project, 'specs'));
-        expect(anchor?.relative).toEqual(['api', 'requests', 'headers.test.ts']);
+        expect(anchor?.relative).toStrictEqual(['api', 'requests', 'headers.test.ts']);
     });
 
     test('returns undefined for a file outside any specs tree', () => {
@@ -53,7 +53,7 @@ describe('specsAnchor', () => {
 
         // Then - no anchor
         expect(specsAnchor(file)).toBeUndefined();
-        expect(isUnderSpecs(file)).toBe(false);
+        expect(isUnderSpecs(file)).toBeFalsy();
     });
 
     test('takes the NEAREST specs ancestor, not the outermost', () => {
@@ -65,7 +65,7 @@ describe('specsAnchor', () => {
         // Then - one answer: the innermost tree owns the file
         const anchor = specsAnchor(file);
         expect(anchor?.directory).toBe(nested);
-        expect(anchor?.relative).toEqual(['integrations', 'adapter.test.ts']);
+        expect(anchor?.relative).toStrictEqual(['integrations', 'adapter.test.ts']);
     });
 
     test('stops at the package root — a checkout under ~/specs/ is not a specs tree', () => {
@@ -76,7 +76,7 @@ describe('specsAnchor', () => {
 
         // Then - the search never climbs past the package's own package.json
         expect(specsAnchor(file)).toBeUndefined();
-        expect(isUnderSpecs(file)).toBe(false);
+        expect(isUnderSpecs(file)).toBeFalsy();
     });
 
     test('anchors a specs tree that lives under that same outer directory', () => {
@@ -92,7 +92,7 @@ describe('specsAnchor', () => {
         const file = join(project, 'specs', 'api.specification.ts');
 
         // Then - the relative path is the basename alone (C1 depth 0)
-        expect(specsAnchor(file)?.relative).toEqual(['api.specification.ts']);
+        expect(specsAnchor(file)?.relative).toStrictEqual(['api.specification.ts']);
     });
 
     test('answers for a path with no package.json anywhere above it', () => {
@@ -102,6 +102,6 @@ describe('specsAnchor', () => {
 
         // Then - the walk simply runs out of ancestors, and the specs dir wins
         expect(specsAnchor(file)?.directory).toBe('/nowhere/repo/specs');
-        expect(specsAnchor(file)?.relative).toEqual(['lint', 'hygiene', 'j5.test.ts']);
+        expect(specsAnchor(file)?.relative).toStrictEqual(['lint', 'hygiene', 'j5.test.ts']);
     });
 });

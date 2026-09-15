@@ -3,7 +3,7 @@ import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
 /** Stable kebab-case job identifier: `nightly-report`, `send-welcome-emails`. */
-const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
 /**
  * CONVENTIONS B8 — a job `name` passed to `.trigger()` is a stable kebab-case

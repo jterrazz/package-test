@@ -46,8 +46,8 @@ describe('docs-typecheck — block selection', () => {
         const appCode = "import { createApp } from '../../src/app.js';\n";
 
         // Then - only the framework block is selected
-        expect(isFrameworkBlock(framework)).toBe(true);
-        expect(isFrameworkBlock(appCode)).toBe(false);
+        expect(isFrameworkBlock(framework)).toBeTruthy();
+        expect(isFrameworkBlock(appCode)).toBeFalsy();
     });
 
     test('rewrites the framework specifier to the repo entry', () => {
@@ -78,7 +78,7 @@ describe('docs-typecheck — the published samples typecheck', () => {
             tscBin: TSC_BIN,
         });
         expect(result.output).toBe('');
-        expect(result.ok).toBe(true);
+        expect(result.ok).toBeTruthy();
     }, 60_000);
 
     test('a framework block that drifts from the API is rejected', () => {
@@ -95,7 +95,7 @@ describe('docs-typecheck — the published samples typecheck', () => {
             indexModule: INDEX_MODULE,
             tscBin: TSC_BIN,
         });
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         expect(result.output).not.toBe('');
     }, 60_000);
 });
@@ -105,8 +105,8 @@ describe('docs-typecheck — harness', () => {
     test('the tsc binary and docs directory are present', () => {
         // Given - the repo layout
         // Then - the meta-test can actually run over every published surface
-        expect(existsSync(TSC_BIN)).toBe(true);
-        expect(existsSync(DOCS)).toBe(true);
-        expect(existsSync(README)).toBe(true);
+        expect(existsSync(TSC_BIN)).toBeTruthy();
+        expect(existsSync(DOCS)).toBeTruthy();
+        expect(existsSync(README)).toBeTruthy();
     });
 });

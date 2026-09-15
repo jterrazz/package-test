@@ -2,8 +2,8 @@ import { importSourceVisitor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
-const TEST_IMPORT = /\.test(?:\.[cm]?[jt]sx?)?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
+const TEST_IMPORT = /\.test(?:\.[cm]?[jt]sx?)?$/u;
 
 /**
  * CONVENTIONS F4 — a `*.test.ts` never imports another `*.test.ts`. Shared

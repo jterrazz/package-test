@@ -3,14 +3,11 @@ import {
     isMap,
     isScalar,
     isSeq,
-    type Node,
-    type Pair,
     parseYamlSource,
     renderYamlSource,
-    type YAMLMap,
-    type YamlSource,
     yamlSyntaxErrors,
 } from '../../integrations/yaml/document.js';
+import type { Node, Pair, YAMLMap, YamlSource } from '../../integrations/yaml/document.js';
 
 /**
  * The `<case>.spec.yaml` document — one scenario, written as data.
@@ -85,24 +82,24 @@ export type SpecEnvToken =
     | { kind: 'set'; line: number; name: string };
 
 /** One `serve:` entry — a registered server plus the extra env it is started with. */
-export interface SpecServeEntry {
+export type SpecServeEntry = {
     env: Record<string, string>;
     line: number;
     name: string;
-}
+};
 
 /** One `fixture:` entry — a path with the line it was declared on. */
-export interface SpecFixture {
+export type SpecFixture = {
     line: number;
     path: string;
-}
+};
 
 /** An expected stream: its text, and the first line of that text in the file. */
-export interface SpecStream {
+export type SpecStream = {
     /** 1-based line the scalar's content starts on — where a token defect is reported. */
     line: number;
     text: string;
-}
+};
 
 /** One `files:` assertion, keyed by a workdir-relative path. */
 export type SpecFileAssertion =
@@ -117,7 +114,7 @@ export type SpecFileAssertion =
     | { kind: 'exists'; line: number; path: string };
 
 /** One run: a command, what it must exit with, and what it must have produced. */
-export interface SpecRun {
+export type SpecRun = {
     command: string;
     /** 1-based line of the `command:` key — the frame a failure points at. */
     commandLine: number;
@@ -131,10 +128,10 @@ export interface SpecRun {
     timeout: null | number;
     /** Only ever on the LAST run — a long-running command ends the session. */
     waitFor: null | string;
-}
+};
 
 /** A parsed `<case>.spec.yaml`. */
-export interface SpecDocument {
+export type SpecDocument = {
     /** The vitest test title. */
     description: string;
     /** 1-based line of the `description:` key. */
@@ -144,20 +141,20 @@ export interface SpecDocument {
     kind: SpecKind;
     runs: SpecRun[];
     serve: SpecServeEntry[];
-}
+};
 
 /** A document plus the YAML source it was read from — what update mode rewrites. */
-export interface SpecFile {
+export type SpecFile = {
     document: SpecDocument;
     source: YamlSource;
-}
+};
 
 /** The three fields update mode refreshes on one run. */
-export interface SpecRunUpdate {
+export type SpecRunUpdate = {
     exitCode: number;
     stderr: string;
     stdout: string;
-}
+};
 
 // ── Refusals ──
 
@@ -175,10 +172,10 @@ export class SpecSyntaxError extends Error {
 // ── Reading ──
 
 /** The reading context threaded through the walk: where we are, and what to call it. */
-interface Context {
+type Context = {
     fileName: string;
     source: YamlSource;
-}
+};
 
 function fail(context: Context, node: Node | null | Pair | undefined, message: string): never {
     throw new SpecSyntaxError(context.fileName, lineOf(context, node), message);
@@ -193,7 +190,7 @@ function nodeRange(node: Node | Pair): [number, number, number] | undefined {
     if ('range' in node && Array.isArray(node.range)) {
         return node.range;
     }
-    const key = (node as Pair).key;
+    const { key } = node as Pair;
     return key !== null && typeof key === 'object' && 'range' in key
         ? ((key as Node).range ?? undefined)
         : undefined;
@@ -437,9 +434,9 @@ function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun 
  */
 export function readSpecFile(content: string, fileName: string): SpecFile {
     const source = parseYamlSource(content);
-    const syntax = yamlSyntaxErrors(source);
-    if (syntax.length > 0) {
-        throw new SpecSyntaxError(fileName, syntax[0].line, syntax[0].message);
+    const [syntax] = yamlSyntaxErrors(source);
+    if (syntax !== undefined) {
+        throw new SpecSyntaxError(fileName, syntax.line, syntax.message);
     }
     const context: Context = { fileName, source };
     const root = source.document.contents;
@@ -479,7 +476,7 @@ export function readSpecFile(content: string, fileName: string): SpecFile {
     const servePair = found.get('serve');
     const document: SpecDocument = {
         description: requireString(context, found.get('description')!.value, 'description:'),
-        descriptionLine: lineOf(context, found.get('description')!),
+        descriptionLine: lineOf(context, found.get('description')),
         env: envPair === undefined ? [] : readEnv(context, envPair.value),
         fixtures:
             fixturePair === undefined
@@ -601,11 +598,32 @@ const STRING_OR_LIST = {
  * has no vocabulary for the sequence of an object's members. The canonical
  * order is the `d4b-spec-key-order` lint pass's, which also rewrites it.
  */
-export const SPEC_SCHEMA = {
+/**
+ * A JSON Schema subtree — the vocabulary is JSON Schema's, not this package's,
+ * so the shape is stated only where a reader of {@link SPEC_SCHEMA} navigates it.
+ */
+type SchemaNode = Record<string, unknown>;
+
+/** The document schema, as far as its own freshness test walks it. */
+export type SpecSchema = {
+    $defs: SchemaNode & {
+        run: SchemaNode & { additionalProperties: boolean; properties: SchemaNode };
+    };
+    $id: string;
+    $schema: string;
+    additionalProperties: boolean;
+    description: string;
+    properties: SchemaNode;
+    required: string[];
+    title: string;
+    type: string;
+};
+
+export const SPEC_SCHEMA: SpecSchema = {
     $defs: {
         fileAssertion: {
             oneOf: [
-                { enum: [...FILE_STATES], type: 'string' },
+                { enum: FILE_STATES as readonly string[], type: 'string' },
                 {
                     additionalProperties: false,
                     minProperties: 1,

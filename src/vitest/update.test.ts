@@ -28,19 +28,19 @@ describe('update-mode detection (CONVENTIONS D5/E1)', () => {
         process.env.TEST_UPDATE = '1';
 
         // Then - update mode is on
-        expect(shouldUpdateSnapshots()).toBe(true);
+        expect(shouldUpdateSnapshots()).toBeTruthy();
     });
 
     test('treats TEST_UPDATE=0 and unset as falsy', () => {
         // Given - no update trigger at all
         // Then - unset is falsy
-        expect(shouldUpdateSnapshots()).toBe(false);
+        expect(shouldUpdateSnapshots()).toBeFalsy();
 
         // Given - explicitly disabled
         process.env.TEST_UPDATE = '0';
 
         // Then - '0' is falsy too (only '1' enables, E1)
-        expect(shouldUpdateSnapshots()).toBe(false);
+        expect(shouldUpdateSnapshots()).toBeFalsy();
     });
 
     test('vitest -u and --update argv flags enable update mode', () => {
@@ -48,13 +48,13 @@ describe('update-mode detection (CONVENTIONS D5/E1)', () => {
         process.argv = [...process.argv, '-u'];
 
         // Then - update mode is on
-        expect(shouldUpdateSnapshots()).toBe(true);
+        expect(shouldUpdateSnapshots()).toBeTruthy();
 
         // Given - the long flag instead
         process.argv = savedArgv.filter((arg) => arg !== '-u' && arg !== '--update');
         process.argv = [...process.argv, '--update'];
 
         // Then - the long flag enables update mode too
-        expect(shouldUpdateSnapshots()).toBe(true);
+        expect(shouldUpdateSnapshots()).toBeTruthy();
     });
 });

@@ -8,7 +8,7 @@ describe('element vocabulary', () => {
         const element = link('Articles');
 
         // Then - descriptors stay serializable; no locator leaks into core
-        expect(element).toEqual({ kind: 'link', name: 'Articles' });
+        expect(element).toStrictEqual({ kind: 'link', name: 'Articles' });
     });
 
     test('omits exact when it was not asked for', () => {
@@ -16,7 +16,7 @@ describe('element vocabulary', () => {
         const element = button('Subscribe');
 
         // Then - the default stays absent rather than false, so refs compare cleanly
-        expect(element).toEqual({ kind: 'button', name: 'Subscribe' });
+        expect(element).toStrictEqual({ kind: 'button', name: 'Subscribe' });
     });
 
     test('carries exact when asked for', () => {
@@ -24,7 +24,7 @@ describe('element vocabulary', () => {
         const element = field('Email', { exact: true });
 
         // Then - the flag travels with the descriptor
-        expect(element).toEqual({ exact: true, kind: 'field', name: 'Email' });
+        expect(element).toStrictEqual({ exact: true, kind: 'field', name: 'Email' });
     });
 
     test('builds an anonymous landmark without a name', () => {
@@ -32,7 +32,7 @@ describe('element vocabulary', () => {
         const element = main();
 
         // Then - it designates the region itself, not a named one
-        expect(element).toEqual({ kind: 'main' });
+        expect(element).toStrictEqual({ kind: 'main' });
     });
 
     test('builds a named landmark for pages carrying several of a region', () => {
@@ -40,7 +40,7 @@ describe('element vocabulary', () => {
         const element = navigation('Breadcrumb');
 
         // Then - the accessible name distinguishes them
-        expect(element).toEqual({ kind: 'navigation', name: 'Breadcrumb' });
+        expect(element).toStrictEqual({ kind: 'navigation', name: 'Breadcrumb' });
     });
 });
 
@@ -50,7 +50,7 @@ describe('within', () => {
         const element = within(navigation(), link('Articles'));
 
         // Then - the scope rides along on the descriptor
-        expect(element).toEqual({
+        expect(element).toStrictEqual({
             kind: 'link',
             name: 'Articles',
             scope: { kind: 'navigation' },
@@ -65,7 +65,7 @@ describe('within', () => {
         const nested = within(main(), inner);
 
         // Then - the region keeps the target and gains main as its own scope
-        expect(nested).toEqual({
+        expect(nested).toStrictEqual({
             kind: 'link',
             name: 'Part 2',
             scope: { kind: 'region', name: 'Series', scope: { kind: 'main' } },
@@ -77,7 +77,7 @@ describe('within', () => {
         const element = within(testId('row-3'), button('Delete'));
 
         // Then - the escape hatch is still scopable
-        expect(element.scope).toEqual({ kind: 'testId', name: 'row-3' });
+        expect(element.scope).toStrictEqual({ kind: 'testId', name: 'row-3' });
     });
 
     test('leaves the original target untouched', () => {

@@ -17,7 +17,10 @@ const commandOutput: CliOutput = {
 };
 
 const workDir = mkdtempSync(resolve(tmpdir(), 'result-scope-'));
-afterAll(() => rmSync(workDir, { force: true, recursive: true }));
+
+afterAll(() => {
+    rmSync(workDir, { force: true, recursive: true });
+});
 
 function makeResult(): CliResult {
     return new CliResult({
@@ -50,7 +53,7 @@ describe('command result — one capture scope per spec execution', () => {
                 result.stdout.comparableText,
                 result.stdout.captures,
             ),
-        ).toBe(true);
+        ).toBeTruthy();
 
         // Then - the JSON accessor sees the same capture and enforces equality
         expect(
@@ -59,14 +62,14 @@ describe('command result — one capture scope per spec execution', () => {
                 result.json.value,
                 result.json.captures,
             ),
-        ).toBe(true);
+        ).toBeTruthy();
         expect(
             structuralEquals(
                 { sessionId: '{{uuid#sid}}' },
                 { sessionId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' },
                 result.json.captures,
             ),
-        ).toBe(false);
+        ).toBeFalsy();
     });
 
     test('two results never share a scope', () => {

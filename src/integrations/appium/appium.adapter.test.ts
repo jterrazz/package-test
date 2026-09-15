@@ -22,17 +22,23 @@ type Session = { capabilities: Record<string, unknown> };
  */
 function stubDriver(): { remote: never; sessions: Session[] } {
     const sessions: Session[] = [];
-    const remote = (options: Session) => {
+    const remote = async (options: Session) => {
         sessions.push(options);
-        return Promise.resolve({
+        return {
             // Nothing ever matches — the polling loop always reaches its deadline.
-            $$: () => Promise.resolve([]),
-            deleteSession: () => Promise.resolve(),
-            executeScript: () => Promise.resolve(),
-            getPageSource: () => Promise.resolve('<XCUIElementTypeApplication name="App" />'),
+            $$: async () => await Promise.resolve([]),
+            deleteSession: async () => {
+                await Promise.resolve();
+            },
+            executeScript: async () => {
+                await Promise.resolve();
+            },
+            getPageSource: async () =>
+                await Promise.resolve('<XCUIElementTypeApplication name="App" />'),
             // Evidence capture is best-effort — refusing it keeps the refusal clean.
-            takeScreenshot: () => Promise.reject(new Error('no screenshots in the stub')),
-        });
+            takeScreenshot: async () =>
+                await Promise.reject(new Error('no screenshots in the stub')),
+        };
     };
     return { remote: remote as never, sessions };
 }

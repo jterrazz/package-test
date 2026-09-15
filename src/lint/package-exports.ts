@@ -65,7 +65,7 @@ export function declaredSubpaths(startDir?: string): string[] {
     if (startDir === undefined && cached !== null) {
         return cached;
     }
-    const from = startDir ?? dirname(fileURLToPath(import.meta.url));
+    const from = startDir ?? import.meta.dirname;
     const manifest = findOwnManifest(from);
     const exports = manifest?.exports;
     const subpaths =

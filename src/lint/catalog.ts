@@ -1,4 +1,5 @@
-import { catalog, type CatalogEntry, FAMILIES } from './manifest.js';
+import { catalog, FAMILIES } from './manifest.js';
+import type { CatalogEntry } from './manifest.js';
 
 /**
  * The conventions-catalogue generator — renders the mechanized rule catalogue
@@ -38,10 +39,10 @@ function cell(text: string): string {
  */
 function table(headers: string[], rows: string[][]): string[] {
     const widths = headers.map((header, index) =>
-        Math.max(header.length, 3, ...rows.map((row) => row[index].length)),
+        Math.max(header.length, 3, ...rows.map((row) => (row[index] ?? '').length)),
     );
     const line = (cells: string[]): string =>
-        `| ${cells.map((text, index) => text.padEnd(widths[index])).join(' | ')} |`;
+        `| ${cells.map((text, index) => text.padEnd(widths[index] ?? 0)).join(' | ')} |`;
     const separator = `| ${widths.map((width) => '-'.repeat(width)).join(' | ')} |`;
     return [line(headers), separator, ...rows.map(line)];
 }

@@ -24,7 +24,7 @@ export class JsonAccessor {
     /** @internal Test-file directory — fixture resolution root for matchers. */
     readonly testDir: string;
     /** @internal */
-    private readonly transform?: (text: string) => string;
+    private readonly transform?: ((text: string) => string) | undefined;
 
     constructor(
         rawText: string,

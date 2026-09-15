@@ -6,9 +6,9 @@ import {
     readSpecFile,
     RUN_KEYS,
     SPEC_SCHEMA,
-    type SpecSyntaxError,
     updateSpecFile,
 } from './spec-document.js';
+import type { SpecSyntaxError } from './spec-document.js';
 
 /**
  * The grammar, read on its own — no runner, no filesystem. Everything here is
@@ -63,9 +63,9 @@ describe('spec document — reading', () => {
         expect(document.kind).toBe('cli');
         expect(document.description).toBe('does the thing');
         expect(document.runs).toHaveLength(1);
-        expect(document.runs[0].stdout).toBeNull();
-        expect(document.runs[0].stderr).toBeNull();
-        expect(document.runs[0].files).toEqual([]);
+        expect(document.runs[0]?.stdout).toBeNull();
+        expect(document.runs[0]?.stderr).toBeNull();
+        expect(document.runs[0]?.files).toStrictEqual([]);
     });
 
     test('a block scalar keeps its final newline; `|-` drops it', () => {
@@ -88,8 +88,8 @@ describe('spec document — reading', () => {
         );
 
         // Then - the comparison text is byte-exact, trailing newline included
-        expect(document.runs[0].stdout?.text).toBe('kept\n');
-        expect(document.runs[1].stdout?.text).toBe('dropped');
+        expect(document.runs[0]?.stdout?.text).toBe('kept\n');
+        expect(document.runs[1]?.stdout?.text).toBe('dropped');
     });
 
     test('a stream reports the line its CONTENT starts on, not the key line', () => {
@@ -108,8 +108,8 @@ describe('spec document — reading', () => {
         );
 
         // Then - a defect inside the stream is reported where the reader sees it
-        expect(document.runs[0].stdout?.line).toBe(6);
-        expect(document.runs[0].commandLine).toBe(3);
+        expect(document.runs[0]?.stdout?.line).toBe(6);
+        expect(document.runs[0]?.commandLine).toBe(3);
     });
 
     test('env and fixture take a bare string or a list, and serve carries extra env', () => {
@@ -134,12 +134,12 @@ describe('spec document — reading', () => {
 
         // Then - a bare word is a registered set, KEY=value is inline, and a
         // Mapping entry names one server plus the env it is started with
-        expect(document.fixtures.map((fixture) => fixture.path)).toEqual(['$FIXTURES/stub/']);
-        expect(document.env).toEqual([
+        expect(document.fixtures.map((fixture) => fixture.path)).toStrictEqual(['$FIXTURES/stub/']);
+        expect(document.env).toStrictEqual([
             { kind: 'set', line: 4, name: 'frozen' },
             { key: 'ORIGIN', kind: 'pair', line: 5, value: 'http://127.0.0.1:9' },
         ]);
-        expect(document.serve).toEqual([
+        expect(document.serve).toStrictEqual([
             { env: {}, line: 7, name: 'dashboard' },
             { env: { MCP_STUB_WITHHOLD: 'get-article' }, line: 8, name: 'mcp' },
         ]);
@@ -165,7 +165,7 @@ describe('spec document — reading', () => {
         );
 
         // Then - each entry keeps its path and its kind
-        expect(document.runs[0].files.map((file) => [file.path, file.kind])).toEqual([
+        expect(document.runs[0]?.files.map((file) => [file.path, file.kind])).toStrictEqual([
             ['one.txt', 'content'],
             ['many.txt', 'content'],
             ['exact.txt', 'content'],
@@ -420,9 +420,11 @@ describe('spec document — the published schema', () => {
     test('describes exactly the keys the parser reads', () => {
         // Given - the schema shipped for editors
         // Then - its closed sets are the parser's own, so the two cannot drift
-        expect(Object.keys(SPEC_SCHEMA.properties).sort()).toEqual([...DOCUMENT_KEYS].sort());
-        expect(Object.keys(SPEC_SCHEMA.$defs.run.properties).sort()).toEqual([...RUN_KEYS].sort());
-        expect(SPEC_SCHEMA.additionalProperties).toBe(false);
-        expect(SPEC_SCHEMA.$defs.run.additionalProperties).toBe(false);
+        expect(Object.keys(SPEC_SCHEMA.properties).sort()).toStrictEqual([...DOCUMENT_KEYS].sort());
+        expect(Object.keys(SPEC_SCHEMA.$defs.run.properties).sort()).toStrictEqual(
+            [...RUN_KEYS].sort(),
+        );
+        expect(SPEC_SCHEMA.additionalProperties).toBeFalsy();
+        expect(SPEC_SCHEMA.$defs.run.additionalProperties).toBeFalsy();
     });
 });

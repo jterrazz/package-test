@@ -3,7 +3,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /** Sibling module tests are callers, not internals (CONVENTIONS I2). */
-const TEST_FILE = /\.test\.[cm]?[jt]s$/;
+const TEST_FILE = /\.test\.[cm]?[jt]s$/u;
 
 /** Where this very module sits inside the framework's SOURCE tree. */
 const SOURCE_LOCATION = join('core', 'specification', 'shared');
@@ -23,7 +23,7 @@ function realPath(path: string): string {
  * `file:` link, where the real path carries neither `node_modules` nor
  * `/src/…` and would otherwise be mistaken for a caller frame.
  */
-const FRAMEWORK_DIR = realPath(dirname(fileURLToPath(import.meta.url)));
+const FRAMEWORK_DIR = realPath(import.meta.dirname);
 
 /**
  * The directory holding the framework's OWN modules: `<package>/dist` for a
@@ -72,19 +72,19 @@ export function isFrameworkFrame(filePath: string, frameworkTree = FRAMEWORK_TRE
  * @internal
  */
 export function getCallerDir(): string {
-    const stack = new Error('caller detection').stack;
+    const { stack } = new Error('caller detection');
     if (!stack) {
         throw new Error('Cannot detect caller directory: no stack trace');
     }
 
     const lines = stack.split('\n');
     for (const line of lines) {
-        const match = line.match(/at\s+(?:.*?\()?(?:file:\/\/)?(?<filePath>[^:)]+):\d+:\d+/);
+        const match = /at\s+(?:.*?\()?(?:file:\/\/)?(?<filePath>[^:)]+):\d+:\d+/u.exec(line);
         if (!match?.groups?.filePath) {
             continue;
         }
 
-        const filePath = match.groups.filePath;
+        const { filePath } = match.groups;
 
         if (filePath.includes('node_modules')) {
             continue;

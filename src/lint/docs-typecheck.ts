@@ -20,10 +20,10 @@ import { join } from 'node:path';
 const ALLOWED_NEIGHBOURS = new Set(['vitest', 'vitest/config']);
 
 const FRAMEWORK_SPECIFIER = '@jterrazz/test';
-const TYPESCRIPT_BLOCK = /```typescript\n(?<code>[\s\S]*?)```/g;
-const IMPORT_SOURCE = /(?:import|export)[^\n]*?\bfrom\s+['"](?<source>[^'"]+)['"]/g;
+const TYPESCRIPT_BLOCK = /```typescript\n(?<code>[\s\S]*?)```/gu;
+const IMPORT_SOURCE = /(?:import|export)[^\n]*?\bfrom\s+['"](?<source>[^'"]+)['"]/gu;
 /** Vitest globals a runnable example must import to resolve. */
-const TEST_GLOBAL = /\b(?:expect|describe|test|it|beforeAll|afterAll|beforeEach|afterEach)\s*\(/;
+const TEST_GLOBAL = /\b(?:expect|describe|test|it|beforeAll|afterAll|beforeEach|afterEach)\s*\(/u;
 
 /** Every ```typescript fenced block in a markdown document. */
 export function extractTypescriptBlocks(markdown: string): string[] {

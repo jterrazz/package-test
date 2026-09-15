@@ -14,7 +14,8 @@
  * {@link CaptureScope} supplied by the caller.
  */
 
-import { CaptureScope, Matcher, type MatcherKind, TOKEN_KINDS } from './match.js';
+import { CaptureScope, Matcher, TOKEN_KINDS } from './match.js';
+import type { MatcherKind } from './match.js';
 
 // ── Token pattern sources (embedded-in-string contexts) ──
 
@@ -63,15 +64,15 @@ const EMBEDDED_SOURCES: Partial<Record<MatcherKind, string>> = {
     uuid: UUID_SOURCE,
 };
 
-const wholeRe = (source: string): RegExp => new RegExp(`^(?:${source})$`);
+const wholeRe = (source: string): RegExp => new RegExp(`^(?:${source})$`, 'u');
 
 const WHOLE_RES: Partial<Record<MatcherKind, RegExp>> = Object.fromEntries(
-    Object.entries(EMBEDDED_SOURCES).map(([kind, source]) => [kind, wholeRe(source!)]),
+    Object.entries(EMBEDDED_SOURCES).map(([kind, source]) => [kind, wholeRe(source)]),
 );
 
 const PLACEHOLDER_RE = new RegExp(
     String.raw`\{\{(?<kind>${[...TOKEN_KINDS].sort((a, b) => b.length - a.length).join('|')})(?:#(?<ref>[\w.-]+))?\}\}`,
-    'g',
+    'gu',
 );
 
 /** Whether a fixture string contains at least one `{{placeholder}}`. */
@@ -194,15 +195,15 @@ function matcherMatches(matcher: Matcher, actual: unknown, scope: CaptureScope):
     return kindMatches(matcher.kind, actual, scope);
 }
 
-interface ParsedPlaceholderString {
+type ParsedPlaceholderString = {
     /** Whole-string single placeholder (typed match against any actual). */
-    single: null | { kind: MatcherKind; ref?: string };
+    single: null | { kind: MatcherKind; ref?: string | undefined };
     /** Embedded form — regex over the string with one group per placeholder. */
     pattern: RegExp;
-    refs: { index: number; kind: MatcherKind; ref?: string }[];
+    refs: { index: number; kind: MatcherKind; ref?: string | undefined }[];
     /** Unanchored source of {@link pattern} — for embedding in a larger regex. */
     source: string;
-}
+};
 
 function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
     if (kind === 'workdir') {
@@ -218,7 +219,7 @@ function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
 }
 
 function escapeRegExp(text: string): string {
-    return text.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+    return text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
 }
 
 function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPlaceholderString {
@@ -231,7 +232,7 @@ function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPl
 
     for (const found of expected.matchAll(PLACEHOLDER_RE)) {
         const kind = found.groups!.kind as MatcherKind;
-        const ref = found.groups!.ref;
+        const { ref } = found.groups!;
         source += escapeRegExp(expected.slice(lastIndex, found.index));
         source += `(${placeholderSource(kind, scope)})`;
         refs.push({ index: count, kind, ref });
@@ -243,7 +244,7 @@ function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPl
     }
     source += escapeRegExp(expected.slice(lastIndex));
 
-    return { pattern: new RegExp(`^${source}$`), refs, single, source };
+    return { pattern: new RegExp(`^${source}$`, 'u'), refs, single, source };
 }
 
 /**
@@ -383,7 +384,7 @@ export function textContains(expected: string, actual: string, scope: CaptureSco
         return actual.includes(expected);
     }
     const parsed = parsePlaceholderString(expected, scope);
-    const found = new RegExp(parsed.source).exec(actual);
+    const found = new RegExp(parsed.source, 'u').exec(actual);
     if (!found) {
         return false;
     }
@@ -516,12 +517,16 @@ export function mergeTextPreservingPlaceholders(
             return false;
         }
         const line = actualLines[actualIndex];
+        if (line === undefined) {
+            return false;
+        }
         return (
             textEquals(prev, line, new CaptureScope(scope.workdir)) ||
             textEquals(prev, rawLines[actualIndex] ?? line, new CaptureScope(scope.workdir))
         );
     };
 
+    // oxlint-disable-next-line unicorn/no-useless-undefined -- the hole IS the value: dropping it makes the callback return void and the array `void[]`
     const merged: (string | undefined)[] = actualLines.map(() => undefined);
     for (const [index] of actualLines.entries()) {
         if (covers(index, index)) {

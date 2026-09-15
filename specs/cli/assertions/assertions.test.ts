@@ -62,7 +62,9 @@ describe('command — stdout accessor', () => {
         const fixtureName = `stdout-transient-${Date.now()}.txt`;
         try {
             const a = await cli.fixture('$FIXTURES/cli-app/').exec('json');
-            inUpdateMode(() => expect(a.stdout).toMatch(fixtureName));
+            inUpdateMode(() => {
+                expect(a.stdout).toMatch(fixtureName);
+            });
 
             // Then - a second identical run matches _expected/<name> (flat)
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('json');
@@ -81,9 +83,9 @@ describe('command — stdout accessor', () => {
 
             // Then - the matcher reports an output diff (frozen: assert the diff even under TEST_UPDATE)
             const result = await cli.fixture('$FIXTURES/cli-app/').exec('json');
-            expect(() => expect(result.stdout).toMatch(fixtureName, { frozen: true })).toThrow(
-                /Output mismatch/,
-            );
+            expect(() => {
+                expect(result.stdout).toMatch(fixtureName, { frozen: true });
+            }).toThrow(/Output mismatch/u);
         } finally {
             rmSync(resolve(EXPECTED_DIR, fixtureName), { force: true });
         }
@@ -96,9 +98,9 @@ describe('command — stdout accessor', () => {
         // Then - the whole -/+ stdout diff is captured and asserted against a golden.
         // Frozen - stdout-wrong.txt is deliberately wrong (its diff IS the subject); only the
         // Error golden updates, never the wrong fixture
-        const message = catchMessage(() =>
-            expect(result.stdout).toMatch('stdout-wrong.txt', { frozen: true }),
-        );
+        const message = catchMessage(() => {
+            expect(result.stdout).toMatch('stdout-wrong.txt', { frozen: true });
+        });
         expect(text(message)).toMatch('errors/stdout-diff-error.txt');
     });
 
@@ -113,9 +115,9 @@ describe('command — stdout accessor', () => {
 
             // Then - even in update mode, a frozen mismatch still throws its diff and never writes
             inUpdateMode(() => {
-                expect(() => expect(result.stdout).toMatch(fixtureName, { frozen: true })).toThrow(
-                    /Output mismatch/,
-                );
+                expect(() => {
+                    expect(result.stdout).toMatch(fixtureName, { frozen: true });
+                }).toThrow(/Output mismatch/u);
             });
             expect(readFileSync(fixturePath, 'utf8')).toBe('deliberately wrong\n');
         } finally {
@@ -129,10 +131,10 @@ describe('command — stdout accessor', () => {
 
         // Then - the failure explains how to create the fixture
         // Frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
-        // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
-        expect(() => expect(result.stdout).toMatch('never-created.txt', { frozen: true })).toThrow(
-            /does not exist[\s\S]*TEST_UPDATE=1/,
-        );
+        expect(() => {
+            // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
+            expect(result.stdout).toMatch('never-created.txt', { frozen: true });
+        }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 
     test('a slash in the fixture name creates a subfolder under _expected/', async () => {
@@ -140,10 +142,12 @@ describe('command — stdout accessor', () => {
         const fixtureName = `sub/help-${Date.now()}.txt`;
         try {
             const a = await cli.fixture('$FIXTURES/cli-app/').exec('help');
-            inUpdateMode(() => expect(a.stdout).toMatch(fixtureName));
+            inUpdateMode(() => {
+                expect(a.stdout).toMatch(fixtureName);
+            });
 
             // Then - the file landed at _expected/sub/<name> and matches on re-run
-            expect(existsSync(resolve(EXPECTED_DIR, fixtureName))).toBe(true);
+            expect(existsSync(resolve(EXPECTED_DIR, fixtureName))).toBeTruthy();
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('help');
             expect(b.stdout).toMatch(fixtureName);
         } finally {
@@ -157,10 +161,10 @@ describe('command — stdout accessor', () => {
 
         // Then - the matcher enforces CONVENTIONS C6
         // Frozen - a negative assertion; keep it update-safe alongside the rest of the sweep
-        // oxlint-disable-next-line jterrazz/c6-tomatch-extension, jterrazz/c8-referenced-fixture-exists -- negative spec: the missing extension IS the behaviour under test
-        expect(() => expect(result.stdout).toMatch('no-extension', { frozen: true })).toThrow(
-            /extension is part of the name/,
-        );
+        expect(() => {
+            // oxlint-disable-next-line jterrazz/c6-tomatch-extension, jterrazz/c8-referenced-fixture-exists -- negative spec: the missing extension IS the behaviour under test
+            expect(result.stdout).toMatch('no-extension', { frozen: true });
+        }).toThrow(/extension is part of the name/u);
     });
 
     test('toContain matcher checks the captured text', async () => {
@@ -169,9 +173,9 @@ describe('command — stdout accessor', () => {
 
         // Then - expect().toContain works on the accessor and stays native for strings/arrays
         expect(result.stdout).toContain('Usage: cli <command>');
-        expect(() => expect(result.stdout).toContain('NOT_THERE')).toThrow(
-            /does not contain expected substring/,
-        );
+        expect(() => {
+            expect(result.stdout).toContain('NOT_THERE');
+        }).toThrow(/does not contain expected substring/u);
         expect('plain string').toContain('plain');
         expect(['a', 'b']).toContain('b');
     });
@@ -191,7 +195,9 @@ describe('command — stderr accessor', () => {
         const fixtureName = `stderr-transient-${Date.now()}.txt`;
         try {
             const a = await cli.fixture('$FIXTURES/cli-app/').exec('fail');
-            inUpdateMode(() => expect(a.stderr).toMatch(fixtureName));
+            inUpdateMode(() => {
+                expect(a.stderr).toMatch(fixtureName);
+            });
 
             // Then - a second identical run matches
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('fail');
@@ -208,7 +214,7 @@ describe('command — json accessor', () => {
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('json');
 
         // Then - the parsed value is readable
-        expect(result.json.value).toEqual({
+        expect(result.json.value).toStrictEqual({
             features: ['build', 'check'],
             name: 'cli-app',
             version: '1.0.0',
@@ -221,12 +227,14 @@ describe('command — json accessor', () => {
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
             const a = await cli.fixture('$FIXTURES/cli-app/').exec('json');
-            inUpdateMode(() => expect(a.json).toMatch(fixtureName));
+            inUpdateMode(() => {
+                expect(a.json).toMatch(fixtureName);
+            });
 
             // Then - the file is pretty-printed with a trailing newline
             const written = readFileSync(fixturePath, 'utf8');
-            expect(written).toMatch(/^\{\n {4}"name": "cli-app"/);
-            expect(written.endsWith('\n')).toBe(true);
+            expect(written).toMatch(/^\{\n {4}"name": "cli-app"/u);
+            expect(written.endsWith('\n')).toBeTruthy();
 
             // Then - a second identical run matches
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('json');
@@ -276,7 +284,9 @@ describe('command — json accessor', () => {
 
             // When - update mode rewrites the fixture from actual output
             const result = await cli.fixture('$FIXTURES/cli-app/').exec('json');
-            inUpdateMode(() => expect(result.json).toMatch(fixtureName));
+            inUpdateMode(() => {
+                expect(result.json).toMatch(fixtureName);
+            });
 
             // Then - the placeholder survived, the stale literal was replaced
             const written = JSON.parse(readFileSync(fixturePath, 'utf8'));
@@ -292,7 +302,7 @@ describe('command — json accessor', () => {
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('help');
 
         // Then - reading .value throws with context
-        expect(() => result.json.value).toThrow(/stdout is not valid JSON/);
+        expect(() => result.json.value).toThrow(/stdout is not valid JSON/u);
     });
 });
 
@@ -302,7 +312,7 @@ describe('command — filesystem accessor', () => {
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
 
         // Then - cwd is the isolated temp dir
-        expect(result.filesystem.cwd).toMatch(/spec-command-/);
+        expect(result.filesystem.cwd).toMatch(/spec-command-/u);
     });
 
     test('files() lists the whole tree sorted, filtering defaults', async () => {
@@ -314,7 +324,7 @@ describe('command — filesystem accessor', () => {
         expect(files).toContain('cli.sh');
         expect(files).toContain('out/main.go');
         expect(files).toContain('out/docs/README.md');
-        expect([...files].sort()).toEqual(files);
+        expect([...files].sort()).toStrictEqual(files);
     });
 
     test('toMatch round-trips the entire working dir', async () => {
@@ -354,7 +364,7 @@ describe('command — filesystem accessor', () => {
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold-changed');
             await expect(
                 expect(b.filesystem).toMatch(fixtureName, { frozen: true }),
-            ).rejects.toThrow(/Directory mismatch/);
+            ).rejects.toThrow(/Directory mismatch/u);
         } finally {
             rmSync(resolve(EXPECTED_DIR, fixtureName), { force: true, recursive: true });
         }
@@ -387,8 +397,8 @@ describe('command — file accessor', () => {
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('build');
 
         // Then - file exists and absent file doesn't
-        expect(result.file('dist/index.js').exists).toBe(true);
-        expect(result.file('dist/nonexistent.js').exists).toBe(false);
+        expect(result.file('dist/index.js').exists).toBeTruthy();
+        expect(result.file('dist/nonexistent.js').exists).toBeFalsy();
     });
 
     test('content check', async () => {
@@ -406,9 +416,9 @@ describe('command — file accessor', () => {
         // Then - several read accessors on one result
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('Build completed');
-        expect(result.file('dist/index.js').exists).toBe(true);
-        expect(result.file('dist/manifest.json').exists).toBe(true);
-        expect(result.file('dist/index.cjs').exists).toBe(false);
+        expect(result.file('dist/index.js').exists).toBeTruthy();
+        expect(result.file('dist/manifest.json').exists).toBeTruthy();
+        expect(result.file('dist/index.cjs').exists).toBeFalsy();
         expect(result.file('dist/index.js').content).toContain('Hello from CLI app');
     });
 });
@@ -424,8 +434,8 @@ describe('command — transform option', () => {
             const result = await transformCli.exec('ansi');
 
             // Then - raw .text still contains the original ANSI escapes
-            expect(result.stdout.text).toContain('\x1b[31m');
-            expect(result.stdout.text).toContain('\x1b[0m');
+            expect(result.stdout.text).toContain('\u001B[31m');
+            expect(result.stdout.text).toContain('\u001B[0m');
 
             // Then - comparison passes because the transform stripped ANSI from the actual
             expect(result.stdout).toMatch(fixtureName);
@@ -439,7 +449,7 @@ describe('command — transform option', () => {
         const result = await transformCli.exec('ansi');
 
         // Then - pristine output preserved
-        expect(result.stdout.text).toBe('\x1b[31mred\x1b[0m plain \x1b[1mbold\x1b[0m\n');
+        expect(result.stdout.text).toBe('\u001B[31mred\u001B[0m plain \u001B[1mbold\u001B[0m\n');
     });
 
     test('transform only runs on actual, never on fixture', async () => {
@@ -468,12 +478,14 @@ describe('command — transform option', () => {
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
             const result = await transformCli.exec('ansi');
-            inUpdateMode(() => expect(result.stdout).toMatch(fixtureName));
+            inUpdateMode(() => {
+                expect(result.stdout).toMatch(fixtureName);
+            });
 
             // Then - no ANSI in the fixture — transform ran before write
             const written = readFileSync(fixturePath, 'utf8');
             expect(written).toBe('red plain bold\n');
-            expect(written).not.toContain('\x1b[');
+            expect(written).not.toContain('\u001B[');
         } finally {
             rmSync(fixturePath, { force: true });
         }
@@ -484,10 +496,10 @@ describe('command — transform option', () => {
         const result = await transformCli.exec('ansi-json');
 
         // Then - raw stdout still has ANSI wrapping the JSON — would NOT parse
-        expect(result.stdout.text).toContain('\x1b[32m');
+        expect(result.stdout.text).toContain('\u001B[32m');
 
         // Then - .json.value works because the transform stripped ANSI before parse
-        expect(result.json.value).toEqual({ status: 'ok', value: 42 });
+        expect(result.json.value).toStrictEqual({ status: 'ok', value: 42 });
     });
 });
 
@@ -512,8 +524,8 @@ describe('command — fixture tree layering', () => {
         // Then - rsync semantics: the directory is copied under its own name
         // (cwd/cli-app/…), NOT spread into the cwd
         expect(result.exitCode).toBe(0);
-        expect(result.file('cli-app/cli.sh').exists).toBe(true);
-        expect(result.file('cli.sh').exists).toBe(false);
+        expect(result.file('cli-app/cli.sh').exists).toBeTruthy();
+        expect(result.file('cli.sh').exists).toBeFalsy();
     });
 
     test('a later .fixture() overwrites an earlier file (last write wins)', async () => {

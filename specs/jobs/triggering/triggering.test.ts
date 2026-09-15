@@ -60,7 +60,7 @@ describe('jobs', () => {
         await client.connect();
         try {
             const rows = await client.query('SELECT type FROM "events"');
-            expect(rows.rows.map((r) => r.type)).toEqual(['pre_crash']);
+            expect(rows.rows.map((r) => r.type)).toStrictEqual(['pre_crash']);
         } finally {
             await client.end();
         }
@@ -101,6 +101,6 @@ describe('jobs — intercepts (D7)', () => {
             jobs
                 .intercept(http.get('https://not.the.url.test/other'), http.json({ label: 'x' }))
                 .trigger('enrich-from-api'),
-        ).rejects.toThrow(/Unmatched outgoing HTTP request[\s\S]*enrich\.example\.test/);
+        ).rejects.toThrow(/Unmatched outgoing HTTP request[\s\S]*enrich\.example\.test/u);
     });
 });

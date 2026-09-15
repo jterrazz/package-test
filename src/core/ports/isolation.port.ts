@@ -8,7 +8,7 @@
  * Implement this interface to support new service types (e.g. MongoDB,
  * Elasticsearch, S3).
  */
-export interface IsolationStrategy {
+export type IsolationStrategy = {
     /**
      * Create an isolated namespace for this worker.
      * Called once when the worker starts — e.g. clone a template database,
@@ -29,4 +29,4 @@ export interface IsolationStrategy {
      * Called once when the worker shuts down — e.g. drop the cloned database.
      */
     release: () => Promise<void>;
-}
+};

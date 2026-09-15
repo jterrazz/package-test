@@ -2,7 +2,7 @@ import { importSourceVisitor, segments } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /**
  * Known DATA extensions — the closed list of what counts as a file asset. The
@@ -49,11 +49,11 @@ const DATA_EXTENSIONS = [
     'yml',
     'zip',
 ];
-const DATA_ASSET = new RegExp(`\\.(?:${DATA_EXTENSIONS.join('|')})$`, 'i');
+const DATA_ASSET = new RegExp(`\\.(?:${DATA_EXTENSIONS.join('|')})$`, 'iu');
 
 /** A bundler suffix (`./payload.json?raw`, `./doc.md#frag`) is not part of the extension. */
 function withoutSuffix(source: string): string {
-    return source.replace(/[?#].*$/, '');
+    return source.replace(/[?#].*$/u, '');
 }
 
 /**

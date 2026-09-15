@@ -1,12 +1,5 @@
-import {
-    type CollectionTag,
-    type Document,
-    LineCounter,
-    parseDocument,
-    Scalar,
-    type ScalarTag,
-    visit,
-} from 'yaml';
+import { LineCounter, parseDocument, Scalar, visit } from 'yaml';
+import type { CollectionTag, Document, ScalarTag } from 'yaml';
 
 /**
  * The `yaml` dependency, wrapped once.
@@ -28,7 +21,7 @@ export { isMap, isPair, isScalar, isSeq, Scalar } from 'yaml';
 export type { Document, Node, Pair, YAMLMap, YAMLSeq } from 'yaml';
 
 /** A parsed YAML file, plus the offset → line map its diagnostics need. */
-export interface YamlSource {
+export type YamlSource = {
     document: Document.Parsed;
     /** The file's own indentation step, so a rewrite comes back in its style. */
     indent: number;
@@ -36,10 +29,10 @@ export interface YamlSource {
     lineAt: (offset: number) => number;
     /** The text it was parsed from — what a rewrite gives back where it changed nothing. */
     text: string;
-}
+};
 
 /** A line that opens a mapping key — `  key:` or `  - key:`, never block-scalar text. */
-const KEY_LINE = /^(?<indent> +)(?:- )?[A-Za-z_$'"][^\n]*:/;
+const KEY_LINE = /^(?<indent> +)(?:- )?[A-Za-z_$'"][^\n]*:/u;
 
 /**
  * The indentation step the file was written with, read from the shallowest
@@ -50,9 +43,9 @@ const KEY_LINE = /^(?<indent> +)(?:- )?[A-Za-z_$'"][^\n]*:/;
 function detectIndent(text: string): number {
     let smallest = 0;
     for (const line of text.split('\n')) {
-        const found = KEY_LINE.exec(line);
-        if (found?.groups && (smallest === 0 || found.groups.indent.length < smallest)) {
-            smallest = found.groups.indent.length;
+        const indent = KEY_LINE.exec(line)?.groups?.indent;
+        if (indent !== undefined && (smallest === 0 || indent.length < smallest)) {
+            smallest = indent.length;
         }
     }
     return smallest === 0 ? 2 : smallest;
@@ -86,7 +79,7 @@ type StringifyContext = Parameters<NonNullable<ScalarTag['stringify']>>[1];
  * at the root, which YAML counts from -1.
  */
 function stateIndentation(written: string, ctx: StringifyContext): string {
-    if (!/^[|>][1-9]/.test(written)) {
+    if (!/^[|>][1-9]/u.test(written)) {
         return written;
     }
     const step = ctx.indent === '' ? 1 : ctx.indentStep.length;
@@ -117,10 +110,10 @@ function statingItsIndentation(tag: ScalarTag): ScalarTag {
 }
 
 /** One refusal from the YAML parser itself, before any grammar is applied. */
-export interface YamlSyntaxError {
+export type YamlSyntaxError = {
     line: number;
     message: string;
-}
+};
 
 /** Parse a YAML file into its document form, keeping comments and key order. */
 export function parseYamlSource(text: string): YamlSource {
@@ -170,14 +163,14 @@ export function blockScalar(text: string): Scalar<string> {
  * that separates it from the key or dash above it, because a spelling broken
  * over several lines begins with the newline the writer would not have written.
  */
-interface FlowCollection {
+type FlowCollection = {
     /** The indentation of the line its owner — the key, or the dash — sits on. */
     ownerIndent: number;
     range: [number, number];
     text: string;
     /** The value it holds, which is what makes two spellings the SAME collection. */
     value: string;
-}
+};
 
 /** The first offset of the line `offset` sits on. */
 function lineStart(text: string, offset: number): number {
@@ -187,7 +180,7 @@ function lineStart(text: string, offset: number): number {
 /** Back over the whitespace before `offset`, to just past the `:` or `-` that owns it. */
 function afterOwner(text: string, offset: number): number {
     let at = offset;
-    while (at > 0 && /\s/.test(text[at - 1])) {
+    while (at > 0 && /\s/u.test(text[at - 1] ?? '')) {
         at -= 1;
     }
     return at;
@@ -196,7 +189,7 @@ function afterOwner(text: string, offset: number): number {
 /** How many spaces a line opens with. */
 function indentOf(text: string, offset: number): number {
     const start = lineStart(text, offset);
-    return /^ */.exec(text.slice(start))![0].length;
+    return /^ */u.exec(text.slice(start))![0].length;
 }
 
 /**
@@ -208,13 +201,17 @@ function flowCollections(text: string): FlowCollection[] {
     const found: FlowCollection[] = [];
     const take = (node: { flow?: boolean; range?: null | number[]; toJSON: () => unknown }) => {
         if (node.flow !== true || !node.range) {
-            return undefined;
+            return;
         }
-        const from = afterOwner(text, node.range[0]);
+        const [start, end] = node.range;
+        if (start === undefined || end === undefined) {
+            return;
+        }
+        const from = afterOwner(text, start);
         found.push({
             ownerIndent: indentOf(text, from === 0 ? 0 : from - 1),
-            range: [from, node.range[1]],
-            text: text.slice(from, node.range[1]),
+            range: [from, end],
+            text: text.slice(from, end),
             value: JSON.stringify(node.toJSON()),
         });
         return visit.SKIP;
@@ -261,8 +258,12 @@ function restoreUntouchedFlow(rendered: string, text: string): string {
         if (at === -1) {
             continue;
         }
+        const source = sources[at];
+        if (source === undefined) {
+            continue;
+        }
         taken.add(at);
-        splices.push({ range: target.range, text: sources[at].text });
+        splices.push({ range: target.range, text: source.text });
     }
     let out = rendered;
     for (const splice of splices.toReversed()) {

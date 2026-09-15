@@ -1,13 +1,13 @@
-import {
-    configDefaults,
-    mergeConfig,
-    type TestProjectConfiguration,
-    type TestProjectInlineConfiguration,
-    type ViteUserConfig,
+import { configDefaults, mergeConfig } from 'vitest/config';
+import type {
+    TestProjectConfiguration,
+    TestProjectInlineConfiguration,
+    ViteUserConfig,
 } from 'vitest/config';
 
 import { COVERAGE_DIR, VITEST_ARTIFACTS_DIR } from '../core/artifacts/artifacts.js';
-import { literate, type LiterateOptions } from './literate-plugin.js';
+import { literate } from './literate-plugin.js';
+import type { LiterateOptions } from './literate-plugin.js';
 
 /**
  * `defineSpecConfig()` — the shared vitest config every repository of the
@@ -60,7 +60,7 @@ const EXCLUDE = [...configDefaults.exclude, '**/_fixtures/**'];
  * Options are a vite/vitest config plus one key of the framework's own.
  * Everything stated here wins over the preset's defaults.
  */
-export interface SpecConfig extends ViteUserConfig {
+export type SpecConfig = {
     /**
      * Turns every matching `<case>.spec.yaml` into a test file bound to the
      * named specification — the {@link literate} plugin, added to `plugins`.
@@ -70,7 +70,7 @@ export interface SpecConfig extends ViteUserConfig {
      * so the plugin goes in that project's own `plugins` instead.
      */
     literate?: LiterateOptions;
-}
+} & ViteUserConfig;
 
 /**
  * Defaults a vitest PROJECT accepts. `coverage` and `reporters` are root-only
@@ -119,7 +119,7 @@ export function defineSpecConfig(config: SpecConfig = {}): ViteUserConfig {
 
     const stated = literateOptions
         ? (mergeConfig({ plugins: [literate(literateOptions)] }, userConfig) as ViteUserConfig)
-        : (userConfig as ViteUserConfig);
+        : userConfig;
 
     const merged = mergeConfig(rootDefaults(), stated) as ViteUserConfig;
     const projects = merged.test?.projects;

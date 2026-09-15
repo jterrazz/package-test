@@ -1,12 +1,5 @@
-import {
-    contentinfo,
-    link,
-    main,
-    navigation,
-    region,
-    type VisitScenario,
-    within,
-} from '@jterrazz/test';
+import { contentinfo, link, main, navigation, region, within } from '@jterrazz/test';
+import type { VisitScenario } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';

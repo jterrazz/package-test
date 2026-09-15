@@ -1,14 +1,15 @@
-import { matchesText, type TextFilter } from '../../core/contracts/filters.js';
+import { matchesText } from '../../core/contracts/filters.js';
+import type { TextFilter } from '../../core/contracts/filters.js';
 import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
-export interface AnthropicMessagesFilter {
+export type AnthropicMessagesFilter = {
     model?: TextFilter;
     system?: TextFilter;
     user?: TextFilter;
     tools?: string[];
-}
+};
 
 function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
     if (!matchesText(filter.model, body?.model ?? '')) {
@@ -74,7 +75,7 @@ export const anthropic = {
             // Pass them through verbatim. Falls back to wrapping for strings.
             wrap(data: unknown): ContractResponse {
                 if (data && typeof data === 'object' && !Array.isArray(data)) {
-                    return { status: 200, body: data as Record<string, unknown> };
+                    return { status: 200, body: data };
                 }
                 return buildReply(data);
             },
@@ -82,7 +83,9 @@ export const anthropic = {
     },
 
     /** Response: wrap data in Anthropic messages format. */
-    reply: buildReply,
+    reply(data: unknown): ContractResponse {
+        return buildReply(data);
+    },
 
     /** Response: return an Anthropic error. */
     error(status: number, message?: string): ContractResponse {

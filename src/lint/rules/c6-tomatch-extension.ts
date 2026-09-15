@@ -6,7 +6,7 @@ import { isDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /** Does the expect(…) subject chain contain a `.directory(…)` call? */
 function subjectIsDirectory(toMatchCallee: AstNode): boolean {

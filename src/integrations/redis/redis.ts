@@ -2,7 +2,7 @@ import type { DatabasePort } from '../../core/ports/database.port.js';
 import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
 import type { ServiceHandle } from '../../core/ports/service.port.js';
 
-export interface RedisOptions {
+export type RedisOptions = {
     /**
      * Map to a service in docker/compose.test.yaml. Defaults to the handle's
      * key in the declared services record.
@@ -10,7 +10,7 @@ export interface RedisOptions {
     composeService?: string;
     /** Override image. */
     image?: string;
-}
+};
 
 export class RedisHandle implements ServiceHandle {
     readonly type = 'redis';

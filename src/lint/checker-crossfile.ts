@@ -269,7 +269,7 @@ function lineAt(text: string, index: number): number {
  * only ever *hides* a dead-fixture finding, so a greedy regex is safe here.
  */
 const STRING_LITERAL =
-    /'(?<single>(?:[^'\\\n]|\\.)*)'|"(?<double>(?:[^"\\\n]|\\.)*)"|`(?<template>(?:[^`$\\]|\\.)*)`/g;
+    /'(?<single>(?:[^'\\\n]|\\.)*)'|"(?<double>(?:[^"\\\n]|\\.)*)"|`(?<template>(?:[^`$\\]|\\.)*)`/gu;
 function collectLiterals(text: string): Set<string> {
     const found = new Set<string>();
     for (const match of text.matchAll(STRING_LITERAL)) {
@@ -287,7 +287,7 @@ function collectLiterals(text: string): Set<string> {
  * variable makes the reference set incomplete, so the feature is reported at
  * warn level instead of error (a false positive would be worse than a miss).
  */
-const FIXTURE_VERB_ARG = /(?:\.(?:seed|request|fixture)|\btoMatch)\s*\(\s*(?<arg>[^,)]*)/g;
+const FIXTURE_VERB_ARG = /(?:\.(?:seed|request|fixture)|\btoMatch)\s*\(\s*(?<arg>[^,)]*)/gu;
 function hasNonLiteralFixtureArg(text: string): boolean {
     for (const match of text.matchAll(FIXTURE_VERB_ARG)) {
         const arg = (match.groups?.arg ?? '').trim();
@@ -295,9 +295,9 @@ function hasNonLiteralFixtureArg(text: string): boolean {
             continue;
         }
         const isPlainString =
-            /^'(?:[^'\\\n]|\\.)*'$/.test(arg) ||
-            /^"(?:[^"\\\n]|\\.)*"$/.test(arg) ||
-            /^`(?:[^`$\\]|\\.)*`$/.test(arg);
+            /^'(?:[^'\\\n]|\\.)*'$/u.test(arg) ||
+            /^"(?:[^"\\\n]|\\.)*"$/u.test(arg) ||
+            /^`(?:[^`$\\]|\\.)*`$/u.test(arg);
         if (!isPlainString) {
             return true;
         }
@@ -318,24 +318,24 @@ export function suppressedLines(text: string, id: string): Set<number> {
     const lines = text.split('\n');
     const applies = (raw: string): boolean => {
         const ids = raw
-            .replace(/--.*$/, '')
+            .replace(/--.*$/u, '')
             .trim()
-            .split(/[\s,]+/);
+            .split(/[\s,]+/u);
         return ids.includes(id) || ids.includes('*');
     };
     for (const [index, line] of lines.entries()) {
         // Case-insensitive: the repo's formatter capitalizes comment leads
         // (`checker-…` → `Checker-…`).
-        let match = /checker-disable-next-line\s+(?<ids>.*)$/i.exec(line);
+        let match = /checker-disable-next-line\s+(?<ids>.*)$/iu.exec(line);
         if (match !== null && applies(match.groups?.ids ?? '')) {
             for (let next = index + 1; next < lines.length; next += 1) {
-                if (lines[next].trim().length > 0) {
+                if ((lines[next] ?? '').trim().length > 0) {
                     suppressed.add(next + 1);
                     break;
                 }
             }
         }
-        match = /checker-disable-line\s+(?<ids>.*)$/i.exec(line);
+        match = /checker-disable-line\s+(?<ids>.*)$/iu.exec(line);
         if (match !== null && applies(match.groups?.ids ?? '')) {
             suppressed.add(index + 1);
         }
@@ -419,12 +419,12 @@ function runnerExportsOf(text: string): Set<string> {
     const names = new Set<string>();
     const decl = new RegExp(
         String.raw`\{(?<names>[^}]*)\}\s*=\s*await\s+specification\.(?:${CONSTRUCTORS})\s*\(`,
-        'g',
+        'gu',
     );
     for (const match of text.matchAll(decl)) {
         for (const raw of (match.groups?.names ?? '').split(',')) {
             // `export const { cleanup, cli }` / `{ api: bareApi }` → key side.
-            const key = raw.split(':')[0].trim();
+            const key = (raw.split(':')[0] ?? '').trim();
             if (key.length > 0 && !NON_RUNNER_BINDINGS.has(key)) {
                 names.add(key);
             }
@@ -435,13 +435,13 @@ function runnerExportsOf(text: string): Set<string> {
 
 /** The leading callee identifier of an expression (`postgres()` → `postgres`). */
 function leadingCallee(value: string): null | string {
-    const match = /^(?<callee>[A-Za-z_$][\w$]*)\s*\(/.exec(value.trim());
+    const match = /^(?<callee>[A-Za-z_$][\w$]*)\s*\(/u.exec(value.trim());
     return match === null ? match : (match.groups?.callee ?? null);
 }
 
 /** SQL factory count of a `services:` record, or null if non-literal/absent. */
 function sqlDatabaseCount(text: string): null | number {
-    const keyword = /\bservices\s*:/.exec(text);
+    const keyword = /\bservices\s*:/u.exec(text);
     if (keyword === null) {
         return null;
     }
@@ -481,10 +481,10 @@ function sqlDatabaseCount(text: string): null | number {
 function modelSpecFile(file: string): SpecModel {
     const text = readSource(file);
     let dockerAware = false;
-    const cliCall = /specification\.cli\s*\(/g;
+    const cliCall = /specification\.cli\s*\(/gu;
     for (const match of text.matchAll(cliCall)) {
         const argsOpen = text.indexOf('(', match.index);
-        if (argsOpen !== -1 && /\bdocker\s*:/.test(balancedParens(text, argsOpen))) {
+        if (argsOpen !== -1 && /\bdocker\s*:/u.test(balancedParens(text, argsOpen))) {
             dockerAware = true;
         }
     }
@@ -501,7 +501,7 @@ function resolveRelativeImport(fromFile: string, specifier: string): string | un
     if (!specifier.startsWith('.')) {
         return undefined;
     }
-    return resolve(dirname(fromFile), specifier).replace(/\.js$/, '.ts');
+    return resolve(dirname(fromFile), specifier).replace(/\.js$/u, '.ts');
 }
 
 type ImportedBinding = { local: string; name: string; source: string };
@@ -509,7 +509,7 @@ type ImportedBinding = { local: string; name: string; source: string };
 /** Every `import { a, b as c } from '…'` binding in a file. */
 function namedImports(text: string): ImportedBinding[] {
     const bindings: ImportedBinding[] = [];
-    const decl = /import\s+(?:type\s+)?\{(?<names>[^}]*)\}\s+from\s+['"](?<source>[^'"]+)['"]/g;
+    const decl = /import\s+(?:type\s+)?\{(?<names>[^}]*)\}\s+from\s+['"](?<source>[^'"]+)['"]/gu;
     for (const match of text.matchAll(decl)) {
         const source = match.groups?.source ?? '';
         for (const raw of (match.groups?.names ?? '').split(',')) {
@@ -517,7 +517,10 @@ function namedImports(text: string): ImportedBinding[] {
             if (part.length === 0) {
                 continue;
             }
-            const [name, local] = part.split(/\s+as\s+/).map((token) => token.trim());
+            const [name, local] = part.split(/\s+as\s+/u).map((token) => token.trim());
+            if (name === undefined) {
+                continue;
+            }
             bindings.push({ local: local ?? name, name, source });
         }
     }
@@ -562,7 +565,7 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
         // A declaration whose initializer is `await <runner>…​.exec(` — the
         // `await using` form matches group 1 and is exempt.
         const binding =
-            /\b(?<kind>await\s+using|const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*await\s+(?<runner>[A-Za-z_$][\w$]*)\b[^;]*?\.exec\s*\(/g;
+            /\b(?<kind>await\s+using|const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*await\s+(?<runner>[A-Za-z_$][\w$]*)\b[^;]*?\.exec\s*\(/gu;
         for (const match of text.matchAll(binding)) {
             const kind = match.groups?.kind ?? '';
             const runner = match.groups?.runner ?? '';
@@ -592,13 +595,13 @@ function localRunnerBindings(text: string): Set<string> {
     const locals = new Set<string>();
     const decl = new RegExp(
         String.raw`\{(?<names>[^}]*)\}\s*=\s*await\s+specification\.(?:${CONSTRUCTORS})\s*\(`,
-        'g',
+        'gu',
     );
     for (const match of text.matchAll(decl)) {
         for (const raw of (match.groups?.names ?? '').split(',')) {
             const part = raw.trim();
-            const local = (part.includes(':') ? part.split(':')[1] : part).trim();
-            if (local.length > 0 && !NON_RUNNER_BINDINGS.has(part.split(':')[0].trim())) {
+            const local = (part.includes(':') ? (part.split(':')[1] ?? '') : part).trim();
+            if (local.length > 0 && !NON_RUNNER_BINDINGS.has((part.split(':')[0] ?? '').trim())) {
                 locals.add(local);
             }
         }
@@ -609,7 +612,7 @@ function localRunnerBindings(text: string): Set<string> {
 /** The identifier immediately before a `.seed(`/`.table(` member, if any. */
 function memberObjectIdentifier(text: string, dotIndex: number): null | string {
     const before = text.slice(0, dotIndex);
-    const match = /(?<name>[A-Za-z_$][\w$]*)\s*$/.exec(before);
+    const match = /(?<name>[A-Za-z_$][\w$]*)\s*$/u.exec(before);
     return match === null ? match : (match.groups?.name ?? null);
 }
 
@@ -642,15 +645,16 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 applicable.add(model);
             }
         }
-        if (applicable.size !== 1) {
+        const [onlyApplicable] = applicable;
+        if (applicable.size !== 1 || onlyApplicable === undefined) {
             continue;
         }
-        const count = [...applicable][0].sqlDatabaseCount ?? 0;
+        const count = onlyApplicable.sqlDatabaseCount ?? 0;
         const locals = localRunnerBindings(text);
         const suppressed = suppressedLines(readText(testFile), 'a7');
         const rel = relative(rootDir, testFile);
 
-        for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/g)) {
+        for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/gu)) {
             const verb = match.groups?.verb ?? '';
             const object = memberObjectIdentifier(text, match.index);
             // Skip calls dispatched on a runner the test declared itself.
@@ -658,7 +662,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 continue;
             }
             const args = balancedParens(text, text.indexOf('(', match.index));
-            const hasDatabase = /\bdatabase\s*:/.test(args);
+            const hasDatabase = /\bdatabase\s*:/u.test(args);
             const line = lineAt(text, match.index);
             if (suppressed.has(line)) {
                 continue;
@@ -846,14 +850,14 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
 // ── C14 / C15 (where a fixture lives) ────────────────────────────────────────
 
 /** One fixture reference: the path a spec named, and where it named it. */
-interface FixtureReference {
+type FixtureReference = {
     file: string;
     line: number;
     path: string;
-}
+};
 
 /** A `.fixture('…')` call with a plain string argument. */
-const FIXTURE_CALL = /\.fixture\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/g;
+const FIXTURE_CALL = /\.fixture\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
 /**
  * Every fixture path a spec file names, with the line it names it on. A
@@ -897,7 +901,7 @@ function poolEntryOf(path: string): string | undefined {
     if (!path.startsWith('$FIXTURES/')) {
         return undefined;
     }
-    const entry = path.slice('$FIXTURES/'.length).split('/')[0];
+    const entry = path.slice('$FIXTURES/'.length).split('/')[0] ?? '';
     return entry.length > 0 ? entry : undefined;
 }
 
@@ -923,12 +927,12 @@ function poolUsage(specsRoot: string, pool: string): Map<string, Map<string, str
 }
 
 /** A pool entry only one leaf reaches for, and the leaf it belongs to. */
-interface MisplacedPoolFixture {
+type MisplacedPoolFixture = {
     entry: string;
     leaf: string;
     pool: string;
     referrers: string[];
-}
+};
 
 /**
  * Pool entries reached from exactly ONE spec directory. Two documents of the
@@ -940,10 +944,11 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     for (const pool of findPools(rootDir)) {
         const usage = poolUsage(dirname(pool), pool);
         for (const [entry, leaves] of usage) {
-            if (leaves.size !== 1 || !isDir(join(pool, entry))) {
+            const [only] = leaves;
+            if (leaves.size !== 1 || only === undefined || !isDir(join(pool, entry))) {
                 continue;
             }
-            const [leaf, referrers] = [...leaves][0];
+            const [leaf, referrers] = only;
             misplaced.push({ entry, leaf, pool, referrers });
         }
     }
@@ -970,7 +975,7 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
             file: relEntry,
             line: 1,
             message: `${relEntry}: only ${relLeaf} reaches for this pool fixture — the pool is what SEVERAL leaves share; move it to ${relLeaf}/${GROUND_FIXTURES}/${entry} and reference it as '${entry}' (C14 — see docs/13-linting.md, or run the checker with --fix)`,
-            severity: 'error' as Severity,
+            severity: 'error',
         };
     });
 }

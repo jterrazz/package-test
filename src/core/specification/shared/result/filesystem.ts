@@ -25,6 +25,6 @@ export class FilesystemAccessor {
 
     /** List all files (recursively) under the working directory, sorted. */
     async files(options: { ignore?: string[] } = {}): Promise<string[]> {
-        return walkDirectory(this.cwd, options);
+        return await walkDirectory(this.cwd, options);
     }
 }

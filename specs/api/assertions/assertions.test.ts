@@ -45,9 +45,9 @@ describe('api assertion details', () => {
         // Then - error names the fixture and shows the full -/+ diff of both values
         // Frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The
         // Error golden below legitimately updates, but the wrong fixture must never be rewritten
-        const message = await catchMessage(() =>
-            expect(result.response).toMatch('wrong-body.http', { frozen: true }),
-        );
+        const message = await catchMessage(() => {
+            expect(result.response).toMatch('wrong-body.http', { frozen: true });
+        });
         expect(text(message)).toMatch('errors/wrong-body-error.txt');
     });
 
@@ -58,10 +58,10 @@ describe('api assertion details', () => {
         // Then - clear error pointing at TEST_UPDATE
         // Frozen - the missing fixture is the behaviour under test; under TEST_UPDATE it must still
         // Throw "does not exist" rather than be spuriously created
-        // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
-        expect(() => expect(result.response).toMatch('nonexistent.http', { frozen: true })).toThrow(
-            /does not exist[\s\S]*TEST_UPDATE=1/,
-        );
+        expect(() => {
+            // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
+            expect(result.response).toMatch('nonexistent.http', { frozen: true });
+        }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 });
 
@@ -118,15 +118,15 @@ describe('shared assertions', () => {
             const result = await api.seed('two-users.sql', { database: 'db' }).get('/users');
 
             // Then - error shows both columns in the full -/+ diff
-            const message = await catchMessage(() =>
-                expect(result.table('users', { database: 'db' })).toMatchRows({
+            const message = await catchMessage(async () => {
+                await expect(result.table('users', { database: 'db' })).toMatchRows({
                     columns: ['name', 'email'],
                     rows: [
                         ['Wrong1', 'wrong1@test.com'],
                         ['Wrong2', 'wrong2@test.com'],
                     ],
-                }),
-            );
+                });
+            });
             expect(text(message)).toMatch('errors/table-multi-column-error.txt');
         });
 
@@ -135,12 +135,12 @@ describe('shared assertions', () => {
             const result = await api.seed('two-users.sql', { database: 'db' }).get('/users');
 
             // Then - row count mismatch + extra rows with + marker (full diff)
-            const message = await catchMessage(() =>
-                expect(result.table('users', { database: 'db' })).toMatchRows({
+            const message = await catchMessage(async () => {
+                await expect(result.table('users', { database: 'db' })).toMatchRows({
                     columns: ['name'],
                     rows: [['Alice']],
-                }),
-            );
+                });
+            });
             expect(text(message)).toMatch('errors/table-extra-rows-error.txt');
         });
 
@@ -149,12 +149,12 @@ describe('shared assertions', () => {
             const result = await api.get('/users');
 
             // Then - row count mismatch + missing rows with - marker (full diff)
-            const message = await catchMessage(() =>
-                expect(result.table('users', { database: 'db' })).toMatchRows({
+            const message = await catchMessage(async () => {
+                await expect(result.table('users', { database: 'db' })).toMatchRows({
                     columns: ['name'],
                     rows: [['Alice']],
-                }),
-            );
+                });
+            });
             expect(text(message)).toMatch('errors/table-missing-rows-error.txt');
         });
 

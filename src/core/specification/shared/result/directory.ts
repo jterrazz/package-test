@@ -9,11 +9,11 @@ import { textEquals } from '../../../matching/structural.js';
 
 const DEFAULT_IGNORES = ['.git', '.DS_Store', 'node_modules', '.next', 'dist', '.turbo', '.cache'];
 
-export interface DirectoryDiff {
+export type DirectoryDiff = {
     added: string[];
     changed: { path: string; expected: string; actual: string }[];
     removed: string[];
-}
+};
 
 /**
  * Recursively walk a directory, returning sorted relative paths of files only.
@@ -110,6 +110,6 @@ export class DirectoryAccessor {
 
     /** List all files (recursively) under the directory, sorted. */
     async files(options: { ignore?: string[] } = {}): Promise<string[]> {
-        return walkDirectory(this.root, options);
+        return await walkDirectory(this.root, options);
     }
 }

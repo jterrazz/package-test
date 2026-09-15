@@ -11,7 +11,7 @@ import { isDirectory, isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /** The ground directory each fixture-referencing verb reads from. */
 const VERB_ROOTS: Record<string, string> = {
@@ -74,7 +74,7 @@ export const c8ReferencedFixtureExists: LintRule = {
                         return;
                     }
                     const target = resolveFixture(
-                        value.replace(/\/+$/, ''),
+                        value.replace(/\/+$/u, ''),
                         featureDir,
                         anchor.directory,
                     );
@@ -95,7 +95,7 @@ export const c8ReferencedFixtureExists: LintRule = {
                 if (value === undefined || !looksLikePath(value)) {
                     return;
                 }
-                const target = join(featureDir, root, value.replace(/\/+$/, ''));
+                const target = join(featureDir, root, value.replace(/\/+$/u, ''));
                 // ToMatch may name a directory-tree snapshot; the others are files.
                 const ok =
                     verb === 'toMatch' ? isFile(target) || isDirectory(target) : isFile(target);

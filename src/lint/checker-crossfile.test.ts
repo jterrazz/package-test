@@ -17,7 +17,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         );
 
         // Then - line 3 (the statement), not line 2 (blank), is suppressed
-        expect(suppressedLines(text, 'a7')).toEqual(new Set([3]));
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([3]));
     });
 
     test('disable-line suppresses its OWN line', () => {
@@ -25,7 +25,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         const text = ['const a = 1;', 'api.seed("x.sql"); // checker-disable-line a7'].join('\n');
 
         // Then - line 2 is suppressed
-        expect(suppressedLines(text, 'a7')).toEqual(new Set([2]));
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([2]));
     });
 
     test('a comma/space-separated id list suppresses each listed pass', () => {
@@ -33,10 +33,10 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         const text = ['// checker-disable-next-line a7, b5 -- reason', 'code();'].join('\n');
 
         // Then - both a7 and b5 are suppressed on line 2
-        expect(suppressedLines(text, 'a7')).toEqual(new Set([2]));
-        expect(suppressedLines(text, 'b5')).toEqual(new Set([2]));
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([2]));
+        expect(suppressedLines(text, 'b5')).toStrictEqual(new Set([2]));
         // But an unlisted pass is not
-        expect(suppressedLines(text, 'c9')).toEqual(new Set());
+        expect(suppressedLines(text, 'c9')).toStrictEqual(new Set());
     });
 
     test('the wildcard `*` suppresses every pass', () => {
@@ -44,8 +44,8 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         const text = ['// checker-disable-next-line * -- blanket', 'code();'].join('\n');
 
         // Then - any queried id is suppressed
-        expect(suppressedLines(text, 'a7')).toEqual(new Set([2]));
-        expect(suppressedLines(text, 'c9')).toEqual(new Set([2]));
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([2]));
+        expect(suppressedLines(text, 'c9')).toStrictEqual(new Set([2]));
     });
 
     test('a directive naming a different pass does not suppress the queried one', () => {
@@ -53,7 +53,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         const text = ['// checker-disable-next-line b5 -- reason', 'api.seed("x.sql");'].join('\n');
 
         // Then - an a7 query sees nothing suppressed
-        expect(suppressedLines(text, 'a7')).toEqual(new Set());
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set());
     });
 
     test('the trailing `-- reason` is stripped before matching ids (reason words are not ids)', () => {
@@ -63,8 +63,8 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         );
 
         // Then - "a7" inside the reason is not treated as a targeted id
-        expect(suppressedLines(text, 'a7')).toEqual(new Set());
-        expect(suppressedLines(text, 'b5')).toEqual(new Set([2]));
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set());
+        expect(suppressedLines(text, 'b5')).toStrictEqual(new Set([2]));
     });
 
     test('matching is case-insensitive (the formatter capitalizes comment leads)', () => {
@@ -72,7 +72,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         const text = ['// Checker-disable-next-line a7 -- reason', 'code();'].join('\n');
 
         // Then - the capitalized form still suppresses
-        expect(suppressedLines(text, 'a7')).toEqual(new Set([2]));
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([2]));
     });
 
     test('source with no directive suppresses nothing', () => {
@@ -80,7 +80,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         const text = ['api.seed("x.sql");', 'api.table("t");'].join('\n');
 
         // Then - the suppression set is empty
-        expect(suppressedLines(text, 'a7')).toEqual(new Set());
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set());
     });
 
     test('a trailing directive with no following non-blank line suppresses nothing', () => {
@@ -88,6 +88,6 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         const text = ['code();', '// checker-disable-next-line a7 -- dangling'].join('\n');
 
         // Then - there is no next statement to suppress
-        expect(suppressedLines(text, 'a7')).toEqual(new Set());
+        expect(suppressedLines(text, 'a7')).toStrictEqual(new Set());
     });
 });

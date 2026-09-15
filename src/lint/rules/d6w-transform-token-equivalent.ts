@@ -3,7 +3,10 @@ import { findProperty, memberPropertyName, specificationMember, stringValue } fr
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
-const KNOWN_TOKEN_LITERAL = new RegExp(`^\\{\\{(?:${TOKEN_KINDS.join('|')})(?:#[\\w.-]+)?\\}\\}$`);
+const KNOWN_TOKEN_LITERAL = new RegExp(
+    `^\\{\\{(?:${TOKEN_KINDS.join('|')})(?:#[\\w.-]+)?\\}\\}$`,
+    'u',
+);
 
 /**
  * Is this function a pure chain of `.replace(…, '{{token}}')` normalisations?
@@ -18,10 +21,11 @@ function isTokenEquivalentTransform(fn: AstNode): boolean {
     let expression = fn.body as AstNode | undefined;
     if (expression?.type === 'BlockStatement') {
         const statements = (expression.body as AstNode[] | undefined) ?? [];
-        if (statements.length !== 1 || statements[0].type !== 'ReturnStatement') {
+        const [only] = statements;
+        if (statements.length !== 1 || only?.type !== 'ReturnStatement') {
             return false;
         }
-        expression = statements[0].argument as AstNode | undefined;
+        expression = only.argument as AstNode | undefined;
     }
     let sawReplace = false;
     while (expression?.type === 'CallExpression') {

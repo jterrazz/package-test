@@ -1,10 +1,7 @@
 import { registerMatchers } from '../../../vitest/matchers.js';
 import type { DevicePort, DeviceTimeouts } from '../../ports/device.port.js';
-import {
-    createMobileFacet,
-    type MobileSpecification,
-    type SpecificationConfig,
-} from '../shared/builder.js';
+import { createMobileFacet } from '../shared/builder.js';
+import type { MobileSpecification, SpecificationConfig } from '../shared/builder.js';
 import { getCallerDir } from '../shared/caller.js';
 import { resolveRoot } from '../shared/resolve.js';
 import { StubBackend } from '../shared/stub-backend.js';
@@ -20,17 +17,17 @@ import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
  * injected: the handle exposes `backendUrl` and the CALLER wires it into its
  * own bundler env.
  */
-export interface MobileBackendOptions {
+export type MobileBackendOptions = {
     /**
      * Fixed port — pins a stable stub URL across runs. Metro inlines
      * `EXPO_PUBLIC_*` values at bundle-serve time; a stable port lets a warm
      * Metro survive between runs. Default: a free OS-assigned port.
      */
     port?: number;
-}
+};
 
 /** Options for {@link startMobile | specification.mobile}. */
-export interface MobileSpecificationOptions {
+export type MobileSpecificationOptions = {
     /** The app under test — terminated and relaunched by every `.open()`. */
     app: {
         /** Bundle id of the installed app (`com.example.app`). */
@@ -64,7 +61,7 @@ export interface MobileSpecificationOptions {
      * (`{ action: 45_000 }`) instead of sleeping inside its scenarios.
      */
     timeouts?: DeviceTimeouts;
-}
+};
 
 /**
  * The record returned by {@link startMobile | specification.mobile}.
@@ -72,19 +69,19 @@ export interface MobileSpecificationOptions {
  *
  *     const { mobile, cleanup, udid } = await specification.mobile(…);
  */
-export interface MobileHandle {
+export type MobileHandle = {
     /**
      * Base URL of the declared stub backend — present only with the
      * `backend` option. The caller injects it into its own bundler env
      * (e.g. `EXPO_PUBLIC_API_URL`); the framework never touches the bundler.
      */
-    backendUrl?: string;
+    backendUrl?: string | undefined;
     /** End the driver session, stop the appium server and the stub backend. */
     cleanup: () => Promise<void>;
     mobile: MobileSpecification;
     /** The resolved simulator UDID the specs run against. */
     udid: string;
-}
+};
 
 // ── Constructor ──
 

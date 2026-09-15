@@ -1,26 +1,16 @@
 import { registerMatchers } from '../../../vitest/matchers.js';
-import {
-    createJobsFacet,
-    type JobHandle,
-    type JobsSpecification,
-    type SpecificationConfig,
-} from '../shared/builder.js';
+import { createJobsFacet } from '../shared/builder.js';
+import type { JobHandle, JobsSpecification, SpecificationConfig } from '../shared/builder.js';
 import { getCallerDir } from '../shared/caller.js';
 import type { Orchestrator } from '../shared/orchestrator.js';
 import { resolveRoot } from '../shared/resolve.js';
-import {
-    type DatabaseKeys,
-    declaredDatabaseKeys,
-    releaseIsolation,
-    type ServiceRecord,
-    type StartedServices,
-    startServices,
-} from '../shared/services.js';
+import { declaredDatabaseKeys, releaseIsolation, startServices } from '../shared/services.js';
+import type { DatabaseKeys, ServiceRecord, StartedServices } from '../shared/services.js';
 
 // ── Types ──
 
 /** Options for {@link startJobs | specification.jobs}. */
-export interface JobsSpecificationOptions<Services extends ServiceRecord = ServiceRecord> {
+export type JobsSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /**
      * Named jobs triggerable via `jobs.trigger(name)` — a factory receiving
      * the started services record, or a static array. Jobs run in-process by
@@ -31,7 +21,7 @@ export interface JobsSpecificationOptions<Services extends ServiceRecord = Servi
     root?: string;
     /** Named infrastructure record started via testcontainers. */
     services?: Services;
-}
+};
 
 /**
  * The record returned by {@link startJobs | specification.jobs}. Destructure
@@ -39,13 +29,13 @@ export interface JobsSpecificationOptions<Services extends ServiceRecord = Servi
  *
  *     const { jobs, cleanup } = await specification.jobs(…);
  */
-export interface JobsHandle<DatabaseKey extends string = string> {
+export type JobsHandle<DatabaseKey extends string = string> = {
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;
     jobs: JobsSpecification<DatabaseKey>;
     /** The orchestrator managing the test infrastructure lifecycle. */
     orchestrator: null | Orchestrator;
-}
+};
 
 // ── Constructor ──
 
@@ -81,7 +71,7 @@ export async function startJobs<Services extends ServiceRecord>(
                 await started.orchestrator.stop();
             }
         },
-        jobs: createJobsFacet(config) as JobsSpecification<DatabaseKeys<Services>>,
+        jobs: createJobsFacet(config),
         orchestrator: started?.orchestrator ?? null,
     };
 }

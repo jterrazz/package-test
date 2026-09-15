@@ -4,7 +4,8 @@
  */
 import { afterAll } from 'vitest';
 
-import { type JobHandle, postgres, specification } from '../../src/index.js';
+import { postgres, specification } from '../../src/index.js';
+import type { JobHandle } from '../../src/index.js';
 
 async function insertSyncedEvents(analyticsUrl: string, dbUrl: string): Promise<void> {
     const { Client } = await import('pg');
@@ -54,7 +55,9 @@ const analyticsHandle = postgres();
 export const { cleanup, jobs } = await specification.jobs({
     jobs: ({ analyticsDb, db }): JobHandle[] => [
         {
-            execute: () => insertSyncedEvents(analyticsDb.connectionString, db.connectionString),
+            execute: async () => {
+                await insertSyncedEvents(analyticsDb.connectionString, db.connectionString);
+            },
             name: 'sync-events',
         },
         {
@@ -67,7 +70,9 @@ export const { cleanup, jobs } = await specification.jobs({
             name: 'crash-after-insert',
         },
         {
-            execute: () => enrichFromApi(analyticsDb.connectionString),
+            execute: async () => {
+                await enrichFromApi(analyticsDb.connectionString);
+            },
             name: 'enrich-from-api',
         },
     ],

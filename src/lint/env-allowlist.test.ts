@@ -23,13 +23,13 @@ describe('framework env reads — E1 allowlist (meta-test)', () => {
     test('every static env read is in the allowlist', () => {
         // Given - all static process.env.<NAME> reads across non-test src/
         // Then - none outside the allowlist
-        expect(findEnvOffenders(files)).toEqual([]);
+        expect(findEnvOffenders(files)).toStrictEqual([]);
     });
 
     test('every dynamic env read carries an env-sanction comment', () => {
         // Given - dynamic process.env[expr] reads
         // Then - each is explicitly sanctioned
-        expect(findUnsanctionedDynamicReads(files)).toEqual([]);
+        expect(findUnsanctionedDynamicReads(files)).toStrictEqual([]);
     });
 
     test('the scanner reports out-of-allowlist static reads (positive coverage)', () => {
@@ -37,7 +37,7 @@ describe('framework env reads — E1 allowlist (meta-test)', () => {
         const offenders = findEnvOffenders([OFFENDER_FIXTURE]);
 
         // Then - both are surfaced (proving the sweep is not vacuously green)
-        expect(offenders).toEqual([
+        expect(offenders).toStrictEqual([
             `${OFFENDER_FIXTURE}: process.env.SECRET`,
             `${OFFENDER_FIXTURE}: process.env.OTHER_SECRET`,
         ]);
@@ -48,6 +48,6 @@ describe('framework env reads — E1 allowlist (meta-test)', () => {
         const dynamic = findUnsanctionedDynamicReads([OFFENDER_FIXTURE]);
 
         // Then - only the unsanctioned read (line 3) is flagged
-        expect(dynamic).toEqual([`${OFFENDER_FIXTURE}:3`]);
+        expect(dynamic).toStrictEqual([`${OFFENDER_FIXTURE}:3`]);
     });
 });

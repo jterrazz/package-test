@@ -4,13 +4,8 @@ import { relative, resolve } from 'node:path';
 
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../../integrations/msw/intercept.js';
-import {
-    type Contract,
-    type ContractInput,
-    contractsOf,
-    isContract,
-    isContracts,
-} from '../../contracts/contract.js';
+import { contractsOf, isContract, isContracts } from '../../contracts/contract.js';
+import type { Contract, ContractInput } from '../../contracts/contract.js';
 import type {
     ContractRequest,
     ContractResponder,
@@ -24,11 +19,8 @@ import type { DevicePort, MobileScenario } from '../../ports/device.port.js';
 import type { ServerPort } from '../../ports/server.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
 import { HttpResult } from '../api/result.js';
-import {
-    type LiterateRunFlags,
-    type LiterateServeRegistration,
-    runSpecDocument,
-} from '../cli/literate.js';
+import { runSpecDocument } from '../cli/literate.js';
+import type { LiterateRunFlags, LiterateServeRegistration } from '../cli/literate.js';
 import { CliResult } from '../cli/result.js';
 import { ScreenResult } from '../mobile/result.js';
 import { FetchResult, PageResult } from '../website/result.js';
@@ -43,10 +35,10 @@ import type { StubBackend } from './stub-backend.js';
 // ── Types ──
 
 /** A named job that can be triggered via jobs.trigger(). */
-export interface JobHandle {
+export type JobHandle = {
     name: string;
     execute: () => Promise<void>;
-}
+};
 
 /**
  * Configuration for the docker-aware cli mode. When set on
@@ -54,119 +46,119 @@ export interface JobHandle {
  * it into the child env under `envVar`, then queries Docker for every
  * container carrying `testRunLabel=<id>` after the command exits.
  */
-export interface DockerSpecConfig {
+export type DockerSpecConfig = {
     envVar: string;
     nameLabel: string;
     testRunLabel: string;
-}
+};
 
 /** Adapter configuration passed to the specification facets at setup time. */
-export interface SpecificationConfig {
+export type SpecificationConfig = {
     /**
      * The declared stub backend (website/mobile facets) — armed with the
      * chain's contracts before every terminal action.
      */
-    backend?: StubBackend;
+    backend?: StubBackend | undefined;
     /**
      * Base URL of the running stub backend — allow-listed through the
      * browser's `external: 'block'` policy so client-side fetches reach it.
      */
-    backendUrl?: string;
+    backendUrl?: string | undefined;
     /** Base URL of the website under test (website facet only). */
-    baseUrl?: string;
+    baseUrl?: string | undefined;
     /**
      * Lazy browser accessor (website facet only). The first `.visit()`
      * launches the shared browser instance; `.fetch()`-only spec files never
      * pay the browser cost.
      */
-    browser?: () => Promise<BrowserPort>;
+    browser?: (() => Promise<BrowserPort>) | undefined;
     /**
      * Cross-origin request policy for visits (website facet only): `'block'`
      * aborts requests leaving the site under test — the browser-side analog
      * of strict intercepts.
      */
-    external?: 'allow' | 'block';
+    external?: 'allow' | 'block' | undefined;
     /** Bundle id of the app under test (mobile facet only) — the app `.open()` relaunches. */
-    bundleId?: string;
-    command?: CliPort;
-    database?: DatabasePort;
+    bundleId?: string | undefined;
+    command?: CliPort | undefined;
+    database?: DatabasePort | undefined;
     /**
      * Keys of the declared services record that are databases. Drives the
      * CONVENTIONS A7 rule: with 2+ databases the `database` option is
      * mandatory on `.seed()` / `.table()`; with exactly one it is forbidden.
      */
-    databaseKeys?: string[];
-    databases?: Map<string, DatabasePort>;
+    databaseKeys?: string[] | undefined;
+    databases?: Map<string, DatabasePort> | undefined;
     /**
      * Lazy device accessor (mobile facet only). The first `.open()` creates
      * the shared driver session; the appium/webdriverio integration stays a
      * lazy import so the optional peer is only loaded when a spec opens the
      * app.
      */
-    device?: () => Promise<DevicePort>;
-    dockerConfig?: DockerSpecConfig;
+    device?: (() => Promise<DevicePort>) | undefined;
+    dockerConfig?: DockerSpecConfig | undefined;
     /**
      * Unique id shared by every spec from this runner instance.
      * Stable for the runner's lifetime so multi-step tests (spawn in
      * one run, inspect in another) see the same container scope. The
      * facet factories auto-populate this when `dockerConfig` is present.
      */
-    dockerTestRunId?: string;
+    dockerTestRunId?: string | undefined;
     /**
      * Named environment SETS a spec document may name by bare word
      * (`env: frozen`). Declared once per app in `specification.cli()`.
      */
-    envSets?: Record<string, CliEnv>;
+    envSets?: Record<string, CliEnv> | undefined;
     /**
      * When set, `.intercept()` is unavailable on this runner and throws this
      * reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
      */
-    interceptDisabledReason?: string;
-    jobs?: JobHandle[];
+    interceptDisabledReason?: string | undefined;
+    jobs?: JobHandle[] | undefined;
     /** The project root — the working directory a document's `serve:` command runs from. */
-    root?: string;
-    server?: ServerPort;
+    root?: string | undefined;
+    server?: ServerPort | undefined;
     /**
      * Named servers a spec document may start (`serve: [mcp]`). Declared once
      * per app in `specification.cli()`.
      */
-    serveRegistry?: Record<string, LiterateServeRegistration>;
+    serveRegistry?: Record<string, LiterateServeRegistration> | undefined;
     /**
      * The declared services record. In cli mode, drives the automatic
      * connection-URL injection into the child env (CONVENTIONS B6):
      * `<KEY>_URL` per service, plus `DATABASE_URL` / `REDIS_URL` when
      * unambiguous.
      */
-    services?: Record<string, ServiceHandle>;
+    services?: Record<string, ServiceHandle> | undefined;
     /**
      * Optional normaliser applied to command stdout/stderr before every
      * comparison. Does not mutate the raw `.text` accessor.
      */
-    transform?: (text: string) => string;
-}
+    transform?: ((text: string) => string) | undefined;
+};
 
 /** A SQL seed file to execute before the action, optionally targeting a named database. */
-export interface SeedEntry {
-    database?: string;
+export type SeedEntry = {
+    database?: string | undefined;
     file: string;
-}
+};
 
 /** A fixture file or directory to copy into the working directory before execution. */
-export interface FixtureEntry {
+export type FixtureEntry = {
     file: string;
-}
+};
 
 /** An HTTP request to perform against the server adapter. */
-export interface RequestEntry {
+export type RequestEntry = {
     /** Inline body value — objects are JSON-serialized, strings sent raw. */
     body?: unknown;
     /** Headers parsed from a `_requests/*.http` file (chain headers win). */
-    fileHeaders?: Record<string, string>;
+    fileHeaders?: Record<string, string> | undefined;
     method: string;
     path: string;
     /** A `_requests/*.http` file to load method/path/headers/body from. */
-    requestFile?: string;
-}
+    requestFile?: string | undefined;
+};
 
 /**
  * The `.intercept()` overload set, identical on every facet: one contract, a
@@ -185,7 +177,7 @@ export type InterceptMethod<T> = ((contracts: ContractInput) => T) &
  * The `DatabaseKey` parameter is the typed vocabulary of `.seed()`: the keys
  * of the declared services record that are databases.
  */
-export interface ApiSpecification<DatabaseKey extends string = string> {
+export type ApiSpecification<DatabaseKey extends string = string> = {
     /** Set HTTP headers for the request. Multiple calls merge. */
     headers: (headers: Record<string, string>) => ApiSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
@@ -203,13 +195,13 @@ export interface ApiSpecification<DatabaseKey extends string = string> {
     put: (path: string, body?: unknown) => Promise<HttpResult>;
     /** Send the complete request described by `_requests/<file>` (.http format). */
     request: (file: string) => Promise<HttpResult>;
-}
+};
 
 /**
  * The `jobs` facet — job chain entry handed out by `specification.jobs()`.
  * Jobs run in-process by definition (CONVENTIONS A5/A8).
  */
-export interface JobsSpecification<DatabaseKey extends string = string> {
+export type JobsSpecification<DatabaseKey extends string = string> = {
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
     /** Queue a SQL seed file from `_seeds/` to run before the action. */
@@ -217,14 +209,14 @@ export interface JobsSpecification<DatabaseKey extends string = string> {
 
     /** Execute the named job registered via the `jobs` option and resolve with the result. */
     trigger: (name: string) => Promise<BaseResult>;
-}
+};
 
 /**
  * The `cli` facet — command chain entry handed out by `specification.cli()`.
  * Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS
  * B2) — `{ waitFor?, timeout? }` covers long-running processes.
  */
-export interface CliSpecification<DatabaseKey extends string = string> {
+export type CliSpecification<DatabaseKey extends string = string> = {
     /** Set environment variables on the child process. `$WORKDIR` expands; `null` unsets. */
     env: (env: CliEnv) => CliSpecification<DatabaseKey>;
     /**
@@ -254,7 +246,7 @@ export interface CliSpecification<DatabaseKey extends string = string> {
      * directory, where the document lives.
      */
     run: (file: string, options?: LiterateRunFlags) => Promise<CliResult>;
-}
+};
 
 /**
  * The `website` facet — page chain entry handed out by
@@ -262,7 +254,7 @@ export interface CliSpecification<DatabaseKey extends string = string> {
  * terminal. `.visit()` renders the page in the shared browser; `.fetch()`
  * performs one raw HTTP exchange and never follows redirects.
  */
-export interface WebsiteSpecification {
+export type WebsiteSpecification = {
     /** Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls merge. */
     headers: (headers: Record<string, string>) => WebsiteSpecification;
     /**
@@ -279,7 +271,7 @@ export interface WebsiteSpecification {
      * the capture reflects the FINAL page state.
      */
     visit: (path: string, scenario?: VisitScenario) => Promise<PageResult>;
-}
+};
 
 /**
  * The `mobile` facet — screen chain entry handed out by
@@ -287,7 +279,7 @@ export interface WebsiteSpecification {
  * terminates and relaunches the app (deterministic fresh state), applies the
  * deep link, runs the scenario, and captures the final screen.
  */
-export interface MobileSpecification {
+export type MobileSpecification = {
     /**
      * Declare the chain's backend contracts — served by the declared stub
      * backend (requires the runner's `backend` option). Multiple calls append.
@@ -300,7 +292,7 @@ export interface MobileSpecification {
      * first (the When) and the capture reflects the FINAL screen state.
      */
     open: (deepLink?: string, scenario?: MobileScenario) => Promise<ScreenResult>;
-}
+};
 
 /**
  * Fluent builder for declaring a single test specification.
@@ -316,19 +308,19 @@ export interface MobileSpecification {
  */
 export class SpecificationBuilder
     implements
-        ApiSpecification<string>,
-        CliSpecification<string>,
-        JobsSpecification<string>,
+        ApiSpecification,
+        CliSpecification,
+        JobsSpecification,
         MobileSpecification,
         WebsiteSpecification
 {
     private commandEnv: CliEnv = {};
-    private config: SpecificationConfig;
-    private contracts: Contract[] = [];
-    private fixtures: FixtureEntry[] = [];
+    private readonly config: SpecificationConfig;
+    private readonly contracts: Contract[] = [];
+    private readonly fixtures: FixtureEntry[] = [];
     private requestHeaders: Record<string, string> = {};
-    private seeds: SeedEntry[] = [];
-    private testDir: string;
+    private readonly seeds: SeedEntry[] = [];
+    private readonly testDir: string;
 
     constructor(config: SpecificationConfig, testDir: string) {
         this.config = config;
@@ -480,8 +472,8 @@ export class SpecificationBuilder
      * @example
      *   const result = await api.request("create-user.http");
      */
-    request(file: string): Promise<HttpResult> {
-        return this.executeHttp({ method: '', path: '', requestFile: file });
+    async request(file: string): Promise<HttpResult> {
+        return await this.executeHttp({ method: '', path: '', requestFile: file });
     }
 
     /**
@@ -490,8 +482,8 @@ export class SpecificationBuilder
      * @example
      *   const result = await api.get("/api/items");
      */
-    get(path: string): Promise<HttpResult> {
-        return this.executeHttp({ method: 'GET', path });
+    async get(path: string): Promise<HttpResult> {
+        return await this.executeHttp({ method: 'GET', path });
     }
 
     /**
@@ -502,18 +494,18 @@ export class SpecificationBuilder
      * @example
      *   const result = await api.post("/api/items", { name: "Widget" });
      */
-    post(path: string, body?: unknown): Promise<HttpResult> {
-        return this.executeHttp({ body, method: 'POST', path });
+    async post(path: string, body?: unknown): Promise<HttpResult> {
+        return await this.executeHttp({ body, method: 'POST', path });
     }
 
     /** Send a PUT request to the server adapter and resolve with the result. */
-    put(path: string, body?: unknown): Promise<HttpResult> {
-        return this.executeHttp({ body, method: 'PUT', path });
+    async put(path: string, body?: unknown): Promise<HttpResult> {
+        return await this.executeHttp({ body, method: 'PUT', path });
     }
 
     /** Send a DELETE request to the server adapter and resolve with the result. */
-    delete(path: string): Promise<HttpResult> {
-        return this.executeHttp({ method: 'DELETE', path });
+    async delete(path: string): Promise<HttpResult> {
+        return await this.executeHttp({ method: 'DELETE', path });
     }
 
     // ── Command actions (terminal) ──
@@ -538,7 +530,7 @@ export class SpecificationBuilder
      *   const result = await cli.exec(["init", "build"]);
      *   const result = await cli.exec("dev --port 0", { waitFor: "Listening on", timeout: 10_000 });
      */
-    exec(args: string | string[] = '', options?: ExecOptions): Promise<CliResult> {
+    async exec(args: string | string[] = '', options?: ExecOptions): Promise<CliResult> {
         if (Array.isArray(args) && args.length === 0) {
             throw new Error('exec([]) requires at least one command');
         }
@@ -547,7 +539,7 @@ export class SpecificationBuilder
                 '.exec(): waitFor/timeout options are not supported with a command sequence',
             );
         }
-        return this.executeCommand({ args, options });
+        return await this.executeCommand({ args, options });
     }
 
     /**
@@ -565,9 +557,12 @@ export class SpecificationBuilder
      *   const result = await cli.run('no-estate.spec.yaml');
      *   await expect(result.directory('out')).toMatch('scaffold');
      */
-    run(file: string, options?: LiterateRunFlags): Promise<CliResult> {
+    async run(file: string, options?: LiterateRunFlags): Promise<CliResult> {
         const workDir = this.prepareWorkDir();
-        return this.executeSetup(workDir, () => this.runLiterateAction(workDir, file, options));
+        return await this.executeSetup(
+            workDir,
+            async () => await this.runLiterateAction(workDir, file, options),
+        );
     }
 
     // ── Website actions (terminal) ──
@@ -583,8 +578,8 @@ export class SpecificationBuilder
      *   expect(result.status).toBe(200);
      *   expect(result.body).toMatch('robots.txt');
      */
-    fetch(path: string): Promise<FetchResult> {
-        return this.executeSetup(null, () => this.runFetchAction(path));
+    async fetch(path: string): Promise<FetchResult> {
+        return await this.executeSetup(null, async () => await this.runFetchAction(path));
     }
 
     /**
@@ -602,8 +597,8 @@ export class SpecificationBuilder
      *   });
      *   expect(result.url).toContain('/articles');
      */
-    visit(path: string, scenario?: VisitScenario): Promise<PageResult> {
-        return this.executeSetup(null, () => this.runVisitAction(path, scenario));
+    async visit(path: string, scenario?: VisitScenario): Promise<PageResult> {
+        return await this.executeSetup(null, async () => await this.runVisitAction(path, scenario));
     }
 
     // ── Mobile actions (terminal) ──
@@ -623,8 +618,11 @@ export class SpecificationBuilder
      *       await visitor.see(content('rapports'));
      *   });
      */
-    open(deepLink?: string, scenario?: MobileScenario): Promise<ScreenResult> {
-        return this.executeSetup(null, () => this.runOpenAction(deepLink, scenario));
+    async open(deepLink?: string, scenario?: MobileScenario): Promise<ScreenResult> {
+        return await this.executeSetup(
+            null,
+            async () => await this.runOpenAction(deepLink, scenario),
+        );
     }
 
     // ── Job actions (terminal) ──
@@ -637,21 +635,24 @@ export class SpecificationBuilder
      *   const result = await jobs.intercept(classifyArticle).trigger('report-refresh');
      */
     async trigger(name: string): Promise<BaseResult> {
-        return this.executeSetup(null, () => this.runJobAction(name));
+        return await this.executeSetup(null, async () => await this.runJobAction(name));
     }
 
     // ── Private execution pipeline ──
 
     private async executeHttp(request: RequestEntry): Promise<HttpResult> {
-        return this.executeSetup(null, () => this.runHttpAction(request));
+        return await this.executeSetup(null, async () => await this.runHttpAction(request));
     }
 
     private async executeCommand(action: {
         args: string | string[];
-        options?: ExecOptions;
+        options?: ExecOptions | undefined;
     }): Promise<CliResult> {
         const workDir = this.prepareWorkDir();
-        return this.executeSetup(workDir, () => this.runCommandAction(workDir, action));
+        return await this.executeSetup(
+            workDir,
+            async () => await this.runCommandAction(workDir, action),
+        );
     }
 
     /**
@@ -788,9 +789,10 @@ export class SpecificationBuilder
     private async runFetchAction(path: string): Promise<FetchResult> {
         const baseUrl = this.requireBaseUrl('fetch');
 
-        const headers =
-            Object.keys(this.requestHeaders).length > 0 ? this.requestHeaders : undefined;
-        const response = await fetch(`${baseUrl}${path}`, { headers, redirect: 'manual' });
+        const response = await fetch(`${baseUrl}${path}`, {
+            headers: this.requestHeaders,
+            redirect: 'manual',
+        });
         const body = await response.text();
         const responseHeaders: Record<string, string> = {};
         response.headers.forEach((value, key) => {
@@ -889,7 +891,7 @@ export class SpecificationBuilder
      * redis). `.env()` overrides; `null` unsets.
      */
     private serviceEnv(): CliEnv | undefined {
-        const services = this.config.services;
+        const { services } = this.config;
         if (!services || Object.keys(services).length === 0) {
             return undefined;
         }
@@ -908,11 +910,13 @@ export class SpecificationBuilder
                 redisHandles.push(handle);
             }
         }
-        if (sqlHandles.length === 1) {
-            env.DATABASE_URL = sqlHandles[0].connectionString;
+        const [onlySql] = sqlHandles;
+        if (sqlHandles.length === 1 && onlySql !== undefined) {
+            env.DATABASE_URL = onlySql.connectionString;
         }
-        if (redisHandles.length === 1) {
-            env.REDIS_URL = redisHandles[0].connectionString;
+        const [onlyRedis] = redisHandles;
+        if (redisHandles.length === 1 && onlyRedis !== undefined) {
+            env.REDIS_URL = onlyRedis.connectionString;
         }
         return env;
     }
@@ -924,7 +928,7 @@ export class SpecificationBuilder
      */
     private childEnv(workDir: string): CliEnv | undefined {
         let env: CliEnv | undefined = this.serviceEnv();
-        const dockerConfig = this.config.dockerConfig;
+        const { dockerConfig } = this.config;
         if (dockerConfig && this.config.dockerTestRunId) {
             env = { ...env, [dockerConfig.envVar]: this.config.dockerTestRunId };
         }
@@ -935,13 +939,13 @@ export class SpecificationBuilder
         return env;
     }
 
-    private runLiterateAction(
+    private async runLiterateAction(
         workDir: string,
         file: string,
         options?: LiterateRunFlags,
     ): Promise<CliResult> {
         const filePath = resolve(this.testDir, file);
-        return runSpecDocument({
+        return await runSpecDocument({
             baseEnv: this.childEnv(workDir),
             frozen: options?.frozen,
             config: this.config,
@@ -954,13 +958,13 @@ export class SpecificationBuilder
 
     private async runCommandAction(
         workDir: string,
-        action: { args: string | string[]; options?: ExecOptions },
+        action: { args: string | string[]; options?: ExecOptions | undefined },
     ): Promise<CliResult> {
         if (!this.config.command) {
             throw new Error('Command actions require a command adapter');
         }
 
-        const dockerConfig = this.config.dockerConfig;
+        const { dockerConfig } = this.config;
         // The test-run id is bound to the SpecificationConfig (i.e. to
         // The runner), not to each spec. This means every spec from the
         // Same runner sees the same isolation scope — tests that spawn a
@@ -1037,17 +1041,17 @@ function withDockerTestRunId(config: SpecificationConfig): SpecificationConfig {
  * Create the `api` facet bound to the given adapter configuration. The test
  * file directory is auto-detected from the call stack at each chain start.
  */
-export function createApiFacet(config: SpecificationConfig): ApiSpecification<string> {
+export function createApiFacet(config: SpecificationConfig): ApiSpecification {
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
-        delete: (path) => start().delete(path),
-        get: (path) => start().get(path),
+        delete: async (path) => await start().delete(path),
+        get: async (path) => await start().get(path),
         headers: (headers) => start().headers(headers),
-        intercept: interceptOn(start) as ApiSpecification<string>['intercept'],
-        post: (path, body) => start().post(path, body),
-        put: (path, body) => start().put(path, body),
-        request: (file) => start().request(file),
+        intercept: interceptOn(start),
+        post: async (path, body) => await start().post(path, body),
+        put: async (path, body) => await start().put(path, body),
+        request: async (file) => await start().request(file),
         seed: (file, options) => start().seed(file, options),
     };
 }
@@ -1055,13 +1059,13 @@ export function createApiFacet(config: SpecificationConfig): ApiSpecification<st
 /**
  * Create the `jobs` facet bound to the given adapter configuration.
  */
-export function createJobsFacet(config: SpecificationConfig): JobsSpecification<string> {
+export function createJobsFacet(config: SpecificationConfig): JobsSpecification {
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
-        intercept: interceptOn(start) as JobsSpecification<string>['intercept'],
+        intercept: interceptOn(start),
         seed: (file, options) => start().seed(file, options),
-        trigger: (name) => start().trigger(name),
+        trigger: async (name) => await start().trigger(name),
     };
 }
 
@@ -1072,10 +1076,10 @@ export function createWebsiteFacet(config: SpecificationConfig): WebsiteSpecific
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
-        fetch: (path) => start().fetch(path),
+        fetch: async (path) => await start().fetch(path),
         headers: (headers) => start().headers(headers),
-        intercept: interceptOn(start) as WebsiteSpecification['intercept'],
-        visit: (path, scenario) => start().visit(path, scenario),
+        intercept: interceptOn(start),
+        visit: async (path, scenario) => await start().visit(path, scenario),
     };
 }
 
@@ -1086,23 +1090,23 @@ export function createMobileFacet(config: SpecificationConfig): MobileSpecificat
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
-        intercept: interceptOn(start) as MobileSpecification['intercept'],
-        open: (deepLink, scenario) => start().open(deepLink, scenario),
+        intercept: interceptOn(start),
+        open: async (deepLink, scenario) => await start().open(deepLink, scenario),
     };
 }
 
 /**
  * Create the `cli` facet bound to the given adapter configuration.
  */
-export function createCliFacet(config: SpecificationConfig): CliSpecification<string> {
+export function createCliFacet(config: SpecificationConfig): CliSpecification {
     const resolved = withDockerTestRunId(config);
     const start = (): SpecificationBuilder => new SpecificationBuilder(resolved, getCallerDir());
 
     return {
         env: (env) => start().env(env),
-        exec: (args, options) => start().exec(args, options),
+        exec: async (args, options) => await start().exec(args, options),
         fixture: (path) => start().fixture(path),
-        run: (file, options) => start().run(file, options),
+        run: async (file, options) => await start().run(file, options),
         seed: (file, options) => start().seed(file, options),
     };
 }

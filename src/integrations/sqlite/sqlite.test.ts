@@ -81,7 +81,7 @@ describe('sqliteTemplateName (regression guard)', () => {
         // Given - no schema at all (the consumer seeds it)
         // Then - a stable key; the folder it lands in already says whose it is
         expect(sqliteTemplateName()).toBe(sqliteTemplateName({}));
-        expect(sqliteTemplateName()).toMatch(/^template-[\da-f]{8}\.sqlite$/);
+        expect(sqliteTemplateName()).toMatch(/^template-[\da-f]{8}\.sqlite$/u);
     });
 
     test('an unreadable schema still keys on its path', () => {
@@ -147,8 +147,8 @@ describe('isValidSqliteTemplate (regression guard)', () => {
         const missing = resolve(workdir, 'missing.sqlite');
 
         // Then - it is not treated as a usable template
-        expect(existsSync(missing)).toBe(false);
-        expect(isValidSqliteTemplate(missing)).toBe(false);
+        expect(existsSync(missing)).toBeFalsy();
+        expect(isValidSqliteTemplate(missing)).toBeFalsy();
     });
 
     test('rejects a 0-byte file — the exact shape a crashed run leaves behind', () => {
@@ -158,7 +158,7 @@ describe('isValidSqliteTemplate (regression guard)', () => {
         writeFileSync(stale, '');
 
         // Then - the guard refuses to treat it as a real template
-        expect(isValidSqliteTemplate(stale)).toBe(false);
+        expect(isValidSqliteTemplate(stale)).toBeFalsy();
     });
 
     test('rejects a short file that is not a SQLite database at all', () => {
@@ -167,7 +167,7 @@ describe('isValidSqliteTemplate (regression guard)', () => {
         writeFileSync(garbage, 'not a database');
 
         // Then - the guard refuses it (fails the magic-header check)
-        expect(isValidSqliteTemplate(garbage)).toBe(false);
+        expect(isValidSqliteTemplate(garbage)).toBeFalsy();
     });
 
     test('accepts a real SQLite database file', () => {
@@ -178,7 +178,7 @@ describe('isValidSqliteTemplate (regression guard)', () => {
         db.close();
 
         // Then - the header check passes
-        expect(isValidSqliteTemplate(real)).toBe(true);
+        expect(isValidSqliteTemplate(real)).toBeTruthy();
     });
 });
 
@@ -200,7 +200,7 @@ describe('sqlite() initialize() — stale template recovery', () => {
             sqliteTemplateName({ init: initSqlPath }),
         );
         writeFileSync(templatePath, '');
-        expect(isValidSqliteTemplate(templatePath)).toBe(false);
+        expect(isValidSqliteTemplate(templatePath)).toBeFalsy();
 
         // When - a fresh handle initializes against that poisoned path
         const db = sqlite({ init: initSqlPath });
@@ -209,8 +209,8 @@ describe('sqlite() initialize() — stale template recovery', () => {
         // Then - the template was detected as invalid and rebuilt: the schema
         // From init.sql is actually present (proving the file was NOT reused
         // As-is) and the file now passes the validity guard.
-        expect(db.started).toBe(true);
-        expect(isValidSqliteTemplate(templatePath)).toBe(true);
+        expect(db.started).toBeTruthy();
+        expect(isValidSqliteTemplate(templatePath)).toBeTruthy();
 
         const check = new Database(templatePath, { readonly: true });
         try {
@@ -230,32 +230,30 @@ describe('sqlite() initialize() — the template is a PROJECT artefact', () => {
         // Given - two checkouts of one project: same schema content, two roots.
         // A machine-global tmpdir gave them ONE file, so whichever ran first
         // Built it and the other silently inherited that schema.
-        const [one, two] = ['a', 'b'].map((suffix) =>
-            mkdtempSync(resolve(tmpdir(), `sqlite-checkout-${suffix}-`)),
-        );
         const schema = 'CREATE TABLE "shared_schema" (id INTEGER PRIMARY KEY);';
-        const roots = [one, two].map((root) => {
+        const roots = ['a', 'b'].map((suffix) => {
+            const root = mkdtempSync(resolve(tmpdir(), `sqlite-checkout-${suffix}-`));
             const initSqlPath = resolve(root, 'init.sql');
             writeFileSync(initSqlPath, schema);
             return { initSqlPath, root };
         });
 
         // When - each checkout initializes its own handle
-        const templates: string[] = [];
+        const templates: { root: string; templatePath: string }[] = [];
         for (const { initSqlPath, root } of roots) {
             const db = sqlite({ init: initSqlPath });
             await db.initialize(root, root);
-            templates.push(db.connectionString.replace('file:', ''));
+            templates.push({ root, templatePath: db.connectionString.replace('file:', '') });
         }
 
         // Then - each template sits inside its own project, and the two are
         // Different files that both exist
-        for (const [index, templatePath] of templates.entries()) {
-            const expected = resolve(roots[index].root, '.artifacts/vitest/sqlite');
-            expect(templatePath.startsWith(`${expected}/`)).toBe(true);
-            expect(isValidSqliteTemplate(templatePath)).toBe(true);
+        for (const { root, templatePath } of templates) {
+            const expected = resolve(root, '.artifacts/vitest/sqlite');
+            expect(templatePath.startsWith(`${expected}/`)).toBeTruthy();
+            expect(isValidSqliteTemplate(templatePath)).toBeTruthy();
         }
-        expect(templates[0]).not.toBe(templates[1]);
+        expect(templates[0]?.templatePath).not.toBe(templates[1]?.templatePath);
 
         for (const { root } of roots) {
             rmSync(root, { force: true, recursive: true });
@@ -277,12 +275,12 @@ describe('the template build lock (regression guard)', () => {
         const lockPath = resolve(workdir, 'exclusive.lock');
 
         // Then - the exclusive create hands the lock to one caller only
-        expect(acquireTemplateLock(lockPath)).toBe(true);
-        expect(acquireTemplateLock(lockPath)).toBe(false);
+        expect(acquireTemplateLock(lockPath)).toBeTruthy();
+        expect(acquireTemplateLock(lockPath)).toBeFalsy();
 
         // And - releasing hands it to the next caller
         releaseTemplateLock(lockPath);
-        expect(acquireTemplateLock(lockPath)).toBe(true);
+        expect(acquireTemplateLock(lockPath)).toBeTruthy();
         releaseTemplateLock(lockPath);
     });
 
@@ -292,11 +290,11 @@ describe('the template build lock (regression guard)', () => {
         acquireTemplateLock(lockPath);
 
         // Then - its holder is presumed alive, so a waiter waits
-        expect(isStaleTemplateLock(lockPath)).toBe(false);
+        expect(isStaleTemplateLock(lockPath)).toBeFalsy();
 
         // And - long past the build budget, the holder is presumed dead: a
         // Crashed worker must not wedge the suite forever
-        expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBe(true);
+        expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBeTruthy();
         releaseTemplateLock(lockPath);
     });
 
@@ -305,8 +303,8 @@ describe('the template build lock (regression guard)', () => {
         const lockPath = resolve(workdir, 'absent.lock');
 
         // Then - nothing to break
-        expect(isStaleTemplateLock(lockPath)).toBe(false);
-        expect(existsSync(lockPath)).toBe(false);
+        expect(isStaleTemplateLock(lockPath)).toBeFalsy();
+        expect(existsSync(lockPath)).toBeFalsy();
     });
 
     test('concurrent handles on a cold cache all end up with the schema', async () => {
@@ -319,7 +317,11 @@ describe('the template build lock (regression guard)', () => {
 
         // When - they all initialize together
         const handles = [0, 1, 2, 3].map(() => sqlite({ init: initSqlPath }));
-        await Promise.all(handles.map((db) => db.initialize(root, root)));
+        await Promise.all(
+            handles.map(async (db) => {
+                await db.initialize(root, root);
+            }),
+        );
 
         // Then - every one of them points at the same finished template, and it
         // Carries the schema: no partial build was ever observable
@@ -329,7 +331,7 @@ describe('the template build lock (regression guard)', () => {
             sqliteTemplateName({ init: initSqlPath }),
         );
         for (const db of handles) {
-            expect(db.started).toBe(true);
+            expect(db.started).toBeTruthy();
             expect(db.connectionString).toBe(`file:${templatePath}`);
         }
 

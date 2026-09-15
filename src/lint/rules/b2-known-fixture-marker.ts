@@ -40,7 +40,7 @@ export const b2KnownFixtureMarker: LintRule = {
                 if (path === undefined || !path.startsWith('$')) {
                     return;
                 }
-                const marker = path.replace(/\/+$/, '').split('/')[0];
+                const marker = path.replace(/\/+$/u, '').split('/')[0] ?? '';
                 if (!KNOWN.has(marker)) {
                     context.report({
                         data: { known: [...KNOWN_FIXTURE_MARKERS].join(', '), marker },

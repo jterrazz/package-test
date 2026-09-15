@@ -4,7 +4,8 @@
  */
 import { afterAll } from 'vitest';
 
-import { type JobHandle, specification } from '../../src/index.js';
+import { specification } from '../../src/index.js';
+import type { JobHandle } from '../../src/index.js';
 
 /** Names of the static jobs that ran — observable from specs. */
 export const staticRuns: string[] = [];

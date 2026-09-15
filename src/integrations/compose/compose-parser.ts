@@ -37,7 +37,9 @@ export function parseComposeFile(filePath: string): ComposeConfig {
                 if (Array.isArray(def.environment)) {
                     for (const env of def.environment) {
                         const [key, ...rest] = String(env).split('=');
-                        environment[key] = rest.join('=');
+                        if (key !== undefined) {
+                            environment[key] = rest.join('=');
+                        }
                     }
                 } else {
                     Object.assign(environment, def.environment);

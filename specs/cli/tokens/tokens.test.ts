@@ -51,7 +51,7 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
             // Then - the written fixture contains the {{workdir}} token, not the raw path
             const written = readFileSync(fixturePath, 'utf8');
             expect(written).toContain('cwd {{workdir}}');
-            expect(written).not.toMatch(/cwd \//);
+            expect(written).not.toMatch(/cwd \//u);
 
             // Then - a second run (different cwd) matches the updated fixture
             const second = await cli.fixture('$FIXTURES/cli-app/').exec('version');
@@ -134,7 +134,7 @@ describe('command — ANSI stripped by default (CONVENTIONS D6)', () => {
 
         // Then - the raw accessor keeps the escapes
         // oxlint-disable-next-line jterrazz/d8w-text-bypass -- the raw `.text` accessor IS the subject: this test proves it retains ANSI escapes while matchers see the stripped form.
-        expect(result.stdout.text).toContain('\x1b[31m');
+        expect(result.stdout.text).toContain('\u001B[31m');
     });
 
     test('json accessor parses through ANSI noise without a transform', async () => {
@@ -142,6 +142,6 @@ describe('command — ANSI stripped by default (CONVENTIONS D6)', () => {
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('ansi-json');
 
         // Then - parsing works because ANSI is stripped by default
-        expect(result.json.value).toEqual({ status: 'ok', value: 42 });
+        expect(result.json.value).toStrictEqual({ status: 'ok', value: 42 });
     });
 });

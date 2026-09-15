@@ -2,9 +2,9 @@ import { importSourceVisitor, isUnderSpecs } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.(?:test|fixtures|specification)\.[cm]?[jt]sx?$/;
-const CONFIG_FILE = /(?:^|[/\\])[\w.-]*\.config\.[cm]?[jt]s$/;
-const TEST_IMPORT = /\.(?:test|fixtures)(?:\.[cm]?[jt]sx?)?$/;
+const TEST_FILE = /\.(?:test|fixtures|specification)\.[cm]?[jt]sx?$/u;
+const CONFIG_FILE = /(?:^|[/\\])[\w.-]*\.config\.[cm]?[jt]s$/u;
+const TEST_IMPORT = /\.(?:test|fixtures)(?:\.[cm]?[jt]sx?)?$/u;
 const TOOL_SUBPATH = '@jterrazz/test/oxlint';
 
 /**

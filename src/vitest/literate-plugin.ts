@@ -25,9 +25,9 @@ import { specDescription } from '../core/specification/cli/literate.js';
  */
 
 /** The `.spec.yaml` extension, matched on the id vite hands the plugin. */
-const SPEC_FILE = /\.spec\.yaml(?:\?.*)?$/;
+const SPEC_FILE = /\.spec\.yaml(?:\?.*)?$/u;
 
-export interface LiterateOptions {
+export type LiterateOptions = {
     /**
      * Globs added to the project's test include. Default: every `.spec.yaml`
      * file. Narrow it when a tree holds documents that are INPUTS to other
@@ -44,21 +44,21 @@ export interface LiterateOptions {
      * scenario to the wrong command.
      */
     specification: string;
-}
+};
 
 /**
  * The shape vite consumes. Declared structurally rather than imported from
  * `vite`, so the package's runner coupling stays the one dependency it already
  * has (CONVENTIONS I1) — the object is assignable to vite's `Plugin`.
  */
-export interface LiteratePlugin {
+export type LiteratePlugin = {
     config: () => { test: { include: string[] } };
     /** Vite hands the resolved root here — what a relative `specification` is resolved against. */
     configResolved: (resolved: { root: string }) => void;
     enforce: 'pre';
     load: (id: string) => null | string;
     name: string;
-}
+};
 
 /**
  * The module a `<case>.spec.yaml` becomes: one `test()` whose title is the
@@ -86,7 +86,7 @@ export function literateModule(
 
 /** Strip vite's query suffix (`?v=…`) from a module id. */
 function cleanId(id: string): string {
-    return id.split('?')[0];
+    return id.split('?')[0] ?? id;
 }
 
 export function literate(options: LiterateOptions): LiteratePlugin {

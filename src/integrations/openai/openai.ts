@@ -1,4 +1,5 @@
-import { matchesText, type TextFilter } from '../../core/contracts/filters.js';
+import { matchesText } from '../../core/contracts/filters.js';
+import type { TextFilter } from '../../core/contracts/filters.js';
 import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
@@ -6,13 +7,13 @@ const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 
 // ── Chat Completions filters ──
 
-export interface OpenAIChatFilter {
+export type OpenAIChatFilter = {
     model?: TextFilter;
     system?: TextFilter;
     user?: TextFilter;
     tools?: string[];
     temperature?: number;
-}
+};
 
 function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
     if (!matchesText(filter.model, body?.model ?? '')) {
@@ -48,12 +49,12 @@ function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
 
 // ── Responses API filters ──
 
-export interface OpenAIResponsesFilter {
+export type OpenAIResponsesFilter = {
     model?: TextFilter;
     system?: TextFilter;
     user?: TextFilter;
     tools?: string[];
-}
+};
 
 function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boolean {
     if (!matchesText(filter.model, body?.model ?? '')) {
@@ -174,7 +175,9 @@ export const openai = {
      * @example
      *   openai.reply({ categories: ['TECH'] })
      */
-    reply: buildChatReply,
+    reply(data: unknown): ContractResponse {
+        return buildChatReply(data);
+    },
 
     /** Response: return an OpenAI error. */
     error(status: number, message?: string): ContractResponse {

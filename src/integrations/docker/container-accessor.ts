@@ -37,7 +37,7 @@ export class ContainerAccessor {
     readonly running: boolean;
     readonly status: string;
     private readonly testDir: string;
-    private readonly transform?: (text: string) => string;
+    private readonly transform?: ((text: string) => string) | undefined;
 
     /**
      * Underlying Docker container ID, or `null` if no container was captured

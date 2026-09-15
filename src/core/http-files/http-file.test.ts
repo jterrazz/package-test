@@ -13,7 +13,10 @@ describe('http-files — requests', () => {
         // Then - every section is extracted
         expect(parsed.method).toBe('POST');
         expect(parsed.path).toBe('/users');
-        expect(parsed.headers).toEqual({ 'content-type': 'application/json', 'x-key': 'abc' });
+        expect(parsed.headers).toStrictEqual({
+            'content-type': 'application/json',
+            'x-key': 'abc',
+        });
         expect(parsed.body).toBe('{ "name": "Charlie" }');
     });
 
@@ -24,7 +27,7 @@ describe('http-files — requests', () => {
         // Then - body is undefined and headers empty
         expect(parsed.method).toBe('GET');
         expect(parsed.path).toBe('/users');
-        expect(parsed.headers).toEqual({});
+        expect(parsed.headers).toStrictEqual({});
         expect(parsed.body).toBeUndefined();
     });
 
@@ -53,7 +56,7 @@ describe('http-files — requests', () => {
 
         // Then - sections are identical to the LF form
         expect(parsed.method).toBe('POST');
-        expect(parsed.headers).toEqual({ 'content-type': 'application/json' });
+        expect(parsed.headers).toStrictEqual({ 'content-type': 'application/json' });
         expect(parsed.body).toBe('{ "name": "Eve" }');
     });
 
@@ -65,7 +68,7 @@ describe('http-files — requests', () => {
         );
 
         // Then - the value keeps its colons intact
-        expect(parsed.headers).toEqual({ 'x-time': '10:30:00' });
+        expect(parsed.headers).toStrictEqual({ 'x-time': '10:30:00' });
     });
 
     test('keeps the query string as part of the path', () => {
@@ -84,7 +87,7 @@ describe('http-files — requests', () => {
         );
 
         // Then - pinned: object assignment keeps only the last value
-        expect(parsed.headers).toEqual({ 'x-a': 'second' });
+        expect(parsed.headers).toStrictEqual({ 'x-a': 'second' });
     });
 });
 
@@ -98,9 +101,9 @@ describe('http-files — responses', () => {
 
         // Then - every section is extracted
         expect(parsed.status).toBe('201');
-        expect(parsed.headers).toEqual({ 'content-type': 'application/json' });
-        expect(parsed.hasBody).toBe(true);
-        expect(parsed.body).toEqual({ id: 1 });
+        expect(parsed.headers).toStrictEqual({ 'content-type': 'application/json' });
+        expect(parsed.hasBody).toBeTruthy();
+        expect(parsed.body).toStrictEqual({ id: 1 });
     });
 
     test('parses a body-less response', () => {
@@ -109,7 +112,7 @@ describe('http-files — responses', () => {
 
         // Then - no body is asserted
         expect(parsed.status).toBe('204');
-        expect(parsed.hasBody).toBe(false);
+        expect(parsed.hasBody).toBeFalsy();
     });
 
     test('rejects a first line that is not HTTP/1.1 <status>', () => {
@@ -152,7 +155,7 @@ describe('http-files — responses', () => {
         );
 
         // Then - the body is the raw string
-        expect(parsed.hasBody).toBe(true);
+        expect(parsed.hasBody).toBeTruthy();
         expect(parsed.body).toBe('plain text, not JSON');
     });
 
@@ -166,7 +169,7 @@ describe('http-files — responses', () => {
         });
 
         // Then - no bogus reason text is invented and the token survives parsing
-        expect(text.startsWith('HTTP/1.1 {{number}}\n')).toBe(true);
+        expect(text.startsWith('HTTP/1.1 {{number}}\n')).toBeTruthy();
         expect(parseResponseFile(text, 'responses/roundtrip.http').status).toBe('{{number}}');
     });
 

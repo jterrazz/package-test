@@ -80,7 +80,7 @@ export function prismaPushCommand(prismaSchema: null | string): string {
     return `${PRISMA_PUSH} --schema ${JSON.stringify(resolve(prismaSchema))}`;
 }
 
-export interface SqliteOptions {
+export type SqliteOptions = {
     /**
      * Path to a SQL file used to initialize the database schema.
      * Mutually exclusive with `prismaSchema`.
@@ -93,7 +93,7 @@ export interface SqliteOptions {
      * Mutually exclusive with `init`.
      */
     prismaSchema?: string;
-}
+};
 
 /** Every template file this package writes carries that prefix, then its key. */
 const TEMPLATE_PREFIX = 'template';
@@ -248,8 +248,8 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     private db: Database.Database | null = null;
     private templatePath = '';
     private workerDbPath = '';
-    private initSql: null | string;
-    private prismaSchema: null | string;
+    private readonly initSql: null | string;
+    private readonly prismaSchema: null | string;
     private readonly options: SqliteOptions;
 
     constructor(options: SqliteOptions = {}) {

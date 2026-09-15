@@ -111,7 +111,7 @@ export function expandWorkdir(env: CliEnv, workDir: string): CliEnv {
     const workdir = safeRealpath(workDir);
     const expanded: CliEnv = {};
     for (const [key, value] of Object.entries(env)) {
-        expanded[key] = typeof value === 'string' ? value.replace(/\$WORKDIR/g, workdir) : value;
+        expanded[key] = typeof value === 'string' ? value.replaceAll('$WORKDIR', workdir) : value;
     }
     return expanded;
 }

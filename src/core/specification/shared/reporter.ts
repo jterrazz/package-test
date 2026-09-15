@@ -1,12 +1,12 @@
 // ── Colors ──
 
-const GREEN = '\x1b[32m';
-const RED = '\x1b[31m';
-const DIM = '\x1b[2m';
-const BOLD = '\x1b[1m';
-const RESET = '\x1b[0m';
-const BG_CYAN = '\x1b[46m';
-const BLACK = '\x1b[30m';
+const GREEN = '\u001B[32m';
+const RED = '\u001B[31m';
+const DIM = '\u001B[2m';
+const BOLD = '\u001B[1m';
+const RESET = '\u001B[0m';
+const BG_CYAN = '\u001B[46m';
+const BLACK = '\u001B[30m';
 
 // ── Symbols (vitest-native) ──
 
@@ -18,20 +18,20 @@ const DASH = '⎯';
 // ── Types ──
 
 /** Status report for a single infrastructure service after startup. */
-export interface ServiceReport {
+export type ServiceReport = {
     name: string;
     type: string;
     connectionString?: string;
     durationMs: number;
     error?: string;
     logs?: string;
-}
+};
 
 /** Describes the application under test for startup reporting. */
-export interface AppInfo {
+export type AppInfo = {
     type: 'http' | 'in-process';
-    url?: string;
-}
+    url?: string | undefined;
+};
 
 // ── Startup report ──
 
@@ -42,9 +42,7 @@ export function formatStartupReport(
 ): string {
     const lines: string[] = [];
 
-    lines.push('');
-    lines.push(`${BG_CYAN}${BLACK}${BOLD} INFRA ${RESET} Starting infrastructure...`);
-    lines.push('');
+    lines.push('', `${BG_CYAN}${BLACK}${BOLD} INFRA ${RESET} Starting infrastructure...`, '');
 
     for (const service of services) {
         if (service.error) {
@@ -98,19 +96,19 @@ export function formatStatusError(
 ): string {
     const lines: string[] = [];
 
-    lines.push(`Expected status: ${GREEN}${expectedStatus}${RESET}`);
-    lines.push(`Received status: ${RED}${receivedStatus}${RESET}`);
-    lines.push('');
-    lines.push(`${DIM}${request.method} ${request.path}${RESET}`);
+    lines.push(
+        `Expected status: ${GREEN}${expectedStatus}${RESET}`,
+        `Received status: ${RED}${receivedStatus}${RESET}`,
+        '',
+        `${DIM}${request.method} ${request.path}${RESET}`,
+    );
 
     if (request.body) {
         lines.push(formatJson(request.body, DIM));
     }
 
     if (responseBody) {
-        lines.push('');
-        lines.push(`${DIM}Response:${RESET}`);
-        lines.push(formatJson(responseBody, RED));
+        lines.push('', `${DIM}Response:${RESET}`, formatJson(responseBody, RED));
     }
 
     return lines.join('\n');
@@ -126,14 +124,16 @@ export function formatTableDiff(
 ): string {
     const lines: string[] = [];
 
-    lines.push(`Table "${table}" mismatch`);
-    lines.push(`${DIM}  query: ${columns.join(', ')}${RESET}`);
-    lines.push(`${DIM}  expected: ${rowLabel(expected.length)}${RESET}`);
-    lines.push(`${DIM}  received: ${rowLabel(actual.length)}${RESET}`);
-    lines.push('');
-    lines.push(`${GREEN}- Expected${RESET}`);
-    lines.push(`${RED}+ Received${RESET}`);
-    lines.push('');
+    lines.push(
+        `Table "${table}" mismatch`,
+        `${DIM}  query: ${columns.join(', ')}${RESET}`,
+        `${DIM}  expected: ${rowLabel(expected.length)}${RESET}`,
+        `${DIM}  received: ${rowLabel(actual.length)}${RESET}`,
+        '',
+        `${GREEN}- Expected${RESET}`,
+        `${RED}+ Received${RESET}`,
+        '',
+    );
 
     const header = columns.join('  |  ');
     lines.push(`${DIM}  ${header}${RESET}`);
@@ -153,8 +153,10 @@ export function formatTableDiff(
             if (same) {
                 lines.push(`  ${formatRow(act)}`);
             } else {
-                lines.push(`${GREEN}- ${formatRow(exp)}${RESET}`);
-                lines.push(`${RED}+ ${formatRow(act)}${RESET}`);
+                lines.push(
+                    `${GREEN}- ${formatRow(exp)}${RESET}`,
+                    `${RED}+ ${formatRow(act)}${RESET}`,
+                );
             }
         }
     }
@@ -171,11 +173,13 @@ export function formatTableDiff(
 export function formatResponseDiff(file: string, expected: unknown, actual: unknown): string {
     const lines: string[] = [];
 
-    lines.push(`Response mismatch (${file})`);
-    lines.push('');
-    lines.push(`${GREEN}- Expected${RESET}`);
-    lines.push(`${RED}+ Received${RESET}`);
-    lines.push('');
+    lines.push(
+        `Response mismatch (${file})`,
+        '',
+        `${GREEN}- Expected${RESET}`,
+        `${RED}+ Received${RESET}`,
+        '',
+    );
 
     const expectedLines = JSON.stringify(expected, null, 2).split('\n');
     const actualLines = JSON.stringify(actual, null, 2).split('\n');
@@ -210,20 +214,20 @@ export function formatExitCodeError(
 ): string {
     const lines: string[] = [];
 
-    lines.push(`Expected exit code: ${GREEN}${expected}${RESET}`);
-    lines.push(`Received exit code: ${RED}${received}${RESET}`);
+    lines.push(
+        `Expected exit code: ${GREEN}${expected}${RESET}`,
+        `Received exit code: ${RED}${received}${RESET}`,
+    );
 
     if (stdout.trim()) {
-        lines.push('');
-        lines.push(`${DIM}stdout:${RESET}`);
+        lines.push('', `${DIM}stdout:${RESET}`);
         for (const line of stdout.trim().split('\n').slice(-15)) {
             lines.push(`  ${DIM}${line}${RESET}`);
         }
     }
 
     if (stderr.trim()) {
-        lines.push('');
-        lines.push(`${DIM}stderr:${RESET}`);
+        lines.push('', `${DIM}stderr:${RESET}`);
         for (const line of stderr.trim().split('\n').slice(-15)) {
             lines.push(`  ${RED}${line}${RESET}`);
         }
@@ -293,11 +297,13 @@ export function formatStdoutDiff(
 ): string {
     const lines: string[] = [];
 
-    lines.push(`Output mismatch (${file})`);
-    lines.push('');
-    lines.push(`${GREEN}- Expected${RESET}`);
-    lines.push(`${RED}+ Received${RESET}`);
-    lines.push('');
+    lines.push(
+        `Output mismatch (${file})`,
+        '',
+        `${GREEN}- Expected${RESET}`,
+        `${RED}+ Received${RESET}`,
+        '',
+    );
 
     const expectedLines = expected.split('\n');
     const actualLines = actual.split('\n');
@@ -314,11 +320,11 @@ export function formatStdoutDiff(
 
 // ── Directory diff ──
 
-interface DirectoryDiffData {
+type DirectoryDiffData = {
     added: string[];
     changed: { path: string; expected: string; actual: string }[];
     removed: string[];
-}
+};
 
 export function formatDirectoryDiff(
     fixtureName: string,
@@ -328,14 +334,14 @@ export function formatDirectoryDiff(
     const lines: string[] = [];
 
     const total = diff.added.length + diff.removed.length + diff.changed.length;
-    lines.push(`Directory mismatch: ${BOLD}${fixtureName}${RESET}`);
     lines.push(
+        `Directory mismatch: ${BOLD}${fixtureName}${RESET}`,
         `${DIM}  ${total} difference${total === 1 ? '' : 's'}: ${diff.added.length} added, ${diff.removed.length} removed, ${diff.changed.length} changed${RESET}`,
+        '',
+        `${GREEN}- Expected (fixture)${RESET}`,
+        `${RED}+ Received (generated)${RESET}`,
+        '',
     );
-    lines.push('');
-    lines.push(`${GREEN}- Expected (fixture)${RESET}`);
-    lines.push(`${RED}+ Received (generated)${RESET}`);
-    lines.push('');
 
     for (const path of diff.added) {
         lines.push(`${RED}+ added    ${path}${RESET}  ${DIM}(not in fixture)${RESET}`);
@@ -373,8 +379,7 @@ export function formatDirectoryDiff(
         }
     }
 
-    lines.push('');
-    lines.push(`${DIM}${hint}${RESET}`);
+    lines.push('', `${DIM}${hint}${RESET}`);
 
     return lines.join('\n');
 }
@@ -402,11 +407,13 @@ export function formatFileUnexpected(path: string): string {
 
 export function formatFileContentMismatch(path: string, expected: string, actual: string): string {
     const lines: string[] = [];
-    lines.push(`File "${path}" does not contain expected content`);
-    lines.push('');
-    lines.push(`${GREEN}Expected to contain:${RESET}`);
-    lines.push(`  ${GREEN}${expected}${RESET}`);
-    lines.push('');
+    lines.push(
+        `File "${path}" does not contain expected content`,
+        '',
+        `${GREEN}Expected to contain:${RESET}`,
+        `  ${GREEN}${expected}${RESET}`,
+        '',
+    );
     lines.push(`${RED}Actual content (first 20 lines):${RESET}`);
     for (const line of actual.split('\n').slice(0, 20)) {
         lines.push(`  ${DIM}${line}${RESET}`);
@@ -457,15 +464,15 @@ function formatRow(row: unknown[]): string {
 
 /** Strip ANSI escape codes from a string. */
 export function stripAnsi(str: string): string {
-    // eslint-disable-next-line no-control-regex
-    return str.replace(/\x1b\[[0-9;]*m/g, '');
+    // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: stripping it is the point
+    return str.replaceAll(/\u001B\[[0-9;]*m/gu, '');
 }
 
 /** Strip ANSI codes and replace volatile tokens (ports, durations) with placeholders. */
 export function normalizeOutput(str: string): string {
     return stripAnsi(str)
-        .replace(/localhost:\d+/g, 'localhost:PORT')
-        .replace(/\d+ms/g, 'Xms')
-        .replace(/\d+\.\d+s/g, 'X.Xs')
+        .replaceAll(/localhost:\d+/gu, 'localhost:PORT')
+        .replaceAll(/\d+ms/gu, 'Xms')
+        .replaceAll(/\d+\.\d+s/gu, 'X.Xs')
         .trim();
 }

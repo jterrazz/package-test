@@ -25,7 +25,7 @@ export type ElementKind = 'button' | 'field' | 'heading' | 'link' | 'testId' | '
  * A descriptor must designate exactly ONE element at action time; see
  * {@link ElementMatch} and CONVENTIONS W3.
  */
-export interface ElementRef {
+export type ElementRef = {
     /**
      * Match the accessible name as a whole string rather than a substring.
      * Default (`false`) mirrors playwright: `link('Articles')` also matches
@@ -40,44 +40,44 @@ export interface ElementRef {
      * `within(scope, target)`. Chains: a scope may itself carry a scope.
      */
     scope?: ElementRef;
-}
+};
 
 /**
  * One candidate captured when a descriptor matched more than one element —
  * the evidence the ambiguity error enumerates so the author can disambiguate
  * without opening a browser.
  */
-export interface ElementMatch {
+export type ElementMatch = {
     /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
-    context?: string;
+    context?: string | undefined;
     /** The attribute that disambiguates most — `href` for links, `name` for fields. */
-    detail?: string;
+    detail?: string | undefined;
     /** Tag name, lower-cased. */
     tag: string;
     /** Text content, whitespace-collapsed and truncated. */
     text: string;
-}
+};
 
 /** A `<link>` element captured from the rendered document's head. */
-export interface BrowserLinkElement {
+export type BrowserLinkElement = {
     href: string;
-    hreflang?: string;
+    hreflang?: string | undefined;
     rel: string;
-    type?: string;
-}
+    type?: string | undefined;
+};
 
 /** A `<meta>` element captured from the rendered document's head. */
-export interface BrowserMetaElement {
+export type BrowserMetaElement = {
     content: string;
-    name?: string;
-    property?: string;
-}
+    name?: string | undefined;
+    property?: string | undefined;
+};
 
 /** A console message emitted while the page loaded or the scenario ran. */
-export interface BrowserConsoleMessage {
+export type BrowserConsoleMessage = {
     text: string;
     type: string;
-}
+};
 
 /**
  * The visitor — the interaction vocabulary handed to a visit scenario.
@@ -85,7 +85,7 @@ export interface BrowserConsoleMessage {
  * synchronization primitive: it retries until the element is visible and
  * fails at the timeout. There is no sleep and no conditional helper.
  */
-export interface Visitor {
+export type Visitor = {
     /** Check a checkbox or radio. */
     check: (element: ElementRef) => Promise<void>;
     /** Click the element. */
@@ -102,18 +102,18 @@ export interface Visitor {
     see: (element: ElementRef) => Promise<void>;
     /** Select an option in a select field. */
     select: (element: ElementRef, option: string) => Promise<void>;
-}
+};
 
 /** The behavior of a visit — the When of the spec; assertions stay in the Then. */
 export type VisitScenario = (visitor: Visitor) => Promise<void>;
 
 /** Per-visit options forwarded to the browser context. */
-export interface BrowserOpenOptions {
+export type BrowserOpenOptions = {
     /**
      * Extra origins the `external: 'block'` policy lets through — the
      * declared stub backend the page legitimately fetches from.
      */
-    allowedOrigins?: string[];
+    allowedOrigins?: string[] | undefined;
     /**
      * Base URL of the site under test — the origin `goto()` resolves against
      * and the boundary of the `external` policy.
@@ -126,17 +126,17 @@ export interface BrowserOpenOptions {
      */
     external: 'allow' | 'block';
     /** Extra HTTP headers sent with every request of the visit (incl. User-Agent overrides). */
-    headers?: Record<string, string>;
+    headers?: Record<string, string> | undefined;
     /** The interaction scenario to run after load; the capture reflects the final state. */
-    scenario?: VisitScenario;
-}
+    scenario?: undefined | VisitScenario;
+};
 
 /**
  * The rendered page captured by a browser visit — the FINAL state when a
  * scenario ran. Extraction happens in-page (the browser IS the HTML
  * parser); interpretation of the raw elements belongs to core.
  */
-export interface BrowserPage {
+export type BrowserPage = {
     /** Console messages emitted while loading and interacting, in order. */
     consoleMessages: BrowserConsoleMessage[];
     /** Serialized DOM after rendering (`document.documentElement.outerHTML`). */
@@ -155,16 +155,16 @@ export interface BrowserPage {
     title: string;
     /** Final URL after redirects and scenario navigation. */
     url: string;
-}
+};
 
 /**
  * Abstract browser interface for the website specification runner.
  * One implementation lives in `integrations/playwright/` — a single shared
  * browser instance per runner; each `open()` gets a fresh, isolated context.
  */
-export interface BrowserPort {
+export type BrowserPort = {
     /** Close the shared browser instance (idempotent). */
     close: () => Promise<void>;
     /** Load `url` in a fresh context, run the scenario, capture the final page. */
     open: (url: string, options: BrowserOpenOptions) => Promise<BrowserPage>;
-}
+};

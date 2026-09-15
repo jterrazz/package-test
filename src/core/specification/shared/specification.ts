@@ -28,7 +28,16 @@ import { startWebsite } from '../website/start-website.js';
  *   export const { cli, cleanup } = await specification.cli('my-cli');
  *   afterAll(cleanup);
  */
-export const specification = {
+/** The five constructors, and only five — the framework's whole entry surface. */
+export type Specification = {
+    api: typeof startApi;
+    cli: typeof startCli;
+    jobs: typeof startJobs;
+    mobile: typeof startMobile;
+    website: typeof startWebsite;
+};
+
+export const specification: Specification = {
     /**
      * Test an HTTP app. Mode `'node'` (default) starts the declared services
      * via testcontainers and runs the app in-process; mode `'compose'` runs

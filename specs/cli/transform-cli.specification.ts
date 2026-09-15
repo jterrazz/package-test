@@ -12,8 +12,7 @@ import { specification } from '../../src/index.js';
  */
 const CLI_BIN = resolve(import.meta.dirname, '../_fixtures/cli-app/cli.sh');
 
-// eslint-disable-next-line no-control-regex
-const stripAnsi = (text: string): string => text.replace(/\x1b\[[0-9;]*m/g, '');
+const stripAnsi = (text: string): string => text.replaceAll(/\u001B\[[0-9;]*m/gu, '');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     transform: stripAnsi,

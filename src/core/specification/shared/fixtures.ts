@@ -55,9 +55,9 @@ export function discoverSpecsRoot(startDir: string): string {
  * {@link copyPlan} — it is irrelevant to source resolution.
  */
 export function resolveFixtureSource(path: string, testDir: string): string {
-    const clean = path.replace(/\/+$/, '');
+    const clean = path.replace(/\/+$/u, '');
     if (clean === '$FIXTURES' || path.startsWith('$FIXTURES/')) {
-        const rest = clean.slice('$FIXTURES'.length).replace(/^\/+/, '');
+        const rest = clean.slice('$FIXTURES'.length).replace(/^\/+/u, '');
         return resolve(discoverSpecsRoot(testDir), GROUND_FIXTURES, rest);
     }
     if (path.startsWith('$')) {
@@ -72,10 +72,10 @@ export function resolveFixtureSource(path: string, testDir: string): string {
 }
 
 /** A resolved copy operation: where to read from, where to write to. */
-interface FixtureCopyPlan {
+type FixtureCopyPlan = {
     dest: string;
     src: string;
-}
+};
 
 /**
  * Compute the source + destination for copying a fixture into the working
@@ -90,7 +90,7 @@ interface FixtureCopyPlan {
  */
 export function copyPlan(path: string, testDir: string, workDir: string): FixtureCopyPlan {
     const src = resolveFixtureSource(path, testDir);
-    const spread = /\/+$/.test(path);
+    const spread = /\/+$/u.test(path);
     const dest = spread ? workDir : resolve(workDir, basename(src));
     return { dest, src };
 }

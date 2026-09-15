@@ -62,7 +62,7 @@ describe('selectSimulator', () => {
         // Given - a device that does not exist
         // Then - the refusal lists what does, so the fix needs no Xcode round-trip
         expect(() => selectSimulator(LISTING, { name: 'iPhone 3G' })).toThrow(
-            /no simulator matches "iPhone 3G"[\s\S]*iPhone 17 — iOS 26\.5/,
+            /no simulator matches "iPhone 3G"[\s\S]*iPhone 17 — iOS 26\.5/u,
         );
     });
 
@@ -70,7 +70,7 @@ describe('selectSimulator', () => {
         // Given - a name present on two runtimes, no os given
         // Then - the framework never guesses which one a spec meant
         expect(() => selectSimulator(LISTING, { name: 'iPhone 16 Pro' })).toThrow(
-            /2 simulators match "iPhone 16 Pro" — add `os:` or `udid:`/,
+            /2 simulators match "iPhone 16 Pro" — add `os:` or `udid:`/u,
         );
     });
 });

@@ -16,16 +16,19 @@ import type { ElementRef } from '../../ports/browser.port.js';
  */
 
 /** Options accepted by every named descriptor. */
-export interface ElementOptions {
+export type ElementOptions = {
     /**
      * Match the accessible name as a whole string. Default is substring —
      * `link('Articles')` also matches "Read Articles".
      */
     exact?: boolean;
-}
+};
+
+/** A user-facing element factory — what every name in this module is. */
+type ElementFactory = (name: string, options?: ElementOptions) => ElementRef;
 
 const named =
-    (kind: ElementRef['kind']) =>
+    (kind: ElementRef['kind']): ElementFactory =>
     (name: string, options?: ElementOptions): ElementRef => ({
         kind,
         name,
@@ -33,19 +36,19 @@ const named =
     });
 
 /** A button (or element with the button role), by accessible name. */
-export const button = named('button');
+export const button: ElementFactory = named('button');
 
 /** A form field, by label. */
-export const field = named('field');
+export const field: ElementFactory = named('field');
 
 /** A heading, by accessible name. */
-export const heading = named('heading');
+export const heading: ElementFactory = named('heading');
 
 /** A link, by accessible name. */
-export const link = named('link');
+export const link: ElementFactory = named('link');
 
 /** An element containing the given text. */
-export const content = named('text');
+export const content: ElementFactory = named('text');
 
 /** The escape hatch: an element by `data-testid`. Prefer user-facing elements. */
 export const testId = (id: string): ElementRef => ({ kind: 'testId', name: id });
@@ -57,8 +60,11 @@ export const testId = (id: string): ElementRef => ({ kind: 'testId', name: id })
  * the pages carrying several of the same region (`navigation('Breadcrumb')`).
  */
 
+/** A landmark factory — the optionally-named containers `within()` accepts. */
+type LandmarkFactory = (name?: string, options?: ElementOptions) => ElementRef;
+
 const landmark =
-    (kind: ElementRef['kind']) =>
+    (kind: ElementRef['kind']): LandmarkFactory =>
     (name?: string, options?: ElementOptions): ElementRef => ({
         kind,
         ...(name === undefined ? {} : { name }),
@@ -66,28 +72,28 @@ const landmark =
     });
 
 /** The `banner` landmark — the page header. */
-export const banner = landmark('banner');
+export const banner: LandmarkFactory = landmark('banner');
 
 /** The `complementary` landmark — an `<aside>`, a sidebar. */
-export const complementary = landmark('complementary');
+export const complementary: LandmarkFactory = landmark('complementary');
 
 /** The `contentinfo` landmark — the page footer. */
-export const contentinfo = landmark('contentinfo');
+export const contentinfo: LandmarkFactory = landmark('contentinfo');
 
 /** The `form` landmark — a form carrying an accessible name. */
-export const form = landmark('form');
+export const form: LandmarkFactory = landmark('form');
 
 /** The `main` landmark — the primary content of the document. */
-export const main = landmark('main');
+export const main: LandmarkFactory = landmark('main');
 
 /** The `navigation` landmark — a `<nav>`. Name it when a page has several. */
-export const navigation = landmark('navigation');
+export const navigation: LandmarkFactory = landmark('navigation');
 
 /** The `region` landmark — a `<section>` carrying an accessible name. */
-export const region = landmark('region');
+export const region: LandmarkFactory = landmark('region');
 
 /** The `search` landmark. */
-export const search = landmark('search');
+export const search: LandmarkFactory = landmark('search');
 
 /**
  * Restrict a descriptor to the inside of another — the answer to ambiguity,

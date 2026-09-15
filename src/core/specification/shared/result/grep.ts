@@ -8,8 +8,8 @@
  * expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports")
  */
 export function grep(output: string, pattern: string): string {
-    // eslint-disable-next-line no-control-regex
-    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
-    const blocks = clean.split(/\n\s*\n/);
+    // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: stripping it is the point
+    const clean = output.replaceAll(/\u001B\[[0-9;]*m/gu, '');
+    const blocks = clean.split(/\n\s*\n/u);
     return blocks.filter((block) => block.includes(pattern)).join('\n\n');
 }

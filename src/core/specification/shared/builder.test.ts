@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { type Contract, defineContracts } from '../../contracts/contract.js';
+import { defineContracts } from '../../contracts/contract.js';
+import type { Contract } from '../../contracts/contract.js';
 import { http } from '../../contracts/http.js';
 import type { CliEnv, CliOutput, CliPort } from '../../ports/cli.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
@@ -60,20 +61,21 @@ function fakeService(options: {
 }
 
 describe('builder — exec argument validation', () => {
-    test('exec([]) is rejected with a clear error', () => {
+    test('exec([]) is rejected with a clear error', async () => {
         // Given - a builder with no particular config
         const builder = new SpecificationBuilder({}, import.meta.dirname);
 
-        // Then - an empty command sequence is a usage error, synchronously
-        expect(() => builder.exec([])).toThrow('exec([]) requires at least one command');
+        // Then - an empty command sequence is a usage error: `.exec()` answers a
+        // Promise, so the refusal arrives as a rejection, not a synchronous throw
+        await expect(builder.exec([])).rejects.toThrow('exec([]) requires at least one command');
     });
 
-    test('exec(array) with waitFor/timeout stays rejected', () => {
+    test('exec(array) with waitFor/timeout stays rejected', async () => {
         // Given - a command sequence plus long-running options
         const builder = new SpecificationBuilder({}, import.meta.dirname);
 
         // Then - the combination is rejected before the empty-array path
-        expect(() => builder.exec(['a', 'b'], { waitFor: 'x' })).toThrow(
+        await expect(builder.exec(['a', 'b'], { waitFor: 'x' })).rejects.toThrow(
             'not supported with a command sequence',
         );
     });
@@ -166,7 +168,7 @@ describe('builder — intercept input forms', () => {
         builder.intercept([first, second]);
 
         // Then - both are queued, in array order (identical to two calls)
-        expect(declaredNumbers(builder)).toEqual([1, 2]);
+        expect(declaredNumbers(builder)).toStrictEqual([1, 2]);
     });
 
     test('a composite is flattened, and .with() lands its override first', () => {
@@ -182,7 +184,7 @@ describe('builder — intercept input forms', () => {
         builder.intercept(base.with({ request, response: http.json({ n: 9 }) }));
 
         // Then - the override replaced its route and leads the queue
-        expect(declaredNumbers(builder)).toEqual([9, 2]);
+        expect(declaredNumbers(builder)).toStrictEqual([9, 2]);
     });
 
     test('a bare request half without its response is refused', () => {
@@ -238,7 +240,7 @@ describe('builder — contracts on the stub facets', () => {
         ]);
 
         // Then - both are held for the stub, in declaration order
-        expect(declaredNumbers(builder)).toEqual([1, 2]);
+        expect(declaredNumbers(builder)).toStrictEqual([1, 2]);
     });
 
     test('a website chain without a backend option names the fix', () => {
@@ -259,7 +261,11 @@ describe('builder — contracts on the stub facets', () => {
     test('a mobile chain without a backend option names its own constructor', () => {
         // Given - a mobile-shaped config (a device accessor, no backend)
         const builder = new SpecificationBuilder(
-            { device: () => Promise.reject(new Error('unused')) },
+            {
+                device: async () => {
+                    throw new Error('unused');
+                },
+            },
             import.meta.dirname,
         );
 
