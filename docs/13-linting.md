@@ -22,9 +22,14 @@ export default compose(node, testing, {
     rules: {
         // Docker-aware runner names in YOUR specs (B5 is inert without them):
         'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }],
+        // A paginated envelope is read field by field: raise D12's cluster
+        // Threshold once here instead of suppressing the warning per case.
+        'jterrazz/d12w-response-body-probe': ['warn', { threshold: 6 }],
     },
 });
 ```
+
+A rule that takes options is declared, not suppressed — an `off` loses the check everywhere, a raised threshold keeps it. Four rules take one: `b5-await-using` (`runners`), `c1-domain-structure` (`depth` — the four tree shapes are [12 — Conventions](12-conventions.md#c1--the-folder-follows-the-assets)), `d12w-response-body-probe` (`threshold`, default 3), `i1-layer-boundaries` (`layers`, the rule being inert without it).
 
 - `testing` = `{ jsPlugins: ['@jterrazz/test/oxlint'], rules: recommendedRules, overrides }`. Its `overrides` relaxes `import/exports-last` for `**/*.specification.ts` — the A4 idiom (`export const { cli, cleanup } … ; afterAll(cleanup)`) legitimately ends a spec file on a non-export statement, so the relaxation ships here instead of being hand-rolled in every strict consumer.
 - Without `@jterrazz/typescript`, spread the fragment into your own config (`defineConfig({ ...testing })`) — it is a plain object.

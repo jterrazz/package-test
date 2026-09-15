@@ -37,6 +37,17 @@ ruleTester.run('d12w-response-body-probe', d12wResponseBodyProbe as unknown as O
             errors: 1,
             filename: SPEC,
         },
+        // A lowered threshold catches the pair the default lets through.
+        {
+            code: `it('two probes', async () => {
+                const body = result.response.body as { total: number };
+                expect(body.total).toBe(1);
+                expect(body.next_cursor).toBeNull();
+            });`,
+            errors: 1,
+            filename: SPEC,
+            options: [{ threshold: 2 }],
+        },
     ],
     valid: [
         // Two probes — a legitimate scalpel, silent (below the default threshold).
