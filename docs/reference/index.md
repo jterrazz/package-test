@@ -25,100 +25,100 @@
 
 | Interface | Description |
 | ------ | ------ |
-| [ApiHandle](interfaces/ApiHandle.md) | The record returned by [specification.api](variables/specification.md#property-api). Destructure with the canonical names (CONVENTIONS A3): |
-| [ApiSpecification](interfaces/ApiSpecification.md) | The `api` facet — HTTP chain entry handed out by `specification.api()`. Setup methods chain; action methods are terminal: they execute the spec and resolve to the result. |
-| [ApiSpecificationOptions](interfaces/ApiSpecificationOptions.md) | Options for [specification.api](variables/specification.md#property-api). |
-| [BrowserConsoleMessage](interfaces/BrowserConsoleMessage.md) | A console message emitted while the page loaded or the scenario ran. |
-| [BrowserLinkElement](interfaces/BrowserLinkElement.md) | A `<link>` element captured from the rendered document's head. |
-| [BrowserMetaElement](interfaces/BrowserMetaElement.md) | A `<meta>` element captured from the rendered document's head. |
-| [BrowserOpenOptions](interfaces/BrowserOpenOptions.md) | Per-visit options forwarded to the browser context. |
-| [BrowserPage](interfaces/BrowserPage.md) | The rendered page captured by a browser visit — the FINAL state when a scenario ran. Extraction happens in-page (the browser IS the HTML parser); interpretation of the raw elements belongs to core. |
-| [BrowserPort](interfaces/BrowserPort.md) | Abstract browser interface for the website specification runner. One implementation lives in `integrations/playwright/` — a single shared browser instance per runner; each `open()` gets a fresh, isolated context. |
 | [CaptureScope](interfaces/CaptureScope.md) | Named captures recorded by `match.ref()` / `{{type#ref}}` placeholders. One scope lives on each spec result — every assertion chained off the same result shares it, and a new chain starts fresh. |
-| [CliHandle](interfaces/CliHandle.md) | The record returned by [specification.cli](variables/specification.md#property-cli). Destructure with the canonical names (CONVENTIONS A3): |
-| [CliInput](interfaces/CliInput.md) | What one invocation is handed beyond its arguments — the two per-run inputs a spec document may state. Both are absent by default: the child gets an immediately-closed stdin (never a TTY) and the adapter's own timeout. |
-| [CliOutput](interfaces/CliOutput.md) | Raw output from a command execution, including exit code and captured output streams. |
-| [CliPort](interfaces/CliPort.md) | - |
-| [CliSpecification](interfaces/CliSpecification.md) | The `cli` facet — command chain entry handed out by `specification.cli()`. Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS B2) — `{ waitFor?, timeout? }` covers long-running processes. |
-| [CliSpecificationOptions](interfaces/CliSpecificationOptions.md) | Options for [specification.cli](variables/specification.md#property-cli). |
-| [ContainerPort](interfaces/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
-| [Contract](interfaces/Contract.md) | A declared external interaction: what to match (`request`) and what to reply (`response`), together in one named artifact. Contracts live in TypeScript files under `contracts/` next to the tests that use them, so the business payload (prompts, JSON responses) is visible at a glance while the real HTTP call stays mocked underneath. |
-| [ContractRequest](interfaces/ContractRequest.md) | The request half of a contract: which outgoing call it speaks for. |
-| [ContractResponse](interfaces/ContractResponse.md) | The response half of a contract: what to reply when the request matches. |
-| [Contracts](interfaces/Contracts.md) | A composite of contracts — the unit tests import. Flat, ordered, immutable; `.with()` derives a variant without touching the original. |
-| [DatabasePort](interfaces/DatabasePort.md) | Abstract database interface for specification runners. Implement this to plug in your database stack (e.g. Postgres, SQLite). |
-| [DeviceOpenOptions](interfaces/DeviceOpenOptions.md) | Per-open options forwarded to the device session. |
-| [DevicePort](interfaces/DevicePort.md) | Abstract device interface for the mobile specification runner. One implementation lives in `integrations/appium/` — a single driver session per runner, created on the first `open()` and reused; each open terminates and relaunches the app for a deterministic fresh state. |
-| [DeviceScreen](interfaces/DeviceScreen.md) | The screen captured by a device open — the FINAL state when a scenario ran. The tree is the projected page source; `texts` are the visible labels/values in document order, consecutive duplicates collapsed. |
-| [DeviceTimeouts](interfaces/DeviceTimeouts.md) | How long a device session waits, in milliseconds. Every field is optional and falls back to the framework's own default, so a runner states only the wait it needs to move — the defaults suit a release build, and a project that drives a DEV build pays for its bundler's cold boot. |
-| [DockerSpecConfig](interfaces/DockerSpecConfig.md) | Configuration for the docker-aware cli mode. When set on [SpecificationConfig](interfaces/SpecificationConfig.md), the cli runner generates a test-run id, injects it into the child env under `envVar`, then queries Docker for every container carrying `testRunLabel=<id>` after the command exits. |
-| [ElementMatch](interfaces/ElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening a browser. |
-| [ElementOptions](interfaces/ElementOptions.md) | Options accepted by every named descriptor. |
-| [ElementRef](interfaces/ElementRef.md) | A user-facing element descriptor — pure data, built by the element vocabulary (`button()`, `link()`, `field()`, …) and translated into concrete locators by the browser integration. CSS/XPath selectors are deliberately not expressible: user-facing elements are the only surface. |
-| [ExecOptions](interfaces/ExecOptions.md) | Options for the long-running form of `.exec()` (CONVENTIONS B2). When either option is present the process is spawned and observed: it resolves as soon as `waitFor` appears in stdout/stderr, and is killed when `timeout` elapses (exit code 124). |
-| [FileAccessor](interfaces/FileAccessor.md) | Read-only handle to a single file produced by a spec action. |
-| [HttpContractFilter](interfaces/HttpContractFilter.md) | Request filters for the generic HTTP provider. Every field is a subset constraint — a request matches when all provided fields match. |
-| [HttpResponseInit](interfaces/HttpResponseInit.md) | Init options shared by the response builders. |
-| [IsolationStrategy](interfaces/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |
-| [JobHandle](interfaces/JobHandle.md) | A named job that can be triggered via jobs.trigger(). |
-| [JobsHandle](interfaces/JobsHandle.md) | The record returned by [specification.jobs](variables/specification.md#property-jobs). Destructure with the canonical names (CONVENTIONS A3): |
-| [JobsSpecification](interfaces/JobsSpecification.md) | The `jobs` facet — job chain entry handed out by `specification.jobs()`. Jobs run in-process by definition (CONVENTIONS A5/A8). |
-| [JobsSpecificationOptions](interfaces/JobsSpecificationOptions.md) | Options for [specification.jobs](variables/specification.md#property-jobs). |
-| [LiterateRunFlags](interfaces/LiterateRunFlags.md) | Per-call options for runSpecDocument / `cli.run()`. |
-| [LiterateServeRegistration](interfaces/LiterateServeRegistration.md) | A server a document may start by name (`serve: mcp`), registered once per app in the `serve` option of `specification.cli()`. |
-| [MatchableRequest](interfaces/MatchableRequest.md) | The observed outgoing request, reduced to what contract matchers inspect. Built once per request by the engine (MSW on api/jobs, the stub backend on website/mobile) and handed to [ContractRequest.match](interfaces/ContractRequest.md#match) and to a [ContractResponder](type-aliases/ContractResponder.md). |
-| [MatchFixtureOptions](interfaces/MatchFixtureOptions.md) | Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a single fixture OUT of update-mode rewriting: a frozen fixture is NEVER written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen mismatch still throws its diff, and a frozen missing fixture still throws its "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the subject of a negative test that asserts the mismatch/error rendering) survivable across update runs instead of being silently overwritten with the actual output. |
-| [MobileBackendOptions](interfaces/MobileBackendOptions.md) | The declared stub backend behind the app under test. The framework owns the simulator and appium but NOT the JS bundler (Metro belongs to the caller's repo, like `next build` belongs to a website's) — so nothing is injected: the handle exposes `backendUrl` and the CALLER wires it into its own bundler env. |
-| [MobileElementMatch](interfaces/MobileElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening the simulator. |
-| [MobileHandle](interfaces/MobileHandle.md) | The record returned by [specification.mobile](variables/specification.md#property-mobile). Destructure with the canonical names (CONVENTIONS A3): |
-| [MobileSpecification](interfaces/MobileSpecification.md) | The `mobile` facet — screen chain entry handed out by `specification.mobile()`. `.open()` is the single, terminal action: it terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen. |
-| [MobileSpecificationOptions](interfaces/MobileSpecificationOptions.md) | Options for [specification.mobile](variables/specification.md#property-mobile). |
-| [MobileVisitor](interfaces/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until a visible match exists; acting verbs then enforce exactly-one (W3), while `see()` — the single synchronization primitive — is satisfied by any visible match. There is no sleep and no conditional helper. |
-| [MockDatePort](interfaces/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
-| [PostgresOptions](interfaces/PostgresOptions.md) | - |
-| [RedisOptions](interfaces/RedisOptions.md) | - |
-| [ScreenNode](interfaces/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
-| [ServeOptions](interfaces/ServeOptions.md) | Options for a local server started by the framework. |
-| [ServerPort](interfaces/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
-| [ServerResponse](interfaces/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
-| [ServiceHandle](interfaces/ServiceHandle.md) | A service handle — returned by factory functions like postgres(), redis(). Mutable: connectionString is populated after the orchestrator starts containers. |
-| [SpecDocument](interfaces/SpecDocument.md) | A parsed `<case>.spec.yaml`. |
-| [SpecFixture](interfaces/SpecFixture.md) | One `fixture:` entry — a path with the line it was declared on. |
-| [SpecificationConfig](interfaces/SpecificationConfig.md) | Adapter configuration passed to the specification facets at setup time. |
-| [SpecRun](interfaces/SpecRun.md) | One run: a command, what it must exit with, and what it must have produced. |
-| [SpecServeEntry](interfaces/SpecServeEntry.md) | One `serve:` entry — a registered server plus the extra env it is started with. |
-| [SpecStream](interfaces/SpecStream.md) | An expected stream: its text, and the first line of that text in the file. |
-| [SqliteOptions](interfaces/SqliteOptions.md) | - |
-| [Visitor](interfaces/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
-| [WebsiteBackendOptions](interfaces/WebsiteBackendOptions.md) | The declared stub backend behind the site under test — started before the server command, torn down with the runner. Its URL is injected into the server child's environment under `env`; the contracts each chain declares via `.intercept(...)` are what it serves. |
-| [WebsiteHandle](interfaces/WebsiteHandle.md) | The record returned by [specification.website](variables/specification.md#property-website). Destructure with the canonical names (CONVENTIONS A3): |
-| [WebsiteSpecification](interfaces/WebsiteSpecification.md) | The `website` facet — page chain entry handed out by `specification.website()`. Setup methods chain; action methods are terminal. `.visit()` renders the page in the shared browser; `.fetch()` performs one raw HTTP exchange and never follows redirects. |
 
 ## Type Aliases
 
 | Type Alias | Description |
 | ------ | ------ |
+| [ApiHandle](type-aliases/ApiHandle.md) | The record returned by startApi \| specification.api. Destructure with the canonical names (CONVENTIONS A3): |
+| [ApiSpecification](type-aliases/ApiSpecification.md) | The `api` facet — HTTP chain entry handed out by `specification.api()`. Setup methods chain; action methods are terminal: they execute the spec and resolve to the result. |
+| [ApiSpecificationOptions](type-aliases/ApiSpecificationOptions.md) | Options for startApi \| specification.api. |
+| [BrowserConsoleMessage](type-aliases/BrowserConsoleMessage.md) | A console message emitted while the page loaded or the scenario ran. |
+| [BrowserLinkElement](type-aliases/BrowserLinkElement.md) | A `<link>` element captured from the rendered document's head. |
+| [BrowserMetaElement](type-aliases/BrowserMetaElement.md) | A `<meta>` element captured from the rendered document's head. |
+| [BrowserOpenOptions](type-aliases/BrowserOpenOptions.md) | Per-visit options forwarded to the browser context. |
+| [BrowserPage](type-aliases/BrowserPage.md) | The rendered page captured by a browser visit — the FINAL state when a scenario ran. Extraction happens in-page (the browser IS the HTML parser); interpretation of the raw elements belongs to core. |
+| [BrowserPort](type-aliases/BrowserPort.md) | Abstract browser interface for the website specification runner. One implementation lives in `integrations/playwright/` — a single shared browser instance per runner; each `open()` gets a fresh, isolated context. |
 | [CliEnv](type-aliases/CliEnv.md) | Extra environment variables to set for the child process. Values are merged on top of process.env. A `null` value unsets the variable. |
+| [CliHandle](type-aliases/CliHandle.md) | The record returned by startCli \| specification.cli. Destructure with the canonical names (CONVENTIONS A3): |
+| [CliInput](type-aliases/CliInput.md) | What one invocation is handed beyond its arguments — the two per-run inputs a spec document may state. Both are absent by default: the child gets an immediately-closed stdin (never a TTY) and the adapter's own timeout. |
+| [CliOutput](type-aliases/CliOutput.md) | Raw output from a command execution, including exit code and captured output streams. |
+| [CliPort](type-aliases/CliPort.md) | - |
+| [CliSpecification](type-aliases/CliSpecification.md) | The `cli` facet — command chain entry handed out by `specification.cli()`. Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS B2) — `{ waitFor?, timeout? }` covers long-running processes. |
+| [CliSpecificationOptions](type-aliases/CliSpecificationOptions.md) | Options for startCli \| specification.cli. |
+| [ContainerPort](type-aliases/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
+| [Contract](type-aliases/Contract.md) | A declared external interaction: what to match (`request`) and what to reply (`response`), together in one named artifact. Contracts live in TypeScript files under `contracts/` next to the tests that use them, so the business payload (prompts, JSON responses) is visible at a glance while the real HTTP call stays mocked underneath. |
 | [ContractInput](type-aliases/ContractInput.md) | Any accepted contract input: one, a list, or a composite. |
-| [ContractResponder](type-aliases/ContractResponder.md) | A dynamic response: computed from the observed request at the moment the contract is served, rather than fixed ahead of time. Handed the same [MatchableRequest](interfaces/MatchableRequest.md) the request half matched on, so the reply can echo or derive from the body/headers/url. |
-| [ContractResponseValue](type-aliases/ContractResponseValue.md) | What a contract replies with: either a fixed [ContractResponse](interfaces/ContractResponse.md) or a [ContractResponder](type-aliases/ContractResponder.md) evaluated per served request. |
+| [ContractRequest](type-aliases/ContractRequest.md) | The request half of a contract: which outgoing call it speaks for. |
+| [ContractResponder](type-aliases/ContractResponder.md) | A dynamic response: computed from the observed request at the moment the contract is served, rather than fixed ahead of time. Handed the same [MatchableRequest](type-aliases/MatchableRequest.md) the request half matched on, so the reply can echo or derive from the body/headers/url. |
+| [ContractResponse](type-aliases/ContractResponse.md) | The response half of a contract: what to reply when the request matches. |
+| [ContractResponseValue](type-aliases/ContractResponseValue.md) | What a contract replies with: either a fixed [ContractResponse](type-aliases/ContractResponse.md) or a [ContractResponder](type-aliases/ContractResponder.md) evaluated per served request. |
+| [Contracts](type-aliases/Contracts.md) | A composite of contracts — the unit tests import. Flat, ordered, immutable; `.with()` derives a variant without touching the original. |
 | [DatabaseKeys](type-aliases/DatabaseKeys.md) | Keys of a services record whose handles are databases. |
+| [DatabasePort](type-aliases/DatabasePort.md) | Abstract database interface for specification runners. Implement this to plug in your database stack (e.g. Postgres, SQLite). |
+| [DeviceOpenOptions](type-aliases/DeviceOpenOptions.md) | Per-open options forwarded to the device session. |
+| [DevicePort](type-aliases/DevicePort.md) | Abstract device interface for the mobile specification runner. One implementation lives in `integrations/appium/` — a single driver session per runner, created on the first `open()` and reused; each open terminates and relaunches the app for a deterministic fresh state. |
+| [DeviceScreen](type-aliases/DeviceScreen.md) | The screen captured by a device open — the FINAL state when a scenario ran. The tree is the projected page source; `texts` are the visible labels/values in document order, consecutive duplicates collapsed. |
+| [DeviceTimeouts](type-aliases/DeviceTimeouts.md) | How long a device session waits, in milliseconds. Every field is optional and falls back to the framework's own default, so a runner states only the wait it needs to move — the defaults suit a release build, and a project that drives a DEV build pays for its bundler's cold boot. |
+| [DockerSpecConfig](type-aliases/DockerSpecConfig.md) | Configuration for the docker-aware cli mode. When set on [SpecificationConfig](type-aliases/SpecificationConfig.md), the cli runner generates a test-run id, injects it into the child env under `envVar`, then queries Docker for every container carrying `testRunLabel=<id>` after the command exits. |
 | [ElementKind](type-aliases/ElementKind.md) | The interactive//textual element kinds — what a visitor actually acts on. |
+| [ElementMatch](type-aliases/ElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening a browser. |
+| [ElementOptions](type-aliases/ElementOptions.md) | Options accepted by every named descriptor. |
+| [ElementRef](type-aliases/ElementRef.md) | A user-facing element descriptor — pure data, built by the element vocabulary (`button()`, `link()`, `field()`, …) and translated into concrete locators by the browser integration. CSS/XPath selectors are deliberately not expressible: user-facing elements are the only surface. |
+| [ExecOptions](type-aliases/ExecOptions.md) | Options for the long-running form of `.exec()` (CONVENTIONS B2). When either option is present the process is spawned and observed: it resolves as soon as `waitFor` appears in stdout/stderr, and is killed when `timeout` elapses (exit code 124). |
+| [FileAccessor](type-aliases/FileAccessor.md) | Read-only handle to a single file produced by a spec action. |
 | [HonoApp](type-aliases/HonoApp.md) | Any object with a request method compatible with Hono's app.request(). |
+| [HttpContractFilter](type-aliases/HttpContractFilter.md) | Request filters for the generic HTTP provider. Every field is a subset constraint — a request matches when all provided fields match. |
+| [HttpResponseInit](type-aliases/HttpResponseInit.md) | Init options shared by the response builders. |
+| [IsolationStrategy](type-aliases/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |
+| [JobHandle](type-aliases/JobHandle.md) | A named job that can be triggered via jobs.trigger(). |
+| [JobsHandle](type-aliases/JobsHandle.md) | The record returned by startJobs \| specification.jobs. Destructure with the canonical names (CONVENTIONS A3): |
+| [JobsSpecification](type-aliases/JobsSpecification.md) | The `jobs` facet — job chain entry handed out by `specification.jobs()`. Jobs run in-process by definition (CONVENTIONS A5/A8). |
+| [JobsSpecificationOptions](type-aliases/JobsSpecificationOptions.md) | Options for startJobs \| specification.jobs. |
 | [LandmarkKind](type-aliases/LandmarkKind.md) | The landmark roles — the standard set of page regions, and the only containers a scope can name. Closed on purpose: ARIA defines exactly these, so `within()` never becomes a second selector language. |
+| [LiterateRunFlags](type-aliases/LiterateRunFlags.md) | Per-call options for runSpecDocument / `cli.run()`. |
+| [LiterateServeRegistration](type-aliases/LiterateServeRegistration.md) | A server a document may start by name (`serve: mcp`), registered once per app in the `serve` option of `specification.cli()`. |
+| [MatchableRequest](type-aliases/MatchableRequest.md) | The observed outgoing request, reduced to what contract matchers inspect. Built once per request by the engine (MSW on api/jobs, the stub backend on website/mobile) and handed to [ContractRequest.match](type-aliases/ContractRequest.md#match) and to a [ContractResponder](type-aliases/ContractResponder.md). |
 | [MatcherKind](type-aliases/MatcherKind.md) | The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds. |
-| [MobileElementKind](type-aliases/MobileElementKind.md) | The element kinds a mobile screen can designate — the structural subset of [ElementRef](interfaces/ElementRef.md) kinds that map onto the XCUITest accessibility tree. There is ONE element vocabulary across facets: `button('Bookmark')` works in a visit scenario and a mobile scenario alike. Landmarks have no iOS analog — passing one to a mobile verb refuses at runtime. |
+| [MatchFixtureOptions](type-aliases/MatchFixtureOptions.md) | Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a single fixture OUT of update-mode rewriting: a frozen fixture is NEVER written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen mismatch still throws its diff, and a frozen missing fixture still throws its "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the subject of a negative test that asserts the mismatch/error rendering) survivable across update runs instead of being silently overwritten with the actual output. |
+| [MobileBackendOptions](type-aliases/MobileBackendOptions.md) | The declared stub backend behind the app under test. The framework owns the simulator and appium but NOT the JS bundler (Metro belongs to the caller's repo, like `next build` belongs to a website's) — so nothing is injected: the handle exposes `backendUrl` and the CALLER wires it into its own bundler env. |
+| [MobileElementKind](type-aliases/MobileElementKind.md) | The element kinds a mobile screen can designate — the structural subset of [ElementRef](type-aliases/ElementRef.md) kinds that map onto the XCUITest accessibility tree. There is ONE element vocabulary across facets: `button('Bookmark')` works in a visit scenario and a mobile scenario alike. Landmarks have no iOS analog — passing one to a mobile verb refuses at runtime. |
+| [MobileElementMatch](type-aliases/MobileElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening the simulator. |
 | [MobileElementRef](type-aliases/MobileElementRef.md) | A user-facing element descriptor for mobile scenarios — pure data, built by the shared element vocabulary (`button()`, `field()`, `content()`, `testId()`, `within()`) and translated into iOS predicate strings by the device integration. Structurally the same ref type as the browser's, so the vocabulary stays single; kinds outside [MobileElementKind](type-aliases/MobileElementKind.md) (the ARIA landmarks) are refused at runtime with a message naming the boundary. |
+| [MobileHandle](type-aliases/MobileHandle.md) | The record returned by startMobile \| specification.mobile. Destructure with the canonical names (CONVENTIONS A3): |
 | [MobileScenario](type-aliases/MobileScenario.md) | The behavior of an open — the When of the spec; assertions stay in the Then. |
+| [MobileSpecification](type-aliases/MobileSpecification.md) | The `mobile` facet — screen chain entry handed out by `specification.mobile()`. `.open()` is the single, terminal action: it terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen. |
+| [MobileSpecificationOptions](type-aliases/MobileSpecificationOptions.md) | Options for startMobile \| specification.mobile. |
+| [MobileVisitor](type-aliases/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until a visible match exists; acting verbs then enforce exactly-one (W3), while `see()` — the single synchronization primitive — is satisfied by any visible match. There is no sleep and no conditional helper. |
+| [MockDatePort](type-aliases/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
 | [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
+| [PostgresOptions](type-aliases/PostgresOptions.md) | - |
+| [RedisOptions](type-aliases/RedisOptions.md) | - |
+| [ScreenNode](type-aliases/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
+| [ServeOptions](type-aliases/ServeOptions.md) | Options for a local server started by the framework. |
+| [ServerPort](type-aliases/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
+| [ServerResponse](type-aliases/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
+| [ServiceHandle](type-aliases/ServiceHandle.md) | A service handle — returned by factory functions like postgres(), redis(). Mutable: connectionString is populated after the orchestrator starts containers. |
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
+| [SpecDocument](type-aliases/SpecDocument.md) | A parsed `<case>.spec.yaml`. |
 | [SpecEnvToken](type-aliases/SpecEnvToken.md) | One `env:` entry — a bare word naming a registered set, or a `KEY=value` pair. |
 | [SpecFileAssertion](type-aliases/SpecFileAssertion.md) | One `files:` assertion, keyed by a workdir-relative path. |
+| [SpecFixture](type-aliases/SpecFixture.md) | One `fixture:` entry — a path with the line it was declared on. |
+| [SpecificationConfig](type-aliases/SpecificationConfig.md) | Adapter configuration passed to the specification facets at setup time. |
 | [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
 | [SpecKind](type-aliases/SpecKind.md) | - |
+| [SpecRun](type-aliases/SpecRun.md) | One run: a command, what it must exit with, and what it must have produced. |
+| [SpecServeEntry](type-aliases/SpecServeEntry.md) | One `serve:` entry — a registered server plus the extra env it is started with. |
+| [SpecStream](type-aliases/SpecStream.md) | An expected stream: its text, and the first line of that text in the file. |
+| [SqliteOptions](type-aliases/SqliteOptions.md) | - |
 | [TextFilter](type-aliases/TextFilter.md) | A text filter on a provider request builder (`openai.chat({ user })`, `anthropic.messages({ system })`, …). |
+| [Visitor](type-aliases/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
 | [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |
-| [WebsiteSpecificationOptions](type-aliases/WebsiteSpecificationOptions.md) | Options for [specification.website](variables/specification.md#property-website). `server` (start the site locally) and `url` (target a running site) are mutually exclusive BY TYPE — the union makes the invalid combinations inexpressible rather than runtime-checked. `backend` requires `server` mode for the same reason: a deployed site cannot be pointed at a local stub. |
+| [WebsiteBackendOptions](type-aliases/WebsiteBackendOptions.md) | The declared stub backend behind the site under test — started before the server command, torn down with the runner. Its URL is injected into the server child's environment under `env`; the contracts each chain declares via `.intercept(...)` are what it serves. |
+| [WebsiteHandle](type-aliases/WebsiteHandle.md) | The record returned by startWebsite \| specification.website. Destructure with the canonical names (CONVENTIONS A3): |
+| [WebsiteSpecification](type-aliases/WebsiteSpecification.md) | The `website` facet — page chain entry handed out by `specification.website()`. Setup methods chain; action methods are terminal. `.visit()` renders the page in the shared browser; `.fetch()` performs one raw HTTP exchange and never follows redirects. |
+| [WebsiteSpecificationOptions](type-aliases/WebsiteSpecificationOptions.md) | Options for startWebsite \| specification.website. `server` (start the site locally) and `url` (target a running site) are mutually exclusive BY TYPE — the union makes the invalid combinations inexpressible rather than runtime-checked. `backend` requires `server` mode for the same reason: a deployed site cannot be pointed at a local stub. |
 
 ## Variables
 
@@ -133,17 +133,17 @@
 | [field](variables/field.md) | A form field, by label. |
 | [form](variables/form.md) | The `form` landmark — a form carrying an accessible name. |
 | [heading](variables/heading.md) | A heading, by accessible name. |
-| [http](variables/http.md) | Generic HTTP contract helpers for any URL. The url is absolute (string or RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')` matches that path on ANY origin, which is what an app calling its own backend needs. An optional [HttpContractFilter](interfaces/HttpContractFilter.md) narrows matching by body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict contracts, CONVENTIONS D7). |
+| [http](variables/http.md) | Generic HTTP contract helpers for any URL. The url is absolute (string or RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')` matches that path on ANY origin, which is what an app calling its own backend needs. An optional [HttpContractFilter](type-aliases/HttpContractFilter.md) narrows matching by body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict contracts, CONVENTIONS D7). |
 | [link](variables/link.md) | A link, by accessible name. |
 | [main](variables/main.md) | The `main` landmark — the primary content of the document. |
-| [match](variables/match.md) | Dynamic-value matchers for structural comparisons — the code-side mirror of the `{{token}}` fixture grammar (CONVENTIONS D4). |
+| [match](variables/match.md) | - |
 | [mockOf](variables/mockOf.md) | Create a deep mock proxy for a given type. Wraps `vitest-mock-extended`'s `mockDeep` for convenient port mocking. |
 | [mockOfDate](variables/mockOfDate.md) | Freeze or reset the global Date for deterministic time-dependent tests. Wraps the `mockdate` package. |
 | [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
 | [region](variables/region.md) | The `region` landmark — a `<section>` carrying an accessible name. |
 | [search](variables/search.md) | The `search` landmark. |
-| [specification](variables/specification.md) | The five specification constructors (CONVENTIONS A2) — created in a `*.specification.ts` file under `specs/`, destructured with canonical names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4). |
+| [specification](variables/specification.md) | - |
 
 ## Functions
 

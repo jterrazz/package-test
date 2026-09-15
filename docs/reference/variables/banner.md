@@ -2,20 +2,9 @@
 # Variable: banner
 
 ```ts
-const banner: (name?, options?) => ElementRef;
+const banner: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:69](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L69)
+Defined in: core/specification/website/elements.ts:75
 
 The `banner` landmark — the page header.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

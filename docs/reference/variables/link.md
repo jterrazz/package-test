@@ -2,20 +2,9 @@
 # Variable: link
 
 ```ts
-const link: (name, options?) => ElementRef;
+const link: ElementFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:45](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L45)
+Defined in: core/specification/website/elements.ts:48
 
 A link, by accessible name.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

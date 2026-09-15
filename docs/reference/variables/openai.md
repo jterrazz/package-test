@@ -5,17 +5,17 @@
 const openai: object;
 ```
 
-Defined in: [integrations/openai/openai.ts:127](https://github.com/jterrazz/package-test/blob/main/src/integrations/openai/openai.ts#L127)
+Defined in: integrations/openai/openai.ts:128
 
 OpenAI API intercept helpers.
 
 ## Type Declaration
 
-| Name | Type | Default value | Description | Defined in |
-| ------ | ------ | ------ | ------ | ------ |
-| <a id="property-reply"></a> `reply()` | (`data`) => [`ContractResponse`](../interfaces/ContractResponse.md) | `buildChatReply` | Response: wrap data in Chat Completions format. **Example** `openai.reply({ categories: ['TECH'] })` | [integrations/openai/openai.ts:177](https://github.com/jterrazz/package-test/blob/main/src/integrations/openai/openai.ts#L177) |
-| `chat()` | (`filter?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | Request: match Chat Completions API calls. STRING filters mean EXACT equality (pass the app's own prompt builder); loosen deliberately with a RegExp or `match.includes(...)`. **Example** `openai.chat() // any chat call openai.chat({ model: 'gpt-4o' }) // exact model openai.chat({ system: buildPrompt() }) // exact system prompt openai.chat({ system: /classify/ }) // pattern` | [integrations/openai/openai.ts:139](https://github.com/jterrazz/package-test/blob/main/src/integrations/openai/openai.ts#L139) |
-| `error()` | (`status`, `message?`) => [`ContractResponse`](../interfaces/ContractResponse.md) | - | Response: return an OpenAI error. | [integrations/openai/openai.ts:180](https://github.com/jterrazz/package-test/blob/main/src/integrations/openai/openai.ts#L180) |
-| `malformed()` | (`content`) => [`ContractResponse`](../interfaces/ContractResponse.md) | - | Response: return malformed content. | [integrations/openai/openai.ts:194](https://github.com/jterrazz/package-test/blob/main/src/integrations/openai/openai.ts#L194) |
-| `responses()` | (`filter?`, `url?`) => [`ContractRequest`](../interfaces/ContractRequest.md) | - | Request: match Responses API calls (AI SDK v5+) with auto-wrapping. String filters mean EXACT equality (see [openai.chat](#chat)). When used with a JSON file, the data is automatically wrapped in the Responses API envelope. **Example** `openai.responses({ user: /Report Ingestion/ }, GATEWAY)` | [integrations/openai/openai.ts:161](https://github.com/jterrazz/package-test/blob/main/src/integrations/openai/openai.ts#L161) |
-| `timeout()` | () => [`ContractResponse`](../interfaces/ContractResponse.md) | - | Response: simulate a timeout. | [integrations/openai/openai.ts:199](https://github.com/jterrazz/package-test/blob/main/src/integrations/openai/openai.ts#L199) |
+| Name | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| `chat()` | (`filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | Request: match Chat Completions API calls. STRING filters mean EXACT equality (pass the app's own prompt builder); loosen deliberately with a RegExp or `match.includes(...)`. **Example** `openai.chat() // any chat call openai.chat({ model: 'gpt-4o' }) // exact model openai.chat({ system: buildPrompt() }) // exact system prompt openai.chat({ system: /classify/ }) // pattern` | integrations/openai/openai.ts:140 |
+| `error()` | (`status`, `message?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: return an OpenAI error. | integrations/openai/openai.ts:183 |
+| `malformed()` | (`content`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: return malformed content. | integrations/openai/openai.ts:197 |
+| `reply()` | (`data`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: wrap data in Chat Completions format. **Example** `openai.reply({ categories: ['TECH'] })` | integrations/openai/openai.ts:178 |
+| `responses()` | (`filter?`, `url?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | Request: match Responses API calls (AI SDK v5+) with auto-wrapping. String filters mean EXACT equality (see [openai.chat](#chat)). When used with a JSON file, the data is automatically wrapped in the Responses API envelope. **Example** `openai.responses({ user: /Report Ingestion/ }, GATEWAY)` | integrations/openai/openai.ts:162 |
+| `timeout()` | () => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: simulate a timeout. | integrations/openai/openai.ts:202 |

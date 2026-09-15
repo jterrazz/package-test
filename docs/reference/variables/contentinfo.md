@@ -2,20 +2,9 @@
 # Variable: contentinfo
 
 ```ts
-const contentinfo: (name?, options?) => ElementRef;
+const contentinfo: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:75](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L75)
+Defined in: core/specification/website/elements.ts:81
 
 The `contentinfo` landmark — the page footer.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

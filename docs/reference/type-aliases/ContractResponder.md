@@ -5,19 +5,19 @@
 type ContractResponder = (request) => ContractResponse;
 ```
 
-Defined in: [core/contracts/types.ts:59](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L59)
+Defined in: core/contracts/types.ts:59
 
 A dynamic response: computed from the observed request at the moment the
 contract is served, rather than fixed ahead of time. Handed the same
-[MatchableRequest](../interfaces/MatchableRequest.md) the request half matched on, so the reply can echo
+[MatchableRequest](MatchableRequest.md) the request half matched on, so the reply can echo
 or derive from the body/headers/url.
 
 ## Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `request` | [`MatchableRequest`](../interfaces/MatchableRequest.md) |
+| `request` | [`MatchableRequest`](MatchableRequest.md) |
 
 ## Returns
 
-[`ContractResponse`](../interfaces/ContractResponse.md)
+[`ContractResponse`](ContractResponse.md)

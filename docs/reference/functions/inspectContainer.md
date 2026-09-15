@@ -5,7 +5,7 @@
 function inspectContainer(id): unknown;
 ```
 
-Defined in: [integrations/docker/docker-lookup.ts:29](https://github.com/jterrazz/package-test/blob/main/src/integrations/docker/docker-lookup.ts#L29)
+Defined in: integrations/docker/docker-lookup.ts:29
 
 Return the raw `docker inspect` payload (object, not array) for a container.
 

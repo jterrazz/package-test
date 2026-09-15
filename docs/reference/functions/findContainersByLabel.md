@@ -5,7 +5,7 @@
 function findContainersByLabel(key, value): string[];
 ```
 
-Defined in: [integrations/docker/docker-lookup.ts:13](https://github.com/jterrazz/package-test/blob/main/src/integrations/docker/docker-lookup.ts#L13)
+Defined in: integrations/docker/docker-lookup.ts:13
 
 Return all container IDs (running or stopped) that carry `key=value`.
 

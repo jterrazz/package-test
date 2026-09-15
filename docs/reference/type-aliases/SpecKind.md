@@ -5,4 +5,4 @@
 type SpecKind = typeof SPEC_KINDS[number];
 ```
 
-Defined in: [core/literate/spec-document.ts:80](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L80)
+Defined in: core/literate/spec-document.ts:77

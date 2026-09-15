@@ -2,43 +2,7 @@
 # Variable: specification
 
 ```ts
-const specification: object;
+const specification: Specification;
 ```
 
-Defined in: [core/specification/shared/specification.ts:31](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L31)
-
-The five specification constructors (CONVENTIONS A2) — created in a
-`*.specification.ts` file under `specs/`, destructured with canonical
-names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4).
-
-## Type Declaration
-
-| Name | Type | Default value | Description | Defined in |
-| ------ | ------ | ------ | ------ | ------ |
-| <a id="property-api"></a> `api()` | \<`Services`\>(`options`) => `Promise`\<[`ApiHandle`](../interfaces/ApiHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startApi` | Test an HTTP app. Mode `'node'` (default) starts the declared services via testcontainers and runs the app in-process; mode `'compose'` runs `docker compose up` on `docker/compose.test.yaml` and sends real HTTP requests to the app service. Resolution: `options.mode` > `TEST_MODE` env var > `'node'`. Only `.api()` has a mode. | [core/specification/shared/specification.ts:39](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L39) |
-| <a id="property-cli"></a> `cli()` | \<`Services`\>(`bin`, `options`) => `Promise`\<[`CliHandle`](../interfaces/CliHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startCli` | Test a command binary. Each spec runs in a fresh temp directory. | [core/specification/shared/specification.ts:45](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L45) |
-| <a id="property-jobs"></a> `jobs()` | \<`Services`\>(`options`) => `Promise`\<[`JobsHandle`](../interfaces/JobsHandle.md)\<[`DatabaseKeys`](../type-aliases/DatabaseKeys.md)\<`Services`\>\>\> | `startJobs` | Test background jobs. Jobs run in-process by definition — no HTTP server, no mode. `.trigger(name)` is the terminal action. | [core/specification/shared/specification.ts:50](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L50) |
-| <a id="property-mobile"></a> `mobile()` | (`options`) => `Promise`\<[`MobileHandle`](../interfaces/MobileHandle.md)\> | `startMobile` | Test a native app on the iOS simulator. `device` names the simulator (resolved and booted via `simctl`); `app` names the bundle under test. `.open(deepLink?, scenario?)` relaunches the app fresh, runs the scenario, and captures the final screen. | [core/specification/shared/specification.ts:57](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L57) |
-| <a id="property-website"></a> `website()` | (`options`) => `Promise`\<[`WebsiteHandle`](../interfaces/WebsiteHandle.md)\> | `startWebsite` | Test a deployed or locally-served website. `server` starts the site (a shell command receiving `PORT`); `url` targets a running one. `.visit(path)` renders the page in a single shared browser instance; `.fetch(path)` performs one raw HTTP exchange (redirects never followed). | [core/specification/shared/specification.ts:65](https://github.com/jterrazz/package-test/blob/main/src/core/specification/shared/specification.ts#L65) |
-
-## Example
-
-```ts
-// specs/api/api.specification.ts
-  export const { api, cleanup } = await specification.api({
-      services: { db: postgres() },
-      server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
-  });
-  afterAll(cleanup);
-
-  // specs/jobs/jobs.specification.ts
-  export const { jobs, cleanup } = await specification.jobs({
-      services: { db: postgres() },
-      jobs: ({ db }) => [nightlyReport(db)],
-  });
-  afterAll(cleanup);
-
-  // specs/setup/cli.specification.ts
-  export const { cli, cleanup } = await specification.cli('my-cli');
-  afterAll(cleanup);
-```
+Defined in: core/specification/shared/specification.ts:40

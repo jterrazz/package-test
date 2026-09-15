@@ -5,7 +5,7 @@
 function defineContract(contract): Contract;
 ```
 
-Defined in: [core/contracts/contract.ts:71](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L71)
+Defined in: core/contracts/contract.ts:71
 
 Declare one contract. Identity function — its value is the enforced shape
 and the naming convention:
@@ -14,11 +14,11 @@ and the naming convention:
 
 | Parameter | Type |
 | ------ | ------ |
-| `contract` | [`Contract`](../interfaces/Contract.md) |
+| `contract` | [`Contract`](../type-aliases/Contract.md) |
 
 ## Returns
 
-[`Contract`](../interfaces/Contract.md)
+[`Contract`](../type-aliases/Contract.md)
 
 ## Example
 

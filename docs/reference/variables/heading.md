@@ -2,20 +2,9 @@
 # Variable: heading
 
 ```ts
-const heading: (name, options?) => ElementRef;
+const heading: ElementFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:42](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L42)
+Defined in: core/specification/website/elements.ts:45
 
 A heading, by accessible name.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

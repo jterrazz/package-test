@@ -2,20 +2,9 @@
 # Variable: main
 
 ```ts
-const main: (name?, options?) => ElementRef;
+const main: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:81](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L81)
+Defined in: core/specification/website/elements.ts:87
 
 The `main` landmark — the primary content of the document.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

@@ -5,7 +5,7 @@
 function redis(options?): RedisHandle;
 ```
 
-Defined in: [integrations/redis/redis.ts:104](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L104)
+Defined in: integrations/redis/redis.ts:104
 
 Create a Redis service handle.
 
@@ -13,7 +13,7 @@ Create a Redis service handle.
 
 | Parameter | Type |
 | ------ | ------ |
-| `options` | [`RedisOptions`](../interfaces/RedisOptions.md) |
+| `options` | [`RedisOptions`](../type-aliases/RedisOptions.md) |
 
 ## Returns
 

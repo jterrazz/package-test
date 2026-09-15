@@ -5,7 +5,7 @@
 type CliEnv = Record<string, null | string>;
 ```
 
-Defined in: [core/ports/cli.port.ts:30](https://github.com/jterrazz/package-test/blob/main/src/core/ports/cli.port.ts#L30)
+Defined in: core/ports/cli.port.ts:30
 
 Extra environment variables to set for the child process.
 Values are merged on top of process.env. A `null` value unsets the variable.

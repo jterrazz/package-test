@@ -2,20 +2,9 @@
 # Variable: region
 
 ```ts
-const region: (name?, options?) => ElementRef;
+const region: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:87](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L87)
+Defined in: core/specification/website/elements.ts:93
 
 The `region` landmark — a `<section>` carrying an accessible name.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

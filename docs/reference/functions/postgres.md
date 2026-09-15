@@ -5,7 +5,7 @@
 function postgres(options?): PostgresHandle;
 ```
 
-Defined in: [integrations/postgres/postgres.ts:204](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L204)
+Defined in: integrations/postgres/postgres.ts:204
 
 Create a PostgreSQL service handle.
 
@@ -13,7 +13,7 @@ Create a PostgreSQL service handle.
 
 | Parameter | Type |
 | ------ | ------ |
-| `options` | [`PostgresOptions`](../interfaces/PostgresOptions.md) |
+| `options` | [`PostgresOptions`](../type-aliases/PostgresOptions.md) |
 
 ## Returns
 

@@ -2,20 +2,9 @@
 # Variable: button
 
 ```ts
-const button: (name, options?) => ElementRef;
+const button: ElementFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:36](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L36)
+Defined in: core/specification/website/elements.ts:39
 
 A button (or element with the button role), by accessible name.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

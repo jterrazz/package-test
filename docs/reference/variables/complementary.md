@@ -2,20 +2,9 @@
 # Variable: complementary
 
 ```ts
-const complementary: (name?, options?) => ElementRef;
+const complementary: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:72](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L72)
+Defined in: core/specification/website/elements.ts:78
 
 The `complementary` landmark — an `<aside>`, a sidebar.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

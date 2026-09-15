@@ -2,20 +2,9 @@
 # Variable: field
 
 ```ts
-const field: (name, options?) => ElementRef;
+const field: ElementFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:39](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L39)
+Defined in: core/specification/website/elements.ts:42
 
 A form field, by label.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

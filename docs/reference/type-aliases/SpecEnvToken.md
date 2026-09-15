@@ -16,6 +16,6 @@ type SpecEnvToken =
 };
 ```
 
-Defined in: [core/literate/spec-document.ts:83](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L83)
+Defined in: core/literate/spec-document.ts:80
 
 One `env:` entry — a bare word naming a registered set, or a `KEY=value` pair.

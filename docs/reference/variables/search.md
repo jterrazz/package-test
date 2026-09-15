@@ -2,20 +2,9 @@
 # Variable: search
 
 ```ts
-const search: (name?, options?) => ElementRef;
+const search: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:90](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L90)
+Defined in: core/specification/website/elements.ts:96
 
 The `search` landmark.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

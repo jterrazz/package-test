@@ -5,7 +5,7 @@
 type MobileElementRef = ElementRef;
 ```
 
-Defined in: [core/ports/device.port.ts:25](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L25)
+Defined in: core/ports/device.port.ts:25
 
 A user-facing element descriptor for mobile scenarios — pure data, built by
 the shared element vocabulary (`button()`, `field()`, `content()`,
@@ -15,6 +15,6 @@ vocabulary stays single; kinds outside [MobileElementKind](MobileElementKind.md)
 landmarks) are refused at runtime with a message naming the boundary.
 
 A descriptor must designate exactly ONE element when a verb ACTS on it
-(`tap`, `fill`) — see [MobileElementMatch](../interfaces/MobileElementMatch.md) and CONVENTIONS W3.
+(`tap`, `fill`) — see [MobileElementMatch](MobileElementMatch.md) and CONVENTIONS W3.
 `see()` acts on nothing, so any visible match satisfies it: XCUITest trees
 legitimately duplicate a label across container and child.

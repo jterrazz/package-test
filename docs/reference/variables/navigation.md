@@ -2,20 +2,9 @@
 # Variable: navigation
 
 ```ts
-const navigation: (name?, options?) => ElementRef;
+const navigation: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:84](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L84)
+Defined in: core/specification/website/elements.ts:90
 
 The `navigation` landmark — a `<nav>`. Name it when a page has several.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)

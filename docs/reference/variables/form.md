@@ -2,20 +2,9 @@
 # Variable: form
 
 ```ts
-const form: (name?, options?) => ElementRef;
+const form: LandmarkFactory;
 ```
 
-Defined in: [core/specification/website/elements.ts:78](https://github.com/jterrazz/package-test/blob/main/src/core/specification/website/elements.ts#L78)
+Defined in: core/specification/website/elements.ts:84
 
 The `form` landmark — a form carrying an accessible name.
-
-## Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `name?` | `string` |
-| `options?` | [`ElementOptions`](../interfaces/ElementOptions.md) |
-
-## Returns
-
-[`ElementRef`](../interfaces/ElementRef.md)
