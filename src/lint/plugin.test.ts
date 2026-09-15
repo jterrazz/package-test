@@ -122,6 +122,45 @@ describe('testing fragment — standalone oxlint config', () => {
         // A standalone config carries no `extends` — the fragment stands on its own.
         expect('extends' in testing).toBe(false);
     });
+
+    test('declares no `categories` — every rule it ships is decided by name', () => {
+        // Given - the fragment, top level and every override entry
+        // (the `categories` block in specs/_fixtures/lint-cli/oxlint.e2e.json is a
+        // Test harness muting oxlint's own defaults, not a config this package ships)
+        const layers: Array<Record<string, unknown>> = [
+            testing as unknown as Record<string, unknown>,
+            ...((testing.overrides ?? []) as unknown as Array<Record<string, unknown>>),
+        ];
+
+        // Then - none of them opens a category: a category turns on rules nobody
+        // Decided, and composing it over a base preset silently re-enables them
+        for (const layer of layers) {
+            expect('categories' in layer).toBe(false);
+        }
+    });
+
+    test('the only `warn` levels are the advisory `w` channel', () => {
+        // Given - each rule the fragment enables
+        for (const [id, level] of Object.entries(testing.rules)) {
+            // Then - `warn` belongs to the redundancy heuristics (`<family><n>w-…`)
+            // And nothing else; every hard convention is an error. The estate's
+            // Rulebook has no warn tier — this package's `w` channel is its one
+            // Documented exception (see the manifest's statique channel note)
+            const advisory = /^jterrazz\/\w+w-/u.test(id);
+            expect(level, `${id} is ${level}`).toBe(advisory ? 'warn' : 'error');
+        }
+    });
+
+    test('its overrides add a layer instead of replacing one', () => {
+        // Given - each override entry of the fragment
+        for (const entry of testing.overrides ?? []) {
+            // Then - it is scoped by `files` and carries `rules` only, so a profile
+            // Already holding its own overrides (v10 puts the `vitest` plugin on the
+            // Test globs that way) keeps them: oxlint concatenates the arrays
+            expect(entry.files.length).toBeGreaterThan(0);
+            expect(Object.keys(entry).sort()).toEqual(['files', 'rules']);
+        }
+    });
 });
 
 describe('conventions catalogue — E2E inventory (meta-test)', () => {

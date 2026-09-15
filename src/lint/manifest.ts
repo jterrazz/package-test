@@ -62,6 +62,14 @@ export const FAMILIES: Record<string, string> = {
  * all-caps first word (`VALID_CATEGORIES`, `HTTP`, `DI`); the rest are
  * behaviour-identical on this package's own fixtures. Only J2 (the arbitrary-sleep
  * ban, which has no upstream counterpart) stays statique.
+ *
+ * **Severity.** The estate's rulebook has no warn tier: a rule is on at `error`
+ * or off with a recorded reason, and that law binds `@jterrazz/typescript`'s
+ * rulebook. This channel is its one documented exception, and it is narrow — an
+ * id shaped `<family><n>w-…` is a REDUNDANCY heuristic (a `root` the walk would
+ * have found, a probe cluster that wants a golden), a reading of taste that
+ * would block a legitimate shape if it failed the build. Every hard convention
+ * here is an `error`; `plugin.test.ts` holds the split.
  */
 export const RULE_DOCS: Record<string, RuleDoc> = {
     'a1-specification-file': {
