@@ -207,22 +207,9 @@ Rules marked _fs-checked_ probe the filesystem, anchored on files oxlint is alre
 
 ## Writing B4 markers under `--fix`
 
-B4 asks every test for a `// Given -` line and a `// Then -` line, in that order. Two rules of the `@jterrazz/typescript` base preset rewrite comments when the fixer runs, and both can turn a well-placed marker into something that means nothing — with the lint green afterwards, because the marker text is still in the file. They are the two hazards to know before writing the narration.
+B4 asks every test for a `// Given -` line and a `// Then -` line, in that order. A marker is a comment, and two rules of the base preset rewrite comments when the fixer runs — either can turn a well-placed marker into something that means nothing, with the lint green afterwards, because the marker text is still in the file. Whether either rule is on, and in which mode, is `@jterrazz/typescript`'s rulebook to state; what they do to a marker is this chapter's.
 
-**A marker is EXACTLY one line.** `capitalized-comments` is on, so the fixer capitalises the first word of every `//` line. Wrap a marker onto a second line and that continuation is capitalised mid-sentence:
-
-```typescript
-// Given - a runner primed with a fixture and a seeded database,
-// and the command line that asks for the second shop
-
-// After `oxlint --fix`
-// Given - a runner primed with a fixture and a seeded database,
-// And the command line that asks for the second shop
-```
-
-If the reasoning does not fit on one line, it is not a marker: keep the marker short and put the reasoning in a docblock above the test.
-
-**A marker goes between STATEMENTS, never between two declarations of one chain.** `one-var` asks for one `const` statement per scope, and the fixer satisfies it by FUSING adjacent declarations — swallowing whatever comment stood between them into the chain, where it now separates two declarators instead of two steps of the test:
+**A marker goes between STATEMENTS, never between two declarators of one chain.** `one-var` exists in oxlint from **1.83** — 1.74 answers `Rule 'one-var' not found in plugin 'eslint'` — and only its `always` mode arms the hazard. Asked for one `const` statement per scope, the fixer satisfies it by FUSING adjacent declarations, swallowing whatever comment stood between them into the chain, where it now separates two declarators instead of two steps of the test:
 
 ```typescript
 // Given - the seeded row
@@ -236,7 +223,20 @@ const before = await cli.exec('seed'),
     after = await cli.exec('read');
 ```
 
-B4 still passes on the second form, which is what makes it worth knowing: nothing fails, the narration has simply stopped separating anything. Both preset rules are documented on their own side, in `@jterrazz/typescript`'s Lint presets chapter; what belongs here is only what they do to a marker.
+B4 still passes on the second form, which is what makes it worth knowing: nothing fails, the narration has simply stopped separating anything. The rule's `never` mode is the opposite hazard-free shape — one declarator per statement, so its fixer splits chains and never moves a comment.
+
+**A marker is EXACTLY one line.** `capitalized-comments` capitalises the first word of every `//` line, a wrapped continuation included, so a marker spilling onto a second line is capitalised mid-sentence:
+
+```typescript
+// Given - a runner primed with a fixture and a seeded database,
+// and the command line that asks for the second shop
+
+// After `oxlint --fix`
+// Given - a runner primed with a fixture and a seeded database,
+// And the command line that asks for the second shop
+```
+
+`@jterrazz/typescript` v10 turns that rule off — 198 of 198 hits on real estate code were false positives on wrapped `//` prose — so the rewrite stops happening under the preset. The one-line discipline outlives it anyway: a marker is the title of a step, and reasoning that does not fit on one line belongs in a docblock above the test, never in the marker.
 
 ## The conventions checker (D4)
 
