@@ -5,6 +5,6 @@
 const form: LandmarkFactory;
 ```
 
-Defined in: core/specification/website/elements.ts:84
+Defined in: [specification/facets/website/elements.ts:84](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L84)
 
 The `form` landmark — a form carrying an accessible name.

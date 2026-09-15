@@ -5,7 +5,7 @@
 type MobileHandle = object;
 ```
 
-Defined in: core/specification/mobile/start-mobile.ts:72
+Defined in: [specification/facets/mobile/start-mobile.ts:72](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L72)
 
 The record returned by startMobile \| specification.mobile.
 Destructure with the canonical names (CONVENTIONS A3):
@@ -20,7 +20,7 @@ Destructure with the canonical names (CONVENTIONS A3):
 optional backendUrl?: string;
 ```
 
-Defined in: core/specification/mobile/start-mobile.ts:78
+Defined in: [specification/facets/mobile/start-mobile.ts:78](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L78)
 
 Base URL of the declared stub backend — present only with the
 `backend` option. The caller injects it into its own bundler env
@@ -34,7 +34,7 @@ Base URL of the declared stub backend — present only with the
 cleanup: () => Promise<void>;
 ```
 
-Defined in: core/specification/mobile/start-mobile.ts:80
+Defined in: [specification/facets/mobile/start-mobile.ts:80](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L80)
 
 End the driver session, stop the appium server and the stub backend.
 
@@ -50,7 +50,7 @@ End the driver session, stop the appium server and the stub backend.
 mobile: MobileSpecification;
 ```
 
-Defined in: core/specification/mobile/start-mobile.ts:81
+Defined in: [specification/facets/mobile/start-mobile.ts:81](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L81)
 
 ***
 
@@ -60,6 +60,6 @@ Defined in: core/specification/mobile/start-mobile.ts:81
 udid: string;
 ```
 
-Defined in: core/specification/mobile/start-mobile.ts:83
+Defined in: [specification/facets/mobile/start-mobile.ts:83](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L83)
 
 The resolved simulator UDID the specs run against.

@@ -5,6 +5,6 @@
 const button: ElementFactory;
 ```
 
-Defined in: core/specification/website/elements.ts:39
+Defined in: [specification/facets/website/elements.ts:39](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L39)
 
 A button (or element with the button role), by accessible name.

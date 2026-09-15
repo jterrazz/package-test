@@ -5,7 +5,7 @@
 type ElementRef = object;
 ```
 
-Defined in: core/ports/browser.port.ts:28
+Defined in: [specification/ports/browser.port.ts:28](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L28)
 
 A user-facing element descriptor — pure data, built by the element
 vocabulary (`button()`, `link()`, `field()`, …) and translated into
@@ -23,7 +23,7 @@ A descriptor must designate exactly ONE element at action time; see
 optional exact?: boolean;
 ```
 
-Defined in: core/ports/browser.port.ts:34
+Defined in: [specification/ports/browser.port.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L34)
 
 Match the accessible name as a whole string rather than a substring.
 Default (`false`) mirrors playwright: `link('Articles')` also matches
@@ -37,7 +37,7 @@ Default (`false`) mirrors playwright: `link('Articles')` also matches
 kind: ElementKind | LandmarkKind;
 ```
 
-Defined in: core/ports/browser.port.ts:35
+Defined in: [specification/ports/browser.port.ts:35](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L35)
 
 ***
 
@@ -47,7 +47,7 @@ Defined in: core/ports/browser.port.ts:35
 optional name?: string;
 ```
 
-Defined in: core/ports/browser.port.ts:37
+Defined in: [specification/ports/browser.port.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L37)
 
 Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 
@@ -59,7 +59,7 @@ Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 optional scope?: ElementRef;
 ```
 
-Defined in: core/ports/browser.port.ts:42
+Defined in: [specification/ports/browser.port.ts:42](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L42)
 
 Restrict the search to the elements of another descriptor — built by
 `within(scope, target)`. Chains: a scope may itself carry a scope.

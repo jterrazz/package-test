@@ -5,7 +5,7 @@
 type SqliteOptions = object;
 ```
 
-Defined in: integrations/sqlite/sqlite.ts:83
+Defined in: [integrations/sqlite/sqlite.ts:83](https://github.com/jterrazz/package-test/blob/main/src/integrations/sqlite/sqlite.ts#L83)
 
 ## Properties
 
@@ -15,7 +15,7 @@ Defined in: integrations/sqlite/sqlite.ts:83
 optional init?: string;
 ```
 
-Defined in: integrations/sqlite/sqlite.ts:88
+Defined in: [integrations/sqlite/sqlite.ts:88](https://github.com/jterrazz/package-test/blob/main/src/integrations/sqlite/sqlite.ts#L88)
 
 Path to a SQL file used to initialize the database schema.
 Mutually exclusive with `prismaSchema`.
@@ -28,7 +28,7 @@ Mutually exclusive with `prismaSchema`.
 optional prismaSchema?: string;
 ```
 
-Defined in: integrations/sqlite/sqlite.ts:95
+Defined in: [integrations/sqlite/sqlite.ts:95](https://github.com/jterrazz/package-test/blob/main/src/integrations/sqlite/sqlite.ts#L95)
 
 Path to a Prisma schema directory or file, resolved against the current
 working directory. The adapter runs `prisma db push --schema <path>` to

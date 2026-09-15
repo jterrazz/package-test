@@ -5,7 +5,7 @@
 type ApiSpecificationOptions<Services> = object;
 ```
 
-Defined in: core/specification/api/start-api.ts:30
+Defined in: [specification/facets/api/start-api.ts:30](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L30)
 
 Options for startApi \| specification.api.
 
@@ -23,7 +23,7 @@ Options for startApi \| specification.api.
 optional mode?: SpecificationMode;
 ```
 
-Defined in: core/specification/api/start-api.ts:37
+Defined in: [specification/facets/api/start-api.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L37)
 
 Execution mode override. Resolution: `options.mode` >
 `process.env.TEST_MODE` > `'node'`. Never hardcode this in a
@@ -38,7 +38,7 @@ project via `env: { TEST_MODE: 'compose' }` (CONVENTIONS A5).
 optional root?: string;
 ```
 
-Defined in: core/specification/api/start-api.ts:45
+Defined in: [specification/facets/api/start-api.ts:45](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L45)
 
 Project root override for compose detection and init scripts. When
 absent, the root is auto-discovered by walking up from the calling
@@ -54,7 +54,7 @@ specification file to the first directory containing
 optional server?: (services) => HonoApp;
 ```
 
-Defined in: core/specification/api/start-api.ts:51
+Defined in: [specification/facets/api/start-api.ts:51](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L51)
 
 The app factory — receives the started services record (fully typed)
 and returns the Hono app. Required in node mode, ignored in compose
@@ -78,7 +78,7 @@ mode (the app runs as a compose service there).
 optional services?: Services;
 ```
 
-Defined in: core/specification/api/start-api.ts:58
+Defined in: [specification/facets/api/start-api.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L58)
 
 Named infrastructure record. Keys become the `database` vocabulary of
 `.seed()` / `.table()` and drive the compose binding: a handle with no

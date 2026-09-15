@@ -5,7 +5,7 @@
 type BrowserPage = object;
 ```
 
-Defined in: core/ports/browser.port.ts:139
+Defined in: [specification/ports/browser.port.ts:139](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L139)
 
 The rendered page captured by a browser visit — the FINAL state when a
 scenario ran. Extraction happens in-page (the browser IS the HTML
@@ -19,7 +19,7 @@ parser); interpretation of the raw elements belongs to core.
 consoleMessages: BrowserConsoleMessage[];
 ```
 
-Defined in: core/ports/browser.port.ts:141
+Defined in: [specification/ports/browser.port.ts:141](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L141)
 
 Console messages emitted while loading and interacting, in order.
 
@@ -31,7 +31,7 @@ Console messages emitted while loading and interacting, in order.
 html: string;
 ```
 
-Defined in: core/ports/browser.port.ts:143
+Defined in: [specification/ports/browser.port.ts:143](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L143)
 
 Serialized DOM after rendering (`document.documentElement.outerHTML`).
 
@@ -43,7 +43,7 @@ Serialized DOM after rendering (`document.documentElement.outerHTML`).
 jsonLdBlocks: string[];
 ```
 
-Defined in: core/ports/browser.port.ts:145
+Defined in: [specification/ports/browser.port.ts:145](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L145)
 
 Raw text content of every `application/ld+json` script, in DOM order.
 
@@ -55,7 +55,7 @@ Raw text content of every `application/ld+json` script, in DOM order.
 links: BrowserLinkElement[];
 ```
 
-Defined in: core/ports/browser.port.ts:147
+Defined in: [specification/ports/browser.port.ts:147](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L147)
 
 `<link>` elements of the head, in DOM order.
 
@@ -67,7 +67,7 @@ Defined in: core/ports/browser.port.ts:147
 metas: BrowserMetaElement[];
 ```
 
-Defined in: core/ports/browser.port.ts:149
+Defined in: [specification/ports/browser.port.ts:149](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L149)
 
 `<meta>` elements of the head, in DOM order.
 
@@ -79,7 +79,7 @@ Defined in: core/ports/browser.port.ts:149
 status: number;
 ```
 
-Defined in: core/ports/browser.port.ts:151
+Defined in: [specification/ports/browser.port.ts:151](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L151)
 
 HTTP status of the main document response (0 when unavailable).
 
@@ -91,7 +91,7 @@ HTTP status of the main document response (0 when unavailable).
 text: string;
 ```
 
-Defined in: core/ports/browser.port.ts:153
+Defined in: [specification/ports/browser.port.ts:153](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L153)
 
 Rendered `document.body.innerText`.
 
@@ -103,7 +103,7 @@ Rendered `document.body.innerText`.
 title: string;
 ```
 
-Defined in: core/ports/browser.port.ts:155
+Defined in: [specification/ports/browser.port.ts:155](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L155)
 
 `document.title` after rendering.
 
@@ -115,6 +115,6 @@ Defined in: core/ports/browser.port.ts:155
 url: string;
 ```
 
-Defined in: core/ports/browser.port.ts:157
+Defined in: [specification/ports/browser.port.ts:157](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L157)
 
 Final URL after redirects and scenario navigation.

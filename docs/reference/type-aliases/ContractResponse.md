@@ -5,7 +5,7 @@
 type ContractResponse = object;
 ```
 
-Defined in: core/contracts/types.ts:42
+Defined in: [specification/contracts/types.ts:42](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L42)
 
 The response half of a contract: what to reply when the request matches.
 
@@ -17,7 +17,7 @@ The response half of a contract: what to reply when the request matches.
 body: unknown;
 ```
 
-Defined in: core/contracts/types.ts:46
+Defined in: [specification/contracts/types.ts:46](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L46)
 
 Response body — an object is JSON, a string is text, `null`/`undefined` is empty.
 
@@ -29,7 +29,7 @@ Response body — an object is JSON, a string is text, `null`/`undefined` is emp
 optional delay?: number;
 ```
 
-Defined in: core/contracts/types.ts:50
+Defined in: [specification/contracts/types.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L50)
 
 Delay in ms before responding (for timeout testing).
 
@@ -41,7 +41,7 @@ Delay in ms before responding (for timeout testing).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: core/contracts/types.ts:48
+Defined in: [specification/contracts/types.ts:48](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L48)
 
 Response headers.
 
@@ -53,6 +53,6 @@ Response headers.
 optional status?: number;
 ```
 
-Defined in: core/contracts/types.ts:44
+Defined in: [specification/contracts/types.ts:44](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L44)
 
 HTTP status code (default: 200).

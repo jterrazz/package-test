@@ -5,7 +5,7 @@
 type RedisOptions = object;
 ```
 
-Defined in: integrations/redis/redis.ts:5
+Defined in: [integrations/redis/redis.ts:5](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L5)
 
 ## Properties
 
@@ -15,7 +15,7 @@ Defined in: integrations/redis/redis.ts:5
 optional composeService?: string;
 ```
 
-Defined in: integrations/redis/redis.ts:10
+Defined in: [integrations/redis/redis.ts:10](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L10)
 
 Map to a service in docker/compose.test.yaml. Defaults to the handle's
 key in the declared services record.
@@ -28,6 +28,6 @@ key in the declared services record.
 optional image?: string;
 ```
 
-Defined in: integrations/redis/redis.ts:12
+Defined in: [integrations/redis/redis.ts:12](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L12)
 
 Override image.

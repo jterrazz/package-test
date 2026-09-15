@@ -15,7 +15,7 @@ type WebsiteSpecificationOptions = object &
 };
 ```
 
-Defined in: core/specification/website/start-website.ts:34
+Defined in: [specification/facets/website/start-website.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L34)
 
 Options for startWebsite \| specification.website. `server` (start
 the site locally) and `url` (target a running site) are mutually
@@ -28,5 +28,5 @@ stub.
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | core/specification/website/start-website.ts:40 |
-| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | core/specification/website/start-website.ts:45 |
+| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | [specification/facets/website/start-website.ts:40](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L40) |
+| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | [specification/facets/website/start-website.ts:45](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L45) |

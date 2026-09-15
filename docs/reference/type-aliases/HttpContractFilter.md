@@ -5,7 +5,7 @@
 type HttpContractFilter = object;
 ```
 
-Defined in: core/contracts/http.ts:15
+Defined in: [specification/contracts/http.ts:15](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L15)
 
 Request filters for the generic HTTP provider. Every field is a subset
 constraint — a request matches when all provided fields match.
@@ -18,7 +18,7 @@ constraint — a request matches when all provided fields match.
 optional body?: object | RegExp | string;
 ```
 
-Defined in: core/contracts/http.ts:21
+Defined in: [specification/contracts/http.ts:21](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L21)
 
 Body constraint. An object is a deep SUBSET match (toMatchObject-style)
 whose leaf values may be `match.*` matchers; a string is a containment
@@ -32,7 +32,7 @@ test and a RegExp a `test()` over the raw text body.
 optional headers?: Record<string, RegExp | string>;
 ```
 
-Defined in: core/contracts/http.ts:23
+Defined in: [specification/contracts/http.ts:23](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L23)
 
 Header subset. Names are case-insensitive; string = exact value, RegExp = `test()`.
 
@@ -44,6 +44,6 @@ Header subset. Names are case-insensitive; string = exact value, RegExp = `test(
 optional query?: Record<string, RegExp | string>;
 ```
 
-Defined in: core/contracts/http.ts:25
+Defined in: [specification/contracts/http.ts:25](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L25)
 
 Query-param subset. string = exact value, RegExp = `test()`.

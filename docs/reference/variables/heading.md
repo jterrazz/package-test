@@ -5,6 +5,6 @@
 const heading: ElementFactory;
 ```
 
-Defined in: core/specification/website/elements.ts:45
+Defined in: [specification/facets/website/elements.ts:45](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L45)
 
 A heading, by accessible name.

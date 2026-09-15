@@ -5,7 +5,7 @@
 type ApiSpecification<DatabaseKey> = object;
 ```
 
-Defined in: core/specification/shared/builder.ts:180
+Defined in: [specification/facets/\_common/builder.ts:180](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L180)
 
 The `api` facet — HTTP chain entry handed out by `specification.api()`.
 Setup methods chain; action methods are terminal: they execute the spec
@@ -28,7 +28,7 @@ of the declared services record that are databases.
 delete: (path) => Promise<HttpResult>;
 ```
 
-Defined in: core/specification/shared/builder.ts:189
+Defined in: [specification/facets/\_common/builder.ts:189](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L189)
 
 Send a DELETE request and resolve with the result.
 
@@ -50,7 +50,7 @@ Send a DELETE request and resolve with the result.
 get: (path) => Promise<HttpResult>;
 ```
 
-Defined in: core/specification/shared/builder.ts:191
+Defined in: [specification/facets/\_common/builder.ts:191](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L191)
 
 Send a GET request and resolve with the result.
 
@@ -72,7 +72,7 @@ Send a GET request and resolve with the result.
 headers: (headers) => ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: core/specification/shared/builder.ts:182
+Defined in: [specification/facets/\_common/builder.ts:182](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L182)
 
 Set HTTP headers for the request. Multiple calls merge.
 
@@ -94,7 +94,7 @@ Set HTTP headers for the request. Multiple calls merge.
 intercept: InterceptMethod<ApiSpecification<DatabaseKey>>;
 ```
 
-Defined in: core/specification/shared/builder.ts:184
+Defined in: [specification/facets/\_common/builder.ts:184](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L184)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -106,7 +106,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 post: (path, body?) => Promise<HttpResult>;
 ```
 
-Defined in: core/specification/shared/builder.ts:193
+Defined in: [specification/facets/\_common/builder.ts:193](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L193)
 
 Send a POST request (optional inline JSON body) and resolve with the result.
 
@@ -129,7 +129,7 @@ Send a POST request (optional inline JSON body) and resolve with the result.
 put: (path, body?) => Promise<HttpResult>;
 ```
 
-Defined in: core/specification/shared/builder.ts:195
+Defined in: [specification/facets/\_common/builder.ts:195](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L195)
 
 Send a PUT request (optional inline JSON body) and resolve with the result.
 
@@ -152,7 +152,7 @@ Send a PUT request (optional inline JSON body) and resolve with the result.
 request: (file) => Promise<HttpResult>;
 ```
 
-Defined in: core/specification/shared/builder.ts:197
+Defined in: [specification/facets/\_common/builder.ts:197](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L197)
 
 Send the complete request described by `_requests/<file>` (.http format).
 
@@ -174,7 +174,7 @@ Send the complete request described by `_requests/<file>` (.http format).
 seed: (file, options?) => ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: core/specification/shared/builder.ts:186
+Defined in: [specification/facets/\_common/builder.ts:186](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L186)
 
 Queue a SQL seed file from `_seeds/` to run before the action.
 

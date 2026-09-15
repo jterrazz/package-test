@@ -5,7 +5,7 @@
 type ApiHandle<DatabaseKey> = object;
 ```
 
-Defined in: core/specification/api/start-api.ts:67
+Defined in: [specification/facets/api/start-api.ts:67](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L67)
 
 The record returned by startApi \| specification.api. Destructure
 with the canonical names (CONVENTIONS A3):
@@ -26,7 +26,7 @@ with the canonical names (CONVENTIONS A3):
 api: ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: core/specification/api/start-api.ts:68
+Defined in: [specification/facets/api/start-api.ts:68](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L68)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: core/specification/api/start-api.ts:68
 cleanup: () => Promise<void>;
 ```
 
-Defined in: core/specification/api/start-api.ts:70
+Defined in: [specification/facets/api/start-api.ts:70](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L70)
 
 Stop all infrastructure started by this specification.
 
@@ -52,7 +52,7 @@ Stop all infrastructure started by this specification.
 docker: (containerId) => ContainerAccessor;
 ```
 
-Defined in: core/specification/api/start-api.ts:75
+Defined in: [specification/facets/api/start-api.ts:75](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L75)
 
 Read a running container by id — returns a [ContainerAccessor](../classes/ContainerAccessor.md)
 usable with `await expect(...).toBeRunning()` and read accessors.
@@ -75,6 +75,6 @@ usable with `await expect(...).toBeRunning()` and read accessors.
 orchestrator: Orchestrator;
 ```
 
-Defined in: core/specification/api/start-api.ts:77
+Defined in: [specification/facets/api/start-api.ts:77](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L77)
 
 The orchestrator managing the test infrastructure lifecycle.

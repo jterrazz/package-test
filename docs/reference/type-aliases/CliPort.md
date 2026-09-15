@@ -5,7 +5,7 @@
 type CliPort = object;
 ```
 
-Defined in: core/ports/cli.port.ts:48
+Defined in: [specification/ports/cli.port.ts:48](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/cli.port.ts#L48)
 
 ## Properties
 
@@ -15,7 +15,7 @@ Defined in: core/ports/cli.port.ts:48
 exec: (args, cwd, env?, input?) => Promise<CliOutput>;
 ```
 
-Defined in: core/ports/cli.port.ts:50
+Defined in: [specification/ports/cli.port.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/cli.port.ts#L50)
 
 Execute a command with the given arguments in the given working directory.
 
@@ -40,7 +40,7 @@ Execute a command with the given arguments in the given working directory.
 watch: (args, cwd, options, env?) => Promise<CliOutput>;
 ```
 
-Defined in: core/ports/cli.port.ts:53
+Defined in: [specification/ports/cli.port.ts:53](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/cli.port.ts#L53)
 
 Run a long-running process and wait for a pattern or timeout.
 

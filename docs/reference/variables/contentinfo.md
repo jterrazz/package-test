@@ -5,6 +5,6 @@
 const contentinfo: LandmarkFactory;
 ```
 
-Defined in: core/specification/website/elements.ts:81
+Defined in: [specification/facets/website/elements.ts:81](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L81)
 
 The `contentinfo` landmark — the page footer.

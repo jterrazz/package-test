@@ -5,7 +5,7 @@
 type Visitor = object;
 ```
 
-Defined in: core/ports/browser.port.ts:88
+Defined in: [specification/ports/browser.port.ts:88](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L88)
 
 The visitor — the interaction vocabulary handed to a visit scenario.
 Every action auto-waits (playwright actionability); `see()` is the single
@@ -20,7 +20,7 @@ fails at the timeout. There is no sleep and no conditional helper.
 check: (element) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:90
+Defined in: [specification/ports/browser.port.ts:90](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L90)
 
 Check a checkbox or radio.
 
@@ -42,7 +42,7 @@ Check a checkbox or radio.
 click: (element) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:92
+Defined in: [specification/ports/browser.port.ts:92](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L92)
 
 Click the element.
 
@@ -64,7 +64,7 @@ Click the element.
 fill: (element, value) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:94
+Defined in: [specification/ports/browser.port.ts:94](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L94)
 
 Fill a form field with a value.
 
@@ -87,7 +87,7 @@ Fill a form field with a value.
 goto: (path) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:96
+Defined in: [specification/ports/browser.port.ts:96](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L96)
 
 Navigate to a path of the site under test.
 
@@ -109,7 +109,7 @@ Navigate to a path of the site under test.
 hover: (element) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:98
+Defined in: [specification/ports/browser.port.ts:98](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L98)
 
 Hover the element.
 
@@ -131,7 +131,7 @@ Hover the element.
 press: (key) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:100
+Defined in: [specification/ports/browser.port.ts:100](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L100)
 
 Press a key (e.g. `Enter`).
 
@@ -153,7 +153,7 @@ Press a key (e.g. `Enter`).
 see: (element) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:102
+Defined in: [specification/ports/browser.port.ts:102](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L102)
 
 Wait until the element is visible — the only synchronization primitive.
 
@@ -175,7 +175,7 @@ Wait until the element is visible — the only synchronization primitive.
 select: (element, option) => Promise<void>;
 ```
 
-Defined in: core/ports/browser.port.ts:104
+Defined in: [specification/ports/browser.port.ts:104](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L104)
 
 Select an option in a select field.
 
