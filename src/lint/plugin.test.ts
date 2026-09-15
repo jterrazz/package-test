@@ -1,3 +1,4 @@
+import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -45,6 +46,20 @@ const CHECKER_PASS_IDS = new Set<string>(CHECKER_PASS_REGISTRY);
  */
 const CLI_CONTRACT_SPECS = new Set(['checker-cli', 'kitchen-sink']);
 
+describe('the composable fragment — what a consumer wires', () => {
+    test('`testing` is an oxlint config, so compose(<profile>, testing) needs no assertion', () => {
+        // Given - the fragment as a consumer's oxlint.config.ts receives it. The
+        // Annotation IS the test: an inferred `rules` widens each severity to
+        // `string`, which oxlint's closed union refuses, and this line stops
+        // Compiling — no consumer should need `testing as OxlintConfig`.
+        const composed: OxlintConfig = testing;
+
+        // Then - it carries the plugin wiring and the whole catalogue
+        expect(composed.jsPlugins).toStrictEqual(['@jterrazz/test/oxlint']);
+        expect(composed.rules).toBe(recommendedRules);
+    });
+});
+
 describe('conventions catalogue — generation freshness (meta-test)', () => {
     test('the docs/10 catalogue is byte-identical to a fresh generation', () => {
         // Given - the committed docs/13-linting.md
@@ -63,11 +78,12 @@ describe('conventions catalogue — generation freshness (meta-test)', () => {
 
 describe('conventions catalogue — completeness (meta-test)', () => {
     test('every shipped plugin rule carries a statique meta.docs entry', () => {
-        // Given - each shipped jterrazz/* rule
+        // Given - each shipped jterrazz/* rule, and the manifest read by rule id
+        const docsById: Record<string, unknown> = RULE_DOCS;
         for (const [id, rule] of Object.entries(plugin.rules)) {
             // Then - it attaches its manifest doc as meta.docs (channel statique)
             expect(rule.meta?.docs, `rule ${id} is missing meta.docs`).toBeDefined();
-            expect(rule.meta?.docs).toBe(RULE_DOCS[id]);
+            expect(rule.meta?.docs).toBe(docsById[id]);
             expect(rule.meta?.docs?.channel).toBe('statique');
         }
     });
@@ -75,13 +91,13 @@ describe('conventions catalogue — completeness (meta-test)', () => {
     test('the statique docs cover exactly the shipped plugin rules', () => {
         // Given - the statique docs and the plugin map
         // Then - the two sets are identical (no orphan doc, no undocumented rule)
-        expect(Object.keys(RULE_DOCS).sort()).toEqual([...pluginRules].sort());
+        expect(Object.keys(RULE_DOCS).sort()).toStrictEqual([...pluginRules].sort());
     });
 
     test('every checker-channel manifest entry maps to a bundled checker pass', () => {
         // Given - the checker channel of the manifest
         // Then - each entry names a real pass run by dist/checker.js
-        expect(CHECKER_PASSES.map((entry) => entry.name).sort()).toEqual(
+        expect(CHECKER_PASSES.map((entry) => entry.name).sort()).toStrictEqual(
             [...CHECKER_PASS_IDS].sort(),
         );
     });
@@ -101,7 +117,7 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         // Then - no two entries share a name (each maps to a distinct implementation)
         const names = new Set<string>();
         for (const entry of catalog) {
-            expect(names.has(entry.name), `duplicate catalogue entry ${entry.name}`).toBe(false);
+            expect(names.has(entry.name), `duplicate catalogue entry ${entry.name}`).toBeFalsy();
             names.add(entry.name);
         }
     });
@@ -115,33 +131,33 @@ describe('testing fragment — standalone oxlint config', () => {
         // Ships the one override the A4 idiom needs — without pulling in any base preset
         expect(testing.jsPlugins).toContain('@jterrazz/test/oxlint');
         expect(testing.rules).toBe(recommendedRules);
-        expect(Object.keys(testing.rules)).toEqual(
+        expect(Object.keys(recommendedRules)).toStrictEqual(
             Object.keys(plugin.rules).map((id) => `jterrazz/${id}`),
         );
         expect(testing.overrides?.[0]?.files).toContain('**/*.specification.ts');
         // A standalone config carries no `extends` — the fragment stands on its own.
-        expect('extends' in testing).toBe(false);
+        expect('extends' in testing).toBeFalsy();
     });
 
     test('declares no `categories` — every rule it ships is decided by name', () => {
         // Given - the fragment, top level and every override entry
         // (the `categories` block in specs/_fixtures/lint-cli/oxlint.e2e.json is a
         // Test harness muting oxlint's own defaults, not a config this package ships)
-        const layers: Array<Record<string, unknown>> = [
+        const layers: Record<string, unknown>[] = [
             testing as unknown as Record<string, unknown>,
-            ...((testing.overrides ?? []) as unknown as Array<Record<string, unknown>>),
+            ...((testing.overrides ?? []) as unknown as Record<string, unknown>[]),
         ];
 
         // Then - none of them opens a category: a category turns on rules nobody
         // Decided, and composing it over a base preset silently re-enables them
         for (const layer of layers) {
-            expect('categories' in layer).toBe(false);
+            expect('categories' in layer).toBeFalsy();
         }
     });
 
     test('the only `warn` levels are the advisory `w` channel', () => {
-        // Given - each rule the fragment enables
-        for (const [id, level] of Object.entries(testing.rules)) {
+        // Given - each rule the fragment enables (its `rules` IS this map, above)
+        for (const [id, level] of Object.entries(recommendedRules)) {
             // Then - `warn` belongs to the redundancy heuristics (`<family><n>w-…`)
             // And nothing else; every hard convention is an error. The estate's
             // Rulebook has no warn tier — this package's `w` channel is its one
@@ -158,7 +174,7 @@ describe('testing fragment — standalone oxlint config', () => {
             // Already holding its own overrides (v10 puts the `vitest` plugin on the
             // Test globs that way) keeps them: oxlint concatenates the arrays
             expect(entry.files.length).toBeGreaterThan(0);
-            expect(Object.keys(entry).sort()).toEqual(['files', 'rules']);
+            expect(Object.keys(entry).sort()).toStrictEqual(['files', 'rules']);
         }
     });
 });
@@ -177,11 +193,11 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         // Given - each shipped rule
         for (const id of pluginRules) {
             // Then - its E2E spec file and violation/compliant fixture twin exist
-            expect(e2eSpecIds.has(id), `${id} has no E2E spec`).toBe(true);
-            expect(existsSync(resolve(ROOT, 'specs/_fixtures/lint-violations', id))).toBe(true);
-            expect(existsSync(resolve(ROOT, 'specs/_fixtures/lint-violations', `${id}-ok`))).toBe(
-                true,
-            );
+            expect(e2eSpecIds.has(id), `${id} has no E2E spec`).toBeTruthy();
+            expect(existsSync(resolve(ROOT, 'specs/_fixtures/lint-violations', id))).toBeTruthy();
+            expect(
+                existsSync(resolve(ROOT, 'specs/_fixtures/lint-violations', `${id}-ok`)),
+            ).toBeTruthy();
         }
     });
 
@@ -192,7 +208,7 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
             expect(
                 pluginRules.has(id) || CHECKER_PASS_IDS.has(id) || CLI_CONTRACT_SPECS.has(id),
                 `${id} maps to no rule, pass, or CLI-contract spec`,
-            ).toBe(true);
+            ).toBeTruthy();
         }
     });
 
@@ -205,7 +221,9 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
 
         // Then - its rule keys match recommendedRules exactly: no rule ships without
         // An E2E lint pass, and no stale rule lingers in the fixture config
-        expect(Object.keys(config.rules).sort()).toEqual(Object.keys(recommendedRules).sort());
+        expect(Object.keys(config.rules).sort()).toStrictEqual(
+            Object.keys(recommendedRules).sort(),
+        );
     });
 
     test('the docs/06 token table matches TOKEN_KINDS exactly', () => {
@@ -218,6 +236,6 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         );
 
         // Then - identical to the frozen vocabulary
-        expect([...documented].sort()).toEqual([...TOKEN_KINDS].sort());
+        expect([...documented].sort()).toStrictEqual([...TOKEN_KINDS].sort());
     });
 });

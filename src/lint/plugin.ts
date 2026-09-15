@@ -1,11 +1,20 @@
+/*
+ * The config type is oxlint's own, reached through `@jterrazz/typescript` —
+ * the one devDependency a consumer of this toolchain declares. Stating it here
+ * is what makes `compose(<profile>, testing)` type-check with no assertion: an
+ * inferred `rules` widens every severity to `string`, which oxlint's closed
+ * union refuses.
+ */
+import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
+
 import { a1SpecificationFile } from './rules/a1-specification-file.js';
-import { a10DuplicateBinding } from './rules/a10-duplicate-binding.js';
 import { a2KnownConstructors } from './rules/a2-known-constructors.js';
 import { a3NoDestructureAlias } from './rules/a3-no-destructure-alias.js';
 import { a4CleanupAfterall } from './rules/a4-cleanup-afterall.js';
 import { a5ModeWithServer } from './rules/a5-mode-with-server.js';
 import { a6wRedundantComposeService } from './rules/a6w-redundant-compose-service.js';
 import { a9wRedundantRoot } from './rules/a9w-redundant-root.js';
+import { a10DuplicateBinding } from './rules/a10-duplicate-binding.js';
 import { b2KnownFixtureMarker } from './rules/b2-known-fixture-marker.js';
 import { b4GivenThen } from './rules/b4-given-then.js';
 import { b5AwaitUsing } from './rules/b5-await-using.js';
@@ -13,22 +22,22 @@ import { b6wRedundantEnvUrl } from './rules/b6w-redundant-env-url.js';
 import { b8KebabTrigger } from './rules/b8-kebab-trigger.js';
 import { b9wProductCommand } from './rules/b9w-product-command.js';
 import { c1DomainStructure } from './rules/c1-domain-structure.js';
-import { c10ContractsBoundary } from './rules/c10-contracts-boundary.js';
-import { c11ContractDataPairing } from './rules/c11-contract-data-pairing.js';
-import { c13UnderscoredGround } from './rules/c13-underscored-ground.js';
 import { c2HttpOnlyRequests } from './rules/c2-http-only-requests.js';
 import { c4ContractShape } from './rules/c4-contract-shape.js';
 import { c6ToMatchExtension } from './rules/c6-tomatch-extension.js';
 import { c7SeedsSqlOnly } from './rules/c7-seeds-sql-only.js';
 import { c8ReferencedFixtureExists } from './rules/c8-referenced-fixture-exists.js';
-import { d12wResponseBodyProbe } from './rules/d12w-response-body-probe.js';
-import { d13wUnfrozenNegativeFixture } from './rules/d13w-unfrozen-negative-fixture.js';
-import { d15wStatusOnlyProbe } from './rules/d15w-status-only-probe.js';
+import { c10ContractsBoundary } from './rules/c10-contracts-boundary.js';
+import { c11ContractDataPairing } from './rules/c11-contract-data-pairing.js';
+import { c13UnderscoredGround } from './rules/c13-underscored-ground.js';
 import { d2AwaitIoMatcher } from './rules/d2-await-io-matcher.js';
 import { d2wAwaitSyncMatcher } from './rules/d2w-await-sync-matcher.js';
 import { d6wTransformTokenEquivalent } from './rules/d6w-transform-token-equivalent.js';
 import { d8wTextBypass } from './rules/d8w-text-bypass.js';
 import { d9wSingleUseRef } from './rules/d9w-single-use-ref.js';
+import { d12wResponseBodyProbe } from './rules/d12w-response-body-probe.js';
+import { d13wUnfrozenNegativeFixture } from './rules/d13w-unfrozen-negative-fixture.js';
+import { d15wStatusOnlyProbe } from './rules/d15w-status-only-probe.js';
 import { f1NoSubpathImport } from './rules/f1-no-subpath-import.js';
 import { f2NoTestImportsInProd } from './rules/f2-no-test-imports-in-prod.js';
 import { f3SpecsPublicEntry } from './rules/f3-specs-public-entry.js';
@@ -119,7 +128,7 @@ const plugin: LintPlugin = {
 export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
     Object.keys(plugin.rules).map((rule) => [
         `jterrazz/${rule}`,
-        /^\w+w-/.test(rule) ? 'warn' : 'error',
+        /^\w+w-/u.test(rule) ? 'warn' : 'error',
     ]),
 );
 
@@ -138,7 +147,7 @@ export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEnt
  * file on a non-export statement, so the relaxation ships here rather than being
  * hand-rolled in every consumer.
  */
-export const testing = {
+export const testing: OxlintConfig = {
     jsPlugins: ['@jterrazz/test/oxlint'],
     overrides: [
         {
