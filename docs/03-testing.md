@@ -2,12 +2,12 @@
 
 What proves a change here: this package specifies itself with itself. The suites under `specs/` are written with `@jterrazz/test` against fixture apps, the module tests sit beside the modules they cover, and a family of meta-tests runs the framework on its own output. This chapter says which suite answers for what, and what a change owes each of them.
 
-| Ground         | Where                                      | Proves                                                       |
-| -------------- | ------------------------------------------ | ------------------------------------------------------------ |
-| Module tests   | `src/**/<file>.test.ts`                    | One module's behaviour, beside it (rule I2)                  |
-| Product specs  | `specs/<facet>/<domain>/<aspect>.test.ts`  | The framework's own facets, through the public surface       |
-| Spec documents | `specs/cli/literate/*.spec.yaml`           | The document format, collected as test files by `literate()` |
-| Meta-tests     | `src/lint/*.test.ts`, `src/core/matching/` | The framework applied to itself and to its own projections   |
+| Ground         | Where                                               | Proves                                                       |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+| Module tests   | `src/**/<file>.test.ts`                             | One module's behaviour, beside it (rule I2)                  |
+| Product specs  | `specs/<facet>/<domain>/<aspect>.test.ts`           | The framework's own facets, through the public surface       |
+| Spec documents | `specs/cli/literate/*.spec.yaml`                    | The document format, collected as test files by `literate()` |
+| Meta-tests     | `src/lint/*.test.ts`, `src/specification/matching/` | The framework applied to itself and to its own projections   |
 
 ## The five projects
 
@@ -29,7 +29,7 @@ npx vitest --run --project website  # after npx playwright install chromium
 
 `api` and `api-stack` run the same test files and the mode switch lives ONLY in `vitest.config.ts` — that is rule A5 applied to this repository, and it is also the point of the two projects: fast feedback in-process, end-to-end confidence against the real stack, from one set of specs. `api-stack` excludes the intercept domain because `.intercept()` is in-process MSW, which compose mode has no access to.
 
-There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/core/specification/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
+There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/specification/facets/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
 
 ## How a spec tree is laid out
 
@@ -61,14 +61,14 @@ Its goldens are full snapshots, not greps: `specs/lint/checker/_expected/*.txt` 
 
 Several truths about this package cannot be asserted from outside it, so they are asserted by running it on itself. Each of these exists because a defect class was found once and made unrepeatable (rule K1).
 
-| Meta-test                                               | Holds                                                                                                                                                                                                                                             |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/core/matching/match.test.ts`, `structural.test.ts` | Every `{{token}}` matches what it should and refuses what it should not — both directions                                                                                                                                                         |
-| `src/lint/plugin.test.ts`                               | Catalogue **freshness** (regenerating reproduces the committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`, every manifest entry maps to an implementation), plus the standing rule↔fixture inventory |
-| `src/lint/docs-typecheck.test.ts`                       | Every framework code block in `docs/*.md` and `README.md` typechecks against the real surface, so a sample cannot outlive the API it calls                                                                                                        |
-| `src/lint/env-allowlist.test.ts`                        | No `process.env` read outside `TEST_MODE`, `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                              |
-| `src/lint/facet-matrix.test.ts`                         | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
-| `src/lint/package-exports.test.ts`                      | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
+| Meta-test                                                        | Holds                                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/specification/matching/match.test.ts`, `structural.test.ts` | Every `{{token}}` matches what it should and refuses what it should not — both directions                                                                                                                                                         |
+| `src/lint/plugin.test.ts`                                        | Catalogue **freshness** (regenerating reproduces the committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`, every manifest entry maps to an implementation), plus the standing rule↔fixture inventory |
+| `src/lint/docs-typecheck.test.ts`                                | Every framework code block in `docs/*.md` and `README.md` typechecks against the real surface, so a sample cannot outlive the API it calls                                                                                                        |
+| `src/lint/env-allowlist.test.ts`                                 | No `process.env` read outside `TEST_MODE`, `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                              |
+| `src/lint/facet-matrix.test.ts`                                  | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
+| `src/lint/package-exports.test.ts`                               | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
 
 The freshness meta-test is the reason a documentation change can turn the suite red: edit the generated catalogue by hand and it fails, correctly. Regenerate instead — the gesture is [02 — Developing](02-developing.md)'s.
 

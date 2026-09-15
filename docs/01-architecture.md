@@ -2,12 +2,12 @@
 
 What this package IS: one runner model behind five constructors, four source layers with declared edges, and four channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
-| The shape                  | Held below                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| The runner model           | [The runner model](#the-runner-model) — constructor, handle, chain, result     |
-| The source layers          | [The four layers](#the-four-layers) — `core`, `integrations`, `vitest`, `lint` |
-| How a convention is held   | [The four enforcement channels](#the-four-enforcement-channels)                |
-| What ships out of the tree | [What the tree publishes](#what-the-tree-publishes)                            |
+| The shape                  | Held below                                                                              |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| The runner model           | [The runner model](#the-runner-model) — constructor, handle, chain, result              |
+| The source layers          | [The four layers](#the-four-layers) — `specification`, `integrations`, `vitest`, `lint` |
+| How a convention is held   | [The four enforcement channels](#the-four-enforcement-channels)                         |
+| What ships out of the tree | [What the tree publishes](#what-the-tree-publishes)                                     |
 
 The rules themselves — what each family says, what a reviewer must judge — are the constitution, [12 — Conventions](12-conventions.md); their normative sentences are the generated catalogue, [13 — Linting](13-linting.md).
 
@@ -15,7 +15,7 @@ The rules themselves — what each family says, what a reviewer must judge — a
 
 Every facet is the same four steps. A **constructor** takes options and returns a **handle**; the handle opens a **chain** of zero or more setups closed by exactly one terminal action; the action executes and resolves to a **typed result**; the result is asserted through vitest's `expect()`. Nothing else is public — there is no imperative escape hatch, because a spec that can do anything proves nothing in particular.
 
-Five constructors exist and the list is closed (`src/core/specification/shared/specification.ts`):
+Five constructors exist and the list is closed (`src/specification/facets/_common/specification.ts`):
 
 | Constructor               | Handle destructures to                   | Subject under test                               |
 | ------------------------- | ---------------------------------------- | ------------------------------------------------ |
@@ -31,7 +31,7 @@ A runner is created **once per suite**, in a `*.specification.ts` file, and impo
 
 ### The seam under the chain
 
-`SpecificationBuilder` (`src/core/specification/shared/builder.ts`) holds the chain for every facet; each facet contributes its own setups and its own terminal actions on top. The infrastructure a chain needs is reached through **ports** — `src/core/ports/` declares eight of them (`browser`, `cli`, `container`, `database`, `device`, `isolation`, `server`, `service`) — and an integration implements one. So the chain knows "a database exists"; it never knows Postgres.
+`SpecificationBuilder` (`src/specification/facets/_common/builder.ts`) holds the chain for every facet; each facet contributes its own setups and its own terminal actions on top. The infrastructure a chain needs is reached through **ports** — `src/specification/ports/` declares eight of them (`browser`, `cli`, `container`, `database`, `device`, `isolation`, `server`, `service`) — and an integration implements one. So the chain knows "a database exists"; it never knows Postgres.
 
 Two seams are opened lazily rather than imported: `playwright` for `.visit()` and `appium`/`webdriverio` for `.open()` are optional peer dependencies, loaded by the one module that owns them. A project that tests no page installs neither.
 
@@ -39,14 +39,14 @@ Two seams are opened lazily rather than imported: `playwright` for `.visit()` an
 
 The source tree is four layers with declared, one-directional edges. The map is not the linter's to assume — `i1-layer-boundaries` ships inert — so this package declares its own as `FRAMEWORK_LAYERS` in `oxlint.config.ts`, and that declaration is the enforced statement of what follows.
 
-| Layer           | May import                                                                   | Holds                                                                                                                                                                                    |
-| --------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `core/`         | itself, plus the docker/hono/yaml integrations and two `vitest/` helpers     | The model: the specification builder and its facets, the results and their accessors, the `{{token}}` engine, the `.http` and `<case>.spec.yaml` grammars, the contract queue, the ports |
-| `integrations/` | its OWN external dependency, plus `core/`                                    | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `compose`, `docker`, `hono`, `playwright`, `appium`, `msw`, `openai`, `anthropic`, `yaml`                    |
-| `vitest/`       | `vitest`, `vitest-mock-extended`, `mockdate`, `core/`, `integrations/docker` | ALL runner coupling: the `expect()` matchers, update-mode detection, `mockOf`/`mockOfDate`, the config preset and the `literate()` plugin                                                |
-| `lint/`         | itself, plus a short list of PURE `core/` modules                            | The tool-facing channel: the oxlint plugin, the conventions checker, the catalogue manifest and generator                                                                                |
+| Layer            | May import                                                                            | Holds                                                                                                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `specification/` | itself, plus the docker/hono/yaml integrations and two `vitest/` helpers              | The model: the specification builder and its facets, the results and their accessors, the `{{token}}` engine, the `.http` and `<case>.spec.yaml` grammars, the contract queue, the ports |
+| `integrations/`  | its OWN external dependency, plus `specification/`                                    | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `compose`, `docker`, `hono`, `playwright`, `appium`, `msw`, `openai`, `anthropic`, `yaml`                    |
+| `vitest/`        | `vitest`, `vitest-mock-extended`, `mockdate`, `specification/`, `integrations/docker` | ALL runner coupling: the `expect()` matchers, update-mode detection, `mockOf`/`mockOfDate`, the config preset and the `literate()` plugin                                                |
+| `lint/`          | itself, plus a short list of PURE `specification/` modules                            | The tool-facing channel: the oxlint plugin, the conventions checker, the catalogue manifest and generator                                                                                |
 
-Three of those edges carry their reason in the declaration itself. `core/` reaches `integrations/docker` because that adapter has no dependency of its own to leak. `lint/` reaches exactly the pure modules the runner also uses — the token list, the ground names, the root walk, the `<case>.spec.yaml` parser — so that the file the lint accepts is the file the runner runs, from ONE parser. And `vitest/` is the only place the word `vitest` appears outside a test: swapping the runner would be a rewrite of that folder and of nothing else.
+Three of those edges carry their reason in the declaration itself. `specification/` reaches `integrations/docker` because that adapter has no dependency of its own to leak. `lint/` reaches exactly the pure modules the runner also uses — the token list, the ground names, the root walk, the `<case>.spec.yaml` parser — so that the file the lint accepts is the file the runner runs, from ONE parser. And `vitest/` is the only place the word `vitest` appears outside a test: swapping the runner would be a rewrite of that folder and of nothing else.
 
 `src/index.ts` is the composition root and names no layer. It wires the container integrations into the registry seam and re-exports the public surface; being the composition root is exactly why it is exempt from the layer map.
 
@@ -73,7 +73,7 @@ Two committed projections leave the code and land in the corpus: the API referen
 
 ## Pitfalls
 
-- **Reaching for a dependency from `core/`.** A new external package belongs in a folder of `integrations/` that imports it and nothing else; `core/` importing it directly is the one boundary this package cannot afford to blur, and `i1-layer-boundaries` refuses it.
+- **Reaching for a dependency from `specification/`.** A new external package belongs in a folder of `integrations/` that imports it and nothing else; `specification/` importing it directly is the one boundary this package cannot afford to blur, and `i1-layer-boundaries` refuses it.
 - **Adding a sixth constructor.** The five are the closed vocabulary the conventions, the linter and the documentation are all shaped around. A new SUBJECT to specify is a design decision, and it earns a record in [`decisions/`](decisions/) before it earns a constructor.
 - **Writing a rule's normative sentence into a chapter.** It belongs in `src/lint/manifest.ts` beside the implementation; a chapter that restates it is the second copy the whole design exists to prevent.
 
