@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const TEST_FILE = /\.test\.[cm]?[jt]s$/u;
 
 /** Where this very module sits inside the framework's SOURCE tree. */
-const SOURCE_LOCATION = join('core', 'specification', 'shared');
+const SOURCE_LOCATION = join('specification', 'facets', '_common');
 
 /** The real path of `path`, or `path` itself when it cannot be resolved. */
 function realPath(path: string): string {

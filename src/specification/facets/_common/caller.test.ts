@@ -86,6 +86,17 @@ describe('framework frames are recognised by identity', () => {
         expect(isFrameworkFrame(join(framework, 'match.test.js'), framework)).toBeFalsy();
     });
 
+    test('a module of another facet is a framework frame, from the DEFAULT tree', () => {
+        // Given - a sibling facet's module, judged against the tree this module
+        // Derives from its own location (no explicit frameworkTree)
+        const other = resolve(import.meta.dirname, '..', 'api', 'start-api.ts');
+
+        // Then - the whole source layer is the framework, not just this folder:
+        // A stale SOURCE_LOCATION shrinks the tree to `_common/` and every other
+        // Framework frame starts anchoring fixture resolution on itself
+        expect(isFrameworkFrame(other)).toBeTruthy();
+    });
+
     test('the framework directory itself is not inside itself', () => {
         // Given - the directory, not a file within it
         // Then - the containment test is strict
