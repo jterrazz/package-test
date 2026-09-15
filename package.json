@@ -41,9 +41,14 @@
             "import": "./dist/vitest.js"
         },
         "./oxlint": {
-            "types": "./dist/oxlint.d.ts",
-            "import": "./dist/oxlint.js",
-            "require": "./dist/oxlint.cjs"
+            "import": {
+                "types": "./dist/oxlint.d.ts",
+                "default": "./dist/oxlint.js"
+            },
+            "require": {
+                "types": "./dist/oxlint.d.cts",
+                "default": "./dist/oxlint.cjs"
+            }
         },
         "./schema": "./schema/spec.schema.json"
     },
