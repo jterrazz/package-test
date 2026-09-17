@@ -1,6 +1,6 @@
 # ADR-002: the statique channel holds only what upstream does not
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-15
 
 ## Context
