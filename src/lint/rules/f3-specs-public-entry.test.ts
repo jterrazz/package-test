@@ -32,9 +32,15 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
-        // A non-oxlint framework subpath (overlaps F1, kept specs-specific).
+        // An UNPUBLISHED framework subpath (overlaps F1, kept specs-specific).
         {
             code: 'import { match } from "@jterrazz/test/core";',
+            errors: 1,
+            filename: '/repo/specs/cli/tokens/tokens.test.ts',
+        },
+        // A subpath the exports map does not publish, even when it names a layer.
+        {
+            code: 'import { registerMatchers } from "@jterrazz/test/specification";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
@@ -61,17 +67,27 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
             code: 'import { redis } from "../../../src/integrations/redis/redis.js";',
             filename: '/repo/specs/integrations/redis/redis.test.ts',
         },
-        // The sanctioned tool-facing subpath.
+        // Every subpath the package's own `exports` map publishes is exempt.
         {
             code: 'import plugin from "@jterrazz/test/oxlint";',
             filename: '/repo/specs/setup/api.specification.ts',
+        },
+        // `/vitest` — what a specs-tree vitest.config.ts imports the preset from.
+        {
+            code: 'import { defineSpecConfig } from "@jterrazz/test/vitest";',
+            filename: '/repo/specs/cli/_fixtures/app/vitest.config.ts',
+        },
+        // `/schema` — the published JSON schema of a <case>.spec.yaml document.
+        {
+            code: 'import schema from "@jterrazz/test/schema" with { type: "json" };',
+            filename: '/repo/specs/cli/literate/literate.test.ts',
         },
         // Outside specs/ the rule is inert.
         {
             code: 'import { match } from "../specification/matching/match.js";',
             filename: '/repo/src/vitest/matchers.ts',
         },
-        // Consumer form — package imports carry no src path.
+        // Consumer form — the ROOT entry is what F3 points a spec at.
         {
             code: 'import { specification } from "@jterrazz/test";',
             filename: '/repo/specs/setup/api.specification.ts',
