@@ -50,7 +50,7 @@ A rule that takes options is declared, not suppressed — an `off` loses the che
 - `recommendedRules` (also exported standalone) enables the whole catalogue in one spread: hard conventions at `error`, redundancy heuristics (ids ending in `w-…`) at `warn`.
 - Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. If you don't compose `testing`, no `jterrazz/*` rule runs. (Only the `typescript check` orchestration still detects deps + `specs/` to decide whether to RUN the conventions-checker step — a runner decision, not config identity.)
 - Rules are individually addressable as `jterrazz/<rule-id>` if you want to deviate — prefer scoped `overrides` with a comment over global downgrades.
-- `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rules F1/F2 — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere.
+- `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rule F2 — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. F1 and F3 exempt every subpath the package's `exports` map publishes, this one among them.
 
 ### Standalone — without `@jterrazz/typescript`
 

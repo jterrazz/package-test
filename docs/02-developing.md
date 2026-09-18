@@ -68,7 +68,7 @@ Peer dependencies:
 
 Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch` types while `toBeEmpty` does not.
 
-Everything imports from the single package root — the only importable subpaths are the ones the package's `exports` map publishes for TOOLS (`@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/vitest` for what `vitest.config.ts` needs); internal subpaths do not exist (rule F1):
+Everything imports from the single package root — the only importable subpaths are the ones the package's `exports` map publishes for TOOLS (`@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/vitest` for what `vitest.config.ts` needs, `@jterrazz/test/schema` for an editor validating a `<case>.spec.yaml`); internal subpaths do not exist (rules F1 and F3, which read that map):
 
 ```typescript
 import {
