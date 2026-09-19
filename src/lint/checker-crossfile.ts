@@ -240,9 +240,15 @@ function collectSpecLiterals(path: string): Set<string> {
     }
 }
 
-/** Is this a file a leaf's ground may be referenced from? */
+/**
+ * Is this a file a leaf's ground may be referenced from?
+ *
+ * `.test.tsx` counts as much as `.test.ts`: a rendered unit's golden — its ARIA
+ * tree — sits in the same `_expected/`, read by a test the suffix alone tells
+ * apart.
+ */
 function isReferrer(name: string): boolean {
-    return name.endsWith('.test.ts') || name.endsWith(SPEC_EXTENSION);
+    return name.endsWith('.test.ts') || name.endsWith('.test.tsx') || name.endsWith(SPEC_EXTENSION);
 }
 
 function isDir(path: string): boolean {
@@ -765,7 +771,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `${rel}: domain directory has ground subdirs (${groundSubdirs.join(', ')}) but no *.test.ts or *.spec.yaml (C9 — see docs/13-linting.md)`,
+                message: `${rel}: domain directory has ground subdirs (${groundSubdirs.join(', ')}) but no *.test.ts(x) or *.spec.yaml (C9 — see docs/13-linting.md)`,
                 severity: 'error',
             });
             continue;

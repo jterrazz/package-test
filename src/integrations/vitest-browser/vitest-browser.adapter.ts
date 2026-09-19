@@ -5,6 +5,7 @@ import type { Locator, LocatorSelectors } from 'vitest/browser';
 import {
     AmbiguousElementError,
     describeAmbiguity,
+    formatElement,
 } from '../../specification/facets/website/ambiguity.js';
 import type { ElementMatch, ElementRef } from '../../specification/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
@@ -126,6 +127,19 @@ export async function act<T>(
     }
 }
 
+/**
+ * Is the element gone — or, with the focus modifier, no longer holding the
+ * keyboard? A node that left the document and one that is still there but not
+ * rendered are the same answer to a spec.
+ */
+function isGone(locator: Locator, byFocus: boolean): boolean {
+    const node = locator.query();
+    if (byFocus) {
+        return node !== document.activeElement;
+    }
+    return node === null || !node.checkVisibility();
+}
+
 /** A key name is a key; a single character is typed as itself. */
 function keystroke(key: string): string {
     return key.length > 1 ? `{${key}}` : key;
@@ -165,11 +179,16 @@ export function componentVerbs(surface: MountedSurface): {
         },
         gone: async (element) => {
             await act(element, async (locator) => {
-                if (element.focused === true) {
-                    await expect.element(locator).not.toHaveFocus();
-                    return;
-                }
-                await expect.element(locator).not.toBeVisible();
+                // Polled rather than asserted through `expect.element`: that
+                // Helper REFUSES a locator matching nothing, and "nothing
+                // Matches" is the commonest way for a thing to be gone. Absence
+                // Is one question — removed, or still there and not shown — and
+                // The poll retries it the same way every other verb retries.
+                await expect
+                    .poll(() => isGone(locator, element.focused === true), {
+                        message: `${formatElement(element)} is still on the screen`,
+                    })
+                    .toBeTruthy();
             });
         },
         hover: async (element) => {
@@ -219,9 +238,11 @@ export async function mountReact(ui: ComponentUi): Promise<MountedSurface> {
     let render;
     try {
         ({ render } = await import('vitest-browser-react'));
-    } catch {
+    } catch (error) {
         throw new Error(
-            'component.render(<X />) needs vitest-browser-react and react (optional peers): npm install -D vitest-browser-react react react-dom',
+            'component.render(<X />) needs vitest-browser-react and react (optional peers): ' +
+                `npm install -D vitest-browser-react react react-dom (${String(error)})`,
+            { cause: error },
         );
     }
     const rendered = await render(ui);

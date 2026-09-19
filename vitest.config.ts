@@ -1,4 +1,6 @@
-import { defineSpecConfig, literate } from './src/vitest/index.js';
+import { resolve } from 'node:path';
+
+import { component, defineSpecConfig, literate } from './src/vitest/index.js';
 
 /**
  * The package eats its own preset: `defineSpecConfig()` sets the artefact
@@ -59,6 +61,25 @@ export default defineSpecConfig({
                     include: ['specs/website/**/*.test.ts'],
                 },
             },
+            component({
+                // The package's own component app is the subject its component
+                // Specs stand on, and A2's law holds for it too: the test of a
+                // Component is the `.test.tsx` NEXT to it.
+                include: ['specs/component-app/**/*.test.tsx'],
+                vite: {
+                    resolve: {
+                        // The dogfood imports the PUBLIC specifier, and in this
+                        // Repository that specifier has to resolve to the
+                        // Browser entry's source — the same module the
+                        // `browser` condition publishes. `tsconfig`'s `paths`
+                        // Mirrors it so the compiler agrees with the bundler.
+                        alias: {
+                            '@jterrazz/test': resolve(import.meta.dirname, 'src/browser/index.ts'),
+                        },
+                    },
+                },
+                wrap: './specs/component-app/providers.tsx',
+            }),
             {
                 test: {
                     name: 'integrations',

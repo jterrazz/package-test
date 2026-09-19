@@ -103,15 +103,25 @@ describe('component() — the browser project', () => {
         expect(stated.exclude).not.toContain('specs/**');
     });
 
-    test('hands the page what it cannot read for itself: update mode and the wrap URL', async () => {
-        // Given - a project whose providers live in a module of its own
-        const project = testOf(await component({ wrap: './specs/app/providers.tsx' }));
+    test('hands the page what it cannot read for itself', async () => {
+        // Given - a project pinning the clock for every render
+        const project = testOf(await component({ clock: '2026-03-04T09:30:00.000Z' }));
 
-        // Then - the wrap crosses as a served URL, and update mode as a value
+        // Then - update mode and the instant cross as values; a page has neither
         expect(project.provide).toStrictEqual({
-            componentWrap: '/specs/app/providers.tsx',
+            componentClock: '2026-03-04T09:30:00.000Z',
             update: false,
         });
+    });
+
+    test('loads the project wrap through a setup file, not a fetch under the run', async () => {
+        // Given - a project whose providers live in a module of its own
+        const project = testOf(await component({ wrap: './specs/component-app/providers.tsx' }));
+        const setup = project.setupFiles;
+
+        // Then - the wrap is in the graph before the first test, from .artifacts/
+        expect(setup).toHaveLength(1);
+        expect(String(setup)).toContain('.artifacts/vitest/component-setup.mjs');
     });
 
     test('keeps the pipeline of a consumer vite config and drops where its app lives', async () => {

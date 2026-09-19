@@ -20,12 +20,21 @@ import type { ContractRegistration } from './handlers.js';
  * What the runner itself fetches. Everything else a page asks for is the
  * subject's own traffic and answers to its contracts (D7).
  */
-const RUNNER_PREFIXES = ['/@fs/', '/@id/', '/@vite', '/node_modules/', '/__vitest'];
+const RUNNER_PREFIXES = ['/.artifacts/', '/@fs/', '/@id/', '/@vite', '/node_modules/', '/__vitest'];
 
 let workerInstance: any = null;
 
-/** Is this the runner's own traffic rather than the subject's? */
-function isRunnerRequest(url: string): boolean {
+/**
+ * Is this the runner's own traffic rather than the subject's?
+ *
+ * In a page EVERY module is an HTTP request: the test file, the seam, the
+ * dependency cache Vite optimised, the runner's own channel. None of them is
+ * the component's network, and none of them can be declared by a contract, so
+ * they are recognised by PREFIX — never by extension, because msw bypasses a
+ * "common asset" path before `onUnhandledRequest` ever runs and an extension
+ * test would let a real `/api/posts.json` through on the same ground.
+ */
+export function isRunnerRequest(url: string): boolean {
     const { pathname } = new URL(url);
     return RUNNER_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
@@ -61,7 +70,7 @@ export async function registerWorkerContracts(
     }
     await ensureContractWorker();
     const msw = await import('msw');
-    const { handlers, violation } = buildContractHandlers(msw, contracts);
+    const { handlers, violation } = buildContractHandlers(msw, contracts, isRunnerRequest);
     workerInstance.use(...handlers);
     return {
         cleanup: () => {

@@ -2,8 +2,8 @@ import { registerWorkerContracts, resetWorkerContracts } from '../../../integrat
 import {
     afterThisTest,
     pinClock,
+    projectWrapper,
     providedClock,
-    providedWrapPath,
     releaseClock,
 } from '../../../integrations/vitest-browser/page-runtime.js';
 import type { ComponentUi, DomMount } from '../../../integrations/vitest-browser/ui.js';
@@ -63,37 +63,6 @@ type ChainState = {
 
 const EMPTY: ChainState = { clock: null, contracts: [], wrap: null };
 
-/**
- * The project-level `wrap`, loaded once from the module path `component()`
- * provided. It is a URL the dev server serves, not a filesystem path: inside a
- * page there is nothing else to import.
- */
-let projectWrap: ((ui: ComponentUi) => ComponentUi) | null = null;
-let projectWrapLoaded = false;
-
-async function loadProjectWrap(): Promise<((ui: ComponentUi) => ComponentUi) | null> {
-    if (projectWrapLoaded) {
-        return projectWrap;
-    }
-    projectWrapLoaded = true;
-    const path = providedWrapPath();
-    if (path === undefined || path === '') {
-        return null;
-    }
-    // oxlint-disable-next-line typescript/no-unsafe-assignment -- a specifier known only at runtime resolves to `any`: the shape is checked on the next line, which is the whole contract of `wrap`
-    const module: { default?: (ui: ComponentUi) => ComponentUi } = await import(
-        /* @vite-ignore */
-        path
-    );
-    if (typeof module.default !== 'function') {
-        throw new TypeError(
-            `component({ wrap: '${path}' }): the module must default-export (ui) => ReactNode.`,
-        );
-    }
-    projectWrap = module.default;
-    return projectWrap;
-}
-
 /** Record what the page writes to the console for the length of the render. */
 function recordConsole(): { entries: ConsoleEntry[]; stop: () => void } {
     const entries: ConsoleEntry[] = [];
@@ -148,8 +117,31 @@ function inlinePair(
     return { request, response };
 }
 
+/**
+ * What the page is still holding, and the teardown that lets it go.
+ *
+ * The React adapter's own auto-cleanup is a `beforeEach` registered when its
+ * module loads — and this package loads it lazily, INSIDE the first render, so
+ * that hook never covers the test that triggered it. The seam does the unmount
+ * itself, on the test that rendered: two renders' markup sharing one document
+ * is how a second `button('Open')` appears and a descriptor that named exactly
+ * one element starts refusing.
+ */
+let mounted: MountedSurface | null = null;
+
 /** Everything one test may have left behind, undone — no hook in any spec. */
-function resetComponentScope(): void {
+async function resetComponentScope(): Promise<void> {
+    const surface = mounted;
+    mounted = null;
+    if (surface !== null) {
+        try {
+            await surface.unmount();
+        } catch {
+            // A scenario that already called `visitor.unmount()` has nothing
+            // Left to take down, and taking it down twice is not a failure
+            // Worth raising from a teardown that has done its job.
+        }
+    }
     resetWorkerContracts();
     releaseClock();
 }
@@ -159,7 +151,7 @@ async function mount(state: ChainState, subject: RenderSubject): Promise<Mounted
     if (isDomMount(subject)) {
         return mountDom(subject);
     }
-    const outer = await loadProjectWrap();
+    const outer = projectWrapper<ComponentUi>();
     const dress = (ui: ComponentUi): ComponentUi => {
         const inner = state.wrap ? state.wrap(ui) : ui;
         return outer ? outer(inner) : inner;
@@ -180,9 +172,9 @@ async function render(
     scenario?: ComponentScenario,
 ): Promise<RenderResult> {
     const recorder = recordConsole();
-    afterThisTest(() => {
+    afterThisTest(async () => {
         recorder.stop();
-        resetComponentScope();
+        await resetComponentScope();
     });
 
     const instant = state.clock ?? providedClock();
@@ -192,6 +184,7 @@ async function render(
 
     const registration = await registerWorkerContracts(state.contracts);
     const surface = await mount(state, subject);
+    mounted = surface;
 
     try {
         if (scenario) {
