@@ -86,11 +86,14 @@ async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
                 ? (landmark.getAttribute('role') ?? landmark.tagName.toLowerCase())
                 : null;
             const detail = element.getAttribute('href') ?? element.getAttribute('name');
+            const text = (element.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80);
+            const label = element.getAttribute('aria-label')?.trim();
             return {
+                accessibleName: label && label !== text ? label : undefined,
                 context: context ?? undefined,
                 detail: detail ?? undefined,
                 tag: element.tagName.toLowerCase(),
-                text: (element.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80),
+                text,
             };
         });
     }, MAX_REPORTED_MATCHES);

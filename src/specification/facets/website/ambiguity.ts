@@ -77,13 +77,28 @@ function formatBare(element: ElementRef): string {
 /** `1. <a href="/articles">Articles</a>  in <nav>` — one evidence line per candidate. */
 function formatMatch(match: ElementMatch, index: number): string {
     const attribute = match.detail ? ` ${quoteDetail(match)}` : '';
+    // The accessible name is what a role descriptor MATCHED on. When it is not
+    // The text — an `aria-label` — the text alone names the wrong thing.
+    const named = match.accessibleName ? `  named ${JSON.stringify(match.accessibleName)}` : '';
     const context = match.context ? `  in <${match.context}>` : '';
-    return `  ${index + 1}. <${match.tag}${attribute}>${match.text}</${match.tag}>${context}`;
+    return `  ${index + 1}. <${match.tag}${attribute}>${match.text}</${match.tag}>${named}${context}`;
 }
 
 function quoteDetail(match: ElementMatch): string {
     const attribute = match.tag === 'a' ? 'href' : 'name';
     return `${attribute}=${JSON.stringify(match.detail)}`;
+}
+
+/** Each landmark the candidates sit in, and how many of them it holds. */
+function landmarkCounts(matches: ElementMatch[]): [string, number][] {
+    const counts = new Map<string, number>();
+    for (const match of matches) {
+        const landmark = match.context === undefined ? undefined : CONTEXT_LANDMARKS[match.context];
+        if (landmark !== undefined) {
+            counts.set(landmark, (counts.get(landmark) ?? 0) + 1);
+        }
+    }
+    return [...counts].sort(([, a], [, b]) => a - b);
 }
 
 /**
@@ -95,21 +110,22 @@ function quoteDetail(match: ElementMatch): string {
 function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     const fixes: string[] = [];
 
-    const landmarks = [
-        ...new Set(
-            matches
-                .map((match) => match.context && CONTEXT_LANDMARKS[match.context])
-                .filter((landmark): landmark is string => Boolean(landmark)),
-        ),
-    ];
-    if (landmarks.length > 0 && !element.scope) {
+    // A landmark holding EVERY candidate narrows nothing, and offering it reads
+    // As a fix while leaving the spec exactly as ambiguous. Only the ones that
+    // Cut the set are offered, each with what it leaves.
+    const narrowing = landmarkCounts(matches).filter(([, count]) => count < matches.length);
+    if (!element.scope) {
+        const [first, ...rest] = narrowing;
         fixes.push(
-            `scope it       within(${landmarks[0]}, ${formatBare(element)})${
-                landmarks.length > 1 ? `   [also here: ${landmarks.slice(1).join(', ')}]` : ''
-            }`,
+            first === undefined
+                ? 'scope it       within(<a container holding only this one>, ' +
+                      `${formatBare(element)})`
+                : `scope it       within(${first[0]}, ${formatBare(element)})` +
+                      `   [leaves ${first[1]} of ${matches.length}]` +
+                      (rest.length > 0
+                          ? `   [also here: ${rest.map(([name]) => name).join(', ')}]`
+                          : ''),
         );
-    } else if (!element.scope) {
-        fixes.push(`scope it       within(main(), ${formatBare(element)})`);
     }
 
     if (!element.exact && element.name !== undefined) {

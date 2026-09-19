@@ -1,4 +1,4 @@
-import { contentinfo, link, main, navigation, region, within } from '@jterrazz/test';
+import { button, contentinfo, link, main, navigation, region, within } from '@jterrazz/test';
 import type { VisitScenario } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
@@ -89,4 +89,16 @@ test('sees an element only when it too designates exactly one', async () => {
 
     // Then - see() is held to the same rule as the actions
     expect(message).toContain('matched 3 elements');
+});
+
+test('names the accessible name a descriptor matched on when it is not the text', async () => {
+    // Given - a row button labelled by an aria-label, and a dialog button named
+    // Verbatim: one descriptor, two matches, and only one of them reads as itself
+    const message = await refusalOf('/ambiguous', async (visitor) => {
+        await visitor.click(button('Delete post'));
+    });
+
+    // Then - the evidence names what actually matched, not the text it shows
+    expect(message).toContain('matched 2 elements');
+    expect(message).toContain('named "Delete Post a"');
 });
