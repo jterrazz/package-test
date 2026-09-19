@@ -53,6 +53,19 @@ const outboundApp = {
                 });
                 return Response.json(await response.json(), { status: response.status });
             }
+            case '/offline': {
+                // The transport failing is a different branch from a status:
+                // `fetch` REJECTS, and nothing about the reply can be read.
+                try {
+                    const response = await fetch(QUOTES_URL);
+                    return Response.json(await response.json(), { status: response.status });
+                } catch {
+                    return Response.json(
+                        { error: 'the quotes service did not answer' },
+                        { status: 503 },
+                    );
+                }
+            }
             case '/quote-twice': {
                 // Two calls to the same provider — exhausts a one-entry queue.
                 const first = await fetch(QUOTES_URL);
