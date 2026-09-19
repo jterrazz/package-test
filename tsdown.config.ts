@@ -59,6 +59,11 @@ export default defineConfig([
         outExtensions: ({ format }) => ({
             js: format === 'cjs' ? '.cjs' : '.js',
         }),
+        // The plugin entry publishes a default (the plugin oxlint loads) AND
+        // Named exports (the rule sets a `compose()` config picks from). The
+        // Bundler calls that mix ambiguous unless the interop is stated, so it
+        // Is stated: the CJS build exposes both as named, `default` included.
+        outputOptions: { exports: 'named' },
         sourcemap: false,
     },
 ]);
