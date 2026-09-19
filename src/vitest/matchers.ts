@@ -31,6 +31,8 @@ import { ResponseAccessor } from '../specification/facets/_common/result/respons
 import { TableAccessor } from '../specification/facets/_common/result/table.js';
 import {
     compareStreamText,
+    nativeContain,
+    nativeMatch,
     requireExtension,
     textContains,
     textIsEmpty,
@@ -354,52 +356,14 @@ function toMatch(
         return matchTreeFile(received.root, received.testDir, expected, received.captures, frozen);
     }
 
-    // Delegate to vitest-native semantics for strings (substring or regexp).
-    if (typeof received === 'string') {
-        const pass =
-            expected instanceof RegExp
-                ? expected.test(received)
-                : received.includes(String(expected));
-        return {
-            message: () =>
-                `expected ${JSON.stringify(received)} ${pass ? 'not ' : ''}to match ${String(expected)}`,
-            pass,
-        };
-    }
-    throw new TypeError(
-        'toMatch: unsupported subject — expected a stream, json, response, filesystem, or directory accessor, or a string.',
-    );
+    return nativeMatch(received, expected);
 }
 
 function toContain(received: unknown, expected: unknown): MatcherResult {
     if (received instanceof TextAccessor) {
         return textContains(received, String(expected));
     }
-
-    // Delegate to vitest-native semantics for strings and iterables.
-    if (typeof received === 'string') {
-        const pass = received.includes(String(expected));
-        return {
-            message: () =>
-                `expected ${JSON.stringify(received)} ${pass ? 'not ' : ''}to contain ${JSON.stringify(expected)}`,
-            pass,
-        };
-    }
-    if (
-        received != null &&
-        typeof (received as Iterable<unknown>)[Symbol.iterator] === 'function'
-    ) {
-        const items = [...(received as Iterable<unknown>)];
-        const pass = items.includes(expected);
-        return {
-            message: () =>
-                `expected iterable ${pass ? 'not ' : ''}to contain ${JSON.stringify(expected)}`,
-            pass,
-        };
-    }
-    throw new TypeError(
-        `toContain: unsupported subject of type ${typeof received} — expected a stream accessor, string, or iterable.`,
-    );
+    return nativeContain(received, expected);
 }
 
 async function toMatchRows(
