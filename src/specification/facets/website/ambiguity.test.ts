@@ -92,9 +92,38 @@ describe('describeAmbiguity', () => {
             url: 'http://site.test/',
         });
 
-        // Then - the suggestion is copy-pasteable and names the alternative
+        // Then - the suggestion is copy-pasteable, counted, and names the alternative
         expect(message).toContain('within(navigation(), link("Articles"))');
+        expect(message).toContain('leaves 1 of 2');
         expect(message).toContain('also here: contentinfo()');
+    });
+
+    test('does not offer a landmark that holds every candidate', () => {
+        // Given - two candidates in the same main
+        const message = describeAmbiguity({
+            element: link('Articles'),
+            matches: [match({ context: 'main' }), match({ context: 'main' })],
+            url: 'http://site.test/',
+        });
+
+        // Then - scoping there would leave the spec exactly as ambiguous
+        expect(message).not.toContain('within(main()');
+        expect(message).toContain('within(<a container holding only this one>');
+    });
+
+    test('names the accessible name when it is not the text that was matched', () => {
+        // Given - a row button labelled by an aria-label, beside a dialog button
+        const message = describeAmbiguity({
+            element: link('Delete post'),
+            matches: [
+                match({ accessibleName: 'Delete Post a', tag: 'button', text: 'Delete' }),
+                match({ tag: 'button', text: 'Delete post' }),
+            ],
+            url: 'http://site.test/',
+        });
+
+        // Then - the evidence names what the descriptor actually matched on
+        expect(message).toContain('named "Delete Post a"');
     });
 
     test('suggests exact only when it would narrow the set, with what it leaves', () => {

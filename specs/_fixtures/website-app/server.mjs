@@ -49,7 +49,9 @@ const pages = {
         <h1>Ambiguous</h1>
         <a href="/articles">Read Articles</a>
         <section aria-label="Series"><a href="/articles/2">Part 2</a></section>
+        <button type="button" aria-label="Delete Post a">Delete</button>
     </main>
+    <dialog open><button type="button">Delete post</button></dialog>
     <footer><a href="/articles">Articles</a></footer>
     </body></html>`,
 };

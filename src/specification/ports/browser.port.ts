@@ -78,6 +78,12 @@ export type ElementRef = {
  * without opening a browser.
  */
 export type ElementMatch = {
+    /**
+     * The accessible name, when it differs from the text — an `aria-label` is
+     * what a role descriptor MATCHED on, and printing the text alone sends the
+     * author to disambiguate a name they cannot see.
+     */
+    accessibleName?: string | undefined;
     /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
     context?: string | undefined;
     /** The attribute that disambiguates most — `href` for links, `name` for fields. */

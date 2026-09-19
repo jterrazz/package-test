@@ -80,11 +80,18 @@ function candidates(locator: Locator): ElementMatch[] {
             const landmark = node.parentElement?.closest(LANDMARKS);
             const context = landmark?.getAttribute('role') ?? landmark?.tagName.toLowerCase();
             const detail = node.getAttribute('href') ?? node.getAttribute('name');
+            const text = (node.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80);
+            const label = node.getAttribute('aria-label')?.trim();
             return {
+                // A role descriptor matches on the ACCESSIBLE name, so a
+                // Candidate whose label is not its text has to say the label:
+                // Naming only the text sends the author after something that
+                // Never matched.
+                accessibleName: label !== undefined && label !== text ? label : undefined,
                 context: context ?? undefined,
                 detail: detail ?? undefined,
                 tag: node.tagName.toLowerCase(),
-                text: (node.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80),
+                text,
             };
         });
 }
