@@ -295,16 +295,17 @@ Every artefact a run produces lands under `.artifacts/<tool>/` — one `.gitigno
 
 ### Setup (chainable)
 
-| Method                                  | Facets       | Description                                                                                                 |
-| --------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })`      | all          | Load SQL from `_seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1)     |
-| `.fixture("file")`                      | cli          | Copy the feature-local `_fixtures/file` into the working directory                                          |
-| `.fixture("$FIXTURES/name/")`           | cli          | Spread the shared `specs/_fixtures/<name>/` project into the cwd (trailing `/` = contents; layers)          |
-| `.env({ KEY: "value" })`                | cli          | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                                  |
-| `.headers({ "Accept-Language": "fr" })` | api, website | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)                  |
-| `.intercept(contracts)`                 | all but cli  | Declare the world: a `defineContracts(...)` composite — MSW on api/jobs, the stub backend on website/mobile |
-| `.intercept(contract)` / `([a, b])`     | all but cli  | A single contract, or an ordered list                                                                       |
-| `.intercept(request, response)`         | all but cli  | Inline pair, for one-off plumbing                                                                           |
+| Method                                  | Facets                          | Description                                                                                                 |
+| --------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `.seed("file.sql", { database? })`      | all                             | Load SQL from `_seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1)     |
+| `.fixture("file")`                      | cli                             | Copy the feature-local `_fixtures/file` into the working directory                                          |
+| `.fixture("$FIXTURES/name/")`           | cli                             | Spread the shared `specs/_fixtures/<name>/` project into the cwd (trailing `/` = contents; layers)          |
+| `.env({ KEY: "value" })`                | cli                             | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                                  |
+| `.headers({ "Accept-Language": "fr" })` | api, website                    | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)                  |
+| `.intercept(contracts)`                 | all but cli                     | Declare the world: a `defineContracts(...)` composite — MSW on api/jobs, the stub backend on website/mobile |
+| `.intercept(contract)` / `([a, b])`     | all but cli                     | A single contract, or an ordered list                                                                       |
+| `.intercept(request, response)`         | all but cli                     | Inline pair, for one-off plumbing                                                                           |
+| `.clock("2026-03-04T09:30:00Z")`        | api, jobs, integration, website | Pin the calendar for this chain — the page's on website, this process's elsewhere                           |
 
 ### Actions (terminal)
 
@@ -447,17 +448,21 @@ test('deploy spawns a labelled container', async () => {
 
 `sqlite()` caches its schema template inside the project — `.artifacts/vitest/sqlite/template-<key>.sqlite` — so two checkouts never share one, and workers racing for a cold cache wait for the one that is building rather than all building at once. Details: [docs/11-services.md](docs/11-services.md#where-the-template-lives).
 
-## Mocking utilities
+## Also exported
 
-```typescript
-import { mockOf, mockOfDate } from '@jterrazz/test';
-```
+Everything below comes from the package root (rule F1) — except the project helpers, which are `@jterrazz/test/vitest`'s. One line each; the chapter owns the detail.
 
-| Export                       | Description                                                                         |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| `mockOf<T>()`                | Deep double of a port — a member that was never stubbed answers with another double |
-| `mockOf<T>({ deep: false })` | The flat double — every member of `T` and nothing beneath them                      |
-| `mockOfDate`                 | Freeze/reset the global Date via `.set(date)` and `.reset()`                        |
+| Export                                                                                 | Is                                                                                                                  | Chapter                                                                         |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `clock.at(iso)` · `.run(iso?)` · `.advance(ms)`                                        | The one time primitive — a `using` scope that pins `Date`, replacing `vi.useFakeTimers()` and `mockOfDate`          | [docs/12](docs/12-conventions.md#time--one-primitive-two-depths)                |
+| `intercept(…)`                                                                         | The same network double with no chain: `await using _ = await intercept(…)` in a module test                        | [docs/10](docs/10-contracts.md#intercept--the-same-double-with-no-chain)        |
+| `process({ command, ready?, … })`                                                      | The one shape an external process takes — a dev server, an API, a bundler, owned by the runner                      | [docs/11](docs/11-services.md#process--the-one-shape-an-external-process-takes) |
+| `http.stream(chunks, init?)` · `http.sse(events)`                                      | A chunked or server-sent response body a contract replies with                                                      | [docs/10](docs/10-contracts.md)                                                 |
+| `mockOf<T>()` · `mockOf<T>({ deep: false })`                                           | Deep double of a port (a member never stubbed answers with another double), or the flat one                         | [docs/12](docs/12-conventions.md#the-doubles-ladder)                            |
+| `mockOfDate`                                                                           | Freeze/reset the global `Date` via `.set(date)` / `.reset()` — `clock` is what replaces it                          | [docs/12](docs/12-conventions.md#time--one-primitive-two-depths)                |
+| `required(value, why)`                                                                 | The value, or a failure naming what was missing and why it mattered — instead of `!`                                | [docs/08](docs/08-assertions.md#two-helpers-that-are-not-matchers)              |
+| `waitUntil(predicate, { timeout?, interval?, why? })`                                  | Wait on a CONDITION, never a duration, on a real-time budget a pinned clock cannot starve                           | [docs/08](docs/08-assertions.md#two-helpers-that-are-not-matchers)              |
+| `unit()` `component()` `api()` `jobs()` `cli()` `integration()` `website()` `mobile()` | The vitest project helpers, each taking `{ include, exclude, timeout, serial }` on top of the project it already is | [docs/02](docs/02-developing.md#vitest-config-the-preset)                       |
 
 ## Conventions
 
@@ -489,7 +494,7 @@ These conventions are not just prose: the package ships an oxlint plugin (`@jter
 - **vitest** - peer dependency
 - **playwright** - optional peer dependency, only needed for `.visit()`: `npm install -D playwright && npx playwright install chromium`
 - **appium + webdriverio** - optional peer dependencies, only needed for `specification.mobile()`: `npm install -D appium webdriverio && npx appium driver install xcuitest` — plus Xcode, a simulator, and the app installed on it
-- **msw** - bundled as a direct dependency (powers `.intercept()`); no separate install
+- **msw** - bundled as a direct dependency (powers `.intercept()` on a chain and `intercept()` in module scope, under node and in a page); no separate install
 - **hono** (or any web framework) - supplied by your project for in-process apps; the adapter only needs an object with a `request()` method, so it is not a peer
 
 ## Docs
