@@ -383,3 +383,32 @@ describe('response comparison — compareResponse', () => {
         ).toContain('s.http');
     });
 });
+
+describe('the hint a missing golden gives names a run that does something', () => {
+    beforeAll(async () => {
+        await registerMatchers();
+    });
+
+    test('an ordinary missing golden sends the author to update mode', () => {
+        // Given - a subject whose fixture was never written
+        const testDir = mkdtempSync(join(tmpdir(), 'hint-'));
+        const subject = new TextAccessor('out', 'stdout', testDir);
+
+        // Then - update mode is where it comes from
+        expect(() => {
+            expect(subject).toMatch('nowhere.txt');
+        }).toThrow('Run with TEST_UPDATE=1');
+    });
+
+    test('a FROZEN missing golden does not, because update mode skips it', () => {
+        // Given - the same subject, asked for a frozen fixture that is absent
+        const testDir = mkdtempSync(join(tmpdir(), 'hint-'));
+        const subject = new TextAccessor('out', 'stdout', testDir);
+
+        // Then - the hint names the two things that do work, and not the one
+        // That silently writes nothing: `{ frozen }` IS the no-write switch
+        expect(() => {
+            expect(subject).toMatch('nowhere.txt', { frozen: true });
+        }).toThrow('Write the file by hand');
+    });
+});

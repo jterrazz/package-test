@@ -48,7 +48,7 @@ import {
     renderExpected,
     structuralEquals,
 } from '../specification/matching/structural.js';
-import { shouldUpdateSnapshots, UPDATE_HINT } from './update.js';
+import { missingHint, shouldUpdateSnapshots } from './update.js';
 
 type MatcherResult = {
     message: () => string;
@@ -82,7 +82,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
 
     if (!existsSync(filePath)) {
         return FAIL(
-            `${accessor.streamName} fixture "${name}" does not exist at ${filePath}.\n${UPDATE_HINT}`,
+            `${accessor.streamName} fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`,
         );
     }
 
@@ -111,7 +111,7 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
     }
 
     if (!existsSync(filePath)) {
-        return FAIL(`JSON fixture "${name}" does not exist at ${filePath}.\n${UPDATE_HINT}`);
+        return FAIL(`JSON fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`);
     }
 
     const expected = JSON.parse(readFileSync(filePath, 'utf8'));
@@ -238,7 +238,7 @@ function matchResponseFile(
     }
 
     if (!existsSync(filePath)) {
-        return FAIL(`Response fixture "${name}" does not exist at ${filePath}.\n${UPDATE_HINT}`);
+        return FAIL(`Response fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`);
     }
 
     const expected = parseResponseFile(
@@ -287,7 +287,7 @@ async function matchTreeFile(
     }
 
     if (!existsSync(fixtureDir)) {
-        return FAIL(`Directory fixture "${name}" does not exist at ${fixtureDir}.\n${UPDATE_HINT}`);
+        return FAIL(`Directory fixture "${name}" does not exist at ${fixtureDir}.\n${missingHint(frozen)}`);
     }
 
     const diff = await diffDirectories(fixtureDir, actualRoot, { scope });
