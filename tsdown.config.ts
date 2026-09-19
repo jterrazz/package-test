@@ -1,11 +1,17 @@
 import { defineConfig } from 'tsdown';
 
 /**
- * Two build groups by consumption model:
+ * Three build groups by consumption model:
  *
  * - **ESM-only** — `index` (imported by vitest, which is ESM-only), plus the
  *   `checker`/`catalog` CLIs (invoked as `node dist/*.js`). None has a CommonJS
  *   consumer, so a `require` build would be dead weight.
+ * - **Browser** — `browser/index`, what the `browser` condition of `exports["."]`
+ *   resolves to, plus `browser-setup`, the setup file the `component()` project
+ *   loads into the page. Built for a page (`platform: 'browser'`), with the
+ *   four seams a page resolves itself left external. No `dts`: the published
+ *   `types` entry is the node build's, so there is ONE type surface and a name
+ *   cannot exist on one side only.
  * - **Dual** — the `oxlint` plugin config is loaded by oxlint from the
  *   consumer's project, which may itself be ESM or CJS, so it ships both.
  *
@@ -24,6 +30,21 @@ export default defineConfig([
         format: ['esm'],
         hash: false,
         outExtensions: () => ({ js: '.js' }),
+        sourcemap: false,
+    },
+    {
+        clean: false,
+        dts: false,
+        entry: {
+            'browser/index': 'src/browser/index.ts',
+        },
+        deps: {
+            neverBundle: ['msw/browser', 'react-dom/client', 'vitest', 'vitest-browser-react'],
+        },
+        format: ['esm'],
+        hash: false,
+        outExtensions: () => ({ js: '.js' }),
+        platform: 'browser',
         sourcemap: false,
     },
     {

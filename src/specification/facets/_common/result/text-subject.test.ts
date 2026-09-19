@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, test } from 'vitest';
 
 import { registerMatchers } from '../../../../vitest/matchers.js';
-import { text, TextAccessor } from './text.js';
+import { text } from './text-subject.js';
+import { TextAccessor } from './text.js';
 
 describe('text() — ad-hoc string as a golden subject', () => {
     beforeAll(async () => {
