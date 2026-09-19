@@ -70,7 +70,11 @@ export {
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
 } from './specification/facets/website/start-website.js';
-export { type ProcessOptions } from './specification/facets/website/serve.adapter.js';
+export {
+    type ProcessOptions,
+    /** @deprecated Renamed to `ProcessOptions` in 15.3; removed in 16.0. */
+    type ServeOptions,
+} from './specification/facets/website/serve.adapter.js';
 export { type ServerSpec } from './specification/facets/website/start-website.js';
 export {
     processService as process,
