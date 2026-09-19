@@ -230,6 +230,16 @@ const apiStack = {
 };
 ```
 
+What every helper accepts, on top of the project it already is:
+
+| Option                | Does                                                                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `include` / `exclude` | Replace the canonical globs. A default `exclude` guards the default `include`, so state both or neither                                |
+| `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                              |
+| `serial`              | `fileParallelism: false` — the project's files run one at a time, for a facet whose files share one server, one database file, one app |
+
+`component()` takes four more that are the APP's — `vite`, `wrap`, `viewport`, `timezone`/`locale`, and the `root` its relative paths are read against — and [16 — Component specs](16-component.md) owns them; `unit()` takes `roots`.
+
 `unit()` and `component()` are a pair by construction: `unit()` excludes `**/*.test.tsx` and `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. `unit()` takes `roots?` where the modules are not at the repository root, or `include?` for the globs outright; `website()` collects `specs/website/**`. All three carry `sequence.groupOrder` — node 0, `website` 1, `component` 2 — so the two browser projects never open two Chromiums at once on a 2-vCPU runner. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [16 — Component specs](16-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
 
 `mode` (node vs compose) is a property of `specification.api()` only, and it is **never hardcoded in a specification file** (rule A5) — the switch lives here, via the `TEST_MODE` environment variable. The same HTTP test files run twice: once in-process (fast feedback), once against the real compose stack (end-to-end confidence). Zero switching logic in the specs themselves.
@@ -245,7 +255,7 @@ const apiStack = {
 | `test.exclude`                   | vitest's defaults + `**/_fixtures/**`   | What a spec stands on is an input, never a suite — a repository must not run its own counter-examples |
 | `plugins`                        | `literate()`, when `literate:` is given | Turns every matching `<case>.spec.yaml` into a test file (see [07 — CLI specs](07-cli.md))            |
 
-It deliberately sets **nothing else**. `fileParallelism` is a per-project truth (a container-lifecycle suite is serial, an isolated one is not) and stays yours; so do `reporters`, `environment`, `env`, `globalSetup` and every `include` — a preset that guessed those would be wrong more often than right.
+It deliberately sets **nothing else**. `fileParallelism` is a per-project truth (a container-lifecycle suite is serial, an isolated one is not), stated by the project rather than by the preset — a helper states it for you when you pass `serial`, and a hand-written project states it itself; so do `reporters`, `environment`, `env`, `globalSetup` and every `include` — a preset that guessed those would be wrong more often than right.
 
 Two behaviours worth knowing:
 
