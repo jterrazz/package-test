@@ -334,6 +334,12 @@ export class PlaywrightAdapter implements BrowserPort {
 
         try {
             const page = await context.newPage();
+            // The page's own calendar, pinned before the first byte is parsed:
+            // A script reading `Date.now()` on load must see the stated instant,
+            // Not the moment the navigation happened to start.
+            if (options.clock !== undefined) {
+                await page.clock.setFixedTime(new Date(options.clock));
+            }
             const consoleMessages: BrowserConsoleMessage[] = [];
             page.on('console', (message) => {
                 consoleMessages.push({ text: message.text(), type: message.type() });

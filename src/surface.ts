@@ -134,8 +134,11 @@ export type {
 } from './specification/contracts/types.js';
 
 // Mock
-export { mockOf, type MockPort } from './vitest/mock-of.js';
+export { mockOf, type MockOfOptions, type MockPort } from './vitest/mock-of.js';
 export { type MockDatePort, mockOfDate } from './vitest/mock-of-date.js';
+
+// Time — the one primitive, real in both runtimes
+export { clock, type PinnedClock } from './vitest/clock.js';
 
 // Matcher options (per-call `toMatch(name, { frozen })`)
 export type { MatchFixtureOptions } from './specification/facets/_common/result/match-options.js';

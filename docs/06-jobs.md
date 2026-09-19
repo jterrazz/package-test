@@ -39,7 +39,9 @@ A job spec exercises your job function directly, wired to real containers. There
 
 ## The chain
 
-Setups: `.seed()`, `.intercept()`. Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
+Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
+
+`.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [12 — Conventions § Time](12-conventions.md#time--one-primitive-two-depths).
 
 ```typescript
 // specs/jobs/reports/reports.test.ts

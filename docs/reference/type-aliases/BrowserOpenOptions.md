@@ -5,7 +5,7 @@
 type BrowserOpenOptions = object;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:170](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L170)
+Defined in: src/specification/ports/browser.port.ts:153
 
 Per-visit options forwarded to the browser context.
 
@@ -17,7 +17,7 @@ Per-visit options forwarded to the browser context.
 optional allowedOrigins?: string[];
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:175](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L175)
+Defined in: src/specification/ports/browser.port.ts:158
 
 Extra origins the `external: 'block'` policy lets through — the
 declared stub backend the page legitimately fetches from.
@@ -30,10 +30,23 @@ declared stub backend the page legitimately fetches from.
 baseUrl: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:180](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L180)
+Defined in: src/specification/ports/browser.port.ts:163
 
 Base URL of the site under test — the origin `goto()` resolves against
 and the boundary of the `external` policy.
+
+***
+
+### clock?
+
+```ts
+optional clock?: string;
+```
+
+Defined in: src/specification/ports/browser.port.ts:168
+
+Pin the page's own `Date` at this instant before the first byte is
+parsed — the calendar the site's scripts read. `.clock()` on the chain.
 
 ***
 
@@ -43,7 +56,7 @@ and the boundary of the `external` policy.
 external: "allow" | "block";
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:186](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L186)
+Defined in: src/specification/ports/browser.port.ts:174
 
 Cross-origin request policy. `'block'` aborts every request leaving
 the site under test (analytics, CDNs) — the browser-side analog of
@@ -57,7 +70,7 @@ strict intercepts. `'allow'` lets them through (deployed-site mode).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:188](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L188)
+Defined in: src/specification/ports/browser.port.ts:176
 
 Extra HTTP headers sent with every request of the visit (incl. User-Agent overrides).
 
@@ -69,6 +82,6 @@ Extra HTTP headers sent with every request of the visit (incl. User-Agent overri
 optional scenario?: VisitScenario;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:190](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L190)
+Defined in: src/specification/ports/browser.port.ts:178
 
 The interaction scenario to run after load; the capture reflects the final state.

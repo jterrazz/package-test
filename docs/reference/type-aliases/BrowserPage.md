@@ -5,7 +5,7 @@
 type BrowserPage = object;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:198](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L198)
+Defined in: src/specification/ports/browser.port.ts:186
 
 The rendered page captured by a browser visit — the FINAL state when a
 scenario ran. Extraction happens in-page (the browser IS the HTML
@@ -19,7 +19,7 @@ parser); interpretation of the raw elements belongs to core.
 consoleMessages: BrowserConsoleMessage[];
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:200](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L200)
+Defined in: src/specification/ports/browser.port.ts:188
 
 Console messages emitted while loading and interacting, in order.
 
@@ -31,7 +31,7 @@ Console messages emitted while loading and interacting, in order.
 html: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:202](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L202)
+Defined in: src/specification/ports/browser.port.ts:190
 
 Serialized DOM after rendering (`document.documentElement.outerHTML`).
 
@@ -43,7 +43,7 @@ Serialized DOM after rendering (`document.documentElement.outerHTML`).
 jsonLdBlocks: string[];
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:204](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L204)
+Defined in: src/specification/ports/browser.port.ts:192
 
 Raw text content of every `application/ld+json` script, in DOM order.
 
@@ -55,7 +55,7 @@ Raw text content of every `application/ld+json` script, in DOM order.
 links: BrowserLinkElement[];
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:206](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L206)
+Defined in: src/specification/ports/browser.port.ts:194
 
 `<link>` elements of the head, in DOM order.
 
@@ -67,7 +67,7 @@ Defined in: [src/specification/ports/browser.port.ts:206](https://github.com/jte
 metas: BrowserMetaElement[];
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:208](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L208)
+Defined in: src/specification/ports/browser.port.ts:196
 
 `<meta>` elements of the head, in DOM order.
 
@@ -79,7 +79,7 @@ Defined in: [src/specification/ports/browser.port.ts:208](https://github.com/jte
 status: number;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:210](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L210)
+Defined in: src/specification/ports/browser.port.ts:198
 
 HTTP status of the main document response (0 when unavailable).
 
@@ -91,7 +91,7 @@ HTTP status of the main document response (0 when unavailable).
 text: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:212](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L212)
+Defined in: src/specification/ports/browser.port.ts:200
 
 Rendered `document.body.innerText`.
 
@@ -103,7 +103,7 @@ Rendered `document.body.innerText`.
 title: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:216](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L216)
+Defined in: src/specification/ports/browser.port.ts:204
 
 `document.title` after rendering.
 
@@ -115,7 +115,7 @@ Defined in: [src/specification/ports/browser.port.ts:216](https://github.com/jte
 tree: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:214](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L214)
+Defined in: src/specification/ports/browser.port.ts:202
 
 The ARIA snapshot of the rendered `<body>` — the outline a golden pins.
 
@@ -127,6 +127,6 @@ The ARIA snapshot of the rendered `<body>` — the outline a golden pins.
 url: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:218](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L218)
+Defined in: src/specification/ports/browser.port.ts:206
 
 Final URL after redirects and scenario navigation.

@@ -117,6 +117,33 @@ Family I governs the source tree rather than the spec tree, and it splits in two
 
 **The test-file rules need no declaration.** I2 (a module's test is its sibling) and I4 (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 
+## Time — one primitive, two depths
+
+Determinism is structural (rule D16): a value a test SAMPLES — `Date.now()`, `new Date()`, `Math.random()`, `randomUUID()` — never reaches an oracle. Time is the one of those the framework pins for you, and `clock` is the whole vocabulary. `vi.useFakeTimers()`, `vi.setSystemTime()` and `mockOfDate` are what it replaces: each of them owns a teardown a test will one day forget.
+
+```typescript
+import { clock } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+test('stamps the moment the receipt was issued', () => {
+    // Given - the calendar pinned for this scope
+    using _ = clock.at('2026-03-04T09:30:00Z');
+
+    // Then - the stamp is the stated instant
+    expect(new Date().toISOString()).toBe('2026-03-04T09:30:00.000Z');
+});
+```
+
+| Form                | Takes                          | For                                                                        |
+| ------------------- | ------------------------------ | -------------------------------------------------------------------------- |
+| `clock.at(iso)`     | the calendar (`Date`)          | a subject that READS the time — a stamp, an expiry, a greeting             |
+| `clock.run(iso?)`   | the calendar and the scheduler | a subject whose behaviour IS elapsed time — a debounce, a backoff, a poll  |
+| `clock.advance(ms)` | —                              | moving the pinned clock on; under `run()`, firing everything that came due |
+
+Both forms are `Disposable`: `using _ = clock.at(…)` releases at the end of the scope, however the scope ends. `at()` leaves the scheduler real, so promises, renders and the framework's own loops keep running; `run()` queues them instead, which is what lets a test assert a five-second backoff without the arbitrary sleep J2 forbids.
+
+A facet pins the same instant for the chain it is stated on — `.clock(iso)` on api, jobs, integration, component, and on a website visit (the PAGE's calendar, through the browser). A cli spec is another process: its instant travels through the product's own env (`TZ`) or is absorbed by a `{{iso8601}}` token in the golden.
+
 ## Maintaining the constitution
 
 - A new **mechanizable** rule is added to the **code** (`src/lint/manifest.ts` + its implementation), not here — then `npm run docs` regenerates the catalogue. The freshness meta-test fails if the committed catalogue is no longer byte-identical.
