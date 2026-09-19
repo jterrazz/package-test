@@ -7,6 +7,8 @@ import { cli } from '../cli.specification.js';
 // A runner with a single SQL database — DB_URL and the unambiguous
 // DATABASE_URL alias are both injected (CONVENTIONS B6).
 import { cli as dbCli } from '../db-cli.specification.js';
+// A runner declaring `defaults` — the env every one of its runs starts with.
+import { cli as defaultsCli } from '../defaults-cli.specification.js';
 
 /*
  * Scalpel by design: the `env` fixture dumps the whole child environment (PATH, HOME,
@@ -188,5 +190,25 @@ describe('command — automatic service env injection (CONVENTIONS B6)', () => {
         // Then - no URL vars appear in the child env
         expect(result.stdout.text).toContain('DB_URL=unset');
         expect(result.stdout.text).toContain('DATABASE_URL=unset');
+    });
+});
+
+describe('cli defaults — the environment every run starts with', () => {
+    test('applies to a run that states nothing', async () => {
+        // Given - a runner declaring defaults, and a run that adds nothing
+        const result = await defaultsCli.exec('env');
+
+        // Then - both defaults reached the child
+        expect(result.stdout.text).toContain('MY_VAR=from-defaults');
+        expect(result.stdout.text).toContain('EXTRA=from-defaults');
+    });
+
+    test('yields to the chain that states its own', async () => {
+        // Given - a chain overriding one of the two
+        const result = await defaultsCli.env({ MY_VAR: 'from-the-chain' }).exec('env');
+
+        // Then - the chain wins on its own, the default holds on the other
+        expect(result.stdout.text).toContain('MY_VAR=from-the-chain');
+        expect(result.stdout.text).toContain('EXTRA=from-defaults');
     });
 });

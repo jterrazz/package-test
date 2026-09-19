@@ -6,6 +6,7 @@
 | Class | Description |
 | ------ | ------ |
 | [BaseResult](classes/BaseResult.md) | Base result - common accessors available after any action type. Extended by HttpResult, CliResult, and used directly by job results. |
+| [CallResult](classes/CallResult.md) | The result of an in-process call — the integration facet's whole surface. |
 | [CliResult](classes/CliResult.md) | Result from a command action (`.exec()`). |
 | [ContainerAccessor](classes/ContainerAccessor.md) | Assertion accessor for a single Docker container captured by the docker() spec mode. Mirrors the shape of [CliResult](classes/CliResult.md) so tests use the same vocabulary (`stdout.toContain`, `file(...).content`, etc.) regardless of where output came from. |
 | [DirectoryAccessor](classes/DirectoryAccessor.md) | Read-only accessor for a directory produced by a spec action. |
@@ -80,6 +81,9 @@
 | [HttpContractFilter](type-aliases/HttpContractFilter.md) | Request filters for the generic HTTP provider. Every field is a subset constraint — a request matches when all provided fields match. |
 | [HttpResponseInit](type-aliases/HttpResponseInit.md) | Init options shared by the response builders. |
 | [HttpStreamInit](type-aliases/HttpStreamInit.md) | Init options for a streamed reply. |
+| [IntegrationHandle](type-aliases/IntegrationHandle.md) | The record returned by startIntegration \| specification.integration. Destructure with the canonical names (CONVENTIONS A3): |
+| [IntegrationSpecification](type-aliases/IntegrationSpecification.md) | The `integration` facet — the in-process chain handed out by `specification.integration()`. |
+| [IntegrationSpecificationOptions](type-aliases/IntegrationSpecificationOptions.md) | Options for startIntegration \| specification.integration. |
 | [Intercept](type-aliases/Intercept.md) | The module-scope network double. Resolves once the engine is listening — which is why it is a promise, and why the canonical form awaits it: |
 | [InterceptScope](type-aliases/InterceptScope.md) | One block's worth of declared network. Disposed at the end of the scope that declared it: the handlers are dropped, and an unmatched request is thrown. |
 | [IsolationStrategy](type-aliases/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |

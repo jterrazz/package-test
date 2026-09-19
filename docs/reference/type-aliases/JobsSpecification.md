@@ -5,7 +5,7 @@
 type JobsSpecification<DatabaseKey> = object;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:207
+Defined in: src/specification/facets/\_common/builder.ts:214
 
 The `jobs` facet — job chain entry handed out by `specification.jobs()`.
 Jobs run in-process by definition (CONVENTIONS A5/A8).
@@ -24,7 +24,7 @@ Jobs run in-process by definition (CONVENTIONS A5/A8).
 clock: (iso) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:209
+Defined in: src/specification/facets/\_common/builder.ts:216
 
 Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 
@@ -46,7 +46,7 @@ Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:211
+Defined in: src/specification/facets/\_common/builder.ts:218
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -58,7 +58,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 seed: (file, options?) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:213
+Defined in: src/specification/facets/\_common/builder.ts:220
 
 Queue a SQL seed file from `_seeds/` to run before the action.
 
@@ -82,7 +82,7 @@ Queue a SQL seed file from `_seeds/` to run before the action.
 trigger: (name) => Promise<BaseResult>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:216
+Defined in: src/specification/facets/\_common/builder.ts:223
 
 Execute the named job registered via the `jobs` option and resolve with the result.
 

@@ -96,7 +96,7 @@ export const RULE_DOCS = {
     'a2-known-constructors': {
         channel: 'statique',
         convention:
-            'Cinq constructeurs et seulement cinq : `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.website()`, `specification.mobile()` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur.',
+            'Six constructeurs et seulement six : `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.mobile()` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur. Un composant rendu ne démarre rien : c’est une chaîne, pas un membre de ce record.',
         family: 'A',
         id: 'A2',
         rationale:
@@ -409,7 +409,7 @@ export const RULE_DOCS = {
     'f3-specs-public-entry': {
         channel: 'statique',
         convention:
-            'Depuis `specs/`, seul l’import en profondeur des INTERNES du framework est interdit : un chemin relatif résolvant dans `src/{specification,integrations,vitest,lint}/` du dépôt du framework, ou tout `@jterrazz/test/<subpath>` que la map `exports` du paquet ne publie pas — les subpaths publiés sont exemptés, LUS du manifeste comme en F1, qui en tient la liste. Les imports de la source de SA PROPRE app par un consommateur sont toujours permis (c’est le motif documenté) ; seul `specs/integrations/` peut importer en profondeur `src/integrations/**`.',
+            'Depuis `specs/`, seul l’import en profondeur des INTERNES du framework est interdit : un chemin relatif résolvant dans `src/{specification,integrations,vitest,lint}/` du dépôt du framework, ou tout `@jterrazz/test/<subpath>` que la map `exports` du paquet ne publie pas — les subpaths publiés sont exemptés, LUS du manifeste comme en F1, qui en tient la liste. Les imports de la source de SA PROPRE app par un consommateur sont toujours permis (c’est le motif documenté) ; seules les sondes de seam sous `specs/seams/` peuvent importer en profondeur `src/integrations/**` — l’adaptateur EST leur sujet.',
         family: 'F',
         id: 'F3',
         rationale:

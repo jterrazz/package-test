@@ -1,0 +1,14 @@
+[
+    {
+        "id": "{{int}}",
+        "placedAt": "{{iso8601}}",
+        "reference": "ORD-1",
+        "total": 42
+    },
+    {
+        "id": "{{int}}",
+        "placedAt": "{{iso8601}}",
+        "reference": "ORD-2",
+        "total": 108
+    }
+]

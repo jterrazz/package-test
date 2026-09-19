@@ -1,6 +1,6 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind five constructors, one chain that needs none, four source layers with declared edges, and four channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+What this package IS: one runner model behind six constructors, one chain that needs none, four source layers with declared edges, and four channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
 | The shape                  | Held below                                                                              |
 | -------------------------- | --------------------------------------------------------------------------------------- |
@@ -73,7 +73,7 @@ The bundle is built by `tsdown` into `dist/` and its shape follows how each entr
 
 **There are FOUR entries and no more**: `@jterrazz/test` for everything a spec uses, `@jterrazz/test/vitest` for what `vitest.config.ts` needs, `@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/schema` for an editor validating a `<case>.spec.yaml`. That is rule F1 rather than a convention of taste, and the exemption is derived from the manifest's own `exports` map (`src/lint/package-exports.ts`), so a subpath is exempt the moment it is published and stops being exempt the moment it is withdrawn.
 
-**The root entry has two runtimes.** A component test renders in a real browser, and the node entry cannot load there: it wires `pg`, `better-sqlite3`, `testcontainers` and `node:fs` at import. So `exports["."]` carries a `browser` condition resolving to `dist/browser/index.js` — the same public surface, built for a page, where every node-only name (the five constructors, the services, the docker accessors, the results that walk a disk) is a stub that throws where it was called, naming the facet and saying it runs under node. The split is the RUNTIME's and never the facets': one specifier, so no spec has to remember which entry it may import.
+**The root entry has two runtimes.** A component test renders in a real browser, and the node entry cannot load there: it wires `pg`, `better-sqlite3`, `testcontainers` and `node:fs` at import. So `exports["."]` carries a `browser` condition resolving to `dist/browser/index.js` — the same public surface, built for a page, where every node-only name (the six constructors, the services, the docker accessors, the results that walk a disk) is a stub that throws where it was called, naming the facet and saying it runs under node. The split is the RUNTIME's and never the facets': one specifier, so no spec has to remember which entry it may import.
 
 `types` is stated once, and it is the node build's — so the two runtimes are ONE type surface and a name cannot exist on one side only. What both agree on lives in `src/surface.ts`, and the `package-exports` meta-test compares the two builds' exported names on every run.
 
@@ -82,7 +82,7 @@ Two committed projections leave the code and land in the corpus: the API referen
 ## Pitfalls
 
 - **Reaching for a dependency from `specification/`.** A new external package belongs in a folder of `integrations/` that imports it and nothing else; `specification/` importing it directly is the one boundary this package cannot afford to blur, and `i1-layer-boundaries` refuses it.
-- **Adding a sixth constructor.** The five are the closed vocabulary the conventions, the linter and the documentation are all shaped around. A new SUBJECT to specify is a design decision, and it earns a record in [`decisions/`](decisions/) before it earns a constructor.
+- **Adding a seventh constructor.** The six are the closed vocabulary the conventions, the linter and the documentation are all shaped around. A new SUBJECT to specify is a design decision, and it earns a record in [`decisions/`](decisions/) before it earns a constructor — as `integration` did in [ADR-004](decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
 - **Writing a rule's normative sentence into a chapter.** It belongs in `src/lint/manifest.ts` beside the implementation; a chapter that restates it is the second copy the whole design exists to prevent.
 
 ## Related

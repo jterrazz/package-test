@@ -53,6 +53,10 @@ export {
     type SpecStream,
 } from './specification/literate/spec-document.js';
 export {
+    type IntegrationHandle,
+    type IntegrationSpecificationOptions,
+} from './specification/facets/integration/start-integration.js';
+export {
     type JobsHandle,
     type JobsSpecificationOptions,
 } from './specification/facets/jobs/start-jobs.js';
@@ -79,6 +83,7 @@ export type {
     ApiSpecification,
     CliSpecification,
     DockerSpecConfig,
+    IntegrationSpecification,
     JobHandle,
     JobsSpecification,
     MobileSpecification,
@@ -95,6 +100,7 @@ export {
     inspectContainer,
     removeContainers,
 } from './integrations/docker/docker-lookup.js';
+export { CallResult } from './specification/facets/integration/result.js';
 export { HttpResult } from './specification/facets/api/result.js';
 export { ScreenResult } from './specification/facets/mobile/result.js';
 export { FetchResult, PageResult } from './specification/facets/website/result.js';

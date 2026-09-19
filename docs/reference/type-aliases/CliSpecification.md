@@ -5,7 +5,7 @@
 type CliSpecification<DatabaseKey> = object;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:224
+Defined in: src/specification/facets/\_common/builder.ts:262
 
 The `cli` facet — command chain entry handed out by `specification.cli()`.
 Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS
@@ -25,7 +25,7 @@ B2) — `{ waitFor?, timeout? }` covers long-running processes.
 env: (env) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:226
+Defined in: src/specification/facets/\_common/builder.ts:264
 
 Set environment variables on the child process. `$WORKDIR` expands; `null` unsets.
 
@@ -47,7 +47,7 @@ Set environment variables on the child process. `$WORKDIR` expands; `null` unset
 exec: (args?, options?) => Promise<CliResult>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:245
+Defined in: src/specification/facets/\_common/builder.ts:283
 
 Execute the command (or sequence of commands) and resolve with the
 result. Called with no arguments (`cli.exec()`), the binary runs bare —
@@ -74,7 +74,7 @@ timeout.
 fixture: (path) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:234
+Defined in: src/specification/facets/\_common/builder.ts:272
 
 Copy a fixture into the working directory before execution. The path is
 feature-local (`<test-dir>/fixtures/<path>`) or, with a `$FIXTURES/`
@@ -100,7 +100,7 @@ directory (or file) is copied under its own name. Chained calls layer.
 run: (file, options?) => Promise<CliResult>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:253
+Defined in: src/specification/facets/\_common/builder.ts:291
 
 Run a `<case>.spec.yaml` document — its ground (fixtures, env sets,
 servers) and every run, each asserted — and resolve with the LAST run's
@@ -127,7 +127,7 @@ directory, where the document lives.
 seed: (file, options?) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:236
+Defined in: src/specification/facets/\_common/builder.ts:274
 
 Queue a SQL seed file from `_seeds/` to run against a database before the action.
 

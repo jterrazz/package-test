@@ -23,6 +23,7 @@ import { HttpResult } from '../api/result.js';
 import { runSpecDocument } from '../cli/literate.js';
 import type { LiterateRunFlags, LiterateServeRegistration } from '../cli/literate.js';
 import { CliResult } from '../cli/result.js';
+import { CallResult } from '../integration/result.js';
 import { ScreenResult } from '../mobile/result.js';
 import { FetchResult, PageResult } from '../website/result.js';
 import { toConstantCase } from './binding.js';
@@ -105,6 +106,12 @@ export type SpecificationConfig = {
      * facet factories auto-populate this when `dockerConfig` is present.
      */
     dockerTestRunId?: string | undefined;
+    /**
+     * Environment applied to every run of the declared binary
+     * (`specification.cli({ defaults })`) — under a chain's own `.env()` and
+     * under a document's `env:`, both of which win.
+     */
+    defaultEnv?: CliEnv | undefined;
     /**
      * Named environment SETS a spec document may name by bare word
      * (`env: frozen`). Declared once per app in `specification.cli()`.
@@ -217,6 +224,37 @@ export type JobsSpecification<DatabaseKey extends string = string> = {
 };
 
 /**
+ * The `integration` facet — the in-process chain handed out by
+ * `specification.integration()`.
+ *
+ * The subject is a MODULE, not an entry: no HTTP, no binary, no page. What
+ * makes it a spec rather than a module test is what it stands on — real
+ * services, declared contracts, a golden — so it takes the same setups as
+ * every other facet and ends on the one action a module has: being called.
+ */
+export type IntegrationSpecification<
+    Services extends Record<string, unknown> = Record<string, unknown>,
+    DatabaseKey extends string = string,
+> = {
+    /** Pin the module's `Date` at `iso` for this chain. */
+    clock: (iso: string) => IntegrationSpecification<Services, DatabaseKey>;
+    /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
+    intercept: InterceptMethod<IntegrationSpecification<Services, DatabaseKey>>;
+    /** Queue a SQL seed file from `_seeds/` to run before the call. */
+    seed: (
+        file: string,
+        options?: { database?: DatabaseKey },
+    ) => IntegrationSpecification<Services, DatabaseKey>;
+
+    /**
+     * Call the module and resolve with what it produced. The started services
+     * record is handed in, so the subject is constructed with the real
+     * connection strings rather than with a double.
+     */
+    call: <T>(subject: (services: Services) => Promise<T> | T) => Promise<CallResult>;
+};
+
+/**
  * The `cli` facet — command chain entry handed out by `specification.cli()`.
  * Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS
  * B2) — `{ waitFor?, timeout? }` covers long-running processes.
@@ -320,6 +358,7 @@ export class SpecificationBuilder
     implements
         ApiSpecification,
         CliSpecification,
+        IntegrationSpecification,
         JobsSpecification,
         MobileSpecification,
         WebsiteSpecification
@@ -658,6 +697,25 @@ export class SpecificationBuilder
         );
     }
 
+    // ── Integration actions (terminal) ──
+
+    /**
+     * Call the module under test and resolve with what it produced — the
+     * value it returned, or the error it threw.
+     *
+     * A refusal is a reading, never a `try`/`catch`: `result.error` carries
+     * what was thrown, and `result.value` what was returned. That is what
+     * keeps a spec of a refusal the same size as a spec of a success, and
+     * what stops a "it should throw" spec from passing when nothing does.
+     *
+     * @example
+     *   const result = await integration.seed('rows.sql').call(({ db }) => find(db.connectionString, id));
+     *   expect(result.value).toMatch('found.json');
+     */
+    async call<T>(subject: (services: never) => Promise<T> | T): Promise<CallResult> {
+        return await this.executeSetup(null, async () => await this.runCallAction(subject));
+    }
+
     // ── Job actions (terminal) ──
 
     /**
@@ -790,6 +848,22 @@ export class SpecificationBuilder
         // Are layered in afterwards via .fixture() (see executeSetup) — the
         // Runner never writes into the source tree.
         return mkdtempSync(resolve(tmpdir(), 'spec-command-'));
+    }
+
+    private async runCallAction<T>(
+        subject: (services: never) => Promise<T> | T,
+    ): Promise<CallResult> {
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the record's TYPE is the constructor's type parameter, which this shared builder has no way to carry; the facet's signature is what the spec sees
+        const services = (this.config.services ?? {}) as never;
+        let outcome: { error: unknown; threw: boolean; value: unknown };
+        try {
+            outcome = { error: null, threw: false, value: await subject(services) };
+        } catch (error) {
+            // The refusal IS the reading. Rethrowing here would put a
+            // `try`/`catch` back in every spec of a module that says no.
+            outcome = { error, threw: true, value: null };
+        }
+        return new CallResult({ config: this.config, outcome, testDir: this.testDir });
     }
 
     private async runHttpAction(request: RequestEntry): Promise<HttpResult> {
@@ -969,7 +1043,10 @@ export class SpecificationBuilder
      * the chain's own `.env()` — which always wins, `null` unsetting.
      */
     private childEnv(workDir: string): CliEnv | undefined {
-        let env: CliEnv | undefined = this.serviceEnv();
+        const declared = this.config.defaultEnv;
+        let env: CliEnv | undefined = declared
+            ? { ...expandWorkdir(declared, workDir), ...this.serviceEnv() }
+            : this.serviceEnv();
         const { dockerConfig } = this.config;
         if (dockerConfig && this.config.dockerTestRunId) {
             env = { ...env, [dockerConfig.envVar]: this.config.dockerTestRunId };
@@ -1110,6 +1187,23 @@ export function createJobsFacet(config: SpecificationConfig): JobsSpecification 
         intercept: interceptOn(start),
         seed: (file, options) => start().seed(file, options),
         trigger: async (name) => await start().trigger(name),
+    };
+}
+
+/**
+ * Create the `integration` facet bound to the given adapter configuration.
+ */
+export function createIntegrationFacet<
+    Services extends Record<string, unknown>,
+    DatabaseKey extends string,
+>(config: SpecificationConfig): IntegrationSpecification<Services, DatabaseKey> {
+    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
+
+    return {
+        call: async (subject) => await start().call(subject),
+        clock: (iso) => start().clock(iso),
+        intercept: interceptOn(start),
+        seed: (file, options) => start().seed(file, options),
     };
 }
 

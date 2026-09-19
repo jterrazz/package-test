@@ -1,11 +1,12 @@
 import { startApi } from '../api/start-api.js';
 import { startCli } from '../cli/start-cli.js';
+import { startIntegration } from '../integration/start-integration.js';
 import { startJobs } from '../jobs/start-jobs.js';
 import { startMobile } from '../mobile/start-mobile.js';
 import { startWebsite } from '../website/start-website.js';
 
 /**
- * The five specification constructors (CONVENTIONS A2) — created in a
+ * The six specification constructors (CONVENTIONS A2) — created in a
  * `*.specification.ts` file under `specs/`, destructured with canonical
  * names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4).
  *
@@ -28,10 +29,11 @@ import { startWebsite } from '../website/start-website.js';
  *   export const { cli, cleanup } = await specification.cli('my-cli');
  *   afterAll(cleanup);
  */
-/** The five constructors, and only five — the framework's whole entry surface. */
+/** The six constructors, and only six — the framework's whole entry surface. */
 export type Specification = {
     api: typeof startApi;
     cli: typeof startCli;
+    integration: typeof startIntegration;
     jobs: typeof startJobs;
     mobile: typeof startMobile;
     website: typeof startWebsite;
@@ -52,6 +54,13 @@ export const specification: Specification = {
      * @param bin - Path to the binary (resolved from node_modules/.bin or PATH).
      */
     cli: startCli,
+    /**
+     * Specify a module against the real thing: a database, a cache, a
+     * `process()` it talks to — or nothing at all, when its oracle is a
+     * golden. `.call((services) => …)` is the terminal action, and what it
+     * produced is read as `result.value` or, when it refused, `result.error`.
+     */
+    integration: startIntegration,
     /**
      * Test background jobs. Jobs run in-process by definition — no HTTP
      * server, no mode. `.trigger(name)` is the terminal action.

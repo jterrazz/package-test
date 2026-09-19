@@ -37,6 +37,7 @@ import { TextAccessor } from '../specification/facets/_common/result/text.js';
 import type { Specification } from '../specification/facets/_common/specification.js';
 import type { HttpResult as HttpResultClass } from '../specification/facets/api/result.js';
 import type { CliResult as CliResultClass } from '../specification/facets/cli/result.js';
+import type { CallResult as CallResultClass } from '../specification/facets/integration/result.js';
 import type { ScreenResult as ScreenResultClass } from '../specification/facets/mobile/result.js';
 import type {
     FetchResult as FetchResultClass,
@@ -63,13 +64,14 @@ export const intercept: Intercept = interceptThrough(registerWorkerContracts);
 export * from '../surface.js';
 
 /**
- * The five constructors, present and refusing. A component test never reaches
+ * The six constructors, present and refusing. A component test never reaches
  * one: what it renders is a unit, and the assembled product behind an entry is
  * specified from a node project.
  */
 export const specification: Specification = {
     api: () => refuse('specification.api()'),
     cli: () => refuse('specification.cli()'),
+    integration: () => refuse('specification.integration()'),
     jobs: () => refuse('specification.jobs()'),
     mobile: () => refuse('specification.mobile()'),
     website: () => refuse('specification.website()'),
@@ -92,6 +94,7 @@ export const Orchestrator: typeof OrchestratorClass = nodeOnlyClass('Orchestrato
 
 // Results built from a disk walk, a database or a child process.
 export const BaseResult: typeof BaseResultClass = nodeOnlyClass('BaseResult');
+export const CallResult: typeof CallResultClass = nodeOnlyClass('CallResult');
 export const CliResult: typeof CliResultClass = nodeOnlyClass('CliResult');
 export const DirectoryAccessor: typeof DirectoryAccessorClass = nodeOnlyClass('DirectoryAccessor');
 export const FetchResult: typeof FetchResultClass = nodeOnlyClass('FetchResult');

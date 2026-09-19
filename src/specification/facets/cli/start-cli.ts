@@ -29,6 +29,14 @@ export type CliSpecificationOptions<Services extends ServiceRecord = ServiceReco
      */
     docker?: DockerSpecConfig;
     /**
+     * Environment applied to EVERY run of this binary — the variables the
+     * product needs to be deterministic at all (`TZ`, `NO_COLOR`, `LANG`,
+     * a config home under the spec's own workdir). Stated once per app
+     * instead of repeated on every chain and in every document; a chained
+     * `.env()` and a document's `env:` both win over it.
+     */
+    defaults?: CliEnv;
+    /**
      * Named environment SETS for `<case>.spec.yaml` documents. An `env:` entry
      * `frozen` applies the whole `frozen` record; `$WORKDIR` expands and `null`
      * unsets, exactly as in `.env()`. Declared once per app so a document
@@ -111,6 +119,7 @@ export async function startCli<Services extends ServiceRecord>(
         databaseKeys,
         databases: started?.databases,
         dockerConfig: options.docker,
+        defaultEnv: options.defaults,
         envSets: options.env,
         root,
         serveRegistry: options.serve,
