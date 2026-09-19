@@ -50,6 +50,12 @@ const NEVER_CACHED = { 'cache-control': 'no-store' };
 /** Turn a contract response into the msw reply, body kind by body kind. */
 export function toMswResponse(msw: any, response: ContractResponse): unknown {
     const { body, headers, status = 200 } = response;
+    if (response.transport === 'network-error') {
+        // Not a reply: msw makes the request itself fail, which is what the
+        // Caller's `fetch` sees when nothing is listening. Both engines honour
+        // It — `setupServer` and `setupWorker` share this response shape.
+        return msw.HttpResponse.error();
+    }
     if (body === null || body === undefined) {
         return new msw.HttpResponse(null, { headers: { ...NEVER_CACHED, ...headers }, status });
     }

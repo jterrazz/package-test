@@ -158,6 +158,14 @@ export const http = {
         };
     },
 
+    /**
+     * Response: no response at all — the request fails in transport, the way a
+     * server that is not running fails it. `fetch` rejects; no status is served.
+     */
+    unreachable(): ContractResponse {
+        return { body: null, transport: 'network-error' };
+    },
+
     /** Response: a text body, served as `text/plain` (200 by default). */
     text(body: string, init?: HttpResponseInit): ContractResponse {
         return {
