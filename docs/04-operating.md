@@ -20,7 +20,7 @@ The tarball is what `files` declares and nothing else: `dist/`, minus `dist/cata
 
 The entries that reach a consumer are the whole public contract, and they are listed once — [01 — Architecture § What the tree publishes](01-architecture.md#what-the-tree-publishes). What matters here is only that the ROOT entry resolves by CONDITION: a bundler serving a page takes `browser`, node takes `import`, and both are described by one `types` entry.
 
-One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. A consumer wires it into its own lint step.
+One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. It answers three runs — a specs tree by path, one workspace member with `--member`, and the whole project path-less — and `--format json` publishes the findings under the `jterrazz-check(<id>)` codes ([13 — Linting](13-linting.md#the-member-pass-and-the-json-contract)). When `typescript check` runs it, which install it resolves it from, and what the floor version is, are the toolchain's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 
 ## What a consumer must bring
 

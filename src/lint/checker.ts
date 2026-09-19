@@ -88,6 +88,9 @@ export const CHECKER_PASS_IDS = [
     'd4b-spec-shape',
     'd5-spec-volatile-literal',
     'd5w-spec-pinned-value',
+    'e3-config-present',
+    'e5b-no-simulated-dom-config-member',
+    'f8-no-seam-dependency',
     'j3w-spec-empty-assertion',
     'j4-spec-description-unique',
     'j5-spec-description',
@@ -99,6 +102,14 @@ export type TokenViolation = {
     file: string;
     line: number;
     message: string;
+    /**
+     * The convention code this finding belongs to, lowercased (`d4`, `c9`,
+     * `e3`). It is what the JSON contract publishes as
+     * `jterrazz-check(<code>)` and what the toolchain's ratchet counts under
+     * `jterrazz-check/<code>` — so a finding without one could never be held
+     * down, and the field is required for that reason.
+     */
+    rule: string;
     severity: Severity;
     token?: string;
 };
@@ -195,6 +206,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
                 file: rel,
                 line: error.line,
                 message: `${error.message} (D4b — see docs/13-linting.md)`,
+                rule: 'd4b',
                 severity: 'error',
             },
         ];
@@ -208,6 +220,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
                 file: rel,
                 line: at,
                 message: `${rel}:${at}: unknown token ${token} — the D4 vocabulary is frozen (known: ${[...TOKEN_KINDS].join(', ')})`,
+                rule: 'd4',
                 severity: 'error',
                 token,
             });
@@ -277,6 +290,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                         file: rel,
                         line: 1,
                         message: `${rel}:1: a _requests/*.http file must start with a request line "METHOD /path" (D4b — see docs/13-linting.md)`,
+                        rule: 'd4b',
                         severity: 'error',
                     });
                 }
@@ -285,6 +299,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                         file: rel,
                         line,
                         message: `${rel}:${line}: token ${token} in a _requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/13-linting.md)`,
+                        rule: 'd10w',
                         severity: 'warn',
                         token,
                     });
@@ -302,6 +317,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     file: rel,
                     line: 1,
                     message: `${rel}:1: an _expected/*.http file must start with a status line "HTTP/1.1 <status>" (D4b — see docs/13-linting.md)`,
+                    rule: 'd4b',
                     severity: 'error',
                 });
             }
@@ -310,6 +326,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     file: rel,
                     line,
                     message: `${rel}:${line}: unknown token ${token} — the D4 vocabulary is frozen (known: ${[...TOKEN_KINDS].join(', ')})`,
+                    rule: 'd4',
                     severity: 'error',
                     token,
                 });

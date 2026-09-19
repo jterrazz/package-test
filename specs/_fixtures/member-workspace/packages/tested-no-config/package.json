@@ -1,0 +1,4 @@
+{
+    "name": "@fixture/tested-no-config",
+    "scripts": { "test": "vitest --run" }
+}

@@ -1,21 +1,38 @@
 #!/usr/bin/env node
 import { existsSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 
 import { fixPoolFixtures } from './checker-crossfile.js';
+import { checkMember, checkMembers, discoverSpecRoots } from './checker-member.js';
 import { fixSpecFiles } from './checker-spec.js';
 import { formatViolations, runAllChecks } from './checker.js';
+import type { TokenViolation } from './checker.js';
 
+/* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**
  * CLI entry for the conventions checker (bundled as `dist/checker.js`).
  *
- *     node dist/checker.js [rootDir] [--fix]     # default root: cwd
+ *     node dist/checker.js [rootDir] [--fix]          # a specs tree
+ *     node dist/checker.js --format json              # every root, every member
+ *     node dist/checker.js --member <dir>             # one workspace member
  *
- * Runs every checker pass — the token/HTTP grammar (D4 / D4b / D10), the
+ * Three runs, one reporter. With a PATH it walks that tree and runs every
+ * checker pass over it — the token/HTTP grammar (D4 / D4b / D10), the
  * `<case>.spec.yaml` document conventions, and the cross-file passes (C9 dead
  * fixtures, C14/C15 fixture placement, B5 await-using inference, A7 database
- * property). Exit 1 on any ERROR-level violation; warnings (D10, a downgraded C9
- * feature) are printed but do not fail the run.
+ * property). With `--member <dir>` it runs the member pass (E3 config-present,
+ * E5b no simulated DOM in a config, F8 no seam dependency) over one workspace
+ * member, whether or not that member has a `specs/` root.
+ *
+ * With NO path it runs both over the whole project: every `specs/` root it
+ * discovers from the root manifest's workspaces, and every member. That is the
+ * run `@jterrazz/typescript`'s ratchet rests on, so the contract is exactly
+ * "a path-less run reports what the per-root and per-member runs report".
+ *
+ * `--format json` prints `[{ code, file, line, severity, message }]` on stdout
+ * and nothing else, where `code` is `jterrazz-check(<id>)` — the namespace the
+ * ratchet records under. Exit 1 on any ERROR-level violation either way;
+ * warnings are reported but never fail the run.
  *
  * `--fix` applies the rewritable passes — the two document ones (key order and
  * block scalars) and C14, which MOVES a single-reader pool fixture beside its
@@ -23,41 +40,110 @@ import { formatViolations, runAllChecks } from './checker.js';
  * run that fixes everything exits 0. The move is a plain rename: the checker
  * never runs git, and the author stages what the working tree now shows.
  */
-const fix = process.argv.includes('--fix');
-const root = resolve(process.argv.slice(2).find((arg) => !arg.startsWith('--')) ?? '.');
 
-// A missing root is operator error (a typo'd path), not a clean tree — fail
-// Loudly rather than silently reporting "0 violations" over nothing.
-if (!existsSync(root) || !statSync(root).isDirectory()) {
-    console.error(`conventions checker: no such directory: ${root}`);
-    process.exit(1);
-}
-
-if (fix) {
-    const written = fixSpecFiles(root);
-    if (written.length > 0) {
-        console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
+const argv = process.argv.slice(2);
+const fix = argv.includes('--fix');
+const json = valueOf('--format') === 'json';
+const member = valueOf('--member');
+const positional = argv.find((argument, index) => {
+    if (argument.startsWith('--')) {
+        return false;
     }
-    for (const move of fixPoolFixtures(root)) {
-        console.log(`conventions checker: moved ${move} (C14) — stage the rename`);
+    // The value of a `--flag value` pair is not a path.
+    const previous = argv[index - 1];
+    return previous !== '--format' && previous !== '--member';
+});
+
+/** The value of `--flag value` or `--flag=value`, or undefined. */
+function valueOf(flag: string): string | undefined {
+    const inline = argv.find((argument) => argument.startsWith(`${flag}=`));
+    if (inline !== undefined) {
+        return inline.slice(flag.length + 1);
+    }
+    const index = argv.indexOf(flag);
+    return index === -1 ? undefined : argv[index + 1];
+}
+
+/** Print the findings and exit on the first error-level one. */
+function report(violations: TokenViolation[], what: string): never {
+    const errors = violations.filter((violation) => violation.severity === 'error');
+
+    if (json) {
+        console.log(
+            JSON.stringify(
+                violations.map((violation) => ({
+                    code: `jterrazz-check(${violation.rule})`,
+                    file: violation.file,
+                    line: violation.line,
+                    message: violation.message,
+                    severity: violation.severity,
+                })),
+            ),
+        );
+        process.exit(errors.length > 0 ? 1 : 0);
+    }
+
+    if (violations.length > 0) {
+        const stream = errors.length > 0 ? console.error : console.warn;
+        stream(formatViolations(violations));
+    }
+    if (errors.length > 0) {
+        console.error(`\nconventions checker: ${errors.length} error(s) found ${what}`);
+        process.exit(1);
+    }
+    // The success line names what actually ran — every pass, not just the token
+    // Scan (the old "no unknown tokens" wording under-reported the C9/B5/A7 passes).
+    console.log(
+        `conventions checker: all passes clean ${what} (D4/D4b/D10 grammar, spec documents, C9 dead fixtures, C14/C15 fixture placement, B5 await-using, A7 database)${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
+    );
+    process.exit(0);
+}
+
+/** A directory that must exist — a typo'd path is operator error, not a clean tree. */
+function requireDirectory(path: string, what: string): string {
+    const resolved = resolve(path);
+    if (!existsSync(resolved) || !statSync(resolved).isDirectory()) {
+        console.error(`conventions checker: no such ${what}: ${resolved}`);
+        process.exit(1);
+    }
+    return resolved;
+}
+
+// ── One member ──
+
+if (member !== undefined) {
+    const root = resolve(positional ?? '.');
+    const dir = requireDirectory(member, 'member directory');
+    report(checkMember(dir, root), `for member ${relative(root, dir) || '.'}`);
+}
+
+// ── One specs tree ──
+
+if (positional !== undefined) {
+    const root = requireDirectory(positional, 'directory');
+    if (fix) {
+        const written = fixSpecFiles(root);
+        if (written.length > 0) {
+            console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
+        }
+        for (const move of fixPoolFixtures(root)) {
+            console.log(`conventions checker: moved ${move} (C14) — stage the rename`);
+        }
+    }
+    report(runAllChecks(root), `under ${root}`);
+}
+
+// ── The whole project: every specs root, every member ──
+
+const root = resolve('.');
+const found: TokenViolation[] = [];
+for (const specsRoot of discoverSpecRoots(root)) {
+    const prefix = relative(root, specsRoot);
+    for (const violation of runAllChecks(specsRoot)) {
+        // A tree pass reports relative to the tree it walked; the project-wide
+        // Run has to say WHICH tree, or two members' findings read alike.
+        found.push({ ...violation, file: `${prefix}/${violation.file}` });
     }
 }
-
-const violations = runAllChecks(root);
-const errors = violations.filter((violation) => violation.severity === 'error');
-
-if (violations.length > 0) {
-    const stream = errors.length > 0 ? console.error : console.warn;
-    stream(formatViolations(violations));
-}
-
-if (errors.length > 0) {
-    console.error(`\nconventions checker: ${errors.length} error(s) found under ${root}`);
-    process.exit(1);
-}
-
-// The success line names what actually ran — every pass, not just the token
-// Scan (the old "no unknown tokens" wording under-reported the C9/B5/A7 passes).
-console.log(
-    `conventions checker: all passes clean under ${root} (D4/D4b/D10 grammar, spec documents, C9 dead fixtures, C14/C15 fixture placement, B5 await-using, A7 database)${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
-);
+found.push(...checkMembers(root));
+report(found, `under ${root}`);
