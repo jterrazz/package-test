@@ -120,6 +120,7 @@ export async function startCli<Services extends ServiceRecord>(
 
     return {
         cleanup: async () => {
+            await started?.stopProcesses();
             await releaseIsolation(services);
             if (started) {
                 await started.orchestrator.stop();

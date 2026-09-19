@@ -61,7 +61,12 @@ export {
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
 } from './specification/facets/website/start-website.js';
-export { type ServeOptions } from './specification/facets/website/serve.adapter.js';
+export { type ProcessOptions } from './specification/facets/website/serve.adapter.js';
+export { type ServerSpec } from './specification/facets/website/start-website.js';
+export {
+    processService as process,
+    ProcessHandle,
+} from './specification/facets/_common/process.js';
 export { type DatabaseKeys, type ServiceRecord } from './specification/facets/_common/services.js';
 
 // Facets

@@ -1,16 +1,39 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
+import { resolve as resolvePath } from 'node:path';
 
 /** Grace period between SIGTERM and the SIGKILL escalation. */
 const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
 
-/** Options for a local server started by the framework. */
-export type ServeOptions = {
-    /** Shell command that starts the site. Receives the chosen port as `PORT`. */
+/**
+ * The ONE shape an external process takes — the site under test, a backend a
+ * page talks to, a bundler a simulator loads from. Built by `process()`
+ * (chapter 11) and accepted wherever a facet starts something outside this
+ * process: `website({ server })`, `services: { api: process(…) }`, and the
+ * literate `serve:` registry.
+ */
+export type ProcessOptions = {
+    /**
+     * A one-shot command run ONCE per specification, before the process is
+     * spawned, which must exit 0 — a build, a migration, a fixture load. Its
+     * failure is the specification's, and it says so.
+     */
+    before?: string;
+    /** Shell command that starts the process. Receives the chosen port as `PORT`. */
     command: string;
+    /** Working directory, relative to the project root. Default: the root itself. */
+    cwd?: string;
+    /**
+     * Environment for the child, on top of the runner's own. A function
+     * receives the services already started beside this one, so a process can
+     * be handed a sibling's connection string.
+     */
+    env?:
+        | ((services: Record<string, { connectionString: string }>) => Record<string, string>)
+        | Record<string, string>;
     /** Fixed port. Default: an OS-assigned free port, injected as `PORT`. */
     port?: number;
     /**
@@ -71,12 +94,12 @@ export class ServeAdapter {
     private readonly extraEnv: Record<string, string>;
     /** The constructor named in error messages — `website`, or `mobile` (appium server). */
     private readonly facet: string;
-    private readonly options: ServeOptions;
+    private readonly options: ProcessOptions;
     private output = '';
     private readonly root: string;
 
     constructor(
-        options: ServeOptions,
+        options: ProcessOptions,
         root: string,
         facet = 'website',
         extraEnv: Record<string, string> = {},
@@ -89,6 +112,7 @@ export class ServeAdapter {
 
     /** Start the server and resolve with its base URL once it is ready. */
     async start(): Promise<string> {
+        this.runBefore();
         const banner = this.options.ready instanceof RegExp ? this.options.ready : null;
         // Banner mode: the SERVER picks the port and announces it, so nothing
         // Is injected as PORT — the framework reads the capture group instead.
@@ -96,10 +120,11 @@ export class ServeAdapter {
         const timeout = this.options.timeout ?? DEFAULT_READY_TIMEOUT;
 
         this.child = spawn(this.options.command, [], {
-            cwd: this.root,
+            cwd: this.workingDirectory(),
             detached: process.platform !== 'win32',
             env: {
                 ...process.env,
+                ...(typeof this.options.env === 'function' ? {} : this.options.env),
                 ...this.extraEnv,
                 ...(port === null ? {} : { PORT: String(port) }),
             },
@@ -173,6 +198,36 @@ export class ServeAdapter {
                 }
                 await delay(READY_POLL_INTERVAL_MS);
             }
+        }
+    }
+
+    /** Where the child runs: the stated `cwd` under the root, or the root. */
+    private workingDirectory(): string {
+        return this.options.cwd === undefined
+            ? this.root
+            : resolvePath(this.root, this.options.cwd);
+    }
+
+    /**
+     * The one-shot command, run before the process is spawned. It must exit 0:
+     * a build that failed is not a spec that failed later on a missing file,
+     * and the difference is what this reports.
+     */
+    private runBefore(): void {
+        const { before } = this.options;
+        if (before === undefined) {
+            return;
+        }
+        const outcome = spawnSync(before, [], {
+            cwd: this.workingDirectory(),
+            encoding: 'utf8',
+            shell: true,
+        });
+        if (outcome.status !== 0) {
+            throw new Error(
+                `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\n` +
+                    `Command: ${before}\nOutput:\n${(outcome.stdout ?? '') + (outcome.stderr ?? '')}`,
+            );
         }
     }
 
