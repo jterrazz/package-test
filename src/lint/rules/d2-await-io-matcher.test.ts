@@ -18,10 +18,14 @@ ruleTester.run('d2-await-io-matcher', d2AwaitIoMatcher as unknown as OxlintRule,
         { code: 'expect(container).toBeRunning();', errors: 1 },
         // Negated form is still IO.
         { code: 'expect(dir).not.toBeEmpty();', errors: 1 },
+        // A text accessor is an IO subject too: `.call()`'s "and it did not
+        // Refuse" reads as a pass when the promise is dropped.
+        { code: 'expect(result.error).toBeEmpty();', errors: 1 },
     ],
     valid: [
         // Awaited.
         { code: 'async function f() { await expect(rows).toMatchRows([]); }' },
+        { code: 'async function f() { await expect(result.error).toBeEmpty(); }' },
         // Returned.
         { code: 'const f = () => expect(dir).toBeEmpty();' },
         { code: 'function f() { return expect(container).toBeRunning(); }' },

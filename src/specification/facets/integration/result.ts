@@ -40,8 +40,11 @@ export class CallResult extends BaseResult {
      * What the call THREW, as text — the message of an `Error`, the value
      * itself when something else was thrown, and empty when it returned.
      *
-     * Empty rather than absent on purpose: `expect(result.error).toBeEmpty()`
-     * is how a spec says "and it did not refuse".
+     * Empty rather than absent on purpose: `await expect(result.error).toBeEmpty()`
+     * is how a spec says "and it did not refuse" — awaited, because the
+     * matcher answers a promise on every subject it takes, and a dropped one
+     * passes the test while the failure surfaces as an unhandled rejection
+     * (D2 refuses the bare form).
      */
     get error(): TextAccessor {
         return new TextAccessor(describeError(this.outcome), 'error', this.testDir, {

@@ -94,7 +94,7 @@ test('refuses an order that is not one', async () => {
 });
 ```
 
-That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `expect(result.error).toBeEmpty()` is how a chain says "and it did not refuse".
+That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `await expect(result.error).toBeEmpty()` is how a chain says "and it did not refuse". The `await` is not optional: `toBeEmpty` answers a promise on every subject it takes, a dropped one passes the test while the real failure surfaces as an unhandled rejection, and rule D2 refuses the bare form.
 
 Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch('<name>.json'|'<name>.txt')` under `_expected/`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([09](09-tokens.md), [08](08-assertions.md)).
 
