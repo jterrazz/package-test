@@ -27,6 +27,7 @@ afterAll(cleanup);
 | `device`   | `{ name, os?, udid? }` — the simulator to run on, resolved through `xcrun simctl` and booted when shut down                                              |
 | `backend`  | `{ port? }` — start a declared stub backend; the handle gains `backendUrl` — see [Declared backend](#declared-backend)                                   |
 | `root`     | **Project-root override** (rule A9): where the `appium` binary is resolved from (`node_modules/.bin`). Auto-discovered from the calling file when absent |
+| `services` | A named record started with the runner and stopped with it — a `process()` for the bundler the app loads from, a database a dev build reads              |
 | `timeouts` | `{ action?, launch? }` in ms — how long this runner waits. Each field falls back to the framework's default; see [Declared timeouts](#declared-timeouts) |
 
 `device` itself takes:
@@ -38,6 +39,20 @@ afterAll(cleanup);
 | `udid`         | Explicit UDID — skips name/os resolution entirely                                              |
 
 Resolution refuses rather than guesses: zero matches and several matches both fail with the full `simctl` device listing, so the fix never needs an Xcode round-trip. A shut-down simulator is booted (`simctl boot` + `bootstatus`); an already-booted one is reused as-is.
+
+**`services` is where Metro goes.** A dev build loads its JavaScript from a bundler, and until now that bundler was a `beforeAll` the repository maintained, with an `afterAll` it sometimes forgot. It is a `process()` like any other external process the framework owns, started before the app is ever launched and stopped with the specification ([11 — Services](11-services.md#process--the-one-shape-an-external-process-takes)):
+
+```typescript
+import { process, specification } from '@jterrazz/test';
+
+export const { cleanup, mobile, udid } = await specification.mobile({
+    app: { bundleId: 'com.example.app' },
+    device: { name: 'iPhone 17' },
+    services: {
+        metro: process({ command: 'expo start', ready: /Metro waiting on .*:(\d+)/u }),
+    },
+});
+```
 
 The appium server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](14-website.md) serve adapter.
 
