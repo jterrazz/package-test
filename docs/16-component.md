@@ -226,7 +226,7 @@ const result = await component.render((container) => {
 ```
 
 - **A router is a test's Given.** cap01's and the console's screens render `<Link>` and read `useParams()`; without a router they throw. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
-- **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total.
+- **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([10](10-contracts.md#intercept--the-same-double-with-no-chain)).
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
 ## Pitfalls

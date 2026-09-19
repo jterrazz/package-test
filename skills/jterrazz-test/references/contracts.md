@@ -81,6 +81,8 @@ The prepend is why a more specific override (`/articles/gone-1`) wins over a gen
 
 Repeated `.intercept()` calls **append**. Composition/override semantics live in `defineContracts` / `.with()`, never in call order.
 
+Without a chain: `await using _ = await intercept(request, response)` in module scope — two awaits, both load-bearing. The refusal of an undeclared call lands at DISPOSAL, not at the call site, so a subject that swallows its own network failures cannot hide it. Around a `.render()` the chain's registration wins: in a `.test.tsx`, `intercept()` is for code the test calls itself. [docs/10](../../../docs/10-contracts.md#intercept--the-same-double-with-no-chain).
+
 ## Selection
 
 **The first contract in list order that matches AND is not exhausted wins.** A request matches on: method (`'*'` ok), url (absolute string/RegExp, or path-form `'/a/{{uuid}}'` matching any origin), declared query + headers as a SUBSET of observed, and the `match` predicate on the body.

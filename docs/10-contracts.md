@@ -220,9 +220,25 @@ test('reads the rate off the provider', async () => {
 
 The scope is an `AsyncDisposable`: the handlers come off at the end of the block however the block ends, and an outgoing request no contract accepted is thrown THERE — the same strictness a chain gets (rule D7), which is what makes it a guard and not a convenience.
 
+**The refusal lands at DISPOSAL, not at the call.** An undeclared request is not rejected where the subject made it: the `fetch` proceeds and fails on its own, and the violation is raised when the scope closes. That is the right place, because a subject that catches its own network failures — a retry loop, an `onError` callback, a fallback value — would swallow a rejection thrown at the call site and the spec would pass on a call nobody declared. Disposal happens after the subject is done, so nothing can catch it.
+
 `await using _ = await intercept(…)` carries two awaits and both are load-bearing. The inner one waits for the engine to be listening; without it the subject could reach the real network before the first handler is in place. The shape refuses that spelling rather than leaving it to discipline: `intercept()` answers a promise, a promise is not an `AsyncDisposable`, and `await using _ = intercept(…)` does not compile.
 
+A file that declares the same world in several tests factors it into a function, and the two awaits survive the move — the helper is `async`, and it awaits what it hands back:
+
+```typescript
+async function rateProvider() {
+    return await intercept(http.get('https://rates.test/eur'), http.json({ rate: 1.07 }));
+}
+
+// In each test: await using _ = await rateProvider();
+```
+
+Both keywords are the rulebook's, not taste: a function returning a promise is `async` (`typescript/promise-function-async`) and a returned promise is awaited (`typescript/return-await`), so the other spellings do not lint.
+
 It is real in both runtimes — msw's server under node, msw's worker in a page — so a module test and a component test declare the outside world the same way. What it replaces is `vi.stubGlobal('fetch')` and a direct `msw/node` import, which rules F6 and F8 refuse a test and a consumer respectively.
+
+**Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its contracts last and its strictness is total ([16](16-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
 ## Two engines, one queue
 
