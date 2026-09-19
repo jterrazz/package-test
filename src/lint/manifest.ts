@@ -524,7 +524,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Chaque membre du workspace qui a des tests (un script `test`, ou un `*.test.ts(x)` quelque part) déclare une config vitest (`vitest.config.*`). La passe MEMBRE juge le membre lui-même, avec ou sans arbre `specs/`.',
+            'Chaque membre du workspace qui a des tests À LUI (un script `test` qui ne délègue pas aux membres, ou un `*.test.ts(x)` hors de l’arbre d’un autre paquet) déclare une config vitest (`vitest.config.*`). La passe MEMBRE juge le membre lui-même, avec ou sans arbre `specs/` ; une racine qui ne fait que déléguer ne doit rien.',
         facet: 'shared',
         family: 'E',
         fix: 'Écrire `export default defineSpecConfig()` dans le membre — le préréglage porte les budgets, le dossier d’artefacts et l’exclusion de `_fixtures/`.',
@@ -550,10 +550,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Un membre ne déclare aucune dépendance que `@jterrazz/test` porte déjà (`msw`, `vitest-mock-extended`, `yaml`) ni aucun seam retiré (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`). Les peers optionnels — `playwright`, `vite`, `react`, `better-sqlite3`, `pg`, `redis`, `testcontainers`… — sont déclarés par le consommateur, à dessein.',
+            'Un membre ne déclare aucune dépendance que `@jterrazz/test` porte déjà (`msw`, `vitest-mock-extended` ; `yaml` en devDependencies seulement — en dépendance de production c’est la bibliothèque du produit) ni aucun seam retiré (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`). Les peers optionnels — `playwright`, `vite`, `react`, `better-sqlite3`, `pg`, `redis`, `testcontainers`… — sont déclarés par le consommateur, à dessein.',
         facet: 'shared',
         family: 'F',
-        fix: 'Retirer la déclaration : le paquet la résout déjà, et le seam a une facette qui le remplace.',
+        fix: 'Retirer la déclaration : une transitive est déjà résolue par le paquet ; un seam retiré a une facette qui le remplace (`component()`, `website()`, `clock`, `intercept()`). Les deux cas ont leur propre phrase dans le diagnostic.',
         id: 'F8',
         name: 'f8-no-seam-dependency',
         rationale:

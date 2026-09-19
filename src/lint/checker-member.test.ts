@@ -26,8 +26,14 @@ describe('the member pass — what a workspace member owes', () => {
     test('the pass reaches a member with no specs/ root at all (E3)', () => {
         // Given - that same member, which has no spec tree
         // Then - the pass judged it anyway: E3 is about a member, not a tree
-        expect(discoverSpecRoots(WORKSPACE)).toStrictEqual([]);
         expect(codes(memberAt('tested-no-config'))).toStrictEqual(['e3']);
+    });
+
+    test("a root whose only tests are its members' owes no config (E3)", () => {
+        // Given - a workspace root that delegates `test` and holds no test file
+        // Of its own, while `packages/clean` holds one
+        // Then - the root is silent: the walk stops at the next package.json
+        expect(codes(WORKSPACE)).toStrictEqual([]);
     });
 
     test('a config that gives every file it collects a drawing of a browser (E5b)', () => {
@@ -45,12 +51,27 @@ describe('the member pass — what a workspace member owes', () => {
         // Optional peer a consumer declares on purpose
         const found = checkMember(memberAt('seam-dependency'), WORKSPACE);
 
-        // Then - the two transitives are named, and playwright is not
+        // Then - the two are named, each by what it actually is, and
+        // Playwright - an optional peer a consumer declares - is not
         expect(found.map((violation) => violation.rule)).toStrictEqual(['f8', 'f8']);
-        expect(found.map((violation) => violation.message).join('\n')).toContain(
-            '@testing-library/react',
-        );
+        expect(found[0]?.message).toContain('@testing-library/react');
+        expect(found[0]?.message).toContain('is a seam `@jterrazz/test` replaced');
+        expect(found[1]?.message).toContain('`msw` is a transitive of `@jterrazz/test`');
         expect(found.every((violation) => !violation.message.includes('playwright'))).toBe(true);
+    });
+
+    test('a finding points at the line the declaration is written on (F8)', () => {
+        // Given - the same member, whose manifest spells msw on its own line
+        const found = checkMember(memberAt('seam-dependency'), WORKSPACE);
+
+        // Then - the anchor is the declaration, not the opening brace
+        expect(found.map((violation) => violation.line)).toStrictEqual([4, 5]);
+    });
+
+    test("a runtime `yaml` is the product's, a dev one is the seam's (F8)", () => {
+        // Given - `clean` declares yaml as a RUNTIME dependency
+        // Then - nothing fires: the framework never ships its yaml to a product
+        expect(codes(memberAt('clean'))).toStrictEqual([]);
     });
 
     test('a member that owes nothing produces nothing', () => {
@@ -63,9 +84,11 @@ describe('the member pass — what a workspace member owes', () => {
         // Given - a workspace whose root declares `packages/*`
         const members = discoverMembers(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
 
-        // Then - the four packages are there, and so is the root itself
+        // Then - every package a glob claims is there, at whatever depth the
+        // Pattern reaches, and so is the root itself
         expect(members.toSorted()).toStrictEqual([
             WORKSPACE,
+            'apps/site/packages/nested',
             'packages/clean',
             'packages/seam-dependency',
             'packages/simulated-dom',
@@ -73,11 +96,19 @@ describe('the member pass — what a workspace member owes', () => {
         ]);
     });
 
+    test('a member that nests its facet tree is still a specs root', () => {
+        // Given - `@fixture/clean` keeps its trees under `web/`
+        const roots = discoverSpecRoots(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
+
+        // Then - the path-less run walks it, the way the toolchain's own does
+        expect(roots).toStrictEqual(['packages/clean/web/specs']);
+    });
+
     test('every member is judged in one run', () => {
         // Given - the whole fixture workspace
         const found = checkMembers(WORKSPACE).map((violation) => violation.rule);
 
-        // Then - one E3, one E5b and two F8, whatever the order they walk in
-        expect(found.toSorted()).toStrictEqual(['e3', 'e5b', 'f8', 'f8']);
+        // Then - one E3, one E5b and three F8, whatever the order they walk in
+        expect(found.toSorted()).toStrictEqual(['e3', 'e5b', 'f8', 'f8', 'f8']);
     });
 });

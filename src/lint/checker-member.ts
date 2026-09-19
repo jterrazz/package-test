@@ -1,5 +1,6 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { basename, join, relative, sep } from 'node:path';
 
 import type { TokenViolation } from './checker.js';
 
@@ -23,13 +24,21 @@ import type { TokenViolation } from './checker.js';
 const SIMULATED_DOM = /\benvironment\s*:\s*['"](?<dom>happy-dom|jsdom)['"]/u;
 
 /**
- * Dependencies `@jterrazz/test` carries, and the seams it REPLACED. A member
- * declaring one of these either duplicates a transitive it already resolves,
- * or keeps a vocabulary the framework has a facet for. Optional peers are not
- * here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are
- * declared BY the consumer on purpose.
+ * Dependencies `@jterrazz/test` carries. A member declaring one of these
+ * duplicates a transitive it already resolves. Optional peers are not here:
+ * `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared
+ * BY the consumer on purpose.
  */
-const CARRIED = new Set(['msw', 'vitest-mock-extended', 'yaml']);
+const CARRIED = new Set(['msw', 'vitest-mock-extended']);
+
+/**
+ * Carried, but only where it can only be the test seam's. `yaml` is a product
+ * library as much as a fixture reader: a member that parses YAML at RUNTIME
+ * declares it rightly, and a rule that read `dependencies` here would be
+ * telling a product to drop a library the framework never ships to it. So the
+ * finding is limited to the one declaration that can only mean the seam.
+ */
+const CARRIED_IN_DEV = new Set(['yaml']);
 
 /**
  * The framework itself. It DECLARES what every other member inherits, so the
@@ -87,14 +96,26 @@ function configOf(dir: string): null | string {
     return null;
 }
 
-/** Does this member hold a test file anywhere it owns? */
+/**
+ * Does this member hold a test file it OWNS?
+ *
+ * A directory carrying its own `package.json` is another package's tree — a
+ * workspace member, a vendored clone — and its tests are its own to configure.
+ * A root that only delegates would otherwise be told to write a config for
+ * files it never collects, which is the finding read backwards.
+ */
 function holdsTests(dir: string): boolean {
     const stack = [dir];
+    let first = true;
     while (stack.length > 0) {
         const current = stack.pop();
         if (current === undefined) {
             break;
         }
+        if (!first && existsSync(join(current, 'package.json'))) {
+            continue;
+        }
+        first = false;
         let entries;
         try {
             entries = readdirSync(current, { withFileTypes: true });
@@ -103,7 +124,7 @@ function holdsTests(dir: string): boolean {
         }
         for (const entry of entries) {
             if (entry.isDirectory()) {
-                if (!SKIPPED.has(entry.name)) {
+                if (!SKIPPED.has(entry.name) && !entry.name.startsWith('.')) {
                     stack.push(join(current, entry.name));
                 }
                 continue;
@@ -116,23 +137,131 @@ function holdsTests(dir: string): boolean {
     return false;
 }
 
-/** Every seam name this member declares that it should not. */
-function declaredSeams(manifest: Manifest): string[] {
+/**
+ * A `test` script that only hands the work to the members below it. It is not
+ * evidence that THIS package runs vitest — `npm run test --workspaces`,
+ * `pnpm -r test` and `turbo run test` all read as "ask the members".
+ */
+const DELEGATING_TEST =
+    /--workspaces|(?:^|\s)-r(?:\s|$)|--recursive|turbo\s+run|nx\s+run-many|lerna\s+run/u;
+
+/** What a declaration is: a transitive the framework resolves, or a seam it replaced. */
+type Seam = { kind: 'carried' | 'retired'; name: string };
+
+/** Every seam name this member declares that it should not, and why it should not. */
+function declaredSeams(manifest: Manifest): Seam[] {
     if (manifest.name === FRAMEWORK) {
         return [];
     }
-    const declared = {
-        ...manifest.dependencies,
-        ...manifest.devDependencies,
-    };
-    return Object.keys(declared)
-        .filter(
-            (name) =>
-                CARRIED.has(name) ||
-                RETIRED.has(name) ||
-                RETIRED_SCOPES.some((scope) => name.startsWith(scope)),
-        )
-        .toSorted();
+    const isRetired = (name: string): boolean =>
+        RETIRED.has(name) || RETIRED_SCOPES.some((scope) => name.startsWith(scope));
+    const declared = new Set([
+        ...Object.keys(manifest.dependencies ?? {}).filter(
+            (name) => CARRIED.has(name) || isRetired(name),
+        ),
+        ...Object.keys(manifest.devDependencies ?? {}).filter(
+            (name) => CARRIED.has(name) || CARRIED_IN_DEV.has(name) || isRetired(name),
+        ),
+    ]);
+    return [...declared].toSorted().map((name) => ({
+        kind: isRetired(name) ? ('retired' as const) : ('carried' as const),
+        name,
+    }));
+}
+
+/** The line a manifest key is written on — a finding points at the declaration, not at `{`. */
+function lineOfKey(dir: string, key: string): number {
+    try {
+        const lines = readFileSync(join(dir, 'package.json'), 'utf8').split('\n');
+        const found = lines.findIndex((line) => line.includes(`"${key}"`));
+        return found === -1 ? 1 : found + 1;
+    } catch {
+        return 1;
+    }
+}
+
+/**
+ * Run E3, E5b and F8 over ONE member. `memberDir` is absolute; `rootDir`
+ * anchors the paths the findings report, so a member's finding reads the same
+ * whether the pass ran over it alone or over the whole workspace.
+ */
+/** E3 — a member with tests of its own states how they run. */
+function configPresent(
+    manifest: Manifest,
+    memberDir: string,
+    label: string,
+    subject: string,
+): TokenViolation[] {
+    // A delegating `test` script is the MEMBERS' tests, not this package's,
+    // And the walk stops at the next `package.json` for the same reason.
+    const testScript = manifest.scripts?.test;
+    const ownsTests =
+        (typeof testScript === 'string' && !DELEGATING_TEST.test(testScript)) ||
+        holdsTests(memberDir);
+    if (!ownsTests) {
+        return [];
+    }
+    return [
+        {
+            file: join(label, 'package.json'),
+            line: 1,
+            message:
+                `${subject}: no vitest.config.ts — vitest's 5 s budget and an unexcluded \`_fixtures/\` ` +
+                `are running your tests; write \`export default defineSpecConfig()\` ` +
+                `(E3 — see docs/13-linting.md#e3-config-present)`,
+            rule: 'e3',
+            severity: 'error',
+        },
+    ];
+}
+
+/** E5b — a config that gives every file it collects a drawing of a browser. */
+function simulatedDom(config: string, rootDir: string): TokenViolation[] {
+    const text = readFileSync(config, 'utf8');
+    const found = SIMULATED_DOM.exec(text);
+    if (found?.groups?.dom === undefined) {
+        return [];
+    }
+    const relConfig = relative(rootDir, config);
+    return [
+        {
+            file: relConfig,
+            line: text.slice(0, found.index).split('\n').length,
+            message:
+                `${relConfig}: \`environment: '${found.groups.dom}'\` gives every file of this project ` +
+                `a drawing of a browser — a rendered thing is a \`.test.tsx\` beside its component, ` +
+                `collected by \`component()\` (E5b — see docs/13-linting.md#e5b-no-simulated-dom-config-member)`,
+            rule: 'e5b',
+            severity: 'error',
+        },
+    ];
+}
+
+/**
+ * F8 — a dependency the framework already carries, or a seam it replaced.
+ *
+ * The two are not the same sentence: removing a transitive changes nothing a
+ * test can see, while dropping a retired seam means writing its facet.
+ */
+function seamDependencies(
+    manifest: Manifest,
+    memberDir: string,
+    label: string,
+    subject: string,
+): TokenViolation[] {
+    return declaredSeams(manifest).map((seam) => ({
+        file: join(label, 'package.json'),
+        line: lineOfKey(memberDir, seam.name),
+        message:
+            seam.kind === 'carried'
+                ? `${subject}: \`${seam.name}\` is a transitive of \`@jterrazz/test\` — remove the declaration ` +
+                  `(F8 — see docs/13-linting.md#f8-no-seam-dependency)`
+                : `${subject}: \`${seam.name}\` is a seam \`@jterrazz/test\` replaced — the facet is \`component()\`, ` +
+                  `\`website()\`, \`clock\` or \`intercept()\`; remove the declaration ` +
+                  `(F8 — see docs/13-linting.md#f8-no-seam-dependency)`,
+        rule: 'f8' as const,
+        severity: 'error' as const,
+    }));
 }
 
 /**
@@ -145,58 +274,17 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
     if (manifest === null) {
         return [];
     }
-    const violations: TokenViolation[] = [];
     const label = relative(rootDir, memberDir) || '.';
+    // What a HUMAN calls this member. `--member .` is the ordinary run, and
+    // `.: no vitest.config.ts` names nothing a reader can act on.
+    const subject = label === '.' ? (manifest.name ?? basename(memberDir)) : label;
     const config = configOf(memberDir);
 
-    // E3 — a member with tests states how they run.
-    const hasTestScript = typeof manifest.scripts?.test === 'string';
-    if (config === null && (hasTestScript || holdsTests(memberDir))) {
-        violations.push({
-            file: join(label, 'package.json'),
-            line: 1,
-            message:
-                `${label}: no vitest.config.ts — vitest's 5 s budget and an unexcluded \`_fixtures/\` ` +
-                `are running your tests; write \`export default defineSpecConfig()\` ` +
-                `(E3 — see docs/13-linting.md#e3-config-present)`,
-            rule: 'e3',
-            severity: 'error',
-        });
-    }
-
-    // E5b — a config that gives every file it collects a drawing of a browser.
-    if (config !== null) {
-        const text = readFileSync(config, 'utf8');
-        const found = SIMULATED_DOM.exec(text);
-        if (found?.groups?.dom !== undefined) {
-            const relConfig = relative(rootDir, config);
-            violations.push({
-                file: relConfig,
-                line: text.slice(0, found.index).split('\n').length,
-                message:
-                    `${relConfig}: \`environment: '${found.groups.dom}'\` gives every file of this project ` +
-                    `a drawing of a browser — a rendered thing is a \`.test.tsx\` beside its component, ` +
-                    `collected by \`component()\` (E5b — see docs/13-linting.md#e5b-no-simulated-dom-config)`,
-                rule: 'e5b',
-                severity: 'error',
-            });
-        }
-    }
-
-    // F8 — a dependency the framework already carries, or a seam it replaced.
-    for (const seam of declaredSeams(manifest)) {
-        violations.push({
-            file: join(label, 'package.json'),
-            line: 1,
-            message:
-                `${label}: \`${seam}\` is a transitive of \`@jterrazz/test\` — remove the declaration ` +
-                `(F8 — see docs/13-linting.md#f8-no-seam-dependency)`,
-            rule: 'f8',
-            severity: 'error',
-        });
-    }
-
-    return violations;
+    return [
+        ...(config === null ? configPresent(manifest, memberDir, label, subject) : []),
+        ...(config === null ? [] : simulatedDom(config, rootDir)),
+        ...seamDependencies(manifest, memberDir, label, subject),
+    ];
 }
 
 /** The glob-ish workspace patterns a root manifest declares. */
@@ -209,27 +297,23 @@ function workspacePatterns(manifest: Manifest): string[] {
 }
 
 /**
- * Expand one workspace pattern to the directories it names. Only the two
- * shapes npm, bun and pnpm all agree on are honoured — a literal path and a
- * trailing `*` — because a checker that guessed at a wider glob language would
- * report findings for members the installer never resolved.
+ * A glob over path SEGMENTS — `*` stops at a separator, `**` does not. The
+ * same translation `@jterrazz/typescript`'s `lib/workspace-members.js` makes,
+ * because the two lists have to be the same list: a member the toolchain runs
+ * `--member` over and the path-less run never discovers is a finding the
+ * ratchet can neither record nor clear.
  */
-function expandPattern(rootDir: string, pattern: string): string[] {
-    const cleaned = pattern.replace(/\/+$/u, '');
-    if (!cleaned.includes('*')) {
-        const path = resolve(rootDir, cleaned);
-        return existsSync(path) ? [path] : [];
-    }
-    const [prefix] = cleaned.split('*');
-    const base = resolve(rootDir, (prefix ?? '').replace(/\/+$/u, ''));
-    try {
-        return readdirSync(base, { withFileTypes: true })
-            .filter((entry) => entry.isDirectory() && !SKIPPED.has(entry.name))
-            .map((entry) => join(base, entry.name));
-    } catch {
-        return [];
-    }
+function toPattern(glob: string): RegExp {
+    const escaped = glob
+        .replaceAll(/[.+^${}()|[\]\\]/gu, String.raw`\$&`)
+        .replaceAll('**', ' ')
+        .replaceAll('*', '[^/]*')
+        .replaceAll(' ', '.*');
+    return new RegExp(`^${escaped}$`, 'u');
 }
+
+/** How deep a member may sit below the root — the toolchain's bound, to the segment. */
+const MEMBER_DEPTH = 6;
 
 /**
  * Every workspace member declared by the root manifest, plus the root itself —
@@ -240,35 +324,113 @@ export function discoverMembers(rootDir: string): string[] {
     if (manifest === null) {
         return [];
     }
+    const patterns = workspacePatterns(manifest)
+        .filter((glob) => typeof glob === 'string' && !glob.startsWith('!'))
+        .map((glob) => toPattern(glob.replace(/\/+$/u, '')));
     const members = new Set<string>([rootDir]);
-    for (const pattern of workspacePatterns(manifest)) {
-        for (const dir of expandPattern(rootDir, pattern)) {
-            if (readManifest(dir) !== null) {
-                members.add(dir);
-            }
-        }
+    if (patterns.length === 0) {
+        return [...members];
     }
+
+    const walk = (dir: string, depth: number): void => {
+        if (depth > MEMBER_DEPTH) {
+            return;
+        }
+        let entries;
+        try {
+            entries = readdirSync(dir, { withFileTypes: true });
+        } catch {
+            return;
+        }
+        for (const entry of entries) {
+            if (!entry.isDirectory() || entry.name.startsWith('.') || SKIPPED.has(entry.name)) {
+                continue;
+            }
+            const child = join(dir, entry.name);
+            const path = relative(rootDir, child).split(sep).join('/');
+            // A directory a pattern claims IS a member, and a member is never
+            // Walked into: what it contains is its own workspace, not this one's.
+            if (patterns.some((pattern) => pattern.test(path)) && readManifest(child) !== null) {
+                members.add(child);
+                continue;
+            }
+            walk(child, depth + 1);
+        }
+    };
+    walk(rootDir, 0);
     return [...members];
 }
 
+/** Paths git is told to ignore — the toolchain skips them, so the two lists agree. */
+function ignoredPaths(rootDir: string, candidates: string[]): Set<string> {
+    if (candidates.length === 0) {
+        return new Set();
+    }
+    try {
+        const answer = spawnSync('git', ['check-ignore', '--stdin'], {
+            cwd: rootDir,
+            encoding: 'utf8',
+            input: `${candidates.join('\n')}\n`,
+        });
+        if (answer.error !== undefined || answer.stdout === '') {
+            return new Set();
+        }
+        return new Set(answer.stdout.split('\n').filter(Boolean));
+    } catch {
+        // No git, or no repository — an unignorable tree is judged whole.
+        return new Set();
+    }
+}
+
+/** How deep below a member a nested `specs/` may sit before the walk gives up. */
+const SPECS_DEPTH = 6;
+
 /**
  * Every `specs/` root the tree passes have to walk: the project's own, and
- * each member's. Stated here rather than guessed by the walk, so a path-less
- * run reports exactly what a per-root run would.
+ * each member's — including a member that NESTS its facet tree (`web/specs`).
+ * Stated here rather than guessed by the walk, so a path-less run reports
+ * exactly what a per-root run would.
+ *
+ * A `specs/` tree is never descended into (the fixtures under it are not spec
+ * roots), and neither is another package's tree: a directory carrying its own
+ * `package.json` belongs to whichever member declares it.
  */
 export function discoverSpecRoots(rootDir: string): string[] {
-    const roots: string[] = [];
+    const roots = new Set<string>();
     for (const member of discoverMembers(rootDir)) {
-        const specs = join(member, 'specs');
-        try {
-            if (statSync(specs).isDirectory()) {
-                roots.push(specs);
+        const walk = (dir: string, depth: number): void => {
+            if (depth > SPECS_DEPTH) {
+                return;
             }
-        } catch {
-            // No specs root here — the member pass still judges it.
-        }
+            let entries;
+            try {
+                entries = readdirSync(dir, { withFileTypes: true });
+            } catch {
+                return;
+            }
+            for (const entry of entries) {
+                if (!entry.isDirectory() || entry.name.startsWith('.') || SKIPPED.has(entry.name)) {
+                    continue;
+                }
+                const child = join(dir, entry.name);
+                if (entry.name === 'specs') {
+                    roots.add(child);
+                    continue;
+                }
+                if (readManifest(child) !== null) {
+                    continue;
+                }
+                walk(child, depth + 1);
+            }
+        };
+        walk(member, 0);
     }
-    return roots;
+    const found = [...roots].toSorted();
+    const ignored = ignoredPaths(
+        rootDir,
+        found.map((path) => relative(rootDir, path)),
+    );
+    return found.filter((path) => !ignored.has(relative(rootDir, path)));
 }
 
 /** Run the member pass over every member the root declares. */

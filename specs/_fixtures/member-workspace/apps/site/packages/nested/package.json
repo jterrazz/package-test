@@ -1,0 +1,4 @@
+{
+    "name": "@fixture/nested",
+    "devDependencies": { "mockdate": "^3.0.5" }
+}

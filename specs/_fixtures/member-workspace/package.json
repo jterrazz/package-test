@@ -1,5 +1,6 @@
 {
     "name": "member-workspace-fixture",
     "private": true,
-    "workspaces": ["packages/*"]
+    "scripts": { "test": "npm run test --workspaces --if-present" },
+    "workspaces": ["packages/*", "apps/*/packages/*"]
 }
