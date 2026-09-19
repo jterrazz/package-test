@@ -59,7 +59,7 @@ export type UnitProjectOptions = FacetProjectOptions & {
 export type WebsiteProjectOptions = FacetProjectOptions;
 
 /** `component()` — rendered units, beside the components they cover. */
-export type ComponentProjectOptions = FacetProjectOptions & {
+export type ComponentProjectOptions = {
     /** Freeze the page's `Date` for every render of the project. */
     clock?: string;
     /** `Accept-Language` and `Intl` locale of the page. Default `'en-US'`. */
@@ -86,7 +86,7 @@ export type ComponentProjectOptions = FacetProjectOptions & {
      * provider). A router belongs on the chain instead: it is a test's Given.
      */
     wrap?: string;
-};
+} & FacetProjectOptions;
 
 /** The pipeline keys a consumer's Vite config contributes, and nothing else. */
 const PIPELINE_KEYS = [
