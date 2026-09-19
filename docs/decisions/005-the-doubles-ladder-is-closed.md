@@ -1,6 +1,6 @@
 # ADR-005: The doubles ladder is closed, and a ban an upstream rule can carry is an option, not a rule
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-19
 
 ## Context

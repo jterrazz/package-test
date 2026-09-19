@@ -1,6 +1,6 @@
 # ADR-004: A module against real services, or against a golden, is the integration facet
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-19
 
 ## Context
