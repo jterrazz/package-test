@@ -4,11 +4,13 @@
 
 Use it when the subject is one thing that draws itself. For a whole served page use [website](14-website.md); for a module that draws nothing, a module test beside it needs no runner at all.
 
+Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md) (proposed).
+
 | The shape           | Held below                                                             |
 | ------------------- | ---------------------------------------------------------------------- |
 | What it specifies   | [What it specifies](#what-it-specifies)                                |
 | Where it is written | [The constructor: there is none](#the-constructor-there-is-none)       |
-| The chain           | [The chain](#the-chain) — `intercept` · `wrap` · `clock` · `render`    |
+| The chain           | [The chain](#the-chain) — `intercept` · `wrap` · `clock` · `viewport` · `render` |
 | The result          | [The result](#the-result) — `tree` `content` `html` `console` `errors` |
 | What only it does   | [Unique here](#unique-here)                                            |
 | What it will refuse | [Pitfalls](#pitfalls)                                                  |
@@ -38,7 +40,7 @@ Every other facet starts something — a server, a database, a binary, a simulat
 | The providers every render is dressed in | the app's  | `component({ wrap })` in `vitest.config.ts`      |
 | The Vite pipeline the app builds with    | the app's  | `component({ vite })`                            |
 | The viewport, the timezone, the locale   | the app's  | `component({ viewport, timezone, locale })`      |
-| The contracts, the wrapper, the instant  | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()` |
+| The contracts, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
 
 ```typescript
 // vitest.config.ts
@@ -64,6 +66,10 @@ export default defineSpecConfig({
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                |
 
 **Only the pipeline of `vite` is adopted.** An app's config says where the app LIVES — its `root`, its `build`, its `server.port`, its `publicDir` — and adopting those re-roots the run so the project collects nothing. The kept keys are an allow-list (`plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json`), and the consumer's `plugins` are concatenated after the seam's, never assigned over them.
+
+**One transformer key, chosen from the installed Vite.** Vite 8 compiles with oxc and warns for every `esbuild` option handed to it beside an `oxc` one; Vite 6 and 7 compile with esbuild and have no `oxc` key at all. `component()` reads the installed major, states the JSX default on the key that Vite actually reads, and drops the other from the adopted pipeline — and the one it states yields to yours: a `jsxImportSource` or a classic runtime is the app's statement, not the seam's to overwrite.
+
+**A `resolve.alias` is an unlisted dependency.** An alias tells the bundler where a specifier resolves; it tells knip nothing, so a package reached only through an alias reads as undeclared, and a `paths`-less `tsconfig` makes the compiler disagree with the bundler besides. Mirror the alias in the `tsconfig`'s `paths` (the compiler and the bundler then answer alike), or name the package in `knip.ignoreDependencies` with the alias as the reason.
 
 ## The chain
 
@@ -96,37 +102,34 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 | --------------- | ---------------------------------------------------------------------------------------------- |
 | `.intercept(…)` | Declares what the network replies — the same contracts and the same queue as every other facet |
 | `.wrap(fn)`     | Wraps every render of this chain: a router stub, a `<StrictMode>`, a provider one test needs   |
-| `.clock(iso)`   | Pins the page's `Date` for this render                                                         |
+| `.clock(iso)`    | Pins the page's `Date` for this render                                                        |
+| `.viewport(size)` | The page size THIS render gets — the Given of a component that reads `matchMedia` or a container query. The project's size is restored when the test ends |
 
 | Terminal action             | Mounts                                                                        |
 | --------------------------- | ----------------------------------------------------------------------------- |
 | `.render(<X />, scenario?)` | A React tree                                                                  |
 | `.render((container) => …)` | A DOM function, handed a fresh container; its optional return is the teardown |
 
-The scenario is the When, and assertions stay in the Then (rule W1). Its verbs are the page's, plus the two only a parent has:
+The scenario is the When, and assertions stay in the Then (rule W1). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [14 — Website specs § The visitor](14-website.md#the-visitor) — plus the two only a parent has:
 
-| Verb                     | Description                                                  |
-| ------------------------ | ------------------------------------------------------------ |
-| `click` `fill` `check`   | What a user does to a control                                |
-| `select` `hover` `press` | …and to a list, a hover target, the keyboard                 |
-| `see(element)`           | Wait until it is visible — the synchronization primitive     |
-| `gone(element)`          | Wait until it is gone — hidden, or no longer in the document |
-| `rerender(ui)`           | What a PARENT does: new props, same mount                    |
-| `unmount()`              | What a parent does when it takes the thing off the screen    |
+| Verb           | Description                                               |
+| -------------- | --------------------------------------------------------- |
+| `rerender(ui)` | What a PARENT does: new props, same mount                 |
+| `unmount()`    | What a parent does when it takes the thing off the screen |
 
-`see(focused(button('Open')))` asks where the keyboard is; `goto()` does not exist here, because a component has no address.
+`goto()` does not exist here, because a component has no address. The element modifiers are the page's too: `see(focused(button('Open')))` asks where the keyboard is, `see(disabled(button('Publish')))` whether a control takes input.
 
 ## The result
 
 | Member           | Type           | Description                                                        |
 | ---------------- | -------------- | ------------------------------------------------------------------ |
 | `result.tree`    | `TextAccessor` | The ARIA snapshot of the rendered body — the outline a golden pins |
-| `result.content` | `TextAccessor` | Rendered text of the document body                                 |
+| `result.content` | `TextAccessor` | The RENDERED text of the document body (`innerText`) — what a reader sees, so a stylesheet's source and a node the page does not display are not in it |
 | `result.html`    | `TextAccessor` | The mounted markup — the escape hatch for a class or an attribute  |
 | `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message          |
 | `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error                  |
 
-`toMatch` is **awaited** on these five and on nothing else in the framework: a golden captured inside a page is read back through a server command, so the file crosses the browser seam.
+`toMatch` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [08 — Assertions](08-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
 ```typescript
 await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml');
@@ -139,9 +142,46 @@ The ARIA tree is the golden a rendered surface wants: it is the outline a screen
 ## Unique here
 
 - **The hook recipe.** A hook has no surface, so its Given is a **Host component written in the test file**, carrying the states the test needs — an opener, a fallback target, a handler that can be swapped. The visitor drives the Host; `rerender` swaps the handler; `unmount` is the parent walking away. There is no hook-specific runner and there is no need for one.
+
+```tsx
+import { button, component, dialog, focused } from '@jterrazz/test';
+import { useState } from 'react';
+import { expect, test, vi } from 'vitest';
+
+// The Given of a hook spec is a Host, written here: the component carrying the
+// States the test needs is part of the TEST, not of the app.
+function Host({ onClose }: { onClose: () => void }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <>
+            <button onClick={() => { setOpen(true); }} type="button">Open</button>
+            {open ? (
+                <dialog aria-label="Host" open>
+                    <button onClick={() => { setOpen(false); onClose(); }} type="button">Close</button>
+                </dialog>
+            ) : null}
+        </>
+    );
+}
+
+test('gives the keyboard back to whatever opened it', async () => {
+    // Given - a dialog opened from a button and then dismissed
+    const onClose = vi.fn<() => void>();
+    await component.render(<Host onClose={onClose} />, async (visitor) => {
+        await visitor.click(button('Open'));
+        await visitor.see(dialog('Host'));
+        await visitor.click(button('Close'));
+        await visitor.gone(dialog('Host'));
+        await visitor.see(focused(button('Open')));
+    });
+
+    // Then - the owner heard the dismissal exactly once
+    expect(onClose).toHaveBeenCalledOnce();
+});
+```
 - **A DOM function is still a component.** `renderSessionRows(container, rows)` renders; it just does not use React. `.render((container) => …)` mounts it in the same Chromium under the same visitor, and `result.html` reads what it drew. No React is loaded.
 - **A router is a test's Given.** cap01's and the console's screens render `<Link>` and read `useParams()`; without a router they throw. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
-- **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request. There is no bypass and no default handler — the same D7 the api facet holds, through msw's worker instead of its node interceptor.
+- **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total.
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
 ## Pitfalls
@@ -151,10 +191,11 @@ The ARIA tree is the golden a rendered surface wants: it is the outline a screen
 - **Hand-rolling `browser:` in a config.** Rule E6 refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule G4 refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
 - **Asserting focus with a golden.** The accessibility tree carries no focus state, so a tree snapshot proves nothing about the keyboard. `see(focused(x))` / `gone(focused(x))` are the verbs that do.
-- **Expecting `toMatch` to be synchronous here.** It is not: `await expect(result.tree).toMatch('…')`. A bare call resolves nothing and the assertion never runs.
+- **Expecting `toMatch` to be synchronous here.** It is not: `await expect(result.tree).toMatch('…')`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
+- **A name that is a prefix of an accessible name.** Names match as a case-insensitive substring unless you say `{ exact: true }`, so `button('Delete post')` also matches a row's `aria-label="Delete Post a"`. The W3 refusal names the accessible name each candidate matched on; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.
 - **Giving the project the app's whole Vite config and expecting the app's root.** Only the pipeline is adopted; the project's root stays the directory of `vitest.config.ts`, which is what makes its `include` globs mean what they say.
 
 ## Related
 
-[02 — Developing](02-developing.md) · [10 — Contracts](10-contracts.md) · [12 — Conventions](12-conventions.md) · [14 — Website specs](14-website.md)
+[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [10 — Contracts](10-contracts.md) · [12 — Conventions](12-conventions.md) · [14 — Website specs](14-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md) (proposed)

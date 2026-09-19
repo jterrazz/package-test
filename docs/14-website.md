@@ -158,15 +158,21 @@ Five more roles a visitor reads and acts on, each optionally named because a pag
 | `row(name?)`      | a row of a table or grid, by the text of its cells      |
 | `listitem(name?)` | an item of a list — the answer to an unnamed `<li>`     |
 
-And one MODIFIER, which is not a descriptor of its own: `focused(element)` asks where the keyboard is.
+And two MODIFIERS, neither a descriptor of its own — each narrows a descriptor by a STATE the vocabulary can already name the element of, and each is accepted by both `see` and `gone`:
+
+| Modifier             | Asks                                                             |
+| -------------------- | ---------------------------------------------------------------- |
+| `focused(element)`   | Where the keyboard is                                            |
+| `disabled(element)`  | Whether the control refuses input — and `enabled(element)` the other direction |
 
 ```typescript
 await visitor.press('Escape');
 await visitor.gone(dialog('Settings'));
 await visitor.see(focused(button('Open')));
+await visitor.see(disabled(button('Publish')));
 ```
 
-Focus is a verb's business and never a golden's: the accessibility tree carries no focus state, so a tree snapshot of a page that handed the keyboard back and one that did not are byte-identical.
+Both are a verb's business and never a golden's: the accessibility tree carries no focus state and no enablement, so a tree snapshot of a page that handed the keyboard back and one that did not are byte-identical. Enablement also has a direction a behavioural substitute cannot reach — clicking a disabled control is a timeout, not an answer.
 
 The vocabulary is shared with the mobile facet — `button`, `field`, `content`, `testId`, `within` work identically in an `.open()` scenario ([15 — Mobile specs](15-mobile.md)) — and with the component facet, where the same descriptors, the same verbs and the same W3 refusal read a mounted unit ([16 — Component specs](16-component.md)). The landmarks below are website/component-only.
 
@@ -186,12 +192,14 @@ Matched:
   3. <a href="/articles">Articles</a>  in <footer>
 
 Disambiguate with one of:
-  • scope it       within(navigation(), link("Articles"))   [also here: contentinfo()]
+  • scope it       within(navigation(), link("Articles"))   [leaves 1 of 3]   [also here: main(), contentinfo()]
   • exact name     link("Articles", { exact: true })   [leaves 2 of 3]
   • other element  a heading(), button() or field() may name one thing where this does not
 
 Docs: docs/14-website.md#designating-exactly-one-element (CONVENTIONS W3)
 ```
+
+Every suggestion carries what it LEAVES, so a rewrite that would keep the spec ambiguous never reads as a fix: a landmark holding every candidate is not offered at all. The evidence also names the ACCESSIBLE name a candidate matched on when that is not its text — a role descriptor matches the name, so `button('Delete post')` finds an `aria-label="Delete Post a"` too, and printing only the text would send you after something that never matched.
 
 Taking "the first match" is the failure this rule exists to prevent: the spec stays green while the visitor acts on a different element, and nothing ever reports it. Ambiguity is an authoring mistake, not something DOM order should arbitrate.
 
@@ -444,7 +452,7 @@ No `_seeds/` or `_requests/` — `specification.website()` has no `services` opt
 - **Reaching for `testId()` to escape an ambiguity.** It silences the refusal without answering it: the test stops asserting the role and the accessible name, which is most of what a user-facing element was buying. Scope it with `within()` instead — that is the fix rule W3 is pointing at.
 - **Assuming a name matches whole.** It is a substring by default: `link('Articles')` also matches "Read Articles". Pass `{ exact: true }` when that is what you meant.
 - **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
-- **Snapshotting the tree to prove focus.** The accessibility tree carries none — `see(focused(x))` is the assertion that does.
+- **Snapshotting the tree to prove focus.** The accessibility tree carries none — `see(focused(x))` is the assertion that does, and `see(disabled(x))` the one for a control that refuses input.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.

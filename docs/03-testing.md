@@ -19,8 +19,10 @@ What proves a change here: this package specifies itself with itself. The suites
 | `fast`         | `src/**/*.test.ts` + `specs/cli/**` + `specs/lint/**`                    | Nothing — Docker specs self-skip; the lint specs need `npm run build` first |
 | `api`          | `specs/api/**` + `specs/jobs/**`, node mode (in-process Hono)            | Docker                                                                      |
 | `api-stack`    | the SAME files with `TEST_MODE=compose`, minus `specs/api/intercepts/**` | Docker compose                                                              |
-| `website`      | `specs/website/**`                                                       | playwright + `npx playwright install chromium`; no Docker                   |
+| `website`      | `specs/website/**`, built by `website()`                                 | playwright + `npx playwright install chromium`; no Docker                   |
 | `component`    | `specs/component-app/**/*.test.tsx`, built by `component()`              | the same chromium; no Docker. Runs in its own group, after `website`        |
+
+`website` and `component` are the two helpers this package dogfoods; `fast` is still stated by hand, because it collects three trees that no single helper's canonical include describes — its rename to `unit()` belongs with the rest of the package's own migration.
 | `integrations` | `specs/integrations/**`, sequential (`fileParallelism: false`)           | Docker                                                                      |
 
 ```bash
@@ -54,7 +56,7 @@ A test at a facet root is forbidden and a `*.specification.ts` inside a domain i
 
 The fixture apps the specs drive live in the pool: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, the `broken-*` trees for the infrastructure failure paths, and `lint-violations/` — a violation/compliant twin per lint rule.
 
-**The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component-app/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel and a pair of same-named links. It is not under `_fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it.
+**The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component-app/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel, a responsive note, a control that refuses input and a pair of same-named links. It is not under `_fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
 ## The lint suite is end-to-end
 

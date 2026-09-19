@@ -31,7 +31,7 @@ Two things travel under one name, and their scopes are not the same: the framewo
 
 **The FRAMEWORK specifies what the SUBJECT is, not which runner it needs.** `specification.*` and everything hanging off it — runners, seeds, fixtures, contracts, goldens, the sandbox a spec runs in — exist to specify something a caller reaches through an entry: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function needs none of it and no runner at all.
 
-A **rendered component** is the case the corpus used to file under "vitest alone", and that was wrong: it needs no runner (nothing is started) but it does need a real browser, a Vite pipeline, a network double and a golden engine — all of which the framework owns. It is a facet with no constructor: `component.render(<X />, scenario)` from `@jterrazz/test`, in a `<file>.test.tsx` beside the component. Never `@testing-library/*`, never `happy-dom` (rules F6, E5, E5b, G4 refuse them and name the move).
+A **rendered component** needs no runner (nothing is started) and does need a real browser, a Vite pipeline, a network double and a golden engine — all of which the framework owns, so the fork is the SUBJECT, never the amount of machinery. It is a facet with no constructor: `component.render(<X />, scenario)` from `@jterrazz/test`, in a `<file>.test.tsx` beside the component. Never `@testing-library/*`, never `happy-dom` (rules F6, E5, E5b, G4 refuse them and name the move).
 
 **The CONVENTIONS bind EVERY test file of a jterrazz repository** — that plain unit test and that component test included. They are the repository's rules, not the framework's, and they hold with no `@jterrazz/test` import in the file:
 
