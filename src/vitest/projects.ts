@@ -1,6 +1,7 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Plugin, UserConfig, UserConfigFn } from 'vite';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
@@ -48,11 +49,18 @@ export type UnitProjectOptions = CommonOptions & {
 export type WebsiteProjectOptions = CommonOptions;
 
 /** `component()` — rendered units, beside the components they cover. */
-export type ComponentProjectOptions = CommonOptions & {
+export type ComponentProjectOptions = {
     /** Freeze the page's `Date` for every render of the project. */
     clock?: string;
     /** `Accept-Language` and `Intl` locale of the page. Default `'en-US'`. */
     locale?: string;
+    /**
+     * The directory `vite` and `wrap` are resolved against. Default: the
+     * directory of the file that CALLED the helper — see
+     * {@link callerDirectory}. State it when the call is not written in the
+     * config it configures (a shared config factory).
+     */
+    root?: string;
     /** IANA zone the page's `Date` reports in. Default `'UTC'`. */
     timezone?: string;
     /**
@@ -68,7 +76,7 @@ export type ComponentProjectOptions = CommonOptions & {
      * provider). A router belongs on the chain instead: it is a test's Given.
      */
     wrap?: string;
-};
+} & CommonOptions;
 
 /** The pipeline keys a consumer's Vite config contributes, and nothing else. */
 const PIPELINE_KEYS = [
@@ -100,6 +108,84 @@ const SEAM_DEPENDENCIES = [
 ];
 
 const requireFrom = createRequire(import.meta.url);
+
+/** This module's own file — the frames the caller search walks past. */
+const HELPERS_FILE = import.meta.filename;
+
+/** A stack frame's file, in either of the two shapes V8 prints it in. */
+const STACK_FRAME = /(?:\((?<wrapped>[^()]+):\d+:\d+\)|at (?<bare>[^()\s]+):\d+:\d+)$/u;
+
+/** A config vite bundled before importing it — `<its name>.timestamp-<hash>.mjs`. */
+const BUNDLED_CONFIG = /^(?<name>.+)\.timestamp-[^.]+\.mjs$/u;
+
+/** The file of the first frame below this module — who called the helper. */
+function callerFile(): string | undefined {
+    // The error is never thrown and never read as a message: asking V8 who
+    // Called is what a stack is for, and the string says so where one prints.
+    const { stack } = new Error('@jterrazz/test: reading the call site of a project helper');
+    for (const frame of stack?.split('\n').slice(1) ?? []) {
+        const groups = STACK_FRAME.exec(frame.trim())?.groups;
+        const location = groups?.wrapped ?? groups?.bare;
+        if (location === undefined || location.startsWith('node:')) {
+            continue;
+        }
+        const file = location.startsWith('file:') ? fileURLToPath(location) : location;
+        if (file !== HELPERS_FILE) {
+            return file;
+        }
+    }
+    return undefined;
+}
+
+/** The nearest directory at or above the cwd holding a file of this name. */
+function nearestHolding(name: string): string | undefined {
+    let directory = process.cwd();
+    for (;;) {
+        if (existsSync(resolve(directory, name))) {
+            return directory;
+        }
+        const parent = dirname(directory);
+        if (parent === directory) {
+            return undefined;
+        }
+        directory = parent;
+    }
+}
+
+/**
+ * The directory of the CONFIG that called a helper — what the relative paths
+ * it was handed mean.
+ *
+ * Not `process.cwd()`: a `vitest.config.ts` is read by more tools than the
+ * runner, and knip and `typescript check` load every config of a repository
+ * from the repository ROOT — `component({ vite: './web/vite.config.ts' })`
+ * written beside an app resolved against the wrong tree and threw before a
+ * single test ran. `import.meta` cannot answer either: it describes THIS
+ * module. And vitest hands a project neither its root nor its config file — a
+ * project function is called with `{ command, mode, isPreview, isSsrBuild }`
+ * and nothing else.
+ *
+ * So the call site is read off the stack, where a loader that keeps a config's
+ * identity (node, tsx, jiti — what those tools use) names the file itself.
+ * Vite's own loader does not: it BUNDLES the config into
+ * `node_modules/.vite-temp/` and only the config's NAME survives the move. The
+ * name is what is then looked for upward from the cwd, because that loader is
+ * the runner's and a runner is started in the tree it tests. A config loaded
+ * by the runner from another tree entirely states `root` itself.
+ */
+function callerDirectory(): string {
+    const file = callerFile();
+    if (file === undefined) {
+        return process.cwd();
+    }
+    const bundled = BUNDLED_CONFIG.exec(basename(file))?.groups?.name;
+    if (bundled === undefined || basename(dirname(file)) !== '.vite-temp') {
+        // Bundled beside the config (no node_modules above it) or not bundled
+        // At all: either way the frame sits in the config's own directory.
+        return dirname(file);
+    }
+    return nearestHolding(bundled) ?? process.cwd();
+}
 
 /** Is this specifier installed here? An absent optional peer is simply not pre-bundled. */
 function resolves(specifier: string): boolean {
@@ -147,12 +233,17 @@ function mswWorkerPlugin(): Plugin {
  */
 async function reroot(
     source: NonNullable<ComponentProjectOptions['vite']>,
+    root: string,
 ): Promise<Record<string, unknown>> {
     const environment = { command: 'serve', isSsrBuild: false, mode: 'test' } as const;
     let loaded: undefined | UserConfig;
+    let from = 'the value it was given';
     if (typeof source === 'string') {
         const { loadConfigFromFile } = await import('vite');
-        const file = await loadConfigFromFile(environment, source);
+        // Absolute before it is handed over: `loadConfigFromFile` resolves a
+        // Relative path against the CWD, which is the tool's, not the config's.
+        from = isAbsolute(source) ? source : resolve(root, source);
+        const file = await loadConfigFromFile(environment, from);
         loaded = file?.config;
     } else if (typeof source === 'function') {
         loaded = await source(environment);
@@ -160,8 +251,7 @@ async function reroot(
         loaded = await source;
     }
     if (loaded === undefined) {
-        const where = typeof source === 'string' ? source : 'the value it was given';
-        throw new Error(`component({ vite }): no config at ${where}`);
+        throw new Error(`component({ vite }): no config at ${from}`);
     }
 
     const inactive = transformKey() === 'oxc' ? 'esbuild' : 'oxc';
@@ -267,9 +357,9 @@ function updating(): boolean {
  * export: the setup module and the package's browser build are separate graphs
  * in the page and share no module instance.
  */
-function writeSetupFile(wrap: string): string {
-    const absolute = resolve(process.cwd(), wrap);
-    const path = resolve(process.cwd(), VITEST_ARTIFACTS_DIR, 'component-setup.mjs');
+function writeSetupFile(wrap: string, root: string): string {
+    const absolute = resolve(root, wrap);
+    const path = resolve(root, VITEST_ARTIFACTS_DIR, 'component-setup.mjs');
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(
         path,
@@ -365,9 +455,12 @@ export function website(options: WebsiteProjectOptions = {}): TestProjectInlineC
 export async function component(
     options: ComponentProjectOptions = {},
 ): Promise<TestProjectInlineConfiguration> {
+    // Read before the first `await`: the caller's frame is only on the stack
+    // While the helper's own synchronous body is running.
+    const root = options.root ?? callerDirectory();
     assertProviderPin();
     const { playwright } = await import('@vitest/browser-playwright');
-    const pipeline = options.vite === undefined ? {} : await reroot(options.vite);
+    const pipeline = options.vite === undefined ? {} : await reroot(options.vite, root);
     const consumerPlugins = Array.isArray(pipeline.plugins) ? pipeline.plugins : [];
 
     const project = {
@@ -404,7 +497,9 @@ export async function component(
             // Does not have, and a wrap module is imported by URL there: both
             // Cross the seam as provided values.
             provide: providedToPage(options),
-            ...(options.wrap === undefined ? {} : { setupFiles: [writeSetupFile(options.wrap)] }),
+            ...(options.wrap === undefined
+                ? {}
+                : { setupFiles: [writeSetupFile(options.wrap, root)] }),
             // Two Chromiums must never share a slot on a 2-vCPU runner: node
             // Projects run first (0), the website facet next (1), this one last.
             sequence: { groupOrder: 2 },

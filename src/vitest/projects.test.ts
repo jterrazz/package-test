@@ -1,6 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
+import nestedApp from './_fixtures/nested-app/vitest.config.js';
 import { component, unit, website } from './projects.js';
 
 /** The `test` block of a project, whatever the helper wrapped around it. */
@@ -162,12 +165,30 @@ describe('component() — the browser project', () => {
 
     test('loads the project wrap through a setup file, not a fetch under the run', async () => {
         // Given - a project whose providers live in a module of its own
-        const project = testOf(await component({ wrap: './specs/component-app/providers.tsx' }));
+        const project = testOf(
+            await component({ root: process.cwd(), wrap: './specs/component-app/providers.tsx' }),
+        );
         const setup = project.setupFiles;
 
         // Then - the wrap is in the graph before the first test, from .artifacts/
         expect(setup).toHaveLength(1);
         expect(String(setup)).toContain('.artifacts/vitest/component-setup.mjs');
+    });
+
+    test('reads a relative path against the config that stated it, not the cwd', () => {
+        // Given - the config of an app in a subdirectory, loaded from the
+        // Package root the way knip and the type-checker load every config
+        const nested = resolve(import.meta.dirname, '_fixtures/nested-app');
+        const project = testOf(nestedApp);
+
+        // Then - both of its relative paths landed beside it, and neither here
+        expect(nestedApp.define).toStrictEqual({ __NESTED_APP__: 'true' });
+        expect(project.setupFiles).toStrictEqual([
+            resolve(nested, '.artifacts/vitest/component-setup.mjs'),
+        ]);
+        expect(readFileSync(String(project.setupFiles), 'utf8')).toContain(
+            resolve(nested, 'providers.ts'),
+        );
     });
 
     test('keeps the pipeline of a consumer vite config and drops where its app lives', async () => {

@@ -22,11 +22,15 @@ What this facet does NOT cover, and where each of those subjects goes instead: [
 ## The project (`vitest.config.ts`)
 
 ```typescript
+// apps/console/vitest.config.ts
 import { component, defineSpecConfig, unit } from '@jterrazz/test/vitest';
 
 export default defineSpecConfig({
     test: {
-        projects: [unit(), component({ vite: './vite.config.ts', wrap: './src/providers.tsx' })],
+        projects: [
+            unit({ roots: ['src', 'web'] }),
+            component({ vite: './web/vite.config.ts', wrap: './web/src/providers.tsx' }),
+        ],
     },
 });
 ```
@@ -34,6 +38,7 @@ export default defineSpecConfig({
 - `wrap` — a module PATH default-exporting `(ui) => ReactNode`: the app's own providers, around every render. A router is NOT this; it is a test's Given, on `.wrap()`.
 - `vite` — the app's pipeline (path | object | function | promise). Only `plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json` are adopted; `root`, `build`, `server`, `publicDir` are dropped so the project still collects from where the config sits. Consumer plugins are CONCATENATED after the seam's. The JSX default lands on the key the installed Vite transforms with (`oxc` from 8, `esbuild` before it) and yields to yours.
 - A `resolve.alias` is an unlisted dependency to knip, and a bundler-only statement to the compiler: mirror it in the `tsconfig`'s `paths`, or name the package in `knip.ignoreDependencies` with the alias as the reason.
+- A relative `vite` or `wrap` is resolved against the directory of the CONFIG that called `component()`, never the cwd — knip and `typescript check` load every config from the repository root. `root` states that anchor when it cannot be read: a call written outside the config it configures, or a runner started in another tree.
 - `clock`, `viewport` (default 1280×720 — one test overrides it with `.viewport()`), `timezone` (`'UTC'`), `locale` (`'en-US'`), `include`/`exclude`, `timeout`.
 - Beside it: `unit({ roots?, include?, exclude?, timeout? })` and `website({ include?, exclude?, timeout? })`. The three carry `sequence.groupOrder` — node 0, website 1, component 2 — so two chromiums never share a slot.
 - It is `async`; `projects: [component({ … })]` is fine without `await`.
