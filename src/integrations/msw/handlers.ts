@@ -34,19 +34,30 @@ export const NO_CONTRACTS: ContractRegistration = {
     violation: () => null,
 };
 
+/**
+ * A contract answers the request that was made, never a copy of an earlier one.
+ *
+ * In a page the reply travels through a real service worker and a real HTTP
+ * cache, so a second render of the same component can be served the FIRST
+ * test's answer and never reach the queue at all — a contract that was
+ * exhausted, or replaced, silently keeps answering. Stated as a default, so a
+ * spec whose subject IS caching can still say otherwise.
+ */
+const NEVER_CACHED = { 'cache-control': 'no-store' };
+
 /** Turn a contract response into the msw reply, body kind by body kind. */
 export function toMswResponse(msw: any, response: ContractResponse): unknown {
     const { body, headers, status = 200 } = response;
     if (body === null || body === undefined) {
-        return new msw.HttpResponse(null, { headers, status });
+        return new msw.HttpResponse(null, { headers: { ...NEVER_CACHED, ...headers }, status });
     }
     if (typeof body === 'string') {
         return new msw.HttpResponse(body, {
-            headers: { 'content-type': 'text/plain; charset=utf-8', ...headers },
+            headers: { ...NEVER_CACHED, 'content-type': 'text/plain; charset=utf-8', ...headers },
             status,
         });
     }
-    return msw.HttpResponse.json(body, { headers, status });
+    return msw.HttpResponse.json(body, { headers: { ...NEVER_CACHED, ...headers }, status });
 }
 
 /**
@@ -54,10 +65,14 @@ export function toMswResponse(msw: any, response: ContractResponse): unknown {
  * records any request no contract accepted (CONVENTIONS D7: strict from the
  * first contract). The caller decides what to do with the recorded violation —
  * the api chain rethrows it, the component chain fails the render.
+ *
+ * `bypass` names the traffic that is not the subject's: under node there is
+ * none, in a page it is everything the runner fetches to BE a page.
  */
 export function buildContractHandlers(
     msw: any,
     contracts: readonly Contract[],
+    bypass?: (url: string) => boolean,
 ): { handlers: unknown[]; violation: () => Error | null } {
     const queue = new ContractQueue(contracts);
     let violation: Error | null = null;
@@ -66,7 +81,7 @@ export function buildContractHandlers(
         violation ??= queue.unmatchedError(method, url);
         return msw.HttpResponse.json(
             { error: `@jterrazz/test strict contracts: unmatched request ${method} ${url}` },
-            { status: 501 },
+            { headers: NEVER_CACHED, status: 501 },
         );
     };
 
@@ -102,9 +117,15 @@ export function buildContractHandlers(
 
     // Catch-all LAST: any request no specific handler claimed is a strict
     // Failure. Handlers registered in one use() call are matched in order.
+    //
+    // `bypass` is what keeps the engine from eating the RUNNER's own traffic:
+    // In a page every module is an HTTP request, the dependency cache included,
+    // And a 501 to one of those stops the run rather than failing a spec.
     handlers.push(
         msw.http.all('*', ({ request }: { request: Request }) =>
-            recordViolation(request.method, request.url),
+            bypass?.(request.url) === true
+                ? msw.passthrough()
+                : recordViolation(request.method, request.url),
         ),
     );
 

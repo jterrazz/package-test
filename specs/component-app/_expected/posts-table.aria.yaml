@@ -1,0 +1,13 @@
+- main:
+  - region "Posts":
+    - heading "Posts" [level=1]
+    - table "Showing 2 of 200 posts":
+      - caption: Showing 2 of 200 posts
+      - rowgroup:
+        - row "Title":
+          - columnheader "Title"
+      - rowgroup:
+        - row "A first post":
+          - cell "A first post"
+        - row "A second post":
+          - cell "A second post"

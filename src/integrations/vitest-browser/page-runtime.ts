@@ -10,7 +10,7 @@ import { inject, onTestFinished, vi } from 'vitest';
  */
 
 /** Run `teardown` when the current test ends, however it ends. No hook in the spec. */
-export function afterThisTest(teardown: () => void): void {
+export function afterThisTest(teardown: () => Promise<void> | void): void {
     onTestFinished(teardown);
 }
 
@@ -32,9 +32,16 @@ export function providedClock(): string | undefined {
     return inject('componentClock');
 }
 
-/** The URL of the project's `wrap` module, as the dev server serves it. */
-export function providedWrapPath(): string | undefined {
-    return inject('componentWrap');
+/**
+ * The project's `wrap`, left on `globalThis` by the setup module the project
+ * loads. A shared symbol rather than an import: the setup module and this
+ * bundle are two graphs in one page and share no module instance.
+ */
+export function projectWrapper<Ui>(): ((ui: Ui) => Ui) | undefined {
+    const key = Symbol.for('@jterrazz/test:component-wrap');
+    const holder = globalThis as Record<symbol, ((ui: Ui) => Ui) | undefined>;
+    const wrap = holder[key];
+    return typeof wrap === 'function' ? wrap : undefined;
 }
 
 /** What the project hands the page, declared where the page reads it. */
@@ -43,8 +50,6 @@ declare module 'vitest' {
     interface ProvidedContext {
         /** The instant `component({ clock })` pins for every render. */
         componentClock?: string;
-        /** The path, as the dev server serves it, of the project's `wrap` module. */
-        componentWrap?: string;
         /** `TEST_UPDATE=1` / `-u`, read on the server and handed to the page. */
         update?: boolean;
     }
