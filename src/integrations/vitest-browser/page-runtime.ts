@@ -1,4 +1,5 @@
 import { inject, onTestFinished, vi } from 'vitest';
+import { page } from 'vitest/browser';
 
 /**
  * The runner, as the page reaches it.
@@ -32,6 +33,16 @@ export function providedClock(): string | undefined {
     return inject('componentClock');
 }
 
+/** The page size the project states — what a per-test `.viewport()` is restored to. */
+export function providedViewport(): { height: number; width: number } {
+    return inject('componentViewport');
+}
+
+/** Resize the page the test renders into. */
+export async function setViewport(size: { height: number; width: number }): Promise<void> {
+    await page.viewport(size.width, size.height);
+}
+
 /**
  * The project's `wrap`, left on `globalThis` by the setup module the project
  * loads. A shared symbol rather than an import: the setup module and this
@@ -50,6 +61,8 @@ declare module 'vitest' {
     interface ProvidedContext {
         /** The instant `component({ clock })` pins for every render. */
         componentClock?: string;
+        /** The page size `component({ viewport })` states — the size a test is restored to. */
+        componentViewport: { height: number; width: number };
         /** `TEST_UPDATE=1` / `-u`, read on the server and handed to the page. */
         update?: boolean;
     }

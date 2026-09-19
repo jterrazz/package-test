@@ -62,3 +62,22 @@ test('fails the render when the component asks for what no contract declared', a
     // Then - strictness is total on this facet: the unmatched request IS the failure
     await expect(render).rejects.toThrow(/\/api\/posts/u);
 });
+
+test('fails the render when a component with no contract at all reaches the network', async () => {
+    // Given - no `.intercept()` at all, and a table that asks for its rows
+    const render = component.render(<PostTable />, async (visitor) => {
+        await visitor.see(content('Could not load posts'));
+    });
+
+    // Then - D7 is TOTAL here: no contract means no network, not an open door
+    await expect(render).rejects.toThrow(/\/api\/posts/u);
+});
+
+test('replaces the first surface when one test renders twice', async () => {
+    // Given - two renders in one test, the second the only one left standing
+    await component.intercept(listing).render(<PostTable />);
+    await component.intercept(listing).render(<PostTable />, async (visitor) => {
+        // Then - one document, one table: a descriptor still names exactly one
+        await visitor.see(heading('Posts'));
+    });
+});

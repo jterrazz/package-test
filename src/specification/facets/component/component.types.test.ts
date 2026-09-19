@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import type { ElementRef, Visitor } from '../../ports/browser.port.js';
 import type { MobileVisitor } from '../../ports/device.port.js';
 import { focused } from '../website/elements.js';
-import type { ComponentVisitor } from './component.types.js';
+import type { ComponentChain, ComponentVisitor } from './component.types.js';
 
 /**
  * The verb rows of CONVENTIONS W6, held by the COMPILER.
@@ -54,6 +54,14 @@ export type MobileNeverRerenders = Assert<
     Carries<MobileVisitor, 'rerender'> extends false ? true : false
 >;
 
+
+// The setups a component test states per render. The page size is one of them:
+// A responsive component's Given is the viewport, and it belongs to ONE test.
+export type ComponentSetsViewport = Assert<Carries<ComponentChain, 'viewport'>>;
+export type ComponentSetsClock = Assert<Carries<ComponentChain, 'clock'>>;
+export type ComponentIntercepts = Assert<Carries<ComponentChain, 'intercept'>>;
+export type ComponentWraps = Assert<Carries<ComponentChain, 'wrap'>>;
+
 describe('the verb rows the compiler holds (W6)', () => {
     test('a modifier the web vocabulary carries is plain data, like any descriptor', () => {
         // Given - the focus modifier, applied to a button
@@ -64,15 +72,16 @@ describe('the verb rows the compiler holds (W6)', () => {
     });
 
     test('states the rows in English beside the types that hold them', () => {
-        // Given - the four rows above, as a reader would say them
+        // Given - the rows above, as a reader would say them
         const rows = [
             "rerender and unmount are the component facet's",
             "goto is the website facet's",
             'gone is on both rendered facets',
             'focused is reachable only where see and gone are',
+            'the chain states intercept, clock, wrap and viewport',
         ];
 
         // Then - each has a compile-time twin in this file
-        expect(rows).toHaveLength(4);
+        expect(rows).toHaveLength(5);
     });
 });

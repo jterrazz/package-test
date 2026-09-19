@@ -26,8 +26,10 @@ export type ContractRegistration = {
 };
 
 /**
- * What a chain with zero contracts gets: nothing was declared, so nothing is
- * guarded and nothing has to be torn down (known scope, CONVENTIONS D7).
+ * What a chain with zero contracts gets where the facet's scope is KNOWN but
+ * not total — the node engine, which shares a process with everything else the
+ * test does. Nothing was declared, so nothing is guarded and nothing has to be
+ * torn down (CONVENTIONS D7, known scope).
  */
 export const NO_CONTRACTS: ContractRegistration = {
     cleanup: () => {},
@@ -62,9 +64,10 @@ export function toMswResponse(msw: any, response: ContractResponse): unknown {
 
 /**
  * The handlers one chain's contracts become, plus the trailing catch-all that
- * records any request no contract accepted (CONVENTIONS D7: strict from the
- * first contract). The caller decides what to do with the recorded violation —
- * the api chain rethrows it, the component chain fails the render.
+ * records any request no contract accepted (CONVENTIONS D7). The caller decides
+ * what to do with the recorded violation — the api chain rethrows it, the
+ * component chain fails the render. An EMPTY contract list is still a guard:
+ * the catch-all alone says "this subject has no network".
  *
  * `bypass` names the traffic that is not the subject's: under node there is
  * none, in a page it is everything the runner fetches to BE a page.
