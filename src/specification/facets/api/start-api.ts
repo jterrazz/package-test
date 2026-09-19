@@ -159,6 +159,12 @@ export async function startApi<Services extends ServiceRecord>(
         database: orchestrator.getDatabase() ?? undefined,
         databaseKeys,
         databases: databases.size > 0 ? databases : undefined,
+        // The app runs in its own container, so pinning THIS process's `Date`
+        // Would freeze a calendar nothing under test reads. A stamp a compose
+        // Spec asserts on is a `{{iso8601}}` token, never a frozen instant.
+        clockDisabledReason:
+            "the calendar it pins is this runner's, and compose mode runs the app in a " +
+            'container — assert the stamp with a `{{iso8601}}` token instead.',
         // The app runs in its own container — MSW cannot reach it (I3).
         interceptDisabledReason:
             'intercepts are in-process (MSW) and not available in compose mode — ' +
