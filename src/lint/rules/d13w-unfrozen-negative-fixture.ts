@@ -1,5 +1,6 @@
-import { findProperty, memberPropertyName, segments } from '../ast.js';
+import { findProperty, memberPropertyName } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 /**
@@ -65,7 +66,7 @@ function isWrappedInExpect(node: AstNode): boolean {
  */
 export const d13wUnfrozenNegativeFixture: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!segments(context.filename).includes('specs')) {
+        if (!isTestRole(roleOf(context.filename).role)) {
             return {};
         }
         return {

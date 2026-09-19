@@ -1,16 +1,21 @@
-import { importSourceVisitor, isUnderSpecs, memberPropertyName } from '../ast.js';
+import { importSourceVisitor, memberPropertyName } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 /**
- * CONVENTIONS J2 — spec files (`specs/**`) contain no arbitrary sleeps:
- * synchronisation goes through `waitFor` / the framework's own mechanisms.
- * Flags `setTimeout(…)` calls (bare or as a member, e.g.
+ * CONVENTIONS J2 — a test contains no arbitrary sleep, wherever it sits:
+ * synchronisation is `see()`/`gone()` inside a scenario and `waitUntil()`
+ * everywhere else. Flags `setTimeout(…)` calls (bare or as a member, e.g.
  * `globalThis.setTimeout`) and imports of `node:timers/promises`.
+ *
+ * The reach is every test file — a sleep in a module test beside `src/` waits
+ * exactly as blindly as one under `specs/`, and went unseen while the rule
+ * gated on the folder.
  */
 export const j2NoSleepInSpecs: LintRule = {
     create(context: RuleContext) {
-        if (!isUnderSpecs(context.filename)) {
+        if (!isTestRole(roleOf(context.filename).role)) {
             return {};
         }
         const visitor: Visitor = {
@@ -48,9 +53,9 @@ export const j2NoSleepInSpecs: LintRule = {
     meta: {
         docs: RULE_DOCS['j2-no-sleep-in-specs'],
         messages: {
-            sleep: 'No arbitrary sleeps in specs — synchronise via `waitFor` or the framework (J2 — see docs/13-linting.md).',
+            sleep: 'No arbitrary sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else (J2 — see docs/13-linting.md).',
             timersImport:
-                'No timer-based sleeps in specs — synchronise via `waitFor` or the framework (J2 — see docs/13-linting.md).',
+                'No timer-based sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else (J2 — see docs/13-linting.md).',
         },
         type: 'problem',
     },

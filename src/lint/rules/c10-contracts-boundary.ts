@@ -1,5 +1,6 @@
-import { importSourceVisitor, segments } from '../ast.js';
+import { importSourceVisitor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
+import { roleOf } from '../role.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
 /** A specifier reaching into a provider folder — the internal half of contracts/. */
@@ -15,12 +16,10 @@ const INTERNAL_UNIT = /(?:^|\/)contracts\/(?:anthropic|http|openai)\//u;
  */
 export const c10ContractsBoundary: LintRule = {
     create(context: RuleContext): Visitor {
-        const parts = segments(context.physicalFilename);
-        if (!parts.includes('specs')) {
-            return {};
-        }
-        // Inside contracts/ the internal half is the file's own business.
-        if (parts.slice(0, -1).includes('contracts')) {
+        const { inSpecs, role } = roleOf(context.physicalFilename);
+        // Inside contracts/ the internal half is the file's own business — and
+        // That folder IS a role, so the rule asks the identity, not the path.
+        if (!inSpecs || role === 'contract') {
             return {};
         }
         return importSourceVisitor(({ node, source }) => {

@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { findProperty, memberPropertyName, segments, stringValue, walk } from '../ast.js';
 import { isDirectory, listDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
+import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 /** The only directories a `contracts/` root may hold — the provider carriers. */
@@ -214,7 +215,7 @@ export const c4ContractShape: LintRule = {
         const parts = segments(file);
         // `src/**/contracts/` is the framework's own contract MODULE, not a
         // Feature's contract tree — only specs carry the convention.
-        if (!parts.includes('specs')) {
+        if (!roleOf(file).inSpecs) {
             return {};
         }
         const contractsIndex = parts.lastIndexOf('contracts');

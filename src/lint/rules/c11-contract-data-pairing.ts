@@ -1,11 +1,9 @@
 import { dirname, join } from 'node:path';
 
-import { segments } from '../ast.js';
 import { listDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
-
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /** The provider folders that may carry data files. */
 const PROVIDERS = ['anthropic', 'http', 'openai'];
@@ -29,7 +27,8 @@ function ownerOf(entry: string): string {
 export const c11ContractDataPairing: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        if (!TEST_FILE.test(file) || !segments(file).includes('specs')) {
+        const { inSpecs, role } = roleOf(file);
+        if (!isTestRole(role) || !inSpecs) {
             return {};
         }
         return {

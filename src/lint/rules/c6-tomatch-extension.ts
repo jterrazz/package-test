@@ -1,12 +1,11 @@
 import { dirname, join } from 'node:path';
 
 import { GROUND_EXPECTED } from '../../specification/facets/_common/ground.js';
-import { memberPropertyName, segments, stringValue, walk } from '../ast.js';
+import { memberPropertyName, stringValue, walk } from '../ast.js';
 import { isDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
-
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /** Does the expect(…) subject chain contain a `.directory(…)` call? */
 function subjectIsDirectory(toMatchCallee: AstNode): boolean {
@@ -44,7 +43,8 @@ function subjectIsDirectory(toMatchCallee: AstNode): boolean {
 export const c6ToMatchExtension: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        if (!TEST_FILE.test(file) || !segments(file).includes('specs')) {
+        const { inSpecs, role } = roleOf(file);
+        if (!isTestRole(role) || !inSpecs) {
             return {};
         }
         return {

@@ -1,5 +1,6 @@
 import { importSourceVisitor, segments } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
@@ -57,26 +58,34 @@ function withoutSuffix(source: string): string {
 }
 
 /**
- * CONVENTIONS I4 — in module tests under `src/`, mocks and data are CODE:
- * `mockOf`/`mockOfDate` inline, large payloads in a `*.fixtures.ts` neighbour.
- * Flags, under `src/`:
+ * CONVENTIONS I4 — in a test, mocks and data are CODE: `mockOf` inline, large
+ * payloads in a `*.fixtures.ts` neighbour. The rule reaches every test file —
+ * a module test, a rendered one, a spec under `specs/` — and flags:
  *
- * - `vi.mock(…)` calls (module mocking) in any file;
+ * - `vi.mock(…)` calls (module mocking) in any of them;
  * - files living in a `__mocks__/` or `__fixtures__/` directory;
- * - a `*.test.ts` importing a known data asset (`.json`, `.txt`, `.sql`, …) —
- *   a test needing a real file is a specification and belongs in `specs/`.
+ * - in a `module`-role test only, an import of a known data asset (`.json`,
+ *   `.txt`, `.sql`, …) — a test needing a real file is a specification and
+ *   belongs under `specs/`. A contract unit legitimately imports its payload.
  *
  * A specifier whose extension is not on the data list is CODE, dotted or not:
  * `<subject>.<role>` module names are a naming convention, not a file type.
  */
 export const i4NoViMockInSrc: LintRule = {
     create(context: RuleContext) {
+        const { role } = roleOf(context.filename);
         const parts = segments(context.filename);
-        if (!parts.includes('src')) {
+        const banned = parts
+            .slice(0, -1)
+            .find((part) => part === '__mocks__' || part === '__fixtures__');
+        // Every TEST file — plus any file sitting inside one of the two banned
+        // Directories, which is the clause that names the directory itself.
+        if (!isTestRole(role) && banned === undefined) {
             return {};
         }
-        const banned = parts.find((part) => part === '__mocks__' || part === '__fixtures__');
-        const isTest = TEST_FILE.test(context.filename);
+        // The data-asset clause is the MODULE role's alone: a contract unit
+        // Legitimately imports the `.response.json` it stands for.
+        const isTest = role === 'module' && TEST_FILE.test(context.filename);
         const visitor: Visitor = {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;
@@ -116,10 +125,10 @@ export const i4NoViMockInSrc: LintRule = {
         docs: RULE_DOCS['i4-no-vi-mock-in-src'],
         messages: {
             assetImport:
-                'A src/ module test must not import the data asset "{{source}}" — inline it as code or move the test to specs/ (I4 — see docs/13-linting.md).',
+                'A module test must not import the data asset "{{source}}" — inline it as code or move the test under specs/ as a `.spec.ts` (I4 — see docs/13-linting.md).',
             bannedDir:
-                '`{{dir}}/` directories are banned under src/ — mocks and data are code: mockOf/mockOfDate inline, payloads in a *.fixtures.ts neighbour (I4 — see docs/13-linting.md).',
-            viMock: '`vi.mock` is banned under src/ — use mockOf/mockOfDate (I4 — see docs/13-linting.md).',
+                '`{{dir}}/` directories are banned — mocks and data are code: mockOf inline, payloads in a *.fixtures.ts neighbour (I4 — see docs/13-linting.md).',
+            viMock: '`vi.mock` is banned in a test — use `mockOf<Port>()` (I4 — see docs/13-linting.md).',
         },
         type: 'problem',
     },

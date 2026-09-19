@@ -1,12 +1,10 @@
 import { dirname, join } from 'node:path';
 
 import { GROUND_SEEDS } from '../../specification/facets/_common/ground.js';
-import { segments } from '../ast.js';
 import { listDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
-
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /**
  * CONVENTIONS C7 — `.seed()` carries DATABASE state only: `_seeds/` contains
@@ -17,7 +15,8 @@ const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 export const c7SeedsSqlOnly: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        if (!TEST_FILE.test(file) || !segments(file).includes('specs')) {
+        const { inSpecs, role } = roleOf(file);
+        if (!isTestRole(role) || !inSpecs) {
             return {};
         }
         return {

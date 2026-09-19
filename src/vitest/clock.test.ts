@@ -1,3 +1,4 @@
+// oxlint-disable-next-line jterrazz/j2-no-sleep-in-specs -- the subject IS the clock: proving `clock.run()` takes the scheduler needs a REAL delay to contrast with the frozen one, which no framework primitive can stand in for
 import { setTimeout as afterRealMs } from 'node:timers/promises';
 import { describe, expect, test } from 'vitest';
 
@@ -46,6 +47,7 @@ describe('clock — the one time primitive', () => {
         // Given - the scheduler taken, and work scheduled five seconds out
         using _ = clock.run('2026-03-04T09:30:00Z');
         let fired = 'not yet';
+        // oxlint-disable-next-line jterrazz/j2-no-sleep-in-specs -- the work this schedules is the test's Given: `clock.advance()` is what fires it, so the timer is the subject, not a sleep
         setTimeout(() => {
             fired = new Date().toISOString();
         }, 5000);

@@ -21,6 +21,7 @@
     "eslint/prefer-destructuring": 6,
     "import/no-cycle": 2,
     "jsdoc/empty-tags": 26,
+    "jterrazz/d15w-status-only-probe": 4,
     "jterrazz/i1-layer-boundaries": 1,
     "promise/avoid-new": 13,
     "promise/param-names": 2,
