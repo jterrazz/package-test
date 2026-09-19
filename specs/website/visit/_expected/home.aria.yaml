@@ -1,0 +1,6 @@
+- heading "Welcome" [level=1]
+- link "Articles":
+  - /url: /articles
+- text: Email
+- textbox "Email"
+- button "Subscribe"
