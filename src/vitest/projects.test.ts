@@ -285,6 +285,28 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(stated.name).toBe('api');
     });
 
+    test('a node facet states its own serial run, the way website() does', () => {
+        // Given - an integration suite whose files share one database file
+        const shared = testOf(integration({ serial: true }));
+
+        // Then - the project states it, and a silent helper states nothing
+        expect(shared.fileParallelism).toBe(false);
+        expect(testOf(integration()).fileParallelism).toBeUndefined();
+    });
+
+    test('every helper takes it, not only the ones 15.2 shipped it on', () => {
+        // Given - the four other helpers this release adds
+        const serial = [api, jobs, mobile].map((helper) => testOf(helper({ serial: true })));
+
+        // Then - `serial` is what chapter 02 says it is: every helper's
+        expect(serial.map((project) => project.fileParallelism)).toStrictEqual([
+            false,
+            false,
+            false,
+        ]);
+        expect(testOf(cli({ literate: false, serial: true })).fileParallelism).toBe(false);
+    });
+
     test('cli() wires the literate door by default', () => {
         // Given - the canonical cli project
         // Then - the plugin that turns a document into a test file is there
