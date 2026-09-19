@@ -67,6 +67,13 @@ serves is that one.
   `vitest-mock-extended`'s range on the consumer's behalf, which is why the
   consumer is forbidden to declare it. Its `{ deep: false }` form exists so
   rung four does not push a test back down to a hand-written object.
+- **A mandatory type argument is not expressible.** `mockOf<T extends object>()`
+  has no default, but TypeScript falls back to the CONSTRAINT where no
+  inference site says otherwise, so `mockOf()` compiles and answers for
+  `object`. The refusal lands where the double is used — it is assignable to
+  no port — rather than where it was made. Stated rather than worked around: a
+  cast or a never-typed overload would buy the earlier error with a worse
+  signature.
 - **Three bans move upstream.** `no-restricted-matchers` (the snapshot
   matchers), `no-restricted-vi-methods` (`stubGlobal`, the timer methods) and
   `max-nested-describe` are configured, not reimplemented. They turn on in the
