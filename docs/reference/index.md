@@ -130,6 +130,7 @@
 | [TextFilter](type-aliases/TextFilter.md) | A text filter on a provider request builder (`openai.chat({ user })`, `anthropic.messages({ system })`, …). |
 | [Visitor](type-aliases/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
 | [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |
+| [WaitUntilOptions](type-aliases/WaitUntilOptions.md) | How long to wait, and how often to look. |
 | [WebsiteBackendOptions](type-aliases/WebsiteBackendOptions.md) | The declared stub backend behind the site under test — started before the server command, torn down with the runner. Its URL is injected into the server child's environment under `env`; the contracts each chain declares via `.intercept(...)` are what it serves. |
 | [WebsiteHandle](type-aliases/WebsiteHandle.md) | The record returned by startWebsite \| specification.website. Destructure with the canonical names (CONVENTIONS A3): |
 | [WebsiteSpecification](type-aliases/WebsiteSpecification.md) | The `website` facet — page chain entry handed out by `specification.website()`. Setup methods chain; action methods are terminal. `.visit()` renders the page in the shared browser; `.fetch()` performs one raw HTTP exchange and never follows redirects. |
@@ -160,7 +161,6 @@
 | [mockOfDate](variables/mockOfDate.md) | Freeze or reset the global Date for deterministic time-dependent tests. Wraps the `mockdate` package. |
 | [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
-| [option](variables/option.md) | An option of a select or a listbox, by its label — named inside the field that holds it: `within(field('Channel'), option('LinkedIn'))`. |
 | [region](variables/region.md) | The `region` landmark — a `<section>` carrying an accessible name. |
 | [row](variables/row.md) | A row of a table or grid, by the text of its cells. |
 | [search](variables/search.md) | The `search` landmark. |
@@ -183,9 +183,9 @@
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
 | [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |
-| [selected](functions/selected.md) | Which option the field is on: `see(selected(option('LinkedIn')))`, and `gone(selected(option('X')))` for the one it left. |
+| [required](functions/required.md) | The value, or a failure that says what was missing and why it mattered. |
 | [sqlite](functions/sqlite.md) | Create a SQLite service handle. Uses file-copy isolation for parallel tests. |
 | [testId](functions/testId.md) | The escape hatch: an element by `data-testid`. Prefer user-facing elements. |
 | [text](functions/text.md) | Wrap an arbitrary string into a [TextAccessor](classes/TextAccessor.md) anchored on the calling test's directory — the same caller-detection the builders use. |
-| [valued](functions/valued.md) | What the field holds: `see(valued(field('Title'), 'Launch teaser'))`, and `gone(valued(field('Title'), '…'))` for a value it no longer holds. |
+| [waitUntil](functions/waitUntil.md) | Wait until a condition holds — the sanctioned answer to "the thing I am specifying is not ready yet". |
 | [within](functions/within.md) | Restrict a descriptor to the inside of another — the answer to ambiguity, and the one the framework prefers over a test id. |
