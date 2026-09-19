@@ -59,7 +59,10 @@ export type ElementRef = {
     /**
      * Narrows to "and it is (not) accepting input" — built by `disabled(x)` /
      * `enabled(x)`. Like `focused`, a STATE the vocabulary can already name the
-     * element of, so it is a verb's business and never a golden's.
+     * element of; unlike it, one the ARIA tree carries too (`[disabled]`), so
+     * this modifier is what names the ONE control a test is about, and it
+     * reaches the direction a behavioural substitute cannot — clicking a
+     * disabled control is a timeout, never an answer.
      */
     disabled?: boolean;
     kind: ElementKind | LandmarkKind;

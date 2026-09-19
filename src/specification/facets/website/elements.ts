@@ -148,9 +148,11 @@ export const focused = (element: ElementRef): ElementRef => ({ ...element, focus
  * it refuses, `see(enabled(button('Delete')))` that it takes it.
  *
  * Modifiers rather than descriptors, for the same reason as `focused`: being
- * disabled is a state of an element the vocabulary already names. They also buy
- * the direction a behavioural substitute cannot reach — clicking a disabled
- * control is a timeout, never an assertion.
+ * disabled is a state of an element the vocabulary already names. Unlike focus,
+ * the ARIA tree carries it, so a golden pins a whole outline's enablement and
+ * these name the ONE control a test is about. They also buy the direction a
+ * behavioural substitute cannot reach — clicking a disabled control is a
+ * timeout, never an assertion.
  */
 export const disabled = (element: ElementRef): ElementRef => ({ ...element, disabled: true });
 
