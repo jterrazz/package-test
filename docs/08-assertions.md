@@ -206,6 +206,32 @@ The runner handle itself also exposes a `docker(containerId)` reader (returned b
 
 **The sync container-read exception (as implemented):** container property reads — `exists`, `running`, `status`, `file(path).exists`, `file(path).content`, log streams — are synchronous, backed by one-shot `docker inspect` / `docker exec` shell-outs captured lazily on first access. This is the documented exception to the "await only IO matchers" rule (D2): only the _matchers_ (`toBeRunning`) are async; property reads stay sync so container assertions read exactly like host-side ones.
 
+## Two helpers that are not matchers
+
+`expect()` is the only way an assertion is made (rule D1), but two gestures around an assertion had been hand-written in every repository that needed them.
+
+**`required(value, why)`** — the value, or a failure that says what was missing and why it mattered. A test reaching into a captured structure meets `T | undefined` and has to answer for it; `!` erases the question and a three-line `if (…) throw` is the same three lines everywhere.
+
+```typescript
+import { required } from '@jterrazz/test';
+
+const body: { id?: number } = { id: 7 };
+const id: number = required(body.id, 'the creation reply carries the new id');
+```
+
+`null` and `undefined` are the only values it refuses: `0`, `''` and `false` are present, and go through.
+
+**`waitUntil(predicate, { timeout?, interval?, why? })`** — wait on a CONDITION, never on a duration. A spec that sleeps for a guessed number of milliseconds is slow on a fast machine and flaky on a slow one, which is why rule J2 refuses `setTimeout` under `specs/`. Every facet that drives something already waits on a condition; this is the primitive for the cases no facet owns — a background write to land, a queue to drain, a file to appear.
+
+```typescript
+import { waitUntil } from '@jterrazz/test';
+
+const outbox: string[] = [];
+await waitUntil(() => outbox.length === 1, { why: 'the job wrote its one message' });
+```
+
+The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the condition and the budget, so a timeout reads as a sentence rather than as "expected true, got false". Not for a subject under `clock.run()` — there the scheduler belongs to the test and `clock.advance(ms)` is what makes time pass ([12 — Conventions § Time](12-conventions.md#time--one-primitive-two-depths)).
+
 ## Matcher summary
 
 | Matcher       | Valid subjects                                                                                                                                      | Sync/async                                | Fixture root |

@@ -1,3 +1,4 @@
+import { pause } from '../timing/pause.js';
 import type { StreamBody } from './types.js';
 
 /**
@@ -10,13 +11,6 @@ import type { StreamBody } from './types.js';
  * nowhere else. A second copy of it would be a second answer to "what does the
  * subject read", and the facets would drift.
  */
-
-/** Wait `ms`, without the caller having to say how. */
-async function pause(ms: number): Promise<void> {
-    await new Promise<void>((resolve) => {
-        setTimeout(resolve, ms);
-    });
-}
 
 /**
  * The pieces of `body`, in order, `delayBetweenChunks` milliseconds apart,

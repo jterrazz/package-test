@@ -146,6 +146,11 @@ export { type MockDatePort, mockOfDate } from './vitest/mock-of-date.js';
 // Time — the one primitive, real in both runtimes
 export { clock, type PinnedClock } from './vitest/clock.js';
 
+// Assertions that are not matchers: a value that must be there, and a
+// Condition that has to become true.
+export { required } from './specification/assertions/required.js';
+export { waitUntil, type WaitUntilOptions } from './specification/assertions/wait-until.js';
+
 // Matcher options (per-call `toMatch(name, { frozen })`)
 export type { MatchFixtureOptions } from './specification/facets/_common/result/match-options.js';
 
