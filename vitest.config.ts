@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import { component, defineSpecConfig, literate } from './src/vitest/index.js';
+import { component, defineSpecConfig, literate, website } from './src/vitest/index.js';
 
 /**
  * The package eats its own preset: `defineSpecConfig()` sets the artefact
@@ -54,13 +54,8 @@ export default defineSpecConfig({
                     env: { TEST_MODE: 'compose' },
                 },
             },
-            {
-                test: {
-                    name: 'website',
-                    // Needs playwright + `npx playwright install chromium`; no Docker.
-                    include: ['specs/website/**/*.test.ts'],
-                },
-            },
+            // Needs playwright + `npx playwright install chromium`; no Docker.
+            website(),
             component({
                 // The package's own component app is the subject its component
                 // Specs stand on, and A2's law holds for it too: the test of a
