@@ -5,7 +5,7 @@
 type ElementMatch = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:80
+Defined in: [src/specification/ports/browser.port.ts:80](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L80)
 
 One candidate captured when a descriptor matched more than one element —
 the evidence the ambiguity error enumerates so the author can disambiguate
@@ -19,7 +19,7 @@ without opening a browser.
 optional accessibleName?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:86
+Defined in: [src/specification/ports/browser.port.ts:86](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L86)
 
 The accessible name, when it differs from the text — an `aria-label` is
 what a role descriptor MATCHED on, and printing the text alone sends the
@@ -33,7 +33,7 @@ author to disambiguate a name they cannot see.
 optional context?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:88
+Defined in: [src/specification/ports/browser.port.ts:88](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L88)
 
 Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 
@@ -45,7 +45,7 @@ Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 optional detail?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:90
+Defined in: [src/specification/ports/browser.port.ts:90](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L90)
 
 The attribute that disambiguates most — `href` for links, `name` for fields.
 
@@ -57,7 +57,7 @@ The attribute that disambiguates most — `href` for links, `name` for fields.
 tag: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:92
+Defined in: [src/specification/ports/browser.port.ts:92](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L92)
 
 Tag name, lower-cased.
 
@@ -69,6 +69,6 @@ Tag name, lower-cased.
 text: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:94
+Defined in: [src/specification/ports/browser.port.ts:94](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L94)
 
 Text content, whitespace-collapsed and truncated.

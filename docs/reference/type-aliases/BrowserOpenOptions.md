@@ -5,7 +5,7 @@
 type BrowserOpenOptions = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:153
+Defined in: [src/specification/ports/browser.port.ts:153](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L153)
 
 Per-visit options forwarded to the browser context.
 
@@ -17,7 +17,7 @@ Per-visit options forwarded to the browser context.
 optional allowedOrigins?: string[];
 ```
 
-Defined in: src/specification/ports/browser.port.ts:158
+Defined in: [src/specification/ports/browser.port.ts:158](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L158)
 
 Extra origins the `external: 'block'` policy lets through — the
 declared stub backend the page legitimately fetches from.
@@ -30,7 +30,7 @@ declared stub backend the page legitimately fetches from.
 baseUrl: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:163
+Defined in: [src/specification/ports/browser.port.ts:163](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L163)
 
 Base URL of the site under test — the origin `goto()` resolves against
 and the boundary of the `external` policy.
@@ -43,7 +43,7 @@ and the boundary of the `external` policy.
 external: "allow" | "block";
 ```
 
-Defined in: src/specification/ports/browser.port.ts:169
+Defined in: [src/specification/ports/browser.port.ts:169](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L169)
 
 Cross-origin request policy. `'block'` aborts every request leaving
 the site under test (analytics, CDNs) — the browser-side analog of
@@ -57,7 +57,7 @@ strict intercepts. `'allow'` lets them through (deployed-site mode).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:171
+Defined in: [src/specification/ports/browser.port.ts:171](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L171)
 
 Extra HTTP headers sent with every request of the visit (incl. User-Agent overrides).
 
@@ -69,6 +69,6 @@ Extra HTTP headers sent with every request of the visit (incl. User-Agent overri
 optional scenario?: VisitScenario;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:173
+Defined in: [src/specification/ports/browser.port.ts:173](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L173)
 
 The interaction scenario to run after load; the capture reflects the final state.

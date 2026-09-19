@@ -5,7 +5,7 @@
 type JobsSpecification<DatabaseKey> = object;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:204
+Defined in: [src/specification/facets/\_common/builder.ts:204](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L204)
 
 The `jobs` facet — job chain entry handed out by `specification.jobs()`.
 Jobs run in-process by definition (CONVENTIONS A5/A8).
@@ -24,7 +24,7 @@ Jobs run in-process by definition (CONVENTIONS A5/A8).
 intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:206
+Defined in: [src/specification/facets/\_common/builder.ts:206](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L206)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -36,7 +36,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 seed: (file, options?) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:208
+Defined in: [src/specification/facets/\_common/builder.ts:208](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L208)
 
 Queue a SQL seed file from `_seeds/` to run before the action.
 
@@ -60,7 +60,7 @@ Queue a SQL seed file from `_seeds/` to run before the action.
 trigger: (name) => Promise<BaseResult>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:211
+Defined in: [src/specification/facets/\_common/builder.ts:211](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L211)
 
 Execute the named job registered via the `jobs` option and resolve with the result.
 

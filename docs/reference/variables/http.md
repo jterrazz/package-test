@@ -5,7 +5,7 @@
 const http: object;
 ```
 
-Defined in: src/specification/contracts/http.ts:116
+Defined in: [src/specification/contracts/http.ts:116](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L116)
 
 Generic HTTP contract helpers for any URL. The url is absolute (string or
 RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')`
@@ -18,17 +18,17 @@ filter counts as unmatched (strict contracts, CONVENTIONS D7).
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `any()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:117 |
-| `delete()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:121 |
-| `empty()` | (`status?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a body-less reply (204 by default). | src/specification/contracts/http.ts:142 |
-| `error()` | (`status`, `body?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: an error status. Without a body, `{ error: 'HTTP <status>' }`. | src/specification/contracts/http.ts:147 |
-| `get()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:125 |
-| `json()` | (`body`, `init?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a JSON body (200 by default). | src/specification/contracts/http.ts:152 |
-| `patch()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:129 |
-| `post()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:133 |
-| `put()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:137 |
-| `text()` | (`body`, `init?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a text body, served as `text/plain` (200 by default). | src/specification/contracts/http.ts:170 |
-| `unreachable()` | () => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: no response at all — the request fails in transport, the way a server that is not running fails it. `fetch` rejects; no status is served. | src/specification/contracts/http.ts:165 |
+| `any()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | [src/specification/contracts/http.ts:117](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L117) |
+| `delete()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | [src/specification/contracts/http.ts:121](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L121) |
+| `empty()` | (`status?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a body-less reply (204 by default). | [src/specification/contracts/http.ts:142](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L142) |
+| `error()` | (`status`, `body?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: an error status. Without a body, `{ error: 'HTTP <status>' }`. | [src/specification/contracts/http.ts:147](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L147) |
+| `get()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | [src/specification/contracts/http.ts:125](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L125) |
+| `json()` | (`body`, `init?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a JSON body (200 by default). | [src/specification/contracts/http.ts:152](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L152) |
+| `patch()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | [src/specification/contracts/http.ts:129](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L129) |
+| `post()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | [src/specification/contracts/http.ts:133](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L133) |
+| `put()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | [src/specification/contracts/http.ts:137](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L137) |
+| `text()` | (`body`, `init?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a text body, served as `text/plain` (200 by default). | [src/specification/contracts/http.ts:170](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L170) |
+| `unreachable()` | () => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: no response at all — the request fails in transport, the way a server that is not running fails it. `fetch` rejects; no status is served. | [src/specification/contracts/http.ts:165](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L165) |
 
 ## Example
 

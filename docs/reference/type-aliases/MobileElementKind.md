@@ -5,7 +5,7 @@
 type MobileElementKind = "button" | "field" | "testId" | "text";
 ```
 
-Defined in: src/specification/ports/device.port.ts:10
+Defined in: [src/specification/ports/device.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L10)
 
 The element kinds a mobile screen can designate — the structural subset of
 [ElementRef](ElementRef.md) kinds that map onto the XCUITest accessibility tree.

@@ -5,6 +5,6 @@
 type ComponentVisitor = ReturnType<typeof componentVerbs>;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:21
+Defined in: [src/specification/facets/component/component.types.ts:21](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L21)
 
 The interaction vocabulary a render scenario is handed — the When.

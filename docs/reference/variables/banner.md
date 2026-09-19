@@ -5,6 +5,6 @@
 const banner: LandmarkFactory;
 ```
 
-Defined in: src/specification/facets/website/elements.ts:74
+Defined in: [src/specification/facets/website/elements.ts:74](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L74)
 
 The `banner` landmark — the page header.

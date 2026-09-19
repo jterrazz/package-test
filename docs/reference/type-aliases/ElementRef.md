@@ -5,7 +5,7 @@
 type ElementRef = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:46
+Defined in: [src/specification/ports/browser.port.ts:46](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L46)
 
 A user-facing element descriptor — pure data, built by the element
 vocabulary (`button()`, `link()`, `field()`, …) and translated into
@@ -23,7 +23,7 @@ A descriptor must designate exactly ONE element at action time; see
 optional disabled?: boolean;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:64
+Defined in: [src/specification/ports/browser.port.ts:64](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L64)
 
 Narrows to "and it is (not) accepting input" — built by `disabled(x)` /
 `enabled(x)`. Like `focused`, a STATE the vocabulary can already name the
@@ -37,7 +37,7 @@ element of, so it is a verb's business and never a golden's.
 optional exact?: boolean;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:52
+Defined in: [src/specification/ports/browser.port.ts:52](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L52)
 
 Match the accessible name as a whole string rather than a substring.
 Default (`false`) mirrors playwright: `link('Articles')` also matches
@@ -51,7 +51,7 @@ Default (`false`) mirrors playwright: `link('Articles')` also matches
 optional focused?: boolean;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:58
+Defined in: [src/specification/ports/browser.port.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L58)
 
 Assert about the element's FOCUS rather than its presence — built by
 `focused(element)`. The accessibility tree carries no focus state, so
@@ -65,7 +65,7 @@ where the keyboard is cannot be goldened; it is asserted by a verb.
 kind: ElementKind | LandmarkKind;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:65
+Defined in: [src/specification/ports/browser.port.ts:65](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L65)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: src/specification/ports/browser.port.ts:65
 optional name?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:67
+Defined in: [src/specification/ports/browser.port.ts:67](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L67)
 
 Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 
@@ -87,7 +87,7 @@ Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 optional scope?: ElementRef;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:72
+Defined in: [src/specification/ports/browser.port.ts:72](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L72)
 
 Restrict the search to the elements of another descriptor — built by
 `within(scope, target)`. Chains: a scope may itself carry a scope.

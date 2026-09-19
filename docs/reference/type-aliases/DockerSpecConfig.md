@@ -5,7 +5,7 @@
 type DockerSpecConfig = object;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:49
+Defined in: [src/specification/facets/\_common/builder.ts:49](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L49)
 
 Configuration for the docker-aware cli mode. When set on
 [SpecificationConfig](SpecificationConfig.md), the cli runner generates a test-run id, injects
@@ -20,7 +20,7 @@ container carrying `testRunLabel=<id>` after the command exits.
 envVar: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:50
+Defined in: [src/specification/facets/\_common/builder.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L50)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/specification/facets/\_common/builder.ts:50
 nameLabel: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:51
+Defined in: [src/specification/facets/\_common/builder.ts:51](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L51)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: src/specification/facets/\_common/builder.ts:51
 testRunLabel: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:52
+Defined in: [src/specification/facets/\_common/builder.ts:52](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L52)

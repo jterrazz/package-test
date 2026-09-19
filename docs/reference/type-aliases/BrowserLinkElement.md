@@ -5,7 +5,7 @@
 type BrowserLinkElement = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:98
+Defined in: [src/specification/ports/browser.port.ts:98](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L98)
 
 A `<link>` element captured from the rendered document's head.
 
@@ -17,7 +17,7 @@ A `<link>` element captured from the rendered document's head.
 href: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:99
+Defined in: [src/specification/ports/browser.port.ts:99](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L99)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: src/specification/ports/browser.port.ts:99
 optional hreflang?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:100
+Defined in: [src/specification/ports/browser.port.ts:100](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L100)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: src/specification/ports/browser.port.ts:100
 rel: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:101
+Defined in: [src/specification/ports/browser.port.ts:101](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L101)
 
 ***
 
@@ -47,4 +47,4 @@ Defined in: src/specification/ports/browser.port.ts:101
 optional type?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:102
+Defined in: [src/specification/ports/browser.port.ts:102](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L102)
