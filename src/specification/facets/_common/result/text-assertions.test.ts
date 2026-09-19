@@ -13,21 +13,21 @@ describe('nativeContain', () => {
     test('asks an iterable for membership, never for a substring of its rendering', () => {
         // Given - an array whose joined text contains a fragment no element is
         // Then - membership is the question, and `'b'` is not a member
-        expect(nativeContain(['ab', 'cd'], 'b').pass).toBe(false);
-        expect(nativeContain(['ab', 'cd'], 'ab').pass).toBe(true);
+        expect(nativeContain(['ab', 'cd'], 'b').pass).toBeFalsy();
+        expect(nativeContain(['ab', 'cd'], 'ab').pass).toBeTruthy();
     });
 
     test('reads a Set the way vitest does', () => {
         // Given - a collection that is iterable but has no indices
         // Then - its members answer
-        expect(nativeContain(new Set([1]), 1).pass).toBe(true);
-        expect(nativeContain(new Set([1]), 2).pass).toBe(false);
+        expect(nativeContain(new Set([1]), 1).pass).toBeTruthy();
+        expect(nativeContain(new Set([1]), 2).pass).toBeFalsy();
     });
 
     test('is a substring test on a string, as it always was', () => {
         // Given - a plain string subject
         // Then - the substring answers
-        expect(nativeContain('hexagonal', 'agon').pass).toBe(true);
+        expect(nativeContain('hexagonal', 'agon').pass).toBeTruthy();
     });
 
     test('refuses a subject that is neither', () => {
@@ -41,9 +41,9 @@ describe('nativeMatch', () => {
     test('takes a substring or a regular expression on a string', () => {
         // Given - the two shapes vitest's own toMatch accepts
         // Then - both answer the same way they do without the override
-        expect(nativeMatch('hexagonal', 'agon').pass).toBe(true);
-        expect(nativeMatch('hexagonal', /^hex/u).pass).toBe(true);
-        expect(nativeMatch('hexagonal', /^agon/u).pass).toBe(false);
+        expect(nativeMatch('hexagonal', 'agon').pass).toBeTruthy();
+        expect(nativeMatch('hexagonal', /^hex/u).pass).toBeTruthy();
+        expect(nativeMatch('hexagonal', /^agon/u).pass).toBeFalsy();
     });
 
     test('refuses a subject that is not a string, rather than stringifying it', () => {

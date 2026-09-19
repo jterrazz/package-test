@@ -6,14 +6,14 @@ Use it when the subject is one thing that draws itself. For a whole served page 
 
 Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md) (proposed).
 
-| The shape           | Held below                                                             |
-| ------------------- | ---------------------------------------------------------------------- |
-| What it specifies   | [What it specifies](#what-it-specifies)                                |
-| Where it is written | [The constructor: there is none](#the-constructor-there-is-none)       |
+| The shape           | Held below                                                                       |
+| ------------------- | -------------------------------------------------------------------------------- |
+| What it specifies   | [What it specifies](#what-it-specifies)                                          |
+| Where it is written | [The constructor: there is none](#the-constructor-there-is-none)                 |
 | The chain           | [The chain](#the-chain) — `intercept` · `wrap` · `clock` · `viewport` · `render` |
-| The result          | [The result](#the-result) — `tree` `content` `html` `console` `errors` |
-| What only it does   | [Unique here](#unique-here)                                            |
-| What it will refuse | [Pitfalls](#pitfalls)                                                  |
+| The result          | [The result](#the-result) — `tree` `content` `html` `console` `errors`           |
+| What only it does   | [Unique here](#unique-here)                                                      |
+| What it will refuse | [Pitfalls](#pitfalls)                                                            |
 
 ## What it specifies
 
@@ -35,11 +35,11 @@ The suffix decides which project collects the file and therefore which rules jud
 
 Every other facet starts something — a server, a database, a binary, a simulator — so every other facet has a `*.specification.ts` holding what was started. A component has nothing to start. What a specification file WOULD have held splits by owner:
 
-| What                                     | Whose      | Where                                            |
-| ---------------------------------------- | ---------- | ------------------------------------------------ |
-| The providers every render is dressed in | the app's  | `component({ wrap })` in `vitest.config.ts`      |
-| The Vite pipeline the app builds with    | the app's  | `component({ vite })`                            |
-| The viewport, the timezone, the locale   | the app's  | `component({ viewport, timezone, locale })`      |
+| What                                                   | Whose      | Where                                                           |
+| ------------------------------------------------------ | ---------- | --------------------------------------------------------------- |
+| The providers every render is dressed in               | the app's  | `component({ wrap })` in `vitest.config.ts`                     |
+| The Vite pipeline the app builds with                  | the app's  | `component({ vite })`                                           |
+| The viewport, the timezone, the locale                 | the app's  | `component({ viewport, timezone, locale })`                     |
 | The contracts, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
 
 ```typescript
@@ -98,11 +98,11 @@ test('says how much of the collection the table is showing', async () => {
 
 Every setup returns a NEW chain, so the handle a spec imports never carries the previous test's state.
 
-| Setup           | Does                                                                                           |
-| --------------- | ---------------------------------------------------------------------------------------------- |
-| `.intercept(…)` | Declares what the network replies — the same contracts and the same queue as every other facet |
-| `.wrap(fn)`     | Wraps every render of this chain: a router stub, a `<StrictMode>`, a provider one test needs   |
-| `.clock(iso)`    | Pins the page's `Date` for this render                                                        |
+| Setup             | Does                                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.intercept(…)`   | Declares what the network replies — the same contracts and the same queue as every other facet                                                            |
+| `.wrap(fn)`       | Wraps every render of this chain: a router stub, a `<StrictMode>`, a provider one test needs                                                              |
+| `.clock(iso)`     | Pins the page's `Date` for this render                                                                                                                    |
 | `.viewport(size)` | The page size THIS render gets — the Given of a component that reads `matchMedia` or a container query. The project's size is restored when the test ends |
 
 | Terminal action             | Mounts                                                                        |
@@ -121,13 +121,13 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 
 ## The result
 
-| Member           | Type           | Description                                                        |
-| ---------------- | -------------- | ------------------------------------------------------------------ |
-| `result.tree`    | `TextAccessor` | The ARIA snapshot of the rendered body — the outline a golden pins |
+| Member           | Type           | Description                                                                                                                                            |
+| ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `result.tree`    | `TextAccessor` | The ARIA snapshot of the rendered body — the outline a golden pins                                                                                     |
 | `result.content` | `TextAccessor` | The RENDERED text of the document body (`innerText`) — what a reader sees, so a stylesheet's source and a node the page does not display are not in it |
-| `result.html`    | `TextAccessor` | The mounted markup — the escape hatch for a class or an attribute  |
-| `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message          |
-| `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error                  |
+| `result.html`    | `TextAccessor` | The mounted markup — the escape hatch for a class or an attribute                                                                                      |
+| `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message                                                                                              |
+| `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error                                                                                                      |
 
 `toMatch` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [08 — Assertions](08-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
@@ -148,25 +148,41 @@ import { button, component, dialog, focused } from '@jterrazz/test';
 import { useState } from 'react';
 import { expect, test, vi } from 'vitest';
 
-// The Given of a hook spec is a Host, written here: the component carrying the
-// States the test needs is part of the TEST, not of the app.
+// The Given of a hook spec is a Host, written HERE: the component carrying the
+// States the test needs is part of the test, not of the app.
 function Host({ onClose }: { onClose: () => void }) {
     const [open, setOpen] = useState(false);
+
+    const show = (): void => {
+        setOpen(true);
+    };
+
+    const dismiss = (): void => {
+        setOpen(false);
+        onClose();
+    };
+
+    if (!open) {
+        return (
+            <button onClick={show} type="button">
+                Open
+            </button>
+        );
+    }
+
     return (
-        <>
-            <button onClick={() => { setOpen(true); }} type="button">Open</button>
-            {open ? (
-                <dialog aria-label="Host" open>
-                    <button onClick={() => { setOpen(false); onClose(); }} type="button">Close</button>
-                </dialog>
-            ) : null}
-        </>
+        <dialog aria-label="Host" open>
+            <button onClick={dismiss} type="button">
+                Close
+            </button>
+        </dialog>
     );
 }
 
 test('gives the keyboard back to whatever opened it', async () => {
     // Given - a dialog opened from a button and then dismissed
     const onClose = vi.fn<() => void>();
+
     await component.render(<Host onClose={onClose} />, async (visitor) => {
         await visitor.click(button('Open'));
         await visitor.see(dialog('Host'));
@@ -179,6 +195,7 @@ test('gives the keyboard back to whatever opened it', async () => {
     expect(onClose).toHaveBeenCalledOnce();
 });
 ```
+
 - **A DOM function is still a component.** `renderSessionRows(container, rows)` renders; it just does not use React. `.render((container) => …)` mounts it in the same Chromium under the same visitor, and `result.html` reads what it drew. No React is loaded.
 - **A router is a test's Given.** cap01's and the console's screens render `<Link>` and read `useParams()`; without a router they throw. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
 - **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total.

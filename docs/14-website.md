@@ -160,10 +160,10 @@ Five more roles a visitor reads and acts on, each optionally named because a pag
 
 And two MODIFIERS, neither a descriptor of its own — each narrows a descriptor by a STATE the vocabulary can already name the element of, and each is accepted by both `see` and `gone`:
 
-| Modifier             | Asks                                                             |
-| -------------------- | ---------------------------------------------------------------- |
-| `focused(element)`   | Where the keyboard is                                            |
-| `disabled(element)`  | Whether the control refuses input — and `enabled(element)` the other direction |
+| Modifier            | Asks                                                                           |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `focused(element)`  | Where the keyboard is                                                          |
+| `disabled(element)` | Whether the control refuses input — and `enabled(element)` the other direction |
 
 ```typescript
 await visitor.press('Escape');

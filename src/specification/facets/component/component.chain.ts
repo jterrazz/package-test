@@ -222,6 +222,7 @@ async function render(
     const { entries } = recorder;
     return new RenderResult({
         console: entries.map((entry) => `[${entry.type}] ${entry.text}`).join('\n'),
+        // oxlint-disable-next-line unicorn/prefer-dom-node-text-content -- RENDERED text is the subject: `textContent` carries a `<style>` body and every node the page does not display, and the website twin reads `innerText` for the same reason
         content: document.body.innerText,
         errors: entries
             .filter((entry) => entry.type === 'error')

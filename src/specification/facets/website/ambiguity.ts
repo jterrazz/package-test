@@ -98,7 +98,7 @@ function landmarkCounts(matches: ElementMatch[]): [string, number][] {
             counts.set(landmark, (counts.get(landmark) ?? 0) + 1);
         }
     }
-    return [...counts].sort(([, a], [, b]) => a - b);
+    return [...counts].toSorted(([, a], [, b]) => a - b);
 }
 
 /**
@@ -116,15 +116,12 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     const narrowing = landmarkCounts(matches).filter(([, count]) => count < matches.length);
     if (!element.scope) {
         const [first, ...rest] = narrowing;
+        const alsoHere =
+            rest.length > 0 ? `   [also here: ${rest.map(([name]) => name).join(', ')}]` : '';
         fixes.push(
             first === undefined
-                ? 'scope it       within(<a container holding only this one>, ' +
-                      `${formatBare(element)})`
-                : `scope it       within(${first[0]}, ${formatBare(element)})` +
-                      `   [leaves ${first[1]} of ${matches.length}]` +
-                      (rest.length > 0
-                          ? `   [also here: ${rest.map(([name]) => name).join(', ')}]`
-                          : ''),
+                ? `scope it       within(<a container holding only this one>, ${formatBare(element)})`
+                : `scope it       within(${first[0]}, ${formatBare(element)})   [leaves ${first[1]} of ${matches.length}]${alsoHere}`,
         );
     }
 
