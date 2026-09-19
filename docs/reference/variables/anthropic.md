@@ -5,7 +5,7 @@
 const anthropic: object;
 ```
 
-Defined in: src/integrations/anthropic/anthropic.ts:55
+Defined in: [src/integrations/anthropic/anthropic.ts:55](https://github.com/jterrazz/package-test/blob/main/src/integrations/anthropic/anthropic.ts#L55)
 
 Anthropic API intercept helpers.
 
@@ -13,7 +13,7 @@ Anthropic API intercept helpers.
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `error()` | (`status`, `message?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: return an Anthropic error. | src/integrations/anthropic/anthropic.ts:91 |
-| `messages()` | (`filter?`, `url?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | Request: match Messages API calls, optionally routed through a custom gateway URL. When used with a JSON fixture file, the data is returned as-is (no wrapping) because Anthropic fixtures are typically already in the Messages API response shape. **Example** `anthropic.messages() anthropic.messages({ system: /classify/ }) anthropic.messages({ user: buildPrompt() }) // string = EXACT equality anthropic.messages({ user: /classify/ }, GATEWAY)` | src/integrations/anthropic/anthropic.ts:68 |
-| `reply()` | (`data`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: wrap data in Anthropic messages format. | src/integrations/anthropic/anthropic.ts:86 |
-| `timeout()` | () => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: simulate a timeout. | src/integrations/anthropic/anthropic.ts:105 |
+| `error()` | (`status`, `message?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: return an Anthropic error. | [src/integrations/anthropic/anthropic.ts:91](https://github.com/jterrazz/package-test/blob/main/src/integrations/anthropic/anthropic.ts#L91) |
+| `messages()` | (`filter?`, `url?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | Request: match Messages API calls, optionally routed through a custom gateway URL. When used with a JSON fixture file, the data is returned as-is (no wrapping) because Anthropic fixtures are typically already in the Messages API response shape. **Example** `anthropic.messages() anthropic.messages({ system: /classify/ }) anthropic.messages({ user: buildPrompt() }) // string = EXACT equality anthropic.messages({ user: /classify/ }, GATEWAY)` | [src/integrations/anthropic/anthropic.ts:68](https://github.com/jterrazz/package-test/blob/main/src/integrations/anthropic/anthropic.ts#L68) |
+| `reply()` | (`data`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: wrap data in Anthropic messages format. | [src/integrations/anthropic/anthropic.ts:86](https://github.com/jterrazz/package-test/blob/main/src/integrations/anthropic/anthropic.ts#L86) |
+| `timeout()` | () => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: simulate a timeout. | [src/integrations/anthropic/anthropic.ts:105](https://github.com/jterrazz/package-test/blob/main/src/integrations/anthropic/anthropic.ts#L105) |

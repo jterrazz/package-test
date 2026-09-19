@@ -5,7 +5,7 @@
 type ContainerPort = object;
 ```
 
-Defined in: src/specification/ports/container.port.ts:5
+Defined in: [src/specification/ports/container.port.ts:5](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/container.port.ts#L5)
 
 Abstract container interface.
 Represents a running service (database, cache, etc.)
@@ -18,7 +18,7 @@ Represents a running service (database, cache, etc.)
 getConnectionString: () => string;
 ```
 
-Defined in: src/specification/ports/container.port.ts:19
+Defined in: [src/specification/ports/container.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/container.port.ts#L19)
 
 Get a full connection string for this service.
 
@@ -34,7 +34,7 @@ Get a full connection string for this service.
 getHost: () => string;
 ```
 
-Defined in: src/specification/ports/container.port.ts:16
+Defined in: [src/specification/ports/container.port.ts:16](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/container.port.ts#L16)
 
 Get the host to connect to.
 
@@ -50,7 +50,7 @@ Get the host to connect to.
 getLogs: () => Promise<string>;
 ```
 
-Defined in: src/specification/ports/container.port.ts:22
+Defined in: [src/specification/ports/container.port.ts:22](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/container.port.ts#L22)
 
 Get container logs (stdout + stderr).
 
@@ -66,7 +66,7 @@ Get container logs (stdout + stderr).
 getMappedPort: (containerPort) => number;
 ```
 
-Defined in: src/specification/ports/container.port.ts:13
+Defined in: [src/specification/ports/container.port.ts:13](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/container.port.ts#L13)
 
 Get the mapped host port for a container port.
 
@@ -88,7 +88,7 @@ Get the mapped host port for a container port.
 start: () => Promise<void>;
 ```
 
-Defined in: src/specification/ports/container.port.ts:7
+Defined in: [src/specification/ports/container.port.ts:7](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/container.port.ts#L7)
 
 Start the container and wait until ready.
 
@@ -104,7 +104,7 @@ Start the container and wait until ready.
 stop: () => Promise<void>;
 ```
 
-Defined in: src/specification/ports/container.port.ts:10
+Defined in: [src/specification/ports/container.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/container.port.ts#L10)
 
 Stop and remove the container.
 

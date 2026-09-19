@@ -15,7 +15,7 @@ type WebsiteSpecificationOptions<Services> = object &
 };
 ```
 
-Defined in: src/specification/facets/website/start-website.ts:62
+Defined in: [src/specification/facets/website/start-website.ts:62](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L62)
 
 Options for startWebsite \| specification.website. `server` (start
 the site locally) and `url` (target a running site) are mutually
@@ -28,9 +28,9 @@ stub.
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | src/specification/facets/website/start-website.ts:68 |
-| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | src/specification/facets/website/start-website.ts:73 |
-| `services?` | `Services` | Named services started with the runner, before the site is: a database the site reads, a `process()` backend it calls. They are started in declaration order and stopped with the specification, and `server` may be a function of them — which is how a site is handed the URL of the API it was started beside. | src/specification/facets/website/start-website.ts:81 |
+| `external?` | `"allow"` \| `"block"` | Cross-origin request policy for visits. Default: `'block'` with a local `server` (deterministic — analytics and CDNs never leave the machine), `'allow'` with a deployed `url`. | [src/specification/facets/website/start-website.ts:68](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L68) |
+| `root?` | `string` | Project-root override (CONVENTIONS A9): the working directory of the `server` command. Auto-discovered from the calling file when absent. | [src/specification/facets/website/start-website.ts:73](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L73) |
+| `services?` | `Services` | Named services started with the runner, before the site is: a database the site reads, a `process()` backend it calls. They are started in declaration order and stopped with the specification, and `server` may be a function of them — which is how a site is handed the URL of the API it was started beside. | [src/specification/facets/website/start-website.ts:81](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L81) |
 
 ## Type Parameters
 

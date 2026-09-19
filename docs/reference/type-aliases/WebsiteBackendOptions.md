@@ -5,7 +5,7 @@
 type WebsiteBackendOptions = object;
 ```
 
-Defined in: src/specification/facets/website/start-website.ts:47
+Defined in: [src/specification/facets/website/start-website.ts:47](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L47)
 
 The declared stub backend behind the site under test — started before the
 server command, torn down with the runner. Its URL is injected into the
@@ -20,7 +20,7 @@ via `.intercept(...)` are what it serves.
 env: string;
 ```
 
-Defined in: src/specification/facets/website/start-website.ts:49
+Defined in: [src/specification/facets/website/start-website.ts:49](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L49)
 
 Env var receiving the stub's URL in the server child (e.g. `'API_URL'`).
 
@@ -32,6 +32,6 @@ Env var receiving the stub's URL in the server child (e.g. `'API_URL'`).
 optional port?: number;
 ```
 
-Defined in: src/specification/facets/website/start-website.ts:51
+Defined in: [src/specification/facets/website/start-website.ts:51](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L51)
 
 Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port.

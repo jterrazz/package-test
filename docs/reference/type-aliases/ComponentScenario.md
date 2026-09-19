@@ -5,7 +5,7 @@
 type ComponentScenario = (visitor) => Promise<void>;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:24
+Defined in: [src/specification/facets/component/component.types.ts:24](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L24)
 
 The behaviour of a render; assertions stay in the Then, on the result (W1).
 

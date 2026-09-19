@@ -5,7 +5,7 @@
 type CliHandle<DatabaseKey> = object;
 ```
 
-Defined in: src/specification/facets/cli/start-cli.ts:83
+Defined in: [src/specification/facets/cli/start-cli.ts:83](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L83)
 
 The record returned by startCli \| specification.cli. Destructure
 with the canonical names (CONVENTIONS A3):
@@ -26,7 +26,7 @@ with the canonical names (CONVENTIONS A3):
 cleanup: () => Promise<void>;
 ```
 
-Defined in: src/specification/facets/cli/start-cli.ts:85
+Defined in: [src/specification/facets/cli/start-cli.ts:85](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L85)
 
 Stop all infrastructure started by this specification.
 
@@ -42,7 +42,7 @@ Stop all infrastructure started by this specification.
 cli: CliSpecification<DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/cli/start-cli.ts:86
+Defined in: [src/specification/facets/cli/start-cli.ts:86](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L86)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: src/specification/facets/cli/start-cli.ts:86
 docker: (containerId) => ContainerAccessor;
 ```
 
-Defined in: src/specification/facets/cli/start-cli.ts:91
+Defined in: [src/specification/facets/cli/start-cli.ts:91](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L91)
 
 Read a running container by id — returns a [ContainerAccessor](../classes/ContainerAccessor.md)
 usable with `await expect(...).toBeRunning()` and read accessors.
@@ -75,6 +75,6 @@ usable with `await expect(...).toBeRunning()` and read accessors.
 orchestrator: null | Orchestrator;
 ```
 
-Defined in: src/specification/facets/cli/start-cli.ts:93
+Defined in: [src/specification/facets/cli/start-cli.ts:93](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L93)
 
 The orchestrator managing the test infrastructure lifecycle.

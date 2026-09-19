@@ -17,7 +17,7 @@ type ElementKind =
   | "text";
 ```
 
-Defined in: src/specification/ports/browser.port.ts:24
+Defined in: [src/specification/ports/browser.port.ts:24](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L24)
 
 The interactive/textual element kinds — what a visitor actually acts on.
 

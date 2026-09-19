@@ -5,7 +5,7 @@
 type MobileSpecificationOptions<Services> = object;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:32
+Defined in: [src/specification/facets/mobile/start-mobile.ts:32](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L32)
 
 Options for startMobile \| specification.mobile.
 
@@ -23,7 +23,7 @@ Options for startMobile \| specification.mobile.
 app: object;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:34
+Defined in: [src/specification/facets/mobile/start-mobile.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L34)
 
 The app under test — terminated and relaunched by every `.open()`.
 
@@ -43,7 +43,7 @@ Bundle id of the installed app (`com.example.app`).
 optional backend?: MobileBackendOptions;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:43
+Defined in: [src/specification/facets/mobile/start-mobile.ts:43](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L43)
 
 Declared stub backend: started with the runner, serving the contracts
 each chain declares via `.intercept(...)`. The handle gains
@@ -57,7 +57,7 @@ each chain declares via `.intercept(...)`. The handle gains
 device: object;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:45
+Defined in: [src/specification/facets/mobile/start-mobile.ts:45](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L45)
 
 The simulator to run on — resolved through `xcrun simctl`.
 
@@ -93,7 +93,7 @@ Explicit UDID — skips name/os resolution entirely.
 optional root?: string;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:58
+Defined in: [src/specification/facets/mobile/start-mobile.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L58)
 
 Project-root override (CONVENTIONS A9): where the appium binary is
 resolved from (`node_modules/.bin`). Auto-discovered from the calling
@@ -107,7 +107,7 @@ file when absent.
 optional services?: Services;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:72
+Defined in: [src/specification/facets/mobile/start-mobile.ts:72](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L72)
 
 Named services started with the runner and stopped with it — a
 `process()` for the bundler the app loads from, a database a dev build
@@ -123,4 +123,4 @@ like every other external process the framework owns.
 optional timeouts?: DeviceTimeouts;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:73
+Defined in: [src/specification/facets/mobile/start-mobile.ts:73](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L73)

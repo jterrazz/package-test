@@ -5,7 +5,7 @@
 function disabled(element): ElementRef;
 ```
 
-Defined in: src/specification/facets/website/elements.ts:169
+Defined in: [src/specification/facets/website/elements.ts:169](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L169)
 
 Whether the element accepts input: `see(disabled(button('Delete')))` asserts
 it refuses, `see(enabled(button('Delete')))` that it takes it.

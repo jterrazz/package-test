@@ -5,7 +5,7 @@
 type DeviceOpenOptions = object;
 ```
 
-Defined in: src/specification/ports/device.port.ts:89
+Defined in: [src/specification/ports/device.port.ts:89](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L89)
 
 Per-open options forwarded to the device session.
 
@@ -17,7 +17,7 @@ Per-open options forwarded to the device session.
 bundleId: string;
 ```
 
-Defined in: src/specification/ports/device.port.ts:91
+Defined in: [src/specification/ports/device.port.ts:91](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L91)
 
 The app under test — terminated and relaunched for a fresh, deterministic state.
 
@@ -29,7 +29,7 @@ The app under test — terminated and relaunched for a fresh, deterministic stat
 optional deepLink?: string;
 ```
 
-Defined in: src/specification/ports/device.port.ts:93
+Defined in: [src/specification/ports/device.port.ts:93](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L93)
 
 Deep link applied after the relaunch (`news://events`); absent opens the app plainly.
 
@@ -41,6 +41,6 @@ Deep link applied after the relaunch (`news://events`); absent opens the app pla
 optional scenario?: MobileScenario;
 ```
 
-Defined in: src/specification/ports/device.port.ts:95
+Defined in: [src/specification/ports/device.port.ts:95](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L95)
 
 The interaction scenario to run after launch; the capture reflects the final state.
