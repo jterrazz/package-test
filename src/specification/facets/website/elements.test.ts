@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 import {
     button,
     dialog,
+    disabled,
+    enabled,
     field,
     focused,
     link,
@@ -99,6 +101,36 @@ describe('focused', () => {
             kind: 'link',
             name: 'Articles',
             scope: { kind: 'navigation' },
+        });
+    });
+});
+
+describe('disabled / enabled', () => {
+    test('modify a descriptor rather than replacing it', () => {
+        // Given - the same control, asked about each direction of enablement
+        // Then - one flag, two answers; the descriptor is untouched otherwise
+        expect(disabled(button('Publish'))).toStrictEqual({
+            disabled: true,
+            kind: 'button',
+            name: 'Publish',
+        });
+        expect(enabled(button('Publish'))).toStrictEqual({
+            disabled: false,
+            kind: 'button',
+            name: 'Publish',
+        });
+    });
+
+    test('survive scoping, so enablement can be asserted inside a landmark', () => {
+        // Given - a disabled button designated inside a form
+        const element = within(main(), disabled(button('Publish')));
+
+        // Then - both the scope and the modifier travel with it
+        expect(element).toStrictEqual({
+            disabled: true,
+            kind: 'button',
+            name: 'Publish',
+            scope: { kind: 'main' },
         });
     });
 });

@@ -128,14 +128,17 @@ export async function act<T>(
 }
 
 /**
- * Is the element gone — or, with the focus modifier, no longer holding the
- * keyboard? A node that left the document and one that is still there but not
- * rendered are the same answer to a spec.
+ * Is the element gone — or, with a state modifier, no longer in that state? A
+ * node that left the document and one that is still there but not rendered are
+ * the same answer to a spec.
  */
-function isGone(locator: Locator, byFocus: boolean): boolean {
+function isGone(locator: Locator, element: ElementRef): boolean {
     const node = locator.query();
-    if (byFocus) {
+    if (element.focused === true) {
         return node !== document.activeElement;
+    }
+    if (element.disabled !== undefined) {
+        return node === null || node.matches(':disabled') !== element.disabled;
     }
     return node === null || !node.checkVisibility();
 }
@@ -185,7 +188,7 @@ export function componentVerbs(surface: MountedSurface): {
                 // Is one question — removed, or still there and not shown — and
                 // The poll retries it the same way every other verb retries.
                 await expect
-                    .poll(() => isGone(locator, element.focused === true), {
+                    .poll(() => isGone(locator, element), {
                         message: `${formatElement(element)} is still on the screen`,
                     })
                     .toBeTruthy();
@@ -204,6 +207,12 @@ export function componentVerbs(surface: MountedSurface): {
             await act(element, async (locator) => {
                 if (element.focused === true) {
                     await expect.element(locator).toHaveFocus();
+                    return;
+                }
+                if (element.disabled !== undefined) {
+                    await (element.disabled
+                        ? expect.element(locator).toBeDisabled()
+                        : expect.element(locator).toBeEnabled());
                     return;
                 }
                 await expect.element(locator).toBeVisible();

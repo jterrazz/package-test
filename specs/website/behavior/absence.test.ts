@@ -1,4 +1,4 @@
-import { button, content, field, focused } from '@jterrazz/test';
+import { button, content, disabled, enabled, field, focused } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -24,5 +24,18 @@ test('says where the keyboard is after a field was filled', async () => {
     });
 
     // Then - both verbs answered on the settled page, and it stayed silent
+    await expect(result.errors).toBeEmpty();
+});
+
+test('says whether a control is taking input, in both directions', async () => {
+    // Given - a clear button the page enables only once there is something to clear
+    const result = await website.visit('/', async (visitor) => {
+        await visitor.see(disabled(button('Clear')));
+        await visitor.click(button('Subscribe'));
+        await visitor.see(enabled(button('Clear')));
+        await visitor.gone(disabled(button('Clear')));
+    });
+
+    // Then - the page stayed silent through all four answers
     await expect(result.errors).toBeEmpty();
 });

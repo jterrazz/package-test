@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { ElementRef, Visitor } from '../../ports/browser.port.js';
 import type { MobileVisitor } from '../../ports/device.port.js';
-import { focused } from '../website/elements.js';
+import { disabled, focused } from '../website/elements.js';
 import type { ComponentChain, ComponentVisitor } from './component.types.js';
 
 /**
@@ -54,6 +54,9 @@ export type MobileNeverRerenders = Assert<
     Carries<MobileVisitor, 'rerender'> extends false ? true : false
 >;
 
+// Enablement is the second modifier, and it is the one direction a behavioural
+// Substitute cannot reach: clicking a disabled control is a timeout, not a no.
+export type WebElementTakesEnablement = Assert<Accepts<ElementRef, 'disabled'>>;
 
 // The setups a component test states per render. The page size is one of them:
 // A responsive component's Given is the viewport, and it belongs to ONE test.
@@ -71,13 +74,21 @@ describe('the verb rows the compiler holds (W6)', () => {
         expect(element.focused).toBeTruthy();
     });
 
+    test('a modifier is data whichever state it names', () => {
+        // Given - the enablement modifier, applied to a button
+        const element: ElementRef = disabled({ kind: 'button', name: 'Publish' });
+
+        // Then - it travels as a field, exactly as focus does
+        expect(element.disabled).toBeTruthy();
+    });
+
     test('states the rows in English beside the types that hold them', () => {
         // Given - the rows above, as a reader would say them
         const rows = [
             "rerender and unmount are the component facet's",
             "goto is the website facet's",
             'gone is on both rendered facets',
-            'focused is reachable only where see and gone are',
+            'focused and disabled are reachable only where see and gone are',
             'the chain states intercept, clock, wrap and viewport',
         ];
 

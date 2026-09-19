@@ -56,6 +56,12 @@ export type ElementRef = {
      * where the keyboard is cannot be goldened; it is asserted by a verb.
      */
     focused?: boolean;
+    /**
+     * Narrows to "and it is (not) accepting input" — built by `disabled(x)` /
+     * `enabled(x)`. Like `focused`, a STATE the vocabulary can already name the
+     * element of, so it is a verb's business and never a golden's.
+     */
+    disabled?: boolean;
     kind: ElementKind | LandmarkKind;
     /** Landmarks may be anonymous (`main()`, `banner()`); everything else is named. */
     name?: string;
