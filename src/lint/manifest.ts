@@ -204,7 +204,7 @@ export const RULE_DOCS = {
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `facet` (test au root de la facette OU un dossier domaine plus bas, jamais plus profond), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`. Dans tous les modes, `off` compris : un dossier à underscore initial est du SOL, jamais un domaine — aucune spec ne vit dedans. Une exception, et une seule : le sol peut être du CODE, et un `<module>.test.ts` posé À CÔTÉ du `<module>.ts` qu’il teste y est légal (c’est la loi I2) ; un test sans module voisin, ou un `*.specification.ts`, reste une violation.',
+            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `facet` (test au root de la facette OU un dossier domaine plus bas, jamais plus profond), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`. Dans tous les modes, `off` compris : un dossier à underscore initial est du SOL, jamais un domaine — aucune spec ne vit dedans. Une exception, et une seule : le sol peut être du CODE, et un `<module>.test.ts` posé À CÔTÉ du `<module>.ts` qu’il teste y est légal (c’est la loi I2) ; un test sans module voisin, ou un `*.specification.ts`, reste une violation. Un `.test.tsx` est hors de portée : une unité rendue se spécifie à côté de son composant, jamais dans un arbre facette/domaine — c’est I2 qui tient son voisinage.',
         family: 'C',
         id: 'C1',
         rationale:
@@ -355,7 +355,8 @@ export const RULE_DOCS = {
     'e5-no-simulated-dom': {
         channel: 'statique',
         convention:
-            'Un fichier de test ne déclare pas de DOM simulé : la pragma `@vitest-environment happy-dom|jsdom` est une erreur.',
+            'Un fichier de test ne déclare pas de DOM simulé : la pragma `@vitest-environment happy-dom|jsdom` est une erreur. Portée : les rôles qui EXÉCUTENT un test (`module`, `component`, `specification`) — une config de projet est le domaine de E5b.',
+        facet: 'component',
         family: 'E',
         fix: 'Déplacer le test à côté de son composant en `.test.tsx` et le faire collecter par le projet `component()`.',
         id: 'E5',
@@ -367,6 +368,7 @@ export const RULE_DOCS = {
         channel: 'statique',
         convention:
             "Une config vitest ne déclare pas de DOM simulé : `environment: 'happy-dom'|'jsdom'` est une erreur ; `'node'` et `'edge-runtime'` nomment un vrai runtime et restent hors de portée.",
+        facet: 'component',
         family: 'E',
         fix: 'Supprimer `environment` et collecter le rendu avec `component()` ; les tests de module restent sous node.',
         id: 'E5b',
@@ -377,7 +379,8 @@ export const RULE_DOCS = {
     'e6-component-project-helper': {
         channel: 'statique',
         convention:
-            'Un projet navigateur vient de `component()` : un bloc `browser:` écrit à la main dans une config est une erreur.',
+            "Un projet navigateur vient de `component()` : dans une config vitest, une clé `browser` sous `test` qui n'est pas dans un appel à `component(...)` est une erreur. Une clé `browser` ailleurs (un `define`, un enregistrement d'env) n'est pas un bloc de projet et reste hors de portée.",
+        facet: 'component',
         family: 'E',
         fix: 'Remplacer le bloc par `component({ vite })` et ne garder que ce qui appartient au projet.',
         id: 'E6',
@@ -431,7 +434,8 @@ export const RULE_DOCS = {
     'f6-no-foreign-test-runtime': {
         channel: 'statique',
         convention:
-            'Un fichier de test n’importe pas de second runtime de test : `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*` et `@vitest/browser*` sont des erreurs.',
+            'Un fichier de test n’importe pas de second runtime de test : `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*` et `@vitest/browser*` sont des erreurs. Portée : les rôles qui EXÉCUTENT un test (`module`, `component`, `specification`) — la config d’un projet fixture et un module de providers sous `specs/` nomment légitimement l’adaptateur.',
+        facet: 'component',
         family: 'F',
         fix: 'Passer par la facette qui remplace le seam : `component.render()`, le vocabulaire d’éléments et le visiteur.',
         id: 'F6',
@@ -442,7 +446,8 @@ export const RULE_DOCS = {
     'g4-no-dom-in-module-test': {
         channel: 'statique',
         convention:
-            'Un test de module ne touche aucun global du DOM : `document`, `window`, `navigator`, `HTMLElement` référencés dans un fichier de rôle `module` sont une erreur.',
+            'Un test de module ne touche aucun global du DOM : `document`, `window`, `navigator`, `HTMLElement` référencés en position de VALEUR dans un fichier de rôle `module` HORS de `specs/` sont une erreur. Un nom en position de type (`x as HTMLElement`) et un garde `typeof window` n’atteignent aucun document et restent hors de portée ; tant que le rôle `spec` n’existe pas, `module` couvre aussi les `.test.ts` de `specs/`, que la règle laisse donc passer.',
+        facet: 'component',
         family: 'G',
         fix: 'Renommer le test en `.test.tsx` à côté du composant qu’il rend, et le faire collecter par `component()`.',
         id: 'G4',
@@ -462,9 +467,11 @@ export const RULE_DOCS = {
     'i2-sibling-test-naming': {
         channel: 'statique',
         convention:
-            'Le test de `<fichier>.ts` est `<fichier>.test.ts` à côté de lui ; un `.test.ts` mal nommé, ou un dossier `__tests__/`, est une erreur.',
+            'Le test de `<fichier>.ts` est `<fichier>.test.ts` à côté de lui ; un `.test.ts` mal nommé, ou un dossier `__tests__/`, est une erreur. Une unité RENDUE obéit à la même loi où qu’elle vive : un `.test.tsx` est voisin du `.tsx` qu’il rend, ou du `.ts` du hook ou de la fonction DOM dont il porte l’hôte.',
         family: 'I',
+        fix: 'Poser le test à côté de l’unité qu’il couvre, sous le même basename.',
         id: 'I2',
+        reach: 'tests',
         rationale:
             'Des tests voisins (parité avec le `foo_test.go` de Go) gardent test et code ensemble et découvrables.',
     },

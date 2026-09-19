@@ -8,9 +8,9 @@ import type { LintRule } from './types.js';
  * One wiring of oxlint's `RuleTester`, for every rule test in this layer.
  *
  * The tester reaches for a describe/it pair and for oxlint's own `Rule` type,
- * which the package does not export — so each rule test used to open on the
- * same four lines and the same boundary cast. Stating them once is what keeps a
- * new rule's test about the RULE.
+ * which the package does not export — four lines and a boundary cast every rule
+ * test would otherwise open on. Stating them once is what keeps a new rule's
+ * test about the RULE.
  *
  * It is a `*.fixtures.ts` because that is what it IS: material a test stands on,
  * importable only from a test (F5), and not production code the layer map or

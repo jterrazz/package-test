@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { TOKEN_KINDS } from '../specification/matching/match.js';
-import { renderRules, spliceCatalog } from './catalog.js';
+import { anchor, renderRules, spliceCatalog } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
 import { catalog, CHECKER_PASSES, PROCESS_RULES, RULE_DOCS, RUNTIME_RULES } from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
@@ -67,6 +67,26 @@ describe('conventions catalogue — generation freshness (meta-test)', () => {
 
         // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
         expect(spliceCatalog(committed)).toBe(committed);
+    });
+
+    test('every anchor a rule message links to exists in the generated catalogue', () => {
+        // Given - every `docs/13-linting.md#<id>` a shipped rule's message carries
+        const generated = read('docs/13-linting.md');
+        const links = new Set<string>();
+        for (const rule of Object.values(plugin.rules)) {
+            for (const message of Object.values(rule.meta?.messages ?? {})) {
+                for (const found of message.matchAll(/docs\/13-linting\.md#(?<id>[\w-]+)/gu)) {
+                    links.add(found.groups?.id ?? '');
+                }
+            }
+        }
+
+        // Then - each resolves to a row: a message that links nowhere is worse
+        // Than one that links to the chapter, because it reads as a route
+        expect(links.size).toBeGreaterThan(0);
+        for (const id of links) {
+            expect(generated, `dead anchor docs/13-linting.md#${id}`).toContain(anchor(id));
+        }
     });
 
     test('the generated skill rule reference is byte-identical to a fresh generation', () => {

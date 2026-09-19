@@ -44,5 +44,15 @@ tester.run('f6-no-foreign-test-runtime', asOxlintRule(f6NoForeignTestRuntime), {
             code: 'import { page } from "vitest/browser";',
             filename: '/repo/src/integrations/vitest-browser/adapter.ts',
         },
+        // A fixture project's own config has to name the provider it runs on.
+        {
+            code: 'import { playwright } from "@vitest/browser-playwright";',
+            filename: '/repo/specs/_fixtures/app/vitest.config.ts',
+        },
+        // A providers module is the app's frame, not a spec speaking a dialect.
+        {
+            code: 'import { render } from "vitest-browser-react";',
+            filename: '/repo/specs/component-app/providers.tsx',
+        },
     ],
 });
