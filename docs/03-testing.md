@@ -20,7 +20,7 @@ What proves a change here: this package specifies itself with itself. The suites
 | `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                               | Nothing — the Docker specs self-skip                                 |
 | `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                                 | Docker                                                               |
 | `jobs`        | `specs/jobs/**`, built by `jobs()`                                                                            | Docker                                                               |
-| `integration` | `specs/integration/**`, built by `integration()` — the container seams included                               | Docker                                                               |
+| `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included               | Docker                                                               |
 | `api-stack`   | `specs/api/**` + `specs/jobs/**` with `TEST_MODE=compose`, minus intercepts, clock and the node-mode refusals | Docker compose                                                       |
 | `website`     | `specs/website/**`, built by `website()`                                                                      | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                                                   | the same chromium; no Docker. Runs in its own group, after `website` |
