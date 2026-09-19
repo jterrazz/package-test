@@ -5,7 +5,7 @@
 type JobHandle = object;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:38](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L38)
+Defined in: src/specification/facets/\_common/builder.ts:39
 
 A named job that can be triggered via jobs.trigger().
 
@@ -17,7 +17,7 @@ A named job that can be triggered via jobs.trigger().
 execute: () => Promise<void>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:40](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L40)
+Defined in: src/specification/facets/\_common/builder.ts:41
 
 #### Returns
 
@@ -31,4 +31,4 @@ Defined in: [src/specification/facets/\_common/builder.ts:40](https://github.com
 name: string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:39](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L39)
+Defined in: src/specification/facets/\_common/builder.ts:40

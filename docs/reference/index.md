@@ -99,7 +99,9 @@
 | [MobileSpecificationOptions](type-aliases/MobileSpecificationOptions.md) | Options for startMobile \| specification.mobile. |
 | [MobileVisitor](type-aliases/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until a visible match exists; acting verbs then enforce exactly-one (W3), while `see()` — the single synchronization primitive — is satisfied by any visible match. There is no sleep and no conditional helper. |
 | [MockDatePort](type-aliases/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
+| [MockOfOptions](type-aliases/MockOfOptions.md) | How much of the port the double answers for. |
 | [MockPort](type-aliases/MockPort.md) | The factory's own shape — kept as a name so a consumer can annotate with it. |
+| [PinnedClock](type-aliases/PinnedClock.md) | A pinned clock — released when the `using` scope that declared it ends. |
 | [PostgresOptions](type-aliases/PostgresOptions.md) | - |
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
 | [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
@@ -135,6 +137,7 @@
 | [anthropic](variables/anthropic.md) | Anthropic API intercept helpers. |
 | [banner](variables/banner.md) | The `banner` landmark — the page header. |
 | [button](variables/button.md) | A button (or element with the button role), by accessible name. |
+| [clock](variables/clock.md) | - |
 | [complementary](variables/complementary.md) | The `complementary` landmark — an `<aside>`, a sidebar. |
 | [component](variables/component.md) | Present, typed, and refusing — every setup and the terminal action alike. |
 | [content](variables/content.md) | An element containing the given text. |

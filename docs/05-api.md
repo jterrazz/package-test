@@ -125,15 +125,16 @@ test('returns 404 with a useful body', async () => {
 
 ## Setups (chainable)
 
-| Setup                             | Description                                                                                        |
-| --------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `.seed('file.sql')`               | Load `_seeds/file.sql` into the database                                                           |
-| `.seed('file.sql', { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7) |
-| `.headers({ 'Name': 'value' })`   | Set request headers; repeated calls merge                                                          |
-| `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](10-contracts.md)                             |
-| `.intercept(trigger, response)`   | Inline intercept for one-off cases                                                                 |
+| Setup                             | Description                                                                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `.seed('file.sql')`               | Load `_seeds/file.sql` into the database                                                                                        |
+| `.seed('file.sql', { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
+| `.headers({ 'Name': 'value' })`   | Set request headers; repeated calls merge                                                                                       |
+| `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](10-contracts.md)                                                          |
+| `.intercept(trigger, response)`   | Inline intercept for one-off cases                                                                                              |
+| `.clock('2026-03-04T09:30:00Z')`  | Pin the app's `Date` for this chain, released when the action resolves ([12](12-conventions.md#time--one-primitive-two-depths)) |
 
-Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). `.intercept()` is **node-only** — a compose-mode runner throws immediately, so keep intercept specs in a node-only vitest project (the `api-stack` project excludes `specs/api/intercepts/**`).
+Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). `.intercept()` is **node-only** — a compose-mode runner throws immediately, so keep intercept specs in a node-only vitest project (the `api-stack` project excludes `specs/api/intercepts/**`). `.clock()` is node-only for the same reason: it pins THIS process's calendar, which is the app's only while the app runs in-process.
 
 ```typescript
 test('serves french content', async () => {

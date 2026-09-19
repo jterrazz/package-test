@@ -31,6 +31,9 @@ const FRAMEWORK_LAYERS = {
             'integrations/hono/',
             'integrations/yaml/',
             'vitest/matchers',
+            // The one time primitive: a chain's `.clock()` pins the calendar
+            // Through the same seam a test takes it through by hand.
+            'vitest/clock',
             // Update-mode detection is a pure env read the literate runner
             // Shares with the matchers — one answer to "are we rewriting?".
             'vitest/update',

@@ -432,6 +432,22 @@ test('sends chain headers on the raw exchange', async () => {
 });
 ```
 
+## Setup: `.clock()`
+
+`.clock('2026-03-04T09:30:00Z')` pins the calendar of the PAGE — what the site's own scripts read when they call `new Date()` — before the first byte is parsed, so a stamp rendered on load is the stated instant and not the moment the navigation happened to start. It is released with the visit.
+
+```typescript
+test('stamps the moment the page was opened', async () => {
+    // Given - the page's calendar pinned for this visit
+    const result = await website.clock('2026-03-04T09:30:00Z').visit('/clock');
+
+    // Then - the rendered stamp is the stated instant
+    expect(result.content).toContain('2026-03-04T09:30:00.000Z');
+});
+```
+
+A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [12 — Conventions § Time](12-conventions.md#time--one-primitive-two-depths).
+
 ## Evidence on failure
 
 When a scenario throws — an element never becomes visible, a `see()` times out — the error carries a full-page screenshot of the state the scenario died in, referenced by its temp path in the error message. The original error is never masked; the screenshot is attached evidence, not a replacement.

@@ -5,7 +5,7 @@
 type ApiSpecification<DatabaseKey> = object;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:180](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L180)
+Defined in: src/specification/facets/\_common/builder.ts:181
 
 The `api` facet — HTTP chain entry handed out by `specification.api()`.
 Setup methods chain; action methods are terminal: they execute the spec
@@ -22,13 +22,35 @@ of the declared services record that are databases.
 
 ## Properties
 
+### clock
+
+```ts
+clock: (iso) => ApiSpecification<DatabaseKey>;
+```
+
+Defined in: src/specification/facets/\_common/builder.ts:183
+
+Pin the app's `Date` at `iso` for this chain — the calendar the app reads.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `iso` | `string` |
+
+#### Returns
+
+`ApiSpecification`\<`DatabaseKey`\>
+
+***
+
 ### delete
 
 ```ts
 delete: (path) => Promise<HttpResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:189](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L189)
+Defined in: src/specification/facets/\_common/builder.ts:192
 
 Send a DELETE request and resolve with the result.
 
@@ -50,7 +72,7 @@ Send a DELETE request and resolve with the result.
 get: (path) => Promise<HttpResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:191](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L191)
+Defined in: src/specification/facets/\_common/builder.ts:194
 
 Send a GET request and resolve with the result.
 
@@ -72,7 +94,7 @@ Send a GET request and resolve with the result.
 headers: (headers) => ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:182](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L182)
+Defined in: src/specification/facets/\_common/builder.ts:185
 
 Set HTTP headers for the request. Multiple calls merge.
 
@@ -94,7 +116,7 @@ Set HTTP headers for the request. Multiple calls merge.
 intercept: InterceptMethod<ApiSpecification<DatabaseKey>>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:184](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L184)
+Defined in: src/specification/facets/\_common/builder.ts:187
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -106,7 +128,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 post: (path, body?) => Promise<HttpResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:193](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L193)
+Defined in: src/specification/facets/\_common/builder.ts:196
 
 Send a POST request (optional inline JSON body) and resolve with the result.
 
@@ -129,7 +151,7 @@ Send a POST request (optional inline JSON body) and resolve with the result.
 put: (path, body?) => Promise<HttpResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:195](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L195)
+Defined in: src/specification/facets/\_common/builder.ts:198
 
 Send a PUT request (optional inline JSON body) and resolve with the result.
 
@@ -152,7 +174,7 @@ Send a PUT request (optional inline JSON body) and resolve with the result.
 request: (file) => Promise<HttpResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:197](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L197)
+Defined in: src/specification/facets/\_common/builder.ts:200
 
 Send the complete request described by `_requests/<file>` (.http format).
 
@@ -174,7 +196,7 @@ Send the complete request described by `_requests/<file>` (.http format).
 seed: (file, options?) => ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:186](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L186)
+Defined in: src/specification/facets/\_common/builder.ts:189
 
 Queue a SQL seed file from `_seeds/` to run before the action.
 

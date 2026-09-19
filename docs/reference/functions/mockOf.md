@@ -65,7 +65,7 @@ answers for `object`, which satisfies no port and fails where it is used.
 
 | Parameter | Type |
 | ------ | ------ |
-| `options?` | `MockOfOptions` |
+| `options?` | [`MockOfOptions`](../type-aliases/MockOfOptions.md) |
 
 ### Returns
 

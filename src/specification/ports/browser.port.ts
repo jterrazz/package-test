@@ -179,6 +179,11 @@ export type BrowserOpenOptions = {
      */
     baseUrl: string;
     /**
+     * Pin the page's own `Date` at this instant before the first byte is
+     * parsed — the calendar the site's scripts read. `.clock()` on the chain.
+     */
+    clock?: string | undefined;
+    /**
      * Cross-origin request policy. `'block'` aborts every request leaving
      * the site under test (analytics, CDNs) — the browser-side analog of
      * strict intercepts. `'allow'` lets them through (deployed-site mode).

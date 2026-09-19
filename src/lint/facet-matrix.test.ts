@@ -33,6 +33,7 @@ import type { FacetRole } from './facet-matrix.js';
 
 const apiMatrix = {
     // Setup (chainable) — README "Builder API › Setup", api column.
+    clock: 'setup',
     headers: 'setup',
     intercept: 'setup',
     seed: 'setup',
@@ -46,6 +47,7 @@ const apiMatrix = {
 
 const jobsMatrix = {
     // Setup (chainable).
+    clock: 'setup',
     intercept: 'setup',
     seed: 'setup',
     // Action (terminal).
@@ -73,6 +75,17 @@ describe('facet capability matrix (K1 guard)', () => {
         expect('headers' in jobsMatrix || 'headers' in cliMatrix).toBeFalsy();
         expect('fixture' in cliMatrix && 'env' in cliMatrix).toBeTruthy(); // Cli only
         expect('fixture' in apiMatrix || 'env' in apiMatrix).toBeFalsy();
+    });
+
+    test('time is pinned on the facets whose subject shares this process', () => {
+        // Given - the same matrix; a cli child reads its OWN calendar and takes
+        // The instant through the product's env, never through the chain
+        // Then - `.clock()` sits on api and jobs, and on neither cli row
+        expect(['clock' in apiMatrix, 'clock' in jobsMatrix, 'clock' in cliMatrix]).toStrictEqual([
+            true,
+            true,
+            false,
+        ]);
     });
 
     test('each facet exposes exactly the documented terminal actions', () => {

@@ -4,6 +4,7 @@ import { relative, resolve } from 'node:path';
 
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../../integrations/msw/intercept.js';
+import { clock as timeClock } from '../../../vitest/clock.js';
 import { contractsOf, isContract, isContracts } from '../../contracts/contract.js';
 import type { Contract, ContractInput } from '../../contracts/contract.js';
 import type {
@@ -178,6 +179,8 @@ export type InterceptMethod<T> = ((contracts: ContractInput) => T) &
  * of the declared services record that are databases.
  */
 export type ApiSpecification<DatabaseKey extends string = string> = {
+    /** Pin the app's `Date` at `iso` for this chain — the calendar the app reads. */
+    clock: (iso: string) => ApiSpecification<DatabaseKey>;
     /** Set HTTP headers for the request. Multiple calls merge. */
     headers: (headers: Record<string, string>) => ApiSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
@@ -202,6 +205,8 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
  * Jobs run in-process by definition (CONVENTIONS A5/A8).
  */
 export type JobsSpecification<DatabaseKey extends string = string> = {
+    /** Pin the job's `Date` at `iso` for this chain — the calendar the job reads. */
+    clock: (iso: string) => JobsSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
     /** Queue a SQL seed file from `_seeds/` to run before the action. */
@@ -255,6 +260,11 @@ export type CliSpecification<DatabaseKey extends string = string> = {
  * performs one raw HTTP exchange and never follows redirects.
  */
 export type WebsiteSpecification = {
+    /**
+     * Pin the PAGE's `Date` at `iso` for this chain — what the site's own
+     * scripts read. A `.fetch()` opens no page and refuses the setup.
+     */
+    clock: (iso: string) => WebsiteSpecification;
     /** Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls merge. */
     headers: (headers: Record<string, string>) => WebsiteSpecification;
     /**
@@ -314,6 +324,7 @@ export class SpecificationBuilder
         MobileSpecification,
         WebsiteSpecification
 {
+    private pinnedClock: null | string = null;
     private commandEnv: CliEnv = {};
     private readonly config: SpecificationConfig;
     private readonly contracts: Contract[] = [];
@@ -328,6 +339,22 @@ export class SpecificationBuilder
     }
 
     // ── Setup ──
+
+    /**
+     * Pin the clock at `iso` for this chain.
+     *
+     * In-process facets (api, jobs, integration) pin the runner's own `Date`,
+     * which is the app's; a website visit pins the PAGE's, through the browser.
+     * Either way the clock is released when the action resolves, so a chain
+     * never leaks its instant into the next one (CONVENTIONS D16).
+     *
+     * @example
+     *   const result = await api.clock('2026-03-04T09:30:00Z').get('/now');
+     */
+    clock(iso: string): this {
+        this.pinnedClock = iso;
+        return this;
+    }
 
     /**
      * Queue a SQL seed file to run before the action.
@@ -579,6 +606,12 @@ export class SpecificationBuilder
      *   expect(result.body).toMatch('robots.txt');
      */
     async fetch(path: string): Promise<FetchResult> {
+        if (this.pinnedClock !== null) {
+            throw new Error(
+                '.clock() pins the clock of a PAGE, and .fetch() opens none — it is one raw HTTP ' +
+                    'exchange. Assert the moment with a token ({{iso8601}}) in the golden, or visit the page.',
+            );
+        }
         return await this.executeSetup(null, async () => await this.runFetchAction(path));
     }
 
@@ -718,6 +751,13 @@ export class SpecificationBuilder
             registration = await registerContracts(this.contracts);
         }
 
+        // Pin the in-process calendar for the action alone. A website chain
+        // Pins the PAGE's instead (the site runs in its own process), so its
+        // Instant travels with the visit and never touches this one.
+        const instant = this.pinnedClock;
+        const pinned =
+            instant !== null && this.config.baseUrl === undefined ? timeClock.at(instant) : null;
+
         // Execute action
         try {
             const value = await action();
@@ -731,6 +771,7 @@ export class SpecificationBuilder
             // It over the app-level fallout of the 501 the request received.
             throw registration?.violation() ?? this.config.backend?.violation() ?? error;
         } finally {
+            pinned?.[Symbol.dispose]();
             registration?.cleanup();
         }
     }
@@ -820,6 +861,7 @@ export class SpecificationBuilder
                 ? [new URL(this.config.backendUrl).origin]
                 : undefined,
             baseUrl,
+            ...(this.pinnedClock === null ? {} : { clock: this.pinnedClock }),
             external: this.config.external ?? 'allow',
             headers,
             scenario,
@@ -1045,6 +1087,7 @@ export function createApiFacet(config: SpecificationConfig): ApiSpecification {
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
+        clock: (iso) => start().clock(iso),
         delete: async (path) => await start().delete(path),
         get: async (path) => await start().get(path),
         headers: (headers) => start().headers(headers),
@@ -1063,6 +1106,7 @@ export function createJobsFacet(config: SpecificationConfig): JobsSpecification 
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
+        clock: (iso) => start().clock(iso),
         intercept: interceptOn(start),
         seed: (file, options) => start().seed(file, options),
         trigger: async (name) => await start().trigger(name),
@@ -1076,6 +1120,7 @@ export function createWebsiteFacet(config: SpecificationConfig): WebsiteSpecific
     const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
 
     return {
+        clock: (iso) => start().clock(iso),
         fetch: async (path) => await start().fetch(path),
         headers: (headers) => start().headers(headers),
         intercept: interceptOn(start),

@@ -49,8 +49,10 @@ export default defineSpecConfig({
                     // Parallel: each worker gets its own compose project (test-worker-N)
                     include: ['specs/api/**/*.test.ts', 'specs/jobs/**/*.test.ts'],
                     // Intercepts are in-process (MSW) — node-only (CONVENTIONS I3/D7).
+                    // `.clock()` is in-process too: compose mode runs the app in
+                    // Its own container, where this runner's calendar is nothing.
                     // Added to the preset's list, not replacing it: vite concatenates.
-                    exclude: ['specs/api/intercepts/**'],
+                    exclude: ['specs/api/clock/**', 'specs/api/intercepts/**'],
                     env: { TEST_MODE: 'compose' },
                 },
             },

@@ -42,6 +42,12 @@ const pages = {
     '/articles': `<!doctype html><html lang="en"><head>${head('Fixture — Articles', '/articles')}
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"All articles"}</script>
     </head><body><h1>All articles</h1><a href="/">Home</a></body></html>`,
+    // The page whose content IS the moment it was opened: a site's own script
+    // Reading `Date` is what `.clock()` pins, and only the page's clock can.
+    '/clock': `<!doctype html><html lang="en"><head>${head('Fixture — Clock', '/clock')}
+    </head><body><h1>Clock</h1><p id="now">unset</p>
+    <script>document.getElementById('now').textContent = new Date().toISOString();</script>
+    </body></html>`,
     '/noisy': `<!doctype html><html lang="en"><head><title>Fixture — Noisy</title></head>
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
     // The ambiguity fixture: "Articles" appears three times — twice verbatim
