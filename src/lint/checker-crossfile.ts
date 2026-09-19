@@ -288,6 +288,37 @@ function collectLiterals(text: string): Set<string> {
 }
 
 /**
+ * A golden NAMED by a template literal with a hole — the table form chapter 17
+ * prescribes for the golden half (`toMatch(`${name}.json`)` under a
+ * `test.each`). The hole's value is not readable here, but its static ends are:
+ * a fixture whose name starts with `prefix` and ends with `suffix` is one the
+ * table could have asked for, which is all C9 needs to stop calling it dead.
+ */
+export type LiteralPattern = { prefix: string; suffix: string };
+
+const TEMPLATE_WITH_HOLE = /`(?<body>(?:[^`\\]|\\.)*\$\{(?:[^`\\]|\\.)*)`/gu;
+function collectLiteralPatterns(text: string): LiteralPattern[] {
+    const found: LiteralPattern[] = [];
+    for (const match of text.matchAll(TEMPLATE_WITH_HOLE)) {
+        const body = match.groups?.body ?? '';
+        const opens = body.indexOf('${');
+        const closes = body.lastIndexOf('}');
+        if (opens === -1 || closes === -1 || closes < opens) {
+            continue;
+        }
+        const prefix = body.slice(0, opens);
+        const suffix = body.slice(closes + 1);
+        // A template that is ALL hole names everything; it vouches for
+        // Nothing in particular, and C9 already downgrades that file's
+        // Findings to warn through `hasNonLiteralFixtureArg`.
+        if (prefix.length > 0 || suffix.length > 0) {
+            found.push({ prefix, suffix });
+        }
+    }
+    return found;
+}
+
+/**
  * Does the text pass a NON-literal argument to a fixture-ish verb
  * (`.seed`/`.request`/`.fixture`/`toMatch`)? A template with an expression or a
  * variable makes the reference set incomplete, so the feature is reported at
@@ -699,7 +730,17 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
 // ── C9 (dead fixtures + orphan dirs) ─────────────────────────────────────────
 
 /** Is a top-level ground-subdir entry referenced by any test literal? */
-function entryReferenced(entry: string, entryIsDir: boolean, literals: Set<string>): boolean {
+function entryReferenced(
+    entry: string,
+    entryIsDir: boolean,
+    literals: Set<string>,
+    patterns: LiteralPattern[] = [],
+): boolean {
+    for (const pattern of patterns) {
+        if (entry.startsWith(pattern.prefix) && entry.endsWith(pattern.suffix)) {
+            return true;
+        }
+    }
     for (const literal of literals) {
         if (entryIsDir) {
             // A referenced `<name>/…` tree counts entirely as used.
@@ -782,6 +823,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
         }
 
         const literals = new Set<string>();
+        const patterns: LiteralPattern[] = [];
         let downgrade = false;
         for (const testFile of testFiles) {
             if (testFile.endsWith(SPEC_EXTENSION)) {
@@ -794,6 +836,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             for (const literal of collectLiterals(text)) {
                 literals.add(literal);
             }
+            patterns.push(...collectLiteralPatterns(text));
             downgrade ||= hasNonLiteralFixtureArg(text);
         }
         const severity: Severity = downgrade ? 'warn' : 'error';
@@ -802,7 +845,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             const subPath = join(dir, sub);
             for (const entry of readdirSync(subPath, { withFileTypes: true })) {
                 const entryIsDir = entry.isDirectory();
-                if (entryReferenced(entry.name, entryIsDir, literals)) {
+                if (entryReferenced(entry.name, entryIsDir, literals, patterns)) {
                     continue;
                 }
                 const relEntry = relative(rootDir, join(subPath, entry.name));

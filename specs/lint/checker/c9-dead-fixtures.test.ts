@@ -52,6 +52,17 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         expect(result.stderr).toMatch('c9-dead-pool.txt');
     });
 
+    test('a golden named by a template literal in a table is a reference, not silence', async () => {
+        // Given - the form chapter 17 prescribes for the golden half: one row
+        // Per case, `toMatch(`${name}.json`)`, three goldens beside the test
+        const result = await cli.fixture('$FIXTURES/lint-violations/c9-table-golden-ok/').exec('.');
+
+        // Then - none of the three is dead: the literal's static ends say
+        // Which files the table could have asked for
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch('clean.txt');
+    });
+
     test('an escaped literal preceding a fixture reference does not desync quote scanning', async () => {
         // Given - a test whose escaped-newline string precedes a .seed('used.sql') reference
         const result = await cli
