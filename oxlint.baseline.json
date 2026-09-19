@@ -1,7 +1,6 @@
 {
     "eslint/class-methods-use-this": 15,
     "eslint/complexity": 31,
-    "eslint/default-case": 1,
     "eslint/eqeqeq": 2,
     "eslint/max-classes-per-file": 3,
     "eslint/max-depth": 5,

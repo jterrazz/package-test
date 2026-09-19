@@ -52,7 +52,6 @@ export const content: ElementFactory = named('text');
 
 /** The escape hatch: an element by `data-testid`. Prefer user-facing elements. */
 export const testId = (id: string): ElementRef => ({ kind: 'testId', name: id });
-
 /*
  * The landmarks — the containers a scope can name. This is the ARIA landmark
  * set and nothing else: a closed, standard vocabulary keeps `within()` from
@@ -110,3 +109,36 @@ export const within = (scope: ElementRef, target: ElementRef): ElementRef => ({
     ...target,
     scope: target.scope ? { ...target.scope, scope } : scope,
 });
+
+/*
+ * Five more roles a visitor reads and acts on. They are not landmarks — a
+ * landmark is a CONTAINER of a page — but they take an optional name for the
+ * same reason: a page carries several rows and several list items, and one
+ * status has none at all.
+ */
+
+/** A modal or non-modal `<dialog>`, by accessible name. A closed one is absent. */
+export const dialog: LandmarkFactory = landmark('dialog');
+
+/** A live region announcing a result — `role="status"`, an `<output>`. */
+export const status: LandmarkFactory = landmark('status');
+
+/** A table, by its caption or accessible name. */
+export const table: LandmarkFactory = landmark('table');
+
+/** A row of a table or grid, by the text of its cells. */
+export const row: LandmarkFactory = landmark('row');
+
+/** An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`. */
+export const listitem: LandmarkFactory = landmark('listitem');
+
+/**
+ * Where the keyboard is: `see(focused(button('Open')))` asserts the element has
+ * focus, `gone(focused(x))` that it does not.
+ *
+ * A modifier rather than a descriptor of its own, because focus is a STATE of
+ * an element the vocabulary can already name. It is a verb's business and never
+ * a golden's: the accessibility tree carries no focus, so a tree snapshot of a
+ * dialog that took the keyboard and one that did not are byte-identical.
+ */
+export const focused = (element: ElementRef): ElementRef => ({ ...element, focused: true });
