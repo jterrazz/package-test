@@ -32,6 +32,12 @@ type CommonOptions = {
     exclude?: string[];
     /** Replace the canonical `include` globs. */
     include?: string[];
+    /**
+     * Run this project's files ONE AT A TIME (`fileParallelism: false`) — for
+     * the facets whose files share something a second worker would collide
+     * with: one served app, one database file, one browser profile.
+     */
+    serial?: boolean;
     /** Raise (or lower) the 30s budget for this project alone. */
     timeout?: number;
 };
@@ -418,6 +424,7 @@ export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfigu
         test: {
             exclude: options.exclude ?? ['specs/**', '**/*.test.tsx'],
             include: options.include ?? fromRoots ?? ['**/*.test.ts'],
+            ...(options.serial === true ? { fileParallelism: false } : {}),
             name: 'unit',
             // Node projects run first; the two browser projects follow.
             sequence: { groupOrder: 0 },
@@ -436,6 +443,7 @@ export function website(options: WebsiteProjectOptions = {}): TestProjectInlineC
     return mergeConfig(projectDefaults(), {
         test: {
             ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
+            ...(options.serial === true ? { fileParallelism: false } : {}),
             include: options.include ?? ['specs/website/**/*.test.ts'],
             name: 'website',
             sequence: { groupOrder: 1 },
@@ -492,6 +500,7 @@ export async function component(
                 viewport: viewportOf(options),
             },
             ...componentGlobs(options),
+            ...(options.serial === true ? { fileParallelism: false } : {}),
             name: 'component',
             // `shouldUpdateSnapshots()` reads process.env/argv, which a page
             // Does not have, and a wrap module is imported by URL there: both

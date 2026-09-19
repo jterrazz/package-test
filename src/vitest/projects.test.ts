@@ -78,6 +78,15 @@ describe('website() — the served product', () => {
         expect(project.sequence).toStrictEqual({ groupOrder: 1 });
     });
 
+    test('runs its files one at a time when the served app is shared', () => {
+        // Given - three website specs sharing one server and one database file
+        const shared = testOf(website({ serial: true }));
+
+        // Then - the project states it, so no consumer spreads it back over the helper
+        expect(shared.fileParallelism).toBe(false);
+        expect(testOf(website()).fileParallelism).toBeUndefined();
+    });
+
     test('takes the globs and the budget a project states instead', () => {
         // Given - a repository whose pages are specified elsewhere, and slowly
         const project = testOf(website({ include: ['e2e/**/*.test.ts'], timeout: 60_000 }));

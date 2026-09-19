@@ -84,6 +84,7 @@ export default defineSpecConfig({
 | `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory of the config that called `component()`     |
 | `include` / `exclude` | The globs. Default `['**/*.test.tsx']`, kept out of `specs/` — state your own `include` and the exclusion is yours too   |
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                |
+| `serial`              | `fileParallelism: false` — the project's renders run one file at a time                                                  |
 
 **Only the pipeline of `vite` is adopted.** An app's config says where the app LIVES — its `root`, its `build`, its `server.port`, its `publicDir` — and adopting those re-roots the run so the project collects nothing. The kept keys are an allow-list (`plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json`), and the consumer's `plugins` are concatenated after the seam's, never assigned over them.
 
