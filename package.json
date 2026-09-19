@@ -1,10 +1,12 @@
 {
     "name": "@jterrazz/test",
     "version": "15.1.1",
-    "description": "Declarative testing framework for HTTP APIs, CLIs, and background jobs — one entry point, real infrastructure, golden-file assertions, plus an oxlint convention plugin.",
+    "description": "Declarative testing framework for HTTP APIs, CLIs, background jobs, websites, mobile apps and rendered components — one entry point, real infrastructure and a real browser, golden-file assertions, plus an oxlint convention plugin.",
     "keywords": [
         "api-testing",
+        "browser-mode",
         "cli-testing",
+        "component-testing",
         "e2e",
         "golden-files",
         "hexagonal",
@@ -14,7 +16,8 @@
         "test-framework",
         "testcontainers",
         "testing",
-        "vitest"
+        "vitest",
+        "website-testing"
     ],
     "license": "MIT",
     "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
