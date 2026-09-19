@@ -172,7 +172,7 @@ await visitor.see(focused(button('Open')));
 await visitor.see(disabled(button('Publish')));
 ```
 
-Both are a verb's business and never a golden's: the accessibility tree carries no focus state and no enablement, so a tree snapshot of a page that handed the keyboard back and one that did not are byte-identical. Enablement also has a direction a behavioural substitute cannot reach — clicking a disabled control is a timeout, not an answer.
+FOCUS is a verb's business and never a golden's: the accessibility tree carries none, so a tree snapshot of a page that handed the keyboard back and one that did not are byte-identical. ENABLEMENT the tree does carry — a disabled control reads `button "Publish" [disabled]` in it, and a selected option `[selected]` — so a golden pins it for a whole outline and `see(disabled(…))` names the one control a test is about. The modifier also buys a direction a behavioural substitute cannot reach: clicking a disabled control is a timeout, not an answer.
 
 The vocabulary is shared with the mobile facet — `button`, `field`, `content`, `testId`, `within` work identically in an `.open()` scenario ([15 — Mobile specs](15-mobile.md)) — and with the component facet, where the same descriptors, the same verbs and the same W3 refusal read a mounted unit ([16 — Component specs](16-component.md)). The landmarks below are website/component-only.
 
@@ -452,7 +452,7 @@ No `_seeds/` or `_requests/` — `specification.website()` has no `services` opt
 - **Reaching for `testId()` to escape an ambiguity.** It silences the refusal without answering it: the test stops asserting the role and the accessible name, which is most of what a user-facing element was buying. Scope it with `within()` instead — that is the fix rule W3 is pointing at.
 - **Assuming a name matches whole.** It is a substring by default: `link('Articles')` also matches "Read Articles". Pass `{ exact: true }` when that is what you meant.
 - **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
-- **Snapshotting the tree to prove focus.** The accessibility tree carries none — `see(focused(x))` is the assertion that does, and `see(disabled(x))` the one for a control that refuses input.
+- **Snapshotting the tree to prove focus.** The accessibility tree carries none — `see(focused(x))` is the assertion that does. Enablement and selection it DOES carry (`[disabled]`, `[selected]`), so those a golden may pin; `see(disabled(x))` is for the one control a test is about.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.
