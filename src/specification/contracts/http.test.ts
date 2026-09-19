@@ -204,3 +204,21 @@ describe('http — combined filter', () => {
         ).toBeFalsy();
     });
 });
+
+describe('http — responses', () => {
+    test('unreachable() is a transport failure, not a status', () => {
+        // Given - the collection declared unreachable
+        const response = http.unreachable();
+
+        // Then - nothing is served: the request itself fails, as it does when
+        // Nothing is listening. A 503 would test the other branch entirely.
+        expect(response).toStrictEqual({ body: null, transport: 'network-error' });
+    });
+
+    test('error() still answers with a status, which unreachable() never does', () => {
+        // Given - the two ways a call can go wrong
+        // Then - one has a reply and the other has none
+        expect(http.error(503).status).toBe(503);
+        expect(http.unreachable().status).toBeUndefined();
+    });
+});

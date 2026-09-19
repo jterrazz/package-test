@@ -48,6 +48,16 @@ export type ContractResponse = {
     headers?: Record<string, string> | undefined;
     /** Delay in ms before responding (for timeout testing). */
     delay?: number | undefined;
+    /**
+     * A transport failure instead of a reply: the request never reached a
+     * server, so `fetch` rejects. `status`, `body` and `headers` say nothing
+     * here — there is no response to carry them.
+     *
+     * The one thing a status code cannot express. A component's "the server did
+     * not answer, check that it is running" branch is reached by a rejected
+     * `fetch`, and a 503 stand-in tests the other branch entirely.
+     */
+    transport?: 'network-error' | undefined;
 };
 
 /**

@@ -73,6 +73,20 @@ test('fails the render when a component with no contract at all reaches the netw
     await expect(render).rejects.toThrow(/\/api\/posts/u);
 });
 
+test('serves a transport failure the way a server that is not running does', async () => {
+    // Given - the collection declared unreachable rather than answering a status
+    const offline = defineContract({
+        request: http.get('/api/posts'),
+        response: http.unreachable(),
+    });
+    const result = await component.intercept(offline).render(<PostTable />, async (visitor) => {
+        await visitor.see(content('Could not load posts'));
+    });
+
+    // Then - the component took its "nothing answered" branch, not an error status
+    expect(result.content).toContain('Could not load posts');
+});
+
 test('replaces the first surface when one test renders twice', async () => {
     // Given - two renders in one test, the second the only one left standing
     await component.intercept(listing).render(<PostTable />);
