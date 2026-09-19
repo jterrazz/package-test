@@ -88,3 +88,61 @@ export function textContains(accessor: TextAccessor, expected: string): TextComp
         pass,
     };
 }
+
+/**
+ * `toMatch` and `toContain` on a subject that is NOT an accessor.
+ *
+ * Both matchers are overridden globally, for every subject in the project, so
+ * whatever the framework does not own has to keep meaning what vitest's own
+ * matcher meant. Stated once here because the two builds register two different
+ * `expect.extend` calls: a copy in the page is how `expect(['ab']).toContain('b')`
+ * ends up passing on one side of the seam and failing on the other.
+ */
+
+/** vitest's `toMatch` for a plain string: a substring, or a regular expression. */
+export function nativeMatch(received: unknown, expected: unknown): TextComparison {
+    if (typeof received !== 'string') {
+        throw new TypeError(
+            'toMatch: unsupported subject — expected a stream, json, response, filesystem, or directory accessor, or a string.',
+        );
+    }
+    const pass =
+        expected instanceof RegExp ? expected.test(received) : received.includes(String(expected));
+    return {
+        message: () =>
+            `expected ${JSON.stringify(received)} ${pass ? 'not ' : ''}to match ${String(expected)}`,
+        pass,
+    };
+}
+
+/** vitest's `toContain` for a plain string (substring) or an iterable (membership). */
+export function nativeContain(received: unknown, expected: unknown): TextComparison {
+    if (typeof received === 'string') {
+        const pass = received.includes(String(expected));
+        return {
+            message: () =>
+                `expected ${JSON.stringify(received)} ${pass ? 'not ' : ''}to contain ${JSON.stringify(expected)}`,
+            pass,
+        };
+    }
+    if (isIterable(received)) {
+        const pass = [...received].includes(expected);
+        return {
+            message: () =>
+                `expected iterable ${pass ? 'not ' : ''}to contain ${JSON.stringify(expected)}`,
+            pass,
+        };
+    }
+    throw new TypeError(
+        `toContain: unsupported subject of type ${typeof received} — expected a stream accessor, string, or iterable.`,
+    );
+}
+
+/** Does this value hand out its members? A Set and an array both do; a DOM node does not. */
+function isIterable(value: unknown): value is Iterable<unknown> {
+    return (
+        value !== null &&
+        value !== undefined &&
+        typeof (value as Iterable<unknown>)[Symbol.iterator] === 'function'
+    );
+}

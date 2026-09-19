@@ -3,6 +3,8 @@ import { expect, inject } from 'vitest';
 import { GROUND_EXPECTED } from '../../specification/facets/_common/ground.js';
 import {
     compareStreamText,
+    nativeContain,
+    nativeMatch,
     requireExtension,
     textContains,
     textIsEmpty,
@@ -63,28 +65,14 @@ async function toMatch(received: unknown, expected: unknown): Promise<MatcherRes
         }
         return await matchGolden(received, expected);
     }
-    // Vitest-native semantics for strings (substring or regexp).
-    const actual = String(received);
-    const pass =
-        expected instanceof RegExp ? expected.test(actual) : actual.includes(String(expected));
-    return {
-        message: () =>
-            `expected ${JSON.stringify(actual)} ${pass ? 'not ' : ''}to match ${String(expected)}`,
-        pass,
-    };
+    return nativeMatch(received, expected);
 }
 
 function toContain(received: unknown, expected: unknown): MatcherResult {
     if (received instanceof TextAccessor) {
         return textContains(received, String(expected));
     }
-    const actual = String(received);
-    const pass = actual.includes(String(expected));
-    return {
-        message: () =>
-            `expected ${JSON.stringify(actual)} ${pass ? 'not ' : ''}to contain ${JSON.stringify(expected)}`,
-        pass,
-    };
+    return nativeContain(received, expected);
 }
 
 function toBeEmpty(received: unknown): MatcherResult {
