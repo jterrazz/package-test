@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { clock } from '../../vitest/clock.js';
 import { waitUntil } from './wait-until.js';
 
 describe('waitUntil — waiting on a condition, never on a duration', () => {
@@ -40,5 +41,16 @@ describe('waitUntil — waiting on a condition, never on a duration', () => {
                 why: 'the outbox held one message',
             }),
         ).rejects.toThrow('the outbox held one message did not hold within 10ms');
+    });
+
+    test('times out with its own sentence under a pinned calendar', async () => {
+        // Given - a frozen `Date`, which a deadline read off the calendar
+        // Would never pass: the poll would run until vitest killed the file
+        using _ = clock.at('2026-03-04T09:30:00Z');
+
+        // Then - the budget is the condition's, not the calendar's
+        await expect(
+            waitUntil(() => false, { interval: 1, timeout: 10, why: 'the queue drained' }),
+        ).rejects.toThrow('the queue drained did not hold within 10ms');
     });
 });

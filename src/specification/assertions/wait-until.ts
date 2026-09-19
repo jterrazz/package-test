@@ -27,6 +27,11 @@ const DEFAULT_INTERVAL_MS = 50;
  * The failure names the condition and how long it was given, so a timeout is a
  * sentence rather than "expected true, got false".
  *
+ * The budget is measured on `performance.now()`, not on `Date` — `clock.at()`
+ * freezes the calendar, and a deadline read off a frozen calendar never
+ * arrives: the poll would run until vitest killed the test with a sentence
+ * about the file rather than about the condition.
+ *
  * Not for a subject under `clock.run()`: there the scheduler is the test's, and
  * `clock.advance(ms)` is what makes time pass.
  *
@@ -39,12 +44,12 @@ export async function waitUntil(
 ): Promise<void> {
     const timeout = options.timeout ?? DEFAULT_TIMEOUT_MS;
     const interval = options.interval ?? DEFAULT_INTERVAL_MS;
-    const deadline = Date.now() + timeout;
+    const deadline = performance.now() + timeout;
     for (;;) {
         if (await predicate()) {
             return;
         }
-        if (Date.now() >= deadline) {
+        if (performance.now() >= deadline) {
             throw new Error(
                 `waitUntil(): ${options.why ?? 'the condition'} did not hold within ${timeout}ms. ` +
                     'Raise the budget if the wait is legitimate, or wait on what actually changes.',
