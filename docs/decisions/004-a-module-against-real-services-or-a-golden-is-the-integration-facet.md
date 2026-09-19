@@ -59,7 +59,7 @@ one `.call()` inside `test.each`.
 
 - **A refusal is a reading.** No `try`/`catch` in a spec, and no "it should
   throw" test that passes because nothing threw. A chain says "and it did not
-  refuse" with `expect(result.error).toBeEmpty()`.
+  refuse" with `await expect(result.error).toBeEmpty()`.
 - **D20 gains its destination.** `toMatchSnapshot` can be banned because every
   test it served now has a facet, a folder and a golden engine.
 - **One more folder name is spoken for.** `specs/integration/` is a facet

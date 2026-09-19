@@ -80,6 +80,7 @@ Always `await expect(…)` (IO). `database:` is **mandatory when the services re
 | -------------------------------- | ---------- | ---------------------------------------------------------------------- |
 | `toMatchRows({ columns, rows })` | async      | see below                                                              |
 | `toBeEmpty()`                    | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()` |
+| `toBeEmpty()` on a text subject  | async      | `await expect(result.error).toBeEmpty()` — the integration facet's "and it did not refuse" ([17](17-integration.md#the-result--callresult)) |
 
 ```typescript
 await expect(result.table('orders', { database: 'db' })).toMatchRows({
@@ -100,6 +101,8 @@ await expect(result.table('payment_intents', { database: 'db' })).toMatchRows({
     rows: [[match.ref('intent', { not: 'order' }), match.ref('order')]],
 });
 ```
+
+`toBeEmpty` is async on EVERY subject, the text ones included: it is one matcher with one signature, so a sync/async split by subject could not be expressed by a lint rule that keys on the matcher's name. Rule D2 therefore refuses the bare `expect(x).toBeEmpty();` outright — dropped, it passes the test and surfaces the real failure as an unhandled rejection.
 
 A failing `toMatchRows` prints the expected grid against the actual rows for the selected columns, cell by cell — matcher cells render as their placeholder text (`Matcher.toString()`): `match.uuid()` shows as `{{uuid}}`, `match.ref('order')` as `{{ref#order}}`, `match.ref('intent', { not: 'order' })` as `{{ref#intent!order}}`, `match.regex(/…/)` as `{{regex:…}}`. A failing `toBeEmpty` reports how many rows it found (the count, not the rows themselves). `.not` inverts both (`.not.toBeEmpty()` = at least one row).
 
@@ -238,7 +241,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------ |
 | `toMatch`     | `response`, `stdout`, `stderr`, `json`, `directory(…)`, `filesystem`                                                                                | sync, except directory/filesystem (async) | `_expected/` |
 | `toMatchRows` | `table(…)`                                                                                                                                          | async                                     | — (inline)   |
-| `toBeEmpty`   | `table(…)`                                                                                                                                          | async                                     | —            |
+| `toBeEmpty`   | `table(…)`, `error`, `console` and every text accessor                                                                                              | async (every subject)                     | —            |
 | `toContain`   | `stdout`, `stderr` (host and container-exec streams), container logs                                                                                | sync                                      | —            |
 | `toBeRunning` | `container(…)`                                                                                                                                      | async                                     | —            |
 | native vitest | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) | per vitest                                | —            |
