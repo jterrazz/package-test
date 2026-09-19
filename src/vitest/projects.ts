@@ -23,7 +23,11 @@ import { projectDefaults } from './preset.js';
 
 /** What every helper accepts on top of its canonical project. */
 type CommonOptions = {
-    /** Replace the canonical `include` globs. */
+    /**
+     * Replace the canonical `exclude` globs. A helper whose canonical
+     * `exclude` only guards its canonical `include` drops it when you state
+     * `include` alone, so state both or neither.
+     */
     exclude?: string[];
     /** Replace the canonical `include` globs. */
     include?: string[];
