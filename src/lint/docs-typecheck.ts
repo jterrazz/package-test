@@ -5,9 +5,11 @@ import { join } from 'node:path';
 /**
  * Doc typechecking — the guard against the historical defect class where a
  * `docs/*.md` sample drifts from the real API (e.g. keeps calling a removed
- * `.spawn()`). It extracts the ```typescript blocks that import the framework,
- * rewrites `@jterrazz/test` to the repo source, and runs the real `tsc` over
- * them so a stale sample surfaces as a type error.
+ * `.spawn()`). It extracts the ```typescript and ```tsx blocks that import the
+ * framework, rewrites `@jterrazz/test` to the repo source, and runs the real
+ * `tsc` over them so a stale sample surfaces as a type error. A rendered
+ * example is written as `.tsx` and compiled with the automatic JSX runtime —
+ * the chapter whose examples are newest must not be the one nothing checks.
  *
  * **Precision over coverage** (the miner's guidance): only blocks whose imports
  * are the framework plus resolvable neighbours (vitest, node builtins) are
@@ -17,17 +19,23 @@ import { join } from 'node:path';
  */
 
 /** Import specifiers allowed alongside `@jterrazz/test` in a checkable block. */
-const ALLOWED_NEIGHBOURS = new Set(['vitest', 'vitest/config']);
+const ALLOWED_NEIGHBOURS = new Set(['react', 'vitest', 'vitest/config']);
 
 const FRAMEWORK_SPECIFIER = '@jterrazz/test';
-const TYPESCRIPT_BLOCK = /```typescript\n(?<code>[\s\S]*?)```/gu;
+const TYPESCRIPT_BLOCK = /```(?<language>typescript|tsx)\n(?<code>[\s\S]*?)```/gu;
 const IMPORT_SOURCE = /(?:import|export)[^\n]*?\bfrom\s+['"](?<source>[^'"]+)['"]/gu;
 /** Vitest globals a runnable example must import to resolve. */
 const TEST_GLOBAL = /\b(?:expect|describe|test|it|beforeAll|afterAll|beforeEach|afterEach)\s*\(/u;
 
-/** Every ```typescript fenced block in a markdown document. */
-export function extractTypescriptBlocks(markdown: string): string[] {
-    return [...markdown.matchAll(TYPESCRIPT_BLOCK)].map((match) => match.groups?.code ?? '');
+/** One checkable example: its source, and whether it renders. */
+export type DocBlock = { code: string; jsx: boolean };
+
+/** Every ```typescript / ```tsx fenced block in a markdown document. */
+export function extractTypescriptBlocks(markdown: string): DocBlock[] {
+    return [...markdown.matchAll(TYPESCRIPT_BLOCK)].map((match) => ({
+        code: match.groups?.code ?? '',
+        jsx: match.groups?.language === 'tsx',
+    }));
 }
 
 /** The import specifiers of a code block. */
@@ -40,7 +48,8 @@ function importSources(code: string): string[] {
  * import resolves without app context (vitest, node builtins). App-code samples
  * are skipped on purpose.
  */
-export function isFrameworkBlock(code: string): boolean {
+export function isFrameworkBlock(block: DocBlock): boolean {
+    const { code } = block;
     const sources = importSources(code);
     if (!sources.includes(FRAMEWORK_SPECIFIER)) {
         return false;
@@ -72,7 +81,7 @@ export type DocTypecheckResult = { blocks: number; ok: boolean; output: string }
  * `vitest`/`node` type resolution walks up to the repo `node_modules`).
  */
 export function typecheckDocBlocks(options: {
-    blocks: string[];
+    blocks: DocBlock[];
     cacheDir: string;
     indexModule: string;
     tscBin: string;
@@ -85,8 +94,8 @@ export function typecheckDocBlocks(options: {
     try {
         blocks.forEach((block, index) => {
             writeFileSync(
-                join(dir, `block-${index}.ts`),
-                rewriteFrameworkImports(block, indexModule),
+                join(dir, `block-${index}.${block.jsx ? 'tsx' : 'ts'}`),
+                rewriteFrameworkImports(block.code, indexModule),
             );
         });
         writeFileSync(
@@ -94,6 +103,7 @@ export function typecheckDocBlocks(options: {
             JSON.stringify({
                 compilerOptions: {
                     esModuleInterop: true,
+                    jsx: 'react-jsx',
                     module: 'ESNext',
                     moduleResolution: 'Bundler',
                     noEmit: true,
@@ -103,7 +113,7 @@ export function typecheckDocBlocks(options: {
                     target: 'ESNext',
                     types: ['node'],
                 },
-                include: ['block-*.ts'],
+                include: ['block-*.ts', 'block-*.tsx'],
             }),
         );
         try {

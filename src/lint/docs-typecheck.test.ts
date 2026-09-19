@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import type { DocBlock } from './docs-typecheck.js';
 import {
     extractTypescriptBlocks,
     isFrameworkBlock,
@@ -27,7 +28,7 @@ const CACHE = resolve(ROOT, 'node_modules/.cache');
  * the README headline samples. Both are surfaces a stale sample would ship
  * through, so both are guarded.
  */
-function frameworkBlocks(): string[] {
+function frameworkBlocks(): DocBlock[] {
     const markdowns: string[] = [readFileSync(README, 'utf8')];
     for (const file of readdirSync(DOCS)) {
         if (file.endsWith('.md')) {
@@ -42,8 +43,8 @@ function frameworkBlocks(): string[] {
 describe('docs-typecheck — block selection', () => {
     test('keeps a framework block, drops an app-code block', () => {
         // Given - one block importing only the framework, one importing app code
-        const framework = "import { specification } from '@jterrazz/test';\n";
-        const appCode = "import { createApp } from '../../src/app.js';\n";
+        const framework = { code: "import { specification } from '@jterrazz/test';\n", jsx: false };
+        const appCode = { code: "import { createApp } from '../../src/app.js';\n", jsx: false };
 
         // Then - only the framework block is selected
         expect(isFrameworkBlock(framework)).toBeTruthy();
@@ -65,9 +66,12 @@ describe('docs-typecheck — block selection', () => {
 
 describe('docs-typecheck — the published samples typecheck', () => {
     test('every framework code block in docs/ compiles against src/', () => {
-        // Given - the framework-only ```typescript blocks across docs/
+        // Given - the framework-only ```typescript and ```tsx blocks across docs/
         const blocks = frameworkBlocks();
         expect(blocks.length).toBeGreaterThan(0);
+        // And - the rendered examples are among them: a chapter whose examples
+        // Are all JSX must not be the one this guard silently skips
+        expect(blocks.some((block) => block.jsx)).toBeTruthy();
 
         // Then - tsc --noEmit accepts them all (no drift from the real API)
         mkdirSync(CACHE, { recursive: true });
@@ -83,8 +87,10 @@ describe('docs-typecheck — the published samples typecheck', () => {
 
     test('a framework block that drifts from the API is rejected', () => {
         // Given - a framework block with a type error (the drift this guard exists to catch)
-        const drifted =
-            "import { specification } from '@jterrazz/test';\nconst count: number = 'not a number';\nvoid specification;\nvoid count;\n";
+        const drifted: DocBlock = {
+            code: "import { specification } from '@jterrazz/test';\nconst count: number = 'not a number';\nvoid specification;\nvoid count;\n",
+            jsx: false,
+        };
 
         // Then - the checker bites: it fails with a real diagnostic (proves the
         // Green run above is a genuine typecheck, not a vacuous pass)
