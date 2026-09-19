@@ -9,6 +9,7 @@ type ElementKind =
   | "heading"
   | "link"
   | "listitem"
+  | "option"
   | "row"
   | "status"
   | "table"
@@ -20,7 +21,7 @@ Defined in: [src/specification/ports/browser.port.ts:24](https://github.com/jter
 
 The interactive/textual element kinds — what a visitor actually acts on.
 
-`dialog`, `status`, `table`, `row` and `listitem` are ARIA roles like the
-landmarks, but they are not CONTAINERS of a page: they are things a visitor
-reads and acts on, and they are the roles the estate's UI specs were already
-reaching for through `getByRole` or, worse, through `.first()`.
+`dialog`, `status`, `table`, `row`, `listitem` and `option` are ARIA roles
+like the landmarks, but they are not CONTAINERS of a page: they are things a
+visitor reads and acts on, and they are the roles the estate's UI specs were
+already reaching for through `getByRole` or, worse, through `.first()`.

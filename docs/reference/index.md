@@ -152,6 +152,7 @@
 | [mockOfDate](variables/mockOfDate.md) | Freeze or reset the global Date for deterministic time-dependent tests. Wraps the `mockdate` package. |
 | [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
+| [option](variables/option.md) | An option of a select or a listbox, by its label — named inside the field that holds it: `within(field('Channel'), option('LinkedIn'))`. |
 | [region](variables/region.md) | The `region` landmark — a `<section>` carrying an accessible name. |
 | [row](variables/row.md) | A row of a table or grid, by the text of its cells. |
 | [search](variables/search.md) | The `search` landmark. |
@@ -173,7 +174,9 @@
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
 | [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |
+| [selected](functions/selected.md) | Which option the field is on: `see(selected(option('LinkedIn')))`, and `gone(selected(option('X')))` for the one it left. |
 | [sqlite](functions/sqlite.md) | Create a SQLite service handle. Uses file-copy isolation for parallel tests. |
 | [testId](functions/testId.md) | The escape hatch: an element by `data-testid`. Prefer user-facing elements. |
 | [text](functions/text.md) | Wrap an arbitrary string into a [TextAccessor](classes/TextAccessor.md) anchored on the calling test's directory — the same caller-detection the builders use. |
+| [valued](functions/valued.md) | What the field holds: `see(valued(field('Title'), 'Launch teaser'))`, and `gone(valued(field('Title'), '…'))` for a value it no longer holds. |
 | [within](functions/within.md) | Restrict a descriptor to the inside of another — the answer to ambiguity, and the one the framework prefers over a test id. |

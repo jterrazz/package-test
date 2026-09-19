@@ -5,7 +5,7 @@
 type BrowserMetaElement = object;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:106](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L106)
+Defined in: [src/specification/ports/browser.port.ts:123](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L123)
 
 A `<meta>` element captured from the rendered document's head.
 
@@ -17,7 +17,7 @@ A `<meta>` element captured from the rendered document's head.
 content: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:107](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L107)
+Defined in: [src/specification/ports/browser.port.ts:124](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L124)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [src/specification/ports/browser.port.ts:107](https://github.com/jte
 optional name?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:108](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L108)
+Defined in: [src/specification/ports/browser.port.ts:125](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L125)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [src/specification/ports/browser.port.ts:108](https://github.com/jte
 optional property?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:109](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L109)
+Defined in: [src/specification/ports/browser.port.ts:126](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L126)
