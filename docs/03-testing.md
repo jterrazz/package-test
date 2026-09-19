@@ -16,7 +16,7 @@ What proves a change here: this package specifies itself with itself. The suites
 
 | Project       | Collects                                                                                                      | Needs                                                                |
 | ------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `fast`        | `src/**/*.test.ts` + `specs/lint/**`                                                                          | Nothing — the lint specs need `npm run build` first                  |
+| `unit`        | `src/**/*.test.ts` + `specs/lint/**`, built by `unit()`                                                       | Nothing — the lint specs need `npm run build` first                  |
 | `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                               | Nothing — the Docker specs self-skip                                 |
 | `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                                 | Docker                                                               |
 | `jobs`        | `specs/jobs/**`, built by `jobs()`                                                                            | Docker                                                               |
@@ -25,13 +25,13 @@ What proves a change here: this package specifies itself with itself. The suites
 | `website`     | `specs/website/**`, built by `website()`                                                                      | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                                                   | the same chromium; no Docker. Runs in its own group, after `website` |
 
-Every facet the package specifies itself on comes from its own helper, so `--project api` means the same tree here as in any consumer. Two projects are still stated by hand and say why: `fast` collects two trees no canonical include describes (its rename to `unit()` belongs with the rest of the package's own migration), and `api-stack` is compose mode, which leaves the package in 16.0.
+Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. One project is still written by hand and says why: `api-stack` is compose mode, which leaves the package in 16.0.
 
 There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles, the orchestrator's own lifecycle — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/integrations/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
 
 ```bash
 npm test                            # every project — Docker and chromium both required
-npx vitest --run --project fast     # the loop: no infrastructure, after npm run build
+npx vitest --run --project unit     # the loop: no infrastructure, after npm run build
 npx vitest --run --project website  # after npx playwright install chromium
 npx vitest --run --project component  # the same chromium, a mounted unit at a time
 ```
@@ -88,7 +88,7 @@ The freshness meta-test is the reason a documentation change can turn the suite 
 A fixture the framework compares against is regenerated, never hand-tuned:
 
 ```bash
-TEST_UPDATE=1 npx vitest --run --project fast   # or: npx vitest --run -u
+TEST_UPDATE=1 npx vitest --run --project unit   # or: npx vitest --run -u
 ```
 
 Update mode writes **tokens, not values**: a segment already covered by a placeholder survives, and values known to be volatile — the working directory among them — are substituted back into placeholders (rule D5). Run the suite again afterwards; a fixture that does not round-trip on the second run was not a golden, it was a transcript.
@@ -103,7 +103,7 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 
 - **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.
 - **Hand-editing a golden under `specs/lint/checker/_expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
-- **Expecting `npm test` to pass with Docker stopped.** Only `fast` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs`, `integration` and `api-stack` fail honestly.
+- **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs`, `integration` and `api-stack` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.test.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
 
 ## Related
