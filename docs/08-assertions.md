@@ -230,7 +230,7 @@ const outbox: string[] = [];
 await waitUntil(() => outbox.length === 1, { why: 'the job wrote its one message' });
 ```
 
-The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the condition and the budget, so a timeout reads as a sentence rather than as "expected true, got false". Not for a subject under `clock.run()` — there the scheduler belongs to the test and `clock.advance(ms)` is what makes time pass ([12 — Conventions § Time](12-conventions.md#time--one-primitive-two-depths)).
+The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the condition and the budget, so a timeout reads as a sentence rather than as "expected true, got false". The budget is measured on `performance.now()`, never on `Date`, so `clock.at()` may freeze the calendar around a wait and the timeout still arrives with its own sentence. Not for a subject under `clock.run()` — there the scheduler belongs to the test and `clock.advance(ms)` is what makes time pass ([12 — Conventions § Time](12-conventions.md#time--one-primitive-two-depths)).
 
 ## Matcher summary
 
