@@ -132,6 +132,9 @@ export type {
     ContractResponseValue,
     MatchableRequest,
 } from './specification/contracts/types.js';
+// The module-scope double — the VALUE is each entry's (one engine per runtime);
+// The shape is stated here so the two surfaces can only publish the same one.
+export type { Intercept, InterceptScope } from './integrations/msw/scope.js';
 
 // Mock
 export { mockOf, type MockOfOptions, type MockPort } from './vitest/mock-of.js';

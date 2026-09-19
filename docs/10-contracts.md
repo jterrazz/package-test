@@ -200,6 +200,30 @@ test('serves the declared world', async () => {
 
 Repeated `.intercept()` calls **append**. Composition and override semantics live in `defineContracts` / `.with()`, never in call order.
 
+## `intercept()` — the same double, with no chain
+
+A module test has no runner and therefore no chain to hang contracts on, and its subject can still reach the network. `intercept(...)` is that case, and it takes the same three forms:
+
+```typescript
+import { http, intercept } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+test('reads the rate off the provider', async () => {
+    // Given - the one call this module makes, declared for the block
+    await using _ = await intercept(http.get('https://rates.test/eur'), http.json({ rate: 1.07 }));
+
+    // Then - the module answers with what the provider replied
+    const response = await fetch('https://rates.test/eur');
+    await expect(response.json()).resolves.toStrictEqual({ rate: 1.07 });
+});
+```
+
+The scope is an `AsyncDisposable`: the handlers come off at the end of the block however the block ends, and an outgoing request no contract accepted is thrown THERE — the same strictness a chain gets (rule D7), which is what makes it a guard and not a convenience.
+
+`await using _ = await intercept(…)` carries two awaits and both are load-bearing. The inner one waits for the engine to be listening; without it the subject could reach the real network before the first handler is in place. The shape refuses that spelling rather than leaving it to discipline: `intercept()` answers a promise, a promise is not an `AsyncDisposable`, and `await using _ = intercept(…)` does not compile.
+
+It is real in both runtimes — msw's server under node, msw's worker in a page — so a module test and a component test declare the outside world the same way. What it replaces is `vi.stubGlobal('fetch')` and a direct `msw/node` import, which rules F6 and F8 refuse a test and a consumer respectively.
+
 ## Two engines, one queue
 
 | Facets              | Engine                                            | Notes                                                                               |
