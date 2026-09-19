@@ -27,6 +27,7 @@ import {
 } from '../specification/facets/_common/result/directory.js';
 import { FilesystemAccessor } from '../specification/facets/_common/result/filesystem.js';
 import { JsonAccessor } from '../specification/facets/_common/result/json.js';
+import type { MatchFixtureOptions } from '../specification/facets/_common/result/match-options.js';
 import { ResponseAccessor } from '../specification/facets/_common/result/response.js';
 import { TableAccessor } from '../specification/facets/_common/result/table.js';
 import {
@@ -52,20 +53,6 @@ import { shouldUpdateSnapshots, UPDATE_HINT } from './update.js';
 type MatcherResult = {
     message: () => string;
     pass: boolean;
-};
-
-/**
- * Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a
- * single fixture OUT of update-mode rewriting: a frozen fixture is NEVER
- * written under `TEST_UPDATE=1` (or vitest `-u`) — in update mode a frozen
- * mismatch still throws its diff, and a frozen missing fixture still throws its
- * "does not exist" error. This is what makes a DELIBERATELY-WRONG fixture (the
- * subject of a negative test that asserts the mismatch/error rendering)
- * survivable across update runs instead of being silently overwritten with the
- * actual output.
- */
-export type MatchFixtureOptions = {
-    frozen?: boolean;
 };
 
 const PASS = (label: string): MatcherResult => ({ message: () => label, pass: true });

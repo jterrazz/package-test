@@ -18,10 +18,10 @@ import type { ContainerAccessor as ContainerAccessorType } from './integrations/
 import type { DirectoryAccessor as DirectoryAccessorType } from './specification/facets/_common/result/directory.js';
 import type { FilesystemAccessor as FilesystemAccessorType } from './specification/facets/_common/result/filesystem.js';
 import type { JsonAccessor as JsonAccessorType } from './specification/facets/_common/result/json.js';
+import type { MatchFixtureOptions as MatchFixtureOptionsType } from './specification/facets/_common/result/match-options.js';
 import type { ResponseAccessor as ResponseAccessorType } from './specification/facets/_common/result/response.js';
 import type { TableAccessor as TableAccessorType } from './specification/facets/_common/result/table.js';
 import type { TextAccessor as TextAccessorType } from './specification/facets/_common/result/text.js';
-import type { MatchFixtureOptions as MatchFixtureOptionsType } from './vitest/matchers.js';
 
 // The component facet — the chain lives in whichever build can run it (the
 // Page's), and the SHAPE is stated once so both entries publish the same one.
@@ -135,7 +135,7 @@ export { mockOf, type MockPort } from './vitest/mock-of.js';
 export { type MockDatePort, mockOfDate } from './vitest/mock-of-date.js';
 
 // Matcher options (per-call `toMatch(name, { frozen })`)
-export type { MatchFixtureOptions } from './vitest/matchers.js';
+export type { MatchFixtureOptions } from './specification/facets/_common/result/match-options.js';
 
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.

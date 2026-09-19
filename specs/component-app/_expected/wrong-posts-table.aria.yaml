@@ -1,0 +1,15 @@
+- main:
+  - region "Posts":
+    - heading "Posts" [level=1]
+    - table "Showing 3 of 200 posts":
+      - caption: Showing 3 of 200 posts
+      - rowgroup:
+        - row "Title":
+          - columnheader "Title"
+      - rowgroup:
+        - row "A first post":
+          - cell "A first post"
+        - row "A second post":
+          - cell "A second post"
+        - row "A third post":
+          - cell "A third post"

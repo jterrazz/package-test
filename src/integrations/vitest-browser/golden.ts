@@ -1,6 +1,7 @@
 import { expect, inject } from 'vitest';
 
 import { GROUND_EXPECTED } from '../../specification/facets/_common/ground.js';
+import type { MatchFixtureOptions } from '../../specification/facets/_common/result/match-options.js';
 import {
     compareStreamText,
     nativeContain,
@@ -18,9 +19,9 @@ import { readGolden, writeGolden } from './vitest-browser.adapter.js';
  * The node build reads a golden with `node:fs` and decides update mode from
  * `process.env`/`process.argv`; a page has neither. Everything ELSE is the same
  * assertion — the name-with-extension contract, the `{{token}}` grammar, the
- * diff, the "does not exist" refusal, the update hint — because the comparison
- * lives in `result/text-assertions.ts` and both builds call it. Only the
- * transport differs: two server commands and one `provide`.
+ * diff, the "does not exist" refusal, the update hint, `{ frozen: true }` —
+ * because the comparison lives in `result/text-assertions.ts` and both builds
+ * call it. Only the transport differs: two server commands and one `provide`.
  */
 
 type MatcherResult = { message: () => string; pass: boolean };
@@ -30,13 +31,17 @@ function updating(): boolean {
     return inject('update') === true;
 }
 
-async function matchGolden(accessor: TextAccessor, name: string): Promise<MatcherResult> {
+async function matchGolden(
+    accessor: TextAccessor,
+    name: string,
+    frozen: boolean,
+): Promise<MatcherResult> {
     requireExtension(name, 'stream');
     const actual = accessor.comparableText;
     const stored = await readGolden(name);
 
     if (stored === null) {
-        if (updating()) {
+        if (updating() && !frozen) {
             const path = await writeGolden(name, actual);
             return { message: () => `wrote ${path}`, pass: true };
         }
@@ -49,21 +54,25 @@ async function matchGolden(accessor: TextAccessor, name: string): Promise<Matche
     }
 
     const comparison = compareStreamText(accessor, name, stored);
-    if (!comparison.pass && updating()) {
+    if (!comparison.pass && updating() && !frozen) {
         await writeGolden(name, actual);
         return { message: () => `updated ${GROUND_EXPECTED}/${name}`, pass: true };
     }
     return comparison;
 }
 
-async function toMatch(received: unknown, expected: unknown): Promise<MatcherResult> {
+async function toMatch(
+    received: unknown,
+    expected: unknown,
+    options?: MatchFixtureOptions,
+): Promise<MatcherResult> {
     if (received instanceof TextAccessor) {
         if (typeof expected !== 'string') {
             throw new TypeError(
                 'toMatch on accessors takes a fixture name (extension included) — for a regex, assert on the raw text instead: expect(x.text).toMatch(/re/).',
             );
         }
-        return await matchGolden(received, expected);
+        return await matchGolden(received, expected, options?.frozen === true);
     }
     return nativeMatch(received, expected);
 }

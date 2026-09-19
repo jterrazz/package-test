@@ -87,6 +87,33 @@ test('serves a transport failure the way a server that is not running does', asy
     expect(result.content).toContain('Could not load posts');
 });
 
+/** The failure a golden assertion threw, as text — the subject of the test below. */
+async function refusalOf(assertion: Promise<void>): Promise<string> {
+    return await assertion.then(
+        () => 'the frozen golden matched, which the wrong one must never do',
+        (error: unknown) => (error instanceof Error ? error.message : String(error)),
+    );
+}
+
+test('never rewrites a frozen golden, and throws its diff instead', async () => {
+    // Given - a golden deliberately claiming a third row the table never draws
+    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
+        await visitor.see(content('Showing 2 of 200 posts'));
+    });
+
+    // Then - it threw its diff, and throws the SAME diff on a second read: a
+    // Rewrite would have made the second comparison pass, which is exactly what
+    // `{ frozen: true }` forbids under TEST_UPDATE=1 (docs/08 § update mode)
+    const first = await refusalOf(
+        expect(result.tree).toMatch('wrong-posts-table.aria.yaml', { frozen: true }),
+    );
+    const second = await refusalOf(
+        expect(result.tree).toMatch('wrong-posts-table.aria.yaml', { frozen: true }),
+    );
+    expect(first).toContain('A third post');
+    expect(second).toBe(first);
+});
+
 test('replaces the first surface when one test renders twice', async () => {
     // Given - two renders in one test, the second the only one left standing
     await component.intercept(listing).render(<PostTable />);
