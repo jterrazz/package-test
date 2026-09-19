@@ -182,7 +182,7 @@ expect(() => expect(result.response).toMatch('wrong-body.http', { frozen: true }
 );
 ```
 
-A frozen fixture is **never written** in update mode — a frozen mismatch still throws its diff, and a frozen _missing_ fixture still throws "does not exist" (never created). It is available on every fixture subject (`result.response`, `result.stdout`/`result.stderr`, `result.json`, `result.directory`, `result.filesystem`). The static rule `d13w-unfrozen-negative-fixture` flags a `toMatch` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
+A frozen fixture is **never written** in update mode — a frozen mismatch still throws its diff, and a frozen _missing_ fixture still throws "does not exist" (never created). Its failure says so rather than pointing at update mode: write the file by hand, or drop `{ frozen }` for one `TEST_UPDATE=1` run and put it back. It is available on every fixture subject (`result.response`, `result.stdout`/`result.stderr`, `result.json`, `result.directory`, `result.filesystem`). The static rule `d13w-unfrozen-negative-fixture` flags a `toMatch` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
 
 ## Known limitations
 
