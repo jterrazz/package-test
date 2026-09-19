@@ -7,6 +7,7 @@ import { DirectoryAccessor } from '../specification/facets/_common/result/direct
 import { FilesystemAccessor } from '../specification/facets/_common/result/filesystem.js';
 import { JsonAccessor } from '../specification/facets/_common/result/json.js';
 import { ResponseAccessor } from '../specification/facets/_common/result/response.js';
+import { TableAccessor } from '../specification/facets/_common/result/table.js';
 import { TextAccessor } from '../specification/facets/_common/result/text.js';
 import { parseResponseFile, serializeResponseFile } from '../specification/http-files/http-file.js';
 import { CaptureScope } from '../specification/matching/match.js';
@@ -410,5 +411,31 @@ describe('the hint a missing golden gives names a run that does something', () =
         expect(() => {
             expect(subject).toMatch('nowhere.txt', { frozen: true });
         }).toThrow('Write the file by hand');
+    });
+});
+
+describe('toMatchRows states the shape it wants before it queries', () => {
+    beforeAll(async () => {
+        await registerMatchers();
+    });
+
+    test('a bare array of rows is refused by the matcher, not by the adapter', async () => {
+        // Given - a real table subject and the instinctive argument: the rows,
+        // Without the columns the adapter needs to build its SELECT
+        const subject = new TableAccessor('MapPoi', {
+            query: async () => await Promise.resolve([]),
+            reset: async () => {
+                await Promise.resolve();
+            },
+            seed: async () => {
+                await Promise.resolve();
+            },
+        });
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the wrong shape IS the subject: the guard exists for the call the types already refuse
+        const pending = expect(subject).toMatchRows([{ id: 1 }] as never);
+
+        // Then - the refusal names the matcher and the shape, rather than
+        // Surfacing as a TypeError from inside SQL generation
+        await expect(pending).rejects.toThrow('toMatchRows takes { columns, rows }');
     });
 });
