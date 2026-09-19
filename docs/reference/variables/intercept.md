@@ -5,7 +5,7 @@
 const intercept: Intercept;
 ```
 
-Defined in: src/index.ts:24
+Defined in: src/index.ts:23
 
 The module-scope network double, on msw's node server — what a test with no
 chain to hang contracts on reaches for (chapter 10).

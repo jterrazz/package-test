@@ -1,6 +1,5 @@
 import { parseComposeFile } from './integrations/compose/compose-parser.js';
 import { ComposeStackAdapter } from './integrations/compose/compose.js';
-import { registerContracts } from './integrations/msw/intercept.js';
 import { interceptThrough } from './integrations/msw/scope.js';
 import type { Intercept } from './integrations/msw/scope.js';
 import { postgres } from './integrations/postgres/postgres.js';
@@ -21,7 +20,13 @@ export { specification } from './specification/facets/_common/specification.js';
  * The module-scope network double, on msw's node server — what a test with no
  * chain to hang contracts on reaches for (chapter 10).
  */
-export const intercept: Intercept = interceptThrough(registerContracts);
+export const intercept: Intercept = interceptThrough(async (contracts) => {
+    // Reached through the same lazy import the chain uses: a static one here
+    // Would pull the msw engine into every node consumer's graph at load, and
+    // The seam exists to be paid for only by the specs that declare a contract.
+    const { registerContracts } = await import('./integrations/msw/intercept.js');
+    return await registerContracts(contracts);
+});
 export { component } from './specification/facets/component/component.node.js';
 export {
     type ApiHandle,
