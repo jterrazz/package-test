@@ -1,0 +1,51 @@
+import { inject, onTestFinished, vi } from 'vitest';
+
+/**
+ * The runner, as the page reaches it.
+ *
+ * `vitest` is the framework's one sanctioned coupling and it lives in the
+ * layers that own a runner — `src/vitest/` for the config side, this seam for
+ * the page's. The component model asks for "after this test", "pin the clock"
+ * and "what did the project provide" and never learns which runner answers.
+ */
+
+/** Run `teardown` when the current test ends, however it ends. No hook in the spec. */
+export function afterThisTest(teardown: () => void): void {
+    onTestFinished(teardown);
+}
+
+/**
+ * Freeze the page's `Date` at `iso`. `Date` ONLY: faking the page's timers
+ * would stop React's scheduler and nothing would ever render.
+ */
+export function pinClock(iso: string): void {
+    vi.useFakeTimers({ now: new Date(iso), toFake: ['Date'] });
+}
+
+/** Give the page its real clock back. */
+export function releaseClock(): void {
+    vi.useRealTimers();
+}
+
+/** The instant `component({ clock })` pinned for every render, if it did. */
+export function providedClock(): string | undefined {
+    return inject('componentClock');
+}
+
+/** The URL of the project's `wrap` module, as the dev server serves it. */
+export function providedWrapPath(): string | undefined {
+    return inject('componentWrap');
+}
+
+/** What the project hands the page, declared where the page reads it. */
+declare module 'vitest' {
+    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
+    interface ProvidedContext {
+        /** The instant `component({ clock })` pins for every render. */
+        componentClock?: string;
+        /** The path, as the dev server serves it, of the project's `wrap` module. */
+        componentWrap?: string;
+        /** `TEST_UPDATE=1` / `-u`, read on the server and handed to the page. */
+        update?: boolean;
+    }
+}

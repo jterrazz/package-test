@@ -18,7 +18,6 @@ import { GROUND_EXPECTED } from '../specification/facets/_common/ground.js';
 import {
     formatDirectoryDiff,
     formatResponseDiff,
-    formatStdoutDiff,
     formatTableDiff,
 } from '../specification/facets/_common/reporter.js';
 import {
@@ -30,6 +29,12 @@ import { FilesystemAccessor } from '../specification/facets/_common/result/files
 import { JsonAccessor } from '../specification/facets/_common/result/json.js';
 import { ResponseAccessor } from '../specification/facets/_common/result/response.js';
 import { TableAccessor } from '../specification/facets/_common/result/table.js';
+import {
+    compareStreamText,
+    requireExtension,
+    textContains,
+    textIsEmpty,
+} from '../specification/facets/_common/result/text-assertions.js';
 import { TextAccessor } from '../specification/facets/_common/result/text.js';
 import { parseResponseFile, serializeResponseFile } from '../specification/http-files/http-file.js';
 import type { ParsedResponseFile } from '../specification/http-files/http-file.js';
@@ -39,7 +44,6 @@ import {
     mergeTextPreservingPlaceholders,
     renderExpected,
     structuralEquals,
-    textEquals,
 } from '../specification/matching/structural.js';
 import { shouldUpdateSnapshots, UPDATE_HINT } from './update.js';
 
@@ -64,14 +68,6 @@ export type MatchFixtureOptions = {
 
 const PASS = (label: string): MatcherResult => ({ message: () => label, pass: true });
 const FAIL = (message: string): MatcherResult => ({ message: () => message, pass: false });
-
-function requireExtension(name: string, subject: string): void {
-    if (!/\.[A-Za-z0-9]+$/u.test(name)) {
-        throw new Error(
-            `toMatch("${name}"): the extension is part of the name and is required for ${subject} subjects (e.g. "help.txt").`,
-        );
-    }
-}
 
 function formatJson(value: unknown): string {
     return `${JSON.stringify(value, null, 4)}\n`;
@@ -101,20 +97,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
         );
     }
 
-    // Text snapshots share the unified {{token}} grammar (CONVENTIONS D4).
-    const expected = readFileSync(filePath, 'utf8');
-    if (textEquals(expected, actual, accessor.captures)) {
-        return PASS(`expected ${accessor.streamName} not to match ${GROUND_EXPECTED}/${name}`);
-    }
-    // The diff judges each line through the SAME grammar the comparison used,
-    // So a token line that matched is shown as equal instead of competing with
-    // The real mismatch for the reader's attention.
-    return FAIL(
-        formatStdoutDiff(name, expected, actual, {
-            equals: (expectedLine, actualLine) =>
-                textEquals(expectedLine, actualLine, new CaptureScope(accessor.captures.workdir)),
-        }),
-    );
+    return compareStreamText(accessor, name, readFileSync(filePath, 'utf8'));
 }
 
 function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): MatcherResult {
@@ -390,18 +373,7 @@ function toMatch(
 
 function toContain(received: unknown, expected: unknown): MatcherResult {
     if (received instanceof TextAccessor) {
-        const actual = received.comparableText;
-        const text = String(expected);
-        const pass = actual.includes(text);
-        return {
-            message: () =>
-                pass
-                    ? `expected ${received.streamName} not to contain ${JSON.stringify(text)}`
-                    : `${received.streamName} does not contain expected substring.\n` +
-                      `  expected to contain: ${JSON.stringify(text)}\n` +
-                      `  actual: ${JSON.stringify(actual.length > 500 ? `${actual.slice(0, 500)}…` : actual)}`,
-            pass,
-        };
+        return textContains(received, String(expected));
     }
 
     // Delegate to vitest-native semantics for strings and iterables.
@@ -466,15 +438,7 @@ async function toMatchRows(
 
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {
     if (received instanceof TextAccessor) {
-        const content = received.comparableText;
-        const pass = content === '';
-        return {
-            message: () =>
-                pass
-                    ? `expected ${received.streamName} not to be empty`
-                    : `Expected ${received.streamName} to be empty, but it contains:\n${content}`,
-            pass,
-        };
+        return textIsEmpty(received);
     }
     if (!(received instanceof TableAccessor)) {
         throw new TypeError(

@@ -36,6 +36,15 @@ const FRAMEWORK_LAYERS = {
             'vitest/update',
         ],
         seams: {
+            // The component model reaches its two seams and never the runner:
+            // "after this test", "pin the clock" and "what did the project
+            // Provide" are asked of `integrations/vitest-browser/`, which owns
+            // The `vitest` import the way `src/vitest/` owns the config side.
+            'specification/facets/component/component.chain.ts': [
+                'integrations/msw/',
+                'integrations/vitest-browser/',
+            ],
+            'specification/facets/component/component.types.ts': ['integrations/vitest-browser/'],
             'specification/facets/mobile/start-mobile.ts': ['integrations/appium/'],
             'specification/facets/_common/builder.ts': ['integrations/msw/'],
             'specification/facets/website/start-website.ts': ['integrations/playwright/'],
@@ -55,6 +64,7 @@ const FRAMEWORK_LAYERS = {
             redis: ['redis'],
             sqlite: ['better-sqlite3'],
             testcontainers: ['testcontainers'],
+            'vitest-browser': ['react', 'vitest', 'vitest-browser-react'],
             yaml: ['yaml'],
         },
         imports: ['specification/'],
@@ -77,8 +87,22 @@ const FRAMEWORK_LAYERS = {
         ],
     },
     vitest: {
-        imports: ['specification/', 'vitest/', 'integrations/docker/'],
-        packages: ['vitest', 'vitest-mock-extended', 'mockdate'],
+        imports: [
+            'specification/',
+            'vitest/',
+            'integrations/docker/',
+            // The component project registers the seam's server-side commands:
+            // The golden pair and the ARIA producer are Browser Mode's, not the
+            // Model's, so they live with the adapter that reads them.
+            'integrations/vitest-browser/commands',
+        ],
+        packages: [
+            'vite',
+            'vitest',
+            'vitest-mock-extended',
+            'mockdate',
+            '@vitest/browser-playwright',
+        ],
     },
 };
 
@@ -102,9 +126,10 @@ const config: OxlintConfig = defineConfig(
                 },
             },
             {
-                // The vitest layer IS the sanctioned runner coupling (I1) — its
-                // `vitest` imports are the framework's own seam, not prod leakage.
-                files: ['src/vitest/**'],
+                // The vitest layer and the browser-mode seam ARE the sanctioned
+                // Runner coupling (I1) — their `vitest` imports are the
+                // Framework's own seam, not prod leakage.
+                files: ['src/vitest/**', 'src/integrations/vitest-browser/**'],
                 rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
             },
         ],

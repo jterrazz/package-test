@@ -76,8 +76,14 @@ export type SpecConfig = {
  * Defaults a vitest PROJECT accepts. `coverage` and `reporters` are root-only
  * options (vitest omits them from a project's config), so they are absent here
  * on purpose — setting them would be silently dropped.
+ *
+ * Exported for the project helpers, which build their canonical project ON
+ * these rather than beside them: a helper's project must carry the same
+ * budgets and the same artefact directory as a hand-written one.
+ *
+ * @internal
  */
-function projectDefaults(): TestProjectInlineConfiguration {
+export function projectDefaults(): TestProjectInlineConfiguration {
     return {
         cacheDir: VITEST_ARTIFACTS_DIR,
         test: {

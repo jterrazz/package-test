@@ -20,6 +20,7 @@ import type {
 import type { postgres as postgresFn } from '../integrations/postgres/postgres.js';
 import type { redis as redisFn } from '../integrations/redis/redis.js';
 import type { sqlite as sqliteFn } from '../integrations/sqlite/sqlite.js';
+import { registerBrowserMatchers } from '../integrations/vitest-browser/golden.js';
 import type { Orchestrator as OrchestratorClass } from '../specification/facets/_common/orchestrator.js';
 import type { DirectoryAccessor as DirectoryAccessorClass } from '../specification/facets/_common/result/directory.js';
 import type { FilesystemAccessor as FilesystemAccessorClass } from '../specification/facets/_common/result/filesystem.js';
@@ -35,6 +36,13 @@ import type {
     PageResult as PageResultClass,
 } from '../specification/facets/website/result.js';
 import { nodeOnlyClass, refuse } from './node-only.js';
+
+// The page's own matchers, armed by the import that brought `component` in: a
+// Component test writes no setup file and no hook for them.
+registerBrowserMatchers();
+
+// ── The component facet — real here, and only here ──
+export { component } from '../specification/facets/component/component.chain.js';
 
 // ── The surface both runtimes share ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's

@@ -14,6 +14,7 @@ export * from './surface.js';
 
 // ── Core API — the single import point (CONVENTIONS F1) ──
 export { specification } from './specification/facets/_common/specification.js';
+export { component } from './specification/facets/component/component.node.js';
 export {
     type ApiHandle,
     type ApiSpecificationOptions,

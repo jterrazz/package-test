@@ -23,6 +23,18 @@ import type { TableAccessor as TableAccessorType } from './specification/facets/
 import type { TextAccessor as TextAccessorType } from './specification/facets/_common/result/text.js';
 import type { MatchFixtureOptions as MatchFixtureOptionsType } from './vitest/matchers.js';
 
+// The component facet — the chain lives in whichever build can run it (the
+// Page's), and the SHAPE is stated once so both entries publish the same one.
+export type {
+    ComponentChain,
+    ComponentScenario,
+    ComponentVisitor,
+    RenderSubject,
+} from './specification/facets/component/component.types.js';
+export type { RenderResult } from './specification/facets/component/component.result.js';
+export type { RenderedText } from './specification/facets/component/rendered-text.js';
+export type { ComponentUi, DomMount } from './integrations/vitest-browser/ui.js';
+
 // Match — dynamic values in assertions and fixtures
 export {
     type CaptureScope,

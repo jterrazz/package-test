@@ -8,3 +8,9 @@
 
 export { literate, type LiterateOptions, type LiteratePlugin } from './literate-plugin.js';
 export { defineSpecConfig, type SpecConfig } from './preset.js';
+export {
+    component,
+    type ComponentProjectOptions,
+    unit,
+    type UnitProjectOptions,
+} from './projects.js';
