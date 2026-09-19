@@ -125,16 +125,17 @@ test('subscribes through the form and captures the final state', async () => {
 
 Visitor verbs — every action auto-waits (playwright actionability); there are no sleeps anywhere in the framework:
 
-| Verb                      | Description                                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| `click(element)`          | Click the element                                                                   |
-| `fill(element, value)`    | Fill a form field                                                                   |
-| `press(key)`              | Press a key (e.g. `'Enter'`)                                                        |
-| `select(element, option)` | Select an option in a select field                                                  |
-| `check(element)`          | Check a checkbox or radio                                                           |
-| `hover(element)`          | Hover the element                                                                   |
-| `goto(path)`              | Navigate to another path of the site under test                                     |
-| `see(element)`            | **The only synchronization primitive** — retries until visible, times out otherwise |
+| Verb                      | Description                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| `click(element)`          | Click the element                                                                  |
+| `fill(element, value)`    | Fill a form field                                                                  |
+| `press(key)`              | Press a key (e.g. `'Enter'`)                                                       |
+| `select(element, option)` | Select an option in a select field                                                 |
+| `check(element)`          | Check a checkbox or radio                                                          |
+| `hover(element)`          | Hover the element                                                                  |
+| `goto(path)`              | Navigate to another path of the site under test                                    |
+| `see(element)`            | **The synchronization primitive** — retries until visible, times out otherwise     |
+| `gone(element)`           | The absence primitive — retries until the element is hidden or out of the document |
 
 Elements are **user-facing by construction** (rule W2) — there is no CSS/XPath surface:
 
@@ -147,7 +148,27 @@ Elements are **user-facing by construction** (rule W2) — there is no CSS/XPath
 | `content(text)` | any element containing the text                  |
 | `testId(id)`    | `data-testid` — the escape hatch (rule W2 warns) |
 
-The vocabulary is shared with the mobile facet — `button`, `field`, `content`, `testId`, `within` work identically in an `.open()` scenario ([15 — Mobile specs](15-mobile.md)); the landmarks below are website-only.
+Five more roles a visitor reads and acts on, each optionally named because a page carries several of them and one of them usually carries no name at all:
+
+| Element           | Locates by                                              |
+| ----------------- | ------------------------------------------------------- |
+| `dialog(name?)`   | a `<dialog>` or `role="dialog"`. A closed one is absent |
+| `status(name?)`   | a live region announcing a result                       |
+| `table(name?)`    | a table, by its caption or accessible name              |
+| `row(name?)`      | a row of a table or grid, by the text of its cells      |
+| `listitem(name?)` | an item of a list — the answer to an unnamed `<li>`     |
+
+And one MODIFIER, which is not a descriptor of its own: `focused(element)` asks where the keyboard is.
+
+```typescript
+await visitor.press('Escape');
+await visitor.gone(dialog('Settings'));
+await visitor.see(focused(button('Open')));
+```
+
+Focus is a verb's business and never a golden's: the accessibility tree carries no focus state, so a tree snapshot of a page that handed the keyboard back and one that did not are byte-identical.
+
+The vocabulary is shared with the mobile facet — `button`, `field`, `content`, `testId`, `within` work identically in an `.open()` scenario ([15 — Mobile specs](15-mobile.md)) — and with the component facet, where the same descriptors, the same verbs and the same W3 refusal read a mounted unit ([16 — Component specs](16-component.md)). The landmarks below are website/component-only.
 
 ## Designating exactly one element
 
@@ -249,6 +270,21 @@ test('navigates to another page and captures where it landed', async () => {
 | `result.html`       | `TextAccessor`        | Full serialized DOM (`document.documentElement.outerHTML`)                      |
 | `result.console`    | `TextAccessor`        | Every console message, one `[type] text` line per message                       |
 | `result.errors`     | `TextAccessor`        | Console messages of type `error` only                                           |
+| `result.tree`       | `TextAccessor`        | The ARIA snapshot of the rendered `<body>` — the page's outline, as a golden    |
+
+### `result.tree` — the outline, as the accessibility tree draws it
+
+```typescript
+test('lays the article out as a reader walks it', async () => {
+    // Given - the fixture article page
+    const result = await website.visit('/articles/hexagonal');
+
+    // Then - the outline is what a screen reader would walk
+    expect(result.tree).toMatch('article.aria.yaml');
+});
+```
+
+It is produced by the same Playwright `ariaSnapshot()` the component facet calls, so a page's outline and a component's outline are the same kind of golden and comparable to each other. Deterministic where a screenshot is not, and it says what the markup MEANS rather than what it is made of.
 
 ## The `head` golden — one per page
 
@@ -407,6 +443,8 @@ No `_seeds/` or `_requests/` — `specification.website()` has no `services` opt
 - **Reaching for `testId()` as the default locator.** It exists as an escape hatch (rule W2 warns) — prefer `button`/`link`/`field`/`heading`/`content`, the same vocabulary a user's accessibility tree exposes.
 - **Reaching for `testId()` to escape an ambiguity.** It silences the refusal without answering it: the test stops asserting the role and the accessible name, which is most of what a user-facing element was buying. Scope it with `within()` instead — that is the fix rule W3 is pointing at.
 - **Assuming a name matches whole.** It is a substring by default: `link('Articles')` also matches "Read Articles". Pass `{ exact: true }` when that is what you meant.
+- **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
+- **Snapshotting the tree to prove focus.** The accessibility tree carries none — `see(focused(x))` is the assertion that does.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.
@@ -416,4 +454,4 @@ No `_seeds/` or `_requests/` — `specification.website()` has no `services` opt
 
 ## Related
 
-[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [09 — Tokens](09-tokens.md) · [15 — Mobile specs](15-mobile.md)
+[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [09 — Tokens](09-tokens.md) · [15 — Mobile specs](15-mobile.md) · [16 — Component specs](16-component.md)

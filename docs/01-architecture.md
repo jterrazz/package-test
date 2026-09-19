@@ -1,6 +1,6 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind five constructors, four source layers with declared edges, and four channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+What this package IS: one runner model behind five constructors, one chain that needs none, four source layers with declared edges, and four channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
 | The shape                  | Held below                                                                              |
 | -------------------------- | --------------------------------------------------------------------------------------- |
@@ -27,13 +27,15 @@ Five constructors exist and the list is closed (`src/specification/facets/_commo
 
 The asymmetry in that column is the model, not an oversight: `jobs` never spawns a container, so it is handed no `docker`; `website` and `mobile` drive a browser and a simulator rather than an orchestrated stack, so they carry neither.
 
+**One facet has no constructor**, and the same reason explains it: a rendered component starts nothing. `component` ([16 — Component specs](16-component.md)) is a chain the package exports directly — `component.intercept(…).render(<X />)` — so there is no handle to destructure and no `cleanup` to pass to `afterAll`. What every render of a project shares (the providers, the Vite pipeline, the viewport) is the PROJECT's, stated once by `component()` in `vitest.config.ts`.
+
 A runner is created **once per suite**, in a `*.specification.ts` file, and imported by the test files beside it. That split is what makes the container lifecycle affordable — one Postgres per suite, not one per test — and it is why `afterAll(cleanup)` belongs in the specification file and nowhere else.
 
 ### The seam under the chain
 
 `SpecificationBuilder` (`src/specification/facets/_common/builder.ts`) holds the chain for every facet; each facet contributes its own setups and its own terminal actions on top. The infrastructure a chain needs is reached through **ports** — `src/specification/ports/` declares eight of them (`browser`, `cli`, `container`, `database`, `device`, `isolation`, `server`, `service`) — and an integration implements one. So the chain knows "a database exists"; it never knows Postgres.
 
-Two seams are opened lazily rather than imported: `playwright` for `.visit()` and `appium`/`webdriverio` for `.open()` are optional peer dependencies, loaded by the one module that owns them. A project that tests no page installs neither.
+Three seams are opened lazily rather than imported: `playwright` for `.visit()`, `appium`/`webdriverio` for `.open()`, and `@vitest/browser-playwright` + `vitest-browser-react` + `react` for `component.render()` are optional peer dependencies, loaded by the one module that owns them. A project that tests no page and no component installs none of them.
 
 ## The four layers
 
@@ -42,13 +44,15 @@ The source tree is four layers with declared, one-directional edges. The map is 
 | Layer            | May import                                                                            | Holds                                                                                                                                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `specification/` | itself, plus the docker/hono/yaml integrations and two `vitest/` helpers              | The model: the specification builder and its facets, the results and their accessors, the `{{token}}` engine, the `.http` and `<case>.spec.yaml` grammars, the contract queue, the ports |
-| `integrations/`  | its OWN external dependency, plus `specification/`                                    | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `compose`, `docker`, `hono`, `playwright`, `appium`, `msw`, `openai`, `anthropic`, `yaml`                    |
+| `integrations/`  | its OWN external dependency, plus `specification/`                                    | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `compose`, `docker`, `hono`, `playwright`, `vitest-browser`, `appium`, `msw`, `openai`, `anthropic`, `yaml`  |
 | `vitest/`        | `vitest`, `vitest-mock-extended`, `mockdate`, `specification/`, `integrations/docker` | ALL runner coupling: the `expect()` matchers, update-mode detection, `mockOf`/`mockOfDate`, the config preset and the `literate()` plugin                                                |
 | `lint/`          | itself, plus a short list of PURE `specification/` modules                            | The tool-facing channel: the oxlint plugin, the conventions checker, the catalogue manifest and generator                                                                                |
 
 Three of those edges carry their reason in the declaration itself. `specification/` reaches `integrations/docker` because that adapter has no dependency of its own to leak. `lint/` reaches exactly the pure modules the runner also uses — the token list, the ground names, the root walk, the `<case>.spec.yaml` parser — so that the file the lint accepts is the file the runner runs, from ONE parser. And `vitest/` is the only place the word `vitest` appears outside a test: swapping the runner would be a rewrite of that folder and of nothing else.
 
-`src/index.ts` is the composition root and names no layer. It wires the container integrations into the registry seam and re-exports the public surface; being the composition root is exactly why it is exempt from the layer map.
+`vitest-browser/` is the seam the component facet's runner coupling lives in — the locators, the visitor, the golden commands and the page's own `vitest` primitives — for the same reason `vitest/` holds the config side: `specification/` states what a render IS and never which runner performs it.
+
+There are TWO composition roots and neither names a layer. `src/index.ts` is node's: it wires the container integrations into the registry seam and re-exports the public surface. `src/browser/index.ts` is the page's, and `src/surface.ts` is what they agree on — see [What the tree publishes](#what-the-tree-publishes).
 
 ## The four enforcement channels
 
@@ -67,7 +71,11 @@ The channel a rule sits on is not prose here: it is a field of `src/lint/manifes
 
 The bundle is built by `tsdown` into `dist/` and its shape follows how each entry is consumed. `index` and `vitest`, plus the `checker`/`catalog` CLIs, are ESM-only — vitest is ESM-only and the CLIs are invoked as `node dist/*.js`. The `oxlint` plugin ships dual, because oxlint loads it from a consumer project that may itself be CommonJS.
 
-The public import surface is one root and two tool subpaths, and that is rule F1 rather than a convention of taste: `@jterrazz/test` for everything a spec uses, `@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/vitest` for what `vitest.config.ts` needs. The exemption is derived from the manifest's own `exports` map (`src/lint/package-exports.ts`), so a subpath is exempt the moment it is published and stops being exempt the moment it is withdrawn.
+**There are FOUR entries and no more**: `@jterrazz/test` for everything a spec uses, `@jterrazz/test/vitest` for what `vitest.config.ts` needs, `@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/schema` for an editor validating a `<case>.spec.yaml`. That is rule F1 rather than a convention of taste, and the exemption is derived from the manifest's own `exports` map (`src/lint/package-exports.ts`), so a subpath is exempt the moment it is published and stops being exempt the moment it is withdrawn.
+
+**The root entry has two runtimes.** A component test renders in a real browser, and the node entry cannot load there: it wires `pg`, `better-sqlite3`, `testcontainers` and `node:fs` at import. So `exports["."]` carries a `browser` condition resolving to `dist/browser/index.js` — the same public surface, built for a page, where every node-only name (the five constructors, the services, the docker accessors, the results that walk a disk) is a stub that throws where it was called, naming the facet and saying it runs under node. The split is the RUNTIME's and never the facets': one specifier, so no spec has to remember which entry it may import.
+
+`types` is stated once, and it is the node build's — so the two runtimes are ONE type surface and a name cannot exist on one side only. What both agree on lives in `src/surface.ts`, and the `package-exports` meta-test compares the two builds' exported names on every run.
 
 Two committed projections leave the code and land in the corpus: the API reference under `docs/reference/` (typedoc, through `typescript docs`) and the rule catalogue spliced into [13 — Linting](13-linting.md) and `skills/jterrazz-test/references/rules.md`. A third, `schema/spec.schema.json`, is generated from the document grammar's own constants and ships in the tarball. All three are regenerated by one gesture and sync-checked — see [02 — Developing](02-developing.md).
 
