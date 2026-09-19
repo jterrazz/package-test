@@ -4,7 +4,7 @@
 
 Use it when the subject is one thing that draws itself. For a whole served page use [website](14-website.md); for a module that draws nothing, a module test beside it needs no runner at all.
 
-Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md) (proposed).
+Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
 
 | The shape           | Held below                                                                       |
 | ------------------- | -------------------------------------------------------------------------------- |
@@ -229,4 +229,4 @@ test('gives the keyboard back to whatever opened it', async () => {
 
 ## Related
 
-[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [10 — Contracts](10-contracts.md) · [12 — Conventions](12-conventions.md) · [14 — Website specs](14-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md) (proposed)
+[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [10 — Contracts](10-contracts.md) · [12 — Conventions](12-conventions.md) · [14 — Website specs](14-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)

@@ -1,6 +1,6 @@
 # ADR-003: A rendered component is a facet, on Vitest Browser Mode
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-19
 
 ## Context
