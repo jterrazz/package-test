@@ -57,15 +57,20 @@ Every other facet starts something — a server, a database, a binary, a simulat
 | The contracts, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
 
 ```typescript
-// vitest.config.ts
+// apps/console/vitest.config.ts
 import { component, defineSpecConfig, unit } from '@jterrazz/test/vitest';
 
 export default defineSpecConfig({
     test: {
-        projects: [unit(), component({ vite: './vite.config.ts', wrap: './src/providers.tsx' })],
+        projects: [
+            unit({ roots: ['src', 'web'] }),
+            component({ vite: './web/vite.config.ts', wrap: './web/src/providers.tsx' }),
+        ],
     },
 });
 ```
+
+**A relative `vite` or `wrap` is the CONFIG's path, never the cwd's.** Both are resolved against the directory of the config that called `component()`, so the two paths above mean `apps/console/web/…` whoever loaded the file — the runner from the app, knip and `typescript check` from the repository root, where every config of a repository is read. State `root` when the anchor cannot be read that way: a call written outside the config it configures (a shared config factory), or a runner started in another tree entirely (`vitest --config apps/console/vitest.config.ts` from the root).
 
 `wrap` is a MODULE PATH whose default export is `(ui) => ReactNode` — a page imports a URL, not a function, so the providers cross as a setup file the project generates under `.artifacts/`. A router does not belong here: which routes exist is a test's Given, and it goes on the chain.
 
@@ -76,6 +81,7 @@ export default defineSpecConfig({
 | `clock`               | An ISO instant pinned for every render — a project whose components stamp the time                                       |
 | `viewport`            | `{ width, height }` of the page. Default `1280 × 720`                                                                    |
 | `timezone` / `locale` | The browser context's. Defaults `'UTC'` and `'en-US'`                                                                    |
+| `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory of the config that called `component()`     |
 | `include` / `exclude` | The globs. Default `['**/*.test.tsx']`, kept out of `specs/` — state your own `include` and the exclusion is yours too   |
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                |
 
