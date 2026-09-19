@@ -70,7 +70,7 @@ await component.render((container) => {
 
 ## Verbs
 
-The page's — owned by [references/website.md](website.md) — plus the two only a PARENT has: `rerender(ui)` and `unmount()`. No `goto` (a component has no address). The modifiers are the page's too: `see(focused(x))` asks where the keyboard is, `see(disabled(x))` / `see(enabled(x))` whether a control takes input.
+The page's — owned by [references/website.md](website.md) — plus the two only a PARENT has: `rerender(ui)` and `unmount()`. No `goto` (a component has no address). The modifiers are the page's too: `see(focused(x))` asks where the keyboard is, `see(disabled(x))` / `see(enabled(x))` whether a control takes input, `see(selected(option('LinkedIn')))` which option a select is on, `see(valued(field('Title'), 'Launch teaser'))` what a field holds.
 
 ## The result
 

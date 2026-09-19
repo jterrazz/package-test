@@ -11,11 +11,14 @@ import {
     listitem,
     main,
     navigation,
+    option,
     region,
     row,
+    selected,
     status,
     table,
     testId,
+    valued,
     within,
 } from './elements.js';
 
@@ -132,6 +135,51 @@ describe('disabled / enabled', () => {
             name: 'Publish',
             scope: { kind: 'main' },
         });
+    });
+});
+
+describe('option / selected', () => {
+    test('names an option the way every other role descriptor is named', () => {
+        // Given - one of the channels a select offers
+        const element = option('LinkedIn');
+
+        // Then - it is a descriptor of its role, carrying nothing else
+        expect(element).toStrictEqual({ kind: 'option', name: 'LinkedIn' });
+    });
+
+    test('modifies the option a field is on rather than replacing it', () => {
+        // Given - the chosen channel, named inside the field that holds it
+        const element = within(field('Channel'), selected(option('LinkedIn')));
+
+        // Then - the scope and the state travel on the one descriptor
+        expect(element).toStrictEqual({
+            kind: 'option',
+            name: 'LinkedIn',
+            scope: { kind: 'field', name: 'Channel' },
+            selected: true,
+        });
+    });
+});
+
+describe('valued', () => {
+    test('carries the value the field must hold', () => {
+        // Given - the title a form was filled with
+        const element = valued(field('Title'), 'Launch teaser');
+
+        // Then - the descriptor is the same one, asked about its value
+        expect(element).toStrictEqual({
+            kind: 'field',
+            name: 'Title',
+            value: 'Launch teaser',
+        });
+    });
+
+    test('states an empty value as emptiness, not as an absent modifier', () => {
+        // Given - the field a reset left behind
+        const element = valued(field('Title'), '');
+
+        // Then - the empty string is the value asked about
+        expect(element.value).toBe('');
     });
 });
 

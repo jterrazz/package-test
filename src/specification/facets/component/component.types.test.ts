@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { ElementRef, Visitor } from '../../ports/browser.port.js';
 import type { MobileVisitor } from '../../ports/device.port.js';
-import { disabled, focused } from '../website/elements.js';
+import { disabled, focused, option, selected, valued } from '../website/elements.js';
 import type { ComponentChain, ComponentVisitor } from './component.types.js';
 
 /**
@@ -58,6 +58,12 @@ export type MobileNeverRerenders = Assert<
 // Substitute cannot reach: clicking a disabled control is a timeout, not a no.
 export type WebElementTakesEnablement = Assert<Accepts<ElementRef, 'disabled'>>;
 
+// Selection and value are the other two states of a control, and they are
+// Modifiers of the same ref for the same reason. A mobile visitor reaches
+// Neither: it offers no `gone`, and `see` there is presence on a screen.
+export type WebElementTakesSelection = Assert<Accepts<ElementRef, 'selected'>>;
+export type WebElementTakesValue = Assert<Accepts<ElementRef, 'value'>>;
+
 // The setups a component test states per render. The page size is one of them:
 // A responsive component's Given is the viewport, and it belongs to ONE test.
 export type ComponentSetsViewport = Assert<Carries<ComponentChain, 'viewport'>>;
@@ -75,11 +81,15 @@ describe('the verb rows the compiler holds (W6)', () => {
     });
 
     test('a modifier is data whichever state it names', () => {
-        // Given - the enablement modifier, applied to a button
+        // Given - the four states a rendered control is asked about
         const element: ElementRef = disabled({ kind: 'button', name: 'Publish' });
+        const chosen: ElementRef = selected(option('LinkedIn'));
+        const held: ElementRef = valued({ kind: 'field', name: 'Title' }, 'Launch teaser');
 
-        // Then - it travels as a field, exactly as focus does
-        expect(element.disabled).toBeTruthy();
+        // Then - each travels as a field, exactly as focus does
+        expect(element.disabled).toBe(true);
+        expect(chosen.selected).toBe(true);
+        expect(held.value).toBe('Launch teaser');
     });
 
     test('states the rows in English beside the types that hold them', () => {
@@ -88,7 +98,7 @@ describe('the verb rows the compiler holds (W6)', () => {
             "rerender and unmount are the component facet's",
             "goto is the website facet's",
             'gone is on both rendered facets',
-            'focused and disabled are reachable only where see and gone are',
+            'focused, disabled, selected and valued are reachable only where see and gone are',
             'the chain states intercept, clock, wrap and viewport',
         ];
 

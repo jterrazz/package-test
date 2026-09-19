@@ -16,10 +16,10 @@ export type LandmarkKind =
 /**
  * The interactive/textual element kinds — what a visitor actually acts on.
  *
- * `dialog`, `status`, `table`, `row` and `listitem` are ARIA roles like the
- * landmarks, but they are not CONTAINERS of a page: they are things a visitor
- * reads and acts on, and they are the roles the estate's UI specs were already
- * reaching for through `getByRole` or, worse, through `.first()`.
+ * `dialog`, `status`, `table`, `row`, `listitem` and `option` are ARIA roles
+ * like the landmarks, but they are not CONTAINERS of a page: they are things a
+ * visitor reads and acts on, and they are the roles the estate's UI specs were
+ * already reaching for through `getByRole` or, worse, through `.first()`.
  */
 export type ElementKind =
     | 'button'
@@ -28,6 +28,7 @@ export type ElementKind =
     | 'heading'
     | 'link'
     | 'listitem'
+    | 'option'
     | 'row'
     | 'status'
     | 'table'
@@ -68,6 +69,19 @@ export type ElementRef = {
     kind: ElementKind | LandmarkKind;
     /** Landmarks may be anonymous (`main()`, `banner()`); everything else is named. */
     name?: string;
+    /**
+     * Narrows to "and it is (not) the chosen one" — built by `selected(x)`.
+     * An option of a COLLAPSED select is in the tree and in the document, and
+     * it has no box on the screen, so this facet of it is read from the node
+     * (`:checked`) rather than from what a visitor could point at.
+     */
+    selected?: boolean;
+    /**
+     * The value the field must hold — built by `valued(field('Title'), '…')`.
+     * A field's value is a PROPERTY of the node: a controlled input's `value`
+     * attribute never moves, so nothing but the live value answers for it.
+     */
+    value?: string;
     /**
      * Restrict the search to the elements of another descriptor — built by
      * `within(scope, target)`. Chains: a scope may itself carry a scope.

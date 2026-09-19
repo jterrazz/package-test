@@ -23,6 +23,11 @@ const pages = {
     <form>
         <label for="email">Email</label>
         <input id="email" type="email">
+        <label for="channel">Channel</label>
+        <select id="channel">
+            <option value="x">X</option>
+            <option value="linkedin">LinkedIn</option>
+        </select>
         <button type="button" id="subscribe">Subscribe</button>
         <button type="button" id="clear" disabled>Clear</button>
     </form>

@@ -158,18 +158,37 @@ Five more roles a visitor reads and acts on, each optionally named because a pag
 | `row(name?)`      | a row of a table or grid, by the text of its cells      |
 | `listitem(name?)` | an item of a list — the answer to an unnamed `<li>`     |
 
-And two MODIFIERS, neither a descriptor of its own — each narrows a descriptor by a STATE the vocabulary can already name the element of, and each is accepted by both `see` and `gone`:
+And one role that is read where it SITS rather than where it shows:
 
-| Modifier            | Asks                                                                           |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `focused(element)`  | Where the keyboard is                                                          |
-| `disabled(element)` | Whether the control refuses input — and `enabled(element)` the other direction |
+| Element        | Locates by                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| `option(name)` | an option of a select or a listbox, by its label — named inside the field holding it, with `within()` |
+
+`see(option('LinkedIn'))` asks whether the option is OFFERED, not whether it is on the screen: the options of a collapsed `<select>` are in the document and in the accessibility tree, and not one of them has a box until a visitor opens it. Which one the field is on is the `selected` modifier below.
+
+And four MODIFIERS, none a descriptor of its own — each narrows a descriptor by a STATE the vocabulary can already name the element of, and each is accepted by both `see` and `gone`:
+
+| Modifier                   | Asks                                                                           |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| `focused(element)`         | Where the keyboard is                                                          |
+| `disabled(element)`        | Whether the control refuses input — and `enabled(element)` the other direction |
+| `selected(element)`        | Which option the field is on                                                   |
+| `valued(element, 'value')` | What the field holds — its live value, never its `value` attribute             |
 
 ```typescript
 await visitor.press('Escape');
 await visitor.gone(dialog('Settings'));
 await visitor.see(focused(button('Open')));
 await visitor.see(disabled(button('Publish')));
+await visitor.see(selected(option('LinkedIn')));
+await visitor.see(valued(field('Title'), 'Launch teaser'));
+```
+
+Scope an option to its field when a page carries several selects — and NAME the descriptor when you do: three constructors inside a verb is one call too deep for `unicorn/max-nested-calls`, and the name reads better besides.
+
+```typescript
+const channel = within(field('Channel'), selected(option('LinkedIn')));
+await visitor.see(channel);
 ```
 
 FOCUS is a verb's business and never a golden's: the accessibility tree carries none, so a tree snapshot of a page that handed the keyboard back and one that did not are byte-identical. ENABLEMENT the tree does carry — a disabled control reads `button "Publish" [disabled]` in it, and a selected option `[selected]` — so a golden pins it for a whole outline and `see(disabled(…))` names the one control a test is about. The modifier also buys a direction a behavioural substitute cannot reach: clicking a disabled control is a timeout, not an answer.
