@@ -77,16 +77,6 @@ export default defineSpecConfig({
                 },
                 wrap: './specs/component-app/providers.tsx',
             }),
-            {
-                test: {
-                    name: 'seams',
-                    // The container seams themselves — the integrations the
-                    // Facets stand on, probed through their adapters. Sequential:
-                    // Container lifecycle (start/stop) is inherently serial.
-                    fileParallelism: false,
-                    include: ['specs/seams/**/*.test.ts'],
-                },
-            },
         ],
     },
 });

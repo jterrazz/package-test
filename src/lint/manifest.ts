@@ -409,7 +409,7 @@ export const RULE_DOCS = {
     'f3-specs-public-entry': {
         channel: 'statique',
         convention:
-            'Depuis `specs/`, seul l’import en profondeur des INTERNES du framework est interdit : un chemin relatif résolvant dans `src/{specification,integrations,vitest,lint}/` du dépôt du framework, ou tout `@jterrazz/test/<subpath>` que la map `exports` du paquet ne publie pas — les subpaths publiés sont exemptés, LUS du manifeste comme en F1, qui en tient la liste. Les imports de la source de SA PROPRE app par un consommateur sont toujours permis (c’est le motif documenté) ; seules les sondes de seam sous `specs/seams/` peuvent importer en profondeur `src/integrations/**` — l’adaptateur EST leur sujet.',
+            'Depuis `specs/`, seul l’import en profondeur des INTERNES du framework est interdit : un chemin relatif résolvant dans `src/{specification,integrations,vitest,lint}/` du dépôt du framework, ou tout `@jterrazz/test/<subpath>` que la map `exports` du paquet ne publie pas — les subpaths publiés sont exemptés, LUS du manifeste comme en F1, qui en tient la liste. Les imports de la source de SA PROPRE app par un consommateur sont toujours permis (c’est le motif documenté). Aucune exception de dossier : une sonde qui ne peut pas atteindre son sujet par l’entrée publique est un test de module à côté de son module, pas une spec.',
         family: 'F',
         id: 'F3',
         rationale:

@@ -7,13 +7,12 @@ What proves a change here: this package specifies itself with itself. The suites
 | Module tests    | `src/**/<file>.test.ts`                             | One module's behaviour, beside it (rule I2)                            |
 | Component tests | `specs/component-app/<file>.test.tsx`               | A rendered unit, beside it, in a real Chromium ([16](16-component.md)) |
 | Product specs   | `specs/<facet>/<domain>/<aspect>.test.ts`           | The framework's own facets, through the public surface                 |
-| Seam probes     | `specs/seams/<seam>/<seam>.test.ts`                 | The container integrations the facets stand on, through their adapters |
 | Spec documents  | `specs/cli/literate/*.spec.yaml`                    | The document format, collected as test files by `literate()`           |
 | Meta-tests      | `src/lint/*.test.ts`, `src/specification/matching/` | The framework applied to itself and to its own projections             |
 
-## The nine projects
+## The eight projects
 
-`test.projects` in `vitest.config.ts` declares nine, and which one you can run is decided by what is installed and running on the machine.
+`test.projects` in `vitest.config.ts` declares eight, and which one you can run is decided by what is installed and running on the machine.
 
 | Project       | Collects                                                                              | Needs                                                                |
 | ------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
@@ -21,15 +20,14 @@ What proves a change here: this package specifies itself with itself. The suites
 | `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`       | Nothing — the Docker specs self-skip                                 |
 | `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                         | Docker                                                               |
 | `jobs`        | `specs/jobs/**`, built by `jobs()`                                                    | Docker                                                               |
-| `integration` | `specs/integration/**`, built by `integration()`                                      | Docker                                                               |
+| `integration` | `specs/integration/**`, built by `integration()` — the container seams included       | Docker                                                               |
 | `api-stack`   | `specs/api/**` + `specs/jobs/**` with `TEST_MODE=compose`, minus intercepts and clock | Docker compose                                                       |
 | `website`     | `specs/website/**`, built by `website()`                                              | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                           | the same chromium; no Docker. Runs in its own group, after `website` |
-| `seams`       | `specs/seams/**`, sequential (`fileParallelism: false`)                               | Docker                                                               |
 
 Every facet the package specifies itself on comes from its own helper, so `--project api` means the same tree here as in any consumer. Two projects are still stated by hand and say why: `fast` collects two trees no canonical include describes (its rename to `unit()` belongs with the rest of the package's own migration), and `api-stack` is compose mode, which leaves the package in 16.0.
 
-`specs/seams/` is not a facet folder: it holds the package's probes of the container integrations the facets stand on — the testcontainers adapter's log capture, the orchestrator's lifecycle, the postgres and redis handles against a real container. They reach an adapter directly because the adapter IS their subject, which is why they sit outside `specs/integration/`, where every test speaks through the facet's runner.
+There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles, the orchestrator's own lifecycle — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/integrations/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
 
 ```bash
 npm test                            # every project — Docker and chromium both required
@@ -105,7 +103,7 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 
 - **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.
 - **Hand-editing a golden under `specs/lint/checker/_expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
-- **Expecting `npm test` to pass with Docker stopped.** Only `fast` and `cli` are infrastructure-free. The Docker-backed specs self-skip inside them, but `api`, `jobs`, `integration`, `api-stack` and `seams` fail honestly.
+- **Expecting `npm test` to pass with Docker stopped.** Only `fast` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs`, `integration` and `api-stack` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.test.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
 
 ## Related
