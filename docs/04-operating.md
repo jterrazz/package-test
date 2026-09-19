@@ -34,6 +34,8 @@ The package refuses to guess at its environment, so several things it uses are t
     npm install -D vitest@4.1.11 @vitest/browser-playwright@4.1.11   # one unit, both versions
     ```
 
+    The peer range names two majors, and 15.2's own suite is green on both ends of it: vitest 4.1.10 with the 4.1.10 provider — the pair this package locks — and vitest 5.0.1 with the 5.0.1 provider, the component and website projects and the seam's module tests run on each.
+
 - **Docker must be running** for the container-backed services and for compose mode. `sqlite()` and plain CLI specs need none.
 - **Node 20 or newer**, as `engines` states.
 - **A chromium**, for a page or a component: `npx playwright install chromium`, once. The component facet drives the same browser the website facet does, through the same peer.
