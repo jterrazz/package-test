@@ -39,7 +39,7 @@ Three shapes were weighed and refused:
 
 ## Decision
 
-`specification.integration({ services?, root? })` is the seventh kind of test
+`specification.integration({ services?, root? })` is the eighth kind of test
 and the sixth constructor. Its subject is a MODULE; its terminal action is
 `.call((services) => …)`, which hands the started record to the subject so it
 is built with real connection strings; its result is `CallResult`.
