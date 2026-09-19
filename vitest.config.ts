@@ -44,7 +44,11 @@ export default defineSpecConfig({
             // Parallel: each worker gets an isolated DB schema + Redis DB.
             api(),
             jobs(),
-            integration(),
+            // Serial: the facet's own probes of the container seams start
+            // Their own infrastructure — a compose stack among them — and a
+            // Docker daemon is the one thing every file of this project
+            // Shares. Run in parallel they starve each other's healthchecks.
+            integration({ serial: true }),
             {
                 test: {
                     name: 'api-stack',
