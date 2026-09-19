@@ -15,6 +15,13 @@ export type CallResultOptions = BaseResultOptions & {
 };
 
 /**
+ * What `result.value` is, decided by what the call returned: a string reads as
+ * a stream, anything else as JSON. `.call<T>()` already knows T, so the test
+ * reads one field (`result.value.value.ok`) without narrowing a union first.
+ */
+export type CallValue<Returned> = Returned extends string ? TextAccessor : JsonAccessor<Returned>;
+
+/**
  * The result of an in-process call — the integration facet's whole surface.
  *
  * Two readings, never both: `value` is what the call RETURNED, `error` is
@@ -24,11 +31,12 @@ export type CallResultOptions = BaseResultOptions & {
  * happy one, and the shape that quietly passes when nothing throws at all.
  *
  * Both are the package's ordinary accessors, so the golden mechanism reaches
- * them: `toMatch('<name>.json'|'<name>.txt')`, the `{{token}}` grammar,
+ * them, and `Returned` is what `.call<T>()` returned — `result.value.value` is
+ * that type, not `unknown`, so a one-field reading needs no golden file: `toMatch('<name>.json'|'<name>.txt')`, the `{{token}}` grammar,
  * `{ frozen }` and `TEST_UPDATE=1` all work here exactly as on an HTTP
  * response or a command's stdout.
  */
-export class CallResult extends BaseResult {
+export class CallResult<Returned = unknown> extends BaseResult {
     private readonly outcome: CallOutcome;
 
     constructor(options: CallResultOptions) {
@@ -60,17 +68,19 @@ export class CallResult extends BaseResult {
      * A call that threw returns the empty value: what it produced is
      * {@link CallResult.error}.
      */
-    get value(): JsonAccessor | TextAccessor {
+    get value(): CallValue<Returned> {
         const produced = this.outcome.threw ? null : this.outcome.value;
-        if (typeof produced === 'string') {
-            return new TextAccessor(produced, 'value', this.testDir, { captures: this.captures });
-        }
-        return new JsonAccessor(
-            JSON.stringify(produced ?? null),
-            this.testDir,
-            undefined,
-            this.captures,
-        );
+        const accessor =
+            typeof produced === 'string'
+                ? new TextAccessor(produced, 'value', this.testDir, { captures: this.captures })
+                : new JsonAccessor(
+                      JSON.stringify(produced ?? null),
+                      this.testDir,
+                      undefined,
+                      this.captures,
+                  );
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the branch above IS the conditional type, chosen on the same runtime shape the type reads
+        return accessor as CallValue<Returned>;
     }
 }
 
