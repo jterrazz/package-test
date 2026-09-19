@@ -73,11 +73,11 @@ Databases reset at the start of every chain, exactly as on api and jobs (rules B
 
 Two readings, never both.
 
-| Accessor         | Is                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------ |
-| `result.value`   | what the call RETURNED — a `TextAccessor` for a string, a `JsonAccessor` for anything else |
-| `result.error`   | what it THREW, as text: an `Error`'s message, or the value itself. Empty when it returned  |
-| `result.table()` | a table of a declared database, for row-level assertions                                   |
+| Accessor         | Is                                                                                                                                     |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `result.value`   | what the call RETURNED — a `TextAccessor` for a string, a `JsonAccessor<T>` for anything else, where `T` is what `.call<T>()` returned |
+| `result.error`   | what it THREW, as text: an `Error`'s message, or the value itself. Empty when it returned                                              |
+| `result.table()` | a table of a declared database, for row-level assertions                                                                               |
 
 A refusal is a reading, never a `try`/`catch`:
 
@@ -95,6 +95,8 @@ test('refuses an order that is not one', async () => {
 ```
 
 That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `await expect(result.error).toBeEmpty()` is how a chain says "and it did not refuse". The `await` is not optional: `toBeEmpty` answers a promise on every subject it takes, a dropped one passes the test while the real failure surfaces as an unhandled rejection, and rule D2 refuses the bare form.
+
+`.call<T>()` carries `T` through to the result, so one field is read where one field is what the spec means — `expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string — and a golden file is kept for what a golden file is for: a shape worth freezing whole.
 
 Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch('<name>.json'|'<name>.txt')` under `_expected/`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([09](09-tokens.md), [08](08-assertions.md)).
 
@@ -117,8 +119,11 @@ test.each(CASES)('renders $name', async ({ name, input }) => {
 
     // Then - the golden for that case
     expect(result.value).toMatch(`${name}.json`);
+    await expect(result.error).toBeEmpty();
 });
 ```
+
+The golden is named by a template literal, and the checker's C9 dead-fixture pass reads that form: a fixture whose name matches the literal's static ends is one the table could have asked for, so a wall of `_expected/` files stays alive without a hand-written literal each.
 
 ## The project
 

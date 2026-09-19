@@ -257,7 +257,7 @@ export type IntegrationSpecification<
      * record is handed in, so the subject is constructed with the real
      * connection strings rather than with a double.
      */
-    call: <T>(subject: (services: Services) => Promise<T> | T) => Promise<CallResult>;
+    call: <T>(subject: (services: Services) => Promise<T> | T) => Promise<CallResult<T>>;
 };
 
 /**
@@ -721,7 +721,7 @@ export class SpecificationBuilder
      *   const result = await integration.seed('rows.sql').call(({ db }) => find(db.connectionString, id));
      *   expect(result.value).toMatch('found.json');
      */
-    async call<T>(subject: (services: never) => Promise<T> | T): Promise<CallResult> {
+    async call<T>(subject: (services: never) => Promise<T> | T): Promise<CallResult<T>> {
         return await this.executeSetup(null, async () => await this.runCallAction(subject));
     }
 
@@ -861,7 +861,7 @@ export class SpecificationBuilder
 
     private async runCallAction<T>(
         subject: (services: never) => Promise<T> | T,
-    ): Promise<CallResult> {
+    ): Promise<CallResult<T>> {
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the record's TYPE is the constructor's type parameter, which this shared builder has no way to carry; the facet's signature is what the spec sees
         const services = (this.config.services ?? {}) as never;
         let outcome: { error: unknown; threw: boolean; value: unknown };

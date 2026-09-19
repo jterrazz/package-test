@@ -16,7 +16,7 @@ import { stripAnsiCodes } from './text.js';
  * Assertions go through `expect()`: `expect(result.json).toMatch('name.json')`
  * (deep-equal against `_expected/<name>`, with `{{placeholder}}` support).
  */
-export class JsonAccessor {
+export class JsonAccessor<Value = unknown> {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;
     /** @internal */
@@ -38,12 +38,19 @@ export class JsonAccessor {
         this.captures = captures ?? new CaptureScope();
     }
 
-    /** The parsed JSON value. Throws if the text is not valid JSON. */
-    get value(): unknown {
+    /**
+     * The parsed JSON value. Throws if the text is not valid JSON.
+     *
+     * `Value` is `unknown` unless the subject that produced this accessor
+     * knows better — `.call<T>()` does, and hands its T straight through so a
+     * one-field reading needs no cast in the test.
+     */
+    get value(): Value {
         const stripped = stripAnsiCodes(this.rawText);
         const source = this.transform ? this.transform(stripped) : stripped;
         try {
-            return JSON.parse(source);
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`; `Value` is the producer's claim about its own subject, `unknown` wherever nothing claims
+            return JSON.parse(source) as Value;
         } catch {
             const preview = source.slice(0, 200);
             throw new Error(`stdout is not valid JSON: ${preview}`);
