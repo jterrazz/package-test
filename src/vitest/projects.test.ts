@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { component, unit } from './projects.js';
+import { component, unit, website } from './projects.js';
 
 /** The `test` block of a project, whatever the helper wrapped around it. */
 function testOf(
@@ -48,6 +48,44 @@ describe('unit() — module tests, and only module tests', () => {
         // Then - what it states is what it collects
         expect(project.include).toStrictEqual(['packages/**/*.test.ts']);
     });
+
+    test('turns the trees a repository names into the globs that collect them', () => {
+        // Given - a repository whose modules live under two roots
+        const project = testOf(unit({ roots: ['packages', 'apps/'] }));
+
+        // Then - each root is a glob, and the trailing slash is not a second one
+        expect(project.include).toStrictEqual([
+            'packages/**/*.test.ts',
+            'apps/**/*.test.ts',
+        ]);
+    });
+
+    test('runs before either browser project', () => {
+        // Given - the canonical project
+        // Then - node first (0), the page facets after
+        expect(testOf(unit()).sequence).toStrictEqual({ groupOrder: 0 });
+    });
+});
+
+describe('website() — the served product', () => {
+    test('collects the website specs and opens its browser before the component one', () => {
+        // Given - the canonical website project
+        const project = testOf(website());
+
+        // Then - one name, one tree, and the group between node and component
+        expect(project.name).toBe('website');
+        expect(project.include).toStrictEqual(['specs/website/**/*.test.ts']);
+        expect(project.sequence).toStrictEqual({ groupOrder: 1 });
+    });
+
+    test('takes the globs and the budget a project states instead', () => {
+        // Given - a repository whose pages are specified elsewhere, and slowly
+        const project = testOf(website({ include: ['e2e/**/*.test.ts'], timeout: 60_000 }));
+
+        // Then - what it states is what it collects, and how long it gets
+        expect(project.include).toStrictEqual(['e2e/**/*.test.ts']);
+        expect(project.testTimeout).toBe(60_000);
+    });
 });
 
 describe('component() — the browser project', () => {
@@ -87,9 +125,19 @@ describe('component() — the browser project', () => {
         // Given - the canonical browser project on this install
         const project = await component();
 
-        // Then - react and the two adapters are declared up front
+        // Then - react and the react adapter are declared up front
         expect(project.optimizeDeps?.include).toContain('vitest-browser-react');
-        expect(project.optimizeDeps?.include).toContain('msw/browser');
+        expect(project.optimizeDeps?.include).toContain('react-dom/client');
+    });
+
+    test('leaves msw to the runner, which already excludes it', async () => {
+        // Given - the canonical browser project
+        const project = await component();
+
+        // Then - an entry both included and excluded is fatal to Vite 6 and 7's
+        // Optimizer, and `@vitest/browser` excludes exactly these two
+        expect(project.optimizeDeps?.include).not.toContain('msw');
+        expect(project.optimizeDeps?.include).not.toContain('msw/browser');
     });
 
     test('keeps the whole project out of specs/ until an include says otherwise', async () => {
@@ -107,9 +155,10 @@ describe('component() — the browser project', () => {
         // Given - a project pinning the clock for every render
         const project = testOf(await component({ clock: '2026-03-04T09:30:00.000Z' }));
 
-        // Then - update mode and the instant cross as values; a page has neither
+        // Then - update mode, the instant and the page size cross as values
         expect(project.provide).toStrictEqual({
             componentClock: '2026-03-04T09:30:00.000Z',
+            componentViewport: { height: 720, width: 1280 },
             update: false,
         });
     });
@@ -139,6 +188,24 @@ describe('component() — the browser project', () => {
         expect(project.define).toStrictEqual({ __APP__: 'true' });
         expect(project).not.toHaveProperty('root');
         expect(project).not.toHaveProperty('build');
+    });
+
+    test('keeps a consumer JSX transform rather than stating its own over it', async () => {
+        // Given - an app compiling JSX through another library's runtime
+        const stated = await component({ vite: { oxc: { jsx: { importSource: 'preact' } } } });
+        const canonical = await component();
+
+        // Then - the app's statement stands, and only a silent project gets the default
+        expect(stated.oxc).toStrictEqual({ jsx: { importSource: 'preact' } });
+        expect(canonical.oxc).toStrictEqual({ jsx: { runtime: 'automatic' } });
+    });
+
+    test('states the JSX default on the key the installed vite transforms with', async () => {
+        // Given - the canonical project against the vite this package installs
+        const project = await component();
+
+        // Then - never both: vite 8 warns for every esbuild option beside an oxc one
+        expect('esbuild' in project && 'oxc' in project).toBe(false);
     });
 
     test('concatenates a consumer plugin after the worker the seam serves', async () => {

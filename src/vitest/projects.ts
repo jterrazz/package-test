@@ -32,7 +32,16 @@ type CommonOptions = {
 };
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */
-export type UnitProjectOptions = CommonOptions;
+export type UnitProjectOptions = CommonOptions & {
+    /**
+     * The trees module tests live in, when they do not live in `src/`. Each
+     * root becomes `<root>/**\/*.test.ts`; `include` states the globs outright.
+     */
+    roots?: string[];
+};
+
+/** `website()` — the assembled product, met through a served page. */
+export type WebsiteProjectOptions = CommonOptions;
 
 /** `component()` — rendered units, beside the components they cover. */
 export type ComponentProjectOptions = CommonOptions & {
@@ -70,10 +79,15 @@ const PIPELINE_KEYS = [
     'resolve',
 ] as const;
 
-/** The seam's own runtime, pre-bundled so a cold cache never reloads mid-run. */
+/**
+ * The seam's own runtime, pre-bundled so a cold cache never reloads mid-run.
+ *
+ * `msw` and `msw/browser` are NOT here: `@vitest/browser` already puts both in
+ * `optimizeDeps.exclude`, and Vite's esbuild optimizer (6 and 7) treats an
+ * entry that is both included and excluded as fatal — dependency optimisation
+ * throws before a single test runs.
+ */
 const SEAM_DEPENDENCIES = [
-    'msw',
-    'msw/browser',
     'react',
     'react-dom/client',
     'react/jsx-dev-runtime',
@@ -95,9 +109,13 @@ function resolves(specifier: string): boolean {
 
 /**
  * Serve msw's worker script from the package's OWN install, at the path the
- * worker asks for. Without it every consumer would run `msw init` and commit a
- * copy into its public directory — and would have to declare `msw`, which F8
- * forbids because the framework already carries it.
+ * worker asks for, with the scope header a worker registered at `/` needs.
+ *
+ * `@vitest/browser` resolves `/mockServiceWorker.js` too, but from ITS own
+ * directory — and it does not depend on `msw`, so that resolution only lands
+ * where the installer hoists. The package that OWNS the dependency is the one
+ * that can always find it, and it is this one. Without either, a consumer runs
+ * `msw init` and declares `msw`, which F8 forbids.
  */
 function mswWorkerPlugin(): Plugin {
     return {
@@ -142,15 +160,21 @@ async function reroot(
         throw new Error(`component({ vite }): no config at ${where}`);
     }
 
+    const inactive = transformKey() === 'oxc' ? 'esbuild' : 'oxc';
     const kept: Record<string, unknown> = {};
     const config: Record<string, unknown> = { ...loaded };
     for (const key of PIPELINE_KEYS) {
-        if (config[key] !== undefined) {
+        if (config[key] !== undefined && key !== inactive) {
             kept[key] = config[key];
         }
     }
     return kept;
 }
+
+/** What a missing optional peer costs, said once rather than as a resolver stack. */
+const PROVIDER_MISSING =
+    'component(): @vitest/browser-playwright is an optional peer — install it beside the runner ' +
+    'it pins (npm i -D @vitest/browser-playwright@<the installed vitest version> playwright).';
 
 /** The installed version of a package, read from its own manifest. */
 function versionOf(specifier: string): string {
@@ -164,6 +188,32 @@ function versionOf(specifier: string): string {
 }
 
 /**
+ * Which of the two transformer keys the INSTALLED Vite actually reads.
+ *
+ * Vite 8 transforms with oxc and prints a warning for every `esbuild` option it
+ * is handed; Vite 6 and 7 transform with esbuild and have no `oxc` key at all.
+ * The inactive one is dropped rather than carried as a second, ignored
+ * statement — a config that says the same thing twice is a config that will one
+ * day say two different things.
+ */
+function transformKey(): 'esbuild' | 'oxc' {
+    return Number.parseInt(versionOf('vite').split('.')[0] ?? '', 10) >= 8 ? 'oxc' : 'esbuild';
+}
+
+/**
+ * The JSX default, on the key the running Vite reads, yielding to the
+ * consumer's own: a `jsxImportSource` or a classic runtime is the app's
+ * statement, not the seam's to overwrite.
+ */
+function jsxPipeline(pipeline: Partial<UserConfig>): Record<string, unknown> {
+    const key = transformKey();
+    if (key === 'oxc') {
+        return { oxc: pipeline.oxc ?? { jsx: { runtime: 'automatic' } } };
+    }
+    return { esbuild: pipeline.esbuild ?? { jsx: 'automatic' } };
+}
+
+/**
  * `@vitest/browser-playwright` peers vitest on an EXACT version: 4.1.10 wants
  * 4.1.10, not `^4.1`. A mismatch fails deep inside the tester with a message
  * about a missing runner, so the pair is checked where the project is built
@@ -171,7 +221,12 @@ function versionOf(specifier: string): string {
  */
 function assertProviderPin(): void {
     const runner = versionOf('vitest');
-    const provider = versionOf('@vitest/browser-playwright');
+    let provider: string;
+    try {
+        provider = versionOf('@vitest/browser-playwright');
+    } catch {
+        throw new Error(PROVIDER_MISSING);
+    }
     if (runner !== provider) {
         throw new Error(
             `component(): @vitest/browser-playwright@${provider} peers vitest on an exact version, and vitest is ${runner}. ` +
@@ -228,11 +283,21 @@ function writeSetupFile(wrap: string): string {
  * What the page cannot read for itself: update mode is a `process.env`/`argv`
  * read, and the project's clock is stated where `process` exists.
  */
-function providedToPage(options: ComponentProjectOptions): Record<string, boolean | string> {
+function providedToPage(options: ComponentProjectOptions): {
+    componentClock?: string;
+    componentViewport: { height: number; width: number };
+    update: boolean;
+} {
     return {
         ...(options.clock === undefined ? {} : { componentClock: options.clock }),
+        componentViewport: viewportOf(options),
         update: updating(),
     };
+}
+
+/** The page size every render of the project starts at. */
+function viewportOf(options: ComponentProjectOptions): { height: number; width: number } {
+    return options.viewport ?? { height: 720, width: 1280 };
 }
 
 /** The globs a component project collects, and the ones it stays out of. */
@@ -253,11 +318,32 @@ function componentGlobs(options: ComponentProjectOptions): {
  * `.tsx` collected here would be optimised for a page that never opens.
  */
 export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfiguration {
+    const fromRoots = options.roots?.map((root) => `${root.replace(/\/+$/u, '')}/**/*.test.ts`);
     return mergeConfig(projectDefaults(), {
         test: {
             exclude: options.exclude ?? ['specs/**', '**/*.test.tsx'],
-            include: options.include ?? ['**/*.test.ts'],
+            include: options.include ?? fromRoots ?? ['**/*.test.ts'],
             name: 'unit',
+            // Node projects run first; the two browser projects follow.
+            sequence: { groupOrder: 0 },
+            ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
+        },
+    }) as TestProjectInlineConfiguration;
+}
+
+/**
+ * A website spec meets the assembled product through a served page, in the
+ * Chromium playwright drives. It opens a browser, so it is scheduled before the
+ * component project and never beside it: two Chromiums must not share a slot on
+ * a 2-vCPU runner.
+ */
+export function website(options: WebsiteProjectOptions = {}): TestProjectInlineConfiguration {
+    return mergeConfig(projectDefaults(), {
+        test: {
+            ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
+            include: options.include ?? ['specs/website/**/*.test.ts'],
+            name: 'website',
+            sequence: { groupOrder: 1 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },
     }) as TestProjectInlineConfiguration;
@@ -281,10 +367,7 @@ export async function component(
 
     const project = {
         ...pipeline,
-        // Vite 8 transforms with oxc; an `esbuild.jsx` default is ignored there.
-        // A consumer's own pipeline wins: this is only the answer for a project
-        // That states none.
-        oxc: { jsx: { runtime: 'automatic' } },
+        ...jsxPipeline(pipeline),
         // A cold Vite cache optimises dependencies DURING the first run and
         // Reloads the tester mid-flight ("Vitest failed to find the runner").
         // A fresh CI checkout is exactly that state, so the seam's own runtime
@@ -308,7 +391,7 @@ export async function component(
                 // Root and `__screenshots__/` beside the test; both are
                 // Artefacts and belong under `.artifacts/<tool>/`.
                 screenshotDirectory: `${VITEST_ARTIFACTS_DIR}/screenshots`,
-                viewport: options.viewport ?? { height: 720, width: 1280 },
+                viewport: viewportOf(options),
             },
             ...componentGlobs(options),
             name: 'component',
