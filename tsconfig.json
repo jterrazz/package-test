@@ -1,3 +1,10 @@
 {
-    "extends": "@jterrazz/typescript/tsconfig/node"
+    "extends": "@jterrazz/typescript/tsconfig/node",
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "paths": {
+            "@jterrazz/test": ["./src/browser/index.ts"]
+        }
+    },
+    "include": ["${configDir}/**/*.ts", "${configDir}/**/*.tsx", "${configDir}/**/*.js"]
 }
