@@ -20,12 +20,14 @@ The tarball is what `files` declares and nothing else: `dist/`, minus `dist/cata
 
 Four entry points reach a consumer, and they are the whole public contract:
 
-| Entry                   | Resolves to                      | Consumed by                                              |
-| ----------------------- | -------------------------------- | -------------------------------------------------------- |
-| `@jterrazz/test`        | `dist/index.js` (ESM)            | Every spec — the single import point (rule F1)           |
-| `@jterrazz/test/vitest` | `dist/vitest.js` (ESM)           | `vitest.config.ts`: the config preset and `literate()`   |
-| `@jterrazz/test/oxlint` | `dist/oxlint.js` / `.cjs` (dual) | The consumer's `oxlint.config.*`, which may be CommonJS  |
-| `@jterrazz/test/schema` | `schema/spec.schema.json`        | An editor validating a `<case>.spec.yaml` as it is typed |
+| Entry                   | Resolves to                                           | Consumed by                                              |
+| ----------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| `@jterrazz/test`        | `dist/index.js`, or `dist/browser/index.js` in a page | Every spec — the single import point (rule F1)           |
+| `@jterrazz/test/vitest` | `dist/vitest.js` (ESM)                                | `vitest.config.ts`: the preset and the project helpers   |
+| `@jterrazz/test/oxlint` | `dist/oxlint.js` / `.cjs` (dual)                      | The consumer's `oxlint.config.*`, which may be CommonJS  |
+| `@jterrazz/test/schema` | `schema/spec.schema.json`                             | An editor validating a `<case>.spec.yaml` as it is typed |
+
+The root entry resolves by CONDITION: a bundler serving a page takes `browser`, node takes `import`, and both are described by one `types` entry ([01 — Architecture](01-architecture.md) § What the tree publishes).
 
 One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. A consumer wires it into its own lint step.
 
@@ -34,9 +36,16 @@ One binary ships with them: `jterrazz-test-check`, the conventions checker, poin
 The package refuses to guess at its environment, so several things it uses are the consuming project's to install.
 
 - **`vitest` is a required peer.** The framework registers its matchers into vitest; there is no standalone runner.
-- **`playwright`, `appium` and `webdriverio` are OPTIONAL peers**, loaded lazily by the one module that owns each. A project that specifies no page and no screen installs none of them.
+- **Every seam is an OPTIONAL peer**, loaded lazily by the one module that owns it: `playwright` for a page, `appium`/`webdriverio` for a screen, and `@vitest/browser-playwright`, `vitest-browser-react`, `vite`, `react` and `react-dom` for a component. A project that specifies none of those installs none of them.
+- **The browser provider is pinned to the runner, patch included.** `@vitest/browser-playwright@X` peers `vitest: X` EXACTLY, so the two move together in one change or not at all. This package therefore declares the provider as `*` rather than a range of its own — a second, weaker statement of a constraint the provider already makes would be wrong the day the pair moves — and `component()` asserts the equality when the project is built, naming both versions:
+
+    ```bash
+    npm install -D vitest@4.1.11 @vitest/browser-playwright@4.1.11   # one unit, both versions
+    ```
+
 - **Docker must be running** for the container-backed services and for compose mode. `sqlite()` and plain CLI specs need none.
 - **Node 20 or newer**, as `engines` states.
+- **A chromium**, for a page or a component: `npx playwright install chromium`, once. The component facet drives the same browser the website facet does, through the same peer.
 
 `msw` is a direct dependency, not a peer — outgoing interception is part of the framework rather than a choice a consumer makes.
 

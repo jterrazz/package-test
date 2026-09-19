@@ -2,16 +2,17 @@
 
 What proves a change here: this package specifies itself with itself. The suites under `specs/` are written with `@jterrazz/test` against fixture apps, the module tests sit beside the modules they cover, and a family of meta-tests runs the framework on its own output. This chapter says which suite answers for what, and what a change owes each of them.
 
-| Ground         | Where                                               | Proves                                                       |
-| -------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-| Module tests   | `src/**/<file>.test.ts`                             | One module's behaviour, beside it (rule I2)                  |
-| Product specs  | `specs/<facet>/<domain>/<aspect>.test.ts`           | The framework's own facets, through the public surface       |
-| Spec documents | `specs/cli/literate/*.spec.yaml`                    | The document format, collected as test files by `literate()` |
-| Meta-tests     | `src/lint/*.test.ts`, `src/specification/matching/` | The framework applied to itself and to its own projections   |
+| Ground          | Where                                               | Proves                                                                 |
+| --------------- | --------------------------------------------------- | ---------------------------------------------------------------------- |
+| Module tests    | `src/**/<file>.test.ts`                             | One module's behaviour, beside it (rule I2)                            |
+| Component tests | `specs/component-app/<file>.test.tsx`               | A rendered unit, beside it, in a real Chromium ([16](16-component.md)) |
+| Product specs   | `specs/<facet>/<domain>/<aspect>.test.ts`           | The framework's own facets, through the public surface                 |
+| Spec documents  | `specs/cli/literate/*.spec.yaml`                    | The document format, collected as test files by `literate()`           |
+| Meta-tests      | `src/lint/*.test.ts`, `src/specification/matching/` | The framework applied to itself and to its own projections             |
 
-## The five projects
+## The six projects
 
-`test.projects` in `vitest.config.ts` declares five, and which one you can run is decided by what is installed and running on the machine.
+`test.projects` in `vitest.config.ts` declares six, and which one you can run is decided by what is installed and running on the machine.
 
 | Project        | Collects                                                                 | Needs                                                                       |
 | -------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
@@ -19,12 +20,14 @@ What proves a change here: this package specifies itself with itself. The suites
 | `api`          | `specs/api/**` + `specs/jobs/**`, node mode (in-process Hono)            | Docker                                                                      |
 | `api-stack`    | the SAME files with `TEST_MODE=compose`, minus `specs/api/intercepts/**` | Docker compose                                                              |
 | `website`      | `specs/website/**`                                                       | playwright + `npx playwright install chromium`; no Docker                   |
+| `component`    | `specs/component-app/**/*.test.tsx`, built by `component()`              | the same chromium; no Docker. Runs in its own group, after `website`        |
 | `integrations` | `specs/integrations/**`, sequential (`fileParallelism: false`)           | Docker                                                                      |
 
 ```bash
 npm test                            # every project — Docker and chromium both required
 npx vitest --run --project fast     # the loop: no infrastructure, after npm run build
 npx vitest --run --project website  # after npx playwright install chromium
+npx vitest --run --project component  # the same chromium, a mounted unit at a time
 ```
 
 `api` and `api-stack` run the same test files and the mode switch lives ONLY in `vitest.config.ts` — that is rule A5 applied to this repository, and it is also the point of the two projects: fast feedback in-process, end-to-end confidence against the real stack, from one set of specs. `api-stack` excludes the intercept domain because `.intercept()` is in-process MSW, which compose mode has no access to.
@@ -50,6 +53,8 @@ specs/
 A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; a leading underscore means ground, never a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([12 — Conventions](12-conventions.md)).
 
 The fixture apps the specs drive live in the pool: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, the `broken-*` trees for the infrastructure failure paths, and `lint-violations/` — a violation/compliant twin per lint rule.
+
+**The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component-app/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel and a pair of same-named links. It is not under `_fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it.
 
 ## The lint suite is end-to-end
 

@@ -2,7 +2,7 @@
 name: jterrazz-test
 description: Testing conventions for @jterrazz projects — unit/integration/e2e structure, vitest, testcontainers, golden files, mocks. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain unit test included.
 metadata:
-    version: '9.1'
+    version: '15.2'
 ---
 
 # `@jterrazz/test`
@@ -16,19 +16,22 @@ The ecosystem's declarative testing framework for HTTP APIs, background jobs, CL
 - **`vitest.config.ts` starts from the preset** — `defineSpecConfig()` from `@jterrazz/test/vitest`, beside `literate()`. It sets `cacheDir: '.artifacts/vitest'`, the coverage directory under it, 30s test/hook budgets and a `**/_fixtures/**` exclusion, then merges YOUR config over them; inline `projects` inherit the same defaults, arrays concatenate, scalars override. It sets nothing else — `fileParallelism`, `reporters`, `environment` and every `include` stay the consumer's. Never hand-roll those four again.
 - **Artefacts live under `.artifacts/<tool>/`** — the vite cache, coverage, and `sqlite()`'s schema template (`.artifacts/vitest/sqlite/template-<key>.sqlite`, inside the PROJECT, so two checkouts never share one). Per-run scratch — a CLI spec's temp cwd, a browser profile — stays in the OS temp dir on purpose. One `.gitignore` line: `.artifacts/`.
 - **Five constructors, only five** — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()`. Created in a `*.specification.ts` file at the facet root, destructured with the canonical name (`{ api, cleanup }` / `{ jobs, cleanup }` / `{ cli, cleanup }` / `{ website, cleanup }` / `{ mobile, cleanup }`, no aliasing), always `afterAll(cleanup)`.
+- **One facet with NO constructor: `component`** — a rendered unit starts nothing, so there is no handle and no `*.specification.ts`. Import the chain (`import { component, button } from '@jterrazz/test'`) and write the test BESIDE the thing it renders, as `<file>.test.tsx`. What every render of a project shares — the providers, the Vite pipeline, the viewport — is `component({ wrap, vite, … })` in `vitest.config.ts`, beside `unit()`. [docs/16](../../docs/16-component.md).
 - **Terminal actions** — `.request()` / `.get()` (api), `.trigger()` (jobs), `.exec()` and `.run()` (cli), `.fetch()` / `.visit()` (website), `.open()` (mobile) execute the chain and resolve to a typed result. Setups (`.seed()`, `.fixture()`, `.env()`, `.headers()`, `.intercept()`) chain before them. No label, no `.spawn()`. One chain = one action; databases reset each chain.
 - **A CLI session can BE the file** — a `<case>.spec.yaml` document states one scenario (`description:`, the ground, then `runs:` with their commands, exit codes, streams and `files:`) and executes either as a test file of its own (the `literate()` vite plugin) or through `cli.run('case.spec.yaml')`. Same engine as the chain, same tokens, same `TEST_UPDATE=1`; a JSON Schema ships at `@jterrazz/test/schema`.
 - **Every assertion goes through `expect()`** — accessors (`result.stdout`, `result.response`, `result.table(...)`, `result.file(...)`) are read-only; the matchers are registered on vitest's `expect`. `await` exactly the IO matchers (`toMatchRows`, `toBeEmpty`, `toBeRunning`, `toMatch` on tree subjects); everything else is sync.
 - **Goldens first (D11)** — snapshot the whole surface per scoped use case (`expect(x).toMatch('case.http'|'case.txt')`, tokens for volatile parts, `TEST_UPDATE=1` to generate). `.grep()` / `toContain` are the scalpel for targeted probes, not the default.
 - **One verb per state** — `.seed()` is SQL-only (database state); `.fixture(path)` is the one file-state verb (copies into the cwd). No `.project()`, no seed handlers.
-- **Layout in one breath** — `specs/<facet>/<name>.specification.ts` (runner at the facet root) + `specs/<facet>/<domain>/<aspect>.test.ts` (tests one level down). The folder follows the assets. Module unit tests are SIBLINGS under `src/` (`<file>.test.ts`), never under `specs/`.
+- **Layout in one breath** — `specs/<facet>/<name>.specification.ts` (runner at the facet root) + `specs/<facet>/<domain>/<aspect>.test.ts` (tests one level down). The folder follows the assets. A UNIT's test is a SIBLING of its code, never under `specs/`: `<file>.test.ts` for a module, `<file>.test.tsx` for a component — the suffix is the kind, and it decides which project collects the file.
 - **Dynamic values** — the `{{token}}` grammar in fixtures, `match.*` in code (same vocabulary). Every test carries both `// Given -` and `// Then -`.
 
 ## When to use this skill
 
 Two things travel under one name, and their scopes are not the same: the framework is for a surface, the conventions are for every test file.
 
-**The FRAMEWORK specifies a surface.** `specification.*` and everything hanging off it — runners, seeds, fixtures, contracts, goldens, the sandbox a spec runs in — exist to specify something a caller reaches: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function and a frontend component test (Vitest + Testing Library) have no such surface; they need vitest alone, and reaching for a runner there is the mistake to avoid.
+**The FRAMEWORK specifies what the SUBJECT is, not which runner it needs.** `specification.*` and everything hanging off it — runners, seeds, fixtures, contracts, goldens, the sandbox a spec runs in — exist to specify something a caller reaches through an entry: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function needs none of it and no runner at all.
+
+A **rendered component** is the case the corpus used to file under "vitest alone", and that was wrong: it needs no runner (nothing is started) but it does need a real browser, a Vite pipeline, a network double and a golden engine — all of which the framework owns. It is a facet with no constructor: `component.render(<X />, scenario)` from `@jterrazz/test`, in a `<file>.test.tsx` beside the component. Never `@testing-library/*`, never `happy-dom` (rules F6, E5, E5b, G4 refuse them and name the move).
 
 **The CONVENTIONS bind EVERY test file of a jterrazz repository** — that plain unit test and that component test included. They are the repository's rules, not the framework's, and they hold with no `@jterrazz/test` import in the file:
 
@@ -55,6 +58,7 @@ Load the one reference that matches the task; each also names the docs chapter c
 | Writing **CLI** specs (exec, env, fixtures, docker) | [references/cli.md](references/cli.md)                         | [docs/07-cli.md](../../docs/07-cli.md)                                        |
 | Writing **spec documents** (`<case>.spec.yaml`)     | [references/cli.md](references/cli.md)                         | [docs/07-cli.md](../../docs/07-cli.md)                                        |
 | Writing **website** specs (fetch, visit, scenarios) | [references/website.md](references/website.md)                 | [docs/14-website.md](../../docs/14-website.md)                                |
+| Writing **component** specs (render, hooks, DOM)    | [references/component.md](references/component.md)             | [docs/16-component.md](../../docs/16-component.md)                            |
 | Writing **mobile** specs (open, simulator, screens) | [references/mobile.md](references/mobile.md)                   | [docs/15-mobile.md](../../docs/15-mobile.md)                                  |
 | **Dynamic values** / the `{{token}}` grammar        | [references/tokens.md](references/tokens.md)                   | [docs/09-tokens.md](../../docs/09-tokens.md)                                  |
 | **Declaring** what an LLM / HTTP call replies       | [references/contracts.md](references/contracts.md)             | [docs/10-contracts.md](../../docs/10-contracts.md)                            |

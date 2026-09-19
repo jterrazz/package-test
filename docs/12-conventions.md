@@ -20,10 +20,10 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | B     | Spec chains (setups, terminal actions, Given/Then, `job` vocabulary) | [05](05-api.md), [06](06-jobs.md), [07](07-cli.md)                    |
 | C     | Files & folders per feature                                          | [02](02-developing.md), [08](08-assertions.md), [10](10-contracts.md) |
 | D     | Assertions, tokens, snapshots, strict contracts                      | [08](08-assertions.md), [09](09-tokens.md), [10](10-contracts.md)     |
-| E     | Framework environment variables                                      | [02](02-developing.md)                                                |
+| E     | Environment & test configuration                                     | [02](02-developing.md), [16](16-component.md)                         |
 | F     | Imports (single package root) & production protection                | [02](02-developing.md)                                                |
 | W     | Website & mobile specs (scenarios, user-facing elements)             | [14](14-website.md), [15](15-mobile.md)                               |
-| G     | Infrastructure (compose, isolation, docker-aware)                    | [07](07-cli.md), [11](11-services.md)                                 |
+| G     | Infrastructure & the runtime a test actually runs in                 | [07](07-cli.md), [11](11-services.md), [16](16-component.md)          |
 | H     | Naming recap                                                         | below                                                                 |
 | I     | Source-code architecture (four layers, sibling module tests)         | below · [01](01-architecture.md) for this repo's own layer map        |
 | J     | Hygiene (no arbitrary sleeps, honest spec documents)                 | [13](13-linting.md)                                                   |
@@ -31,7 +31,9 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 
 ## The reach of the conventions
 
-The framework and the conventions do not have the same scope, and confusing the two is the commonest misreading of this constitution. `specification.*` — with its seeds, fixtures, contracts, goldens and containers — is for specifying a **surface**: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function, or a frontend component test, has no such surface and needs none of it.
+The framework and the conventions do not have the same scope, and confusing the two is the commonest misreading of this constitution. `specification.*` — with its seeds, fixtures, contracts, goldens and containers — is for specifying a **surface** something is served through: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function has no such surface and needs none of it.
+
+A **rendered component** is the case that used to be filed under "needs none of it", and it was the wrong file. It needs no RUNNER — nothing is started, so it has no constructor and no `*.specification.ts` — but it needs a real browser, a Vite pipeline and a network double, which is exactly what the framework owns. So the fork is not "framework or vitest alone": it is what the SUBJECT is. One unit — a module, a component — sits beside its code and is judged by its suffix (`<file>.test.ts`, `<file>.test.tsx`). The assembled product, reached through an entry, sits under `specs/`. [16 — Component specs](16-component.md) holds the rendered half.
 
 The conventions bind **every test file of the repository**, that plain unit test included, whether or not `@jterrazz/test` is imported in it. A test is a test: it sits beside the module it covers (I2), it narrates its Given then its Then (B4), it keeps its doubles out of `src/` (I4), and it stays honest under the J hygiene floor — no committed `.only`/`.skip`, an assertion in every test, no two literal titles alike in a file, a lowercase title. That floor is oxlint's own `vitest` plugin, which `@jterrazz/typescript` turns on over the test globs in every profile; this package's J family keeps only what the plugin has no counterpart for — the arbitrary-sleep ban (J2), narrowed to `specs/**` where waiting is a real temptation, and the spec-document mirrors. Every one of these is mechanized, so its normative sentence lives in the catalogue ([13 — Linting](13-linting.md)) and not here.
 
@@ -96,6 +98,7 @@ Two further rules decide WHERE a fixture lives, and they are the same question a
 | Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                                   |
 | Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `_expected/` ([07](07-cli.md#spec-documents--casespecyaml)) |
 | Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                     |
+| Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([16](16-component.md))      |
 | Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                             |
 | Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic)      |
 | Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                          |
