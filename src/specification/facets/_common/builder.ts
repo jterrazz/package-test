@@ -118,6 +118,12 @@ export type SpecificationConfig = {
      */
     envSets?: Record<string, CliEnv> | undefined;
     /**
+     * When set, `.clock()` is unavailable on this runner and throws this
+     * reason immediately (compose mode — the calendar it would pin is this
+     * process's, and the app runs in a container).
+     */
+    clockDisabledReason?: string | undefined;
+    /**
      * When set, `.intercept()` is unavailable on this runner and throws this
      * reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
      */
@@ -391,6 +397,9 @@ export class SpecificationBuilder
      *   const result = await api.clock('2026-03-04T09:30:00Z').get('/now');
      */
     clock(iso: string): this {
+        if (this.config.clockDisabledReason !== undefined) {
+            throw new Error(`.clock(): ${this.config.clockDisabledReason}`);
+        }
         this.pinnedClock = iso;
         return this;
     }

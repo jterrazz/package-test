@@ -401,3 +401,28 @@ describe('builder — service env injection', () => {
         expect(command.lastEnv?.DATABASE_URL).toBe('file:main.sqlite');
     });
 });
+
+describe('builder — the calendar in compose mode', () => {
+    test('.clock() throws immediately when the app runs in a container', () => {
+        // Given - an api facet configured the way compose mode builds it
+        const api = createApiFacet({
+            clockDisabledReason:
+                "the calendar it pins is this runner's, and compose mode runs the app in a " +
+                'container — assert the stamp with a `{{iso8601}}` token instead.',
+        });
+
+        // Then - the refusal is the sentence .intercept() gives, at call time:
+        // Silently pinning a calendar nothing under test reads is the failure
+        expect(() => api.clock('2026-03-04T09:30:00Z')).toThrow(
+            "the calendar it pins is this runner's",
+        );
+    });
+
+    test('.clock() stays available when the reason is unset (node mode)', () => {
+        // Given - a plain builder (node-mode config)
+        const builder = new SpecificationBuilder({}, import.meta.dirname);
+
+        // Then - the instant is accepted and travels with the chain
+        expect(() => builder.clock('2026-03-04T09:30:00Z')).not.toThrow();
+    });
+});
