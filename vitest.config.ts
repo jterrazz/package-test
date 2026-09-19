@@ -7,6 +7,7 @@ import {
     defineSpecConfig,
     integration,
     jobs,
+    unit,
     website,
 } from './src/vitest/index.js';
 
@@ -21,14 +22,15 @@ import {
 export default defineSpecConfig({
     test: {
         projects: [
-            {
-                test: {
-                    name: 'fast',
-                    // Specs/lint E2E-lints fixture projects through the real
-                    // Oxlint binary — needs `npm run build` (dist/oxlint.js).
-                    include: ['src/**/*.test.ts', 'specs/lint/**/*.test.ts'],
-                },
-            },
+            // The module tests, plus the one specs tree that is not a facet's:
+            // `specs/lint/` E2E-lints fixture projects through the real oxlint
+            // Binary, so it needs `npm run build` (dist/oxlint.js) and it runs
+            // Where the modules run. `unit()`'s include and exclude guard each
+            // Other, so stating one states both.
+            unit({
+                exclude: [],
+                include: ['src/**/*.test.ts', 'specs/lint/**/*.test.ts'],
+            }),
             // The cli helper wires the literate door: the package's documents
             // Are collected as TEST FILES by the project that owns the facet.
             // The glob stops at depth 1 so the deliberately-wrong twins under

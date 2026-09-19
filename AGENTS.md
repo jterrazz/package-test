@@ -32,11 +32,11 @@ Decisions this package alone took are in `docs/decisions/`. The agent-facing pro
 
 ```bash
 npm install                       # or make install
-npm run build                     # MUST precede lint and the fast project
+npm run build                     # MUST precede lint and the unit project
 npm run lint                      # typescript check + the conventions checker
 npm test                          # every project — needs Docker and chromium
 npm run docs                      # regenerate the three committed projections
-npx vitest --run --project fast   # the loop, no infrastructure
+npx vitest --run --project unit   # the loop, no infrastructure
 ```
 
 ## Standing rules
