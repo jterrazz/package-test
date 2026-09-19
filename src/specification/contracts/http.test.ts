@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { match } from '../matching/match.js';
 import { http } from './http.js';
+import { isStreamBody, STREAM_BODY } from './types.js';
 import type { MatchableRequest } from './types.js';
 
 const URL = 'https://api.example.com/things';
@@ -220,5 +221,53 @@ describe('http — responses', () => {
         // Then - one has a reply and the other has none
         expect(http.error(503).status).toBe(503);
         expect(http.unreachable().status).toBeUndefined();
+    });
+});
+
+describe('http — streamed responses', () => {
+    test('stream() keeps the pieces and their order, never a serialised value', () => {
+        // Given - a reply declared as three pieces
+        const response = http.stream(['Hel', 'lo, ', 'world'], {
+            contentType: 'text/plain',
+            delay: 5,
+        });
+
+        // Then - the body is a tagged stream the engines recognise, not an object
+        expect(isStreamBody(response.body)).toBe(true);
+        expect(response.body).toStrictEqual({
+            chunks: ['Hel', 'lo, ', 'world'],
+            contentType: 'text/plain',
+            delayBetweenChunks: 5,
+            kind: STREAM_BODY,
+        });
+    });
+
+    test('sse() frames one chunk per event, as an EventSource reads them', () => {
+        // Given - a named event, a JSON payload and a plain one
+        const response = http.sse([
+            { data: { token: 'Hel' } },
+            { data: { token: 'lo' }, event: 'token', id: '2' },
+            { data: '', event: 'done' },
+        ]);
+
+        // Then - each event is its own chunk, in the wire form
+        expect(response.body).toMatchObject({
+            chunks: [
+                'data: {"token":"Hel"}\n\n',
+                'event: token\nid: 2\ndata: {"token":"lo"}\n\n',
+                'event: done\ndata: \n\n',
+            ],
+            contentType: 'text/event-stream',
+        });
+    });
+
+    test('sse() splits a multi-line payload into one data line each', () => {
+        // Given - an event whose payload carries a newline
+        const response = http.sse([{ data: 'first\nsecond' }]);
+
+        // Then - the frame stays one event: a raw newline would end it
+        expect(response.body).toMatchObject({
+            chunks: ['data: first\ndata: second\n\n'],
+        });
     });
 });

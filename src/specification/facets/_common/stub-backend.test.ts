@@ -29,6 +29,46 @@ async function fetchJson(url: string): Promise<unknown> {
     return await response.json();
 }
 
+describe('stub backend — streamed replies', () => {
+    test('writes the pieces in order and closes after the last one', async () => {
+        // Given - a route declared as three pieces of text
+        const url = await started([
+            {
+                request: http.get('/tokens'),
+                response: http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain' }),
+            },
+        ]);
+
+        // When - the app reads the reply as it lands
+        const response = await fetch(`${url}/tokens`);
+        const decoder = new TextDecoder();
+        const seen = await Array.fromAsync(response.body ?? [], (piece: Uint8Array) =>
+            decoder.decode(piece),
+        );
+
+        // Then - it read the declared order, under the declared content type
+        expect(response.headers.get('content-type')).toBe('text/plain');
+        expect(seen.join('')).toBe('Hello, world');
+    });
+
+    test('serves an event stream as text/event-stream', async () => {
+        // Given - two server-sent events declared on one route
+        const url = await started([
+            {
+                request: http.get('/feed'),
+                response: http.sse([{ data: { token: 'a' } }, { data: { token: 'b' } }]),
+            },
+        ]);
+
+        // Then - the frames arrive in the wire form, under the SSE type
+        const response = await fetch(`${url}/feed`);
+        expect(response.headers.get('content-type')).toBe('text/event-stream');
+        await expect(response.text()).resolves.toBe(
+            'data: {"token":"a"}\n\ndata: {"token":"b"}\n\n',
+        );
+    });
+});
+
 describe('stub backend — serving declared contracts', () => {
     test('serves a declared contract with its status, body, and cors headers', async () => {
         // Given - one declared route

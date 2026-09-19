@@ -5,7 +5,7 @@
 type HttpResponseInit = object;
 ```
 
-Defined in: [src/specification/contracts/http.ts:29](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L29)
+Defined in: src/specification/contracts/http.ts:77
 
 Init options shared by the response builders.
 
@@ -17,7 +17,7 @@ Init options shared by the response builders.
 optional delay?: number;
 ```
 
-Defined in: [src/specification/contracts/http.ts:31](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L31)
+Defined in: src/specification/contracts/http.ts:79
 
 Delay in ms before responding (for timeout testing).
 
@@ -29,7 +29,7 @@ Delay in ms before responding (for timeout testing).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: [src/specification/contracts/http.ts:33](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L33)
+Defined in: src/specification/contracts/http.ts:81
 
 Response headers, merged over the builder's own.
 
@@ -41,6 +41,6 @@ Response headers, merged over the builder's own.
 optional status?: number;
 ```
 
-Defined in: [src/specification/contracts/http.ts:35](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L35)
+Defined in: src/specification/contracts/http.ts:83
 
 HTTP status code.

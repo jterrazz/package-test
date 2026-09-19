@@ -12,7 +12,17 @@ import { specification } from '../../src/index.js';
 
 export const NEWS_URL = 'https://news.spec.test/api/latest';
 export const QUOTES_URL = 'https://quotes.spec.test/api/quote';
+export const STREAM_URL = 'https://tokens.spec.test/api/stream';
 const UNREGISTERED_URL = 'https://unregistered.spec.test/thing';
+
+/** Every piece a streamed reply was written in, in the order it arrived. */
+async function readChunks(response: Response, decoder: TextDecoder): Promise<string[]> {
+    const stream = response.body;
+    if (stream === null) {
+        throw new Error('the provider answered with no body to read');
+    }
+    return await Array.fromAsync(stream, (piece: Uint8Array) => decoder.decode(piece));
+}
 
 /** Minimal Hono-compatible app — every route fans out to the network. */
 const outboundApp = {
@@ -65,6 +75,18 @@ const outboundApp = {
                         { status: 503 },
                     );
                 }
+            }
+            case '/tokens': {
+                // A provider that answers in PIECES: the app reads them as
+                // They land, which is the whole of what a stream contract
+                // States — the chunks and their order.
+                const response = await fetch(STREAM_URL);
+                const decoder = new TextDecoder();
+                const chunks = await readChunks(response, decoder);
+                return Response.json({
+                    chunks,
+                    contentType: response.headers.get('content-type'),
+                });
             }
             case '/quote-twice': {
                 // Two calls to the same provider — exhausts a one-entry queue.
