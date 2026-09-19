@@ -18,6 +18,8 @@ How a change is made. The first half is this repository's own loop — the toolc
 
 Each has a `make` alias that installs first, which is what CI calls — [03 — Testing](03-testing.md) § What CI runs.
 
+`better-sqlite3` is a native dependency, and an npm that does not run install scripts by default leaves it unbuilt: the `sqlite()` specs of the `fast` project then fail on a missing binding. `npm rebuild better-sqlite3` after the install fixes it, once per checkout.
+
 ### The build comes first
 
 `oxlint.config.ts` loads this package's OWN plugin from `./dist/oxlint.js`, and the end-to-end lint specs load it too. Node's type-stripping does not resolve a `.js` specifier back to its `.ts` source, so **`npm run build` must precede `npm run lint`** and must precede the `fast` project. A lint run on a stale bundle judges the previous build's rules.
