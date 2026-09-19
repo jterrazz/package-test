@@ -111,7 +111,9 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
     }
 
     if (!existsSync(filePath)) {
-        return FAIL(`JSON fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`);
+        return FAIL(
+            `JSON fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`,
+        );
     }
 
     const expected = JSON.parse(readFileSync(filePath, 'utf8'));
@@ -238,7 +240,9 @@ function matchResponseFile(
     }
 
     if (!existsSync(filePath)) {
-        return FAIL(`Response fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`);
+        return FAIL(
+            `Response fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`,
+        );
     }
 
     const expected = parseResponseFile(
@@ -287,7 +291,9 @@ async function matchTreeFile(
     }
 
     if (!existsSync(fixtureDir)) {
-        return FAIL(`Directory fixture "${name}" does not exist at ${fixtureDir}.\n${missingHint(frozen)}`);
+        return FAIL(
+            `Directory fixture "${name}" does not exist at ${fixtureDir}.\n${missingHint(frozen)}`,
+        );
     }
 
     const diff = await diffDirectories(fixtureDir, actualRoot, { scope });
@@ -353,12 +359,30 @@ function toContain(received: unknown, expected: unknown): MatcherResult {
     return nativeContain(received, expected);
 }
 
-async function toMatchRows(
-    received: unknown,
-    expected: { columns: string[]; rows: readonly (readonly unknown[])[] },
-): Promise<MatcherResult> {
+/** The one argument shape `toMatchRows` reads: a column list, and cells per row. */
+type RowsExpectation = { columns: string[]; rows: readonly (readonly unknown[])[] };
+
+/** Is this the shape, before the adapter is asked to build SQL from it? */
+function isRowsExpectation(expected: unknown): expected is RowsExpectation {
+    if (expected === null || typeof expected !== 'object') {
+        return false;
+    }
+    const { columns, rows } = expected as Partial<RowsExpectation>;
+    return Array.isArray(columns) && Array.isArray(rows);
+}
+
+async function toMatchRows(received: unknown, expected: unknown): Promise<MatcherResult> {
     if (!(received instanceof TableAccessor)) {
         throw new TypeError('toMatchRows: unsupported subject — expected result.table(...).');
+    }
+    // The shape is stated before the query runs: handing the adapter an
+    // Absent `columns` used to surface as a TypeError from inside SQL
+    // Generation, which names neither the matcher nor what it wanted.
+    if (!isRowsExpectation(expected)) {
+        throw new TypeError(
+            'toMatchRows takes { columns, rows } — a column list and one array of cells per row ' +
+                `(received ${Array.isArray(expected) ? 'an array' : `a ${typeof expected}`}).`,
+        );
     }
 
     const actual = await received.query(expected.columns);
