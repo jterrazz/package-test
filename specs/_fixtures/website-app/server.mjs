@@ -24,11 +24,13 @@ const pages = {
         <label for="email">Email</label>
         <input id="email" type="email">
         <button type="button" id="subscribe">Subscribe</button>
+        <button type="button" id="clear" disabled>Clear</button>
     </form>
     <p id="confirmation" hidden>Thanks for subscribing</p>
     <script>
         document.getElementById('subscribe').addEventListener('click', () => {
             document.getElementById('confirmation').hidden = false;
+            document.getElementById('clear').disabled = false;
         });
     </script>
     </body></html>`,

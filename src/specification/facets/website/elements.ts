@@ -142,3 +142,17 @@ export const listitem: LandmarkFactory = landmark('listitem');
  * dialog that took the keyboard and one that did not are byte-identical.
  */
 export const focused = (element: ElementRef): ElementRef => ({ ...element, focused: true });
+
+/**
+ * Whether the element accepts input: `see(disabled(button('Delete')))` asserts
+ * it refuses, `see(enabled(button('Delete')))` that it takes it.
+ *
+ * Modifiers rather than descriptors, for the same reason as `focused`: being
+ * disabled is a state of an element the vocabulary already names. They also buy
+ * the direction a behavioural substitute cannot reach — clicking a disabled
+ * control is a timeout, never an assertion.
+ */
+export const disabled = (element: ElementRef): ElementRef => ({ ...element, disabled: true });
+
+/** The other direction of {@link disabled} — the element takes input. */
+export const enabled = (element: ElementRef): ElementRef => ({ ...element, disabled: false });

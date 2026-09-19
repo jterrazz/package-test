@@ -136,16 +136,23 @@ async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<Elem
 }
 
 /**
- * The same element, narrowed to "and it has focus".
+ * The same element, narrowed by whatever STATE the descriptor carries — focus,
+ * or accepting input — or `null` when it carries none.
  *
- * `:focus` as a second condition rather than a one-shot probe: the locator
+ * A second condition on the locator rather than a one-shot probe: the locator
  * keeps playwright's own retry, so `see(focused(x))` waits for the keyboard to
  * arrive instead of asking once and failing on a frame of animation. It also
  * needs nothing but `playwright` — `expect(...).toBeFocused()` lives in
  * `@playwright/test`, which this package deliberately does not carry.
  */
-function focusedOnly(page: Page, locator: Locator): Locator {
-    return locator.and(page.locator(':focus'));
+function stateOnly(page: Page, locator: Locator, element: ElementRef): Locator | null {
+    if (element.focused === true) {
+        return locator.and(page.locator(':focus'));
+    }
+    if (element.disabled !== undefined) {
+        return locator.and(page.locator(element.disabled ? ':disabled' : ':enabled'));
+    }
+    return null;
 }
 
 /** The visitor implementation — every action auto-waits via playwright actionability. */
@@ -179,16 +186,18 @@ function createVisitor(page: Page, baseUrl: string): Visitor {
         },
         gone: async (element) => {
             await act(page, element, async (locator) => {
-                await (element.focused === true
-                    ? focusedOnly(page, locator).waitFor({ state: 'detached' })
-                    : locator.waitFor({ state: 'hidden' }));
+                const narrowed = stateOnly(page, locator, element);
+                await (narrowed === null
+                    ? locator.waitFor({ state: 'hidden' })
+                    : narrowed.waitFor({ state: 'detached' }));
             });
         },
         see: async (element) => {
             await act(page, element, async (locator) => {
-                await (element.focused === true
-                    ? focusedOnly(page, locator).waitFor({ state: 'attached' })
-                    : locator.waitFor({ state: 'visible' }));
+                const narrowed = stateOnly(page, locator, element);
+                await (narrowed === null
+                    ? locator.waitFor({ state: 'visible' })
+                    : narrowed.waitFor({ state: 'attached' }));
             });
         },
         select: async (element, option) => {

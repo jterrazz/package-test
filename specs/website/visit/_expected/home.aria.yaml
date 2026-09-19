@@ -4,3 +4,4 @@
 - text: Email
 - textbox "Email"
 - button "Subscribe"
+- button "Clear" [disabled]
