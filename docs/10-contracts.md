@@ -298,6 +298,8 @@ Exactness is the default because a substring filter silently cross-matches: two 
 | `http.text(body, init?)`                   | `text/plain` response                                                               |
 | `http.error(status, body?)`                | HTTP error, optional JSON body                                                      |
 | `http.empty(status = 204)`                 | Empty response                                                                      |
+| `http.stream(chunks, init?)`               | A body that arrives in PIECES — `init: { contentType?, delay?, status?, headers? }` |
+| `http.sse(events, init?)`                  | A server-sent event stream: one chunk per event, `text/event-stream`                |
 | `http.unreachable()`                       | No response at all: the request fails in TRANSPORT and the caller's `fetch` rejects |
 | `openai.reply(data)`                       | `data` wrapped in a valid Chat Completions envelope                                 |
 | `anthropic.reply(data)`                    | `data` (object or text) wrapped in a Messages envelope                              |
@@ -308,6 +310,38 @@ Exactness is the default because a substring filter silently cross-matches: two 
 The point: your contract states the **business payload** (`{ category: 'TECH' }`) and the builder produces the provider's full wire format around it.
 
 `http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. Both engines honour it: msw's node interceptor and its service worker share the response shape.
+
+### Streamed replies
+
+A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three engines honour them: msw's server, msw's worker, and the `node:http` stub the website and mobile facets serve from.
+
+```typescript
+import { http, intercept } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+test('renders a streamed reply as its pieces land', async () => {
+    // Given - a provider answering in three pieces, ten milliseconds apart
+    await using _ = await intercept(
+        http.get('https://tokens.test/stream'),
+        http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain', delay: 10 }),
+    );
+
+    // Then - the reader sees them in that order
+    const response = await fetch('https://tokens.test/stream');
+    await expect(response.text()).resolves.toBe('Hello, world');
+});
+```
+
+`http.sse(events)` frames each event the way an `EventSource` reads it — `event:`, `id:`, `retry:` and one `data:` line per line of payload, then the blank line that ends the frame — and serves the lot as `text/event-stream`. An object payload is JSON; a string is sent as-is.
+
+| `SseEvent` field | Becomes                                                           |
+| ---------------- | ----------------------------------------------------------------- |
+| `data`           | the `data:` lines — an object is JSON, a string is sent verbatim  |
+| `event`          | the `event:` name; omitted, the client sees the default `message` |
+| `id`             | the `id:` the client echoes as `Last-Event-ID` when it reconnects |
+| `retry`          | the `retry:` hint, in milliseconds                                |
+
+Provider streams — `openai.reply({ stream: true })` and its Anthropic twin — are not here: no test on the workbench mocks a provider's wire protocol for a stream, and the three that stream mock the AI SDK's model instead. They arrive when one does.
 
 ### Dynamic responses
 

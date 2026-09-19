@@ -42,7 +42,11 @@ export type ContractRequest = {
 export type ContractResponse = {
     /** HTTP status code (default: 200). */
     status?: number;
-    /** Response body — an object is JSON, a string is text, `null`/`undefined` is empty. */
+    /**
+     * Response body — an object is JSON, a string is text, `null`/`undefined`
+     * is empty, and a {@link StreamBody} (built by `http.stream()` /
+     * `http.sse()`) arrives in pieces.
+     */
     body: unknown;
     /** Response headers. */
     headers?: Record<string, string> | undefined;
@@ -59,6 +63,38 @@ export type ContractResponse = {
      */
     transport?: 'network-error' | undefined;
 };
+
+/**
+ * The marker that tells a STREAMED body from a value that happens to be an
+ * object. A body reaches three different engines (msw's server, msw's worker,
+ * the `node:http` stub) and each of them serialises "an object" as JSON, so a
+ * stream declared as a plain value arrives as `{}`. The tag is what each
+ * engine recognises before it reaches for `JSON.stringify`.
+ */
+export const STREAM_BODY = '@jterrazz/test:stream';
+
+/**
+ * A body that arrives in pieces — what `http.stream()` and `http.sse()` build.
+ *
+ * The chunks are written in order, `delayBetweenChunks` milliseconds apart,
+ * and the connection closes after the last one. It is the chunks and their
+ * ORDER that a streaming subject is specified against: a client that renders
+ * tokens as they land, or one that reconnects on a half-read body.
+ */
+export type StreamBody = {
+    /** The pieces, written in order. */
+    chunks: readonly string[];
+    /** The `content-type` the stream is served under. */
+    contentType: string;
+    /** Milliseconds between two chunks. Default 0 — everything at once. */
+    delayBetweenChunks: number;
+    kind: typeof STREAM_BODY;
+};
+
+/** Is this body a declared stream rather than a value to serialise? */
+export function isStreamBody(body: unknown): body is StreamBody {
+    return typeof body === 'object' && body !== null && 'kind' in body && body.kind === STREAM_BODY;
+}
 
 /**
  * A dynamic response: computed from the observed request at the moment the

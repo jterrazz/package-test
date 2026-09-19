@@ -1,12 +1,15 @@
 import { CaptureScope } from '../matching/match.js';
 import { structuralSubset } from '../matching/structural.js';
-import type { ContractRequest, ContractResponse, MatchableRequest } from './types.js';
+import { STREAM_BODY } from './types.js';
+import type { ContractRequest, ContractResponse, MatchableRequest, StreamBody } from './types.js';
 
 function wrapJson(data: unknown): ContractResponse {
     return { status: 200, body: data };
 }
 
 const TEXT_CONTENT_TYPE = 'text/plain; charset=utf-8';
+const STREAM_CONTENT_TYPE = 'application/octet-stream';
+const SSE_CONTENT_TYPE = 'text/event-stream';
 
 /**
  * Request filters for the generic HTTP provider. Every field is a subset
@@ -24,6 +27,51 @@ export type HttpContractFilter = {
     /** Query-param subset. string = exact value, RegExp = `test()`. */
     query?: Record<string, RegExp | string>;
 };
+
+/** Init options for a streamed reply. */
+export type HttpStreamInit = {
+    /** The `content-type` the stream is served under. Default `application/octet-stream`. */
+    contentType?: string;
+    /** Milliseconds between two chunks. Default 0 — every chunk at once. */
+    delay?: number;
+    /** Response headers, merged over the builder's own. */
+    headers?: Record<string, string>;
+    /** HTTP status code. Default 200. */
+    status?: number;
+};
+
+/** One server-sent event, as `http.sse()` frames it. */
+export type SseEvent = {
+    /** The `data:` payload. An object is serialised as JSON; a string is sent as-is. */
+    data: unknown;
+    /** The `event:` name. Omitted for an unnamed (default `message`) event. */
+    event?: string;
+    /** The `id:` the client echoes as `Last-Event-ID` when it reconnects. */
+    id?: string;
+    /** The `retry:` hint, in milliseconds. */
+    retry?: number;
+};
+
+/** The wire form of one event — the frame an `EventSource` parses. */
+function frameEvent(event: SseEvent): string {
+    const lines: string[] = [];
+    if (event.event !== undefined) {
+        lines.push(`event: ${event.event}`);
+    }
+    if (event.id !== undefined) {
+        lines.push(`id: ${event.id}`);
+    }
+    if (event.retry !== undefined) {
+        lines.push(`retry: ${event.retry}`);
+    }
+    const payload = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
+    // A multi-line payload is several `data:` lines: the parser joins them
+    // With newlines, and a raw newline inside one would end the frame.
+    for (const line of payload.split('\n')) {
+        lines.push(`data: ${line}`);
+    }
+    return `${lines.join('\n')}\n\n`;
+}
 
 /** Init options shared by the response builders. */
 export type HttpResponseInit = {
@@ -164,6 +212,51 @@ export const http = {
      */
     unreachable(): ContractResponse {
         return { body: null, transport: 'network-error' };
+    },
+
+    /**
+     * Response: a body that arrives in PIECES, written in order.
+     *
+     * A subject that reads a response as it lands — a token-by-token render, a
+     * progress bar, a reconnect on a half-read body — is specified by the
+     * chunks and their order, which a single serialised body cannot state.
+     * Honoured by all three engines: msw's server, msw's worker, and the
+     * `node:http` stub the website and mobile facets serve from.
+     *
+     * @example
+     *   http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain', delay: 10 })
+     */
+    stream(chunks: readonly string[], init?: HttpStreamInit): ContractResponse {
+        return {
+            status: init?.status ?? 200,
+            body: {
+                chunks: [...chunks],
+                contentType: init?.contentType ?? STREAM_CONTENT_TYPE,
+                delayBetweenChunks: init?.delay ?? 0,
+                kind: STREAM_BODY,
+            } satisfies StreamBody,
+            headers: init?.headers,
+        };
+    },
+
+    /**
+     * Response: a server-sent event stream — one chunk per event, framed the
+     * way an `EventSource` reads them, served as `text/event-stream`.
+     *
+     * @example
+     *   http.sse([{ data: { token: 'Hel' } }, { data: { token: 'lo' } }, { event: 'done', data: '' }])
+     */
+    sse(events: readonly SseEvent[], init?: Omit<HttpStreamInit, 'contentType'>): ContractResponse {
+        return {
+            status: init?.status ?? 200,
+            body: {
+                chunks: events.map(frameEvent),
+                contentType: SSE_CONTENT_TYPE,
+                delayBetweenChunks: init?.delay ?? 0,
+                kind: STREAM_BODY,
+            } satisfies StreamBody,
+            headers: { 'cache-control': 'no-cache', ...init?.headers },
+        };
     },
 
     /** Response: a text body, served as `text/plain` (200 by default). */

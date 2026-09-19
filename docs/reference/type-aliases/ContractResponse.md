@@ -5,7 +5,7 @@
 type ContractResponse = object;
 ```
 
-Defined in: [src/specification/contracts/types.ts:42](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L42)
+Defined in: src/specification/contracts/types.ts:42
 
 The response half of a contract: what to reply when the request matches.
 
@@ -17,9 +17,11 @@ The response half of a contract: what to reply when the request matches.
 body: unknown;
 ```
 
-Defined in: [src/specification/contracts/types.ts:46](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L46)
+Defined in: src/specification/contracts/types.ts:50
 
-Response body — an object is JSON, a string is text, `null`/`undefined` is empty.
+Response body — an object is JSON, a string is text, `null`/`undefined`
+is empty, and a [StreamBody](StreamBody.md) (built by `http.stream()` /
+`http.sse()`) arrives in pieces.
 
 ***
 
@@ -29,7 +31,7 @@ Response body — an object is JSON, a string is text, `null`/`undefined` is emp
 optional delay?: number;
 ```
 
-Defined in: [src/specification/contracts/types.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L50)
+Defined in: src/specification/contracts/types.ts:54
 
 Delay in ms before responding (for timeout testing).
 
@@ -41,7 +43,7 @@ Delay in ms before responding (for timeout testing).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: [src/specification/contracts/types.ts:48](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L48)
+Defined in: src/specification/contracts/types.ts:52
 
 Response headers.
 
@@ -53,7 +55,7 @@ Response headers.
 optional status?: number;
 ```
 
-Defined in: [src/specification/contracts/types.ts:44](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L44)
+Defined in: src/specification/contracts/types.ts:44
 
 HTTP status code (default: 200).
 
@@ -65,7 +67,7 @@ HTTP status code (default: 200).
 optional transport?: "network-error";
 ```
 
-Defined in: [src/specification/contracts/types.ts:60](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L60)
+Defined in: src/specification/contracts/types.ts:64
 
 A transport failure instead of a reply: the request never reached a
 server, so `fetch` rejects. `status`, `body` and `headers` say nothing

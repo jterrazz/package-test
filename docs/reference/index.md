@@ -78,6 +78,7 @@
 | [HonoApp](type-aliases/HonoApp.md) | Any object with a request method compatible with Hono's app.request(). |
 | [HttpContractFilter](type-aliases/HttpContractFilter.md) | Request filters for the generic HTTP provider. Every field is a subset constraint — a request matches when all provided fields match. |
 | [HttpResponseInit](type-aliases/HttpResponseInit.md) | Init options shared by the response builders. |
+| [HttpStreamInit](type-aliases/HttpStreamInit.md) | Init options for a streamed reply. |
 | [Intercept](type-aliases/Intercept.md) | The module-scope network double. Resolves once the engine is listening — which is why it is a promise, and why the canonical form awaits it: |
 | [InterceptScope](type-aliases/InterceptScope.md) | One block's worth of declared network. Disposed at the end of the scope that declared it: the handlers are dropped, and an unmatched request is thrown. |
 | [IsolationStrategy](type-aliases/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |
@@ -124,6 +125,8 @@
 | [SpecServeEntry](type-aliases/SpecServeEntry.md) | One `serve:` entry — a registered server plus the extra env it is started with. |
 | [SpecStream](type-aliases/SpecStream.md) | An expected stream: its text, and the first line of that text in the file. |
 | [SqliteOptions](type-aliases/SqliteOptions.md) | - |
+| [SseEvent](type-aliases/SseEvent.md) | One server-sent event, as `http.sse()` frames it. |
+| [StreamBody](type-aliases/StreamBody.md) | A body that arrives in pieces — what `http.stream()` and `http.sse()` build. |
 | [TextFilter](type-aliases/TextFilter.md) | A text filter on a provider request builder (`openai.chat({ user })`, `anthropic.messages({ system })`, …). |
 | [Visitor](type-aliases/Visitor.md) | The visitor — the interaction vocabulary handed to a visit scenario. Every action auto-waits (playwright actionability); `see()` is the single synchronization primitive: it retries until the element is visible and fails at the timeout. There is no sleep and no conditional helper. |
 | [VisitScenario](type-aliases/VisitScenario.md) | The behavior of a visit — the When of the spec; assertions stay in the Then. |

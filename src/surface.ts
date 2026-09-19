@@ -115,6 +115,8 @@ export {
     http,
     type HttpContractFilter,
     type HttpResponseInit,
+    type HttpStreamInit,
+    type SseEvent,
 } from './specification/contracts/http.js';
 export { type TextFilter } from './specification/contracts/filters.js';
 export { openai } from './integrations/openai/openai.js';
@@ -131,6 +133,7 @@ export type {
     ContractResponse,
     ContractResponseValue,
     MatchableRequest,
+    StreamBody,
 } from './specification/contracts/types.js';
 // The module-scope double — the VALUE is each entry's (one engine per runtime);
 // The shape is stated here so the two surfaces can only publish the same one.

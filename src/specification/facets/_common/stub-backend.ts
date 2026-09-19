@@ -26,6 +26,8 @@ import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 import type { Contract } from '../../contracts/contract.js';
 import { ContractQueue } from '../../contracts/queue.js';
+import { toReadableStream } from '../../contracts/stream.js';
+import { isStreamBody } from '../../contracts/types.js';
 import type { MatchableRequest } from '../../contracts/types.js';
 
 /** Options for the stub backend server. */
@@ -207,6 +209,30 @@ export class StubBackend {
 
         const status = reply.status ?? 200;
         const { body } = reply;
+        if (isStreamBody(body)) {
+            // A declared stream is written piece by piece with the connection
+            // Held open — the one body this server must not serialise, because
+            // What the client is specified against is the order it reads in.
+            response.writeHead(status, {
+                ...cors,
+                'content-type': body.contentType,
+                ...reply.headers,
+            });
+            // Piped rather than looped over: the stream's own plumbing writes
+            // Each piece as it is produced and ends the response after the
+            // Last one, which is what closes the connection.
+            await toReadableStream(body).pipeTo(
+                new WritableStream<Uint8Array>({
+                    close() {
+                        response.end();
+                    },
+                    write(chunk) {
+                        response.write(chunk);
+                    },
+                }),
+            );
+            return;
+        }
         if (body === null || body === undefined) {
             response.writeHead(status, { ...cors, ...reply.headers });
             response.end();

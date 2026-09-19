@@ -13,6 +13,8 @@
  */
 import type { Contract } from '../../specification/contracts/contract.js';
 import { ContractQueue } from '../../specification/contracts/queue.js';
+import { toReadableStream } from '../../specification/contracts/stream.js';
+import { isStreamBody } from '../../specification/contracts/types.js';
 import type { ContractResponse, MatchableRequest } from '../../specification/contracts/types.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
@@ -58,6 +60,14 @@ export function toMswResponse(msw: any, response: ContractResponse): unknown {
     }
     if (body === null || body === undefined) {
         return new msw.HttpResponse(null, { headers: { ...NEVER_CACHED, ...headers }, status });
+    }
+    if (isStreamBody(body)) {
+        // A stream is the one body the engine must NOT serialise: it is the
+        // Pieces and their order that the subject reads.
+        return new msw.HttpResponse(toReadableStream(body), {
+            headers: { ...NEVER_CACHED, 'content-type': body.contentType, ...headers },
+            status,
+        });
     }
     if (typeof body === 'string') {
         return new msw.HttpResponse(body, {
