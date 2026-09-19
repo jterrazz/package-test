@@ -99,7 +99,7 @@
 | [MobileSpecificationOptions](type-aliases/MobileSpecificationOptions.md) | Options for startMobile \| specification.mobile. |
 | [MobileVisitor](type-aliases/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until a visible match exists; acting verbs then enforce exactly-one (W3), while `see()` — the single synchronization primitive — is satisfied by any visible match. There is no sleep and no conditional helper. |
 | [MockDatePort](type-aliases/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
-| [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
+| [MockPort](type-aliases/MockPort.md) | The factory's own shape — kept as a name so a consumer can annotate with it. |
 | [PostgresOptions](type-aliases/PostgresOptions.md) | - |
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
 | [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
@@ -148,7 +148,6 @@
 | [listitem](variables/listitem.md) | An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`. |
 | [main](variables/main.md) | The `main` landmark — the primary content of the document. |
 | [match](variables/match.md) | - |
-| [mockOf](variables/mockOf.md) | Create a deep mock proxy for a given type. Wraps `vitest-mock-extended`'s `mockDeep` for convenient port mocking. |
 | [mockOfDate](variables/mockOfDate.md) | Freeze or reset the global Date for deterministic time-dependent tests. Wraps the `mockdate` package. |
 | [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
@@ -171,6 +170,7 @@
 | [findContainersByLabel](functions/findContainersByLabel.md) | Return all container IDs (running or stopped) that carry `key=value`. |
 | [focused](functions/focused.md) | Where the keyboard is: `see(focused(button('Open')))` asserts the element has focus, `gone(focused(x))` that it does not. |
 | [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
+| [mockOf](functions/mockOf.md) | A typed double for an injected port — the fourth rung of the doubles ladder (docs/12-conventions.md), and the only one a module test may build itself. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
 | [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |

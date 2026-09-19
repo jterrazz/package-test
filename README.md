@@ -450,10 +450,11 @@ test('deploy spawns a labelled container', async () => {
 import { mockOf, mockOfDate } from '@jterrazz/test';
 ```
 
-| Export        | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| `mockOf<T>()` | Deep mock of any interface (wraps `vitest-mock-extended`)    |
-| `mockOfDate`  | Freeze/reset the global Date via `.set(date)` and `.reset()` |
+| Export                       | Description                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `mockOf<T>()`                | Deep double of a port — a member that was never stubbed answers with another double |
+| `mockOf<T>({ deep: false })` | The flat double — every member of `T` and nothing beneath them                      |
+| `mockOfDate`                 | Freeze/reset the global Date via `.set(date)` and `.reset()`                        |
 
 ## Conventions
 

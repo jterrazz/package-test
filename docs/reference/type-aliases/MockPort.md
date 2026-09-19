@@ -2,19 +2,9 @@
 # Type Alias: MockPort
 
 ```ts
-type MockPort = <T>() => DeepMockProxy<T>;
+type MockPort = typeof mockOf;
 ```
 
-Defined in: [src/vitest/mock-of.ts:5](https://github.com/jterrazz/package-test/blob/main/src/vitest/mock-of.ts#L5)
+Defined in: src/vitest/mock-of.ts:35
 
-Factory signature that creates a deep mock proxy for any interface.
-
-## Type Parameters
-
-| Type Parameter |
-| ------ |
-| `T` |
-
-## Returns
-
-`DeepMockProxy`\<`T`\>
+The factory's own shape — kept as a name so a consumer can annotate with it.
