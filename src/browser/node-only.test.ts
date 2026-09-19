@@ -26,9 +26,10 @@ describe('the page refuses what only node can do, where it was called', () => {
 
     test('a node-only class is present and throws when it is constructed', () => {
         // Given - a result class the page can name but never build
-        const Stub = nodeOnlyClass('CliResult');
+        const Stub: new () => unknown = nodeOnlyClass('CliResult');
 
-        // Then - the name resolves, and using it is what fails
+        // Then - the name resolves, and `new` is what fails, saying which name
         expect(Stub).toBeTypeOf('function');
+        expect(() => new Stub()).toThrow(/^CliResult runs under node/u);
     });
 });

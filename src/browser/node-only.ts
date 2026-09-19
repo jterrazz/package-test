@@ -26,6 +26,13 @@ export function refuse(name: string): never {
  * cannot honour — every instance member of the real one — so this is the one
  * place the page's entry states a type it does not structurally satisfy; what
  * the value can actually do is throw, which is the whole of the contract.
+ *
+ * The stub is a constructible FUNCTION, never an arrow: `new` on an arrow
+ * throws "is not a constructor" before the refusal can run, so the page would
+ * lose the one thing the stub exists to say — which name it reached for.
  */
-// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the stub is deliberately narrower than the class it stands in for: constructing it is the only thing a page may do with it, and that throws
-export const nodeOnlyClass = (name: string): never => (() => refuse(name)) as never;
+export const nodeOnlyClass = (name: string): never =>
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the stub is deliberately narrower than the class it stands in for: constructing it is the only thing a page may do with it, and that throws
+    function NodeOnly(): never {
+        return refuse(name);
+    } as never;
