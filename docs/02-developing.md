@@ -203,13 +203,14 @@ Each CLI spec runs in a fresh, empty temp directory. ANSI escape sequences are s
 
 ```typescript
 // vitest.config.ts
-import { component, defineSpecConfig, unit } from '@jterrazz/test/vitest';
+import { component, defineSpecConfig, unit, website } from '@jterrazz/test/vitest';
 
 export default defineSpecConfig({
     test: {
         projects: [
             unit(), // `**/*.test.ts` outside specs/ — no browser, no pipeline
             component({ vite: './vite.config.ts', wrap: './src/providers.tsx' }),
+            website(), // `specs/website/**` — the served product, in its own group
             { test: { name: 'api', include: ['specs/api/**/*.test.ts'] } }, // node mode
             apiStack, // the same files, with TEST_MODE=compose
         ],
@@ -229,7 +230,7 @@ const apiStack = {
 };
 ```
 
-`unit()` and `component()` are the two helpers a repository with a UI needs, and they are a pair by construction: `unit()` excludes `**/*.test.tsx` and `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [16 — Component specs](16-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
+`unit()` and `component()` are a pair by construction: `unit()` excludes `**/*.test.tsx` and `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. `unit()` takes `roots?` where the modules are not at the repository root, or `include?` for the globs outright; `website()` collects `specs/website/**`. All three carry `sequence.groupOrder` — node 0, `website` 1, `component` 2 — so the two browser projects never open two Chromiums at once on a 2-vCPU runner. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [16 — Component specs](16-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
 
 `mode` (node vs compose) is a property of `specification.api()` only, and it is **never hardcoded in a specification file** (rule A5) — the switch lives here, via the `TEST_MODE` environment variable. The same HTTP test files run twice: once in-process (fast feedback), once against the real compose stack (end-to-end confidence). Zero switching logic in the specs themselves.
 

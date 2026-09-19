@@ -30,8 +30,10 @@ export default defineSpecConfig({
 ```
 
 - `wrap` — a module PATH default-exporting `(ui) => ReactNode`: the app's own providers, around every render. A router is NOT this; it is a test's Given, on `.wrap()`.
-- `vite` — the app's pipeline (path | object | function | promise). Only `plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json` are adopted; `root`, `build`, `server`, `publicDir` are dropped so the project still collects from where the config sits. Consumer plugins are CONCATENATED after the seam's.
-- `clock`, `viewport` (default 1280×720), `timezone` (`'UTC'`), `locale` (`'en-US'`), `include`/`exclude`, `timeout`.
+- `vite` — the app's pipeline (path | object | function | promise). Only `plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json` are adopted; `root`, `build`, `server`, `publicDir` are dropped so the project still collects from where the config sits. Consumer plugins are CONCATENATED after the seam's. The JSX default lands on the key the installed Vite transforms with (`oxc` from 8, `esbuild` before it) and yields to yours.
+- A `resolve.alias` is an unlisted dependency to knip, and a bundler-only statement to the compiler: mirror it in the `tsconfig`'s `paths`, or name the package in `knip.ignoreDependencies` with the alias as the reason.
+- `clock`, `viewport` (default 1280×720 — one test overrides it with `.viewport()`), `timezone` (`'UTC'`), `locale` (`'en-US'`), `include`/`exclude`, `timeout`.
+- Beside it: `unit({ roots?, include?, exclude?, timeout? })` and `website({ include?, exclude?, timeout? })`. The three carry `sequence.groupOrder` — node 0, website 1, component 2 — so two chromiums never share a slot.
 - It is `async`; `projects: [component({ … })]` is fine without `await`.
 - Peers it needs: `@vitest/browser-playwright` (peers vitest on an EXACT version — bump both in one change), `vitest-browser-react`, `react`, `react-dom`, `vite`, `playwright` + `npx playwright install chromium`.
 
@@ -41,9 +43,10 @@ export default defineSpecConfig({
 import { button, component, content, defineContract, http } from '@jterrazz/test';
 
 const result = await component
-    .intercept(listing) // contracts — strict from the first one (D7)
+    .intercept(listing) // contracts — D7 is TOTAL here: no contract, no network
     .wrap((ui) => <Stub />) // a router stub, StrictMode, a test-local provider
     .clock('2026-03-04T09:30:00Z') // pins the page's Date
+    .viewport({ height: 640, width: 400 }) // this render's page size; restored after
     .render(<PostTable />, async (visitor) => {
         await visitor.click(button('Apply'));
         await visitor.see(content('Showing 2 of 200 posts'));
@@ -54,19 +57,13 @@ const result = await component
 
 ## Verbs
 
-The page's — `click fill check select hover press see gone` — plus the two only a PARENT has: `rerender(ui)` and `unmount()`. No `goto` (a component has no address). `see(focused(button('Open')))` asks where the keyboard is; `gone(x)` is the absence primitive (`see` cannot prove something went away).
+The page's — owned by [references/website.md](website.md) — plus the two only a PARENT has: `rerender(ui)` and `unmount()`. No `goto` (a component has no address). The modifiers are the page's too: `see(focused(x))` asks where the keyboard is, `see(disabled(x))` / `see(enabled(x))` whether a control takes input.
 
 ## The result
 
-| Member    | Is                                                                       |
-| --------- | ------------------------------------------------------------------------ |
-| `tree`    | ARIA snapshot of the rendered body — the golden a rendered surface wants |
-| `content` | rendered text of the document body                                       |
-| `html`    | the mounted markup — the escape hatch for a class or an attribute        |
-| `console` | every message, one `[type] text` line                                    |
-| `errors`  | console errors only, plus any uncaught page error                        |
+Five accessors — `tree` `content` `html` `console` `errors` — described in [docs/16-component.md § The result](../../../docs/16-component.md#the-result). `content` is `innerText`: what a reader sees, so a `<style>` body and a hidden node are not in it.
 
-`toMatch` is **awaited** here and only here: the golden crosses the browser seam.
+`toMatch` is **awaited** on all five (the golden crosses the browser seam) and on a directory subject (it walks a disk); [docs/08-assertions.md](../../../docs/08-assertions.md) owns which matchers are IO.
 
 ```typescript
 await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml'); // _expected/, TEST_UPDATE=1
@@ -79,5 +76,7 @@ expect(result.html).toContain('row row--live');
 - No `@testing-library/*`, no `happy-dom`, no `jsdom`, no `vitest/browser`, no `vitest-browser-*` in a test file (F6).
 - No hand-rolled `browser:` block in a config (E6) — `component()` owns the provider pin, the msw worker, the JSX transform and the cold-cache pre-bundling.
 - No DOM global in a `.test.ts` (G4); no `@vitest-environment happy-dom` anywhere (E5/E5b).
-- A component that fetches something no contract declared FAILS the render, naming the request.
+- A component that fetches something no contract declared FAILS the render, naming the request — including one given NO contract at all.
+- A forgotten `await` on `toMatch` does not skip the assertion: it lands as an `Unhandled Error` blamed on no test, the test reports PASSED, and the run still exits non-zero.
+- A name matches as a case-insensitive SUBSTRING: `button('Delete post')` also matches an `aria-label="Delete Post a"`. The W3 refusal names the accessible name each candidate matched on.
 - Focus is never a golden — the ARIA tree carries none. Assert it with `see(focused(x))`.
