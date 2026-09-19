@@ -25,11 +25,13 @@ describe('checker CLI — the member pass', () => {
         // Passes that actually ran — never the tree ones, which walked nothing
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('packages/clean');
-        expect(result.stdout).toContain('E3 config-present, E5b no simulated DOM, F8 no seam dependency');
+        expect(result.stdout).toContain(
+            'E3 config-present, E5b no simulated DOM, F8 no seam dependency',
+        );
         expect(result.stdout).not.toContain('C9 dead fixtures');
     });
 
-    test('a root whose only tests are its members\' owes no config', async () => {
+    test("a root whose only tests are its members' owes no config", async () => {
         // Given - a workspace root that delegates `test` to its members
         const result = await cli.exec(`--member ${WORKSPACE} ${WORKSPACE}`);
 
