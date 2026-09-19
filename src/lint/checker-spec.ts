@@ -14,6 +14,7 @@ import {
 } from '../specification/literate/spec-document.js';
 import type { SpecDocument, SpecFile } from '../specification/literate/spec-document.js';
 import type { Severity, TokenViolation } from './checker.js';
+import { codeOf } from './rule-code.js';
 
 /**
  * The `<case>.spec.yaml` conventions — the checker passes that judge a document
@@ -639,6 +640,7 @@ export function checkSpecConventions(text: string, rel: string, path: string): T
         file: rel,
         line,
         message: `${rel}:${line}: ${message} (${rule} — see docs/13-linting.md)`,
+        rule: codeOf(rule),
         severity,
     }));
 }
@@ -671,6 +673,7 @@ export function checkSpecDescriptionsUnique(rootDir: string): TokenViolation[] {
             file: rel,
             line: document.descriptionLine,
             message: `${rel}:${document.descriptionLine}: "${document.description}" is already the description of ${first} — two documents of one directory cannot share a title (j4-spec-description-unique — see docs/13-linting.md)`,
+            rule: 'j4',
             severity: 'error',
         });
     }

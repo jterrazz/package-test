@@ -1,0 +1,16 @@
+[
+    {
+        "code": "jterrazz-check(f8)",
+        "file": "packages/seam-dependency/package.json",
+        "line": 1,
+        "message": "packages/seam-dependency: `@testing-library/react` is a transitive of `@jterrazz/test` — remove the declaration (F8 — see docs/13-linting.md#f8-no-seam-dependency)",
+        "severity": "error"
+    },
+    {
+        "code": "jterrazz-check(f8)",
+        "file": "packages/seam-dependency/package.json",
+        "line": 1,
+        "message": "packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` — remove the declaration (F8 — see docs/13-linting.md#f8-no-seam-dependency)",
+        "severity": "error"
+    }
+]

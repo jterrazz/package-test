@@ -1,0 +1,5 @@
+{
+    "name": "@fixture/clean",
+    "devDependencies": { "playwright": "^1.49.0" },
+    "scripts": { "test": "vitest --run" }
+}

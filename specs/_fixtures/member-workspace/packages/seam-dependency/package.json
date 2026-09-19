@@ -1,0 +1,8 @@
+{
+    "name": "@fixture/seam-dependency",
+    "devDependencies": {
+        "@testing-library/react": "^16.0.0",
+        "msw": "^2.15.0",
+        "playwright": "^1.49.0"
+    }
+}

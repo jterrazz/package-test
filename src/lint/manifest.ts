@@ -524,6 +524,45 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            'Chaque membre du workspace qui a des tests (un script `test`, ou un `*.test.ts(x)` quelque part) déclare une config vitest (`vitest.config.*`). La passe MEMBRE juge le membre lui-même, avec ou sans arbre `specs/`.',
+        facet: 'shared',
+        family: 'E',
+        fix: 'Écrire `export default defineSpecConfig()` dans le membre — le préréglage porte les budgets, le dossier d’artefacts et l’exclusion de `_fixtures/`.',
+        id: 'E3',
+        name: 'e3-config-present',
+        rationale:
+            'Sans config, le budget de 5 s de vitest et un `_fixtures/` non exclu font tourner les tests du membre : le défaut n’est pas choisi, il est hérité.',
+        reach: 'config',
+    },
+    {
+        channel: 'checker',
+        convention:
+            "La passe MEMBRE relit la règle E5b là où oxlint peut ne pas atteindre la config d’un membre : `environment: 'happy-dom'|'jsdom'` dans un `vitest.config.*` est une erreur.",
+        facet: 'component',
+        family: 'E',
+        fix: 'Supprimer `environment` et collecter le rendu avec `component()`.',
+        id: 'E5b',
+        name: 'e5b-no-simulated-dom-config-member',
+        rationale:
+            'La passe statique ne voit que ce que la configuration oxlint du dépôt lui donne ; la passe membre part du manifeste racine et atteint chaque membre déclaré.',
+        reach: 'config',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Un membre ne déclare aucune dépendance que `@jterrazz/test` porte déjà (`msw`, `vitest-mock-extended`, `yaml`) ni aucun seam retiré (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`). Les peers optionnels — `playwright`, `vite`, `react`, `better-sqlite3`, `pg`, `redis`, `testcontainers`… — sont déclarés par le consommateur, à dessein.',
+        facet: 'shared',
+        family: 'F',
+        fix: 'Retirer la déclaration : le paquet la résout déjà, et le seam a une facette qui le remplace.',
+        id: 'F8',
+        name: 'f8-no-seam-dependency',
+        rationale:
+            'Une déclaration en double laisse deux versions d’un même seam coexister, et un seam retiré garde un vocabulaire que le framework a remplacé.',
+        reach: 'config',
+    },
+    {
+        channel: 'checker',
+        convention:
             'Tout `{{token}}` dans une fixture `_expected/` — ou dans un flux attendu d’un document `<cas>.spec.yaml` — appartient au vocabulaire figé ; un token inconnu est une erreur.',
         family: 'D',
         id: 'D4',
