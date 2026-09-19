@@ -40,7 +40,7 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
         // Tests at facet/domain depth (aspect name is free).
         { code: 'const x = 1;', filename: '/repo/specs/api/responses/responses.test.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/cli/check/linter.test.ts' },
-        { code: 'const x = 1;', filename: '/repo/specs/seams/redis/redis.test.ts' },
+        { code: 'const x = 1;', filename: '/repo/specs/integration/redis/redis.test.ts' },
         // Specifications at the facet root.
         { code: 'const x = 1;', filename: '/repo/specs/api/api.specification.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/cli/cli.specification.ts' },

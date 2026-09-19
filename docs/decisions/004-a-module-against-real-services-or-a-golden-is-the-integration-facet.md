@@ -62,11 +62,16 @@ one `.call()` inside `test.each`.
   refuse" with `await expect(result.error).toBeEmpty()`.
 - **D20 gains its destination.** `toMatchSnapshot` can be banned because every
   test it served now has a facet, a folder and a golden engine.
-- **One more folder name is spoken for.** `specs/integration/` is a facet
-  folder: singular, like `website/`, and holding a `*.specification.ts` at its
-  root. The package renamed its own plural folder in the same change, and what
-  lived there — probes of the container adapters themselves — moved to
-  `specs/seams/`, which is what they always were.
+- **One more folder name is spoken for, and no unowned one is added.**
+  `specs/integration/` is a facet folder: singular, like `website/`, and
+  holding a `*.specification.ts` at its root. The package renamed its own
+  plural folder in the same change. What lived there — probes of the container
+  adapters themselves — became integration specs under
+  `specs/integration/<seam>/`: an adapter met against a real service IS a
+  module against a real service. Folder = constructor holds for the package
+  too, so no probe earns a folder under `specs/` that no constructor owns, and
+  what a probe cannot reach through the public entry is a module test beside
+  its module (rule F3).
 - **An env-gated sub-suite stops being a project.** With `{ include, exclude }`
   on the helper, package-attestation's five projects become `unit()` plus one
   `integration()`.

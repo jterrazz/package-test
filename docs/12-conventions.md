@@ -92,7 +92,7 @@ Two further rules decide WHERE a fixture lives, and they are the same question a
 
 | Thing           | Rule                                                                                                                        |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `website/`, `mobile/`, `integrations/`, `lint/`, `_fixtures/`)                           |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `integration/`, `website/`, `mobile/`, `_fixtures/`) — one folder per constructor        |
 | Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                 |
 | Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                              |
 | Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                                   |
@@ -133,6 +133,8 @@ Three questions, in order. The answer fixes the folder, the constructor (or none
 | Is it a module alone?                                                  | module      | `<file>.test.ts` beside `<file>.ts`          | none                          | `unit`        |
 
 The fork is the SUBJECT, never the amount of machinery. A rendered component needs a real browser, a Vite pipeline, a network double and a golden engine — all of them the framework's — and it is still a unit, so it sits beside its code. A module that needs a real database needs nothing new at all, and it is still an assembled thing, so it sits under `specs/` ([17](17-integration.md)).
+
+The table is total: **a folder under `specs/` is a constructor's name, and there is no ninth row**. A probe of an adapter against a real service — a database driver, a cache handle, the orchestrator that starts them — answers the seventh question, so it is an integration spec like any other; what it cannot reach through the package's public entry it should not be reaching from a spec at all, and that probe is a module test beside its module (rule F3).
 
 ## The doubles ladder
 

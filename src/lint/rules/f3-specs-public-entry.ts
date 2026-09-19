@@ -31,9 +31,8 @@ const FRAMEWORK_LAYERS = new Set(['integrations', 'lint', 'specification', 'vite
  *
  * Distinct from F1 (which judges the same specifiers from any file): F3 is the
  * specs-specific guard that also reaches relative framework-internal paths.
- * Documented exception: the SEAM probes under `specs/seams/` may deep-import
- * the integration module they cover (`src/integrations/**`) — the adapter IS
- * their subject, which is what tells them from a spec of a facet.
+ * There is no folder exception: a probe that cannot reach its subject through
+ * the public entry is a module test beside its module, not a spec.
  */
 export const f3SpecsPublicEntry: LintRule = {
     create(context: RuleContext) {
@@ -43,7 +42,6 @@ export const f3SpecsPublicEntry: LintRule = {
         }
         const published = new Set(declaredSubpaths());
         const exempt = published.size === 0 ? 'none' : [...published].join(', ');
-        const underSeams = anchor.relative[0] === 'seams';
         const visitor: Visitor = {
             ...importSourceVisitor(({ node, source }) => {
                 // Framework subpath imports (overlaps F1, kept specs-specific).
@@ -68,9 +66,6 @@ export const f3SpecsPublicEntry: LintRule = {
                 if (!FRAMEWORK_LAYERS.has(layer)) {
                     return; // Consumer's own app source (e.g. src/app.js) — the pattern.
                 }
-                if (underSeams && layer === 'integrations') {
-                    return; // Sanctioned: integration specs cover internal adapters.
-                }
                 context.report({
                     data: { published: exempt, source },
                     messageId: 'deepImport',
@@ -84,7 +79,7 @@ export const f3SpecsPublicEntry: LintRule = {
         docs: RULE_DOCS['f3-specs-public-entry'],
         messages: {
             deepImport:
-                'specs/ must not deep-import framework internals — reach the framework via its public entry (@jterrazz/test, or src/index.js in this repo), not "{{source}}" (F3 — see docs/13-linting.md). Exempt: the published subpaths {{published}}, and src/integrations/** from specs/seams/.',
+                'specs/ must not deep-import framework internals — reach the framework via its public entry (@jterrazz/test, or src/index.js in this repo), not "{{source}}" (F3 — see docs/13-linting.md). Exempt: the published subpaths {{published}}. A probe whose subject is not on the public entry is a module test beside its module.',
         },
         type: 'problem',
     },
