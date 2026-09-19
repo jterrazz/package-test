@@ -5,7 +5,7 @@
 type ServerResponse = object;
 ```
 
-Defined in: [src/specification/ports/server.port.ts:4](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/server.port.ts#L4)
+Defined in: src/specification/ports/server.port.ts:4
 
 HTTP response returned by a server port, with parsed JSON body.
 
@@ -17,7 +17,7 @@ HTTP response returned by a server port, with parsed JSON body.
 body: unknown;
 ```
 
-Defined in: [src/specification/ports/server.port.ts:8](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/server.port.ts#L8)
+Defined in: src/specification/ports/server.port.ts:8
 
 Parsed JSON response body, or null if parsing failed.
 
@@ -29,7 +29,7 @@ Parsed JSON response body, or null if parsing failed.
 headers: Record<string, string>;
 ```
 
-Defined in: [src/specification/ports/server.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/server.port.ts#L10)
+Defined in: src/specification/ports/server.port.ts:10
 
 Response headers as a flat key-value map.
 
@@ -41,6 +41,6 @@ Response headers as a flat key-value map.
 status: number;
 ```
 
-Defined in: [src/specification/ports/server.port.ts:6](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/server.port.ts#L6)
+Defined in: src/specification/ports/server.port.ts:6
 
 HTTP status code.

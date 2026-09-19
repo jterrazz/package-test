@@ -5,7 +5,7 @@
 type ElementOptions = object;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:19](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L19)
+Defined in: src/specification/facets/website/elements.ts:19
 
 Options accepted by every named descriptor.
 
@@ -17,7 +17,7 @@ Options accepted by every named descriptor.
 optional exact?: boolean;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:24](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L24)
+Defined in: src/specification/facets/website/elements.ts:24
 
 Match the accessible name as a whole string. Default is substring —
 `link('Articles')` also matches "Read Articles".

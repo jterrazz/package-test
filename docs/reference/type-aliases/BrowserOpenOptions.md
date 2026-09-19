@@ -5,7 +5,7 @@
 type BrowserOpenOptions = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:153
+Defined in: src/specification/ports/browser.port.ts:170
 
 Per-visit options forwarded to the browser context.
 
@@ -17,7 +17,7 @@ Per-visit options forwarded to the browser context.
 optional allowedOrigins?: string[];
 ```
 
-Defined in: src/specification/ports/browser.port.ts:158
+Defined in: src/specification/ports/browser.port.ts:175
 
 Extra origins the `external: 'block'` policy lets through — the
 declared stub backend the page legitimately fetches from.
@@ -30,7 +30,7 @@ declared stub backend the page legitimately fetches from.
 baseUrl: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:163
+Defined in: src/specification/ports/browser.port.ts:180
 
 Base URL of the site under test — the origin `goto()` resolves against
 and the boundary of the `external` policy.
@@ -43,7 +43,7 @@ and the boundary of the `external` policy.
 optional clock?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:168
+Defined in: src/specification/ports/browser.port.ts:185
 
 Pin the page's own `Date` at this instant before the first byte is
 parsed — the calendar the site's scripts read. `.clock()` on the chain.
@@ -56,7 +56,7 @@ parsed — the calendar the site's scripts read. `.clock()` on the chain.
 external: "allow" | "block";
 ```
 
-Defined in: src/specification/ports/browser.port.ts:174
+Defined in: src/specification/ports/browser.port.ts:191
 
 Cross-origin request policy. `'block'` aborts every request leaving
 the site under test (analytics, CDNs) — the browser-side analog of
@@ -70,7 +70,7 @@ strict intercepts. `'allow'` lets them through (deployed-site mode).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:176
+Defined in: src/specification/ports/browser.port.ts:193
 
 Extra HTTP headers sent with every request of the visit (incl. User-Agent overrides).
 
@@ -82,6 +82,6 @@ Extra HTTP headers sent with every request of the visit (incl. User-Agent overri
 optional scenario?: VisitScenario;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:178
+Defined in: src/specification/ports/browser.port.ts:195
 
 The interaction scenario to run after load; the capture reflects the final state.

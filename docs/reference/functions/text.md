@@ -5,7 +5,7 @@
 function text(value): TextAccessor;
 ```
 
-Defined in: [src/specification/facets/\_common/result/text-subject.ts:27](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/result/text-subject.ts#L27)
+Defined in: src/specification/facets/\_common/result/text-subject.ts:27
 
 Wrap an arbitrary string into a [TextAccessor](../classes/TextAccessor.md) anchored on the calling
 test's directory — the same caller-detection the builders use.

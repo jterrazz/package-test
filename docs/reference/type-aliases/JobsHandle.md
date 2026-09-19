@@ -5,7 +5,7 @@
 type JobsHandle<DatabaseKey> = object;
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:32](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L32)
+Defined in: src/specification/facets/jobs/start-jobs.ts:32
 
 The record returned by startJobs \| specification.jobs. Destructure
 with the canonical names (CONVENTIONS A3):
@@ -26,7 +26,7 @@ with the canonical names (CONVENTIONS A3):
 cleanup: () => Promise<void>;
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L34)
+Defined in: src/specification/facets/jobs/start-jobs.ts:34
 
 Stop all infrastructure started by this specification.
 
@@ -42,7 +42,7 @@ Stop all infrastructure started by this specification.
 jobs: JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:35](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L35)
+Defined in: src/specification/facets/jobs/start-jobs.ts:35
 
 ***
 
@@ -52,6 +52,6 @@ Defined in: [src/specification/facets/jobs/start-jobs.ts:35](https://github.com/
 orchestrator: null | Orchestrator;
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L37)
+Defined in: src/specification/facets/jobs/start-jobs.ts:37
 
 The orchestrator managing the test infrastructure lifecycle.

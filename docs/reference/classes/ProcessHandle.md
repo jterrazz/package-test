@@ -181,7 +181,7 @@ ServiceHandle.type
 get spec(): ProcessOptions;
 ```
 
-Defined in: src/specification/facets/\_common/process.ts:120
+Defined in: src/specification/facets/\_common/process.ts:123
 
 What it was declared as — what a facet reads to start it in a slot of its own.
 
@@ -199,7 +199,7 @@ What it was declared as — what a facet reads to start it in a slot of its own.
 get url(): string;
 ```
 
-Defined in: src/specification/facets/\_common/process.ts:125
+Defined in: src/specification/facets/\_common/process.ts:128
 
 The base URL it came up on — known only once it is started.
 
@@ -312,11 +312,14 @@ ServiceHandle.initialize
 isolation(): IsolationStrategy;
 ```
 
-Defined in: src/specification/facets/\_common/process.ts:68
+Defined in: src/specification/facets/\_common/process.ts:71
 
-Isolation is the RUN's, not the worker's: a process is started once per
-specification and every worker that reaches it shares it, so the id the
-facet mints is what tells two runs apart — never a label a spec samples.
+Isolation is the RUN's, not the worker's — and a run here is one
+EVALUATION of the specification module. Under vitest's default
+isolation that is once per test file, so two files that import the same
+specification get a child each, with the id the facet minted for it.
+Nothing is acquired or reset between tests: the id is what tells two
+runs apart, never a label a spec samples.
 
 #### Returns
 
@@ -336,7 +339,7 @@ ServiceHandle.isolation
 reset(): Promise<void>;
 ```
 
-Defined in: src/specification/facets/\_common/process.ts:82
+Defined in: src/specification/facets/\_common/process.ts:85
 
 Reset state between tests (truncate tables, flush cache, etc.)
 
@@ -358,7 +361,7 @@ ServiceHandle.reset
 shutdown(): Promise<void>;
 ```
 
-Defined in: src/specification/facets/\_common/process.ts:113
+Defined in: src/specification/facets/\_common/process.ts:116
 
 Terminate the process group. Idempotent.
 

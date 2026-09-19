@@ -5,7 +5,7 @@
 type MatchableRequest = object;
 ```
 
-Defined in: [src/specification/contracts/types.ts:7](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L7)
+Defined in: src/specification/contracts/types.ts:7
 
 The observed outgoing request, reduced to what contract matchers inspect.
 Built once per request by the engine (MSW on api/jobs, the stub backend on
@@ -20,7 +20,7 @@ website/mobile) and handed to [ContractRequest.match](ContractRequest.md#match) 
 body: unknown;
 ```
 
-Defined in: [src/specification/contracts/types.ts:9](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L9)
+Defined in: src/specification/contracts/types.ts:9
 
 Parsed JSON body when the payload is JSON, the raw text otherwise, or `null` when absent.
 
@@ -32,7 +32,7 @@ Parsed JSON body when the payload is JSON, the raw text otherwise, or `null` whe
 headers: Record<string, string>;
 ```
 
-Defined in: [src/specification/contracts/types.ts:11](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L11)
+Defined in: src/specification/contracts/types.ts:11
 
 Request headers, keyed by lowercased header name.
 
@@ -44,7 +44,7 @@ Request headers, keyed by lowercased header name.
 method: string;
 ```
 
-Defined in: [src/specification/contracts/types.ts:13](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L13)
+Defined in: src/specification/contracts/types.ts:13
 
 Uppercased HTTP method of the observed request.
 
@@ -56,6 +56,6 @@ Uppercased HTTP method of the observed request.
 url: string;
 ```
 
-Defined in: [src/specification/contracts/types.ts:15](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L15)
+Defined in: src/specification/contracts/types.ts:15
 
 The request URL — fully-qualified, or origin-relative for the stub backend.

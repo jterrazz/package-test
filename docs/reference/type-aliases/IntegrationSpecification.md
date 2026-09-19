@@ -5,7 +5,7 @@
 type IntegrationSpecification<Services, DatabaseKey> = object;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:235
+Defined in: src/specification/facets/\_common/builder.ts:241
 
 The `integration` facet — the in-process chain handed out by
 `specification.integration()`.
@@ -27,10 +27,10 @@ every other facet and ends on the one action a module has: being called.
 ### call
 
 ```ts
-call: <T>(subject) => Promise<CallResult>;
+call: <T>(subject) => Promise<CallResult<T>>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:254
+Defined in: src/specification/facets/\_common/builder.ts:260
 
 Call the module and resolve with what it produced. The started services
 record is handed in, so the subject is constructed with the real
@@ -50,7 +50,7 @@ connection strings rather than with a double.
 
 #### Returns
 
-`Promise`\<[`CallResult`](../classes/CallResult.md)\>
+`Promise`\<[`CallResult`](../classes/CallResult.md)\<`T`\>\>
 
 ***
 
@@ -60,7 +60,7 @@ connection strings rather than with a double.
 clock: (iso) => IntegrationSpecification<Services, DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:240
+Defined in: src/specification/facets/\_common/builder.ts:246
 
 Pin the module's `Date` at `iso` for this chain.
 
@@ -82,7 +82,7 @@ Pin the module's `Date` at `iso` for this chain.
 intercept: InterceptMethod<IntegrationSpecification<Services, DatabaseKey>>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:242
+Defined in: src/specification/facets/\_common/builder.ts:248
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -94,7 +94,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 seed: (file, options?) => IntegrationSpecification<Services, DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:244
+Defined in: src/specification/facets/\_common/builder.ts:250
 
 Queue a SQL seed file from `_seeds/` to run before the call.
 

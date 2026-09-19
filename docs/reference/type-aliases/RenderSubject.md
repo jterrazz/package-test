@@ -5,7 +5,7 @@
 type RenderSubject = ComponentUi | DomMount;
 ```
 
-Defined in: [src/specification/facets/component/component.types.ts:31](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L31)
+Defined in: src/specification/facets/component/component.types.ts:31
 
 What `.render()` mounts. A React tree is an element (`<PostTable />`); a
 vanilla DOM subject is the FUNCTION that fills a container, which is how a

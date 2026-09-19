@@ -5,7 +5,7 @@
 type TextFilter = Matcher | RegExp | string;
 ```
 
-Defined in: [src/specification/contracts/filters.ts:20](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/filters.ts#L20)
+Defined in: src/specification/contracts/filters.ts:20
 
 A text filter on a provider request builder (`openai.chat({ user })`,
 `anthropic.messages({ system })`, …).

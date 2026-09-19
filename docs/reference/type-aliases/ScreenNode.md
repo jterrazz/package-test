@@ -5,7 +5,7 @@
 type ScreenNode = object;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:68](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L68)
+Defined in: src/specification/ports/device.port.ts:68
 
 One node of the projected accessibility tree — the XCUITest page source
 with its noise collapsed: unlabeled, identifier-less, valueless wrapper
@@ -20,7 +20,7 @@ stable and golden-friendly. Type names lose the `XCUIElementType` prefix.
 optional children?: ScreenNode[];
 ```
 
-Defined in: [src/specification/ports/device.port.ts:69](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L69)
+Defined in: src/specification/ports/device.port.ts:69
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/specification/ports/device.port.ts:69](https://github.com/jterr
 optional identifier?: string;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:71](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L71)
+Defined in: src/specification/ports/device.port.ts:71
 
 The accessibility identifier, only when it differs from the label.
 
@@ -42,7 +42,7 @@ The accessibility identifier, only when it differs from the label.
 optional label?: string;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:72](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L72)
+Defined in: src/specification/ports/device.port.ts:72
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [src/specification/ports/device.port.ts:72](https://github.com/jterr
 type: string;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:74](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L74)
+Defined in: src/specification/ports/device.port.ts:74
 
 Element type without the `XCUIElementType` prefix — `Button`, `StaticText`.
 
@@ -64,4 +64,4 @@ Element type without the `XCUIElementType` prefix — `Button`, `StaticText`.
 optional value?: string;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:75](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L75)
+Defined in: src/specification/ports/device.port.ts:75

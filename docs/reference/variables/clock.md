@@ -5,12 +5,12 @@
 const clock: object;
 ```
 
-Defined in: src/vitest/clock.ts:46
+Defined in: src/vitest/clock.ts:62
 
 ## Type Declaration
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `advance()` | (`ms`) => `Promise`\<`void`\> | Move the pinned clock forward by `ms` — and, under [clock.run](#run), fire every callback that came due, awaiting what each of them started. Only a pinned clock moves: called with no clock taken, it says so rather than silently doing nothing to the real one. | src/vitest/clock.ts:54 |
-| `at()` | (`iso`) => `Disposable` | Pin `Date` at `iso` for the current scope. `Date` ONLY: the scheduler stays real, so a subject that awaits, renders or polls keeps running. **Example** `using _ = clock.at('2026-03-04T09:30:00Z'); expect(stampedAt()).toBe('2026-03-04T09:30:00.000Z');` | src/vitest/clock.ts:72 |
-| `run()` | (`iso?`) => `Disposable` | Take the scheduler as well as the calendar: `setTimeout`, `setInterval` and their friends queue instead of firing, and [clock.advance](#advance) is what makes them due. For a subject whose behaviour IS elapsed time — a debounce, a retry backoff, a poll — where waiting for real would be the arbitrary sleep J2 forbids. **Example** `using _ = clock.run('2026-03-04T09:30:00Z'); const pending = retrying(failsTwice); await clock.advance(5_000); await expect(pending).resolves.toBe('ok');` | src/vitest/clock.ts:90 |
+| `advance()` | (`ms`) => `Promise`\<`void`\> | Move the pinned clock forward by `ms` — and, under [clock.run](#run), fire every callback that came due, awaiting what each of them started. Only a pinned clock moves: called with no clock taken, it says so rather than silently doing nothing to the real one. | src/vitest/clock.ts:70 |
+| `at()` | (`iso`) => `Disposable` | Pin `Date` at `iso` for the current scope. `Date` ONLY: the scheduler stays real, so a subject that awaits, renders or polls keeps running. **Example** `using _ = clock.at('2026-03-04T09:30:00Z'); expect(stampedAt()).toBe('2026-03-04T09:30:00.000Z');` | src/vitest/clock.ts:88 |
+| `run()` | (`iso?`) => `Disposable` | Take the scheduler as well as the calendar: `setTimeout`, `setInterval` and their friends queue instead of firing, and [clock.advance](#advance) is what makes them due. For a subject whose behaviour IS elapsed time — a debounce, a retry backoff, a poll — where waiting for real would be the arbitrary sleep J2 forbids. **Example** `using _ = clock.run('2026-03-04T09:30:00Z'); const pending = retrying(failsTwice); await clock.advance(5_000); await expect(pending).resolves.toBe('ok');` | src/vitest/clock.ts:105 |
