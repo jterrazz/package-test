@@ -117,6 +117,23 @@ Family I governs the source tree rather than the spec tree, and it splits in two
 
 **The test-file rules need no declaration.** I2 (a module's test is its sibling) and I4 (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 
+## The fork — which kind of test this is
+
+Three questions, in order. The answer fixes the folder, the constructor (or none), and the project.
+
+| Question                                                               | Kind        | Lives at                                     | Constructor                   | Project       |
+| ---------------------------------------------------------------------- | ----------- | -------------------------------------------- | ----------------------------- | ------------- |
+| Does it render in a browser as a whole served page?                    | website     | `specs/website/<domain>/`                    | `specification.website()`     | `website`     |
+| Does it render as a component (React, a DOM function, a hook)?         | component   | `<file>.test.tsx` beside `<file>.tsx`        | none — the `component` chain  | `component`   |
+| Does it render on a simulator?                                         | mobile      | `specs/mobile/<domain>/`                     | `specification.mobile()`      | `mobile`      |
+| Does it answer HTTP?                                                   | api         | `specs/api/<domain>/`                        | `specification.api()`         | `api`         |
+| Is it triggered by name, in-process?                                   | jobs        | `specs/jobs/<domain>/`                       | `specification.jobs()`        | `jobs`        |
+| Is it a binary?                                                        | cli         | `specs/cli/<domain>/` (+ `<case>.spec.yaml`) | `specification.cli(bin)`      | `cli`         |
+| Is it a module that needs a real service, or whose oracle is a golden? | integration | `specs/integration/<domain>/`                | `specification.integration()` | `integration` |
+| Is it a module alone?                                                  | module      | `<file>.test.ts` beside `<file>.ts`          | none                          | `unit`        |
+
+The fork is the SUBJECT, never the amount of machinery. A rendered component needs a real browser, a Vite pipeline, a network double and a golden engine — all of them the framework's — and it is still a unit, so it sits beside its code. A module that needs a real database needs nothing new at all, and it is still an assembled thing, so it sits under `specs/` ([17](17-integration.md)).
+
 ## The doubles ladder
 
 Closed and ordered. An agent takes the FIRST rung that fits, and nothing below rung four is a rung.

@@ -520,6 +520,8 @@ test('scaffolds a shop and leaves the tree we expect', async () => {
 });
 ```
 
+`.run()` is a DOOR, not a fallback, and the criterion is written: it stays for a document whose result needs one assertion the grammar has no vocabulary for — an absence, a count, an exhaustive file list, a directory golden, a host shell-out probe — or for a document `literate()`'s static glob cannot collect, because it is generated at test time or deliberately excluded to prove a refusal. It is never for a Given built by chaining onto `cli`: no site on the workbench does that, and the default door is `literate()`, which `cli()` wires for you.
+
 The path is relative to the test file's directory, where the document lives. Setup chained before the call layers **underneath** the document's own ground: a chained `.fixture()` is copied first, the document's `fixture:` entries over it, and its `env:` wins over a chained `.env()`. `{ frozen: true }` opts one document out of the update rewrite — the same guard as `toMatch(name, { frozen: true })`, for a deliberately-wrong document whose failure rendering is the subject of a negative test.
 
 ### Failure and update
