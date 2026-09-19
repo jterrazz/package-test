@@ -216,7 +216,14 @@ test('gives the keyboard back to whatever opened it', async () => {
 });
 ```
 
-- **A DOM function is still a component.** `renderSessionRows(container, rows)` renders; it just does not use React. `.render((container) => …)` mounts it in the same Chromium under the same visitor, and `result.html` reads what it drew. No React is loaded.
+- **A DOM function is still a component.** `renderSessionRows(container, rows)` renders; it just does not use React. `.render((container) => …)` mounts it in the same Chromium under the same visitor, and `result.html` reads what it drew. No React is loaded. Write the body BRACED: a concise arrow hands back the void the render function returns, and `typescript/no-confusing-void-expression` refuses that.
+
+```tsx
+const result = await component.render((container) => {
+    renderSessionRows(container, rows);
+});
+```
+
 - **A router is a test's Given.** cap01's and the console's screens render `<Link>` and read `useParams()`; without a router they throw. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
 - **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total.
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.

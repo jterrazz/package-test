@@ -60,7 +60,13 @@ const result = await component
     });
 ```
 
-`.render()` also takes a DOM function: `.render((container) => renderRows(container, rows))`, whose optional return is its teardown. No React is loaded for it.
+`.render()` also takes a DOM function, whose optional return is its teardown. No React is loaded for it. Brace the body — a concise arrow returns the render function's void, which `typescript/no-confusing-void-expression` refuses:
+
+```tsx
+await component.render((container) => {
+    renderRows(container, rows);
+});
+```
 
 ## Verbs
 
