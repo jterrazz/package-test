@@ -4,6 +4,8 @@ import { createMobileFacet } from '../_common/builder.js';
 import type { MobileSpecification, SpecificationConfig } from '../_common/builder.js';
 import { getCallerDir } from '../_common/caller.js';
 import { resolveRoot } from '../_common/resolve.js';
+import { releaseIsolation, startServices } from '../_common/services.js';
+import type { ServiceRecord, StartedServices } from '../_common/services.js';
 import { StubBackend } from '../_common/stub-backend.js';
 import { startAppiumServer } from './appium-server.js';
 import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
@@ -27,7 +29,7 @@ export type MobileBackendOptions = {
 };
 
 /** Options for {@link startMobile | specification.mobile}. */
-export type MobileSpecificationOptions = {
+export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /** The app under test — terminated and relaunched by every `.open()`. */
     app: {
         /** Bundle id of the installed app (`com.example.app`). */
@@ -60,6 +62,14 @@ export type MobileSpecificationOptions = {
      * driving a DEV build states the wait its bundler's cold boot needs
      * (`{ action: 45_000 }`) instead of sleeping inside its scenarios.
      */
+    /**
+     * Named services started with the runner and stopped with it — a
+     * `process()` for the bundler the app loads from, a database a dev build
+     * reads. Metro stops being a `beforeAll` the repository maintains: it is
+     * `process({ command: 'expo start', ready: /Metro waiting on .*:(\\d+)/ })`
+     * like every other external process the framework owns.
+     */
+    services?: Services;
     timeouts?: DeviceTimeouts;
 };
 
@@ -85,7 +95,9 @@ export type MobileHandle = {
 
 // ── Constructor ──
 
-export async function startMobile(options: MobileSpecificationOptions): Promise<MobileHandle> {
+export async function startMobile<Services extends ServiceRecord>(
+    options: MobileSpecificationOptions<Services>,
+): Promise<MobileHandle> {
     // Caller detection must run before any await — async resumption drops
     // The calling file's frames from the stack.
     const callerDir = getCallerDir();
@@ -95,6 +107,20 @@ export async function startMobile(options: MobileSpecificationOptions): Promise<
     const udid = options.device.udid ?? (await resolveSimulatorUdid(options.device));
     await ensureBooted(udid);
     const appium = await startAppiumServer(root);
+
+    // The declared services come up before the app is ever launched: a dev
+    // Build reaches its bundler on the first frame it renders.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the empty record stands for an absent one, and every facet states the default the same way
+    const services = (options.services ?? {}) as Services;
+    let started: null | StartedServices = null;
+    if (Object.keys(services).length > 0) {
+        try {
+            started = await startServices(services, root);
+        } catch (error) {
+            await appium.stop();
+            throw error;
+        }
+    }
 
     // The stub starts last (nothing can fail after it), so a constructor
     // Refusal never leaves an orphaned server keeping the process alive.
@@ -136,6 +162,11 @@ export async function startMobile(options: MobileSpecificationOptions): Promise<
             if (device) {
                 await device.close();
                 device = null;
+            }
+            if (started) {
+                await started.stopProcesses();
+                await releaseIsolation(services);
+                await started.orchestrator.stop();
             }
             await appium.stop();
             if (backend) {

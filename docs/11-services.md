@@ -4,17 +4,18 @@ Infrastructure is declared as a **named record** of service factories on the run
 
 ## Service factories
 
-All three import from the package root (rule F1):
+All four import from the package root (rule F1):
 
 ```typescript
-import { postgres, redis, sqlite } from '@jterrazz/test';
+import { postgres, process, redis, sqlite } from '@jterrazz/test';
 ```
 
-| Factory      | Backing                                           | Options                                                     | Connection string shape               |
-| ------------ | ------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------- |
-| `postgres()` | Docker container                                  | `composeService`, `image`, `env`                            | `postgresql://user:pass@host:port/db` |
-| `redis()`    | Docker container                                  | `composeService`, `image`                                   | `redis://host:port`                   |
-| `sqlite()`   | **No Docker** — a template file copied per worker | `init` (SQL file) or `prismaSchema` (runs `prisma db push`) | `file:/…/….sqlite`                    |
+| Factory      | Backing                                            | Options                                                       | Connection string shape               |
+| ------------ | -------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------- |
+| `postgres()` | Docker container                                   | `composeService`, `image`, `env`                              | `postgresql://user:pass@host:port/db` |
+| `redis()`    | Docker container                                   | `composeService`, `image`                                     | `redis://host:port`                   |
+| `sqlite()`   | **No Docker** — a template file copied per worker  | `init` (SQL file) or `prismaSchema` (runs `prisma db push`)   | `file:/…/….sqlite`                    |
+| `process()`  | **No Docker** — a child process the framework owns | `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout` | `http://127.0.0.1:port`               |
 
 `image` overrides the container image, and `env` (postgres only) overrides the environment variables, for the rare case where the compose file is not the right source — normally both are read from `docker/compose.test.yaml`.
 
@@ -35,6 +36,46 @@ export const { api, cleanup } = await specification.api({
         }),
 });
 ```
+
+## `process()` — the one shape an external process takes
+
+A site's dev server, an API the site calls, the bundler a simulator loads from: each of them is a command, a way of knowing it is ready, and a lifetime. There used to be three shapes for that — `website({ server })` took its own options object, a literate document took a `serve:` entry, and anything else was a `beforeAll` spawning a child and an `afterAll` that sometimes forgot to kill it. `process()` is the one shape, and the framework owns the lifetime.
+
+| Option    | Means                                                                                                                         |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `command` | the shell command that starts it, receiving the chosen port as `PORT`                                                         |
+| `ready`   | a **path** polled until it answers (default `/`), or a **RegExp** over the child's output whose one capture group is the port |
+| `port`    | a fixed port instead of a free one the OS assigns                                                                             |
+| `cwd`     | a working directory relative to the project root                                                                              |
+| `env`     | the child's environment — an object, or a function of the services started beside it                                          |
+| `before`  | a one-shot command run ONCE per specification, which must exit 0: a build, a migration, a fixture load                        |
+| `timeout` | the readiness budget, in milliseconds (default 30 000)                                                                        |
+
+It sits in a `services` record like any other service, so it starts after the databases and can be handed their connection strings, and it is stopped with the specification:
+
+```typescript
+import { postgres, process, specification } from '@jterrazz/test';
+
+const api = process({
+    before: 'make build',
+    command: 'bin/server web --port $PORT',
+    env: ({ db }) => ({ DATABASE_URL: db.connectionString }),
+    ready: '/health',
+});
+
+export const { cleanup, website } = await specification.website({
+    server: (services) =>
+        process({
+            command: 'next dev',
+            env: { NEXT_PUBLIC_API_URL: services.api.connectionString },
+        }),
+    services: { api, db: postgres() },
+});
+```
+
+`website()` and `mobile()` take a `services` record for exactly this: a site started beside the API it calls, a simulator started beside its Metro bundler (`process({ command: 'expo start', ready: /Metro waiting on .*:(\d+)/ })`). What used to be a bundler bootstrap the repository maintained is a declaration.
+
+**The run's id is minted, never sampled.** Every process of one specification is handed `TEST_RUN_ID` in its environment — one value per run, created by the facet. A test that needs a label unique to its run reads that variable; it never builds one from `Date.now()` or `Math.random()`, which rule D16 refuses under an oracle and which makes two runs of the same suite disagree.
 
 ## The services record — three jobs for one key
 

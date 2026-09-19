@@ -16,6 +16,7 @@
 | [Matcher](classes/Matcher.md) | A dynamic-value matcher. Created via the [match](variables/match.md) factories — never constructed directly by user code. |
 | [Orchestrator](classes/Orchestrator.md) | Orchestrator for test infrastructure. Integration: starts services via testcontainers. E2E: runs full docker compose up. |
 | [PageResult](classes/PageResult.md) | Result from a rendered `.visit()` action — the page as a browser saw it. |
+| [ProcessHandle](classes/ProcessHandle.md) | An external process, declared like any other service. |
 | [ResponseAccessor](classes/ResponseAccessor.md) | Read-only accessor for an HTTP response. |
 | [ScreenResult](classes/ScreenResult.md) | Result from a `.open()` action — the screen as the device saw it, final state. |
 | [TableAccessor](classes/TableAccessor.md) | Read-only accessor for a database table after a specification run. |
@@ -106,12 +107,13 @@
 | [MockPort](type-aliases/MockPort.md) | The factory's own shape — kept as a name so a consumer can annotate with it. |
 | [PinnedClock](type-aliases/PinnedClock.md) | A pinned clock — released when the `using` scope that declared it ends. |
 | [PostgresOptions](type-aliases/PostgresOptions.md) | - |
+| [ProcessOptions](type-aliases/ProcessOptions.md) | The ONE shape an external process takes — the site under test, a backend a page talks to, a bundler a simulator loads from. Built by `process()` (chapter 11) and accepted wherever a facet starts something outside this process: `website({ server })`, `services: { api: process(…) }`, and the literate `serve:` registry. |
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
 | [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
 | [ScreenNode](type-aliases/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
-| [ServeOptions](type-aliases/ServeOptions.md) | Options for a local server started by the framework. |
 | [ServerPort](type-aliases/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
 | [ServerResponse](type-aliases/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
+| [ServerSpec](type-aliases/ServerSpec.md) | What `server` may be handed as, and what it resolves to. |
 | [ServiceHandle](type-aliases/ServiceHandle.md) | A service handle — returned by factory functions like postgres(), redis(). Mutable: connectionString is populated after the orchestrator starts containers. |
 | [ServiceRecord](type-aliases/ServiceRecord.md) | Infrastructure services declared as a named record. Keys become the typed vocabulary of the whole spec: the server factory receives the same record, and `.seed()` / `.table()` target databases by key. |
 | [SpecDocument](type-aliases/SpecDocument.md) | A parsed `<case>.spec.yaml`. |
@@ -181,6 +183,7 @@
 | [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
 | [mockOf](functions/mockOf.md) | A typed double for an injected port — the fourth rung of the doubles ladder (docs/12-conventions.md), and the only one a module test may build itself. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
+| [process](functions/process.md) | Declare an external process the framework owns for the life of the specification. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
 | [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |
 | [required](functions/required.md) | The value, or a failure that says what was missing and why it mattered. |

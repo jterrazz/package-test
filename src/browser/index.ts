@@ -25,6 +25,10 @@ import type { redis as redisFn } from '../integrations/redis/redis.js';
 import type { sqlite as sqliteFn } from '../integrations/sqlite/sqlite.js';
 import { registerBrowserMatchers } from '../integrations/vitest-browser/golden.js';
 import type { Orchestrator as OrchestratorClass } from '../specification/facets/_common/orchestrator.js';
+import type {
+    processService as processFn,
+    ProcessHandle as ProcessHandleClass,
+} from '../specification/facets/_common/process.js';
 import type { DirectoryAccessor as DirectoryAccessorClass } from '../specification/facets/_common/result/directory.js';
 import type { FilesystemAccessor as FilesystemAccessorClass } from '../specification/facets/_common/result/filesystem.js';
 import type { ResponseAccessor as ResponseAccessorClass } from '../specification/facets/_common/result/response.js';
@@ -72,6 +76,8 @@ export const specification: Specification = {
 };
 
 // Services — each opens a socket or a file the page does not have.
+export const process: typeof processFn = () => refuse('process()');
+export const ProcessHandle: typeof ProcessHandleClass = nodeOnlyClass('ProcessHandle');
 export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');

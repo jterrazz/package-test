@@ -48,6 +48,13 @@ const pages = {
     </head><body><h1>Clock</h1><p id="now">unset</p>
     <script>document.getElementById('now').textContent = new Date().toISOString();</script>
     </body></html>`,
+    // What the site was STARTED with: the URL of the process declared beside
+    // It, and the run id the facet minted — neither of them sampled here.
+    '/services': `<!doctype html><html lang="en"><head>${head('Fixture — Services', '/services')}
+    </head><body><h1>Services</h1>
+    <p id="api">${process.env.API_URL ?? 'unset'}</p>
+    <p id="run">${process.env.TEST_RUN_ID ?? 'unset'}</p>
+    </body></html>`,
     '/noisy': `<!doctype html><html lang="en"><head><title>Fixture — Noisy</title></head>
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
     // The ambiguity fixture: "Articles" appears three times — twice verbatim

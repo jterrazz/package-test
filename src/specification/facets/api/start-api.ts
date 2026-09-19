@@ -111,7 +111,10 @@ export async function startApi<Services extends ServiceRecord>(
             );
         }
 
-        const { database, databases, orchestrator } = await startServices(services, root);
+        const { database, databases, orchestrator, stopProcesses } = await startServices(
+            services,
+            root,
+        );
         const app = options.server(services);
 
         const config: SpecificationConfig = {
@@ -124,6 +127,7 @@ export async function startApi<Services extends ServiceRecord>(
         return {
             api: createApiFacet(config),
             cleanup: async () => {
+                await stopProcesses();
                 await releaseIsolation(services);
                 await orchestrator.stop();
             },
