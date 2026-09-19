@@ -5,7 +5,7 @@
 type SpecificationConfig = object;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:58
+Defined in: [src/specification/facets/\_common/builder.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L58)
 
 Adapter configuration passed to the specification facets at setup time.
 
@@ -17,7 +17,7 @@ Adapter configuration passed to the specification facets at setup time.
 optional backend?: StubBackend;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:63
+Defined in: [src/specification/facets/\_common/builder.ts:63](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L63)
 
 The declared stub backend (website/mobile facets) — armed with the
 chain's contracts before every terminal action.
@@ -30,7 +30,7 @@ chain's contracts before every terminal action.
 optional backendUrl?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:68
+Defined in: [src/specification/facets/\_common/builder.ts:68](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L68)
 
 Base URL of the running stub backend — allow-listed through the
 browser's `external: 'block'` policy so client-side fetches reach it.
@@ -43,7 +43,7 @@ browser's `external: 'block'` policy so client-side fetches reach it.
 optional baseUrl?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:70
+Defined in: [src/specification/facets/\_common/builder.ts:70](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L70)
 
 Base URL of the website under test (website facet only).
 
@@ -55,7 +55,7 @@ Base URL of the website under test (website facet only).
 optional browser?: () => Promise<BrowserPort>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:76
+Defined in: [src/specification/facets/\_common/builder.ts:76](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L76)
 
 Lazy browser accessor (website facet only). The first `.visit()`
 launches the shared browser instance; `.fetch()`-only spec files never
@@ -73,7 +73,7 @@ pay the browser cost.
 optional bundleId?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:84
+Defined in: [src/specification/facets/\_common/builder.ts:84](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L84)
 
 Bundle id of the app under test (mobile facet only) — the app `.open()` relaunches.
 
@@ -85,7 +85,7 @@ Bundle id of the app under test (mobile facet only) — the app `.open()` relaun
 optional clockDisabledReason?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:125
+Defined in: [src/specification/facets/\_common/builder.ts:125](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L125)
 
 When set, `.clock()` is unavailable on this runner and throws this
 reason immediately (compose mode — the calendar it would pin is this
@@ -99,7 +99,7 @@ process's, and the app runs in a container).
 optional command?: CliPort;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:85
+Defined in: [src/specification/facets/\_common/builder.ts:85](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L85)
 
 ***
 
@@ -109,7 +109,7 @@ Defined in: src/specification/facets/\_common/builder.ts:85
 optional database?: DatabasePort;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:86
+Defined in: [src/specification/facets/\_common/builder.ts:86](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L86)
 
 ***
 
@@ -119,7 +119,7 @@ Defined in: src/specification/facets/\_common/builder.ts:86
 optional databaseKeys?: string[];
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:92
+Defined in: [src/specification/facets/\_common/builder.ts:92](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L92)
 
 Keys of the declared services record that are databases. Drives the
 CONVENTIONS A7 rule: with 2+ databases the `database` option is
@@ -133,7 +133,7 @@ mandatory on `.seed()` / `.table()`; with exactly one it is forbidden.
 optional databases?: Map<string, DatabasePort>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:93
+Defined in: [src/specification/facets/\_common/builder.ts:93](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L93)
 
 ***
 
@@ -143,7 +143,7 @@ Defined in: src/specification/facets/\_common/builder.ts:93
 optional defaultEnv?: CliEnv;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:114
+Defined in: [src/specification/facets/\_common/builder.ts:114](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L114)
 
 Environment applied to every run of the declared binary
 (`specification.cli({ defaults })`) — under a chain's own `.env()` and
@@ -157,7 +157,7 @@ under a document's `env:`, both of which win.
 optional device?: () => Promise<DevicePort>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:100
+Defined in: [src/specification/facets/\_common/builder.ts:100](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L100)
 
 Lazy device accessor (mobile facet only). The first `.open()` creates
 the shared driver session; the appium/webdriverio integration stays a
@@ -176,7 +176,7 @@ app.
 optional dockerConfig?: DockerSpecConfig;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:101
+Defined in: [src/specification/facets/\_common/builder.ts:101](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L101)
 
 ***
 
@@ -186,7 +186,7 @@ Defined in: src/specification/facets/\_common/builder.ts:101
 optional dockerTestRunId?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:108
+Defined in: [src/specification/facets/\_common/builder.ts:108](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L108)
 
 Unique id shared by every spec from this runner instance.
 Stable for the runner's lifetime so multi-step tests (spawn in
@@ -201,7 +201,7 @@ facet factories auto-populate this when `dockerConfig` is present.
 optional envSets?: Record<string, CliEnv>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:119
+Defined in: [src/specification/facets/\_common/builder.ts:119](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L119)
 
 Named environment SETS a spec document may name by bare word
 (`env: frozen`). Declared once per app in `specification.cli()`.
@@ -214,7 +214,7 @@ Named environment SETS a spec document may name by bare word
 optional external?: "allow" | "block";
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:82
+Defined in: [src/specification/facets/\_common/builder.ts:82](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L82)
 
 Cross-origin request policy for visits (website facet only): `'block'`
 aborts requests leaving the site under test — the browser-side analog
@@ -228,7 +228,7 @@ of strict intercepts.
 optional interceptDisabledReason?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:130
+Defined in: [src/specification/facets/\_common/builder.ts:130](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L130)
 
 When set, `.intercept()` is unavailable on this runner and throws this
 reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
@@ -241,7 +241,7 @@ reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
 optional jobs?: JobHandle[];
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:131
+Defined in: [src/specification/facets/\_common/builder.ts:131](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L131)
 
 ***
 
@@ -251,7 +251,7 @@ Defined in: src/specification/facets/\_common/builder.ts:131
 optional root?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:133
+Defined in: [src/specification/facets/\_common/builder.ts:133](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L133)
 
 The project root — the working directory a document's `serve:` command runs from.
 
@@ -263,7 +263,7 @@ The project root — the working directory a document's `serve:` command runs fr
 optional server?: ServerPort;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:134
+Defined in: [src/specification/facets/\_common/builder.ts:134](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L134)
 
 ***
 
@@ -273,7 +273,7 @@ Defined in: src/specification/facets/\_common/builder.ts:134
 optional serveRegistry?: Record<string, LiterateServeRegistration>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:139
+Defined in: [src/specification/facets/\_common/builder.ts:139](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L139)
 
 Named servers a spec document may start (`serve: [mcp]`). Declared once
 per app in `specification.cli()`.
@@ -286,7 +286,7 @@ per app in `specification.cli()`.
 optional services?: Record<string, ServiceHandle>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:146
+Defined in: [src/specification/facets/\_common/builder.ts:146](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L146)
 
 The declared services record. In cli mode, drives the automatic
 connection-URL injection into the child env (CONVENTIONS B6):
@@ -301,7 +301,7 @@ unambiguous.
 optional transform?: (text) => string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:151
+Defined in: [src/specification/facets/\_common/builder.ts:151](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L151)
 
 Optional normaliser applied to command stdout/stderr before every
 comparison. Does not mutate the raw `.text` accessor.

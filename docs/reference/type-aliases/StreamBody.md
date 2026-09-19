@@ -5,7 +5,7 @@
 type StreamBody = object;
 ```
 
-Defined in: src/specification/contracts/types.ts:84
+Defined in: [src/specification/contracts/types.ts:84](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L84)
 
 A body that arrives in pieces — what `http.stream()` and `http.sse()` build.
 
@@ -22,7 +22,7 @@ tokens as they land, or one that reconnects on a half-read body.
 chunks: readonly string[];
 ```
 
-Defined in: src/specification/contracts/types.ts:86
+Defined in: [src/specification/contracts/types.ts:86](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L86)
 
 The pieces, written in order.
 
@@ -34,7 +34,7 @@ The pieces, written in order.
 contentType: string;
 ```
 
-Defined in: src/specification/contracts/types.ts:88
+Defined in: [src/specification/contracts/types.ts:88](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L88)
 
 The `content-type` the stream is served under.
 
@@ -46,7 +46,7 @@ The `content-type` the stream is served under.
 delayBetweenChunks: number;
 ```
 
-Defined in: src/specification/contracts/types.ts:90
+Defined in: [src/specification/contracts/types.ts:90](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L90)
 
 Milliseconds between two chunks. Default 0 — everything at once.
 
@@ -58,4 +58,4 @@ Milliseconds between two chunks. Default 0 — everything at once.
 kind: typeof STREAM_BODY;
 ```
 
-Defined in: src/specification/contracts/types.ts:91
+Defined in: [src/specification/contracts/types.ts:91](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/types.ts#L91)

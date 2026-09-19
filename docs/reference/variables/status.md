@@ -5,6 +5,6 @@
 const status: LandmarkFactory;
 ```
 
-Defined in: src/specification/facets/website/elements.ts:124
+Defined in: [src/specification/facets/website/elements.ts:124](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L124)
 
 A live region announcing a result — `role="status"`, an `<output>`.

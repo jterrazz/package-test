@@ -5,6 +5,6 @@
 const component: ComponentChain;
 ```
 
-Defined in: src/specification/facets/component/component.node.ts:21
+Defined in: [src/specification/facets/component/component.node.ts:21](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.node.ts#L21)
 
 Present, typed, and refusing — every setup and the terminal action alike.

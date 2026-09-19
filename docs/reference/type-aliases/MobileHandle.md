@@ -5,7 +5,7 @@
 type MobileHandle = object;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:82
+Defined in: [src/specification/facets/mobile/start-mobile.ts:82](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L82)
 
 The record returned by startMobile \| specification.mobile.
 Destructure with the canonical names (CONVENTIONS A3):
@@ -20,7 +20,7 @@ Destructure with the canonical names (CONVENTIONS A3):
 optional backendUrl?: string;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:88
+Defined in: [src/specification/facets/mobile/start-mobile.ts:88](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L88)
 
 Base URL of the declared stub backend — present only with the
 `backend` option. The caller injects it into its own bundler env
@@ -34,7 +34,7 @@ Base URL of the declared stub backend — present only with the
 cleanup: () => Promise<void>;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:90
+Defined in: [src/specification/facets/mobile/start-mobile.ts:90](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L90)
 
 End the driver session, stop the appium server and the stub backend.
 
@@ -50,7 +50,7 @@ End the driver session, stop the appium server and the stub backend.
 mobile: MobileSpecification;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:91
+Defined in: [src/specification/facets/mobile/start-mobile.ts:91](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L91)
 
 ***
 
@@ -60,6 +60,6 @@ Defined in: src/specification/facets/mobile/start-mobile.ts:91
 udid: string;
 ```
 
-Defined in: src/specification/facets/mobile/start-mobile.ts:93
+Defined in: [src/specification/facets/mobile/start-mobile.ts:93](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L93)
 
 The resolved simulator UDID the specs run against.

@@ -5,7 +5,7 @@
 type ProcessOptions = object;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:18
+Defined in: [src/specification/facets/website/serve.adapter.ts:18](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L18)
 
 The ONE shape an external process takes — the site under test, a backend a
 page talks to, a bundler a simulator loads from. Built by `process()`
@@ -21,7 +21,7 @@ literate `serve:` registry.
 optional before?: string;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:24
+Defined in: [src/specification/facets/website/serve.adapter.ts:24](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L24)
 
 A one-shot command run ONCE per specification, before the process is
 spawned, which must exit 0 — a build, a migration, a fixture load. Its
@@ -35,7 +35,7 @@ failure is the specification's, and it says so.
 command: string;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:26
+Defined in: [src/specification/facets/website/serve.adapter.ts:26](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L26)
 
 Shell command that starts the process. Receives the chosen port as `PORT`.
 
@@ -47,7 +47,7 @@ Shell command that starts the process. Receives the chosen port as `PORT`.
 optional cwd?: string;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:28
+Defined in: [src/specification/facets/website/serve.adapter.ts:28](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L28)
 
 Working directory, relative to the project root. Default: the root itself.
 
@@ -61,7 +61,7 @@ optional env?:
 | Record<string, string>;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:34
+Defined in: [src/specification/facets/website/serve.adapter.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L34)
 
 Environment for the child, on top of the runner's own. A function
 receives the services already started beside this one, so a process can
@@ -75,7 +75,7 @@ be handed a sibling's connection string.
 optional port?: number;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:38
+Defined in: [src/specification/facets/website/serve.adapter.ts:38](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L38)
 
 Fixed port. Default: an OS-assigned free port, injected as `PORT`.
 
@@ -87,7 +87,7 @@ Fixed port. Default: an OS-assigned free port, injected as `PORT`.
 optional ready?: RegExp | string;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:50
+Defined in: [src/specification/facets/website/serve.adapter.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L50)
 
 How readiness is observed. Two forms:
 
@@ -107,6 +107,6 @@ How readiness is observed. Two forms:
 optional timeout?: number;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:52
+Defined in: [src/specification/facets/website/serve.adapter.ts:52](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L52)
 
 Readiness budget in milliseconds. Default 30 000.

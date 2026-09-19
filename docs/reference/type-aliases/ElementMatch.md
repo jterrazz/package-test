@@ -5,7 +5,7 @@
 type ElementMatch = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:97
+Defined in: [src/specification/ports/browser.port.ts:97](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L97)
 
 One candidate captured when a descriptor matched more than one element —
 the evidence the ambiguity error enumerates so the author can disambiguate
@@ -19,7 +19,7 @@ without opening a browser.
 optional accessibleName?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:103
+Defined in: [src/specification/ports/browser.port.ts:103](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L103)
 
 The accessible name, when it differs from the text — an `aria-label` is
 what a role descriptor MATCHED on, and printing the text alone sends the
@@ -33,7 +33,7 @@ author to disambiguate a name they cannot see.
 optional context?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:105
+Defined in: [src/specification/ports/browser.port.ts:105](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L105)
 
 Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 
@@ -45,7 +45,7 @@ Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 optional detail?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:107
+Defined in: [src/specification/ports/browser.port.ts:107](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L107)
 
 The attribute that disambiguates most — `href` for links, `name` for fields.
 
@@ -57,7 +57,7 @@ The attribute that disambiguates most — `href` for links, `name` for fields.
 tag: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:109
+Defined in: [src/specification/ports/browser.port.ts:109](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L109)
 
 Tag name, lower-cased.
 
@@ -69,6 +69,6 @@ Tag name, lower-cased.
 text: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:111
+Defined in: [src/specification/ports/browser.port.ts:111](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L111)
 
 Text content, whitespace-collapsed and truncated.

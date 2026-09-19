@@ -5,7 +5,7 @@
 function focused(element): ElementRef;
 ```
 
-Defined in: src/specification/facets/website/elements.ts:156
+Defined in: [src/specification/facets/website/elements.ts:156](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L156)
 
 Where the keyboard is: `see(focused(button('Open')))` asserts the element has
 focus, `gone(focused(x))` that it does not.

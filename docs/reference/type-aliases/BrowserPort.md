@@ -5,7 +5,7 @@
 type BrowserPort = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:231
+Defined in: [src/specification/ports/browser.port.ts:231](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L231)
 
 Abstract browser interface for the website specification runner.
 One implementation lives in `integrations/playwright/` — a single shared
@@ -19,7 +19,7 @@ browser instance per runner; each `open()` gets a fresh, isolated context.
 close: () => Promise<void>;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:233
+Defined in: [src/specification/ports/browser.port.ts:233](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L233)
 
 Close the shared browser instance (idempotent).
 
@@ -35,7 +35,7 @@ Close the shared browser instance (idempotent).
 open: (url, options) => Promise<BrowserPage>;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:235
+Defined in: [src/specification/ports/browser.port.ts:235](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L235)
 
 Load `url` in a fresh context, run the scenario, capture the final page.
 

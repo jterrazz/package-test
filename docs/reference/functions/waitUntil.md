@@ -5,7 +5,7 @@
 function waitUntil(predicate, options?): Promise<void>;
 ```
 
-Defined in: src/specification/assertions/wait-until.ts:41
+Defined in: [src/specification/assertions/wait-until.ts:41](https://github.com/jterrazz/package-test/blob/main/src/specification/assertions/wait-until.ts#L41)
 
 Wait until a condition holds — the sanctioned answer to "the thing I am
 specifying is not ready yet".

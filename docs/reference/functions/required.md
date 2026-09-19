@@ -5,7 +5,7 @@
 function required<T>(value, why): T;
 ```
 
-Defined in: src/specification/assertions/required.ts:15
+Defined in: [src/specification/assertions/required.ts:15](https://github.com/jterrazz/package-test/blob/main/src/specification/assertions/required.ts#L15)
 
 The value, or a failure that says what was missing and why it mattered.
 

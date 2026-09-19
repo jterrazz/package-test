@@ -10,7 +10,7 @@ type ServerSpec<Services> =
   | ProcessOptions;
 ```
 
-Defined in: src/specification/facets/website/start-website.ts:17
+Defined in: [src/specification/facets/website/start-website.ts:17](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/start-website.ts#L17)
 
 What `server` may be handed as, and what it resolves to.
 

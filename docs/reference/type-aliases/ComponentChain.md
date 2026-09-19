@@ -5,7 +5,7 @@
 type ComponentChain = object;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:37
+Defined in: [src/specification/facets/component/component.types.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L37)
 
 The chain. Every setup returns a new one, so the handle a spec imports never
 carries the previous test's contracts, wrapper or clock.
@@ -18,7 +18,7 @@ carries the previous test's contracts, wrapper or clock.
 clock: (iso) => ComponentChain;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:39
+Defined in: [src/specification/facets/component/component.types.ts:39](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L39)
 
 Pin the page's `Date` for this render — the clock the component reads.
 
@@ -43,7 +43,7 @@ intercept: {
 };
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:45
+Defined in: [src/specification/facets/component/component.types.ts:45](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L45)
 
 Declare what the network replies — the same contracts, the same queue
 and the same strictness as every other facet (D7), served by msw's
@@ -90,7 +90,7 @@ worker instead of its node interceptor.
 render: (subject, scenario?) => Promise<RenderResult>;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:50
+Defined in: [src/specification/facets/component/component.types.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L50)
 
 Mount the subject, run the scenario, and capture what the page shows.
 
@@ -113,7 +113,7 @@ Mount the subject, run the scenario, and capture what the page shows.
 viewport: (size) => ComponentChain;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:56
+Defined in: [src/specification/facets/component/component.types.ts:56](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L56)
 
 The page size THIS render gets — the Given of a component that reads
 `matchMedia` or a container query. The project's size is restored when
@@ -139,7 +139,7 @@ the test ends, so a narrow render never leaks into the next one.
 wrap: (wrapper) => ComponentChain;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:62
+Defined in: [src/specification/facets/component/component.types.ts:62](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/component/component.types.ts#L62)
 
 Wrap every render of this chain — the test-local Given a router stub or
 a `<StrictMode>` is. The project's own `wrap` stays outermost: it is the

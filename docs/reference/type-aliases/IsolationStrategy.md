@@ -5,7 +5,7 @@
 type IsolationStrategy = object;
 ```
 
-Defined in: src/specification/ports/isolation.port.ts:11
+Defined in: [src/specification/ports/isolation.port.ts:11](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/isolation.port.ts#L11)
 
 Strategy for isolating service state across parallel test workers.
 
@@ -24,7 +24,7 @@ Elasticsearch, S3).
 acquire: (workerId) => Promise<void>;
 ```
 
-Defined in: src/specification/ports/isolation.port.ts:19
+Defined in: [src/specification/ports/isolation.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/isolation.port.ts#L19)
 
 Create an isolated namespace for this worker.
 Called once when the worker starts — e.g. clone a template database,
@@ -48,7 +48,7 @@ set a Redis key prefix.
 release: () => Promise<void>;
 ```
 
-Defined in: src/specification/ports/isolation.port.ts:31
+Defined in: [src/specification/ports/isolation.port.ts:31](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/isolation.port.ts#L31)
 
 Tear down the isolated namespace.
 Called once when the worker shuts down — e.g. drop the cloned database.
@@ -65,7 +65,7 @@ Called once when the worker shuts down — e.g. drop the cloned database.
 reset: () => Promise<void>;
 ```
 
-Defined in: src/specification/ports/isolation.port.ts:25
+Defined in: [src/specification/ports/isolation.port.ts:25](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/isolation.port.ts#L25)
 
 Fast reset within the namespace between `spec.run()` calls.
 E.g. truncate tables (without dropping the database).

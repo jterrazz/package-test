@@ -5,7 +5,7 @@
 type ServeOptions = ProcessOptions;
 ```
 
-Defined in: src/specification/facets/website/serve.adapter.ts:63
+Defined in: [src/specification/facets/website/serve.adapter.ts:63](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L63)
 
 What `ProcessOptions` was called in 15.2, when the only process the
 framework owned was a website's server.

@@ -5,7 +5,7 @@
 type IntegrationHandle<Services, DatabaseKey> = object;
 ```
 
-Defined in: src/specification/facets/integration/start-integration.ts:29
+Defined in: [src/specification/facets/integration/start-integration.ts:29](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/integration/start-integration.ts#L29)
 
 The record returned by startIntegration \| specification.integration.
 Destructure with the canonical names (CONVENTIONS A3):
@@ -27,7 +27,7 @@ Destructure with the canonical names (CONVENTIONS A3):
 cleanup: () => Promise<void>;
 ```
 
-Defined in: src/specification/facets/integration/start-integration.ts:34
+Defined in: [src/specification/facets/integration/start-integration.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/integration/start-integration.ts#L34)
 
 Stop all infrastructure started by this specification.
 
@@ -43,4 +43,4 @@ Stop all infrastructure started by this specification.
 integration: IntegrationSpecification<Services, DatabaseKey>;
 ```
 
-Defined in: src/specification/facets/integration/start-integration.ts:35
+Defined in: [src/specification/facets/integration/start-integration.ts:35](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/integration/start-integration.ts#L35)
