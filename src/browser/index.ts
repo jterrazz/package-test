@@ -17,6 +17,9 @@ import type {
     inspectContainer as inspectContainerFn,
     removeContainers as removeContainersFn,
 } from '../integrations/docker/docker-lookup.js';
+import { interceptThrough } from '../integrations/msw/scope.js';
+import type { Intercept } from '../integrations/msw/scope.js';
+import { registerWorkerContracts } from '../integrations/msw/worker.js';
 import type { postgres as postgresFn } from '../integrations/postgres/postgres.js';
 import type { redis as redisFn } from '../integrations/redis/redis.js';
 import type { sqlite as sqliteFn } from '../integrations/sqlite/sqlite.js';
@@ -43,6 +46,13 @@ registerBrowserMatchers();
 
 // ── The component facet — real here, and only here ──
 export { component } from '../specification/facets/component/component.chain.js';
+
+/**
+ * The module-scope network double, on msw's WORKER — the same contracts and
+ * the same strictness the node entry publishes, served by the one engine a
+ * page has. Everything new in this release that a page can use is real here.
+ */
+export const intercept: Intercept = interceptThrough(registerWorkerContracts);
 
 // ── The surface both runtimes share ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's

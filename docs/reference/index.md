@@ -78,6 +78,8 @@
 | [HonoApp](type-aliases/HonoApp.md) | Any object with a request method compatible with Hono's app.request(). |
 | [HttpContractFilter](type-aliases/HttpContractFilter.md) | Request filters for the generic HTTP provider. Every field is a subset constraint — a request matches when all provided fields match. |
 | [HttpResponseInit](type-aliases/HttpResponseInit.md) | Init options shared by the response builders. |
+| [Intercept](type-aliases/Intercept.md) | The module-scope network double. Resolves once the engine is listening — which is why it is a promise, and why the canonical form awaits it: |
+| [InterceptScope](type-aliases/InterceptScope.md) | One block's worth of declared network. Disposed at the end of the scope that declared it: the handlers are dropped, and an unmatched request is thrown. |
 | [IsolationStrategy](type-aliases/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |
 | [JobHandle](type-aliases/JobHandle.md) | A named job that can be triggered via jobs.trigger(). |
 | [JobsHandle](type-aliases/JobsHandle.md) | The record returned by startJobs \| specification.jobs. Destructure with the canonical names (CONVENTIONS A3): |
@@ -147,6 +149,7 @@
 | [form](variables/form.md) | The `form` landmark — a form carrying an accessible name. |
 | [heading](variables/heading.md) | A heading, by accessible name. |
 | [http](variables/http.md) | Generic HTTP contract helpers for any URL. The url is absolute (string or RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')` matches that path on ANY origin, which is what an app calling its own backend needs. An optional [HttpContractFilter](type-aliases/HttpContractFilter.md) narrows matching by body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict contracts, CONVENTIONS D7). |
+| [intercept](variables/intercept.md) | The module-scope network double, on msw's node server — what a test with no chain to hang contracts on reaches for (chapter 10). |
 | [link](variables/link.md) | A link, by accessible name. |
 | [listitem](variables/listitem.md) | An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`. |
 | [main](variables/main.md) | The `main` landmark — the primary content of the document. |

@@ -1,5 +1,8 @@
 import { parseComposeFile } from './integrations/compose/compose-parser.js';
 import { ComposeStackAdapter } from './integrations/compose/compose.js';
+import { registerContracts } from './integrations/msw/intercept.js';
+import { interceptThrough } from './integrations/msw/scope.js';
+import type { Intercept } from './integrations/msw/scope.js';
 import { postgres } from './integrations/postgres/postgres.js';
 import { redis } from './integrations/redis/redis.js';
 import { TestcontainersAdapter } from './integrations/testcontainers/testcontainers.js';
@@ -14,6 +17,11 @@ export * from './surface.js';
 
 // ── Core API — the single import point (CONVENTIONS F1) ──
 export { specification } from './specification/facets/_common/specification.js';
+/**
+ * The module-scope network double, on msw's node server — what a test with no
+ * chain to hang contracts on reaches for (chapter 10).
+ */
+export const intercept: Intercept = interceptThrough(registerContracts);
 export { component } from './specification/facets/component/component.node.js';
 export {
     type ApiHandle,
