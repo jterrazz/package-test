@@ -46,7 +46,9 @@ const result = await website.visit('/', async (visitor) => {
 
 - **No `expect()` inside a scenario (W1).** The scenario is pure interaction; assertions live in the Then, on the returned result.
 - Visitor verbs: `click`, `fill`, `press`, `select`, `check`, `hover`, `goto(path)`, `see(element)`. Every action auto-waits; `see()` is the ONLY synchronization primitive (retries until visible). There are no sleeps anywhere.
-- Elements are **user-facing by construction (W2)**: `button(name)`, `link(name)`, `field(label)`, `heading(name)`, `content(text)` — CSS/XPath is not expressible. `testId(id)` is the escape hatch and warns.
+- Elements are **user-facing by construction (W2)**: `button(name)`, `link(name)`, `field(label)`, `heading(name)`, `content(text)`, the roles `dialog/status/table/row/listitem(name?)`, and `option(name)` named inside its field (`within(field('Channel'), option('LinkedIn'))`) — CSS/XPath is not expressible. `testId(id)` is the escape hatch and warns.
+- An `option` is asserted by PRESENCE, not visibility: a collapsed `<select>` draws none of its options.
+- Four MODIFIERS narrow a descriptor by a state, on `see` and `gone` alike: `focused(x)`, `disabled(x)` / `enabled(x)`, `selected(option('LinkedIn'))`, `valued(field('Title'), 'Launch teaser')` (the live value, never the `value` attribute). Scoping an option to its field is three constructors deep — name it (`const channel = within(field('Channel'), selected(option('LinkedIn')))`) or `unicorn/max-nested-calls` refuses it.
 
 ## Result surfaces
 

@@ -3,5 +3,9 @@
   - /url: /articles
 - text: Email
 - textbox "Email"
+- text: Channel
+- combobox "Channel":
+  - option "X" [selected]
+  - option "LinkedIn"
 - button "Subscribe"
 - button "Clear" [disabled]

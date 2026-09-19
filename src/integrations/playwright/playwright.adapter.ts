@@ -1,11 +1,13 @@
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
+import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserType, Locator, Page } from 'playwright';
 
 import {
     AmbiguousElementError,
     describeAmbiguity,
+    formatElement,
 } from '../../specification/facets/website/ambiguity.js';
 import type {
     BrowserConsoleMessage,
@@ -38,6 +40,15 @@ type PageExtraction = {
 
 /** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
+
+/*
+ * How long a value assertion retries, and how often it looks. The budget is
+ * playwright's own actionability default, so `see(valued(…))` waits exactly as
+ * long as the `see()` beside it; the interval is short because the answer
+ * usually arrives on the first re-render after a fill.
+ */
+const VALUE_TIMEOUT_MS = 30_000;
+const VALUE_POLL_MS = 100;
 
 /**
  * Translate a user-facing descriptor into a playwright locator, resolving
@@ -155,7 +166,62 @@ function stateOnly(page: Page, locator: Locator, element: ElementRef): Locator |
     if (element.disabled !== undefined) {
         return locator.and(page.locator(element.disabled ? ':disabled' : ':enabled'));
     }
+    if (element.selected !== undefined) {
+        return locator.and(page.locator(element.selected ? ':checked' : ':not(:checked)'));
+    }
     return null;
+}
+
+/**
+ * Is this descriptor answered by PRESENCE rather than by visibility? The
+ * options of a collapsed `<select>` are in the document and in the tree, and
+ * none of them has a box on the screen until a visitor opens it.
+ */
+function byPresence(element: ElementRef): boolean {
+    return element.kind === 'option';
+}
+
+/** The field's live value, or `null` when nothing (unambiguous) is there yet. */
+async function currentValue(locator: Locator): Promise<null | string> {
+    try {
+        return await locator.inputValue({ timeout: VALUE_POLL_MS });
+    } catch (error) {
+        // A strict-mode violation is the W3 refusal and belongs to `act()`;
+        // Anything else means the field is not on the page (yet).
+        if (isStrictViolation(error)) {
+            throw error;
+        }
+        return null;
+    }
+}
+
+/**
+ * Wait until the field holds the value the descriptor carries — or, for
+ * `gone()`, until it no longer does.
+ *
+ * A poll rather than a narrowed locator: a value is a PROPERTY of the node,
+ * and the CSS a locator narrows with reads ATTRIBUTES — a controlled input
+ * whose `value` attribute never moves would answer for a value it no longer
+ * holds. The locator is re-read every round, so a re-rendered field is read
+ * again rather than held as a stale handle.
+ */
+async function waitForValue(locator: Locator, element: ElementRef, wanted: boolean): Promise<void> {
+    const value = element.value ?? '';
+    const deadline = Date.now() + VALUE_TIMEOUT_MS;
+    for (;;) {
+        // oxlint-disable-next-line eslint/no-await-in-loop -- a poll asks, waits, asks again: the rounds are sequential by definition and there is nothing to run in parallel
+        const actual = await currentValue(locator);
+        if (actual === null ? !wanted : (actual === value) === wanted) {
+            return;
+        }
+        if (Date.now() >= deadline) {
+            throw new Error(
+                `${formatElement(element)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
+            );
+        }
+        // oxlint-disable-next-line eslint/no-await-in-loop -- same round: the wait between two looks is what a poll IS
+        await sleep(VALUE_POLL_MS);
+    }
 }
 
 /** The visitor implementation — every action auto-waits via playwright actionability. */
@@ -189,18 +255,30 @@ function createVisitor(page: Page, baseUrl: string): Visitor {
         },
         gone: async (element) => {
             await act(page, element, async (locator) => {
+                if (element.value !== undefined) {
+                    await waitForValue(locator, element, false);
+                    return;
+                }
                 const narrowed = stateOnly(page, locator, element);
-                await (narrowed === null
-                    ? locator.waitFor({ state: 'hidden' })
-                    : narrowed.waitFor({ state: 'detached' }));
+                if (narrowed !== null) {
+                    await narrowed.waitFor({ state: 'detached' });
+                    return;
+                }
+                await locator.waitFor({ state: byPresence(element) ? 'detached' : 'hidden' });
             });
         },
         see: async (element) => {
             await act(page, element, async (locator) => {
+                if (element.value !== undefined) {
+                    await waitForValue(locator, element, true);
+                    return;
+                }
                 const narrowed = stateOnly(page, locator, element);
-                await (narrowed === null
-                    ? locator.waitFor({ state: 'visible' })
-                    : narrowed.waitFor({ state: 'attached' }));
+                if (narrowed !== null) {
+                    await narrowed.waitFor({ state: 'attached' });
+                    return;
+                }
+                await locator.waitFor({ state: byPresence(element) ? 'attached' : 'visible' });
             });
         },
         select: async (element, option) => {

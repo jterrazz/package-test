@@ -97,12 +97,15 @@ export {
     listitem,
     main,
     navigation,
+    option,
     region,
     row,
     search,
+    selected,
     status,
     table,
     testId,
+    valued,
     within,
 } from './specification/facets/website/elements.js';
 

@@ -133,6 +133,18 @@ export const row: LandmarkFactory = landmark('row');
 export const listitem: LandmarkFactory = landmark('listitem');
 
 /**
+ * An option of a select or a listbox, by its label — named inside the field
+ * that holds it: `within(field('Channel'), option('LinkedIn'))`.
+ *
+ * Asserted by PRESENCE, not by visibility: the options of a collapsed
+ * `<select>` are in the document and in the accessibility tree, and none of
+ * them has a box on the screen until it is opened. `see(option('LinkedIn'))`
+ * therefore asks "is it offered", and `see(selected(option('LinkedIn')))`
+ * asks which one the field is on.
+ */
+export const option: ElementFactory = named('option');
+
+/**
  * Where the keyboard is: `see(focused(button('Open')))` asserts the element has
  * focus, `gone(focused(x))` that it does not.
  *
@@ -158,3 +170,26 @@ export const disabled = (element: ElementRef): ElementRef => ({ ...element, disa
 
 /** The other direction of {@link disabled} — the element takes input. */
 export const enabled = (element: ElementRef): ElementRef => ({ ...element, disabled: false });
+
+/**
+ * Which option the field is on: `see(selected(option('LinkedIn')))`, and
+ * `gone(selected(option('X')))` for the one it left.
+ *
+ * A modifier for the same reason as {@link disabled}: being chosen is a state
+ * of an element the vocabulary already names. No matcher answers for it — a
+ * `<option>` is not a checkbox — so both adapters read the `:checked` the CSS
+ * spec gives a selected option.
+ */
+export const selected = (element: ElementRef): ElementRef => ({ ...element, selected: true });
+
+/**
+ * What the field holds: `see(valued(field('Title'), 'Launch teaser'))`, and
+ * `gone(valued(field('Title'), '…'))` for a value it no longer holds.
+ *
+ * A modifier for the same reason as {@link disabled}: what a field holds is a
+ * state of an element the vocabulary already names, and this is how the ONE
+ * field a test is about is waited for — a golden pins a whole outline instead.
+ * Read from the node's live value, never from the `value` ATTRIBUTE, which a
+ * controlled input never moves.
+ */
+export const valued = (element: ElementRef, value: string): ElementRef => ({ ...element, value });

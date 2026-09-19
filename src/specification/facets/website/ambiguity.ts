@@ -29,6 +29,7 @@ const CONSTRUCTORS: Record<ElementRef['kind'], string> = {
     listitem: 'listitem',
     main: 'main',
     navigation: 'navigation',
+    option: 'option',
     region: 'region',
     row: 'row',
     search: 'search',

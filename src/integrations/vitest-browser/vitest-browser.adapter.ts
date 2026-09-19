@@ -135,6 +135,27 @@ export async function act<T>(
 }
 
 /**
+ * Is this descriptor answered by PRESENCE rather than by visibility?
+ *
+ * The options of a collapsed `<select>` are in the document and in the
+ * accessibility tree, and not one of them has a box on the screen — asking
+ * whether an option is visible would answer "no" for every select a visitor
+ * never opened.
+ */
+function byPresence(element: ElementRef): boolean {
+    return element.kind === 'option';
+}
+
+/** A control's live value — the property, never the attribute. */
+function valueOf(node: Element | null): string | undefined {
+    return node instanceof HTMLInputElement ||
+        node instanceof HTMLSelectElement ||
+        node instanceof HTMLTextAreaElement
+        ? node.value
+        : undefined;
+}
+
+/**
  * Is the element gone — or, with a state modifier, no longer in that state? A
  * node that left the document and one that is still there but not rendered are
  * the same answer to a spec.
@@ -147,7 +168,13 @@ function isGone(locator: Locator, element: ElementRef): boolean {
     if (element.disabled !== undefined) {
         return node === null || node.matches(':disabled') !== element.disabled;
     }
-    return node === null || !node.checkVisibility();
+    if (element.selected !== undefined) {
+        return node === null || node.matches(':checked') !== element.selected;
+    }
+    if (element.value !== undefined) {
+        return node === null || valueOf(node) !== element.value;
+    }
+    return node === null || (byPresence(element) ? false : !node.checkVisibility());
 }
 
 /**
@@ -169,6 +196,12 @@ function remainingBudget(): number | undefined {
         return undefined;
     }
     return Math.max(current.timeout - (Date.now() - started) - 100, 0);
+}
+
+/** `expect.poll` over that budget — the retry the matchers get for free. */
+function polling<T>(probe: () => T, message: string): ReturnType<typeof expect.poll<T>> {
+    const timeout = remainingBudget();
+    return expect.poll(probe, { message, ...(timeout === undefined ? {} : { timeout }) });
 }
 
 /** A key name is a key; a single character is typed as itself. */
@@ -215,13 +248,10 @@ export function componentVerbs(surface: MountedSurface): {
                 // Matches" is the commonest way for a thing to be gone. Absence
                 // Is one question — removed, or still there and not shown — and
                 // The poll retries it the same way every other verb retries.
-                const timeout = remainingBudget();
-                await expect
-                    .poll(() => isGone(locator, element), {
-                        message: `${formatElement(element)} is still on the screen`,
-                        ...(timeout === undefined ? {} : { timeout }),
-                    })
-                    .toBeTruthy();
+                await polling(
+                    () => isGone(locator, element),
+                    `${formatElement(element)} is still on the screen`,
+                ).toBeTruthy();
             });
         },
         hover: async (element) => {
@@ -245,6 +275,24 @@ export function componentVerbs(surface: MountedSurface): {
                 }
                 if (element.disabled === false) {
                     await expect.element(locator).toBeEnabled();
+                    return;
+                }
+                if (element.selected !== undefined) {
+                    // No matcher answers for an `<option>`: `toBeChecked` is
+                    // The checkbox/radio/aria-checked one. `:checked` is what
+                    // CSS gives a selected option, and `gone()` reads it too.
+                    await polling(
+                        () => locator.query()?.matches(':checked') === true,
+                        `${formatElement(element)} is not the selected one`,
+                    ).toBe(element.selected);
+                    return;
+                }
+                if (element.value !== undefined) {
+                    await expect.element(locator).toHaveValue(element.value);
+                    return;
+                }
+                if (byPresence(element)) {
+                    await expect.element(locator).toBeInTheDocument();
                     return;
                 }
                 await expect.element(locator).toBeVisible();

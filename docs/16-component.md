@@ -138,7 +138,7 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 | `rerender(ui)` | What a PARENT does: new props, same mount                 |
 | `unmount()`    | What a parent does when it takes the thing off the screen |
 
-`goto()` does not exist here, because a component has no address. The element modifiers are the page's too: `see(focused(button('Open')))` asks where the keyboard is, `see(disabled(button('Publish')))` whether a control takes input.
+`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included: `see(focused(button('Open')))` asks where the keyboard is, `see(disabled(button('Publish')))` whether a control takes input, `see(selected(option('LinkedIn')))` which option a select is on, and `see(valued(field('Title'), 'Launch teaser'))` what a field holds. An option is asserted by PRESENCE — a collapsed select draws none of them — and [14 — Website specs § the vocabulary](14-website.md#the-visitor) owns them all.
 
 ## The result
 
