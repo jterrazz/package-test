@@ -14,16 +14,16 @@ What proves a change here: this package specifies itself with itself. The suites
 
 `test.projects` in `vitest.config.ts` declares eight, and which one you can run is decided by what is installed and running on the machine.
 
-| Project       | Collects                                                                              | Needs                                                                |
-| ------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `fast`        | `src/**/*.test.ts` + `specs/lint/**`                                                  | Nothing — the lint specs need `npm run build` first                  |
-| `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`       | Nothing — the Docker specs self-skip                                 |
-| `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                         | Docker                                                               |
-| `jobs`        | `specs/jobs/**`, built by `jobs()`                                                    | Docker                                                               |
-| `integration` | `specs/integration/**`, built by `integration()` — the container seams included       | Docker                                                               |
-| `api-stack`   | `specs/api/**` + `specs/jobs/**` with `TEST_MODE=compose`, minus intercepts and clock | Docker compose                                                       |
-| `website`     | `specs/website/**`, built by `website()`                                              | playwright + `npx playwright install chromium`; no Docker            |
-| `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                           | the same chromium; no Docker. Runs in its own group, after `website` |
+| Project       | Collects                                                                                                      | Needs                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `fast`        | `src/**/*.test.ts` + `specs/lint/**`                                                                          | Nothing — the lint specs need `npm run build` first                  |
+| `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                               | Nothing — the Docker specs self-skip                                 |
+| `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                                 | Docker                                                               |
+| `jobs`        | `specs/jobs/**`, built by `jobs()`                                                                            | Docker                                                               |
+| `integration` | `specs/integration/**`, built by `integration()` — the container seams included                               | Docker                                                               |
+| `api-stack`   | `specs/api/**` + `specs/jobs/**` with `TEST_MODE=compose`, minus intercepts, clock and the node-mode refusals | Docker compose                                                       |
+| `website`     | `specs/website/**`, built by `website()`                                                                      | playwright + `npx playwright install chromium`; no Docker            |
+| `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                                                   | the same chromium; no Docker. Runs in its own group, after `website` |
 
 Every facet the package specifies itself on comes from its own helper, so `--project api` means the same tree here as in any consumer. Two projects are still stated by hand and say why: `fast` collects two trees no canonical include describes (its rename to `unit()` belongs with the rest of the package's own migration), and `api-stack` is compose mode, which leaves the package in 16.0.
 
@@ -36,7 +36,7 @@ npx vitest --run --project website  # after npx playwright install chromium
 npx vitest --run --project component  # the same chromium, a mounted unit at a time
 ```
 
-`api` and `api-stack` run the same test files and the mode switch lives ONLY in `vitest.config.ts` — that is rule A5 applied to this repository, and it is also the point of the two projects: fast feedback in-process, end-to-end confidence against the real stack, from one set of specs. `api-stack` excludes the intercept domain because `.intercept()` is in-process MSW, which compose mode has no access to.
+`api` and `api-stack` run the same test files and the mode switch lives ONLY in `vitest.config.ts` — that is rule A5 applied to this repository, and it is also the point of the two projects: fast feedback in-process, end-to-end confidence against the real stack, from one set of specs. `api-stack` excludes the intercept domain because `.intercept()` is in-process MSW, which compose mode has no access to, and the `initiation-errors` domain because those specs ARE the constructor's node-mode refusals — the compose ones they drive themselves.
 
 There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/specification/facets/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
 
