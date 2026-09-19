@@ -34,8 +34,24 @@ function instantOf(method: string, iso: string): Date {
     return at;
 }
 
-/** Give the real clock back, whichever of the two took it. */
-function release(): PinnedClock {
+/**
+ * One clock per test — a second one taken inside the first is refused rather
+ * than nested.
+ *
+ * Disposing gives the REAL clock back, which is the only thing vitest's fake
+ * timers can restore: the instant, the `toFake` set and the queue a previous
+ * scope held are not readable, so an inner scope that ended would silently end
+ * the outer one too. A refusal says which of the two the test meant.
+ */
+function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): PinnedClock {
+    if (vi.isFakeTimers()) {
+        throw new Error(
+            `clock.${method}(): a clock is already pinned — one scope per test. ` +
+                'End the first scope before taking another, or state the instant on the ' +
+                'chain (`.clock(iso)`) rather than around it.',
+        );
+    }
+    vi.useFakeTimers(options);
     return {
         [Symbol.dispose]: () => {
             vi.useRealTimers();
@@ -70,8 +86,7 @@ export const clock = {
      *   expect(stampedAt()).toBe('2026-03-04T09:30:00.000Z');
      */
     at(iso: string): PinnedClock {
-        vi.useFakeTimers({ now: instantOf('at', iso), toFake: ['Date'] });
-        return release();
+        return take('at', { now: instantOf('at', iso), toFake: ['Date'] });
     },
 
     /**
@@ -88,7 +103,6 @@ export const clock = {
      *   await expect(pending).resolves.toBe('ok');
      */
     run(iso?: string): PinnedClock {
-        vi.useFakeTimers(iso === undefined ? {} : { now: instantOf('run', iso) });
-        return release();
+        return take('run', iso === undefined ? {} : { now: instantOf('run', iso) });
     },
 };
