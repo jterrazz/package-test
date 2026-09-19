@@ -9,6 +9,7 @@ Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](d
 | The shape           | Held below                                                                       |
 | ------------------- | -------------------------------------------------------------------------------- |
 | What it specifies   | [What it specifies](#what-it-specifies)                                          |
+| What it refuses     | [What it does not do](#what-it-does-not-do)                                      |
 | Where it is written | [The constructor: there is none](#the-constructor-there-is-none)                 |
 | The chain           | [The chain](#the-chain) — `intercept` · `wrap` · `clock` · `viewport` · `render` |
 | The result          | [The result](#the-result) — `tree` `content` `html` `console` `errors`           |
@@ -30,6 +31,19 @@ src/presentation/posts/
 ```
 
 The suffix decides which project collects the file and therefore which rules judge it: `unit()` takes `**/*.test.ts` and excludes `**/*.test.tsx`; `component()` takes the `.tsx`. A rendered thing in a `.test.ts` is rule G4's error, and it names the move.
+
+## What it does not do
+
+The subject is a unit that draws itself IN A BROWSER, which leaves four neighbours outside the facet — each with a route, so none of them is a hole.
+
+| Not this                               | Because                                                                              | Route                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| A React Native screen                  | The renderer is a real Chromium, and a native view never reaches one                 | jest stays, until the `react-native-web` spike says otherwise             |
+| An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [14 — Website specs](14-website.md)                      |
+| A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                                     |
+| A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                                   |
+
+**`vite` as a framework function is BACKLOG, not a shape to reach for.** `component({ vite })` accepts the function a framework exports, and Astro's `getViteConfig()` is one — but no spike has yet proven that pipeline under this facet: the cross-repo probe that suggested it was confounded by two Vite versions, and the proof owed is an in-repo spike inside a `jterrazz-web` worktree. Until it lands, state the app's own `vite.config.ts` and let the allow-list take the pipeline from it.
 
 ## The constructor: there is none
 

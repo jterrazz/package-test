@@ -17,6 +17,8 @@ src/presentation/posts/
 
 `unit()` collects `**/*.test.ts` and EXCLUDES `**/*.test.tsx`; `component()` collects the `.tsx`. Never `specs/` — that is for a product reached through an entry.
 
+What this facet does NOT cover, and where each of those subjects goes instead: [docs/16-component.md § What it does not do](../../../docs/16-component.md#what-it-does-not-do).
+
 ## The project (`vitest.config.ts`)
 
 ```typescript
