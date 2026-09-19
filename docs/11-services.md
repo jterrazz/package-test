@@ -43,15 +43,15 @@ A site's dev server, an API the site calls, the bundler a simulator loads from: 
 
 The options type is `ProcessOptions`. It is what 15.2 published as `ServeOptions`, when the only process the framework owned was a website's server; the old name stays as a deprecated alias for the 15.x line and is removed in 16.0.
 
-| Option    | Means                                                                                                                         |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `command` | the shell command that starts it, receiving the chosen port as `PORT`                                                         |
-| `ready`   | a **path** polled until it answers (default `/`), or a **RegExp** over the child's output whose one capture group is the port |
-| `port`    | a fixed port instead of a free one the OS assigns                                                                             |
-| `cwd`     | a working directory relative to the project root                                                                              |
-| `env`     | the child's environment — an object, or a function of the services started beside it                                          |
-| `before`  | a one-shot command run ONCE per specification, which must exit 0: a build, a migration, a fixture load                        |
-| `timeout` | the readiness budget, in milliseconds (default 30 000)                                                                        |
+| Option    | Means                                                                                                                                                                                   |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `command` | the shell command that starts it, receiving the chosen port as `PORT`                                                                                                                   |
+| `ready`   | a **path** polled until it answers (default `/`), or a **RegExp** over the child's output whose one capture group is the port                                                           |
+| `port`    | a fixed port instead of a free one the OS assigns                                                                                                                                       |
+| `cwd`     | a working directory relative to the project root                                                                                                                                        |
+| `env`     | the child's environment — an object, or a function of the services started beside it                                                                                                    |
+| `before`  | a one-shot command run ONCE per evaluation of the specification module — under vitest's default isolation, once per test file — which must exit 0: a build, a migration, a fixture load |
+| `timeout` | the readiness budget, in milliseconds (default 30 000)                                                                                                                                  |
 
 It sits in a `services` record like any other service, so it starts after the databases and can be handed their connection strings, and it is stopped with the specification:
 
@@ -77,7 +77,7 @@ export const { cleanup, website } = await specification.website({
 
 `website()` and `mobile()` take a `services` record for exactly this: a site started beside the API it calls, a simulator started beside its Metro bundler (`process({ command: 'expo start', ready: /Metro waiting on .*:(\d+)/ })`). What used to be a bundler bootstrap the repository maintained is a declaration.
 
-**The run's id is minted, never sampled.** Every process of one specification is handed `TEST_RUN_ID` in its environment — one value per run, created by the facet. A test that needs a label unique to its run reads that variable; it never builds one from `Date.now()` or `Math.random()`, which rule D16 refuses under an oracle and which makes two runs of the same suite disagree.
+**The run's id is minted, never sampled.** Every process of one specification is handed `TEST_RUN_ID` in its environment — one value per RUN, where a run is one evaluation of the specification module, so two test files importing the same specification get a child each with an id of its own. A test that needs a label unique to its run reads that variable; it never builds one from `Date.now()` or `Math.random()`, which rule D16 refuses under an oracle and which makes two runs of the same suite disagree.
 
 ## The services record — three jobs for one key
 
