@@ -5,7 +5,7 @@
 type BrowserLinkElement = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:86
+Defined in: src/specification/ports/browser.port.ts:98
 
 A `<link>` element captured from the rendered document's head.
 
@@ -17,7 +17,7 @@ A `<link>` element captured from the rendered document's head.
 href: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:87
+Defined in: src/specification/ports/browser.port.ts:99
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: src/specification/ports/browser.port.ts:87
 optional hreflang?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:88
+Defined in: src/specification/ports/browser.port.ts:100
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: src/specification/ports/browser.port.ts:88
 rel: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:89
+Defined in: src/specification/ports/browser.port.ts:101
 
 ***
 
@@ -47,4 +47,4 @@ Defined in: src/specification/ports/browser.port.ts:89
 optional type?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:90
+Defined in: src/specification/ports/browser.port.ts:102

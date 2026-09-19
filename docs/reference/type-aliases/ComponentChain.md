@@ -107,13 +107,39 @@ Mount the subject, run the scenario, and capture what the page shows.
 
 ***
 
+### viewport
+
+```ts
+viewport: (size) => ComponentChain;
+```
+
+Defined in: src/specification/facets/component/component.types.ts:56
+
+The page size THIS render gets — the Given of a component that reads
+`matchMedia` or a container query. The project's size is restored when
+the test ends, so a narrow render never leaks into the next one.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `size` | \{ `height`: `number`; `width`: `number`; \} |
+| `size.height` | `number` |
+| `size.width` | `number` |
+
+#### Returns
+
+`ComponentChain`
+
+***
+
 ### wrap
 
 ```ts
 wrap: (wrapper) => ComponentChain;
 ```
 
-Defined in: src/specification/facets/component/component.types.ts:56
+Defined in: src/specification/facets/component/component.types.ts:62
 
 Wrap every render of this chain — the test-local Given a router stub or
 a `<StrictMode>` is. The project's own `wrap` stays outermost: it is the

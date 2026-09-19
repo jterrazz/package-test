@@ -5,7 +5,7 @@
 type VisitScenario = (visitor) => Promise<void>;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:138
+Defined in: src/specification/ports/browser.port.ts:150
 
 The behavior of a visit — the When of the spec; assertions stay in the Then.
 

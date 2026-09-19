@@ -5,7 +5,7 @@
 type BrowserConsoleMessage = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:101
+Defined in: src/specification/ports/browser.port.ts:113
 
 A console message emitted while the page loaded or the scenario ran.
 
@@ -17,7 +17,7 @@ A console message emitted while the page loaded or the scenario ran.
 text: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:102
+Defined in: src/specification/ports/browser.port.ts:114
 
 ***
 
@@ -27,4 +27,4 @@ Defined in: src/specification/ports/browser.port.ts:102
 type: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:103
+Defined in: src/specification/ports/browser.port.ts:115

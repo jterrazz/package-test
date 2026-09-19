@@ -27,7 +27,8 @@ filter counts as unmatched (strict contracts, CONVENTIONS D7).
 | `patch()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:129 |
 | `post()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:133 |
 | `put()` | (`url`, `filter?`) => [`ContractRequest`](../type-aliases/ContractRequest.md) | - | src/specification/contracts/http.ts:137 |
-| `text()` | (`body`, `init?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a text body, served as `text/plain` (200 by default). | src/specification/contracts/http.ts:162 |
+| `text()` | (`body`, `init?`) => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: a text body, served as `text/plain` (200 by default). | src/specification/contracts/http.ts:170 |
+| `unreachable()` | () => [`ContractResponse`](../type-aliases/ContractResponse.md) | Response: no response at all — the request fails in transport, the way a server that is not running fails it. `fetch` rejects; no status is served. | src/specification/contracts/http.ts:165 |
 
 ## Example
 

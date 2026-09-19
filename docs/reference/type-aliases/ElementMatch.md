@@ -5,7 +5,7 @@
 type ElementMatch = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:74
+Defined in: src/specification/ports/browser.port.ts:80
 
 One candidate captured when a descriptor matched more than one element —
 the evidence the ambiguity error enumerates so the author can disambiguate
@@ -13,13 +13,27 @@ without opening a browser.
 
 ## Properties
 
+### accessibleName?
+
+```ts
+optional accessibleName?: string;
+```
+
+Defined in: src/specification/ports/browser.port.ts:86
+
+The accessible name, when it differs from the text — an `aria-label` is
+what a role descriptor MATCHED on, and printing the text alone sends the
+author to disambiguate a name they cannot see.
+
+***
+
 ### context?
 
 ```ts
 optional context?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:76
+Defined in: src/specification/ports/browser.port.ts:88
 
 Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 
@@ -31,7 +45,7 @@ Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 optional detail?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:78
+Defined in: src/specification/ports/browser.port.ts:90
 
 The attribute that disambiguates most — `href` for links, `name` for fields.
 
@@ -43,7 +57,7 @@ The attribute that disambiguates most — `href` for links, `name` for fields.
 tag: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:80
+Defined in: src/specification/ports/browser.port.ts:92
 
 Tag name, lower-cased.
 
@@ -55,6 +69,6 @@ Tag name, lower-cased.
 text: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:82
+Defined in: src/specification/ports/browser.port.ts:94
 
 Text content, whitespace-collapsed and truncated.

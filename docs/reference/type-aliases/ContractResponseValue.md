@@ -7,7 +7,7 @@ type ContractResponseValue =
   | ContractResponse;
 ```
 
-Defined in: src/specification/contracts/types.ts:65
+Defined in: src/specification/contracts/types.ts:75
 
 What a contract replies with: either a fixed [ContractResponse](ContractResponse.md) or a
 [ContractResponder](ContractResponder.md) evaluated per served request.

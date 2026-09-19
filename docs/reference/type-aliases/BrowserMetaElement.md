@@ -5,7 +5,7 @@
 type BrowserMetaElement = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:94
+Defined in: src/specification/ports/browser.port.ts:106
 
 A `<meta>` element captured from the rendered document's head.
 
@@ -17,7 +17,7 @@ A `<meta>` element captured from the rendered document's head.
 content: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:95
+Defined in: src/specification/ports/browser.port.ts:107
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: src/specification/ports/browser.port.ts:95
 optional name?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:96
+Defined in: src/specification/ports/browser.port.ts:108
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: src/specification/ports/browser.port.ts:96
 optional property?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:97
+Defined in: src/specification/ports/browser.port.ts:109

@@ -5,7 +5,7 @@
 type ContractResponder = (request) => ContractResponse;
 ```
 
-Defined in: src/specification/contracts/types.ts:59
+Defined in: src/specification/contracts/types.ts:69
 
 A dynamic response: computed from the observed request at the moment the
 contract is served, rather than fixed ahead of time. Handed the same

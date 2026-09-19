@@ -165,6 +165,8 @@
 | ------ | ------ |
 | [defineContract](functions/defineContract.md) | Declare one contract. Identity function — its value is the enforced shape and the naming convention: |
 | [defineContracts](functions/defineContracts.md) | Compose contracts into the artifact a test imports — it's contracts all the way down: a composite may extend contracts, lists, and other composites, recursively, order preserved. |
+| [disabled](functions/disabled.md) | Whether the element accepts input: `see(disabled(button('Delete')))` asserts it refuses, `see(enabled(button('Delete')))` that it takes it. |
+| [enabled](functions/enabled.md) | The other direction of [disabled](functions/disabled.md) — the element takes input. |
 | [findContainersByLabel](functions/findContainersByLabel.md) | Return all container IDs (running or stopped) that carry `key=value`. |
 | [focused](functions/focused.md) | Where the keyboard is: `see(focused(button('Open')))` asserts the element has focus, `gone(focused(x))` that it does not. |
 | [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
