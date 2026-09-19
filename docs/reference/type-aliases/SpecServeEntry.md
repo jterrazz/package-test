@@ -5,7 +5,7 @@
 type SpecServeEntry = object;
 ```
 
-Defined in: src/specification/literate/spec-document.ts:85
+Defined in: [src/specification/literate/spec-document.ts:85](https://github.com/jterrazz/package-test/blob/main/src/specification/literate/spec-document.ts#L85)
 
 One `serve:` entry — a registered server plus the extra env it is started with.
 
@@ -17,7 +17,7 @@ One `serve:` entry — a registered server plus the extra env it is started with
 env: Record<string, string>;
 ```
 
-Defined in: src/specification/literate/spec-document.ts:86
+Defined in: [src/specification/literate/spec-document.ts:86](https://github.com/jterrazz/package-test/blob/main/src/specification/literate/spec-document.ts#L86)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: src/specification/literate/spec-document.ts:86
 line: number;
 ```
 
-Defined in: src/specification/literate/spec-document.ts:87
+Defined in: [src/specification/literate/spec-document.ts:87](https://github.com/jterrazz/package-test/blob/main/src/specification/literate/spec-document.ts#L87)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: src/specification/literate/spec-document.ts:87
 name: string;
 ```
 
-Defined in: src/specification/literate/spec-document.ts:88
+Defined in: [src/specification/literate/spec-document.ts:88](https://github.com/jterrazz/package-test/blob/main/src/specification/literate/spec-document.ts#L88)

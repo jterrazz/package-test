@@ -5,4 +5,4 @@
 const specification: Specification;
 ```
 
-Defined in: src/specification/facets/\_common/specification.ts:40
+Defined in: [src/specification/facets/\_common/specification.ts:40](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/specification.ts#L40)

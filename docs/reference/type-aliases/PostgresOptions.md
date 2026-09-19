@@ -5,7 +5,7 @@
 type PostgresOptions = object;
 ```
 
-Defined in: src/integrations/postgres/postgres.ts:9
+Defined in: [src/integrations/postgres/postgres.ts:9](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L9)
 
 ## Properties
 
@@ -15,7 +15,7 @@ Defined in: src/integrations/postgres/postgres.ts:9
 optional composeService?: string;
 ```
 
-Defined in: src/integrations/postgres/postgres.ts:14
+Defined in: [src/integrations/postgres/postgres.ts:14](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L14)
 
 Map to a service in docker/compose.test.yaml. Defaults to the handle's
 key in the declared services record.
@@ -28,7 +28,7 @@ key in the declared services record.
 optional env?: Record<string, string>;
 ```
 
-Defined in: src/integrations/postgres/postgres.ts:18
+Defined in: [src/integrations/postgres/postgres.ts:18](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L18)
 
 Override environment variables.
 
@@ -40,6 +40,6 @@ Override environment variables.
 optional image?: string;
 ```
 
-Defined in: src/integrations/postgres/postgres.ts:16
+Defined in: [src/integrations/postgres/postgres.ts:16](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L16)
 
 Override image.
