@@ -1,5 +1,4 @@
 import { CaptureScope } from '../../../matching/match.js';
-import { getCallerDir } from '../caller.js';
 import { grep as grepBlocks } from './grep.js';
 
 // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: stripping it is the point
@@ -88,25 +87,4 @@ export class TextAccessor {
     valueOf(): string {
         return this.text;
     }
-}
-
-/**
- * Wrap an arbitrary string into a {@link TextAccessor} anchored on the calling
- * test's directory — the same caller-detection the builders use.
- *
- * The product surface of a test framework is its own error messages, checker
- * output, and reports; those deserve the same goldening as any other output.
- * `text()` makes an ad-hoc string a first-class snapshot subject:
- *
- * ```typescript
- * const message = await catchMessage(() => expect(result.response).toMatch('wrong-body.http'));
- * expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to _expected/
- * ```
- *
- * ANSI is stripped before every comparison (the raw form stays on `.text`),
- * the `{{token}}` grammar applies to the fixture, and `.grep()` composition
- * works exactly as on any stream accessor.
- */
-export function text(value: string): TextAccessor {
-    return new TextAccessor(value, 'text', getCallerDir());
 }

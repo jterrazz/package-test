@@ -34,6 +34,7 @@
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
+            "browser": "./dist/browser/index.js",
             "import": "./dist/index.js"
         },
         "./vitest": {
@@ -103,5 +104,8 @@
     },
     "engines": {
         "node": ">=20"
+    },
+    "allowScripts": {
+        "better-sqlite3@12.11.1": true
     }
 }
