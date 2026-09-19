@@ -17,6 +17,20 @@ A descriptor must designate exactly ONE element at action time; see
 
 ## Properties
 
+### disabled?
+
+```ts
+optional disabled?: boolean;
+```
+
+Defined in: src/specification/ports/browser.port.ts:64
+
+Narrows to "and it is (not) accepting input" — built by `disabled(x)` /
+`enabled(x)`. Like `focused`, a STATE the vocabulary can already name the
+element of, so it is a verb's business and never a golden's.
+
+***
+
 ### exact?
 
 ```ts
@@ -51,7 +65,7 @@ where the keyboard is cannot be goldened; it is asserted by a verb.
 kind: ElementKind | LandmarkKind;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:59
+Defined in: src/specification/ports/browser.port.ts:65
 
 ***
 
@@ -61,7 +75,7 @@ Defined in: src/specification/ports/browser.port.ts:59
 optional name?: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:61
+Defined in: src/specification/ports/browser.port.ts:67
 
 Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 
@@ -73,7 +87,7 @@ Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 optional scope?: ElementRef;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:66
+Defined in: src/specification/ports/browser.port.ts:72
 
 Restrict the search to the elements of another descriptor — built by
 `within(scope, target)`. Chains: a scope may itself carry a scope.

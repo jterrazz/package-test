@@ -5,7 +5,7 @@
 type MatchFixtureOptions = object;
 ```
 
-Defined in: src/vitest/matchers.ts:65
+Defined in: src/vitest/matchers.ts:67
 
 Per-call options for the fixture-file `toMatch` subjects. `frozen` opts a
 single fixture OUT of update-mode rewriting: a frozen fixture is NEVER
@@ -24,4 +24,4 @@ actual output.
 optional frozen?: boolean;
 ```
 
-Defined in: src/vitest/matchers.ts:66
+Defined in: src/vitest/matchers.ts:68

@@ -56,3 +56,21 @@ optional status?: number;
 Defined in: src/specification/contracts/types.ts:44
 
 HTTP status code (default: 200).
+
+***
+
+### transport?
+
+```ts
+optional transport?: "network-error";
+```
+
+Defined in: src/specification/contracts/types.ts:60
+
+A transport failure instead of a reply: the request never reached a
+server, so `fetch` rejects. `status`, `body` and `headers` say nothing
+here — there is no response to carry them.
+
+The one thing a status code cannot express. A component's "the server did
+not answer, check that it is running" branch is reached by a rejected
+`fetch`, and a 503 stand-in tests the other branch entirely.
