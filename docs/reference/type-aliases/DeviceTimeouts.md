@@ -5,7 +5,7 @@
 type DeviceTimeouts = object;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:104](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L104)
+Defined in: src/specification/ports/device.port.ts:104
 
 How long a device session waits, in milliseconds. Every field is optional
 and falls back to the framework's own default, so a runner states only the
@@ -20,7 +20,7 @@ that drives a DEV build pays for its bundler's cold boot.
 optional action?: number;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:109](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L109)
+Defined in: src/specification/ports/device.port.ts:109
 
 How long every verb polls for a visible match before refusing.
 Default: `30_000` — enough for a cold app boot on a release bundle.
@@ -33,7 +33,7 @@ Default: `30_000` — enough for a cold app boot on a release bundle.
 optional launch?: number;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:114](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L114)
+Defined in: src/specification/ports/device.port.ts:114
 
 How long the FIRST session waits for WebDriverAgent to build and
 launch on the simulator. Default: `240_000`.

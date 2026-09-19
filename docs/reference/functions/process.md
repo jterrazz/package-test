@@ -5,7 +5,7 @@
 function process(options): ProcessHandle;
 ```
 
-Defined in: src/specification/facets/\_common/process.ts:149
+Defined in: src/specification/facets/\_common/process.ts:152
 
 Declare an external process the framework owns for the life of the
 specification.

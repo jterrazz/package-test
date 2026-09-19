@@ -5,7 +5,7 @@
 type ElementRef = object;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:47](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L47)
+Defined in: src/specification/ports/browser.port.ts:47
 
 A user-facing element descriptor — pure data, built by the element
 vocabulary (`button()`, `link()`, `field()`, …) and translated into
@@ -23,7 +23,7 @@ A descriptor must designate exactly ONE element at action time; see
 optional disabled?: boolean;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:68](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L68)
+Defined in: src/specification/ports/browser.port.ts:68
 
 Narrows to "and it is (not) accepting input" — built by `disabled(x)` /
 `enabled(x)`. Like `focused`, a STATE the vocabulary can already name the
@@ -40,7 +40,7 @@ disabled control is a timeout, never an answer.
 optional exact?: boolean;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:53](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L53)
+Defined in: src/specification/ports/browser.port.ts:53
 
 Match the accessible name as a whole string rather than a substring.
 Default (`false`) mirrors playwright: `link('Articles')` also matches
@@ -54,7 +54,7 @@ Default (`false`) mirrors playwright: `link('Articles')` also matches
 optional focused?: boolean;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:59](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L59)
+Defined in: src/specification/ports/browser.port.ts:59
 
 Assert about the element's FOCUS rather than its presence — built by
 `focused(element)`. The accessibility tree carries no focus state, so
@@ -68,7 +68,7 @@ where the keyboard is cannot be goldened; it is asserted by a verb.
 kind: ElementKind | LandmarkKind;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:69](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L69)
+Defined in: src/specification/ports/browser.port.ts:69
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [src/specification/ports/browser.port.ts:69](https://github.com/jter
 optional name?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:71](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L71)
+Defined in: src/specification/ports/browser.port.ts:71
 
 Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 
@@ -90,7 +90,7 @@ Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 optional scope?: ElementRef;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:89](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L89)
+Defined in: src/specification/ports/browser.port.ts:89
 
 Restrict the search to the elements of another descriptor — built by
 `within(scope, target)`. Chains: a scope may itself carry a scope.
@@ -103,7 +103,7 @@ Restrict the search to the elements of another descriptor — built by
 optional selected?: boolean;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:78](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L78)
+Defined in: src/specification/ports/browser.port.ts:78
 
 Narrows to "and it is (not) the chosen one" — built by `selected(x)`.
 An option of a COLLAPSED select is in the tree and in the document, and
@@ -118,7 +118,7 @@ it has no box on the screen, so this facet of it is read from the node
 optional value?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:84](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L84)
+Defined in: src/specification/ports/browser.port.ts:84
 
 The value the field must hold — built by `valued(field('Title'), '…')`.
 A field's value is a PROPERTY of the node: a controlled input's `value`

@@ -115,6 +115,7 @@
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
 | [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
 | [ScreenNode](type-aliases/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
+| [~~ServeOptions~~](type-aliases/ServeOptions.md) | What `ProcessOptions` was called in 15.2, when the only process the framework owned was a website's server. |
 | [ServerPort](type-aliases/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
 | [ServerResponse](type-aliases/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
 | [ServerSpec](type-aliases/ServerSpec.md) | What `server` may be handed as, and what it resolves to. |
@@ -167,6 +168,7 @@
 | [mockOfDate](variables/mockOfDate.md) | Freeze or reset the global Date for deterministic time-dependent tests. Wraps the `mockdate` package. |
 | [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
+| [option](variables/option.md) | An option of a select or a listbox, by its label — named inside the field that holds it: `within(field('Channel'), option('LinkedIn'))`. |
 | [region](variables/region.md) | The `region` landmark — a `<section>` carrying an accessible name. |
 | [row](variables/row.md) | A row of a table or grid, by the text of its cells. |
 | [search](variables/search.md) | The `search` landmark. |
@@ -191,8 +193,10 @@
 | [redis](functions/redis.md) | Create a Redis service handle. |
 | [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |
 | [required](functions/required.md) | The value, or a failure that says what was missing and why it mattered. |
+| [selected](functions/selected.md) | Which option the field is on: `see(selected(option('LinkedIn')))`, and `gone(selected(option('X')))` for the one it left. |
 | [sqlite](functions/sqlite.md) | Create a SQLite service handle. Uses file-copy isolation for parallel tests. |
 | [testId](functions/testId.md) | The escape hatch: an element by `data-testid`. Prefer user-facing elements. |
 | [text](functions/text.md) | Wrap an arbitrary string into a [TextAccessor](classes/TextAccessor.md) anchored on the calling test's directory — the same caller-detection the builders use. |
+| [valued](functions/valued.md) | What the field holds: `see(valued(field('Title'), 'Launch teaser'))`, and `gone(valued(field('Title'), '…'))` for a value it no longer holds. |
 | [waitUntil](functions/waitUntil.md) | Wait until a condition holds — the sanctioned answer to "the thing I am specifying is not ready yet". |
 | [within](functions/within.md) | Restrict a descriptor to the inside of another — the answer to ambiguity, and the one the framework prefers over a test id. |

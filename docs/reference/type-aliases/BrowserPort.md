@@ -5,7 +5,7 @@
 type BrowserPort = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:214
+Defined in: src/specification/ports/browser.port.ts:231
 
 Abstract browser interface for the website specification runner.
 One implementation lives in `integrations/playwright/` — a single shared
@@ -19,7 +19,7 @@ browser instance per runner; each `open()` gets a fresh, isolated context.
 close: () => Promise<void>;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:216
+Defined in: src/specification/ports/browser.port.ts:233
 
 Close the shared browser instance (idempotent).
 
@@ -35,7 +35,7 @@ Close the shared browser instance (idempotent).
 open: (url, options) => Promise<BrowserPage>;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:218
+Defined in: src/specification/ports/browser.port.ts:235
 
 Load `url` in a fresh context, run the scenario, capture the final page.
 

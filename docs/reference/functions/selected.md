@@ -5,7 +5,7 @@
 function selected(element): ElementRef;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:183](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L183)
+Defined in: src/specification/facets/website/elements.ts:183
 
 Which option the field is on: `see(selected(option('LinkedIn')))`, and
 `gone(selected(option('X')))` for the one it left.

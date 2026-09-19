@@ -5,7 +5,7 @@
 type BrowserPage = object;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:186
+Defined in: src/specification/ports/browser.port.ts:203
 
 The rendered page captured by a browser visit — the FINAL state when a
 scenario ran. Extraction happens in-page (the browser IS the HTML
@@ -19,7 +19,7 @@ parser); interpretation of the raw elements belongs to core.
 consoleMessages: BrowserConsoleMessage[];
 ```
 
-Defined in: src/specification/ports/browser.port.ts:188
+Defined in: src/specification/ports/browser.port.ts:205
 
 Console messages emitted while loading and interacting, in order.
 
@@ -31,7 +31,7 @@ Console messages emitted while loading and interacting, in order.
 html: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:190
+Defined in: src/specification/ports/browser.port.ts:207
 
 Serialized DOM after rendering (`document.documentElement.outerHTML`).
 
@@ -43,7 +43,7 @@ Serialized DOM after rendering (`document.documentElement.outerHTML`).
 jsonLdBlocks: string[];
 ```
 
-Defined in: src/specification/ports/browser.port.ts:192
+Defined in: src/specification/ports/browser.port.ts:209
 
 Raw text content of every `application/ld+json` script, in DOM order.
 
@@ -55,7 +55,7 @@ Raw text content of every `application/ld+json` script, in DOM order.
 links: BrowserLinkElement[];
 ```
 
-Defined in: src/specification/ports/browser.port.ts:194
+Defined in: src/specification/ports/browser.port.ts:211
 
 `<link>` elements of the head, in DOM order.
 
@@ -67,7 +67,7 @@ Defined in: src/specification/ports/browser.port.ts:194
 metas: BrowserMetaElement[];
 ```
 
-Defined in: src/specification/ports/browser.port.ts:196
+Defined in: src/specification/ports/browser.port.ts:213
 
 `<meta>` elements of the head, in DOM order.
 
@@ -79,7 +79,7 @@ Defined in: src/specification/ports/browser.port.ts:196
 status: number;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:198
+Defined in: src/specification/ports/browser.port.ts:215
 
 HTTP status of the main document response (0 when unavailable).
 
@@ -91,7 +91,7 @@ HTTP status of the main document response (0 when unavailable).
 text: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:200
+Defined in: src/specification/ports/browser.port.ts:217
 
 Rendered `document.body.innerText`.
 
@@ -103,7 +103,7 @@ Rendered `document.body.innerText`.
 title: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:204
+Defined in: src/specification/ports/browser.port.ts:221
 
 `document.title` after rendering.
 
@@ -115,7 +115,7 @@ Defined in: src/specification/ports/browser.port.ts:204
 tree: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:202
+Defined in: src/specification/ports/browser.port.ts:219
 
 The ARIA snapshot of the rendered `<body>` — the outline a golden pins.
 
@@ -127,6 +127,6 @@ The ARIA snapshot of the rendered `<body>` — the outline a golden pins.
 url: string;
 ```
 
-Defined in: src/specification/ports/browser.port.ts:206
+Defined in: src/specification/ports/browser.port.ts:223
 
 Final URL after redirects and scenario navigation.

@@ -5,7 +5,7 @@
 function waitUntil(predicate, options?): Promise<void>;
 ```
 
-Defined in: src/specification/assertions/wait-until.ts:36
+Defined in: src/specification/assertions/wait-until.ts:41
 
 Wait until a condition holds — the sanctioned answer to "the thing I am
 specifying is not ready yet".
@@ -19,6 +19,11 @@ land, a queue to drain, a file to appear.
 
 The failure names the condition and how long it was given, so a timeout is a
 sentence rather than "expected true, got false".
+
+The budget is measured on `performance.now()`, not on `Date` — `clock.at()`
+freezes the calendar, and a deadline read off a frozen calendar never
+arrives: the poll would run until vitest killed the test with a sentence
+about the file rather than about the condition.
 
 Not for a subject under `clock.run()`: there the scheduler is the test's, and
 `clock.advance(ms)` is what makes time pass.
