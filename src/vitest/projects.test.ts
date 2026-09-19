@@ -54,10 +54,7 @@ describe('unit() — module tests, and only module tests', () => {
         const project = testOf(unit({ roots: ['packages', 'apps/'] }));
 
         // Then - each root is a glob, and the trailing slash is not a second one
-        expect(project.include).toStrictEqual([
-            'packages/**/*.test.ts',
-            'apps/**/*.test.ts',
-        ]);
+        expect(project.include).toStrictEqual(['packages/**/*.test.ts', 'apps/**/*.test.ts']);
     });
 
     test('runs before either browser project', () => {
@@ -205,7 +202,7 @@ describe('component() — the browser project', () => {
         const project = await component();
 
         // Then - never both: vite 8 warns for every esbuild option beside an oxc one
-        expect('esbuild' in project && 'oxc' in project).toBe(false);
+        expect('esbuild' in project && 'oxc' in project).toBeFalsy();
     });
 
     test('concatenates a consumer plugin after the worker the seam serves', async () => {

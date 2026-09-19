@@ -90,8 +90,10 @@ test('serves a transport failure the way a server that is not running does', asy
 test('replaces the first surface when one test renders twice', async () => {
     // Given - two renders in one test, the second the only one left standing
     await component.intercept(listing).render(<PostTable />);
-    await component.intercept(listing).render(<PostTable />, async (visitor) => {
-        // Then - one document, one table: a descriptor still names exactly one
+    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
         await visitor.see(heading('Posts'));
     });
+
+    // Then - one document, one table: the first mount did not stay behind
+    expect(result.content.text.match(/Showing 2 of 200 posts/gu)).toHaveLength(1);
 });

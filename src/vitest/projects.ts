@@ -143,7 +143,7 @@ function mswWorkerPlugin(): Plugin {
  */
 async function reroot(
     source: NonNullable<ComponentProjectOptions['vite']>,
-): Promise<Partial<UserConfig>> {
+): Promise<Record<string, unknown>> {
     const environment = { command: 'serve', isSsrBuild: false, mode: 'test' } as const;
     let loaded: undefined | UserConfig;
     if (typeof source === 'string') {
@@ -205,12 +205,13 @@ function transformKey(): 'esbuild' | 'oxc' {
  * consumer's own: a `jsxImportSource` or a classic runtime is the app's
  * statement, not the seam's to overwrite.
  */
-function jsxPipeline(pipeline: Partial<UserConfig>): Record<string, unknown> {
+function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown> {
     const key = transformKey();
+    const stated = pipeline[key];
     if (key === 'oxc') {
-        return { oxc: pipeline.oxc ?? { jsx: { runtime: 'automatic' } } };
+        return { oxc: stated ?? { jsx: { runtime: 'automatic' } } };
     }
-    return { esbuild: pipeline.esbuild ?? { jsx: 'automatic' } };
+    return { esbuild: stated ?? { jsx: 'automatic' } };
 }
 
 /**

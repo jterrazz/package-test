@@ -16,10 +16,13 @@ test('renders for the page size the test gave it', async () => {
 });
 
 test('is restored to the project size for the next test', async () => {
-    // Given - no viewport of its own, so the project's 1280x720 stands
-    await component.render(<ViewportNote />, async (visitor) => {
+    // Given - no viewport of its own, after a test that narrowed the page
+    const result = await component.render(<ViewportNote />, async (visitor) => {
         await visitor.see(content('Wide layout'));
     });
+
+    // Then - the project's 1280x720 is what this render got
+    expect(result.content).toContain('Wide layout');
 });
 
 test('captures the text the page renders, not everything the document holds', async () => {

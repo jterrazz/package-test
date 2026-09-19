@@ -38,9 +38,8 @@ export const i2SiblingTestNaming: LintRule = {
                         if (!neighbours.some(isFile)) {
                             context.report({
                                 data: {
-                                    expected: neighbours[rendered ? 1 : 0]
-                                        ?.split(/[/\\]/u)
-                                        .at(-1) ?? '',
+                                    expected:
+                                        neighbours[rendered ? 1 : 0]?.split(/[/\\]/u).at(-1) ?? '',
                                 },
                                 messageId: rendered ? 'orphanComponent' : 'orphanTest',
                                 node,

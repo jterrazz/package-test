@@ -216,10 +216,12 @@ export function componentVerbs(surface: MountedSurface): {
                     await expect.element(locator).toHaveFocus();
                     return;
                 }
-                if (element.disabled !== undefined) {
-                    await (element.disabled
-                        ? expect.element(locator).toBeDisabled()
-                        : expect.element(locator).toBeEnabled());
+                if (element.disabled === true) {
+                    await expect.element(locator).toBeDisabled();
+                    return;
+                }
+                if (element.disabled === false) {
+                    await expect.element(locator).toBeEnabled();
                     return;
                 }
                 await expect.element(locator).toBeVisible();

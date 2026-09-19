@@ -14,16 +14,16 @@ What proves a change here: this package specifies itself with itself. The suites
 
 `test.projects` in `vitest.config.ts` declares six, and which one you can run is decided by what is installed and running on the machine.
 
-| Project        | Collects                                                                 | Needs                                                                       |
-| -------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| `fast`         | `src/**/*.test.ts` + `specs/cli/**` + `specs/lint/**`                    | Nothing — Docker specs self-skip; the lint specs need `npm run build` first |
-| `api`          | `specs/api/**` + `specs/jobs/**`, node mode (in-process Hono)            | Docker                                                                      |
-| `api-stack`    | the SAME files with `TEST_MODE=compose`, minus `specs/api/intercepts/**` | Docker compose                                                              |
-| `website`      | `specs/website/**`, built by `website()`                                 | playwright + `npx playwright install chromium`; no Docker                   |
-| `component`    | `specs/component-app/**/*.test.tsx`, built by `component()`              | the same chromium; no Docker. Runs in its own group, after `website`        |
+| Project     | Collects                                                                 | Needs                                                                       |
+| ----------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| `fast`      | `src/**/*.test.ts` + `specs/cli/**` + `specs/lint/**`                    | Nothing — Docker specs self-skip; the lint specs need `npm run build` first |
+| `api`       | `specs/api/**` + `specs/jobs/**`, node mode (in-process Hono)            | Docker                                                                      |
+| `api-stack` | the SAME files with `TEST_MODE=compose`, minus `specs/api/intercepts/**` | Docker compose                                                              |
+| `website`   | `specs/website/**`, built by `website()`                                 | playwright + `npx playwright install chromium`; no Docker                   |
+| `component` | `specs/component-app/**/*.test.tsx`, built by `component()`              | the same chromium; no Docker. Runs in its own group, after `website`        |
 
 `website` and `component` are the two helpers this package dogfoods; `fast` is still stated by hand, because it collects three trees that no single helper's canonical include describes — its rename to `unit()` belongs with the rest of the package's own migration.
-| `integrations` | `specs/integrations/**`, sequential (`fileParallelism: false`)           | Docker                                                                      |
+| `integrations` | `specs/integrations/**`, sequential (`fileParallelism: false`) | Docker |
 
 ```bash
 npm test                            # every project — Docker and chromium both required

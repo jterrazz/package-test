@@ -268,22 +268,22 @@ Exactness is the default because a substring filter silently cross-matches: two 
 
 ## Response builders
 
-| Response                                   | Produces                                                                      |
-| ------------------------------------------ | ----------------------------------------------------------------------------- |
-| `http.json(body, init?)`                   | JSON response — `init: { status?, headers?, delay? }`                         |
-| `http.text(body, init?)`                   | `text/plain` response                                                         |
-| `http.error(status, body?)`                | HTTP error, optional JSON body                                                |
-| `http.empty(status = 204)`                 | Empty response                                                                |
+| Response                                   | Produces                                                                            |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `http.json(body, init?)`                   | JSON response — `init: { status?, headers?, delay? }`                               |
+| `http.text(body, init?)`                   | `text/plain` response                                                               |
+| `http.error(status, body?)`                | HTTP error, optional JSON body                                                      |
+| `http.empty(status = 204)`                 | Empty response                                                                      |
 | `http.unreachable()`                       | No response at all: the request fails in TRANSPORT and the caller's `fetch` rejects |
-| `openai.reply(data)`                       | `data` wrapped in a valid Chat Completions envelope                           |
-| `anthropic.reply(data)`                    | `data` (object or text) wrapped in a Messages envelope                        |
-| `openai.error(status)` / `anthropic.error` | Provider HTTP error (e.g. `429` rate limit)                                   |
-| `openai.timeout()` / `anthropic.timeout()` | A provider that never answers within the caller's timeout                     |
-| `openai.malformed(text)`                   | HTTP 200 whose assistant content is `text` — an unparseable payload to handle |
+| `openai.reply(data)`                       | `data` wrapped in a valid Chat Completions envelope                                 |
+| `anthropic.reply(data)`                    | `data` (object or text) wrapped in a Messages envelope                              |
+| `openai.error(status)` / `anthropic.error` | Provider HTTP error (e.g. `429` rate limit)                                         |
+| `openai.timeout()` / `anthropic.timeout()` | A provider that never answers within the caller's timeout                           |
+| `openai.malformed(text)`                   | HTTP 200 whose assistant content is `text` — an unparseable payload to handle       |
 
 The point: your contract states the **business payload** (`{ category: 'TECH' }`) and the builder produces the provider's full wire format around it.
 
-`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like *the server did not answer, check that it is running*; `http.error(503)` tests the other one. Both engines honour it: msw's node interceptor and its service worker share the response shape.
+`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. Both engines honour it: msw's node interceptor and its service worker share the response shape.
 
 ### Dynamic responses
 
