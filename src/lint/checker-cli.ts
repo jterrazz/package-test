@@ -64,8 +64,18 @@ function valueOf(flag: string): string | undefined {
     return index === -1 ? undefined : argv[index + 1];
 }
 
-/** Print the findings and exit on the first error-level one. */
-function report(violations: TokenViolation[], what: string): never {
+/** The passes a tree run puts over a `specs/` root. */
+const TREE_PASSES =
+    'D4/D4b/D10 grammar, spec documents, C9 dead fixtures, C14/C15 fixture placement, B5 await-using, A7 database';
+/** The passes a member run puts over a package. */
+const MEMBER_PASSES = 'E3 config-present, E5b no simulated DOM, F8 no seam dependency';
+
+/**
+ * Print the findings and exit on the first error-level one. `passes` names the
+ * ones that ACTUALLY ran: a member run that claimed the tree passes would be
+ * telling the reader a `specs/` tree was judged when none was walked.
+ */
+function report(violations: TokenViolation[], what: string, passes: string): never {
     const errors = violations.filter((violation) => violation.severity === 'error');
 
     if (json) {
@@ -94,7 +104,7 @@ function report(violations: TokenViolation[], what: string): never {
     // The success line names what actually ran — every pass, not just the token
     // Scan (the old "no unknown tokens" wording under-reported the C9/B5/A7 passes).
     console.log(
-        `conventions checker: all passes clean ${what} (D4/D4b/D10 grammar, spec documents, C9 dead fixtures, C14/C15 fixture placement, B5 await-using, A7 database)${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
+        `conventions checker: all passes clean ${what} (${passes})${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
     );
     process.exit(0);
 }
@@ -114,7 +124,7 @@ function requireDirectory(path: string, what: string): string {
 if (member !== undefined) {
     const root = resolve(positional ?? '.');
     const dir = requireDirectory(member, 'member directory');
-    report(checkMember(dir, root), `for member ${relative(root, dir) || '.'}`);
+    report(checkMember(dir, root), `for member ${relative(root, dir) || '.'}`, MEMBER_PASSES);
 }
 
 // ── One specs tree ──
@@ -130,7 +140,7 @@ if (positional !== undefined) {
             console.log(`conventions checker: moved ${move} (C14) — stage the rename`);
         }
     }
-    report(runAllChecks(root), `under ${root}`);
+    report(runAllChecks(root), `under ${root}`, TREE_PASSES);
 }
 
 // ── The whole project: every specs root, every member ──
@@ -146,4 +156,4 @@ for (const specsRoot of discoverSpecRoots(root)) {
     }
 }
 found.push(...checkMembers(root));
-report(found, `under ${root}`);
+report(found, `under ${root}`, `${TREE_PASSES}, ${MEMBER_PASSES}`);
