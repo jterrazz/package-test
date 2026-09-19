@@ -61,9 +61,12 @@ export class ProcessHandle implements ServiceHandle {
     }
 
     /**
-     * Isolation is the RUN's, not the worker's: a process is started once per
-     * specification and every worker that reaches it shares it, so the id the
-     * facet mints is what tells two runs apart — never a label a spec samples.
+     * Isolation is the RUN's, not the worker's — and a run here is one
+     * EVALUATION of the specification module. Under vitest's default
+     * isolation that is once per test file, so two files that import the same
+     * specification get a child each, with the id the facet minted for it.
+     * Nothing is acquired or reset between tests: the id is what tells two
+     * runs apart, never a label a spec samples.
      */
     isolation(): IsolationStrategy {
         return {
