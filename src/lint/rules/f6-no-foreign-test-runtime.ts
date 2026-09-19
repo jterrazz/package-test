@@ -1,6 +1,7 @@
 import { importSourceVisitor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
-import { isTestFile } from '../role.js';
+import { roleOf } from '../role.js';
+import type { FileRole } from '../role.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
 /**
@@ -33,18 +34,24 @@ const GROUPS: Group[] = [
 ];
 
 /**
+ * The roles that RUN a test — never a fixture app's config or a provider module
+ * that happens to sit under `specs/`. A fixture project's own `vitest.config.ts`
+ * has to name the provider, and a `providers.tsx` has to import the adapter it
+ * wraps: neither is a spec speaking a second dialect.
+ */
+const REACHED = new Set<FileRole>(['component', 'module', 'specification']);
+
+/**
  * CONVENTIONS F6 — a test file imports no second test runtime.
  *
  * Every seam the framework owns is one a spec must not reach around: a test
  * that imports the adapter speaks the adapter's dialect, and a repository ends
- * up with as many vocabularies as it has seams. The groups that ship with the
- * component facet are the ones that facet REPLACES; the rest of the family
- * (the mocking libraries, the raw contract engines, the drivers) lands with the
- * rule wave in 16.0, where the migrations that need them are worked.
+ * up with as many vocabularies as it has seams. The groups the rule carries are
+ * the ones the component facet REPLACES.
  */
 export const f6NoForeignTestRuntime: LintRule = {
     create(context: RuleContext) {
-        if (!isTestFile(context.physicalFilename)) {
+        if (!REACHED.has(roleOf(context.physicalFilename).role)) {
             return {};
         }
         const visitor: Visitor = {

@@ -7,9 +7,10 @@ import type { CatalogEntry } from './manifest.js';
  *
  * - the full four-channel catalogue inside `docs/13-linting.md`, spliced between
  *   GENERATED markers ({@link spliceCatalog}) — grouped by convention family,
- *   each row carrying what it REACHES and the one imperative line that FIXES it
- *   where the row states them (a ban with no destination is an argument, not a
- *   rule; the whole catalogue carries both after the rule wave);
+ *   each row anchored by its implementation name so a rule MESSAGE can link
+ *   straight to it, and carrying what it REACHES and the one imperative line
+ *   that FIXES it where the row states them (a ban with no destination is an
+ *   argument, not a rule);
  * - `skills/jterrazz-test/references/rules.md` — the agent-facing rule reference
  *   ({@link renderRules}).
  *
@@ -57,6 +58,18 @@ const CHANNEL_ORDER: Record<CatalogEntry['channel'], number> = {
     process: 3,
 };
 
+/**
+ * The landing spot a rule MESSAGE links to.
+ *
+ * A message ending in `docs/13-linting.md#<implementation>` is only a route if
+ * something in the file answers to that fragment, and a table row is not a
+ * heading. The anchor rides inside the Implementation cell, where it renders as
+ * nothing and resolves as the row.
+ */
+export function anchor(name: string): string {
+    return `<a id="${name}"></a>`;
+}
+
 /** The catalogue families, deterministically ordered. */
 function families(): string[] {
     return [...new Set(catalog.map((entry) => entry.family))].sort((a, b) => a.localeCompare(b));
@@ -84,7 +97,7 @@ function catalogueSections(): string[] {
             .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel])
             .map((entry) => [
                 entry.id,
-                `\`${entry.name}\``,
+                `${anchor(entry.name)}\`${entry.name}\``,
                 entry.channel,
                 entry.reach ?? '—',
                 cell(entry.convention),

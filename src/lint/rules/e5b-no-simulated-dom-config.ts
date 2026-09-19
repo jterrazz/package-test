@@ -3,7 +3,7 @@ import { RULE_DOCS } from '../manifest.js';
 import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-/** The two simulated DOMs a config used to name. */
+/** The two simulated DOMs. */
 const SIMULATED = new Set(['happy-dom', 'jsdom']);
 
 /**

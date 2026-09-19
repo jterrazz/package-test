@@ -26,6 +26,9 @@ tester.run('e6-component-project-helper', asOxlintRule(e6ComponentProjectHelper)
         },
         // A node project states no browser at all.
         { code: 'export default { test: { projects: [unit()] } };', filename: CONFIG },
+        // A `browser` key that is not the runner's project block: a define flag
+        // Names a constant, not a browser to open.
+        { code: 'export default { define: { browser: true } };', filename: CONFIG },
         // The word means something else outside a vitest config.
         { code: 'export const ua = { browser: "chromium" };', filename: '/repo/src/ua.ts' },
     ],

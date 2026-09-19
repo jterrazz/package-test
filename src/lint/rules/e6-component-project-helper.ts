@@ -3,6 +3,20 @@ import { RULE_DOCS } from '../manifest.js';
 import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
+/** Is this property the RUNNER's browser block, rather than a key that shares its name? */
+function isRunnerBrowserBlock(node: AstNode): boolean {
+    for (
+        let current = child(node, 'parent');
+        current !== undefined;
+        current = child(current, 'parent')
+    ) {
+        if (current.type === 'Property' && propertyKeyName(current) === 'test') {
+            return true;
+        }
+    }
+    return false;
+}
+
 /** Is this node inside a call to `component(...)`? */
 function insideComponentCall(node: AstNode): boolean {
     for (
@@ -40,6 +54,12 @@ export const e6ComponentProjectHelper: LintRule = {
             Program(node: AstNode) {
                 walk(node, (candidate: AstNode) => {
                     if (candidate.type !== 'Property' || propertyKeyName(candidate) !== 'browser') {
+                        return;
+                    }
+                    // A `browser` key somewhere else in a config — a `define`
+                    // Flag, an env record — is not a project's browser block.
+                    // The runner's sits under `test`.
+                    if (!isRunnerBrowserBlock(candidate)) {
                         return;
                     }
                     if (!insideComponentCall(candidate)) {

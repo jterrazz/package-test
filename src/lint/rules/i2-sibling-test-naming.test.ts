@@ -32,6 +32,12 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
             errors: [{ messageId: 'testsDir' }],
             filename: '/repo/src/specification/__tests__/match.test.ts',
         },
+        // A rendered unit with nothing beside it — the same law, outside src/.
+        {
+            code: 'test("x", () => {});',
+            errors: [{ messageId: 'orphanComponent' }],
+            filename: `${FIXTURES}/i2-sibling-test-naming/src/orphan-card.test.tsx`,
+        },
         // A root-level tests/ dir (guarded by a real package.json at that root) is banned.
         {
             code: 'export {};',
@@ -49,6 +55,16 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
         {
             code: 'export {};',
             filename: `${FIXTURES}/i2-sibling-test-naming-ok/src/util.ts`,
+        },
+        // A component test beside the component it renders.
+        {
+            code: 'test("x", () => {});',
+            filename: `${FIXTURES}/i2-sibling-test-naming-ok/src/card.test.tsx`,
+        },
+        // A hook's test is a .test.tsx beside the .ts, with its Host in the file.
+        {
+            code: 'test("x", () => {});',
+            filename: `${FIXTURES}/i2-sibling-test-naming-ok/src/use-toggle.test.tsx`,
         },
         // A .js neighbour satisfies I2 too (JS-shipping packages).
         {

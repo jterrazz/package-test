@@ -3,16 +3,14 @@ import { isUnderSpecs, segments } from './ast.js';
 /**
  * What KIND of file a rule is looking at, decided from its path alone.
  *
- * Every rule of the catalogue reaches a set of files, and until now each one
- * spelled that set out for itself — a suffix test here, a `specs/` walk there.
- * One answer, read from one place, is what lets a rule say "this is mine" in a
- * line and what makes a new kind (a rendered component) reachable by the rules
- * that should see it and invisible to the ones that should not.
+ * One answer, read from one place: it is what lets a rule say "this is mine" in
+ * a line, and what makes a rendered component reachable by the rules that should
+ * see it and invisible to the ones that should not.
  *
- * 15.2 answers what the component seam needs and no more. The full vocabulary —
- * `spec` (a test importing a `*.specification`), `contract`, `member`, and the
- * `.spec.ts` suffix that tells a spec from a module test — lands with the rule
- * wave in 16.0, where the checker's mover renames the trees it reads.
+ * The vocabulary is the set of kinds the rules of this release tell apart, and
+ * no more. There is no `spec` role yet, so `module` covers every `.test.ts`,
+ * including those under `specs/`; a rule that must not reach a product spec
+ * reads `inSpecs` beside the role.
  */
 
 /** The kinds this release tells apart. */

@@ -1,12 +1,16 @@
 import { RULE_DOCS } from '../manifest.js';
-import { isTestFile } from '../role.js';
+import { roleOf } from '../role.js';
+import type { FileRole } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 /** The pragma vitest reads to swap a test file's environment. */
 const PRAGMA = /@vitest-environment\s+(?<environment>[\w-]+)/u;
 
-/** The two simulated DOMs a test file used to reach for. */
+/** The two simulated DOMs. */
 const SIMULATED = new Set(['happy-dom', 'jsdom']);
+
+/** The roles that RUN a test file — the only ones a pragma steers. */
+const REACHED = new Set<FileRole>(['component', 'module', 'specification']);
 
 /**
  * CONVENTIONS E5 — no simulated DOM, stated per file.
@@ -18,7 +22,7 @@ const SIMULATED = new Set(['happy-dom', 'jsdom']);
  */
 export const e5NoSimulatedDom: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestFile(context.physicalFilename)) {
+        if (!REACHED.has(roleOf(context.physicalFilename).role)) {
             return {};
         }
         return {

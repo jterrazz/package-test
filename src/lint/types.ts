@@ -70,15 +70,14 @@ export type RuleDoc = {
     /**
      * One imperative line: what to DO about it. A ban with no destination is an
      * argument rather than a rule, so the catalogue and the message carry the
-     * same fix. Rows written before the field exists leave it absent; the whole
-     * catalogue carries one with the rule wave.
+     * same fix. A row that states none renders `—`.
      */
     fix?: string;
     /**
      * The specification facet the rule guards — segments the catalogue like
      * the constructors segment the API. `'shared'` for cross-facet rules.
      */
-    facet?: 'api' | 'cli' | 'jobs' | 'mobile' | 'shared' | 'website';
+    facet?: 'api' | 'cli' | 'component' | 'jobs' | 'mobile' | 'shared' | 'website';
     /** Convention family letter, e.g. `'A'`. */
     family: string;
     /** Convention code, e.g. `'A1'`. */
@@ -88,7 +87,7 @@ export type RuleDoc = {
     /**
      * Which files the rule looks at — the vocabulary of `roleOf` plus the two
      * shapes that are not a role (`tests`, everything the conventions bind, and
-     * `all`). Absent where the row predates the field.
+     * `all`). A row that states none renders `—`.
      */
     reach?:
         | 'all'

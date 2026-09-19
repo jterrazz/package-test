@@ -50,11 +50,28 @@ function declaredNames(root: AstNode): Set<string> {
     return names;
 }
 
-/** Is this identifier read as a value, rather than named as a property or a key? */
+/** The node kinds a name sits in when it is a TYPE, not a value the test reaches. */
+const TYPE_POSITIONS = new Set([
+    'TSInterfaceHeritage',
+    'TSQualifiedName',
+    'TSTypeQuery',
+    'TSTypeReference',
+]);
+
+/** Is this identifier read as a value, rather than named as a property, a key or a type? */
 function isValueReference(node: AstNode): boolean {
     const parent = child(node, 'parent');
     if (parent === undefined) {
         return true;
+    }
+    if (TYPE_POSITIONS.has(parent.type)) {
+        return false;
+    }
+    if (parent.type === 'UnaryExpression' && parent.operator === 'typeof') {
+        // `typeof window === 'undefined'` REACHES no document: it is how a
+        // Module states it runs in both runtimes, and the test of that guard
+        // Is a module test by definition.
+        return false;
     }
     if (parent.type === 'MemberExpression') {
         return child(parent, 'property') !== node || parent.computed === true;
@@ -69,17 +86,22 @@ function isValueReference(node: AstNode): boolean {
  * CONVENTIONS G4 — a module test touches no DOM.
  *
  * A module test runs under node, where `document` does not exist: a test that
- * reaches for one is not testing a module, it is rendering something. Before
- * the component facet the only way out was a simulated DOM, and a simulated DOM
- * proves the least of all — the thing it renders never met a browser. Now there
- * is somewhere for that test to go, and it is beside the component it renders.
+ * reaches for one is not testing a module, it is rendering something, and the
+ * place for that is a `.test.tsx` beside the component.
  *
- * Reach is the `module` role only: a `.test.tsx` IS the rendered kind and lives
- * in a page, so the same globals are exactly what it is there to use.
+ * Reach is the `module` role OUTSIDE `specs/`: a `.test.tsx` is the rendered
+ * kind and lives in a page, where those globals are what it is there to use;
+ * and under `specs/` an api or cli spec is a `.test.ts` too until the `spec`
+ * role exists, so the guard stops at the tree it can judge.
+ *
+ * A name in a TYPE position (`x as HTMLElement`) and a `typeof window` guard
+ * name no document: neither reaches one, and a module that must run in both
+ * runtimes is tested by exactly that guard.
  */
 export const g4NoDomInModuleTest: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.physicalFilename).role !== 'module') {
+        const identity = roleOf(context.physicalFilename);
+        if (identity.role !== 'module' || identity.inSpecs) {
             return {};
         }
         let declared = new Set<string>();
