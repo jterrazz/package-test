@@ -1,5 +1,5 @@
 import { button, component, dialog, focused } from '@jterrazz/test';
-import { useRef, useState } from 'react';
+import { StrictMode, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { expect, test, vi } from 'vitest';
 
@@ -115,4 +115,22 @@ test('reports nothing when the parent takes it off the screen itself', async () 
 
     // Then - an unmount is not a dismissal, and the owner was told nothing
     expect(onClose).not.toHaveBeenCalled();
+});
+
+test('holds its contract under the <StrictMode> a chain wraps the tree in', async () => {
+    // Given - the same host inside <StrictMode>: the extra checks React runs
+    // Under it must not turn one dismissal into two, nor lose the opener
+    const onClose = vi.fn<() => void>();
+    await component
+        .wrap((ui) => <StrictMode>{ui}</StrictMode>)
+        .render(<Host onClose={onClose} />, async (visitor) => {
+            await visitor.click(button('Open'));
+            await visitor.see(dialog('Host'));
+            await visitor.press('Escape');
+            await visitor.gone(dialog('Host'));
+            await visitor.see(focused(button('Open')));
+        });
+
+    // Then - one dismissal, and the keyboard back where it came from
+    expect(onClose).toHaveBeenCalledOnce();
 });
