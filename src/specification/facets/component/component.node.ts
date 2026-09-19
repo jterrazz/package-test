@@ -22,5 +22,6 @@ export const component: ComponentChain = {
     clock: refuse,
     intercept: refuse,
     render: refuse,
+    viewport: refuse,
     wrap: refuse,
 };

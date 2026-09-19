@@ -49,6 +49,12 @@ export type ComponentChain = {
     /** Mount the subject, run the scenario, and capture what the page shows. */
     render: (subject: RenderSubject, scenario?: ComponentScenario) => Promise<RenderResult>;
     /**
+     * The page size THIS render gets — the Given of a component that reads
+     * `matchMedia` or a container query. The project's size is restored when
+     * the test ends, so a narrow render never leaks into the next one.
+     */
+    viewport: (size: { height: number; width: number }) => ComponentChain;
+    /**
      * Wrap every render of this chain — the test-local Given a router stub or
      * a `<StrictMode>` is. The project's own `wrap` stays outermost: it is the
      * app's frame, and one test does not get to sit outside it.

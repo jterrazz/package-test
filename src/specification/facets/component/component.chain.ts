@@ -4,7 +4,9 @@ import {
     pinClock,
     projectWrapper,
     providedClock,
+    providedViewport,
     releaseClock,
+    setViewport,
 } from '../../../integrations/vitest-browser/page-runtime.js';
 import type { ComponentUi, DomMount } from '../../../integrations/vitest-browser/ui.js';
 import {
@@ -58,10 +60,11 @@ type ConsoleMethod = (typeof CONSOLE_METHODS)[number];
 type ChainState = {
     clock: null | string;
     contracts: readonly Contract[];
+    viewport: null | { height: number; width: number };
     wrap: ((ui: ComponentUi) => ComponentUi) | null;
 };
 
-const EMPTY: ChainState = { clock: null, contracts: [], wrap: null };
+const EMPTY: ChainState = { clock: null, contracts: [], viewport: null, wrap: null };
 
 /** Record what the page writes to the console for the length of the render. */
 function recordConsole(): { entries: ConsoleEntry[]; stop: () => void } {
@@ -130,7 +133,17 @@ function inlinePair(
 let mounted: MountedSurface | null = null;
 
 /** Everything one test may have left behind, undone — no hook in any spec. */
-async function resetComponentScope(): Promise<void> {
+async function resetComponentScope(resized: boolean): Promise<void> {
+    await unmountHeld();
+    if (resized) {
+        await setViewport(providedViewport());
+    }
+    resetWorkerContracts();
+    releaseClock();
+}
+
+/** Take down whatever is still mounted, and hold nothing afterwards. */
+async function unmountHeld(): Promise<void> {
     const surface = mounted;
     mounted = null;
     if (surface !== null) {
@@ -142,8 +155,6 @@ async function resetComponentScope(): Promise<void> {
             // Worth raising from a teardown that has done its job.
         }
     }
-    resetWorkerContracts();
-    releaseClock();
 }
 
 /** Mount the subject, dressing a React tree in the chain's wrapper and the project's. */
@@ -171,11 +182,20 @@ async function render(
     subject: RenderSubject,
     scenario?: ComponentScenario,
 ): Promise<RenderResult> {
+    // A second `.render()` in one test replaces the first: two mounts sharing
+    // One document is how a descriptor that named exactly one element starts
+    // Refusing, and the teardown only ever sees the last surface.
+    await unmountHeld();
+
     const recorder = recordConsole();
     afterThisTest(async () => {
         recorder.stop();
-        await resetComponentScope();
+        await resetComponentScope(state.viewport !== null);
     });
+
+    if (state.viewport !== null) {
+        await setViewport(state.viewport);
+    }
 
     const instant = state.clock ?? providedClock();
     if (instant !== undefined) {
@@ -202,7 +222,7 @@ async function render(
     const { entries } = recorder;
     return new RenderResult({
         console: entries.map((entry) => `[${entry.type}] ${entry.text}`).join('\n'),
-        content: document.body.textContent,
+        content: document.body.innerText,
         errors: entries
             .filter((entry) => entry.type === 'error')
             .map((entry) => entry.text)
@@ -229,6 +249,7 @@ function chainOf(state: ChainState): ComponentChain {
             return chainOf({ ...state, contracts: [...state.contracts, ...added] });
         },
         render: async (subject, scenario) => await render(state, subject, scenario),
+        viewport: (size) => chainOf({ ...state, viewport: size }),
         wrap: (wrapper) => chainOf({ ...state, wrap: wrapper }),
     };
 }

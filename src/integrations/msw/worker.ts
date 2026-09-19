@@ -11,7 +11,7 @@
  * `/api/posts.json` through on the same ground.
  */
 import type { Contract } from '../../specification/contracts/contract.js';
-import { buildContractHandlers, NO_CONTRACTS } from './handlers.js';
+import { buildContractHandlers } from './handlers.js';
 import type { ContractRegistration } from './handlers.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
@@ -61,13 +61,17 @@ export async function ensureContractWorker(): Promise<void> {
     });
 }
 
-/** Register one render's contracts on the page's worker. */
+/**
+ * Register one render's contracts on the page's worker.
+ *
+ * The worker starts even when the list is empty: on this facet D7 is TOTAL —
+ * a component that was given no contract has no network, and a fetch it makes
+ * anyway is named by {@link ContractRegistration.violation} rather than
+ * answered by whatever the dev server happens to have at that path.
+ */
 export async function registerWorkerContracts(
     contracts: readonly Contract[],
 ): Promise<ContractRegistration> {
-    if (contracts.length === 0) {
-        return NO_CONTRACTS;
-    }
     await ensureContractWorker();
     const msw = await import('msw');
     const { handlers, violation } = buildContractHandlers(msw, contracts, isRunnerRequest);
