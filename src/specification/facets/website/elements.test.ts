@@ -1,6 +1,21 @@
 import { describe, expect, test } from 'vitest';
 
-import { button, field, link, main, navigation, region, testId, within } from './elements.js';
+import {
+    button,
+    dialog,
+    field,
+    focused,
+    link,
+    listitem,
+    main,
+    navigation,
+    region,
+    row,
+    status,
+    table,
+    testId,
+    within,
+} from './elements.js';
 
 describe('element vocabulary', () => {
     test('builds a named descriptor as plain data', () => {
@@ -41,6 +56,50 @@ describe('element vocabulary', () => {
 
         // Then - the accessible name distinguishes them
         expect(element).toStrictEqual({ kind: 'navigation', name: 'Breadcrumb' });
+    });
+
+    test('names the five roles a visitor reads rather than the container it sits in', () => {
+        // Given - the roles the estate's UI specs were reaching for by hand
+        const named = [dialog('Settings'), table('Posts'), row('A first post')];
+
+        // Then - each is a descriptor of its own role, named like any other
+        expect(named).toStrictEqual([
+            { kind: 'dialog', name: 'Settings' },
+            { kind: 'table', name: 'Posts' },
+            { kind: 'row', name: 'A first post' },
+        ]);
+    });
+
+    test('lets the roles that usually carry no name stay anonymous', () => {
+        // Given - the live region of a page, and the item of a list
+        // Then - a name is optional, exactly as it is on a landmark
+        expect([status(), listitem('Part 2')]).toStrictEqual([
+            { kind: 'status' },
+            { kind: 'listitem', name: 'Part 2' },
+        ]);
+    });
+});
+
+describe('focused', () => {
+    test('modifies a descriptor rather than replacing it', () => {
+        // Given - the button a dialog should hand the keyboard back to
+        const element = focused(button('Open'));
+
+        // Then - the descriptor is the same one, asked about its focus
+        expect(element).toStrictEqual({ focused: true, kind: 'button', name: 'Open' });
+    });
+
+    test('survives scoping, so the keyboard can be asserted inside a landmark', () => {
+        // Given - a focused link designated inside the nav
+        const element = within(navigation(), focused(link('Articles')));
+
+        // Then - both the scope and the modifier travel with it
+        expect(element).toStrictEqual({
+            focused: true,
+            kind: 'link',
+            name: 'Articles',
+            scope: { kind: 'navigation' },
+        });
     });
 });
 

@@ -13,8 +13,26 @@ export type LandmarkKind =
     | 'region'
     | 'search';
 
-/** The interactive//textual element kinds — what a visitor actually acts on. */
-export type ElementKind = 'button' | 'field' | 'heading' | 'link' | 'testId' | 'text';
+/**
+ * The interactive/textual element kinds — what a visitor actually acts on.
+ *
+ * `dialog`, `status`, `table`, `row` and `listitem` are ARIA roles like the
+ * landmarks, but they are not CONTAINERS of a page: they are things a visitor
+ * reads and acts on, and they are the roles the estate's UI specs were already
+ * reaching for through `getByRole` or, worse, through `.first()`.
+ */
+export type ElementKind =
+    | 'button'
+    | 'dialog'
+    | 'field'
+    | 'heading'
+    | 'link'
+    | 'listitem'
+    | 'row'
+    | 'status'
+    | 'table'
+    | 'testId'
+    | 'text';
 
 /**
  * A user-facing element descriptor — pure data, built by the element
@@ -32,6 +50,12 @@ export type ElementRef = {
      * "Read Articles".
      */
     exact?: boolean;
+    /**
+     * Assert about the element's FOCUS rather than its presence — built by
+     * `focused(element)`. The accessibility tree carries no focus state, so
+     * where the keyboard is cannot be goldened; it is asserted by a verb.
+     */
+    focused?: boolean;
     kind: ElementKind | LandmarkKind;
     /** Landmarks may be anonymous (`main()`, `banner()`); everything else is named. */
     name?: string;
@@ -92,6 +116,12 @@ export type Visitor = {
     click: (element: ElementRef) => Promise<void>;
     /** Fill a form field with a value. */
     fill: (element: ElementRef, value: string) => Promise<void>;
+    /**
+     * Wait until the element is GONE — hidden, or never in the document. The
+     * absence primitive: `see()` cannot answer "the dialog closed", because an
+     * element that never appears and one that disappeared read the same to it.
+     */
+    gone: (element: ElementRef) => Promise<void>;
     /** Navigate to a path of the site under test. */
     goto: (path: string) => Promise<void>;
     /** Hover the element. */
@@ -151,6 +181,8 @@ export type BrowserPage = {
     status: number;
     /** Rendered `document.body.innerText`. */
     text: string;
+    /** The ARIA snapshot of the rendered `<body>` — the outline a golden pins. */
+    tree: string;
     /** `document.title` after rendering. */
     title: string;
     /** Final URL after redirects and scenario navigation. */

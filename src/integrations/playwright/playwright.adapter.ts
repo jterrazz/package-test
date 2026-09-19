@@ -50,36 +50,24 @@ function locate(root: MatchScope, element: ElementRef): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
     // Playwright's own option bags are exact-optional: an absent `name` is no
     // Name filter at all, and `exact` defaults to false where it is unstated.
-    const options =
-        element.name === undefined
-            ? { exact: element.exact ?? false }
-            : { exact: element.exact ?? false, name: element.name };
-    switch (element.kind) {
-        case 'banner':
-        case 'complementary':
-        case 'contentinfo':
-        case 'form':
-        case 'main':
-        case 'navigation':
-        case 'region':
-        case 'search': {
-            return scope.getByRole(element.kind, options);
-        }
-        case 'button':
-        case 'heading':
-        case 'link': {
-            return scope.getByRole(element.kind, options);
-        }
-        case 'field': {
-            return scope.getByLabel(element.name ?? '', { exact: element.exact ?? false });
-        }
-        case 'testId': {
-            return scope.getByTestId(element.name ?? '');
-        }
-        case 'text': {
-            return scope.getByText(element.name ?? '', { exact: element.exact ?? false });
-        }
+    const exact = element.exact ?? false;
+    const name = element.name ?? '';
+    if (element.kind === 'field') {
+        return scope.getByLabel(name, { exact });
     }
+    if (element.kind === 'testId') {
+        return scope.getByTestId(name);
+    }
+    if (element.kind === 'text') {
+        return scope.getByText(name, { exact });
+    }
+    // Every other kind IS an ARIA role — landmark or not — and the vocabulary
+    // Names each after the role it locates, so one branch answers for all of
+    // Them and a descriptor added to the vocabulary needs nothing here.
+    return scope.getByRole(
+        element.kind,
+        element.name === undefined ? { exact } : { exact, name: element.name },
+    );
 }
 
 /** Playwright signals "more than one match" through this error text. */
@@ -147,6 +135,19 @@ async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<Elem
     return element;
 }
 
+/**
+ * The same element, narrowed to "and it has focus".
+ *
+ * `:focus` as a second condition rather than a one-shot probe: the locator
+ * keeps playwright's own retry, so `see(focused(x))` waits for the keyboard to
+ * arrive instead of asking once and failing on a frame of animation. It also
+ * needs nothing but `playwright` — `expect(...).toBeFocused()` lives in
+ * `@playwright/test`, which this package deliberately does not carry.
+ */
+function focusedOnly(page: Page, locator: Locator): Locator {
+    return locator.and(page.locator(':focus'));
+}
+
 /** The visitor implementation — every action auto-waits via playwright actionability. */
 function createVisitor(page: Page, baseUrl: string): Visitor {
     return {
@@ -176,9 +177,18 @@ function createVisitor(page: Page, baseUrl: string): Visitor {
         press: async (key) => {
             await page.keyboard.press(key);
         },
+        gone: async (element) => {
+            await act(page, element, async (locator) => {
+                await (element.focused === true
+                    ? focusedOnly(page, locator).waitFor({ state: 'detached' })
+                    : locator.waitFor({ state: 'hidden' }));
+            });
+        },
         see: async (element) => {
             await act(page, element, async (locator) => {
-                await locator.waitFor({ state: 'visible' });
+                await (element.focused === true
+                    ? focusedOnly(page, locator).waitFor({ state: 'attached' })
+                    : locator.waitFor({ state: 'visible' }));
             });
         },
         select: async (element, option) => {
@@ -289,9 +299,15 @@ export class PlaywrightAdapter implements BrowserPort {
                 };
             });
 
+            // The ARIA snapshot comes from the same Playwright method the
+            // Component facet's server command calls, so both facets speak ONE
+            // Dialect and a page tree and a component tree are comparable.
+            const tree = await page.locator('body').ariaSnapshot();
+
             return {
                 consoleMessages,
                 status: response?.status() ?? 0,
+                tree,
                 url: page.url(),
                 ...extraction,
             };

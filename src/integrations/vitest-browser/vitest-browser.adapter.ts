@@ -165,7 +165,11 @@ export function componentVerbs(surface: MountedSurface): {
         },
         gone: async (element) => {
             await act(element, async (locator) => {
-                await expect.element(locator).not.toBeInTheDocument();
+                if (element.focused === true) {
+                    await expect.element(locator).not.toHaveFocus();
+                    return;
+                }
+                await expect.element(locator).not.toBeVisible();
             });
         },
         hover: async (element) => {
@@ -179,6 +183,10 @@ export function componentVerbs(surface: MountedSurface): {
         rerender: surface.rerender,
         see: async (element) => {
             await act(element, async (locator) => {
+                if (element.focused === true) {
+                    await expect.element(locator).toHaveFocus();
+                    return;
+                }
                 await expect.element(locator).toBeVisible();
             });
         },

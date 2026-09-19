@@ -168,6 +168,18 @@ export class PageResult extends BaseResult {
         });
     }
 
+    /**
+     * The ARIA snapshot of the rendered `<body>` — the page's outline, as the
+     * accessibility tree draws it, and the one golden a rendered surface pins.
+     * Deterministic where a screenshot is not, and the SAME dialect a component
+     * spec asserts, so a page and the components inside it read alike.
+     */
+    get tree(): TextAccessor {
+        return new TextAccessor(this.page.tree, 'tree', this.testDir, {
+            captures: this.captures,
+        });
+    }
+
     /** The document title as a text accessor. */
     get title(): TextAccessor {
         return new TextAccessor(this.page.title, 'title', this.testDir, {
