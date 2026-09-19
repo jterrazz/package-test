@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import nestedApp from './_fixtures/nested-app/vitest.config.js';
-import { component, unit, website } from './projects.js';
+import { api, cli, component, integration, jobs, mobile, unit, website } from './projects.js';
 
 /** The `test` block of a project, whatever the helper wrapped around it. */
 function testOf(
@@ -241,5 +241,60 @@ describe('component() — the browser project', () => {
 
         // Then - the seam's plugin is kept and the consumer's joins it
         expect(pluginNames(project)).toStrictEqual(['@jterrazz/test:msw-worker', 'app:svg']);
+    });
+});
+
+describe('the node facet helpers — one canonical project per kind', () => {
+    test('each collects its own facet tree, under its own name', () => {
+        // Given - the canonical projects, stated by nobody
+        // Then - `--project api` means the same tree in every repository
+        expect(
+            [api(), jobs(), integration(), mobile()].map((project) => testOf(project).name),
+        ).toStrictEqual(['api', 'jobs', 'integration', 'mobile']);
+        expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.test.ts']);
+    });
+
+    test('node facets run first, and the simulator runs alone at the end', () => {
+        // Given - the group order each helper states
+        const orders = [api(), jobs(), integration(), cli(), mobile()].map(
+            (project) => testOf(project).sequence?.groupOrder,
+        );
+
+        // Then - everything node shares group 0; website is 1, component 2,
+        // And a simulator cannot share a machine with itself
+        expect(orders).toStrictEqual([0, 0, 0, 0, 3]);
+    });
+
+    test('takes the tree and the budget a repository states instead', () => {
+        // Given - a facet whose tree and budget are not the convention's
+        const stated = testOf(
+            api({
+                exclude: ['specs/api/slow/**'],
+                include: ['suites/api/**/*.test.ts'],
+                timeout: 90_000,
+            }),
+        );
+
+        // Then - all three are the repository's, the name stays canonical
+        expect(stated.include).toStrictEqual(['suites/api/**/*.test.ts']);
+        // The preset's own exclusions are never dropped — vite concatenates,
+        // So a repository ADDS to `_fixtures/` rather than having to restate it.
+        expect(stated.exclude).toContain('specs/api/slow/**');
+        expect(stated.exclude).toContain('**/_fixtures/**');
+        expect(stated.testTimeout).toBe(90_000);
+        expect(stated.name).toBe('api');
+    });
+
+    test('cli() wires the literate door by default', () => {
+        // Given - the canonical cli project
+        // Then - the plugin that turns a document into a test file is there
+        expect(pluginNames(cli())).toContain('jterrazz-test:literate');
+    });
+
+    test('cli({ literate: false }) collects no documents', () => {
+        // Given - a repository whose cli facet has no documents
+        // Then - the plugin is absent, and nothing else changed
+        expect(pluginNames(cli({ literate: false }))).toStrictEqual([]);
+        expect(testOf(cli({ literate: false })).name).toBe('cli');
     });
 });

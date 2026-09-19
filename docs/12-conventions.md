@@ -117,6 +117,19 @@ Family I governs the source tree rather than the spec tree, and it splits in two
 
 **The test-file rules need no declaration.** I2 (a module's test is its sibling) and I4 (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 
+## The doubles ladder
+
+Closed and ordered. An agent takes the FIRST rung that fits, and nothing below rung four is a rung.
+
+1. **The real thing**, in-process — a pure module, a Hono app handed to `server`, a component mounted in a real Chromium.
+2. **A declared service** — `sqlite()`, `postgres()`, `redis()`, `process()` ([11](11-services.md)): real, isolated per worker, reset at the start of every chain.
+3. **A contract** — `.intercept()` on a chain (api, jobs, integration, component, website, mobile), `intercept()` in module scope ([10](10-contracts.md)). One queue, three transports, strict from the first contract (rule D7); a streamed body is `http.stream` / `http.sse`.
+4. **A typed port double** — `mockOf<Port>()` for an injected interface, `vi.fn<Fn>()` for a function-shaped dependency. Asserting a call on one is a boundary observation; asserting ONLY on doubles the test built is not a test of anything.
+
+**Off the ladder**, each with a destination: `vi.stubGlobal('fetch')` → `intercept()`; a raw `msw`/`nock`/`sinon` import → a contract; `vi.useFakeTimers` / `mockOfDate` → `clock`; `toMatchSnapshot` → a golden under `_expected/`; `vi.mock` of an application module → inject the port instead. A native module a consumer genuinely cannot inject is the one allow-listed exception, per specifier, with a reason.
+
+Where a test lives is what makes the rungs mechanizable: a module test may not carry a golden, and a module that needs a real service is an integration spec ([17](17-integration.md)). The reasoning is [ADR-005](decisions/005-the-doubles-ladder-is-closed.md).
+
 ## Time — one primitive, two depths
 
 Determinism is structural (rule D16): a value a test SAMPLES — `Date.now()`, `new Date()`, `Math.random()`, `randomUUID()` — never reaches an oracle. Time is the one of those the framework pins for you, and `clock` is the whole vocabulary. `vi.useFakeTimers()`, `vi.setSystemTime()` and `mockOfDate` are what it replaces: each of them owns a teardown a test will one day forget.
@@ -158,4 +171,4 @@ A facet pins the same instant for the chain it is stated on — `.clock(iso)` on
 
 ## Related
 
-[01 — Architecture](01-architecture.md) · [02 — Developing](02-developing.md) · [03 — Testing](03-testing.md) · [08 — Assertions](08-assertions.md) · [13 — Linting](13-linting.md)
+[01 — Architecture](01-architecture.md) · [02 — Developing](02-developing.md) · [03 — Testing](03-testing.md) · [08 — Assertions](08-assertions.md) · [13 — Linting](13-linting.md) · [17 — Integration specs](17-integration.md)

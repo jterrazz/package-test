@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import type { ApiSpecification, CliSpecification, JobsSpecification } from '../index.js';
+import type {
+    ApiSpecification,
+    CliSpecification,
+    IntegrationSpecification,
+    JobsSpecification,
+} from '../index.js';
 import { methodsByRole } from './facet-matrix.js';
 import type { FacetRole } from './facet-matrix.js';
 
@@ -54,6 +59,15 @@ const jobsMatrix = {
     trigger: 'action',
 } satisfies Record<keyof JobsSpecification, FacetRole>;
 
+const integrationMatrix = {
+    // Setup (chainable).
+    clock: 'setup',
+    intercept: 'setup',
+    seed: 'setup',
+    // Action (terminal).
+    call: 'action',
+} satisfies Record<keyof IntegrationSpecification, FacetRole>;
+
 const cliMatrix = {
     // Setup (chainable).
     env: 'setup',
@@ -81,11 +95,12 @@ describe('facet capability matrix (K1 guard)', () => {
         // Given - the same matrix; a cli child reads its OWN calendar and takes
         // The instant through the product's env, never through the chain
         // Then - `.clock()` sits on api and jobs, and on neither cli row
-        expect(['clock' in apiMatrix, 'clock' in jobsMatrix, 'clock' in cliMatrix]).toStrictEqual([
-            true,
-            true,
-            false,
-        ]);
+        expect([
+            'clock' in apiMatrix,
+            'clock' in jobsMatrix,
+            'clock' in integrationMatrix,
+            'clock' in cliMatrix,
+        ]).toStrictEqual([true, true, true, false]);
     });
 
     test('each facet exposes exactly the documented terminal actions', () => {
@@ -100,5 +115,6 @@ describe('facet capability matrix (K1 guard)', () => {
         ]);
         expect(methodsByRole(jobsMatrix, 'action')).toStrictEqual(['trigger']);
         expect(methodsByRole(cliMatrix, 'action')).toStrictEqual(['exec', 'run']);
+        expect(methodsByRole(integrationMatrix, 'action')).toStrictEqual(['call']);
     });
 });

@@ -1,48 +1,48 @@
 import { resolve } from 'node:path';
 
-import { component, defineSpecConfig, literate, website } from './src/vitest/index.js';
+import {
+    api,
+    cli,
+    component,
+    defineSpecConfig,
+    integration,
+    jobs,
+    website,
+} from './src/vitest/index.js';
 
 /**
  * The package eats its own preset: `defineSpecConfig()` sets the artefact
  * paths, the budgets and the `_fixtures/` exclusion, and every project below
- * states only what makes it different.
+ * states only what makes it different. Every facet the package specifies
+ * itself on comes from its own helper — the canonical name, include and group
+ * order are the framework's, so `--project api` means the same thing here as
+ * in every consumer.
  */
 export default defineSpecConfig({
     test: {
         projects: [
             {
-                // The framework eats its own document format:
-                // `specs/cli/literate/*.spec.yaml` are collected as TEST FILES and run
-                // Through the registered runner. The glob stops at depth 1 so the
-                // Deliberately-wrong twins under `literate/_fixtures/` stay inputs to
-                // The negative specs, never tests.
-                //
-                // The plugin sits in THIS project, not at the root: its glob has
-                // To join the include of the project that collects those documents.
-                plugins: [
-                    literate({
-                        include: ['specs/cli/literate/*.spec.yaml'],
-                        specification: './specs/cli/literate-cli.specification.ts',
-                    }),
-                ],
                 test: {
                     name: 'fast',
                     // Specs/lint E2E-lints fixture projects through the real
                     // Oxlint binary — needs `npm run build` (dist/oxlint.js).
-                    include: [
-                        'src/**/*.test.ts',
-                        'specs/cli/**/*.test.ts',
-                        'specs/lint/**/*.test.ts',
-                    ],
+                    include: ['src/**/*.test.ts', 'specs/lint/**/*.test.ts'],
                 },
             },
-            {
-                test: {
-                    name: 'api',
-                    // Parallel: each worker gets isolated DB schema + Redis DB via IsolationStrategy
-                    include: ['specs/api/**/*.test.ts', 'specs/jobs/**/*.test.ts'],
+            // The cli helper wires the literate door: the package's documents
+            // Are collected as TEST FILES by the project that owns the facet.
+            // The glob stops at depth 1 so the deliberately-wrong twins under
+            // `literate/_fixtures/` stay inputs to the negative specs.
+            cli({
+                literate: {
+                    include: ['specs/cli/literate/*.spec.yaml'],
+                    specification: './specs/cli/literate-cli.specification.ts',
                 },
-            },
+            }),
+            // Parallel: each worker gets an isolated DB schema + Redis DB.
+            api(),
+            jobs(),
+            integration(),
             {
                 test: {
                     name: 'api-stack',
@@ -79,10 +79,12 @@ export default defineSpecConfig({
             }),
             {
                 test: {
-                    name: 'integrations',
-                    // Sequential: tests container lifecycle (start/stop) — inherently serial
+                    name: 'seams',
+                    // The container seams themselves — the integrations the
+                    // Facets stand on, probed through their adapters. Sequential:
+                    // Container lifecycle (start/stop) is inherently serial.
                     fileParallelism: false,
-                    include: ['specs/integrations/**/*.test.ts'],
+                    include: ['specs/seams/**/*.test.ts'],
                 },
             },
         ],

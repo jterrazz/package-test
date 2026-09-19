@@ -5,7 +5,7 @@
 type SpecificationConfig = object;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:57
+Defined in: src/specification/facets/\_common/builder.ts:58
 
 Adapter configuration passed to the specification facets at setup time.
 
@@ -17,7 +17,7 @@ Adapter configuration passed to the specification facets at setup time.
 optional backend?: StubBackend;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:62
+Defined in: src/specification/facets/\_common/builder.ts:63
 
 The declared stub backend (website/mobile facets) — armed with the
 chain's contracts before every terminal action.
@@ -30,7 +30,7 @@ chain's contracts before every terminal action.
 optional backendUrl?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:67
+Defined in: src/specification/facets/\_common/builder.ts:68
 
 Base URL of the running stub backend — allow-listed through the
 browser's `external: 'block'` policy so client-side fetches reach it.
@@ -43,7 +43,7 @@ browser's `external: 'block'` policy so client-side fetches reach it.
 optional baseUrl?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:69
+Defined in: src/specification/facets/\_common/builder.ts:70
 
 Base URL of the website under test (website facet only).
 
@@ -55,7 +55,7 @@ Base URL of the website under test (website facet only).
 optional browser?: () => Promise<BrowserPort>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:75
+Defined in: src/specification/facets/\_common/builder.ts:76
 
 Lazy browser accessor (website facet only). The first `.visit()`
 launches the shared browser instance; `.fetch()`-only spec files never
@@ -73,7 +73,7 @@ pay the browser cost.
 optional bundleId?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:83
+Defined in: src/specification/facets/\_common/builder.ts:84
 
 Bundle id of the app under test (mobile facet only) — the app `.open()` relaunches.
 
@@ -85,7 +85,7 @@ Bundle id of the app under test (mobile facet only) — the app `.open()` relaun
 optional command?: CliPort;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:84
+Defined in: src/specification/facets/\_common/builder.ts:85
 
 ***
 
@@ -95,7 +95,7 @@ Defined in: src/specification/facets/\_common/builder.ts:84
 optional database?: DatabasePort;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:85
+Defined in: src/specification/facets/\_common/builder.ts:86
 
 ***
 
@@ -105,7 +105,7 @@ Defined in: src/specification/facets/\_common/builder.ts:85
 optional databaseKeys?: string[];
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:91
+Defined in: src/specification/facets/\_common/builder.ts:92
 
 Keys of the declared services record that are databases. Drives the
 CONVENTIONS A7 rule: with 2+ databases the `database` option is
@@ -119,7 +119,21 @@ mandatory on `.seed()` / `.table()`; with exactly one it is forbidden.
 optional databases?: Map<string, DatabasePort>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:92
+Defined in: src/specification/facets/\_common/builder.ts:93
+
+***
+
+### defaultEnv?
+
+```ts
+optional defaultEnv?: CliEnv;
+```
+
+Defined in: src/specification/facets/\_common/builder.ts:114
+
+Environment applied to every run of the declared binary
+(`specification.cli({ defaults })`) — under a chain's own `.env()` and
+under a document's `env:`, both of which win.
 
 ***
 
@@ -129,7 +143,7 @@ Defined in: src/specification/facets/\_common/builder.ts:92
 optional device?: () => Promise<DevicePort>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:99
+Defined in: src/specification/facets/\_common/builder.ts:100
 
 Lazy device accessor (mobile facet only). The first `.open()` creates
 the shared driver session; the appium/webdriverio integration stays a
@@ -148,7 +162,7 @@ app.
 optional dockerConfig?: DockerSpecConfig;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:100
+Defined in: src/specification/facets/\_common/builder.ts:101
 
 ***
 
@@ -158,7 +172,7 @@ Defined in: src/specification/facets/\_common/builder.ts:100
 optional dockerTestRunId?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:107
+Defined in: src/specification/facets/\_common/builder.ts:108
 
 Unique id shared by every spec from this runner instance.
 Stable for the runner's lifetime so multi-step tests (spawn in
@@ -173,7 +187,7 @@ facet factories auto-populate this when `dockerConfig` is present.
 optional envSets?: Record<string, CliEnv>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:112
+Defined in: src/specification/facets/\_common/builder.ts:119
 
 Named environment SETS a spec document may name by bare word
 (`env: frozen`). Declared once per app in `specification.cli()`.
@@ -186,7 +200,7 @@ Named environment SETS a spec document may name by bare word
 optional external?: "allow" | "block";
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:81
+Defined in: src/specification/facets/\_common/builder.ts:82
 
 Cross-origin request policy for visits (website facet only): `'block'`
 aborts requests leaving the site under test — the browser-side analog
@@ -200,7 +214,7 @@ of strict intercepts.
 optional interceptDisabledReason?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:117
+Defined in: src/specification/facets/\_common/builder.ts:124
 
 When set, `.intercept()` is unavailable on this runner and throws this
 reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
@@ -213,7 +227,7 @@ reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
 optional jobs?: JobHandle[];
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:118
+Defined in: src/specification/facets/\_common/builder.ts:125
 
 ***
 
@@ -223,7 +237,7 @@ Defined in: src/specification/facets/\_common/builder.ts:118
 optional root?: string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:120
+Defined in: src/specification/facets/\_common/builder.ts:127
 
 The project root — the working directory a document's `serve:` command runs from.
 
@@ -235,7 +249,7 @@ The project root — the working directory a document's `serve:` command runs fr
 optional server?: ServerPort;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:121
+Defined in: src/specification/facets/\_common/builder.ts:128
 
 ***
 
@@ -245,7 +259,7 @@ Defined in: src/specification/facets/\_common/builder.ts:121
 optional serveRegistry?: Record<string, LiterateServeRegistration>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:126
+Defined in: src/specification/facets/\_common/builder.ts:133
 
 Named servers a spec document may start (`serve: [mcp]`). Declared once
 per app in `specification.cli()`.
@@ -258,7 +272,7 @@ per app in `specification.cli()`.
 optional services?: Record<string, ServiceHandle>;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:133
+Defined in: src/specification/facets/\_common/builder.ts:140
 
 The declared services record. In cli mode, drives the automatic
 connection-URL injection into the child env (CONVENTIONS B6):
@@ -273,7 +287,7 @@ unambiguous.
 optional transform?: (text) => string;
 ```
 
-Defined in: src/specification/facets/\_common/builder.ts:138
+Defined in: src/specification/facets/\_common/builder.ts:145
 
 Optional normaliser applied to command stdout/stderr before every
 comparison. Does not mutate the raw `.text` accessor.

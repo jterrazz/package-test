@@ -73,19 +73,14 @@ Trying an unreleased branch of the framework: install a `npm pack` tarball, neve
 Everything imports from the single package root — the only importable subpaths are the ones the package's `exports` map publishes for TOOLS (`@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/vitest` for what `vitest.config.ts` needs, `@jterrazz/test/schema` for an editor validating a `<case>.spec.yaml`); internal subpaths do not exist (rules F1 and F3, which read that map):
 
 ```typescript
-import {
-    specification,
-    postgres,
-    redis,
-    sqlite,
-    defineContract,
-    openai,
-    anthropic,
-    http,
-    match,
-    mockOf,
-    mockOfDate,
-} from '@jterrazz/test';
+// the runners, the services, and what a chain stands on
+import { postgres, process, redis, specification, sqlite } from '@jterrazz/test';
+```
+
+```typescript
+// what a test says: contracts, dynamic values, doubles, time, assertions
+import { anthropic, clock, defineContract, http, intercept } from '@jterrazz/test';
+import { match, mockOf, openai, required, waitUntil } from '@jterrazz/test';
 ```
 
 ### The shape of every test
@@ -93,11 +88,12 @@ import {
 A **specification file** (`*.specification.ts`, under `specs/`) creates a runner once per suite. A **test file** imports the runner and writes specs. Every spec is one chain: zero or more setups, then exactly one terminal action, resolving to a typed result you assert on with `expect()`.
 
 ```
-specification.api(…)     → { api, cleanup, docker, orchestrator }
-specification.jobs(…)    → { jobs, cleanup, orchestrator }         // no docker — jobs never spawn containers
-specification.cli(…)     → { cli, cleanup, docker, orchestrator }
-specification.website(…) → { website, cleanup, url }               // no docker, no orchestrator — a browser, not a container
-specification.mobile(…)  → { mobile, cleanup, udid }               // no docker, no orchestrator — a simulator, not a container
+specification.api(…)         → { api, cleanup, docker, orchestrator }
+specification.jobs(…)        → { jobs, cleanup, orchestrator }         // no docker — jobs never spawn containers
+specification.cli(…)         → { cli, cleanup, docker, orchestrator }
+specification.integration(…) → { integration, cleanup }                // a module, against real services or a golden
+specification.website(…)     → { website, cleanup, url }               // no docker, no orchestrator — a browser, not a container
+specification.mobile(…)      → { mobile, cleanup, udid }               // no docker, no orchestrator — a simulator, not a container
 ```
 
 The destructured names are canonical — no aliasing (`{ api: myApi }` is an error, rule A3) — and every specification file registers `afterAll(cleanup)` (rule A4).

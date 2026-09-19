@@ -8,6 +8,8 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { COMPONENT_COMMANDS } from '../integrations/vitest-browser/commands.js';
 import { VITEST_ARTIFACTS_DIR } from '../specification/artifacts/artifacts.js';
+import { literate } from './literate-plugin.js';
+import type { LiterateOptions } from './literate-plugin.js';
 import { projectDefaults } from './preset.js';
 
 /**
@@ -23,11 +25,13 @@ import { projectDefaults } from './preset.js';
  */
 
 /** What every helper accepts on top of its canonical project. */
-type CommonOptions = {
+export type FacetProjectOptions = {
     /**
-     * Replace the canonical `exclude` globs. A helper whose canonical
-     * `exclude` only guards its canonical `include` drops it when you state
-     * `include` alone, so state both or neither.
+     * Globs this project stays out of. On a facet helper they ADD to the
+     * preset's (`_fixtures/` and vitest's own), because vite concatenates. On
+     * `unit()` and `component()`, whose canonical `exclude` exists only to
+     * guard their canonical `include`, stating one replaces it — so state
+     * both or neither there.
      */
     exclude?: string[];
     /** Replace the canonical `include` globs. */
@@ -43,7 +47,7 @@ type CommonOptions = {
 };
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */
-export type UnitProjectOptions = CommonOptions & {
+export type UnitProjectOptions = FacetProjectOptions & {
     /**
      * The trees module tests live in, when they do not live in `src/`. Each
      * root becomes `<root>/**\/*.test.ts`; `include` states the globs outright.
@@ -52,10 +56,10 @@ export type UnitProjectOptions = CommonOptions & {
 };
 
 /** `website()` — the assembled product, met through a served page. */
-export type WebsiteProjectOptions = CommonOptions;
+export type WebsiteProjectOptions = FacetProjectOptions;
 
 /** `component()` — rendered units, beside the components they cover. */
-export type ComponentProjectOptions = {
+export type ComponentProjectOptions = FacetProjectOptions & {
     /** Freeze the page's `Date` for every render of the project. */
     clock?: string;
     /** `Accept-Language` and `Intl` locale of the page. Default `'en-US'`. */
@@ -82,7 +86,7 @@ export type ComponentProjectOptions = {
      * provider). A router belongs on the chain instead: it is a test's Given.
      */
     wrap?: string;
-} & CommonOptions;
+};
 
 /** The pipeline keys a consumer's Vite config contributes, and nothing else. */
 const PIPELINE_KEYS = [
@@ -516,4 +520,92 @@ export async function component(
         },
     };
     return mergeConfig(projectDefaults(), project) as TestProjectInlineConfiguration;
+}
+
+/**
+ * The node facets' canonical projects.
+ *
+ * Each one collects the facet's own tree, carries the preset's budgets and
+ * artefact directory, and runs in group 0 — the browser facets follow, so two
+ * Chromiums never share a slot on a two-vCPU runner. `{ include, exclude,
+ * timeout, serial }` is what a repository states when its tree, its budget or
+ * its parallelism differs;
+ * everything else is the framework's.
+ */
+
+/** The globs a node facet collects, and the ones a caller stated instead. */
+function facetProject(facet: string, options: FacetProjectOptions): TestProjectInlineConfiguration {
+    return mergeConfig(projectDefaults(), {
+        test: {
+            ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
+            include: options.include ?? [`specs/${facet}/**/*.test.ts`],
+            ...(options.serial === true ? { fileParallelism: false } : {}),
+            name: facet,
+            sequence: { groupOrder: 0 },
+            ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
+        },
+    }) as TestProjectInlineConfiguration;
+}
+
+/** `api()` — the app met through HTTP. */
+export function api(options: FacetProjectOptions = {}): TestProjectInlineConfiguration {
+    return facetProject('api', options);
+}
+
+/** `jobs()` — what a name triggers in-process. */
+export function jobs(options: FacetProjectOptions = {}): TestProjectInlineConfiguration {
+    return facetProject('jobs', options);
+}
+
+/** `integration()` — a module against real services, or against a golden. */
+export function integration(options: FacetProjectOptions = {}): TestProjectInlineConfiguration {
+    return facetProject('integration', options);
+}
+
+/**
+ * `mobile()` — the app on a simulator. A simulator is the one thing that
+ * cannot share a machine with itself, so it runs last and alone (group 3).
+ */
+export function mobile(options: FacetProjectOptions = {}): TestProjectInlineConfiguration {
+    return mergeConfig(facetProject('mobile', options), {
+        test: { sequence: { groupOrder: 3 } },
+    }) as TestProjectInlineConfiguration;
+}
+
+/** `cli()` — a binary, and the documents that specify it. */
+export type CliProjectOptions = FacetProjectOptions & {
+    /**
+     * The literate door, wired by default: every `specs/cli/**\/*.spec.yaml`
+     * becomes a test file bound to `specs/cli/cli.specification.ts`. State
+     * `specification` to name another runner, `include` to narrow the glob, or
+     * `false` to collect no documents at all.
+     */
+    literate?: false | Partial<LiterateOptions>;
+};
+
+/** The literate defaults — the path convention `cli()` assumes when nothing says otherwise. */
+const CLI_SPECIFICATION = './specs/cli/cli.specification.ts';
+const CLI_DOCUMENTS = ['specs/cli/**/*.spec.yaml'];
+
+/**
+ * A cli project collects the facet's `.test.ts` files AND its documents: a
+ * `<case>.spec.yaml` is a test file of its own (docs/07 § the literate door),
+ * so the plugin's glob has to join the include of the project that collects
+ * them — which is this one, never the root config.
+ */
+export function cli(options: CliProjectOptions = {}): TestProjectInlineConfiguration {
+    const { literate: literateOptions, ...common } = options;
+    const project = facetProject('cli', common);
+    if (literateOptions === false) {
+        return project;
+    }
+    const documents = literateOptions?.include ?? CLI_DOCUMENTS;
+    return mergeConfig(project, {
+        plugins: [
+            literate({
+                include: documents,
+                specification: literateOptions?.specification ?? CLI_SPECIFICATION,
+            }),
+        ],
+    }) as TestProjectInlineConfiguration;
 }

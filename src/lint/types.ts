@@ -77,7 +77,7 @@ export type RuleDoc = {
      * The specification facet the rule guards — segments the catalogue like
      * the constructors segment the API. `'shared'` for cross-facet rules.
      */
-    facet?: 'api' | 'cli' | 'component' | 'jobs' | 'mobile' | 'shared' | 'website';
+    facet?: 'api' | 'cli' | 'component' | 'integration' | 'jobs' | 'mobile' | 'shared' | 'website';
     /** Convention family letter, e.g. `'A'`. */
     family: string;
     /** Convention code, e.g. `'A1'`. */

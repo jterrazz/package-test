@@ -2,14 +2,16 @@ import { memberPropertyName } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
-/** The five constructors, and only five (A2 — see docs/13-linting.md). */
-const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'jobs', 'mobile', 'website']);
+/** The six constructors, and only six (A2 — see docs/13-linting.md). */
+const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile', 'website']);
 
 /**
  * CONVENTIONS A2 — `specification.api()`, `specification.jobs()`,
- * `specification.cli()`, `specification.website()` and
- * `specification.mobile()` are the only members. Any other access
- * (`specification.app`, `.http`, `.stack`, …) is flagged at the member site.
+ * `specification.cli()`, `specification.integration()`,
+ * `specification.website()` and `specification.mobile()` are the only
+ * members. Any other access (`specification.app`, `.http`, `.stack`, …) is
+ * flagged at the member site. A rendered component has no constructor: it
+ * starts nothing, so it is a chain, not a member of this record.
  */
 export const a2KnownConstructors: LintRule = {
     create(context: RuleContext) {
@@ -30,7 +32,7 @@ export const a2KnownConstructors: LintRule = {
         docs: RULE_DOCS['a2-known-constructors'],
         messages: {
             unknownConstructor:
-                'specification.{{member}} does not exist — the only constructors are specification.api(), specification.jobs(), specification.cli(), specification.website() and specification.mobile() (A2 — see docs/13-linting.md).',
+                'specification.{{member}} does not exist — the only constructors are specification.api(), specification.jobs(), specification.cli(), specification.integration(), specification.website() and specification.mobile() (A2 — see docs/13-linting.md).',
         },
         type: 'problem',
     },

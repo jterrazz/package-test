@@ -147,19 +147,22 @@ test('shows the events feed behind its deep link', async () => {
 });
 ```
 
-Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.fetch()`, `.visit()`, `.open()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
+Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.call()`, `.fetch()`, `.visit()`, `.open()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
 
-## The five constructors
+## The six constructors
 
 One constructor per tested interface, each returning a record destructured with its canonical name:
 
-| Constructor                       | Returns                                  | Terminal actions                                             |
-| --------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
-| `specification.api(options)`      | `{ api, cleanup, docker, orchestrator }` | `.request(file)`, `.get()`, `.post()`, `.put()`, `.delete()` |
-| `specification.jobs(options)`     | `{ jobs, cleanup, orchestrator }`        | `.trigger(name)`                                             |
-| `specification.cli(bin, options)` | `{ cli, cleanup, docker, orchestrator }` | `.exec(args, { waitFor?, timeout? }?)`                       |
-| `specification.website(options)`  | `{ website, cleanup, url }`              | `.fetch(path)`, `.visit(path, scenario?)`                    |
-| `specification.mobile(options)`   | `{ mobile, cleanup, udid }`              | `.open(deepLink?, scenario?)`                                |
+| Constructor                        | Returns                                  | Terminal actions                                             |
+| ---------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
+| `specification.api(options)`       | `{ api, cleanup, docker, orchestrator }` | `.request(file)`, `.get()`, `.post()`, `.put()`, `.delete()` |
+| `specification.jobs(options)`      | `{ jobs, cleanup, orchestrator }`        | `.trigger(name)`                                             |
+| `specification.cli(bin, options)`  | `{ cli, cleanup, docker, orchestrator }` | `.exec(args, { waitFor?, timeout? }?)`                       |
+| `specification.integration(opts?)` | `{ integration, cleanup }`               | `.call((services) => …)`                                     |
+| `specification.website(options)`   | `{ website, cleanup, url }`              | `.fetch(path)`, `.visit(path, scenario?)`                    |
+| `specification.mobile(options)`    | `{ mobile, cleanup, udid }`              | `.open(deepLink?, scenario?)`                                |
+
+A rendered component has no constructor: it starts nothing, so it is reached through the `component` chain directly (docs/16).
 
 ### `specification.api({ services, server, mode?, root? })`
 
@@ -461,7 +464,7 @@ import { mockOf, mockOfDate } from '@jterrazz/test';
 Normative rules live in the constitution ([docs/12-conventions.md](docs/12-conventions.md)); the generated per-rule catalogue is [docs/13-linting.md](docs/13-linting.md). A facet (`specs/<facet>/`) carries its runner(s) at its root and holds domain folders; the folder follows the assets:
 
 ```
-specs/<facet>/                  # api | jobs | cli | integrations | lint
+specs/<facet>/                  # api | jobs | cli | integration | website | mobile
 ├── <facet>.specification.ts    # runner(s) at the facet ROOT (rule C1)
 └── <domain>/                   # a product command/area — 1..n test files
     ├── <aspect>.test.ts

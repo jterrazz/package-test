@@ -20,7 +20,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
-        // Integration deep import from OUTSIDE specs/integrations.
+        // Integration deep import from OUTSIDE specs/seams.
         {
             code: 'import { postgres } from "../../src/integrations/postgres/postgres.js";',
             errors: 1,
@@ -65,7 +65,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
         // Sanctioned: integration specs deep-import the adapter they cover.
         {
             code: 'import { redis } from "../../../src/integrations/redis/redis.js";',
-            filename: '/repo/specs/integrations/redis/redis.test.ts',
+            filename: '/repo/specs/seams/redis/redis.test.ts',
         },
         // Every subpath the package's own `exports` map publishes is exempt.
         {
