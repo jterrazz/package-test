@@ -68,6 +68,13 @@ export type RuleDoc = {
     /** The French normative sentence (the constitution's per-rule text, moved here). */
     convention: string;
     /**
+     * One imperative line: what to DO about it. A ban with no destination is an
+     * argument rather than a rule, so the catalogue and the message carry the
+     * same fix. Rows written before the field exists leave it absent; the whole
+     * catalogue carries one with the rule wave.
+     */
+    fix?: string;
+    /**
      * The specification facet the rule guards — segments the catalogue like
      * the constructors segment the API. `'shared'` for cross-facet rules.
      */
@@ -78,6 +85,21 @@ export type RuleDoc = {
     id: string;
     /** One line: why the rule exists. */
     rationale: string;
+    /**
+     * Which files the rule looks at — the vocabulary of `roleOf` plus the two
+     * shapes that are not a role (`tests`, everything the conventions bind, and
+     * `all`). Absent where the row predates the field.
+     */
+    reach?:
+        | 'all'
+        | 'component'
+        | 'config'
+        | 'document'
+        | 'ground'
+        | 'module'
+        | 'specification'
+        | 'specs'
+        | 'tests';
 };
 
 /** Rule metadata (the subset we set). */

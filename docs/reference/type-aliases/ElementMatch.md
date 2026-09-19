@@ -5,7 +5,7 @@
 type ElementMatch = object;
 ```
 
-Defined in: [specification/ports/browser.port.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L50)
+Defined in: src/specification/ports/browser.port.ts:74
 
 One candidate captured when a descriptor matched more than one element —
 the evidence the ambiguity error enumerates so the author can disambiguate
@@ -19,7 +19,7 @@ without opening a browser.
 optional context?: string;
 ```
 
-Defined in: [specification/ports/browser.port.ts:52](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L52)
+Defined in: src/specification/ports/browser.port.ts:76
 
 Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 
@@ -31,7 +31,7 @@ Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 optional detail?: string;
 ```
 
-Defined in: [specification/ports/browser.port.ts:54](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L54)
+Defined in: src/specification/ports/browser.port.ts:78
 
 The attribute that disambiguates most — `href` for links, `name` for fields.
 
@@ -43,7 +43,7 @@ The attribute that disambiguates most — `href` for links, `name` for fields.
 tag: string;
 ```
 
-Defined in: [specification/ports/browser.port.ts:56](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L56)
+Defined in: src/specification/ports/browser.port.ts:80
 
 Tag name, lower-cased.
 
@@ -55,6 +55,6 @@ Tag name, lower-cased.
 text: string;
 ```
 
-Defined in: [specification/ports/browser.port.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L58)
+Defined in: src/specification/ports/browser.port.ts:82
 
 Text content, whitespace-collapsed and truncated.

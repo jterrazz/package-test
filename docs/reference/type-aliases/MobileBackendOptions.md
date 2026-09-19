@@ -5,7 +5,7 @@
 type MobileBackendOptions = object;
 ```
 
-Defined in: [specification/facets/mobile/start-mobile.ts:20](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L20)
+Defined in: src/specification/facets/mobile/start-mobile.ts:20
 
 The declared stub backend behind the app under test. The framework owns
 the simulator and appium but NOT the JS bundler (Metro belongs to the
@@ -21,7 +21,7 @@ own bundler env.
 optional port?: number;
 ```
 
-Defined in: [specification/facets/mobile/start-mobile.ts:26](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/mobile/start-mobile.ts#L26)
+Defined in: src/specification/facets/mobile/start-mobile.ts:26
 
 Fixed port — pins a stable stub URL across runs. Metro inlines
 `EXPO_PUBLIC_*` values at bundle-serve time; a stable port lets a warm

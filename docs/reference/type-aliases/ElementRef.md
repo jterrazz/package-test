@@ -5,7 +5,7 @@
 type ElementRef = object;
 ```
 
-Defined in: [specification/ports/browser.port.ts:28](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L28)
+Defined in: src/specification/ports/browser.port.ts:46
 
 A user-facing element descriptor — pure data, built by the element
 vocabulary (`button()`, `link()`, `field()`, …) and translated into
@@ -23,11 +23,25 @@ A descriptor must designate exactly ONE element at action time; see
 optional exact?: boolean;
 ```
 
-Defined in: [specification/ports/browser.port.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L34)
+Defined in: src/specification/ports/browser.port.ts:52
 
 Match the accessible name as a whole string rather than a substring.
 Default (`false`) mirrors playwright: `link('Articles')` also matches
 "Read Articles".
+
+***
+
+### focused?
+
+```ts
+optional focused?: boolean;
+```
+
+Defined in: src/specification/ports/browser.port.ts:58
+
+Assert about the element's FOCUS rather than its presence — built by
+`focused(element)`. The accessibility tree carries no focus state, so
+where the keyboard is cannot be goldened; it is asserted by a verb.
 
 ***
 
@@ -37,7 +51,7 @@ Default (`false`) mirrors playwright: `link('Articles')` also matches
 kind: ElementKind | LandmarkKind;
 ```
 
-Defined in: [specification/ports/browser.port.ts:35](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L35)
+Defined in: src/specification/ports/browser.port.ts:59
 
 ***
 
@@ -47,7 +61,7 @@ Defined in: [specification/ports/browser.port.ts:35](https://github.com/jterrazz
 optional name?: string;
 ```
 
-Defined in: [specification/ports/browser.port.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L37)
+Defined in: src/specification/ports/browser.port.ts:61
 
 Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 
@@ -59,7 +73,7 @@ Landmarks may be anonymous (`main()`, `banner()`); everything else is named.
 optional scope?: ElementRef;
 ```
 
-Defined in: [specification/ports/browser.port.ts:42](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L42)
+Defined in: src/specification/ports/browser.port.ts:66
 
 Restrict the search to the elements of another descriptor — built by
 `within(scope, target)`. Chains: a scope may itself carry a scope.

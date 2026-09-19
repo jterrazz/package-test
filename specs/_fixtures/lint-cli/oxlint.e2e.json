@@ -2,7 +2,9 @@
     "categories": {
         "correctness": "off"
     },
-    "jsPlugins": ["../../../dist/oxlint.js"],
+    "jsPlugins": [
+        "../../../dist/oxlint.js"
+    ],
     "rules": {
         "jterrazz/a1-specification-file": "error",
         "jterrazz/a10-duplicate-binding": "error",
@@ -17,7 +19,9 @@
         "jterrazz/b5-await-using": [
             "error",
             {
-                "runners": ["dockerCli"]
+                "runners": [
+                    "dockerCli"
+                ]
             }
         ],
         "jterrazz/b6w-redundant-env-url": "warn",
@@ -32,25 +36,43 @@
         "jterrazz/c6-tomatch-extension": "error",
         "jterrazz/c7-seeds-sql-only": "error",
         "jterrazz/c8-referenced-fixture-exists": "error",
+        "jterrazz/d12w-response-body-probe": "warn",
+        "jterrazz/d13w-unfrozen-negative-fixture": "warn",
+        "jterrazz/d15w-status-only-probe": "warn",
         "jterrazz/d2-await-io-matcher": "error",
         "jterrazz/d2w-await-sync-matcher": "warn",
         "jterrazz/d6w-transform-token-equivalent": "warn",
         "jterrazz/d8w-text-bypass": "warn",
         "jterrazz/d9w-single-use-ref": "warn",
-        "jterrazz/d12w-response-body-probe": "warn",
-        "jterrazz/d13w-unfrozen-negative-fixture": "warn",
-        "jterrazz/d15w-status-only-probe": "warn",
+        "jterrazz/e5-no-simulated-dom": "error",
+        "jterrazz/e5b-no-simulated-dom-config": "error",
+        "jterrazz/e6-component-project-helper": "error",
         "jterrazz/f1-no-subpath-import": "error",
         "jterrazz/f2-no-test-imports-in-prod": "error",
         "jterrazz/f3-specs-public-entry": "error",
         "jterrazz/f4-no-test-to-test-import": "error",
         "jterrazz/f5-fixtures-only-from-tests": "error",
+        "jterrazz/f6-no-foreign-test-runtime": "error",
+        "jterrazz/g4-no-dom-in-module-test": "error",
         "jterrazz/i1-layer-boundaries": [
             "error",
             {
                 "layers": {
-                    "core": { "imports": ["core/"] },
-                    "integrations": { "folders": { "postgres": ["pg"] }, "imports": ["core/"] }
+                    "core": {
+                        "imports": [
+                            "core/"
+                        ]
+                    },
+                    "integrations": {
+                        "folders": {
+                            "postgres": [
+                                "pg"
+                            ]
+                        },
+                        "imports": [
+                            "core/"
+                        ]
+                    }
                 }
             }
         ],

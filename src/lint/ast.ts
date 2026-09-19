@@ -175,14 +175,6 @@ export function walk(root: AstNode, visit: (node: AstNode) => void): void {
     }
 }
 
-function isNode(value: unknown): value is AstNode {
-    return (
-        typeof value === 'object' &&
-        value !== null &&
-        typeof (value as { type?: unknown }).type === 'string'
-    );
-}
-
 /** The source start offset of a node or comment (oxlint `start`, else `range[0]`). */
 export function nodeStart(node: undefined | { range?: unknown; start?: unknown }): number {
     if (node === undefined) {
@@ -274,4 +266,35 @@ export function importSourceVisitor(
         ImportDeclaration: fromSourceField,
         ImportExpression: fromSourceField,
     };
+}
+
+/** Is this value an AST node — an object carrying a `type` string? */
+export function isNode(value: unknown): value is AstNode {
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        'type' in value &&
+        typeof value.type === 'string'
+    );
+}
+
+/**
+ * A node's child by key, or `undefined` when the key holds something else.
+ *
+ * Every rule reaches for `node.parent`, `node.id`, `node.value`; the node shape
+ * types them as `unknown`, so each reach was an assertion of its own. One
+ * guarded read is the same answer, checked once.
+ */
+export function child(node: AstNode | undefined, key: string): AstNode | undefined {
+    const value = node?.[key];
+    return isNode(value) ? value : undefined;
+}
+
+/** The name of an identifier node, or `undefined` for anything else. */
+export function identifierName(node: AstNode | undefined): string | undefined {
+    if (node?.type !== 'Identifier') {
+        return undefined;
+    }
+    const { name } = node;
+    return typeof name === 'string' ? name : undefined;
 }

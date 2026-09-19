@@ -5,7 +5,7 @@
 type CliOutput = object;
 ```
 
-Defined in: [specification/ports/cli.port.ts:4](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/cli.port.ts#L4)
+Defined in: src/specification/ports/cli.port.ts:4
 
 Raw output from a command execution, including exit code and captured output streams.
 
@@ -17,7 +17,7 @@ Raw output from a command execution, including exit code and captured output str
 exitCode: number;
 ```
 
-Defined in: [specification/ports/cli.port.ts:6](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/cli.port.ts#L6)
+Defined in: src/specification/ports/cli.port.ts:6
 
 Process exit code (0 = success).
 
@@ -29,7 +29,7 @@ Process exit code (0 = success).
 stderr: string;
 ```
 
-Defined in: [specification/ports/cli.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/cli.port.ts#L10)
+Defined in: src/specification/ports/cli.port.ts:10
 
 Captured standard error.
 
@@ -41,6 +41,6 @@ Captured standard error.
 stdout: string;
 ```
 
-Defined in: [specification/ports/cli.port.ts:8](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/cli.port.ts#L8)
+Defined in: src/specification/ports/cli.port.ts:8
 
 Captured standard output.

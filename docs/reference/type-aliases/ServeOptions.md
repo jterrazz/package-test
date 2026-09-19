@@ -5,7 +5,7 @@
 type ServeOptions = object;
 ```
 
-Defined in: [specification/facets/website/serve.adapter.ts:11](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L11)
+Defined in: src/specification/facets/website/serve.adapter.ts:11
 
 Options for a local server started by the framework.
 
@@ -17,7 +17,7 @@ Options for a local server started by the framework.
 command: string;
 ```
 
-Defined in: [specification/facets/website/serve.adapter.ts:13](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L13)
+Defined in: src/specification/facets/website/serve.adapter.ts:13
 
 Shell command that starts the site. Receives the chosen port as `PORT`.
 
@@ -29,7 +29,7 @@ Shell command that starts the site. Receives the chosen port as `PORT`.
 optional port?: number;
 ```
 
-Defined in: [specification/facets/website/serve.adapter.ts:15](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L15)
+Defined in: src/specification/facets/website/serve.adapter.ts:15
 
 Fixed port. Default: an OS-assigned free port, injected as `PORT`.
 
@@ -41,7 +41,7 @@ Fixed port. Default: an OS-assigned free port, injected as `PORT`.
 optional ready?: RegExp | string;
 ```
 
-Defined in: [specification/facets/website/serve.adapter.ts:27](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L27)
+Defined in: src/specification/facets/website/serve.adapter.ts:27
 
 How readiness is observed. Two forms:
 
@@ -61,6 +61,6 @@ How readiness is observed. Two forms:
 optional timeout?: number;
 ```
 
-Defined in: [specification/facets/website/serve.adapter.ts:29](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/serve.adapter.ts#L29)
+Defined in: src/specification/facets/website/serve.adapter.ts:29
 
 Readiness budget in milliseconds. Default 30 000.

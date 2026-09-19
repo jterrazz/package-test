@@ -6,7 +6,10 @@ import type { CatalogEntry } from './manifest.js';
  * FROM `manifest.ts` (the source of truth) into two committed projections:
  *
  * - the full four-channel catalogue inside `docs/13-linting.md`, spliced between
- *   GENERATED markers ({@link spliceCatalog}) — grouped by convention family;
+ *   GENERATED markers ({@link spliceCatalog}) — grouped by convention family,
+ *   each row carrying what it REACHES and the one imperative line that FIXES it
+ *   where the row states them (a ban with no destination is an argument, not a
+ *   rule; the whole catalogue carries both after the rule wave);
  * - `skills/jterrazz-test/references/rules.md` — the agent-facing rule reference
  *   ({@link renderRules}).
  *
@@ -83,13 +86,18 @@ function catalogueSections(): string[] {
                 entry.id,
                 `\`${entry.name}\``,
                 entry.channel,
+                entry.reach ?? '—',
                 cell(entry.convention),
+                cell(entry.fix ?? '—'),
                 cell(entry.rationale),
             ]);
         return [
             `## ${family} — ${FAMILIES[family] ?? family}`,
             '',
-            ...table(['Code', 'Implementation', 'Channel', 'Convention', 'Rationale'], rows),
+            ...table(
+                ['Code', 'Implementation', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'],
+                rows,
+            ),
         ].join('\n');
     });
 }
@@ -129,11 +137,17 @@ export function renderRules(): string {
         const rows = catalog
             .filter((entry) => entry.family === family)
             .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel])
-            .map((entry) => [entry.id, `\`${entry.name}\``, entry.channel, cell(entry.convention)]);
+            .map((entry) => [
+                entry.id,
+                `\`${entry.name}\``,
+                entry.channel,
+                cell(entry.convention),
+                cell(entry.fix ?? '—'),
+            ]);
         return [
             `## ${family} — ${FAMILIES[family] ?? family}`,
             '',
-            ...table(['Code', 'Implementation', 'Channel', 'Enforces'], rows),
+            ...table(['Code', 'Implementation', 'Channel', 'Enforces', 'Fix'], rows),
         ].join('\n');
     });
 

@@ -5,7 +5,7 @@
 type FileAccessor = object;
 ```
 
-Defined in: [specification/facets/\_common/result/result.ts:13](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/result/result.ts#L13)
+Defined in: src/specification/facets/\_common/result/result.ts:13
 
 Read-only handle to a single file produced by a spec action.
 
@@ -17,7 +17,7 @@ Read-only handle to a single file produced by a spec action.
 readonly content: string;
 ```
 
-Defined in: [specification/facets/\_common/result/result.ts:15](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/result/result.ts#L15)
+Defined in: src/specification/facets/\_common/result/result.ts:15
 
 The UTF-8 text content. Throws if the file does not exist.
 
@@ -29,7 +29,7 @@ The UTF-8 text content. Throws if the file does not exist.
 readonly exists: boolean;
 ```
 
-Defined in: [specification/facets/\_common/result/result.ts:16](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/result/result.ts#L16)
+Defined in: src/specification/facets/\_common/result/result.ts:16
 
 ***
 
@@ -39,7 +39,7 @@ Defined in: [specification/facets/\_common/result/result.ts:16](https://github.c
 grep: (pattern) => TextAccessor;
 ```
 
-Defined in: [specification/facets/\_common/result/result.ts:18](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/result/result.ts#L18)
+Defined in: src/specification/facets/\_common/result/result.ts:18
 
 The file text as a [TextAccessor](../classes/TextAccessor.md), keeping only blocks matching `pattern`.
 

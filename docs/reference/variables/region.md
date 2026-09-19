@@ -5,6 +5,6 @@
 const region: LandmarkFactory;
 ```
 
-Defined in: [specification/facets/website/elements.ts:93](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L93)
+Defined in: src/specification/facets/website/elements.ts:92
 
 The `region` landmark — a `<section>` carrying an accessible name.

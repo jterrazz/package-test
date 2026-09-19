@@ -5,7 +5,7 @@
 type SpecStream = object;
 ```
 
-Defined in: [specification/literate/spec-document.ts:98](https://github.com/jterrazz/package-test/blob/main/src/specification/literate/spec-document.ts#L98)
+Defined in: src/specification/literate/spec-document.ts:98
 
 An expected stream: its text, and the first line of that text in the file.
 
@@ -17,7 +17,7 @@ An expected stream: its text, and the first line of that text in the file.
 line: number;
 ```
 
-Defined in: [specification/literate/spec-document.ts:100](https://github.com/jterrazz/package-test/blob/main/src/specification/literate/spec-document.ts#L100)
+Defined in: src/specification/literate/spec-document.ts:100
 
 1-based line the scalar's content starts on — where a token defect is reported.
 
@@ -29,4 +29,4 @@ Defined in: [specification/literate/spec-document.ts:100](https://github.com/jte
 text: string;
 ```
 
-Defined in: [specification/literate/spec-document.ts:101](https://github.com/jterrazz/package-test/blob/main/src/specification/literate/spec-document.ts#L101)
+Defined in: src/specification/literate/spec-document.ts:101

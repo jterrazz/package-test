@@ -5,6 +5,6 @@
 const main: LandmarkFactory;
 ```
 
-Defined in: [specification/facets/website/elements.ts:87](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L87)
+Defined in: src/specification/facets/website/elements.ts:86
 
 The `main` landmark — the primary content of the document.

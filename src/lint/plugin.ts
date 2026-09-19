@@ -38,11 +38,16 @@ import { d9wSingleUseRef } from './rules/d9w-single-use-ref.js';
 import { d12wResponseBodyProbe } from './rules/d12w-response-body-probe.js';
 import { d13wUnfrozenNegativeFixture } from './rules/d13w-unfrozen-negative-fixture.js';
 import { d15wStatusOnlyProbe } from './rules/d15w-status-only-probe.js';
+import { e5NoSimulatedDom } from './rules/e5-no-simulated-dom.js';
+import { e5bNoSimulatedDomConfig } from './rules/e5b-no-simulated-dom-config.js';
+import { e6ComponentProjectHelper } from './rules/e6-component-project-helper.js';
 import { f1NoSubpathImport } from './rules/f1-no-subpath-import.js';
 import { f2NoTestImportsInProd } from './rules/f2-no-test-imports-in-prod.js';
 import { f3SpecsPublicEntry } from './rules/f3-specs-public-entry.js';
 import { f4NoTestToTestImport } from './rules/f4-no-test-to-test-import.js';
 import { f5FixturesOnlyFromTests } from './rules/f5-fixtures-only-from-tests.js';
+import { f6NoForeignTestRuntime } from './rules/f6-no-foreign-test-runtime.js';
+import { g4NoDomInModuleTest } from './rules/g4-no-dom-in-module-test.js';
 import { i1LayerBoundaries } from './rules/i1-layer-boundaries.js';
 import { i2SiblingTestNaming } from './rules/i2-sibling-test-naming.js';
 import { i4NoViMockInSrc } from './rules/i4-no-vi-mock-in-src.js';
@@ -99,11 +104,16 @@ const plugin: LintPlugin = {
         'd12w-response-body-probe': d12wResponseBodyProbe,
         'd13w-unfrozen-negative-fixture': d13wUnfrozenNegativeFixture,
         'd15w-status-only-probe': d15wStatusOnlyProbe,
+        'e5-no-simulated-dom': e5NoSimulatedDom,
+        'e5b-no-simulated-dom-config': e5bNoSimulatedDomConfig,
+        'e6-component-project-helper': e6ComponentProjectHelper,
         'f1-no-subpath-import': f1NoSubpathImport,
         'f2-no-test-imports-in-prod': f2NoTestImportsInProd,
         'f3-specs-public-entry': f3SpecsPublicEntry,
         'f4-no-test-to-test-import': f4NoTestToTestImport,
         'f5-fixtures-only-from-tests': f5FixturesOnlyFromTests,
+        'f6-no-foreign-test-runtime': f6NoForeignTestRuntime,
+        'g4-no-dom-in-module-test': g4NoDomInModuleTest,
         'i1-layer-boundaries': i1LayerBoundaries,
         'i2-sibling-test-naming': i2SiblingTestNaming,
         'i4-no-vi-mock-in-src': i4NoViMockInSrc,

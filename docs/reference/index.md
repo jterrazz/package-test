@@ -26,6 +26,8 @@
 | Interface | Description |
 | ------ | ------ |
 | [CaptureScope](interfaces/CaptureScope.md) | Named captures recorded by `match.ref()` / `{{type#ref}}` placeholders. One scope lives on each spec result — every assertion chained off the same result shares it, and a new chain starts fresh. |
+| [RenderedText](interfaces/RenderedText.md) | A stream captured INSIDE the page. |
+| [RenderResult](interfaces/RenderResult.md) | What a render resolves to — the component as the page saw it, after the scenario ran. |
 
 ## Type Aliases
 
@@ -47,6 +49,10 @@
 | [CliPort](type-aliases/CliPort.md) | - |
 | [CliSpecification](type-aliases/CliSpecification.md) | The `cli` facet — command chain entry handed out by `specification.cli()`. Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS B2) — `{ waitFor?, timeout? }` covers long-running processes. |
 | [CliSpecificationOptions](type-aliases/CliSpecificationOptions.md) | Options for startCli \| specification.cli. |
+| [ComponentChain](type-aliases/ComponentChain.md) | The chain. Every setup returns a new one, so the handle a spec imports never carries the previous test's contracts, wrapper or clock. |
+| [ComponentScenario](type-aliases/ComponentScenario.md) | The behaviour of a render; assertions stay in the Then, on the result (W1). |
+| [ComponentUi](type-aliases/ComponentUi.md) | Represents all of the things React can render. |
+| [ComponentVisitor](type-aliases/ComponentVisitor.md) | The interaction vocabulary a render scenario is handed — the When. |
 | [ContainerPort](type-aliases/ContainerPort.md) | Abstract container interface. Represents a running service (database, cache, etc.) |
 | [Contract](type-aliases/Contract.md) | A declared external interaction: what to match (`request`) and what to reply (`response`), together in one named artifact. Contracts live in TypeScript files under `contracts/` next to the tests that use them, so the business payload (prompts, JSON responses) is visible at a glance while the real HTTP call stays mocked underneath. |
 | [ContractInput](type-aliases/ContractInput.md) | Any accepted contract input: one, a list, or a composite. |
@@ -62,7 +68,8 @@
 | [DeviceScreen](type-aliases/DeviceScreen.md) | The screen captured by a device open — the FINAL state when a scenario ran. The tree is the projected page source; `texts` are the visible labels/values in document order, consecutive duplicates collapsed. |
 | [DeviceTimeouts](type-aliases/DeviceTimeouts.md) | How long a device session waits, in milliseconds. Every field is optional and falls back to the framework's own default, so a runner states only the wait it needs to move — the defaults suit a release build, and a project that drives a DEV build pays for its bundler's cold boot. |
 | [DockerSpecConfig](type-aliases/DockerSpecConfig.md) | Configuration for the docker-aware cli mode. When set on [SpecificationConfig](type-aliases/SpecificationConfig.md), the cli runner generates a test-run id, injects it into the child env under `envVar`, then queries Docker for every container carrying `testRunLabel=<id>` after the command exits. |
-| [ElementKind](type-aliases/ElementKind.md) | The interactive//textual element kinds — what a visitor actually acts on. |
+| [DomMount](type-aliases/DomMount.md) | A vanilla DOM subject: a function handed the container it must fill. Its optional return is the teardown, the way a DOM library states one. |
+| [ElementKind](type-aliases/ElementKind.md) | The interactive/textual element kinds — what a visitor actually acts on. |
 | [ElementMatch](type-aliases/ElementMatch.md) | One candidate captured when a descriptor matched more than one element — the evidence the ambiguity error enumerates so the author can disambiguate without opening a browser. |
 | [ElementOptions](type-aliases/ElementOptions.md) | Options accepted by every named descriptor. |
 | [ElementRef](type-aliases/ElementRef.md) | A user-facing element descriptor — pure data, built by the element vocabulary (`button()`, `link()`, `field()`, …) and translated into concrete locators by the browser integration. CSS/XPath selectors are deliberately not expressible: user-facing elements are the only surface. |
@@ -95,6 +102,7 @@
 | [MockPort](type-aliases/MockPort.md) | Factory signature that creates a deep mock proxy for any interface. |
 | [PostgresOptions](type-aliases/PostgresOptions.md) | - |
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
+| [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
 | [ScreenNode](type-aliases/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
 | [ServeOptions](type-aliases/ServeOptions.md) | Options for a local server started by the framework. |
 | [ServerPort](type-aliases/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
@@ -128,13 +136,16 @@
 | [banner](variables/banner.md) | The `banner` landmark — the page header. |
 | [button](variables/button.md) | A button (or element with the button role), by accessible name. |
 | [complementary](variables/complementary.md) | The `complementary` landmark — an `<aside>`, a sidebar. |
+| [component](variables/component.md) | Present, typed, and refusing — every setup and the terminal action alike. |
 | [content](variables/content.md) | An element containing the given text. |
 | [contentinfo](variables/contentinfo.md) | The `contentinfo` landmark — the page footer. |
+| [dialog](variables/dialog.md) | A modal or non-modal `<dialog>`, by accessible name. A closed one is absent. |
 | [field](variables/field.md) | A form field, by label. |
 | [form](variables/form.md) | The `form` landmark — a form carrying an accessible name. |
 | [heading](variables/heading.md) | A heading, by accessible name. |
 | [http](variables/http.md) | Generic HTTP contract helpers for any URL. The url is absolute (string or RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')` matches that path on ANY origin, which is what an app calling its own backend needs. An optional [HttpContractFilter](type-aliases/HttpContractFilter.md) narrows matching by body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict contracts, CONVENTIONS D7). |
 | [link](variables/link.md) | A link, by accessible name. |
+| [listitem](variables/listitem.md) | An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`. |
 | [main](variables/main.md) | The `main` landmark — the primary content of the document. |
 | [match](variables/match.md) | - |
 | [mockOf](variables/mockOf.md) | Create a deep mock proxy for a given type. Wraps `vitest-mock-extended`'s `mockDeep` for convenient port mocking. |
@@ -142,8 +153,11 @@
 | [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
 | [region](variables/region.md) | The `region` landmark — a `<section>` carrying an accessible name. |
+| [row](variables/row.md) | A row of a table or grid, by the text of its cells. |
 | [search](variables/search.md) | The `search` landmark. |
 | [specification](variables/specification.md) | - |
+| [status](variables/status.md) | A live region announcing a result — `role="status"`, an `<output>`. |
+| [table](variables/table.md) | A table, by its caption or accessible name. |
 
 ## Functions
 
@@ -152,6 +166,7 @@
 | [defineContract](functions/defineContract.md) | Declare one contract. Identity function — its value is the enforced shape and the naming convention: |
 | [defineContracts](functions/defineContracts.md) | Compose contracts into the artifact a test imports — it's contracts all the way down: a composite may extend contracts, lists, and other composites, recursively, order preserved. |
 | [findContainersByLabel](functions/findContainersByLabel.md) | Return all container IDs (running or stopped) that carry `key=value`. |
+| [focused](functions/focused.md) | Where the keyboard is: `see(focused(button('Open')))` asserts the element has focus, `gone(focused(x))` that it does not. |
 | [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
