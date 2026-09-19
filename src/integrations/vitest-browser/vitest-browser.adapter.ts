@@ -1,4 +1,4 @@
-import { expect } from 'vitest';
+import { expect, TestRunner } from 'vitest';
 import { commands, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
@@ -150,6 +150,27 @@ function isGone(locator: Locator, element: ElementRef): boolean {
     return node === null || !node.checkVisibility();
 }
 
+/**
+ * How long `gone()` waits — what is LEFT of the running test's budget.
+ *
+ * Every other verb already gets it: a locator action and `expect.element`
+ * default their timeout to the remaining budget, and only a bare
+ * `expect.poll` falls back to vitest's one second. That second made `gone()`
+ * the one verb that could not outlast a slow answer — a button taken off the
+ * screen when a two-second request returns was "still on the screen".
+ *
+ * The 100ms margin is vitest's own: the poll has to give up just BEFORE the
+ * test does, or the failure is a bare timeout naming no element.
+ */
+function remainingBudget(): number | undefined {
+    const current = TestRunner.getCurrentTest();
+    const started = current?.result?.startTime;
+    if (current === undefined || started === undefined) {
+        return undefined;
+    }
+    return Math.max(current.timeout - (Date.now() - started) - 100, 0);
+}
+
 /** A key name is a key; a single character is typed as itself. */
 function keystroke(key: string): string {
     return key.length > 1 ? `{${key}}` : key;
@@ -194,9 +215,11 @@ export function componentVerbs(surface: MountedSurface): {
                 // Matches" is the commonest way for a thing to be gone. Absence
                 // Is one question — removed, or still there and not shown — and
                 // The poll retries it the same way every other verb retries.
+                const timeout = remainingBudget();
                 await expect
                     .poll(() => isGone(locator, element), {
                         message: `${formatElement(element)} is still on the screen`,
+                        ...(timeout === undefined ? {} : { timeout }),
                     })
                     .toBeTruthy();
             });
