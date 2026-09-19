@@ -5,7 +5,7 @@
 type CliSpecification<DatabaseKey> = object;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:219](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L219)
+Defined in: src/specification/facets/\_common/builder.ts:219
 
 The `cli` facet — command chain entry handed out by `specification.cli()`.
 Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS
@@ -25,7 +25,7 @@ B2) — `{ waitFor?, timeout? }` covers long-running processes.
 env: (env) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:221](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L221)
+Defined in: src/specification/facets/\_common/builder.ts:221
 
 Set environment variables on the child process. `$WORKDIR` expands; `null` unsets.
 
@@ -47,7 +47,7 @@ Set environment variables on the child process. `$WORKDIR` expands; `null` unset
 exec: (args?, options?) => Promise<CliResult>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:240](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L240)
+Defined in: src/specification/facets/\_common/builder.ts:240
 
 Execute the command (or sequence of commands) and resolve with the
 result. Called with no arguments (`cli.exec()`), the binary runs bare —
@@ -74,7 +74,7 @@ timeout.
 fixture: (path) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:229](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L229)
+Defined in: src/specification/facets/\_common/builder.ts:229
 
 Copy a fixture into the working directory before execution. The path is
 feature-local (`<test-dir>/fixtures/<path>`) or, with a `$FIXTURES/`
@@ -100,7 +100,7 @@ directory (or file) is copied under its own name. Chained calls layer.
 run: (file, options?) => Promise<CliResult>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:248](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L248)
+Defined in: src/specification/facets/\_common/builder.ts:248
 
 Run a `<case>.spec.yaml` document — its ground (fixtures, env sets,
 servers) and every run, each asserted — and resolve with the LAST run's
@@ -127,7 +127,7 @@ directory, where the document lives.
 seed: (file, options?) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:231](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L231)
+Defined in: src/specification/facets/\_common/builder.ts:231
 
 Queue a SQL seed file from `_seeds/` to run against a database before the action.
 

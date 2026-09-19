@@ -2,9 +2,25 @@
 # Type Alias: ElementKind
 
 ```ts
-type ElementKind = "button" | "field" | "heading" | "link" | "testId" | "text";
+type ElementKind = 
+  | "button"
+  | "dialog"
+  | "field"
+  | "heading"
+  | "link"
+  | "listitem"
+  | "row"
+  | "status"
+  | "table"
+  | "testId"
+  | "text";
 ```
 
-Defined in: [specification/ports/browser.port.ts:17](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L17)
+Defined in: src/specification/ports/browser.port.ts:24
 
-The interactive//textual element kinds — what a visitor actually acts on.
+The interactive/textual element kinds — what a visitor actually acts on.
+
+`dialog`, `status`, `table`, `row` and `listitem` are ARIA roles like the
+landmarks, but they are not CONTAINERS of a page: they are things a visitor
+reads and acts on, and they are the roles the estate's UI specs were already
+reaching for through `getByRole` or, worse, through `.first()`.

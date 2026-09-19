@@ -5,7 +5,7 @@
 type DeviceScreen = object;
 ```
 
-Defined in: [specification/ports/device.port.ts:83](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L83)
+Defined in: src/specification/ports/device.port.ts:83
 
 The screen captured by a device open — the FINAL state when a scenario
 ran. The tree is the projected page source; `texts` are the visible
@@ -19,7 +19,7 @@ labels/values in document order, consecutive duplicates collapsed.
 texts: string[];
 ```
 
-Defined in: [specification/ports/device.port.ts:84](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L84)
+Defined in: src/specification/ports/device.port.ts:84
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [specification/ports/device.port.ts:84](https://github.com/jterrazz/
 tree: ScreenNode;
 ```
 
-Defined in: [specification/ports/device.port.ts:85](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L85)
+Defined in: src/specification/ports/device.port.ts:85

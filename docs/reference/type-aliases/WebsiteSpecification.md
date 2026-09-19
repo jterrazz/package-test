@@ -5,7 +5,7 @@
 type WebsiteSpecification = object;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:257](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L257)
+Defined in: src/specification/facets/\_common/builder.ts:257
 
 The `website` facet — page chain entry handed out by
 `specification.website()`. Setup methods chain; action methods are
@@ -20,7 +20,7 @@ performs one raw HTTP exchange and never follows redirects.
 fetch: (path) => Promise<FetchResult>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:267](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L267)
+Defined in: src/specification/facets/\_common/builder.ts:267
 
 Perform one raw HTTP GET — redirects surface as 3xx results, never followed.
 
@@ -42,7 +42,7 @@ Perform one raw HTTP GET — redirects surface as 3xx results, never followed.
 headers: (headers) => WebsiteSpecification;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:259](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L259)
+Defined in: src/specification/facets/\_common/builder.ts:259
 
 Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls merge.
 
@@ -64,7 +64,7 @@ Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls m
 intercept: InterceptMethod<WebsiteSpecification>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:264](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L264)
+Defined in: src/specification/facets/\_common/builder.ts:264
 
 Declare the chain's backend contracts — served by the declared stub
 backend (requires the runner's `backend` option). Multiple calls append.
@@ -77,7 +77,7 @@ backend (requires the runner's `backend` option). Multiple calls append.
 visit: (path, scenario?) => Promise<PageResult>;
 ```
 
-Defined in: [specification/facets/\_common/builder.ts:273](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L273)
+Defined in: src/specification/facets/\_common/builder.ts:273
 
 Render the page in the shared browser and resolve with the captured
 document. With a scenario, the visitor interacts first (the When) and

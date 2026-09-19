@@ -5,7 +5,7 @@
 type Contract = object;
 ```
 
-Defined in: [specification/contracts/contract.ts:10](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L10)
+Defined in: src/specification/contracts/contract.ts:10
 
 A declared external interaction: what to match (`request`) and what to reply
 (`response`), together in one named artifact. Contracts live in TypeScript
@@ -21,7 +21,7 @@ call stays mocked underneath.
 request: ContractRequest;
 ```
 
-Defined in: [specification/contracts/contract.ts:12](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L12)
+Defined in: src/specification/contracts/contract.ts:12
 
 Which outgoing call this contract speaks for.
 
@@ -33,7 +33,7 @@ Which outgoing call this contract speaks for.
 optional required?: boolean;
 ```
 
-Defined in: [specification/contracts/contract.ts:30](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L30)
+Defined in: src/specification/contracts/contract.ts:30
 
 When true, the chain FAILS unless the contract was actually requested:
 at least once, or exactly `times` times when `times` is set. Turns a
@@ -47,7 +47,7 @@ silently-unused declaration into a spec failure.
 response: ContractResponseValue;
 ```
 
-Defined in: [specification/contracts/contract.ts:18](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L18)
+Defined in: src/specification/contracts/contract.ts:18
 
 The reply — a fixed [ContractResponse](ContractResponse.md), or a function
 `(request) => ContractResponse` evaluated per served request when the
@@ -61,7 +61,7 @@ response must derive from the incoming payload.
 optional times?: number;
 ```
 
-Defined in: [specification/contracts/contract.ts:24](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L24)
+Defined in: src/specification/contracts/contract.ts:24
 
 How many times this contract may serve. Omitted = unlimited (a
 re-render or a retry replays it). `n` = exhausted after n serves, so an

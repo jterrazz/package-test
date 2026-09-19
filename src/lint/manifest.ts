@@ -40,7 +40,9 @@ export const FAMILIES: Record<string, string> = {
     B: 'Chaînes de spec',
     C: 'Fichiers & dossiers',
     D: 'Assertions',
+    E: 'Environnement & configuration',
     F: 'Imports & protection de la prod',
+    G: 'Infrastructure & runtime des tests',
     W: 'Specs website & mobile',
     I: 'Architecture du code source',
     J: 'Hygiène',
@@ -350,6 +352,39 @@ export const RULE_DOCS = {
         rationale:
             'Un statut isolé ne fige que le code de réponse et jette tout le reste du payload ; le golden complet capture la forme entière et sa grammaire de tokens (complète d12w, qui exige un amas de sondes de corps et manque le cas de la sonde de statut solitaire).',
     },
+    'e5-no-simulated-dom': {
+        channel: 'statique',
+        convention:
+            'Un fichier de test ne déclare pas de DOM simulé : la pragma `@vitest-environment happy-dom|jsdom` est une erreur.',
+        family: 'E',
+        fix: 'Déplacer le test à côté de son composant en `.test.tsx` et le faire collecter par le projet `component()`.',
+        id: 'E5',
+        rationale:
+            'Un DOM simulé se comporte PRESQUE comme un navigateur, et ce qui est livré est jugé par un vrai : la facette component rend dans le Chromium que la facette website pilote déjà.',
+        reach: 'tests',
+    },
+    'e5b-no-simulated-dom-config': {
+        channel: 'statique',
+        convention:
+            "Une config vitest ne déclare pas de DOM simulé : `environment: 'happy-dom'|'jsdom'` est une erreur ; `'node'` et `'edge-runtime'` nomment un vrai runtime et restent hors de portée.",
+        family: 'E',
+        fix: 'Supprimer `environment` et collecter le rendu avec `component()` ; les tests de module restent sous node.',
+        id: 'E5b',
+        rationale:
+            'La pragma (E5) n’engage qu’un fichier ; la config engage tout ce que le projet collecte — c’est ainsi qu’un dépôt hérite d’un DOM simulé que personne n’a choisi test par test.',
+        reach: 'config',
+    },
+    'e6-component-project-helper': {
+        channel: 'statique',
+        convention:
+            'Un projet navigateur vient de `component()` : un bloc `browser:` écrit à la main dans une config est une erreur.',
+        family: 'E',
+        fix: 'Remplacer le bloc par `component({ vite })` et ne garder que ce qui appartient au projet.',
+        id: 'E6',
+        rationale:
+            'Le provider épinglé à la version exacte du runner, le service worker servi depuis l’installation du framework, la transformation JSX du Vite courant, le pré-bundling d’un cache froid et les dossiers d’artefacts sont autant de runs qui passent ici et échouent sur la machine suivante.',
+        reach: 'config',
+    },
     'f1-no-subpath-import': {
         channel: 'statique',
         convention:
@@ -392,6 +427,28 @@ export const RULE_DOCS = {
         id: 'F5',
         rationale:
             'Cantonner les fixtures aux tests empêche la donnée de test de fuir dans le code de prod.',
+    },
+    'f6-no-foreign-test-runtime': {
+        channel: 'statique',
+        convention:
+            'Un fichier de test n’importe pas de second runtime de test : `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*` et `@vitest/browser*` sont des erreurs.',
+        family: 'F',
+        fix: 'Passer par la facette qui remplace le seam : `component.render()`, le vocabulaire d’éléments et le visiteur.',
+        id: 'F6',
+        rationale:
+            'Un test qui importe l’adaptateur parle le dialecte de l’adaptateur : un dépôt finit avec autant de vocabulaires que de seams. Les groupes livrés sont ceux que la facette component REMPLACE ; le reste de la famille suit la vague de règles.',
+        reach: 'tests',
+    },
+    'g4-no-dom-in-module-test': {
+        channel: 'statique',
+        convention:
+            'Un test de module ne touche aucun global du DOM : `document`, `window`, `navigator`, `HTMLElement` référencés dans un fichier de rôle `module` sont une erreur.',
+        family: 'G',
+        fix: 'Renommer le test en `.test.tsx` à côté du composant qu’il rend, et le faire collecter par `component()`.',
+        id: 'G4',
+        rationale:
+            'Un test de module tourne sous node, où `document` n’existe pas : un test qui en réclame un ne teste pas un module, il rend quelque chose — et il a désormais un endroit où aller.',
+        reach: 'module',
     },
     'i1-layer-boundaries': {
         channel: 'statique',
@@ -819,14 +876,23 @@ function sortKey(entry: CatalogEntry): [string, number, string] {
  * number, then variant/name. The generator and the freshness meta-test both
  * consume this, so a stable order keeps generated output byte-identical.
  */
-const statiqueEntries: CatalogEntry[] = Object.entries(RULE_DOCS).map(([name, doc]) => ({
-    channel: doc.channel,
-    convention: doc.convention,
-    family: doc.family,
-    id: doc.id,
-    name,
-    rationale: doc.rationale,
-}));
+const statiqueEntries: CatalogEntry[] = Object.entries(RULE_DOCS).map(([name, doc]) => {
+    const entry: CatalogEntry = {
+        channel: doc.channel,
+        convention: doc.convention,
+        family: doc.family,
+        id: doc.id,
+        name,
+        rationale: doc.rationale,
+    };
+    if ('fix' in doc) {
+        entry.fix = doc.fix;
+    }
+    if ('reach' in doc) {
+        entry.reach = doc.reach;
+    }
+    return entry;
+});
 
 export const catalog: CatalogEntry[] = [
     ...statiqueEntries,

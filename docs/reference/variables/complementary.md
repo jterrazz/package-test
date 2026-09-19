@@ -5,6 +5,6 @@
 const complementary: LandmarkFactory;
 ```
 
-Defined in: [specification/facets/website/elements.ts:78](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L78)
+Defined in: src/specification/facets/website/elements.ts:77
 
 The `complementary` landmark — an `<aside>`, a sidebar.
