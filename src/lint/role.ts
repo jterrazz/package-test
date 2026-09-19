@@ -1,4 +1,7 @@
+import { basename, dirname, join } from 'node:path';
+
 import { isUnderSpecs, segments } from './ast.js';
+import { isFile } from './fs-cache.js';
 
 /**
  * What KIND of file a rule is looking at, decided from its path alone.
@@ -7,19 +10,35 @@ import { isUnderSpecs, segments } from './ast.js';
  * a line, and what makes a rendered component reachable by the rules that should
  * see it and invisible to the ones that should not.
  *
- * The vocabulary is the set of kinds the rules of this release tell apart, and
- * no more. There is no `spec` role yet, so `module` covers every `.test.ts`,
- * including those under `specs/`; a rule that must not reach a product spec
- * reads `inSpecs` beside the role.
+ * The SUFFIX decides the kind, and nothing else: `.test.ts` beside a module,
+ * `.test.tsx` beside a component, `.spec.ts` under `specs/`, `.spec.yaml` for a
+ * document, `.specification.ts(x)` for the file that builds a runner. A rule
+ * reads the three fields this module returns and NOTHING else of the path — the
+ * gates that used to probe for a `src` or a `specs` segment disagreed with each
+ * other and with the project that actually runs the file.
  */
 
-/** The kinds this release tells apart. */
-export type FileRole = 'component' | 'config' | 'ground' | 'module' | 'other' | 'specification';
+/** The kinds the catalogue tells apart. */
+export type FileRole =
+    | 'component'
+    | 'config'
+    | 'contract'
+    | 'document'
+    | 'ground'
+    | 'module'
+    | 'other'
+    | 'spec'
+    | 'specification';
+
+/** A test root the conventions retired — `roleOf` names it so I2 can refuse it. */
+export type LegacyDir = '__tests__' | 'tests' | null;
 
 /** What a rule reads about the file it was handed. */
 export type FileIdentity = {
     /** Is an ancestor directory named `specs`? */
     inSpecs: boolean;
+    /** The retired test root this path sits under, when it does. */
+    legacyDir: LegacyDir;
     /** The kind the path states. */
     role: FileRole;
 };
@@ -31,39 +50,101 @@ const GROUND = new Set(['_expected', '_fixtures', '_requests', '_seeds']);
 const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
 
 /**
+ * The retired test root this path sits under.
+ *
+ * `__tests__/` is retired wherever it appears. A `tests/` directory is only the
+ * retired ROOT when it sits directly under a package — a `tests` segment deeper
+ * in a tree is an ordinary domain name, and a checkout living under `~/tests/`
+ * is nobody's business but the filesystem's.
+ */
+function legacyDirOf(parts: string[]): LegacyDir {
+    if (parts.slice(0, -1).includes('__tests__')) {
+        return '__tests__';
+    }
+    const testsIndex = parts.indexOf('tests');
+    if (testsIndex > 0 && isFile(`/${parts.slice(0, testsIndex).join('/')}/package.json`)) {
+        return 'tests';
+    }
+    return null;
+}
+
+/**
  * The kind of file this path names.
  *
  * The suffix decides, and the order matters: a `*.specification.ts` is a
- * specification wherever it sits, ground swallows anything under it that is not
- * a test of its own module, and `.tsx` versus `.ts` is what tells a RENDERED
- * unit from a plain one — the same distinction the two project helpers collect
- * on, so a file is judged by the rules of the project that actually runs it.
+ * specification wherever it sits, `.spec.*` is the assembled product's word and
+ * `.test.*` the unit's, `.tsx` versus `.ts` is what tells a RENDERED unit from a
+ * plain one — the same distinction the two project helpers collect on, so a file
+ * is judged by the rules of the project that actually runs it. Ground swallows
+ * only what carries no suffix of its own.
  */
 export function roleOf(filename: string): FileIdentity {
     const parts = segments(filename);
     const base = parts.at(-1) ?? '';
-    const inSpecs = isUnderSpecs(filename);
+    const identity = { inSpecs: isUnderSpecs(filename), legacyDir: legacyDirOf(parts) };
 
     if (base.endsWith('.specification.ts') || base.endsWith('.specification.tsx')) {
-        return { inSpecs, role: 'specification' };
+        return { ...identity, role: 'specification' };
     }
-    if (CONFIG.test(base)) {
-        return { inSpecs, role: 'config' };
+    if (base.endsWith('.spec.yaml')) {
+        return { ...identity, role: 'document' };
+    }
+    if (base.endsWith('.spec.ts')) {
+        return { ...identity, role: 'spec' };
     }
     if (base.endsWith('.test.tsx')) {
-        return { inSpecs, role: 'component' };
+        return { ...identity, role: 'component' };
     }
     if (base.endsWith('.test.ts')) {
-        return { inSpecs, role: 'module' };
+        return { ...identity, role: 'module' };
+    }
+    if (CONFIG.test(base)) {
+        return { ...identity, role: 'config' };
     }
     if (parts.slice(0, -1).some((segment) => GROUND.has(segment))) {
-        return { inSpecs, role: 'ground' };
+        return { ...identity, role: 'ground' };
     }
-    return { inSpecs, role: 'other' };
+    if (parts.slice(0, -1).includes('contracts')) {
+        return { ...identity, role: 'contract' };
+    }
+    return { ...identity, role: 'other' };
+}
+
+/** The roles that ARE a test — what a rule reaching "every test file" means. */
+const TEST_ROLES = new Set<FileRole>(['component', 'module', 'spec']);
+
+/** Is this one of the three files that DECLARE tests? */
+export function isTestRole(role: FileRole): boolean {
+    return TEST_ROLES.has(role);
 }
 
 /** Is this a file the test conventions reach — a test, or anything under `specs/`? */
 export function isTestFile(filename: string): boolean {
     const { inSpecs, role } = roleOf(filename);
-    return role === 'component' || role === 'module' || role === 'specification' || inSpecs;
+    return isTestRole(role) || role === 'specification' || role === 'document' || inSpecs;
+}
+
+/** The directory the file sits in — what a layout pass walks from. */
+export function directoryOf(filename: string): string {
+    return dirname(filename);
+}
+
+/** The nearest package root at or above a directory, when there is one. */
+export function packageRootOf(directory: string): string | undefined {
+    let current = directory;
+    for (;;) {
+        if (isFile(join(current, 'package.json'))) {
+            return current;
+        }
+        const parent = dirname(current);
+        if (parent === current) {
+            return undefined;
+        }
+        current = parent;
+    }
+}
+
+/** The basename, for the one message that names the neighbour a test wants. */
+export function baseNameOf(filename: string): string {
+    return basename(filename);
 }

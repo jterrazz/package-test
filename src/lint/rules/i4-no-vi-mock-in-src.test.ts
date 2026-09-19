@@ -13,6 +13,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 const SRC_TEST = '/repo/src/specification/matching/match.test.ts';
+const SPEC = '/repo/specs/cli/exec/exec.spec.ts';
 
 ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule, {
     invalid: [
@@ -41,6 +42,9 @@ ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule,
             errors: [{ messageId: 'assetImport' }],
             filename: SRC_TEST,
         },
+        // A spec under specs/ is a test too: module mocking is banned there as
+        // Well — the reach is every test file, not the src/ tree.
+        { code: 'vi.mock("./x.js");', errors: [{ messageId: 'viMock' }], filename: SPEC },
         // Banned directories.
         {
             code: 'export {};',
@@ -70,7 +74,8 @@ ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule,
             code: 'import data from "./payload.json";',
             filename: '/repo/src/specification/config.ts',
         },
-        // Outside src/ the rule is inert (specs read real files by design).
-        { code: 'vi.mock("./x.js");', filename: '/repo/specs/cli/exec/exec.test.ts' },
+        // A spec under specs/ reads real files by design — the asset clause is
+        // The module role's alone.
+        { code: 'import seed from "./_seeds/users.sql";', filename: SPEC },
     ],
 });

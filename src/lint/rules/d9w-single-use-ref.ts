@@ -1,12 +1,11 @@
 import { dirname, join } from 'node:path';
 
 import { GROUND_EXPECTED } from '../../specification/facets/_common/ground.js';
-import { memberPropertyName, segments, stringValue, walk } from '../ast.js';
+import { memberPropertyName, stringValue, walk } from '../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
-
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 /** A captured-ref token: `{{kind#ref}}`. Captures the ref name. */
 const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/gu;
@@ -55,7 +54,8 @@ function refsInFixture(target: string): string[] {
 export const d9wSingleUseRef: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        if (!TEST_FILE.test(file) || !segments(file).includes('specs')) {
+        const { inSpecs, role } = roleOf(file);
+        if (!isTestRole(role) || !inSpecs) {
             return {};
         }
         const featureDir = dirname(file);

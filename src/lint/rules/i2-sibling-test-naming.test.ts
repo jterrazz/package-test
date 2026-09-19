@@ -13,7 +13,11 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-// The fs-anchored cases run against the shared E2E fixture trees.
+// The fs-anchored cases run against the shared E2E fixture trees. Each one
+// Carries its own package.json: that is what makes its `src/` tree sit OUTSIDE
+// A specs tree, which is the half of I2's orphan clause that reads `inSpecs`.
+// The guard on the `tests/` clause — a `tests` segment with no package above it
+// Is an ordinary folder name — is `roleOf`'s, and `role.test.ts` holds it.
 const FIXTURES = resolve(import.meta.dirname, '../../../specs/_fixtures/lint-violations');
 // The repo root DOES carry a package.json — the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../..');
@@ -71,11 +75,11 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
             code: 'test("x", () => {});',
             filename: `${FIXTURES}/i2-sibling-test-naming-ok/src/helper.test.ts`,
         },
-        // A tests/ path with NO package.json at its root candidate is not flagged
-        // (the guard prevents matching arbitrary nested `tests/` segments).
+        // A REPOSITORY suite: a module-role test under a specs/ tree covers a
+        // Tree, not one module — the orphan clause requires `!inSpecs`.
         {
-            code: 'export {};',
-            filename: '/no-such-root-xyz/tests/foo.test.ts',
+            code: 'test("x", () => {});',
+            filename: `${FIXTURES}/i2-repository-suite/specs/build/a.test.ts`,
         },
     ],
 });

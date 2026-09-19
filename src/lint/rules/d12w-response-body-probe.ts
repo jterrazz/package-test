@@ -1,5 +1,6 @@
-import { findTestCallback, isTestCallee, memberPropertyName, segments, walk } from '../ast.js';
+import { findTestCallback, isTestCallee, memberPropertyName, walk } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
+import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 type Options = { threshold?: number };
@@ -47,8 +48,7 @@ function unwrap(node: AstNode | undefined): AstNode | undefined {
  */
 export const d12wResponseBodyProbe: LintRule = {
     create(context: RuleContext): Visitor {
-        const parts = segments(context.filename);
-        if (!parts.includes('specs')) {
+        if (!isTestRole(roleOf(context.filename).role)) {
             return {};
         }
         const threshold =
