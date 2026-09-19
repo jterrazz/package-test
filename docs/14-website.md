@@ -31,24 +31,45 @@ export const { cleanup, website } = await specification.website({
 
 | Option     | Description                                                                                                                                                                 |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server`   | `{ command, ready?, port?, timeout? }` — start the site as a child process. Exactly one of `server` / `url`                                                                 |
+| `server`   | How the site is started locally: a `process()`, the `ProcessOptions` object itself, or `(services) => …` returning either. Exactly one of `server` / `url`                  |
 | `url`      | Target an already-running site (deployed, preview, dev server). Exactly one of `server` / `url`                                                                             |
+| `services` | A named record started BEFORE the site and stopped with it — a database it reads, a `process()` backend it calls. See [Services beside the site](#services-beside-the-site) |
 | `backend`  | `{ env, port? }` — start a declared stub backend and inject its URL into the server child. Requires `server` mode — see [Declared backend](#declared-backend)               |
 | `external` | `'allow' \| 'block'` — cross-origin policy for `.visit()`. Default `'block'` with `server`, `'allow'` with `url` — see [Cross-origin policy](#cross-origin-policy-external) |
 | `root`     | **Project-root override** (rule A9): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                |
 
-`server` itself takes:
-
-| `server` field | Description                                                                                        |
-| -------------- | -------------------------------------------------------------------------------------------------- |
-| `command`      | Shell command that starts the site. Receives the chosen port as the `PORT` env var                 |
-| `ready`        | Path polled until it answers with any HTTP status — a 404 still counts as "listening". Default `/` |
-| `port`         | Fixed port. Default: a free OS-assigned port, injected as `PORT`                                   |
-| `timeout`      | Readiness budget in milliseconds. Default 30 000                                                   |
+`server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [11 — Services § `process()`](11-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
 
 The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is terminated by process group (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [cli](07-cli.md) exec adapter, so a framework's own child processes don't outlive the run.
 
 The handle destructures to `{ website, cleanup, url }` (rule A3) — no `docker`, no `orchestrator`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
+
+### Services beside the site
+
+A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other facet takes ([11 — Services](11-services.md)) — started before the site, in declaration order, and stopped with the specification.
+
+That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time.
+
+```typescript
+import { postgres, process, specification } from '@jterrazz/test';
+import { afterAll } from 'vitest';
+
+export const { cleanup, website } = await specification.website({
+    server: (services) =>
+        process({
+            command: 'next dev',
+            env: { NEXT_PUBLIC_API_URL: services.api.connectionString },
+        }),
+    services: {
+        api: process({ command: 'bin/server web --port $PORT', ready: '/health' }),
+        db: postgres(),
+    },
+});
+
+afterAll(cleanup);
+```
+
+A declared database is not seeded by the chain — a website chain has no `.seed()`. It is seeded by whatever owns it: the compose service's `init.sql`, or a `before:` command on the `process()` that migrates it.
 
 ## Two terminal actions: `.fetch()` and `.visit()`
 
@@ -477,7 +498,7 @@ specs/website/
         └── http/…
 ```
 
-No `_seeds/` or `_requests/` — `specification.website()` has no `services` option and no request-file format; `.fetch()`/`.visit()` calls are inline, and the golden is always `_expected/<name>`.
+No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `_expected/<name>`.
 
 ## Pitfalls
 
