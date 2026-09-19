@@ -170,7 +170,23 @@ test('stamps the moment the receipt was issued', () => {
 | `clock.run(iso?)`   | the calendar and the scheduler | a subject whose behaviour IS elapsed time — a debounce, a backoff, a poll  |
 | `clock.advance(ms)` | —                              | moving the pinned clock on; under `run()`, firing everything that came due |
 
-Both forms are `Disposable`: `using _ = clock.at(…)` releases at the end of the scope, however the scope ends. `at()` leaves the scheduler real, so promises, renders and the framework's own loops keep running; `run()` queues them instead, which is what lets a test assert a five-second backoff without the arbitrary sleep J2 forbids.
+Both forms are `Disposable`: `using _ = clock.at(…)` gives the REAL clock back at the end of the scope, however the scope ends. `at()` leaves the scheduler real, so promises, renders and the framework's own loops keep running; `run()` queues them instead, which is what lets a test assert a five-second backoff without the arbitrary sleep J2 forbids.
+
+One clock per test: a second scope taken inside the first is refused, not nested. Disposing restores the real clock — the only state vitest's fake timers can give back — so a nested scope that ended would silently end the outer one too, and the refusal says which of the two the test meant.
+
+Migrating a `beforeEach`/`afterEach` pair holds the `Disposable` by hand:
+
+```typescript
+let pinned: Disposable;
+beforeEach(() => {
+    pinned = clock.at('2026-03-04T09:30:00Z');
+});
+afterEach(() => {
+    pinned[Symbol.dispose]();
+});
+```
+
+That form works, and it is the migration shape rather than the destination: `using _ = clock.at(…)` inside the test states the instant where the test that needs it can be read, and cannot be forgotten.
 
 A facet pins the same instant for the chain it is stated on — `.clock(iso)` on api, jobs, integration, component, and on a website visit (the PAGE's calendar, through the browser). A cli spec is another process: its instant travels through the product's own env (`TZ`) or is absorbed by a `{{iso8601}}` token in the golden.
 
