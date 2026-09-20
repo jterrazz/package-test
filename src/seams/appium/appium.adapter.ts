@@ -6,6 +6,7 @@ import type { remote } from 'webdriverio';
 import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
 import { projectScreen } from '../../facets/mobile/projection.js';
 import { AmbiguousElementError, formatElement } from '../../model/elements/ambiguity.js';
+import { warnSubstringOnly } from '../../model/elements/substring-warning.js';
 import type {
     DeviceOpenOptions,
     DevicePort,
@@ -97,6 +98,25 @@ function compilePredicate(
             );
         }
     }
+}
+
+/**
+ * Every element a predicate designates under `scope`.
+ *
+ * ONE place awaits webdriverio's query: `$$` answers a chainable typed as the
+ * array it resolves to, so the await that makes the array real reads to the
+ * typechecker as an await of a non-promise.
+ */
+async function matching(
+    scope: MatchScope,
+    element: MobileElementRef,
+    options?: { anyVisibility?: boolean },
+): Promise<ElementList> {
+    /* oxlint-disable typescript/await-thenable -- webdriverio's chainable is TYPED as the array it resolves to and is a promise at runtime: the await is what runs the query */
+    /* oxlint-disable typescript/return-await -- same reason: the value returned is a promise, whatever its type says */
+    return await scope.$$(`-ios predicate string:${compilePredicate(element, options)}`);
+    /* oxlint-enable typescript/return-await */
+    /* oxlint-enable typescript/await-thenable */
 }
 
 /** The outside-in scope chain of a descriptor, ending on the target itself. */
@@ -283,10 +303,29 @@ export class AppiumAdapter implements DevicePort {
                 return resolved;
             }
             if (Date.now() > deadline) {
-                throw await this.timeoutError(driver, element, verb);
+                return await this.atDeadline({ cardinality, chain, driver, element, verb });
             }
             await delay(POLL_INTERVAL_MS);
         }
+    }
+
+    /**
+     * What the deadline means: the whole-label match never answered, so the
+     * transitional window gets its one try before the refusal is raised.
+     */
+    private async atDeadline(missed: {
+        cardinality: 'any' | 'one';
+        chain: MobileElementRef[];
+        driver: Driver;
+        element: MobileElementRef;
+        verb: string;
+    }): Promise<DriverElement> {
+        const { cardinality, chain, driver, element, verb } = missed;
+        const widened = await this.widenedForWindow(driver, chain, cardinality);
+        if (widened !== null) {
+            return widened;
+        }
+        throw await this.timeoutError(driver, element, verb);
     }
 
     /** One resolution pass over the chain — `null` means "nothing yet, keep polling". */
@@ -298,9 +337,7 @@ export class AppiumAdapter implements DevicePort {
     ): Promise<DriverElement | null> {
         let scope: MatchScope = driver;
         for (const [index, level] of chain.entries()) {
-            const matches: ElementList = await scope.$$(
-                `-ios predicate string:${compilePredicate(level)}`,
-            );
+            const matches = await matching(scope, level);
             const count = await matches.length;
             if (count === 0) {
                 /*
@@ -309,9 +346,7 @@ export class AppiumAdapter implements DevicePort {
                  * poll re-resolves it as visible on the next pass.
                  */
                 if (options?.tryScroll) {
-                    const offscreen: ElementList = await scope.$$(
-                        `-ios predicate string:${compilePredicate(level, { anyVisibility: true })}`,
-                    );
+                    const offscreen = await matching(scope, level, { anyVisibility: true });
                     const first = offscreen[0];
                     if (first !== undefined) {
                         try {
@@ -344,6 +379,63 @@ export class AppiumAdapter implements DevicePort {
             scope = next;
         }
         return scope as DriverElement;
+    }
+
+    /**
+     * The transitional retry, level by level: a descriptor that designated
+     * nothing as a whole label but designates something as a SUBSTRING is
+     * resolved the old way, once, with the warning that names the label to
+     * write. The window is the vocabulary's, not one surface's — chapter 13 —
+     * so the screen answers it exactly as a page does.
+     *
+     * `null` when nothing would change, which is the ordinary timeout.
+     */
+    private async widenedForWindow(
+        driver: Driver,
+        chain: MobileElementRef[],
+        cardinality: 'any' | 'one',
+    ): Promise<DriverElement | null> {
+        let scope: MatchScope = driver;
+        const widened: MobileElementRef[] = [];
+        let changed = false;
+        /* oxlint-disable eslint/no-await-in-loop -- the chain resolves outside-in: a level can only be looked for inside the scope the level before it resolved to */
+        for (const level of chain) {
+            const found = await this.widenedLevel(scope, level);
+            changed ||= found !== null;
+            const candidate = found ?? level;
+            const matches = await matching(scope, candidate);
+            const next = matches[0];
+            if (next === undefined) {
+                return null;
+            }
+            scope = next;
+            widened.push(candidate);
+        }
+        /* oxlint-enable eslint/no-await-in-loop */
+        return changed ? await this.resolveChain(driver, widened, cardinality) : null;
+    }
+
+    /** One level of the chain, widened and warned about, or `null`. */
+    private async widenedLevel(
+        scope: MatchScope,
+        level: MobileElementRef,
+    ): Promise<MobileElementRef | null> {
+        if (level.exact !== undefined || level.name === undefined) {
+            return null;
+        }
+        const strict = await matching(scope, level);
+        if ((await strict.length) > 0) {
+            return null;
+        }
+        const loose: MobileElementRef = { ...level, exact: false };
+        const matches = await matching(scope, loose);
+        const first = matches[0];
+        if (first === undefined) {
+            return null;
+        }
+        const evidence = await captureMatch(first);
+        warnSubstringOnly(level, this.options.udid, evidence.label);
+        return loose;
     }
 
     /** Enumerate the candidates' evidence, truncated. */

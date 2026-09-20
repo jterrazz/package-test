@@ -2,6 +2,7 @@
 import { describe, expect, test, vi } from 'vitest';
 
 import { button } from '../../model/elements/elements.js';
+import { resetSubstringWarnings } from '../../model/elements/substring-warning.js';
 import { AppiumAdapter } from './appium.adapter.js';
 
 /**
@@ -21,6 +22,11 @@ type Session = { capabilities: Record<string, unknown> };
  * Cast at the seam: the port surface exercised here is the handful of calls
  * below, not webdriverio's full session type.
  */
+function asRemote(stub: unknown): never {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stub implements the handful of calls these tests drive, never webdriverio's whole session type
+    return stub as never;
+}
+
 function stubDriver(): { remote: never; sessions: Session[] } {
     const sessions: Session[] = [];
     const remote = async (options: Session) => {
@@ -41,7 +47,7 @@ function stubDriver(): { remote: never; sessions: Session[] } {
                 await Promise.reject(new Error('no screenshots in the stub')),
         };
     };
-    return { remote: remote as never, sessions };
+    return { remote: asRemote(remote), sessions };
 }
 
 /**
@@ -137,5 +143,73 @@ describe('appium adapter — the declared timeouts', () => {
 
         // Then - the session carries the framework's own default
         expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(240_000);
+    });
+});
+
+/**
+ * A driver whose one button is labelled "Continue to payment" — it answers a
+ * `CONTAINS` predicate and refuses an `==` one, which is exactly the shape the
+ * exact-name default made unreachable.
+ */
+function substringDriver(): { remote: never; state: { taps: number } } {
+    const state = { taps: 0 };
+    const element = {
+        click: async () => {
+            state.taps += 1;
+            await Promise.resolve();
+        },
+        elementId: 'button-1',
+        getAttribute: async (name: string) =>
+            await Promise.resolve(
+                name === 'label' ? 'Continue to payment' : `XCUIElementType${name}`,
+            ),
+        setValue: async () => {
+            await Promise.resolve();
+        },
+    };
+    const remote = async () =>
+        await Promise.resolve({
+            $$: async (selector: string) =>
+                await Promise.resolve(selector.includes('CONTAINS') ? [element] : []),
+            deleteSession: async () => {
+                await Promise.resolve();
+            },
+            executeScript: async () => {
+                await Promise.resolve();
+            },
+            getPageSource: async () =>
+                await Promise.resolve('<XCUIElementTypeApplication name="App" />'),
+            takeScreenshot: async () =>
+                await Promise.reject(new Error('no screenshots in the stub')),
+        });
+    return { remote: asRemote(remote), state };
+}
+
+describe('appium adapter — the transitional window for a name matched in part', () => {
+    test('taps the element the label CONTAINS, and names the label to write', async () => {
+        // Given - a screen whose only button is labelled "Continue to payment", and a scenario naming part of it
+        resetSubstringWarnings();
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const { remote, state } = substringDriver();
+        const adapter = new AppiumAdapter({
+            remote,
+            serverUrl: SERVER_URL,
+            timeouts: { action: 1 },
+            udid: 'SIM-UDID',
+        });
+
+        // When - the whole-label match answers nothing and the deadline passes
+        await adapter.open({
+            bundleId: BUNDLE_ID,
+            scenario: async (visitor) => {
+                await visitor.tap(button('Continue'));
+            },
+        });
+
+        // Then - the tap reached the button through the window, with the one line the author has to act on
+        expect(state.taps).toBe(1);
+        expect(String(warn.mock.calls[0]?.[0])).toContain(
+            "The name to write is 'Continue to payment'",
+        );
     });
 });

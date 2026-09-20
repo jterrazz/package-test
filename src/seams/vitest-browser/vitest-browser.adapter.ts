@@ -7,7 +7,8 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../model/elements/ambiguity.js';
-import { warnSubstringOnly } from '../../model/elements/substring-warning.js';
+import { throughWindow } from '../../model/elements/substring-warning.js';
+import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type { ElementMatch, ElementRef } from '../../model/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
 
@@ -141,6 +142,15 @@ function ambiguousLevel(element: ElementRef): ElementRef {
     return element;
 }
 
+/** What the transitional window may ask of the mounted page. */
+const PROBE: WindowProbe = {
+    count: async (element) => await Promise.resolve(locate(page, element).elements().length),
+    nameOf: async (element) => {
+        const [match] = candidates(locate(page, element));
+        return await Promise.resolve(match?.accessibleName ?? match?.text);
+    },
+};
+
 /**
  * Run one visitor action, turning "more than one match" into the W3 refusal.
  * The ambiguous LEVEL is identified first: a scope matching several landmarks
@@ -155,39 +165,19 @@ export async function act<T>(
     try {
         return await action(locator);
     } catch (error) {
-        if (locator.elements().length <= 1) {
-            reportSubstringOnly(element);
-            throw error;
+        if (locator.elements().length > 1) {
+            const culprit = ambiguousLevel(element);
+            const matches = candidates(locate(page, culprit));
+            const url = globalThis.location.href;
+            throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));
         }
-        const culprit = ambiguousLevel(element);
-        const matches = candidates(locate(page, culprit));
-        const url = globalThis.location.href;
-        throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));
-    }
-}
-
-/**
- * Say so when a descriptor found NOTHING as a whole name but would have found
- * something as a substring — the one shape the whole-name default changes.
- *
- * Asked only on the failure path, and only for a descriptor that stated no
- * `exact` of its own: an author who wrote `{ exact: false }` chose the
- * substring, and one who wrote `{ exact: true }` was already exact.
- */
-function reportSubstringOnly(element: ElementRef): void {
-    if (element.exact !== undefined || element.name === undefined) {
-        return;
-    }
-    try {
-        if (locate(page, element).elements().length > 0) {
-            return;
-        }
-        if (locate(page, { ...element, exact: false }).elements().length > 0) {
-            warnSubstringOnly(element, globalThis.location.href);
-        }
-    } catch {
-        // A descriptor the looser match makes ambiguous is not this warning's
-        // Business, and may not replace the failure the caller is being handed.
+        return await throughWindow({
+            element,
+            failure: error,
+            probe: PROBE,
+            run: async (widened) => await action(locate(page, widened)),
+            where: globalThis.location.href,
+        });
     }
 }
 
