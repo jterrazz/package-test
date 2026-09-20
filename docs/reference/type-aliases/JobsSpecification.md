@@ -5,7 +5,7 @@
 type JobsSpecification<DatabaseKey> = object;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:231](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L231)
+Defined in: [src/specification/facets/\_common/builder.ts:220](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L220)
 
 ## Type Parameters
 
@@ -21,7 +21,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:231](https://github.co
 clock: (iso) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:233](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L233)
+Defined in: [src/specification/facets/\_common/builder.ts:222](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L222)
 
 Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 
@@ -43,7 +43,7 @@ Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:235](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L235)
+Defined in: [src/specification/facets/\_common/builder.ts:224](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L224)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -55,7 +55,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 seed: (file, options?) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:237](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L237)
+Defined in: [src/specification/facets/\_common/builder.ts:226](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L226)
 
 Queue a SQL seed file from `_seeds/` to run before the action.
 
@@ -79,7 +79,7 @@ Queue a SQL seed file from `_seeds/` to run before the action.
 trigger: (name) => Promise<JobsResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:240](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L240)
+Defined in: [src/specification/facets/\_common/builder.ts:229](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L229)
 
 Execute the named job registered via the `jobs` option and resolve with the result.
 

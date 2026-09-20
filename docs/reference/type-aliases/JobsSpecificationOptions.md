@@ -29,7 +29,7 @@ Defined in: [src/specification/facets/jobs/start-jobs.ts:19](https://github.com/
 
 Named jobs triggerable via `jobs.trigger(name)` — a factory receiving
 the started services record, or a static array. Jobs run in-process by
-definition (CONVENTIONS A5/A8) — there is no mode.
+definition (CONVENTIONS A8).
 
 ***
 

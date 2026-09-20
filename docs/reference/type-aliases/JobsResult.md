@@ -5,7 +5,7 @@
 type JobsResult = Omit<BaseResult, "directory" | "file">;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:229](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L229)
+Defined in: [src/specification/facets/\_common/builder.ts:218](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L218)
 
 What a triggered job HANDS BACK.
 

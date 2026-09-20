@@ -2,10 +2,10 @@
 # Type Alias: Intercept
 
 ```ts
-type Intercept = (contracts) => Promise<InterceptScope> & (request, response) => Promise<InterceptScope>;
+type Intercept = (contracts, options?) => Promise<InterceptScope> & (request, response, options?) => Promise<InterceptScope>;
 ```
 
-Defined in: [src/integrations/msw/scope.ts:44](https://github.com/jterrazz/package-test/blob/main/src/integrations/msw/scope.ts#L44)
+Defined in: [src/integrations/msw/scope.ts:58](https://github.com/jterrazz/package-test/blob/main/src/integrations/msw/scope.ts#L58)
 
 The module-scope network double. Resolves once the engine is listening —
 which is why it is a promise, and why the canonical form awaits it:

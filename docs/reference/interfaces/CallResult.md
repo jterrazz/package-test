@@ -7,9 +7,9 @@ The result of an in-process call — the integration facet's whole surface.
 
 Two readings, never both: `value` is what the call RETURNED, `error` is
 what it THREW. A module that refuses is specified the same way a module
-that answers is, and neither needs a `try`/`catch` in the test — which is
-the shape that used to make a refusal spec three times the size of the
-happy one, and the shape that quietly passes when nothing throws at all.
+that answers is, and neither needs a `try`/`catch` in the test — a shape
+that costs a refusal spec three times the size of the happy one, and that
+quietly passes when nothing throws at all.
 
 Both are the package's ordinary accessors, so the golden mechanism reaches
 them, and `Returned` is what `.call<T>()` returned — `result.value.value` is
