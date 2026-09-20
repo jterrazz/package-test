@@ -72,12 +72,21 @@ const pages = {
     // Its text content: the two block children glue to "Experiments9" when read
     // As text and join as "Experiments 9" when the browser computes the name —
     // And the name is what a descriptor matches. The field is named by its
-    // Label alone, which is nowhere in its text at all.
+    // Label alone, which is nowhere in its text at all. The `<h2>` carries the
+    // NEXT page's heading as a substring, so a verb asked while the slow
+    // Navigation is still in flight has something to widen to on the page it
+    // Is leaving — which is the straddle the window must not fall for.
     '/window': `<!doctype html><html lang="en"><head>${head('Fixture — Window', '/window')}
     </head><body><h1>Window</h1><main>
     <button type="button"><span style="display:block">Experiments</span><span style="display:block">9</span></button>
     <label for="journal">Journal entry</label><input id="journal" type="text">
+    <h2>All articles, in one place</h2>
+    <a href="/window/list">Open the list</a>
     </main></body></html>`,
+    // The destination of that link, whose `<h1>` is the heading exactly, served
+    // Late on purpose (see the handler).
+    '/window/list': `<!doctype html><html lang="en"><head>${head('Fixture — Window list', '/window/list')}
+    </head><body><h1>All articles</h1></body></html>`,
     '/noisy': `<!doctype html><html lang="en"><head><title>Fixture — Noisy</title></head>
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
     // The ambiguity fixture: "Articles" appears three times — twice as the
@@ -98,7 +107,19 @@ const pages = {
     </body></html>`,
 };
 
+/** How late `/window/list` answers — long enough for a verb to be asked on the page being left. */
+const SLOW_MS = 300;
+
 const server = createServer((request, response) => {
+    // The one slow route: a destination that arrives AFTER the verb following
+    // The click is asked, which is the navigation a probe used to straddle.
+    if (request.url === '/window/list') {
+        setTimeout(() => {
+            response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+            response.end(pages['/window/list']);
+        }, SLOW_MS);
+        return;
+    }
     if (request.url === '/old') {
         response.writeHead(308, { location: '/' });
         response.end();

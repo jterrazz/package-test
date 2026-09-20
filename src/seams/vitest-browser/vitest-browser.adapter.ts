@@ -8,7 +8,7 @@ import {
     formatElement,
 } from '../../model/elements/ambiguity.js';
 import { accessibleNameIn } from '../../model/elements/aria-name.js';
-import { widenedForWindow } from '../../model/elements/substring-warning.js';
+import { widenedForWindow, WINDOW_SETTLE_MS } from '../../model/elements/substring-warning.js';
 import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type { ElementMatch, ElementRef } from '../../model/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
@@ -170,6 +170,26 @@ async function wholeNameOf(element: ElementRef): Promise<string | undefined> {
     return collapsed === '' ? undefined : collapsed;
 }
 
+/**
+ * Does the descriptor arrive if the subject is given the settle budget?
+ *
+ * A mounted component never navigates, but it does re-render: a subject whose
+ * name arrives with the state after a click is the same question a page asks
+ * across a navigation, and one window answers both. The poll is vitest's own,
+ * with the window's budget rather than the test's — what is being waited for
+ * here is a surface settling, not an assertion coming true.
+ */
+async function settles(element: ElementRef): Promise<boolean> {
+    try {
+        await expect
+            .poll(() => locate(page, element).elements().length, { timeout: WINDOW_SETTLE_MS })
+            .toBeGreaterThan(0);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 /** What the transitional window may ask of the mounted page. */
 const PROBE: WindowProbe = {
     count: async (element) => await Promise.resolve(locate(page, element).elements().length),
@@ -179,6 +199,7 @@ const PROBE: WindowProbe = {
     print: async (line) => {
         await commands.notify(line);
     },
+    settles: async (element) => await settles(element),
 };
 
 /**

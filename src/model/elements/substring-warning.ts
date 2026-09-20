@@ -88,15 +88,30 @@ export async function warnSubstringOnly(
 }
 
 /**
+ * How long a descriptor is given to ARRIVE before the window concludes it is
+ * absent — the budget `settles` spends and no more.
+ *
+ * A count is one observation, and a verb called right after a navigating
+ * `click()` takes it on the page being LEFT. The window may not decide
+ * "nothing matches this whole name" on that reading: the destination has not
+ * been parsed yet. Long enough for a navigation to commit, far short of the
+ * verb's own 30 s, and paid only when there is a substring to widen to.
+ */
+export const WINDOW_SETTLE_MS = 5000;
+
+/**
  * What an adapter can ask of its own surface while the window lasts: how many
- * elements a descriptor designates right now, and the whole name of the first
- * one — the spelling the author should be writing.
+ * elements a descriptor designates right now, the whole name of the first one
+ * — the spelling the author should be writing — and whether the descriptor
+ * arrives if the surface is given a moment to settle.
  */
 export type WindowProbe = {
     count: (element: ElementRef) => Promise<number>;
     nameOf: (element: ElementRef) => Promise<string | undefined>;
     /** Where a line goes; absent means the node side's own stderr. */
     print?: undefined | WindowPrinter;
+    /** Does the descriptor designate something within {@link WINDOW_SETTLE_MS}? */
+    settles: (element: ElementRef) => Promise<boolean>;
 };
 
 /**
@@ -116,8 +131,8 @@ export type WindowProbe = {
  *
  * Asked BEFORE the action, not after it fails: a verb waits its whole
  * actionability budget, which is the test's own budget, so a retry afterwards
- * never runs — the test is already over. The probes are counts, which wait for
- * nothing, and the common case (the name matches whole) costs one per level.
+ * never runs — the test is already over. The common case (the name matches
+ * whole) costs one count per level, which waits for nothing.
  */
 export async function widenedForWindow(
     element: ElementRef,
@@ -146,8 +161,16 @@ export async function widenedForWindow(
 
 /**
  * The one level, widened and warned about, or `undefined` when it designates
- * something already, states its own `exact`, carries no name, or would
- * designate nothing either way.
+ * something already, states its own `exact`, carries no name, would designate
+ * nothing either way, or turns out to be exact on the surface that ARRIVES.
+ *
+ * The last is the navigation case, and it is the reason the verdict is not two
+ * counts: a `see()` fired right after a navigating `click()` counts the page
+ * being left, so a descriptor that is perfectly exact on the DESTINATION read
+ * as substring-only — non-deterministically, since which page each count
+ * landed on was a race. A widening is therefore only decided once the exact
+ * descriptor has been given the settle budget and still designates nothing.
+ * The tell of the old fault was the printed name equalling the name written.
  */
 async function widenedLevel(
     candidate: ElementRef,
@@ -168,6 +191,12 @@ async function widenedLevel(
         if ((await probe.count(loose)) !== 1) {
             return undefined;
         }
+        // Asked last, so the wait is paid only where there is something to
+        // Widen to: an ordinary miss — a `gone()` on an absent element — is
+        // Still two counts and no wait at all.
+        if (!alreadyJudged(candidate) && (await probe.settles(candidate))) {
+            return undefined;
+        }
         await warnSubstringOnly(candidate, where, await probe.nameOf(loose), probe.print);
         return loose;
     } catch {
@@ -176,6 +205,17 @@ async function widenedLevel(
         // Caller is already being handed.
         return undefined;
     }
+}
+
+/**
+ * Has this descriptor already been judged substring-only in this run?
+ *
+ * The verdict is made once: a scenario that clicks the same link in ten tests
+ * pays the settle budget on the first of them and is widened straight away on
+ * the nine after it.
+ */
+function alreadyJudged(element: ElementRef): boolean {
+    return reported.has(identityOf(element));
 }
 
 /** Forget what has been reported — the seam the adapters' tests reset between cases. */

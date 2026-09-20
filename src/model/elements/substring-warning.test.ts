@@ -92,6 +92,9 @@ function surfaceOf(names: string[]): WindowProbe {
         print: (line) => {
             printed.push(line);
         },
+        // A surface that is not going anywhere: what is on it now is what is
+        // On it when the budget runs out.
+        settles: async (element) => await Promise.resolve(matching(element).length > 0),
     };
 }
 
@@ -177,6 +180,45 @@ describe('the window — what the descriptor is retried with', () => {
             surface,
         );
         expect(widened).toBeUndefined();
+    });
+
+    test('says nothing when the whole name ARRIVES while the surface settles', async () => {
+        // Given - the page being LEFT, carrying the destination's heading only as a substring
+        const lines = aQuietProcess();
+        const leaving = surfaceOf(['All articles, in one place']);
+        const navigating: WindowProbe = {
+            ...leaving,
+            // The destination parses, and the exact name is there after all.
+            settles: async () => await Promise.resolve(true),
+        };
+
+        // Then - the descriptor is left exactly as written, and no line is printed
+        const widened = await widenedForWindow(
+            { kind: 'heading', name: 'All articles' },
+            'http://localhost/window',
+            navigating,
+        );
+        expect(widened).toBeUndefined();
+        expect(lines).toHaveLength(0);
+    });
+
+    test('pays the settle budget once per descriptor, not once per verb', async () => {
+        // Given - a surface that never settles, and the same descriptor asked twice
+        aQuietProcess();
+        let asked = 0;
+        const surface: WindowProbe = {
+            ...surfaceOf(['Experiments 9']),
+            settles: async () => {
+                asked += 1;
+                return await Promise.resolve(false);
+            },
+        };
+        const element: ElementRef = { kind: 'button', name: 'Experiments' };
+
+        // Then - the verdict was made once and reused, so a scenario run ten times waits once
+        await widenedForWindow(element, 'http://localhost/', surface);
+        await widenedForWindow(element, 'http://localhost/', surface);
+        expect(asked).toBe(1);
     });
 
     test('warns once, naming the spelling to write', async () => {
