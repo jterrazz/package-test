@@ -155,7 +155,7 @@ expect(shop.file('/app/shoply.yaml').content).toContain('name: alpha');
 specs/cli/
 ├── cli.specification.ts        # runner(s) at the facet ROOT
 └── <domain>/                   # a product command/area — the folder follows the assets
-    ├── <aspect>.test.ts        # 1..n test files per domain
+    ├── <aspect>.spec.ts        # 1..n specs per domain
     ├── <case>.spec.yaml        # spec documents, BESIDE the tests (never under _expected/)
     ├── _fixtures/               # domain-local, copied into the cwd via .fixture('name')
     ├── _seeds/                  # *.sql ONLY

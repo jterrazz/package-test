@@ -44,7 +44,7 @@ Three rules cannot be mechanized — they turn on judgement no single channel ca
 
 ### C1 — the folder follows the assets
 
-The grouping criterion: a test that owns **its own** asset directories (`_fixtures/`, `_expected/`, `_seeds/`, …) gets **its own** domain folder; tests **without local assets** (or sharing the `$FIXTURES/` pool) group as sibling `<aspect>.test.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `c1-domain-structure` checks only placement; which of the two shapes is right is the review call.
+The grouping criterion: a test that owns **its own** asset directories (`_fixtures/`, `_expected/`, `_seeds/`, …) gets **its own** domain folder; specs **without local assets** (or sharing the `$FIXTURES/` pool) group as sibling `<aspect>.spec.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `c1-domain-structure` checks only placement; which of the two shapes is right is the review call.
 
 Placement itself is **declared**, because a spec tree may legitimately have a shape this package cannot know:
 
@@ -54,8 +54,8 @@ Placement itself is **declared**, because a spec tree may legitimately have a sh
 
 | `depth`          | The tree                                                                                                                                                            |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `'facet-domain'` | the default and the historical rule — `specs/<facet>/<domain>/<aspect>.test.ts`, `*.specification.ts` at the facet root                                             |
-| `'facet'`        | the assets decide the folder — a test at the facet root (`specs/<facet>/<aspect>.test.ts`) OR one domain down, never deeper; `*.specification.ts` at the facet root |
+| `'facet-domain'` | the default — `specs/<facet>/<domain>/<aspect>.spec.ts`, `*.specification.ts` at the facet root                                                                     |
+| `'facet'`        | the assets decide the folder — a spec at the facet root (`specs/<facet>/<aspect>.spec.ts`) OR one domain down, never deeper; `*.specification.ts` at the facet root |
 | `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a test at any depth ≥ 1, named `<dir>/<dir>.test.ts`                                   |
 | `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                                                   |
 

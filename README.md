@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Declarative testing framework for APIs, jobs, CLIs, websites, and mobile apps. Five constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.website()`, `specification.mobile()` — and specs that read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
+Declarative testing framework for APIs, jobs, CLIs, modules against real services, websites, mobile apps and rendered components. Six constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none. Specs read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
 
 ```bash
 npm install -D @jterrazz/test vitest
@@ -149,303 +149,21 @@ test('shows the events feed behind its deep link', async () => {
 
 Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.call()`, `.fetch()`, `.visit()`, `.open()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
 
-## The six constructors
-
-One constructor per tested interface, each returning a record destructured with its canonical name:
-
-| Constructor                        | Returns                     | Terminal actions                                             |
-| ---------------------------------- | --------------------------- | ------------------------------------------------------------ |
-| `specification.api(options)`       | `{ api, cleanup, docker }`  | `.request(file)`, `.get()`, `.post()`, `.put()`, `.delete()` |
-| `specification.jobs(options)`      | `{ jobs, cleanup }`         | `.trigger(name)`                                             |
-| `specification.cli(bin, options)`  | `{ cli, cleanup, docker }`  | `.exec(args, { waitFor?, timeout? }?)`                       |
-| `specification.integration(opts?)` | `{ integration, cleanup }`  | `.call((services) => …)`                                     |
-| `specification.website(options)`   | `{ website, cleanup, url }` | `.fetch(path)`, `.visit(path, scenario?)`                    |
-| `specification.mobile(options)`    | `{ mobile, cleanup, udid }` | `.open(deepLink?, scenario?)`                                |
-
-A rendered component has no constructor: it starts nothing, so it is reached through the `component` chain directly (docs/16).
-
-### `specification.api({ services, server, root? })`
-
-The declared services start in real containers; the app is built by `server(services)` and runs **in this process**, so a request reaches it without a socket, `.intercept()` sees its outgoing calls, and `.clock()` pins the `Date` it reads.
-
-```typescript
-// vitest.config.ts
-import { api, defineSpecConfig } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({
-    test: { projects: [api()] }, // `specs/api/**/*.spec.ts`
-});
-```
-
-`services` is a named record, and the key is the only name a service has. It types the `server` factory parameters, names databases for `.seed()`/`.table()` (`{ database: 'analyticsDb' }`), is what the startup report prints, and — kebab-cased — is the folder its init script sits in (`analyticsDb` → `docker/analytics-db/init.sql`).
-
-### `specification.jobs({ services, jobs, root? })`
-
-Background jobs run in-process by definition — no HTTP server:
-
-```typescript
-export const { jobs, cleanup } = await specification.jobs({
-    services: { db: postgres() },
-    jobs: ({ db }) => [nightlyReport(db)], // (services) => JobHandle[], or a static array
-});
-
-// In a test:
-const result = await jobs.seed('pending.sql').trigger('nightly-report');
-```
-
-A `JobHandle` is `{ name: string; execute: () => Promise<void> }`.
-
-### `specification.cli(bin, { root?, services?, docker?, transform?, env?, serve? })`
-
-Runs a command binary against fixture projects in fresh temp directories. `env` (named environment sets) and `serve` (named servers) are the registries a [`<case>.spec.yaml`](docs/07-cli.md#spec-documents--casespecyaml) names by word. With `services`, connection URLs are injected into the child env automatically: `<KEY>_URL` per record key (CONSTANT_CASE at camelCase boundaries — `analyticsDb` → `ANALYTICS_DB_URL`), plus `DATABASE_URL` (exactly one SQL database) and `REDIS_URL` (exactly one redis). `.env()` overrides; `null` unsets.
-
-```typescript
-export const { cli, cleanup } = await specification.cli('my-migrate-tool', {
-    services: { db: postgres() },
-});
-
-// DATABASE_URL / DB_URL are already in the child env:
-const result = await cli.seed('legacy-schema.sql').exec('up');
-```
-
-### `specification.website({ server?, url?, backend?, external?, root? })`
-
-Tests a rendered website: `.fetch(path)` for a raw HTTP exchange (redirects never followed), `.visit(path, scenario?)` for a page rendered in a real chromium. Exactly one of `server` (start the site locally — a free port injected as `PORT`, polled on `ready`) or `url` (target a running site) is required. `backend: { env, port? }` (server mode only) additionally starts a declared stub backend and injects its URL into the server child under `env`; each chain declares what it serves with `.intercept(contracts)`, the same contracts form `api`/`jobs` use.
-
-```typescript
-export const { website, cleanup } = await specification.website({
-    server: { command: 'node specs/_fixtures/website-app/server.mjs', ready: '/' },
-});
-
-// Raw exchange — status + headers, redirects surface as 3xx
-const redirect = await website.fetch('/old');
-
-// Rendered page, optionally driven by a scenario (the When)
-const page = await website.visit('/', async (visitor) => {
-    await visitor.click(link('Articles'));
-});
-```
-
-The handle destructures to `{ website, cleanup, url }` — no `docker`. `.visit()` needs playwright (`npm install -D playwright && npx playwright install chromium`) — an optional peer dependency, only loaded when a spec actually renders a page. Full reference: [docs/14-website.md](docs/14-website.md).
-
-### `specification.mobile({ app, device, backend?, root? })`
-
-Tests a native app on the iOS simulator through a real XCUITest session (appium): `.open(deepLink?, scenario?)` terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen — the projected accessibility tree plus the visible texts. The simulator is resolved by `device: { name, os?, udid? }` via `xcrun simctl` (refusing on zero or several matches) and booted when shut down; the appium server is spawned from the caller project on a free port.
-
-```typescript
-export const { mobile, cleanup, udid } = await specification.mobile({
-    app: { bundleId: 'com.jterrazz.fakenews' },
-    device: { name: 'iPhone 17', os: '26.5' },
-});
-
-// A screen behind its deep link, driven by a scenario (the When)
-const result = await mobile.open('news://events', async (visitor) => {
-    await visitor.tap(button('Enquête Fauci COVID-19'));
-    await visitor.see(content('rapports'));
-});
-```
-
-The handle destructures to `{ mobile, cleanup, udid }` (plus `backendUrl` with `backend: { port? }` — a declared stub backend whose URL the CALLER wires into its own bundler env; the framework never touches Metro). The element vocabulary is the website facet's, unchanged — `button`, `field`, `content`, `testId`, `within` — landmarks excepted (an iOS screen has no ARIA regions; they refuse at runtime). Requires the app installed on the simulator plus the optional peers: `npm install -D appium webdriverio && npx appium driver install xcuitest`. Full reference: [docs/15-mobile.md](docs/15-mobile.md).
-
-### Root auto-discovery
-
-When `root` is absent, the framework walks up from the specification file to the **nearest** directory carrying `package.json`. In a workspace that is the member being tested, not the repository root above it. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (local-bin resolution, init scripts, the artefact paths, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
-
-## vitest config — `defineSpecConfig()`
-
-`@jterrazz/test/vitest` is the subpath `vitest.config.ts` imports, never a spec. Beside `literate()` it exports the shared preset: what you pass is a plain vite/vitest config merged **over** its defaults, and `literate:` adds the plugin.
-
-```typescript
-import { defineSpecConfig } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({
-    literate: { specification: './specs/cli/cli.specification.ts' },
-    test: { include: ['specs/**/*.test.ts'] },
-});
-```
-
-| Sets                               | To                                                     |
-| ---------------------------------- | ------------------------------------------------------ |
-| `cacheDir`                         | `.artifacts/vitest`                                    |
-| `test.coverage.reportsDirectory`   | `.artifacts/vitest/coverage` (bring your own provider) |
-| `test.testTimeout` / `hookTimeout` | `30_000`                                               |
-| `test.exclude`                     | vitest's defaults **+** `**/_fixtures/**`              |
-
-Nothing else: `fileParallelism`, `reporters`, `environment` and every `include` stay yours. Inline `projects` inherit the same defaults (vitest gives a project nothing from the root), arrays are concatenated rather than replaced, and scalars you state win. Full walkthrough, including migrating a hand-rolled config: [docs/02-developing.md](docs/02-developing.md#vitest-config-the-preset).
-
-Every artefact a run produces lands under `.artifacts/<tool>/` — one `.gitignore` line, one `rm -rf`. Per-run scratch (a CLI spec's temp cwd, a browser profile) stays in the OS temp dir.
-
-## Builder API
-
-### Setup (chainable)
-
-| Method                                  | Facets                          | Description                                                                                                 |
-| --------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `.seed("file.sql", { database? })`      | all                             | Load SQL from `_seeds/` — `database` is the record key (mandatory with ≥ 2 databases, forbidden with 1)     |
-| `.fixture("file")`                      | cli                             | Copy the feature-local `_fixtures/file` into the working directory                                          |
-| `.fixture("$FIXTURES/name/")`           | cli                             | Spread the shared `specs/_fixtures/<name>/` project into the cwd (trailing `/` = contents; layers)          |
-| `.env({ KEY: "value" })`                | cli                             | Set env vars on the child (`null` unsets, `$WORKDIR` expands, calls merge)                                  |
-| `.headers({ "Accept-Language": "fr" })` | api, website                    | Set HTTP request headers (merge on top of `.http` file headers, or on the browser context)                  |
-| `.intercept(contracts)`                 | all but cli                     | Declare the world: a `defineContracts(...)` composite — MSW on api/jobs, the stub backend on website/mobile |
-| `.intercept(contract)` / `([a, b])`     | all but cli                     | A single contract, or an ordered list                                                                       |
-| `.intercept(request, response)`         | all but cli                     | Inline pair, for one-off plumbing                                                                           |
-| `.clock("2026-03-04T09:30:00Z")`        | api, jobs, integration, website | Pin the calendar for this chain — the page's on website, this process's elsewhere                           |
-
-### Actions (terminal)
-
-| Method                                     | Facet   | Resolves to    | Description                                                                              |
-| ------------------------------------------ | ------- | -------------- | ---------------------------------------------------------------------------------------- |
-| `.request("create-user.http")`             | api     | `HttpResult`   | Send the COMPLETE request from `_requests/<file>` (method, path, headers, raw body)      |
-| `.get(path)` / `.delete(path)`             | api     | `HttpResult`   | Inline requests for simple cases                                                         |
-| `.post(path, body?)` / `.put(path, body?)` | api     | `HttpResult`   | Inline body: plain object, JSON-serialized                                               |
-| `.trigger("name")`                         | jobs    | `BaseResult`   | Execute a registered job                                                                 |
-| `.exec("args")`                            | cli     | `CliResult`    | Run the command                                                                          |
-| `.exec(["build", "start"])`                | cli     | `CliResult`    | Sequence in the same cwd; stops on first non-zero exit                                   |
-| `.exec("dev", { waitFor, timeout? })`      | cli     | `CliResult`    | Long-running: resolves at the pattern, killed at `timeout` (default 10 s)                |
-| `.run("case.spec.yaml")`                   | cli     | `CliResult`    | Run a `<case>.spec.yaml` — its ground and EVERY run asserted; the last one returns       |
-| `.fetch(path)`                             | website | `FetchResult`  | One raw HTTP exchange — redirects surface as 3xx, never followed                         |
-| `.visit(path, scenario?)`                  | website | `PageResult`   | Render the page in a shared chromium; with a scenario, the capture is the final state    |
-| `.open(deepLink?, scenario?)`              | mobile  | `ScreenResult` | Relaunch the app fresh on the simulator; with a scenario, the capture is the final state |
-
-One chain = one terminal action; databases reset at the start of every chain. Every cli spec runs in a fresh, empty temp directory.
-
-## Assertions — everything through `expect()`
-
-Accessors are **read-only**; the framework registers subject-typed matchers on vitest's `expect` automatically. `await` is required exactly where IO happens (tables, trees, containers).
-
-```typescript
-// HTTP
-expect(result.status).toBe(201);
-expect(result.response).toMatch('user-created.http'); // _expected/<name> — status + header subset + body
-expect(result.response.body).toEqual({ error: 'User 999 not found' });
-
-// Tables (async — queries the database)
-await expect(result.table('orders', { database: 'db' })).toMatchRows({
-    columns: ['id', 'status', 'created_at'],
-    rows: [[match.uuid(), 'pending', match.iso8601()]],
-});
-await expect(result.table('orders', { database: 'db' })).toBeEmpty();
-
-// Streams (ANSI stripped by default; .text stays raw)
-expect(result.stdout).toContain('Build completed');
-expect(result.stdout).toMatch('help.txt'); // _expected/help.txt — {{token}}-aware
-expect(result.json).toMatch('config.json'); // _expected/config.json
-expect(result.json.value).toMatchObject({ name: 'shoply' });
-
-// Files & trees
-expect(result.file('my-shop/shoply.yaml').content).toContain('name: my-shop');
-await expect(result.directory('my-shop')).toMatch('shop-scaffold'); // _expected/shop-scaffold/
-await expect(result.filesystem).toMatch('upgraded-shop'); // whole cwd
-
-// Containers (docker-aware cli)
-await expect(result.container('alpha')).toBeRunning();
-```
-
-`toMatch` always resolves against `_expected/<name>` — every subject, no exceptions (only `.request()` reads `_requests/`). The folder is flat: a slash in the name creates a subfolder; the extension is part of the name and required, except for tree snapshots which are directories.
-
-**Updating snapshots:** `TEST_UPDATE=1` or `vitest -u`. Update mode writes **tokens**, not values — segments covered by an existing placeholder are preserved, and `{{workdir}}` is substituted automatically.
-
-## Dynamic values — one `{{token}}` grammar
-
-The same vocabulary works in `_expected/*.http` (body AND headers), `_expected/*.json`, text snapshots, and tree-snapshot file contents — and in code via `match.*`:
-
-`uuid` `ulid` `iso8601` `date` `time` `duration` `number` `int` `float` `semver` `sha` `hex` `base64` `port` `ip` `url` `email` `path` `workdir` `string` `any`
-
-Each token is capturable via `{{type#ref}}`: the first occurrence captures, later occurrences must be equal (scope: one spec). Code-side: `match.ref('order')`, `match.ref('intent', { not: 'order' })`, `match.regex(/…/)`.
-
-```http
-### _expected/order-created.http
-HTTP/1.1 201 Created
-Content-Type: application/json
-Location: /orders/{{uuid#order}}
-
-{
-    "id": "{{uuid#order}}",
-    "total": "{{number}}",
-    "createdAt": "{{iso8601}}"
-}
-```
-
-See [docs/09-tokens.md](docs/09-tokens.md) for the canonical accepted form of every token.
-
-## Contracts
-
-Everything the outside world replies is a **contract** — a request to match and a response to serve, declared together. A feature owns a `contracts/` folder: a public `<name>.contracts.ts` facade (default export = the world, named exports = its scenarios) over internal `<provider>/<name>.ts` units, `provider ∈ { http, openai, anthropic }`.
-
-```typescript
-// contracts/openai/classify-product.ts
-import { defineContract, openai } from '@jterrazz/test';
-
-export default defineContract({
-    request: openai.responses({ user: /Product Classification/, tools: ['classify'] }),
-    response: openai.reply({ category: 'ELECTRONICS', confidence: 0.97 }),
-});
-```
-
-```typescript
-// contracts/pipeline.contracts.ts
-import { defineContracts, http } from '@jterrazz/test';
-
-import classifyProduct from './openai/classify-product.js';
-import exchangeRates from './http/exchange-rates.js';
-
-const pipeline = defineContracts(classifyProduct, exchangeRates);
-
-export default pipeline;
-
-export const withRatesDown = () =>
-    pipeline.with({ request: http.get('/rates'), response: http.error(503) });
-```
-
-```typescript
-const result = await jobs.intercept(pipeline).trigger('nightly-report');
-```
-
-Selection is first-match, one queue for every facet: `times` bounds how often a contract serves (omitted = unlimited, so retries and re-renders replay it), `required: true` fails the chain if it was never requested. Provider string filters are **exact** — the loose forms are explicit (`RegExp`, `match.includes('…')`). Failure simulation: `openai.error(429)`, `anthropic.timeout()`, `openai.malformed('not json')`. MSW ships as a direct dependency — no separate install. Full chapter: [docs/10-contracts.md](docs/10-contracts.md).
-
-## Docker-aware CLIs
-
-For CLIs that spawn containers, declare `docker: { envVar, nameLabel, testRunLabel }`. The runner injects a unique test-run id into the child env; the tested binary must label its containers with `testRunLabel=<id>`. Results expose lazy `.container(name)` accessors — and must be bound with `await using` so leaked containers are force-removed at scope exit:
-
-```typescript
-test('deploy spawns a labelled container', async () => {
-    // Given
-    await using result = await cli.fixture('$FIXTURES/two-shops/').exec('deploy alpha');
-
-    // Then - property reads are sync; only the matcher is async
-    const shop = result.container('alpha');
-    expect(shop.exists).toBe(true);
-    await expect(shop).toBeRunning();
-    expect(shop.file('/app/shoply.yaml').content).toContain('name: alpha');
-});
-```
-
-## Service factories
-
-| Factory      | Options                  | Connection string                     |
-| ------------ | ------------------------ | ------------------------------------- |
-| `postgres()` | `image`, `env`           | `postgresql://user:pass@host:port/db` |
-| `redis()`    | `image`                  | `redis://host:port`                   |
-| `sqlite()`   | `init` or `prismaSchema` | `file:/…/….sqlite`                    |
-
-`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. Parallel isolation is automatic per vitest worker: postgres clones a schema, redis assigns a database index, sqlite copies the template file.
-
-`sqlite()` caches its schema template inside the project — `.artifacts/vitest/sqlite/template-<key>.sqlite` — so two checkouts never share one, and workers racing for a cold cache wait for the one that is building rather than all building at once. Details: [docs/11-services.md](docs/11-services.md#where-the-template-lives).
-
-## Also exported
-
-Everything below comes from the package root (rule F1) — except the project helpers, which are `@jterrazz/test/vitest`'s. One line each; the chapter owns the detail.
-
-| Export                                                                                 | Is                                                                                                                  | Chapter                                                                         |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `clock.at(iso)` · `.run(iso?)` · `.advance(ms)`                                        | The one time primitive — a `using` scope that pins `Date`, replacing `vi.useFakeTimers()`                           | [docs/12](docs/12-conventions.md#time--one-primitive-two-depths)                |
-| `intercept(…)`                                                                         | The same network double with no chain: `await using _ = await intercept(…)` in a module test                        | [docs/10](docs/10-contracts.md#intercept--the-same-double-with-no-chain)        |
-| `process({ command, ready?, … })`                                                      | The one shape an external process takes — a dev server, an API, a bundler, owned by the runner                      | [docs/11](docs/11-services.md#process--the-one-shape-an-external-process-takes) |
-| `http.stream(chunks, init?)` · `http.sse(events)`                                      | A chunked or server-sent response body a contract replies with                                                      | [docs/10](docs/10-contracts.md)                                                 |
-| `mockOf<T>()` · `mockOf<T>({ deep: false })`                                           | Deep double of a port (a member never stubbed answers with another double), or the flat one                         | [docs/12](docs/12-conventions.md#the-doubles-ladder)                            |
-| `required(value, why)`                                                                 | The value, or a failure naming what was missing and why it mattered — instead of `!`                                | [docs/08](docs/08-assertions.md#two-helpers-that-are-not-matchers)              |
-| `waitUntil(predicate, { timeout?, interval?, why? })`                                  | Wait on a CONDITION, never a duration, on a real-time budget a pinned clock cannot starve                           | [docs/08](docs/08-assertions.md#two-helpers-that-are-not-matchers)              |
-| `unit()` `component()` `api()` `jobs()` `cli()` `integration()` `website()` `mobile()` | The vitest project helpers, each taking `{ include, exclude, timeout, serial }` on top of the project it already is | [docs/02](docs/02-developing.md#vitest-config-the-preset)                       |
+## The whole surface, one chapter per subject
+
+Everything below the quick start is stated ONCE, in the chapter that owns it — a second copy here would be a second answer, and the one a reader meets first is the one that goes stale.
+
+| Subject                                                            | Chapter                                                                                                              |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| The six constructors, their options, the handles they return       | [docs/05](docs/05-api.md)–[docs/07](docs/07-cli.md), [docs/14](docs/14-website.md)–[docs/17](docs/17-integration.md) |
+| A rendered component — no constructor, the chain and `component()` | [docs/16](docs/16-component.md)                                                                                      |
+| The chain: setups, terminal actions, what each result carries      | [docs/08](docs/08-assertions.md)                                                                                     |
+| Every matcher, by subject                                          | [docs/08](docs/08-assertions.md)                                                                                     |
+| The `{{token}}` grammar, `#ref` captures, update mode              | [docs/09](docs/09-tokens.md)                                                                                         |
+| Contracts, selection, the provider builders, `intercept()`         | [docs/10](docs/10-contracts.md)                                                                                      |
+| Services, init scripts, per-worker isolation, `process()`          | [docs/11](docs/11-services.md)                                                                                       |
+| `defineSpecConfig()`, the project helpers, the artefact paths      | [docs/02](docs/02-developing.md#vitest-config-the-preset)                                                            |
+| The conventions, and the catalogue that enforces them              | [docs/12](docs/12-conventions.md), [docs/13](docs/13-linting.md)                                                     |
 
 ## Conventions
 
@@ -454,8 +172,8 @@ Normative rules live in the constitution ([docs/12-conventions.md](docs/12-conve
 ```
 specs/<facet>/                  # api | jobs | cli | integration | website | mobile
 ├── <facet>.specification.ts    # runner(s) at the facet ROOT (rule C1)
-└── <domain>/                   # a product command/area — 1..n test files
-    ├── <aspect>.test.ts
+└── <domain>/                   # a product command/area — 1..n specs
+    ├── <aspect>.spec.ts
     ├── _seeds/          # *.sql ONLY — database state
     ├── _requests/       # *.http — inputs: COMPLETE request (method, path, headers, body)
     ├── contracts/      # <name>.contracts.ts facade + <provider>/<name>.ts units + their .response.json / .request.ts data
@@ -463,13 +181,13 @@ specs/<facet>/                  # api | jobs | cli | integration | website | mob
     └── _expected/       # ALL expected fixtures, FLAT (incl. response *.http) — a slash in the name creates a subfolder
 ```
 
-A test with its OWN asset dirs gets its own domain folder; tests without local assets group as sibling `<aspect>.test.ts` files inside a named group folder (the folder follows the assets). `.fixture(path)` is the one verb that copies into the cwd: domain-local (`_fixtures/…`) or shared (`$FIXTURES/…` → `specs/_fixtures/…`), with rsync trailing-slash semantics and layering. `.seed()` is SQL-only.
+**The suffix says the kind.** A UNIT sits beside its code: `<file>.test.ts` for a module, `<file>.test.tsx` for a component. The assembled product, met through an entry, sits under `specs/<facet>/` as `<aspect>.spec.ts`. A spec with its OWN asset dirs gets its own domain folder; specs without local assets group as siblings inside a named group folder (the folder follows the assets). `.fixture(path)` is the one verb that copies into the cwd: domain-local (`_fixtures/…`) or shared (`$FIXTURES/…` → `specs/_fixtures/…`), with rsync trailing-slash semantics and layering. `.seed()` is SQL-only.
 
 Every test contains `// Given -` and `// Then -` comments (always both; `// When -` only if the action is not obvious — the chain IS the when). User-facing framework env var: `TEST_UPDATE` — the only one you set; the framework also reads vitest's `VITEST_POOL_ID` for per-worker isolation.
 
 ### Convention enforcement — the shipped lint plugin
 
-These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) with ~40 AST rules, plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full four-channel catalogue (each rule, its channel and rationale) is generated into [docs/13-linting.md](docs/13-linting.md).
+These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full seven-channel catalogue (each rule, its channel and rationale) is generated into [docs/13-linting.md](docs/13-linting.md).
 
 ## Requirements
 

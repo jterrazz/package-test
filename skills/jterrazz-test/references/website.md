@@ -80,7 +80,7 @@ npm install -D playwright && npx playwright install chromium
 specs/website/
 ├── website.specification.ts    # runner at the facet ROOT
 └── <domain>/
-    ├── <aspect>.test.ts
+    ├── <aspect>.spec.ts
     ├── _expected/                # *.head.json, *.jsonld.json, *.console.txt, … — FLAT
     └── contracts/               # what the declared `backend` stub serves — see contracts.md
 ```
