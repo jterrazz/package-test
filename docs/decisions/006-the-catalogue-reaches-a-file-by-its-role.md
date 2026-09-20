@@ -184,7 +184,8 @@ renumbering that missed a message fails the suite rather than a reader.
 ## What the proof holds, and what it does not
 
 The release proof of this wave reads: the package's own tree green under
-`typescript check`, the `unit` project inside its 12-second budget, the
+`typescript check`, the `unit` project inside the budget
+[03 — Testing](../03-testing.md) states, the
 catalogue's own meta-tests holding freshness, completeness, reach and channel,
 and the R8 counts above re-derivable from the branch head. All of it holds.
 
