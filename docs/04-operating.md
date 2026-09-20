@@ -81,10 +81,11 @@ things to know before they surprise a reader:
   toolchain's own walk looks for a CHILD directory named `specs`, so until it
   makes the same move its Test Conventions pass reports the member findings
   alone — `TODO.md` carries the ask.
-- **An include glob that names `.test.ts`** stops collecting the moment `--fix`
-  renames a facet spec. The mover names every such glob in the member it moved
-  files under; update them in the same commit, and E7w holds the class
-  afterwards.
+- **An include entry that names `.test.ts`** stops collecting the moment `--fix`
+  renames a facet spec. The mover names the ones it BROKE — a glob whose prefix
+  covers a file it moved, a literal naming one, and never a comment — so a
+  notice is always about a file that just moved; update them in the same commit,
+  and E7w holds the class afterwards.
 - **`typescript baseline` in an npm-hoisted member** cannot resolve oxlint
   today, so the step the adopt flow prescribes "where red" has to be run from a
   directory where `node_modules/.bin/oxlint` does resolve. Also in `TODO.md`.

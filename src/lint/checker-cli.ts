@@ -55,10 +55,11 @@ import { codeOf } from './rule-code.js';
  * fixes everything exits 0. With no path it applies them to every `specs/` root
  * it discovers: `--fix` means the same thing whichever run the operator typed.
  *
- * After a C12 rename it NAMES every include glob of the owning member that
- * still says `.test.ts`. A glob the rename left behind collects nothing, the
- * run stays green with fewer files, and nothing else in the toolchain would
- * have said a word.
+ * After a C12 rename it NAMES the entries of the owning member's configs that
+ * the rename BROKE — a glob whose prefix covers a file it moved, or a literal
+ * naming one — and nothing else. An entry the rename left behind collects
+ * nothing, the run stays green with fewer files, and nothing else in the
+ * toolchain would have said a word.
  *
  * C12's rename goes through `git mv` where the tree is a git working tree, so
  * the history follows the file across a migration that touches hundreds of
@@ -180,15 +181,18 @@ function renameKeepingHistory(from: string, to: string): void {
     }
 }
 
+/** A rename the mover performed, as absolute paths. */
+type Rename = { from: string; to: string };
+
 /** C12's mover: every `.test.ts` under a facet folder becomes a `.spec.ts`. */
-function fixSpecSuffixes(root: string): string[] {
-    const renamed: string[] = [];
+function fixSpecSuffixes(root: string): Rename[] {
+    const renamed: Rename[] = [];
     for (const { from, to } of movesUnderFacet(root)) {
         if (to === undefined || existsSync(to)) {
             continue;
         }
         renameKeepingHistory(from, to);
-        renamed.push(`${relative(root, from)} → ${relative(root, to)}`);
+        renamed.push({ from, to });
     }
     return renamed;
 }
@@ -203,50 +207,142 @@ const CONFIG_NAMES = [
     'vitest.config.cjs',
 ];
 
-/** Any string in a config that ends in the suffix the mover just retired. */
-const TEST_GLOB = /['"`](?<glob>[^'"`]*\*[^'"`]*\.test\.ts)['"`]/gu;
+/** What a config COLLECTS: the two keys whose entries name test files. */
+const COLLECTION = /\b(?:include|exclude)\s*:\s*\[(?<entries>[^\]]*)\]/gu;
+
+/** One quoted entry of such a list. */
+const ENTRY = /['"`](?<entry>[^'"`\n]*)['"`]/gu;
+
+/** The quotes a config's entries are written in. */
+const QUOTES = new Set(["'", '"', '`']);
+
+/** The index of the newline ending the `//` comment that starts at `index`. */
+function endOfLineComment(text: string, index: number): number {
+    const newline = text.indexOf('\n', index);
+    return newline === -1 ? text.length : newline;
+}
+
+/** The index just past the block comment that starts at `index`. */
+function endOfBlockComment(text: string, index: number): number {
+    const close = text.indexOf('*/', index + 2);
+    return close === -1 ? text.length : close + 2;
+}
 
 /**
- * The include globs a rename leaves behind.
+ * The config, with what is not code taken out.
+ *
+ * A notice that read a COMMENT as an include told signews-mobile to follow a
+ * glob no project collected on. The scan is character by character because a
+ * regex cannot tell the two apart: `specs/api/**` + `/*.test.ts` opens a block
+ * comment to any pattern that does not know it is inside a string, and a `://`
+ * opens a line comment to one that does not either.
+ */
+function withoutComments(text: string): string {
+    let out = '';
+    let quote: null | string = null;
+    let index = 0;
+    while (index < text.length) {
+        const char = text[index] ?? '';
+        const pair = text.slice(index, index + 2);
+        if (quote !== null) {
+            const escaped = char === '\\';
+            out += escaped ? pair : char;
+            quote = char === quote ? null : quote;
+            index += escaped ? 2 : 1;
+        } else if (pair === '//') {
+            out += '\n';
+            index = endOfLineComment(text, index);
+        } else if (pair === '/*') {
+            index = endOfBlockComment(text, index);
+        } else {
+            quote = QUOTES.has(char) ? char : null;
+            out += char;
+            index += 1;
+        }
+    }
+    return out;
+}
+
+/**
+ * Does this entry of a config sitting in `dir` reach `file`?
+ *
+ * A glob reaches what its literal PREFIX — everything before the first `*` —
+ * contains; an entry with no `*` reaches the one file it names. Both are
+ * resolved against the config's own directory, which is what vitest does.
+ */
+function reaches(dir: string, entry: string, file: string): boolean {
+    const star = entry.indexOf('*');
+    if (star === -1) {
+        return resolve(dir, entry) === file;
+    }
+    const prefix = resolve(dir, entry.slice(0, star));
+    return file === prefix || file.startsWith(`${prefix}/`);
+}
+
+/** Every entry of every `include`/`exclude` list a config states. */
+function collectedEntries(text: string): string[] {
+    const entries: string[] = [];
+    for (const list of text.matchAll(COLLECTION)) {
+        for (const match of (list.groups?.entries ?? '').matchAll(ENTRY)) {
+            entries.push(match.groups?.entry ?? '');
+        }
+    }
+    return entries;
+}
+
+/** What one broken entry says, glob or literal. */
+function noticeFor(where: string, entry: string): string {
+    return entry.includes('*')
+        ? `${where}: ${entry} still names \`.test.ts\` — the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (C12)`
+        : `${where}: ${entry} names a file this run renamed — it is \`${entry.slice(0, -'.test.ts'.length)}.spec.ts\` now, and the entry collects nothing until it follows (C12)`;
+}
+
+/** The entries of ONE config the renames broke. */
+function staleEntriesIn(path: string, owner: string, renamed: Rename[]): string[] {
+    const directory = dirname(path);
+    return collectedEntries(withoutComments(readFileSync(path, 'utf8')))
+        .filter((entry) => entry.endsWith('.test.ts'))
+        .filter((entry) => renamed.some(({ from }) => reaches(directory, entry, from)))
+        .map((entry) => noticeFor(relative(owner, path), entry));
+}
+
+/**
+ * The entries a rename leaves behind.
  *
  * A consumer that names its suffix in an `include` loses the whole suite the
  * moment the mover renames it: vitest collects fewer files, exits 0, and the
  * only trace is a number nobody compares. The mover owns that consequence —
- * it cannot rewrite a config it does not parse, so it NAMES every glob that
- * still says `.test.ts` in the configs of the member it just moved files
- * under, and the author updates them in the same commit as the rename.
+ * it cannot rewrite a config it does not parse, so it NAMES what it broke, and
+ * the author updates it in the same commit as the rename.
+ *
+ * What it names is exactly what it broke: an entry of an `include`/`exclude`
+ * list, never a comment, and only where the entry reaches a file this run
+ * actually moved. A glob over `src/` collecting module tests the mover never
+ * touched is not a stale glob, and four repositories of the wave were told it
+ * was — one of them would have emptied its unit project by following the
+ * notice.
  */
-function staleIncludes(root: string): string[] {
-    const owner = packageRootOf(root) ?? dirname(root);
-    const found: string[] = [];
-    for (const directory of new Set([root, owner, dirname(root)])) {
-        for (const name of CONFIG_NAMES) {
-            const path = join(directory, name);
-            if (!existsSync(path)) {
-                continue;
-            }
-            const text = readFileSync(path, 'utf8');
-            for (const match of text.matchAll(TEST_GLOB)) {
-                const glob = match.groups?.glob ?? '';
-                if (glob !== '') {
-                    found.push(`${relative(owner, path)}: ${glob}`);
-                }
-            }
-        }
+function staleIncludes(root: string, renamed: Rename[]): string[] {
+    if (renamed.length === 0) {
+        return [];
     }
-    return found;
+    const owner = packageRootOf(root) ?? dirname(root);
+    const paths = [...new Set([root, owner, dirname(root)])].flatMap((directory) =>
+        CONFIG_NAMES.map((name) => join(directory, name)).filter((path) => existsSync(path)),
+    );
+    return paths.flatMap((path) => staleEntriesIn(path, owner, renamed));
 }
 
 /** Apply every rewritable pass over one tree, printing what it did. */
 function applyFixes(root: string): void {
     const renamed = fixSpecSuffixes(root);
-    for (const rename of renamed) {
-        console.log(`conventions checker: renamed ${rename} (C12)`);
-    }
-    for (const glob of renamed.length === 0 ? [] : staleIncludes(root)) {
+    for (const { from, to } of renamed) {
         console.log(
-            `conventions checker: ${glob} still names \`.test.ts\` — the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (C12)`,
+            `conventions checker: renamed ${relative(root, from)} → ${relative(root, to)} (C12)`,
         );
+    }
+    for (const stale of staleIncludes(root, renamed)) {
+        console.log(`conventions checker: ${stale}`);
     }
     const written = fixSpecFiles(root);
     if (written.length > 0) {
