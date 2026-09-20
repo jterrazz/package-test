@@ -1,0 +1,4 @@
+[error] website/home/_seeds:1: `_seeds/` has no reader on the `website` facet: state the backend with contracts (C19 — see docs/13-linting.md)
+[error] website/home/_seeds/posts.sql: dead fixture — no test literal in home references _seeds/posts.sql (C9 — see docs/13-linting.md)
+
+conventions checker: 2 error(s) found under {{workdir}}/specs

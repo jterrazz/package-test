@@ -1103,3 +1103,64 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
     }
     return violations;
 }
+
+// ── J9 — a suppression states why (checker channel) ──────────────────────────
+
+/** The directive, whatever precedes it on the line, and what follows the ids. */
+const DIRECTIVE = /(?<lead>.*?)checker-disable(?:-next-line|-line)\s+(?<rest>.*)$/iu;
+
+/**
+ * A directive is written in a COMMENT — the word inside a string is a test
+ * TALKING about suppressions, which is what this package's own suite does.
+ */
+const COMMENT_LEAD = /(?:^|\s)(?:\/\/|\/\*|\*|#)\s*$/u;
+
+/** The files a directive can be written in — source, documents, goldens. */
+const READABLE = /\.(?:[cm]?[jt]sx?|ya?ml|json|md|sql|http|txt)$/u;
+
+/** Is this a file a human writes a directive in? */
+function isReadableText(path: string): boolean {
+    return READABLE.test(path);
+}
+
+/** A reason: the `--` separator with something after it. */
+const REASON = /--\s*\S/u;
+
+/**
+ * J9 — every checker suppression says WHY.
+ *
+ * A suppression with no reason is a rule turned off by someone who is no longer
+ * here: the next reader cannot tell whether the pass was wrong, the shape was
+ * exceptional, or it was simply in the way — so the line survives every review
+ * and the convention quietly stops holding. The toolchain's own
+ * `suppressions-reason` gate reads `oxlint-disable*` and nothing else, which is
+ * why this channel carries its own.
+ */
+export function checkSuppressionReason(rootDir: string): TokenViolation[] {
+    const violations: TokenViolation[] = [];
+    for (const file of listFiles(rootDir, isReadableText)) {
+        const text = readText(file);
+        if (!text.includes('checker-disable')) {
+            continue;
+        }
+        for (const [index, line] of text.split('\n').entries()) {
+            const match = DIRECTIVE.exec(line);
+            if (
+                match === null ||
+                !COMMENT_LEAD.test(match.groups?.lead ?? '') ||
+                REASON.test(match.groups?.rest ?? '')
+            ) {
+                continue;
+            }
+            const rel = relative(rootDir, file);
+            violations.push({
+                file: rel,
+                line: index + 1,
+                message: `${rel}:${index + 1}: say why: \`checker-disable-next-line <id> -- <reason>\` (J9 — see docs/13-linting.md)`,
+                rule: 'j9-checker-suppression-reason',
+                severity: 'error',
+            });
+        }
+    }
+    return violations;
+}
