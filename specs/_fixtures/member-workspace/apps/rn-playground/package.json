@@ -1,0 +1,5 @@
+{
+    "name": "@fixture/rn-playground",
+    "private": true,
+    "devDependencies": { "jest": "^30.0.0" }
+}

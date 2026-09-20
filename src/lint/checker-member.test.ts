@@ -83,6 +83,18 @@ describe('the member pass — what a workspace member owes', () => {
         expect(codes(memberAt('rn-jest'))).toStrictEqual([]);
     });
 
+    test('the RN testing library stands where jest runs it from ONE MEMBER AWAY (F8)', () => {
+        // Given - a library whose own script is `vitest --run`, whose render tests are co-located in its `src/`, and an app beside it whose jest config roots into exactly that folder
+        // Then - nothing fires: jest runs those tests, and where it runs them from is not the library's business
+        expect(codes(memberAt('rn-library'))).toStrictEqual([]);
+    });
+
+    test('a jest config that reaches ANOTHER member clears nothing here (F8)', () => {
+        // Given - the same workspace, read from the member the playground does NOT root into
+        // Then - the seam is still refused: the allowance follows the tests, not the workspace
+        expect(codes(memberAt('seam-dependency'))).toStrictEqual(['f8', 'f8']);
+    });
+
     test('discovers every member the root manifest declares, and the root', () => {
         // Given - a workspace whose root declares `packages/*`
         const members = discoverMembers(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
@@ -90,9 +102,11 @@ describe('the member pass — what a workspace member owes', () => {
         // Then - every package a glob claims is there, at whatever depth the pattern reaches, and so is the root itself
         expect(members.toSorted()).toStrictEqual([
             WORKSPACE,
+            'apps/rn-playground',
             'apps/site/packages/nested',
             'packages/clean',
             'packages/rn-jest',
+            'packages/rn-library',
             'packages/seam-dependency',
             'packages/simulated-dom',
             'packages/stray-spec',

@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, join, relative, sep } from 'node:path';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
@@ -21,6 +21,12 @@ import { isTestFileName } from './role.js';
  * it for one member, and a path-less `--format json` run at the project root
  * runs it for every member the root manifest declares.
  */
+
+/** How deep a member may sit below the root — the toolchain's bound, to the segment. */
+const MEMBER_DEPTH = 6;
+
+/** Directories the member walk never enters. */
+const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
 
 /** The two simulated DOMs — the same pair the statique E5b refuses. */
 const SIMULATED_DOM = /\benvironment\s*:\s*['"](?<dom>happy-dom|jsdom)['"]/u;
@@ -58,14 +64,16 @@ const RETIRED_SCOPES = ['@testing-library/'];
  * React Native renders under jest until the react-native-web answer lands, and
  * where jest is the sanctioned runner `@testing-library/react-native` is the
  * only vocabulary there is: the rule would be asking for a facet that does not
- * reach that runtime yet. The allowance is read from the member itself — a
- * declared `jest`, a `jest` field, or a `test` script that calls it — so it
- * lapses the day the member stops running jest.
+ * reach that runtime yet. The allowance lapses the day jest stops running the
+ * member's tests, and it has TWO sources, because jest is not always the
+ * member's own: in a workspace where one app owns the only working RN
+ * toolchain, the library declares the vocabulary and the app runs the tests
+ * that use it.
  */
 const JEST_ONLY_SEAM = '@testing-library/react-native';
 
-/** Does this member run jest? */
-function runsJest(manifest: Manifest): boolean {
+/** Does the member's OWN manifest say jest runs here? */
+function declaresJest(manifest: Manifest): boolean {
     const declares = (name: string): boolean =>
         name in (manifest.dependencies ?? {}) || name in (manifest.devDependencies ?? {});
     return (
@@ -74,6 +82,85 @@ function runsJest(manifest: Manifest): boolean {
         manifest.jest !== undefined ||
         /(?:^|[\s/])jest(?:\s|$)/u.test(manifest.scripts?.test ?? '')
     );
+}
+
+/** The config names jest answers to, whatever a project writes it in. */
+const JEST_CONFIG = /^jest\.config\.[cm]?[jt]s$/u;
+
+/** The keys of a jest config that name WHERE its tests are. */
+const JEST_REACH =
+    /\b(?:roots|testMatch|testPathDirs|testPathIgnorePatterns)\s*:\s*\[(?<paths>[^\]]*)\]/gu;
+
+/** One quoted entry of such a list. */
+const JEST_PATH = /['"`](?<path>[^'"`\n]*)['"`]/gu;
+
+/** Every `jest.config.*` under `rootDir`, by absolute path — read once per root. */
+const jestConfigs = new Map<string, string[]>();
+
+/** Find them, bounded by the same skips and depth the member walk uses. */
+function findJestConfigs(rootDir: string): string[] {
+    const cached = jestConfigs.get(rootDir);
+    if (cached !== undefined) {
+        return cached;
+    }
+    const found: string[] = [];
+    const walk = (dir: string, depth: number): void => {
+        if (depth > MEMBER_DEPTH) {
+            return;
+        }
+        let entries;
+        try {
+            entries = readdirSync(dir, { withFileTypes: true });
+        } catch {
+            return;
+        }
+        for (const entry of entries) {
+            const path = join(dir, entry.name);
+            if (entry.isDirectory()) {
+                if (!entry.name.startsWith('.') && !SKIPPED.has(entry.name)) {
+                    walk(path, depth + 1);
+                }
+            } else if (JEST_CONFIG.test(entry.name)) {
+                found.push(path);
+            }
+        }
+    };
+    walk(rootDir, 0);
+    jestConfigs.set(rootDir, found);
+    return found;
+}
+
+/**
+ * Does a jest config ELSEWHERE in the workspace collect this member's tests?
+ *
+ * jterrazz-design is the shape: the render tests are co-located in
+ * `packages/native/src`, and `apps/playground` — which owns the only working
+ * React Native toolchain — is what runs them, rooting into the library from its
+ * own config. The library's manifest says `vitest --run`, so reading the
+ * allowance from the member alone answered "no jest here" and F8 errored on
+ * exactly the layout the exemption was written for.
+ *
+ * `<rootDir>` is jest's own token for the directory its config sits in, so a
+ * path is resolved against that, and the member is reached when the result
+ * lands inside it.
+ */
+function jestReachesMember(memberDir: string, rootDir: string): boolean {
+    return findJestConfigs(rootDir).some((config) => {
+        const from = dirname(config);
+        let text;
+        try {
+            text = readFileSync(config, 'utf8');
+        } catch {
+            return false;
+        }
+        return [...text.matchAll(JEST_REACH)].some((list) =>
+            [...(list.groups?.paths ?? '').matchAll(JEST_PATH)].some((entry) => {
+                const stated = (entry.groups?.path ?? '').replace('<rootDir>', from);
+                const absolute = resolve(from, stated);
+                return absolute === memberDir || absolute.startsWith(`${memberDir}/`);
+            }),
+        );
+    });
 }
 
 /** Where a member states what it collects, whatever extension it writes it in. */
@@ -85,9 +172,6 @@ const CONFIG_NAMES = [
     'vitest.config.mjs',
     'vitest.config.cjs',
 ];
-
-/** Directories the member walk never enters. */
-const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
 
 type Manifest = {
     dependencies?: Record<string, string>;
@@ -176,11 +260,10 @@ const DELEGATING_TEST =
 type Seam = { kind: 'carried' | 'retired'; name: string };
 
 /** Every seam name this member declares that it should not, and why it should not. */
-function declaredSeams(manifest: Manifest): Seam[] {
+function declaredSeams(manifest: Manifest, jestRuns: boolean): Seam[] {
     if (manifest.name === FRAMEWORK) {
         return [];
     }
-    const jestRuns = runsJest(manifest);
     const isRetired = (name: string): boolean => {
         if (name === JEST_ONLY_SEAM && jestRuns) {
             return false;
@@ -275,13 +358,16 @@ function simulatedDom(config: string, rootDir: string): TokenViolation[] {
  * The two are not the same sentence: removing a transitive changes nothing a
  * test can see, while dropping a retired seam means writing its facet.
  */
-function seamDependencies(
-    manifest: Manifest,
-    memberDir: string,
-    label: string,
-    subject: string,
-): TokenViolation[] {
-    return declaredSeams(manifest).map((seam) => ({
+function seamDependencies(member: {
+    label: string;
+    manifest: Manifest;
+    memberDir: string;
+    rootDir: string;
+    subject: string;
+}): TokenViolation[] {
+    const { label, manifest, memberDir, rootDir, subject } = member;
+    const jestRuns = declaresJest(manifest) || jestReachesMember(memberDir, rootDir);
+    return declaredSeams(manifest, jestRuns).map((seam) => ({
         file: join(label, 'package.json'),
         line: lineOfKey(memberDir, seam.name),
         message:
@@ -330,7 +416,7 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
     return [
         ...(config === null ? configPresent(manifest, memberDir, label, subject) : []),
         ...(config === null ? [] : simulatedDom(config, rootDir)),
-        ...seamDependencies(manifest, memberDir, label, subject),
+        ...seamDependencies({ label, manifest, memberDir, rootDir, subject }),
         // C12's first clause: only a walk of the MEMBER sees a `.spec.ts`
         // That never reached a `specs/` tree.
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
@@ -361,9 +447,6 @@ function toPattern(glob: string): RegExp {
         .replaceAll(' ', '.*');
     return new RegExp(`^${escaped}$`, 'u');
 }
-
-/** How deep a member may sit below the root — the toolchain's bound, to the segment. */
-const MEMBER_DEPTH = 6;
 
 /**
  * Every workspace member declared by the root manifest, plus the root itself —
