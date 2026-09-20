@@ -155,6 +155,8 @@ specs/integration/
     └── _expected/                 # ground: every expected fixture, flat
 ```
 
+**`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the contracts it declared are checked when that call ends, and a contract declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification — it does not inherit the first's obligations.
+
 ## Pitfalls
 
 - **Reaching for `try`/`catch`.** A thrown error is `result.error`. A `try` around `.call()` brings back the shape where a spec passes because nothing threw.

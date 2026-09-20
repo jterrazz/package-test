@@ -217,7 +217,7 @@ Scopes compose outside-in exactly as on the website facet, and every scope level
 await visitor.tap(button('Bookmark', { exact: false }));
 ```
 
-Same semantics as the website facet: a label matches WHOLE (equality in the compiled predicate), and `{ exact: false }` compiles to `CONTAINS`.
+The option is the website facet's, with the same meaning ([14](14-website.md#a-name-designates-the-accessible-name-whole)): it is the opt-out, stated per descriptor, and a label that carries a part the test does not control is the case it exists for.
 
 ## Result surface — `ScreenResult`
 
