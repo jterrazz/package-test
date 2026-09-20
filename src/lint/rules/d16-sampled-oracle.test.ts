@@ -69,5 +69,15 @@ ruleTester().run('d16-sampled-oracle', asOxlintRule(d16SampledOracle), {
             });`,
             filename: '/repo/specs/api/api.specification.ts',
         },
+        // Under a pinned clock a reading is the constant the test chose —
+        // Which is what this rule's own message asks the author to do.
+        {
+            code: `test('stamps', () => {
+                using _ = clock.at('2026-03-04T09:30:00Z');
+                expect(stamp().at).toEqual(new Date());
+                expect(Date.now()).toBe(1772616600000);
+            });`,
+            filename: TEST_FILE,
+        },
     ],
 });

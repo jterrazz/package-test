@@ -318,7 +318,7 @@ export const RULE_DOCS = {
     'd16-sampled-oracle': {
         channel: 'statique',
         convention:
-            "No sampled value under an oracle: `new Date()` (no argument), `Date.now()`, `performance.now()`, `Math.random()` and `randomUUID()` are an error as a direct argument of `expect` or of its matcher, and anywhere inside a structural matcher's expected shape. A `*.specification.ts(x)` is out of reach — a runner legitimately samples at startup.",
+            "No sampled value under an oracle: `new Date()` (no argument), `Date.now()`, `performance.now()`, `Math.random()` and `randomUUID()` are an error as a direct argument of `expect` or of its matcher, and anywhere inside a structural matcher's expected shape. A test that pins the clock (`clock.at`, `clock.advance`) is out of reach — the reading is then the constant it chose — and so is a `*.specification.ts(x)`, where a runner legitimately samples at startup.",
         family: 'D',
         fix: 'Pin it with `clock.at()`, or match it with `{{iso8601}}`/`match.uuid`.',
         id: 'D16',
@@ -340,9 +340,9 @@ export const RULE_DOCS = {
     'd17w-double-only-oracle': {
         channel: 'statique',
         convention:
-            'A module test whose every assertion reads the call log of a double it built itself (`mockOf`, `vi.fn`, `vi.spyOn`) is a warning. The reach is the `module` role: on a component a callback prop IS the contract with its parent.',
+            'A module test whose every assertion reads the call log of a double it built itself (`mockOf`, `vi.fn`, `vi.spyOn`) is a warning. The reach is the `module` role: on a component a callback prop IS the contract with its parent. It is a warning, and not an error, because one subject answers this way honestly — one whose PRODUCT is a call it was handed (a listener, an output port) — and the shape is the same one either way.',
         family: 'D',
-        fix: 'Assert the returned value or the resulting state — something the subject produced.',
+        fix: 'Assert the returned value or the resulting state — or say in a line that the call IS the product.',
         id: 'D17',
         rationale:
             'The subject can return anything, raise anything, or return nothing at all, and every assertion still passes.',
@@ -351,7 +351,7 @@ export const RULE_DOCS = {
     'd18w-existence-only-oracle': {
         channel: 'statique',
         convention:
-            'A test whose ONE assertion is an existence check (`toBeDefined`, `toBeTruthy`, `not.toBeNull`, `not.toBeUndefined`, a bare `not.toThrow` or a bare `toHaveBeenCalled`) is a warning. Beside a real assertion the same check is a precondition and stays silent.',
+            'A test whose ONE assertion is an existence check (`toBeDefined`, `toBeTruthy`, `not.toBeNull`, `not.toBeUndefined`, a bare `toThrow` or a bare `toHaveBeenCalled`) is a warning. Beside a real assertion the same check is a precondition and stays silent, `expect.soft` counts as an assertion, and a NEGATED bare matcher (`not.toHaveBeenCalled`) is a precise proof rather than a loose one.',
         family: 'D',
         fix: 'Assert the value, a golden, or a row.',
         id: 'D18',
@@ -362,7 +362,7 @@ export const RULE_DOCS = {
     'd19w-probe-cluster': {
         channel: 'statique',
         convention:
-            "Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html`, `value`, `error` — with no `toMatch('<file>')` on it is a warning.",
+            "Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatch('<file>')` on it is a warning. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.",
         family: 'D',
         fix: "Golden the subject: `expect(result.stdout).toMatch('<case>.txt')`, tokens for what moves.",
         id: 'D19',

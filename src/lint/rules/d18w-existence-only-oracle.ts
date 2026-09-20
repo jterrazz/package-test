@@ -9,7 +9,11 @@ const EXISTENCE_MATCHERS = new Set(['toBeDefined', 'toBeTruthy']);
 /** Matchers that are an existence check only under `not`. */
 const NEGATED_EXISTENCE = new Set(['toBeNull', 'toBeUndefined']);
 
-/** Matchers that assert nothing once their argument is left out. */
+/**
+ * Matchers that assert nothing once their argument is left out — and only in
+ * the affirmative. `expect(onClose).not.toHaveBeenCalled()` is the precise
+ * opposite: it states that nothing happened, which nothing else can state.
+ */
 const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
 
 /**
@@ -20,6 +24,10 @@ const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
  * rather than what it answered. A single one beside a real assertion is a
  * precondition and stays silent — the rule fires only when it is the whole
  * proof.
+ *
+ * A NEGATED bare matcher is the opposite of a loose one:
+ * `expect(onClose).not.toHaveBeenCalled()` passes for one state of the world
+ * and fails for every other, so it is a whole proof on its own.
  */
 export const d18wExistenceOnlyOracle: LintRule = {
     create(context: RuleContext): Visitor {
@@ -36,7 +44,7 @@ export const d18wExistenceOnlyOracle: LintRule = {
                     return;
                 }
                 let assertions = 0;
-                let existence = 0;
+                let matcher: string | undefined;
                 walk(callback, (inner) => {
                     const assertion = assertionOf(inner);
                     if (assertion === undefined) {
@@ -48,13 +56,13 @@ export const d18wExistenceOnlyOracle: LintRule = {
                     const isExistence =
                         (!negated && EXISTENCE_MATCHERS.has(assertion.matcher)) ||
                         (negated && NEGATED_EXISTENCE.has(assertion.matcher)) ||
-                        (bare && BARE_ONLY.has(assertion.matcher));
+                        (!negated && bare && BARE_ONLY.has(assertion.matcher));
                     if (isExistence) {
-                        existence += 1;
+                        matcher = `${negated ? 'not.' : ''}${assertion.matcher}`;
                     }
                 });
-                if (assertions === 1 && existence === 1) {
-                    context.report({ messageId: 'existenceOnly', node });
+                if (assertions === 1 && matcher !== undefined) {
+                    context.report({ data: { matcher }, messageId: 'existenceOnly', node });
                 }
             },
         };
@@ -63,7 +71,7 @@ export const d18wExistenceOnlyOracle: LintRule = {
         docs: RULE_DOCS['d18w-existence-only-oracle'],
         messages: {
             existenceOnly:
-                '`toBeDefined()` passes for almost anything: assert the value, a golden, or a row.',
+                '`{{matcher}}()` passes for almost anything and is this test\'s only oracle: assert the value, a golden, or a row.',
         },
         type: 'suggestion',
     },
