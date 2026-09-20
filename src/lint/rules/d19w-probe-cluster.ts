@@ -16,23 +16,24 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 const DEFAULT_THRESHOLD = 3;
 
 /**
- * The accessors a golden can pin whole — a stream, a rendered page, a value.
+ * The accessors a golden can pin whole — a stream, a rendered page, a tree.
  *
  * A probe on `result.status` is not on this list: a status IS one value, and
- * d15w already owns the test whose only oracle is one.
+ * d15w already owns the test whose only oracle is one. Neither are `value` and
+ * `error`: a returned value and a raised error are single readings that a
+ * component's `input.value` and a refusal's message spell the same way, and
+ * "golden the subject" is not the fix for three reads of one string.
  */
 const GOLDENABLE = new Set([
     'alternates',
     'canonical',
     'content',
-    'error',
     'head',
     'html',
     'meta()',
     'stderr',
     'stdout',
     'tree',
-    'value',
 ]);
 
 /** The matchers that read a PIECE of a subject rather than the whole of it. */
@@ -96,7 +97,10 @@ export const d19wProbeCluster: LintRule = {
                         goldened.add(subject);
                         return;
                     }
-                    if (PROBES.has(assertion.matcher)) {
+                    // A negated probe states an ABSENCE — three of them are
+                    // Three things the output must not carry, which no golden
+                    // Of what it does carry can say.
+                    if (PROBES.has(assertion.matcher) && !assertion.modifiers.includes('not')) {
                         probes.set(subject, (probes.get(subject) ?? 0) + 1);
                     }
                 });

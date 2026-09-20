@@ -378,13 +378,33 @@ export function firstMarkerAt(markers: MarkerComment[], marker: Marker): number 
     return found?.start ?? -1;
 }
 
-/** Is this an `expect(…)` call — the bare identifier callee, no chain? */
+/** The two forms of `expect` that open a chain on a subject of their own. */
+const EXPECT_OPENERS = new Set(['poll', 'soft']);
+
+/**
+ * Is this an `expect(…)` call — the bare form, or one of the two openers that
+ * take a subject of their own (`expect.soft(x)`, `expect.poll(() => x)`)?
+ *
+ * A soft assertion is an assertion: a rule that counted only the bare form read
+ * a test with two oracles as a test with one.
+ */
 export function isExpectCall(node: AstNode | undefined): boolean {
     if (node?.type !== 'CallExpression') {
         return false;
     }
     const callee = child(node, 'callee');
-    return callee?.type === 'Identifier' && callee.name === 'expect';
+    if (callee?.type === 'Identifier') {
+        return callee.name === 'expect';
+    }
+    if (callee?.type !== 'MemberExpression') {
+        return false;
+    }
+    const opener = memberPropertyName(callee);
+    return (
+        identifierName(child(callee, 'object')) === 'expect' &&
+        opener !== undefined &&
+        EXPECT_OPENERS.has(opener)
+    );
 }
 
 /** An assertion taken apart: what was asserted, how, and through which modifiers. */

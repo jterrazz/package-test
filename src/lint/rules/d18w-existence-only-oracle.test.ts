@@ -54,5 +54,22 @@ ruleTester().run('d18w-existence-only-oracle', asOxlintRule(d18wExistenceOnlyOra
             });`,
             filename: TEST_FILE,
         },
+        // A precise negative: nothing happened, which nothing else states.
+        {
+            code: `test('stays open', () => {
+                open({ onClose });
+                expect(onClose).not.toHaveBeenCalled();
+            });`,
+            filename: TEST_FILE,
+        },
+        // A soft assertion is an assertion — two oracles, not one.
+        {
+            code: `test('builds', () => {
+                const result = build();
+                expect.soft(result.name).toBe('widget');
+                expect(result).toBeDefined();
+            });`,
+            filename: TEST_FILE,
+        },
     ],
 });

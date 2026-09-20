@@ -62,6 +62,26 @@ ruleTester().run('d19w-probe-cluster', asOxlintRule(d19wProbeCluster), {
             });`,
             filename: SPEC_FILE,
         },
+        // Three absences: nothing a golden of what the output DOES carry states.
+        {
+            code: `test('escapes', async () => {
+                const result = await render();
+                expect(result.html).not.toContain('<img src=x');
+                expect(result.html).not.toContain('<script');
+                expect(result.html).not.toContain('onerror=');
+            });`,
+            filename: SPEC_FILE,
+        },
+        // A value is one reading, however many times it is read.
+        {
+            code: `test('fills', async () => {
+                const input = field('Name');
+                expect(input.value).toBe('');
+                expect(input.value).toBe('a');
+                expect(input.value).toBe('ab');
+            });`,
+            filename: SPEC_FILE,
+        },
         // The threshold is an option.
         {
             code: `test('builds', async () => {

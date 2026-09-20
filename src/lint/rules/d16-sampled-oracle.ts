@@ -6,6 +6,7 @@ import {
     isExpectCall,
     isSampledValue,
     isTestCallee,
+    memberPath,
     walk,
 } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
@@ -18,6 +19,24 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
  * argument of `expect`.
  */
 const STRUCTURAL_MATCHERS = new Set(['toEqual', 'toMatch', 'toMatchObject', 'toStrictEqual']);
+
+/** The two calls that PIN the clock — under one of them, a reading is a constant. */
+const PINS = new Set(['clock.advance', 'clock.at']);
+
+/** Does this test pin the clock it then reads? */
+function pinsTheClock(callback: AstNode): boolean {
+    let pinned = false;
+    walk(callback, (inner) => {
+        if (inner.type !== 'CallExpression') {
+            return;
+        }
+        const path = memberPath(child(inner, 'callee'));
+        if (path !== undefined && PINS.has(path)) {
+            pinned = true;
+        }
+    });
+    return pinned;
+}
 
 /** Every sampled call at or under `node`. */
 function sampledUnder(node: AstNode | undefined): AstNode[] {
@@ -44,6 +63,11 @@ function sampledUnder(node: AstNode | undefined): AstNode[] {
  * structural matcher's expected shape) — because the wider net is d16w's, at
  * warn, where a false positive costs a line rather than a build.
  *
+ * A test that PINS the clock is out of reach: under `clock.at()` a reading is
+ * a constant the test chose, and `expect(row.createdAt).toEqual(new Date())`
+ * is the comparison the message asks for. Reporting it would have named the
+ * fix the author had already applied.
+ *
  * `*.specification.ts(x)` is out of reach by role: a runner's own startup
  * legitimately samples (a per-run label, a temp directory).
  */
@@ -63,7 +87,7 @@ export const d16SampledOracle: LintRule = {
                     return;
                 }
                 const callback = findTestCallback(childList(node, 'arguments'));
-                if (callback === undefined) {
+                if (callback === undefined || pinsTheClock(callback)) {
                     return;
                 }
                 walk(callback, (inner) => {
