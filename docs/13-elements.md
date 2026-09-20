@@ -216,6 +216,8 @@ The window is asked BEFORE the verb acts, not after it fails: a verb waits its w
 
 It widens on exactly one match, never on several: a name two elements carry in part is the ambiguity the old default hid, and the window may not resolve it by guessing which one the author meant. That descriptor designates nothing, as W3 says, and the refusal is the one to read.
 
+**The name it prints is the ACCESSIBLE name, and the whole of it.** It is read off the element's ARIA snapshot — the browser's own name computation, which is what the descriptor matched on — and never off the text content: a button holding two inline children reads as `Experiments9` through its text and is named "Experiments 9", and a field's name is its label, which its text carries nothing of. Nor is it truncated: a name cut at eighty characters, mid-word, designates nothing when it is written back. The one descriptor whose printed name is TEXT is `content()`, because text is what it matches. On a device the name is what the device reports as the element's label.
+
 **The line goes to stderr**, and never to the console. Vitest CAPTURES the console and its default reporter prints nothing of what it captured, so a warning written with `console.warn` is invisible in the very run that fired it — `npm test` showed zero lines on a run that had one, and a deadline nobody can see is a deadline nobody meets. The node-side adapters write the line to the runner's own stderr; a mounted component, which runs IN the page and has no stderr, hands it back to the node side through `server.commands`. Nothing but a plain `vitest --run` is needed to read it.
 
 ## `testId()` — the one escape hatch

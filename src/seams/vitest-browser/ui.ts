@@ -30,6 +30,7 @@ export type DomMount = (container: HTMLElement) => (() => void) | void;
 declare module 'vitest/browser' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- `BrowserCommands` is vitest's own interface and only an interface merges into it
     interface BrowserCommands {
+        ariaNode: (selector: string) => Promise<string>;
         ariaTree: () => Promise<string>;
         goldenRead: (name: string) => Promise<null | string>;
         goldenWrite: (name: string, content: string) => Promise<string>;
