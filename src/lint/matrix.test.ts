@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { COLUMNS } from './facet-matrix.js';
-import { matrixRows, renderMatrix, spliceMatrix } from './matrix.js';
+import { layers, matrixRows, renderMatrix, spliceLayers, spliceMatrix } from './matrix.js';
 
 /** The repository root, from this module's place inside `src/lint/`. */
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -58,5 +58,21 @@ describe('capability matrix (meta-test K6)', () => {
         // Then - regenerating reproduces them exactly (edit the source, not the projection)
         expect(spliceMatrix(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
         expect(renderMatrix(ROOT)).toBe(read('skills/jterrazz-test/references/matrix.md'));
+    });
+
+    test('the layered reading is byte-identical to a fresh generation', () => {
+        // Given - the layers block chapter 03 carries
+        // Then - regenerating reproduces it exactly, counts included
+        expect(spliceLayers(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
+    });
+
+    test('every layer of the reading carries files', () => {
+        // Given - the four layers the chapter publishes
+        // Then - none of them is a claim with nothing behind it
+        const found = layers(ROOT);
+        expect(found).toHaveLength(4);
+        for (const layer of found) {
+            expect(layer.count, `${layer.layer} is empty`).toBeGreaterThan(0);
+        }
     });
 });

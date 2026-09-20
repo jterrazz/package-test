@@ -84,6 +84,23 @@ The fixture apps the specs drive live in the pool: `app` and `website-app` for t
 
 **The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component-app/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel, a responsive note, a control that refuses input and a pair of links whose names overlap. It is not under `_fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
+## The layered reading
+
+The package proves itself in four layers, and they are meant to be read from the inside out: a module against its own exports, a rule against its own fixtures, a facet against its own tree, and the corpus against what a meta-test says it must keep true. Each layer judges something the one below it cannot.
+
+<!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: src/lint/matrix.ts -->
+
+| Layer                             | Where                                                   | What it judges                                                           | Files |
+| --------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
+| Module tests                      | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 66    |
+| Rule tests                        | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
+| The package’s own specs           | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 80    |
+| The lint suite and the meta-tests | `specs/lint/**`                                         | the built binary end to end, and what the corpus must keep true          | 88    |
+
+<!-- /GENERATED:layers -->
+
+The counts are generated: a layer that stops growing while the surface does is visible here before it is visible in a bug.
+
 ## The lint suite is end-to-end
 
 `specs/lint/**` runs the REAL oxlint binary and the real checker over the fixture projects and goldens their output, grouped by convention family (`runners/`, `chains/`, `files/`, `assertions/`, `imports/`, `architecture/`, `hygiene/`, `website/`, `checker/`, `meta/`). Because it loads `dist/oxlint.js`, `npm run build` must precede it — the same ordering `npm run lint` depends on.

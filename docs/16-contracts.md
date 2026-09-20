@@ -251,7 +251,7 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 That is the ONE escape rule M3 sanctions, and it is narrow because the upstream option carries no allow-list. A subject whose own code cancels a body keeps `vi.stubGlobal('fetch')`, behind a directive written on the call that states the defect:
 
 ```typescript
-// oxlint-disable-next-line vitest/no-restricted-vi-methods -- reason: the subject cancels the reply body, which never settles through intercept() under msw's node interceptor (docs/10 § A cancelled body does not settle)
+// oxlint-disable-next-line vitest/no-restricted-vi-methods -- reason: the subject cancels the reply body, which never settles through intercept() under msw's node interceptor (docs/16 § A cancelled body does not settle)
 vi.stubGlobal('fetch', fetchStub);
 ```
 

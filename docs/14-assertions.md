@@ -209,6 +209,46 @@ The runner handle itself also exposes a `docker(containerId)` reader (returned b
 
 **The sync container-read exception (as implemented):** container property reads — `exists`, `running`, `status`, `file(path).exists`, `file(path).content`, log streams — are synchronous, backed by one-shot `docker inspect` / `docker exec` shell-outs captured lazily on first access. This is the documented exception to the "await only IO matchers" rule (D2): only the _matchers_ (`toBeRunning`) are async; property reads stay sync so container assertions read exactly like host-side ones.
 
+## `result.tree` — the accessibility outline (website, mobile, component)
+
+The one golden a rendered surface wants. It is the outline a screen reader walks, it is the same dialect on a page, a screen and a mounted unit, and it is deterministic where a screenshot is not — a font hint or a scrollbar moves a picture and moves nothing here.
+
+```typescript
+await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml');
+```
+
+`toMatch` is **awaited** on it: a tree captured inside a page crosses the browser seam through a server command, so the read is IO. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([13 — Elements](13-elements.md#modifiers)).
+
+## `result.html` — the markup (component)
+
+The escape hatch for what the tree cannot say: a class name, a `data-` attribute, an element the accessibility tree flattens away.
+
+```typescript
+expect(result.html).toContain('row row--live');
+```
+
+Reach for it after the tree, not instead of it. A test that asserts only on markup is testing an implementation the user never meets, which is the failure the vocabulary exists to prevent.
+
+## `result.value` / `result.error` — what a call returned (integration)
+
+`.call()` resolves one way or the other, and both sides are subjects.
+
+`result.value` is a **JSON accessor** when the call returned an object and a **text accessor** when it returned a string, so the same golden vocabulary reaches both:
+
+```typescript
+await expect(result.value).toMatch('found.json');
+expect(result.value.text).toContain('Alice');
+```
+
+`result.error` is what the call THREW, read as a subject of its own — a refusal is an answer, and it deserves a golden like any other:
+
+```typescript
+await expect(result.error).toMatch('refused.txt');
+await expect(result.error).toBeEmpty(); // nothing was thrown
+```
+
+A call that threw leaves `result.value` empty and vice versa; asserting on both in one test is asserting on a branch that cannot happen.
+
 ## Two helpers that are not matchers
 
 `expect()` is the only way an assertion is made (rule D1), but two gestures around an assertion had been hand-written in every repository that needed them.
@@ -248,21 +288,9 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 `.not` is supported on every framework matcher.
 
-## Update mode and frozen fixtures
+## Update mode
 
-`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching `toMatch` fixture from the actual output instead of failing — token-preserving, see [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved). This is the right default for a **positive** golden, and exactly wrong for a **negative** one: a fixture that is _deliberately wrong_ (its diff is the behaviour under test) or _deliberately missing_ (its error is the behaviour under test) gets silently overwritten, and the assertion stops testing anything.
-
-Pass `{ frozen: true }` to opt a single fixture out — it is then never written in update mode, and a frozen mismatch/missing fixture still throws:
-
-```typescript
-// The diff rendering is the subject — freeze the wrong fixture so TEST_UPDATE never rewrites it.
-const message = await catchMessage(() =>
-    expect(result.response).toMatch('wrong-body.http', { frozen: true }),
-);
-expect(text(message)).toMatch('errors/wrong-body-error.txt'); // the error golden still updates
-```
-
-`{ frozen: true }` works on every fixture subject (`response`, `stdout`, `stderr`, `json`, `directory`, `filesystem`). The rule `d13w-unfrozen-negative-fixture` flags a `toMatch` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
+`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching `toMatch` fixture from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The engine, the flag, the discipline it asks for and the frozen two-pass are all [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matcher the flag reaches, and that is `toMatch`, on every fixture subject.
 
 ## Common mistakes
 
