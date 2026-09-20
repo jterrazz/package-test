@@ -1137,7 +1137,7 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
-            'Every constructor has a `specs/<facet>/` tree in this package; `mobile` is the one exception, with its reason stated.',
+            'Every constructor has a `specs/<facet>/` tree in this package. Two subjects answer differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component-app/`; `mobile` has no tree at all, because CI provisions no simulator.',
         family: 'M',
         fix: 'Specify the facet on the package itself before a rule presumes it.',
         id: 'M1',

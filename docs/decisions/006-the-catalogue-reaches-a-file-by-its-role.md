@@ -150,6 +150,42 @@ D19w called three reads of one `value` a cluster.
 The chapters are renumbered ONCE, in the same release, so a link repointed by
 this change is repointed for good.
 
+## What the proof holds, and what it does not
+
+The release proof of this wave reads: the package's own tree green under
+`typescript check`, the `unit` project inside its 12-second budget, the
+catalogue's own meta-tests holding freshness, completeness, reach and channel,
+and the R8 counts above re-derivable from the branch head. All of it holds.
+
+**Suppressions are the one stated exception.** The proof as written asked for
+zero directives added to this package's own tree, and the wave adds about a
+dozen outside fixtures and goldens (`typescript check` reports 68 in total).
+They are three shapes, and none of them is debt: a test whose SUBJECT is the
+primitive the rule bans — the clock seam, `waitUntil`, the adapter deadlines,
+the marker rule's own one-line fixture; a negative spec whose violation IS the
+behaviour under test; and one skipped spec, the repro of the seam defect chapter
+10 names, which leaves the day the seam answers. A rule cannot exempt the test
+that proves it without exempting the class it guards, so the directive carries
+the reason instead. The number is written here so the next release holds it
+there: 68, and a rise asks for the same reading.
+
+**Not done in this cut**, deliberately, each with the reason:
+
+- **The chapter 14 and 15 duplicates.** W3, `within`, `{ exact: false }` and the
+  declared-backend semantics are restated in both facet chapters. Their owner is
+  the elements chapter, which the renumbering creates — removing them now would
+  leave the vocabulary with no page to live on. They leave with it.
+- **The eight hand-written skill references.** `skills/jterrazz-test/references/`
+  still duplicates chapters; their stale content is repaired, and the skill's own
+  rebuild is the renumbering's.
+- **`response.body.cancel()`.** A seam defect, not a catalogue one: chapter 10
+  states it and M3's row names the one suppression it sanctions, with the repro
+  skipped beside the other intercept specs.
+- **W4 stays a runtime row** rather than a type one, for the reason written in
+  `src/type-channel.test-d.ts`.
+- **The three statuses.** ADR-006, 007 and 008 are `Proposed`; only the owner
+  writes `Accepted`, in the commit that cuts the version.
+
 ## Consequences
 
 - A reader deciding whether a rule applies to the file in front of them reads
