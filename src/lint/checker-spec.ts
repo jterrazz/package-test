@@ -1,18 +1,18 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../integrations/yaml/document.js';
-import type { Node, Pair, YAMLMap } from '../integrations/yaml/document.js';
-import { resolveFixtureSource } from '../specification/facets/_common/fixtures.js';
-import { GROUND_FIXTURES } from '../specification/facets/_common/ground.js';
+import { resolveFixtureSource } from '../core/chain/fixtures.js';
+import { GROUND_FIXTURES } from '../core/chain/ground.js';
 import {
     assertedStreams,
     DOCUMENT_KEYS,
     readSpecFile,
     RUN_KEYS,
     SPEC_EXTENSION,
-} from '../specification/literate/spec-document.js';
-import type { SpecDocument, SpecFile } from '../specification/literate/spec-document.js';
+} from '../core/literate/spec-document.js';
+import type { SpecDocument, SpecFile } from '../core/literate/spec-document.js';
+import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../seams/yaml/document.js';
+import type { Node, Pair, YAMLMap } from '../seams/yaml/document.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { codeOf } from './rule-code.js';
 

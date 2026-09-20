@@ -5,7 +5,7 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 ## Mental model
 
 - **Five constructors, and only five.** `specification.api()`, `.jobs()`, `.cli()`, `.website()`, `.mobile()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. A sixth subject is a decision before it is a constructor.
-- **Four layers with declared edges.** `specification/` (no external imports), `integrations/<dep>/` (one folder per dependency), `vitest/` (all runner coupling), `lint/` (no runtime imports). The map is stated as `FRAMEWORK_LAYERS` in `oxlint.config.ts` and enforced from there.
+- **Five trees with declared edges.** `core/` (what every facet is made of, no external imports), `facets/<facet>/` (the same four files in each), `seams/<dep>/` (one folder per dependency), `runner/` (the config side of the runner coupling), `lint/` (no runtime imports). The map is stated as `FRAMEWORK_LAYERS` in `oxlint.config.ts` and enforced from there.
 - **The code owns the rules.** A mechanized rule's normative sentence lives in `src/lint/manifest.ts` beside its implementation, and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
 - **The package specifies itself with itself.** `specs/` is written with `@jterrazz/test` against fixture apps, and a family of meta-tests runs the framework on its own output.
 - **The build precedes the lint.** `oxlint.config.ts` and the lint specs load `./dist/oxlint.js`, so `npm run build` comes first — always.

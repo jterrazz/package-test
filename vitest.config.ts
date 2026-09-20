@@ -9,7 +9,7 @@ import {
     jobs,
     unit,
     website,
-} from './src/vitest/index.js';
+} from './src/runner/index.js';
 
 /**
  * The package eats its own preset: `defineSpecConfig()` sets the artefact

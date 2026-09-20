@@ -16,26 +16,26 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
     invalid: [
         // Deep specification-layer import from a spec.
         {
-            code: 'import { match } from "../../src/specification/matching/match.js";',
+            code: 'import { match } from "../../src/core/matching/match.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
         // The integrations layer is internal — from any spec, no exception.
         {
-            code: 'import { postgres } from "../../src/integrations/postgres/postgres.js";',
+            code: 'import { postgres } from "../../src/seams/postgres/postgres.js";',
             errors: 1,
             filename: '/repo/specs/api/seeding/seeding.test.ts',
         },
         // Not even from a spec whose subject IS the adapter: that probe is a
         // Module test beside its module.
         {
-            code: 'import { redis } from "../../../src/integrations/redis/redis.js";',
+            code: 'import { redis } from "../../src/seams/redis/redis.js";',
             errors: 1,
             filename: '/repo/specs/integration/redis/redis.test.ts',
         },
         // The vitest layer is internal too.
         {
-            code: 'import { registerMatchers } from "../../src/vitest/matchers.js";',
+            code: 'import { registerMatchers } from "../../src/core/goldens/matchers.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
@@ -72,7 +72,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
         // A seam probe reaches its adapter through the public entry, which
         // Re-exports it — that is the whole point of the entry.
         {
-            code: 'import { redis } from "../../../src/index.js";',
+            code: 'import { redis } from "../../index.js";',
             filename: '/repo/specs/integration/redis/redis.test.ts',
         },
         // Every subpath the package's own `exports` map publishes is exempt.
@@ -92,8 +92,8 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
         },
         // Outside specs/ the rule is inert.
         {
-            code: 'import { match } from "../specification/matching/match.js";',
-            filename: '/repo/src/vitest/matchers.ts',
+            code: 'import { match } from "../matching/match.js";',
+            filename: '/repo/src/core/goldens/matchers.ts',
         },
         // Consumer form — the ROOT entry is what F3 points a spec at.
         {

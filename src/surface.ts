@@ -14,14 +14,14 @@
  * too: one `declare module` for one published `types` entry.
  */
 
-import type { ContainerAccessor as ContainerAccessorType } from './integrations/docker/container-accessor.js';
-import type { DirectoryAccessor as DirectoryAccessorType } from './specification/facets/_common/result/directory.js';
-import type { FilesystemAccessor as FilesystemAccessorType } from './specification/facets/_common/result/filesystem.js';
-import type { JsonAccessor as JsonAccessorType } from './specification/facets/_common/result/json.js';
-import type { MatchFixtureOptions as MatchFixtureOptionsType } from './specification/facets/_common/result/match-options.js';
-import type { ResponseAccessor as ResponseAccessorType } from './specification/facets/_common/result/response.js';
-import type { TableAccessor as TableAccessorType } from './specification/facets/_common/result/table.js';
-import type { TextAccessor as TextAccessorType } from './specification/facets/_common/result/text.js';
+import type { DirectoryAccessor as DirectoryAccessorType } from './core/result/directory.js';
+import type { FilesystemAccessor as FilesystemAccessorType } from './core/result/filesystem.js';
+import type { JsonAccessor as JsonAccessorType } from './core/result/json.js';
+import type { MatchFixtureOptions as MatchFixtureOptionsType } from './core/result/match-options.js';
+import type { ResponseAccessor as ResponseAccessorType } from './core/result/response.js';
+import type { TableAccessor as TableAccessorType } from './core/result/table.js';
+import type { TextAccessor as TextAccessorType } from './core/result/text.js';
+import type { ContainerAccessor as ContainerAccessorType } from './seams/docker/container-accessor.js';
 
 // The component facet — the chain lives in whichever build can run it (the
 // Page's), and the SHAPE is stated once so both entries publish the same one.
@@ -30,24 +30,19 @@ export type {
     ComponentScenario,
     ComponentVisitor,
     RenderSubject,
-} from './specification/facets/component/component.types.js';
-export type { RenderResult } from './specification/facets/component/component.result.js';
-export type { RenderedText } from './specification/facets/component/rendered-text.js';
-export type { ComponentUi, DomMount } from './integrations/vitest-browser/ui.js';
+} from './facets/component/component.types.js';
+export type { RenderResult } from './facets/component/component.result.js';
+export type { RenderedText } from './facets/component/rendered-text.js';
+export type { ComponentUi, DomMount } from './seams/vitest-browser/ui.js';
 
 // Match — dynamic values in assertions and fixtures
-export {
-    type CaptureScope,
-    match,
-    Matcher,
-    type MatcherKind,
-} from './specification/matching/match.js';
+export { type CaptureScope, match, Matcher, type MatcherKind } from './core/matching/match.js';
 
 // Accessors a page can build: pure projections over a captured value. TYPES,
 // Like every other accessor — `text()` is the one that HANDS one out.
-export type { JsonAccessor } from './specification/facets/_common/result/json.js';
-export type { TableAccessor } from './specification/facets/_common/result/table.js';
-export type { TextAccessor } from './specification/facets/_common/result/text.js';
+export type { JsonAccessor } from './core/result/json.js';
+export type { TableAccessor } from './core/result/table.js';
+export type { TextAccessor } from './core/result/text.js';
 
 // Ports — the shapes the element vocabulary and the visitors speak
 export type {
@@ -63,7 +58,7 @@ export type {
     LandmarkKind,
     Visitor,
     VisitScenario,
-} from './specification/ports/browser.port.js';
+} from './core/ports/browser.port.js';
 export type {
     DeviceOpenOptions,
     DevicePort,
@@ -75,7 +70,7 @@ export type {
     MobileScenario,
     MobileVisitor,
     ScreenNode,
-} from './specification/ports/device.port.js';
+} from './core/ports/device.port.js';
 
 // The element vocabulary — user-facing descriptors, shared by visit (website),
 // Render (component) and open (mobile) scenarios: ONE vocabulary, three facets.
@@ -108,26 +103,26 @@ export {
     testId,
     valued,
     within,
-} from './specification/facets/website/elements.js';
+} from './core/elements/elements.js';
 
 // Contracts — the ONE way to declare what the outside world replies
-export { anthropic } from './integrations/anthropic/anthropic.js';
+export { anthropic } from './seams/anthropic/anthropic.js';
 export {
     http,
     type HttpContractFilter,
     type HttpResponseInit,
     type HttpStreamInit,
     type SseEvent,
-} from './specification/contracts/http.js';
-export { type TextFilter } from './specification/contracts/filters.js';
-export { openai } from './integrations/openai/openai.js';
+} from './core/contracts/http.js';
+export { type TextFilter } from './core/contracts/filters.js';
+export { openai } from './seams/openai/openai.js';
 export {
     type Contract,
     type ContractInput,
     type Contracts,
     defineContract,
     defineContracts,
-} from './specification/contracts/contract.js';
+} from './core/contracts/contract.js';
 export type {
     ContractRequest,
     ContractResponder,
@@ -135,24 +130,24 @@ export type {
     ContractResponseValue,
     MatchableRequest,
     StreamBody,
-} from './specification/contracts/types.js';
+} from './core/contracts/types.js';
 // The module-scope double — the VALUE is each entry's (one engine per runtime);
 // The shape is stated here so the two surfaces can only publish the same one.
-export type { Intercept, InterceptOptions, InterceptScope } from './integrations/msw/scope.js';
+export type { Intercept, InterceptOptions, InterceptScope } from './core/contracts/intercept.js';
 
 // Mock
-export { mockOf, type MockOfOptions, type MockPort } from './vitest/mock-of.js';
+export { mockOf, type MockOfOptions, type MockPort } from './core/doubles/mock-of.js';
 
 // Time — the one primitive, real in both runtimes
-export { clock, type PinnedClock } from './vitest/clock.js';
+export { clock, type PinnedClock } from './core/clock/clock.js';
 
 // Assertions that are not matchers: a value that must be there, and a
 // Condition that has to become true.
-export { required } from './specification/assertions/required.js';
-export { waitUntil, type WaitUntilOptions } from './specification/assertions/wait-until.js';
+export { required } from './core/assertions/required.js';
+export { waitUntil, type WaitUntilOptions } from './core/assertions/wait-until.js';
 
 // Matcher options (per-call `toMatch(name, { frozen })`)
-export type { MatchFixtureOptions } from './specification/facets/_common/result/match-options.js';
+export type { MatchFixtureOptions } from './core/result/match-options.js';
 
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.

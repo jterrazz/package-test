@@ -7,53 +7,110 @@ import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import { testing } from './dist/oxlint.js';
 
 /**
- * The four layers of this package and their sanctioned edges (CONVENTIONS I1).
+ * The five trees of this package and their sanctioned edges (CONVENTIONS I1).
  *
- * - `specification/` — zero external imports; may reach `integrations/docker`,
- *   `integrations/hono`, `vitest/matchers`, plus three lazy seams, each opened
- *   for the one module that owns it.
- * - `integrations/<dep>/` — one folder = one external dependency, plus `specification/`.
- * - `vitest/` — the runner coupling: `vitest`, `vitest-mock-extended`,
- *   plus `specification/` and `integrations/docker` (the matchers recognise
- *   the zero-dependency ContainerAccessor subject).
- * - `lint/` — zero runtime imports: no external packages, and from `specification/` only
- *   the pure helpers (the token list, the case conversions, fixture markers, the
- *   root walk a rule must share with the runner, the spec-document parser).
+ * - `core/` — the chain, the results, the elements, the contracts and the
+ *   intercept, the goldens, the clock and the doubles: what every facet is
+ *   made of. It reaches the two seams that carry no engine of their own
+ *   (docker, yaml), the msw engine through the one lazy import each of its
+ *   two openers owns, and — for the type a terminal action hands back — the
+ *   facet module that NAMES that result.
+ * - `facets/<facet>/` — the same four files in every folder
+ *   (`<facet>.specification.ts`, `.chain.ts`, `.result.ts`, `.project.ts`)
+ *   plus what is unique to the facet. It reaches `core/` freely, and each
+ *   constructor opens the one seam its runtime needs.
+ * - `seams/<dep>/` — one folder = one external dependency, plus `core/` and
+ *   the facet vocabulary an adapter projects into (the ambiguity readings,
+ *   the cli result a container exec produces).
+ * - `runner/` — the config surface: the preset, the project index, update
+ *   mode, the literate plugin. It couples to `vite`/`vitest` by design.
+ * - `lint/` — zero runtime imports: no external packages, and from `core/`
+ *   only the pure helpers (the token list, the case conversions, fixture
+ *   markers, the root walk a rule must share with the runner, the
+ *   spec-document parser).
  *
- * `src/index.ts` is the composition root and names no layer, so it is out of
- * scope; module tests and `*.fixtures.ts` files are governed by F2/I4.
+ * `src/index.ts`, `src/surface.ts` and `src/browser/` are composition roots and
+ * name no layer, so they are out of scope; module tests and `*.fixtures.ts`
+ * files are governed by F2/I4.
  */
 const FRAMEWORK_LAYERS = {
-    specification: {
+    core: {
         imports: [
-            'specification/',
-            'integrations/docker/',
-            'integrations/hono/',
-            'integrations/yaml/',
-            'vitest/matchers',
-            // The one time primitive: a chain's `.clock()` pins the calendar
-            // Through the same seam a test takes it through by hand.
-            'vitest/clock',
+            'core/',
+            // A terminal action hands back the FACET's result, and the facet
+            // Folder is where that name lives (`<facet>.result.ts`). The edge
+            // Is a type edge: the builder constructs nothing it imports here.
+            'facets/api/api.result',
+            'facets/cli/cli.result',
+            'facets/cli/literate',
+            'facets/integration/integration.result',
+            'facets/mobile/mobile.result',
+            'facets/website/website.result',
+            'facets/website/serve.adapter',
+            // The two seams that carry no engine: a docker lookup is a shell
+            // Read, a yaml document is a parse.
+            'seams/docker/',
+            'seams/yaml/document',
             // Update-mode detection is a pure env read the literate runner
             // Shares with the matchers — one answer to "are we rewriting?".
-            'vitest/update',
+            'runner/update',
         ],
+        packages: ['vitest', 'vitest-mock-extended'],
         seams: {
-            // The component model reaches its two seams and never the runner:
-            // "after this test", "pin the clock" and "what did the project
-            // Provide" are asked of `integrations/vitest-browser/`, which owns
-            // The `vitest` import the way `src/vitest/` owns the config side.
-            'specification/facets/component/component.chain.ts': [
-                'integrations/msw/',
-                'integrations/vitest-browser/',
-            ],
-            'specification/facets/component/component.types.ts': ['integrations/vitest-browser/'],
-            'specification/facets/mobile/start-mobile.ts': ['integrations/appium/'],
-            'specification/facets/_common/builder.ts': ['integrations/msw/'],
-            'specification/facets/website/start-website.ts': ['integrations/playwright/'],
+            // The contract engine is reached through a lazy import, once per
+            // Opener: the chain's `.intercept()` and the module-scope one.
+            'core/chain/builder.ts': ['seams/msw/'],
+            'core/contracts/intercept.ts': ['seams/msw/'],
         },
     },
-    integrations: {
+    facets: {
+        imports: ['facets/', 'core/', 'runner/facet-project', 'runner/preset', 'runner/update'],
+        packages: ['vite', 'vitest', 'vitest/config', '@vitest/browser-playwright'],
+        seams: {
+            'facets/api/api.specification.ts': ['seams/docker/', 'seams/hono/'],
+            'facets/cli/cli.result.ts': ['seams/docker/'],
+            'facets/cli/cli.specification.ts': ['seams/docker/'],
+            // The component model reaches its two seams and never the runner:
+            // "after this test", "pin the clock" and "what did the project
+            // Provide" are asked of `seams/vitest-browser/`, which owns the
+            // `vitest` import the way `src/runner/` owns the config side.
+            'facets/component/component.chain.ts': ['seams/msw/', 'seams/vitest-browser/'],
+            'facets/component/component.types.ts': ['seams/vitest-browser/'],
+            'facets/component/component.project.ts': ['seams/vitest-browser/commands'],
+            'facets/cli/cli.project.ts': ['runner/literate-plugin'],
+            'facets/mobile/mobile.specification.ts': ['seams/appium/'],
+            'facets/website/website.specification.ts': ['seams/playwright/'],
+        },
+    },
+    lint: {
+        imports: [
+            'lint/',
+            // The .spec.yaml grammar is read by the runner AND by the checker —
+            // One parser, so the file lint accepts is the one the runner runs.
+            'core/literate/spec-document',
+            'seams/yaml/document',
+            'core/matching/match',
+            'core/chain/binding',
+            'core/chain/fixtures',
+            // The four ground names have ONE home; a rule that probed for its
+            // Own copy of them could drift from what the runner resolves.
+            'core/chain/ground',
+            // A9's rule must derive the root with the framework's own walk, not a copy.
+            'core/chain/resolve',
+        ],
+    },
+    runner: {
+        imports: [
+            'runner/',
+            'core/',
+            // The cli project wires the literate door, and the plugin needs the
+            // Facet's own runner to bind a document to.
+            'facets/cli/literate',
+            'facets/',
+        ],
+        packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
+    },
+    seams: {
         folders: {
             anthropic: ['@anthropic-ai/sdk'],
             appium: ['webdriverio'],
@@ -70,41 +127,20 @@ const FRAMEWORK_LAYERS = {
             yaml: ['yaml'],
         },
         imports: [
-            'specification/',
+            'core/',
             // The one module every seam folder reaches for: it owns the
             // Message a MISSING optional peer produces, and a copy of that
             // Message per folder is how the four of them would have drifted.
-            'integrations/peer',
+            'seams/peer',
+            // What an adapter PROJECTS into: the ambiguity readings and the
+            // Result a container exec produces are the facet's vocabulary, and
+            // A seam that copied them would answer in a second dialect.
+            'facets/cli/cli.result',
+            'facets/mobile/ambiguity',
+            'facets/mobile/projection',
+            'facets/website/ambiguity',
+            'facets/website/substring-warning',
         ],
-    },
-    lint: {
-        imports: [
-            'lint/',
-            // The .spec.yaml grammar is read by the runner AND by the checker —
-            // One parser, so the file lint accepts is the one the runner runs.
-            'specification/literate/spec-document',
-            'integrations/yaml/document',
-            'specification/matching/match',
-            'specification/facets/_common/binding',
-            'specification/facets/_common/fixtures',
-            // The four ground names have ONE home; a rule that probed for its
-            // Own copy of them could drift from what the runner resolves.
-            'specification/facets/_common/ground',
-            // A9's rule must derive the root with the framework's own walk, not a copy.
-            'specification/facets/_common/resolve',
-        ],
-    },
-    vitest: {
-        imports: [
-            'specification/',
-            'vitest/',
-            'integrations/docker/',
-            // The component project registers the seam's server-side commands:
-            // The golden pair and the ARIA producer are Browser Mode's, not the
-            // Model's, so they live with the adapter that reads them.
-            'integrations/vitest-browser/commands',
-        ],
-        packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
     },
 };
 
@@ -128,7 +164,17 @@ const config: OxlintConfig = defineConfig(
                 // The vitest layer and the browser-mode seam ARE the sanctioned
                 // Runner coupling (I1) — their `vitest` imports are the
                 // Framework's own seam, not prod leakage.
-                files: ['src/vitest/**', 'src/integrations/vitest-browser/**'],
+                files: [
+                    'src/runner/**',
+                    // A facet's `<facet>.project.ts` IS the runner-config side
+                    // Of that facet — it states the project the kind runs in,
+                    // And states nothing a spec imports.
+                    'src/facets/**/*.project.ts',
+                    'src/seams/vitest-browser/**',
+                    'src/core/clock/**',
+                    'src/core/doubles/**',
+                    'src/core/goldens/**',
+                ],
                 rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
             },
         ],
