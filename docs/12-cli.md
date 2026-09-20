@@ -1,8 +1,8 @@
-# 07 — CLI specs (`specification.cli`)
+# 12 — CLI specs (`specification.cli`)
 
 `specification.cli(bin, options)` tests a command-line binary. Every spec runs the binary in a **fresh, empty temp directory**, captures stdout/stderr/exit code, and exposes the resulting filesystem — and, in Docker-aware mode, the containers the binary spawned. The CLI is always a local binary.
 
-Use it when the subject under test is a process invocation. If the process serves HTTP, test that surface with [api](05-api.md).
+Use it when the subject under test is a process invocation. If the process serves HTTP, test that surface with [api](10-api.md).
 
 ## Creating the runner
 
@@ -237,7 +237,7 @@ So: one reader, beside the leaf. Two or more, in the pool. Write it local first 
 
 ## The chain never reaches a real system
 
-A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a chain proves must come out of its fixture, never out of the machine that happened to run it. A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network connection, or reads the operator's home directory is **a test escaping the sandbox, not extra realism** — it passes on the one laptop where those tools are installed and configured, fails everywhere else, and either way it proves something about that laptop rather than about the binary under test. The HTTP half of the same rule is D7, in [contracts](10-contracts.md).
+A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a chain proves must come out of its fixture, never out of the machine that happened to run it. A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network connection, or reads the operator's home directory is **a test escaping the sandbox, not extra realism** — it passes on the one laptop where those tools are installed and configured, fails everywhere else, and either way it proves something about that laptop rather than about the binary under test. The HTTP half of the same rule is D7, in [contracts](16-contracts.md).
 
 The framework supplies the ground; the chain states the sandbox, in three verbs:
 
@@ -353,7 +353,7 @@ test('lints a shop and reports per-file blocks', async () => {
 
 `result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison (rule D6), with `.text` exposing the raw capture. Text operations are **closed** over the type: `.grep(pattern)` returns a `TextAccessor` (not a string), so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch('block.txt')`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
 
-**Tool output → snapshot per scoped use case (rule D11).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch('<use-case>.txt')` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](08-assertions.md).
+**Tool output → snapshot per scoped use case (rule D11).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch('<use-case>.txt')` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](14-assertions.md).
 
 ## Spec documents — `<case>.spec.yaml`
 
@@ -413,7 +413,7 @@ Everything above `runs:`. Any key outside the table below is a refusal naming th
 
 **`|` and `|-` are the whole newline story.** A block scalar written `|` keeps the final newline of its text; `|-` drops it. The comparison is byte-exact against that, so a command whose output ends with `\n` is written `|`, and one that ends mid-line is written `|-`. There is no normalisation to remember, and no empty last line to spell.
 
-The whole [token vocabulary](09-tokens.md) works in `stdout`, `stderr` and the `files:` texts — `{{url}}`, `{{int}}`, `{{workdir}}`, `{{any}}`, `#ref` captures — and **never** in `description`, `command` or `exit`, which are prose and data. For wording that varies WITHIN a line (a duration phrase, a hostname, a count in a sentence), reach for `{{string}}`, which stops at the end of the line; keep `{{any}}` for a span that genuinely crosses lines.
+The whole [token vocabulary](15-tokens.md) works in `stdout`, `stderr` and the `files:` texts — `{{url}}`, `{{int}}`, `{{workdir}}`, `{{any}}`, `#ref` captures — and **never** in `description`, `command` or `exit`, which are prose and data. For wording that varies WITHIN a line (a duration phrase, a hostname, a count in a sentence), reach for `{{string}}`, which stops at the end of the line; keep `{{any}}` for a span that genuinely crosses lines.
 
 ### `files:` — what the run left behind
 
@@ -484,7 +484,7 @@ The document's JSON Schema ships with the package at `schema/spec.schema.json`, 
 # yaml-language-server: $schema=./node_modules/@jterrazz/test/schema/spec.schema.json
 ```
 
-A schema says which keys exist, not which ORDER they come in — JSON Schema has no vocabulary for the sequence of an object's members. The canonical order (`kind, description, fixture, env, serve, runs`, and `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run) is the `d4b-spec-key-order` lint pass's, which also rewrites it: `npx jterrazz-test-check specs --fix`. The full document family is in [13 — linting](13-linting.md).
+A schema says which keys exist, not which ORDER they come in — JSON Schema has no vocabulary for the sequence of an object's members. The canonical order (`kind, description, fixture, env, serve, runs`, and `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run) is the `d4b-spec-key-order` lint pass's, which also rewrites it: `npx jterrazz-test-check specs --fix`. The full document family is in [19 — linting](19-linting.md).
 
 ### The three doors, one engine
 
@@ -551,7 +551,7 @@ Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, an
 
 A line the comparison ACCEPTED is rendered as equal, with its token — a `{{url}}` that matched is never shown as a `-`/`+` pair against the concrete URL — so the marked lines are the mismatch and nothing else. The stack carries one frame: the run's own `command:` line.
 
-`TEST_UPDATE=1` rewrites **only `exit`, `stdout` and `stderr`, per run**. The ground, the commands and the `files:` assertions are never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. An empty stream loses its key, since absence already asserts emptiness. Placeholders survive by **pattern match**, not by line index, so a token stays a token wherever the line moved to: see [update mode](09-tokens.md#update-mode-tokens-are-preserved).
+`TEST_UPDATE=1` rewrites **only `exit`, `stdout` and `stderr`, per run**. The ground, the commands and the `files:` assertions are never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. An empty stream loses its key, since absence already asserts emptiness. Placeholders survive by **pattern match**, not by line index, so a token stays a token wherever the line moved to: see [update mode](15-tokens.md#update-mode-tokens-are-preserved).
 
 ### When to reach for code
 
@@ -639,4 +639,4 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 
 ## Related
 
-[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [09 — Tokens](09-tokens.md) · [11 — Services](11-services.md)
+[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [17 — Services](17-services.md)

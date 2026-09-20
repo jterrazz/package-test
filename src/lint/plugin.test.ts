@@ -24,12 +24,12 @@ import { anchorOf, CATALOGUE_CHAPTER } from './rule-code.js';
  * Catalogue meta-test — the docs-as-code contract.
  *
  * `src/lint/manifest.ts` is the single source of truth for the mechanized rule
- * catalogue; `docs/12-conventions.md` is the hand-maintained constitution
- * (principles + non-mechanizable criteria) and `docs/13-linting.md` carries the
+ * catalogue; `docs/18-conventions.md` is the hand-maintained constitution
+ * (principles + non-mechanizable criteria) and `docs/19-linting.md` carries the
  * GENERATED catalogue. This test guards two invariants:
  *
  * - **freshness** — running the generator reproduces the committed
- *   `docs/13-linting.md` catalogue and `skills/jterrazz-test/references/rules.md`
+ *   `docs/19-linting.md` catalogue and `skills/jterrazz-test/references/rules.md`
  *   byte-for-byte;
  * - **completeness** — every shipped rule carries `meta.docs`, and every manifest
  *   entry maps to an implementation (a plugin rule / a checker pass) or a
@@ -189,20 +189,20 @@ describe('the upstream options this vocabulary owns (ADR-005)', () => {
 
 describe('conventions catalogue — generation freshness (meta-test)', () => {
     test('the docs/13 catalogue is byte-identical to a fresh generation', () => {
-        // Given - the committed docs/13-linting.md
-        const committed = read('docs/13-linting.md');
+        // Given - the committed docs/19-linting.md
+        const committed = read('docs/19-linting.md');
 
         // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
         expect(spliceCatalog(committed)).toBe(committed);
     });
 
     test('every anchor a rule message links to exists in the generated catalogue', () => {
-        // Given - every `docs/13-linting.md#<id>` a shipped rule's message carries
-        const generated = read('docs/13-linting.md');
+        // Given - every `docs/19-linting.md#<id>` a shipped rule's message carries
+        const generated = read('docs/19-linting.md');
         const links = new Set<string>();
         for (const rule of Object.values(plugin.rules)) {
             for (const message of Object.values(rule.meta?.messages ?? {})) {
-                for (const found of message.matchAll(/docs\/13-linting\.md#(?<id>[\w-]+)/gu)) {
+                for (const found of message.matchAll(/docs\/19-linting\.md#(?<id>[\w-]+)/gu)) {
                     links.add(found.groups?.id ?? '');
                 }
             }
@@ -211,7 +211,7 @@ describe('conventions catalogue — generation freshness (meta-test)', () => {
         // Then - each resolves to a row: a message that links nowhere is worse than one that links to the chapter, because it reads as a route
         expect(links.size).toBeGreaterThan(0);
         for (const id of links) {
-            expect(generated, `dead anchor docs/13-linting.md#${id}`).toContain(anchor(id));
+            expect(generated, `dead anchor docs/19-linting.md#${id}`).toContain(anchor(id));
         }
     });
 
@@ -710,7 +710,7 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
     test('the docs/09 token table matches TOKEN_KINDS exactly', () => {
         // Given - the token reference table's first-column cells (`| `{{kind}}` |`)
         const documented = new Set(
-            read('docs/09-tokens.md')
+            read('docs/15-tokens.md')
                 .split('\n')
                 .map((line) => /^\|\s*`\{\{(?<kind>[a-z0-9]+)\}\}`\s*\|/u.exec(line)?.groups?.kind)
                 .filter((kind): kind is string => kind !== undefined),

@@ -21,10 +21,10 @@ The corpus is `docs/` + `README.md`, mapped by [`docs/README.md`](docs/README.md
 | The projects, the spec tree, the meta-tests       | `docs/03-testing.md`                           |
 | The npm release and what ships                    | `docs/04-operating.md`                         |
 | A facet: api · jobs · cli · website · mobile      | `docs/05` · `06` · `07` · `14` · `15`          |
-| Matchers, the `{{token}}` grammar                 | `docs/08-assertions.md` · `docs/09-tokens.md`  |
-| Contracts and services                            | `docs/10-contracts.md` · `docs/11-services.md` |
-| The principles, and what review must judge        | `docs/12-conventions.md`                       |
-| Rule ids, channels, the generated catalogue       | `docs/13-linting.md`                           |
+| Matchers, the `{{token}}` grammar                 | `docs/14-assertions.md` · `docs/15-tokens.md`  |
+| Contracts and services                            | `docs/16-contracts.md` · `docs/17-services.md` |
+| The principles, and what review must judge        | `docs/18-conventions.md`                       |
+| Rule ids, channels, the generated catalogue       | `docs/19-linting.md`                           |
 
 Decisions this package alone took are in `docs/decisions/`. The agent-facing projection of the corpus is `skills/jterrazz-test/` — a routing layer, not a second copy.
 
@@ -42,6 +42,6 @@ npx vitest --run --project unit   # the loop, no infrastructure
 ## Standing rules
 
 - **A discovery grows a guard, in the same change** (rule K1) — a static rule, a meta-test, or a runtime refusal, or an explicit note of why no channel can hold it.
-- **Never edit a generated file.** `docs/reference/`, the catalogue between the `GENERATED:catalog` markers of `docs/13-linting.md`, `skills/jterrazz-test/references/rules.md` and `schema/spec.schema.json` all come from `npm run docs`. A hand edit fails the sync check and the freshness meta-test.
+- **Never edit a generated file.** `docs/reference/`, the catalogue between the `GENERATED:catalog` markers of `docs/19-linting.md`, `skills/jterrazz-test/references/rules.md` and `schema/spec.schema.json` all come from `npm run docs`. A hand edit fails the sync check and the freshness meta-test.
 - **Four things land with the change that makes them true** — the guard, the regenerated projections, the chapter the behaviour falsified, and the skill when the public surface moved. Each is stated once, in `docs/02-developing.md` § What a change owes.
-- **A rule belongs in the code, a principle in the constitution.** `src/lint/manifest.ts` for the first, `docs/12-conventions.md` for the second; neither ever holds a copy of the other.
+- **A rule belongs in the code, a principle in the constitution.** `src/lint/manifest.ts` for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.

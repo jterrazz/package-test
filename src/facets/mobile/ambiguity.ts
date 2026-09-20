@@ -97,6 +97,6 @@ export function describeMobileAmbiguity(options: {
         'Disambiguate with one of:',
         ...fixes,
         '',
-        'Docs: docs/15-mobile.md#designating-exactly-one-element (CONVENTIONS W3)',
+        'Docs: docs/13-elements.md#designating-exactly-one-element (CONVENTIONS W3)',
     ].join('\n');
 }

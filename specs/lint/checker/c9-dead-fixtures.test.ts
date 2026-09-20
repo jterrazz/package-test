@@ -53,7 +53,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
     });
 
     test('a golden named by a template literal in a table is a reference, not silence', async () => {
-        // Given - the form chapter 17 prescribes for the golden half: one row per case, `toMatch(`${name}.json`)`, three goldens beside the test
+        // Given - the form chapter 06 prescribes for the golden half: one row per case, `toMatch(`${name}.json`)`, three goldens beside the test
         const result = await cli.fixture('$FIXTURES/lint-violations/c9-table-golden-ok/').exec('.');
 
         // Then - none of the three is dead: the literal's static ends say which files the table could have asked for

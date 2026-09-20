@@ -127,7 +127,7 @@ export const g4NoDomInModuleTest: LintRule = {
         docs: RULE_DOCS['g4-no-dom-in-module-test'],
         messages: {
             domGlobal:
-                '`{{name}}` does not exist where a module test runs — a rendered thing is a `.test.tsx` beside its component, collected by the `component()` project (G4 — docs/13-linting.md#g4-no-dom-in-module-test).',
+                '`{{name}}` does not exist where a module test runs — a rendered thing is a `.test.tsx` beside its component, collected by the `component()` project (G4 — docs/19-linting.md#g4-no-dom-in-module-test).',
         },
         type: 'problem',
     },

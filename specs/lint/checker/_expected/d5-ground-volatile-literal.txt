@@ -1,4 +1,4 @@
-[error] specs/cli/report/_expected/summary.txt:1: "{{string}}" is a value the next run will not reproduce — write {{string}} (D5 — see docs/13-linting.md)
-[error] specs/cli/report/_expected/summary.txt:2: "{{string}}" is a value the next run will not reproduce — write {{string}} (D5 — see docs/13-linting.md)
+[error] specs/cli/report/_expected/summary.txt:1: "{{string}}" is a value the next run will not reproduce — write {{string}} (D5 — see docs/19-linting.md)
+[error] specs/cli/report/_expected/summary.txt:2: "{{string}}" is a value the next run will not reproduce — write {{string}} (D5 — see docs/19-linting.md)
 
 conventions checker: 2 error(s) found under {{workdir}}

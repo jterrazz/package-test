@@ -1,5 +1,5 @@
-[error] widget/_seeds/posts.sql:2: `'now'` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()` (C23 — see docs/13-linting.md)
-[error] widget/_seeds/posts.sql:3: `CURRENT_TIMESTAMP` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()` (C23 — see docs/13-linting.md)
-[error] widget/_seeds/posts.sql:4: `NOW()` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()` (C23 — see docs/13-linting.md)
+[error] widget/_seeds/posts.sql:2: `'now'` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()` (C23 — see docs/19-linting.md)
+[error] widget/_seeds/posts.sql:3: `CURRENT_TIMESTAMP` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()` (C23 — see docs/19-linting.md)
+[error] widget/_seeds/posts.sql:4: `NOW()` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()` (C23 — see docs/19-linting.md)
 
 conventions checker: 3 error(s) found under {{workdir}}/specs

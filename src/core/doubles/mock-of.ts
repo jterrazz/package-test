@@ -15,7 +15,7 @@ export type MockOfOptions = {
 
 /**
  * A typed double for an injected port — the fourth rung of the doubles ladder
- * (docs/12-conventions.md), and the only one a module test may build itself.
+ * (docs/18-conventions.md), and the only one a module test may build itself.
  *
  * The type argument is the port: `T` is constrained to `object` and has no
  * default, so a double is always asked for something. A call with no argument

@@ -87,7 +87,7 @@ runs:
           Error: no my-cli.yaml in the current directory
 ```
 
-Same engine as the chain, same `{{token}}` grammar, same `TEST_UPDATE=1` — which rewrites each run's exit code and streams, and nothing else. A JSON Schema ships at `@jterrazz/test/schema` so an editor validates as you type. Full grammar: [docs/07-cli.md](docs/07-cli.md#spec-documents--casespecyaml).
+Same engine as the chain, same `{{token}}` grammar, same `TEST_UPDATE=1` — which rewrites each run's exit code and streams, and nothing else. A JSON Schema ships at `@jterrazz/test/schema` so an editor validates as you type. Full grammar: [docs/12-cli.md](docs/12-cli.md#spec-documents--casespecyaml).
 
 ### Website testing (browser)
 
@@ -155,19 +155,19 @@ Everything below the quick start is stated ONCE, in the chapter that owns it —
 
 | Subject                                                            | Chapter                                                                                                              |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| The six constructors, their options, the handles they return       | [docs/05](docs/05-api.md)–[docs/07](docs/07-cli.md), [docs/14](docs/14-website.md)–[docs/17](docs/17-integration.md) |
-| A rendered component — no constructor, the chain and `component()` | [docs/16](docs/16-component.md)                                                                                      |
-| The chain: setups, terminal actions, what each result carries      | [docs/08](docs/08-assertions.md)                                                                                     |
-| Every matcher, by subject                                          | [docs/08](docs/08-assertions.md)                                                                                     |
-| The `{{token}}` grammar, `#ref` captures, update mode              | [docs/09](docs/09-tokens.md)                                                                                         |
-| Contracts, selection, the provider builders, `intercept()`         | [docs/10](docs/10-contracts.md)                                                                                      |
-| Services, init scripts, per-worker isolation, `process()`          | [docs/11](docs/11-services.md)                                                                                       |
+| The six constructors, their options, the handles they return       | [docs/05](docs/10-api.md)–[docs/07](docs/12-cli.md), [docs/14](docs/08-website.md)–[docs/17](docs/06-integration.md) |
+| A rendered component — no constructor, the chain and `component()` | [docs/16](docs/07-component.md)                                                                                      |
+| The chain: setups, terminal actions, what each result carries      | [docs/08](docs/14-assertions.md)                                                                                     |
+| Every matcher, by subject                                          | [docs/08](docs/14-assertions.md)                                                                                     |
+| The `{{token}}` grammar, `#ref` captures, update mode              | [docs/09](docs/15-tokens.md)                                                                                         |
+| Contracts, selection, the provider builders, `intercept()`         | [docs/10](docs/16-contracts.md)                                                                                      |
+| Services, init scripts, per-worker isolation, `process()`          | [docs/11](docs/17-services.md)                                                                                       |
 | `defineSpecConfig()`, the project helpers, the artefact paths      | [docs/02](docs/02-developing.md#vitest-config-the-preset)                                                            |
-| The conventions, and the catalogue that enforces them              | [docs/12](docs/12-conventions.md), [docs/13](docs/13-linting.md)                                                     |
+| The conventions, and the catalogue that enforces them              | [docs/12](docs/18-conventions.md), [docs/13](docs/19-linting.md)                                                     |
 
 ## Conventions
 
-Normative rules live in the constitution ([docs/12-conventions.md](docs/12-conventions.md)); the generated per-rule catalogue is [docs/13-linting.md](docs/13-linting.md). A facet (`specs/<facet>/`) carries its runner(s) at its root and holds domain folders; the folder follows the assets:
+Normative rules live in the constitution ([docs/18-conventions.md](docs/18-conventions.md)); the generated per-rule catalogue is [docs/19-linting.md](docs/19-linting.md). A facet (`specs/<facet>/`) carries its runner(s) at its root and holds domain folders; the folder follows the assets:
 
 ```
 specs/<facet>/                  # api | jobs | cli | integration | website | mobile
@@ -187,7 +187,7 @@ Every test contains `// Given -` and `// Then -` comments (always both; `// When
 
 ### Convention enforcement — the shipped lint plugin
 
-These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full seven-channel catalogue (each rule, its channel and rationale) is generated into [docs/13-linting.md](docs/13-linting.md).
+These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full seven-channel catalogue (each rule, its channel and rationale) is generated into [docs/19-linting.md](docs/19-linting.md).
 
 ## Requirements
 

@@ -1,8 +1,8 @@
-# 16 — Component specs (`component`)
+# 07 — Component specs (`component`)
 
-`component` specifies a rendered UNIT — a React component, a React hook through a Host written in the test, or a plain DOM function — in a real headless Chromium, the same browser [14 — Website specs](14-website.md) already drives through the same `playwright` peer.
+`component` specifies a rendered UNIT — a React component, a React hook through a Host written in the test, or a plain DOM function — in a real headless Chromium, the same browser [08 — Website specs](08-website.md) already drives through the same `playwright` peer.
 
-Use it when the subject is one thing that draws itself. For a whole served page use [website](14-website.md); for a module that draws nothing, a module test beside it needs no runner at all.
+Use it when the subject is one thing that draws itself. For a whole served page use [website](08-website.md); for a module that draws nothing, a module test beside it needs no runner at all.
 
 Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
 
@@ -39,7 +39,7 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 | Not this                               | Because                                                                              | Route                                                         |
 | -------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
 | A React Native screen                  | The renderer is a real Chromium, and a native view never reaches one                 | jest stays, until the `react-native-web` spike says otherwise |
-| An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [14 — Website specs](14-website.md)          |
+| An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [08 — Website specs](08-website.md)          |
 | A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                         |
 | A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                       |
 
@@ -131,14 +131,14 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 | `.render(<X />, scenario?)` | A React tree                                                                  |
 | `.render((container) => …)` | A DOM function, handed a fresh container; its optional return is the teardown |
 
-The scenario is the When, and assertions stay in the Then (rule W1). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [14 — Website specs § The visitor](14-website.md#the-visitor) — plus the two only a parent has:
+The scenario is the When, and assertions stay in the Then (rule W1). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [13 — Elements § Verbs](13-elements.md#verbs) — plus the two only a parent has:
 
 | Verb           | Description                                               |
 | -------------- | --------------------------------------------------------- |
 | `rerender(ui)` | What a PARENT does: new props, same mount                 |
 | `unmount()`    | What a parent does when it takes the thing off the screen |
 
-`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included: `see(focused(button('Open')))` asks where the keyboard is, `see(disabled(button('Publish')))` whether a control takes input, `see(selected(option('LinkedIn')))` which option a select is on, and `see(valued(field('Title'), 'Launch teaser'))` what a field holds. An option is asserted by PRESENCE — a collapsed select draws none of them — and [14 — Website specs § the vocabulary](14-website.md#the-visitor) owns them all.
+`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included: `see(focused(button('Open')))` asks where the keyboard is, `see(disabled(button('Publish')))` whether a control takes input, `see(selected(option('LinkedIn')))` which option a select is on, and `see(valued(field('Title'), 'Launch teaser'))` what a field holds. An option is asserted by PRESENCE — a collapsed select draws none of them — and [13 — Elements](13-elements.md) owns them all, including the W3 refusal and the exact-name rule.
 
 ## The result
 
@@ -150,7 +150,7 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 | `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message                                                                                              |
 | `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error                                                                                                      |
 
-`toMatch` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [08 — Assertions](08-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
+`toMatch` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
 ```typescript
 await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml');
@@ -158,7 +158,7 @@ expect(result.html).toContain('row row--live');
 await expect(result.errors).toBeEmpty();
 ```
 
-The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [14 — Website specs](14-website.md) produces for a whole page. Goldens live in `_expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([09 — Tokens](09-tokens.md)).
+The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [08 — Website specs](08-website.md) produces for a whole page. Goldens live in `_expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([15 — Tokens](15-tokens.md)).
 
 ## Unique here
 
@@ -226,7 +226,7 @@ const result = await component.render((container) => {
 ```
 
 - **A router is a test's Given.** cap01's and the console's screens render `<Link>` and read `useParams()`; without a router they throw. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
-- **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([10](10-contracts.md#intercept--the-same-double-with-no-chain)).
+- **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([16](16-contracts.md#intercept--the-same-double-with-no-chain)).
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
 ## Pitfalls
@@ -243,4 +243,4 @@ const result = await component.render((container) => {
 
 ## Related
 
-[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [10 — Contracts](10-contracts.md) · [12 — Conventions](12-conventions.md) · [14 — Website specs](14-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)
+[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [18 — Conventions](18-conventions.md) · [08 — Website specs](08-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)

@@ -1,6 +1,6 @@
 # Component specs — the `component` chain
 
-Operative reference. Prose + examples: [docs/16-component.md](../../../docs/16-component.md). Elements and verbs: [references/website.md](website.md). Contracts: [references/contracts.md](contracts.md).
+Operative reference. Prose + examples: [docs/07-component.md](../../../docs/07-component.md). Elements and verbs: [references/website.md](website.md). Contracts: [references/contracts.md](contracts.md).
 
 Tests a rendered UNIT — a React component, a React hook through a Host written in the test, or a plain DOM function — in a real headless chromium. No constructor, no `*.specification.ts`: nothing is started.
 
@@ -17,7 +17,7 @@ src/presentation/posts/
 
 `unit()` collects `**/*.test.ts` and EXCLUDES `**/*.test.tsx`; `component()` collects the `.tsx`. Never `specs/` — that is for a product reached through an entry.
 
-What this facet does NOT cover, and where each of those subjects goes instead: [docs/16-component.md § What it does not do](../../../docs/16-component.md#what-it-does-not-do).
+What this facet does NOT cover, and where each of those subjects goes instead: [docs/07-component.md § What it does not do](../../../docs/07-component.md#what-it-does-not-do).
 
 ## The project (`vitest.config.ts`)
 
@@ -74,9 +74,9 @@ The page's — owned by [references/website.md](website.md) — plus the two onl
 
 ## The result
 
-Five accessors — `tree` `content` `html` `console` `errors` — described in [docs/16-component.md § The result](../../../docs/16-component.md#the-result). `content` is `innerText`: what a reader sees, so a `<style>` body and a hidden node are not in it.
+Five accessors — `tree` `content` `html` `console` `errors` — described in [docs/07-component.md § The result](../../../docs/07-component.md#the-result). `content` is `innerText`: what a reader sees, so a `<style>` body and a hidden node are not in it.
 
-`toMatch` is **awaited** on all five (the golden crosses the browser seam) and on a directory subject (it walks a disk); [docs/08-assertions.md](../../../docs/08-assertions.md) owns which matchers are IO.
+`toMatch` is **awaited** on all five (the golden crosses the browser seam) and on a directory subject (it walks a disk); [docs/14-assertions.md](../../../docs/14-assertions.md) owns which matchers are IO.
 
 ```typescript
 await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml'); // _expected/, TEST_UPDATE=1

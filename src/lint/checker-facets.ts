@@ -139,7 +139,7 @@ export function checkFacetFolder(specsRoot: string): TokenViolation[] {
         violations.push({
             file: rel,
             line: 1,
-            message: `${rel}:1: \`specs/${facet}/\` is a facet folder with no \`${facet}.specification.ts\` constructing \`specification.${facet}()\` — create it, or rename the folder (C20 — see docs/13-linting.md)`,
+            message: `${rel}:1: \`specs/${facet}/\` is a facet folder with no \`${facet}.specification.ts\` constructing \`specification.${facet}()\` — create it, or rename the folder (C20 — see docs/19-linting.md)`,
             rule: 'c20-facet-folder',
             severity: 'error',
         });
@@ -174,7 +174,7 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `${rel}:1: reaches no runner under the \`${facet}\` facet: import \`{ ${facet} }\` from \`${facet}.specification.js\`, or move a module test beside its module (C18 — see docs/13-linting.md)`,
+                message: `${rel}:1: reaches no runner under the \`${facet}\` facet: import \`{ ${facet} }\` from \`${facet}.specification.js\`, or move a module test beside its module (C18 — see docs/19-linting.md)`,
                 rule: 'c18-module-test-under-facet',
                 severity: 'error',
             });
@@ -258,7 +258,7 @@ export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `${rel}:1: \`${ground}/\` here is read by \`${relative(directory, reader)}\` alone — give it its own domain folder (C21 — see docs/13-linting.md)`,
+                message: `${rel}:1: \`${ground}/\` here is read by \`${relative(directory, reader)}\` alone — give it its own domain folder (C21 — see docs/19-linting.md)`,
                 rule: 'c21w-ground-owned-by-one',
                 severity: 'warn',
             });

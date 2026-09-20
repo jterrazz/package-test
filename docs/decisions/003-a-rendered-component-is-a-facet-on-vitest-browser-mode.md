@@ -13,7 +13,7 @@ MEANT; beside it, in the same repository, a component test said
 and the second proves the least of the two, because the thing it renders never
 met a browser.
 
-The corpus had sanctioned that split. `docs/12-conventions.md` and the agent
+The corpus had sanctioned that split. `docs/18-conventions.md` and the agent
 skill both said a component test "needs vitest alone", on the ground that the
 framework is for a SURFACE and a component has none. The reading was wrong in
 one word: a component has no surface it is SERVED through, but it needs

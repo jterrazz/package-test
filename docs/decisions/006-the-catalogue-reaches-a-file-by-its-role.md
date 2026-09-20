@@ -19,7 +19,7 @@ unreadable: nothing in a row said which files it judged, so the only way to
 find out was to read the implementation.
 
 **A row could not say what to do.** A ban with no destination is an argument
-rather than a rule, and forty-odd messages ended on `see docs/13-linting.md`
+rather than a rule, and forty-odd messages ended on `see docs/19-linting.md`
 with no fragment — a route to a chapter, not to a row. Nothing failed when a
 heading moved, so the routes rotted silently.
 
@@ -148,7 +148,38 @@ D18w called a precise negative (`not.toHaveBeenCalled()`) an existence check;
 D19w called three reads of one `value` a cluster.
 
 The chapters are renumbered ONCE, in the same release, so a link repointed by
-this change is repointed for good.
+this change is repointed for good. The map it lands on runs the fork's own
+order: the spine, then the kinds of test from the one with no runner to the one
+that drives a simulator, then the shared references every kind links into, then
+the enforcement. Two chapters are BORN by it — 05, the majority kind that had no
+page, and 13, the element vocabulary two facet chapters were each holding half
+of — and every kind chapter is rewritten on one seven-section skeleton.
+
+| Old | New | Chapter                                   |
+| --- | --- | ----------------------------------------- |
+| 01  | 01  | Architecture                              |
+| 02  | 02  | Developing                                |
+| 03  | 03  | Testing                                   |
+| 04  | 04  | Operating                                 |
+| —   | 05  | Module tests (new)                        |
+| 17  | 06  | Integration specs                         |
+| 16  | 07  | Component specs                           |
+| 14  | 08  | Website specs                             |
+| 15  | 09  | Mobile specs                              |
+| 05  | 10  | API specs                                 |
+| 06  | 11  | Jobs specs                                |
+| 07  | 12  | CLI specs                                 |
+| —   | 13  | Elements (new)                            |
+| 08  | 14  | Assertions                                |
+| 09  | 15  | Tokens (+ update mode end to end)         |
+| 10  | 16  | Contracts (+ `intercept()`)               |
+| 11  | 17  | Services                                  |
+| 12  | 18  | Conventions                               |
+| 13  | 19  | Linting (carries the generated catalogue) |
+
+A rule message anchored at `docs/13-linting.md#<name>` now reads
+`docs/19-linting.md#<name>`; K3 holds that every one of them resolves, so a
+renumbering that missed a message fails the suite rather than a reader.
 
 ## What the proof holds, and what it does not
 
@@ -171,14 +202,13 @@ there: 68, and a rise asks for the same reading.
 
 **Not done in this cut**, deliberately, each with the reason:
 
-- **The chapter 14 and 15 duplicates.** W3, `within`, `{ exact: false }` and the
-  declared-backend semantics are restated in both facet chapters. Their owner is
-  the elements chapter, which the renumbering creates — removing them now would
-  leave the vocabulary with no page to live on. They leave with it.
-- **The eight hand-written skill references.** `skills/jterrazz-test/references/`
-  still duplicates chapters; their stale content is repaired, and the skill's own
-  rebuild is the renumbering's.
-- **`response.body.cancel()`.** A seam defect, not a catalogue one: chapter 10
+- **The website and mobile duplicates**, and **the eight hand-written skill
+  references**, were both deferred from the catalogue cut to the renumbering
+  that follows it in the same release: the vocabulary had no page to move to
+  until chapter 13 existed, and the references had no generated card to be
+  replaced by. Both landed with it — 13 owns the vocabulary, and
+  `references/<kind>.md` is generated from the facet matrix.
+- **`response.body.cancel()`.** A seam defect, not a catalogue one: chapter 16
   states it and M3's row names the one suppression it sanctions, with the repro
   skipped beside the other intercept specs.
 - **W4 stays a runtime row** rather than a type one, for the reason written in

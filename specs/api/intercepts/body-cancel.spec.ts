@@ -15,7 +15,7 @@ import { api, QUOTES_URL } from '../intercepts.specification.js';
  *
  * Until it answers, a subject whose own code cancels a body is the ONE case
  * with no `intercept()` to reach for: it keeps `vi.stubGlobal('fetch')` behind
- * a reasoned suppression of M3 ([10](../../../docs/10-contracts.md)). This spec
+ * a reasoned suppression of M3 ([16](../../../docs/16-contracts.md)). This spec
  * is the fix's acceptance test — unskip it, and the exception goes with it.
  */
 describe('contracts — a body the subject cancels', () => {

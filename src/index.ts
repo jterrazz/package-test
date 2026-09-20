@@ -11,7 +11,7 @@ export * from './surface.js';
 export { specification } from './facets/specification.js';
 /**
  * The module-scope network double, on msw's node server — what a test with no
- * chain to hang contracts on reaches for (chapter 10).
+ * chain to hang contracts on reaches for (chapter 16).
  */
 export const intercept: Intercept = interceptThrough(async (contracts) => {
     // Reached through the same lazy import the chain uses: a static one here

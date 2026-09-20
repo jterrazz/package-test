@@ -15,10 +15,10 @@ export function codeOf(passId: string): string {
  * same page — a number that moved in one place and not the other sends every
  * diagnostic to a heading that no longer exists.
  */
-export const CATALOGUE_CHAPTER = 'docs/13-linting.md';
+export const CATALOGUE_CHAPTER = 'docs/19-linting.md';
 
 /**
- * The tail every diagnostic ends with — `(I2 — docs/13-linting.md#i2-…)`.
+ * The tail every diagnostic ends with — `(I2 — docs/19-linting.md#i2-…)`.
  *
  * Generated, never typed. A message is the only page most readers ever see of
  * this catalogue, so it carries the id they cite in a suppression AND the exact

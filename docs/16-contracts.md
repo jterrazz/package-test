@@ -1,4 +1,4 @@
-# 10 — Contracts: the outside world, declared
+# 16 — Contracts: the outside world, declared
 
 Everything the outside world replies is declared as a **contract**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Contracts are the whole vocabulary, on all four facets that reach the network.
 
@@ -132,7 +132,7 @@ specs/<facet>/<feature>/
         └── draft-reply.ts
 ```
 
-The rules, enforced by [C4, C10 and C11](13-linting.md):
+The rules, enforced by [C4, C10 and C11](19-linting.md):
 
 - The **root** holds only `*.contracts.ts` facades and the provider directories `http`, `openai`, `anthropic`. The folder carries the provider — filenames drop it and go back to being business names.
 - A facade default-exports a `defineContracts(...)` composition; its **named exports are scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world.
@@ -257,7 +257,7 @@ vi.stubGlobal('fetch', fetchStub);
 
 Every other subject has `intercept()`, and this one gets it back the day the seam answers.
 
-**Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its contracts last and its strictness is total ([16](16-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
+**Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its contracts last and its strictness is total ([07](07-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
 ## Two engines, one queue
 
@@ -286,7 +286,7 @@ http.post('https://api.shoply.dev/orders', {
 });
 ```
 
-`http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** — the app's real host does not matter — and `{{token}}` segments match structurally ([09 — Tokens](09-tokens.md)).
+`http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** — the app's real host does not matter — and `{{token}}` segments match structurally ([15 — Tokens](15-tokens.md)).
 
 The optional `filter` narrows beyond method + URL, and these are **filters**, so subset is the right default:
 
@@ -422,4 +422,4 @@ Two scoping notes:
 
 ## Related
 
-[05 — API specs](05-api.md) · [06 — Jobs specs](06-jobs.md) · [14 — Website specs](14-website.md) · [15 — Mobile specs](15-mobile.md) · [12 — Conventions](12-conventions.md)
+[10 — API specs](10-api.md) · [11 — Jobs specs](11-jobs.md) · [08 — Website specs](08-website.md) · [09 — Mobile specs](09-mobile.md) · [18 — Conventions](18-conventions.md)

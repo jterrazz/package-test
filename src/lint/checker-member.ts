@@ -240,7 +240,7 @@ function configPresent(
             message:
                 `${subject}: no vitest.config.ts — vitest's 5 s budget and an unexcluded \`_fixtures/\` ` +
                 `are running your tests; write \`export default defineSpecConfig()\` ` +
-                `(E3 — see docs/13-linting.md#e3-config-present)`,
+                `(E3 — see docs/19-linting.md#e3-config-present)`,
             rule: 'e3',
             severity: 'error',
         },
@@ -262,7 +262,7 @@ function simulatedDom(config: string, rootDir: string): TokenViolation[] {
             message:
                 `${relConfig}: \`environment: '${found.groups.dom}'\` gives every file of this project ` +
                 `a drawing of a browser — a rendered thing is a \`.test.tsx\` beside its component, ` +
-                `collected by \`component()\` (E5b — see docs/13-linting.md#e5b-no-simulated-dom-config-member)`,
+                `collected by \`component()\` (E5b — see docs/19-linting.md#e5b-no-simulated-dom-config-member)`,
             rule: 'e5b',
             severity: 'error',
         },
@@ -287,10 +287,10 @@ function seamDependencies(
         message:
             seam.kind === 'carried'
                 ? `${subject}: \`${seam.name}\` is a transitive of \`@jterrazz/test\` — remove the declaration ` +
-                  `(F8 — see docs/13-linting.md#f8-no-seam-dependency)`
+                  `(F8 — see docs/19-linting.md#f8-no-seam-dependency)`
                 : `${subject}: \`${seam.name}\` is a seam \`@jterrazz/test\` replaced — the facet is \`component()\`, ` +
                   `\`website()\`, \`clock\` or \`intercept()\`; remove the declaration ` +
-                  `(F8 — see docs/13-linting.md#f8-no-seam-dependency)`,
+                  `(F8 — see docs/19-linting.md#f8-no-seam-dependency)`,
         rule: 'f8' as const,
         severity: 'error' as const,
     }));

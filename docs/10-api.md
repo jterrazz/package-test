@@ -1,8 +1,8 @@
-# 05 — API specs (`specification.api`)
+# 10 — API specs (`specification.api`)
 
 `specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the services the runner started in real containers — so a request reaches it without a socket, and a contract, a clock and a golden all mean something because the app shares this process's world.
 
-Use it when the subject under test is an HTTP surface. For background pipelines use [jobs](06-jobs.md); for binaries use [cli](07-cli.md).
+Use it when the subject under test is an HTTP surface. For background pipelines use [jobs](11-jobs.md); for binaries use [cli](12-cli.md).
 
 ## Creating the runner
 
@@ -34,7 +34,7 @@ afterAll(cleanup);
 
 | Option     | Required                     | Description                                                                                                                             |
 | ---------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `services` | yes (if the app needs infra) | Named record of service factories (`postgres()`, `redis()`, `sqlite()`). Keys are your test vocabulary — see [services](11-services.md) |
+| `services` | yes (if the app needs infra) | Named record of service factories (`postgres()`, `redis()`, `sqlite()`). Keys are your test vocabulary — see [services](17-services.md) |
 | `server`   | yes                          | `(services) => app` — receives the started services record, fully typed (rule A8)                                                       |
 | `root`     | no                           | Override for root resolution — reserved for cases where the convention is not enough (rule A9)                                          |
 
@@ -53,7 +53,7 @@ Without `root`, the framework walks **up from the specification file** to the **
 
 Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this facet does not claim it.
 
-`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. See [services](11-services.md).
+`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. See [services](17-services.md).
 
 ## `.http` request files — full format
 
@@ -88,7 +88,7 @@ Location: /users/{{uuid#user}}
 
 - First line: `HTTP/1.1 <status>` — mandatory.
 - Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule C3).
-- Body and headers both accept `{{token}}` placeholders, including `#ref` captures — `{{uuid#user}}` above must be the _same_ UUID in the `Location` header and the body. See [tokens](09-tokens.md).
+- Body and headers both accept `{{token}}` placeholders, including `#ref` captures — `{{uuid#user}}` above must be the _same_ UUID in the `Location` header and the body. See [tokens](15-tokens.md).
 
 ## Actions (terminal)
 
@@ -124,11 +124,11 @@ test('returns 404 with a useful body', async () => {
 | `.seed('file.sql')`               | Load `_seeds/file.sql` into the database                                                                                        |
 | `.seed('file.sql', { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
 | `.headers({ 'Name': 'value' })`   | Set request headers; repeated calls merge                                                                                       |
-| `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](10-contracts.md)                                                          |
+| `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |
 | `.intercept(trigger, response)`   | Inline intercept for one-off cases                                                                                              |
-| `.clock('2026-03-04T09:30:00Z')`  | Pin the app's `Date` for this chain, released when the action resolves ([12](12-conventions.md#time--one-primitive-two-depths)) |
+| `.clock('2026-03-04T09:30:00Z')`  | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths)) |
 
-Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
+Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
 ```typescript
 test('serves french content', async () => {
@@ -165,7 +165,7 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 | `result.response.body`      | parsed body      | Raw body for native assertions (`toEqual`, `toMatchObject`)                      |
 | `result.table(name, opts?)` | table subject    | Database table — subject for `toMatchRows` / `toBeEmpty` (async, `await expect`) |
 
-`expect(result.response).toMatch('user-created.http')` resolves against `_expected/`, like every other subject (rule D3) — there is no per-subject resolution. The full matcher reference is in [assertions](08-assertions.md).
+`expect(result.response).toMatch('user-created.http')` resolves against `_expected/`, like every other subject (rule D3) — there is no per-subject resolution. The full matcher reference is in [assertions](14-assertions.md).
 
 Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.jobs()` has no `docker` member — jobs never spawn containers.)
 
@@ -253,4 +253,4 @@ The app runs in THIS process, always: there is no second mode, no container bind
 
 ## Related
 
-[06 — Jobs specs](06-jobs.md) · [08 — Assertions](08-assertions.md) · [09 — Tokens](09-tokens.md) · [10 — Contracts](10-contracts.md) · [11 — Services](11-services.md)
+[11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)

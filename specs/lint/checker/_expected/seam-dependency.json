@@ -3,14 +3,14 @@
         "code": "jterrazz-check(f8)",
         "file": "packages/seam-dependency/package.json",
         "line": 4,
-        "message": "packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced — the facet is `component()`, `website()`, `clock` or `intercept()`; remove the declaration (F8 — see docs/13-linting.md#f8-no-seam-dependency)",
+        "message": "packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced — the facet is `component()`, `website()`, `clock` or `intercept()`; remove the declaration (F8 — see docs/19-linting.md#f8-no-seam-dependency)",
         "severity": "error"
     },
     {
         "code": "jterrazz-check(f8)",
         "file": "packages/seam-dependency/package.json",
         "line": 5,
-        "message": "packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` — remove the declaration (F8 — see docs/13-linting.md#f8-no-seam-dependency)",
+        "message": "packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` — remove the declaration (F8 — see docs/19-linting.md#f8-no-seam-dependency)",
         "severity": "error"
     }
 ]
