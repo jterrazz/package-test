@@ -314,6 +314,25 @@ const VOLATILE = [
 ] as const;
 
 /**
+ * The volatile literal on this line, if it carries one — the reader BOTH halves
+ * of d5's reach use, so a document's expected stream and a file under
+ * `_expected/` are judged by one list.
+ *
+ * A `{{token}}` is removed before the test: the token IS the answer the rule
+ * asks for, and a path written after one is the token's tail, not a literal.
+ */
+export function volatileLiteralIn(line: string): undefined | { found: string; token: string } {
+    const bare = line.replaceAll(/\{\{[^}]*\}\}/gu, ' ');
+    for (const { pattern, token } of VOLATILE) {
+        const found = pattern.exec(bare);
+        if (found !== null) {
+            return { found: found[0].trim(), token };
+        }
+    }
+    return undefined;
+}
+
+/**
  * A stream that pins a loopback port, a temp directory or somebody's home is a
  * golden that passed once, on one machine: the port was free that second, the
  * temp path belonged to that run. It is the exact shape of a value the update
@@ -324,19 +343,15 @@ function checkVolatileLiterals(document: SpecDocument): Finding[] {
     const findings: Finding[] = [];
     for (const stream of assertedStreams(document)) {
         for (const [index, text] of stream.text.split('\n').entries()) {
-            for (const { pattern, token } of VOLATILE) {
-                const found = pattern.exec(text);
-                if (found === null) {
-                    continue;
-                }
+            const volatileLiteral = volatileLiteralIn(text);
+            if (volatileLiteral !== undefined) {
                 findings.push(
                     finding(
                         'd5-spec-volatile-literal',
                         stream.line + index,
-                        `"${found[0].trim()}" is a value the next run will not reproduce — write ${token}`,
+                        `"${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token}`,
                     ),
                 );
-                break;
             }
         }
     }

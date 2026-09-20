@@ -920,7 +920,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'An expected stream carries no literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). The message names the token to write.',
+            'No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `_expected/`. A `{{token}}` is not a literal.',
         family: 'D',
         fix: 'Write the token the message names — `{{workdir}}`, `{{url}}` — in place of the literal.',
         id: 'D5',
@@ -932,13 +932,13 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A literal ISO-8601 timestamp or uuid in an expected stream → warning, unless the same value appears in a `fixture:` or a `stdin:` of the same document (it is then pinned, not volatile).',
+            'A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for D21w, whose criterion chapter 12 carries.',
         family: 'D',
         fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
         id: 'D5',
         name: 'd5w-spec-pinned-value',
         rationale: 'The defect is not the literal: it is the literal nothing pinned.',
-        reach: 'ground',
+        reach: 'document',
     },
     {
         channel: 'checker',
