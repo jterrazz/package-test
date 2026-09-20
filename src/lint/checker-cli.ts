@@ -16,22 +16,32 @@ import { codeOf } from './rule-code.js';
 /**
  * CLI entry for the conventions checker (bundled as `dist/checker.js`).
  *
- *     node dist/checker.js [rootDir] [--fix]          # a specs tree
+ *     node dist/checker.js [dir] [--fix]              # a specs tree, or a project root
  *     node dist/checker.js --format json              # every root, every member
  *     node dist/checker.js --member <dir>             # one workspace member
  *
- * Three runs, one reporter. With a PATH it walks that tree and runs every
- * checker pass over it — the token/HTTP grammar (D4 / D4b / D10), the
- * `<case>.spec.yaml` document conventions, and the cross-file passes (C9 dead
+ * Three runs, one reporter. A PATH is read for what it IS. Name a specs tree
+ * — a directory with a `specs` segment in its path — and it walks that tree
+ * with every tree pass: the token/HTTP grammar (D4 / D4b / D10), the
+ * `<case>.spec.yaml` document conventions, the cross-file passes (C9 dead
  * fixtures, C14/C15 fixture placement, B5 await-using inference, A7 database
- * property). With `--member <dir>` it runs the member pass (E3 config-present,
- * E5b no simulated DOM in a config, F8 no seam dependency) over one workspace
- * member, whether or not that member has a `specs/` root.
+ * property) and the facet passes (C12, C18, C20, C21w), which read the first
+ * level of the tree and are the reason the anchor has to be right. Name
+ * anything else and it is a PROJECT ROOT: the run is the path-less one,
+ * anchored there. With `--member <dir>` it runs the member pass (E3
+ * config-present, E5b no simulated DOM in a config, F8 no seam dependency)
+ * over one workspace member, whether or not that member has a `specs/` root.
  *
  * With NO path it runs both over the whole project: every `specs/` root it
  * discovers from the root manifest's workspaces, and every member. That is the
  * run `@jterrazz/typescript`'s ratchet rests on, so the contract is exactly
  * "a path-less run reports what the per-root and per-member runs report".
+ *
+ * A NAMED root that turns out to hold no `specs/` tree at all is refused, loud
+ * and non-zero. Pointed at a project root, the facet passes used to key on its
+ * first level, find no facet folder there and report nothing — `<project>` and
+ * `<project>/specs` disagreed on the same tree, and the run that reported
+ * nothing was the one a CI line was likelier to be written with.
  *
  * `--format json` prints `[{ code, file, line, severity, message }]` on stdout
  * and nothing else, where `code` is `jterrazz-check(<id>)` — the namespace the
@@ -247,9 +257,21 @@ function applyFixes(root: string): void {
     }
 }
 
+/**
+ * Is this directory a specs tree?
+ *
+ * The `specs` SEGMENT is the anchor every other pass reads (`specsAnchor`), so
+ * the CLI reads it too: `specs`, `apps/web/specs` and `specs/api` are trees —
+ * a subtree of one is still inside it — and everything else is a project root
+ * holding zero or more of them.
+ */
+function isSpecsTree(dir: string): boolean {
+    return dir.split(/[/\\]/u).includes('specs');
+}
+
 // ── One specs tree ──
 
-if (positional !== undefined) {
+if (positional !== undefined && isSpecsTree(requireDirectory(positional, 'directory'))) {
     const root = requireDirectory(positional, 'directory');
     if (fix) {
         applyFixes(root);
@@ -259,9 +281,16 @@ if (positional !== undefined) {
 
 // ── The whole project: every specs root, every member ──
 
-const root = resolve('.');
+const root = positional === undefined ? resolve('.') : requireDirectory(positional, 'directory');
+const specsRoots = discoverSpecRoots(root);
+if (positional !== undefined && specsRoots.length === 0) {
+    console.error(
+        `conventions checker: no \`specs/\` tree under ${root} — name a specs tree, or a project root that holds one`,
+    );
+    process.exit(1);
+}
 const found: TokenViolation[] = [];
-for (const specsRoot of discoverSpecRoots(root)) {
+for (const specsRoot of specsRoots) {
     const prefix = relative(root, specsRoot);
     if (fix) {
         applyFixes(specsRoot);

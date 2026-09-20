@@ -448,7 +448,10 @@ const SPECS_DEPTH = 6;
  */
 export function discoverSpecRoots(rootDir: string): string[] {
     const roots = new Set<string>();
-    for (const member of discoverMembers(rootDir)) {
+    // A directory with no manifest is no member, and the walk still owes an
+    // Answer about it: a tree named by hand is judged on what it HOLDS.
+    const members = discoverMembers(rootDir);
+    for (const member of members.length === 0 ? [rootDir] : members) {
         // A member whose own root IS the tree — a workspace declaring
         // `packages: ['specs']`. Without this, the run the toolchain merges
         // Into the ratchet walked no tree at all and the member's facet

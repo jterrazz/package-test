@@ -893,7 +893,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `${relEntry}: dead pool fixture — no spec under ${relative(rootDir, specsRoot)} references $FIXTURES/${entry.name} (C9 — see docs/19-linting.md)`,
+                    message: `${relEntry}: dead pool fixture — no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} references $FIXTURES/${entry.name} (C9 — see docs/19-linting.md)`,
                     rule: 'c9',
                     severity: 'error',
                 });

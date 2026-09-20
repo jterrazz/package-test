@@ -400,10 +400,21 @@ Oxlint only parses JS/TS. The D4 token grammar also constrains **data fixtures**
 
 ```bash
 jterrazz-test-check specs                                # one specs tree
+jterrazz-test-check apps/console                         # a project root: every specs tree below it
 jterrazz-test-check --member packages/web                # one workspace member
 jterrazz-test-check --format json                        # every root, every member
 npx jterrazz-test-check specs   # or `node node_modules/@jterrazz/test/dist/checker.js specs`
 ```
+
+**A path is read for what it IS.** A directory with a `specs` segment in its
+path is a tree, walked as one. Anything else is a project root, and takes the
+path-less run anchored there — every `specs/` tree the workspaces declare
+below it, plus every member. The tree passes that read the FIRST level of what
+they are handed (C12, C18, C20) need the anchor to be the tree: pointed at a
+project root they used to find no facet folder there and report nothing, so
+`jterrazz-test-check .` passed silently on a tree `jterrazz-test-check specs`
+failed. A named root holding no `specs/` tree at all is refused with a non-zero
+exit, because the run the operator asked for had nothing to walk.
 
 What it checks:
 
