@@ -20,11 +20,10 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | B     | Spec chains (setups, terminal actions, Given/Then, `job` vocabulary) | [05](05-api.md), [06](06-jobs.md), [07](07-cli.md)                    |
 | C     | Files & folders per feature                                          | [02](02-developing.md), [08](08-assertions.md), [10](10-contracts.md) |
 | D     | Assertions, tokens, snapshots, strict contracts                      | [08](08-assertions.md), [09](09-tokens.md), [10](10-contracts.md)     |
-| E     | Environment & test configuration                                     | [02](02-developing.md), [16](16-component.md)                         |
+| E     | Environment & runner configuration                                   | [02](02-developing.md), [16](16-component.md)                         |
 | F     | Imports (single package root) & production protection                | [02](02-developing.md)                                                |
 | W     | Website & mobile specs (scenarios, user-facing elements)             | [14](14-website.md), [15](15-mobile.md)                               |
-| G     | Infrastructure & the runtime a test actually runs in                 | [07](07-cli.md), [11](11-services.md), [16](16-component.md)          |
-| H     | Naming recap                                                         | below                                                                 |
+| G     | Infrastructure                                                       | [07](07-cli.md), [11](11-services.md), [16](16-component.md)          |
 | I     | Source-code architecture (four layers, sibling module tests)         | below · [01](01-architecture.md) for this repo's own layer map        |
 | J     | Hygiene (no arbitrary sleeps, honest spec documents)                 | [13](13-linting.md)                                                   |
 | K     | Retro-propagation — every defect class grows its own guard           | below                                                                 |
@@ -84,7 +83,7 @@ Every other use is converted to a full snapshot. A single "kitchen-sink" project
 
 Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other three channels growing instead of decaying. When a defect class is mechanizable, its rule joins `src/lint/manifest.ts` and the catalogue regenerates.
 
-## H — Naming recap
+## The naming recap
 
 One rule decides every folder of a spec tree: **what a spec stands on carries the underscore; a spec's own folder never does.** The four names are `_fixtures/`, `_expected/`, `_requests/` and `_seeds/` — inert material the framework resolves by path. A facet, a domain, and `contracts/` are members of the row, not ground: a contract is TypeScript a spec imports, so it stays bare. `docker/` sits at the project root, outside any row of specs, and is untouched by the rule.
 
@@ -95,7 +94,7 @@ Two further rules decide WHERE a fixture lives, and they are the same question a
 | Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `integration/`, `website/`, `mobile/`, `_fixtures/`) — one folder per constructor        |
 | Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                 |
 | Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                              |
-| Test file       | `specs/<facet>/<domain>/<aspect>.test.ts`                                                                                   |
+| Spec file       | `specs/<facet>/<domain>/<aspect>.spec.ts` — the assembled product's word (C12)                                              |
 | Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `_expected/` ([07](07-cli.md#spec-documents--casespecyaml)) |
 | Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                     |
 | Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([16](16-component.md))      |

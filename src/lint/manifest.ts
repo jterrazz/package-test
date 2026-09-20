@@ -34,19 +34,27 @@ export type CatalogEntry = {
     name: string;
 } & RuleDoc;
 
-/** Family letter → its French section title. */
+/**
+ * Family letter → its section title.
+ *
+ * English, like every sentence the catalogue publishes. The rows were written
+ * in French while the catalogue had one reader; a message a consumer's CI
+ * prints, and a chapter their agent reads, are not that — and a half-French
+ * catalogue is worse than either, because a reader cannot tell which half they
+ * are in. K5 holds the line with a deny-list of the tokens that were here.
+ */
 export const FAMILIES: Record<string, string> = {
-    A: 'Création des runners',
-    B: 'Chaînes de spec',
-    C: 'Fichiers & dossiers',
+    A: 'Creating runners',
+    B: 'Spec chains',
+    C: 'Files & folders',
     D: 'Assertions',
-    E: 'Environnement & configuration',
-    F: 'Imports & protection de la prod',
-    G: 'Infrastructure & runtime des tests',
-    W: 'Specs website & mobile',
-    I: 'Architecture du code source',
-    J: 'Hygiène',
-    K: 'Rétro-propagation',
+    E: 'Environment & runner configuration',
+    F: 'Imports & protecting production',
+    G: 'Infrastructure',
+    W: 'Website & mobile specs',
+    I: 'Source architecture',
+    J: 'Hygiene',
+    K: 'Retro-propagation',
 };
 
 /**
@@ -78,406 +86,472 @@ export const RULE_DOCS = {
     'a1-specification-file': {
         channel: 'statique',
         convention:
-            'Un runner ne se crée que dans un fichier `*.specification.ts` sous `specs/` : appeler `specification.*` ailleurs est une erreur.',
+            'A runner is created only in a `*.specification.ts` file under `specs/`: calling `specification.*` anywhere else is an error.',
         family: 'A',
+        fix: 'Move the call into `specs/<facet>/<facet>.specification.ts` and export the handle from there.',
         id: 'A1',
         rationale:
-            'Ancrer les runners à un nom de fichier reconnaissable rend le point d’entrée détectable et garde les tests déclaratifs.',
+            'Anchoring runners to a recognisable filename makes the entry point discoverable and keeps tests declarative.',
+        reach: 'tests',
     },
     'a2-known-constructors': {
         channel: 'statique',
         convention:
-            'Six constructeurs et seulement six : `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.mobile()` ; tout autre membre (`.app`, `.http`, `.stack`…) est une erreur. Un composant rendu ne démarre rien : c’est une chaîne, pas un membre de ce record.',
+            'Six constructors and only six: `specification.api()`, `specification.jobs()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.mobile()`. Any other member (`.app`, `.http`, `.stack`…) is an error. A rendered component starts nothing: it is a chain, not a member of this record.',
         family: 'A',
+        fix: 'Name one of the six, or reach for the `component` chain — a seventh subject is a decision before it is a constructor.',
         id: 'A2',
         rationale:
-            'Une surface fermée empêche l’invention de constructeurs parallèles et garde l’API mémorisable.',
+            'A closed surface stops parallel constructors being invented and keeps the API memorable.',
+        reach: 'specification',
     },
     'a3-no-destructure-alias': {
         channel: 'statique',
         convention:
-            'Le retour se destructure avec le nom canonique du constructeur, sans alias (`{ api, cleanup, docker }`) ; renommer (`{ api: monApi }`) est une erreur.',
+            "The return is destructured under the constructor's canonical name, unaliased (`{ api, cleanup, docker }`); renaming (`{ api: myApi }`) is an error.",
         family: 'A',
+        fix: 'Drop the alias and keep the canonical name.',
         id: 'A3',
-        rationale:
-            'Un nom d’instance unique par facette rend chaque spec lisible sans contexte local.',
+        rationale: 'One instance name per facet makes every spec readable with no local context.',
+        reach: 'specification',
     },
     'a4-cleanup-afterall': {
         channel: 'statique',
         convention:
-            'Le fichier de specification passe `cleanup` à `afterAll` ; un `cleanup` destructuré mais jamais transmis est une erreur.',
+            'The specification file passes `cleanup` to `afterAll`; a `cleanup` destructured but never handed over is an error.',
         family: 'A',
+        fix: 'Add `afterAll(cleanup)` at the end of the specification file.',
         id: 'A4',
-        rationale:
-            'Garantir le teardown évite les conteneurs et connexions qui fuient entre fichiers.',
+        rationale: 'Guaranteeing teardown stops containers and connections leaking between files.',
+        reach: 'specification',
     },
     'a9w-redundant-root': {
         channel: 'statique',
         convention:
-            '`root` pointant vers le dossier que la remontée automatique aurait trouvé est redondant → warning.',
+            'A `root` pointing at the directory the automatic walk would have found is redundant → warning.',
         family: 'A',
+        fix: 'Drop the option: the walk finds the nearest `package.json` by itself.',
         id: 'A9',
         rationale:
-            'La détection par convention doit rester le défaut ; un `root` explicite ne se justifie que là où elle échoue.',
+            'Detection by convention has to stay the default; an explicit `root` is only justified where it fails.',
+        reach: 'specification',
     },
     'b2-known-fixture-marker': {
         channel: 'statique',
         convention:
-            'Un marqueur `$…` inconnu dans un littéral passé à `.fixture()` est une erreur (seul `$FIXTURES` est connu).',
+            'An unknown `$…` marker in a literal passed to `.fixture()` is an error (`$FIXTURES` is the only one).',
         family: 'B',
+        fix: 'Write `$FIXTURES/<name>` for the shared pool, or a path relative to the spec for local ground.',
         id: 'B2',
         rationale:
-            'Attraper un marqueur fautif statiquement évite un chemin de fixture résolu au hasard à l’exécution.',
+            'Catching a wrong marker statically avoids a fixture path resolved at random at run time.',
+        reach: 'tests',
     },
     'b4-given-then': {
         channel: 'statique',
         convention:
-            'Chaque test contient `// Given -` puis `// Then -` (les deux, dans cet ordre) ; Given déclaré après Then est une erreur. Un document `<cas>.spec.yaml` n’a pas de commentaires : sa narration est sa `description:`.',
+            'Every test carries `// Given -` then `// Then -` (both, in that order); a Given declared after a Then is an error. A `<case>.spec.yaml` document has no comments: its narration is its `description:`.',
         family: 'B',
+        fix: 'Write the two markers, in order, as sentences about the subject — not about the code.',
         id: 'B4',
         rationale:
-            'La narration Given/Then rend l’intention du test lisible sans lire les assertions.',
+            "Given/Then narration makes a test's intent readable without reading its assertions.",
+        reach: 'tests',
     },
     'b6w-redundant-env-url': {
         channel: 'statique',
         convention:
-            '`.env({ <SERVICE>_URL: ….connectionString })` répète l’injection automatique du framework → warning.',
+            "`.env({ <SERVICE>_URL: ….connectionString })` repeats the framework's own injection → warning.",
         family: 'B',
+        fix: 'Drop the line: the record key already injects `<KEY>_URL` into the child process.',
         id: 'B6',
         rationale:
-            'L’injection couvre déjà les URLs de services ; les réécrire à la main invite au décalage.',
+            'The injection already covers service URLs; rewriting them by hand invites drift.',
+        reach: 'tests',
     },
     'b8-kebab-trigger': {
         channel: 'statique',
         convention:
-            '`.trigger(name)` prend un identifiant kebab-case stable ; un `name` non kebab-case est une erreur.',
+            '`.trigger(name)` takes a stable kebab-case identifier; a non-kebab-case `name` is an error.',
         family: 'B',
+        fix: 'Write the job name in kebab-case, the same spelling the application registers it under.',
         id: 'B8',
         rationale:
-            'Le nom de job est un contrat entre l’app et les tests — un identifiant stable interdit les traductions divergentes.',
+            'The job name is a contract between the app and its tests — a stable identifier forbids divergent translations.',
+        reach: 'tests',
     },
     'b9w-product-command': {
         channel: 'statique',
         convention:
-            'Un `specification.cli(bin)` dont le binaire résout dans le `node_modules/.bin` d’une dépendance teste l’outil tiers, pas la commande produit → warning (suppression avec raison admise).',
+            "A `specification.cli(bin)` whose binary resolves inside a dependency's `node_modules/.bin` tests the third-party tool, not the product command → warning (a suppression with a reason is accepted).",
         family: 'B',
+        fix: "Point the runner at the product's own binary; assert on a tool's output through `result.grep`.",
         id: 'B9',
         rationale:
-            'Une spec doit exercer la vraie commande du produit ; les assertions par outil passent par `result.grep`.',
+            "A spec has to exercise the product's real command; per-tool assertions go through `result.grep`.",
+        reach: 'specification',
     },
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'La forme de l’arbre `specs/` se déclare via l’option `depth` : `facet-domain` (défaut — `*.test.ts` à la profondeur facet/domain, `*.specification.ts` au root de la facette), `facet` (test au root de la facette OU un dossier domaine plus bas, jamais plus profond), `mirror` (test à toute profondeur ≥ 1, nommé d’après son dossier), `off`. Dans tous les modes, `off` compris : un dossier à underscore initial est du SOL, jamais un domaine — aucune spec ne vit dedans. Une exception, et une seule : le sol peut être du CODE, et un `<module>.test.ts` posé À CÔTÉ du `<module>.ts` qu’il teste y est légal (c’est la loi I2) ; un test sans module voisin, ou un `*.specification.ts`, reste une violation. Un `.test.tsx` est hors de portée : une unité rendue se spécifie à côté de son composant, jamais dans un arbre facette/domaine — c’est I2 qui tient son voisinage.',
+            'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth, a `*.specification.ts` at the facet root), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. In every mode, `off` included: a directory with a leading underscore is GROUND, never a domain — no spec lives inside one. One exception, and only one: ground may be CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is I2). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — I2 holds its neighbourhood.',
         family: 'C',
+        fix: 'Move the file to the depth the tree declares, or declare the depth the tree actually has.',
         id: 'C1',
-        rationale:
-            'Une profondeur fixe rend la place de chaque fichier prévisible et détectable statiquement.',
+        rationale: "A fixed depth makes every file's place predictable and statically checkable.",
+        reach: 'specs',
     },
     'c10-contracts-boundary': {
         channel: 'statique',
         convention:
-            'Hors de `specs/**/contracts/`, un import qui résout dans un dossier de provider (`contracts/{http,openai,anthropic}/…`) est une erreur : un test n’importe que les façades `*.contracts.ts`.',
+            'Outside `specs/**/contracts/`, an import resolving into a provider folder (`contracts/{http,openai,anthropic}/…`) is an error: a test imports only the `*.contracts.ts` facades.',
         family: 'C',
+        fix: 'Add a named scenario export to the facade and import that instead.',
         id: 'C10',
         rationale:
-            'Les contrats unitaires sont des détails de composition ; passer par la façade garde chaque scénario nommé au même endroit que le monde dont il dérive.',
+            'Unit contracts are composition details; going through the facade keeps each scenario named in the same place as the world it derives from.',
+        reach: 'tests',
     },
     'c11-contract-data-pairing': {
         channel: 'statique',
         convention:
-            'Dans un dossier de provider, tout `*.response.json` et tout `*.request.ts` a un frère `<souche>.ts` — la souche est le nom jusqu’au PREMIER point (`events.fr.response.json` → `events.ts`) ; une donnée orpheline est une erreur.',
+            'Inside a provider folder, every `*.response.json` and every `*.request.ts` has a `<stem>.ts` sibling — the stem is the name up to the FIRST dot (`events.fr.response.json` → `events.ts`). Orphan data is an error.',
         family: 'C',
+        fix: 'Write the contract that serves the payload, or delete the payload.',
         id: 'C11',
         rationale:
-            'Une donnée n’existe que servie par un contrat — un fichier sans propriétaire est du poids mort qu’aucun test ne charge.',
+            'Data exists only as served by a contract — a file with no owner is dead weight no test ever loads.',
+        reach: 'contract',
     },
     'c13-underscored-ground': {
         channel: 'statique',
         convention:
-            'Sous `specs/`, le sol d’une spec porte un underscore initial : `_fixtures/`, `_expected/`, `_requests/`, `_seeds/`. Un dossier `fixtures/`, `expected/`, `requests/` ou `seeds/` est un nom d’avant la 14 — erreur nommant le renommage.',
+            "Under `specs/`, a spec's ground carries a leading underscore: `_fixtures/`, `_expected/`, `_requests/`, `_seeds/`. A `fixtures/`, `expected/`, `requests/` or `seeds/` directory is a pre-14 name — an error naming the rename.",
         family: 'C',
+        fix: 'Rename the directory with the leading underscore the resolvers read.',
         id: 'C13',
         rationale:
-            'Aucun résolveur ne lit plus le nom sans underscore : gardé tel quel, l’arbre devient invisible plutôt que faux, et l’échec arrive une étape plus loin que sa cause.',
+            'No resolver reads the underscore-less name any more: left as is, the tree goes invisible rather than wrong, and the failure lands one step past its cause.',
+        reach: 'specs',
     },
     'c2-http-only-requests': {
         channel: 'statique',
-        convention:
-            '`_requests/` ne contient que des fichiers `.http` ; toute autre extension est une erreur.',
+        convention: '`_requests/` holds `.http` files only; any other extension is an error.',
         family: 'C',
+        fix: 'Write the request as a complete `.http` document, or move the file to `_fixtures/`.',
         id: 'C2',
         rationale:
-            'Une entrée de requête est un `.http` complet — homogénéiser le dossier interdit les formats ad hoc.',
+            'A request input is a complete `.http` — one format per folder forbids ad-hoc ones.',
+        reach: 'ground',
     },
     'c4-contract-shape': {
         channel: 'statique',
         convention:
-            'Sous `specs/**/contracts/` : la RACINE ne porte que des façades `*.contracts.ts` (export default construit par `defineContracts(...)` ou une re-export de composition ; exports nommés = scénarios) et les dossiers de provider `http` | `openai` | `anthropic`. Un contrat unitaire est `<provider>/<nom-kebab>.ts` avec un `export default defineContract(...)` (ou une factory qui en retourne un), et son builder de `request` doit désigner le provider de son dossier. Un dossier de provider est plat et ne contient que des `*.ts` et des `*.response.json`.',
+            'Under `specs/**/contracts/`: the ROOT carries only `*.contracts.ts` facades (a default export built by `defineContracts(...)` or a composition re-export; named exports are scenarios) and the provider folders `http` | `openai` | `anthropic`. A unit contract is `<provider>/<kebab-name>.ts` with an `export default defineContract(...)` (or a factory returning one), and its `request` builder must name the provider of its own folder. A provider folder is flat and holds only `*.ts` and `*.response.json`.',
         family: 'C',
+        fix: 'Move the file to the half it belongs to: a facade at the root, a unit under its provider.',
         id: 'C4',
         rationale:
-            'Une arborescence figée sépare la façade publique des unités internes et fait porter le provider par le DOSSIER — les noms de fichiers redeviennent du métier, et la donnée volumineuse se range à côté du contrat qui la sert.',
+            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the provider — filenames go back to being domain words, and bulky data sits beside the contract that serves it.',
+        reach: 'contract',
     },
     'c6-tomatch-extension': {
         channel: 'statique',
         convention:
-            "L’argument de `toMatch` porte son extension (`'help.txt'`), sauf pour les snapshots d’arborescence (dossiers) ; un sujet fichier sans extension est une erreur.",
+            "`toMatch`'s argument carries its extension (`'help.txt'`), except for tree snapshots (directories); a file subject with no extension is an error.",
         family: 'C',
+        fix: "Write the fixture's full name, extension included.",
         id: 'C6',
         rationale:
-            'L’extension fait partie du nom du fichier attendu — l’omettre casse la résolution `_expected/`.',
+            "The extension is part of the expected file's name — dropping it breaks `_expected/` resolution.",
+        reach: 'tests',
     },
     'c7-seeds-sql-only': {
         channel: 'statique',
-        convention: '`_seeds/` ne contient que des `*.sql` ; tout autre fichier est une erreur.',
+        convention: '`_seeds/` holds `*.sql` files only; any other file is an error.',
         family: 'C',
+        fix: 'Write the seed as SQL, or move the file to `_fixtures/` as the material it is.',
         id: 'C7',
-        rationale:
-            '`.seed()` porte l’état des bases uniquement — pas de seed-handler ni de dispatch par préfixe.',
+        rationale: '`.seed()` carries database state only — no seed handlers, no prefix dispatch.',
+        reach: 'ground',
     },
     'c8-referenced-fixture-exists': {
         channel: 'statique',
         convention:
-            'Un littéral de `.request`/`.seed`/`.fixture`/`toMatch` doit exister sur disque sous sa racine conventionnelle ; un chemin absent est une erreur.',
+            'A literal passed to `.request`/`.seed`/`.fixture`/`toMatch` must exist on disk under its conventional root; a missing path is an error.',
         family: 'C',
+        fix: 'Create the file, or fix the name — the message prints the path it looked for.',
         id: 'C8',
         rationale:
-            'Attraper un typo statiquement évite un échec qui ne surviendrait qu’à l’exécution.',
+            'Catching a typo statically avoids a failure that would only surface at run time.',
+        reach: 'tests',
     },
     'd2-await-io-matcher': {
         channel: 'statique',
         convention:
-            'Un matcher IO (`toMatchRows`/`toBeEmpty`/`toBeRunning`) doit être awaité ou retourné ; sinon l’assertion ne s’exécute jamais → erreur.',
+            'An IO matcher (`toMatchRows`/`toBeEmpty`/`toBeRunning`) must be awaited or returned; otherwise the assertion never runs → error.',
         family: 'D',
+        fix: 'Put `await` in front of the `expect(...)`.',
         id: 'D2',
         rationale:
-            'Une assertion IO non attendue passe silencieusement — le pire mode d’échec d’un test.',
+            'An un-awaited IO assertion passes silently — the worst failure mode a test has.',
+        reach: 'tests',
     },
     'd2w-await-sync-matcher': {
         channel: 'statique',
         convention:
-            '`await` sur un matcher toujours synchrone (`toBe`/`toEqual`/`toContain`/`toHaveLength`) est redondant → warning.',
+            '`await` on an always-synchronous matcher (`toBe`/`toEqual`/`toContain`/`toHaveLength`) is redundant → warning.',
         family: 'D',
+        fix: 'Drop the `await`.',
         id: 'D2',
-        rationale: 'Un await inutile masque le signal qui distingue les vrais matchers IO.',
+        rationale: 'A pointless await hides the signal that marks the real IO matchers.',
+        reach: 'tests',
     },
     'd6w-transform-token-equivalent': {
         channel: 'statique',
         convention:
-            'Un `transform` qui ne fait que réécrire vers des équivalents de tokens standard duplique la grammaire → warning.',
+            'A `transform` that only rewrites into equivalents of the standard tokens duplicates the grammar → warning.',
         family: 'D',
+        fix: 'Delete the transform and write the token the grammar already has.',
         id: 'D6',
         rationale:
-            '`transform` est une échappatoire pour le bruit non couvert par les tokens — pas un doublon des tokens.',
+            '`transform` is the escape hatch for noise the tokens do not cover — not a second copy of them.',
+        reach: 'tests',
     },
     'd8w-text-bypass': {
         channel: 'statique',
         convention:
-            '`expect(x.text).toContain/toMatch` court-circuite le sujet accesseur typé → warning.',
+            '`expect(x.text).toContain/toMatch` short-circuits the typed accessor subject → warning.',
         family: 'D',
+        fix: 'Assert on the accessor itself (`expect(x)`), which carries the tokens and the fixture resolution.',
         id: 'D8',
         rationale:
-            "Asserter sur `.text` jette la grammaire de tokens et la résolution `toMatch('fichier')` du sujet.",
+            "Asserting on `.text` throws away the token grammar and the subject's `toMatch('file')` resolution.",
+        reach: 'tests',
     },
     'd9w-single-use-ref': {
         channel: 'statique',
         convention:
-            'Une ref de capture (`match.ref`, `{{kind#ref}}`) qui n’apparaît qu’une seule fois dans tout le fichier (code + fixtures `_expected/` référencées) porte un nom inutilement → warning.',
+            'A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code plus the referenced `_expected/` fixtures) is named for nothing → warning.',
         family: 'D',
+        fix: 'Drop the ref name and keep the bare token.',
         id: 'D9',
         rationale:
-            'Une ref ne se justifie que si elle asserte l’égalité sur au moins deux occurrences.',
+            'A ref only earns its name when it asserts equality across at least two occurrences.',
+        reach: 'tests',
     },
     'd12w-response-body-probe': {
         channel: 'statique',
         convention:
-            "Un test qui accumule un AMAS de sondes brutes sur `.response.body` (≥ `threshold`, défaut 3 ; une variable castée depuis `.response.body` compte ses lectures) → warning : ce cas veut un golden complet (`expect(result.response).toMatch('cas.http')`). Une ou deux sondes restent silencieuses (scalpel légitime).",
+            "A test accumulating a CLUSTER of raw probes on `.response.body` (≥ `threshold`, default 3; a variable cast from `.response.body` counts its reads) → warning: this case wants a full golden (`expect(result.response).toMatch('case.http')`). One or two probes stay silent (a legitimate scalpel).",
         family: 'D',
+        fix: "Golden the response: `expect(result.response).toMatch('<case>.http')`, with tokens for the parts that move.",
         id: 'D12',
         rationale:
-            'Le golden complet capture toute la forme et sa grammaire de tokens ; un amas de sondes brutes le remplace par des checks ad hoc qui dérivent (mécanise la frontière D11 pour les réponses API).',
+            'A full golden captures the whole shape and its token grammar; a cluster of raw probes replaces it with ad-hoc checks that drift (it mechanises the D11 boundary for API responses).',
+        reach: 'tests',
     },
     'd13w-unfrozen-negative-fixture': {
         channel: 'statique',
         convention:
-            'Un `toMatch` dont l’échec EST le sujet du test doit porter `{ frozen: true }` → sinon `TEST_UPDATE=1` réécrit silencieusement la fixture délibérément-fausse au lieu de lever → warning. Deux formes : l’enveloppe exacte (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) et l’heuristique bornée — un `toMatch` dans une fonction dont le corps asserte aussi un throw, c’est-à-dire le helper qui possède le try/catch.',
+            'A `toMatch` whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong fixture instead of throwing → warning. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
         family: 'D',
+        fix: 'Pass `{ frozen: true }` so update mode never overwrites the fixture the test is about.',
         id: 'D13',
         rationale:
-            'En mode update, un matcher non gelé écrit au lieu de lever : la fixture négative est corrompue par sa propre sortie réelle et l’assertion ne teste plus rien. `frozen` fige la fixture négative.',
+            'In update mode an unfrozen matcher writes instead of throwing: the negative fixture is corrupted by its own real output and the assertion stops testing anything. `frozen` pins it.',
+        reach: 'tests',
     },
     'd15w-status-only-probe': {
         channel: 'statique',
         convention:
-            "Un test de spec dont les SEULES assertions sont des sondes de statut HTTP (`expect(X.status).toBe(N)` / `.toEqual(N)`, N littéral numérique 100–599) → warning : ce cas veut un golden complet (`expect(result.response).toMatch('cas.http')`). Une sonde de statut À CÔTÉ d’une vraie assertion (golden, `toMatchRows`, `toContain`…) reste silencieuse (scalpel légitime).",
+            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatch('case.http')`). A status probe BESIDE a real assertion (a golden, `toMatchRows`, `toContain`…) stays silent (a legitimate scalpel).",
         family: 'D',
+        fix: 'Assert what the response carries, not only the code it came back with.',
         id: 'D15',
         rationale:
-            'Un statut isolé ne fige que le code de réponse et jette tout le reste du payload ; le golden complet capture la forme entière et sa grammaire de tokens (complète d12w, qui exige un amas de sondes de corps et manque le cas de la sonde de statut solitaire).',
+            'A lone status pins the response code and throws away the whole payload; a full golden captures the shape and its token grammar (it completes d12w, which needs a cluster of body probes and misses the solitary status probe).',
+        reach: 'tests',
     },
     'e5-no-simulated-dom': {
         channel: 'statique',
         convention:
-            'Un fichier de test ne déclare pas de DOM simulé : la pragma `@vitest-environment happy-dom|jsdom` est une erreur. Portée : les rôles qui EXÉCUTENT un test (`module`, `component`, `specification`) — une config de projet est le domaine de E5b.',
+            'A test file declares no simulated DOM: the `@vitest-environment happy-dom|jsdom` pragma is an error. Reach: the roles that RUN a test (`module`, `component`, `specification`) — a project config is E5b’s.',
         facet: 'component',
         family: 'E',
-        fix: 'Déplacer le test à côté de son composant en `.test.tsx` et le faire collecter par le projet `component()`.',
+        fix: 'A rendered thing is a `.test.tsx` beside its component, collected by the `component()` project.',
         id: 'E5',
         rationale:
-            'Un DOM simulé se comporte PRESQUE comme un navigateur, et ce qui est livré est jugé par un vrai : la facette component rend dans le Chromium que la facette website pilote déjà.',
+            'A simulated DOM behaves ALMOST like a browser, and what ships is judged by a real one: the component facet renders in the Chromium the website facet already drives.',
         reach: 'tests',
     },
     'e5b-no-simulated-dom-config': {
         channel: 'statique',
         convention:
-            "Une config vitest ne déclare pas de DOM simulé : `environment: 'happy-dom'|'jsdom'` est une erreur ; `'node'` et `'edge-runtime'` nomment un vrai runtime et restent hors de portée.",
+            "A vitest config declares no simulated DOM: `environment: 'happy-dom'|'jsdom'` is an error; `'node'` and `'edge-runtime'` name a real runtime and stay out of reach.",
         facet: 'component',
         family: 'E',
-        fix: 'Supprimer `environment` et collecter le rendu avec `component()` ; les tests de module restent sous node.',
+        fix: 'Remove `environment` and collect the rendered tests with `component()`; module tests stay under node.',
         id: 'E5b',
         rationale:
-            'La pragma (E5) n’engage qu’un fichier ; la config engage tout ce que le projet collecte — c’est ainsi qu’un dépôt hérite d’un DOM simulé que personne n’a choisi test par test.',
+            'The pragma (E5) binds one file; the config binds everything the project collects — which is how a repository inherits a simulated DOM nobody chose test by test.',
         reach: 'config',
     },
     'e6-component-project-helper': {
         channel: 'statique',
         convention:
-            "Un projet navigateur vient de `component()` : dans une config vitest, une clé `browser` sous `test` qui n'est pas dans un appel à `component(...)` est une erreur. Une clé `browser` ailleurs (un `define`, un enregistrement d'env) n'est pas un bloc de projet et reste hors de portée.",
+            'A browser project comes from `component()`: in a vitest config, a `browser` key under `test` that is not inside a `component(...)` call is an error. A `browser` key elsewhere (a `define`, an env registration) is not a project block and stays out of reach.',
         facet: 'component',
         family: 'E',
-        fix: 'Remplacer le bloc par `component({ vite })` et ne garder que ce qui appartient au projet.',
+        fix: 'Replace the block with `component({ vite })` and keep only what belongs to the project.',
         id: 'E6',
         rationale:
-            'Le provider épinglé à la version exacte du runner, le service worker servi depuis l’installation du framework, la transformation JSX du Vite courant, le pré-bundling d’un cache froid et les dossiers d’artefacts sont autant de runs qui passent ici et échouent sur la machine suivante.',
+            "The provider pinned to the runner's exact version, the service worker served from the framework's own install, the JSX transform the current Vite uses, a cold cache's pre-bundling and the artefact directories are all runs that pass here and fail on the next machine.",
         reach: 'config',
     },
     'f1-no-subpath-import': {
         channel: 'statique',
         convention:
-            'Tout s’importe depuis `@jterrazz/test` ; un import de `@jterrazz/test/<subpath>` est une erreur, sauf les subpaths que la map `exports` du paquet publie — `@jterrazz/test/oxlint` (plugin de lint) et `@jterrazz/test/vitest` (surface de configuration du runner) — exemptés partout. La liste est LUE du manifeste, jamais recopiée dans la règle.',
+            "Everything is imported from `@jterrazz/test`; an import of `@jterrazz/test/<subpath>` is an error, except the subpaths the package's `exports` map publishes — `@jterrazz/test/oxlint` (the lint plugin) and `@jterrazz/test/vitest` (the runner configuration surface) — exempt everywhere. The list is READ from the manifest, never copied into the rule.",
         family: 'F',
+        fix: 'Import the name from `@jterrazz/test`; it is re-exported there by design.',
         id: 'F1',
         rationale:
-            'Un point d’entrée unique garde l’API publique explicite et les subpaths internes invisibles.',
+            'A single entry point keeps the public API explicit and the internal subpaths invisible.',
+        reach: 'all',
     },
     'f2-no-test-imports-in-prod': {
         channel: 'statique',
         convention:
-            'Un fichier de prod n’importe jamais `vitest`, `@jterrazz/test`, un `*.test.*`, un `*.fixtures.*` ni `mockOf` (exception : `@jterrazz/test/oxlint`).',
+            'A production file never imports `vitest`, `@jterrazz/test`, a `*.test.*`, a `*.fixtures.*` or `mockOf` (one exception: `@jterrazz/test/oxlint`).',
         family: 'F',
+        fix: 'Move the code that needs the import into a test, or inject what it needs as a port.',
         id: 'F2',
         rationale:
-            'Empêcher les artefacts de test de fuir en prod protège le bundle applicatif du consommateur.',
+            "Keeping test artefacts out of production protects the consumer's application bundle.",
+        reach: 'all',
     },
     'f3-specs-public-entry': {
         channel: 'statique',
         convention:
-            'Depuis `specs/`, seul l’import en profondeur des INTERNES du framework est interdit : un chemin relatif résolvant dans `src/{specification,integrations,vitest,lint}/` du dépôt du framework, ou tout `@jterrazz/test/<subpath>` que la map `exports` du paquet ne publie pas — les subpaths publiés sont exemptés, LUS du manifeste comme en F1, qui en tient la liste. Les imports de la source de SA PROPRE app par un consommateur sont toujours permis (c’est le motif documenté). Aucune exception de dossier : une sonde qui ne peut pas atteindre son sujet par l’entrée publique est un test de module à côté de son module, pas une spec.',
+            "From `specs/`, only a deep import of the framework's INTERNALS is forbidden: a relative path resolving into the framework repository's `src/{specification,integrations,vitest,lint}/`, or any `@jterrazz/test/<subpath>` the package's `exports` map does not publish — the published subpaths are exempt, READ from the manifest as in F1, which holds the list. A consumer importing ITS OWN app's source is always allowed (that is the documented pattern). No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
         family: 'F',
+        fix: 'Reach the framework through `@jterrazz/test`, or move the probe beside the module it covers.',
         id: 'F3',
         rationale:
-            'Tester par la surface publique garde les specs découplées des chemins internes du framework, sans gêner le consommateur qui importe sa propre app.',
+            "Testing through the public surface keeps specs decoupled from the framework's internal paths, without getting in the way of a consumer importing its own app.",
+        reach: 'specs',
     },
     'f4-no-test-to-test-import': {
         channel: 'statique',
-        convention: 'Un `*.test.ts` n’importe jamais un autre `*.test.ts`.',
+        convention: 'A test file never imports another test file.',
         family: 'F',
+        fix: 'Move what the two share into a `*.fixtures.ts` neighbour.',
         id: 'F4',
         rationale:
-            'Le partage entre tests passe par des `*.fixtures.ts`, pas par des imports test-à-test qui couplent les fichiers.',
+            'Sharing between tests goes through `*.fixtures.ts`, not through test-to-test imports that couple the files.',
+        reach: 'tests',
     },
     'f5-fixtures-only-from-tests': {
         channel: 'statique',
-        convention: 'Un `*.fixtures.ts` n’est importable que depuis des `*.test.ts`.',
+        convention: 'A `*.fixtures.ts` is importable only from a test file.',
         family: 'F',
+        fix: 'Move the value into production code if production needs it; otherwise import it from a test.',
         id: 'F5',
-        rationale:
-            'Cantonner les fixtures aux tests empêche la donnée de test de fuir dans le code de prod.',
+        rationale: 'Confining fixtures to tests stops test data leaking into production code.',
+        reach: 'all',
     },
     'f6-no-foreign-test-runtime': {
         channel: 'statique',
         convention:
-            'Un fichier de test n’importe pas de second runtime de test : `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*` et `@vitest/browser*` sont des erreurs. Portée : les rôles qui EXÉCUTENT un test (`module`, `component`, `specification`) — la config d’un projet fixture et un module de providers sous `specs/` nomment légitimement l’adaptateur.',
+            'A test file imports no second test runtime: `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*` and `@vitest/browser*` are errors. Reach: the roles that RUN a test (`module`, `component`, `specification`) — a fixture project’s config and a providers module under `specs/` legitimately name the adapter.',
         facet: 'component',
         family: 'F',
-        fix: 'Passer par la facette qui remplace le seam : `component.render()`, le vocabulaire d’éléments et le visiteur.',
+        fix: 'Go through the facet that replaces the seam: `component.render()`, the element vocabulary and the visitor.',
         id: 'F6',
         rationale:
-            'Un test qui importe l’adaptateur parle le dialecte de l’adaptateur : un dépôt finit avec autant de vocabulaires que de seams. Les groupes livrés sont ceux que la facette component REMPLACE ; le reste de la famille suit la vague de règles.',
+            "A test importing the adapter speaks the adapter's dialect: a repository ends up with as many vocabularies as it has seams. The groups shipped are the ones the component facet REPLACES; the rest of the family follows the rule wave.",
         reach: 'tests',
     },
     'g4-no-dom-in-module-test': {
         channel: 'statique',
         convention:
-            'Un test de module ne touche aucun global du DOM : `document`, `window`, `navigator`, `HTMLElement` référencés en position de VALEUR dans un fichier de rôle `module` HORS de `specs/` sont une erreur. Un nom en position de type (`x as HTMLElement`) et un garde `typeof window` n’atteignent aucun document et restent hors de portée ; tant que le rôle `spec` n’existe pas, `module` couvre aussi les `.test.ts` de `specs/`, que la règle laisse donc passer.',
+            'A module test touches no DOM global: `document`, `window`, `navigator`, `HTMLElement` referenced in VALUE position in a `module`-role file OUTSIDE `specs/` is an error. A name in type position (`x as HTMLElement`) and a `typeof window` guard reach no document and stay out of reach.',
         facet: 'component',
         family: 'G',
-        fix: 'Renommer le test en `.test.tsx` à côté du composant qu’il rend, et le faire collecter par `component()`.',
+        fix: 'A rendered thing is a `.test.tsx` beside its component, collected by `component()`.',
         id: 'G4',
         rationale:
-            'Un test de module tourne sous node, où `document` n’existe pas : un test qui en réclame un ne teste pas un module, il rend quelque chose — et il a désormais un endroit où aller.',
+            'A module test runs under node, where `document` does not exist: a test asking for one is not testing a module, it is rendering something — and it now has somewhere to go.',
         reach: 'module',
     },
     'i1-layer-boundaries': {
         channel: 'statique',
         convention:
-            'Le projet DÉCLARE ses couches sous `src/` via l’option `layers` (paquets autorisés, imports internes, un dossier = une dépendance, seams) ; tout import hors des arêtes déclarées est une erreur. Sans carte de couches, la règle est inerte.',
+            'A project DECLARES its layers under `src/` through the `layers` option (allowed packages, internal imports, one folder per dependency, seams); any import outside the declared edges is an error. With no layer map the rule is inert.',
         family: 'I',
+        fix: 'Declare the edge in the layer map, or route the import through the layer that owns it.',
         id: 'I1',
         rationale:
-            'Une architecture appartient au projet : des frontières déclarées se vérifient, une architecture supposée se contourne.',
+            'An architecture belongs to the project: declared boundaries are checkable, an assumed one is worked around.',
+        reach: 'all',
     },
     'i2-sibling-test-naming': {
         channel: 'statique',
         convention:
-            'Le test de `<fichier>.ts` est `<fichier>.test.ts` à côté de lui ; un `.test.ts` mal nommé, ou un dossier `__tests__/`, est une erreur. Une unité RENDUE obéit à la même loi où qu’elle vive : un `.test.tsx` est voisin du `.tsx` qu’il rend, ou du `.ts` du hook ou de la fonction DOM dont il porte l’hôte.',
+            "The test of `<file>.ts` is `<file>.test.ts` beside it; a misnamed `.test.ts`, a `__tests__/` directory or a package's `tests/` root is an error. A RENDERED unit answers to the same law wherever it lives: a `.test.tsx` is the neighbour of the `.tsx` it renders, or of the `.ts` of the hook or DOM function whose Host it carries. A `module`-role file under a `specs/` tree is a repository suite — it covers a tree, so it has no neighbour to miss.",
         family: 'I',
-        fix: 'Poser le test à côté de l’unité qu’il couvre, sous le même basename.',
+        fix: 'Put the test beside the unit it covers, under the same basename.',
         id: 'I2',
-        reach: 'tests',
         rationale:
-            'Des tests voisins (parité avec le `foo_test.go` de Go) gardent test et code ensemble et découvrables.',
+            "Neighbouring tests (parity with Go's `foo_test.go`) keep a test and its code together and discoverable.",
+        reach: 'tests',
     },
     'i4-no-vi-mock-in-src': {
         channel: 'statique',
         convention:
-            'Sous `src/`, `vi.mock`, `__mocks__/`, `__fixtures__/` et l’import d’un asset de données (`.json`, `.sql`, `.yaml`, …) depuis un `.test.ts` sont interdits ; un spécifieur pointé (`./dashboard.post`) reste du code.',
+            'In a test, mocks and data are CODE: `vi.mock`, a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all forbidden. A dotted specifier (`./dashboard.post`) is still code.',
         family: 'I',
+        fix: 'Use `mockOf<Port>()` for a double, a `*.fixtures.ts` neighbour for a payload, and a spec under `specs/` for a test that needs a real file.',
         id: 'I4',
         rationale:
-            'Dans les tests de module, mocks et données sont du CODE (`mockOf`, `*.fixtures.ts`) ; un vrai fichier appelle une spec.',
+            'A module test that reaches for a real file or a module mock is describing an assembled product, and that has a facet of its own.',
+        reach: 'tests',
     },
     'j2-no-sleep-in-specs': {
         channel: 'statique',
         convention:
-            'Aucun sleep arbitraire (`setTimeout`/`setInterval`/`Atomics.wait`) sous `specs/**` — la synchronisation passe par `waitFor`.',
+            'No arbitrary sleep (`setTimeout`/`setInterval`/`Atomics.wait`, or a `node:timers/promises` import) in any test file — synchronisation is `see()`/`gone()` inside a scenario and `waitUntil()` everywhere else.',
         family: 'J',
+        fix: 'Wait for the condition, not for a duration.',
         id: 'J2',
         rationale:
-            'Un sleep fixe rend les tests lents et instables ; attendre une condition est déterministe.',
+            'A fixed sleep makes tests slow and flaky; waiting on a condition is deterministic.',
+        reach: 'tests',
     },
     'w1-scenario-pure': {
         channel: 'statique',
         convention:
-            'Un scénario (`.visit()` website, `.open()` mobile) est le When : le visiteur agit, la capture reflète l’état final ; aucun `expect()` dans le callback — les assertions vivent dans le Then, sur le résultat retourné.',
+            'A scenario (`.visit()` on website, `.open()` on mobile, `.render()` on component) is the When: the visitor acts and the capture reflects the settled state; no `expect()` in the callback — assertions live in the Then, on the returned result.',
         facet: 'shared',
         family: 'W',
+        fix: 'Move the assertion out of the callback, onto the result the terminal action resolves to.',
         id: 'W1',
         rationale:
-            'Séparer l’interaction de l’assertion garde la grammaire setup → action → résultat intacte et les scénarios rejouables.',
+            'Separating interaction from assertion keeps the setup → action → result grammar intact and the scenarios replayable.',
+        reach: 'tests',
     },
     'w2-testid-states-what-is-missing': {
         channel: 'statique',
         convention:
-            'Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content` ; côté mobile `button`, `field`, `content`). `testId()` est l’unique échappatoire, et la ligne DIT ce que l’élément n’a pas : un commentaire `// testId: <ce qui manque>` sur la ligne de l’appel ou sur celle juste au-dessus. C’est une invariante, pas une justification.',
+            "A scenario's elements are user-facing (`button`, `link`, `field`, `heading`, `content`; on mobile `button`, `field`, `content`). `testId()` is the one escape hatch, and the line STATES what the element lacks: a `// testId: <what is missing>` comment on the call's own line or the one directly above. It is an invariant, not a rationale.",
         facet: 'shared',
         family: 'W',
-        fix: 'Écrire `// testId: <pas de nom accessible | pas de rôle | …>` sur la ligne de l’appel ou celle du dessus — ou nommer l’élément avec `button()`/`link()`/`field()`/`heading()`/`content()`.',
+        fix: 'Write `// testId: <no accessible name | no role | …>` on the call’s line or the one above — or name the element with `button()`/`link()`/`field()`/`heading()`/`content()`.',
         id: 'W2',
         rationale:
-            'Tester ce que l’utilisateur voit (rôles, labels) rend les specs robustes aux refontes DOM ; un test-id contourne cette garantie, et sans l’invariante écrite personne ne sait plus si l’échappatoire est encore nécessaire.',
-        reach: 'specs',
+            'Testing what the user sees (roles, labels) keeps specs robust to DOM rewrites; a test id sidesteps that guarantee, and without the invariant written down nobody can tell whether the hatch is still needed.',
+        reach: 'tests',
     },
 } satisfies Record<string, RuleDoc>;
 
@@ -490,243 +564,279 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Chaque membre du workspace qui a des tests À LUI (un script `test` qui ne délègue pas aux membres, ou un `*.test.ts(x)` hors de l’arbre d’un autre paquet) déclare une config vitest (`vitest.config.*`). La passe MEMBRE juge le membre lui-même, avec ou sans arbre `specs/` ; une racine qui ne fait que déléguer ne doit rien.',
+            'Every workspace member with tests OF ITS OWN (a `test` script that does not delegate to members, or a `*.test.ts(x)` outside another package’s tree) declares a vitest config (`vitest.config.*`). The MEMBER pass judges the member itself, with or without a `specs/` root; a root that only delegates owes nothing.',
         facet: 'shared',
         family: 'E',
-        fix: 'Écrire `export default defineSpecConfig()` dans le membre — le préréglage porte les budgets, le dossier d’artefacts et l’exclusion de `_fixtures/`.',
+        fix: 'Write `export default defineSpecConfig()` in the member — the preset carries the budgets, the artefact directory and the `_fixtures/` exclusion.',
         id: 'E3',
         name: 'e3-config-present',
         rationale:
-            'Sans config, le budget de 5 s de vitest et un `_fixtures/` non exclu font tourner les tests du membre : le défaut n’est pas choisi, il est hérité.',
-        reach: 'config',
+            "Without a config, vitest's 5 s budget and an unexcluded `_fixtures/` are running the member's tests: the default is not chosen, it is inherited.",
+        reach: 'member',
     },
     {
         channel: 'checker',
         convention:
-            "La passe MEMBRE relit la règle E5b là où oxlint peut ne pas atteindre la config d’un membre : `environment: 'happy-dom'|'jsdom'` dans un `vitest.config.*` est une erreur.",
+            "The MEMBER pass re-reads rule E5b where oxlint may not reach a member's config: `environment: 'happy-dom'|'jsdom'` in a `vitest.config.*` is an error.",
         facet: 'component',
         family: 'E',
-        fix: 'Supprimer `environment` et collecter le rendu avec `component()`.',
+        fix: 'Remove `environment` and collect the rendered tests with `component()`.',
         id: 'E5b',
         name: 'e5b-no-simulated-dom-config-member',
         rationale:
-            'La passe statique ne voit que ce que la configuration oxlint du dépôt lui donne ; la passe membre part du manifeste racine et atteint chaque membre déclaré.',
-        reach: 'config',
+            "The static pass sees only what the repository's oxlint configuration hands it; the member pass starts from the root manifest and reaches every declared member.",
+        reach: 'member',
     },
     {
         channel: 'checker',
         convention:
-            'Un membre ne déclare aucune dépendance que `@jterrazz/test` porte déjà (`msw`, `vitest-mock-extended` ; `yaml` en devDependencies seulement — en dépendance de production c’est la bibliothèque du produit) ni aucun seam retiré (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`). Les peers optionnels — `playwright`, `vite`, `react`, `better-sqlite3`, `pg`, `redis`, `testcontainers`… — sont déclarés par le consommateur, à dessein.',
+            'A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`). The optional peers — `playwright`, `vite`, `react`, `better-sqlite3`, `pg`, `redis`, `testcontainers`… — are declared by the consumer, by design.',
         facet: 'shared',
         family: 'F',
-        fix: 'Retirer la déclaration : une transitive est déjà résolue par le paquet ; un seam retiré a une facette qui le remplace (`component()`, `website()`, `clock`, `intercept()`). Les deux cas ont leur propre phrase dans le diagnostic.',
+        fix: 'Remove the declaration: a transitive is already resolved by the package; a retired seam has a facet that replaces it (`component()`, `website()`, `clock`, `intercept()`). The diagnostic carries a sentence for each case.',
         id: 'F8',
         name: 'f8-no-seam-dependency',
         rationale:
-            'Une déclaration en double laisse deux versions d’un même seam coexister, et un seam retiré garde un vocabulaire que le framework a remplacé.',
-        reach: 'config',
+            'A duplicate declaration lets two versions of one seam coexist, and a retired seam keeps a vocabulary the framework has replaced.',
+        reach: 'member',
     },
     {
         channel: 'checker',
         convention:
-            'Tout `{{token}}` dans une fixture `_expected/` — ou dans un flux attendu d’un document `<cas>.spec.yaml` — appartient au vocabulaire figé ; un token inconnu est une erreur.',
+            'Every `{{token}}` in an `_expected/` fixture — or in an expected stream of a `<case>.spec.yaml` document — belongs to the frozen vocabulary; an unknown token is an error.',
         family: 'D',
+        fix: 'Write a token the grammar knows; the message prints the full list.',
         id: 'D4',
         name: 'd4-unknown-token',
         rationale:
-            'Une grammaire fermée partagée avec le matcher runtime empêche la dérive entre canaux.',
+            'A closed grammar shared with the runtime matcher stops the two channels drifting.',
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Une ref malformée d’un kind connu (`{{iso8601#}}`, `{{uuid #id}}`) dans un fichier texte sous `_expected/` est une erreur.',
+            'A malformed ref of a known kind (`{{iso8601#}}`, `{{uuid #id}}`) in a text file under `_expected/` is an error.',
         family: 'D',
+        fix: 'Write `{{kind#name}}` with no space, and a name for the ref.',
         id: 'D4',
         name: 'd4-malformed-ref',
-        rationale:
-            'Une capture malformée échouerait silencieusement — la signaler la rend visible tôt.',
+        rationale: 'A malformed capture would fail silently — naming it makes it visible early.',
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'La première ligne d’un `.http` de profondeur 1 suit sa grammaire : requête (`MÉTHODE /path`) sous `_requests/`, statut (`HTTP/1.1 <status>`) sous `_expected/`.',
+            'The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`) under `_requests/`, a status line (`HTTP/1.1 <status>`) under `_expected/`.',
         family: 'D',
+        fix: 'Write the opening line the folder calls for, or move the file to the other one.',
         id: 'D4b',
         name: 'd4b-http-first-line',
         rationale:
-            'La ligne d’ouverture distingue une requête d’une réponse — la contraindre attrape les fichiers mal placés.',
+            'The opening line is what tells a request from a response — constraining it catches misplaced files.',
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Un document `<cas>.spec.yaml` respecte sa grammaire : clés fermées au niveau du document (`kind`, `description`, `fixture`, `env`, `serve`, `runs`) comme dans un run (`command`, `stdin`, `timeout`, `waitFor`, `exit`, `stdout`, `stderr`, `files`), `description:` et `runs:` obligatoires, `command:` et `exit:` obligatoires dans chaque run, `exit:` entier littéral, `waitFor:` seulement sur le dernier run et jamais avec `stdin:`, chemin `files:` relatif et sous le workdir.',
+            'A `<case>.spec.yaml` document follows its grammar: closed keys at document level (`kind`, `description`, `fixture`, `env`, `serve`, `runs`) and inside a run (`command`, `stdin`, `timeout`, `waitFor`, `exit`, `stdout`, `stderr`, `files`), `description:` and `runs:` required, `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir.',
         family: 'D',
+        fix: 'Write the key the grammar names; the message prints the accepted set.',
         id: 'D4b',
         name: 'd4b-spec-shape',
         rationale:
-            'La grammaire est lue par le parseur du runner lui-même : le document que le lint accepte est exactement celui que le runner exécute.',
+            "The grammar is read by the runner's own parser: the document lint accepts is exactly the one the runner runs.",
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            'Les clés d’un `<cas>.spec.yaml` suivent l’ordre canonique — `kind, description, fixture, env, serve, runs` au niveau du document, `command, stdin, timeout, waitFor, exit, stdout, stderr, files` dans un run. Corrigeable (`--fix`).',
+            'The keys of a `<case>.spec.yaml` follow the canonical order — `kind, description, fixture, env, serve, runs` at document level, `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run. Fixable (`--fix`).',
         family: 'D',
+        fix: 'Run `node dist/checker.js <root> --fix`; it rewrites the order.',
         id: 'D4b',
         name: 'd4b-spec-key-order',
         rationale:
-            'Le décor avant la session, l’entrée avant la sortie : un ordre unique rend les documents comparables et supprime les diffs qui ne changent rien.',
+            'The setting before the session, the input before the output: one order makes documents comparable and removes the diffs that change nothing.',
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            '`stdout`, `stderr`, `stdin` et `files.*.equals` d’un `<cas>.spec.yaml` s’écrivent en scalaire bloc (`|` garde le saut de ligne final, `|-` le supprime), jamais en chaîne entre guillemets avec des `\\n`. Corrigeable (`--fix`).',
+            '`stdout`, `stderr`, `stdin` and `files.*.equals` of a `<case>.spec.yaml` are written as block scalars (`|` keeps the trailing newline, `|-` drops it), never as a quoted string carrying `\\n`. Fixable (`--fix`).',
         family: 'D',
+        fix: 'Run `node dist/checker.js <root> --fix`; it rewrites the scalar.',
         id: 'D4b',
         name: 'd4b-spec-block-scalar',
         rationale:
-            'Une sortie attendue doit ressembler à une sortie — une golden sur une ligne est illisible et aucun diff ne peut la montrer.',
+            'Expected output has to look like output — a golden on one line is unreadable and no diff can show it.',
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            'Le suffixe dit le genre, et l’arbre lui donne raison. Un `.spec.ts` — le produit ASSEMBLÉ — vit sous `specs/<facette>/` ; ailleurs c’est une erreur. Un `.test.ts` — l’UNITÉ — vit à côté de son module ; sous un dossier de facette (`api`, `cli`, `integration`, `jobs`, `mobile`, `website`) c’est une erreur, réparable par `--fix` (un `git mv`). Un premier niveau qui n’est PAS une facette est une suite de dépôt : elle couvre un arbre, garde `.test.ts`, et c’est la profondeur déclarée de C1 qui la juge. Un document se nomme `<cas>.spec.yaml` : `<cas>` en kebab-case, sans les mots `test`/`spec`/`cli` que le suffixe porte déjà, et jamais le nom nu de son dossier.',
+            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`; anywhere else is an error. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `jobs`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and C1’s declared depth is what judges it. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
         facet: 'shared',
         family: 'C',
-        fix: 'Déplacer le `.spec.ts` sous `specs/<facette>/` (ou le renommer `.test.ts` à côté de son module) ; renommer le `.test.ts` de facette en `.spec.ts` — `node dist/checker.js <root> --fix` le fait avec `git mv`.',
+        fix: 'Move the `.spec.ts` under `specs/<facet>/` (or rename it `.test.ts` beside its module); rename the facet `.test.ts` to `.spec.ts` — `node dist/checker.js <root> --fix` does it with `git mv`.',
         id: 'C12',
         name: 'c12-spec-file-name',
         rationale:
-            'Sans accord entre le suffixe et l’arbre, on ne peut pas dire ce qu’un test prouve sans l’ouvrir ; et le nom du fichier est la première phrase que le lecteur lit — `rm/rm.spec.yaml` ne dit rien deux fois.',
+            'With no agreement between the suffix and the tree, a reader cannot say what a test proves without opening it; and the filename is the first sentence they read — `rm/rm.spec.yaml` says nothing twice.',
         reach: 'specs',
     },
     {
         channel: 'checker',
         convention:
-            'La `description:` d’un document est un titre : une seule ligne, initiale minuscule (identifiant tout en majuscules exempté), sans point final, moins de 100 caractères.',
+            "A document's `description:` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters.",
         family: 'J',
+        fix: 'Write it as a title, not as a sentence.',
         id: 'J5',
         name: 'j5-spec-description',
         rationale:
-            'La description EST le titre vitest — les règles du titre s’y appliquent, pas celles d’un paragraphe.',
+            "The description IS the vitest title — a title's rules apply to it, not a paragraph's.",
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            'Deux `<cas>.spec.yaml` d’un même dossier ne partagent pas leur `description:`.',
+            'Two `<case>.spec.yaml` documents in one directory do not share a `description:`.',
         family: 'J',
+        fix: 'Name what each case proves; two titles that read alike leave two files to open.',
         id: 'J4',
         name: 'j4-spec-description-unique',
-        rationale:
-            'Le rapporteur nomme le titre : deux titres identiques laissent deux fichiers à ouvrir.',
+        rationale: 'The reporter names the title: two identical titles leave two files to open.',
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            'Un flux attendu ne contient pas de valeur volatile littérale : origine loopback avec port (`127.0.0.1:8080`, `localhost:3000`), chemin temporaire absolu (`/tmp/`, `/private/tmp/`, `/var/folders/`) ou chemin home (`/Users/…`, `/home/…`). Le message nomme le token à écrire.',
+            'An expected stream carries no literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). The message names the token to write.',
         family: 'D',
+        fix: 'Write the token the message names — `{{workdir}}`, `{{url}}` — in place of the literal.',
         id: 'D5',
         name: 'd5-spec-volatile-literal',
         rationale:
-            'C’est exactement la forme qu’un `TEST_UPDATE` aurait tokenisée : en trouver une signifie qu’un token a été écrasé à la main.',
+            'This is exactly the shape a `TEST_UPDATE` run would have tokenised: finding one means a token was overwritten by hand.',
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Un horodatage ISO-8601 ou un uuid littéral dans un flux attendu → warning, sauf si la même valeur apparaît dans un `fixture:` ou un `stdin:` du même document (elle est alors fixée, pas volatile).',
+            'A literal ISO-8601 timestamp or uuid in an expected stream → warning, unless the same value appears in a `fixture:` or a `stdin:` of the same document (it is then pinned, not volatile).',
         family: 'D',
+        fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
         id: 'D5',
         name: 'd5w-spec-pinned-value',
-        rationale: 'Le défaut n’est pas le littéral : c’est le littéral que rien n’a fixé.',
+        rationale: 'The defect is not the literal: it is the literal nothing pinned.',
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Un flux attendu dont tout le contenu est `{{any}}` → warning : le run s’exécute et ne prouve rien.',
+            'An expected stream whose whole content is `{{any}}` → warning: the run executes and proves nothing.',
         family: 'J',
+        fix: 'Regenerate with `TEST_UPDATE=1` and keep tokens only for the parts that move.',
         id: 'J3',
         name: 'j3w-spec-empty-assertion',
         rationale:
-            'Le miroir de J3 pour les documents — une assertion qui accepte tout est une assertion absente.',
+            'The J3 mirror for documents — an assertion that accepts anything is an absent assertion.',
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            'Un run dont `exit:` est non nul sans `stdout:` ni `stderr:` → warning : le document ne dit pas pourquoi la commande a refusé.',
+            'A run whose `exit:` is non-zero with neither `stdout:` nor `stderr:` → warning: the document does not say why the command refused.',
         family: 'D',
+        fix: 'Write the refusal the command prints — that is what the case proves.',
         id: 'D11',
         name: 'd11w-spec-silent-refusal',
         rationale:
-            'Un refus muet est soit un défaut du produit, soit une golden qui a oublié que les mots partaient sur stderr.',
+            'A silent refusal is either a defect in the product, or a golden that forgot the words went to stderr.',
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            'Les mots nus d’`env:` et les noms de `serve:` d’un document sont des clés des objets `env`/`serve` d’un `specification.cli(…)` du plus proche dossier portant des `*.specification.ts` (lecture statique des littéraux ; ignoré sinon).',
+            "A document's bare `env:` words and `serve:` names are keys of the `env`/`serve` objects of a `specification.cli(…)` in the nearest directory carrying `*.specification.ts` files (literals read statically; ignored otherwise).",
         family: 'C',
+        fix: 'Register the name in the specification, or fix the spelling.',
         id: 'C8',
         name: 'c8-spec-registered-name',
         rationale:
-            'Une faute de frappe (`serve: dashbord`) échoue aujourd’hui à l’exécution, un fichier de test plus tard ; ici c’est une ligne de lint.',
+            'A typo (`serve: dashbord`) fails at run time today, a test file later; here it is one lint line.',
+        reach: 'document',
     },
     {
         channel: 'checker',
         convention:
-            'Un token connu dans un fichier sous `_requests/` → warning : les requêtes sont des entrées, jamais matchées.',
+            'A known token in a file under `_requests/` → warning: requests are inputs, never matched.',
         family: 'D',
+        fix: 'Write the literal value the request actually sends.',
         id: 'D10',
         name: 'd10w-tokens-in-requests',
         rationale:
-            'Un token dans une entrée ne sera ni validé ni substitué — c’est presque toujours une erreur.',
+            'A token in an input is neither validated nor substituted — it is almost always a mistake.',
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Aucune fixture morte : tout fichier sous `_seeds/`/`_requests/`/`_fixtures/` et toute entrée de premier niveau de `_expected/` doit être référencée ; un dossier de feature sans `*.test.ts` ni `*.spec.yaml` est orphelin (warning si argument non littéral). Un `<cas>.spec.yaml` référence les fixtures nommées par ses entrées `fixture:`.',
+            'No dead fixtures: every file under `_seeds/`/`_requests/`/`_fixtures/` and every top-level entry of `_expected/` must be referenced; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the fixtures its `fixture:` entries name.',
         family: 'C',
+        fix: 'Reference it from the spec it stands under, or delete it.',
         id: 'C9',
         name: 'c9-dead-fixtures',
         rationale:
-            'Le miroir de C8 — une fixture que rien ne référence est du poids mort qui trompe le lecteur.',
+            'The C8 mirror — a fixture nothing references is dead weight that misleads the reader.',
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Une fixture du pool est PARTAGÉE, ou elle est locale : un dossier de `<specs>/_fixtures/` référencé (`$FIXTURES/<nom>`) depuis un seul dossier de spec — deux documents d’une même feuille comptent pour un — doit vivre à côté de cette feuille, en `<feuille>/_fixtures/<nom>/`, référencé par la forme relative. Zéro référence reste l’erreur de fixture morte (C9). Corrigé par `--fix` : le dossier est déplacé et les littéraux réécrits.',
+            'A pool fixture is SHARED, or it is local: a directory of `<specs>/_fixtures/` referenced (`$FIXTURES/<name>`) from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/_fixtures/<name>/`, referenced by the relative form. Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved and the literals rewritten.',
         family: 'C',
+        fix: 'Run `node dist/checker.js <root> --fix`; it moves the directory and rewrites what named it.',
         id: 'C14',
         name: 'c14-pool-fixture-shared',
         rationale:
-            'Une fixture d’un seul scénario garée dans le pool se lit comme du sol partagé : chacun suppose qu’un autre en dépend et personne n’ose y toucher.',
+            "A single scenario's fixture parked in the pool reads as shared ground: everyone assumes someone else depends on it and nobody dares touch it.",
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Une fixture locale ne se lit que depuis son propre dossier : un chemin `fixture:`/`.fixture()` contenant `..`, ou dont la cible sort du `_fixtures/` de la spec qui le nomme, est une erreur — le sol partagé par plusieurs feuilles va dans le pool `$FIXTURES`.',
+            'A local fixture is read only from its own directory: a `fixture:`/`.fixture()` path containing `..`, or whose target leaves the `_fixtures/` of the spec naming it, is an error — ground shared by several leaves goes in the `$FIXTURES` pool.',
         family: 'C',
+        fix: "Copy it under this leaf's own `_fixtures/`, or promote it to the pool.",
         id: 'C15',
         name: 'c15-local-fixture-reach',
         rationale:
-            'Une feuille qui pioche dans les fixtures d’une voisine, c’est le pool par une autre porte, sans la visibilité du pool : la voisine casse une spec à deux dossiers de là sans le savoir.',
+            "A leaf reaching into a neighbour's fixtures is the pool through another door, without the pool's visibility: the neighbour breaks a spec two folders away without knowing.",
+        reach: 'ground',
     },
     {
         channel: 'checker',
         convention:
-            'Canal principal de B5 : les runners docker-aware sont inférés de l’option `docker:` du fichier de specification importé, puis chaque résultat `.exec()` lié sans `await using` est signalé.',
+            "B5's one channel: docker-aware runners are inferred from the `docker:` option of the imported specification file, and every `.exec()` result bound without `await using` is reported.",
         family: 'B',
+        fix: 'Bind the result with `await using`, so the containers the run spawned are disposed with the scope.',
         id: 'B5',
         name: 'b5-await-using-inference',
         rationale:
-            'Inférer les runners supprime la liste à maintenir à la main de la règle oxlint.',
+            'Inferring the runners removes the hand-maintained list an oxlint rule would need.',
+        reach: 'tests',
     },
     {
         channel: 'checker',
         convention:
-            'Avec ≥ 2 bases, `database:` est obligatoire sur chaque `.seed()`/`.table()` ; avec une seule, il est interdit — vérifié en croisant le record `services:` avec les appels des tests.',
+            'With ≥ 2 databases, `database:` is required on every `.seed()`/`.table()`; with exactly one it is forbidden — checked by crossing the `services:` record with the calls in the tests.',
         family: 'A',
+        fix: 'State `database:` everywhere or nowhere, whichever the record calls for.',
         id: 'A7',
         name: 'a7-database-property',
         rationale:
-            'Le nombre de bases fixe l’API d’appel ; l’analyse cross-fichier attrape l’omission avant le runtime.',
+            'The number of databases fixes the call API; the cross-file analysis catches the omission before run time.',
+        reach: 'tests',
     },
 ];
 
@@ -739,71 +849,85 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            'Le framework lève à l’exécution si `database:` est absent avec ≥ 2 bases, ou présent avec une seule (double le canal checker).',
+            'The framework throws at run time if `database:` is absent with ≥ 2 databases, or present with exactly one (it doubles the checker channel).',
         family: 'A',
+        fix: 'State `database:` everywhere or nowhere, whichever the record calls for.',
         id: 'A7',
         name: 'a7-database-runtime',
-        rationale: 'Le runtime garde la garantie même là où l’analyse statique s’abstient.',
+        rationale: 'The runtime keeps the guarantee even where static analysis abstains.',
+        reach: 'tests',
     },
     {
         channel: 'runtime',
         convention:
-            'Le framework refuse à l’exécution un marqueur `$…` inconnu, ou un `$FIXTURES` sans dossier `specs` ancêtre (message guidant).',
+            'The framework refuses at run time an unknown `$…` marker, or a `$FIXTURES` with no ancestor `specs` directory (with a guiding message).',
         family: 'B',
+        fix: 'Write `$FIXTURES/<name>`, from a spec that sits under a `specs/` tree.',
         id: 'B2',
         name: 'b2-unknown-marker-runtime',
         rationale:
-            'Un message runtime guide l’auteur quand la faute échappe au canal statique (argument non littéral).',
+            'A runtime message guides the author where the fault escapes the static channel (a non-literal argument).',
+        reach: 'tests',
     },
     {
         channel: 'runtime',
         convention:
-            'En mode `cli` avec `services`, le framework injecte `<CLÉ>_URL` (CONSTANT_CASE camel-aware) plus les alias non ambigus `DATABASE_URL`/`REDIS_URL` ; `.env()` override (`null` retire).',
+            'In `cli` mode with `services`, the framework injects `<KEY>_URL` (camel-aware CONSTANT_CASE) plus the unambiguous aliases `DATABASE_URL`/`REDIS_URL`; `.env()` overrides (`null` unsets).',
         family: 'B',
+        fix: 'Read the variable the record key injects; state `.env()` only to override or unset it.',
         id: 'B6',
         name: 'b6-url-injection',
-        rationale: 'Injecter les URLs évite le câblage manuel répété et son décalage (voir b6w).',
+        rationale: 'Injecting the URLs avoids the repeated hand-wiring and its drift (see b6w).',
+        reach: 'tests',
     },
     {
         channel: 'runtime',
         convention:
-            'Dès qu’une chaîne `api`/`jobs` déclare un intercept, toute requête sortante non matchée (y compris une file épuisée) fait échouer le spec avec une erreur explicite.',
+            'As soon as an `api`/`jobs` chain declares an intercept, any unmatched outgoing request (an exhausted queue included) fails the spec with an explicit error.',
         family: 'D',
+        fix: 'Declare the contract the request needs, or stop making the request.',
         id: 'D7',
         name: 'd7-strict-intercepts',
-        rationale: 'Un réseau gardé rend les interactions externes exhaustives et intentionnelles.',
+        rationale: 'A guarded network makes external interactions exhaustive and intentional.',
+        reach: 'tests',
     },
     {
         channel: 'runtime',
         convention:
-            '`toMatch` sur un sujet accesseur (`stream`/`json`/`response`/arborescence) attend un NOM de fixture (extension comprise) : passer une `RegExp` (ou tout non-string) lève immédiatement, en nommant le sujet et l’échappatoire `expect(x.text).toMatch(/re/)`.',
+            '`toMatch` on an accessor subject (`stream`/`json`/`response`/tree) expects a fixture NAME (extension included): passing a `RegExp` (or any non-string) throws immediately, naming the subject and the `expect(x.text).toMatch(/re/)` escape hatch.',
         family: 'D',
+        fix: "Write the fixture's name, or assert on `.text` when a pattern is genuinely what you mean.",
         id: 'D14',
         name: 'd14-tomatch-fixture-name',
         rationale:
-            'L’instinct hérité de vitest (`toMatch(/re/)`) tomberait sinon sur l’erreur d’extension ou coercerait la regex en `"/re/"`. L’argument accesseur n’est jamais littéral côté valeur, et une heuristique statique confondrait le `expect(chaîne).toMatch(/re/)` légitime (D3/D8) — seul le canal runtime refuse proprement, sans faux positifs.',
+            'The instinct inherited from vitest (`toMatch(/re/)`) would otherwise hit the extension error or coerce the regex into `"/re/"`. The accessor argument is never a value-side literal, and a static heuristic would confuse the legitimate `expect(string).toMatch(/re/)` (D3/D8) — only the runtime channel refuses it cleanly, with no false positives.',
+        reach: 'tests',
     },
     {
         channel: 'runtime',
         convention:
-            'Un descripteur d’élément doit désigner exactement UN élément quand un verbe AGIT dessus (`click`/`tap`/`fill`) : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, un autre descripteur). Le framework n’agit jamais sur « le premier ». Un nom désigne le nom accessible ENTIER depuis 16.0 — `{ exact: false }` est l’échappatoire — et un descripteur qui ne trouve rien entier mais trouvait quelque chose en sous-chaîne déclenche un avertissement runtime, une fois par descripteur, pendant 16.0 et 16.1. Vaut pour les deux facettes à scénario : website et mobile ; sur mobile, `see()` — qui n’agit sur rien — est satisfait par n’importe quel match visible (l’arbre XCUITest duplique légitimement un label entre conteneur et enfant).',
+            'An element descriptor must designate exactly ONE element when a verb ACTS on it (`click`/`tap`/`fill`): if several match, the action is refused with an error enumerating the candidates and offering the rewrites (`within(...)`, another descriptor). The framework never acts on "the first". A name designates the WHOLE accessible name since 16.0 — `{ exact: false }` is the opt-out — and a descriptor that finds nothing whole but would have found something as a substring raises a runtime warning, once per descriptor, through 16.0 and 16.1. It holds on both scenario facets, website and mobile; on mobile, `see()` — which acts on nothing — is satisfied by any visible match (the XCUITest tree legitimately duplicates a label between a container and its child).',
         facet: 'shared',
         family: 'W',
+        fix: 'Scope it with `within(<landmark>, …)`, or name the element with a descriptor that designates one thing.',
         id: 'W3',
         name: 'w3-unambiguous-element',
         rationale:
-            'Agir sur le premier match rend le spec vert alors que le visiteur clique autre chose, et rien ne le signale jamais — une ambiguïté est une faute d’écriture, pas un cas à arbitrer par l’ordre du DOM. Le comptage n’existe qu’à l’exécution : aucune analyse statique ne peut le faire, d’où le canal runtime.',
+            'Acting on the first match makes a spec green while the visitor clicks something else, and nothing ever says so — an ambiguity is a writing fault, not a case to be settled by DOM order. The counting exists only at run time: no static analysis can do it, which is why the channel is runtime.',
+        reach: 'tests',
     },
     {
         channel: 'runtime',
         convention:
-            'Le vocabulaire d’éléments est UNIQUE entre les facettes website et mobile ; un landmark ARIA (`main()`, `navigation()`…) passé à un verbe mobile est refusé à l’exécution — un écran iOS n’a pas de régions ARIA ; scoper avec `within(testId(…), …)`.',
+            'The element vocabulary is ONE between the website and mobile facets; an ARIA landmark (`main()`, `navigation()`…) passed to a mobile verb is refused at run time — an iOS screen has no ARIA regions; scope with `within(testId(…), …)`.',
         facet: 'mobile',
         family: 'W',
+        fix: 'Scope with `within(testId(…), …)`: a screen has no landmarks, and any descriptor works as the scope.',
         id: 'W4',
         name: 'w4-no-landmarks-on-mobile',
         rationale:
-            'Un seul vocabulaire garde l’API mémorisable ; refuser explicitement la partie sans équivalent iOS évite une approximation silencieuse.',
+            'One vocabulary keeps the API memorable; refusing the part with no iOS equivalent outright avoids a silent approximation.',
+        reach: 'tests',
     },
 ];
 
@@ -816,32 +940,37 @@ export const PROCESS_RULES: CatalogEntry[] = [
     {
         channel: 'process',
         convention:
-            'Le dossier suit les assets : un test avec ses propres dossiers d’assets a son propre domaine ; des tests sans assets locaux se regroupent en `<aspect>.test.ts` frères. La règle statique ne vérifie que la profondeur.',
+            'The folder follows the assets: a test with asset directories of its own gets its own domain; tests with no local assets group as sibling `<aspect>` files. The static rule only checks the depth.',
         family: 'C',
+        fix: 'Read what the assets say: a test that stands on its own ground earns a folder.',
         id: 'C1',
         name: 'c1-asset-grouping',
         rationale:
-            'Ce sont les assets qui tranchent le regroupement — un critère qu’aucun canal ne peut décider seul.',
+            'It is the assets that settle the grouping — a criterion no channel can decide alone.',
+        reach: 'specs',
     },
     {
         channel: 'process',
         convention:
-            'La sortie d’un outil s’asserte en snapshot complet par use case scopé, pas en grappe de `grep` ; `.grep()` reste le scalpel pour les sondes ciblées.',
+            "A tool's output is asserted as a full golden per scoped use case, not as a cluster of greps; `.grep()` stays the scalpel for targeted probes.",
         family: 'D',
+        fix: 'Golden the stream, and keep `.grep()` for the one line a case is genuinely about.',
         id: 'D11',
         name: 'd11-golden-file',
         rationale:
-            'Jugement de revue — le canal statique ne distingue pas un grep légitime d’un grep paresseux.',
+            'A review judgement — the static channel cannot tell a legitimate grep from a lazy one.',
+        reach: 'tests',
     },
     {
         channel: 'process',
         convention:
-            'Toute classe de défaut découverte produit, dans le même change, la garde qui l’empêche de revenir (règle statique, meta-test ou erreur runtime) — ou documente pourquoi aucun canal n’est possible.',
+            'Every defect class discovered produces, in the same change, the guard that stops it coming back (a static rule, a meta-test or a runtime error) — or documents why no channel can hold it.',
         family: 'K',
+        fix: 'Write the guard in the same change, or write down why no channel can hold it.',
         id: 'K1',
         name: 'k1-retro-propagation',
-        rationale:
-            'C’est la règle qui fait croître les trois autres canaux au lieu de les laisser pourrir.',
+        rationale: 'This is the rule that grows the other channels instead of letting them rot.',
+        reach: 'all',
     },
 ];
 
@@ -861,23 +990,10 @@ function sortKey(entry: CatalogEntry): [string, number, string] {
  * number, then variant/name. The generator and the freshness meta-test both
  * consume this, so a stable order keeps generated output byte-identical.
  */
-const statiqueEntries: CatalogEntry[] = Object.entries(RULE_DOCS).map(([name, doc]) => {
-    const entry: CatalogEntry = {
-        channel: doc.channel,
-        convention: doc.convention,
-        family: doc.family,
-        id: doc.id,
-        name,
-        rationale: doc.rationale,
-    };
-    if ('fix' in doc) {
-        entry.fix = doc.fix;
-    }
-    if ('reach' in doc) {
-        entry.reach = doc.reach;
-    }
-    return entry;
-});
+const statiqueEntries: CatalogEntry[] = [];
+for (const [name, doc] of Object.entries(RULE_DOCS)) {
+    statiqueEntries.push({ name, ...doc });
+}
 
 export const catalog: CatalogEntry[] = [
     ...statiqueEntries,

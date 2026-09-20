@@ -8,10 +8,12 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
         // Given - a project whose tests miss Given, Then, or both
         const result = await cli.fixture('$FIXTURES/lint-violations/b4-given-then/').exec('.');
 
-        // Then - oxlint reports one diagnostic per missing marker (1 + 1 + 2)
+        // Then - oxlint reports one diagnostic per missing marker (1 + 1 + 2).
+        // Counted by DIAGNOSTIC, not by name: every message ends with its
+        // Generated anchor, so the rule name appears twice on each line
         expect(result.exitCode).toBe(1);
         expect(result.stdout.grep('scenario.test.ts')).toContain('b4-given-then');
-        const missing = result.stdout.text.match(/b4-given-then/gu) ?? [];
+        const missing = result.stdout.text.match(/jterrazz\(b4-given-then\)/gu) ?? [];
         expect(missing).toHaveLength(4);
     });
 
@@ -23,7 +25,7 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
 
         // Then - the position upgrade reports one diagnostic per test (2)
         expect(result.exitCode).toBe(1);
-        const hits = result.stdout.text.match(/b4-given-then/gu) ?? [];
+        const hits = result.stdout.text.match(/jterrazz\(b4-given-then\)/gu) ?? [];
         expect(hits).toHaveLength(2);
     });
 

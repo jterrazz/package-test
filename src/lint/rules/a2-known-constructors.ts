@@ -2,7 +2,7 @@ import { memberPropertyName } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
-/** The six constructors, and only six (A2 — see docs/13-linting.md). */
+/** The six constructors, and only six. */
 const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile', 'website']);
 
 /**
@@ -32,7 +32,7 @@ export const a2KnownConstructors: LintRule = {
         docs: RULE_DOCS['a2-known-constructors'],
         messages: {
             unknownConstructor:
-                'specification.{{member}} does not exist — the only constructors are specification.api(), specification.jobs(), specification.cli(), specification.integration(), specification.website() and specification.mobile() (A2 — see docs/13-linting.md).',
+                'specification.{{member}} does not exist — the only constructors are specification.api(), specification.jobs(), specification.cli(), specification.integration(), specification.website() and specification.mobile().',
         },
         type: 'problem',
     },

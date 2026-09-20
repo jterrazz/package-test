@@ -53,9 +53,9 @@ export const j2NoSleepInSpecs: LintRule = {
     meta: {
         docs: RULE_DOCS['j2-no-sleep-in-specs'],
         messages: {
-            sleep: 'No arbitrary sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else (J2 — see docs/13-linting.md).',
+            sleep: 'No arbitrary sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else.',
             timersImport:
-                'No timer-based sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else (J2 — see docs/13-linting.md).',
+                'No timer-based sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else.',
         },
         type: 'problem',
     },

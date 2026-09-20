@@ -6,8 +6,16 @@ import { describe, expect, test } from 'vitest';
 import { TOKEN_KINDS } from '../specification/matching/match.js';
 import { anchor, renderRules, spliceCatalog } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
-import { catalog, CHECKER_PASSES, PROCESS_RULES, RULE_DOCS, RUNTIME_RULES } from './manifest.js';
+import {
+    catalog,
+    CHECKER_PASSES,
+    FAMILIES,
+    PROCESS_RULES,
+    RULE_DOCS,
+    RUNTIME_RULES,
+} from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
+import { anchorOf, CATALOGUE_CHAPTER } from './rule-code.js';
 
 /**
  * Catalogue meta-test — the docs-as-code contract.
@@ -96,6 +104,16 @@ describe('conventions catalogue — generation freshness (meta-test)', () => {
     });
 });
 
+/**
+ * Whole words only: `qui` is inside "required", `est` inside "test". The
+ * deny-list is about a SENTENCE coming back, not about letters.
+ */
+function carries(text: string, token: string): boolean {
+    return new RegExp(String.raw`(?<![\p{L}'’])${token}(?![\p{L}'’])`, 'u').test(
+        text.toLowerCase(),
+    );
+}
+
 describe('conventions catalogue — completeness (meta-test)', () => {
     test('every shipped plugin rule carries a statique meta.docs entry', () => {
         // Given - each shipped jterrazz/* rule, and the manifest read by rule id
@@ -129,6 +147,92 @@ describe('conventions catalogue — completeness (meta-test)', () => {
             // Is the framework runtime or human review — documented here, not a lint rule)
             expect(entry.convention.length, `${entry.name} convention`).toBeGreaterThan(0);
             expect(entry.rationale.length, `${entry.name} rationale`).toBeGreaterThan(0);
+        }
+    });
+
+    test('k5 — no catalogue sentence has gone back to French', () => {
+        // Given - the tokens the manifest actually carried while it was French.
+        // A deny-list of the KNOWN corpus, not a language heuristic: the point
+        // Is to catch a row being written back in the old language, and a
+        // Heuristic would argue with every borrowed word the domain has
+        const FRENCH = [
+            'aucun',
+            'chaque',
+            'dossier',
+            'erreur',
+            'est une',
+            'fichier',
+            'interdit',
+            'jamais',
+            'le framework',
+            'même',
+            'n’est',
+            'qui',
+            'règle',
+            'sous',
+            'toute',
+            'une spec',
+        ];
+
+        // Then - every sentence the catalogue publishes is English
+        for (const entry of catalog) {
+            const sentences = `${entry.convention} ${entry.rationale} ${entry.fix}`;
+            for (const token of FRENCH) {
+                expect(
+                    carries(sentences, token),
+                    `${entry.name} carries the French token "${token}"`,
+                ).toBe(false);
+            }
+        }
+        for (const [letter, title] of Object.entries(FAMILIES)) {
+            for (const token of FRENCH) {
+                expect(
+                    carries(title, token),
+                    `family ${letter} carries the French token "${token}"`,
+                ).toBe(false);
+            }
+        }
+    });
+
+    test('k3 — every diagnostic ends with its own generated anchor', () => {
+        // Given - the shipped plugin, whose messages carry a generated tail
+        const chapter = read(CATALOGUE_CHAPTER);
+        for (const [name, rule] of Object.entries(plugin.rules)) {
+            const id = rule.meta?.docs?.id ?? '';
+            const tail = anchorOf(id, name);
+            for (const [key, message] of Object.entries(rule.meta?.messages ?? {})) {
+                // Then - it routes to a heading that EXISTS in the chapter
+                expect(message.endsWith(tail), `${name}.${key} is missing its anchor`).toBe(true);
+            }
+            expect(chapter).toContain(`<a id="${name}"></a>`);
+        }
+    });
+
+    test('every catalogue row states its reach and its fix', () => {
+        // Given - the assembled catalogue
+        for (const entry of catalog) {
+            // Then - a reader deciding whether a rule applies to the file in
+            // Front of them never has to read its implementation
+            expect(entry.reach.length, `${entry.name} reach`).toBeGreaterThan(0);
+            expect(entry.fix.length, `${entry.name} fix`).toBeGreaterThan(0);
+        }
+    });
+
+    test('every catalogue row names exactly ONE channel', () => {
+        // Given - the seven-channel vocabulary
+        const CHANNELS = new Set([
+            'checker',
+            'meta',
+            'process',
+            'runtime',
+            'statique',
+            'type',
+            'upstream',
+        ]);
+
+        // Then - each row says which pass a reader should expect its finding from
+        for (const entry of catalog) {
+            expect(CHANNELS.has(entry.channel), `${entry.name} channel`).toBe(true);
         }
     });
 

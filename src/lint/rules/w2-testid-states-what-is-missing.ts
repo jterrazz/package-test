@@ -87,7 +87,7 @@ export const w2TestIdStatesWhatIsMissing: LintRule = {
         docs: RULE_DOCS['w2-testid-states-what-is-missing'],
         messages: {
             unexplainedTestId:
-                '`testId()` is the escape hatch: state what the element lacks with `// testId: <no accessible name|no role|…>` on this line or the one above, or name it with `button()`/`link()`/`field()`/`heading()`/`content()` (W2 — see docs/13-linting.md).',
+                '`testId()` is the escape hatch: state what the element lacks with `// testId: <no accessible name|no role|…>` on this line or the one above, or name it with `button()`/`link()`/`field()`/`heading()`/`content()`.',
         },
         type: 'problem',
     },
