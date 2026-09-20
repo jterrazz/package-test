@@ -28,6 +28,12 @@ const pages = {
             <option value="x">X</option>
             <option value="linkedin">LinkedIn</option>
         </select>
+        <label class="field"><span>Topic</span>
+            <select id="topic">
+                <option value="news">News</option>
+                <option value="opinion">Opinion</option>
+            </select>
+        </label>
         <button type="button" id="subscribe">Subscribe</button>
         <button type="button" id="clear" disabled>Clear</button>
     </form>

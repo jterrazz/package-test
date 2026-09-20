@@ -25,6 +25,17 @@ test('names an option of a field, and which one the field is on', async () => {
     expect(result.tree).toContain('option "LinkedIn" [selected]');
 });
 
+test('names a field by its accessible name, whatever its label wraps', async () => {
+    // Given - a topic select whose LABEL wraps it, so the label element's own text carries every option the select holds
+    const result = await website.visit('/', async (visitor) => {
+        await visitor.select(field('Topic'), 'opinion');
+        await visitor.see(within(field('Topic'), selected(option('Opinion'))));
+    });
+
+    // Then - the field answered to the name the tree shows, not to the text of the element around it
+    expect(result.tree).toContain('combobox "Topic"');
+});
+
 test('says what a field holds, which no accessibility tree carries', async () => {
     // Given - an email field filled by the visitor
     const result = await website.visit('/', async (visitor) => {

@@ -172,7 +172,7 @@ The element vocabulary is **the same one the website facet uses** (rule W2) — 
 | Element         | Locates by                                                  |
 | --------------- | ----------------------------------------------------------- |
 | `button(name)`  | accessible label, `XCUIElementTypeButton`                   |
-| `field(label)`  | label or value, text/secure-text fields                     |
+| `field(label)`  | accessible name or value, text/secure-text fields           |
 | `content(text)` | any element whose label or value contains the text          |
 | `testId(id)`    | accessibility identifier — the escape hatch (rule W2 warns) |
 

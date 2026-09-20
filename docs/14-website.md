@@ -164,7 +164,7 @@ Elements are **user-facing by construction** (rule W2) — there is no CSS/XPath
 | --------------- | ------------------------------------------------ |
 | `button(name)`  | accessible name, button role                     |
 | `link(name)`    | accessible name, link role                       |
-| `field(label)`  | form label                                       |
+| `field(label)`  | accessible name, input roles (or its label)      |
 | `heading(name)` | accessible name, heading role                    |
 | `content(text)` | any element containing the text                  |
 | `testId(id)`    | `data-testid` — the escape hatch (rule W2 warns) |

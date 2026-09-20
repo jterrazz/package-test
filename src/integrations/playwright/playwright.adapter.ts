@@ -52,6 +52,30 @@ const VALUE_TIMEOUT_MS = 30_000;
 const VALUE_POLL_MS = 100;
 
 /**
+ * The roles a FIELD can carry — what `field('Name')` designates.
+ *
+ * A field is named by its ACCESSIBLE name, not by the text of the label
+ * element that happens to wrap it: `<label><span>Channel</span><select>…` has
+ * a label whose text carries every option of the select, while the control's
+ * accessible name is `Channel` — which is what the ARIA tree shows and what a
+ * screen reader reads. Resolving by label text alone made the ordinary
+ * wrapping-label form unreachable under the 16.0 whole-name default.
+ *
+ * The label-text locator stays in the union for the controls ARIA gives no
+ * role at all (a date or colour input), which nothing else would find.
+ */
+const FIELD_ROLES = [
+    'checkbox',
+    'combobox',
+    'radio',
+    'searchbox',
+    'slider',
+    'spinbutton',
+    'switch',
+    'textbox',
+] as const;
+
+/**
  * Translate a user-facing descriptor into a playwright locator, resolving
  * `scope` outside-in so `within(navigation(), link('X'))` searches the nav
  * subtree. No `.first()` anywhere: playwright's strict mode is the mechanism
@@ -66,7 +90,10 @@ function locate(root: MatchScope, element: ElementRef): Locator {
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
-        return scope.getByLabel(name, { exact });
+        return FIELD_ROLES.map((role) => scope.getByRole(role, { exact, name })).reduce(
+            (all, one) => all.or(one),
+            scope.getByLabel(name, { exact }),
+        );
     }
     if (element.kind === 'testId') {
         return scope.getByTestId(name);
