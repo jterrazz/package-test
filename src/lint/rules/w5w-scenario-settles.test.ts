@@ -23,6 +23,14 @@ ruleTester().run('w5w-scenario-settles', asOxlintRule(w5wScenarioSettles), {
             errors: [{ messageId: 'unsettled' }],
             filename: SPEC,
         },
+        // A facet spec that has not taken the suffix yet is the same scenario.
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next'));
+            });`,
+            errors: [{ messageId: 'unsettled' }],
+            filename: '/repo/specs/website/posts/table.test.ts',
+        },
         // A scenario ending on a loop full of clicks settles nothing either.
         {
             code: `const result = await website.visit('/', async (visitor) => {
@@ -112,6 +120,13 @@ ruleTester().run('w5w-scenario-settles', asOxlintRule(w5wScenarioSettles), {
                 await visitor.click(button('Save'));
             });`,
             filename: COMPONENT,
+        },
+        // Out of reach beside a module, wherever the scenario came from.
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next'));
+            });`,
+            filename: '/repo/src/domain/order.test.ts',
         },
     ],
 });

@@ -119,10 +119,18 @@ function settles(node: AstNode, visitor: string): boolean {
  * is a component's, whose action often produces a CALL rather than a screen
  * (`expect(onSubmit).toHaveBeenCalledOnce()` outside the scenario) — the
  * vocabulary has no word for that yet, and `see()` is not it.
+ *
+ * The reach is the specs TREE, not the `.spec.ts` suffix alone: a facet spec
+ * that has not been renamed yet is the same scenario, and a rule that waited
+ * for the rename would say nothing about the tree it is asked to migrate.
  */
 export const w5wScenarioSettles: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'spec') {
+        const identity = roleOf(context.filename);
+        // A scenario of the ASSEMBLED product: a `.spec.ts`, or — in a tree
+        // That has not taken the suffix yet — a `.test.ts` under `specs/`. A
+        // `.test.tsx` is the component's, and out of reach.
+        if (identity.role !== 'spec' && !(identity.role === 'module' && identity.inSpecs)) {
             return {};
         }
         return {

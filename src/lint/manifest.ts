@@ -694,14 +694,14 @@ export const RULE_DOCS = {
     'w5w-scenario-settles': {
         channel: 'statique',
         convention:
-            'A `.spec.ts` scenario that ACTS (`click`, `fill`, `select`, `check`, `press`, `tap`, `rerender`) on the visitor it was handed ends on `visitor.see(…)`, `visitor.gone(…)` or `visitor.unmount()` — through the block, branch, loop or `.then()` it ends in. A scenario that only reads is out of reach, and so is a component test, whose action often produces a CALL rather than a screen.',
+            'A scenario under `specs/` that ACTS (`click`, `fill`, `select`, `check`, `press`, `tap`, `rerender`) on the visitor it was handed ends on `visitor.see(…)`, `visitor.gone(…)` or `visitor.unmount()` — through the block, branch, loop or `.then()` it ends in. A scenario that only reads is out of reach, and so is a component test, whose action often produces a CALL rather than a screen.',
         facet: 'shared',
         family: 'W',
         fix: 'End on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`.',
         id: 'W5',
         rationale:
             'The capture is taken when the callback returns: a scenario ending on a click hands the golden whatever was on the screen at that instant, and the failure reads as flakiness rather than as a missing wait.',
-        reach: 'spec',
+        reach: 'specs',
     },
 } satisfies Record<string, RuleDoc>;
 

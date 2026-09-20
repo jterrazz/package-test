@@ -73,33 +73,38 @@ routes to the chapter and the id says which row.
 seen once and its criterion is decidable. A class nobody has seen is a backlog
 line with its criterion written, coded on its first occurrence. The R8 dry run
 — the whole catalogue run over every clone of the workbench, read-only — is
-what settles which of the two a row is, and it is re-run before the major is
-cut. The counts of the 2026-09-20 run:
+what settles which of the two a row is, and it is re-run whenever a criterion
+changes. The counts below are the run of 2026-09-20, re-run after the fix pass
+that bounded six false classes: 27 clones plus the estate's own `apps`,
+`packages` and `specs`, with each package's own violation FIXTURES excluded —
+they violate on purpose, and counting them would let a rule justify itself.
 
-| rule                               | total | where                                                                                                                                        |
-| ---------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `b4-given-then`                    | 2575  | jterrazz-design 902, signews-mobile 532, archive 419, hoverfly-lsp 246, extensions 216, package-attestation 144, spwn 104                    |
-| `b11-marker-one-line`              | 242   | package-test 162, signews-api 40, hoverfly-lsp 13, jterrazz-web 5, spwn 4, package-typescript 4, archive 4, jterrazz-studio 3, jterrazz-os 2 |
-| `i2-sibling-test-naming`           | 222   | archive 169, signews-mobile 35, hoverfly-lsp 13, package-typescript 2                                                                        |
-| `c12-spec-file-name`               | 208   | spwn 42, package-test 35, package-typescript 35, jterrazz-web 24, signews-api 15, signews-mobile 8, jterrazz-os 6, package-attestation 6     |
-| `j6w-given-in-the-test`            | 165   | archive 54, package-test 41, signews-api 19, package-typescript 17, hoverfly-lsp 14, jterrazz-os 6, spwn 6                                   |
-| `d18w-existence-only-oracle`       | 91    | package-test 41, archive 13, hoverfly-lsp 13, jterrazz-os 8, package-telemetry 4, package-intelligence 3                                     |
-| `d16w-ambient-value`               | 57    | signews-api 36, package-test 10, archive 6, hoverfly-lsp 2, jterrazz-os 2                                                                    |
-| `c18-module-test-under-facet`      | 44    | package-typescript 22, jterrazz-web 10, signews-web 2, spwn 2, spwn-web 1                                                                    |
-| `d19w-probe-cluster`               | 36    | package-typescript 14, spwn 7, jterrazz-web 5, jterrazz-os 5, archive 2                                                                      |
-| `e9w-env-assignment-in-test`       | 27    | package-test 26, jterrazz-os 1                                                                                                               |
-| `w5w-scenario-settles`             | 26    | jterrazz-os 13, package-test 9, cap01 1, jterrazz-web 1, signews-mobile 1                                                                    |
-| `i4-no-module-doubles`             | 25    | signews-mobile 13, archive 5, package-test 2, package-intelligence 2, jterrazz-web 1, package-typescript 1, signews-api 1                    |
-| `e2-preset-config`                 | 11    | package-test 8, spwn 2, archive 1                                                                                                            |
-| `j2-no-sleep`                      | 9     | package-test 4, archive 2, jterrazz-os 1, signews-mobile 1, spwn 1                                                                           |
-| `d17w-double-only-oracle`          | 8     | signews-api 4, signews-mobile 4                                                                                                              |
-| `c21w-ground-owned-by-one`         | 4     | spwn 2, jterrazz-web 1, signews-api 1                                                                                                        |
-| `e7w-include-prefix-exists`        | 3     | package-test 3 (its own violation fixtures; the one spwn case the survey named has since been fixed)                                         |
-| `b10-when-between-markers`         | 2     | spwn 1, archive 1                                                                                                                            |
-| `f6-no-foreign-test-runtime`       | 2     | signews-web 1, package-test 1                                                                                                                |
-| `d16-sampled-oracle`               | 1     | package-test 1 (the test that proves `clock.at()` pins the reading)                                                                          |
-| `e4w-project-binding`              | 1     | package-test 1 (the `api-stack` project compose mode left behind)                                                                            |
-| `w2-testid-states-what-is-missing` | 1     | package-test 1 (its own fixture — zero uses of the escape hatch anywhere)                                                                    |
+| rule                          | total | where                                                                                                                                                           |
+| ----------------------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `b4-given-then`               | 2569  | jterrazz-design 902, signews-mobile 532, archive 419, hoverfly-lsp 246, extensions 216, package-attestation 144, spwn 104, package-typescript 4, package-test 2 |
+| `b11-marker-one-line`         | 240   | package-test 160, signews-api 40, hoverfly-lsp 13, jterrazz-web 5, archive 4, package-typescript 4, spwn 4, jterrazz-studio 3, jterrazz-os 2                    |
+| `i2-sibling-test-naming`      | 224   | archive 169, signews-mobile 35, hoverfly-lsp 15, package-typescript 2, jterrazz-design 1, package-test 1, spwn 1                                                |
+| `c12-spec-file-name`          | 180   | spwn 40, package-test 37, jterrazz-web 22, signews-api 15, package-typescript 9, signews-mobile 8, jterrazz-os 6, package-attestation 6, 9 more repositories    |
+| `j6w-given-in-the-test`       | 165   | archive 54, package-test 41, signews-api 19, package-typescript 17, hoverfly-lsp 14, jterrazz-os 6, spwn 6, package-telemetry 4, signews-mobile 2               |
+| `d16w-ambient-value`          | 57    | signews-api 36, package-test 10, archive 6, hoverfly-lsp 2, jterrazz-os 2, signews-mobile 1                                                                     |
+| `e9w-env-assignment-in-test`  | 49    | package-test 47, jterrazz-os 2                                                                                                                                  |
+| `d18w-existence-only-oracle`  | 37    | package-test 14, hoverfly-lsp 10, archive 4, package-intelligence 2, signews-mobile 2, jterrazz-os 1, jterrazz-web 1, package-typescript 1, signews-api 1       |
+| `c1-domain-structure`         | 33    | jterrazz-os 26, package-typescript 7                                                                                                                            |
+| `c18-module-test-under-facet` | 31    | package-typescript 27, jterrazz-web 2, spwn 2                                                                                                                   |
+| `i4-no-module-doubles`        | 23    | signews-mobile 13, archive 5, package-intelligence 2, jterrazz-web 1, package-typescript 1, signews-api 1                                                       |
+| `d19w-probe-cluster`          | 22    | package-typescript 7, spwn 6, jterrazz-os 3, jterrazz-web 3, archive 2                                                                                          |
+| `e3-config-present`           | 17    | archive 16, extensions 1                                                                                                                                        |
+| `d5w-spec-pinned-value`       | 10    | jterrazz-os 9, package-test 1                                                                                                                                   |
+| `j2-no-sleep`                 | 8     | package-test 3, archive 2, jterrazz-os 1, signews-mobile 1, spwn 1                                                                                              |
+| `w5w-scenario-settles`        | 8     | package-test 4, cap01 1, jterrazz-web 1, signews-mobile 1                                                                                                       |
+| `d17w-double-only-oracle`     | 8     | signews-api 4, signews-mobile 4                                                                                                                                 |
+| `e2-preset-config`            | 6     | package-test 3, spwn 2, archive 1                                                                                                                               |
+| `c21w-ground-owned-by-one`    | 5     | spwn 2, package-attestation 1, signews-api 1, jterrazz-web 1                                                                                                    |
+| `e7w-include-prefix-exists`   | 3     | spwn 2, package-test 1                                                                                                                                          |
+| `f8-no-seam-dependency`       | 3     | archive 1, jterrazz-design 1, spwn 1                                                                                                                            |
+| `b10-when-between-markers`    | 2     | archive 1, spwn 1                                                                                                                                               |
+| `e4w-project-binding`         | 1     | package-test 1 (the `api-stack` project compose mode left behind)                                                                                               |
+| `f6-no-foreign-test-runtime`  | 1     | signews-web 1                                                                                                                                                   |
 
 Four rows were at zero with no new surface to be the boundary of, and the gate
 moved them to the backlog with their criteria written: **B12** (a marker inside
@@ -112,6 +117,24 @@ zero) and **D22w**. Three rows ship at zero as the boundary of a surface born
 with them: **W2** (the escape hatch nobody uses yet), **E8** (the literate door
 the `cli()` helper now defaults) and **C20** (folder = constructor, which the
 `integration` facet of 15.3 is the first new folder to answer to).
+
+Two rows ship at zero for a reason the re-run wrote itself. **D16** is the
+error half of a class d16w counts 57 times: the one occurrence the first run
+found was a test that PINS its clock and then reads it, which is what the rule
+tells an author to do — so the exemption that made it disappear is the rule
+working. **J9** has no occurrence because the toolchain's suppression gate
+reads `oxlint-disable*` and nothing else: the checker's own directive has never
+been held by anything, and the 16 of them on the workbench were written under
+no obligation to say why.
+
+Six false classes the re-run bounded, each of which had made a row look larger
+than it is: C18 read a spec importing `../x.specification` (no extension) as
+reaching no runner — 13 of its 44; C12 and C18 both claimed the same file, and
+`--fix` performed the wrong one; C21w counted a golden named through a template
+as no reader at all; W5w read a `db.select()` as a visitor's action and every
+component test as a screen scenario — 13 of its 26 were the estate's console;
+D18w called a precise negative (`not.toHaveBeenCalled()`) an existence check;
+D19w called three reads of one `value` a cluster.
 
 The chapters are renumbered ONCE, in the same release, so a link repointed by
 this change is repointed for good.
