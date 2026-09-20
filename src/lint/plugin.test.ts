@@ -344,7 +344,7 @@ describe('conventions catalogue — completeness (meta-test)', () => {
             if (entry.channel !== 'statique' || !ROLE_REACH.has(entry.reach)) {
                 continue;
             }
-            const source = read(`src/lint/rules/${entry.name}.ts`);
+            const source = read(`src/lint/rules/${entry.facet}/${entry.name}.ts`);
             expect(
                 source.includes('roleOf(') || source.includes('isTestRole('),
                 `${entry.name} states reach \`${entry.reach}\` and reads no role`,

@@ -77,10 +77,40 @@ export function anchor(name: string): string {
     return `<a id="${name}"></a>`;
 }
 
-/** The catalogue families, deterministically ordered. */
-function families(): string[] {
-    return [...new Set(catalog.map((entry) => entry.family))].sort((a, b) => a.localeCompare(b));
+/** The catalogue families of a set of rows, deterministically ordered. */
+function families(rows: CatalogEntry[]): string[] {
+    return [...new Set(rows.map((entry) => entry.family))].sort((a, b) => a.localeCompare(b));
 }
+
+/**
+ * How the catalogue is grouped: `core` first — the rules that reach every
+ * facet, which is what a reader adopting ANY facet owes — then one section per
+ * facet, alphabetically.
+ *
+ * A reader adopting one constructor should be able to stop reading at the end
+ * of two sections. Grouping by family alone could not say that: a family is a
+ * kind of convention, not an audience, and `C — Files & folders` mixes a rule
+ * every facet obeys with one only the literate door can break.
+ */
+const FACET_ORDER = ['core', 'api', 'cli', 'component', 'integration', 'jobs', 'mobile', 'website'];
+
+/** The facet sections present in the catalogue, core first. */
+function facets(): string[] {
+    const present = new Set<string>(catalog.map((entry) => entry.facet));
+    return FACET_ORDER.filter((facet) => present.has(facet));
+}
+
+/** What a facet section is titled — the tree, and what it is the tree of. */
+const FACET_TITLES: Record<string, string> = {
+    api: 'the HTTP app, met through its entry',
+    cli: 'the command binary and its literate documents',
+    component: 'a rendered unit, in a page',
+    core: 'every facet, whichever constructor you reach for',
+    integration: 'a module against the real thing',
+    jobs: 'what a name triggers in-process',
+    mobile: 'a native screen on a simulator',
+    website: 'the served site, driven in a browser',
+};
 
 /** Per-channel row counts, for the generated intro line. */
 function counts(): Record<CatalogEntry['channel'], number> {
@@ -100,32 +130,45 @@ function counts(): Record<CatalogEntry['channel'], number> {
 }
 
 /**
- * One `## <family> — <title>` section per family, each a full five-column table
- * (Code · Implementation · Channel · Convention · Rationale) sorted by channel
- * then id/name. Shared by the docs catalogue.
+ * The catalogue's sections: `## <facet>` — core first — each holding one
+ * `### <family> — <title>` table (Code · Implementation · Channel · Reach ·
+ * Convention · Fix · Rationale) sorted by channel then id.
  */
 function catalogueSections(): string[] {
-    return families().map((family) => {
-        const rows = catalog
-            .filter((entry) => entry.family === family)
-            .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel])
-            .map((entry) => [
-                entry.id,
-                `${anchor(entry.name)}\`${entry.name}\``,
-                entry.channel,
-                entry.reach ?? '—',
-                cell(entry.convention),
-                cell(entry.fix ?? '—'),
-                cell(entry.rationale),
-            ]);
-        return [
-            `## ${family} — ${FAMILIES[family] ?? family}`,
-            '',
-            ...table(
-                ['Code', 'Implementation', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'],
-                rows,
-            ),
-        ].join('\n');
+    return facets().flatMap((facet) => {
+        const owned = catalog.filter((entry) => entry.facet === facet);
+        const tables = families(owned).map((family) => {
+            const rows = owned
+                .filter((entry) => entry.family === family)
+                .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel])
+                .map((entry) => [
+                    entry.id,
+                    `${anchor(entry.name)}\`${entry.name}\``,
+                    entry.channel,
+                    entry.reach,
+                    cell(entry.convention),
+                    cell(entry.fix),
+                    cell(entry.rationale),
+                ]);
+            return [
+                `### ${family} — ${FAMILIES[family] ?? family}`,
+                '',
+                ...table(
+                    [
+                        'Code',
+                        'Implementation',
+                        'Channel',
+                        'Reach',
+                        'Convention',
+                        'Fix',
+                        'Rationale',
+                    ],
+                    rows,
+                ),
+            ].join('\n');
+        });
+        tables.unshift(`## ${facet} — ${FACET_TITLES[facet] ?? facet}`);
+        return tables;
     });
 }
 
@@ -172,25 +215,29 @@ export function spliceCatalog(existing: string): string {
  * The agent-facing rule reference `skills/jterrazz-test/references/rules.md` —
  * the same seven-channel catalogue as `docs/13`, trimmed to what an agent needs
  * to apply and cite a rule (Code · Implementation · Channel · Enforces), grouped
- * by family. Stamped `DO NOT EDIT`; the skill routes here for rule ids.
+ * core first, then by facet, then by family. Stamped `DO NOT EDIT`; the skill routes here for rule ids.
  */
 export function renderRules(): string {
-    const sections = families().map((family) => {
-        const rows = catalog
-            .filter((entry) => entry.family === family)
-            .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel])
-            .map((entry) => [
-                entry.id,
-                `\`${entry.name}\``,
-                entry.channel,
-                cell(entry.convention),
-                cell(entry.fix ?? '—'),
-            ]);
-        return [
-            `## ${family} — ${FAMILIES[family] ?? family}`,
-            '',
-            ...table(['Code', 'Implementation', 'Channel', 'Enforces', 'Fix'], rows),
-        ].join('\n');
+    const sections = facets().flatMap((facet) => {
+        const owned = catalog.filter((entry) => entry.facet === facet);
+        const tables = families(owned).map((family) => {
+            const rows = owned
+                .filter((entry) => entry.family === family)
+                .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel])
+                .map((entry) => [
+                    entry.id,
+                    `\`${entry.name}\``,
+                    entry.channel,
+                    cell(entry.convention),
+                    cell(entry.fix),
+                ]);
+            const body = table(['Code', 'Implementation', 'Channel', 'Enforces', 'Fix'], rows).join(
+                '\n',
+            );
+            return `### ${family} — ${FAMILIES[family] ?? family}\n\n${body}`;
+        });
+        tables.unshift(`## ${facet} — ${FACET_TITLES[facet] ?? facet}`);
+        return tables;
     });
 
     const parts = [

@@ -61,7 +61,7 @@ There are TWO composition roots and neither names a layer. `src/index.ts` is nod
 
 A convention this package states is held by a **channel**, and every row of the catalogue names exactly one of seven. The guiding aim is that most enforcement is programmatic, not review-borne.
 
-- **statique** — the `jterrazz/*` oxlint plugin: one file per rule under `src/lint/rules/`, AST analysis, one diagnostic per file.
+- **statique** — the `jterrazz/*` oxlint plugin: one file per rule under `src/lint/rules/core/` or `src/lint/rules/<facet>/` — the tree the rule reaches, which is also the `facet` field of its manifest row — AST analysis, one diagnostic per file.
 - **upstream** — a convention an oxlint vitest-plugin rule already holds, set as an OPTION from the `testing` fragment rather than duplicated as a rule of ours ([ADR-005](decisions/005-the-doubles-ladder-is-closed.md)).
 - **checker** — passes of the `jterrazz-test-check` binary reading what an AST cannot: the `{{token}}` grammar of `_requests/` and `_expected/` fixtures, the `<case>.spec.yaml` document family, cross-file analyses that cross a `*.specification.ts` with its tests, and the member pass that judges a package rather than a tree.
 - **runtime** — the framework refuses incorrect usage as it executes, where static analysis abstains (a non-literal argument) or cannot reach (the network, a container lifecycle).

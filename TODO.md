@@ -69,7 +69,7 @@ rule about either one is a chapter-12 backlog line, and it waits on the surface.
   that need it most.
 - **The grab-bag roster has no project-level exemption, and `core` is on it.** The tree
   this package's three-tree restructure names `src/core/` — the model every facet is made
-  of — fails `Names (tree)` (`lib/check-names.js`, closed roster). The roster is right in
+  of — fails the toolchain's `Names (tree)` pass, whose roster is closed. The roster is right in
   general and wrong here: `core` names a subject when a package's OTHER trees are
   `facets/`, `seams/` and `runner/`, because it is what those three are made of. The flag
   the pass reads (`--ignore-pattern`) is the caller's, not the project's, so a project

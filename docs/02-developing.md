@@ -28,16 +28,16 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 
 ### Which file a change opens
 
-| Changing…                                         | Opens                                                                                       |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| A facet's chain, setups or terminal actions       | `src/facets/<facet>/`, over `core/chain/builder.ts`                                         |
-| What a result exposes                             | `src/core/result/` — accessors stay READ-ONLY                                               |
-| A matcher, or update-mode behaviour               | `src/core/goldens/` and `src/runner/` — the two sides of the runner coupling                |
-| An external dependency's adapter                  | `src/seams/<dep>/`, which imports that dep and `core/` and no more                          |
-| A `{{token}}` or the structural comparison        | `src/core/matching/`                                                                        |
-| The `<case>.spec.yaml` grammar                    | `src/core/literate/` — read by BOTH the runner and the checker                              |
-| A mechanized rule                                 | `src/lint/manifest.ts` **and** its implementation under `src/lint/rules/` or a checker pass |
-| A principle, or a criterion no machine can settle | [12 — Conventions](12-conventions.md), the constitution                                     |
+| Changing…                                         | Opens                                                                                     |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| A facet's chain, setups or terminal actions       | `src/facets/<facet>/`, over `core/chain/builder.ts`                                       |
+| What a result exposes                             | `src/core/result/` — accessors stay READ-ONLY                                             |
+| A matcher, or update-mode behaviour               | `src/core/goldens/` and `src/runner/` — the two sides of the runner coupling              |
+| An external dependency's adapter                  | `src/seams/<dep>/`, which imports that dep and `core/` and no more                        |
+| A `{{token}}` or the structural comparison        | `src/core/matching/`                                                                      |
+| The `<case>.spec.yaml` grammar                    | `src/core/literate/` — read by BOTH the runner and the checker                            |
+| A mechanized rule                                 | `src/lint/manifest.ts` **and** its implementation under `src/lint/rules/<facet-or-core>/` |
+| A principle, or a criterion no machine can settle | [12 — Conventions](12-conventions.md), the constitution                                   |
 
 ### What a change owes
 
