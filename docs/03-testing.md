@@ -65,18 +65,32 @@ specs/
 capabilities belong to no facet in particular — a runner's `lifecycle`, the
 declared network (`intercepts`), the ground a chain loads (`seeding`), what a
 result answers (`assertions`), the `{{token}}` engine (`tokens`) and the pinned
-calendar (`clock`) — and where a facet specifies one, its domain folder is
-called that, so `specs/api/clock/` and `specs/website/clock/` are the same
-question asked of two constructors. A domain present in every facet is core
-behaviour; one present in a single facet is that facet's own, and keeps its own
-name.
+calendar (`clock`) — and a facet that gives one of them a FOLDER calls it by
+that name, so `specs/api/clock/` and `specs/website/clock/` are the same
+question asked of two constructors. Everything else is one facet's own, and a
+name that is one facet's own is never another's: two names for one capability
+is the drift the vocabulary exists to stop.
 
-`requests/` and `responses/` are api's, `env/`, `exec/`, `directory/`,
-`docker/` and `literate/` are cli's, `call/`, `golden/`, `postgres/` and
-`redis/` are integration's, `triggering/` is jobs', `visit/`, `fetch/`,
-`console/` and `services/` are website's. The tree is the reading: a name that
-appears twice says the capability is shared, and a name that appears once says
-where it is not.
+It says nothing about where a METHOD may appear. `.seed()` is used inside jobs'
+`triggering/` scenarios and integration's `call/` ones, because seeding is the
+Given there and not the subject; a capability earns a folder when it is what
+the specs in it are ABOUT.
+
+The vocabulary is declared in `src/lint/domains.ts` and `domains.test.ts` holds
+the tree equal to it in both directions — a folder nothing declares fails, and
+a declared name nothing carries fails too.
+
+<!-- GENERATED:domains — do not edit by hand; run `npm run docs`. Source: src/lint/domains.ts -->
+
+| Facet         | Shared domains it carries                                        | Its own                                               |
+| ------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
+| `api`         | `assertions/`, `clock/`, `intercepts/`, `lifecycle/`, `seeding/` | `initiation-errors/`, `requests/`, `responses/`       |
+| `cli`         | `assertions/`, `seeding/`, `tokens/`                             | `directory/`, `docker/`, `env/`, `exec/`, `literate/` |
+| `integration` | `clock/`, `intercepts/`                                          | `call/`, `golden/`, `postgres/`, `redis/`             |
+| `jobs`        | —                                                                | `triggering/`                                         |
+| `website`     | `assertions/`, `clock/`                                          | `console/`, `fetch/`, `services/`, `visit/`           |
+
+<!-- /GENERATED:domains -->
 
 A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; a leading underscore means ground, never a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
 
@@ -96,7 +110,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
 | The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 64    |
 | The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 88    |
-| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 15    |
+| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 16    |
 
 <!-- /GENERATED:layers -->
 
