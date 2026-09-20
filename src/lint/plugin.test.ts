@@ -173,9 +173,12 @@ describe('the upstream options this vocabulary owns (ADR-005)', () => {
     });
 
     test('j10 — one level of describe, and no more', () => {
-        // Given - the option the fragment sets
+        // Given - the option the fragment sets on vitest's own rule
+        const { options, severity } = optionOf('vitest/max-nested-describe');
+
         // Then - a second level of context is refused
-        expect(testGlobRules()['vitest/max-nested-describe']).toStrictEqual(['error', { max: 1 }]);
+        expect(severity).toBe('error');
+        expect(options).toStrictEqual({ max: '1' });
     });
 });
 
@@ -469,14 +472,20 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
 
     test('every channel answers for its rows the way the channel can', () => {
         // Given - the seven channels, each with the proof its rows owe
-        const proofs: [string, (entry: { id: string; name: string }) => boolean][] = [
+        const proofs: [
+            string,
+            (entry: { id: string; name: string; upstream?: string }) => boolean,
+        ][] = [
             ['statique', (entry) => pluginRules.has(entry.name)],
             ['checker', (entry) => CHECKER_PASS_IDS.has(entry.name)],
             [
+                // The row names the upstream rule it rests on, and the proof is
+                // An assertion on THAT rule's resolved option — a file-level
+                // Check passed for any row as long as one assertion existed.
                 'upstream',
                 (entry) =>
-                    read('src/lint/plugin.test.ts').includes(`optionOf('vitest/`) &&
-                    entry.name.length > 0,
+                    entry.upstream !== undefined &&
+                    read('src/lint/plugin.test.ts').includes(`optionOf('${entry.upstream}')`),
             ],
             ['type', (entry) => read('src/type-channel.test-d.ts').includes(entry.id)],
             ['runtime', (entry) => runtimeMarkers().has(entry.id)],

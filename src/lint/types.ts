@@ -103,6 +103,12 @@ export type RuleDoc = {
     /** One line: why the rule exists. */
     rationale: string;
     /**
+     * For an `upstream` row: the rule whose OPTION carries the convention
+     * (`vitest/no-restricted-matchers`). It is what the completeness meta-test
+     * reads, so a row of that channel names the option it rests on.
+     */
+    upstream?: string;
+    /**
      * Which files the rule looks at — the vocabulary of `roleOf` plus the
      * shapes that are not a role: `tests` (every file that declares tests),
      * `specs` (a tree), `member` (a package), and `all`.

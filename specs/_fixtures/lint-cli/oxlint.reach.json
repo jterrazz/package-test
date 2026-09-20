@@ -48,7 +48,6 @@
         "jterrazz/e2-preset-config": "error",
         "jterrazz/e4w-project-binding": "warn",
         "jterrazz/e5-no-simulated-dom": "error",
-        "jterrazz/e5b-no-simulated-dom-config": "error",
         "jterrazz/e6-component-project-helper": "error",
         "jterrazz/e7w-include-prefix-exists": "warn",
         "jterrazz/e8-literate-specification-exists": "error",

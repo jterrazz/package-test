@@ -21,13 +21,13 @@ describe('checker CLI — the member pass', () => {
         // Given - a member with a config and only optional peers declared
         const result = await cli.exec(`--member ${member('clean')} ${WORKSPACE}`);
 
-        // Then - the run is clean, says which member it judged, and names the passes that actually ran — never the tree ones, which walked nothing
+        // Then - the run is clean, says which member it judged, and names the passes that actually ran — from the registry itself, and never the tree ones, which walked nothing
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('packages/clean');
         expect(result.stdout).toContain(
-            'E3 config-present, E5b no simulated DOM, F8 no seam dependency',
+            'c12-spec-file-name, e3-config-present, e5b-no-simulated-dom-config-member, f8-no-seam-dependency',
         );
-        expect(result.stdout).not.toContain('C9 dead fixtures');
+        expect(result.stdout).not.toContain('c9-dead-fixtures');
     });
 
     test("a root whose only tests are its members' owes no config", async () => {

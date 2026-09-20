@@ -75,13 +75,13 @@ const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_mod
 const GROUND_NAMES = new Set<string>(GROUND_DIRS);
 
 /**
- * The logical passes bundled into `dist/checker.js` — the authoritative
- * registry both the manifest catalogue (docs) and the E2E inventory meta-test
- * derive from, so neither can name a pass the CLI does not actually run. The
- * three `d4*`/`d10w` ids are sub-scans of {@link checkConventionFiles}; the rest
- * are the cross-file passes.
+ * The passes a run over a `specs/` TREE puts on it.
+ *
+ * The three `d4*`/`d10w` ids are sub-scans of {@link checkConventionFiles}; the
+ * rest are the cross-file and facet passes. The CLI prints this list when a run
+ * is clean, so what the reader is told ran is the registry itself.
  */
-export const CHECKER_PASS_IDS = [
+export const TREE_PASS_IDS = [
     'a7-database-property',
     'b5-await-using-inference',
     'c12-spec-file-name',
@@ -103,14 +103,33 @@ export const CHECKER_PASS_IDS = [
     'd4b-spec-shape',
     'd5-spec-volatile-literal',
     'd5w-spec-pinned-value',
-    'e3-config-present',
-    'e5b-no-simulated-dom-config-member',
-    'f8-no-seam-dependency',
     'j3w-spec-empty-assertion',
     'j4-spec-description-unique',
     'j9-checker-suppression-reason',
     'j5-spec-description',
 ] as const;
+
+/**
+ * The passes a run over one workspace MEMBER puts on it — what no file under
+ * `specs/` can answer: whether the member states how its tests run, whether its
+ * config draws a browser, what it declares, and whether a `.spec.ts` of its own
+ * ever reached a specs tree.
+ */
+export const MEMBER_PASS_IDS = [
+    'c12-spec-file-name',
+    'e3-config-present',
+    'e5b-no-simulated-dom-config-member',
+    'f8-no-seam-dependency',
+] as const;
+
+/**
+ * Every logical pass bundled into `dist/checker.js` — the authoritative registry
+ * both the manifest catalogue (docs) and the E2E inventory meta-test derive
+ * from, so neither can name a pass the CLI does not actually run.
+ */
+export const CHECKER_PASS_IDS: string[] = [
+    ...new Set<string>([...TREE_PASS_IDS, ...MEMBER_PASS_IDS]),
+];
 
 export type Severity = 'error' | 'warn';
 
