@@ -13,15 +13,33 @@ import { dirname, resolve } from 'node:path';
  * it into a one-line fix. Two things make it actionable:
  *
  * - it names the FACET that asked, so the reader knows which line to look at,
- *   and the peer to install, with the command;
+ *   and the peer to install, with the command of the package manager the
+ *   project's own lockfile names — `npm install -D` in a Bun workspace is a
+ *   line the reader has to translate before they can use it;
  * - under pnpm it names `only-built-dependencies` as well. pnpm does not run a
  *   dependency's install script unless the manifest lists it, so a native
  *   binding installs and then fails to LOAD — the one failure where "install
  *   the package" is advice the reader has already followed.
  */
 
-/** A pnpm lockfile at the project root is how the package manager announces itself. */
-const PNPM_LOCK = 'pnpm-lock.yaml';
+/**
+ * The lockfile each package manager leaves at the project root, and the
+ * command a reader of this message types.
+ *
+ * A message that says `npm install` in a Bun workspace is a message the reader
+ * has to translate before they can use it — and the translation is the only
+ * part of the fix they did not already know.
+ */
+const INSTALLERS = [
+    { command: 'bun add -d', lockfile: 'bun.lock', name: 'bun' },
+    { command: 'bun add -d', lockfile: 'bun.lockb', name: 'bun' },
+    { command: 'pnpm add -D', lockfile: 'pnpm-lock.yaml', name: 'pnpm' },
+    { command: 'yarn add -D', lockfile: 'yarn.lock', name: 'yarn' },
+    { command: 'npm install -D', lockfile: 'package-lock.json', name: 'npm' },
+] as const;
+
+/** What npm's absence of a lockfile still answers. */
+const DEFAULT_INSTALLER = { command: 'npm install -D', name: 'npm' } as const;
 
 /** The peers whose install script has to run for the package to load at all. */
 const NATIVE_PEERS = new Set(['better-sqlite3']);
@@ -41,15 +59,28 @@ function projectRoot(from: string): string | undefined {
     }
 }
 
-/** Is this project installed by pnpm? */
-function underPnpm(): boolean {
-    const root = projectRoot(process.cwd());
-    return root !== undefined && existsSync(resolve(root, PNPM_LOCK));
+/**
+ * The package manager a project is installed by, read from its lockfile.
+ *
+ * Exported for its own module test: the answer depends on the filesystem
+ * around the caller, which a test states by building one.
+ *
+ * @internal
+ */
+export function installerAt(from: string): { command: string; name: string } {
+    const root = projectRoot(from);
+    if (root === undefined) {
+        return DEFAULT_INSTALLER;
+    }
+    return (
+        INSTALLERS.find((candidate) => existsSync(resolve(root, candidate.lockfile))) ??
+        DEFAULT_INSTALLER
+    );
 }
 
 /** The line a reader has to add, when the package manager needs one. */
-function buildNote(peer: string): string {
-    if (!NATIVE_PEERS.has(peer) || !underPnpm()) {
+function buildNote(peer: string, manager: string): string {
+    if (!NATIVE_PEERS.has(peer) || manager !== 'pnpm') {
         return '';
     }
     return (
@@ -71,9 +102,10 @@ export async function loadPeer<T>(peer: string, what: string, load: () => Promis
     try {
         return await load();
     } catch (error) {
+        const { command, name } = installerAt(process.cwd());
         throw new Error(
             `${what} requires \`${peer}\`, an optional peer dependency of @jterrazz/test:` +
-                ` npm install -D ${peer}.${buildNote(peer)}`,
+                ` ${command} ${peer}.${buildNote(peer, name)}`,
             { cause: error },
         );
     }
