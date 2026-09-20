@@ -1,8 +1,7 @@
-import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import type { FacetProjectOptions } from '../../runner/facet-project.js';
-import { projectDefaults } from '../../runner/preset.js';
+import { onProjectDefaults } from '../../runner/preset.js';
 
 /** `website()` — the assembled product, met through a served page. */
 export type WebsiteProjectOptions = FacetProjectOptions;
@@ -14,7 +13,7 @@ export type WebsiteProjectOptions = FacetProjectOptions;
  * a 2-vCPU runner.
  */
 export function website(options: WebsiteProjectOptions = {}): TestProjectInlineConfiguration {
-    return mergeConfig(projectDefaults(), {
+    return onProjectDefaults({
         test: {
             ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
             ...(options.serial === true ? { fileParallelism: false } : {}),
@@ -23,5 +22,5 @@ export function website(options: WebsiteProjectOptions = {}): TestProjectInlineC
             sequence: { groupOrder: 1 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },
-    }) as TestProjectInlineConfiguration;
+    });
 }

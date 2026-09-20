@@ -7,6 +7,7 @@ import {
     VITEST_ARTIFACTS_DIR,
 } from '../model/artifacts/artifacts.js';
 import { defineSpecConfig } from './preset.js';
+import { unit } from './projects.js';
 
 describe('defineSpecConfig() — artefact paths', () => {
     test('sends the vite cache and the coverage report under .artifacts/vitest', () => {
@@ -137,6 +138,55 @@ describe('defineSpecConfig() — what the consumer states wins', () => {
 
         // Then - there is no object to merge into, so nothing is invented
         expect(config.test?.projects).toStrictEqual(['packages/*']);
+    });
+});
+
+/** The exclusions of the one project a config declares. */
+function excludeOf(config: ReturnType<typeof defineSpecConfig>): string[] {
+    const [project] = config.test?.projects ?? [];
+    if (typeof project !== 'object' || project === null || !('test' in project)) {
+        return [];
+    }
+    return project.test?.exclude ?? [];
+}
+
+describe('defineSpecConfig() — every glob stated once', () => {
+    test('a helper built on the defaults does not carry them twice', () => {
+        // Given - the canonical config: one helper project, which is built ON the defaults and then merged INTO them
+        const config = defineSpecConfig({ test: { projects: [unit()] } });
+
+        // Then - vite concatenates the two lists, and the result names each glob once
+        expect(excludeOf(config)).toStrictEqual([
+            '**/node_modules/**',
+            '**/.git/**',
+            '**/_fixtures/**',
+            'specs/**',
+            '**/*.test.tsx',
+        ]);
+    });
+
+    test('the root drops the exclusions every project already states', () => {
+        // Given - the same config: with projects, the root collects nothing and its list only travels into them, where vitest concatenates it
+        const config = defineSpecConfig({ test: { projects: [unit()] } });
+
+        // Then - nothing of the preset's is left to travel, so the banner prints one copy
+        expect(config.test?.exclude).toStrictEqual([]);
+    });
+
+    test('what the consumer states at the root still reaches the projects', () => {
+        // Given - a root exclusion no project holds a copy of
+        const config = defineSpecConfig({ test: { exclude: ['heavy/**'], projects: [unit()] } });
+
+        // Then - it stays where vitest will read it
+        expect(config.test?.exclude).toStrictEqual(['heavy/**']);
+    });
+
+    test('a project named by a glob keeps the root exclusions it depends on', () => {
+        // Given - a project this preset never merged into: its config is another file's
+        const config = defineSpecConfig({ test: { projects: ['packages/*'] } });
+
+        // Then - the root is the only place its exclusions can come from, so nothing is dropped
+        expect(config.test?.exclude).toContain('**/_fixtures/**');
     });
 });
 
