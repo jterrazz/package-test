@@ -319,6 +319,61 @@ export const RULE_DOCS = {
             'Catching a typo statically avoids a failure that would only surface at run time.',
         reach: 'tests',
     },
+    'd16-sampled-oracle': {
+        channel: 'statique',
+        convention:
+            "No sampled value under an oracle: `new Date()` (no argument), `Date.now()`, `performance.now()`, `Math.random()` and `randomUUID()` are an error as a direct argument of `expect` or of its matcher, and anywhere inside a structural matcher's expected shape. A `*.specification.ts(x)` is out of reach — a runner legitimately samples at startup.",
+        family: 'D',
+        fix: 'Pin it with `clock.at()`, or match it with `{{iso8601}}`/`match.uuid`.',
+        id: 'D16',
+        rationale:
+            'An assertion that reads the machine twice holds whatever the subject does, and the day it fails it fails for the clock.',
+        reach: 'tests',
+    },
+    'd16w-ambient-value': {
+        channel: 'statique',
+        convention:
+            'A sampled value anywhere in a test callback is a warning — the wider net around D16, silent where D16 already refuses and on a name built in a template literal. A `*.specification.ts(x)` is out of reach.',
+        family: 'D',
+        fix: 'Reach for `clock.at()`, `clock.advance()`, or a token in the golden.',
+        id: 'D16',
+        rationale:
+            'A value sampled into the Given travels into the subject, and the assertion that reads it back is the same tautology one step removed.',
+        reach: 'tests',
+    },
+    'd17w-double-only-oracle': {
+        channel: 'statique',
+        convention:
+            'A module test whose every assertion reads the call log of a double it built itself (`mockOf`, `vi.fn`, `vi.spyOn`) is a warning. The reach is the `module` role: on a component a callback prop IS the contract with its parent.',
+        family: 'D',
+        fix: 'Assert the returned value or the resulting state — something the subject produced.',
+        id: 'D17',
+        rationale:
+            'The subject can return anything, raise anything, or return nothing at all, and every assertion still passes.',
+        reach: 'module',
+    },
+    'd18w-existence-only-oracle': {
+        channel: 'statique',
+        convention:
+            'A test whose ONE assertion is an existence check (`toBeDefined`, `toBeTruthy`, `not.toBeNull`, `not.toBeUndefined`, a bare `not.toThrow` or a bare `toHaveBeenCalled`) is a warning. Beside a real assertion the same check is a precondition and stays silent.',
+        family: 'D',
+        fix: 'Assert the value, a golden, or a row.',
+        id: 'D18',
+        rationale:
+            '`toBeDefined()` passes for `0`, `[]`, the wrong object and the right one: as a whole proof it records that the call returned, not what it answered.',
+        reach: 'tests',
+    },
+    'd19w-probe-cluster': {
+        channel: 'statique',
+        convention:
+            "Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html`, `value`, `error` — with no `toMatch('<file>')` on it is a warning.",
+        family: 'D',
+        fix: "Golden the subject: `expect(result.stdout).toMatch('<case>.txt')`, tokens for what moves.",
+        id: 'D19',
+        rationale:
+            'Three greps state three lines, leave everything between them unstated, and still have to be rewritten one by one the day the output changes.',
+        reach: 'tests',
+    },
     'd2-await-io-matcher': {
         channel: 'statique',
         convention:
