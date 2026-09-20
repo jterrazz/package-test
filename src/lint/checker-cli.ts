@@ -10,6 +10,7 @@ import { fixSpecFiles } from './checker-spec.js';
 import { formatViolations, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
 import type { TokenViolation } from './checker.js';
 import { packageRootOf } from './role.js';
+import { codeOf } from './rule-code.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**
@@ -102,7 +103,11 @@ function report(violations: TokenViolation[], what: string, passes: string): nev
         console.log(
             JSON.stringify(
                 violations.map((violation) => ({
-                    code: `jterrazz-check(${violation.rule})`,
+                    // The published code is the CONVENTION code — the id's
+                    // First segment — whatever a pass calls itself internally:
+                    // It is the key the toolchain's ratchet records under, and
+                    // Two spellings of one rule would be two lines of debt.
+                    code: `jterrazz-check(${codeOf(violation.rule)})`,
                     file: violation.file,
                     line: violation.line,
                     message: violation.message,
