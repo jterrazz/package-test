@@ -43,16 +43,21 @@ test('`{ exact: false }` brings the substring match back, and the ambiguity with
     expect(refusal).toContain('matched 3 elements');
 });
 
-test('a name that only matches as a substring says what changed, once', async () => {
-    // Given - a name no element carries whole, and one element carries in part
+test('a name that only matches as a substring still resolves, and says so once', async () => {
+    // Given - a name no element carries whole, and exactly one element carries in part
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // `see()` rather than `click()`: the window resolves it, and a resolved
+    // Click would navigate the mounted page out from under the runner.
     const refusal = await refusalOf(async (visitor) => {
-        await visitor.click(link('archive'));
+        await visitor.see(link('archive'));
     });
 
-    // Then - the descriptor designates nothing, and the transitional warning names the two releases it ships for so the reader knows the deadline
-    expect(refusal).not.toBe('');
+    // Then - the transitional window resolved it rather than waiting out the budget, and one line names the spelling to write and the release it disappears in
+    expect(refusal).toBe('');
     const lines = warn.mock.calls.map(([line]) => String(line));
     expect(lines.some((line) => line.includes('matched only as a SUBSTRING'))).toBe(true);
-    expect(lines.some((line) => line.includes('16.0 and 16.1'))).toBe(true);
+    expect(lines.some((line) => line.includes("The name to write is 'Articles archive'"))).toBe(
+        true,
+    );
+    expect(lines.some((line) => line.includes('gone in 17.0'))).toBe(true);
 });

@@ -7,7 +7,7 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../model/elements/ambiguity.js';
-import { throughWindow } from '../../model/elements/substring-warning.js';
+import { widenedForWindow } from '../../model/elements/substring-warning.js';
 import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type { ElementMatch, ElementRef } from '../../model/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
@@ -161,23 +161,20 @@ export async function act<T>(
     element: ElementRef,
     action: (locator: Locator) => Promise<T>,
 ): Promise<T> {
-    const locator = locate(page, element);
+    // The transitional window is asked BEFORE the action, because the action
+    // Waits the whole budget and the budget is the test's ({@link widenedForWindow}).
+    const target = (await widenedForWindow(element, globalThis.location.href, PROBE)) ?? element;
+    const locator = locate(page, target);
     try {
         return await action(locator);
     } catch (error) {
-        if (locator.elements().length > 1) {
-            const culprit = ambiguousLevel(element);
-            const matches = candidates(locate(page, culprit));
-            const url = globalThis.location.href;
-            throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));
+        if (locator.elements().length <= 1) {
+            throw error;
         }
-        return await throughWindow({
-            element,
-            failure: error,
-            probe: PROBE,
-            run: async (widened) => await action(locate(page, widened)),
-            where: globalThis.location.href,
-        });
+        const culprit = ambiguousLevel(target);
+        const matches = candidates(locate(page, culprit));
+        const url = globalThis.location.href;
+        throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));
     }
 }
 

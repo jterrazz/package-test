@@ -82,6 +82,11 @@ export type WindowProbe = {
  * A level that states an `exact` of its own is left alone: an author who wrote
  * `{ exact: false }` chose the substring, and one who wrote `{ exact: true }`
  * was already exact.
+ *
+ * Asked BEFORE the action, not after it fails: a verb waits its whole
+ * actionability budget, which is the test's own budget, so a retry afterwards
+ * never runs — the test is already over. The probes are counts, which wait for
+ * nothing, and the common case (the name matches whole) costs one per level.
  */
 export async function widenedForWindow(
     element: ElementRef,
@@ -109,39 +114,6 @@ export async function widenedForWindow(
 }
 
 /**
- * Run an action through the transitional window: the descriptor that failed is
- * widened level by level ({@link widenedForWindow}) and the action is tried
- * ONCE more with it.
- *
- * The retry answering nothing is not an answer of its own — the caller is
- * handed the failure it already had, never one about a descriptor nobody
- * wrote.
- */
-export async function throughWindow<T>(attempt: {
-    /** The descriptor the action was written with. */
-    element: ElementRef;
-    /** The failure the caller already has, and the one it keeps. */
-    failure: unknown;
-    /** What the surface can be asked while the window lasts. */
-    probe: WindowProbe;
-    /** The action, run once more with the widened descriptor. */
-    run: (widened: ElementRef) => Promise<T>;
-    /** Where the looking happened — a url, a device. */
-    where: string;
-}): Promise<T> {
-    const { element, failure, probe, run, where } = attempt;
-    const widened = await widenedForWindow(element, where, probe);
-    if (widened !== undefined) {
-        try {
-            return await run(widened);
-        } catch {
-            // Falls through to the original failure.
-        }
-    }
-    throw failure;
-}
-
-/**
  * The one level, widened and warned about, or `undefined` when it designates
  * something already, states its own `exact`, carries no name, or would
  * designate nothing either way.
@@ -159,7 +131,10 @@ async function widenedLevel(
             return undefined;
         }
         const loose: ElementRef = { ...candidate, exact: false };
-        if ((await probe.count(loose)) === 0) {
+        // Exactly one, never "at least one": a substring that designates
+        // Several is the ambiguity the old default hid, and the window may not
+        // Resolve it by guessing which one the author meant (W3).
+        if ((await probe.count(loose)) !== 1) {
             return undefined;
         }
         warnSubstringOnly(candidate, where, await probe.nameOf(loose));
