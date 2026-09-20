@@ -38,6 +38,11 @@ import { d9wSingleUseRef } from './rules/d9w-single-use-ref.js';
 import { d12wResponseBodyProbe } from './rules/d12w-response-body-probe.js';
 import { d13wUnfrozenNegativeFixture } from './rules/d13w-unfrozen-negative-fixture.js';
 import { d15wStatusOnlyProbe } from './rules/d15w-status-only-probe.js';
+import { d16SampledOracle } from './rules/d16-sampled-oracle.js';
+import { d16wAmbientValue } from './rules/d16w-ambient-value.js';
+import { d17wDoubleOnlyOracle } from './rules/d17w-double-only-oracle.js';
+import { d18wExistenceOnlyOracle } from './rules/d18w-existence-only-oracle.js';
+import { d19wProbeCluster } from './rules/d19w-probe-cluster.js';
 import { e5NoSimulatedDom } from './rules/e5-no-simulated-dom.js';
 import { e5bNoSimulatedDomConfig } from './rules/e5b-no-simulated-dom-config.js';
 import { e6ComponentProjectHelper } from './rules/e6-component-project-helper.js';
@@ -123,6 +128,11 @@ const plugin: LintPlugin = {
         'c6-tomatch-extension': c6ToMatchExtension,
         'c7-seeds-sql-only': c7SeedsSqlOnly,
         'c8-referenced-fixture-exists': c8ReferencedFixtureExists,
+        'd16-sampled-oracle': d16SampledOracle,
+        'd16w-ambient-value': d16wAmbientValue,
+        'd17w-double-only-oracle': d17wDoubleOnlyOracle,
+        'd18w-existence-only-oracle': d18wExistenceOnlyOracle,
+        'd19w-probe-cluster': d19wProbeCluster,
         'd2-await-io-matcher': d2AwaitIoMatcher,
         'd2w-await-sync-matcher': d2wAwaitSyncMatcher,
         'd6w-transform-token-equivalent': d6wTransformTokenEquivalent,

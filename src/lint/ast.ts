@@ -377,3 +377,118 @@ export function firstMarkerAt(markers: MarkerComment[], marker: Marker): number 
     const found = markers.find((entry) => entry.marker === marker && entry.start >= 0);
     return found?.start ?? -1;
 }
+
+/** Is this an `expect(…)` call — the bare identifier callee, no chain? */
+export function isExpectCall(node: AstNode | undefined): boolean {
+    if (node?.type !== 'CallExpression') {
+        return false;
+    }
+    const callee = child(node, 'callee');
+    return callee?.type === 'Identifier' && callee.name === 'expect';
+}
+
+/** An assertion taken apart: what was asserted, how, and through which modifiers. */
+export type Assertion = {
+    /** The matcher name — `toBe`, `toMatch`, `toHaveBeenCalledWith`… */
+    matcher: string;
+    /** The modifiers between `expect(…)` and the matcher, outermost last. */
+    modifiers: string[];
+    /** The `expect(…)` argument, when there is one. */
+    subject: AstNode | undefined;
+};
+
+/** The modifier members an assertion may pass through before its matcher. */
+const MODIFIERS = new Set(['element', 'not', 'rejects', 'resolves']);
+
+/**
+ * Read a call as an assertion — `expect(x).not.toBe(y)` → subject `x`, matcher
+ * `toBe`, modifiers `['not']`.
+ *
+ * Four rules judge the SHAPE of an assertion (what it reads, what it proves,
+ * how many of them stand on one subject), and each of them was going to walk
+ * the same chain. `undefined` for anything that is not an assertion.
+ */
+export function assertionOf(node: AstNode): Assertion | undefined {
+    if (node.type !== 'CallExpression') {
+        return undefined;
+    }
+    const callee = child(node, 'callee');
+    if (callee?.type !== 'MemberExpression') {
+        return undefined;
+    }
+    const matcher = memberPropertyName(callee);
+    if (matcher === undefined) {
+        return undefined;
+    }
+    const modifiers: string[] = [];
+    let current = child(callee, 'object');
+    while (current?.type === 'MemberExpression') {
+        const name = memberPropertyName(current);
+        if (name === undefined || !MODIFIERS.has(name)) {
+            return undefined;
+        }
+        modifiers.unshift(name);
+        current = child(current, 'object');
+    }
+    if (!isExpectCall(current)) {
+        return undefined;
+    }
+    return { matcher, modifiers, subject: childList(current, 'arguments')[0] };
+}
+
+/**
+ * The dotted path of a member chain, as a reader would write it —
+ * `result.stdout` , `result.meta()`. `undefined` for a computed access or
+ * anything that is not rooted in an identifier: two subjects a rule cannot
+ * SPELL are two subjects it must not equate.
+ */
+export function memberPath(node: AstNode | undefined): string | undefined {
+    if (node === undefined) {
+        return undefined;
+    }
+    if (node.type === 'Identifier') {
+        return identifierName(node);
+    }
+    if (node.type === 'CallExpression') {
+        const callee = memberPath(child(node, 'callee'));
+        return callee === undefined || childList(node, 'arguments').length > 0
+            ? undefined
+            : `${callee}()`;
+    }
+    if (node.type !== 'MemberExpression') {
+        return undefined;
+    }
+    const object = memberPath(child(node, 'object'));
+    const property = memberPropertyName(node);
+    return object === undefined || property === undefined ? undefined : `${object}.${property}`;
+}
+
+/**
+ * Is this a value SAMPLED from the machine — the clock, the entropy source?
+ *
+ * `new Date()` with an argument is a pinned instant and not one of these; the
+ * zero-argument form, `Date.now()`, `performance.now()`, `Math.random()` and
+ * `randomUUID()` all answer differently on the next run.
+ */
+export function isSampledValue(node: AstNode): boolean {
+    if (node.type === 'NewExpression') {
+        return (
+            identifierName(child(node, 'callee')) === 'Date' &&
+            childList(node, 'arguments').length === 0
+        );
+    }
+    if (node.type !== 'CallExpression') {
+        return false;
+    }
+    const path = memberPath(child(node, 'callee'));
+    if (path === undefined) {
+        return false;
+    }
+    return (
+        path === 'Date.now' ||
+        path === 'performance.now' ||
+        path === 'Math.random' ||
+        path === 'randomUUID' ||
+        path.endsWith('.randomUUID')
+    );
+}

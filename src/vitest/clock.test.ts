@@ -11,6 +11,7 @@ describe('clock — the one time primitive', () => {
 
         // Then - every reading of the calendar is that instant
         expect(new Date().toISOString()).toBe('2026-03-04T09:30:00.000Z');
+        // oxlint-disable-next-line jterrazz/d16-sampled-oracle -- the sampled reading IS the subject here: this test proves the primitive pins it
         expect(Date.now()).toBe(Date.parse('2026-03-04T09:30:00Z'));
     });
 
