@@ -7,10 +7,10 @@
 function mockOf<T>(options): MockProxy<T>;
 ```
 
-Defined in: [src/vitest/mock-of.ts:28](https://github.com/jterrazz/package-test/blob/main/src/vitest/mock-of.ts#L28)
+Defined in: [src/core/doubles/mock-of.ts:28](https://github.com/jterrazz/package-test/blob/main/src/core/doubles/mock-of.ts#L28)
 
 A typed double for an injected port — the fourth rung of the doubles ladder
-(docs/12-conventions.md), and the only one a module test may build itself.
+(docs/18-conventions.md), and the only one a module test may build itself.
 
 The type argument is the port: `T` is constrained to `object` and has no
 default, so a double is always asked for something. A call with no argument
@@ -46,10 +46,10 @@ const gateway = mockOf<PaymentGateway>();                // deep
 function mockOf<T>(options?): DeepMockProxy<T>;
 ```
 
-Defined in: [src/vitest/mock-of.ts:29](https://github.com/jterrazz/package-test/blob/main/src/vitest/mock-of.ts#L29)
+Defined in: [src/core/doubles/mock-of.ts:29](https://github.com/jterrazz/package-test/blob/main/src/core/doubles/mock-of.ts#L29)
 
 A typed double for an injected port — the fourth rung of the doubles ladder
-(docs/12-conventions.md), and the only one a module test may build itself.
+(docs/18-conventions.md), and the only one a module test may build itself.
 
 The type argument is the port: `T` is constrained to `object` and has no
 default, so a double is always asked for something. A call with no argument

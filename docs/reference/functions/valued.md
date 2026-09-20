@@ -5,7 +5,7 @@
 function valued(element, value): ElementRef;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:201](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L201)
+Defined in: [src/core/elements/elements.ts:201](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L201)
 
 What the field holds: `see(valued(field('Title'), 'Launch teaser'))`, and
 `gone(valued(field('Title'), '…'))` for a value it no longer holds.

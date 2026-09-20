@@ -5,6 +5,6 @@
 const content: ElementFactory;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:57](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L57)
+Defined in: [src/core/elements/elements.ts:57](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L57)
 
 An element containing the given text.

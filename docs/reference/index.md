@@ -111,7 +111,7 @@
 | [MockPort](type-aliases/MockPort.md) | The factory's own shape — kept as a name so a consumer can annotate with it. |
 | [PinnedClock](type-aliases/PinnedClock.md) | A pinned clock — released when the `using` scope that declared it ends. |
 | [PostgresOptions](type-aliases/PostgresOptions.md) | - |
-| [ProcessOptions](type-aliases/ProcessOptions.md) | The ONE shape an external process takes — the site under test, a backend a page talks to, a bundler a simulator loads from. Built by `process()` (chapter 11) and accepted wherever a facet starts something outside this process: `website({ server })`, `services: { api: process(…) }`, and the literate `serve:` registry. |
+| [ProcessOptions](type-aliases/ProcessOptions.md) | The ONE shape an external process takes — the site under test, a backend a page talks to, a bundler a simulator loads from. Built by `process()` (chapter 17) and accepted wherever a facet starts something outside this process: `website({ server })`, `services: { api: process(…) }`, and the literate `serve:` registry. |
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
 | [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
 | [ScreenNode](type-aliases/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
@@ -158,7 +158,7 @@
 | [form](variables/form.md) | The `form` landmark — a form carrying an accessible name. |
 | [heading](variables/heading.md) | A heading, by accessible name. |
 | [http](variables/http.md) | Generic HTTP contract helpers for any URL. The url is absolute (string or RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')` matches that path on ANY origin, which is what an app calling its own backend needs. An optional [HttpContractFilter](type-aliases/HttpContractFilter.md) narrows matching by body, headers, or query — a request that hits the URL/method but fails the filter counts as unmatched (strict contracts, CONVENTIONS D7). |
-| [intercept](variables/intercept.md) | The module-scope network double, on msw's node server — what a test with no chain to hang contracts on reaches for (chapter 10). |
+| [intercept](variables/intercept.md) | The module-scope network double, on msw's node server — what a test with no chain to hang contracts on reaches for (chapter 16). |
 | [link](variables/link.md) | A link, by accessible name. |
 | [listitem](variables/listitem.md) | An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`. |
 | [main](variables/main.md) | The `main` landmark — the primary content of the document. |
@@ -182,7 +182,7 @@
 | [disabled](functions/disabled.md) | Whether the element accepts input: `see(disabled(button('Delete')))` asserts it refuses, `see(enabled(button('Delete')))` that it takes it. |
 | [enabled](functions/enabled.md) | The other direction of [disabled](functions/disabled.md) — the element takes input. |
 | [focused](functions/focused.md) | Where the keyboard is: `see(focused(button('Open')))` asserts the element has focus, `gone(focused(x))` that it does not. |
-| [mockOf](functions/mockOf.md) | A typed double for an injected port — the fourth rung of the doubles ladder (docs/12-conventions.md), and the only one a module test may build itself. |
+| [mockOf](functions/mockOf.md) | A typed double for an injected port — the fourth rung of the doubles ladder (docs/18-conventions.md), and the only one a module test may build itself. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [process](functions/process.md) | Declare an external process the framework owns for the life of the specification. |
 | [redis](functions/redis.md) | Create a Redis service handle. |

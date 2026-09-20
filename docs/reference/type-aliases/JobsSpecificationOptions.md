@@ -5,7 +5,7 @@
 type JobsSpecificationOptions<Services> = object;
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:13](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L13)
+Defined in: [src/facets/jobs/jobs.specification.ts:18](https://github.com/jterrazz/package-test/blob/main/src/facets/jobs/jobs.specification.ts#L18)
 
 Options for startJobs \| specification.jobs.
 
@@ -25,7 +25,7 @@ jobs:
   | JobHandle[];
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:19](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L19)
+Defined in: [src/facets/jobs/jobs.specification.ts:24](https://github.com/jterrazz/package-test/blob/main/src/facets/jobs/jobs.specification.ts#L24)
 
 Named jobs triggerable via `jobs.trigger(name)` — a factory receiving
 the started services record, or a static array. Jobs run in-process by
@@ -39,7 +39,7 @@ definition (CONVENTIONS A8).
 optional root?: string;
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:21](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L21)
+Defined in: [src/facets/jobs/jobs.specification.ts:26](https://github.com/jterrazz/package-test/blob/main/src/facets/jobs/jobs.specification.ts#L26)
 
 Project root override — see the `root` option of `specification.api()`.
 
@@ -51,6 +51,6 @@ Project root override — see the `root` option of `specification.api()`.
 optional services?: Services;
 ```
 
-Defined in: [src/specification/facets/jobs/start-jobs.ts:23](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/jobs/start-jobs.ts#L23)
+Defined in: [src/facets/jobs/jobs.specification.ts:28](https://github.com/jterrazz/package-test/blob/main/src/facets/jobs/jobs.specification.ts#L28)
 
 Named infrastructure record started via testcontainers.

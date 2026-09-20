@@ -5,7 +5,7 @@
 type RedisOptions = object;
 ```
 
-Defined in: [src/integrations/redis/redis.ts:6](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L6)
+Defined in: [src/seams/redis/redis.ts:6](https://github.com/jterrazz/package-test/blob/main/src/seams/redis/redis.ts#L6)
 
 ## Properties
 
@@ -15,6 +15,6 @@ Defined in: [src/integrations/redis/redis.ts:6](https://github.com/jterrazz/pack
 optional image?: string;
 ```
 
-Defined in: [src/integrations/redis/redis.ts:8](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L8)
+Defined in: [src/seams/redis/redis.ts:8](https://github.com/jterrazz/package-test/blob/main/src/seams/redis/redis.ts#L8)
 
 Override image.

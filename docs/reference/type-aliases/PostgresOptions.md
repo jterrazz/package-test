@@ -5,7 +5,7 @@
 type PostgresOptions = object;
 ```
 
-Defined in: [src/integrations/postgres/postgres.ts:23](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L23)
+Defined in: [src/seams/postgres/postgres.ts:23](https://github.com/jterrazz/package-test/blob/main/src/seams/postgres/postgres.ts#L23)
 
 ## Properties
 
@@ -15,7 +15,7 @@ Defined in: [src/integrations/postgres/postgres.ts:23](https://github.com/jterra
 optional env?: Record<string, string>;
 ```
 
-Defined in: [src/integrations/postgres/postgres.ts:27](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L27)
+Defined in: [src/seams/postgres/postgres.ts:27](https://github.com/jterrazz/package-test/blob/main/src/seams/postgres/postgres.ts#L27)
 
 Override environment variables.
 
@@ -27,6 +27,6 @@ Override environment variables.
 optional image?: string;
 ```
 
-Defined in: [src/integrations/postgres/postgres.ts:25](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L25)
+Defined in: [src/seams/postgres/postgres.ts:25](https://github.com/jterrazz/package-test/blob/main/src/seams/postgres/postgres.ts#L25)
 
 Override image.

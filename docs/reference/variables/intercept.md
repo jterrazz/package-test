@@ -8,4 +8,4 @@ const intercept: Intercept;
 Defined in: [src/index.ts:16](https://github.com/jterrazz/package-test/blob/main/src/index.ts#L16)
 
 The module-scope network double, on msw's node server — what a test with no
-chain to hang contracts on reaches for (chapter 10).
+chain to hang contracts on reaches for (chapter 16).

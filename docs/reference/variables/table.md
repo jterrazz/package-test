@@ -5,6 +5,6 @@
 const table: LandmarkFactory;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:133](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L133)
+Defined in: [src/core/elements/elements.ts:133](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L133)
 
 A table, by its caption or accessible name.

@@ -5,6 +5,6 @@
 const link: ElementFactory;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:54](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L54)
+Defined in: [src/core/elements/elements.ts:54](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L54)
 
 A link, by accessible name.

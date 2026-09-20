@@ -5,7 +5,7 @@
 type ServerPort = object;
 ```
 
-Defined in: [src/specification/ports/server.port.ts:17](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/server.port.ts#L17)
+Defined in: [src/core/ports/server.port.ts:17](https://github.com/jterrazz/package-test/blob/main/src/core/ports/server.port.ts#L17)
 
 Abstract server interface for specification runners.
 Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch.
@@ -18,7 +18,7 @@ Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch.
 request: (method, path, body?, headers?) => Promise<ServerResponse>;
 ```
 
-Defined in: [src/specification/ports/server.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/server.port.ts#L19)
+Defined in: [src/core/ports/server.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/core/ports/server.port.ts#L19)
 
 Send an HTTP request and return the parsed response.
 

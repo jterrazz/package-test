@@ -5,7 +5,7 @@
 type JobsSpecification<DatabaseKey> = object;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:220](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L220)
+Defined in: [src/core/chain/builder.ts:216](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L216)
 
 ## Type Parameters
 
@@ -21,7 +21,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:220](https://github.co
 clock: (iso) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:222](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L222)
+Defined in: [src/core/chain/builder.ts:218](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L218)
 
 Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 
@@ -43,7 +43,7 @@ Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:224](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L224)
+Defined in: [src/core/chain/builder.ts:220](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L220)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -55,7 +55,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 seed: (file, options?) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:226](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L226)
+Defined in: [src/core/chain/builder.ts:222](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L222)
 
 Queue a SQL seed file from `_seeds/` to run before the action.
 
@@ -79,7 +79,7 @@ Queue a SQL seed file from `_seeds/` to run before the action.
 trigger: (name) => Promise<JobsResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:229](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L229)
+Defined in: [src/core/chain/builder.ts:225](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L225)
 
 Execute the named job registered via the `jobs` option and resolve with the result.
 

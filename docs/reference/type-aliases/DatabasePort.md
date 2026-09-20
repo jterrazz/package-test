@@ -5,7 +5,7 @@
 type DatabasePort = object;
 ```
 
-Defined in: [src/specification/ports/database.port.ts:5](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/database.port.ts#L5)
+Defined in: [src/core/ports/database.port.ts:5](https://github.com/jterrazz/package-test/blob/main/src/core/ports/database.port.ts#L5)
 
 Abstract database interface for specification runners.
 Implement this to plug in your database stack (e.g. Postgres, SQLite).
@@ -18,7 +18,7 @@ Implement this to plug in your database stack (e.g. Postgres, SQLite).
 query: (table, columns) => Promise<unknown[][]>;
 ```
 
-Defined in: [src/specification/ports/database.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/database.port.ts#L10)
+Defined in: [src/core/ports/database.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/core/ports/database.port.ts#L10)
 
 Query a table and return rows as arrays of values.
 
@@ -41,7 +41,7 @@ Query a table and return rows as arrays of values.
 reset: () => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/database.port.ts:13](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/database.port.ts#L13)
+Defined in: [src/core/ports/database.port.ts:13](https://github.com/jterrazz/package-test/blob/main/src/core/ports/database.port.ts#L13)
 
 Reset database to clean state between tests.
 
@@ -57,7 +57,7 @@ Reset database to clean state between tests.
 seed: (sql) => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/database.port.ts:7](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/database.port.ts#L7)
+Defined in: [src/core/ports/database.port.ts:7](https://github.com/jterrazz/package-test/blob/main/src/core/ports/database.port.ts#L7)
 
 Execute raw SQL (for seeding test data).
 

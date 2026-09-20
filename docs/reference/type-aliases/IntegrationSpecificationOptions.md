@@ -5,7 +5,7 @@
 type IntegrationSpecificationOptions<Services> = object;
 ```
 
-Defined in: [src/specification/facets/integration/start-integration.ts:12](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/integration/start-integration.ts#L12)
+Defined in: [src/facets/integration/integration.specification.ts:17](https://github.com/jterrazz/package-test/blob/main/src/facets/integration/integration.specification.ts#L17)
 
 Options for startIntegration \| specification.integration.
 
@@ -23,7 +23,7 @@ Options for startIntegration \| specification.integration.
 optional root?: string;
 ```
 
-Defined in: [src/specification/facets/integration/start-integration.ts:14](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/integration/start-integration.ts#L14)
+Defined in: [src/facets/integration/integration.specification.ts:19](https://github.com/jterrazz/package-test/blob/main/src/facets/integration/integration.specification.ts#L19)
 
 Project-root override — see the `root` option of `specification.api()`.
 
@@ -35,7 +35,7 @@ Project-root override — see the `root` option of `specification.api()`.
 optional services?: Services;
 ```
 
-Defined in: [src/specification/facets/integration/start-integration.ts:20](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/integration/start-integration.ts#L20)
+Defined in: [src/facets/integration/integration.specification.ts:25](https://github.com/jterrazz/package-test/blob/main/src/facets/integration/integration.specification.ts#L25)
 
 Named infrastructure the module is specified AGAINST — a real database,
 a real cache, a `process()` it talks to. Omit it for the other half of
