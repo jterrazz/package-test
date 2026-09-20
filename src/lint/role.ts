@@ -31,7 +31,7 @@ export type FileRole =
     | 'specification';
 
 /** A test root the conventions retired — `roleOf` names it so I2 can refuse it. */
-export type LegacyDir = '__tests__' | 'tests' | null;
+export type LegacyDir = '__tests__' | 'test' | 'tests' | null;
 
 /** What a rule reads about the file it was handed. */
 export type FileIdentity = {
@@ -52,18 +52,24 @@ const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
 /**
  * The retired test root this path sits under.
  *
- * `__tests__/` is retired wherever it appears. A `tests/` directory is only the
- * retired ROOT when it sits directly under a package — a `tests` segment deeper
- * in a tree is an ordinary domain name, and a checkout living under `~/tests/`
- * is nobody's business but the filesystem's.
+ * `__tests__/` is retired wherever it appears. A `tests/` or `test/` directory
+ * is only the retired ROOT when it sits directly under a package — a `test`
+ * segment deeper in a tree is an ordinary domain name, and a checkout living
+ * under `~/tests/` is nobody's business but the filesystem's.
+ *
+ * Both spellings, because both exist: hoverfly-lsp keeps thirteen corpus tests
+ * under `packages/*\/test/`, and a rule that named only the plural told it
+ * nothing.
  */
 function legacyDirOf(parts: string[]): LegacyDir {
     if (parts.slice(0, -1).includes('__tests__')) {
         return '__tests__';
     }
-    const testsIndex = parts.indexOf('tests');
-    if (testsIndex > 0 && isFile(`/${parts.slice(0, testsIndex).join('/')}/package.json`)) {
-        return 'tests';
+    for (const name of ['tests', 'test'] as const) {
+        const index = parts.indexOf(name);
+        if (index > 0 && isFile(`/${parts.slice(0, index).join('/')}/package.json`)) {
+            return name;
+        }
     }
     return null;
 }

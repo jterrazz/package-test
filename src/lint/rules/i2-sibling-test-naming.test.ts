@@ -48,6 +48,12 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
             errors: [{ messageId: 'rootTests' }],
             filename: `${REPO_ROOT}/tests/foo.test.ts`,
         },
+        // And so is the singular spelling of the same root.
+        {
+            code: 'export {};',
+            errors: [{ messageId: 'rootTests' }],
+            filename: `${REPO_ROOT}/test/corpus.test.ts`,
+        },
     ],
     valid: [
         // Neighbour exists in the compliant twin.

@@ -52,6 +52,30 @@ const FRAMEWORK = '@jterrazz/test';
 const RETIRED = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
 const RETIRED_SCOPES = ['@testing-library/'];
 
+/**
+ * The one retired seam a member may still declare, and what makes it allowed.
+ *
+ * React Native renders under jest until the react-native-web answer lands, and
+ * where jest is the sanctioned runner `@testing-library/react-native` is the
+ * only vocabulary there is: the rule would be asking for a facet that does not
+ * reach that runtime yet. The allowance is read from the member itself — a
+ * declared `jest`, a `jest` field, or a `test` script that calls it — so it
+ * lapses the day the member stops running jest.
+ */
+const JEST_ONLY_SEAM = '@testing-library/react-native';
+
+/** Does this member run jest? */
+function runsJest(manifest: Manifest): boolean {
+    const declares = (name: string): boolean =>
+        name in (manifest.dependencies ?? {}) || name in (manifest.devDependencies ?? {});
+    return (
+        declares('jest') ||
+        declares('jest-expo') ||
+        manifest.jest !== undefined ||
+        /(?:^|[\s/])jest(?:\s|$)/u.test(manifest.scripts?.test ?? '')
+    );
+}
+
 /** Where a member states what it collects, whatever extension it writes it in. */
 const CONFIG_NAMES = [
     'vitest.config.ts',
@@ -68,6 +92,7 @@ const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules
 type Manifest = {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
+    jest?: unknown;
     name?: string;
     scripts?: Record<string, string>;
     workspaces?: string[] | { packages?: string[] };
@@ -155,8 +180,13 @@ function declaredSeams(manifest: Manifest): Seam[] {
     if (manifest.name === FRAMEWORK) {
         return [];
     }
-    const isRetired = (name: string): boolean =>
-        RETIRED.has(name) || RETIRED_SCOPES.some((scope) => name.startsWith(scope));
+    const jestRuns = runsJest(manifest);
+    const isRetired = (name: string): boolean => {
+        if (name === JEST_ONLY_SEAM && jestRuns) {
+            return false;
+        }
+        return RETIRED.has(name) || RETIRED_SCOPES.some((scope) => name.startsWith(scope));
+    };
     const declared = new Set([
         ...Object.keys(manifest.dependencies ?? {}).filter(
             (name) => CARRIED.has(name) || isRetired(name),

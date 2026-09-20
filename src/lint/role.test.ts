@@ -73,7 +73,10 @@ describe('roleOf — the kind a path states', () => {
         // Then - `legacyDir` is the third field, and the `tests` clause is anchored on a package root
         expect(roleOf('/repo/src/matching/__tests__/match.test.ts').legacyDir).toBe('__tests__');
         expect(roleOf(`${REPO_ROOT}/tests/smoke.test.ts`).legacyDir).toBe('tests');
+        // The singular spelling is the same root under another name.
+        expect(roleOf(`${REPO_ROOT}/test/corpus.test.ts`).legacyDir).toBe('test');
         expect(roleOf('/no-such-root-xyz/tests/smoke.test.ts').legacyDir).toBeNull();
+        expect(roleOf('/no-such-root-xyz/test/smoke.test.ts').legacyDir).toBeNull();
         expect(roleOf('/repo/specs/api/users/create.test.ts').legacyDir).toBeNull();
     });
 });
