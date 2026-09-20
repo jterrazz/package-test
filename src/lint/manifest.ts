@@ -696,6 +696,18 @@ export const RULE_DOCS = {
             'Testing what the user sees (roles, labels) keeps specs robust to DOM rewrites; a test id sidesteps that guarantee, and without the invariant written down nobody can tell whether the hatch is still needed.',
         reach: 'tests',
     },
+    'w5w-scenario-settles': {
+        channel: 'statique',
+        convention:
+            'A scenario that ACTS (`click`, `fill`, `select`, `check`, `press`, `tap`, `rerender`, `unmount`) ends on `await visitor.see(…)` or `await visitor.gone(…)`. A scenario that only reads is out of reach.',
+        facet: 'shared',
+        family: 'W',
+        fix: 'End on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`.',
+        id: 'W5',
+        rationale:
+            'The capture is taken when the callback returns: a scenario ending on a click hands the golden whatever was on the screen at that instant, and the failure reads as flakiness rather than as a missing wait.',
+        reach: 'tests',
+    },
 } satisfies Record<string, RuleDoc>;
 
 /**

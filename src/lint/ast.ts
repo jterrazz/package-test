@@ -492,3 +492,25 @@ export function isSampledValue(node: AstNode): boolean {
         path.endsWith('.randomUUID')
     );
 }
+
+/**
+ * The terminal actions that carry a SCENARIO — a callback the visitor drives.
+ *
+ * `visit` (website), `open` (mobile), `render` (component): one list, because
+ * three rules judge what happens inside that callback and a fourth judges how
+ * it ends. A facet that gains a scenario adds its word here, once.
+ */
+export const SCENARIO_ACTIONS = new Set(['open', 'render', 'visit']);
+
+/** The scenario callback of a terminal action, when the call carries one. */
+export function scenarioCallbackOf(node: AstNode): AstNode | undefined {
+    const callee = child(node, 'callee');
+    const member = callee === undefined ? undefined : memberPropertyName(callee);
+    if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
+        return undefined;
+    }
+    const scenario = childList(node, 'arguments').at(-1);
+    return scenario?.type === 'ArrowFunctionExpression' || scenario?.type === 'FunctionExpression'
+        ? scenario
+        : undefined;
+}

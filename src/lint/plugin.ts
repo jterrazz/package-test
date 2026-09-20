@@ -64,6 +64,7 @@ import { i4NoViMockInSrc } from './rules/i4-no-vi-mock-in-src.js';
 import { j2NoSleepInSpecs } from './rules/j2-no-sleep-in-specs.js';
 import { w1ScenarioPure } from './rules/w1-scenario-pure.js';
 import { w2TestIdStatesWhatIsMissing } from './rules/w2-testid-states-what-is-missing.js';
+import { w5wScenarioSettles } from './rules/w5w-scenario-settles.js';
 import type { LintPlugin, LintRule } from './types.js';
 
 /**
@@ -167,6 +168,7 @@ const plugin: LintPlugin = {
         'j2-no-sleep-in-specs': j2NoSleepInSpecs,
         'w1-scenario-pure': w1ScenarioPure,
         'w2-testid-states-what-is-missing': w2TestIdStatesWhatIsMissing,
+        'w5w-scenario-settles': w5wScenarioSettles,
     },
 };
 
