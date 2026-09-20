@@ -25,6 +25,7 @@ export default defineConfig([
         entry: {
             catalog: 'src/lint/catalog-cli.ts',
             checker: 'src/lint/checker-cli.ts',
+            coverage: 'src/lint/coverage-cli.ts',
             index: 'src/index.ts',
             vitest: 'src/runner/index.ts',
         },

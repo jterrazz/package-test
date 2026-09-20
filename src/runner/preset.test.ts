@@ -13,9 +13,13 @@ describe('defineSpecConfig() — artefact paths', () => {
         // Given - the preset alone, nothing stated
         const config = defineSpecConfig();
 
-        // Then - both writers point inside the one artefact folder
+        // Then - both writers point inside the one artefact folder, and the coverage block names the provider the ratchet reads (`json-summary`)
         expect(config.cacheDir).toBe(VITEST_ARTIFACTS_DIR);
-        expect(config.test?.coverage).toStrictEqual({ reportsDirectory: COVERAGE_DIR });
+        expect(config.test?.coverage).toMatchObject({
+            provider: 'v8',
+            reporter: ['text', 'html', 'json-summary'],
+            reportsDirectory: COVERAGE_DIR,
+        });
     });
 
     test('routes every path Vitest 5 pins under .artifacts/vitest', () => {

@@ -123,13 +123,53 @@ export function projectDefaults(): TestProjectInlineConfiguration {
     };
 }
 
+/**
+ * Coverage, when `--coverage` asks for it.
+ *
+ * `v8` because it is the runtime's own counter: no instrumentation pass, no
+ * second transform of every file, and the numbers do not move when the bundler
+ * does. The provider is an OPTIONAL peer (`@vitest/coverage-v8`), so a project
+ * that never asks for coverage never installs it.
+ *
+ * `json-summary` is not a taste: it is the machine-readable report the ratchet
+ * reads. `text` is for the human running the command, and `html` for the one
+ * chasing a line. All three land under `.artifacts/vitest/coverage/`, the one
+ * directory the toolchain's page owns.
+ *
+ * What is EXCLUDED is the shape of the answer, not a way to raise the number:
+ * a type-only module has nothing to execute (v8 reports it as 0/0 or, worse,
+ * as uncovered lines that cannot be covered), and the CLI entries are proven
+ * by running the binary, not by importing it.
+ */
+const COVERAGE = {
+    exclude: [
+        // Browser Mode instruments what the PAGE loaded, which is the bundle:
+        // Without this line react-dom alone is 19 000 statements and the
+        // Project's own number disappears under its dependencies.
+        '**/node_modules/**',
+        // A spec is a test, and the fixture app a spec drives is ground.
+        'specs/**',
+        '**/_fixtures/**',
+        '**/*.d.ts',
+        '**/*.test-d.ts',
+        '**/*.fixtures.ts',
+        'dist/**',
+        '.artifacts/**',
+        '**/*.config.ts',
+        '**/*.config.mts',
+    ],
+    provider: 'v8' as const,
+    reporter: ['text', 'html', 'json-summary'],
+    reportsDirectory: COVERAGE_DIR,
+};
+
 /** Defaults for the root config — the project ones, plus what only a root carries. */
 function rootDefaults(): ViteUserConfig {
     return {
         cacheDir: VITEST_ARTIFACTS_DIR,
         test: {
             attachmentsDir: ATTACHMENTS_DIR,
-            coverage: { reportsDirectory: COVERAGE_DIR },
+            coverage: COVERAGE,
             exclude: EXCLUDE,
             hookTimeout: HOOK_TIMEOUT_MS,
             ...HYGIENE,

@@ -90,6 +90,59 @@ The fixture apps the specs drive live in the pool: `app` and `website-app` for t
 
 Its goldens are full snapshots, not greps: `specs/lint/checker/_expected/*.txt` holds the exact lines the checker prints, including the chapter each message points a consumer at. A message that changes its wording moves its golden with it, in the same commit.
 
+## Coverage is a ratchet, not a threshold
+
+`npx vitest --run --coverage` turns on v8 — the runtime's own counter, so there
+is no instrumentation pass and the numbers do not move when the bundler does —
+and writes three reports under `.artifacts/vitest/coverage/`: `text` for the
+person who ran it, `html` for the one chasing a line, and `json-summary`, which
+is the one a machine reads.
+
+`npm run coverage` records where the suite stands in `coverage.baseline.json`;
+`npm run coverage:check` (and `make check`, which chains build, lint, test and
+this) refuses a run that fell below it. The floor only ever rises: lowering it
+is an edit to a committed file, with a commit body saying why.
+
+A fixed threshold would be a number somebody picked. Set it where the project
+stands and it forbids nothing; set it where the project should be and every run
+is red until it gets there, which is how a gate becomes something people pass
+with `--no-verify`. A ratchet asks the only question a gate can answer
+honestly: is this change worse than the last one?
+
+What the report EXCLUDES is the shape of the answer, not a way to raise the
+number: `node_modules/` (Browser Mode instruments the page's bundle, and
+react-dom alone is 19 000 statements), `specs/` and `_fixtures/` (a spec is a
+test and the app it drives is ground), the type-only and config files.
+
+## Modules with no sibling test
+
+I2 says a module test lives beside its module. It never said every module has
+one, and it cannot: a barrel executes nothing, a `*.port.ts` declares a shape,
+and a facet's constructor is proven by the tree that constructs it. What was
+missing is the LIST of the ones that do not, and why — a module with real
+behaviour, no sibling test and nobody able to say what covers it is the silence
+this section closes.
+
+`src/lint/siblings.ts` declares the kinds, and **K7** fails on a module that
+matches none of them. Today 83 modules have no sibling test, all claimed:
+
+| Kind                           | Proven instead by                                                       |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| composition root or barrel (4) | `package-exports.test.ts`, and every spec that imports the entry        |
+| type-only declaration (11)     | the compiler, plus `type-channel.test-d.ts` for what it must refuse     |
+| constant data (3)              | the readers that assert on it — `preset.test.ts`, `plugin.test.ts`      |
+| the facet file set (13)        | the ONE builder they name (`builder.test.ts`, `facet-matrix.test.ts`)   |
+| a facet's vitest project (7)   | `projects.test.ts`, which builds every one of them                      |
+| a facet module (10)            | the facet's own tree under `specs/<facet>/`                             |
+| a result accessor (7)          | every spec that asserts on a result, over `result.test.ts` for the base |
+| a seam adapter (13)            | the facet that drives it, or `specs/integration/<seam>/`                |
+| a bundled CLI entry (3)        | `specs/lint/`, which runs the built binary end to end                   |
+| a lint-layer module (5)        | the rule tests beside each rule, and `specs/lint/`                      |
+| a chain or runner internal (7) | the facet specs that drive the chain                                    |
+
+A new module that matches no kind fails the meta-test, which is the moment to
+write the test — not six months later, when a coverage number moved.
+
 ## The capability matrix
 
 The catalogue in [19 — Linting](13-linting.md) answers "which conventions are
