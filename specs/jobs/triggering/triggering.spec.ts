@@ -53,8 +53,7 @@ describe('jobs', () => {
             'crash-after-insert: boom',
         );
 
-        // Then - the row inserted before the crash is still in the analytics db
-        // (queried directly — the rejected chain returned no result handle)
+        // Then - the row inserted before the crash is still in the analytics db (queried directly — the rejected chain returned no result handle)
         const { Client } = await import('pg');
         const client = new Client({ connectionString: analyticsUrl() });
         await client.connect();
@@ -93,10 +92,8 @@ describe('jobs — intercepts (D7)', () => {
     });
 
     test('strict by default: an outgoing request matching no intercept fails the trigger', async () => {
-        // Given - an intercept is declared, but for a DIFFERENT url than the job calls,
-        // So the chain's network is guarded (D7) yet the job's real request matches nothing
-        // Then - the trigger rejects, naming the offending request rather than letting it
-        // Reach the network
+        // Given - an intercept is declared, but for a DIFFERENT url than the job calls, so the chain's network is guarded (D7) yet the job's real request matches nothing
+        // Then - the trigger rejects, naming the offending request rather than letting it reach the network
         await expect(
             jobs
                 .intercept(http.get('https://not.the.url.test/other'), http.json({ label: 'x' }))

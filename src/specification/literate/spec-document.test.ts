@@ -132,8 +132,7 @@ describe('spec document — reading', () => {
             'case.spec.yaml',
         );
 
-        // Then - a bare word is a registered set, KEY=value is inline, and a
-        // Mapping entry names one server plus the env it is started with
+        // Then - a bare word is a registered set, KEY=value is inline, and a mapping entry names one server plus the env it is started with
         expect(document.fixtures.map((fixture) => fixture.path)).toStrictEqual(['$FIXTURES/stub/']);
         expect(document.env).toStrictEqual([
             { kind: 'set', line: 4, name: 'frozen' },
@@ -271,8 +270,7 @@ describe('spec document — update', () => {
             { exitCode: 0, stderr: '', stdout: 'fresh\nlines\n' },
         ]);
 
-        // Then - only exit and stdout moved; the comment, the command and the
-        // Files: block came back untouched, in the order they were written
+        // Then - only exit and stdout moved; the comment, the command and the files: block came back untouched, in the order they were written
         expect(written).toBe(
             [
                 '# the comment a rewrite must keep',
@@ -330,8 +328,7 @@ describe('spec document — update at the document’s own indentation', () => {
         const stdout = ' TYPESCRIPT  src/index.ts\n2 files\n';
         const written = updateSpecFile(file, [{ exitCode: 0, stderr: '', stdout }]);
 
-        // Then - the indicator names the four spaces the content sits at, and the
-        // Golden reads back as the bytes the command printed
+        // Then - the indicator names the four spaces the content sits at, and the golden reads back as the bytes the command printed
         expect(written).toContain('stdout: |4\n');
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
@@ -363,8 +360,7 @@ describe('spec document — update at the document’s own indentation', () => {
     });
 
     test('a stdout opening on a tab survives without an indicator', () => {
-        // Given - a four-space document and a tab-started stream, which YAML never
-        // Reads as indentation
+        // Given - a four-space document and a tab-started stream, which YAML never reads as indentation
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
         const stdout = '\tTABBED\nback\n';
         const written = updateSpecFile(file, [{ exitCode: 0, stderr: '', stdout }]);
@@ -386,8 +382,7 @@ describe('spec document — update at the document’s own indentation', () => {
     });
 
     test('the stdin and files: blocks an author wrote survive the rewrite unchanged', () => {
-        // Given - a four-space document whose stdin and files.equals both open on
-        // A space, each stating the four spaces it is written at
+        // Given - a four-space document whose stdin and files.equals both open on A space, each stating the four spaces it is written at
         const source = [
             'description: keeps what it did not write',
             'runs:',

@@ -15,8 +15,7 @@ async function refusalOf(path: string, scenario: VisitScenario): Promise<string>
 }
 
 test('refuses an element that matches more than one node', async () => {
-    // Given - a page where "Articles" names two links verbatim, and a third
-    // Only as a substring ("Read Articles") the exact default no longer reaches
+    // Given - a page where "Articles" names two links verbatim, and a third only as a substring ("Read Articles") the exact default no longer reaches
     const message = await refusalOf('/ambiguous', async (visitor) => {
         // When - a scenario acts on the bare descriptor
         await visitor.click(link('Articles'));
@@ -93,8 +92,7 @@ test('sees an element only when it too designates exactly one', async () => {
 });
 
 test('names the accessible name a descriptor matched on when it is not the text', async () => {
-    // Given - a row button labelled by an aria-label, and a dialog button named
-    // Verbatim: one descriptor, two matches, and only one of them reads as itself
+    // Given - a row button labelled by an aria-label, and a dialog button named verbatim: one descriptor, two matches, and only one of them reads as itself
     const message = await refusalOf('/ambiguous', async (visitor) => {
         await visitor.click(button('Delete post'));
     });

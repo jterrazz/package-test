@@ -20,8 +20,7 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
         // Given - two runs, each with its own temp cwd
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('version');
 
-        // Then - the fixture matched THIS run's cwd (fresh cwd per spec means
-        // A stale literal path could never pass — the token is exact)
+        // Then - the fixture matched THIS run's cwd (fresh cwd per spec means A stale literal path could never pass — the token is exact)
         expect(result.stdout.comparableText).toContain('cwd /');
         expect(result.stdout).toMatch('version.txt');
     });
@@ -62,8 +61,7 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
     });
 
     test('update mode substitutes the workdir inside JSON (CONVENTIONS D5, text/json parity)', async () => {
-        // Given - a JSON payload whose values embed the run cwd, update mode on
-        // A fresh fixture name
+        // Given - a JSON payload whose values embed the run cwd, update mode on A fresh fixture name
         const fixtureName = `json-cwd-transient-${Date.now()}.json`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {

@@ -31,8 +31,7 @@ describe('contracts — defineContract', () => {
             },
         });
 
-        // Then - the response is stored as the function, evaluable per request,
-        // And the produced reply echoes the observed request into the envelope
+        // Then - the response is stored as the function, evaluable per request, and the produced reply echoes the observed request into the envelope
         expect(contract.response).toBeTypeOf('function');
         const produced =
             typeof contract.response === 'function'
@@ -57,8 +56,7 @@ describe('contracts — defineContract', () => {
             response: anthropic.reply('hello'),
         });
 
-        // Then - the single-argument contract overload chains without throwing;
-        // Further chaining returns the same builder
+        // Then - the single-argument contract overload chains without throwing; further chaining returns the same builder
         const builder = api.intercept(contract);
         expect(builder.intercept(contract)).toBe(builder);
     });

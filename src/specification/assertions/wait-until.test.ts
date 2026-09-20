@@ -45,8 +45,7 @@ describe('waitUntil — waiting on a condition, never on a duration', () => {
     });
 
     test('times out with its own sentence under a pinned calendar', async () => {
-        // Given - a frozen `Date`, which a deadline read off the calendar
-        // Would never pass: the poll would run until vitest killed the file
+        // Given - a frozen `Date`, which a deadline read off the calendar would never pass: the poll would run until vitest killed the file
         using _ = clock.at('2026-03-04T09:30:00Z');
 
         // Then - the budget is the condition's, not the calendar's

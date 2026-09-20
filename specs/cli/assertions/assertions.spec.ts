@@ -95,9 +95,7 @@ describe('command — stdout accessor', () => {
         // Given - a run whose output differs from a committed, deliberately-wrong fixture
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('help');
 
-        // Then - the whole -/+ stdout diff is captured and asserted against a golden.
-        // Frozen - stdout-wrong.txt is deliberately wrong (its diff IS the subject); only the
-        // Error golden updates, never the wrong fixture
+        // Then - the whole -/+ stdout diff is captured and asserted against a golden. frozen - stdout-wrong.txt is deliberately wrong (its diff IS the subject); only the error golden updates, never the wrong fixture
         const message = catchMessage(() => {
             expect(result.stdout).toMatch('stdout-wrong.txt', { frozen: true });
         });
@@ -129,8 +127,7 @@ describe('command — stdout accessor', () => {
         // Given - a fixture name that was never created
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('help');
 
-        // Then - the failure explains how to create the fixture
-        // Frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
+        // Then - the failure explains how to create the fixture frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
         expect(() => {
             // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
             expect(result.stdout).toMatch('never-created.txt', { frozen: true });
@@ -159,8 +156,7 @@ describe('command — stdout accessor', () => {
         // Given - a fixture name without extension
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('json');
 
-        // Then - the matcher enforces CONVENTIONS C6
-        // Frozen - a negative assertion; keep it update-safe alongside the rest of the sweep
+        // Then - the matcher enforces CONVENTIONS C6 frozen - a negative assertion; keep it update-safe alongside the rest of the sweep
         expect(() => {
             // oxlint-disable-next-line jterrazz/c6-tomatch-extension, jterrazz/c8-referenced-fixture-exists -- negative spec: the missing extension IS the behaviour under test
             expect(result.stdout).toMatch('no-extension', { frozen: true });
@@ -359,8 +355,7 @@ describe('command — filesystem accessor', () => {
                 delete process.env.TEST_UPDATE;
             }
 
-            // Then - the changed tree fails with a directory diff. Frozen: the fixture written
-            // Above must not be overwritten with the changed tree under TEST_UPDATE
+            // Then - the changed tree fails with a directory diff. Frozen: the fixture written above must not be overwritten with the changed tree under TEST_UPDATE
             const b = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold-changed');
             await expect(
                 expect(b.filesystem).toMatch(fixtureName, { frozen: true }),
@@ -453,8 +448,7 @@ describe('command — transform option', () => {
     });
 
     test('transform only runs on actual, never on fixture', async () => {
-        // Given - a transform that strips the word " plain" (ANSI is already
-        // Stripped by default), and a fixture matching the transformed form
+        // Given - a transform that strips the word " plain" (ANSI is already stripped by default), and a fixture matching the transformed form
         const fixtureName = `transform-asymmetric-${Date.now()}.txt`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
@@ -505,8 +499,7 @@ describe('command — transform option', () => {
 
 describe('command — fixture tree layering', () => {
     test('layers a shared project and a feature-local file tree into the cwd', async () => {
-        // Given - the shared cli-app project spread first, then a feature-local
-        // Tree (spwn.yaml + spwn/agents/…) laid out exactly as the cwd should look
+        // Given - the shared cli-app project spread first, then a feature-local tree (spwn.yaml + spwn/agents/…) laid out exactly as the cwd should look
         const result = await cli
             .fixture('$FIXTURES/cli-app/')
             .fixture('spwn-seed/')
@@ -521,8 +514,7 @@ describe('command — fixture tree layering', () => {
         // Given - the shared cli-app project spread WITHOUT a trailing slash
         const result = await cli.fixture('$FIXTURES/cli-app').exec('help');
 
-        // Then - rsync semantics: the directory is copied under its own name
-        // (cwd/cli-app/…), NOT spread into the cwd
+        // Then - rsync semantics: the directory is copied under its own name (cwd/cli-app/…), NOT spread into the cwd
         expect(result.exitCode).toBe(0);
         expect(result.file('cli-app/cli.sh').exists).toBeTruthy();
         expect(result.file('cli.sh').exists).toBeFalsy();

@@ -18,6 +18,9 @@ import { b4GivenThen } from './rules/b4-given-then.js';
 import { b6wRedundantEnvUrl } from './rules/b6w-redundant-env-url.js';
 import { b8KebabTrigger } from './rules/b8-kebab-trigger.js';
 import { b9wProductCommand } from './rules/b9w-product-command.js';
+import { b10WhenBetweenMarkers } from './rules/b10-when-between-markers.js';
+import { b11MarkerOneLine } from './rules/b11-marker-one-line.js';
+import { b12MarkerBetweenStatements } from './rules/b12-marker-between-statements.js';
 import { c1DomainStructure } from './rules/c1-domain-structure.js';
 import { c2HttpOnlyRequests } from './rules/c2-http-only-requests.js';
 import { c4ContractShape } from './rules/c4-contract-shape.js';
@@ -103,6 +106,9 @@ const plugin: LintPlugin = {
         'a3-no-destructure-alias': a3NoDestructureAlias,
         'a4-cleanup-afterall': a4CleanupAfterall,
         'a9w-redundant-root': a9wRedundantRoot,
+        'b10-when-between-markers': b10WhenBetweenMarkers,
+        'b11-marker-one-line': b11MarkerOneLine,
+        'b12-marker-between-statements': b12MarkerBetweenStatements,
         'b2-known-fixture-marker': b2KnownFixtureMarker,
         'b4-given-then': b4GivenThen,
         'b6w-redundant-env-url': b6wRedundantEnvUrl,

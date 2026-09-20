@@ -70,8 +70,7 @@ describe('seeding details', () => {
 
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
-        // Then - .seed() without a database option violates A7, synchronously
-        // Checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
+        // Then - .seed() without a database option violates A7, synchronously checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
         expect(() => api.seed('one-user.sql')).toThrow(
             'seed(): 2 databases are declared ("analyticsDb", "db") — pass { database: <key> } to target one of them.',
         );

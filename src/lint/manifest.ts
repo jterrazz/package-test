@@ -136,6 +136,39 @@ export const RULE_DOCS = {
             'Detection by convention has to stay the default; an explicit `root` is only justified where it fails.',
         reach: 'specification',
     },
+    'b10-when-between-markers': {
+        channel: 'statique',
+        convention:
+            'A `// When -` marker is optional; written, it sits after `// Given -` and before `// Then -`.',
+        family: 'B',
+        fix: 'Move it to the action it narrates, or drop it when the chain is the action.',
+        id: 'B10',
+        rationale:
+            'The optional marker is the one the order slips on: a `When` above the Given or below the Then tells a story the code does not follow.',
+        reach: 'tests',
+    },
+    'b11-marker-one-line': {
+        channel: 'statique',
+        convention:
+            'A marker is exactly one line: a `//` comment directly under one, at the same indentation, is a wrapped marker and an error.',
+        family: 'B',
+        fix: 'Fold the continuation into the sentence, or separate it with a blank line.',
+        id: 'B11',
+        rationale:
+            'The narration is a sentence about the subject; a paragraph hides its second half from every reader that only looks at the marker line.',
+        reach: 'tests',
+    },
+    'b12-marker-between-statements': {
+        channel: 'statique',
+        convention:
+            'A marker sits between statements: one inside a `const a = …, b = …` declarator chain is an error.',
+        family: 'B',
+        fix: 'Split the declaration so the marker sits between two statements.',
+        id: 'B12',
+        rationale:
+            'A marker inside a statement opens a section with no body, and the offsets that judge the order read a narrative the reader cannot see.',
+        reach: 'tests',
+    },
     'b2-known-fixture-marker': {
         channel: 'statique',
         convention:

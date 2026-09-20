@@ -14,8 +14,7 @@ describe('defineSpecConfig() — artefact paths', () => {
     });
 
     test('gives every inline project the cache dir too', () => {
-        // Given - a config with projects (each is resolved as its own vite config,
-        // Inheriting nothing from the root)
+        // Given - a config with projects (each is resolved as its own vite config, inheriting nothing from the root)
         const config = defineSpecConfig({
             test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
         });
@@ -75,8 +74,7 @@ describe('defineSpecConfig() — what the consumer states wins', () => {
         // Given - a config excluding one heavy spec
         const config = defineSpecConfig({ test: { exclude: ['specs/smoke/**'] } });
 
-        // Then - vite concatenates: the preset's exclusions survive, so a
-        // Consumer never has to spread `configDefaults.exclude` by hand
+        // Then - vite concatenates: the preset's exclusions survive, so a consumer never has to spread `configDefaults.exclude` by hand
         expect(config.test?.exclude).toContain('specs/smoke/**');
         expect(config.test?.exclude).toContain('**/_fixtures/**');
     });

@@ -65,10 +65,8 @@ describe('initiation errors', () => {
         }, 30_000);
 
         test('throws with the init script path and the underlying SQL error', () => {
-            // Given - the captured startup failure (init.sql declares a bogus
-            // TEXTTTT column type)
-            // Then - the error names the failing init script by path AND surfaces
-            // The specific SQL error, not a generic "startup failed" wrapper
+            // Given - the captured startup failure (init.sql declares a bogus TEXTTTT column type)
+            // Then - the error names the failing init script by path AND surfaces the specific SQL error, not a generic "startup failed" wrapper
             expect(caught?.message).toContain('init script failed');
             expect(caught?.message).toContain('postgres/init.sql');
             expect(caught?.message.toLowerCase()).toContain('textttt');
@@ -77,9 +75,7 @@ describe('initiation errors', () => {
 
         test('error report shows the failed service, named after its record key', () => {
             // Given - the captured startup report
-            // Then - formatted report includes failure markers AND the unique
-            // Failing line (the SQL type error) so the report pinpoints the cause,
-            // Not just that some init failed
+            // Then - formatted report includes failure markers AND the unique failing line (the SQL type error) so the report pinpoints the cause, not just that some init failed
             expect(output).toContain('INFRA');
             expect(output).toContain('Starting infrastructure...');
             expect(output).toContain('postgres (db)');
@@ -128,9 +124,7 @@ describe('initiation errors', () => {
         let output: string;
 
         beforeAll(async () => {
-            // Given - db (ok init) + brokenDb (bad init) — start once. Insertion
-            // Order matters: db must be wired (and succeed) before brokenDb fails,
-            // And the kebab-case of each key names the folder its init sits in.
+            // Given - db (ok init) + brokenDb (bad init) — start once. Insertion order matters: db must be wired (and succeed) before brokenDb fails, and the kebab-case of each key names the folder its init sits in.
             ({ failure: caught, output } = await startAndCapture(BROKEN_SECOND_POSTGRES, {
                 db: postgres(),
                 brokenDb: postgres(),

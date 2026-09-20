@@ -40,8 +40,7 @@ describe('specsAnchor', () => {
         // Given - a test at facet/domain depth
         const file = join(project, 'specs', 'api', 'requests', 'headers.test.ts');
 
-        // Then - the anchor is the specs dir, and the relative segments are
-        // [facet, domain, basename] — the depth C1 measures
+        // Then - the anchor is the specs dir, and the relative segments are [facet, domain, basename] — the depth C1 measures
         const anchor = specsAnchor(file);
         expect(anchor?.directory).toBe(join(project, 'specs'));
         expect(anchor?.relative).toStrictEqual(['api', 'requests', 'headers.test.ts']);
@@ -57,9 +56,7 @@ describe('specsAnchor', () => {
     });
 
     test('takes the NEAREST specs ancestor, not the outermost', () => {
-        // Given - a fixture project nested inside the repo's own specs tree — the
-        // Exact shape where C1 (lastIndexOf) and F3 (indexOf) used to disagree,
-        // Reading one file as two different facets
+        // Given - a fixture project nested inside the repo's own specs tree — the exact shape where C1 (lastIndexOf) and F3 (indexOf) used to disagree, reading one file as two different facets
         const file = join(nested, 'integrations', 'adapter.test.ts');
 
         // Then - one answer: the innermost tree owns the file
@@ -69,9 +66,7 @@ describe('specsAnchor', () => {
     });
 
     test('stops at the package root — a checkout under ~/specs/ is not a specs tree', () => {
-        // Given - the package cloned inside a directory that happens to be named
-        // `specs` (the hazard: a bare "is `specs` a segment" test matched it, and
-        // F2 then stopped protecting this repo's production code entirely)
+        // Given - the package cloned inside a directory that happens to be named `specs` (the hazard: a bare "is `specs` a segment" test matched it, and F2 then stopped protecting this repo's production code entirely)
         const file = join(underSpecs, 'src', 'app.ts');
 
         // Then - the search never climbs past the package's own package.json
@@ -96,8 +91,7 @@ describe('specsAnchor', () => {
     });
 
     test('answers for a path with no package.json anywhere above it', () => {
-        // Given - a filename that exists only as a string (how the rule testers
-        // Address the rules, and how a virtual/in-memory file arrives)
+        // Given - a filename that exists only as a string (how the rule testers address the rules, and how a virtual/in-memory file arrives)
         const file = '/nowhere/repo/specs/lint/hygiene/j5.test.ts';
 
         // Then - the walk simply runs out of ancestors, and the specs dir wins

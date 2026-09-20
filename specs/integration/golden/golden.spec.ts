@@ -31,8 +31,7 @@ describe('integration — a table of cases, one golden each', () => {
         // Given - a call whose return type the chain already knows
         const result = await integration.call(() => ({ ok: true, seen: 3 }));
 
-        // Then - `.call<T>()` carries T through, so the field is read inline
-        // Rather than frozen into a file for the sake of one boolean
+        // Then - `.call<T>()` carries T through, so the field is read inline rather than frozen into a file for the sake of one boolean
         expect(result.value.value.ok).toBe(true);
         expect(result.value.value.seen).toBe(3);
     });

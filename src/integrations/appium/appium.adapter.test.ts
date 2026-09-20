@@ -85,8 +85,7 @@ function tapTheAbsent(adapter: AppiumAdapter): { error?: Error; settled: Promise
 
 describe('appium adapter — the declared timeouts', () => {
     test('waits the declared action timeout, not the framework default', async () => {
-        // Given - a runner declaring 45s, because its dev-mode cold boot
-        // Outlasts the 30s default
+        // Given - a runner declaring 45s, because its dev-mode cold boot outlasts the 30s default
         const { adapter } = await openedAdapter({ action: 45_000 });
         vi.useFakeTimers();
         try {

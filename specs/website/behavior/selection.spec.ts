@@ -21,8 +21,7 @@ test('names an option of a field, and which one the field is on', async () => {
         await visitor.gone(channelIs('X'));
     });
 
-    // Then - an option is answered by presence, never by a box on the screen,
-    // And the selection is in the tree the page hands back
+    // Then - an option is answered by presence, never by a box on the screen, and the selection is in the tree the page hands back
     expect(result.tree).toContain('option "LinkedIn" [selected]');
 });
 
@@ -34,8 +33,7 @@ test('says what a field holds, which no accessibility tree carries', async () =>
         await visitor.see(valued(field('Email'), 'visitor@site.test'));
     });
 
-    // Then - a tree carries a field's value too, so the modifier is not the
-    // Only way to read one: it is how the ONE field a test is about is waited for
+    // Then - a tree carries a field's value too, so the modifier is not the only way to read one: it is how the ONE field a test is about is waited for
     expect(result.tree).toContain('visitor@site.test');
     await expect(result.errors).toBeEmpty();
 });

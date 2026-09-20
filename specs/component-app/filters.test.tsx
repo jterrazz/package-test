@@ -41,9 +41,7 @@ test('carries every filter the visitor set into the summary it reports', async (
 });
 
 test('takes the summary off the screen when the visitor clears it', async () => {
-    // Given - a summary on screen, then cleared. The descriptor names the line
-    // WHOLE: a name designates the accessible name entire since 16.0, and
-    // `content('Showing everything')` would have answered to a prefix of it
+    // Given - a summary on screen, then cleared. The descriptor names the line WHOLE: a name designates the accessible name entire since 16.0, and `content('Showing everything')` would have answered to a prefix of it
     const summary = content('Showing everything · published · newest');
     const result = await component.render(<Filters onApply={vi.fn<Apply>()} />, async (visitor) => {
         await visitor.click(button('Apply'));
@@ -66,8 +64,7 @@ test('names the options a field offers, and the one it is on', async () => {
         await visitor.gone(sortedBy('Newest'));
     });
 
-    // Then - the tree carries the selection the verbs answered about; not one
-    // Of those options ever had a box on the screen to be seen through
+    // Then - the tree carries the selection the verbs answered about; not one of those options ever had a box on the screen to be seen through
     expect(result.tree).toContain('option "Oldest" [selected]');
     await expect(result.errors).toBeEmpty();
 });

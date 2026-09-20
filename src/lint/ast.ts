@@ -1,7 +1,7 @@
 import { basename, dirname, join } from 'node:path';
 
 import { isFile } from './fs-cache.js';
-import type { AstNode } from './types.js';
+import type { AstNode, Comment } from './types.js';
 
 /**
  * Shared AST helpers for the rule files. Everything here is pure and
@@ -175,8 +175,11 @@ export function walk(root: AstNode, visit: (node: AstNode) => void): void {
     }
 }
 
+/** Anything the source positions a rule can ask about — a node or a comment. */
+type Positioned = AstNode | Comment;
+
 /** The source start offset of a node or comment (oxlint `start`, else `range[0]`). */
-export function nodeStart(node: undefined | { range?: unknown; start?: unknown }): number {
+export function nodeStart(node: Positioned | undefined): number {
     if (node === undefined) {
         return -1;
     }
@@ -290,6 +293,18 @@ export function child(node: AstNode | undefined, key: string): AstNode | undefin
     return isNode(value) ? value : undefined;
 }
 
+/**
+ * A node's child LIST by key — the nodes of it, and nothing else.
+ *
+ * `arguments`, `declarations`, `body`: every rule reaches for one of them, and
+ * the node shape types them as `unknown`, so each reach was an assertion of its
+ * own. One guarded read answers them all.
+ */
+export function childList(node: AstNode | undefined, key: string): AstNode[] {
+    const value = node?.[key];
+    return Array.isArray(value) ? value.filter((item) => isNode(item)) : [];
+}
+
 /** The name of an identifier node, or `undefined` for anything else. */
 export function identifierName(node: AstNode | undefined): string | undefined {
     if (node?.type !== 'Identifier') {
@@ -297,4 +312,68 @@ export function identifierName(node: AstNode | undefined): string | undefined {
     }
     const { name } = node;
     return typeof name === 'string' ? name : undefined;
+}
+
+/** The source end offset of a node or comment (oxlint `end`, else `range[1]`). */
+export function nodeEnd(node: Positioned | undefined): number {
+    if (node === undefined) {
+        return -1;
+    }
+    if (typeof node.end === 'number') {
+        return node.end;
+    }
+    const range = node.range as number[] | undefined;
+    return Array.isArray(range) && typeof range[1] === 'number' ? range[1] : -1;
+}
+
+/** The three words a test narrates with, in the order they may appear. */
+export const MARKERS = ['Given', 'When', 'Then'] as const;
+
+/** One of the three narration words. */
+export type Marker = (typeof MARKERS)[number];
+
+/**
+ * The marker a comment opens on, or `undefined` for an ordinary comment.
+ *
+ * One reader for the three rules that judge the narration (B4's presence and
+ * order, B10's `When`, B11's one line, B12's placement): the shape `// Given -`
+ * is a fact about the dialect, and a second copy of it would be a second
+ * dialect the day someone widened one of them.
+ */
+export function markerOf(comment: Comment): Marker | undefined {
+    const text = comment.value.trimStart();
+    return MARKERS.find((marker) => text.startsWith(`${marker} -`));
+}
+
+/** A marker comment and where it sits in the source. */
+export type MarkerComment = { comment: Comment; marker: Marker; start: number };
+
+/**
+ * Every marker comment among `comments`, in source order.
+ *
+ * A comment whose offset this oxlint build does not expose keeps its place in
+ * the list with `start: -1`: PRESENCE is readable without offsets, and only the
+ * ordering passes need them — a marker dropped for want of a number would read
+ * as a marker the author never wrote.
+ */
+export function markerComments(comments: Comment[]): MarkerComment[] {
+    const found: MarkerComment[] = [];
+    for (const comment of comments) {
+        const marker = markerOf(comment);
+        if (marker !== undefined) {
+            found.push({ comment, marker, start: nodeStart(comment) });
+        }
+    }
+    return found.toSorted((a, b) => a.start - b.start);
+}
+
+/** Is the marker written at all? */
+export function hasMarker(markers: MarkerComment[], marker: Marker): boolean {
+    return markers.some((found) => found.marker === marker);
+}
+
+/** The first offset a marker appears at, or `-1` when it is absent or unplaced. */
+export function firstMarkerAt(markers: MarkerComment[], marker: Marker): number {
+    const found = markers.find((entry) => entry.marker === marker && entry.start >= 0);
+    return found?.start ?? -1;
 }

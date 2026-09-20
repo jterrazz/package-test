@@ -21,8 +21,7 @@ describe('checker CLI — the member pass', () => {
         // Given - a member with a config and only optional peers declared
         const result = await cli.exec(`--member ${member('clean')} ${WORKSPACE}`);
 
-        // Then - the run is clean, says which member it judged, and names the
-        // Passes that actually ran — never the tree ones, which walked nothing
+        // Then - the run is clean, says which member it judged, and names the passes that actually ran — never the tree ones, which walked nothing
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('packages/clean');
         expect(result.stdout).toContain(

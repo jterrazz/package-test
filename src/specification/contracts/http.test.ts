@@ -211,8 +211,7 @@ describe('http — responses', () => {
         // Given - the collection declared unreachable
         const response = http.unreachable();
 
-        // Then - nothing is served: the request itself fails, as it does when
-        // Nothing is listening. A 503 would test the other branch entirely.
+        // Then - nothing is served: the request itself fails, as it does when nothing is listening. A 503 would test the other branch entirely.
         expect(response).toStrictEqual({ body: null, transport: 'network-error' });
     });
 

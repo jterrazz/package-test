@@ -30,8 +30,7 @@ describe('the member pass — what a workspace member owes', () => {
     });
 
     test("a root whose only tests are its members' owes no config (E3)", () => {
-        // Given - a workspace root that delegates `test` and holds no test file
-        // Of its own, while `packages/clean` holds one
+        // Given - a workspace root that delegates `test` and holds no test file of its own, while `packages/clean` holds one
         // Then - the root is silent: the walk stops at the next package.json
         expect(codes(WORKSPACE)).toStrictEqual([]);
     });
@@ -47,12 +46,10 @@ describe('the member pass — what a workspace member owes', () => {
     });
 
     test('a dependency the framework carries, and a seam it replaced (F8)', () => {
-        // Given - a member declaring msw, a testing-library package, and the
-        // Optional peer a consumer declares on purpose
+        // Given - a member declaring msw, a testing-library package, and the optional peer a consumer declares on purpose
         const found = checkMember(memberAt('seam-dependency'), WORKSPACE);
 
-        // Then - the two are named, each by what it actually is, and
-        // Playwright - an optional peer a consumer declares - is not
+        // Then - the two are named, each by what it actually is, and playwright - an optional peer a consumer declares - is not
         expect(found.map((violation) => violation.rule)).toStrictEqual(['f8', 'f8']);
         expect(found[0]?.message).toContain('@testing-library/react');
         expect(found[0]?.message).toContain('is a seam `@jterrazz/test` replaced');
@@ -84,8 +81,7 @@ describe('the member pass — what a workspace member owes', () => {
         // Given - a workspace whose root declares `packages/*`
         const members = discoverMembers(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
 
-        // Then - every package a glob claims is there, at whatever depth the
-        // Pattern reaches, and so is the root itself
+        // Then - every package a glob claims is there, at whatever depth the pattern reaches, and so is the root itself
         expect(members.toSorted()).toStrictEqual([
             WORKSPACE,
             'apps/site/packages/nested',

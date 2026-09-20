@@ -38,14 +38,12 @@ describe('lint — c1-domain-structure (CONVENTIONS C1)', () => {
     });
 
     test('accepts a ground module carrying its own unit test beside it', async () => {
-        // Given - the same compliant project, whose ground is CODE:
-        // Specs/widget/_binary/binary.ts with binary.test.ts next to it (I2)
+        // Given - the same compliant project, whose ground is CODE: specs/widget/_binary/binary.ts with binary.test.ts next to it (I2)
         const result = await cli
             .fixture('$FIXTURES/lint-violations/c1-domain-structure-ok/')
             .exec('.');
 
-        // Then - the pairing is legal in ground, so nothing is reported and no
-        // Project has to switch a clause off that no project may switch off
+        // Then - the pairing is legal in ground, so nothing is reported and no project has to switch a clause off that no project may switch off
         expect(result.exitCode).toBe(0);
         expect(result.stdout).not.toContain('binary.test.ts');
     });

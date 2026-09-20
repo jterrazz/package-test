@@ -90,8 +90,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
     });
 
     test('a served stub answers out of the workdir the document laid down', async () => {
-        // Given - the stub reads TEST_WORKDIR: run 1 echoes it, run 2 serves
-        // The file the document's `fixture:` put there
+        // Given - the stub reads TEST_WORKDIR: run 1 echoes it, run 2 serves the file the document's `fixture:` put there
         const result = await cli.run('served-workdir.spec.yaml');
 
         // Then - the answer came off disk, from the very cwd the runs share
@@ -194,8 +193,7 @@ describe('spec documents — refusals', () => {
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
-        // Given - a contains that does not, an absent that is there, and a
-        // Missing file that should exist
+        // Given - a contains that does not, an absent that is there, and a missing file that should exist
         const message = await failureOf(
             cli.run('_fixtures/wrong-files.spec.yaml', { frozen: true }),
         );
@@ -208,8 +206,7 @@ describe('spec documents — refusals', () => {
         // Given - a golden whose run is deliberately wrong
         const error = await errorOf(cli.run('_fixtures/wrong-stdout.spec.yaml', { frozen: true }));
 
-        // Then - no engine frames, no generated-module frame: the `command:`
-        // Line, which is what the message names too
+        // Then - no engine frames, no generated-module frame: the `command:` line, which is what the message names too
         expect(frames(error)).toStrictEqual([
             `at ${resolve(import.meta.dirname, '_fixtures/wrong-stdout.spec.yaml')}:3:1`,
         ]);
@@ -329,8 +326,7 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
     });
 
     test('a mid-file insertion keeps the tokens of the lines it shifted', async () => {
-        // Given - a golden whose token line sits above the line a new command
-        // Adds; the update must recognise it where it landed, not by index
+        // Given - a golden whose token line sits above the line a new command adds; the update must recognise it where it landed, not by index
         const path = scratchFile(
             [
                 'description: survives a new line appearing above a token',
@@ -381,15 +377,12 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
             delete process.env.TEST_UPDATE;
         }
 
-        // Then - the wrong assertion is still there: an update refreshes the
-        // Streams and the exit code, and nothing a human decided
+        // Then - the wrong assertion is still there: an update refreshes the streams and the exit code, and nothing a human decided
         expect(readFileSync(path, 'utf8')).toContain('out/main.go: { contains: package rust }');
     });
 
     test('an update that changes nothing gives the file back byte for byte', async () => {
-        // Given - a true golden, spelled the way the repository formatter
-        // Spells it: a padded flow mapping, an unpadded flow sequence, one
-        // Broken over lines, and a comment
+        // Given - a true golden, spelled the way the repository formatter spells it: a padded flow mapping, an unpadded flow sequence, one broken over lines, and a comment
         const source = [
             '# the ground of the case',
             'description: rewrites nothing when nothing moved',
@@ -417,8 +410,7 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
             delete process.env.TEST_UPDATE;
         }
 
-        // Then - not one byte moved: a rewrite restates the streams, and a
-        // Collection it never read is not the writer's to restyle
+        // Then - not one byte moved: a rewrite restates the streams, and a collection it never read is not the writer's to restyle
         expect(readFileSync(path, 'utf8')).toBe(source);
     });
 

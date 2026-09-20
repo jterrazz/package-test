@@ -49,8 +49,7 @@ describe('yaml document — a block scalar states its indentation', () => {
         const text = '    deeply indented\nback\n';
         const rendered = rewritten(4, text);
 
-        // Then - the indicator still names the document's step; the value's own
-        // Spaces are content and come back with it
+        // Then - the indicator still names the document's step; the value's own spaces are content and come back with it
         expect(rendered).toContain('stdout: |4\n');
         expect(readBack(rendered)).toBe(text);
     });
@@ -103,8 +102,7 @@ const FORMATTED = [
 
 describe('yaml document — a rewrite leaves alone what it did not change', () => {
     test('a document nobody edited comes back byte for byte', () => {
-        // Given - unpadded flow sequences, a padded flow mapping, one broken
-        // Over several lines, and a comment
+        // Given - unpadded flow sequences, a padded flow mapping, one broken over several lines, and a comment
         const source = parseYamlSource(FORMATTED);
 
         // Then - the render is the file, not the writer's house style
@@ -120,8 +118,7 @@ describe('yaml document — a rewrite leaves alone what it did not change', () =
         const rendered = renderYamlSource(source);
         expect(rendered).toContain('      stdout: |\n          Scaffolded\n');
 
-        // Then - and every collection it did not touch is untouched, padding,
-        // Quotes and line breaks included
+        // Then - and every collection it did not touch is untouched, padding, quotes and line breaks included
         expect(rendered).toContain("out/docs/README.md: { contains: ['# Docs', 'second needle'] }");
         expect(rendered).toContain(
             [

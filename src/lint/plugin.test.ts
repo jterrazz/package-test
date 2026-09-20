@@ -56,10 +56,7 @@ const CLI_CONTRACT_SPECS = new Set(['checker-cli', 'kitchen-sink', 'member-pass'
 
 describe('the composable fragment — what a consumer wires', () => {
     test('`testing` is an oxlint config, so compose(<profile>, testing) needs no assertion', () => {
-        // Given - the fragment as a consumer's oxlint.config.ts receives it. The
-        // Annotation IS the test: an inferred `rules` widens each severity to
-        // `string`, which oxlint's closed union refuses, and this line stops
-        // Compiling — no consumer should need `testing as OxlintConfig`.
+        // Given - the fragment as a consumer's oxlint.config.ts receives it. The annotation IS the test: an inferred `rules` widens each severity to `string`, which oxlint's closed union refuses, and this line stops compiling — no consumer should need `testing as OxlintConfig`.
         const composed: OxlintConfig = testing;
 
         // Then - it carries the plugin wiring and the whole catalogue
@@ -89,8 +86,7 @@ describe('conventions catalogue — generation freshness (meta-test)', () => {
             }
         }
 
-        // Then - each resolves to a row: a message that links nowhere is worse
-        // Than one that links to the chapter, because it reads as a route
+        // Then - each resolves to a row: a message that links nowhere is worse than one that links to the chapter, because it reads as a route
         expect(links.size).toBeGreaterThan(0);
         for (const id of links) {
             expect(generated, `dead anchor docs/13-linting.md#${id}`).toContain(anchor(id));
@@ -143,18 +139,14 @@ describe('conventions catalogue — completeness (meta-test)', () => {
     test('runtime and process manifest entries are documented (convention + rationale)', () => {
         // Given - the review-borne / execution-time channels
         for (const entry of [...RUNTIME_RULES, ...PROCESS_RULES]) {
-            // Then - each carries non-empty normative text and a rationale (its "implementation"
-            // Is the framework runtime or human review — documented here, not a lint rule)
+            // Then - each carries non-empty normative text and a rationale (its "implementation" is the framework runtime or human review — documented here, not a lint rule)
             expect(entry.convention.length, `${entry.name} convention`).toBeGreaterThan(0);
             expect(entry.rationale.length, `${entry.name} rationale`).toBeGreaterThan(0);
         }
     });
 
     test('k5 — no catalogue sentence has gone back to French', () => {
-        // Given - the tokens the manifest actually carried while it was French.
-        // A deny-list of the KNOWN corpus, not a language heuristic: the point
-        // Is to catch a row being written back in the old language, and a
-        // Heuristic would argue with every borrowed word the domain has
+        // Given - the tokens the manifest actually carried while it was French. A deny-list of the KNOWN corpus, not a language heuristic: the point is to catch a row being written back in the old language, and a heuristic would argue with every borrowed word the domain has
         const FRENCH = [
             'aucun',
             'chaque',
@@ -211,8 +203,7 @@ describe('conventions catalogue — completeness (meta-test)', () => {
     test('every catalogue row states its reach and its fix', () => {
         // Given - the assembled catalogue
         for (const entry of catalog) {
-            // Then - a reader deciding whether a rule applies to the file in
-            // Front of them never has to read its implementation
+            // Then - a reader deciding whether a rule applies to the file in front of them never has to read its implementation
             expect(entry.reach.length, `${entry.name} reach`).toBeGreaterThan(0);
             expect(entry.fix.length, `${entry.name} fix`).toBeGreaterThan(0);
         }
@@ -249,10 +240,8 @@ describe('conventions catalogue — completeness (meta-test)', () => {
 
 describe('testing fragment — standalone oxlint config', () => {
     test('is self-sufficient (no `extends` needed): plugin + every rule + the A4 override', () => {
-        // Given - a consumer NOT using @jterrazz/typescript adopts just the conventions
-        // Via `export default testing` — the fragment must be a COMPLETE oxlint config
-        // Then - it registers the tool-facing plugin, enables every shipped rule, and
-        // Ships the one override the A4 idiom needs — without pulling in any base preset
+        // Given - a consumer NOT using @jterrazz/typescript adopts just the conventions via `export default testing` — the fragment must be a COMPLETE oxlint config
+        // Then - it registers the tool-facing plugin, enables every shipped rule, and ships the one override the A4 idiom needs — without pulling in any base preset
         expect(testing.jsPlugins).toContain('@jterrazz/test/oxlint');
         expect(testing.rules).toBe(recommendedRules);
         expect(Object.keys(recommendedRules)).toStrictEqual(
@@ -264,16 +253,13 @@ describe('testing fragment — standalone oxlint config', () => {
     });
 
     test('declares no `categories` — every rule it ships is decided by name', () => {
-        // Given - the fragment, top level and every override entry
-        // (the `categories` block in specs/_fixtures/lint-cli/oxlint.e2e.json is a
-        // Test harness muting oxlint's own defaults, not a config this package ships)
+        // Given - the fragment, top level and every override entry (the `categories` block in specs/_fixtures/lint-cli/oxlint.e2e.json is a test harness muting oxlint's own defaults, not a config this package ships)
         const layers: Record<string, unknown>[] = [
             testing as unknown as Record<string, unknown>,
             ...((testing.overrides ?? []) as unknown as Record<string, unknown>[]),
         ];
 
-        // Then - none of them opens a category: a category turns on rules nobody
-        // Decided, and composing it over a base preset silently re-enables them
+        // Then - none of them opens a category: a category turns on rules nobody decided, and composing it over a base preset silently re-enables them
         for (const layer of layers) {
             expect('categories' in layer).toBeFalsy();
         }
@@ -282,10 +268,7 @@ describe('testing fragment — standalone oxlint config', () => {
     test('the only `warn` levels are the advisory `w` channel', () => {
         // Given - each rule the fragment enables (its `rules` IS this map, above)
         for (const [id, level] of Object.entries(recommendedRules)) {
-            // Then - `warn` belongs to the redundancy heuristics (`<family><n>w-…`)
-            // And nothing else; every hard convention is an error. The estate's
-            // Rulebook has no warn tier — this package's `w` channel is its one
-            // Documented exception (see the manifest's statique channel note)
+            // Then - `warn` belongs to the redundancy heuristics (`<family><n>w-…`) and nothing else; every hard convention is an error. The estate's rulebook has no warn tier — this package's `w` channel is its one documented exception (see the manifest's statique channel note)
             const advisory = /^jterrazz\/\w+w-/u.test(id);
             expect(level, `${id} is ${level}`).toBe(advisory ? 'warn' : 'error');
         }
@@ -294,9 +277,7 @@ describe('testing fragment — standalone oxlint config', () => {
     test('its overrides add a layer instead of replacing one', () => {
         // Given - each override entry of the fragment
         for (const entry of testing.overrides ?? []) {
-            // Then - it is scoped by `files` and carries `rules` only, so a profile
-            // Already holding its own overrides (v10 puts the `vitest` plugin on the
-            // Test globs that way) keeps them: oxlint concatenates the arrays
+            // Then - it is scoped by `files` and carries `rules` only, so a profile already holding its own overrides (v10 puts the `vitest` plugin on the test globs that way) keeps them: oxlint concatenates the arrays
             expect(entry.files.length).toBeGreaterThan(0);
             expect(Object.keys(entry).sort()).toStrictEqual(['files', 'rules']);
         }
@@ -337,14 +318,12 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
     });
 
     test('the E2E lint config (oxlint.e2e.json) enables exactly the shipped rule set', () => {
-        // Given - the standalone oxlint config the checker E2E specs lint their
-        // Violation fixtures with
+        // Given - the standalone oxlint config the checker E2E specs lint their violation fixtures with
         const config = JSON.parse(read('specs/_fixtures/lint-cli/oxlint.e2e.json')) as {
             rules: Record<string, unknown>;
         };
 
-        // Then - its rule keys match recommendedRules exactly: no rule ships without
-        // An E2E lint pass, and no stale rule lingers in the fixture config
+        // Then - its rule keys match recommendedRules exactly: no rule ships without an E2E lint pass, and no stale rule lingers in the fixture config
         expect(Object.keys(config.rules).sort()).toStrictEqual(
             Object.keys(recommendedRules).sort(),
         );

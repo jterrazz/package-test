@@ -65,8 +65,7 @@ describe('builder — exec argument validation', () => {
         // Given - a builder with no particular config
         const builder = new SpecificationBuilder({}, import.meta.dirname);
 
-        // Then - an empty command sequence is a usage error: `.exec()` answers a
-        // Promise, so the refusal arrives as a rejection, not a synchronous throw
+        // Then - an empty command sequence is a usage error: `.exec()` answers a promise, so the refusal arrives as a rejection, not a synchronous throw
         await expect(builder.exec([])).rejects.toThrow('exec([]) requires at least one command');
     });
 
@@ -395,8 +394,7 @@ describe('builder — service env injection', () => {
 
         await cli.exec('run');
 
-        // Then - the dash becomes an underscore, and the single SQL database
-        // Also gets the unambiguous DATABASE_URL alias
+        // Then - the dash becomes an underscore, and the single SQL database also gets the unambiguous DATABASE_URL alias
         expect(command.lastEnv?.DB_MAIN_URL).toBe('file:main.sqlite');
         expect(command.lastEnv?.DATABASE_URL).toBe('file:main.sqlite');
     });
@@ -411,8 +409,7 @@ describe('builder — the calendar in compose mode', () => {
                 'container — assert the stamp with a `{{iso8601}}` token instead.',
         });
 
-        // Then - the refusal is the sentence .intercept() gives, at call time:
-        // Silently pinning a calendar nothing under test reads is the failure
+        // Then - the refusal is the sentence .intercept() gives, at call time: silently pinning a calendar nothing under test reads is the failure
         expect(() => api.clock('2026-03-04T09:30:00Z')).toThrow(
             "the calendar it pins is this runner's",
         );

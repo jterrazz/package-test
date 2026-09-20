@@ -12,13 +12,11 @@ const tokenAware = (expected: string, actual: string): boolean =>
 
 describe('formatStdoutDiff — only the real cause is marked', () => {
     test('a token line that matched renders as equal, keeping its token', () => {
-        // Given - a golden whose first line is a {{url}} the run satisfied, and
-        // Whose second line is the genuine mismatch
+        // Given - a golden whose first line is a {{url}} the run satisfied, and whose second line is the genuine mismatch
         const expected = 'backend {{url}}\nstatus ready';
         const actual = 'backend http://127.0.0.1:63810/mcp\nstatus degraded';
 
-        // Then - the url line is unmarked and shows the TOKEN; only the status
-        // Line carries the - / + pair
+        // Then - the url line is unmarked and shows the TOKEN; only the status line carries the - / + pair
         const lines = plain(formatStdoutDiff('stdout', expected, actual, { equals: tokenAware }));
         expect(lines).toContain('  backend {{url}}');
         expect(lines).toContain('- status ready');
@@ -37,8 +35,7 @@ describe('formatStdoutDiff — only the real cause is marked', () => {
     });
 
     test('a diff that would mark nothing falls back to strict rendering', () => {
-        // Given - two texts every line of which the token-aware pass accepts,
-        // Which happens when the real cause is a cross-line #ref conflict
+        // Given - two texts every line of which the token-aware pass accepts, which happens when the real cause is a cross-line #ref conflict
         const lines = plain(
             formatStdoutDiff('stdout', 'id {{int#a}}\nid {{int#a}}', 'id 1\nid 2', {
                 equals: tokenAware,

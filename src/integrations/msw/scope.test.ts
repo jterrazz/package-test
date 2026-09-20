@@ -53,8 +53,7 @@ describe('intercept — the network double in module scope', () => {
     });
 
     test('lets the handlers of a block go when the block ends', async () => {
-        // Given - a block that declared one call and ended, then a second
-        // Block declaring a different one
+        // Given - a block that declared one call and ended, then a second block declaring a different one
         {
             await using _ = await intercept(
                 http.get('https://weather.test/today'),
@@ -74,8 +73,7 @@ describe('intercept — the network double in module scope', () => {
     });
 
     test('refuses a bare request with no response', () => {
-        // Given - a request half handed over alone, as only an untyped caller
-        // Can hand it (the overloads refuse the shape at every typed site)
+        // Given - a request half handed over alone, as only an untyped caller can hand it (the overloads refuse the shape at every typed site)
         // Then - the refusal names both ways to give it its reply
         expect(() => declared(http.get('https://weather.test/today'))).toThrow(
             'a bare request needs its response',

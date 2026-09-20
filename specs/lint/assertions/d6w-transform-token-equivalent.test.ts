@@ -10,8 +10,7 @@ describe('lint — d6w-transform-token-equivalent (CONVENTIONS D6)', () => {
             .fixture('$FIXTURES/lint-violations/d6w-transform-token-equivalent/')
             .exec('.');
 
-        // Then - oxlint reports the d6w-transform-token-equivalent diagnostic
-        // Warnings do not fail the run - the diagnostic is advisory
+        // Then - oxlint reports the d6w-transform-token-equivalent diagnostic warnings do not fail the run - the diagnostic is advisory
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('d6w-transform-token-equivalent');
     });

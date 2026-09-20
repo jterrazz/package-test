@@ -16,8 +16,7 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
     });
 
     test('rejects an unknown token in a document stream, never in its description', async () => {
-        // Given - a <case>.spec.yaml whose description prose AND whose stdout
-        // Golden both spell {{widget}} — only a stream carries the grammar
+        // Given - a <case>.spec.yaml whose description prose AND whose stdout golden both spell {{widget}} — only a stream carries the grammar
         const result = await cli
             .fixture('$FIXTURES/lint-violations/d4-unknown-token-spec/')
             .exec('.');

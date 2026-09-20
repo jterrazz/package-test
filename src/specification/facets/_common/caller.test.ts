@@ -55,8 +55,7 @@ describe('framework frames are recognised by identity', () => {
     });
 
     test("a consumer's own src/core file is a CALLER, not an internal", () => {
-        // Given - an app with its own src/core/, which the substring check
-        // (`filePath.includes('/src/core/')`) read as framework-internal
+        // Given - an app with its own src/core/, which the substring check (`filePath.includes('/src/core/')`) read as framework-internal
         // Then - identity says otherwise: the frame anchors fixture resolution
         expect(isFrameworkFrame(join(app, 'src', 'core', 'container.ts'), framework)).toBeFalsy();
     });
@@ -87,13 +86,10 @@ describe('framework frames are recognised by identity', () => {
     });
 
     test('a module of another facet is a framework frame, from the DEFAULT tree', () => {
-        // Given - a sibling facet's module, judged against the tree this module
-        // Derives from its own location (no explicit frameworkTree)
+        // Given - a sibling facet's module, judged against the tree this module derives from its own location (no explicit frameworkTree)
         const other = resolve(import.meta.dirname, '..', 'api', 'start-api.ts');
 
-        // Then - the whole source layer is the framework, not just this folder:
-        // A stale SOURCE_LOCATION shrinks the tree to `_common/` and every other
-        // Framework frame starts anchoring fixture resolution on itself
+        // Then - the whole source layer is the framework, not just this folder: A stale SOURCE_LOCATION shrinks the tree to `_common/` and every other framework frame starts anchoring fixture resolution on itself
         expect(isFrameworkFrame(other)).toBeTruthy();
     });
 

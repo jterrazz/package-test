@@ -74,8 +74,7 @@ describe('clock — the one time primitive', () => {
         // Given - a scope that already holds the scheduler
         using _ = clock.run('2026-03-04T09:30:00Z');
 
-        // Then - the inner one says so: disposing it would give back the REAL
-        // Clock, not the outer scope's, and end a pin the test still needs
+        // Then - the inner one says so: disposing it would give back the REAL clock, not the outer scope's, and end a pin the test still needs
         expect(() => clock.at('2026-03-05T00:00:00Z')).toThrow('a clock is already pinned');
     });
 });

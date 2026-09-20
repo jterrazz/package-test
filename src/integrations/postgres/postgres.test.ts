@@ -50,8 +50,7 @@ describe('postgres handle', () => {
         const unreachable = postgres();
         unreachable.connectionString = 'postgresql://test:test@localhost:1/test';
 
-        // Then - it rejects, naming the service AND keeping the driver's own
-        // Reason, which survives as the error's cause
+        // Then - it rejects, naming the service AND keeping the driver's own reason, which survives as the error's cause
         const failure = await unreachable
             .healthcheck()
             .then(() => null)

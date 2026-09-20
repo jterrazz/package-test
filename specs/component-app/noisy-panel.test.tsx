@@ -22,7 +22,6 @@ test('scopes through a test id where the container carries no role', async () =>
         await visitor.see(within(testId('panel-body'), content('Panel')));
     });
 
-    // Then - the escape hatch found its anchor, which is an attribute and not
-    // Anything a user can see
+    // Then - the escape hatch found its anchor, which is an attribute and not anything a user can see
     expect(result.html).toContain('data-testid="panel-body"');
 });

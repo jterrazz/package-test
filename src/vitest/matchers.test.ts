@@ -39,8 +39,7 @@ describe('toMatch — native string behavior preserved (D3)', () => {
 
 describe('response update mode — buildUpdatedResponse (CONVENTIONS D5)', () => {
     test('writes only headers present in the actual response (intersection)', () => {
-        // Given - a previous fixture with a matching placeholder, a stale
-        // Value, and a header the response no longer sends
+        // Given - a previous fixture with a matching placeholder, a stale value, and a header the response no longer sends
         const previous = parseResponseFile(
             'HTTP/1.1 200 OK\ncontent-type: {{string}}\nx-stale: old\nx-gone: bye\n\n{ "ok": true }\n',
             'responses/prev.http',
@@ -92,9 +91,7 @@ describe('response update mode — buildUpdatedResponse (CONVENTIONS D5)', () =>
     });
 
     test('meta: a freshly updated fixture passes the next comparison run', () => {
-        // Given - an update-mode write from a previous fixture (placeholders,
-        // Stale header value, dropped header), serialized and re-parsed
-        // Exactly as the matcher does across two runs
+        // Given - an update-mode write from a previous fixture (placeholders, stale header value, dropped header), serialized and re-parsed exactly as the matcher does across two runs
         const previous = parseResponseFile(
             'HTTP/1.1 {{number}}\ncontent-type: {{string}}\nx-stale: old\nx-gone: bye\n\n{ "id": "{{uuid}}", "name": "STALE" }\n',
             'responses/prev.http',
@@ -406,8 +403,7 @@ describe('the hint a missing golden gives names a run that does something', () =
         const testDir = mkdtempSync(join(tmpdir(), 'hint-'));
         const subject = new TextAccessor('out', 'stdout', testDir);
 
-        // Then - the hint names the two things that do work, and not the one
-        // That silently writes nothing: `{ frozen }` IS the no-write switch
+        // Then - the hint names the two things that do work, and not the one that silently writes nothing: `{ frozen }` IS the no-write switch
         expect(() => {
             expect(subject).toMatch('nowhere.txt', { frozen: true });
         }).toThrow('Write the file by hand');
@@ -420,8 +416,7 @@ describe('toMatchRows states the shape it wants before it queries', () => {
     });
 
     test('a bare array of rows is refused by the matcher, not by the adapter', async () => {
-        // Given - a real table subject and the instinctive argument: the rows,
-        // Without the columns the adapter needs to build its SELECT
+        // Given - a real table subject and the instinctive argument: the rows, without the columns the adapter needs to build its SELECT
         const subject = new TableAccessor('MapPoi', {
             query: async () => await Promise.resolve([]),
             reset: async () => {
@@ -434,8 +429,7 @@ describe('toMatchRows states the shape it wants before it queries', () => {
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the wrong shape IS the subject: the guard exists for the call the types already refuse
         const pending = expect(subject).toMatchRows([{ id: 1 }] as never);
 
-        // Then - the refusal names the matcher and the shape, rather than
-        // Surfacing as a TypeError from inside SQL generation
+        // Then - the refusal names the matcher and the shape, rather than surfacing as a TypeError from inside SQL generation
         await expect(pending).rejects.toThrow('toMatchRows takes { columns, rows }');
     });
 });

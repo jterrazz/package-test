@@ -11,8 +11,7 @@ import { fixSpecDocument } from './checker-spec.js';
 
 describe('fixSpecDocument — key order and block scalars', () => {
     test('moves the keys back into the canonical order, each with its comment', () => {
-        // Given - a document whose runs sit above its description, and whose
-        // Exit follows its stdout
+        // Given - a document whose runs sit above its description, and whose exit follows its stdout
         const source = [
             '# the comment above runs',
             'runs:',
@@ -24,8 +23,7 @@ describe('fixSpecDocument — key order and block scalars', () => {
             '',
         ].join('\n');
 
-        // Then - the ground comes first, the run reads given-then-received, and
-        // The comment travels with the key it was written above
+        // Then - the ground comes first, the run reads given-then-received, and the comment travels with the key it was written above
         expect(fixSpecDocument(source, 'case.spec.yaml')).toBe(
             [
                 'description: builds the widget',
@@ -61,9 +59,7 @@ describe('fixSpecDocument — key order and block scalars', () => {
     });
 
     test('a document the repository formatter already styled is left untouched', () => {
-        // Given - canonical keys and block scalars, with the flow collections
-        // Spelled as oxfmt spells them: a padded mapping, an unpadded sequence,
-        // And a long one broken over lines
+        // Given - canonical keys and block scalars, with the flow collections spelled as oxfmt spells them: a padded mapping, an unpadded sequence, and a long one broken over lines
         const source = [
             '# the ground of the case',
             'description: scaffolds the module',
@@ -82,8 +78,7 @@ describe('fixSpecDocument — key order and block scalars', () => {
             '',
         ].join('\n');
 
-        // Then - `null`: the fixer has nothing to say, so the formatter has
-        // Nothing to undo and `lint:fix` converges on the first pass
+        // Then - `null`: the fixer has nothing to say, so the formatter has nothing to undo and `lint:fix` converges on the first pass
         expect(fixSpecDocument(source, 'case.spec.yaml')).toBeNull();
     });
 

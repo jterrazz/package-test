@@ -16,9 +16,7 @@ describe('lint — f1-no-subpath-import (CONVENTIONS F1)', () => {
     });
 
     test('accepts the single public entry point and every published subpath', async () => {
-        // Given - the compliant twin: a spec on the entry point, and a
-        // Vitest.config.ts on `@jterrazz/test/vitest` — a subpath the
-        // Package's own `exports` map publishes
+        // Given - the compliant twin: a spec on the entry point, and a vitest.config.ts on `@jterrazz/test/vitest` — a subpath the package's own `exports` map publishes
         const result = await cli
             .fixture('$FIXTURES/lint-violations/f1-no-subpath-import-ok/')
             .exec('.');

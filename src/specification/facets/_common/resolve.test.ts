@@ -37,8 +37,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
     let base: string;
 
     beforeAll(() => {
-        // Given - <base>/project with a manifest and a nested tests dir,
-        // And <base>/plain with only a package.json
+        // Given - <base>/project with a manifest and a nested tests dir, and <base>/plain with only a package.json
         base = mkdtempSync(resolve(tmpdir(), 'root-discovery-'));
         mkdirSync(resolve(base, 'project/tests/feature'), { recursive: true });
         writeFileSync(resolve(base, 'project/package.json'), '{"name":"project"}\n');
@@ -94,10 +93,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
     });
 
     test('a workspace package wins over the repository above it (monorepo)', () => {
-        // Given - a manifest at the monorepo root and one in a nested package
-        // (the shape that used to resolve to the repository: a second marker
-        // Was walked first, so the FURTHER one decided and every path the
-        // Runner resolved was measured from the wrong unit)
+        // Given - a manifest at the monorepo root and one in a nested package (the shape that used to resolve to the repository: a second marker was walked first, so the FURTHER one decided and every path the runner resolved was measured from the wrong unit)
         mkdirSync(resolve(base, 'mono'), { recursive: true });
         writeFileSync(resolve(base, 'mono/package.json'), '{"name":"mono"}\n');
         mkdirSync(resolve(base, 'mono/packages/pkg/src'), { recursive: true });

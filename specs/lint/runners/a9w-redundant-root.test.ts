@@ -8,8 +8,7 @@ describe('lint — a9w-redundant-root (CONVENTIONS A9)', () => {
         // Given - a project violating A9
         const result = await cli.fixture('$FIXTURES/lint-violations/a9w-redundant-root/').exec('.');
 
-        // Then - oxlint reports the a9w-redundant-root diagnostic
-        // Warnings do not fail the run - the diagnostic is advisory
+        // Then - oxlint reports the a9w-redundant-root diagnostic warnings do not fail the run - the diagnostic is advisory
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('a9w-redundant-root');
     });

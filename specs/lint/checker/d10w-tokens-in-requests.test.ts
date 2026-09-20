@@ -11,9 +11,7 @@ describe('lint — d10w tokens in requests (CONVENTIONS D10)', () => {
             .fixture('$FIXTURES/lint-violations/d10w-tokens-in-requests/')
             .exec('.');
 
-        // Then - advisory only: the run passes (exit 0) but the full warning is on stderr.
-        // The echoed leaked token is covered by {{string}} — a literal {{uuid}} in the
-        // Golden would itself be read as a placeholder by the token grammar (see D4).
+        // Then - advisory only: the run passes (exit 0) but the full warning is on stderr. the echoed leaked token is covered by {{string}} — a literal {{uuid}} in the golden would itself be read as a placeholder by the token grammar (see D4).
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch('d10w-tokens-in-requests.txt');
     });
