@@ -1,6 +1,16 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { drops, raised, report } from './coverage.js';
+import { BASELINE_FILE, drops, raised, readBaseline, report } from './coverage.js';
+
+/** A throwaway root carrying one written `coverage.baseline.json`. */
+function rootWith(contents: string): string {
+    const root = mkdtempSync(join(tmpdir(), 'coverage-baseline-'));
+    writeFileSync(join(root, BASELINE_FILE), contents);
+    return root;
+}
 
 const floor = { branches: 70, functions: 80, lines: 76, statements: 76 };
 
@@ -55,5 +65,28 @@ describe('the coverage ratchet', () => {
         expect(report('all', floor)).toBe(
             'all: statements 76.00%, branches 70.00%, functions 80.00%, lines 76.00%',
         );
+    });
+
+    test('refuses a floor that is missing a metric', () => {
+        // Given - a baseline whose `all` entry carries branches alone
+        const root = rootWith('{ "all": { "branches": 69.89 } }');
+
+        // Then - it is refused rather than read as three floors of zero, which would forbid nothing
+        expect(() => readBaseline(root)).toThrow(/statements, functions, lines/u);
+    });
+
+    test('reads a complete floor', () => {
+        // Given - a baseline with the four metrics
+        const root = rootWith(
+            '{ "all": { "branches": 1, "functions": 2, "lines": 3, "statements": 4 } }',
+        );
+
+        // Then - the four come back, rounded the way the file records them
+        expect(readBaseline(root).all).toStrictEqual({
+            branches: 1,
+            functions: 2,
+            lines: 3,
+            statements: 4,
+        });
     });
 });

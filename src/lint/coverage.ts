@@ -78,7 +78,14 @@ export function readSummary(root: string): CoverageMetrics | null {
     };
 }
 
-/** The committed floor, or an empty one the first time. */
+/**
+ * The committed floor, or an empty one the first time.
+ *
+ * A scope missing one of the four metrics is REFUSED rather than read as a
+ * zero: a floor of 0 forbids nothing, so a truncated entry would turn the gate
+ * green on a run that should have failed it — the one failure mode a ratchet
+ * must not have.
+ */
 export function readBaseline(root: string): CoverageBaseline {
     const path = resolve(root, BASELINE_FILE);
     if (!existsSync(path)) {
@@ -91,14 +98,22 @@ export function readBaseline(root: string): CoverageBaseline {
     const baseline: CoverageBaseline = {};
     for (const scope of Object.keys(parsed)) {
         const entry: unknown = Reflect.get(parsed, scope);
-        if (typeof entry === 'object' && entry !== null) {
-            baseline[scope] = {
-                branches: percent(Reflect.get(entry, 'branches')),
-                functions: percent(Reflect.get(entry, 'functions')),
-                lines: percent(Reflect.get(entry, 'lines')),
-                statements: percent(Reflect.get(entry, 'statements')),
-            };
+        if (typeof entry !== 'object' || entry === null) {
+            throw new Error(`${BASELINE_FILE}: the \`${scope}\` floor is not an object.`);
         }
+        const missing = METRICS.filter((metric) => typeof Reflect.get(entry, metric) !== 'number');
+        if (missing.length > 0) {
+            throw new Error(
+                `${BASELINE_FILE}: the \`${scope}\` floor has no ${missing.join(', ')} — ` +
+                    'a missing metric is a floor of zero, which forbids nothing. Run `npm run coverage`.',
+            );
+        }
+        baseline[scope] = {
+            branches: percent(Reflect.get(entry, 'branches')),
+            functions: percent(Reflect.get(entry, 'functions')),
+            lines: percent(Reflect.get(entry, 'lines')),
+            statements: percent(Reflect.get(entry, 'statements')),
+        };
     }
     return baseline;
 }
