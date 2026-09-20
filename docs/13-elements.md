@@ -208,7 +208,11 @@ Every named descriptor accepts the option — `button`, `link`, `field`, `headin
 
 Reach for the opt-out only when the name genuinely carries a variable part (a count, a user's name); scope with `within()` when the problem is that the same name appears twice.
 
-**The transitional warning.** Exact-by-default arrived in 16.0, where substring was the rule before it. For 16.0 and 16.1, a descriptor that designates NOTHING as a whole name but WOULD have designated something as a substring prints one line naming itself, the three ways out and this deadline — once per descriptor per run, from the two adapters, at the place W3 already enumerates candidates. It is a runtime warning and not a lint rule on purpose: a verdict fed by a previous run's artefact is not deterministic. After 16.1 the substring fallback is gone and the same descriptor is simply not found.
+**The transitional window.** Exact-by-default arrived in 16.0, where substring was the rule before it. Through 16.x, a descriptor that designates NOTHING as a whole name but WOULD have designated something as a substring is RESOLVED as a substring, once, and prints one line naming itself, the whole name it matched — the spelling to write — the three ways out and this deadline. The line is printed once per descriptor per run, by whichever adapter did the looking: a page's, a mounted component's, a screen's. It is a runtime warning and not a lint rule on purpose: whether a name matched whole or in part is a fact about a RUN, and a verdict fed by a previous run's artefact is not deterministic. In 17.0 the fallback is gone and the same descriptor is simply not found.
+
+The window reaches every LEVEL of a chain, not the target alone: `within(button('Proof of authorship'), content('Verified'))` against a button named "Proof of authorship Verified" fails on the SCOPE, and a window that only ever widened the target left that migration with no line to read at all. The chain is walked outside-in, each level asked the same question, and a level that states its own `exact` is left as the author wrote it.
+
+It costs what a miss costs: the verb waits its full actionability budget before the retry, so a descriptor living on the window is a SLOW passing test. That is the shape of the deal — the run stays green while the names are fixed, and the warning says which ones.
 
 ## `testId()` — the one escape hatch
 

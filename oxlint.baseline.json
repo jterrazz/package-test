@@ -32,7 +32,6 @@
     "promise/param-names": 2,
     "promise/prefer-await-to-callbacks": 1,
     "promise/prefer-await-to-then": 1,
-    "typescript/await-thenable": 2,
     "typescript/consistent-return": 1,
     "typescript/no-base-to-string": 1,
     "typescript/no-deprecated": 6,

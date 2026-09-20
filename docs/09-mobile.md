@@ -116,7 +116,7 @@ test('bookmarks an event from its detail screen', async () => {
     const result = await mobile.open('news://events', async (visitor) => {
         // When - they open the Fauci event and bookmark it
         await visitor.tap(button('Enquête Fauci COVID-19'));
-        await visitor.see(content('rapports'));
+        await visitor.see(content('12 rapports publiés'));
         await visitor.tap(button('Bookmark'));
     });
 
@@ -131,7 +131,7 @@ The element vocabulary is [13 — Elements](13-elements.md)'s, the same one the 
 
 **The verbs are three.** `tap(element)` is the device's word for a click, `fill(element, value)` fills a text field, and `see(element)` is the only synchronization primitive. There is no `gone()` here: the adapter cannot answer honestly for absence on an XCUITest tree. Every verb polls until at least one visible match exists (default 30 s, sized for a cold app boot), then enforces the verb's cardinality; there are no sleeps anywhere in the framework. Actionability includes **scroll-into-view**: when a descriptor matches nothing visible but an off-screen element exists, the adapter scrolls it into view once (directly by element id) and keeps polling — elements buried in very heavy screens (a full-page WebView) may still be out of reach, so prefer a deep link then.
 
-**Four descriptors reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value contains the text) and `testId(id)` (the accessibility identifier, rule W2's escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
+**Four descriptors reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value IS the text — the whole-name default of [13 — Elements](13-elements.md#a-name-designates-the-accessible-name-whole), compiled to `==`; `{ exact: false }` compiles to `CONTAINS`) and `testId(id)` (the accessibility identifier, rule W2's escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
 
 **W3 is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous descriptor and print the candidates with their accessibility identifiers; `see()` does not — [13 — Elements § `see()` and `gone()`](13-elements.md#see-and-gone-are-the-synchronization) says why, once.
 
