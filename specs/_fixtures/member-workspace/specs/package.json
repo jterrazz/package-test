@@ -1,0 +1,5 @@
+{
+    "name": "@fixture/specs-rooted",
+    "private": true,
+    "scripts": { "test": "vitest --run" }
+}

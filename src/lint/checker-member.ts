@@ -413,11 +413,19 @@ const SPECS_DEPTH = 6;
  *
  * A `specs/` tree is never descended into (the fixtures under it are not spec
  * roots), and neither is another package's tree: a directory carrying its own
- * `package.json` belongs to whichever member declares it.
+ * `package.json` belongs to whichever member declares it. A member DIRECTORY
+ * named `specs` is a root of its own — the tree can be the member.
  */
 export function discoverSpecRoots(rootDir: string): string[] {
     const roots = new Set<string>();
     for (const member of discoverMembers(rootDir)) {
+        // A member whose own root IS the tree — a workspace declaring
+        // `packages: ['specs']`. Without this, the run the toolchain merges
+        // Into the ratchet walked no tree at all and the member's facet
+        // Findings were reachable only by naming the path by hand.
+        if (basename(member) === 'specs') {
+            roots.add(member);
+        }
         const walk = (dir: string, depth: number): void => {
             if (depth > SPECS_DEPTH) {
                 return;

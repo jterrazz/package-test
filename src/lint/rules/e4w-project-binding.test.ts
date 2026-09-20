@@ -1,7 +1,20 @@
+import { resolve } from 'node:path';
+
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
 import { e4wProjectBinding } from './e4w-project-binding.js';
 
 const CONFIG = '/repo/vitest.config.ts';
+
+/**
+ * A real config in a real package whose ABSOLUTE path carries a `specs`
+ * segment above it — the shape a checkout under `~/specs/` has, read here from
+ * a fixture that exists on disk so the package boundary is a fact and not a
+ * string.
+ */
+const UNDER_A_SPECS_PATH = resolve(
+    import.meta.dirname,
+    '../../../specs/_fixtures/lint-violations/e4w-project-binding-ok/vitest.config.ts',
+);
 
 ruleTester().run('e4w-project-binding', asOxlintRule(e4wProjectBinding), {
     invalid: [
@@ -38,6 +51,18 @@ ruleTester().run('e4w-project-binding', asOxlintRule(e4wProjectBinding), {
         // `unit` where it belongs.
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'unit', include: ['src/**/*.test.ts'] }] } });`,
+            filename: CONFIG,
+        },
+        // A checkout that lives under a folder called `specs`: the package
+        // Root bounds the search, so `unit` collects its own `src/`.
+        {
+            code: `export default defineSpecConfig({ test: { projects: [{ name: 'unit', include: ['src/**/*.test.ts'] }] } });`,
+            filename: UNDER_A_SPECS_PATH,
+        },
+        // An option spelled `include` that is not a project's — package
+        // Specifiers, never a tree.
+        {
+            code: `export default defineSpecConfig({ optimizeDeps: { include: ['react-dom/client'] }, test: { projects: [{ name: 'api', include: ['specs/api/**/*.spec.ts'] }] } });`,
             filename: CONFIG,
         },
         // A project with no name is the helper's business, not this rule's.

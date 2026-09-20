@@ -1,6 +1,9 @@
-import { dirname, resolve } from 'node:path';
-
-import { facetOfPath, FACETS, projectLiterals, staticPrefix, underSpecs } from '../config-shape.js';
+import {
+    collectedSegments,
+    facetOfSegments,
+    FACETS,
+    projectLiterals,
+} from '../config-shape.js';
 import { RULE_DOCS } from '../manifest.js';
 import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
@@ -16,13 +19,17 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
  *
  * Any other name is out of reach: a repository suite calls its projects what it
  * likes, and `unit` is only asked not to reach inside a specs tree.
+ *
+ * What the include collects is read from the GLOB and the config's own place in
+ * its package, never from the absolute path: a checkout living under a folder
+ * called `specs` collects nothing of the kind.
  */
 export const e4wProjectBinding: LintRule = {
     create(context: RuleContext): Visitor {
         if (roleOf(context.physicalFilename).role !== 'config') {
             return {};
         }
-        const configDirectory = dirname(context.physicalFilename);
+        const config = context.physicalFilename;
         return {
             Program(program: AstNode) {
                 for (const project of projectLiterals(program)) {
@@ -31,8 +38,8 @@ export const e4wProjectBinding: LintRule = {
                     if (name === undefined || first === undefined) {
                         continue;
                     }
-                    const collected = resolve(configDirectory, staticPrefix(first.value));
-                    const facet = facetOfPath(collected);
+                    const collected = collectedSegments(config, first.value);
+                    const facet = facetOfSegments(collected);
                     if (facet !== undefined && name.value !== facet) {
                         context.report({
                             data: { facet, name: name.value },
@@ -49,7 +56,7 @@ export const e4wProjectBinding: LintRule = {
                         });
                         continue;
                     }
-                    if (name.value === 'unit' && underSpecs(collected)) {
+                    if (name.value === 'unit' && collected !== undefined) {
                         context.report({ messageId: 'unitOutsideSpecs', node: first.node });
                     }
                 }

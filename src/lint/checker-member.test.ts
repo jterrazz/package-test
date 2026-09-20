@@ -90,7 +90,22 @@ describe('the member pass — what a workspace member owes', () => {
             'packages/simulated-dom',
             'packages/stray-spec',
             'packages/tested-no-config',
+            'specs',
         ]);
+    });
+
+    test('a member whose own root is the specs tree holds specs, not strays (C12)', () => {
+        // Given - `@fixture/specs-rooted`, a member declared as `specs` (spwn's shape), holding `cli/agent/agent-list.spec.ts`
+        // Then - the member pass reads the tree it IS: nothing is outside a specs tree here
+        expect(codes(resolve(WORKSPACE, 'specs'))).toStrictEqual([]);
+    });
+
+    test('a member whose own root is the specs tree is a specs root (C12/C18/C21w)', () => {
+        // Given - that member run on its own, the way the toolchain runs it
+        const roots = discoverSpecRoots(resolve(WORKSPACE, 'specs'));
+
+        // Then - the tree passes have a tree to walk: the member IS the root
+        expect(roots).toStrictEqual([resolve(WORKSPACE, 'specs')]);
     });
 
     test('a member that nests its facet tree is still a specs root', () => {
@@ -98,7 +113,7 @@ describe('the member pass — what a workspace member owes', () => {
         const roots = discoverSpecRoots(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
 
         // Then - the path-less run walks it, the way the toolchain's own does
-        expect(roots).toStrictEqual(['packages/clean/web/specs']);
+        expect(roots).toContain('packages/clean/web/specs');
     });
 
     test('every member is judged in one run', () => {
@@ -114,5 +129,13 @@ describe('the member pass — what a workspace member owes', () => {
             'f8',
             'f8',
         ]);
+    });
+
+    test('the path-less run reaches a specs-rooted member of the workspace', () => {
+        // Given - the whole fixture workspace, which declares `specs` as a member
+        const roots = discoverSpecRoots(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
+
+        // Then - both trees are walked, the nested one and the member that is one
+        expect(roots.toSorted()).toStrictEqual(['packages/clean/web/specs', 'specs']);
     });
 });
