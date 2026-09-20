@@ -53,6 +53,20 @@ ruleTester.run('j2-no-sleep', j2NoSleep as unknown as OxlintRule, {
             errors: [{ messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
+        // An object literal's implementation ends where the function does: the
+        // Sleep in the test body after it is the test waiting.
+        {
+            code: 'const git: GitPort = { clone: async () => await Promise.resolve() }; await new Promise((resolve) => setTimeout(resolve, 5));',
+            errors: [{ messageId: 'sleep' }],
+            filename: SPEC_FILE,
+        },
+        // A property that is not a function is no implementation: the timer is
+        // The test's own, wherever the object it sits in came from.
+        {
+            code: 'const options = { handle: setTimeout(tick, 5) };',
+            errors: [{ messageId: 'sleep' }],
+            filename: SPEC_FILE,
+        },
     ],
     valid: [
         // Framework-level synchronisation.
@@ -73,6 +87,17 @@ ruleTester.run('j2-no-sleep', j2NoSleep as unknown as OxlintRule, {
         },
         {
             code: 'const port = mockOf<GitPort>({ clone: () => new Promise((resolve) => setTimeout(resolve, 5)) });',
+            filename: SPEC_FILE,
+        },
+        // The plainest double there is: a typed object literal whose methods
+        // ARE the implementation. The object is the double.
+        {
+            code: 'const git: GitGateway = { cloneRepository: async () => await new Promise((resolve) => { setTimeout(resolve, 5); }) };',
+            filename: SPEC_FILE,
+        },
+        // The method shorthand says the same thing.
+        {
+            code: 'const git = { async cloneRepository() { await new Promise((resolve) => { setTimeout(resolve, 5); }); } };',
             filename: SPEC_FILE,
         },
         // Outside specs/ the rule is inert.

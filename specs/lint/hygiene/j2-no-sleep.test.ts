@@ -13,8 +13,8 @@ describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
         expect(result.stdout).toContain('j2-no-sleep');
     });
 
-    test('accepts framework-level synchronisation', async () => {
-        // Given - the compliant twin
+    test('accepts framework-level synchronisation, and a double that settles late', async () => {
+        // Given - the compliant twin: a `waitFor`, and a double written as a plain object literal whose method holds a timer
         const result = await cli.fixture('$FIXTURES/lint-violations/j2-no-sleep-ok/').exec('.');
 
         // Then - clean run, no j2-no-sleep diagnostic

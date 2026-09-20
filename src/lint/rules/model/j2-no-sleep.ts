@@ -30,6 +30,23 @@ function isDoubleImplementation(node: AstNode): boolean {
 }
 
 /**
+ * The FUNCTION a property of an object literal holds, or `undefined`.
+ *
+ * A double is not always built by a factory: the plainest one there is, in a
+ * test file, is an object literal whose properties are the port's methods —
+ * `const git: GitGateway = { cloneRepository: async () => … }`. The object IS
+ * the double, so a timer in one of its methods stages the world exactly as
+ * `vi.fn(() => setTimeout(…))` does, and judging it as the test sleeping asked
+ * an author to remove the very thing under test.
+ */
+function implementationOf(node: AstNode): AstNode | undefined {
+    const value = child(node, 'value');
+    return value?.type === 'ArrowFunctionExpression' || value?.type === 'FunctionExpression'
+        ? value
+        : undefined;
+}
+
+/**
  * CONVENTIONS J2 — a test contains no arbitrary sleep, wherever it sits:
  * synchronisation is `see()`/`gone()` inside a scenario and `waitUntil()`
  * everywhere else. Flags `setTimeout(…)` calls (bare or as a member, e.g.
@@ -45,7 +62,8 @@ function isDoubleImplementation(node: AstNode): boolean {
  * about the ORDER results come back in, which no predicate can state: a
  * `waitUntil` waits for something to become true, while what this test needs is
  * for something to happen late. The test is not the one waiting, so the rule is
- * not about it.
+ * not about it. A double written as a plain object literal is the same thing
+ * said without a factory, and it counts too.
  */
 export const j2NoSleep: LintRule = {
     create(context: RuleContext) {
@@ -60,6 +78,19 @@ export const j2NoSleep: LintRule = {
         const insideADouble = (node: AstNode): boolean =>
             doubles.some((span) => nodeStart(node) >= span.start && nodeEnd(node) <= span.end);
         const visitor: Visitor = {
+            // A function-valued property of an object literal: the object is a
+            // Double, and its methods are implementations. Opened here rather
+            // Than on the object, so a `setTimeout(…)` sitting in a non-function
+            // Property is still the test's own.
+            Property(node: AstNode) {
+                const implementation = implementationOf(node);
+                if (implementation !== undefined) {
+                    doubles.push({
+                        end: nodeEnd(implementation),
+                        start: nodeStart(implementation),
+                    });
+                }
+            },
             CallExpression(node: AstNode) {
                 if (isDoubleImplementation(node)) {
                     doubles.push({ end: nodeEnd(node), start: nodeStart(node) });
