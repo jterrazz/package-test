@@ -37,7 +37,7 @@ The package refuses to guess at its environment, so several things it uses are t
     The peer range names two majors, and 15.2's own suite is green on both ends of it: vitest 4.1.10 with the 4.1.10 provider — the pair this package locks — and vitest 5.0.1 with the 5.0.1 provider, the component and website projects and the seam's module tests run on each.
 
 - **Docker must be running** for the container-backed services. `sqlite()` and plain CLI specs need none.
-- **Node 20 or newer**, as `engines` states.
+- **Node 24 or newer**, as `engines` states — the toolchain's floor, and vitest 5's.
 - **A chromium**, for a page or a component: `npx playwright install chromium`, once. The component facet drives the same browser the website facet does, through the same peer.
 - **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. 15.2's own suite runs on Vite 8.1; the Vite 7 path is exercised by a consumer, not by this package's suite — see [16 — Component specs](16-component.md).
 

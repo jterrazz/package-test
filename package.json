@@ -67,11 +67,7 @@
         "test": "vitest --run"
     },
     "dependencies": {
-        "better-sqlite3": "^12.11.1",
         "msw": "^2.15.0",
-        "pg": "^8.22.0",
-        "redis": "^6.1.0",
-        "testcontainers": "^12.0.4",
         "vitest-mock-extended": "^5.0.0",
         "yaml": "^2.9.0"
     },
@@ -83,26 +79,34 @@
         "@types/pg": "^8.20.0",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
-        "@vitest/browser-playwright": "^4.1.10",
+        "@vitest/browser-playwright": "5.0.1",
+        "better-sqlite3": "^12.11.1",
         "hono": "^4.12.30",
+        "pg": "^8.22.0",
         "playwright": "^1.49.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
         "react-router": "^8.4.0",
+        "redis": "^6.1.0",
+        "testcontainers": "^12.0.4",
         "tsdown": "^0.22.7",
         "vite": "^8.1.4",
-        "vitest": "^4.1.10",
+        "vitest": "5.0.1",
         "vitest-browser-react": "^2.3.0",
         "webdriverio": "^9.30.0"
     },
     "peerDependencies": {
         "@vitest/browser-playwright": "*",
         "appium": "^3.0.0",
+        "better-sqlite3": "^12.11.1",
+        "pg": "^8.22.0",
         "playwright": "^1.49.0",
         "react": "^18 || ^19",
         "react-dom": "^18 || ^19",
+        "redis": "^6.1.0",
+        "testcontainers": "^12.0.4",
         "vite": "^6.4.0 || ^7 || ^8",
-        "vitest": "^4.1.10 || ^5",
+        "vitest": "^5",
         "vitest-browser-react": "^2.3.0",
         "webdriverio": "^9.30.0"
     },
@@ -113,6 +117,12 @@
         "appium": {
             "optional": true
         },
+        "better-sqlite3": {
+            "optional": true
+        },
+        "pg": {
+            "optional": true
+        },
         "playwright": {
             "optional": true
         },
@@ -120,6 +130,12 @@
             "optional": true
         },
         "react-dom": {
+            "optional": true
+        },
+        "redis": {
+            "optional": true
+        },
+        "testcontainers": {
             "optional": true
         },
         "vite": {
@@ -133,6 +149,6 @@
         }
     },
     "engines": {
-        "node": ">=20"
+        "node": ">=24"
     }
 }

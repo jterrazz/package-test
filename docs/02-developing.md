@@ -226,16 +226,24 @@ What every helper accepts, on top of the project it already is:
 
 #### What the preset sets
 
-| Setting                          | Value                                   | Why                                                                                                   |
-| -------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `cacheDir`                       | `.artifacts/vitest`                     | The artefact convention below — vite's transform cache leaves `node_modules/`                         |
-| `test.coverage.reportsDirectory` | `.artifacts/vitest/coverage`            | Same folder, one level down. The **provider is yours to install** (`@vitest/coverage-v8`)             |
-| `test.testTimeout`               | `30_000`                                | Vitest's 5s never survived a container boot, a `prisma db push` or a `next build`                     |
-| `test.hookTimeout`               | `30_000`                                | Same reason, for the `beforeAll` that starts the infrastructure                                       |
-| `test.exclude`                   | vitest's defaults + `**/_fixtures/**`   | What a spec stands on is an input, never a suite — a repository must not run its own counter-examples |
-| `plugins`                        | `literate()`, when `literate:` is given | Turns every matching `<case>.spec.yaml` into a test file (see [07 — CLI specs](07-cli.md))            |
+| Setting                          | Value                                      | Why                                                                                                   |
+| -------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `cacheDir`                       | `.artifacts/vitest`                        | The artefact convention below — vite's transform cache leaves `node_modules/`                         |
+| `test.coverage.reportsDirectory` | `.artifacts/vitest/coverage`               | Same folder, one level down. The **provider is yours to install** (`@vitest/coverage-v8`)             |
+| `test.testTimeout`               | `30_000`                                   | Vitest's 5s never survived a container boot, a `prisma db push` or a `next build`                     |
+| `test.hookTimeout`               | `30_000`                                   | Same reason, for the `beforeAll` that starts the infrastructure                                       |
+| `test.exclude`                   | vitest's defaults + `**/_fixtures/**`      | What a spec stands on is an input, never a suite — a repository must not run its own counter-examples |
+| `test.attachmentsDir`            | `.artifacts/vitest/attachments`            | Vitest 5 writes `context.annotate()` attachments to `.vitest/` at the repository root                 |
+| `test.outputFile`                | `.artifacts/vitest/{json,junit,html,blob}` | Vitest 5 turned the json and junit reporters into FILE writers; all four are artefacts                |
+| `test.retry`                     | `0`                                        | A flaky test is fixed or deleted — a retry turns a real defect into a slow one and hides it           |
+| `test.restoreMocks`              | `true`                                     | A `vi.spyOn` a test forgets to restore fails a LATER file, one that did nothing wrong                 |
+| `test.unstubGlobals`             | `true`                                     | Same for `vi.stubGlobal` — and it is what lets a test be written without an `afterEach` (rule J6w)    |
+| `test.unstubEnvs`                | `true`                                     | Same for `vi.stubEnv`, which is the sanctioned way to state a module's env contract (rule E9w)        |
+| `plugins`                        | `literate()`, when `literate:` is given    | Turns every matching `<case>.spec.yaml` into a test file (see [07 — CLI specs](07-cli.md))            |
 
 It deliberately sets **nothing else**. `fileParallelism` is a per-project truth (a container-lifecycle suite is serial, an isolated one is not), stated by the project rather than by the preset — a helper states it for you when you pass `serial`, and a hand-written project states it itself; so do `reporters`, `environment`, `env`, `globalSetup` and every `include` — a preset that guessed those would be wrong more often than right.
+
+**Why the artefact paths are the preset's.** Every one of them is a path the TOOL pins and a consumer never writes: a repository does not choose where `context.annotate()` lands, it discovers it one CI run later, as an untracked `.vitest/` beside `.artifacts/`. Moving them here is the same rule the estate applies to every tool — what a tool generates lives at `.artifacts/<tool>/` — applied once instead of in fourteen configs.
 
 Two behaviours worth knowing:
 

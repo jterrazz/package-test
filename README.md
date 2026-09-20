@@ -474,10 +474,11 @@ These conventions are not just prose: the package ships an oxlint plugin (`@jter
 ## Requirements
 
 - **Docker** - testcontainers for the container-backed services; not needed for `sqlite()`, plain cli specs, website specs, or mobile specs
-- **vitest** - peer dependency
+- **Node 24+** and **vitest 5** - the two required peers
+- **better-sqlite3 / pg / redis / testcontainers** - optional peer dependencies, one per service a repository declares: `postgres()` needs `pg` + `testcontainers`, `redis()` needs `redis` + `testcontainers`, `sqlite()` needs `better-sqlite3`. Each is loaded the first time its service starts, and the message names the peer and the command. Under pnpm a native binding also needs its package listed in `onlyBuiltDependencies`, which the message says too
 - **playwright** - optional peer dependency, only needed for `.visit()`: `npm install -D playwright && npx playwright install chromium`
 - **appium + webdriverio** - optional peer dependencies, only needed for `specification.mobile()`: `npm install -D appium webdriverio && npx appium driver install xcuitest` — plus Xcode, a simulator, and the app installed on it
-- **msw** - bundled as a direct dependency (powers `.intercept()` on a chain and `intercept()` in module scope, under node and in a page); no separate install
+- **msw**, **vitest-mock-extended**, **yaml** - the three direct dependencies, bundled; no separate install, and declaring one yourself is rule F8's finding
 - **hono** (or any web framework) - supplied by your project for in-process apps; the adapter only needs an object with a `request()` method, so it is not a peer
 
 ## Docs

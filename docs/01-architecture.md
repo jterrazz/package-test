@@ -35,7 +35,7 @@ A runner is created **once per suite**, in a `*.specification.ts` file, and impo
 
 `SpecificationBuilder` (`src/specification/facets/_common/builder.ts`) holds the chain for every facet; each facet contributes its own setups and its own terminal actions on top. The infrastructure a chain needs is reached through **ports** — `src/specification/ports/` declares eight of them (`browser`, `cli`, `container`, `database`, `device`, `isolation`, `server`, `service`) — and an integration implements one. So the chain knows "a database exists"; it never knows Postgres.
 
-Three seams are opened lazily rather than imported: `playwright` for `.visit()`, `appium`/`webdriverio` for `.open()`, and `@vitest/browser-playwright` + `vitest-browser-react` + `react` for `component.render()` are optional peer dependencies, loaded by the one module that owns them. A project that tests no page and no component installs none of them.
+Every seam is opened lazily rather than imported, and each one is an optional peer loaded by the one module that owns it: `playwright` for `.visit()`, `appium`/`webdriverio` for `.open()`, `@vitest/browser-playwright` + `vitest-browser-react` + `react` for `component.render()`, and — since 16.0 — `better-sqlite3`, `pg`, `redis` and `testcontainers` for the services a record declares. A project that tests no page, no component and no database installs none of them; `src/integrations/peer.ts` owns the one message a missing peer produces, which names the facet that asked, the command, and under pnpm the `onlyBuiltDependencies` line a native binding needs.
 
 ## The four layers
 

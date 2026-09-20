@@ -174,8 +174,17 @@ declare module 'vitest' {
     // The `toMatch` override must stay ASSIGNABLE to the native
     // `(expected: string | RegExp) => void`, so every branch keeps the
     // `RegExp | string` parameter and a void-compatible return.
-    // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-explicit-any -- a module augmentation MERGES only as an interface (a type alias redeclares the name and every matcher is lost), and `T = any` is the default vitest's own `Assertion` declares
-    interface Assertion<T = any> {
+    //
+    // The two type parameters are vitest's own, repeated CHARACTER for
+    // Character: an augmentation whose parameter list differs from the
+    // Declaration it merges into is refused outright (TS2428), so this line
+    // Tracks the runner's — `R` is the return shape a promisified assertion
+    // Threads through, `T` the received value every branch below keys on.
+    // `R` is unused here because each matcher states its own return: a golden
+    // Read across the browser seam is async where the identical node accessor
+    // Is sync, and that is not something the chai chain can infer.
+    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface: a type alias redeclares the name and every matcher is lost
+    interface Assertion<R extends Promise<void> | void = void, T = unknown> {
         /**
          * Assert the subject is empty — zero rows for a table (async), an
          * empty stream for a text accessor (console, errors, stdout).
@@ -207,13 +216,20 @@ declare module 'vitest' {
         // A stream captured INSIDE a page reads its golden through a server
         // Command, so it is async where the identical node accessor is sync —
         // Told apart by the same kind of structural marker as `toBeEmpty`.
+        //
+        // The async branches return `Promise<void> & R`, not `Promise<void>`:
+        // `toMatch` is INHERITED from `JestAssertion<R, T>` as `=> R`, and an
+        // Override has to stay assignable to what it overrides. The
+        // Intersection is what says both things at once — the caller awaits a
+        // Promise, and the chain keeps the return shape vitest threads through
+        // `.resolves` / `.rejects`.
         toMatch: T extends DirectoryAccessorType | FilesystemAccessorType
-            ? (name: RegExp | string, options?: MatchFixtureOptionsType) => Promise<void>
+            ? (name: RegExp | string, options?: MatchFixtureOptionsType) => Promise<void> & R
             : T extends { readonly capturedInPage: true }
-              ? (name: RegExp | string, options?: MatchFixtureOptionsType) => Promise<void>
+              ? (name: RegExp | string, options?: MatchFixtureOptionsType) => Promise<void> & R
               : T extends JsonAccessorType | ResponseAccessorType | TextAccessorType
-                ? (name: RegExp | string, options?: MatchFixtureOptionsType) => void
-                : (expected: RegExp | string, options?: MatchFixtureOptionsType) => void;
+                ? (name: RegExp | string, options?: MatchFixtureOptionsType) => R
+                : (expected: RegExp | string, options?: MatchFixtureOptionsType) => R;
         /**
          * Assert the table contains exactly the given rows for the given
          * columns. Cells accept `match.*` dynamic-value matchers. Async —

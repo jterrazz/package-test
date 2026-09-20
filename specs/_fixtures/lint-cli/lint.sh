@@ -8,7 +8,18 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+# npm hoists oxlint to the repository's own .bin when nothing else claims it,
+# And nests it under the toolchain that depends on it when something does.
+# Both layouts are ordinary installs, so the wrapper looks in both rather than
+# Silently linting NOTHING when the resolution moves.
 OXLINT="$REPO_ROOT/node_modules/.bin/oxlint"
+if [ ! -x "$OXLINT" ]; then
+  OXLINT="$REPO_ROOT/node_modules/@jterrazz/typescript/node_modules/.bin/oxlint"
+fi
+if [ ! -x "$OXLINT" ]; then
+  echo "lint.sh: no oxlint binary under $REPO_ROOT/node_modules — run npm install" >&2
+  exit 2
+fi
 CONFIG="$SCRIPT_DIR/oxlint.e2e.json"
 TARGET="${1:-.}"
 

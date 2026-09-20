@@ -57,7 +57,6 @@ const FRAMEWORK_LAYERS = {
         folders: {
             anthropic: ['@anthropic-ai/sdk'],
             appium: ['webdriverio'],
-            compose: ['yaml'],
             docker: [],
             hono: ['hono', '@hono/node-server'],
             msw: ['msw'],
@@ -70,7 +69,13 @@ const FRAMEWORK_LAYERS = {
             'vitest-browser': ['react', 'vitest', 'vitest-browser-react'],
             yaml: ['yaml'],
         },
-        imports: ['specification/'],
+        imports: [
+            'specification/',
+            // The one module every seam folder reaches for: it owns the
+            // Message a MISSING optional peer produces, and a copy of that
+            // Message per folder is how the four of them would have drifted.
+            'integrations/peer',
+        ],
     },
     lint: {
         imports: [
