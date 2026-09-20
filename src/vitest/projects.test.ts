@@ -72,9 +72,9 @@ describe('website() — the served product', () => {
         // Given - the canonical website project
         const project = testOf(website());
 
-        // Then - one name, one tree, and the group between node and component
+        // Then - one name, the `.spec.ts` tree, and the group between node and component
         expect(project.name).toBe('website');
-        expect(project.include).toStrictEqual(['specs/website/**/*.test.ts']);
+        expect(project.include).toStrictEqual(['specs/website/**/*.spec.ts']);
         expect(project.sequence).toStrictEqual({ groupOrder: 1 });
     });
 
@@ -251,7 +251,10 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(
             [api(), jobs(), integration(), mobile()].map((project) => testOf(project).name),
         ).toStrictEqual(['api', 'jobs', 'integration', 'mobile']);
-        expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.test.ts']);
+        // The suffix is the fork: a facet collects the ASSEMBLED product, and
+        // The word for that is `.spec.ts`.
+        expect(testOf(api()).include).toStrictEqual(['specs/api/**/*.spec.ts']);
+        expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.spec.ts']);
     });
 
     test('node facets run first, and the simulator runs alone at the end', () => {

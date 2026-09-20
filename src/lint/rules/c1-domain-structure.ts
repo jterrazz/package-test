@@ -3,8 +3,21 @@ import { isFile } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
+/** The two node suffixes a spec tree collects — `.test.ts` beside ground code, `.spec.ts` for the product. */
+const NODE_TEST_SUFFIXES = ['.spec.ts', '.test.ts'];
 const TEST_SUFFIX = '.test.ts';
 const SPECIFICATION_SUFFIX = '.specification.ts';
+
+/** Does this basename end in one of the two node test suffixes? */
+function isNodeTest(base: string): boolean {
+    return NODE_TEST_SUFFIXES.some((suffix) => base.endsWith(suffix));
+}
+
+/** The basename with whichever node test suffix it carries removed. */
+function stemOf(base: string): string {
+    const suffix = NODE_TEST_SUFFIXES.find((candidate) => base.endsWith(candidate));
+    return suffix === undefined ? base : base.slice(0, -suffix.length);
+}
 
 /** The shapes a spec tree may declare. */
 export type SpecsDepth = 'facet' | 'facet-domain' | 'mirror' | 'off';
@@ -93,7 +106,7 @@ export const c1DomainStructure: LintRule = {
                 // Segments strictly between `specs` and the file: [facet, domain, …].
                 const nesting = anchor.relative.length - 1;
 
-                if (base.endsWith(TEST_SUFFIX) || base.endsWith(SPECIFICATION_SUFFIX)) {
+                if (isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX)) {
                     const ground = anchor.relative
                         .slice(0, -1)
                         .find((segment) => segment.startsWith('_'));
@@ -110,7 +123,7 @@ export const c1DomainStructure: LintRule = {
                 }
 
                 if (depth === 'facet') {
-                    if (base.endsWith(TEST_SUFFIX)) {
+                    if (isNodeTest(base)) {
                         if (nesting < 1) {
                             context.report({ messageId: 'testOutsideFacet', node });
                         } else if (nesting > 2) {
@@ -125,7 +138,7 @@ export const c1DomainStructure: LintRule = {
                 }
 
                 if (depth === 'mirror') {
-                    if (!base.endsWith(TEST_SUFFIX)) {
+                    if (!isNodeTest(base)) {
                         return; // A mirror constrains its tests, nothing else.
                     }
                     if (nesting < 1) {
@@ -133,7 +146,7 @@ export const c1DomainStructure: LintRule = {
                         return;
                     }
                     const directory = anchor.relative.at(-2) ?? '';
-                    if (base.slice(0, -TEST_SUFFIX.length) !== directory) {
+                    if (stemOf(base) !== directory) {
                         context.report({
                             data: { directory },
                             messageId: 'testNotMirroringDirectory',
@@ -143,7 +156,7 @@ export const c1DomainStructure: LintRule = {
                     return;
                 }
 
-                if (base.endsWith(TEST_SUFFIX)) {
+                if (isNodeTest(base)) {
                     if (nesting < 2) {
                         context.report({ messageId: 'testAtFacetRoot', node });
                     } else if (nesting > 2) {

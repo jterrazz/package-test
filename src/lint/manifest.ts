@@ -623,12 +623,15 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Un document se nomme `<cas>.spec.yaml` : `<cas>` en kebab-case, sans les mots `test`/`spec`/`cli` que le suffixe porte déjà, et jamais le nom nu de son dossier.',
+            'Le suffixe dit le genre, et l’arbre lui donne raison. Un `.spec.ts` — le produit ASSEMBLÉ — vit sous `specs/<facette>/` ; ailleurs c’est une erreur. Un `.test.ts` — l’UNITÉ — vit à côté de son module ; sous un dossier de facette (`api`, `cli`, `integration`, `jobs`, `mobile`, `website`) c’est une erreur, réparable par `--fix` (un `git mv`). Un premier niveau qui n’est PAS une facette est une suite de dépôt : elle couvre un arbre, garde `.test.ts`, et c’est la profondeur déclarée de C1 qui la juge. Un document se nomme `<cas>.spec.yaml` : `<cas>` en kebab-case, sans les mots `test`/`spec`/`cli` que le suffixe porte déjà, et jamais le nom nu de son dossier.',
+        facet: 'shared',
         family: 'C',
+        fix: 'Déplacer le `.spec.ts` sous `specs/<facette>/` (ou le renommer `.test.ts` à côté de son module) ; renommer le `.test.ts` de facette en `.spec.ts` — `node dist/checker.js <root> --fix` le fait avec `git mv`.',
         id: 'C12',
         name: 'c12-spec-file-name',
         rationale:
-            'Le nom du fichier est la première phrase que le lecteur lit ; `rm/rm.spec.yaml` ne dit rien deux fois.',
+            'Sans accord entre le suffixe et l’arbre, on ne peut pas dire ce qu’un test prouve sans l’ouvrir ; et le nom du fichier est la première phrase que le lecteur lit — `rm/rm.spec.yaml` ne dit rien deux fois.',
+        reach: 'specs',
     },
     {
         channel: 'checker',

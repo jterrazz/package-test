@@ -100,7 +100,7 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/mobile/events/feed.test.ts
+// specs/mobile/events/feed.spec.ts
 import newsroom from './contracts/newsroom.contracts.js';
 
 test('renders the events feed from the declared backend', async () => {

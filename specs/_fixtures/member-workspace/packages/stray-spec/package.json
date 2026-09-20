@@ -1,0 +1,4 @@
+{
+    "name": "@fixture/stray-spec",
+    "scripts": { "test": "vitest --run" }
+}
