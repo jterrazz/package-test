@@ -216,3 +216,86 @@ export function renderMatrix(root: string): string {
         renderMatrixBody(root),
     ].join('\n\n')}\n`;
 }
+
+/** Markers delimiting the generated layered reading inside `docs/03-testing.md`. */
+export const LAYERS_START =
+    '<!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: src/lint/matrix.ts -->';
+export const LAYERS_END = '<!-- /GENERATED:layers -->';
+
+/**
+ * One layer of the package's own proof: what it judges, where it lives, and how
+ * many files carry it today.
+ *
+ * The count is the point. "The package has meta-tests" is a claim; "eleven
+ * files, and here is the tree" is a thing a reader can check and a thing that
+ * changes when the layer decays.
+ */
+type Layer = { count: number; judges: string; layer: string; where: string };
+
+/** Files matching `extensions` under any of `roots`, counted. */
+function countUnder(root: string, roots: string[], extensions: string[]): number {
+    return roots.flatMap((relative) => filesUnder(resolve(root, relative), extensions)).length;
+}
+
+/** The four layers, innermost first — the order a reader should read them in. */
+export function layers(root: string): Layer[] {
+    const moduleTests = countUnder(root, ['src'], ['.test.ts', '.test.tsx']);
+    const ruleTests = countUnder(root, ['src/lint/rules'], ['.test.ts']);
+    const facetSpecs = COLUMNS.filter((column) => column !== 'module').reduce(
+        (total, column) =>
+            total +
+            countUnder(root, COLUMN_TREES[column].roots, [...COLUMN_TREES[column].extensions]),
+        0,
+    );
+    const lintSuite = countUnder(root, ['specs/lint'], ['.test.ts']);
+    return [
+        {
+            count: moduleTests - ruleTests,
+            judges: 'one module, through its own exports, with nothing started',
+            layer: 'Module tests',
+            where: '`src/**/*.test.ts` beside the module',
+        },
+        {
+            count: ruleTests,
+            judges: 'one rule: what it flags, what it leaves alone, and the message it prints',
+            layer: 'Rule tests',
+            where: '`src/lint/rules/<facet>/<rule>.test.ts` beside the rule',
+        },
+        {
+            count: facetSpecs,
+            judges: "the framework's own facets, each met through its constructor",
+            layer: 'The package’s own specs',
+            where: '`specs/<facet>/`',
+        },
+        {
+            count: lintSuite,
+            judges: 'the built binary end to end, and what the corpus must keep true',
+            layer: 'The lint suite and the meta-tests',
+            where: '`specs/lint/**`',
+        },
+    ];
+}
+
+/** The layered-reading table, generated. */
+export function renderLayers(root: string): string {
+    const rows = layers(root).map((layer) => [
+        layer.layer,
+        cell(layer.where),
+        cell(layer.judges),
+        String(layer.count),
+    ]);
+    return table(['Layer', 'Where', 'What it judges', 'Files'], rows).join('\n');
+}
+
+/** Replace the region between the GENERATED:layers markers of chapter 03. */
+export function spliceLayers(existing: string, root: string): string {
+    const start = existing.indexOf(LAYERS_START);
+    const end = existing.indexOf(LAYERS_END);
+    if (start === -1 || end === -1) {
+        throw new Error(
+            `docs/03-testing.md is missing the GENERATED:layers markers (${LAYERS_START} … ${LAYERS_END})`,
+        );
+    }
+    const inner = `${LAYERS_START}\n\n${renderLayers(root)}\n\n`;
+    return existing.slice(0, start) + inner + existing.slice(end);
+}

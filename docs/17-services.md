@@ -17,6 +17,8 @@ import { postgres, process, redis, sqlite } from '@jterrazz/test';
 | `sqlite()`   | **No Docker** — a template file copied per worker  | `init` (SQL file) or `prismaSchema` (runs `prisma db push`)   | `file:/…/….sqlite`                    |
 | `process()`  | **No Docker** — a child process the framework owns | `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout` | `http://127.0.0.1:port`               |
 
+**Each factory names its own optional peer**, and names it at startup rather than at install time: `postgres()` and `redis()` need `testcontainers` (and `pg` / `redis` for the driver a table read uses), `sqlite()` needs `better-sqlite3`, and `process()` needs nothing but node. A project that declares none of them installs none of them — the seams are optional peers since 16.0, loaded lazily by the one module that owns each ([04 — Operating](04-operating.md#what-a-consumer-must-bring)). The refusal, when one is missing, names the facet that asked, the peer, the install command of the package manager the project's own lockfile names, and — under pnpm — the `onlyBuiltDependencies` line a native binding also needs before it is built at all.
+
 `image` overrides the container image and `env` (postgres only) the environment variables; each factory carries a default for both, so a record that states neither still starts a real service. After the runner starts, each service handle exposes `.connectionString`, which is what you pass to your app:
 
 ```typescript
@@ -119,6 +121,12 @@ docker/
 - `docker/<service>/init.sql` executes when the corresponding service starts — matched by the **kebab-case of the record key**, so the analytics schema above belongs to `analytics-db/` (the folder `analyticsDb` names).
 - A project with one database needs no folder of its own: a postgres handle falls back to `docker/postgres/init.sql` when nothing sits under its own name.
 - Testcontainers starts each declared service from the handle's image and environment. There is no second definition of the stack to keep in step.
+
+## A contract's `required` is verified per `.call()`
+
+A chain's scope is ONE terminal action, and a contract's `required` is checked at the end of it — not at the end of the test, and not at the end of the file. A spec that declares a contract and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` contract unmet by the action it belongs to fails that action's chain.
+
+This is the same boundary rule B1 already states from the other side — one chain, one action — read from the contract's end. A test that wants a contract to hold across two actions writes two chains, each declaring what it expects to see.
 
 ## Per-worker isolation (rule G2)
 

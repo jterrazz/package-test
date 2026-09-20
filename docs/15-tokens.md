@@ -184,6 +184,20 @@ expect(() => expect(result.response).toMatch('wrong-body.http', { frozen: true }
 
 A frozen fixture is **never written** in update mode — a frozen mismatch still throws its diff, and a frozen _missing_ fixture still throws "does not exist" (never created). Its failure says so rather than pointing at update mode: write the file by hand, or drop `{ frozen }` for one `TEST_UPDATE=1` run and put it back. It is available on every fixture subject (`result.response`, `result.stdout`/`result.stderr`, `result.json`, `result.directory`, `result.filesystem`). The static rule `d13w-unfrozen-negative-fixture` flags a `toMatch` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
 
+### The discipline — update mode writes, it does not judge
+
+A rewritten fixture is not a passing test: it is this run's output, made into the expectation. Three steps, in this order, and the middle one is the whole point.
+
+1. **Run it.** `TEST_UPDATE=1 npx vitest --run --project <kind>` — narrowed to the project whose goldens moved, never the whole suite, because a broad update rewrites files nobody looked at.
+2. **Read the diff.** `git diff` is the review: every line that changed is a behaviour that changed. A golden diff that nobody can explain is a bug that just became the expectation, and this is the only moment it is cheap to catch.
+3. **Run again, without the flag.** The second run is the one that proves anything. It reads the file as any other run would, and it is what a reviewer's machine will do.
+
+The round-trip is not a step the suite performs for you, and deliberately so: update mode writes the file from THIS run's actual value, so re-comparing inside the same run matches by construction and proves nothing. The real round-trip already exists — CI runs the same goldens on another machine, which is exactly the question "does this file still hold when the run is not the one that wrote it?"
+
+**The frozen two-pass.** A frozen fixture is never written, so changing one on purpose is two deliberate passes: drop `{ frozen: true }`, run once under `TEST_UPDATE=1`, read the diff, and put the option back in the same commit. The friction is the feature — a negative fixture should cost something to change.
+
+**What update mode never touches.** The ground of a `<case>.spec.yaml` — its `description:`, its commands, its `env:`/`serve:`/`fixture:` and its `files:` — is authored, never rewritten; only the expected streams move. A `_requests/*.http` is an input, not an expectation, and is never written either.
+
 ## Known limitations
 
 The grammar is deliberately small; three edges are worth knowing:
