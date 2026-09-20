@@ -33,6 +33,57 @@ tester.run('f6-no-foreign-test-runtime', asOxlintRule(f6NoForeignTestRuntime), {
             errors: [{ messageId: 'foreignRuntime' }],
             filename: COMPONENT_TEST,
         },
+        // The network answers through contracts, whichever transport is reached for.
+        {
+            code: 'import { setupServer } from "msw/node";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: MODULE_TEST,
+        },
+        {
+            code: 'import nock from "nock";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: MODULE_TEST,
+        },
+        // The doubles ladder is closed.
+        {
+            code: 'import { mockDeep } from "vitest-mock-extended";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: MODULE_TEST,
+        },
+        {
+            code: 'import sinon from "sinon";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: MODULE_TEST,
+        },
+        // A second runner.
+        {
+            code: 'import { jest } from "@jest/globals";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: MODULE_TEST,
+        },
+        // A second clock.
+        {
+            code: 'import MockDate from "mockdate";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: MODULE_TEST,
+        },
+        // The browser and the simulator are the facets' to drive.
+        {
+            code: 'import { chromium } from "playwright";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: '/repo/specs/website/home/home.spec.ts',
+        },
+        {
+            code: 'import { remote } from "webdriverio";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: '/repo/specs/mobile/home/home.spec.ts',
+        },
+        // A component rendered to a string in a `.test.ts` is the shape the fork names.
+        {
+            code: 'import { renderToStaticMarkup } from "react-dom/server";',
+            errors: [{ messageId: 'foreignRuntime' }],
+            filename: MODULE_TEST,
+        },
     ],
     valid: [
         // The framework's own entry is the one a spec imports (F1).
@@ -48,6 +99,11 @@ tester.run('f6-no-foreign-test-runtime', asOxlintRule(f6NoForeignTestRuntime), {
         {
             code: 'import { playwright } from "@vitest/browser-playwright";',
             filename: '/repo/specs/_fixtures/app/vitest.config.ts',
+        },
+        // In a `.test.tsx` a server render is a legitimate thing for a component to do.
+        {
+            code: 'import { renderToStaticMarkup } from "react-dom/server";',
+            filename: COMPONENT_TEST,
         },
         // A providers module is the app's frame, not a spec speaking a dialect.
         {

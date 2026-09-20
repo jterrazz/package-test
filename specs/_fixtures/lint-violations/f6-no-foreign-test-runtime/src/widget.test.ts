@@ -1,10 +1,16 @@
-import { render } from '@testing-library/react';
+import MockDate from 'mockdate';
+import { setupServer } from 'msw/node';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, test } from 'vitest';
+import { mockDeep } from 'vitest-mock-extended';
 
-test('renders the widget', () => {
-    // Given - a foreign renderer
-    const rendered = render;
+import { widget } from './widget.js';
 
-    // Then - the framework has its own
-    expect(rendered).toBeDefined();
+test('reaches around every seam the vocabulary owns', () => {
+    // Given - a network double, a clock, a port double and a server render
+    const seams = [setupServer, MockDate, mockDeep, renderToStaticMarkup];
+
+    // Then - the widget is unchanged by any of them
+    expect(widget()).toBe('Widget');
+    expect(seams).toHaveLength(4);
 });
