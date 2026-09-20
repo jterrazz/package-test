@@ -695,7 +695,7 @@ export const RULE_DOCS = {
     'j2-no-sleep': {
         channel: 'statique',
         convention:
-            'No arbitrary sleep (`setTimeout`/`setInterval`/`Atomics.wait`, or a `node:timers/promises` import) in any test file — synchronisation is `see()`/`gone()` inside a scenario and `waitUntil(predicate)` everywhere else.',
+            "No arbitrary sleep (`setTimeout`/`setInterval`/`Atomics.wait`, or a `node:timers/promises` import) in any test file — synchronisation is `see()`/`gone()` inside a scenario and `waitUntil(predicate)` everywhere else. A timer inside a test DOUBLE's implementation (`vi.fn(…)`, `mockImplementation(…)`, a `mockOf` handler) is out of reach: the double is staging the world, not the test waiting on it.",
         facet: 'model',
         family: 'J',
         fix: 'Wait for the condition, not for a duration.',

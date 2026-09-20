@@ -1,7 +1,33 @@
-import { importSourceVisitor, memberPropertyName } from '../../ast.js';
+import {
+    child,
+    identifierName,
+    importSourceVisitor,
+    memberPropertyName,
+    nodeEnd,
+    nodeStart,
+} from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole, roleOf } from '../../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
+
+/** The doubles whose implementation STAGES the world rather than waits on it. */
+const DOUBLE_FACTORIES = new Set(['fn', 'mockImplementation', 'mockImplementationOnce', 'mockOf']);
+
+/**
+ * Is this call a test double taking an implementation — `vi.fn(…)`,
+ * `x.mockImplementation(…)`, `mockOf<Port>({ … })`?
+ *
+ * The member forms are read by their PROPERTY alone, because the object is
+ * whatever the test called its double.
+ */
+function isDoubleImplementation(node: AstNode): boolean {
+    const callee = child(node, 'callee');
+    if (callee === undefined) {
+        return false;
+    }
+    const name = callee.type === 'Identifier' ? identifierName(callee) : memberPropertyName(callee);
+    return name !== undefined && DOUBLE_FACTORIES.has(name);
+}
 
 /**
  * CONVENTIONS J2 — a test contains no arbitrary sleep, wherever it sits:
@@ -12,21 +38,43 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
  * The reach is every test file — a sleep in a module test beside `src/` waits
  * exactly as blindly as one under `specs/`, and went unseen while the rule
  * gated on the folder.
+ *
+ * What it does NOT reach is a timer inside a test DOUBLE's implementation. A
+ * `vi.fn(() => setTimeout(…))` is the world being staged — a clone that settles
+ * late, a handler that answers out of order — and the assertion that follows is
+ * about the ORDER results come back in, which no predicate can state: a
+ * `waitUntil` waits for something to become true, while what this test needs is
+ * for something to happen late. The test is not the one waiting, so the rule is
+ * not about it.
  */
 export const j2NoSleep: LintRule = {
     create(context: RuleContext) {
         if (!isTestRole(roleOf(context.filename).role)) {
             return {};
         }
+        // The source spans of the double implementations seen so far. The walk
+        // Is top-down, so a double's span is recorded before anything inside it
+        // Is visited — which is what makes "inside a double" answerable without
+        // A parent pointer the plugin API does not give.
+        const doubles: { end: number; start: number }[] = [];
+        const insideADouble = (node: AstNode): boolean =>
+            doubles.some((span) => nodeStart(node) >= span.start && nodeEnd(node) <= span.end);
         const visitor: Visitor = {
             CallExpression(node: AstNode) {
-                const callee = node.callee as AstNode | undefined;
+                if (isDoubleImplementation(node)) {
+                    doubles.push({ end: nodeEnd(node), start: nodeStart(node) });
+                    return;
+                }
+                if (insideADouble(node)) {
+                    return;
+                }
+                const callee = child(node, 'callee');
                 if (callee === undefined) {
                     return;
                 }
                 const name =
                     callee.type === 'Identifier'
-                        ? (callee.name as string)
+                        ? identifierName(callee)
                         : memberPropertyName(callee);
                 if (name === 'setTimeout' || name === 'setInterval') {
                     context.report({ messageId: 'sleep', node });
@@ -36,8 +84,7 @@ export const j2NoSleep: LintRule = {
                 if (
                     name === 'wait' &&
                     callee.type === 'MemberExpression' &&
-                    (callee.object as AstNode | undefined)?.type === 'Identifier' &&
-                    ((callee.object as AstNode).name as string) === 'Atomics'
+                    identifierName(child(callee, 'object')) === 'Atomics'
                 ) {
                     context.report({ messageId: 'sleep', node });
                 }

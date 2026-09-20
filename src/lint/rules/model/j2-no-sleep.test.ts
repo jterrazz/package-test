@@ -46,11 +46,33 @@ ruleTester.run('j2-no-sleep', j2NoSleep as unknown as OxlintRule, {
             errors: [{ messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
+        // A double's implementation ends where its call does: the sleep AFTER
+        // One is the test waiting, and still an error.
+        {
+            code: 'const clone = vi.fn(() => 1); await new Promise((resolve) => setTimeout(resolve, 5));',
+            errors: [{ messageId: 'sleep' }],
+            filename: SPEC_FILE,
+        },
     ],
     valid: [
         // Framework-level synchronisation.
         {
             code: 'await cli.exec("serve", { waitFor: /listening/ });',
+            filename: SPEC_FILE,
+        },
+        // A timer inside a test DOUBLE stages the world — a clone that settles
+        // Late, so the results come back out of order — and the test is not the
+        // One waiting.
+        {
+            code: 'const clone = vi.fn(() => new Promise((resolve) => setTimeout(resolve, 5)));',
+            filename: SPEC_FILE,
+        },
+        {
+            code: 'git.clone.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 5)));',
+            filename: SPEC_FILE,
+        },
+        {
+            code: 'const port = mockOf<GitPort>({ clone: () => new Promise((resolve) => setTimeout(resolve, 5)) });',
             filename: SPEC_FILE,
         },
         // Outside specs/ the rule is inert.
