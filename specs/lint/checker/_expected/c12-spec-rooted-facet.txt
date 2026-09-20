@@ -1,0 +1,3 @@
+[error] operator/manifest/manifest.test.ts:1: a `.test.ts` under `specs/` specifies the assembled product — rename it `.spec.ts` (fixable: `jterrazz-test-check <root> --fix`) (C12 — see docs/19-linting.md)
+
+conventions checker: 1 error(s) found under {{workdir}}/specs
