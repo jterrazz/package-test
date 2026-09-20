@@ -7,6 +7,7 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../model/elements/ambiguity.js';
+import { accessibleNameIn } from '../../model/elements/aria-name.js';
 import { widenedForWindow } from '../../model/elements/substring-warning.js';
 import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type { ElementMatch, ElementRef } from '../../model/ports/browser.port.js';
@@ -142,13 +143,37 @@ function ambiguousLevel(element: ElementRef): ElementRef {
     return element;
 }
 
+/**
+ * The name to WRITE for this descriptor — the whole one, never truncated.
+ *
+ * A role descriptor matches the accessible name the browser computed, and a
+ * page cannot compute one: the snapshot comes back from the node side, of the
+ * one node the locator's own selector names. Text content would be the wrong
+ * answer — it glues inline children with no separator and carries nothing of a
+ * field's label — except for a `text` descriptor, which matches text.
+ */
+async function wholeNameOf(element: ElementRef): Promise<string | undefined> {
+    const locator = locate(page, element);
+    if (element.kind !== 'text') {
+        try {
+            const named = accessibleNameIn(await commands.ariaNode(locator.selector));
+            if (named !== undefined) {
+                return named;
+            }
+        } catch {
+            // The node left the page, or it has no snapshot of its own: the
+            // Text below is the only answer left, and a window that threw here
+            // Would replace the caller's failure with its own.
+        }
+    }
+    const collapsed = (locator.query()?.textContent ?? '').replaceAll(/\s+/gu, ' ').trim();
+    return collapsed === '' ? undefined : collapsed;
+}
+
 /** What the transitional window may ask of the mounted page. */
 const PROBE: WindowProbe = {
     count: async (element) => await Promise.resolve(locate(page, element).elements().length),
-    nameOf: async (element) => {
-        const [match] = candidates(locate(page, element));
-        return await Promise.resolve(match?.accessibleName ?? match?.text);
-    },
+    nameOf: async (element) => await wholeNameOf(element),
     // The page has no stderr, and the console it does have is captured and
     // Dropped by the reporter: the line goes out to the node side to be printed.
     print: async (line) => {

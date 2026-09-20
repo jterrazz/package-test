@@ -9,6 +9,7 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../model/elements/ambiguity.js';
+import { accessibleNameIn } from '../../model/elements/aria-name.js';
 import { widenedForWindow } from '../../model/elements/substring-warning.js';
 import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type {
@@ -174,11 +175,46 @@ async function act<T>(
 function probeOf(page: Page): WindowProbe {
     return {
         count: async (element) => await locate(page, element).count(),
-        nameOf: async (element) => {
-            const [match] = await captureMatches(locate(page, element));
-            return match?.accessibleName ?? match?.text;
-        },
+        nameOf: async (element) => await wholeNameOf(page, element),
     };
+}
+
+/**
+ * The name to WRITE for this descriptor — the whole one, never truncated.
+ *
+ * A role descriptor matches the accessible name the browser computed, so the
+ * name is read off the ARIA snapshot, which is that same computation: the text
+ * content glues inline children with no separator (`Experiments9` for a button
+ * named "Experiments 9") and a field's name is its label, which its text never
+ * carries at all. A `text` descriptor matches text, so text is what it is told
+ * to write.
+ */
+async function wholeNameOf(page: Page, element: ElementRef): Promise<string | undefined> {
+    const locator = locate(page, element);
+    if (element.kind !== 'text') {
+        try {
+            const named = accessibleNameIn(await locator.ariaSnapshot());
+            if (named !== undefined) {
+                return named;
+            }
+        } catch {
+            // The element left the page, or the node has no snapshot of its
+            // Own: the text below is the only answer left, and a window that
+            // Threw here would replace the caller's failure with its own.
+        }
+    }
+    return await wholeTextOf(locator);
+}
+
+/** The element's text, whitespace-collapsed and WHOLE — a name cut mid-word resolves to nothing. */
+async function wholeTextOf(locator: Locator): Promise<string | undefined> {
+    try {
+        const text = await locator.evaluate((node) => node.textContent ?? '');
+        const collapsed = text.replaceAll(/\s+/gu, ' ').trim();
+        return collapsed === '' ? undefined : collapsed;
+    } catch {
+        return undefined;
+    }
 }
 
 /** Walk the scope chain outside-in; the outermost ambiguous level is the fault. */

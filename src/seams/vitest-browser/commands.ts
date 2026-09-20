@@ -5,7 +5,7 @@ import type { BrowserCommand } from 'vitest/node';
 import { GROUND_EXPECTED } from '../../model/chain/ground.js';
 
 /**
- * The three things a page cannot do for itself, run on the server side of
+ * The four things a page cannot do for itself, run on the server side of
  * Browser Mode and reached from the page through `server.commands`.
  *
  * **The ARIA tree.** Browser Mode's own locators expose no `ariaSnapshot()`, so
@@ -45,6 +45,17 @@ export const ariaTree: BrowserCommand<[], string> = async (context) => {
 };
 
 /**
+ * The ARIA snapshot of ONE node, named by the selector the page's locator
+ * carries — the accessible name, as the browser computed it, for a page that
+ * cannot compute one itself.
+ */
+export const ariaNode: BrowserCommand<[string], string> = async (context, selector) => {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the provider merges its own context in at runtime; the playwright one is what `component()` pins
+    const frame = await (context as unknown as PlaywrightCommandContext).frame();
+    return await frame.locator(selector).ariaSnapshot();
+};
+
+/**
  * A line the page has for whoever is running the suite, written on the node
  * side's stderr — the one channel vitest's default reporter passes through.
  * The console is captured and dropped, so a page that printed to it printed to
@@ -72,4 +83,4 @@ export const goldenWrite: BrowserCommand<[string, string], string> = (context, n
  * The commands, as `component()` registers them — one list, so the names the
  * page calls and the names the project registers cannot drift.
  */
-export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite, notify };
+export const COMPONENT_COMMANDS = { ariaNode, ariaTree, goldenRead, goldenWrite, notify };

@@ -108,9 +108,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                   | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 52    |
+| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 53    |
 | Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 66    |
+| The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 67    |
 | The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 88    |
 | Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 18    |
 
@@ -278,15 +278,15 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.visit()`   | —   | —    | —   | —           | 11      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 2       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
-| `.render()`  | —   | —    | —   | —           | —       | —      | 14        | —      |
+| `.render()`  | —   | —    | —   | —           | —       | —      | 15        | —      |
 
 ### Verb
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 6       | 0      | 14        | —      |
+| `see`      | —   | —    | —   | —           | 6       | 0      | 15        | —      |
 | `fill`     | —   | —    | —   | —           | 3       | 0      | 2         | —      |
-| `click`    | —   | —    | —   | —           | 3       | —      | 4         | —      |
+| `click`    | —   | —    | —   | —           | 3       | —      | 5         | —      |
 | `gone`     | —   | —    | —   | —           | 2       | —      | 4         | —      |
 | `press`    | —   | —    | —   | —           | 0       | —      | 2         | —      |
 | `hover`    | —   | —    | —   | —           | 0       | —      | 1         | —      |
@@ -301,14 +301,14 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `button`        | —   | —    | —   | —           | 3       | 0      | 4         | —      |
+| `button`        | —   | —    | —   | —           | 4       | 0      | 5         | —      |
 | `field`         | —   | —    | —   | —           | 4       | 0      | 3         | —      |
 | `content`       | —   | —    | —   | —           | 3       | 0      | 10        | —      |
 | `testId`        | —   | —    | —   | —           | 0       | 0      | 1         | —      |
 | `heading`       | —   | —    | —   | —           | 0       | —      | 1         | —      |
 | `link`          | —   | —    | —   | —           | 2       | —      | 2         | —      |
 | `dialog`        | —   | —    | —   | —           | 0       | —      | 1         | —      |
-| `status`        | —   | —    | —   | —           | 0       | —      | 2         | —      |
+| `status`        | —   | —    | —   | —           | 0       | —      | 3         | —      |
 | `table`         | —   | —    | —   | —           | 0       | —      | 1         | —      |
 | `row`           | —   | —    | —   | —           | 0       | —      | 1         | —      |
 | `listitem`      | —   | —    | —   | —           | 0       | —      | 1         | —      |
@@ -345,8 +345,8 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `.value`        | —   | —    | —   | 6           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
-| `.tree`         | —   | —    | —   | —           | 2       | —      | 3         | —      |
-| `.content`      | —   | —    | —   | —           | 4       | 0      | 11        | —      |
+| `.tree`         | —   | —    | —   | —           | 2       | —      | 4         | —      |
+| `.content`      | —   | —    | —   | —           | 4       | 0      | 12        | —      |
 | `.console`      | —   | —    | —   | —           | 1       | —      | 3         | —      |
 | `.errors`       | —   | —    | —   | —           | 4       | —      | 5         | —      |
 | `.html`         | —   | —    | —   | —           | 0       | —      | 5         | —      |
