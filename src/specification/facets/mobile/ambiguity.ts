@@ -28,10 +28,10 @@ function formatMatch(match: MobileElementMatch, index: number): string {
 
 /**
  * The rewrites worth offering, in the order they should be tried. Scoping is
- * always available; `exact` only when it would actually narrow the set, and
- * the count it would leave is stated so a still-ambiguous suggestion never
- * reads as a fix; distinct identifiers make `testId()` a concrete rewrite
- * rather than a guess.
+ * always available; `exact` only to a descriptor that opted OUT of it (exact is
+ * the default since 16.0), and the count it would leave is stated so a
+ * still-ambiguous suggestion never reads as a fix; distinct identifiers make
+ * `testId()` a concrete rewrite rather than a guess.
  */
 function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): string[] {
     const fixes: string[] = [];
@@ -42,7 +42,7 @@ function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): 
         );
     }
 
-    if (!element.exact && element.name !== undefined) {
+    if (element.exact === false && element.name !== undefined) {
         const remaining = matches.filter((match) => match.label === element.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(

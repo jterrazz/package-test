@@ -57,9 +57,10 @@ const pages = {
     </body></html>`,
     '/noisy': `<!doctype html><html lang="en"><head><title>Fixture — Noisy</title></head>
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
-    // The ambiguity fixture: "Articles" appears three times — twice verbatim
-    // In two landmarks, once as a substring — which is exactly the shape that
-    // Used to resolve silently to whichever came first in the DOM (W3).
+    // The ambiguity fixture: "Articles" appears three times — twice as the
+    // WHOLE accessible name in two landmarks, once only as a substring ("Read
+    // Articles"). The first pair is what W3 refuses to guess between; the third
+    // Is what the pre-16.0 substring default used to fold in silently.
     '/ambiguous': `<!doctype html><html lang="en"><head>${head('Fixture — Ambiguous', '/ambiguous')}
     </head><body>
     <nav aria-label="Main"><a href="/articles">Articles</a></nav>
@@ -67,7 +68,7 @@ const pages = {
         <h1>Ambiguous</h1>
         <a href="/articles">Read Articles</a>
         <section aria-label="Series"><a href="/articles/2">Part 2</a></section>
-        <button type="button" aria-label="Delete Post a">Delete</button>
+        <button type="button" aria-label="Delete post">Delete</button>
     </main>
     <dialog open><button type="button">Delete post</button></dialog>
     <footer><a href="/articles">Articles</a></footer>

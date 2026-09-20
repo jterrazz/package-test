@@ -9,6 +9,7 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../specification/facets/website/ambiguity.js';
+import { warnSubstringOnly } from '../../specification/facets/website/substring-warning.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -60,8 +61,9 @@ const VALUE_POLL_MS = 100;
 function locate(root: MatchScope, element: ElementRef): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
     // Playwright's own option bags are exact-optional: an absent `name` is no
-    // Name filter at all, and `exact` defaults to false where it is unstated.
-    const exact = element.exact ?? false;
+    // Name filter at all. `exact` is the framework's default, not playwright's
+    // — a name designates the accessible name WHOLE since 16.0.
+    const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
         return scope.getByLabel(name, { exact });
@@ -125,6 +127,7 @@ async function act<T>(
         return await action(locate(page, element));
     } catch (error) {
         if (!isStrictViolation(error)) {
+            await reportSubstringOnly(page, element);
             throw error;
         }
         const culprit = await findAmbiguousLevel(page, element);
@@ -132,6 +135,32 @@ async function act<T>(
         throw new AmbiguousElementError(
             describeAmbiguity({ element: culprit, matches, url: page.url() }),
         );
+    }
+}
+
+/**
+ * Say so when a descriptor found NOTHING as a whole name but would have found
+ * something as a substring — the one shape the 16.0 default changes.
+ *
+ * Asked only on the failure path, and only for a descriptor that stated no
+ * `exact` of its own: an author who wrote `{ exact: false }` chose the
+ * substring, and one who wrote `{ exact: true }` was already exact.
+ */
+async function reportSubstringOnly(page: Page, element: ElementRef): Promise<void> {
+    if (element.exact !== undefined || element.name === undefined) {
+        return;
+    }
+    try {
+        if ((await locate(page, element).count()) > 0) {
+            return;
+        }
+        if ((await locate(page, { ...element, exact: false }).count()) > 0) {
+            warnSubstringOnly(element, page.url());
+        }
+    } catch {
+        // The page is gone, or the descriptor is ambiguous under the looser
+        // Match: neither is this warning's business, and neither may replace
+        // The failure the caller is already being handed.
     }
 }
 

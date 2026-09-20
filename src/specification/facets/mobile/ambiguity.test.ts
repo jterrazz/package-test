@@ -62,16 +62,28 @@ describe('describeMobileAmbiguity', () => {
         expect(message).toContain('within(testId(\'…\'), button("Bookmark"))');
     });
 
-    test('suggests exact only when it would narrow the set, with what it leaves', () => {
-        // Given - one candidate matched as a substring
+    test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
+        // Given - `{ exact: false }`, which is the only way a substring
+        // Candidate is in the set at all since 16.0
         const message = describeMobileAmbiguity({
-            element: button('Bookmark'),
+            element: button('Bookmark', { exact: false }),
             matches: [match(), match({ label: 'Bookmark all' })],
         });
 
         // Then - the remaining count keeps the suggestion honest
         expect(message).toContain('button("Bookmark", { exact: true })');
         expect(message).toContain('leaves 1 of 2');
+    });
+
+    test('never offers exact to an ordinary descriptor — it is already exact', () => {
+        // Given - a descriptor stating nothing, which is the 16.0 default
+        const message = describeMobileAmbiguity({
+            element: button('Bookmark'),
+            matches: [match(), match({ label: 'Bookmark all' })],
+        });
+
+        // Then - the suggestion would be telling it to do what it already does
+        expect(message).not.toContain('exact name');
     });
 
     test('omits the exact suggestion when every candidate matches the name whole', () => {
