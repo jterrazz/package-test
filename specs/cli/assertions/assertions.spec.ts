@@ -123,6 +123,9 @@ describe('command — stdout accessor', () => {
         }
     });
 
+    // RUNTIME D3 — every `toMatch` subject resolves against `_expected/`; the
+    // Refusal names the path it looked at, and only `.request()` reads
+    // `_requests/`.
     test('toMatch on a missing stream fixture mentions TEST_UPDATE', async () => {
         // Given - a fixture name that was never created
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('help');
@@ -134,6 +137,8 @@ describe('command — stdout accessor', () => {
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 
+    // RUNTIME C5 — a slash in a fixture name is a SUBFOLDER of `_expected/`,
+    // Not a separator the resolver flattens.
     test('a slash in the fixture name creates a subfolder under _expected/', async () => {
         // Given - a fixture written via update mode with a slash in its name
         const fixtureName = `sub/help-${Date.now()}.txt`;

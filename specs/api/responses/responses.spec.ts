@@ -49,6 +49,9 @@ describe('response mismatch messages', () => {
         );
     });
 
+    // RUNTIME C3 — an `_expected/*.http` starts with a status line and its
+    // Headers are matched as a SUBSET: the ones listed must match, the rest are
+    // Unconstrained.
     test('reports a subset-header mismatch when the header is absent', async () => {
         // Given - a fixture listing a header the response does not carry
         const result = await api.get('/session');

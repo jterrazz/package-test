@@ -28,7 +28,7 @@ import { isNodeTestFileName, isTestFileName } from './role.js';
  */
 
 /** The six facet folders — a first-level name under `specs/` that IS a constructor. */
-export const FACETS = ['api', 'cli', 'integration', 'jobs', 'mobile', 'website'] as const;
+export const FACETS: string[] = ['api', 'cli', 'integration', 'jobs', 'mobile', 'website'];
 
 /** The facets whose world is a SCREEN: no database, no request document. */
 const SCREEN_FACETS = new Set<string>(['mobile', 'website']);
@@ -91,9 +91,7 @@ function* walkFiles(dir: string): Generator<string> {
 /** The facet folders a specs root actually holds. */
 function facetFoldersOf(specsRoot: string): { facet: string; path: string }[] {
     return entriesOf(specsRoot)
-        .filter(
-            (entry) => entry.isDirectory() && (FACETS as readonly string[]).includes(entry.name),
-        )
+        .filter((entry) => entry.isDirectory() && FACETS.includes(entry.name))
         .map((entry) => ({ facet: entry.name, path: join(specsRoot, entry.name) }));
 }
 

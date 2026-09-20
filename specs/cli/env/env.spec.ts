@@ -83,6 +83,8 @@ describe('command — env', () => {
         expect(result.stdout.text).not.toContain('MY_VAR=first');
     });
 
+    // RUNTIME B2 — an unknown `$…` marker is refused where it is written, and
+    // `$FIXTURES` outside a specs tree with it.
     test('expands $WORKDIR token to the actual cwd', async () => {
         // Given - $WORKDIR placeholder for HOME (the typical isolation pattern)
         const result = await cli

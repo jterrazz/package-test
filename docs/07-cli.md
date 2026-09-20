@@ -585,7 +585,7 @@ export const {
 
 The contract with your binary: it must label every container it creates with `testRunLabel = <value of envVar>`. That is how the runner finds — and force-removes — the containers belonging to a run.
 
-A Docker-aware runner **requires `await using`** on every result (rule B5), so leaked containers are cleaned by label filter at scope exit:
+A Docker-aware runner **requires `await using`** on every result (rule B5 — the checker infers the runners from the `docker:` option), so leaked containers are cleaned by label filter at scope exit:
 
 ```typescript
 test('deploy spawns a labelled container', async () => {

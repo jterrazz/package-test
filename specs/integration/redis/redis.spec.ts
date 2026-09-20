@@ -33,6 +33,9 @@ describe('redis — the handle against a real container', () => {
         await expect(result.error).toBeEmpty();
     });
 
+    // RUNTIME G2 — isolation is per WORKER: the runner's handle holds this
+    // Worker's database index, and a client opened at the default index would
+    // Be talking to another database entirely.
     test('flushes every key on reset', async () => {
         // Given - a key written to the container, then a reset
         const result = await integration.call(async ({ cache }) => {

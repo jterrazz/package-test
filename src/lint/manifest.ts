@@ -55,6 +55,7 @@ export const FAMILIES: Record<string, string> = {
     I: 'Source architecture',
     J: 'Hygiene',
     K: 'Retro-propagation',
+    M: 'Doubles, time & the proof of a seam',
 };
 
 /**
@@ -1102,6 +1103,187 @@ export const CHECKER_PASSES: CatalogEntry[] = [
 ];
 
 /**
+ * The **meta** channel — what the package's own tests hold about the catalogue
+ * and about itself.
+ *
+ * These rows never reach a consumer: they are the guards that keep the other
+ * six channels honest. A rule with no fixture, a message linking to a heading
+ * that moved, an id cited in a chapter that resolves to nothing, a reach a
+ * reader could only learn by reading the implementation — each is a way the
+ * catalogue stops being true without anything failing, and each has a test
+ * here that fails instead.
+ */
+export const META_ROWS: CatalogEntry[] = [
+    {
+        channel: 'meta',
+        convention:
+            'Every environment variable the framework reads is on the allow-list, and a dynamic read carries its sanction comment.',
+        family: 'E',
+        fix: 'Add the variable to `env-allowlist.ts`, or read it through the option that already exists.',
+        id: 'E1',
+        name: 'e1-env-allowlist',
+        rationale:
+            'An env read nobody declared is a behaviour a consumer cannot see, cannot set, and cannot turn off.',
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
+            'Every rule id cited in `docs/**`, `skills/**`, `README.md` or a rule message resolves to a catalogue row.',
+        family: 'K',
+        fix: 'Cite a row that exists, or write the row.',
+        id: 'K2',
+        name: 'k2-cited-ids-resolve',
+        rationale:
+            'A chapter citing "rule X" that resolves to nothing is worse than silence: the reader goes looking for a guard that was never written.',
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
+            'Every diagnostic ends with its own generated anchor, and the anchor exists in the generated chapter.',
+        family: 'K',
+        fix: 'Let `withAnchors()` generate the tail; never type one.',
+        id: 'K3',
+        name: 'k3-message-anchors',
+        rationale:
+            'The anchor is the only route most readers ever take into the catalogue, and forty hand-written tails drifted the first time a heading moved.',
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
+            'The REACH of every row is proven on one fixture project laid out with every path role, judged by a single oxlint run.',
+        family: 'K',
+        fix: 'Add the path to the reach fixture and state what each rule says about it.',
+        id: 'K4',
+        name: 'k4-reach-per-path',
+        rationale:
+            'A stated reach nothing checks is a sentence: the gates that drifted from their rows were the ones no fixture ever put a file in front of.',
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
+            'No catalogue sentence has gone back to French — a deny-list of the tokens the manifest actually carried.',
+        family: 'K',
+        fix: 'Write the row in English, like every sentence the catalogue publishes.',
+        id: 'K5',
+        name: 'k5-english-catalogue',
+        rationale:
+            "A message a consumer's CI prints and a chapter their agent reads are not a private notebook, and a half-translated catalogue is worse than either.",
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
+            'Every constructor has a `specs/<facet>/` tree in this package; `mobile` is the one exception, with its reason stated.',
+        family: 'M',
+        fix: 'Specify the facet on the package itself before a rule presumes it.',
+        id: 'M1',
+        name: 'm1-constructor-has-a-tree',
+        rationale:
+            'A facet the framework never ran against itself is a surface nobody has met, and P10 says the seam is proven before the rule wave.',
+        reach: 'all',
+    },
+];
+
+/**
+ * The **type** channel — what the COMPILER refuses.
+ *
+ * No rule sees these and no pass walks them: the call they describe does not
+ * compile, so the framework never gets the chance to refuse it at run time.
+ * Each row is proven by an `@ts-expect-error` in `src/type-channel.test-d.ts`
+ * (the W6 verb rows have a fuller set in the component facet's own type test),
+ * which `typescript check` runs over the whole repository — the assertion fails
+ * the day the line it marks starts compiling.
+ */
+export const TYPE_ROWS: CatalogEntry[] = [
+    {
+        channel: 'type',
+        convention:
+            'The `services` record types the factory argument: `server: (services) => …` sees exactly the keys the record declares.',
+        family: 'A',
+        fix: 'Declare the service in the record, or read the key that is there.',
+        id: 'A8',
+        name: 'a8-services-type-the-factory',
+        rationale:
+            'A service read by a name nothing started is a startup failure with no line to blame; the compiler has the record in hand and can say so at the call.',
+        reach: 'specification',
+    },
+    {
+        channel: 'type',
+        convention:
+            '`server` and `url` are mutually exclusive on `specification.website()` — the pair is inexpressible, not runtime-checked.',
+        family: 'A',
+        fix: 'State `server` for a site this run starts, `url` for one already running.',
+        id: 'A11',
+        name: 'a11-server-xor-url',
+        rationale:
+            'They name two different subjects, and a specification that states both leaves the reader to guess which site the spec is about.',
+        reach: 'specification',
+    },
+    {
+        channel: 'type',
+        convention:
+            'Exactly ONE terminal action closes a chain: what it answers is a result, and a result carries no verbs to continue with.',
+        family: 'B',
+        fix: 'Open a second chain for a second action.',
+        id: 'B1',
+        name: 'b1-one-terminal-action',
+        rationale:
+            'Two actions in one chain make a test with two Whens, and the reader cannot tell which one the Then is about.',
+        reach: 'tests',
+    },
+    {
+        channel: 'type',
+        convention: 'A chain carries no label: the test name is the sentence.',
+        family: 'B',
+        fix: 'Name the test; the chain states what it does, not what it is called.',
+        id: 'B3',
+        name: 'b3-no-label-on-a-chain',
+        rationale: 'A second place to read the intent is a second place for it to be stale.',
+        reach: 'tests',
+    },
+    {
+        channel: 'type',
+        convention: 'A result accessor is read-only.',
+        family: 'D',
+        fix: 'Assert on what the run produced; change the Given if the answer is wrong.',
+        id: 'D1',
+        name: 'd1-read-only-accessors',
+        rationale:
+            'The answer a run produced is evidence, and a test that can rewrite its own evidence proves nothing.',
+        reach: 'tests',
+    },
+    {
+        channel: 'type',
+        convention:
+            '`mockOf<Port>()` needs its port: `T` is constrained to `object` with no default, so a double built without one has no surface and every call on it is refused.',
+        family: 'M',
+        fix: 'State the port: `mockOf<PaymentGateway>()`.',
+        id: 'M2',
+        name: 'm2-mockof-requires-the-port',
+        rationale:
+            'The type argument IS the contract the double stands for; without it the double agrees with anything.',
+        reach: 'tests',
+    },
+    {
+        channel: 'type',
+        convention:
+            "The verb set is the boundary between the facets: `goto` is the page's, `rerender`/`unmount` the component's, `tap` the screen's, and `focused`/`disabled`/`selected`/`valued` reach only where `see` and `gone` do.",
+        facet: 'shared',
+        family: 'W',
+        fix: 'Reach for the verb the facet offers; a missing one is a decision, not an omission.',
+        id: 'W6',
+        name: 'w6-verb-subset-per-facet',
+        rationale:
+            'One vocabulary across three facets is memorable only while each facet refuses the words it cannot mean.',
+        reach: 'tests',
+    },
+];
+
+/**
  * The **upstream** channel — a convention an oxlint plugin rule ALREADY knows
  * how to enforce, turned on with the option that states it (ADR-005).
  *
@@ -1157,6 +1339,78 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
  * cannot reach (network, container lifecycle). Several double a static pass.
  */
 export const RUNTIME_RULES: CatalogEntry[] = [
+    {
+        channel: 'runtime',
+        convention:
+            'A sequence is expressed by SEEDING the state the second run would have found: every chain starts on databases the framework has reset.',
+        family: 'B',
+        fix: 'Seed the state the earlier step would have left, and open one chain per action.',
+        id: 'B7',
+        name: 'b7-sequence-by-seed',
+        rationale:
+            'A spec that depends on a previous one passes alone, passes in order, and fails the day the runner reorders them.',
+        reach: 'tests',
+    },
+    {
+        channel: 'runtime',
+        convention:
+            'An `_expected/*.http` starts with a status line, and its headers are matched as a SUBSET: the ones listed must match, unlisted response headers are unconstrained.',
+        family: 'C',
+        fix: 'List the headers the case is about; leave the rest out.',
+        id: 'C3',
+        name: 'c3-expected-http-shape',
+        rationale:
+            'A response carries headers no test is about (dates, lengths, proxies); matching them all would make every golden a record of the machine that wrote it.',
+        reach: 'ground',
+    },
+    {
+        channel: 'runtime',
+        convention:
+            "A slash in a fixture name is a SUBFOLDER of `_expected/`: `toMatch('build/verbose.txt')` resolves to `_expected/build/verbose.txt`.",
+        family: 'C',
+        fix: 'Name the subfolder in the fixture name; the resolver creates it under `_expected/`.',
+        id: 'C5',
+        name: 'c5-slash-is-a-subfolder',
+        rationale:
+            'A flat `_expected/` stops being readable at a dozen files, and the alternative — a second option naming a directory — would be a second way to say where a golden lives.',
+        reach: 'ground',
+    },
+    {
+        channel: 'runtime',
+        convention:
+            'Every `toMatch` subject resolves against `_expected/` — response, stream, json, directory, tree. Only `.request()` reads `_requests/`.',
+        family: 'D',
+        fix: 'Put the golden under `_expected/` and name it with its extension.',
+        id: 'D3',
+        name: 'd3-tomatch-resolves-under-expected',
+        rationale:
+            'One resolution rule for every subject means a reader knows where a golden lives without knowing which accessor produced it.',
+        reach: 'tests',
+    },
+    {
+        channel: 'runtime',
+        convention:
+            'Isolation is per WORKER: each worker takes its own schema, database index or file copy, so two workers never share state.',
+        family: 'G',
+        fix: 'Take the handle the runner gives the chain; a client opened at the default index talks to another worker.',
+        id: 'G2',
+        name: 'g2-per-worker-isolation',
+        rationale:
+            'Parallelism is the default, and a shared database turns it into a source of failures that never reproduce alone.',
+        reach: 'tests',
+    },
+    {
+        channel: 'runtime',
+        convention:
+            'The capture is docker-aware: every container a run spawned carries that run label, and the scope exit removes them whether the test asked about them or not.',
+        family: 'G',
+        fix: 'Bind the result with `await using`, and declare `docker` on the runner.',
+        id: 'G3',
+        name: 'g3-docker-aware-capture',
+        rationale:
+            'A container that outlives its run is a machine filling up quietly, and the next run inherits its state.',
+        reach: 'tests',
+    },
     {
         channel: 'runtime',
         convention:
@@ -1309,6 +1563,8 @@ for (const [name, doc] of Object.entries(RULE_DOCS)) {
 export const catalog: CatalogEntry[] = [
     ...statiqueEntries,
     ...UPSTREAM_RULES,
+    ...TYPE_ROWS,
+    ...META_ROWS,
     ...CHECKER_PASSES,
     ...RUNTIME_RULES,
     ...PROCESS_RULES,

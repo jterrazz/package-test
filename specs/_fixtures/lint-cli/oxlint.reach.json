@@ -1,0 +1,94 @@
+{
+    "categories": {
+        "correctness": "off"
+    },
+    "jsPlugins": [
+        "../../../dist/oxlint.js"
+    ],
+    "rules": {
+        "jterrazz/a1-specification-file": "error",
+        "jterrazz/a2-known-constructors": "error",
+        "jterrazz/a3-no-destructure-alias": "error",
+        "jterrazz/a4-cleanup-afterall": "error",
+        "jterrazz/a9w-redundant-root": "warn",
+        "jterrazz/b10-when-between-markers": "error",
+        "jterrazz/b11-marker-one-line": "error",
+        "jterrazz/b12-marker-between-statements": "error",
+        "jterrazz/b2-known-fixture-marker": "error",
+        "jterrazz/b4-given-then": "error",
+        "jterrazz/b6w-redundant-env-url": "warn",
+        "jterrazz/b8-kebab-trigger": "error",
+        "jterrazz/b9w-product-command": "warn",
+        "jterrazz/c1-domain-structure": [
+            "error",
+            {
+                "depth": "facet"
+            }
+        ],
+        "jterrazz/c10-contracts-boundary": "error",
+        "jterrazz/c11-contract-data-pairing": "error",
+        "jterrazz/c13-underscored-ground": "error",
+        "jterrazz/c2-http-only-requests": "error",
+        "jterrazz/c4-contract-shape": "error",
+        "jterrazz/c6-tomatch-extension": "error",
+        "jterrazz/c7-seeds-sql-only": "error",
+        "jterrazz/c8-referenced-fixture-exists": "error",
+        "jterrazz/d12w-response-body-probe": "warn",
+        "jterrazz/d13w-unfrozen-negative-fixture": "warn",
+        "jterrazz/d15w-status-only-probe": "warn",
+        "jterrazz/d16-sampled-oracle": "error",
+        "jterrazz/d16w-ambient-value": "warn",
+        "jterrazz/d17w-double-only-oracle": "warn",
+        "jterrazz/d18w-existence-only-oracle": "warn",
+        "jterrazz/d19w-probe-cluster": "warn",
+        "jterrazz/d2-await-io-matcher": "error",
+        "jterrazz/d2w-await-sync-matcher": "warn",
+        "jterrazz/d6w-transform-token-equivalent": "warn",
+        "jterrazz/d8w-text-bypass": "warn",
+        "jterrazz/d9w-single-use-ref": "warn",
+        "jterrazz/e2-preset-config": "error",
+        "jterrazz/e4w-project-binding": "warn",
+        "jterrazz/e5-no-simulated-dom": "error",
+        "jterrazz/e5b-no-simulated-dom-config": "error",
+        "jterrazz/e6-component-project-helper": "error",
+        "jterrazz/e7w-include-prefix-exists": "warn",
+        "jterrazz/e8-literate-specification-exists": "error",
+        "jterrazz/e9w-env-assignment-in-test": "warn",
+        "jterrazz/f1-no-subpath-import": "error",
+        "jterrazz/f2-no-test-imports-in-prod": "error",
+        "jterrazz/f3-specs-public-entry": "error",
+        "jterrazz/f4-no-test-to-test-import": "error",
+        "jterrazz/f5-fixtures-only-from-tests": "error",
+        "jterrazz/f6-no-foreign-test-runtime": "error",
+        "jterrazz/g4-no-dom-in-module-test": "error",
+        "jterrazz/i1-layer-boundaries": [
+            "error",
+            {
+                "layers": {
+                    "core": {
+                        "imports": [
+                            "core/"
+                        ]
+                    },
+                    "integrations": {
+                        "folders": {
+                            "postgres": [
+                                "pg"
+                            ]
+                        },
+                        "imports": [
+                            "core/"
+                        ]
+                    }
+                }
+            }
+        ],
+        "jterrazz/i2-sibling-test-naming": "error",
+        "jterrazz/i4-no-vi-mock-in-src": "error",
+        "jterrazz/j2-no-sleep-in-specs": "error",
+        "jterrazz/j6w-given-in-the-test": "warn",
+        "jterrazz/w1-scenario-pure": "error",
+        "jterrazz/w2-testid-states-what-is-missing": "error",
+        "jterrazz/w5w-scenario-settles": "warn"
+    }
+}

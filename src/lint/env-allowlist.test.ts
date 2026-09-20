@@ -19,7 +19,7 @@ const files = sourceFiles(resolve(import.meta.dirname, '..'));
  */
 const OFFENDER_FIXTURE = resolve(import.meta.dirname, 'env-allowlist.offenders.txt');
 
-describe('framework env reads — E1 allowlist (meta-test)', () => {
+describe('framework env reads — e1-env-allowlist (meta-test)', () => {
     test('every static env read is in the allowlist', () => {
         // Given - all static process.env.<NAME> reads across non-test src/
         // Then - none outside the allowlist

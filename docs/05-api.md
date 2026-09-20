@@ -243,7 +243,6 @@ test('links the analytics event to the created order', async () => {
 
 ## Pitfalls
 
-- **`mode` in the specification file while `server` is defined** — error (rule A5). The switch belongs in `vitest.config.ts`.
 - **Omitting `database:` with ≥ 2 databases, or passing it with 1** — both are convention violations (rule A7).
 - **Expecting unlisted response headers to be constrained.** Response `_expected/*.http` header matching is subset-only; if a header must be _absent_, that is not expressible in the file — assert on it in code.
 - **Chaining two actions** (`api.get(...).get(...)`) or reusing state across tests. One chain = one terminal action; databases reset per chain (rules B1, B7).

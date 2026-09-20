@@ -199,6 +199,8 @@ describe('toMatch — accessor subjects reject a regex argument (runtime guard, 
         });
     }
 
+    // RUNTIME D14 — `toMatch` on an accessor subject expects a fixture NAME:
+    // Anything else is refused at once, naming the subject and the escape hatch.
     test('a non-string, non-regex argument is rejected too (defensive)', () => {
         // Given - a stream subject and a numeric argument
         const subject = new TextAccessor('out', 'stdout', '/tmp');

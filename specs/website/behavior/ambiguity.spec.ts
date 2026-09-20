@@ -14,6 +14,8 @@ async function refusalOf(path: string, scenario: VisitScenario): Promise<string>
     throw new Error(`expected ${path} to be refused, but the visit succeeded`);
 }
 
+// RUNTIME W3 — a descriptor a verb ACTS on must designate exactly one
+// Element; the refusal enumerates the candidates and the rewrites.
 test('refuses an element that matches more than one node', async () => {
     // Given - a page where "Articles" names two links verbatim, and a third only as a substring ("Read Articles") the exact default no longer reaches
     const message = await refusalOf('/ambiguous', async (visitor) => {
