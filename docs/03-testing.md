@@ -133,11 +133,12 @@ is the one a machine reads.
 `npm run coverage` records where the suite stands in `coverage.baseline.json`;
 `npm run coverage:check` refuses a run that fell below it. Neither runs the
 suite: both read the report of the LAST `--coverage` run, which is why
-`make check` runs the suite WITH coverage (`npm test -- --coverage`) before the
+`make test` runs the suite WITH coverage (`npm test -- --coverage`) before the
 gate — a plain `npm test` would leave it judging an older run, or, on a fresh
-clone where `.artifacts/` does not exist yet, nothing at all. The floor only
-ever rises: lowering it is an edit to a committed file, with a commit body
-saying why.
+clone where `.artifacts/` does not exist yet, nothing at all. That target is
+the one CI calls ([What CI runs](#what-ci-runs)), so the floor is judged on
+every push. It only ever rises: lowering it is an edit to a committed file,
+with a commit body saying why.
 
 **One floor, over the whole suite.** The baseline is keyed by scope and the CLI
 takes `--scope`, so a project can keep its own; this repository records `all`
@@ -448,6 +449,8 @@ What update mode writes, what it preserves and the discipline it asks for are [1
 ## What CI runs
 
 The workflow is `.github/workflows/validate.yaml`, on every push to `main` and every pull request, delegating to the estate's shared `validate.yaml`. It restores `.artifacts/`, then runs `make build`, `make lint` and `make test` in that order, with chromium provisioned because the website specs drive a real browser. The same three targets are what a local run owes before a push; the ordering is not decorative, since lint loads what build produced.
+
+**`make test` carries the floor.** It runs the suite WITH coverage and then `npm run coverage:check`, so the ratchet is judged on every push rather than trusted to whoever remembered to type `make check` — a gate CI never runs is a courtesy, not a gate. `make check` is still the whole verdict locally: build, lint, then that same target.
 
 ## Pitfalls
 

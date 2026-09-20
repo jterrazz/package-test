@@ -15,22 +15,21 @@ docs: node_modules/.install
 lint: node_modules/.install
 	npm run lint
 
+# What CI calls, so the floor is judged on every push: the suite runs WITH
+# Coverage because `coverage:check` reads the report of the LAST `--coverage`
+# Run — a plain `npm test` would leave it judging an older run, or nothing at
+# All on a fresh clone, where `.artifacts/` does not exist yet.
 test: node_modules/.install
-	npm test
+	npm test -- --coverage
+	npm run coverage:check
 
 coverage: node_modules/.install
 	npm run coverage
 
 # The whole verdict, in the order a failure is cheapest to read: the build the
-# lint and the specs both need, then the linters, then the suite, then the
-# floor the suite may not fall through.
-#
-# The suite runs WITH coverage here, and that is the point: `coverage:check`
-# reads the report of the last `--coverage` run, so a plain `npm test` would
-# leave it judging either nothing (a fresh clone has no report — `.artifacts/`
-# is ignored) or an older run's.
+# lint and the specs both need, then the linters, then the suite and the floor
+# it may not fall through — the same three targets CI runs, in the same order.
 check: node_modules/.install
 	npm run build
 	npm run lint
-	npm test -- --coverage
-	npm run coverage:check
+	$(MAKE) test
