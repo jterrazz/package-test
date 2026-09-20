@@ -61,6 +61,13 @@ const pages = {
     <p id="api">${process.env.API_URL ?? 'unset'}</p>
     <p id="run">${process.env.TEST_RUN_ID ?? 'unset'}</p>
     </body></html>`,
+    // The FRAMEWORK's own page: the two metas a view-transitions router writes
+    // Into every head, which no spec ever asked for and no token can name — the
+    // Runner's `transform` is the door that drops them before a comparison.
+    '/framework': `<!doctype html><html lang="en"><head>${head('Fixture — Framework', '/framework')}
+    <meta name="framework-transitions-enabled" content="">
+    <meta name="framework-transitions-fallback" content="animate">
+    </head><body><h1>Framework</h1></body></html>`,
     '/noisy': `<!doctype html><html lang="en"><head><title>Fixture — Noisy</title></head>
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
     // The ambiguity fixture: "Articles" appears three times — twice as the

@@ -32,6 +32,7 @@ export class FetchResult extends BaseResult {
     get body(): TextAccessor {
         return new TextAccessor(this.exchange.body, 'body', this.testDir, {
             captures: this.captures,
+            transform: this.config.transform,
         });
     }
 
@@ -42,7 +43,12 @@ export class FetchResult extends BaseResult {
 
     /** The response body parsed as JSON. */
     get json(): JsonAccessor {
-        return new JsonAccessor(this.exchange.body, this.testDir, undefined, this.captures);
+        return new JsonAccessor(
+            this.exchange.body,
+            this.testDir,
+            this.config.transform,
+            this.captures,
+        );
     }
 
     /** The `location` header of a redirect response, or undefined. */
@@ -99,7 +105,10 @@ export class PageResult extends BaseResult {
      */
     get console(): TextAccessor {
         const lines = this.page.consoleMessages.map((m) => `[${m.type}] ${m.text}`).join('\n');
-        return new TextAccessor(lines, 'console', this.testDir, { captures: this.captures });
+        return new TextAccessor(lines, 'console', this.testDir, {
+            captures: this.captures,
+            transform: this.config.transform,
+        });
     }
 
     /**
@@ -112,7 +121,10 @@ export class PageResult extends BaseResult {
             .filter((m) => m.type === 'error')
             .map((m) => m.text)
             .join('\n');
-        return new TextAccessor(lines, 'errors', this.testDir, { captures: this.captures });
+        return new TextAccessor(lines, 'errors', this.testDir, {
+            captures: this.captures,
+            transform: this.config.transform,
+        });
     }
 
     /**
@@ -127,13 +139,19 @@ export class PageResult extends BaseResult {
             metas: namedMetas(this.page.metas),
             title: this.page.title,
         };
-        return new JsonAccessor(JSON.stringify(summary), this.testDir, undefined, this.captures);
+        return new JsonAccessor(
+            JSON.stringify(summary),
+            this.testDir,
+            this.config.transform,
+            this.captures,
+        );
     }
 
     /** The rendered DOM serialization as a text accessor. */
     get html(): TextAccessor {
         return new TextAccessor(this.page.html, 'html', this.testDir, {
             captures: this.captures,
+            transform: this.config.transform,
         });
     }
 
@@ -143,7 +161,7 @@ export class PageResult extends BaseResult {
      */
     get jsonLd(): JsonAccessor {
         const combined = `[${this.page.jsonLdBlocks.join(',')}]`;
-        return new JsonAccessor(combined, this.testDir, undefined, this.captures);
+        return new JsonAccessor(combined, this.testDir, this.config.transform, this.captures);
     }
 
     /** `<link>` elements of the head, in DOM order. */
@@ -165,6 +183,7 @@ export class PageResult extends BaseResult {
     get content(): TextAccessor {
         return new TextAccessor(this.page.text, 'text', this.testDir, {
             captures: this.captures,
+            transform: this.config.transform,
         });
     }
 
