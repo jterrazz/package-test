@@ -1,206 +1,199 @@
 # @jterrazz/test
 
-Declarative testing framework for APIs, jobs, CLIs, modules against real services, websites, mobile apps and rendered components. Six constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none. Specs read as sentences: given → action → assertions. The vitest test name is the spec's description; all assertions go through `expect()` with auto-registered, subject-typed matchers.
+Declarative testing framework for modules, APIs, jobs, CLIs, rendered components, websites and native apps. Seven constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none.
+
+A spec reads as a sentence: given → action → assertions. The vitest test name is its only description, every assertion goes through `expect()` with subject-typed matchers, and the infrastructure a spec declares — Postgres, Redis, SQLite, a child process, a real Chromium, an iOS simulator — is started, isolated per worker and cleaned up for you.
 
 ```bash
 npm install -D @jterrazz/test vitest
 ```
 
-Everything a spec needs imports from `@jterrazz/test`. The exceptions are the two TOOL subpaths, which no spec ever imports: `@jterrazz/test/oxlint` (the zero-runtime lint plugin and its config fragment, loading no test runtime) and `@jterrazz/test/vitest` (what `vitest.config.ts` imports — the `defineSpecConfig()` preset and the `literate()` plugin).
+Everything a spec needs imports from `@jterrazz/test`. The other three entries are tools no spec imports: `@jterrazz/test/vitest` (what `vitest.config.ts` imports), `@jterrazz/test/oxlint` (the zero-runtime lint plugin) and `@jterrazz/test/schema` (the document JSON Schema).
 
-## Quick start
+## One kind of test, one example
 
-### API testing (HTTP)
+Which kind a test is, is the first question — [the fork](docs/18-conventions.md#the-fork--which-kind-of-test-this-is) asks it in nine lines and the answer fixes the folder, the constructor and the project.
+
+**A module** — beside its code, nothing started ([docs/05](docs/05-module-tests.md)):
 
 ```typescript
-// specs/api/api.specification.ts
-import { afterAll } from 'vitest';
-import { postgres, specification } from '@jterrazz/test';
-import { createApp } from '../../src/app.js';
+// src/domain/ranking.test.ts
+import { clock } from '@jterrazz/test';
+import { expect, test } from 'vitest';
 
-export const { api, cleanup } = await specification.api({
-    services: { db: postgres() }, // → reported as "db"; init from docker/db/
-    server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
+import { rank } from './ranking.js';
+
+test('ranks a fresher post above an older one of equal score', () => {
+    // Given - two posts of equal score, one written this morning
+    using _ = clock.at('2026-03-04T09:30:00Z');
+
+    // Then - the fresher one leads
+    expect(rank(posts).map((post) => post.id)).toStrictEqual(['fresh', 'stale']);
 });
-
-afterAll(cleanup);
 ```
 
+**An integration spec** — a module against the real thing, or against a golden ([docs/06](docs/06-integration.md)):
+
 ```typescript
-// specs/api/users/users.spec.ts
+// specs/integration/posts/find.spec.ts
 import { expect, test } from 'vitest';
-import { api } from '../api.specification.js';
 
-test('creates a user', async () => {
-    // Given - the complete request from _requests/create-user.http
-    const result = await api.request('create-user.http');
+import { integration } from '../integration.specification.js';
 
-    // Then - status + headers + body from _expected/user-created.http; row in db
-    expect(result.response).toMatch('user-created.http');
-    await expect(result.table('users')).toMatchRows({
-        columns: ['name'],
-        rows: [['Alice']],
+test('finds the post the migration wrote', async () => {
+    // Given - a seeded database
+    const result = await integration.seed('posts.sql').call(({ db }) => findPost(db, 'p-1'));
+
+    // Then - the row comes back as the repository shapes it
+    await expect(result.value).toMatch('found.json');
+});
+```
+
+**A component** — a rendered unit in a real browser, beside its code ([docs/07](docs/07-component.md)):
+
+```tsx
+// src/presentation/post-table.test.tsx
+import { component, content } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+import { PostTable } from './post-table.js';
+
+test('says how much of the collection the table is showing', async () => {
+    // Given - a page of one row answering for a collection of two hundred
+    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
+        await visitor.see(content('Showing 1 of 200 posts'));
     });
+
+    // Then - the table is qualified by what it is not showing
+    await expect(result.tree).toMatch('one-of-two-hundred.aria.yaml');
 });
 ```
 
-### CLI testing
+**A website** — the served page, driven in a browser ([docs/08](docs/08-website.md)):
 
 ```typescript
-// specs/cli/cli.specification.ts
-import { resolve } from 'node:path';
-import { afterAll } from 'vitest';
-import { specification } from '@jterrazz/test';
-
-export const { cli, cleanup } = await specification.cli(
-    resolve(import.meta.dirname, '../../bin/my-cli.sh'),
-);
-
-afterAll(cleanup);
-```
-
-```typescript
-// specs/cli/build/build.spec.ts
+// specs/website/subscribe/subscribe.spec.ts
+import { button, field } from '@jterrazz/test';
 import { expect, test } from 'vitest';
-import { cli } from '../cli.specification.js';
 
-test('builds the project', async () => {
-    // Given - sample app project spread into the cwd
-    const result = await cli.fixture('$FIXTURES/sample-app/').exec('build');
-
-    // Then - ESM output, no CJS
-    expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('Build completed');
-    expect(result.file('dist/index.js').exists).toBe(true);
-    expect(result.file('dist/index.cjs').exists).toBe(false);
-});
-```
-
-A CLI session can also BE the spec file. A `<case>.spec.yaml` document states one scenario — its ground, then its runs — and executes either as a test file of its own (the `literate()` vite plugin) or through `cli.run('case.spec.yaml')`:
-
-```yaml
-description: refuses to build without a manifest
-runs:
-    - command: build
-      exit: 1
-      stderr: |
-          Error: no my-cli.yaml in the current directory
-```
-
-Same engine as the chain, same `{{token}}` grammar, same `TEST_UPDATE=1` — which rewrites each run's exit code and streams, and nothing else. A JSON Schema ships at `@jterrazz/test/schema` so an editor validates as you type. Full grammar: [docs/12-cli.md](docs/12-cli.md#spec-documents--casespecyaml).
-
-### Website testing (browser)
-
-```typescript
-// specs/website/website.specification.ts
-import { specification } from '@jterrazz/test';
-import { afterAll } from 'vitest';
-
-export const { cleanup, website } = await specification.website({
-    server: { command: 'node specs/_fixtures/website-app/server.mjs', ready: '/' },
-});
-
-afterAll(cleanup);
-```
-
-```typescript
-// specs/website/visit/head.spec.ts
-import { expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
-test('captures the full head surface of a rendered page', async () => {
-    // Given - the fixture homepage
-    const result = await website.visit('/');
+test('subscribes through the form and captures the final state', async () => {
+    // Given - a visitor on the homepage
+    const result = await website.visit('/', async (visitor) => {
+        await visitor.fill(field('Email'), 'visitor@site.test');
+        await visitor.click(button('Subscribe'));
+    });
 
-    // Then - one golden covers title, canonical, alternates, and metas
-    expect(result.status).toBe(200);
-    expect(result.head).toMatch('home.head.json');
+    // Then - the page says so, and the console is clean
+    expect(result.content).toContain('Thanks for subscribing');
+    await expect(result.errors).toBeEmpty();
 });
 ```
 
-### Mobile testing (iOS simulator)
+**A mobile screen** — the installed app on a simulator ([docs/09](docs/09-mobile.md)):
 
 ```typescript
-// specs/mobile/mobile.specification.ts
-import { specification } from '@jterrazz/test';
-import { afterAll } from 'vitest';
-
-export const { cleanup, mobile } = await specification.mobile({
-    app: { bundleId: 'com.jterrazz.fakenews' },
-    device: { name: 'iPhone 17', os: '26.5' },
-});
-
-afterAll(cleanup);
-```
-
-```typescript
-// specs/mobile/events/feed.spec.ts
+// specs/mobile/events/bookmark.spec.ts
+import { button, content } from '@jterrazz/test';
 import { expect, test } from 'vitest';
+
 import { mobile } from '../mobile.specification.js';
 
-test('shows the events feed behind its deep link', async () => {
-    // Given - the events screen
-    const result = await mobile.open('news://events');
+test('bookmarks an event from its detail screen', async () => {
+    // Given - a visitor on the events feed
+    const result = await mobile.open('news://events', async (visitor) => {
+        await visitor.tap(button('Enquête Fauci COVID-19'));
+        await visitor.see(content('rapports'));
+        await visitor.tap(button('Bookmark'));
+    });
 
-    // Then - one golden covers the whole projected accessibility tree
-    expect(result.screen).toMatch('events.screen.json');
+    // Then - the capture reflects the screen after the interaction
+    expect(result.content).toContain('Bookmarked');
 });
 ```
 
-Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.call()`, `.fetch()`, `.visit()`, `.open()` execute the spec and resolve to a precisely typed result. There is no `.run()`, no label, and no `.spawn()`.
+**An API** — the assembled app, met through a complete HTTP exchange ([docs/10](docs/10-api.md)):
 
-## The whole surface, one chapter per subject
+```typescript
+// specs/api/users/create-user.spec.ts
+import { expect, test } from 'vitest';
 
-Everything below the quick start is stated ONCE, in the chapter that owns it — a second copy here would be a second answer, and the one a reader meets first is the one that goes stale.
+import { api } from '../api.specification.js';
 
-| Subject                                                            | Chapter                                                                                                              |
-| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| The six constructors, their options, the handles they return       | [docs/05](docs/10-api.md)–[docs/07](docs/12-cli.md), [docs/14](docs/08-website.md)–[docs/17](docs/06-integration.md) |
-| A rendered component — no constructor, the chain and `component()` | [docs/16](docs/07-component.md)                                                                                      |
-| The chain: setups, terminal actions, what each result carries      | [docs/08](docs/14-assertions.md)                                                                                     |
-| Every matcher, by subject                                          | [docs/08](docs/14-assertions.md)                                                                                     |
-| The `{{token}}` grammar, `#ref` captures, update mode              | [docs/09](docs/15-tokens.md)                                                                                         |
-| Contracts, selection, the provider builders, `intercept()`         | [docs/10](docs/16-contracts.md)                                                                                      |
-| Services, init scripts, per-worker isolation, `process()`          | [docs/11](docs/17-services.md)                                                                                       |
-| `defineSpecConfig()`, the project helpers, the artefact paths      | [docs/02](docs/02-developing.md#vitest-config-the-preset)                                                            |
-| The conventions, and the catalogue that enforces them              | [docs/12](docs/18-conventions.md), [docs/13](docs/19-linting.md)                                                     |
+test('creates a user and returns its location', async () => {
+    // Given - an empty users table
+    const result = await api.seed('empty.sql').request('create-user.http');
 
-## Conventions
-
-Normative rules live in the constitution ([docs/18-conventions.md](docs/18-conventions.md)); the generated per-rule catalogue is [docs/19-linting.md](docs/19-linting.md). A facet (`specs/<facet>/`) carries its runner(s) at its root and holds domain folders; the folder follows the assets:
-
-```
-specs/<facet>/                  # api | jobs | cli | integration | website | mobile
-├── <facet>.specification.ts    # runner(s) at the facet ROOT (rule C1)
-└── <domain>/                   # a product command/area — 1..n specs
-    ├── <aspect>.spec.ts
-    ├── _seeds/          # *.sql ONLY — database state
-    ├── _requests/       # *.http — inputs: COMPLETE request (method, path, headers, body)
-    ├── contracts/      # <name>.contracts.ts facade + <provider>/<name>.ts units + their .response.json / .request.ts data
-    ├── _fixtures/       # domain-local files/dirs copied into the cwd (cli) — shared pool lives at specs/_fixtures/
-    └── _expected/       # ALL expected fixtures, FLAT (incl. response *.http) — a slash in the name creates a subfolder
+    // Then - the response matches the golden, tokens and all
+    expect(result.response).toMatch('user-created.http');
+    await expect(result.table('users')).toMatchRows([{ name: 'Alice' }]);
+});
 ```
 
-**The suffix says the kind.** A UNIT sits beside its code: `<file>.test.ts` for a module, `<file>.test.tsx` for a component. The assembled product, met through an entry, sits under `specs/<facet>/` as `<aspect>.spec.ts`. A spec with its OWN asset dirs gets its own domain folder; specs without local assets group as siblings inside a named group folder (the folder follows the assets). `.fixture(path)` is the one verb that copies into the cwd: domain-local (`_fixtures/…`) or shared (`$FIXTURES/…` → `specs/_fixtures/…`), with rsync trailing-slash semantics and layering. `.seed()` is SQL-only.
+**A job** — what a name triggers, in-process ([docs/11](docs/11-jobs.md)):
 
-Every test contains `// Given -` and `// Then -` comments (always both; `// When -` only if the action is not obvious — the chain IS the when). User-facing framework env var: `TEST_UPDATE` — the only one you set; the framework also reads vitest's `VITEST_POOL_ID` for per-worker isolation.
+```typescript
+// specs/jobs/digest/daily-digest.spec.ts
+import { expect, test } from 'vitest';
 
-### Convention enforcement — the shipped lint plugin
+import { jobs } from '../jobs.specification.js';
 
-These conventions are not just prose: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), plus a `jterrazz-test-check` binary (the conventions checker) that reads the data fixtures and cross-file relationships oxlint cannot. Wire the plugin into your `oxlint.config.ts` and run `jterrazz-test-check specs` in CI — the full seven-channel catalogue (each rule, its channel and rationale) is generated into [docs/19-linting.md](docs/19-linting.md).
+test('writes one digest row per active subscriber', async () => {
+    // Given - two active subscribers and one cancelled
+    const result = await jobs.seed('subscribers.sql').trigger('daily-digest');
+
+    // Then - only the active ones were written
+    await expect(result.table('digests')).toMatchRows([
+        { to: 'a@site.test' },
+        { to: 'b@site.test' },
+    ]);
+});
+```
+
+**A CLI** — the built binary, usually as a document ([docs/12](docs/12-cli.md)):
+
+```yaml
+# specs/cli/scaffold/new-project.spec.yaml
+description: scaffolds a project into an empty directory
+fixture: empty-dir
+runs:
+    - command: new my-app
+      exitCode: 0
+      stdout: scaffolded.txt
+      files:
+          my-app/package.json: package.json
+```
+
+## The map
+
+Everything is stated ONCE, in the chapter that owns it — a second copy here would be a second answer, and the one a reader meets first is the one that goes stale. The corpus map is [docs/README.md](docs/README.md).
+
+| Subject                                                          | Chapter                                                          |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| What the framework is, its trees, its channels, its four entries | [docs/01](docs/01-architecture.md)                               |
+| Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)        |
+| Each kind of test, one chapter, the same seven sections          | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md)     |
+| Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                   |
+| Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                 |
+| The `{{token}}` grammar, `#ref` captures, update mode            | [docs/15](docs/15-tokens.md)                                     |
+| Contracts, selection, provider builders, `intercept()`           | [docs/16](docs/16-contracts.md)                                  |
+| Services, init scripts, per-worker isolation, `process()`        | [docs/17](docs/17-services.md)                                   |
+| The conventions, and the catalogue that enforces them            | [docs/18](docs/18-conventions.md), [docs/19](docs/19-linting.md) |
+
+The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships oxlint cannot. Every diagnostic ends in a rule id and an anchor into the generated catalogue.
 
 ## Requirements
 
-- **Docker** - testcontainers for the container-backed services; not needed for `sqlite()`, plain cli specs, website specs, or mobile specs
-- **Node 24+** and **vitest 5** - the two required peers
-- **better-sqlite3 / pg / redis / testcontainers** - optional peer dependencies, one per service a repository declares: `postgres()` needs `pg` + `testcontainers`, `redis()` needs `redis` + `testcontainers`, `sqlite()` needs `better-sqlite3`. Each is loaded the first time its service starts, and the message names the peer and the command. Under pnpm a native binding also needs its package listed in `onlyBuiltDependencies`, which the message says too
-- **playwright** - optional peer dependency, only needed for `.visit()`: `npm install -D playwright && npx playwright install chromium`
-- **appium + webdriverio** - optional peer dependencies, only needed for `specification.mobile()`: `npm install -D appium webdriverio && npx appium driver install xcuitest` — plus Xcode, a simulator, and the app installed on it
-- **msw**, **vitest-mock-extended**, **yaml** - the three direct dependencies, bundled; no separate install, and declaring one yourself is rule F8's finding
-- **hono** (or any web framework) - supplied by your project for in-process apps; the adapter only needs an object with a `request()` method, so it is not a peer
+- **Node 24+** and **vitest 5** — the two required peers.
+- **Docker** — for `postgres()` and `redis()`; not needed for `sqlite()`, a CLI spec, a website spec or a component spec.
+- **Optional peers, one per thing a repository declares** — `better-sqlite3`, `pg`, `redis`, `testcontainers` for the services; `playwright` for a page or a component, with `@vitest/browser-playwright` pinned to the runner's exact version; `appium` + `webdriverio` for a simulator. Each is loaded the first time it is needed and the refusal names the peer, the facet that asked and the install command — under pnpm, the `onlyBuiltDependencies` line too.
+- **A web framework** — supplied by your project for an in-process app; the adapter only needs an object with a `request()` method, so it is not a peer.
+
+Full detail, and what the tarball leaves behind: [docs/04](docs/04-operating.md).
 
 ## Docs
 
-- Guide (chapters): [docs/README.md](docs/README.md) — getting started, API/jobs/CLI/website/mobile specs, assertions, tokens, contracts, services, conventions, linting
-- API reference: committed under [docs/reference/](docs/reference/) — compiled from source by `npm run docs`
-- Agent skill: [skills/jterrazz-test/](skills/jterrazz-test/) — mental model, per-facet references, generated rule reference
+- The corpus: [docs/README.md](docs/README.md) — the spine, one chapter per kind, the shared references, the enforcement.
+- API reference: [docs/reference/](docs/reference/) — compiled from source by `npm run docs`.
+- Agent skill: [skills/jterrazz-test/](skills/jterrazz-test/) — the fork, the mental model, and a generated signature card per kind.
