@@ -1,6 +1,17 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { loadPeer } from './peer.js';
+import { installerAt, loadPeer } from './peer.js';
+
+/** A project installed by the manager whose lockfile it carries. */
+function projectWith(lockfile: string): string {
+    const directory = mkdtempSync(join(tmpdir(), 'peer-'));
+    writeFileSync(join(directory, 'package.json'), '{ "name": "consumer" }');
+    writeFileSync(join(directory, lockfile), '');
+    return directory;
+}
 
 describe('loadPeer — an optional peer, or a message that fixes it', () => {
     test('hands back what the import resolved, untouched', async () => {
@@ -27,6 +38,14 @@ describe('loadPeer — an optional peer, or a message that fixes it', () => {
         await expect(failed).rejects.toThrow(
             'redis() requires `redis`, an optional peer dependency of @jterrazz/test: npm install -D redis.',
         );
+    });
+
+    test('names the command of the package manager the project uses', () => {
+        // Given - three projects, each carrying one package manager's lockfile
+        // Then - the line the reader types is theirs to copy, not to translate
+        expect(installerAt(projectWith('bun.lock')).command).toBe('bun add -d');
+        expect(installerAt(projectWith('pnpm-lock.yaml')).command).toBe('pnpm add -D');
+        expect(installerAt(projectWith('package-lock.json')).command).toBe('npm install -D');
     });
 
     test('keeps the original failure as the cause', async () => {

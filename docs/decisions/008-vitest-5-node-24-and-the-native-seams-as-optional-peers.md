@@ -37,9 +37,17 @@ flow bumps the pair in one unit.
 
 **The four native seams become OPTIONAL peers**, each loaded on first use
 through `loadPeer()`, whose refusal names the facet, the peer, the install
-command and — under pnpm — the `onlyBuiltDependencies` line. What stays a
-dependency is what every consumer uses and none should declare: `msw`,
-`vitest-mock-extended`, `yaml`. That list is what rule F8 reads.
+command of the package manager the project's own lockfile names, and — under
+pnpm — the `onlyBuiltDependencies` line. What stays a dependency is what every
+consumer uses and none should declare: `msw`, `vitest-mock-extended`, `yaml`.
+That list is what rule F8 reads.
+
+The saving is npm's and Bun's. pnpm resolves a peer it can satisfy whatever
+the consumer declares — with `auto-install-peers` (its default since 8) all
+four arrive anyway, and the native one builds — so under pnpm the change buys
+the DECLARATION, not the install: a member that uses `sqlite()` says so, and a
+member that does not is no longer described by its dependency tree as a
+database consumer.
 
 **Every artefact under `.artifacts/vitest/`**: `attachmentsDir`, the
 json/junit/html/blob `outputFile` map, and both screenshot directories, set by
