@@ -46,6 +46,8 @@ covers (`<file>.test.ts`, I2), and the ASSEMBLED product sits under
 C12 and C18). A few specifications have neither address, and they are not
 mistakes.
 
+### What has no address of its own
+
 What they specify is a REPOSITORY's own surface: the subpaths its
 `package.json` publishes, a `.d.ts` beside every `.js` it ships, the lint guards
 a tree owes, the files a build is expected to write. There is no one module to
@@ -55,14 +57,39 @@ runner"); put beside a module under `src/`, I2 refuses them ("no neighbour
 `exports.ts` found"). Both refusals are right, and a legitimate file shape with
 no green position is a hole in the conventions, not a defect in the file.
 
+### The door, and the depth it is judged by
+
 **The third door is a FIRST-LEVEL folder under `specs/` that is not a facet
 name.** It is a repository suite: it covers a TREE rather than a product served
 through an entry. C12's rename clause does not reach it, C18 and C20 do not
-reach it, and C1's declared depth is what judges its shape. This package's own
-`specs/lint/` is one; a package whose product IS its published tree writes the
-same shape — a suite folder named for what it covers, holding one test that
-resolves every subpath the manifest publishes and one that holds each `.d.ts`
-to the `.js` beside it.
+reach it, and C1's declared depth is what judges its shape.
+
+**C1 judges a suite exactly as it judges a facet.** The suite folder is the
+first level and the tests sit one level down, in a folder named for what they
+cover: at the default depth, `specs/<suite>/<domain>/<aspect>.test.ts`. A test
+written straight into the suite folder is refused for the same reason one at a
+facet root is — the level that says what a file covers would be missing. This
+package's own `specs/lint/` is two levels deep for that reason.
+
+### The two names the estate shares
+
+Two suites carry names the whole estate shares, because two repositories
+inventing two names for one idea is the drift a vocabulary exists to stop: a
+package's own published SURFACE is `surface/`, and a repository's own lint
+guards are `lint/`. Every other suite is named for what it covers.
+
+```
+specs/
+├── surface/                      # what the package publishes
+│   └── package/
+│       ├── exports.test.ts       # every subpath the manifest resolves
+│       └── types.test.ts         # a `.d.ts` beside each `.js` it ships
+└── lint/                         # the guards the repository's own tree owes
+    └── <family>/
+        └── <rule>.test.ts
+```
+
+### The suffix, and the one thing the door does not license
 
 The files there carry `.test.ts` — the UNIT's word — because what they prove is
 read without assembling anything, and `unit()` is what collects them (`roots`,
