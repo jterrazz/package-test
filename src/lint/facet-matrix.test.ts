@@ -92,8 +92,7 @@ describe('facet capability matrix (K1 guard)', () => {
     });
 
     test('time is pinned on the facets whose subject shares this process', () => {
-        // Given - the same matrix; a cli child reads its OWN calendar and takes
-        // The instant through the product's env, never through the chain
+        // Given - the same matrix; a cli child reads its OWN calendar and takes the instant through the product's env, never through the chain
         // Then - `.clock()` sits on api and jobs, and on neither cli row
         expect([
             'clock' in apiMatrix,

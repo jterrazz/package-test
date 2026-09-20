@@ -16,8 +16,7 @@ describe('structural — float semantics (pinned)', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
-        // Then - a JSON number without decimals still matches float (JSON does
-        // Not distinguish 42 from 42.0)
+        // Then - a JSON number without decimals still matches float (JSON does not distinguish 42 from 42.0)
         expect(structuralEquals(match.float(), 42, scope)).toBeTruthy();
         expect(structuralEquals(match.float(), 4.2, scope)).toBeTruthy();
         expect(structuralEquals(match.float(), Number.NaN, scope)).toBeFalsy();
@@ -124,8 +123,7 @@ describe('structural — token grammar edges (pinned)', () => {
         expect(structuralEquals('{{nope}}', '{{nope}}', scope)).toBeTruthy();
         expect(structuralEquals('{{nope}}', UUID_A, scope)).toBeFalsy();
 
-        // Then - pinned: an actual value that IS the literal text "{{uuid}}"
-        // Cannot be matched by a {{uuid}} fixture (the token always parses)
+        // Then - pinned: an actual value that IS the literal text "{{uuid}}" cannot be matched by a {{uuid}} fixture (the token always parses)
         expect(structuralEquals('{{uuid}}', '{{uuid}}', scope)).toBeFalsy();
     });
 
@@ -143,8 +141,7 @@ describe('structural — token grammar edges (pinned)', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
-        // Then - as a WHOLE value {{any}} accepts any type (objects, numbers, null),
-        // The documented carve-out behind the "always-true" claim
+        // Then - as a WHOLE value {{any}} accepts any type (objects, numbers, null), the documented carve-out behind the "always-true" claim
         expect(structuralEquals('{{any}}', { nested: true }, scope)).toBeTruthy();
         expect(structuralEquals('{{any}}', 42, scope)).toBeTruthy();
         expect(structuralEquals('{{any}}', null, scope)).toBeTruthy();
@@ -176,8 +173,7 @@ describe('structural — token grammar edges (pinned)', () => {
         expect(structuralEquals(match.hex(), 'deadbeef', scope)).toBeTruthy();
         expect(structuralEquals(match.base64(), 'deadbeef', scope)).toBeTruthy();
 
-        // Then - each token still rejects a value outside its alphabet (the
-        // Overlap is not an "accepts anything" escape hatch)
+        // Then - each token still rejects a value outside its alphabet (the overlap is not an "accepts anything" escape hatch)
         expect(structuralEquals(match.hex(), 'xyzt', scope)).toBeFalsy();
         expect(structuralEquals(match.base64(), 'not base64!', scope)).toBeFalsy();
     });
@@ -201,8 +197,7 @@ describe('structural — update-mode merges', () => {
     });
 
     test('a mid-file insertion re-pairs previous placeholders by pattern, not by index', () => {
-        // Given - a golden whose tokens sit on lines 1 and 3, and an actual run
-        // That inserted a new line above them (every token line shifted by one)
+        // Given - a golden whose tokens sit on lines 1 and 3, and an actual run that inserted a new line above them (every token line shifted by one)
         const scope = new CaptureScope();
         const previous = 'id {{uuid}}\nstatic\ndone in {{duration}}';
         const actual = `header\nid ${UUID_A}\nstatic\ndone in 1.24s`;
@@ -262,8 +257,7 @@ describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/
         // Given - a fresh JSON fixture (no previous) whose values embed the cwd
         const actual = { cwd: WORKDIR, nested: { path: `${WORKDIR}/out.txt` }, other: 7 };
 
-        // Then - the workdir is written back as its {{workdir}} token, not the
-        // Run-specific temp path — parity with the text path
+        // Then - the workdir is written back as its {{workdir}} token, not the run-specific temp path — parity with the text path
         expect(mergePreservingPlaceholders(null, actual, WORKDIR)).toStrictEqual({
             cwd: '{{workdir}}',
             nested: { path: '{{workdir}}/out.txt' },
@@ -297,8 +291,7 @@ describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/
         const actual = { cwd: WORKDIR, log: `wrote ${WORKDIR}/out.txt`, name: 'Alice' };
         const merged = mergePreservingPlaceholders(null, actual, WORKDIR);
 
-        // Then - the token is stored, and the merged golden matches the same
-        // Actual on a normal (workdir-aware) comparison run
+        // Then - the token is stored, and the merged golden matches the same actual on a normal (workdir-aware) comparison run
         expect(merged).toStrictEqual({
             cwd: '{{workdir}}',
             log: 'wrote {{workdir}}/out.txt',

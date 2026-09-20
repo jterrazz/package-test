@@ -38,8 +38,7 @@ describe('loadPeer — an optional peer, or a message that fixes it', () => {
             async () => await Promise.reject(original),
         );
 
-        // Then - the resolver's own words survive, so a build failure is never
-        // Read as a missing install
+        // Then - the resolver's own words survive, so a build failure is never read as a missing install
         await expect(failed).rejects.toHaveProperty('cause', original);
     });
 });

@@ -29,8 +29,7 @@ test('a name designates the accessible name WHOLE — the 16.0 default', async (
         await visitor.see(link('Articles archive'));
     });
 
-    // Then - "Articles archive" is one element, not two, and the longer name is
-    // Still on the screen: the descriptor narrowed, not the DOM
+    // Then - "Articles archive" is one element, not two, and the longer name is still on the screen: the descriptor narrowed, not the DOM
     expect(result.content).toContain('Articles archive');
 });
 
@@ -51,8 +50,7 @@ test('a name that only matches as a substring says what changed, once', async ()
         await visitor.click(link('archive'));
     });
 
-    // Then - the descriptor designates nothing, and the transitional warning
-    // Names the two releases it ships for so the reader knows the deadline
+    // Then - the descriptor designates nothing, and the transitional warning names the two releases it ships for so the reader knows the deadline
     expect(refusal).not.toBe('');
     const lines = warn.mock.calls.map(([line]) => String(line));
     expect(lines.some((line) => line.includes('matched only as a SUBSTRING'))).toBe(true);

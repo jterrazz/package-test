@@ -92,8 +92,7 @@ describe('docs-typecheck — the published samples typecheck', () => {
             jsx: false,
         };
 
-        // Then - the checker bites: it fails with a real diagnostic (proves the
-        // Green run above is a genuine typecheck, not a vacuous pass)
+        // Then - the checker bites: it fails with a real diagnostic (proves the green run above is a genuine typecheck, not a vacuous pass)
         mkdirSync(CACHE, { recursive: true });
         const result = typecheckDocBlocks({
             blocks: [drifted],

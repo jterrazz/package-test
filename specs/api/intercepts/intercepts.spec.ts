@@ -6,8 +6,7 @@ import latestNews from './contracts/latest-news.contracts.js';
 
 describe('contracts — selection', () => {
     test('a finite contract plays before the unlimited tail (retry path)', async () => {
-        // Given - a rate-limit allowed exactly once, then a success with no
-        // Times (unlimited), passed as one list, and an app that retries on 429
+        // Given - a rate-limit allowed exactly once, then a success with no times (unlimited), passed as one list, and an app that retries on 429
         const result = await api
             .intercept([
                 { request: http.get(QUOTES_URL), response: http.error(429), times: 1 },
@@ -97,8 +96,7 @@ describe('contracts — strict failures (CONVENTIONS D7)', () => {
     });
 
     test('a request no contract was declared for rejects the action', async () => {
-        // Given - a contract for the quotes provider only, while the app
-        // Calls an entirely different host
+        // Given - a contract for the quotes provider only, while the app calls an entirely different host
         const chain = api.intercept(http.get(QUOTES_URL), http.json({})).get('/other');
 
         // Then - the error names the offending request and the declared routes
@@ -109,8 +107,7 @@ describe('contracts — strict failures (CONVENTIONS D7)', () => {
     });
 
     test('a required contract the app never calls rejects the action', async () => {
-        // Given - a contract the spec claims the route MUST call, on an
-        // Action that never reaches the network
+        // Given - a contract the spec claims the route MUST call, on an action that never reaches the network
         const chain = api
             .intercept({
                 request: http.get(QUOTES_URL),
@@ -128,8 +125,7 @@ describe('contracts — strict failures (CONVENTIONS D7)', () => {
 
 describe('contracts — http request filters', () => {
     test('a body/header/query-filtered request matches the outgoing POST', async () => {
-        // Given - a filtered request half narrowing on a body subset, a header,
-        // And a query param — all of which the /submit route satisfies
+        // Given - a filtered request half narrowing on a body subset, a header, and a query param — all of which the /submit route satisfies
         const result = await api
             .intercept(
                 http.post(QUOTES_URL, {
@@ -164,8 +160,7 @@ describe('contracts — http request filters', () => {
 
 describe('contracts — dynamic responses', () => {
     test('a contract computes its response body from the request body', async () => {
-        // Given - a contract whose response derives from the observed request:
-        // The /submit route POSTs { action, user: { role: 'admin' } }
+        // Given - a contract whose response derives from the observed request: the /submit route POSTs { action, user: { role: 'admin' } }
         const result = await api
             .intercept(
                 defineContract({
@@ -224,8 +219,7 @@ describe('contracts — transport failure', () => {
             .intercept(http.get(QUOTES_URL), http.unreachable())
             .get('/offline');
 
-        // Then - the caller took its "nothing answered" branch, which only a
-        // Transport failure reaches — `http.error(503)` would reach the other
+        // Then - the caller took its "nothing answered" branch, which only a transport failure reaches — `http.error(503)` would reach the other
         expect(result.status).toBe(503);
         expect(result.response.body).toStrictEqual({
             error: 'the quotes service did not answer',

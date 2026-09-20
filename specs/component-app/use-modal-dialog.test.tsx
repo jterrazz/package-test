@@ -118,8 +118,7 @@ test('reports nothing when the parent takes it off the screen itself', async () 
 });
 
 test('holds its contract under the <StrictMode> a chain wraps the tree in', async () => {
-    // Given - the same host inside <StrictMode>: the extra checks React runs
-    // Under it must not turn one dismissal into two, nor lose the opener
+    // Given - the same host inside <StrictMode>: the extra checks React runs under it must not turn one dismissal into two, nor lose the opener
     const onClose = vi.fn<() => void>();
     await component
         .wrap((ui) => <StrictMode>{ui}</StrictMode>)

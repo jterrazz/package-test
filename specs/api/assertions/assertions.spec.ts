@@ -42,9 +42,7 @@ describe('api assertion details', () => {
         // Given - response differs from expected file
         const result = await api.seed('two-users.sql', { database: 'db' }).get('/users');
 
-        // Then - error names the fixture and shows the full -/+ diff of both values
-        // Frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The
-        // Error golden below legitimately updates, but the wrong fixture must never be rewritten
+        // Then - error names the fixture and shows the full -/+ diff of both values frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The error golden below legitimately updates, but the wrong fixture must never be rewritten
         const message = await catchMessage(() => {
             expect(result.response).toMatch('wrong-body.http', { frozen: true });
         });
@@ -55,9 +53,7 @@ describe('api assertion details', () => {
         // Given - valid request
         const result = await api.get('/users');
 
-        // Then - clear error pointing at TEST_UPDATE
-        // Frozen - the missing fixture is the behaviour under test; under TEST_UPDATE it must still
-        // Throw "does not exist" rather than be spuriously created
+        // Then - clear error pointing at TEST_UPDATE frozen - the missing fixture is the behaviour under test; under TEST_UPDATE it must still throw "does not exist" rather than be spuriously created
         expect(() => {
             // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
             expect(result.response).toMatch('nonexistent.http', { frozen: true });
@@ -180,8 +176,7 @@ describe('shared assertions', () => {
             // Given - a spec with two postgres handles (db + analytics)
             const result = await api.get('/users');
 
-            // Then - table() without a database option violates A7
-            // Checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
+            // Then - table() without a database option violates A7 checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
             expect(() => result.table('users')).toThrow(
                 'table(): 2 databases are declared ("analyticsDb", "db") — pass { database: <key> } to target one of them.',
             );

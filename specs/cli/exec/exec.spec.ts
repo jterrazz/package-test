@@ -46,14 +46,10 @@ describe('command — exec', () => {
     });
 
     test('captures stderr on exit zero (Unix-style status banners)', async () => {
-        // Given - a command that prints to stderr and exits 0, mirroring the
-        // Unix convention where status banners go to stderr while data goes
-        // To stdout. spwn, gh, git, npm and many others follow this pattern.
+        // Given - a command that prints to stderr and exits 0, mirroring the unix convention where status banners go to stderr while data goes to stdout. spwn, gh, git, npm and many others follow this pattern.
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('status-on-stderr');
 
-        // Then - exit code is zero AND stderr is preserved (regression
-        // Guard: an earlier execSync-based adapter discarded stderr on
-        // Exit zero, leaving CLI consumers unable to snapshot status output).
+        // Then - exit code is zero AND stderr is preserved (regression guard: an earlier execSync-based adapter discarded stderr on exit zero, leaving CLI consumers unable to snapshot status output).
         expect(result.exitCode).toBe(0);
         expect(result.stderr.text).toBe('Operation succeeded\n');
         expect(result.stdout.text).toBe('');
@@ -164,8 +160,7 @@ describe('command — exec', () => {
         });
 
         test('terminates the whole process group, not just the direct child', async () => {
-            // Given - a command that spawns a looping background grandchild
-            // (like a tsdown --watch under a dev command) and records its pid
+            // Given - a command that spawns a looping background grandchild (like a tsdown --watch under a dev command) and records its pid
             const result = await cli
                 .fixture('$FIXTURES/cli-app/')
                 .exec('spawn-daemon', { timeout: 10_000, waitFor: 'daemon ready' });
@@ -173,8 +168,7 @@ describe('command — exec', () => {
             const daemonPid = Number(result.file('daemon.pid').content.trim());
             expect(daemonPid).toBeGreaterThan(0);
 
-            // Then - the grandchild is dead too: killing only the shell child
-            // Would orphan it (signal 0 probes liveness without signalling)
+            // Then - the grandchild is dead too: killing only the shell child would orphan it (signal 0 probes liveness without signalling)
             await expect
                 .poll(
                     () => {
@@ -192,8 +186,7 @@ describe('command — exec', () => {
 
         test('rejects waitFor options on a command sequence', async () => {
             // Given - an array of commands plus long-running options
-            // Then - the combination is refused: `.exec()` answers a promise, so
-            // The refusal arrives as a rejection
+            // Then - the combination is refused: `.exec()` answers a promise, so the refusal arrives as a rejection
             await expect(
                 cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start'], { waitFor: 'x' }),
             ).rejects.toThrow('not supported with a command sequence');

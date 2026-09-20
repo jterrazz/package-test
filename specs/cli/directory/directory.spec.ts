@@ -29,8 +29,7 @@ describe('command — directory snapshot', () => {
         // Given - scaffold-changed writes go.mod with different content
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold-changed');
 
-        // Then - diff surfaces the changed file. Frozen: the shared golden is asserted negatively
-        // Here against a changed tree — TEST_UPDATE must not overwrite it with the changed output
+        // Then - diff surfaces the changed file. Frozen: the shared golden is asserted negatively here against a changed tree — TEST_UPDATE must not overwrite it with the changed output
         await expect(
             expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
         ).rejects.toThrow(/Directory mismatch/u);
@@ -53,9 +52,7 @@ describe('command — directory snapshot', () => {
         // Given - scaffold-changed writes go.mod with different content than the fixture tree
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold-changed');
 
-        // Then - the whole directory diff (counts + per-file line diff) is captured and goldened.
-        // Frozen - the shared cli-scaffold/out golden is asserted negatively here; TEST_UPDATE must
-        // Not overwrite it, and only the error golden updates
+        // Then - the whole directory diff (counts + per-file line diff) is captured and goldened. frozen - the shared cli-scaffold/out golden is asserted negatively here; TEST_UPDATE must not overwrite it, and only the error golden updates
         const message = await catchMessage(async () => {
             await expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true });
         });
@@ -66,8 +63,7 @@ describe('command — directory snapshot', () => {
         // Given - a fixture name that was never created
         const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
 
-        // Then - clear error with the TEST_UPDATE hint. Frozen: under TEST_UPDATE the missing
-        // Snapshot must still throw rather than be created
+        // Then - clear error with the TEST_UPDATE hint. Frozen: under TEST_UPDATE the missing snapshot must still throw rather than be created
         await expect(
             // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing snapshot IS the behaviour under test
             expect(result.directory('out')).toMatch('does-not-exist', { frozen: true }),

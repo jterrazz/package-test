@@ -99,8 +99,7 @@ describe('command — env', () => {
     });
 
     test('$WORKDIR expands to the path {{workdir}} holds, symlinked tmp or not', async () => {
-        // Given - a nested path handed to the child through .env(), under a
-        // Temp root whose raw spelling differs from its resolved one
+        // Given - a nested path handed to the child through .env(), under a temp root whose raw spelling differs from its resolved one
         const result = await underSymlinkedTmp(
             async () =>
                 await cli
@@ -115,8 +114,7 @@ describe('command — env', () => {
     });
 
     test('$WORKDIR in a document env: expands to that same path', async () => {
-        // Given - the same pair declared inline in a spec document, whose
-        // Stdout block asserts {{workdir}}/sub
+        // Given - the same pair declared inline in a spec document, whose stdout block asserts {{workdir}}/sub
         const result = await underSymlinkedTmp(
             async () => await cli.run('expanded-workdir.spec.yaml'),
         );

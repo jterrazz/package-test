@@ -11,6 +11,7 @@
 
 /** A source comment, as exposed by oxlint's ESTree-compatible `sourceCode`. */
 export type Comment = {
+    end?: number;
     range?: [number, number];
     start?: number;
     type: 'Block' | 'Line' | 'Shebang';

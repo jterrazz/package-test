@@ -14,9 +14,7 @@ describe('lint — checker kitchen-sink (CONVENTIONS D11)', () => {
             .fixture('$FIXTURES/lint-violations/checker-kitchen-sink/')
             .exec('.');
 
-        // Then - the whole diagnostic block is asserted (the D10 line's echoed
-        // {{uuid}} token is covered by {{string}}; a literal token in the golden
-        // Would itself be read as a placeholder by the grammar — see D4)
+        // Then - the whole diagnostic block is asserted (the D10 line's echoed {{uuid}} token is covered by {{string}}; a literal token in the golden would itself be read as a placeholder by the grammar — see D4)
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch('kitchen-sink.txt');
     });

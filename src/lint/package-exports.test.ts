@@ -112,9 +112,7 @@ describe('package-exports — the root has two runtimes and one type surface', (
     });
 
     test('the browser build carries every name the node build exports', async () => {
-        // Given - the node entry, and the page's bundle read as text: it opens
-        // Browser Mode's own context module, which refuses to load under node —
-        // Which is the very reason the second build exists (`npm run build` first)
+        // Given - the node entry, and the page's bundle read as text: it opens browser Mode's own context module, which refuses to load under node — which is the very reason the second build exists (`npm run build` first)
         const node = await builtEntry('dist/index.js');
         const browser = exportedNames(readFileSync(resolve(ROOT, 'dist/browser/index.js'), 'utf8'));
 

@@ -50,8 +50,7 @@ describe('command — docker option (lazy container accessors)', () => {
     test.skipIf(!HAS_DOCKER)(
         'tracks labelled containers and cleans up on dispose',
         async () => {
-            // Given - the runner's injected test-run id (the label scope the
-            // Dispose path queries) so the teardown can be verified for real
+            // Given - the runner's injected test-run id (the label scope the dispose path queries) so the teardown can be verified for real
             await using idRun = await dockerCli.exec('label');
             const runId = idRun.stdout.text.trim();
             expect(runId).not.toBe('unset');
@@ -92,8 +91,7 @@ describe('command — docker option (lazy container accessors)', () => {
                 expect(containersLabelled('fake.test.run', runId)).toContain(trackedId);
             }
 
-            // Then - scope exit disposed the container: the same label query the
-            // Runner uses now comes back empty, proving async-dispose removed it.
+            // Then - scope exit disposed the container: the same label query the runner uses now comes back empty, proving async-dispose removed it.
             expect(containersLabelled('fake.test.run', runId)).not.toContain(trackedId);
             expect(containersLabelled('fake.test.run', runId)).toStrictEqual([]);
         },
@@ -103,9 +101,7 @@ describe('command — docker option (lazy container accessors)', () => {
     test.skipIf(!HAS_DOCKER)(
         'command-only run (never calls container()) does not query docker',
         async () => {
-            // Given - a fixture that prints help and exits without spawning a
-            // Container. The test never calls .container(), so the runner never
-            // Touches the Docker daemon — but the cleanup path still runs.
+            // Given - a fixture that prints help and exits without spawning a container. The test never calls .container(), so the runner never touches the Docker daemon — but the cleanup path still runs.
             await using result = await dockerCli.exec('help');
 
             // Then - the run succeeded
@@ -153,8 +149,7 @@ describe('command — docker option (lazy container accessors)', () => {
         // Given - a label value that no container carries
         const ids = containersLabelled('nonexistent.label.key', 'definitely-not-a-real-run-id');
 
-        // Then - empty result, no throw: an empty answer above means REMOVED,
-        // Not "the query never worked"
+        // Then - empty result, no throw: an empty answer above means REMOVED, not "the query never worked"
         expect(ids).toStrictEqual([]);
     });
 });

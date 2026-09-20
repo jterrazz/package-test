@@ -1,32 +1,19 @@
-import { findTestCallback, isTestCallee, nodeStart } from '../ast.js';
+import {
+    child,
+    childList,
+    findTestCallback,
+    firstMarkerAt,
+    hasMarker,
+    isTestCallee,
+    markerComments,
+} from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
-import type { AstNode, Comment, LintRule, RuleContext } from '../types.js';
-
-/** Does any comment start (after leading whitespace) with `<marker> -`? */
-function hasMarker(comments: Comment[], marker: string): boolean {
-    const needle = `${marker} -`;
-    return comments.some((comment) => comment.value.trimStart().startsWith(needle));
-}
-
-/** The source start offset of the first comment opening with `<marker> -`. */
-function firstMarkerOffset(comments: Comment[], marker: string): number {
-    const needle = `${marker} -`;
-    let best = -1;
-    for (const comment of comments) {
-        if (!comment.value.trimStart().startsWith(needle)) {
-            continue;
-        }
-        const start = nodeStart(comment);
-        if (start >= 0 && (best === -1 || start < best)) {
-            best = start;
-        }
-    }
-    return best;
-}
+import type { AstNode, LintRule, RuleContext } from '../types.js';
 
 /**
  * CONVENTIONS B4 — every test carries `// Given -` and `// Then -` (always both),
- * in that order. `// When -` is optional: the spec chain is usually the "when".
+ * in that order. `// When -` is optional: the spec chain is usually the "when",
+ * and where it is written B10 holds its place.
  *
  * Presence is the keystone (comments are reachable via
  * `sourceCode.getCommentsInside(callback)`); the position upgrade adds the
@@ -39,33 +26,23 @@ export const b4GivenThen: LintRule = {
     create(context: RuleContext) {
         return {
             CallExpression(node: AstNode) {
-                if (!isTestCallee(node.callee as AstNode | undefined)) {
+                if (!isTestCallee(child(node, 'callee'))) {
                     return;
                 }
-                const args = (node.arguments as AstNode[] | undefined) ?? [];
-                const callback = findTestCallback(args);
+                const callback = findTestCallback(childList(node, 'arguments'));
                 if (callback === undefined) {
                     return;
                 }
-                const comments = context.sourceCode.getCommentsInside(callback);
-                const hasGiven = hasMarker(comments, 'Given');
-                const hasThen = hasMarker(comments, 'Then');
-                if (!hasGiven) {
+                const markers = markerComments(context.sourceCode.getCommentsInside(callback));
+                if (!hasMarker(markers, 'Given')) {
                     context.report({ data: { marker: 'Given' }, messageId: 'missing', node });
                 }
-                if (!hasThen) {
+                if (!hasMarker(markers, 'Then')) {
                     context.report({ data: { marker: 'Then' }, messageId: 'missing', node });
                 }
-                if (!hasGiven || !hasThen) {
-                    return;
-                }
-                const givenOffset = firstMarkerOffset(comments, 'Given');
-                const thenOffset = firstMarkerOffset(comments, 'Then');
-                // Offsets are unavailable on this oxlint build: skip the ordering pass.
-                if (givenOffset < 0 || thenOffset < 0) {
-                    return;
-                }
-                if (givenOffset > thenOffset) {
+                const givenOffset = firstMarkerAt(markers, 'Given');
+                const thenOffset = firstMarkerAt(markers, 'Then');
+                if (givenOffset >= 0 && thenOffset >= 0 && givenOffset > thenOffset) {
                     context.report({ messageId: 'givenAfterThen', node });
                 }
             },

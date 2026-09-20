@@ -40,14 +40,11 @@ describe('specification.api — the app runs in this process', () => {
     });
 
     test('the server factory is the constructor one required option', async () => {
-        // Given - a call that omits it (the shape compose mode once allowed,
-        // Where the app ran in a container instead of in this process)
+        // Given - a call that omits it (the shape compose mode once allowed, where the app ran in a container instead of in this process)
         // @ts-expect-error - `server` is required; this line is the guard
         const started = specification.api({ root: emptyRoot });
 
-        // Then - the compiler refuses it, and the guard fails the typecheck if
-        // The option ever becomes optional again; at runtime there is no second
-        // Path to fall back to
+        // Then - the compiler refuses it, and the guard fails the typecheck if the option ever becomes optional again; at runtime there is no second path to fall back to
         await expect(started).rejects.toThrow('options.server is not a function');
     });
 });

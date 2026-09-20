@@ -127,8 +127,7 @@ describe('describeAmbiguity', () => {
     });
 
     test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
-        // Given - `{ exact: false }`, which is the only way a substring
-        // Candidate is in the set at all since 16.0
+        // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all since 16.0
         const message = describeAmbiguity({
             element: link('Articles', { exact: false }),
             matches: [match(), match({ text: 'Read Articles' })],
@@ -148,8 +147,7 @@ describe('describeAmbiguity', () => {
             url: 'http://site.test/',
         });
 
-        // Then - telling it to match the name whole would be telling it to do
-        // What it is already doing
+        // Then - telling it to match the name whole would be telling it to do what it is already doing
         expect(message).not.toContain('exact name');
     });
 

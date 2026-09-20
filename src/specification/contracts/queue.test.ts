@@ -38,8 +38,7 @@ describe('contract queue — selection', () => {
             contract(http.get(URL_A), 'second'),
         ]);
 
-        // Then - the first one answers every request (no times = unlimited:
-        // A re-render or a retry replays it instead of falling through)
+        // Then - the first one answers every request (no times = unlimited: A re-render or a retry replays it instead of falling through)
         expect(serve(queue)).toBe('first');
         expect(serve(queue)).toBe('first');
     });

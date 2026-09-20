@@ -91,8 +91,7 @@ describe('requests', () => {
     });
 
     test('sends PUT with an inline body', async () => {
-        // Given - a user seeded at a known id (reset truncates without restarting
-        // The identity sequence, so the id is pinned in the seed, not assumed)
+        // Given - a user seeded at a known id (reset truncates without restarting the identity sequence, so the id is pinned in the seed, not assumed)
         const result = await api
             .seed('one-user-at-id.sql', { database: 'db' })
             .put('/users/1000', { email: 'updated@test.com', name: 'Alice Updated' });

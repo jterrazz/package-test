@@ -19,8 +19,7 @@ test('asks an iterable for membership, the way the node build does', async () =>
     // Given - a render, which is what registers the page's own matchers
     const result = await component.clock('2026-03-04T09:30:00.000Z').render(<ClockStamp />);
 
-    // Then - the accessor is the framework's; an array and a Set are vitest's,
-    // And they mean here exactly what they mean in a module test
+    // Then - the accessor is the framework's; an array and a Set are vitest's, and they mean here exactly what they mean in a module test
     expect(result.content).toContain('2026-03-04');
     expect(['ab', 'cd']).not.toContain('b');
     expect(new Set([1])).toContain(1);

@@ -10,8 +10,7 @@ describe('lint — b6w-redundant-env-url (CONVENTIONS B6)', () => {
             .fixture('$FIXTURES/lint-violations/b6w-redundant-env-url/')
             .exec('.');
 
-        // Then - oxlint reports the b6w-redundant-env-url diagnostic
-        // Warnings do not fail the run - the diagnostic is advisory
+        // Then - oxlint reports the b6w-redundant-env-url diagnostic warnings do not fail the run - the diagnostic is advisory
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('b6w-redundant-env-url');
     });

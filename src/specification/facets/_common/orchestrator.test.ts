@@ -13,14 +13,11 @@ describe('the orchestrator measures from the root it is given', () => {
     });
 
     test('requires a root — the caller resolved it, there is no second opinion', () => {
-        // Given - a construction that omits the root (the shape that used to
-        // Fall back to `process.cwd()`, silently disagreeing with the runner's
-        // Own A9 walk from the calling specification file)
+        // Given - a construction that omits the root (the shape that used to fall back to `process.cwd()`, silently disagreeing with the runner's own A9 walk from the calling specification file)
         // @ts-expect-error - `root` is required; this line is the guard
         const orchestrator = new Orchestrator({ services: {} });
 
-        // Then - the type refuses it, and the guard fails the typecheck if the
-        // Option ever becomes optional again
+        // Then - the type refuses it, and the guard fails the typecheck if the option ever becomes optional again
         expect(orchestrator).toBeInstanceOf(Orchestrator);
     });
 

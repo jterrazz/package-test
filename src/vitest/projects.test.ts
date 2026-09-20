@@ -143,8 +143,7 @@ describe('component() — the browser project', () => {
         // Given - the canonical browser project
         const project = await component();
 
-        // Then - an entry both included and excluded is fatal to Vite 6 and 7's
-        // Optimizer, and `@vitest/browser` excludes exactly these two
+        // Then - an entry both included and excluded is fatal to Vite 6 and 7's optimizer, and `@vitest/browser` excludes exactly these two
         expect(project.optimizeDeps?.include).not.toContain('msw');
         expect(project.optimizeDeps?.include).not.toContain('msw/browser');
     });
@@ -185,8 +184,7 @@ describe('component() — the browser project', () => {
     });
 
     test('reads a relative path against the config that stated it, not the cwd', () => {
-        // Given - the config of an app in a subdirectory, loaded from the
-        // Package root the way knip and the type-checker load every config
+        // Given - the config of an app in a subdirectory, loaded from the package root the way knip and the type-checker load every config
         const nested = resolve(import.meta.dirname, '_fixtures/nested-app');
         const project = testOf(nestedApp);
 
@@ -263,8 +261,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
             (project) => testOf(project).sequence?.groupOrder,
         );
 
-        // Then - everything node shares group 0; website is 1, component 2,
-        // And a simulator cannot share a machine with itself
+        // Then - everything node shares group 0; website is 1, component 2, and a simulator cannot share a machine with itself
         expect(orders).toStrictEqual([0, 0, 0, 0, 3]);
     });
 
