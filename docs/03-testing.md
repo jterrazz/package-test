@@ -126,9 +126,10 @@ Its goldens are full snapshots, not greps: `specs/lint/checker/_expected/*.txt` 
 
 `npx vitest --run --coverage` turns on v8 — the runtime's own counter, so there
 is no instrumentation pass and the numbers do not move when the bundler does —
-and writes three reports under `.artifacts/vitest/coverage/`: `text` for the
-person who ran it, `html` for the one chasing a line, and `json-summary`, which
-is the one a machine reads.
+and writes three reports where the preset sends them ([02 — Developing §
+Artefacts live under `.artifacts/`](02-developing.md#artefacts-live-under-artifacts)):
+`text` for the person who ran it, `html` for the one chasing a line, and
+`json-summary`, which is the one a machine reads.
 
 `npm run coverage` records where the suite stands in `coverage.baseline.json`;
 `npm run coverage:check` refuses a run that fell below it. Neither runs the
