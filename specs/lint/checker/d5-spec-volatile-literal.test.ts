@@ -31,6 +31,17 @@ describe('lint — d5 spec volatile literal (CONVENTIONS D5)', () => {
         expect(result.stderr).toMatch('d5-ground-volatile-literal.txt');
     });
 
+    test('accepts every literal the document itself pinned', async () => {
+        // Given - the estate's own shape: a document whose command carries the instant and the work directory it then asserts, a pool `fixture:` holding the stamp, and a sibling `_fixtures/` holding the origin
+        const result = await cli
+            .fixture('$FIXTURES/lint-violations/d5-pinned-by-the-document/')
+            .exec('.');
+
+        // Then - nothing is reported by either half: the defect is not the literal, it is the literal nobody pinned
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch('clean.txt');
+    });
+
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli.fixture('$FIXTURES/lint-violations/spec-document-ok/').exec('.');

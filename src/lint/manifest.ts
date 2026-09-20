@@ -920,7 +920,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `_expected/`. A `{{token}}` is not a literal.',
+            'No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `_expected/`. A `{{token}}` is not a literal, and neither is a value the DOCUMENT pinned: in a stream, a word the same document states in a command argument, an `env:`/`serve:` value, a `stdin:`, a `fixture:` it names or its own sibling `_fixtures/` is excluded before it is judged.',
         family: 'D',
         fix: 'Write the token the message names — `{{workdir}}`, `{{url}}` — in place of the literal.',
         id: 'D5',
@@ -932,7 +932,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for D21w, whose criterion chapter 12 carries.',
+            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for D21w, whose criterion chapter 12 carries.",
         family: 'D',
         fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
         id: 'D5',

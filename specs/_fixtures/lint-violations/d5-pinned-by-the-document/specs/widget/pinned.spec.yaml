@@ -1,0 +1,15 @@
+description: prints back the instant, the directory and the origin it was handed
+fixture:
+    - $FIXTURES/console/
+    - served/
+env:
+    - frozen
+serve:
+    - console
+runs:
+    - command: widget stamp --at 2026-07-17T10:00:00.000Z --into /tmp/widget-run/
+      exit: 0
+      stdout: |
+          stamped 2026-07-17T10:00:00.000Z
+          into /tmp/widget-run/
+          served http://127.0.0.1:4010/stamps
