@@ -1,7 +1,6 @@
 /**
- * Shared HTTP specification. One code path for both execution modes — the
- * mode switch lives in vitest.config.ts (`env: { TEST_MODE: 'compose' }` for
- * the http-stack project), never here (CONVENTIONS A5).
+ * Shared HTTP specification — the app is handed to the runner in this process,
+ * and the services it reads are declared here (CONVENTIONS A8).
  */
 import { afterAll } from 'vitest';
 
@@ -21,7 +20,7 @@ export const { api, cleanup } = await specification.api({
         // Target of internal resets; _seeds/tables always name their database
         // Explicitly here because two postgres handles are declared (A7).
         // The `analyticsDb` key auto-binds to the `analytics-db` compose
-        // Service via kebab-case derivation — no composeService needed (A6).
+        // The record KEY is the service name, in kebab-case (A8).
         analyticsDb: postgres(),
         cache: redis(),
         db: postgres(),

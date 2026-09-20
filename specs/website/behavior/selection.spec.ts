@@ -11,6 +11,9 @@ import { website } from '../website.specification.js';
  */
 const channelIs = (name: string): ElementRef => within(field('Channel'), selected(option(name)));
 
+/** The topic the wrapped select is on, scoped to that field, for the same reason. */
+const topicIs = (name: string): ElementRef => within(field('Topic'), selected(option(name)));
+
 test('names an option of a field, and which one the field is on', async () => {
     // Given - a channel select, read before and after the visitor changes it
     const result = await website.visit('/', async (visitor) => {
@@ -29,7 +32,7 @@ test('names a field by its accessible name, whatever its label wraps', async () 
     // Given - a topic select whose LABEL wraps it, so the label element's own text carries every option the select holds
     const result = await website.visit('/', async (visitor) => {
         await visitor.select(field('Topic'), 'opinion');
-        await visitor.see(within(field('Topic'), selected(option('Opinion'))));
+        await visitor.see(topicIs('Opinion'));
     });
 
     // Then - the field answered to the name the tree shows, not to the text of the element around it

@@ -336,7 +336,7 @@ export type Marker = (typeof MARKERS)[number];
  * The marker a comment opens on, or `undefined` for an ordinary comment.
  *
  * One reader for the three rules that judge the narration (B4's presence and
- * order, B10's `When`, B11's one line, B12's placement): the shape `// Given -`
+ * order, B10's `When`, B11's one line): the shape `// Given -`
  * is a fact about the dialect, and a second copy of it would be a second
  * dialect the day someone widened one of them.
  */

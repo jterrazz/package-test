@@ -133,7 +133,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         // An exact-module edge reached with its extension.
         {
             code: 'import { toKebabCase } from "../../specification/facets/_common/binding.js";',
-            filename: '/repo/src/lint/rules/a6w-redundant-compose-service.ts',
+            filename: '/repo/src/lint/rules/b8-kebab-trigger.ts',
             options: framework,
         },
         // Module tests are exempt (F2/I4 govern them).

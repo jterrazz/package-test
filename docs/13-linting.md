@@ -33,16 +33,19 @@ export default config;
 ```typescript
 export default compose(node, testing, {
     rules: {
-        // Docker-aware runner names in YOUR specs (B5 is inert without them):
-        'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }],
         // A paginated envelope is read field by field: raise D12's cluster
         // Threshold once here instead of suppressing the warning per case.
         'jterrazz/d12w-response-body-probe': ['warn', { threshold: 6 }],
+        // The one module this repository doubles, with the reason in the line.
+        'jterrazz/i4-no-module-doubles': [
+            'error',
+            { modules: ['@react-native-async-storage/async-storage'] },
+        ],
     },
 });
 ```
 
-A rule that takes options is declared, not suppressed — an `off` loses the check everywhere, a raised threshold keeps it. Four rules take one: `b5-await-using` (`runners`), `c1-domain-structure` (`depth` — the four tree shapes are [12 — Conventions](12-conventions.md#c1--the-folder-follows-the-assets)), `d12w-response-body-probe` (`threshold`, default 3), `i1-layer-boundaries` (`layers`, the rule being inert without it).
+A rule that takes options is declared, not suppressed — an `off` loses the check everywhere, a raised threshold keeps it. Five rules take one: `c1-domain-structure` (`depth` — the four tree shapes are [12 — Conventions](12-conventions.md#c1--the-folder-follows-the-assets)), `d12w-response-body-probe` (`threshold`, default 3), `d19w-probe-cluster` (`threshold`, default 3), `i1-layer-boundaries` (`layers`, the rule being inert without it) and `i4-no-module-doubles` (`modules`, the specifiers this repository doubles, each with its reason in the line above it).
 
 - `testing` = `{ jsPlugins: ['@jterrazz/test/oxlint'], rules: recommendedRules, overrides }`, and it is DECLARED as oxlint's own `OxlintConfig`. That annotation is what makes `compose(<profile>, testing)` type-check with no assertion: an inferred `rules` widens every severity to `string`, which oxlint's closed union refuses. Its `overrides` relaxes `import/exports-last` for `**/*.specification.ts` — the A4 idiom (`export const { cli, cleanup } … ; afterAll(cleanup)`) legitimately ends a spec file on a non-export statement, so the relaxation ships here instead of being hand-rolled in every strict consumer.
 - Without `@jterrazz/typescript`, spread the fragment into your own config (`defineConfig({ ...testing })`) — it is a plain object.
@@ -402,9 +405,8 @@ Oxlint's JS-plugin API is **alpha** (oxlint 1.74): the plugin declares the small
 
 ## Pitfalls
 
-- **Enabling `b5-await-using` without options.** The oxlint rule cannot know which of your runners are docker-aware; it stays inert until you list their identifier names in `runners`. The **checker's B5 pass is the primary channel** now — it infers those runners from the `docker:` option automatically, so B5 is enforced even when the oxlint rule is left unconfigured. Keep the rule for runners the inference can't reach (aliased re-exports).
 - **Suppressing instead of restructuring.** Most hits have a conventional home: an inline runner belongs in a `*.specification.ts`, shared test data in a `*.fixtures.ts`, a file-reading module test in `specs/`. Suppress only what is structurally impossible (negative constructor specs).
-- **Forgetting the checker step.** Oxlint passing does not validate `.http`/`.json`/`.txt` fixtures — wire `dist/checker.js` into your lint chain.
+- **Forgetting the checker step.** Oxlint passing does not validate `.http`/`.json`/`.txt` fixtures — wire `jterrazz-test-check` into your lint chain.
 - **Linting generated fixture pools.** Violation fixtures (like this repo's `specs/_fixtures/lint-violations/**`) must be excluded via `ignorePatterns` — they violate on purpose.
 - **Stale plugin in the IDE after a rebuild (LSP staleness, not a real failure).** The oxlint language server loads `dist/oxlint.js` **into memory once** and holds it for the life of the server process. After you rebuild the plugin (`npm run build`), the editor keeps linting against the _old_ bundle: rules you just changed still fire (or fail to fire), and the in-editor squiggles disagree with a fresh CLI run. The command line is authoritative — if `npm run lint` passes, the code is clean. To resync the IDE, **restart the editor's oxlint server** (reload the window, or restart the oxlint/oxc language-server process); a plain file re-save is not enough. Suspect this whenever the IDE reports a plugin diagnostic that the CLI does not.
 - **CJS config silently drops the plugin (loudest pitfall).** The plugin is ESM-only. If your `oxlint.config` is CommonJS (or resolves the plugin through a CJS path), oxlint **prints a load warning and then exits 0** — the plugin is simply not registered, so **none of the `jterrazz/*` rules run** and your lint stays green while enforcing nothing. There is no error to fail CI. Use an ESM config (`oxlint.config.ts`/`.mjs`), and after wiring, sanity-check that a known violation is actually reported (e.g. a `.seed('x.json')` under a `_seeds/` directory, which C7 rejects).

@@ -117,17 +117,6 @@ export type SpecificationConfig = {
      * (`env: frozen`). Declared once per app in `specification.cli()`.
      */
     envSets?: Record<string, CliEnv> | undefined;
-    /**
-     * When set, `.clock()` is unavailable on this runner and throws this
-     * reason immediately (compose mode — the calendar it would pin is this
-     * process's, and the app runs in a container).
-     */
-    clockDisabledReason?: string | undefined;
-    /**
-     * When set, `.intercept()` is unavailable on this runner and throws this
-     * reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
-     */
-    interceptDisabledReason?: string | undefined;
     jobs?: JobHandle[] | undefined;
     /** The project root — the working directory a document's `serve:` command runs from. */
     root?: string | undefined;
@@ -215,7 +204,7 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
 
 /**
  * The `jobs` facet — job chain entry handed out by `specification.jobs()`.
- * Jobs run in-process by definition (CONVENTIONS A5/A8).
+ * Jobs run in-process by definition (CONVENTIONS A8).
  */
 /**
  * What a triggered job HANDS BACK.
@@ -408,9 +397,6 @@ export class SpecificationBuilder
      *   const result = await api.clock('2026-03-04T09:30:00Z').get('/now');
      */
     clock(iso: string): this {
-        if (this.config.clockDisabledReason !== undefined) {
-            throw new Error(`.clock(): ${this.config.clockDisabledReason}`);
-        }
         this.pinnedClock = iso;
         return this;
     }
@@ -513,10 +499,6 @@ export class SpecificationBuilder
         requestOrContracts: ContractInput | ContractRequest,
         maybeResponse?: ContractResponder | ContractResponse,
     ): this {
-        if (this.config.interceptDisabledReason) {
-            throw new Error(`.intercept(): ${this.config.interceptDisabledReason}`);
-        }
-
         // Website/mobile chains have no in-process network to intercept — the
         // App under test runs in its own process (server child, simulator).
         // Their contracts are served by the declared stub backend instead.

@@ -49,7 +49,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
     });
 
     test('a directive naming a different pass does not suppress the queried one', () => {
-        // Given - a b5-only directive
+        // Given - a directive naming B5 alone
         const text = ['// checker-disable-next-line b5 -- reason', 'api.seed("x.sql");'].join('\n');
 
         // Then - an a7 query sees nothing suppressed

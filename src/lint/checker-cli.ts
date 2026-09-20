@@ -202,9 +202,9 @@ const TEST_GLOB = /['"`](?<glob>[^'"`]*\*[^'"`]*\.test\.ts)['"`]/gu;
  * under, and the author updates them in the same commit as the rename.
  */
 function staleIncludes(root: string): string[] {
-    const member = packageRootOf(root) ?? dirname(root);
+    const owner = packageRootOf(root) ?? dirname(root);
     const found: string[] = [];
-    for (const directory of new Set([root, member, dirname(root)])) {
+    for (const directory of new Set([root, owner, dirname(root)])) {
         for (const name of CONFIG_NAMES) {
             const path = join(directory, name);
             if (!existsSync(path)) {
@@ -214,7 +214,7 @@ function staleIncludes(root: string): string[] {
             for (const match of text.matchAll(TEST_GLOB)) {
                 const glob = match.groups?.glob ?? '';
                 if (glob !== '') {
-                    found.push(`${relative(member, path)}: ${glob}`);
+                    found.push(`${relative(owner, path)}: ${glob}`);
                 }
             }
         }
