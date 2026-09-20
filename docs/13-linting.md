@@ -65,7 +65,7 @@ export default testing;
 
 This registers the plugin and enables the whole `jterrazz/*` catalogue at its intended severities; oxlint's own default rules still run, but no `@jterrazz/typescript` formatting/style preset is imposed. To deviate, spread and override: `export default { ...testing, rules: { ...testing.rules, 'jterrazz/c1-domain-structure': 'off' } }`.
 
-The static plugin is only one of the seven channels. The **conventions checker** (token/HTTP grammar + cross-file passes — D4, C8/C9, A7, B5) ships as a standalone binary; run it as the minimal second channel with no `@jterrazz/typescript` orchestration:
+The static plugin is only one of the seven channels. The **conventions checker** (token/HTTP grammar, the document passes, and the cross-file and tree passes — D4, C8/C9, C12/C16/C18/C20/C21w, A7, B5, J9) ships as a standalone binary; run it as the minimal second channel with no `@jterrazz/typescript` orchestration:
 
 ```bash
 node node_modules/@jterrazz/test/dist/checker.js specs
@@ -328,6 +328,8 @@ What it checks:
 - **D4** — every `{{token}}` in an `expected/` fixture belongs to the frozen vocabulary. It scans **all text files** under `expected/` (not just `.http`/`.json`/`.txt` — it decodes UTF-8 and skips binary), and flags **malformed captures** of a known kind (`{{iso8601#}}`, `{{uuid #id}}`).
 - **D4b** — depth-1 `requests/*.http` must start with a request line (`METHOD /path`); depth-1 `expected/*.http` with a status line (`HTTP/1.1 <status>`).
 - **D10** (warning) — a `{{token}}` inside a `requests/` file: requests are inputs, never matched, so a token there is almost always a mistake. Advisory only — it does not fail the run.
+- **the tree passes** — what a folder says about itself, which no single file can answer for: a facet folder holds the runner its name promises (C20), a spec under it reaches that runner (C18), a `.test.ts` under a facet folder wears the wrong word and a `.spec.ts` outside every specs tree wears the other one (C12, fixable), a document is never filed under ground (C16), and ground a single spec of a leaf reads belongs beside that spec (C21w, warning).
+- **J9** — every `checker-disable-next-line` / `checker-disable-line` carries its ` -- <reason>`. The toolchain's own suppression gate reads `oxlint-disable*` and nothing else, so this channel carries its own.
 
 It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). Exit 1 on any error, 0 when only warnings remain.
 
