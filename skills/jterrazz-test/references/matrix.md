@@ -153,7 +153,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `toMatchRows()`     | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
 | `.http exchange`    | 3   | —    | —   | —           | —       | —      | —         | 7      |
 | `.aria.yaml tree`   | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `.json body`        | 0   | —    | 2   | 5           | 1       | —      | —         | 9      |
+| `.json body`        | 0   | —    | 2   | 5           | 1       | —      | —         | 10     |
 | `.txt stream`       | 1   | —    | 8   | 2           | 2       | —      | —         | 12     |
 | `{ frozen }`        | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
 

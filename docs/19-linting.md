@@ -54,6 +54,7 @@ A rule that takes options is declared, not suppressed — an `off` loses the che
 - Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. If you don't compose `testing`, no `jterrazz/*` rule runs. When and how `typescript check` decides to RUN the checker is the toolchain's, not this chapter's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 - Rules are individually addressable as `jterrazz/<rule-id>` if you want to deviate — prefer scoped `overrides` with a comment over global downgrades.
 - `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rule F2 — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. F1 and F3 exempt every subpath the package's `exports` map publishes, this one among them.
+- **The oxlint version is the toolchain's to pin.** `@jterrazz/typescript` owns the range every profile runs the binary at; a repository whose own code imports oxlint — this one does, from every rule test, through `oxlint/plugins-dev` — declares `oxlint` in its `devDependencies` at exactly that range, so the line here MIRRORS the pin instead of holding a second opinion about it and a plain `npm ci` hoists one oxlint rather than two. `src/lint/oxlint-pin.test.ts` fails the day the two diverge.
 
 ### Standalone — without `@jterrazz/typescript`
 

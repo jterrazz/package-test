@@ -110,7 +110,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
 | The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 64    |
 | The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 88    |
-| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 16    |
+| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 17    |
 
 <!-- /GENERATED:layers -->
 
@@ -362,7 +362,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `toMatchRows()`     | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
 | `.http exchange`    | 3   | —    | —   | —           | —       | —      | —         | 7      |
 | `.aria.yaml tree`   | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `.json body`        | 0   | —    | 2   | 5           | 1       | —      | —         | 9      |
+| `.json body`        | 0   | —    | 2   | 5           | 1       | —      | —         | 10     |
 | `.txt stream`       | 1   | —    | 8   | 2           | 2       | —      | —         | 12     |
 | `{ frozen }`        | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
 
