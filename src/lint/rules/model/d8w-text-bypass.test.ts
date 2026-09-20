@@ -20,6 +20,11 @@ ruleTester.run('d8w-text-bypass', d8wTextBypass as unknown as OxlintRule, {
     valid: [
         // Asserting on the typed subject.
         { code: 'expect(result).toMatch("out.txt");' },
+        // A RegExp is the one argument the typed subject cannot take —
+        // `toMatch` on an accessor resolves a fixture NAME and throws on a
+        // Regex, so chapter 14 prescribes this exact spelling.
+        { code: 'expect(result.stdout.text).toMatch(/error: \\d+/u);' },
+        { code: 'expect(result.text).toMatch(new RegExp(pattern, "u"));' },
         // Some other property, not .text.
         { code: 'expect(result.value).toContain("hi");' },
         // .text but a non-text matcher.
