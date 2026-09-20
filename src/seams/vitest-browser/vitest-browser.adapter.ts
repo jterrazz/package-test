@@ -2,13 +2,13 @@ import { expect, TestRunner } from 'vitest';
 import { commands, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
-import type { ElementMatch, ElementRef } from '../../core/ports/browser.port.js';
 import {
     AmbiguousElementError,
     describeAmbiguity,
     formatElement,
-} from '../../facets/website/ambiguity.js';
-import { warnSubstringOnly } from '../../facets/website/substring-warning.js';
+} from '../../core/elements/ambiguity.js';
+import { warnSubstringOnly } from '../../core/elements/substring-warning.js';
+import type { ElementMatch, ElementRef } from '../../core/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
 
 /**

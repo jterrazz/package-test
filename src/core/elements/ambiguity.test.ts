@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { link, main, navigation, region, within } from '../../core/elements/elements.js';
-import type { ElementMatch } from '../../core/ports/browser.port.js';
+import type { ElementMatch } from '../ports/browser.port.js';
 import { describeAmbiguity, formatElement } from './ambiguity.js';
+import { link, main, navigation, region, within } from './elements.js';
 
 const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
     tag: 'a',

@@ -9,8 +9,8 @@ import { releaseIsolation, startServices } from '../../core/chain/services.js';
 import { StubBackend } from '../../core/chain/stub-backend.js';
 import { registerMatchers } from '../../core/goldens/matchers.js';
 import type { BrowserPort } from '../../core/ports/browser.port.js';
-import { ServeAdapter } from './serve.adapter.js';
-import type { ProcessOptions } from './serve.adapter.js';
+import { ServeAdapter } from '../../seams/process/serve.adapter.js';
+import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
 import { createWebsiteFacet } from './website.chain.js';
 import type { WebsiteSpecification } from './website.chain.js';
 

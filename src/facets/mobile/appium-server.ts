@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { ServeAdapter } from '../website/serve.adapter.js';
+import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 
 const APPIUM_READY_TIMEOUT_MS = 60_000;
 

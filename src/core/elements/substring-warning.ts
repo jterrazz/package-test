@@ -1,5 +1,5 @@
 /* oxlint-disable eslint/no-console -- the warning IS the product here: a transitional notice that reaches the author has nowhere else to go, and a logger the consumer configures would let it be silenced by the very setup it is warning about. */
-import type { ElementRef } from '../../core/ports/browser.port.js';
+import type { ElementRef } from '../ports/browser.port.js';
 
 /**
  * The transitional warning for a name that matches only as a SUBSTRING.

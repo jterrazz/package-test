@@ -1,13 +1,13 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind six constructors, one chain that needs none, four source layers with declared edges, and seven channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+What this package IS: one runner model behind six constructors, one chain that needs none, five source trees with declared edges, and seven channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
-| The shape                  | Held below                                                                              |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| The runner model           | [The runner model](#the-runner-model) — constructor, handle, chain, result              |
-| The source layers          | [The four layers](#the-four-layers) — `specification`, `integrations`, `vitest`, `lint` |
-| How a convention is held   | [The seven enforcement channels](#the-seven-enforcement-channels)                       |
-| What ships out of the tree | [What the tree publishes](#what-the-tree-publishes)                                     |
+| The shape                  | Held below                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| The runner model           | [The runner model](#the-runner-model) — constructor, handle, chain, result      |
+| The source trees           | [The five trees](#the-five-trees) — `core`, `facets`, `seams`, `runner`, `lint` |
+| How a convention is held   | [The seven enforcement channels](#the-seven-enforcement-channels)               |
+| What ships out of the tree | [What the tree publishes](#what-the-tree-publishes)                             |
 
 The rules themselves — what each family says, what a reviewer must judge — are the constitution, [18 — Conventions](18-conventions.md); their normative sentences are the generated catalogue, [19 — Linting](19-linting.md).
 
@@ -15,15 +15,16 @@ The rules themselves — what each family says, what a reviewer must judge — a
 
 Every facet is the same four steps. A **constructor** takes options and returns a **handle**; the handle opens a **chain** of zero or more setups closed by exactly one terminal action; the action executes and resolves to a **typed result**; the result is asserted through vitest's `expect()`. Nothing else is public — there is no imperative escape hatch, because a spec that can do anything proves nothing in particular.
 
-Five constructors exist and the list is closed (`src/facets/specification.ts`):
+Six constructors exist and the list is closed (`src/facets/specification.ts`):
 
-| Constructor               | Handle destructures to      | Subject under test                               |
-| ------------------------- | --------------------------- | ------------------------------------------------ |
-| `specification.api()`     | `{ api, cleanup, docker }`  | An HTTP API, built and served in this process    |
-| `specification.jobs()`    | `{ jobs, cleanup }`         | A background pipeline, triggered by name         |
-| `specification.cli()`     | `{ cli, cleanup, docker }`  | A command binary in a fresh temp directory       |
-| `specification.website()` | `{ website, cleanup, url }` | A rendered page — fetched, or driven in chromium |
-| `specification.mobile()`  | `{ mobile, cleanup, udid }` | A native screen on an iOS simulator              |
+| Constructor                   | Handle destructures to             | Subject under test                               |
+| ----------------------------- | ---------------------------------- | ------------------------------------------------ |
+| `specification.api()`         | `{ api, cleanup, docker }`         | An HTTP API, built and served in this process    |
+| `specification.jobs()`        | `{ jobs, cleanup }`                | A background pipeline, triggered by name         |
+| `specification.cli()`         | `{ cli, cleanup, docker }`         | A command binary in a fresh temp directory       |
+| `specification.integration()` | `{ integration, cleanup, docker }` | A module against real services, or a golden      |
+| `specification.website()`     | `{ website, cleanup, url }`        | A rendered page — fetched, or driven in chromium |
+| `specification.mobile()`      | `{ mobile, cleanup, udid }`        | A native screen on an iOS simulator              |
 
 The asymmetry in that column is the model, not an oversight: `jobs` never spawns a container, so it is handed no `docker`; `website` and `mobile` drive a browser and a simulator rather than an orchestrated stack, so they carry neither.
 
@@ -41,17 +42,17 @@ Every seam is opened lazily rather than imported, and each one is an optional pe
 
 The source tree is five trees with declared, one-directional edges. The map is not the linter's to assume — `i1-layer-boundaries` ships inert — so this package declares its own as `FRAMEWORK_LAYERS` in `oxlint.config.ts`, and that declaration is the enforced statement of what follows.
 
-| Tree      | May import                                                                                                                      | Holds                                                                                                                                                                                                                         |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `core/`   | itself, the docker/yaml seams, the msw seam through two named lazy imports, `runner/update`, and each facet's `*.result` module | What every facet is made of: the chain and the orchestrator, the results and their accessors, the element vocabulary, the contracts and `intercept()`, the `{{token}}` engine, the goldens, the clock, the doubles, the ports |
-| `facets/` | `core/`, itself, the runner's project shape, and the one seam each constructor opens                                            | Seven folders, the SAME four files in each: `<facet>.specification.ts` (the constructor), `<facet>.chain.ts`, `<facet>.result.ts`, `<facet>.project.ts` (the vitest helper), plus what is unique to the facet                 |
-| `seams/`  | its OWN external dependency, plus `core/` and the facet vocabulary an adapter projects into                                     | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `docker`, `hono`, `playwright`, `vitest-browser`, `appium`, `msw`, `openai`, `anthropic`, `yaml`                                                  |
-| `runner/` | `vitest`, `vite`, `@vitest/browser-playwright`, `core/`, `facets/`                                                              | The CONFIG side of the runner coupling: the preset, update mode, the `literate()` plugin, the shape a node facet's project takes, and the project index                                                                       |
-| `lint/`   | itself, plus a short list of PURE `core/` modules                                                                               | The tool-facing channel: the oxlint plugin, the conventions checker, the catalogue manifest and generator                                                                                                                     |
+| Tree      | May import                                                                                                                              | Holds                                                                                                                                                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core/`   | itself, the docker/process/yaml seams, the msw seam through two named lazy imports, `runner/update`, and each facet's `*.result` module | What every facet is made of: the chain and the orchestrator, the results and their accessors, the element vocabulary, the contracts and `intercept()`, the `{{token}}` engine, the goldens, the clock, the doubles, the ports |
+| `facets/` | `core/`, itself, the runner's project shape, and the one seam each constructor opens                                                    | Seven folders, the SAME four files in each: `<facet>.specification.ts` (the constructor), `<facet>.chain.ts`, `<facet>.result.ts`, `<facet>.project.ts` (the vitest helper), plus what is unique to the facet                 |
+| `seams/`  | its OWN external dependency, plus `core/` and the facet vocabulary an adapter projects into                                             | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `docker`, `hono`, `playwright`, `vitest-browser`, `appium`, `msw`, `openai`, `anthropic`, `yaml`, `process`                                       |
+| `runner/` | `vitest`, `vite`, `@vitest/browser-playwright`, `core/`, `facets/`                                                                      | The CONFIG side of the runner coupling: the preset, update mode, the `literate()` plugin, the shape a node facet's project takes, and the project index                                                                       |
+| `lint/`   | itself, plus a short list of PURE `core/` modules                                                                                       | The tool-facing channel: the oxlint plugin, the conventions checker, the catalogue manifest and generator                                                                                                                     |
 
 **Every facet folder carries the same four files, whether or not it owns all four.** The setups and terminal actions of the six node facets are ONE builder, because a second copy of "declare a contract, seed a table, run the thing" is how two facets drift — so `api.chain.ts` and its five siblings are a named re-export of that builder rather than an implementation, and `jobs.result.ts` re-exports the shape the builder states. The shape is uniform so that a reader who has opened one facet has opened all seven; the re-export says, in the folder itself, which of the four a facet does not own.
 
-Three of those edges carry their reason in the declaration itself. `core/` reaches `seams/docker` because that adapter has no dependency of its own to leak. `lint/` reaches exactly the pure modules the runner also uses — the token list, the ground names, the root walk, the `<case>.spec.yaml` parser — so that the file the lint accepts is the file the runner runs, from ONE parser. And the runner is named in exactly TWO places outside a test, one per side of it: `runner/` for the config side — the preset, the project shape, the plugin — and `seams/vitest-browser/` for the page side, where the locators, the visitor, the golden commands and the page's own `vitest` primitives live. Swapping the runner would be a rewrite of those two folders and of nothing else; `core/` states what a render IS and never which runner performs it, which is why the layer map exempts that seam from the prod-import ban (F2) by name.
+Three of those edges carry their reason in the declaration itself. `core/` reaches `seams/docker`, `seams/process` and the yaml parser because none of the three has a dependency of its own to leak, and it reaches each facet's `*.result` module because the ONE builder constructs all seven results — a value edge, stated rather than hidden. `lint/` reaches exactly the pure modules the runner also uses — the token list, the ground names, the root walk, the `<case>.spec.yaml` parser — so that the file the lint accepts is the file the runner runs, from ONE parser. And the runner is named in exactly TWO places outside a test, one per side of it: `runner/` for the config side — the preset, the project shape, the plugin — and `seams/vitest-browser/` for the page side, where the locators, the visitor, the golden commands and the page's own `vitest` primitives live. Swapping the runner would be a rewrite of those two folders and of nothing else; `core/` states what a render IS and never which runner performs it, which is why the layer map exempts that seam from the prod-import ban (F2) by name.
 
 The table's May-import column is a reading of `FRAMEWORK_LAYERS`, never a second statement of it: the declaration in `oxlint.config.ts` is what the linter enforces and what a change edits.
 

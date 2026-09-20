@@ -1,5 +1,5 @@
-import { ServeAdapter } from '../../facets/website/serve.adapter.js';
-import type { ProcessOptions } from '../../facets/website/serve.adapter.js';
+import { ServeAdapter } from '../../seams/process/serve.adapter.js';
+import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
 /* oxlint-disable eslint/class-methods-use-this -- a `ServiceHandle` is an interface of eleven members and a process answers "nothing to do" to most of them: no image to pull, no database adapter, no per-worker namespace. Each stub states that answer where the contract asks for it. */
 import type { DatabasePort } from '../ports/database.port.js';
 import type { IsolationStrategy } from '../ports/isolation.port.js';
