@@ -79,20 +79,6 @@ Bundle id of the app under test (mobile facet only) — the app `.open()` relaun
 
 ***
 
-### clockDisabledReason?
-
-```ts
-optional clockDisabledReason?: string;
-```
-
-Defined in: [src/specification/facets/\_common/builder.ts:125](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L125)
-
-When set, `.clock()` is unavailable on this runner and throws this
-reason immediately (compose mode — the calendar it would pin is this
-process's, and the app runs in a container).
-
-***
-
 ### command?
 
 ```ts
@@ -222,26 +208,13 @@ of strict intercepts.
 
 ***
 
-### interceptDisabledReason?
-
-```ts
-optional interceptDisabledReason?: string;
-```
-
-Defined in: [src/specification/facets/\_common/builder.ts:130](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L130)
-
-When set, `.intercept()` is unavailable on this runner and throws this
-reason immediately (compose mode — MSW is in-process, CONVENTIONS I3).
-
-***
-
 ### jobs?
 
 ```ts
 optional jobs?: JobHandle[];
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:131](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L131)
+Defined in: [src/specification/facets/\_common/builder.ts:120](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L120)
 
 ***
 
@@ -251,7 +224,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:131](https://github.co
 optional root?: string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:133](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L133)
+Defined in: [src/specification/facets/\_common/builder.ts:122](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L122)
 
 The project root — the working directory a document's `serve:` command runs from.
 
@@ -263,7 +236,7 @@ The project root — the working directory a document's `serve:` command runs fr
 optional server?: ServerPort;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:134](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L134)
+Defined in: [src/specification/facets/\_common/builder.ts:123](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L123)
 
 ***
 
@@ -273,7 +246,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:134](https://github.co
 optional serveRegistry?: Record<string, LiterateServeRegistration>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:139](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L139)
+Defined in: [src/specification/facets/\_common/builder.ts:128](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L128)
 
 Named servers a spec document may start (`serve: [mcp]`). Declared once
 per app in `specification.cli()`.
@@ -286,7 +259,7 @@ per app in `specification.cli()`.
 optional services?: Record<string, ServiceHandle>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:146](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L146)
+Defined in: [src/specification/facets/\_common/builder.ts:135](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L135)
 
 The declared services record. In cli mode, drives the automatic
 connection-URL injection into the child env (CONVENTIONS B6):
@@ -301,7 +274,7 @@ unambiguous.
 optional transform?: (text) => string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:151](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L151)
+Defined in: [src/specification/facets/\_common/builder.ts:140](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L140)
 
 Optional normaliser applied to command stdout/stderr before every
 comparison. Does not mutate the raw `.text` accessor.

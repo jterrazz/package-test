@@ -84,6 +84,7 @@
 | [IntegrationSpecification](type-aliases/IntegrationSpecification.md) | The `integration` facet — the in-process chain handed out by `specification.integration()`. |
 | [IntegrationSpecificationOptions](type-aliases/IntegrationSpecificationOptions.md) | Options for startIntegration \| specification.integration. |
 | [Intercept](type-aliases/Intercept.md) | The module-scope network double. Resolves once the engine is listening — which is why it is a promise, and why the canonical form awaits it: |
+| [InterceptOptions](type-aliases/InterceptOptions.md) | What a scope may state about the network it declares. |
 | [InterceptScope](type-aliases/InterceptScope.md) | One block's worth of declared network. Disposed at the end of the scope that declared it: the handlers are dropped, and an unmatched request is thrown. |
 | [IsolationStrategy](type-aliases/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |
 | [JobHandle](type-aliases/JobHandle.md) | A named job that can be triggered via jobs.trigger(). |
@@ -114,7 +115,6 @@
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
 | [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
 | [ScreenNode](type-aliases/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
-| [~~ServeOptions~~](type-aliases/ServeOptions.md) | What `ProcessOptions` was called in 15.2, when the only process the framework owned was a website's server. |
 | [ServerPort](type-aliases/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |
 | [ServerResponse](type-aliases/ServerResponse.md) | HTTP response returned by a server port, with parsed JSON body. |
 | [ServerSpec](type-aliases/ServerSpec.md) | What `server` may be handed as, and what it resolves to. |

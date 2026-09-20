@@ -16,7 +16,7 @@ type ComponentUi =
 | Promise<AwaitedReactNode>;
 ```
 
-Defined in: node\_modules/@types/react/index.d.ts:436
+Defined in: ../../../../../../../Users/jterrazz/Developer/jterrazz/jterrazz-os/home/jterrazz/work/worktrees/package-test-16-0/node\_modules/@types/react/index.d.ts:436
 
 Represents all of the things React can render.
 

@@ -5,7 +5,7 @@
 function process(options): ProcessHandle;
 ```
 
-Defined in: [src/specification/facets/\_common/process.ts:152](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/process.ts#L152)
+Defined in: [src/specification/facets/\_common/process.ts:151](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/process.ts#L151)
 
 Declare an external process the framework owns for the life of the
 specification.

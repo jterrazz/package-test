@@ -5,7 +5,7 @@
 type IntegrationSpecification<Services, DatabaseKey> = object;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:252](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L252)
+Defined in: [src/specification/facets/\_common/builder.ts:241](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L241)
 
 The `integration` facet — the in-process chain handed out by
 `specification.integration()`.
@@ -30,7 +30,7 @@ every other facet and ends on the one action a module has: being called.
 call: <T>(subject) => Promise<CallResult<T>>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:271](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L271)
+Defined in: [src/specification/facets/\_common/builder.ts:260](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L260)
 
 Call the module and resolve with what it produced. The started services
 record is handed in, so the subject is constructed with the real
@@ -60,7 +60,7 @@ connection strings rather than with a double.
 clock: (iso) => IntegrationSpecification<Services, DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:257](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L257)
+Defined in: [src/specification/facets/\_common/builder.ts:246](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L246)
 
 Pin the module's `Date` at `iso` for this chain.
 
@@ -82,7 +82,7 @@ Pin the module's `Date` at `iso` for this chain.
 intercept: InterceptMethod<IntegrationSpecification<Services, DatabaseKey>>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:259](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L259)
+Defined in: [src/specification/facets/\_common/builder.ts:248](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L248)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -94,7 +94,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 seed: (file, options?) => IntegrationSpecification<Services, DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:261](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L261)
+Defined in: [src/specification/facets/\_common/builder.ts:250](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L250)
 
 Queue a SQL seed file from `_seeds/` to run before the call.
 
