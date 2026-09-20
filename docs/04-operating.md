@@ -60,6 +60,24 @@ Nothing persistent. Inside a consuming project the framework writes only under `
 
 Containers are the one resource that outlives a process badly, which is why `afterAll(cleanup)` is a rule and not a suggestion: a suite that forgets it leaks its infrastructure into the next one.
 
+## What a 16.0 adoption meets
+
+The renames and the new rows land through the toolchain's own flow, with three
+things to know before they surprise a reader:
+
+- **A member whose ROOT is the specs tree** (`packages: ['specs']`) is judged by
+  `jterrazz-test-check .` or by a path-less run from that member. The
+  toolchain's own walk looks for a CHILD directory named `specs`, so until it
+  makes the same move its Test Conventions pass reports the member findings
+  alone — `TODO.md` carries the ask.
+- **An include glob that names `.test.ts`** stops collecting the moment `--fix`
+  renames a facet spec. The mover names every such glob in the member it moved
+  files under; update them in the same commit, and E7w holds the class
+  afterwards.
+- **`typescript baseline` in an npm-hoisted member** cannot resolve oxlint
+  today, so the step the adopt flow prescribes "where red" has to be run from a
+  directory where `node_modules/.bin/oxlint` does resolve. Also in `TODO.md`.
+
 ## Pitfalls
 
 - **Pushing the bump and expecting a publish.** `main` is not a release trigger. Without a created GitHub release, the version on npm does not move.
