@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import type { MockInstance } from 'vitest';
 
 import type { ElementRef } from '../ports/browser.port.js';
 import {
@@ -9,22 +8,34 @@ import {
 } from './substring-warning.js';
 import type { WindowProbe } from './substring-warning.js';
 
+/** A printer that keeps what it was handed — what the adapters give the window. */
+function aPrinter(): { lines: string[]; print: (line: string) => void } {
+    const lines: string[] = [];
+    return {
+        lines,
+        print: (line) => {
+            lines.push(line);
+        },
+    };
+}
+
 describe('the transitional warning for a name that only matched in part', () => {
     beforeEach(() => {
         resetSubstringWarnings();
     });
 
-    test('names the descriptor, the spelling to write, the fixes and the deadline', () => {
+    test('names the descriptor, the spelling to write, the fixes and the deadline', async () => {
         // Given - a descriptor that designated nothing as a whole name, and the name that carries it
-        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-        warnSubstringOnly(
+        const printer = aPrinter();
+        await warnSubstringOnly(
             { kind: 'link', name: 'Articles' },
             'http://localhost/ambiguous',
             'Read  Articles ',
+            printer.print,
         );
 
         // Then - the reader has the descriptor, the exact name to write, all three ways out, and the release it disappears in
-        const [line] = warn.mock.calls.map(([first]) => String(first));
+        const [line] = printer.lines;
         expect(line).toContain(`link('Articles')`);
         expect(line).toContain('matched only as a SUBSTRING');
         expect(line).toContain(`The name to write is 'Read Articles'.`);
@@ -33,28 +44,41 @@ describe('the transitional warning for a name that only matched in part', () => 
         expect(line).toContain('http://localhost/ambiguous');
     });
 
-    test('says it once per descriptor — a scenario run ten times has one thing to fix', () => {
+    test('goes to stderr by default — the console is captured and the reporter drops it', async () => {
+        // Given - no printer, which is every adapter running on the node side
+        const written = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+        await warnSubstringOnly({ kind: 'link', name: 'Articles' }, 'http://localhost/');
+
+        // Then - the line is on the one stream a plain `vitest --run` passes through
+        expect(String(written.mock.calls[0]?.[0])).toContain(`link('Articles')`);
+        expect(String(written.mock.calls[0]?.[0])).toMatch(/\n$/u);
+    });
+
+    test('says it once per descriptor — a scenario run ten times has one thing to fix', async () => {
         // Given - the same descriptor reported three times
-        vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const { print } = aPrinter();
         const element = { kind: 'link' as const, name: 'Articles' };
 
         // Then - only the first one prints
-        expect(warnSubstringOnly(element, 'a')).toBe(true);
-        expect(warnSubstringOnly(element, 'a')).toBe(false);
-        expect(warnSubstringOnly(element, 'b')).toBe(false);
+        await expect(warnSubstringOnly(element, 'a', undefined, print)).resolves.toBe(true);
+        await expect(warnSubstringOnly(element, 'a', undefined, print)).resolves.toBe(false);
+        await expect(warnSubstringOnly(element, 'b', undefined, print)).resolves.toBe(false);
     });
 
-    test('tells two descriptors apart by their scope chain, not just their name', () => {
+    test('tells two descriptors apart by their scope chain, not just their name', async () => {
         // Given - the same name, one of them scoped to a landmark
-        vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const { print } = aPrinter();
         const bare = { kind: 'link' as const, name: 'Articles' };
         const scoped = { ...bare, scope: { kind: 'navigation' as const } };
 
         // Then - each is its own thing to fix, so each is reported
-        expect(warnSubstringOnly(bare, 'a')).toBe(true);
-        expect(warnSubstringOnly(scoped, 'a')).toBe(true);
+        await expect(warnSubstringOnly(bare, 'a', undefined, print)).resolves.toBe(true);
+        await expect(warnSubstringOnly(scoped, 'a', undefined, print)).resolves.toBe(true);
     });
 });
+
+/** The lines a surface printed, and no descriptor remembered from an earlier case. */
+const printed: string[] = [];
 
 /** A surface where `names` are the whole accessible names on screen. */
 function surfaceOf(names: string[]): WindowProbe {
@@ -65,13 +89,17 @@ function surfaceOf(names: string[]): WindowProbe {
     return {
         count: async (element) => await Promise.resolve(matching(element).length),
         nameOf: async (element) => await Promise.resolve(matching(element)[0]),
+        print: (line) => {
+            printed.push(line);
+        },
     };
 }
 
-/** A silent console, and no descriptor remembered from an earlier case. */
-function aQuietProcess(): MockInstance<typeof console.warn> {
+/** No line kept from an earlier case, and no descriptor remembered either. */
+function aQuietProcess(): string[] {
+    printed.length = 0;
     resetSubstringWarnings();
-    return vi.spyOn(console, 'warn').mockImplementation(() => {});
+    return printed;
 }
 
 describe('the window — what the descriptor is retried with', () => {
@@ -153,14 +181,14 @@ describe('the window — what the descriptor is retried with', () => {
 
     test('warns once, naming the spelling to write', async () => {
         // Given - the same descriptor asked for twice, as a scenario run twice would
-        const warn = aQuietProcess();
+        const lines = aQuietProcess();
         const surface = surfaceOf(['Experiments 9']);
         const element: ElementRef = { kind: 'button', name: 'Experiments' };
 
         // Then - one line, carrying the name the author should be writing
         await widenedForWindow(element, 'http://localhost/', surface);
         await widenedForWindow(element, 'http://localhost/', surface);
-        expect(warn).toHaveBeenCalledOnce();
-        expect(String(warn.mock.calls[0]?.[0])).toContain("The name to write is 'Experiments 9'");
+        expect(lines).toHaveLength(1);
+        expect(lines[0]).toContain("The name to write is 'Experiments 9'");
     });
 });

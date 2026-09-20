@@ -1,4 +1,3 @@
-/* oxlint-disable eslint/no-console -- the warning IS the product here: a transitional notice that reaches the author has nowhere else to go, and a logger the consumer configures would let it be silenced by the very setup it is warning about. */
 import type { ElementRef } from '../ports/browser.port.js';
 
 /**
@@ -23,6 +22,31 @@ import type { ElementRef } from '../ports/browser.port.js';
 /** How long the window lasts, stated in the message itself. */
 const WINDOW = 'through 16.x';
 
+/**
+ * Where the line goes.
+ *
+ * NOT `console.warn`: vitest CAPTURES the console and its default reporter
+ * prints nothing of what it captured, so a run that fired the warning showed
+ * zero lines and the 17.0 deadline was unenforceable in a plain `npm test`.
+ * The worker's own stderr is passed through instead, which is what a reader
+ * sees without asking for a reporter.
+ *
+ * A printer is a parameter because one adapter is not on that side of the
+ * seam: a mounted component runs IN the page, where there is no stderr, and it
+ * hands the line back to the node side through `server.commands`.
+ */
+export type WindowPrinter = (line: string) => Promise<void> | void;
+
+/** The node side's printer — the default every adapter but the page's uses. */
+function toStandardError(line: string): void {
+    if (typeof process === 'undefined') {
+        // oxlint-disable-next-line eslint/no-console -- the last resort of a runtime with no stderr: a transitional notice that reaches nobody is the defect this printer exists to close
+        console.warn(line);
+        return;
+    }
+    process.stderr.write(`${line}\n`);
+}
+
 /** Descriptors already reported in this process. */
 const reported = new Set<string>();
 
@@ -37,7 +61,12 @@ function identityOf(element: ElementRef): string {
  * designated something as a substring. Returns whether a line was printed,
  * which is what the adapters' own tests assert on.
  */
-export function warnSubstringOnly(element: ElementRef, where: string, found?: string): boolean {
+export async function warnSubstringOnly(
+    element: ElementRef,
+    where: string,
+    found?: string,
+    print: WindowPrinter = toStandardError,
+): Promise<boolean> {
     const identity = identityOf(element);
     if (reported.has(identity)) {
         return false;
@@ -47,7 +76,7 @@ export function warnSubstringOnly(element: ElementRef, where: string, found?: st
         found === undefined
             ? ''
             : ` The name to write is '${found.replaceAll(/\s+/gu, ' ').trim()}'.`;
-    console.warn(
+    await print(
         `@jterrazz/test: ${element.kind}('${element.name ?? ''}') matched nothing as a whole ` +
             `accessible name, and matched only as a SUBSTRING of a longer one (${where}).` +
             `${spelling} Names are exact from 16.0: write the name in full, scope it with ` +
@@ -66,6 +95,8 @@ export function warnSubstringOnly(element: ElementRef, where: string, found?: st
 export type WindowProbe = {
     count: (element: ElementRef) => Promise<number>;
     nameOf: (element: ElementRef) => Promise<string | undefined>;
+    /** Where a line goes; absent means the node side's own stderr. */
+    print?: undefined | WindowPrinter;
 };
 
 /**
@@ -137,7 +168,7 @@ async function widenedLevel(
         if ((await probe.count(loose)) !== 1) {
             return undefined;
         }
-        warnSubstringOnly(candidate, where, await probe.nameOf(loose));
+        await warnSubstringOnly(candidate, where, await probe.nameOf(loose), probe.print);
         return loose;
     } catch {
         // The surface is gone, or the looser match is ambiguous: neither is
