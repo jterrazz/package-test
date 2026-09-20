@@ -16,7 +16,9 @@ Because validate runs inside the release workflow, a red suite stops a publicati
 
 ## What leaves the tree
 
-The tarball is what `files` declares and nothing else: `dist/`, minus `dist/catalog.*`, plus `schema/`. The catalogue generator is a development gesture with no consumer — it writes this repository's own projections — so it is built but never shipped.
+The tarball is what `files` declares and nothing else: `dist/`, minus `dist/catalog.*` and `dist/coverage.*`, plus `docs/` and `schema/`. The catalogue generator is a development gesture with no consumer — it writes this repository's own projections — so it is built but never shipped.
+
+**The manual ships with the code**, because the code points at it: every relative link of the shipped `README.md` and every `(… — see docs/19-linting.md#…)` a rule message ends on is read from inside an install, and a chapter that is not there makes both a dead end. The `package-exports` meta-test holds it — a citation whose file the manifest does not publish fails the suite.
 
 The entries that reach a consumer are the whole public contract, and they are listed once — [01 — Architecture § What the tree publishes](01-architecture.md#what-the-tree-publishes). What matters here is only that the ROOT entry resolves by CONDITION: a bundler serving a page takes `browser`, node takes `import`, and both are described by one `types` entry.
 

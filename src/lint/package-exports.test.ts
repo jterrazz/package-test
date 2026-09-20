@@ -1,4 +1,11 @@
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+    existsSync,
+    mkdirSync,
+    mkdtempSync,
+    readdirSync,
+    readFileSync,
+    writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -41,6 +48,46 @@ function exportedNames(bundle: string): string[] {
 async function builtEntry(path: string): Promise<Record<string, unknown>> {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a computed specifier resolves to `any`: naming the module's shape is exactly what these tests compare
     return (await import(resolve(ROOT, path))) as Record<string, unknown>;
+}
+
+/** Every top-level path `files` publishes; a negation withdraws nothing at that level. */
+function publishedRoots(): Set<string> {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `files` is the array this reads
+    const { files } = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
+        files: string[];
+    };
+    return new Set(files.filter((entry) => !entry.startsWith('!')));
+}
+
+/** Every `docs/…` FILE a text cites — a chapter, or the reference folder's index. */
+function citedDocPaths(text: string): string[] {
+    const cited = [...text.matchAll(/docs\/[\w./-]*\.md|docs\/reference\//gu)].map(
+        (match) => match[0],
+    );
+    return [...new Set(cited)];
+}
+
+/** What the built bundle says to a consumer, gathered from the sources it is built from. */
+function sourceCitations(): string[] {
+    const cited: string[] = [];
+    for (const entry of readdirSync(resolve(ROOT, 'src'), { recursive: true })) {
+        const path = String(entry);
+        if (path.endsWith('.ts')) {
+            const source = readFileSync(resolve(ROOT, 'src', path), 'utf8');
+            cited.push(...citedDocPaths(source));
+        }
+    }
+    return [...new Set(cited)];
+}
+
+/** The cited paths the tarball does NOT carry — either unpublished, or absent. */
+function unpublished(paths: string[]): string[] {
+    const published = publishedRoots();
+    return paths.filter((path) => {
+        const file = path.split('#')[0] ?? '';
+        const root = file.split('/')[0] ?? '';
+        return !published.has(root) || !existsSync(resolve(ROOT, file));
+    });
 }
 
 function manifestAt(dir: string, manifest: unknown): void {
@@ -118,5 +165,25 @@ describe('package-exports — the root has two runtimes and one type surface', (
 
         // Then - one surface: neither side has a name the other lacks
         expect(browser.toSorted()).toStrictEqual(Object.keys(node).toSorted());
+    });
+});
+
+describe('package-exports — the tarball carries what a message points at', () => {
+    test('every chapter the README links is a file the install holds', () => {
+        // Given - the vitrine, whose links are relative and therefore resolved inside the install
+        const cited = citedDocPaths(readFileSync(resolve(ROOT, 'README.md'), 'utf8'));
+
+        // Then - every one of them is under a published path and on disk
+        expect(cited.length).toBeGreaterThan(0);
+        expect(unpublished(cited)).toStrictEqual([]);
+    });
+
+    test('every chapter a diagnostic cites is a file the install holds', () => {
+        // Given - the `(… — see docs/19-linting.md#…)` a rule message ends on: a consumer follows it inside node_modules
+        const cited = sourceCitations();
+
+        // Then - the anchor's file ships, so the pointer resolves where it is read
+        expect(cited.length).toBeGreaterThan(0);
+        expect(unpublished(cited)).toStrictEqual([]);
     });
 });
