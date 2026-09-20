@@ -26,7 +26,11 @@ async function reachRun(): Promise<string> {
     return result.stdout.text;
 }
 
-/** What the run said about one path. */
+/**
+ * What the run said about one path — read off the `unix` rendering the
+ * wrapper pins (`<path>:<line>:<col>: <message> [<Severity>/<rule>]`), one
+ * line per diagnostic.
+ */
 function about(output: string, path: string): string[] {
     return output
         .split('\n')

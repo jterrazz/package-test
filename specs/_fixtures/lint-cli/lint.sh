@@ -25,5 +25,12 @@ fi
 CONFIG="$SCRIPT_DIR/${LINT_CONFIG:-oxlint.e2e.json}"
 TARGET="${1:-.}"
 
+# Without --format, oxlint picks its renderer off the AMBIENT environment: a
+# Shell that advertises an AI agent (CLAUDECODE and friends) gets one line per
+# Diagnostic, every other shell — a plain terminal, a CI runner — gets the
+# Graphical frames. A spec reads the output, so the wrapper STATES the
+# Rendering: `unix` is one line per diagnostic,
+# `<path>:<line>:<col>: <message> [<Severity>/<rule>]`, the same on a
+# Workstation and on a runner.
 # exec so oxlint's exit code (1 on violations, 0 when clean) is the script's.
-exec "$OXLINT" --config "$CONFIG" "$TARGET"
+exec "$OXLINT" --format=unix --config "$CONFIG" "$TARGET"
