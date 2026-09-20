@@ -326,6 +326,35 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         }
     });
 
+    test('a statique row that states a role gate has one', () => {
+        // Given - every statique row whose reach is one KIND of file. `tests`
+        // And `all` are out: a rule gated on a SHAPE (a `.fixture()` literal,
+        // A `.trigger()` name) looks at every file and finds that shape only
+        // In a test, which is what its convention says.
+        const ROLE_REACH = new Set([
+            'component',
+            'config',
+            'contract',
+            'document',
+            'ground',
+            'module',
+            'spec',
+            'specification',
+        ]);
+
+        // Then - its rule asks `roleOf` (directly, or through the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and W2 was one — any file with a `.visit/.render/.open` scenario was judged
+        for (const entry of catalog) {
+            if (entry.channel !== 'statique' || !ROLE_REACH.has(entry.reach)) {
+                continue;
+            }
+            const source = read(`src/lint/rules/${entry.name}.ts`);
+            expect(
+                source.includes('roleOf(') || source.includes('isTestRole('),
+                `${entry.name} states reach \`${entry.reach}\` and reads no role`,
+            ).toBe(true);
+        }
+    });
+
     test('every catalogue row names exactly ONE channel', () => {
         // Given - the seven-channel vocabulary
         const CHANNELS = new Set([
