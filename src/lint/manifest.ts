@@ -434,7 +434,7 @@ export const RULE_DOCS = {
     'd8w-text-bypass': {
         channel: 'statique',
         convention:
-            '`expect(x.text).toContain/toMatch` short-circuits the typed accessor subject → warning.',
+            '`expect(x.text).toContain/toMatch` short-circuits the typed accessor subject → warning. A RegExp argument is exempt: `toMatch` on an accessor takes a fixture NAME and throws on a regex, so reaching through to `.text` is the sanctioned form for a raw pattern (chapter 14).',
         facet: 'model',
         family: 'D',
         fix: 'Assert on the accessor itself (`expect(x)`), which carries the tokens and the fixture resolution.',
