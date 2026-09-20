@@ -1,15 +1,15 @@
 import { randomUUID } from 'node:crypto';
 
-import type { SpecificationConfig } from '../../core/chain/builder.js';
-import { getCallerDir } from '../../core/chain/caller.js';
-import { ProcessHandle } from '../../core/chain/process.js';
-import type { AppInfo } from '../../core/chain/reporter.js';
-import { resolveRoot } from '../../core/chain/resolve.js';
-import type { ServiceRecord, StartedServices } from '../../core/chain/services.js';
-import { releaseIsolation, startServices } from '../../core/chain/services.js';
-import { StubBackend } from '../../core/chain/stub-backend.js';
-import { registerMatchers } from '../../core/goldens/matchers.js';
-import type { BrowserPort } from '../../core/ports/browser.port.js';
+import type { SpecificationConfig } from '../../model/chain/builder.js';
+import { getCallerDir } from '../../model/chain/caller.js';
+import { ProcessHandle } from '../../model/chain/process.js';
+import type { AppInfo } from '../../model/chain/reporter.js';
+import { resolveRoot } from '../../model/chain/resolve.js';
+import type { ServiceRecord, StartedServices } from '../../model/chain/services.js';
+import { releaseIsolation, startServices } from '../../model/chain/services.js';
+import { StubBackend } from '../../model/chain/stub-backend.js';
+import { registerMatchers } from '../../model/goldens/matchers.js';
+import type { BrowserPort } from '../../model/ports/browser.port.js';
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
 import { createWebsiteFacet } from './website.chain.js';

@@ -1,6 +1,6 @@
-import { matchesText } from '../../core/contracts/filters.js';
-import type { TextFilter } from '../../core/contracts/filters.js';
-import type { ContractRequest, ContractResponse } from '../../core/contracts/types.js';
+import { matchesText } from '../../model/contracts/filters.js';
+import type { TextFilter } from '../../model/contracts/filters.js';
+import type { ContractRequest, ContractResponse } from '../../model/contracts/types.js';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const TEST_FILE = /\.test\.[cm]?[jt]s$/u;
 
 /** Where this very module sits inside the framework's SOURCE tree. */
-const SOURCE_LOCATION = join('core', 'chain');
+const SOURCE_LOCATION = join('model', 'chain');
 
 /** The real path of `path`, or `path` itself when it cannot be resolved. */
 function realPath(path: string): string {
@@ -46,7 +46,7 @@ function isInside(directory: string, path: string): boolean {
  * calling it?
  *
  * Answered by IDENTITY — the frame is inside the framework's own directory —
- * and never by substring: a consumer's own `src/core/` is not this package's,
+ * and never by substring: a consumer's own `src/model/` is not this package's,
  * and reading it as one would skip the consumer's files as internals and
  * anchor fixture resolution on the wrong directory.
  *

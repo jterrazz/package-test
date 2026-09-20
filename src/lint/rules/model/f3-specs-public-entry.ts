@@ -13,12 +13,12 @@ const PACKAGE = '@jterrazz/test';
  * spec-to-app imports stay allowed (that IS the documented pattern:
  * `server: () => createApp()` importing `../../src/app.js`).
  */
-const FRAMEWORK_LAYERS = new Set(['core', 'facets', 'lint', 'runner', 'seams']);
+const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams']);
 
 /**
  * CONVENTIONS F3 — from `specs/`, deep-importing the FRAMEWORK's internals is
  * forbidden: a relative path resolving inside the framework repo's
- * `src/{core,facets,seams,runner,lint}/`, or a `@jterrazz/test/<subpath>`
+ * `src/{model,facets,seams,runner,lint}/`, or a `@jterrazz/test/<subpath>`
  * the package does not publish. A consumer's imports of its OWN app source are
  * always allowed — that is the pattern.
  *

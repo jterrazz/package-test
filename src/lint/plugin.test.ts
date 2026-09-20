@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { TOKEN_KINDS } from '../core/matching/match.js';
+import { TOKEN_KINDS } from '../model/matching/match.js';
 import { anchor, renderRules, spliceCatalog } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
 import {

@@ -8,7 +8,7 @@
  * of that interface by `facet-matrix.test.ts`, in BOTH directions — a member
  * added to a facet and forgotten here fails the build, and a row naming a
  * member no interface has fails it too. The element vocabulary is pinned to
- * the exports of `core/elements/elements.ts` the same way.
+ * the exports of `model/elements/elements.ts` the same way.
  *
  * The role vocabulary and the tiny projection helper live here — a pure module
  * with zero framework imports, so the tool-facing lint layer stays runtime-free

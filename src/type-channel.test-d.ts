@@ -1,7 +1,7 @@
-import type { Visitor } from './core/ports/browser.port.js';
-import type { MobileVisitor } from './core/ports/device.port.js';
 /* oxlint-disable jterrazz/a1-specification-file, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. */
 import { mockOf, postgres, specification } from './index.js';
+import type { Visitor } from './model/ports/browser.port.js';
+import type { MobileVisitor } from './model/ports/device.port.js';
 
 /**
  * The TYPE channel — the conventions the compiler refuses, stated as code.

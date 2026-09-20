@@ -1,4 +1,4 @@
-import type { DeviceScreen, ScreenNode } from '../../core/ports/device.port.js';
+import type { DeviceScreen, ScreenNode } from '../../model/ports/device.port.js';
 
 /**
  * The screen projection — XCUITest page source → {@link ScreenNode} tree.

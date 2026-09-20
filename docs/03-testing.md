@@ -142,7 +142,7 @@ saying why.
 **One floor, over the whole suite.** The baseline is keyed by scope and the CLI
 takes `--scope`, so a project can keep its own; this repository records `all`
 and nothing else, because the projects overlap — the browser projects and the
-node ones both execute `core/`, and four floors summing to more than the tree
+node ones both execute `model/`, and four floors summing to more than the tree
 would ratchet on which project happened to run. A scope missing any of the four
 metrics is refused rather than read as a zero, since a floor of zero forbids
 nothing.
@@ -415,16 +415,16 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 Several truths about this package cannot be asserted from outside it, so they are asserted by running it on itself. Each of these exists because a defect class was found once and made unrepeatable (rule K1).
 
-| Meta-test                                               | Holds                                                                                                                                                                                                                                             |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/core/matching/match.test.ts`, `structural.test.ts` | Every `{{token}}` matches what it should and refuses what it should not — both directions                                                                                                                                                         |
-| `src/lint/plugin.test.ts`                               | Catalogue **freshness** (regenerating reproduces the committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`, every manifest entry maps to an implementation), plus the standing rule↔fixture inventory |
-| `src/lint/docs-typecheck.test.ts`                       | Every framework code block in `docs/*.md` and `README.md` typechecks against the real surface, so a sample cannot outlive the API it calls                                                                                                        |
-| `src/lint/env-allowlist.test.ts`                        | No `process.env` read outside `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                                           |
-| `src/lint/facet-matrix.test.ts`                         | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
-| `src/lint/package-exports.test.ts`                      | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
-| `specs/lint/meta/k4-reach-per-path.test.ts`             | The REACH of a rule, on one fixture project laid out with every path role and a single oxlint run (rule K4)                                                                                                                                       |
-| `src/type-channel.test-d.ts`                            | What the COMPILER refuses — A8, A11, B1, B3, D1, M2, W6 — each as an `@ts-expect-error` that fails the day the line it marks starts compiling                                                                                                     |
+| Meta-test                                                | Holds                                                                                                                                                                                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/model/matching/match.test.ts`, `structural.test.ts` | Every `{{token}}` matches what it should and refuses what it should not — both directions                                                                                                                                                         |
+| `src/lint/plugin.test.ts`                                | Catalogue **freshness** (regenerating reproduces the committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`, every manifest entry maps to an implementation), plus the standing rule↔fixture inventory |
+| `src/lint/docs-typecheck.test.ts`                        | Every framework code block in `docs/*.md` and `README.md` typechecks against the real surface, so a sample cannot outlive the API it calls                                                                                                        |
+| `src/lint/env-allowlist.test.ts`                         | No `process.env` read outside `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                                           |
+| `src/lint/facet-matrix.test.ts`                          | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
+| `src/lint/package-exports.test.ts`                       | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
+| `specs/lint/meta/k4-reach-per-path.test.ts`              | The REACH of a rule, on one fixture project laid out with every path role and a single oxlint run (rule K4)                                                                                                                                       |
+| `src/type-channel.test-d.ts`                             | What the COMPILER refuses — A8, A11, B1, B3, D1, M2, W6 — each as an `@ts-expect-error` that fails the day the line it marks starts compiling                                                                                                     |
 
 `src/lint/plugin.test.ts` also holds the seven-channel contract: every row of
 every channel carries the proof that channel can give — a rule file and a

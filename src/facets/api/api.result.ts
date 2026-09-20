@@ -1,7 +1,7 @@
-import type { SpecificationConfig } from '../../core/chain/builder.js';
-import type { ServerResponse } from '../../core/ports/server.port.js';
-import { ResponseAccessor } from '../../core/result/response.js';
-import { BaseResult } from '../../core/result/result.js';
+import type { SpecificationConfig } from '../../model/chain/builder.js';
+import type { ServerResponse } from '../../model/ports/server.port.js';
+import { ResponseAccessor } from '../../model/result/response.js';
+import { BaseResult } from '../../model/result/result.js';
 
 /** Result from an HTTP action (.request(), .get(), .post(), .put(), .delete()). */
 export class HttpResult extends BaseResult {

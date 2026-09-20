@@ -17,11 +17,11 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-import { SQLITE_TEMPLATE_DIR } from '../../core/artifacts/artifacts.js';
-import { discoverRoot } from '../../core/chain/resolve.js';
-import type { DatabasePort } from '../../core/ports/database.port.js';
-import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
-import type { ServiceHandle } from '../../core/ports/service.port.js';
+import { SQLITE_TEMPLATE_DIR } from '../../model/artifacts/artifacts.js';
+import { discoverRoot } from '../../model/chain/resolve.js';
+import type { DatabasePort } from '../../model/ports/database.port.js';
+import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
+import type { ServiceHandle } from '../../model/ports/service.port.js';
 import { loadPeer, requireBuiltPeer } from '../peer.js';
 
 // The first 16 bytes of every well-formed SQLite database file (see the

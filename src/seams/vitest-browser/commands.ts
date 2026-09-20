@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { BrowserCommand } from 'vitest/node';
 
-import { GROUND_EXPECTED } from '../../core/chain/ground.js';
+import { GROUND_EXPECTED } from '../../model/chain/ground.js';
 
 /**
  * The two things a page cannot do for itself, run on the server side of

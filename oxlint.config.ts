@@ -9,7 +9,7 @@ import { testing } from './dist/oxlint.js';
 /**
  * The five trees of this package and their sanctioned edges (CONVENTIONS I1).
  *
- * - `core/` — the chain, the results, the elements (the descriptors, and the
+ * - `model/` — the chain, the results, the elements (the descriptors, and the
  *   ambiguity and substring readings every surface shares), the contracts and
  *   the intercept, the goldens, the clock and the doubles: what every facet is
  *   made of. It reaches the three seams that carry no engine of their own
@@ -18,15 +18,15 @@ import { testing } from './dist/oxlint.js';
  *   back — the facet module that declares that result.
  * - `facets/<facet>/` — the same four files in every folder
  *   (`<facet>.specification.ts`, `.chain.ts`, `.result.ts`, `.project.ts`)
- *   plus what is unique to the facet. It reaches `core/` freely, and each
+ *   plus what is unique to the facet. It reaches `model/` freely, and each
  *   constructor opens the one seam its runtime needs.
  * - `seams/<dep>/` — one folder = one external dependency (or one node
- *   builtin, as `process/` is), plus `core/` and the facet vocabulary an
+ *   builtin, as `process/` is), plus `model/` and the facet vocabulary an
  *   adapter projects into (the device's ambiguity reading, the cli result a
  *   container exec produces).
  * - `runner/` — the config surface: the preset, the project index, update
  *   mode, the literate plugin. It couples to `vite`/`vitest` by design.
- * - `lint/` — zero runtime imports: no external packages, and from `core/`
+ * - `lint/` — zero runtime imports: no external packages, and from `model/`
  *   only the pure helpers (the token list, the case conversions, fixture
  *   markers, the root walk a rule must share with the runner, the
  *   spec-document parser).
@@ -36,39 +36,8 @@ import { testing } from './dist/oxlint.js';
  * files are governed by F2/I4.
  */
 const FRAMEWORK_LAYERS = {
-    core: {
-        imports: [
-            'core/',
-            // A terminal action CONSTRUCTS the facet's result — `new
-            // HttpResult(…)`, `new PageResult(…)` — and the facet folder is
-            // where that class lives (`<facet>.result.ts`). It is a value
-            // edge, by design: one builder, seven results it names.
-            'facets/api/api.result',
-            'facets/cli/cli.result',
-            'facets/cli/literate',
-            'facets/integration/integration.result',
-            'facets/mobile/mobile.result',
-            'facets/website/website.result',
-            // The three seams that carry no engine of their own: a docker
-            // Lookup is a shell read, a yaml document is a parse, a process is
-            // `node:child_process`.
-            'seams/docker/',
-            'seams/process/',
-            'seams/yaml/document',
-            // Update-mode detection is a pure env read the literate runner
-            // Shares with the matchers — one answer to "are we rewriting?".
-            'runner/update',
-        ],
-        packages: ['vitest', 'vitest-mock-extended'],
-        seams: {
-            // The contract engine is reached through a lazy import, once per
-            // Opener: the chain's `.intercept()` and the module-scope one.
-            'core/chain/builder.ts': ['seams/msw/'],
-            'core/contracts/intercept.ts': ['seams/msw/'],
-        },
-    },
     facets: {
-        imports: ['facets/', 'core/', 'runner/facet-project', 'runner/preset', 'runner/update'],
+        imports: ['facets/', 'model/', 'runner/facet-project', 'runner/preset', 'runner/update'],
         packages: ['vite', 'vitest', 'vitest/config', '@vitest/browser-playwright'],
         seams: {
             'facets/api/api.specification.ts': ['seams/docker/', 'seams/hono/'],
@@ -93,25 +62,56 @@ const FRAMEWORK_LAYERS = {
             'lint/',
             // The coverage ratchet reads the report the preset asked for, and
             // There is ONE answer to where a tool writes what it generates.
-            'core/artifacts/artifacts',
+            'model/artifacts/artifacts',
             // The .spec.yaml grammar is read by the runner AND by the checker —
             // One parser, so the file lint accepts is the one the runner runs.
-            'core/literate/spec-document',
+            'model/literate/spec-document',
             'seams/yaml/document',
-            'core/matching/match',
-            'core/chain/binding',
-            'core/chain/fixtures',
+            'model/matching/match',
+            'model/chain/binding',
+            'model/chain/fixtures',
             // The four ground names have ONE home; a rule that probed for its
             // Own copy of them could drift from what the runner resolves.
-            'core/chain/ground',
+            'model/chain/ground',
             // A9's rule must derive the root with the framework's own walk, not a copy.
-            'core/chain/resolve',
+            'model/chain/resolve',
         ],
+    },
+    model: {
+        imports: [
+            'model/',
+            // A terminal action CONSTRUCTS the facet's result — `new
+            // HttpResult(…)`, `new PageResult(…)` — and the facet folder is
+            // where that class lives (`<facet>.result.ts`). It is a value
+            // edge, by design: one builder, seven results it names.
+            'facets/api/api.result',
+            'facets/cli/cli.result',
+            'facets/cli/literate',
+            'facets/integration/integration.result',
+            'facets/mobile/mobile.result',
+            'facets/website/website.result',
+            // The three seams that carry no engine of their own: a docker
+            // Lookup is a shell read, a yaml document is a parse, a process is
+            // `node:child_process`.
+            'seams/docker/',
+            'seams/process/',
+            'seams/yaml/document',
+            // Update-mode detection is a pure env read the literate runner
+            // Shares with the matchers — one answer to "are we rewriting?".
+            'runner/update',
+        ],
+        packages: ['vitest', 'vitest-mock-extended'],
+        seams: {
+            // The contract engine is reached through a lazy import, once per
+            // Opener: the chain's `.intercept()` and the module-scope one.
+            'model/chain/builder.ts': ['seams/msw/'],
+            'model/contracts/intercept.ts': ['seams/msw/'],
+        },
     },
     runner: {
         imports: [
             'runner/',
-            'core/',
+            'model/',
             // The cli project wires the literate door, and the plugin needs the
             // Facet's own runner to bind a document to.
             'facets/cli/literate',
@@ -137,7 +137,7 @@ const FRAMEWORK_LAYERS = {
             yaml: ['yaml'],
         },
         imports: [
-            'core/',
+            'model/',
             // The one module every seam folder reaches for: it owns the
             // Message a MISSING optional peer produces, and a copy of that
             // Message per folder is how the four of them would have drifted.
@@ -145,7 +145,7 @@ const FRAMEWORK_LAYERS = {
             // What an adapter PROJECTS into: the device's own reading of an
             // Ambiguity and the result a container exec produces are the
             // Facet's vocabulary, and a seam that copied them would answer in
-            // A second dialect. The SHARED readings are `core/elements/`.
+            // A second dialect. The SHARED readings are `model/elements/`.
             'facets/cli/cli.result',
             'facets/mobile/ambiguity',
             'facets/mobile/projection',
@@ -180,9 +180,9 @@ const config: OxlintConfig = defineConfig(
                     // And states nothing a spec imports.
                     'src/facets/**/*.project.ts',
                     'src/seams/vitest-browser/**',
-                    'src/core/clock/**',
-                    'src/core/doubles/**',
-                    'src/core/goldens/**',
+                    'src/model/clock/**',
+                    'src/model/doubles/**',
+                    'src/model/goldens/**',
                 ],
                 rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
             },

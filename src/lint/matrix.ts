@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { TOKEN_KINDS } from '../core/matching/match.js';
+import { TOKEN_KINDS } from '../model/matching/match.js';
 import { cell, table } from './catalog.js';
 import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
 import type { Capability, Column } from './facet-matrix.js';

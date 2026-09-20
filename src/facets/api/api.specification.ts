@@ -1,14 +1,14 @@
-import type { SpecificationConfig } from '../../core/chain/builder.js';
-import { getCallerDir } from '../../core/chain/caller.js';
-import { createDockerReader } from '../../core/chain/docker-reader.js';
-import { resolveRoot } from '../../core/chain/resolve.js';
+import type { SpecificationConfig } from '../../model/chain/builder.js';
+import { getCallerDir } from '../../model/chain/caller.js';
+import { createDockerReader } from '../../model/chain/docker-reader.js';
+import { resolveRoot } from '../../model/chain/resolve.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../core/chain/services.js';
-import type { DatabaseKeys, ServiceRecord } from '../../core/chain/services.js';
-import { registerMatchers } from '../../core/goldens/matchers.js';
+} from '../../model/chain/services.js';
+import type { DatabaseKeys, ServiceRecord } from '../../model/chain/services.js';
+import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { HonoAdapter } from '../../seams/hono/hono.adapter.js';
 import { createApiFacet } from './api.chain.js';

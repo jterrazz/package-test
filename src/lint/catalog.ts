@@ -83,7 +83,7 @@ function families(rows: CatalogEntry[]): string[] {
 }
 
 /**
- * How the catalogue is grouped: `core` first — the rules that reach every
+ * How the catalogue is grouped: `model` first — the rules that reach every
  * facet, which is what a reader adopting ANY facet owes — then one section per
  * facet, alphabetically.
  *
@@ -92,9 +92,18 @@ function families(rows: CatalogEntry[]): string[] {
  * kind of convention, not an audience, and `C — Files & folders` mixes a rule
  * every facet obeys with one only the literate door can break.
  */
-const FACET_ORDER = ['core', 'api', 'cli', 'component', 'integration', 'jobs', 'mobile', 'website'];
+const FACET_ORDER = [
+    'model',
+    'api',
+    'cli',
+    'component',
+    'integration',
+    'jobs',
+    'mobile',
+    'website',
+];
 
-/** The facet sections present in the catalogue, core first. */
+/** The facet sections present in the catalogue, model first. */
 function facets(): string[] {
     const present = new Set<string>(catalog.map((entry) => entry.facet));
     return FACET_ORDER.filter((facet) => present.has(facet));
@@ -105,10 +114,10 @@ const FACET_TITLES: Record<string, string> = {
     api: 'the HTTP app, met through its entry',
     cli: 'the command binary and its literate documents',
     component: 'a rendered unit, in a page',
-    core: 'every facet, whichever constructor you reach for',
     integration: 'a module against the real thing',
     jobs: 'what a name triggers in-process',
     mobile: 'a native screen on a simulator',
+    model: 'every facet, whichever constructor you reach for',
     website: 'the served site, driven in a browser',
 };
 
@@ -130,7 +139,7 @@ function counts(): Record<CatalogEntry['channel'], number> {
 }
 
 /**
- * The catalogue's sections: `## <facet>` — core first — each holding one
+ * The catalogue's sections: `## <facet>` — model first — each holding one
  * `### <family> — <title>` table (Code · Implementation · Channel · Reach ·
  * Convention · Fix · Rationale) sorted by channel then id.
  */
@@ -213,9 +222,9 @@ export function spliceCatalog(existing: string): string {
 
 /**
  * The agent-facing rule reference `skills/jterrazz-test/references/rules.md` —
- * the same seven-channel catalogue as `docs/13`, trimmed to what an agent needs
+ * the same seven-channel catalogue as `docs/19`, trimmed to what an agent needs
  * to apply and cite a rule (Code · Implementation · Channel · Enforces), grouped
- * core first, then by facet, then by family. Stamped `DO NOT EDIT`; the skill routes here for rule ids.
+ * model first, then by facet, then by family. Stamped `DO NOT EDIT`; the skill routes here for rule ids.
  */
 export function renderRules(): string {
     const sections = facets().flatMap((facet) => {

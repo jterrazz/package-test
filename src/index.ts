@@ -1,6 +1,6 @@
-import { registerContainerIntegrations } from './core/chain/registry.js';
-import { interceptThrough } from './core/contracts/intercept.js';
-import type { Intercept } from './core/contracts/intercept.js';
+import { registerContainerIntegrations } from './model/chain/registry.js';
+import { interceptThrough } from './model/contracts/intercept.js';
+import type { Intercept } from './model/contracts/intercept.js';
 import { TestcontainersAdapter } from './seams/testcontainers/testcontainers.js';
 
 // ── The surface both runtimes share (browser-safe) ──
@@ -37,7 +37,7 @@ export {
     type SpecRun,
     type SpecServeEntry,
     type SpecStream,
-} from './core/literate/spec-document.js';
+} from './model/literate/spec-document.js';
 export {
     type IntegrationHandle,
     type IntegrationSpecificationOptions,
@@ -58,8 +58,8 @@ export {
 } from './facets/website/website.specification.js';
 export { type ProcessOptions } from './seams/process/serve.adapter.js';
 export { type ServerSpec } from './facets/website/website.specification.js';
-export { processService as process, ProcessHandle } from './core/chain/process.js';
-export { type DatabaseKeys, type ServiceRecord } from './core/chain/services.js';
+export { processService as process, ProcessHandle } from './model/chain/process.js';
+export { type DatabaseKeys, type ServiceRecord } from './model/chain/services.js';
 
 // Facets — each chain is named in its own folder, beside the constructor that
 // Builds it and the result it hands back (the four files every facet carries).
@@ -70,7 +70,7 @@ export type { JobsSpecification } from './facets/jobs/jobs.chain.js';
 export type { JobsResult } from './facets/jobs/jobs.result.js';
 export type { MobileSpecification } from './facets/mobile/mobile.chain.js';
 export type { WebsiteSpecification } from './facets/website/website.chain.js';
-export type { DockerSpecConfig, JobHandle, SpecificationConfig } from './core/chain/builder.js';
+export type { DockerSpecConfig, JobHandle, SpecificationConfig } from './model/chain/builder.js';
 
 // Results that read a disk, a database or a container — node only.
 //
@@ -79,26 +79,26 @@ export type { DockerSpecConfig, JobHandle, SpecificationConfig } from './core/ch
 // thing a consumer needs the name for is annotating a helper that takes one.
 // Publishing the classes exported a constructor nobody may call and a
 // prototype chain the package is then not free to change.
-export type { FileAccessor } from './core/result/result.js';
-export type { BaseResult } from './core/result/result.js';
+export type { FileAccessor } from './model/result/result.js';
+export type { BaseResult } from './model/result/result.js';
 export type { CliResult } from './facets/cli/cli.result.js';
 export type { ContainerAccessor } from './seams/docker/container-accessor.js';
 export type { CallResult } from './facets/integration/integration.result.js';
 export type { HttpResult } from './facets/api/api.result.js';
 export type { ScreenResult } from './facets/mobile/mobile.result.js';
 export type { FetchResult, PageResult } from './facets/website/website.result.js';
-export type { DirectoryAccessor } from './core/result/directory.js';
-export type { FilesystemAccessor } from './core/result/filesystem.js';
-export type { ResponseAccessor } from './core/result/response.js';
-export { text } from './core/result/text-subject.js';
+export type { DirectoryAccessor } from './model/result/directory.js';
+export type { FilesystemAccessor } from './model/result/filesystem.js';
+export type { ResponseAccessor } from './model/result/response.js';
+export { text } from './model/result/text-subject.js';
 
 // Ports
-export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './core/ports/cli.port.js';
-export type { DatabasePort } from './core/ports/database.port.js';
-export type { IsolationStrategy } from './core/ports/isolation.port.js';
-export type { ServiceHandle } from './core/ports/service.port.js';
-export type { ServerPort, ServerResponse } from './core/ports/server.port.js';
-export type { ContainerPort } from './core/ports/container.port.js';
+export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './model/ports/cli.port.js';
+export type { DatabasePort } from './model/ports/database.port.js';
+export type { IsolationStrategy } from './model/ports/isolation.port.js';
+export type { ServiceHandle } from './model/ports/service.port.js';
+export type { ServerPort, ServerResponse } from './model/ports/server.port.js';
+export type { ContainerPort } from './model/ports/container.port.js';
 
 // Services
 export { postgres, type PostgresOptions } from './seams/postgres/postgres.js';

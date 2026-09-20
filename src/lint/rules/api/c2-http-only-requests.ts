@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path';
 
-import { GROUND_REQUESTS } from '../../../core/chain/ground.js';
+import { GROUND_REQUESTS } from '../../../model/chain/ground.js';
 import { listDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole, roleOf } from '../../role.js';

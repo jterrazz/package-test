@@ -11,11 +11,11 @@
  * sides (it is a dependency, never a peer), and the namespace it returns is
  * the seam's to describe, not the model's.
  */
-import type { Contract } from '../../core/contracts/contract.js';
-import { ContractQueue } from '../../core/contracts/queue.js';
-import { toReadableStream } from '../../core/contracts/stream.js';
-import { isStreamBody } from '../../core/contracts/types.js';
-import type { ContractResponse, MatchableRequest } from '../../core/contracts/types.js';
+import type { Contract } from '../../model/contracts/contract.js';
+import { ContractQueue } from '../../model/contracts/queue.js';
+import { toReadableStream } from '../../model/contracts/stream.js';
+import { isStreamBody } from '../../model/contracts/types.js';
+import type { ContractResponse, MatchableRequest } from '../../model/contracts/types.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 

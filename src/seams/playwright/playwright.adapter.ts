@@ -8,8 +8,8 @@ import {
     AmbiguousElementError,
     describeAmbiguity,
     formatElement,
-} from '../../core/elements/ambiguity.js';
-import { warnSubstringOnly } from '../../core/elements/substring-warning.js';
+} from '../../model/elements/ambiguity.js';
+import { warnSubstringOnly } from '../../model/elements/substring-warning.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -20,7 +20,7 @@ import type {
     ElementMatch,
     ElementRef,
     Visitor,
-} from '../../core/ports/browser.port.js';
+} from '../../model/ports/browser.port.js';
 
 /**
  * Anything a locator can be built from — the page root, or another locator

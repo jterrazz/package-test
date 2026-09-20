@@ -201,7 +201,7 @@ export type BrowserOpenOptions = {
 /**
  * The rendered page captured by a browser visit — the FINAL state when a
  * scenario ran. Extraction happens in-page (the browser IS the HTML
- * parser); interpretation of the raw elements belongs to core.
+ * parser); interpretation of the raw elements belongs to the model.
  */
 export type BrowserPage = {
     /** Console messages emitted while loading and interacting, in order. */

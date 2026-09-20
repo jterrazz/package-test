@@ -6,7 +6,7 @@ import type {
     CliOutput,
     CliPort,
     ExecOptions,
-} from '../../core/ports/cli.port.js';
+} from '../../model/ports/cli.port.js';
 
 const DEFAULT_WATCH_TIMEOUT = 10_000;
 /** Grace period between SIGTERM and the SIGKILL escalation. */

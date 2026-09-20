@@ -1,9 +1,9 @@
-import type { DockerSpecConfig, SpecificationConfig } from '../../core/chain/builder.js';
-import type { CliOutput } from '../../core/ports/cli.port.js';
-import { FilesystemAccessor } from '../../core/result/filesystem.js';
-import { JsonAccessor } from '../../core/result/json.js';
-import { BaseResult } from '../../core/result/result.js';
-import { TextAccessor } from '../../core/result/text.js';
+import type { DockerSpecConfig, SpecificationConfig } from '../../model/chain/builder.js';
+import type { CliOutput } from '../../model/ports/cli.port.js';
+import { FilesystemAccessor } from '../../model/result/filesystem.js';
+import { JsonAccessor } from '../../model/result/json.js';
+import { BaseResult } from '../../model/result/result.js';
+import { TextAccessor } from '../../model/result/text.js';
 import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import {
     findContainersByLabel,

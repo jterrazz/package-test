@@ -10,7 +10,7 @@ import {
     COVERAGE_DIR,
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
-} from '../core/artifacts/artifacts.js';
+} from '../model/artifacts/artifacts.js';
 import { literate } from './literate-plugin.js';
 import type { LiterateOptions } from './literate-plugin.js';
 

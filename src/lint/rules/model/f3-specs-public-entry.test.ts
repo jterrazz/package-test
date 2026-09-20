@@ -16,7 +16,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
     invalid: [
         // Deep specification-layer import from a spec.
         {
-            code: 'import { match } from "../../src/core/matching/match.js";',
+            code: 'import { match } from "../../src/model/matching/match.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
@@ -35,7 +35,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
         },
         // The vitest layer is internal too.
         {
-            code: 'import { registerMatchers } from "../../src/core/goldens/matchers.js";',
+            code: 'import { registerMatchers } from "../../src/model/goldens/matchers.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
@@ -93,7 +93,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
         // Outside specs/ the rule is inert.
         {
             code: 'import { match } from "../matching/match.js";',
-            filename: '/repo/src/core/goldens/matchers.ts',
+            filename: '/repo/src/model/goldens/matchers.ts',
         },
         // Consumer form — the ROOT entry is what F3 points a spec at.
         {

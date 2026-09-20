@@ -5,4 +5,4 @@
  * A re-export, so the jobs folder carries the same four files every facet
  * does. The shape itself is stated with the chain that returns it.
  */
-export type { JobsResult } from '../../core/chain/builder.js';
+export type { JobsResult } from '../../model/chain/builder.js';

@@ -1,29 +1,29 @@
 import { cpSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
-import type { SpecificationConfig } from '../../core/chain/builder.js';
-import { copyPlan } from '../../core/chain/fixtures.js';
-import { formatStdoutDiff } from '../../core/chain/reporter.js';
-import { expandWorkdir, safeRealpath } from '../../core/chain/resolve.js';
+import type { SpecificationConfig } from '../../model/chain/builder.js';
+import { copyPlan } from '../../model/chain/fixtures.js';
+import { formatStdoutDiff } from '../../model/chain/reporter.js';
+import { expandWorkdir, safeRealpath } from '../../model/chain/resolve.js';
 import {
     readSpecFile,
     SpecSyntaxError,
     updateSpecFile,
-} from '../../core/literate/spec-document.js';
+} from '../../model/literate/spec-document.js';
 import type {
     SpecDocument,
     SpecFile,
     SpecFileAssertion,
     SpecRun,
-} from '../../core/literate/spec-document.js';
-import { CaptureScope } from '../../core/matching/match.js';
+} from '../../model/literate/spec-document.js';
+import { CaptureScope } from '../../model/matching/match.js';
 import {
     mergeTextPreservingPlaceholders,
     textContains,
     textEquals,
-} from '../../core/matching/structural.js';
-import type { CliEnv, CliOutput } from '../../core/ports/cli.port.js';
-import { stripAnsiCodes } from '../../core/result/text.js';
+} from '../../model/matching/structural.js';
+import type { CliEnv, CliOutput } from '../../model/ports/cli.port.js';
+import { stripAnsiCodes } from '../../model/result/text.js';
 import { shouldUpdateSnapshots } from '../../runner/update.js';
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import { CliResult } from './cli.result.js';

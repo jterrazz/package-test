@@ -10,5 +10,5 @@
  * The constructor beside it imports its chain from HERE, so the name a facet
  * answers to is stated in the facet's own folder.
  */
-export { createIntegrationFacet } from '../../core/chain/builder.js';
-export type { IntegrationSpecification } from '../../core/chain/builder.js';
+export { createIntegrationFacet } from '../../model/chain/builder.js';
+export type { IntegrationSpecification } from '../../model/chain/builder.js';

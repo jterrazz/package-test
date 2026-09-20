@@ -1,12 +1,12 @@
-import type { SpecificationConfig } from '../../core/chain/builder.js';
+import type { SpecificationConfig } from '../../model/chain/builder.js';
 import type {
     BrowserLinkElement,
     BrowserMetaElement,
     BrowserPage,
-} from '../../core/ports/browser.port.js';
-import { JsonAccessor } from '../../core/result/json.js';
-import { BaseResult } from '../../core/result/result.js';
-import { TextAccessor } from '../../core/result/text.js';
+} from '../../model/ports/browser.port.js';
+import { JsonAccessor } from '../../model/result/json.js';
+import { BaseResult } from '../../model/result/result.js';
+import { TextAccessor } from '../../model/result/text.js';
 
 /** A raw HTTP exchange captured by `.fetch()` — redirects are NOT followed. */
 export type FetchExchange = {

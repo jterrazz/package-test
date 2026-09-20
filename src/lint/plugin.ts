@@ -17,53 +17,53 @@ import { e8LiterateSpecificationExists } from './rules/cli/e8-literate-specifica
 import { e5NoSimulatedDom } from './rules/component/e5-no-simulated-dom.js';
 import { e6ComponentProjectHelper } from './rules/component/e6-component-project-helper.js';
 import { g4NoDomInModuleTest } from './rules/component/g4-no-dom-in-module-test.js';
-import { a1SpecificationFile } from './rules/core/a1-specification-file.js';
-import { a2KnownConstructors } from './rules/core/a2-known-constructors.js';
-import { a3NoDestructureAlias } from './rules/core/a3-no-destructure-alias.js';
-import { a4CleanupAfterall } from './rules/core/a4-cleanup-afterall.js';
-import { a9wRedundantRoot } from './rules/core/a9w-redundant-root.js';
-import { b2KnownFixtureMarker } from './rules/core/b2-known-fixture-marker.js';
-import { b4GivenThen } from './rules/core/b4-given-then.js';
-import { b10WhenBetweenMarkers } from './rules/core/b10-when-between-markers.js';
-import { b11MarkerOneLine } from './rules/core/b11-marker-one-line.js';
-import { c1DomainStructure } from './rules/core/c1-domain-structure.js';
-import { c4ContractShape } from './rules/core/c4-contract-shape.js';
-import { c6ToMatchExtension } from './rules/core/c6-tomatch-extension.js';
-import { c7SeedsSqlOnly } from './rules/core/c7-seeds-sql-only.js';
-import { c8ReferencedFixtureExists } from './rules/core/c8-referenced-fixture-exists.js';
-import { c10ContractsBoundary } from './rules/core/c10-contracts-boundary.js';
-import { c11ContractDataPairing } from './rules/core/c11-contract-data-pairing.js';
-import { c13UnderscoredGround } from './rules/core/c13-underscored-ground.js';
-import { d2AwaitIoMatcher } from './rules/core/d2-await-io-matcher.js';
-import { d2wAwaitSyncMatcher } from './rules/core/d2w-await-sync-matcher.js';
-import { d6wTransformTokenEquivalent } from './rules/core/d6w-transform-token-equivalent.js';
-import { d8wTextBypass } from './rules/core/d8w-text-bypass.js';
-import { d9wSingleUseRef } from './rules/core/d9w-single-use-ref.js';
-import { d13wUnfrozenNegativeFixture } from './rules/core/d13w-unfrozen-negative-fixture.js';
-import { d16SampledOracle } from './rules/core/d16-sampled-oracle.js';
-import { d16wAmbientValue } from './rules/core/d16w-ambient-value.js';
-import { d17wDoubleOnlyOracle } from './rules/core/d17w-double-only-oracle.js';
-import { d18wExistenceOnlyOracle } from './rules/core/d18w-existence-only-oracle.js';
-import { d19wProbeCluster } from './rules/core/d19w-probe-cluster.js';
-import { e2PresetConfig } from './rules/core/e2-preset-config.js';
-import { e4wProjectBinding } from './rules/core/e4w-project-binding.js';
-import { e7wIncludePrefixExists } from './rules/core/e7w-include-prefix-exists.js';
-import { e9wEnvAssignmentInTest } from './rules/core/e9w-env-assignment-in-test.js';
-import { f1NoSubpathImport } from './rules/core/f1-no-subpath-import.js';
-import { f2NoTestImportsInProd } from './rules/core/f2-no-test-imports-in-prod.js';
-import { f3SpecsPublicEntry } from './rules/core/f3-specs-public-entry.js';
-import { f4NoTestToTestImport } from './rules/core/f4-no-test-to-test-import.js';
-import { f5FixturesOnlyFromTests } from './rules/core/f5-fixtures-only-from-tests.js';
-import { f6NoForeignTestRuntime } from './rules/core/f6-no-foreign-test-runtime.js';
-import { i1LayerBoundaries } from './rules/core/i1-layer-boundaries.js';
-import { i2SiblingTestNaming } from './rules/core/i2-sibling-test-naming.js';
-import { i4NoModuleDoubles } from './rules/core/i4-no-module-doubles.js';
-import { j2NoSleep } from './rules/core/j2-no-sleep.js';
-import { j6wGivenInTheTest } from './rules/core/j6w-given-in-the-test.js';
-import { w1ScenarioPure } from './rules/core/w1-scenario-pure.js';
-import { w2TestIdStatesWhatIsMissing } from './rules/core/w2-testid-states-what-is-missing.js';
-import { w5wScenarioSettles } from './rules/core/w5w-scenario-settles.js';
 import { b8KebabTrigger } from './rules/jobs/b8-kebab-trigger.js';
+import { a1SpecificationFile } from './rules/model/a1-specification-file.js';
+import { a2KnownConstructors } from './rules/model/a2-known-constructors.js';
+import { a3NoDestructureAlias } from './rules/model/a3-no-destructure-alias.js';
+import { a4CleanupAfterall } from './rules/model/a4-cleanup-afterall.js';
+import { a9wRedundantRoot } from './rules/model/a9w-redundant-root.js';
+import { b2KnownFixtureMarker } from './rules/model/b2-known-fixture-marker.js';
+import { b4GivenThen } from './rules/model/b4-given-then.js';
+import { b10WhenBetweenMarkers } from './rules/model/b10-when-between-markers.js';
+import { b11MarkerOneLine } from './rules/model/b11-marker-one-line.js';
+import { c1DomainStructure } from './rules/model/c1-domain-structure.js';
+import { c4ContractShape } from './rules/model/c4-contract-shape.js';
+import { c6ToMatchExtension } from './rules/model/c6-tomatch-extension.js';
+import { c7SeedsSqlOnly } from './rules/model/c7-seeds-sql-only.js';
+import { c8ReferencedFixtureExists } from './rules/model/c8-referenced-fixture-exists.js';
+import { c10ContractsBoundary } from './rules/model/c10-contracts-boundary.js';
+import { c11ContractDataPairing } from './rules/model/c11-contract-data-pairing.js';
+import { c13UnderscoredGround } from './rules/model/c13-underscored-ground.js';
+import { d2AwaitIoMatcher } from './rules/model/d2-await-io-matcher.js';
+import { d2wAwaitSyncMatcher } from './rules/model/d2w-await-sync-matcher.js';
+import { d6wTransformTokenEquivalent } from './rules/model/d6w-transform-token-equivalent.js';
+import { d8wTextBypass } from './rules/model/d8w-text-bypass.js';
+import { d9wSingleUseRef } from './rules/model/d9w-single-use-ref.js';
+import { d13wUnfrozenNegativeFixture } from './rules/model/d13w-unfrozen-negative-fixture.js';
+import { d16SampledOracle } from './rules/model/d16-sampled-oracle.js';
+import { d16wAmbientValue } from './rules/model/d16w-ambient-value.js';
+import { d17wDoubleOnlyOracle } from './rules/model/d17w-double-only-oracle.js';
+import { d18wExistenceOnlyOracle } from './rules/model/d18w-existence-only-oracle.js';
+import { d19wProbeCluster } from './rules/model/d19w-probe-cluster.js';
+import { e2PresetConfig } from './rules/model/e2-preset-config.js';
+import { e4wProjectBinding } from './rules/model/e4w-project-binding.js';
+import { e7wIncludePrefixExists } from './rules/model/e7w-include-prefix-exists.js';
+import { e9wEnvAssignmentInTest } from './rules/model/e9w-env-assignment-in-test.js';
+import { f1NoSubpathImport } from './rules/model/f1-no-subpath-import.js';
+import { f2NoTestImportsInProd } from './rules/model/f2-no-test-imports-in-prod.js';
+import { f3SpecsPublicEntry } from './rules/model/f3-specs-public-entry.js';
+import { f4NoTestToTestImport } from './rules/model/f4-no-test-to-test-import.js';
+import { f5FixturesOnlyFromTests } from './rules/model/f5-fixtures-only-from-tests.js';
+import { f6NoForeignTestRuntime } from './rules/model/f6-no-foreign-test-runtime.js';
+import { i1LayerBoundaries } from './rules/model/i1-layer-boundaries.js';
+import { i2SiblingTestNaming } from './rules/model/i2-sibling-test-naming.js';
+import { i4NoModuleDoubles } from './rules/model/i4-no-module-doubles.js';
+import { j2NoSleep } from './rules/model/j2-no-sleep.js';
+import { j6wGivenInTheTest } from './rules/model/j6w-given-in-the-test.js';
+import { w1ScenarioPure } from './rules/model/w1-scenario-pure.js';
+import { w2TestIdStatesWhatIsMissing } from './rules/model/w2-testid-states-what-is-missing.js';
+import { w5wScenarioSettles } from './rules/model/w5w-scenario-settles.js';
 import type { LintPlugin, LintRule } from './types.js';
 
 /**
@@ -76,7 +76,7 @@ import type { LintPlugin, LintRule } from './types.js';
  * wholesale by spreading {@link recommendedRules}.
  *
  * This entry is bundled by tsdown (`dist/oxlint.js`); rules import nothing from
- * the framework runtime (only pure core helpers: the token list, the case
+ * the framework runtime (only pure model helpers: the token list, the case
  * conversions, the fixture-marker list), so the bundle stays free of the heavy
  * adapters (msw, pg, testcontainers, …) that the main entry pulls in.
  */

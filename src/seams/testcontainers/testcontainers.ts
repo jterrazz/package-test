@@ -1,4 +1,4 @@
-import type { ContainerPort } from '../../core/ports/container.port.js';
+import type { ContainerPort } from '../../model/ports/container.port.js';
 import { loadPeer } from '../peer.js';
 
 /**

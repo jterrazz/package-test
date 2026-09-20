@@ -9,8 +9,8 @@ import {
 } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { GROUND_DIRS, GROUND_FIXTURES } from '../core/chain/ground.js';
-import { parseSpecDocument, SPEC_EXTENSION } from '../core/literate/spec-document.js';
+import { GROUND_DIRS, GROUND_FIXTURES } from '../model/chain/ground.js';
+import { parseSpecDocument, SPEC_EXTENSION } from '../model/literate/spec-document.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 

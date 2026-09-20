@@ -5,7 +5,7 @@ import {
     GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
-} from '../../../core/chain/ground.js';
+} from '../../../model/chain/ground.js';
 import { memberPropertyName, specsAnchor, stringValue } from '../../ast.js';
 import { isDirectory, isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
