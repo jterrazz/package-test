@@ -5,6 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { renderSchema } from '../core/literate/spec-document.js';
 import { KINDS, renderCard, renderFork, spliceFork } from './cards.js';
 import { renderRules, spliceCatalog } from './catalog.js';
+import { spliceDomains } from './domains.js';
 import { renderMatrix, spliceLayers, spliceMatrix } from './matrix.js';
 import { spliceSiblings } from './siblings.js';
 
@@ -22,8 +23,8 @@ import { spliceSiblings } from './siblings.js';
  *   from the same manifest;
  * - `schema/spec.schema.json`, the published JSON Schema of the `<case>.spec.yaml`
  *   document, from the grammar's own constants;
- * - the layered reading, the capability matrix and the siblingless-module table
- *   inside `docs/03-testing.md`
+ * - the layered reading, the capability matrix, the domain vocabulary and the
+ *   siblingless-module table inside `docs/03-testing.md`
  *   (each between its own GENERATED markers) and the agent-facing `skills/jterrazz-test/references/matrix.md`,
  *   from the facet declaration and a scan of the package's own trees;
  * - one signature card per kind of test, `skills/jterrazz-test/references/<kind>.md`,
@@ -50,7 +51,10 @@ if (nextDocs !== docs) {
 writeFileSync(rulesPath, renderRules());
 
 const testing = readFileSync(testingPath, 'utf8');
-const nextTesting = spliceSiblings(spliceLayers(spliceMatrix(testing, root), root), root);
+const withMatrix = spliceMatrix(testing, root);
+const withLayers = spliceLayers(withMatrix, root);
+const withSiblings = spliceSiblings(withLayers, root);
+const nextTesting = spliceDomains(withSiblings, root);
 if (nextTesting !== testing) {
     writeFileSync(testingPath, nextTesting);
 }
