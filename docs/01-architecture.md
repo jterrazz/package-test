@@ -1,12 +1,12 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind six constructors, one chain that needs none, four source layers with declared edges, and seven channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+What this package IS: one runner model behind six constructors, one chain that needs none, four source layers with declared edges, and seven channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
 | The shape                  | Held below                                                                              |
 | -------------------------- | --------------------------------------------------------------------------------------- |
 | The runner model           | [The runner model](#the-runner-model) — constructor, handle, chain, result              |
 | The source layers          | [The four layers](#the-four-layers) — `specification`, `integrations`, `vitest`, `lint` |
-| How a convention is held   | [The four enforcement channels](#the-four-enforcement-channels)                         |
+| How a convention is held   | [The seven enforcement channels](#the-seven-enforcement-channels)                       |
 | What ships out of the tree | [What the tree publishes](#what-the-tree-publishes)                                     |
 
 The rules themselves — what each family says, what a reviewer must judge — are the constitution, [12 — Conventions](12-conventions.md); their normative sentences are the generated catalogue, [13 — Linting](13-linting.md).
@@ -54,16 +54,17 @@ The table's May-import column is a reading of `FRAMEWORK_LAYERS`, never a second
 
 There are TWO composition roots and neither names a layer. `src/index.ts` is node's: it wires the container integrations into the registry seam and re-exports the public surface. `src/browser/index.ts` is the page's, and `src/surface.ts` is what they agree on — see [What the tree publishes](#what-the-tree-publishes).
 
-## The four enforcement channels
+## The seven enforcement channels
 
-A convention this package states is held by a **channel**, and every mechanized rule names exactly one of four. The guiding aim is that most enforcement is programmatic, not review-borne.
+A convention this package states is held by a **channel**, and every row of the catalogue names exactly one of seven. The guiding aim is that most enforcement is programmatic, not review-borne.
 
-- **static** — the `jterrazz/*` oxlint plugin (one file per rule under `src/lint/rules/`, AST analysis), plus the `conventions` checker binary (`dist/checker.js`) for the data fixtures oxlint never visits.
-- **checker** — passes of that same binary reading what an AST cannot: the `{{token}}` grammar of `_requests/` and `_expected/` fixtures, the `<case>.spec.yaml` document family, and cross-file analyses that cross a `*.specification.ts` with its tests or walk a whole feature tree.
+- **statique** — the `jterrazz/*` oxlint plugin: one file per rule under `src/lint/rules/`, AST analysis, one diagnostic per file.
+- **upstream** — a convention an oxlint vitest-plugin rule already holds, set as an OPTION from the `testing` fragment rather than duplicated as a rule of ours ([ADR-005](decisions/005-the-doubles-ladder-is-closed.md)).
+- **checker** — passes of the `jterrazz-test-check` binary reading what an AST cannot: the `{{token}}` grammar of `_requests/` and `_expected/` fixtures, the `<case>.spec.yaml` document family, cross-file analyses that cross a `*.specification.ts` with its tests, and the member pass that judges a package rather than a tree.
 - **runtime** — the framework refuses incorrect usage as it executes, where static analysis abstains (a non-literal argument) or cannot reach (the network, a container lifecycle).
+- **type** — what the compiler refuses with no rule at all, proven by `src/type-channel.test-d.ts`.
+- **meta** — what the framework's own suite holds about itself: the catalogue's freshness, its completeness, the reach of its rules — [03 — Testing](03-testing.md) owns the channel.
 - **process** — the judgement no single channel settles: asset-driven grouping, golden-file discipline, retro-propagation.
-
-Two further channels double several of these without being nameable per-rule. The **meta-test** channel runs the framework on itself — [03 — Testing](03-testing.md) owns it. The **type** channel covers what the type system guarantees with no rule at all, such as the read-only accessors of a result.
 
 The channel a rule sits on is not prose here: it is a field of `src/lint/manifest.ts`, the single source of truth from which the catalogue in [13 — Linting](13-linting.md) is generated. A rule and its normative sentence live together in the code, so the two cannot drift.
 

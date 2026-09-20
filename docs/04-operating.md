@@ -27,19 +27,30 @@ One binary ships with them: `jterrazz-test-check`, the conventions checker, poin
 The package refuses to guess at its environment, so several things it uses are the consuming project's to install.
 
 - **`vitest` is a required peer.** The framework registers its matchers into vitest; there is no standalone runner.
-- **Every seam is an OPTIONAL peer**, loaded lazily by the one module that owns it and NAMED at startup when it is missing: `playwright` for a page, `appium`/`webdriverio` for a screen, and `@vitest/browser-playwright`, `vitest-browser-react`, `vite`, `react` and `react-dom` for a component. A project that specifies none of those installs none of them.
+- **Every seam is an OPTIONAL peer**, loaded lazily by the one module that owns it and NAMED at startup when it is missing: `playwright` for a page, `appium`/`webdriverio` for a screen, `@vitest/browser-playwright`, `vitest-browser-react`, `vite`, `react` and `react-dom` for a component, and the four native ones — `better-sqlite3`, `pg`, `redis`, `testcontainers` — for the services a chain declares. A project that specifies none of those installs none of them.
+
+    The refusal names the facet that asked, the peer, and the install command of the package manager the project's own lockfile names. Under pnpm a native binding also has to be listed to be BUILT, so the message adds that line:
+
+    ```
+    sqlite() requires `better-sqlite3`, an optional peer dependency of @jterrazz/test: pnpm add -D better-sqlite3.
+    Under pnpm the binding is not built unless the package is listed: add "better-sqlite3" to `onlyBuiltDependencies`
+    in package.json (or `only-built-dependencies` in .npmrc) and reinstall.
+    ```
+
+    ([ADR-008](decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md), proposed, records what the four seams cost as dependencies and what the change buys under each package manager.)
+
 - **The browser provider is pinned to the runner, patch included.** `@vitest/browser-playwright@X` peers `vitest: X` EXACTLY, so the two move together in one change or not at all. This package therefore declares the provider as `*` rather than a range of its own — a second, weaker statement of a constraint the provider already makes would be wrong the day the pair moves — and `component()` asserts the equality when the project is built, naming both versions:
 
     ```bash
-    npm install -D vitest@4.1.11 @vitest/browser-playwright@4.1.11   # one unit, both versions
+    npm install -D vitest@5.0.1 @vitest/browser-playwright@5.0.1   # one unit, both versions
     ```
 
-    The peer range names two majors, and 15.2's own suite is green on both ends of it: vitest 4.1.10 with the 4.1.10 provider — the pair this package locks — and vitest 5.0.1 with the 5.0.1 provider, the component and website projects and the seam's module tests run on each.
+    The peer range is `^5` and nothing else: Vitest 5 is where the artefact paths the preset routes exist, and a package holding two majors would be holding two answers about where a run writes.
 
 - **Docker must be running** for the container-backed services. `sqlite()` and plain CLI specs need none.
 - **Node 24 or newer**, as `engines` states — the toolchain's floor, and vitest 5's.
 - **A chromium**, for a page or a component: `npx playwright install chromium`, once. The component facet drives the same browser the website facet does, through the same peer.
-- **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. 15.2's own suite runs on Vite 8.1; the Vite 7 path is exercised by a consumer, not by this package's suite — see [16 — Component specs](16-component.md).
+- **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. This package's own suite runs on Vite 8.1; the Vite 7 path is exercised by a consumer, not by this suite — see [16 — Component specs](16-component.md).
 
 `msw` is a direct dependency, not a peer — outgoing interception is part of the framework rather than a choice a consumer makes.
 

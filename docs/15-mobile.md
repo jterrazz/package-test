@@ -280,7 +280,7 @@ Calling `specification.mobile()` (or `.open()`) without them throws exactly that
 specs/mobile/
 ├── mobile.specification.ts     # runner at the facet ROOT (rule C1)
 └── <domain>/
-    ├── <aspect>.test.ts
+    ├── <aspect>.spec.ts
     ├── _expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
     └── contracts/               # what the declared backend serves — with the `backend` option
         ├── newsroom.contracts.ts

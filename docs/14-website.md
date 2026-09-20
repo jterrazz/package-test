@@ -492,7 +492,7 @@ Provisioning the environment is not this package's job. In CI, the shared valida
 specs/website/
 ├── website.specification.ts    # runner at the facet ROOT (rule C1)
 └── <domain>/
-    ├── <aspect>.test.ts
+    ├── <aspect>.spec.ts
     ├── _expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
     └── contracts/               # what the declared backend serves — with the `backend` option
         ├── newsroom.contracts.ts

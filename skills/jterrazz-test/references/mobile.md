@@ -72,7 +72,7 @@ npm install -D appium webdriverio && npx appium driver install xcuitest
 specs/mobile/
 ├── mobile.specification.ts     # runner at the facet ROOT
 └── <domain>/
-    ├── <aspect>.test.ts
+    ├── <aspect>.spec.ts
     ├── _expected/                # *.screen.json, … — FLAT
     └── contracts/               # what the declared `backend` stub serves — see contracts.md
 ```

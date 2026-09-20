@@ -336,7 +336,7 @@ specs/
 ├── api/
 │   ├── api.specification.ts
 │   └── users/
-│       ├── users.test.ts          # <aspect>.test.ts inside its domain (rule C1)
+│       ├── users.spec.ts          # <aspect>.spec.ts inside its domain (rule C1)
 │       ├── _seeds/                 # *.sql
 │       ├── _requests/              # *.http — complete requests (inputs)
 │       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
