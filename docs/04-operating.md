@@ -58,6 +58,7 @@ The package refuses to guess at its environment, so several things it uses are t
 - **Docker must be running** for the container-backed services. `sqlite()` and plain CLI specs need none.
 - **Node 24 or newer**, as `engines` states — the toolchain's floor, and vitest 5's.
 - **A chromium**, for a page or a component: `npx playwright install chromium`, once. The component facet drives the same browser the website facet does, through the same peer.
+- **The ARIA dialect a tree golden is written in is Playwright's**, produced by its `ariaSnapshot()` and therefore PINNED by the `playwright` peer: a major of that peer can reword a role line, and every committed `.aria.yaml` moves with it in one regeneration. It is the same dialect on a page and on a mounted unit ([07 — Component specs](07-component.md), [14 — Assertions](14-assertions.md)).
 - **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. This package's own suite runs on Vite 8.1; the Vite 7 path is exercised by a consumer, not by this suite — see [07 — Component specs](07-component.md).
 
 `msw` is a direct dependency, not a peer — outgoing interception is part of the framework rather than a choice a consumer makes.
