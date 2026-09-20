@@ -73,9 +73,9 @@ optional root?: string;
 Defined in: [src/specification/facets/cli/start-cli.ts:60](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L60)
 
 Project-root override (CONVENTIONS A9) — the single meaning of `root`:
-it anchors compose detection and local-bin resolution for the tested
-binary. It is NOT a fixtures root; `.fixture()` resolves feature-local
-or `$FIXTURES/` paths on its own.
+it anchors the local-bin resolution of the tested binary, in place of
+the walk to the nearest `package.json`. It is NOT a fixtures root;
+`.fixture()` resolves feature-local or `$FIXTURES/` paths on its own.
 
 ***
 
