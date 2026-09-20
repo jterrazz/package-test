@@ -42,29 +42,6 @@ Defined in: [src/specification/facets/\_common/process.ts:36](https://github.com
 
 ## Properties
 
-### composeName
-
-```ts
-composeName: string | null = null;
-```
-
-Defined in: [src/specification/facets/\_common/process.ts:29](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/process.ts#L29)
-
-Compose service name. Left `null` until the orchestrator binds it at
-start time (CONVENTIONS A6): a handle with no explicit `composeService`
-links to the compose service named exactly like its record key, else the
-kebab-case conversion of the key — so `{ analyticsDb: postgres() }` binds
-to the compose service `analytics-db` without any option. Set
-`composeService` explicitly only for names the key cannot derive.
-
-#### Implementation of
-
-```ts
-ServiceHandle.composeName
-```
-
-***
-
 ### connectionString
 
 ```ts
@@ -133,6 +110,28 @@ Environment variables to pass to the container.
 
 ```ts
 ServiceHandle.environment
+```
+
+***
+
+### serviceName
+
+```ts
+serviceName: string | null = null;
+```
+
+Defined in: [src/specification/facets/\_common/process.ts:29](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/process.ts#L29)
+
+The name this handle is known by. Left `null` until the orchestrator
+assigns it at start time: it is the kebab-case form of the RECORD KEY,
+so `{ analyticsDb: postgres() }` reports as `analytics-db` and reads its
+init script from `docker/analytics-db/`. The key is the only name a
+specification writes; a handle carries no second one of its own.
+
+#### Implementation of
+
+```ts
+ServiceHandle.serviceName
 ```
 
 ***

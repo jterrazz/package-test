@@ -5,7 +5,7 @@ Defined in: [src/specification/facets/component/rendered-text.ts:12](https://git
 
 A stream captured INSIDE the page.
 
-Structurally identical to any other [TextAccessor](../classes/TextAccessor.md) — the same
+Structurally identical to any other [TextAccessor](TextAccessor.md) — the same
 `{{token}}` grammar, the same ANSI stripping, the same `.grep()` — and
 marked so the matcher augmentation can say the one thing that differs: its
 golden lives on the server, so `toMatch` is awaited here where it is
@@ -13,7 +13,7 @@ synchronous everywhere else.
 
 ## Extends
 
-- [`TextAccessor`](../classes/TextAccessor.md)
+- [`TextAccessor`](TextAccessor.md)
 
 ## Properties
 
@@ -41,7 +41,7 @@ The raw captured text (never transformed, ANSI preserved).
 
 #### Inherited from
 
-[`TextAccessor`](../classes/TextAccessor.md).[`text`](../classes/TextAccessor.md#text)
+[`TextAccessor`](TextAccessor.md).[`text`](TextAccessor.md#text)
 
 ## Methods
 
@@ -67,11 +67,11 @@ whole surface by default, reach for `.grep()` for targeted checks.
 
 #### Returns
 
-[`TextAccessor`](../classes/TextAccessor.md)
+[`TextAccessor`](TextAccessor.md)
 
 #### Inherited from
 
-[`TextAccessor`](../classes/TextAccessor.md).[`grep`](../classes/TextAccessor.md#grep)
+[`TextAccessor`](TextAccessor.md).[`grep`](TextAccessor.md#grep)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: [src/specification/facets/\_common/result/text.ts:83](https://github
 
 #### Inherited from
 
-[`TextAccessor`](../classes/TextAccessor.md).[`toString`](../classes/TextAccessor.md#tostring)
+[`TextAccessor`](TextAccessor.md).[`toString`](TextAccessor.md#tostring)
 
 ***
 
@@ -107,4 +107,4 @@ Defined in: [src/specification/facets/\_common/result/text.ts:87](https://github
 
 #### Inherited from
 
-[`TextAccessor`](../classes/TextAccessor.md).[`valueOf`](../classes/TextAccessor.md#valueof)
+[`TextAccessor`](TextAccessor.md).[`valueOf`](TextAccessor.md#valueof)

@@ -54,7 +54,7 @@ docker: (containerId) => ContainerAccessor;
 
 Defined in: [src/specification/facets/cli/start-cli.ts:91](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L91)
 
-Read a running container by id — returns a [ContainerAccessor](../classes/ContainerAccessor.md)
+Read a running container by id — returns a [ContainerAccessor](../interfaces/ContainerAccessor.md)
 usable with `await expect(...).toBeRunning()` and read accessors.
 
 #### Parameters
@@ -65,7 +65,7 @@ usable with `await expect(...).toBeRunning()` and read accessors.
 
 #### Returns
 
-[`ContainerAccessor`](../classes/ContainerAccessor.md)
+[`ContainerAccessor`](../interfaces/ContainerAccessor.md)
 
 ***
 

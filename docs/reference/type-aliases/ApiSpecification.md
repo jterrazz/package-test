@@ -62,7 +62,7 @@ Send a DELETE request and resolve with the result.
 
 #### Returns
 
-`Promise`\<[`HttpResult`](../classes/HttpResult.md)\>
+`Promise`\<[`HttpResult`](../interfaces/HttpResult.md)\>
 
 ***
 
@@ -84,7 +84,7 @@ Send a GET request and resolve with the result.
 
 #### Returns
 
-`Promise`\<[`HttpResult`](../classes/HttpResult.md)\>
+`Promise`\<[`HttpResult`](../interfaces/HttpResult.md)\>
 
 ***
 
@@ -141,7 +141,7 @@ Send a POST request (optional inline JSON body) and resolve with the result.
 
 #### Returns
 
-`Promise`\<[`HttpResult`](../classes/HttpResult.md)\>
+`Promise`\<[`HttpResult`](../interfaces/HttpResult.md)\>
 
 ***
 
@@ -164,7 +164,7 @@ Send a PUT request (optional inline JSON body) and resolve with the result.
 
 #### Returns
 
-`Promise`\<[`HttpResult`](../classes/HttpResult.md)\>
+`Promise`\<[`HttpResult`](../interfaces/HttpResult.md)\>
 
 ***
 
@@ -186,7 +186,7 @@ Send the complete request described by `_requests/<file>` (.http format).
 
 #### Returns
 
-`Promise`\<[`HttpResult`](../classes/HttpResult.md)\>
+`Promise`\<[`HttpResult`](../interfaces/HttpResult.md)\>
 
 ***
 

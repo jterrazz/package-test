@@ -41,7 +41,7 @@ grep: (pattern) => TextAccessor;
 
 Defined in: [src/specification/facets/\_common/result/result.ts:18](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/result/result.ts#L18)
 
-The file text as a [TextAccessor](../classes/TextAccessor.md), keeping only blocks matching `pattern`.
+The file text as a [TextAccessor](../interfaces/TextAccessor.md), keeping only blocks matching `pattern`.
 
 #### Parameters
 
@@ -51,4 +51,4 @@ The file text as a [TextAccessor](../classes/TextAccessor.md), keeping only bloc
 
 #### Returns
 
-[`TextAccessor`](../classes/TextAccessor.md)
+[`TextAccessor`](../interfaces/TextAccessor.md)

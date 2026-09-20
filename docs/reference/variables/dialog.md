@@ -5,6 +5,6 @@
 const dialog: LandmarkFactory;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:121](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L121)
+Defined in: [src/specification/facets/website/elements.ts:127](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L127)
 
 A modal or non-modal `<dialog>`, by accessible name. A closed one is absent.

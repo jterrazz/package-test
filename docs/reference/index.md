@@ -5,31 +5,30 @@
 
 | Class | Description |
 | ------ | ------ |
-| [BaseResult](classes/BaseResult.md) | Base result - common accessors available after any action type. Extended by HttpResult, CliResult, and used directly by job results. |
-| [CallResult](classes/CallResult.md) | The result of an in-process call — the integration facet's whole surface. |
-| [CliResult](classes/CliResult.md) | Result from a command action (`.exec()`). |
-| [ContainerAccessor](classes/ContainerAccessor.md) | Assertion accessor for a single Docker container captured by the docker() spec mode. Mirrors the shape of [CliResult](classes/CliResult.md) so tests use the same vocabulary (`stdout.toContain`, `file(...).content`, etc.) regardless of where output came from. |
-| [DirectoryAccessor](classes/DirectoryAccessor.md) | Read-only accessor for a directory produced by a spec action. |
-| [FetchResult](classes/FetchResult.md) | Result from a raw `.fetch()` action (robots.txt, sitemaps, redirects). |
-| [FilesystemAccessor](classes/FilesystemAccessor.md) | Read-only accessor for the whole temporary working directory used by a command spec. |
-| [HttpResult](classes/HttpResult.md) | Result from an HTTP action (.request(), .get(), .post(), .put(), .delete()). |
-| [JsonAccessor](classes/JsonAccessor.md) | Read-only accessor for a JSON payload parsed from a text stream (stdout). |
 | [Matcher](classes/Matcher.md) | A dynamic-value matcher. Created via the [match](variables/match.md) factories — never constructed directly by user code. |
-| [Orchestrator](classes/Orchestrator.md) | Orchestrator for test infrastructure. Integration: starts services via testcontainers. E2E: runs full docker compose up. |
-| [PageResult](classes/PageResult.md) | Result from a rendered `.visit()` action — the page as a browser saw it. |
 | [ProcessHandle](classes/ProcessHandle.md) | An external process, declared like any other service. |
-| [ResponseAccessor](classes/ResponseAccessor.md) | Read-only accessor for an HTTP response. |
-| [ScreenResult](classes/ScreenResult.md) | Result from a `.open()` action — the screen as the device saw it, final state. |
-| [TableAccessor](classes/TableAccessor.md) | Read-only accessor for a database table after a specification run. |
-| [TextAccessor](classes/TextAccessor.md) | Read-only accessor for a captured text handle — THE universal one: stdout, stderr, container logs, and file text all surface as a `TextAccessor`. |
 
 ## Interfaces
 
 | Interface | Description |
 | ------ | ------ |
+| [BaseResult](interfaces/BaseResult.md) | Base result - common accessors available after any action type. Extended by HttpResult, CliResult, and used directly by job results. |
+| [CallResult](interfaces/CallResult.md) | The result of an in-process call — the integration facet's whole surface. |
 | [CaptureScope](interfaces/CaptureScope.md) | Named captures recorded by `match.ref()` / `{{type#ref}}` placeholders. One scope lives on each spec result — every assertion chained off the same result shares it, and a new chain starts fresh. |
+| [CliResult](interfaces/CliResult.md) | Result from a command action (`.exec()`). |
+| [ContainerAccessor](interfaces/ContainerAccessor.md) | Assertion accessor for a single Docker container captured by the docker() spec mode. Mirrors the shape of [CliResult](interfaces/CliResult.md) so tests use the same vocabulary (`stdout.toContain`, `file(...).content`, etc.) regardless of where output came from. |
+| [DirectoryAccessor](interfaces/DirectoryAccessor.md) | Read-only accessor for a directory produced by a spec action. |
+| [FetchResult](interfaces/FetchResult.md) | Result from a raw `.fetch()` action (robots.txt, sitemaps, redirects). |
+| [FilesystemAccessor](interfaces/FilesystemAccessor.md) | Read-only accessor for the whole temporary working directory used by a command spec. |
+| [HttpResult](interfaces/HttpResult.md) | Result from an HTTP action (.request(), .get(), .post(), .put(), .delete()). |
+| [JsonAccessor](interfaces/JsonAccessor.md) | Read-only accessor for a JSON payload parsed from a text stream (stdout). |
+| [PageResult](interfaces/PageResult.md) | Result from a rendered `.visit()` action — the page as a browser saw it. |
 | [RenderedText](interfaces/RenderedText.md) | A stream captured INSIDE the page. |
 | [RenderResult](interfaces/RenderResult.md) | What a render resolves to — the component as the page saw it, after the scenario ran. |
+| [ResponseAccessor](interfaces/ResponseAccessor.md) | Read-only accessor for an HTTP response. |
+| [ScreenResult](interfaces/ScreenResult.md) | Result from a `.open()` action — the screen as the device saw it, final state. |
+| [TableAccessor](interfaces/TableAccessor.md) | Read-only accessor for a database table after a specification run. |
+| [TextAccessor](interfaces/TextAccessor.md) | Read-only accessor for a captured text handle — THE universal one: stdout, stderr, container logs, and file text all surface as a `TextAccessor`. |
 
 ## Type Aliases
 
@@ -89,7 +88,8 @@
 | [IsolationStrategy](type-aliases/IsolationStrategy.md) | Strategy for isolating service state across parallel test workers. |
 | [JobHandle](type-aliases/JobHandle.md) | A named job that can be triggered via jobs.trigger(). |
 | [JobsHandle](type-aliases/JobsHandle.md) | The record returned by startJobs \| specification.jobs. Destructure with the canonical names (CONVENTIONS A3): |
-| [JobsSpecification](type-aliases/JobsSpecification.md) | The `jobs` facet — job chain entry handed out by `specification.jobs()`. Jobs run in-process by definition (CONVENTIONS A5/A8). |
+| [JobsResult](type-aliases/JobsResult.md) | What a triggered job HANDS BACK. |
+| [JobsSpecification](type-aliases/JobsSpecification.md) | - |
 | [JobsSpecificationOptions](type-aliases/JobsSpecificationOptions.md) | Options for startJobs \| specification.jobs. |
 | [LandmarkKind](type-aliases/LandmarkKind.md) | The landmark roles — the standard set of page regions, and the only containers a scope can name. Closed on purpose: ARIA defines exactly these, so `within()` never becomes a second selector language. |
 | [LiterateRunFlags](type-aliases/LiterateRunFlags.md) | Per-call options for runSpecDocument / `cli.run()`. |
@@ -106,7 +106,6 @@
 | [MobileSpecification](type-aliases/MobileSpecification.md) | The `mobile` facet — screen chain entry handed out by `specification.mobile()`. `.open()` is the single, terminal action: it terminates and relaunches the app (deterministic fresh state), applies the deep link, runs the scenario, and captures the final screen. |
 | [MobileSpecificationOptions](type-aliases/MobileSpecificationOptions.md) | Options for startMobile \| specification.mobile. |
 | [MobileVisitor](type-aliases/MobileVisitor.md) | The visitor — the interaction vocabulary handed to a mobile scenario. Every verb auto-waits by polling until a visible match exists; acting verbs then enforce exactly-one (W3), while `see()` — the single synchronization primitive — is satisfied by any visible match. There is no sleep and no conditional helper. |
-| [MockDatePort](type-aliases/MockDatePort.md) | Interface for freezing and resetting the global Date in tests. |
 | [MockOfOptions](type-aliases/MockOfOptions.md) | How much of the port the double answers for. |
 | [MockPort](type-aliases/MockPort.md) | The factory's own shape — kept as a name so a consumer can annotate with it. |
 | [PinnedClock](type-aliases/PinnedClock.md) | A pinned clock — released when the `using` scope that declared it ends. |
@@ -126,7 +125,6 @@
 | [SpecFileAssertion](type-aliases/SpecFileAssertion.md) | One `files:` assertion, keyed by a workdir-relative path. |
 | [SpecFixture](type-aliases/SpecFixture.md) | One `fixture:` entry — a path with the line it was declared on. |
 | [SpecificationConfig](type-aliases/SpecificationConfig.md) | Adapter configuration passed to the specification facets at setup time. |
-| [SpecificationMode](type-aliases/SpecificationMode.md) | Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). |
 | [SpecKind](type-aliases/SpecKind.md) | - |
 | [SpecRun](type-aliases/SpecRun.md) | One run: a command, what it must exit with, and what it must have produced. |
 | [SpecServeEntry](type-aliases/SpecServeEntry.md) | One `serve:` entry — a registered server plus the extra env it is started with. |
@@ -165,7 +163,6 @@
 | [listitem](variables/listitem.md) | An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`. |
 | [main](variables/main.md) | The `main` landmark — the primary content of the document. |
 | [match](variables/match.md) | - |
-| [mockOfDate](variables/mockOfDate.md) | Freeze or reset the global Date for deterministic time-dependent tests. Wraps the `mockdate` package. |
 | [navigation](variables/navigation.md) | The `navigation` landmark — a `<nav>`. Name it when a page has several. |
 | [openai](variables/openai.md) | OpenAI API intercept helpers. |
 | [option](variables/option.md) | An option of a select or a listbox, by its label — named inside the field that holds it: `within(field('Channel'), option('LinkedIn'))`. |
@@ -184,19 +181,16 @@
 | [defineContracts](functions/defineContracts.md) | Compose contracts into the artifact a test imports — it's contracts all the way down: a composite may extend contracts, lists, and other composites, recursively, order preserved. |
 | [disabled](functions/disabled.md) | Whether the element accepts input: `see(disabled(button('Delete')))` asserts it refuses, `see(enabled(button('Delete')))` that it takes it. |
 | [enabled](functions/enabled.md) | The other direction of [disabled](functions/disabled.md) — the element takes input. |
-| [findContainersByLabel](functions/findContainersByLabel.md) | Return all container IDs (running or stopped) that carry `key=value`. |
 | [focused](functions/focused.md) | Where the keyboard is: `see(focused(button('Open')))` asserts the element has focus, `gone(focused(x))` that it does not. |
-| [inspectContainer](functions/inspectContainer.md) | Return the raw `docker inspect` payload (object, not array) for a container. |
 | [mockOf](functions/mockOf.md) | A typed double for an injected port — the fourth rung of the doubles ladder (docs/12-conventions.md), and the only one a module test may build itself. |
 | [postgres](functions/postgres.md) | Create a PostgreSQL service handle. |
 | [process](functions/process.md) | Declare an external process the framework owns for the life of the specification. |
 | [redis](functions/redis.md) | Create a Redis service handle. |
-| [removeContainers](functions/removeContainers.md) | Force-remove the given container IDs in a single call. Errors are swallowed. |
 | [required](functions/required.md) | The value, or a failure that says what was missing and why it mattered. |
 | [selected](functions/selected.md) | Which option the field is on: `see(selected(option('LinkedIn')))`, and `gone(selected(option('X')))` for the one it left. |
 | [sqlite](functions/sqlite.md) | Create a SQLite service handle. Uses file-copy isolation for parallel tests. |
 | [testId](functions/testId.md) | The escape hatch: an element by `data-testid`. Prefer user-facing elements. |
-| [text](functions/text.md) | Wrap an arbitrary string into a [TextAccessor](classes/TextAccessor.md) anchored on the calling test's directory — the same caller-detection the builders use. |
+| [text](functions/text.md) | Wrap an arbitrary string into a [TextAccessor](interfaces/TextAccessor.md) anchored on the calling test's directory — the same caller-detection the builders use. |
 | [valued](functions/valued.md) | What the field holds: `see(valued(field('Title'), 'Launch teaser'))`, and `gone(valued(field('Title'), '…'))` for a value it no longer holds. |
 | [waitUntil](functions/waitUntil.md) | Wait until a condition holds — the sanctioned answer to "the thing I am specifying is not ready yet". |
 | [within](functions/within.md) | Restrict a descriptor to the inside of another — the answer to ambiguity, and the one the framework prefers over a test id. |
