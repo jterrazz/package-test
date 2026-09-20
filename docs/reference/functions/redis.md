@@ -5,7 +5,7 @@
 function redis(options?): RedisHandle;
 ```
 
-Defined in: [src/integrations/redis/redis.ts:107](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L107)
+Defined in: [src/seams/redis/redis.ts:107](https://github.com/jterrazz/package-test/blob/main/src/seams/redis/redis.ts#L107)
 
 Create a Redis service handle.
 

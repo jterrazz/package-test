@@ -5,7 +5,7 @@
 type LiterateServeRegistration = object;
 ```
 
-Defined in: [src/specification/facets/cli/literate.ts:47](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/literate.ts#L47)
+Defined in: [src/facets/cli/literate.ts:51](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/literate.ts#L51)
 
 A server a document may start by name (`serve: mcp`), registered once per app
 in the `serve` option of `specification.cli()`.
@@ -18,7 +18,7 @@ in the `serve` option of `specification.cli()`.
 command: string;
 ```
 
-Defined in: [src/specification/facets/cli/literate.ts:49](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/literate.ts#L49)
+Defined in: [src/facets/cli/literate.ts:53](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/literate.ts#L53)
 
 Shell command that starts the server, run from the project root.
 
@@ -30,7 +30,7 @@ Shell command that starts the server, run from the project root.
 env: string;
 ```
 
-Defined in: [src/specification/facets/cli/literate.ts:51](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/literate.ts#L51)
+Defined in: [src/facets/cli/literate.ts:55](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/literate.ts#L55)
 
 The variable the resolved URL is bound to in every run's child env.
 
@@ -42,7 +42,7 @@ The variable the resolved URL is bound to in every run's child env.
 ready: RegExp;
 ```
 
-Defined in: [src/specification/facets/cli/literate.ts:56](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/literate.ts#L56)
+Defined in: [src/facets/cli/literate.ts:60](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/literate.ts#L60)
 
 Matched against the server's output; the FIRST capture group is the port
 it chose — named (`(?<port>\d+)`) or not, it is group 1 either way.
@@ -55,7 +55,7 @@ it chose — named (`(?<port>\d+)`) or not, it is group 1 either way.
 url: (port) => string;
 ```
 
-Defined in: [src/specification/facets/cli/literate.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/literate.ts#L58)
+Defined in: [src/facets/cli/literate.ts:62](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/literate.ts#L62)
 
 Builds the URL bound to [env](#env) from the announced port.
 

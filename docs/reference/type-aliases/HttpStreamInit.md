@@ -5,7 +5,7 @@
 type HttpStreamInit = object;
 ```
 
-Defined in: [src/specification/contracts/http.ts:32](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L32)
+Defined in: [src/core/contracts/http.ts:32](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L32)
 
 Init options for a streamed reply.
 
@@ -17,7 +17,7 @@ Init options for a streamed reply.
 optional contentType?: string;
 ```
 
-Defined in: [src/specification/contracts/http.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L34)
+Defined in: [src/core/contracts/http.ts:34](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L34)
 
 The `content-type` the stream is served under. Default `application/octet-stream`.
 
@@ -29,7 +29,7 @@ The `content-type` the stream is served under. Default `application/octet-stream
 optional delay?: number;
 ```
 
-Defined in: [src/specification/contracts/http.ts:36](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L36)
+Defined in: [src/core/contracts/http.ts:36](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L36)
 
 Milliseconds between two chunks. Default 0 — every chunk at once.
 
@@ -41,7 +41,7 @@ Milliseconds between two chunks. Default 0 — every chunk at once.
 optional headers?: Record<string, string>;
 ```
 
-Defined in: [src/specification/contracts/http.ts:38](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L38)
+Defined in: [src/core/contracts/http.ts:38](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L38)
 
 Response headers, merged over the builder's own.
 
@@ -53,6 +53,6 @@ Response headers, merged over the builder's own.
 optional status?: number;
 ```
 
-Defined in: [src/specification/contracts/http.ts:40](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L40)
+Defined in: [src/core/contracts/http.ts:40](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L40)
 
 HTTP status code. Default 200.

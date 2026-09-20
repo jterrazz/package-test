@@ -5,7 +5,7 @@
 type BrowserLinkElement = object;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:118](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L118)
+Defined in: [src/core/ports/browser.port.ts:118](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L118)
 
 A `<link>` element captured from the rendered document's head.
 
@@ -17,7 +17,7 @@ A `<link>` element captured from the rendered document's head.
 href: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:119](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L119)
+Defined in: [src/core/ports/browser.port.ts:119](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L119)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [src/specification/ports/browser.port.ts:119](https://github.com/jte
 optional hreflang?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:120](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L120)
+Defined in: [src/core/ports/browser.port.ts:120](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L120)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [src/specification/ports/browser.port.ts:120](https://github.com/jte
 rel: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:121](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L121)
+Defined in: [src/core/ports/browser.port.ts:121](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L121)
 
 ***
 
@@ -47,4 +47,4 @@ Defined in: [src/specification/ports/browser.port.ts:121](https://github.com/jte
 optional type?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:122](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L122)
+Defined in: [src/core/ports/browser.port.ts:122](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L122)

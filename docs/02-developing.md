@@ -44,7 +44,10 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 Four things land in the SAME commit as the change that makes them true.
 
 - **The guard.** Every defect class discovered — in review, from a bug, during a migration — grows the thing that stops it recurring: a static rule, a meta-test, or a runtime refusal. That is rule K1, and it is what keeps the other channels growing instead of decaying. When no channel is possible, the change says so explicitly.
-- **The regenerated projections.** `npm run docs` rewrites all three at once — the API reference under `docs/reference/`, the rule catalogue spliced into [19 — Linting](19-linting.md) and `skills/jterrazz-test/references/rules.md`, and `schema/spec.schema.json`. Never edit one by hand: `npm run lint` runs the sync check and the freshness meta-test, and both fail on a hand edit.
+- **The regenerated projections.** `npm run docs` rewrites them all at once — the API reference under `docs/reference/`, the rule catalogue spliced into [19 — Linting](19-linting.md) and `skills/jterrazz-test/references/rules.md`, the capability matrix, the domain vocabulary and the siblingless table in [03 — Testing](03-testing.md), the fork in [18 — Conventions](18-conventions.md), the signature cards, and `schema/spec.schema.json`. Never edit one by hand: `npm run lint` runs the sync check and the freshness meta-tests, and both fail on a hand edit.
+
+    **`docs/reference/` is regenerated from a plain CLONE, never from a worktree.** typedoc writes a `Defined in:` link per symbol from whatever the git origin resolves to, and a worktree under `home/<brand>/work/worktrees/` resolves it to a local path — which turns every `https://github.com/jterrazz/package-test/blob/main/…` into a bare path, a whole-file diff that looks like content and is only an address. So `Docs (sync)` is red on `docs/reference/` in a worktree BY CONSTRUCTION, and the projection is refreshed by regenerating it in a clone and committing what that writes.
+
 - **The chapter the behaviour falsified.** A page that still describes the old behaviour is a defect that ships. The corpus is mapped by [`docs/README.md`](README.md).
 - **The skill, when the public surface moved.** `skills/jterrazz-test/` routes agents into these chapters; `README.md` is the vitrine and moves with a public API change too.
 

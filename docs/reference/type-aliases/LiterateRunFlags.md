@@ -5,7 +5,7 @@
 type LiterateRunFlags = object;
 ```
 
-Defined in: [src/specification/facets/cli/literate.ts:62](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/literate.ts#L62)
+Defined in: [src/facets/cli/literate.ts:66](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/literate.ts#L66)
 
 Per-call options for runSpecDocument / `cli.run()`.
 
@@ -17,7 +17,7 @@ Per-call options for runSpecDocument / `cli.run()`.
 optional frozen?: boolean;
 ```
 
-Defined in: [src/specification/facets/cli/literate.ts:71](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/literate.ts#L71)
+Defined in: [src/facets/cli/literate.ts:75](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/literate.ts#L75)
 
 Opt this document OUT of the update-mode rewrite. A frozen document is
 NEVER written under `TEST_UPDATE=1`: its mismatch still throws its diff.

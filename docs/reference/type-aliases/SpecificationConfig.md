@@ -5,7 +5,7 @@
 type SpecificationConfig = object;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L58)
+Defined in: [src/core/chain/builder.ts:54](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L54)
 
 Adapter configuration passed to the specification facets at setup time.
 
@@ -17,7 +17,7 @@ Adapter configuration passed to the specification facets at setup time.
 optional backend?: StubBackend;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:63](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L63)
+Defined in: [src/core/chain/builder.ts:59](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L59)
 
 The declared stub backend (website/mobile facets) — armed with the
 chain's contracts before every terminal action.
@@ -30,7 +30,7 @@ chain's contracts before every terminal action.
 optional backendUrl?: string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:68](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L68)
+Defined in: [src/core/chain/builder.ts:64](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L64)
 
 Base URL of the running stub backend — allow-listed through the
 browser's `external: 'block'` policy so client-side fetches reach it.
@@ -43,7 +43,7 @@ browser's `external: 'block'` policy so client-side fetches reach it.
 optional baseUrl?: string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:70](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L70)
+Defined in: [src/core/chain/builder.ts:66](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L66)
 
 Base URL of the website under test (website facet only).
 
@@ -55,7 +55,7 @@ Base URL of the website under test (website facet only).
 optional browser?: () => Promise<BrowserPort>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:76](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L76)
+Defined in: [src/core/chain/builder.ts:72](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L72)
 
 Lazy browser accessor (website facet only). The first `.visit()`
 launches the shared browser instance; `.fetch()`-only spec files never
@@ -73,7 +73,7 @@ pay the browser cost.
 optional bundleId?: string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:84](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L84)
+Defined in: [src/core/chain/builder.ts:80](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L80)
 
 Bundle id of the app under test (mobile facet only) — the app `.open()` relaunches.
 
@@ -85,7 +85,7 @@ Bundle id of the app under test (mobile facet only) — the app `.open()` relaun
 optional command?: CliPort;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:85](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L85)
+Defined in: [src/core/chain/builder.ts:81](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L81)
 
 ***
 
@@ -95,7 +95,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:85](https://github.com
 optional database?: DatabasePort;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:86](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L86)
+Defined in: [src/core/chain/builder.ts:82](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L82)
 
 ***
 
@@ -105,7 +105,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:86](https://github.com
 optional databaseKeys?: string[];
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:92](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L92)
+Defined in: [src/core/chain/builder.ts:88](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L88)
 
 Keys of the declared services record that are databases. Drives the
 CONVENTIONS A7 rule: with 2+ databases the `database` option is
@@ -119,7 +119,7 @@ mandatory on `.seed()` / `.table()`; with exactly one it is forbidden.
 optional databases?: Map<string, DatabasePort>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:93](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L93)
+Defined in: [src/core/chain/builder.ts:89](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L89)
 
 ***
 
@@ -129,7 +129,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:93](https://github.com
 optional defaultEnv?: CliEnv;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:114](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L114)
+Defined in: [src/core/chain/builder.ts:110](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L110)
 
 Environment applied to every run of the declared binary
 (`specification.cli({ defaults })`) — under a chain's own `.env()` and
@@ -143,7 +143,7 @@ under a document's `env:`, both of which win.
 optional device?: () => Promise<DevicePort>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:100](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L100)
+Defined in: [src/core/chain/builder.ts:96](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L96)
 
 Lazy device accessor (mobile facet only). The first `.open()` creates
 the shared driver session; the appium/webdriverio integration stays a
@@ -162,7 +162,7 @@ app.
 optional dockerConfig?: DockerSpecConfig;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:101](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L101)
+Defined in: [src/core/chain/builder.ts:97](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L97)
 
 ***
 
@@ -172,7 +172,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:101](https://github.co
 optional dockerTestRunId?: string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:108](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L108)
+Defined in: [src/core/chain/builder.ts:104](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L104)
 
 Unique id shared by every spec from this runner instance.
 Stable for the runner's lifetime so multi-step tests (spawn in
@@ -187,7 +187,7 @@ facet factories auto-populate this when `dockerConfig` is present.
 optional envSets?: Record<string, CliEnv>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:119](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L119)
+Defined in: [src/core/chain/builder.ts:115](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L115)
 
 Named environment SETS a spec document may name by bare word
 (`env: frozen`). Declared once per app in `specification.cli()`.
@@ -200,7 +200,7 @@ Named environment SETS a spec document may name by bare word
 optional external?: "allow" | "block";
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:82](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L82)
+Defined in: [src/core/chain/builder.ts:78](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L78)
 
 Cross-origin request policy for visits (website facet only): `'block'`
 aborts requests leaving the site under test — the browser-side analog
@@ -214,7 +214,7 @@ of strict intercepts.
 optional jobs?: JobHandle[];
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:120](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L120)
+Defined in: [src/core/chain/builder.ts:116](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L116)
 
 ***
 
@@ -224,7 +224,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:120](https://github.co
 optional root?: string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:122](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L122)
+Defined in: [src/core/chain/builder.ts:118](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L118)
 
 The project root — the working directory a document's `serve:` command runs from.
 
@@ -236,7 +236,7 @@ The project root — the working directory a document's `serve:` command runs fr
 optional server?: ServerPort;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:123](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L123)
+Defined in: [src/core/chain/builder.ts:119](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L119)
 
 ***
 
@@ -246,7 +246,7 @@ Defined in: [src/specification/facets/\_common/builder.ts:123](https://github.co
 optional serveRegistry?: Record<string, LiterateServeRegistration>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:128](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L128)
+Defined in: [src/core/chain/builder.ts:124](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L124)
 
 Named servers a spec document may start (`serve: [mcp]`). Declared once
 per app in `specification.cli()`.
@@ -259,7 +259,7 @@ per app in `specification.cli()`.
 optional services?: Record<string, ServiceHandle>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:135](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L135)
+Defined in: [src/core/chain/builder.ts:131](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L131)
 
 The declared services record. In cli mode, drives the automatic
 connection-URL injection into the child env (CONVENTIONS B6):
@@ -274,7 +274,7 @@ unambiguous.
 optional transform?: (text) => string;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:140](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L140)
+Defined in: [src/core/chain/builder.ts:136](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L136)
 
 Optional normaliser applied to command stdout/stderr before every
 comparison. Does not mutate the raw `.text` accessor.

@@ -5,7 +5,7 @@
 type DomMount = (container) => (() => void) | void;
 ```
 
-Defined in: [src/integrations/vitest-browser/ui.ts:18](https://github.com/jterrazz/package-test/blob/main/src/integrations/vitest-browser/ui.ts#L18)
+Defined in: [src/seams/vitest-browser/ui.ts:18](https://github.com/jterrazz/package-test/blob/main/src/seams/vitest-browser/ui.ts#L18)
 
 A vanilla DOM subject: a function handed the container it must fill. Its
 optional return is the teardown, the way a DOM library states one.

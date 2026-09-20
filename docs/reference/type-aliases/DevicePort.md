@@ -5,7 +5,7 @@
 type DevicePort = object;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:123](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L123)
+Defined in: [src/core/ports/device.port.ts:123](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L123)
 
 Abstract device interface for the mobile specification runner.
 One implementation lives in `integrations/appium/` — a single driver
@@ -20,7 +20,7 @@ terminates and relaunches the app for a deterministic fresh state.
 close: () => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:125](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L125)
+Defined in: [src/core/ports/device.port.ts:125](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L125)
 
 End the driver session (idempotent).
 
@@ -36,7 +36,7 @@ End the driver session (idempotent).
 open: (options) => Promise<DeviceScreen>;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:127](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L127)
+Defined in: [src/core/ports/device.port.ts:127](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L127)
 
 Relaunch the app, apply the deep link, run the scenario, capture the final screen.
 

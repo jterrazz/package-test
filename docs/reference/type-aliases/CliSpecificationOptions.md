@@ -5,7 +5,7 @@
 type CliSpecificationOptions<Services> = object;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:22](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L22)
+Defined in: [src/facets/cli/cli.specification.ts:23](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L23)
 
 Options for startCli \| specification.cli.
 
@@ -23,7 +23,7 @@ Options for startCli \| specification.cli.
 optional defaults?: CliEnv;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:38](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L38)
+Defined in: [src/facets/cli/cli.specification.ts:39](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L39)
 
 Environment applied to EVERY run of this binary — the variables the
 product needs to be deterministic at all (`TZ`, `NO_COLOR`, `LANG`,
@@ -39,7 +39,7 @@ instead of repeated on every chain and in every document; a chained
 optional docker?: DockerSpecConfig;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:30](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L30)
+Defined in: [src/facets/cli/cli.specification.ts:31](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L31)
 
 Opt-in Docker awareness. When set, every spec generates a unique
 test-run id, injects it into the child process env under `envVar`,
@@ -55,7 +55,7 @@ containers get force-removed at scope exit (CONVENTIONS B5).
 optional env?: Record<string, CliEnv>;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:45](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L45)
+Defined in: [src/facets/cli/cli.specification.ts:46](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L46)
 
 Named environment SETS for `<case>.spec.yaml` documents. An `env:` entry
 `frozen` applies the whole `frozen` record; `$WORKDIR` expands and `null`
@@ -70,7 +70,7 @@ states WHICH ground it stands on, not how to build it.
 optional root?: string;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:60](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L60)
+Defined in: [src/facets/cli/cli.specification.ts:61](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L61)
 
 Project-root override (CONVENTIONS A9) — the single meaning of `root`:
 it anchors the local-bin resolution of the tested binary, in place of
@@ -85,7 +85,7 @@ the walk to the nearest `package.json`. It is NOT a fixtures root;
 optional serve?: Record<string, LiterateServeRegistration>;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:53](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L53)
+Defined in: [src/facets/cli/cli.specification.ts:54](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L54)
 
 Named servers a `<case>.spec.yaml` document may start (`serve: [mcp]`, or
 `- mcp: { KEY: value }` to add env to that one). Each entry names the
@@ -101,7 +101,7 @@ URL is bound to in every run's child.
 optional services?: Services;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:67](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L67)
+Defined in: [src/facets/cli/cli.specification.ts:68](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L68)
 
 Named infrastructure record started via testcontainers. Connection
 URLs are injected automatically into the child env: `<KEY>_URL` per
@@ -116,7 +116,7 @@ service, plus `DATABASE_URL` / `REDIS_URL` when unambiguous
 optional transform?: (text) => string;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:74](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L74)
+Defined in: [src/facets/cli/cli.specification.ts:75](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L75)
 
 Escape hatch: normaliser applied to result.stdout / result.stderr
 before every comparison, AFTER the default ANSI strip (CONVENTIONS

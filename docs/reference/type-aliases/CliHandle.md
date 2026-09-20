@@ -5,7 +5,7 @@
 type CliHandle<DatabaseKey> = object;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:83](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L83)
+Defined in: [src/facets/cli/cli.specification.ts:84](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L84)
 
 The record returned by startCli \| specification.cli. Destructure
 with the canonical names (CONVENTIONS A3):
@@ -26,7 +26,7 @@ with the canonical names (CONVENTIONS A3):
 cleanup: () => Promise<void>;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:85](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L85)
+Defined in: [src/facets/cli/cli.specification.ts:86](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L86)
 
 Stop all infrastructure started by this specification.
 
@@ -42,7 +42,7 @@ Stop all infrastructure started by this specification.
 cli: CliSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:86](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L86)
+Defined in: [src/facets/cli/cli.specification.ts:87](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L87)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [src/specification/facets/cli/start-cli.ts:86](https://github.com/jt
 docker: (containerId) => ContainerAccessor;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:91](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L91)
+Defined in: [src/facets/cli/cli.specification.ts:92](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L92)
 
 Read a running container by id — returns a [ContainerAccessor](../interfaces/ContainerAccessor.md)
 usable with `await expect(...).toBeRunning()` and read accessors.
@@ -75,6 +75,6 @@ usable with `await expect(...).toBeRunning()` and read accessors.
 orchestrator: null | Orchestrator;
 ```
 
-Defined in: [src/specification/facets/cli/start-cli.ts:93](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/cli/start-cli.ts#L93)
+Defined in: [src/facets/cli/cli.specification.ts:94](https://github.com/jterrazz/package-test/blob/main/src/facets/cli/cli.specification.ts#L94)
 
 The orchestrator managing the test infrastructure lifecycle.

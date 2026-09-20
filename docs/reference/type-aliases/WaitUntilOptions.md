@@ -5,7 +5,7 @@
 type WaitUntilOptions = object;
 ```
 
-Defined in: [src/specification/assertions/wait-until.ts:4](https://github.com/jterrazz/package-test/blob/main/src/specification/assertions/wait-until.ts#L4)
+Defined in: [src/core/assertions/wait-until.ts:4](https://github.com/jterrazz/package-test/blob/main/src/core/assertions/wait-until.ts#L4)
 
 How long to wait, and how often to look.
 
@@ -17,7 +17,7 @@ How long to wait, and how often to look.
 optional interval?: number;
 ```
 
-Defined in: [src/specification/assertions/wait-until.ts:6](https://github.com/jterrazz/package-test/blob/main/src/specification/assertions/wait-until.ts#L6)
+Defined in: [src/core/assertions/wait-until.ts:6](https://github.com/jterrazz/package-test/blob/main/src/core/assertions/wait-until.ts#L6)
 
 Milliseconds between two readings. Default 50.
 
@@ -29,7 +29,7 @@ Milliseconds between two readings. Default 50.
 optional timeout?: number;
 ```
 
-Defined in: [src/specification/assertions/wait-until.ts:8](https://github.com/jterrazz/package-test/blob/main/src/specification/assertions/wait-until.ts#L8)
+Defined in: [src/core/assertions/wait-until.ts:8](https://github.com/jterrazz/package-test/blob/main/src/core/assertions/wait-until.ts#L8)
 
 How long the condition has to become true. Default 5 000 ms.
 
@@ -41,6 +41,6 @@ How long the condition has to become true. Default 5 000 ms.
 optional why?: string;
 ```
 
-Defined in: [src/specification/assertions/wait-until.ts:10](https://github.com/jterrazz/package-test/blob/main/src/specification/assertions/wait-until.ts#L10)
+Defined in: [src/core/assertions/wait-until.ts:10](https://github.com/jterrazz/package-test/blob/main/src/core/assertions/wait-until.ts#L10)
 
 What the condition is, named in the failure. Default: the predicate's source.

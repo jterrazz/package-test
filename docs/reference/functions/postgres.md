@@ -5,7 +5,7 @@
 function postgres(options?): PostgresHandle;
 ```
 
-Defined in: [src/integrations/postgres/postgres.ts:216](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L216)
+Defined in: [src/seams/postgres/postgres.ts:216](https://github.com/jterrazz/package-test/blob/main/src/seams/postgres/postgres.ts#L216)
 
 Create a PostgreSQL service handle.
 

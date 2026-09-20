@@ -5,7 +5,7 @@
 type SseEvent = object;
 ```
 
-Defined in: [src/specification/contracts/http.ts:44](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L44)
+Defined in: [src/core/contracts/http.ts:44](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L44)
 
 One server-sent event, as `http.sse()` frames it.
 
@@ -17,7 +17,7 @@ One server-sent event, as `http.sse()` frames it.
 data: unknown;
 ```
 
-Defined in: [src/specification/contracts/http.ts:46](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L46)
+Defined in: [src/core/contracts/http.ts:46](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L46)
 
 The `data:` payload. An object is serialised as JSON; a string is sent as-is.
 
@@ -29,7 +29,7 @@ The `data:` payload. An object is serialised as JSON; a string is sent as-is.
 optional event?: string;
 ```
 
-Defined in: [src/specification/contracts/http.ts:48](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L48)
+Defined in: [src/core/contracts/http.ts:48](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L48)
 
 The `event:` name. Omitted for an unnamed (default `message`) event.
 
@@ -41,7 +41,7 @@ The `event:` name. Omitted for an unnamed (default `message`) event.
 optional id?: string;
 ```
 
-Defined in: [src/specification/contracts/http.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L50)
+Defined in: [src/core/contracts/http.ts:50](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L50)
 
 The `id:` the client echoes as `Last-Event-ID` when it reconnects.
 
@@ -53,6 +53,6 @@ The `id:` the client echoes as `Last-Event-ID` when it reconnects.
 optional retry?: number;
 ```
 
-Defined in: [src/specification/contracts/http.ts:52](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/http.ts#L52)
+Defined in: [src/core/contracts/http.ts:52](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/http.ts#L52)
 
 The `retry:` hint, in milliseconds.

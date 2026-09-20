@@ -5,7 +5,7 @@
 type Contracts = object;
 ```
 
-Defined in: [src/specification/contracts/contract.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L37)
+Defined in: [src/core/contracts/contract.ts:37](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L37)
 
 A composite of contracts — the unit tests import. Flat, ordered, immutable;
 `.with()` derives a variant without touching the original.
@@ -18,7 +18,7 @@ A composite of contracts — the unit tests import. Flat, ordered, immutable;
 readonly contracts: readonly Contract[];
 ```
 
-Defined in: [src/specification/contracts/contract.ts:39](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L39)
+Defined in: [src/core/contracts/contract.ts:39](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L39)
 
 The flattened contracts, in selection order.
 
@@ -30,7 +30,7 @@ The flattened contracts, in selection order.
 with: (...overrides) => Contracts;
 ```
 
-Defined in: [src/specification/contracts/contract.ts:46](https://github.com/jterrazz/package-test/blob/main/src/specification/contracts/contract.ts#L46)
+Defined in: [src/core/contracts/contract.ts:46](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L46)
 
 Derive a new composite: every base contract sharing a route with an
 override is REPLACED, and the overrides are PREPENDED — so a

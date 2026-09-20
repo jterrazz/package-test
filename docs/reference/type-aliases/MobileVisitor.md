@@ -5,7 +5,7 @@
 type MobileVisitor = object;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:50](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L50)
+Defined in: [src/core/ports/device.port.ts:50](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L50)
 
 The visitor — the interaction vocabulary handed to a mobile scenario.
 Every verb auto-waits by polling until a visible match exists; acting
@@ -21,7 +21,7 @@ no sleep and no conditional helper.
 fill: (element, value) => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:52](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L52)
+Defined in: [src/core/ports/device.port.ts:52](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L52)
 
 Fill a text field with a value.
 
@@ -44,7 +44,7 @@ Fill a text field with a value.
 see: (element) => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:54](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L54)
+Defined in: [src/core/ports/device.port.ts:54](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L54)
 
 Wait until the element is visible — the only synchronization primitive.
 
@@ -66,7 +66,7 @@ Wait until the element is visible — the only synchronization primitive.
 tap: (element) => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/device.port.ts:56](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/device.port.ts#L56)
+Defined in: [src/core/ports/device.port.ts:56](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L56)
 
 Tap the element.
 

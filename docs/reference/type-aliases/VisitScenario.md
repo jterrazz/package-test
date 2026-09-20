@@ -5,7 +5,7 @@
 type VisitScenario = (visitor) => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:170](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L170)
+Defined in: [src/core/ports/browser.port.ts:170](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L170)
 
 The behavior of a visit — the When of the spec; assertions stay in the Then.
 

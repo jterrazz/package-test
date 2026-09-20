@@ -5,7 +5,7 @@
 type ApiSpecificationOptions<Services> = object;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:20](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L20)
+Defined in: [src/facets/api/api.specification.ts:25](https://github.com/jterrazz/package-test/blob/main/src/facets/api/api.specification.ts#L25)
 
 Options for startApi \| specification.api.
 
@@ -23,7 +23,7 @@ Options for startApi \| specification.api.
 optional root?: string;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:26](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L26)
+Defined in: [src/facets/api/api.specification.ts:31](https://github.com/jterrazz/package-test/blob/main/src/facets/api/api.specification.ts#L31)
 
 Project root override for init scripts and artefact paths. When absent,
 the root is auto-discovered by walking up from the calling specification
@@ -37,7 +37,7 @@ file to the first directory containing `package.json` (CONVENTIONS A9).
 server: (services) => HonoApp;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:31](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L31)
+Defined in: [src/facets/api/api.specification.ts:36](https://github.com/jterrazz/package-test/blob/main/src/facets/api/api.specification.ts#L36)
 
 The app factory — receives the started services record (fully typed)
 and returns the Hono app.
@@ -60,7 +60,7 @@ and returns the Hono app.
 optional services?: Services;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:38](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L38)
+Defined in: [src/facets/api/api.specification.ts:43](https://github.com/jterrazz/package-test/blob/main/src/facets/api/api.specification.ts#L43)
 
 Named infrastructure record. Keys become the `database` vocabulary of
 `.seed()` / `.table()`, and, kebab-cased, the folder each service reads
