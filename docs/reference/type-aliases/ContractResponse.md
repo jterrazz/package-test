@@ -5,7 +5,7 @@
 type ContractResponse = object;
 ```
 
-Defined in: [src/core/contracts/types.ts:42](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L42)
+Defined in: [src/model/contracts/types.ts:42](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/types.ts#L42)
 
 The response half of a contract: what to reply when the request matches.
 
@@ -17,7 +17,7 @@ The response half of a contract: what to reply when the request matches.
 body: unknown;
 ```
 
-Defined in: [src/core/contracts/types.ts:50](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L50)
+Defined in: [src/model/contracts/types.ts:50](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/types.ts#L50)
 
 Response body — an object is JSON, a string is text, `null`/`undefined`
 is empty, and a [StreamBody](StreamBody.md) (built by `http.stream()` /
@@ -31,7 +31,7 @@ is empty, and a [StreamBody](StreamBody.md) (built by `http.stream()` /
 optional delay?: number;
 ```
 
-Defined in: [src/core/contracts/types.ts:54](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L54)
+Defined in: [src/model/contracts/types.ts:54](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/types.ts#L54)
 
 Delay in ms before responding (for timeout testing).
 
@@ -43,7 +43,7 @@ Delay in ms before responding (for timeout testing).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: [src/core/contracts/types.ts:52](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L52)
+Defined in: [src/model/contracts/types.ts:52](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/types.ts#L52)
 
 Response headers.
 
@@ -55,7 +55,7 @@ Response headers.
 optional status?: number;
 ```
 
-Defined in: [src/core/contracts/types.ts:44](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L44)
+Defined in: [src/model/contracts/types.ts:44](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/types.ts#L44)
 
 HTTP status code (default: 200).
 
@@ -67,7 +67,7 @@ HTTP status code (default: 200).
 optional transport?: "network-error";
 ```
 
-Defined in: [src/core/contracts/types.ts:64](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/types.ts#L64)
+Defined in: [src/model/contracts/types.ts:64](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/types.ts#L64)
 
 A transport failure instead of a reply: the request never reached a
 server, so `fetch` rejects. `status`, `body` and `headers` say nothing

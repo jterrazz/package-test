@@ -5,6 +5,6 @@
 type PinnedClock = Disposable;
 ```
 
-Defined in: [src/core/clock/clock.ts:23](https://github.com/jterrazz/package-test/blob/main/src/core/clock/clock.ts#L23)
+Defined in: [src/model/clock/clock.ts:23](https://github.com/jterrazz/package-test/blob/main/src/model/clock/clock.ts#L23)
 
 A pinned clock — released when the `using` scope that declared it ends.

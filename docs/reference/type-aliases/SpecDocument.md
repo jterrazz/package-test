@@ -5,7 +5,7 @@
 type SpecDocument = object;
 ```
 
-Defined in: [src/core/literate/spec-document.ts:134](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L134)
+Defined in: [src/model/literate/spec-document.ts:134](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L134)
 
 A parsed `<case>.spec.yaml`.
 
@@ -17,7 +17,7 @@ A parsed `<case>.spec.yaml`.
 description: string;
 ```
 
-Defined in: [src/core/literate/spec-document.ts:136](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L136)
+Defined in: [src/model/literate/spec-document.ts:136](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L136)
 
 The vitest test title.
 
@@ -29,7 +29,7 @@ The vitest test title.
 descriptionLine: number;
 ```
 
-Defined in: [src/core/literate/spec-document.ts:138](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L138)
+Defined in: [src/model/literate/spec-document.ts:138](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L138)
 
 1-based line of the `description:` key.
 
@@ -41,7 +41,7 @@ Defined in: [src/core/literate/spec-document.ts:138](https://github.com/jterrazz
 env: SpecEnvToken[];
 ```
 
-Defined in: [src/core/literate/spec-document.ts:139](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L139)
+Defined in: [src/model/literate/spec-document.ts:139](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L139)
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: [src/core/literate/spec-document.ts:139](https://github.com/jterrazz
 fixtures: SpecFixture[];
 ```
 
-Defined in: [src/core/literate/spec-document.ts:140](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L140)
+Defined in: [src/model/literate/spec-document.ts:140](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L140)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [src/core/literate/spec-document.ts:140](https://github.com/jterrazz
 kind: SpecKind;
 ```
 
-Defined in: [src/core/literate/spec-document.ts:141](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L141)
+Defined in: [src/model/literate/spec-document.ts:141](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L141)
 
 ***
 
@@ -71,7 +71,7 @@ Defined in: [src/core/literate/spec-document.ts:141](https://github.com/jterrazz
 runs: SpecRun[];
 ```
 
-Defined in: [src/core/literate/spec-document.ts:142](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L142)
+Defined in: [src/model/literate/spec-document.ts:142](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L142)
 
 ***
 
@@ -81,4 +81,4 @@ Defined in: [src/core/literate/spec-document.ts:142](https://github.com/jterrazz
 serve: SpecServeEntry[];
 ```
 
-Defined in: [src/core/literate/spec-document.ts:143](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L143)
+Defined in: [src/model/literate/spec-document.ts:143](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L143)

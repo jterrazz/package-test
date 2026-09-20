@@ -5,7 +5,7 @@
 type MobileScenario = (visitor) => Promise<void>;
 ```
 
-Defined in: [src/core/ports/device.port.ts:60](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L60)
+Defined in: [src/model/ports/device.port.ts:60](https://github.com/jterrazz/package-test/blob/main/src/model/ports/device.port.ts#L60)
 
 The behavior of an open — the When of the spec; assertions stay in the Then.
 

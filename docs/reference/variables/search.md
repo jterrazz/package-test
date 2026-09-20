@@ -5,6 +5,6 @@
 const search: LandmarkFactory;
 ```
 
-Defined in: [src/core/elements/elements.ts:101](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L101)
+Defined in: [src/model/elements/elements.ts:101](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L101)
 
 The `search` landmark.

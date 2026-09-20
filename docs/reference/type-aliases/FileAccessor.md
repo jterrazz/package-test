@@ -5,7 +5,7 @@
 type FileAccessor = object;
 ```
 
-Defined in: [src/core/result/result.ts:13](https://github.com/jterrazz/package-test/blob/main/src/core/result/result.ts#L13)
+Defined in: [src/model/result/result.ts:13](https://github.com/jterrazz/package-test/blob/main/src/model/result/result.ts#L13)
 
 Read-only handle to a single file produced by a spec action.
 
@@ -17,7 +17,7 @@ Read-only handle to a single file produced by a spec action.
 readonly content: string;
 ```
 
-Defined in: [src/core/result/result.ts:15](https://github.com/jterrazz/package-test/blob/main/src/core/result/result.ts#L15)
+Defined in: [src/model/result/result.ts:15](https://github.com/jterrazz/package-test/blob/main/src/model/result/result.ts#L15)
 
 The UTF-8 text content. Throws if the file does not exist.
 
@@ -29,7 +29,7 @@ The UTF-8 text content. Throws if the file does not exist.
 readonly exists: boolean;
 ```
 
-Defined in: [src/core/result/result.ts:16](https://github.com/jterrazz/package-test/blob/main/src/core/result/result.ts#L16)
+Defined in: [src/model/result/result.ts:16](https://github.com/jterrazz/package-test/blob/main/src/model/result/result.ts#L16)
 
 ***
 
@@ -39,7 +39,7 @@ Defined in: [src/core/result/result.ts:16](https://github.com/jterrazz/package-t
 grep: (pattern) => TextAccessor;
 ```
 
-Defined in: [src/core/result/result.ts:18](https://github.com/jterrazz/package-test/blob/main/src/core/result/result.ts#L18)
+Defined in: [src/model/result/result.ts:18](https://github.com/jterrazz/package-test/blob/main/src/model/result/result.ts#L18)
 
 The file text as a [TextAccessor](../interfaces/TextAccessor.md), keeping only blocks matching `pattern`.
 

@@ -5,7 +5,7 @@
 type BrowserConsoleMessage = object;
 ```
 
-Defined in: [src/core/ports/browser.port.ts:133](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L133)
+Defined in: [src/model/ports/browser.port.ts:133](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L133)
 
 A console message emitted while the page loaded or the scenario ran.
 
@@ -17,7 +17,7 @@ A console message emitted while the page loaded or the scenario ran.
 text: string;
 ```
 
-Defined in: [src/core/ports/browser.port.ts:134](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L134)
+Defined in: [src/model/ports/browser.port.ts:134](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L134)
 
 ***
 
@@ -27,4 +27,4 @@ Defined in: [src/core/ports/browser.port.ts:134](https://github.com/jterrazz/pac
 type: string;
 ```
 
-Defined in: [src/core/ports/browser.port.ts:135](https://github.com/jterrazz/package-test/blob/main/src/core/ports/browser.port.ts#L135)
+Defined in: [src/model/ports/browser.port.ts:135](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L135)

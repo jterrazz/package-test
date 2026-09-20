@@ -5,7 +5,7 @@
 type IntegrationSpecification<Services, DatabaseKey> = object;
 ```
 
-Defined in: [src/core/chain/builder.ts:237](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L237)
+Defined in: [src/model/chain/builder.ts:237](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L237)
 
 The `integration` facet — the in-process chain handed out by
 `specification.integration()`.
@@ -30,7 +30,7 @@ every other facet and ends on the one action a module has: being called.
 call: <T>(subject) => Promise<CallResult<T>>;
 ```
 
-Defined in: [src/core/chain/builder.ts:256](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L256)
+Defined in: [src/model/chain/builder.ts:256](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L256)
 
 Call the module and resolve with what it produced. The started services
 record is handed in, so the subject is constructed with the real
@@ -60,7 +60,7 @@ connection strings rather than with a double.
 clock: (iso) => IntegrationSpecification<Services, DatabaseKey>;
 ```
 
-Defined in: [src/core/chain/builder.ts:242](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L242)
+Defined in: [src/model/chain/builder.ts:242](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L242)
 
 Pin the module's `Date` at `iso` for this chain.
 
@@ -82,7 +82,7 @@ Pin the module's `Date` at `iso` for this chain.
 intercept: InterceptMethod<IntegrationSpecification<Services, DatabaseKey>>;
 ```
 
-Defined in: [src/core/chain/builder.ts:244](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L244)
+Defined in: [src/model/chain/builder.ts:244](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L244)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -94,7 +94,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 seed: (file, options?) => IntegrationSpecification<Services, DatabaseKey>;
 ```
 
-Defined in: [src/core/chain/builder.ts:246](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L246)
+Defined in: [src/model/chain/builder.ts:246](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L246)
 
 Queue a SQL seed file from `_seeds/` to run before the call.
 

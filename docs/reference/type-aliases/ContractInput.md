@@ -8,6 +8,6 @@ type ContractInput =
   | Contracts;
 ```
 
-Defined in: [src/core/contracts/contract.ts:50](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L50)
+Defined in: [src/model/contracts/contract.ts:50](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/contract.ts#L50)
 
 Any accepted contract input: one, a list, or a composite.

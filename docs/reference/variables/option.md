@@ -5,7 +5,7 @@
 const option: ElementFactory;
 ```
 
-Defined in: [src/core/elements/elements.ts:151](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L151)
+Defined in: [src/model/elements/elements.ts:151](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L151)
 
 An option of a select or a listbox, by its label — named inside the field
 that holds it: `within(field('Channel'), option('LinkedIn'))`.

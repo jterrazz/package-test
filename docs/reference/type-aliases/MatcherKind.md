@@ -29,6 +29,6 @@ type MatcherKind =
   | "workdir";
 ```
 
-Defined in: [src/core/matching/match.ts:12](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L12)
+Defined in: [src/model/matching/match.ts:12](https://github.com/jterrazz/package-test/blob/main/src/model/matching/match.ts#L12)
 
 The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds.

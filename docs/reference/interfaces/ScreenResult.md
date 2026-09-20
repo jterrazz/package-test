@@ -55,7 +55,7 @@ per screen: `expect(result.screen).toMatch('events.screen.json')`.
 directory(path?): DirectoryAccessor;
 ```
 
-Defined in: [src/core/result/result.ts:55](https://github.com/jterrazz/package-test/blob/main/src/core/result/result.ts#L55)
+Defined in: [src/model/result/result.ts:55](https://github.com/jterrazz/package-test/blob/main/src/model/result/result.ts#L55)
 
 Access a directory (relative to the working directory) for snapshot assertions.
 
@@ -81,7 +81,7 @@ Access a directory (relative to the working directory) for snapshot assertions.
 file(path): FileAccessor;
 ```
 
-Defined in: [src/core/result/result.ts:61](https://github.com/jterrazz/package-test/blob/main/src/core/result/result.ts#L61)
+Defined in: [src/model/result/result.ts:61](https://github.com/jterrazz/package-test/blob/main/src/model/result/result.ts#L61)
 
 Access a single file (relative to the working directory) for content assertions.
 
@@ -107,7 +107,7 @@ Access a single file (relative to the working directory) for content assertions.
 table(tableName, options?): TableAccessor;
 ```
 
-Defined in: [src/core/result/result.ts:86](https://github.com/jterrazz/package-test/blob/main/src/core/result/result.ts#L86)
+Defined in: [src/model/result/result.ts:86](https://github.com/jterrazz/package-test/blob/main/src/model/result/result.ts#L86)
 
 Access a database table for row-level assertions via expect() matchers.
 

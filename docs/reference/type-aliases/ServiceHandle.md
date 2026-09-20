@@ -5,7 +5,7 @@
 type ServiceHandle = object;
 ```
 
-Defined in: [src/core/ports/service.port.ts:8](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L8)
+Defined in: [src/model/ports/service.port.ts:8](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L8)
 
 A service handle — returned by factory functions like postgres(), redis().
 Mutable: connectionString is populated after the orchestrator starts containers.
@@ -18,7 +18,7 @@ Mutable: connectionString is populated after the orchestrator starts containers.
 buildConnectionString: (host, port) => string;
 ```
 
-Defined in: [src/core/ports/service.port.ts:37](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L37)
+Defined in: [src/model/ports/service.port.ts:37](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L37)
 
 Build the connection string from host and port.
 
@@ -41,7 +41,7 @@ Build the connection string from host and port.
 connectionString: string;
 ```
 
-Defined in: [src/core/ports/service.port.ts:31](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L31)
+Defined in: [src/model/ports/service.port.ts:31](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L31)
 
 Connection string — populated after start.
 
@@ -53,7 +53,7 @@ Connection string — populated after start.
 createDatabaseAdapter: () => DatabasePort | null;
 ```
 
-Defined in: [src/core/ports/service.port.ts:40](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L40)
+Defined in: [src/model/ports/service.port.ts:40](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L40)
 
 Create a DatabasePort adapter (if this is a database). Returns null otherwise.
 
@@ -69,7 +69,7 @@ Create a DatabasePort adapter (if this is a database). Returns null otherwise.
 readonly defaultImage: string;
 ```
 
-Defined in: [src/core/ports/service.port.ts:25](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L25)
+Defined in: [src/model/ports/service.port.ts:25](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L25)
 
 Default Docker image for this service type.
 
@@ -81,7 +81,7 @@ Default Docker image for this service type.
 readonly defaultPort: number;
 ```
 
-Defined in: [src/core/ports/service.port.ts:22](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L22)
+Defined in: [src/model/ports/service.port.ts:22](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L22)
 
 Default container port for this service type.
 
@@ -93,7 +93,7 @@ Default container port for this service type.
 readonly environment: Record<string, string>;
 ```
 
-Defined in: [src/core/ports/service.port.ts:28](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L28)
+Defined in: [src/model/ports/service.port.ts:28](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L28)
 
 Environment variables to pass to the container.
 
@@ -105,7 +105,7 @@ Environment variables to pass to the container.
 healthcheck: () => Promise<void>;
 ```
 
-Defined in: [src/core/ports/service.port.ts:43](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L43)
+Defined in: [src/model/ports/service.port.ts:43](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L43)
 
 Verify the service is ready and accepting connections. Throws with context if not.
 
@@ -121,7 +121,7 @@ Verify the service is ready and accepting connections. Throws with context if no
 initialize: (dockerDir, root) => Promise<void>;
 ```
 
-Defined in: [src/core/ports/service.port.ts:55](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L55)
+Defined in: [src/model/ports/service.port.ts:55](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L55)
 
 Run initialization scripts (e.g., init.sql). Throws with SQL error
 context if it fails.
@@ -151,7 +151,7 @@ checkouts would share.
 isolation: () => IsolationStrategy;
 ```
 
-Defined in: [src/core/ports/service.port.ts:61](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L61)
+Defined in: [src/model/ports/service.port.ts:61](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L61)
 
 Get the isolation strategy for parallel test execution.
 
@@ -167,7 +167,7 @@ Get the isolation strategy for parallel test execution.
 reset: () => Promise<void>;
 ```
 
-Defined in: [src/core/ports/service.port.ts:58](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L58)
+Defined in: [src/model/ports/service.port.ts:58](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L58)
 
 Reset state between tests (truncate tables, flush cache, etc.)
 
@@ -183,7 +183,7 @@ Reset state between tests (truncate tables, flush cache, etc.)
 serviceName: null | string;
 ```
 
-Defined in: [src/core/ports/service.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L19)
+Defined in: [src/model/ports/service.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L19)
 
 The name this handle is known by. Left `null` until the orchestrator
 assigns it at start time: it is the kebab-case form of the RECORD KEY,
@@ -199,7 +199,7 @@ specification writes; a handle carries no second one of its own.
 started: boolean;
 ```
 
-Defined in: [src/core/ports/service.port.ts:34](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L34)
+Defined in: [src/model/ports/service.port.ts:34](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L34)
 
 Whether this service has been started.
 
@@ -211,6 +211,6 @@ Whether this service has been started.
 readonly type: string;
 ```
 
-Defined in: [src/core/ports/service.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/core/ports/service.port.ts#L10)
+Defined in: [src/model/ports/service.port.ts:10](https://github.com/jterrazz/package-test/blob/main/src/model/ports/service.port.ts#L10)
 
 Service type identifier.

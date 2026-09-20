@@ -35,7 +35,7 @@ The marker the `toMatch` overload reads. Never asserted on directly.
 readonly text: string;
 ```
 
-Defined in: [src/core/result/text.ts:43](https://github.com/jterrazz/package-test/blob/main/src/core/result/text.ts#L43)
+Defined in: [src/model/result/text.ts:43](https://github.com/jterrazz/package-test/blob/main/src/model/result/text.ts#L43)
 
 The raw captured text (never transformed, ANSI preserved).
 
@@ -51,7 +51,7 @@ The raw captured text (never transformed, ANSI preserved).
 grep(pattern): TextAccessor;
 ```
 
-Defined in: [src/core/result/text.ts:76](https://github.com/jterrazz/package-test/blob/main/src/core/result/text.ts#L76)
+Defined in: [src/model/result/text.ts:76](https://github.com/jterrazz/package-test/blob/main/src/model/result/text.ts#L76)
 
 Keep only the blank-line-separated blocks of the text that contain
 `pattern` (how linter/compiler output is structured), returned as a new
@@ -81,7 +81,7 @@ whole surface by default, reach for `.grep()` for targeted checks.
 toString(): string;
 ```
 
-Defined in: [src/core/result/text.ts:83](https://github.com/jterrazz/package-test/blob/main/src/core/result/text.ts#L83)
+Defined in: [src/model/result/text.ts:83](https://github.com/jterrazz/package-test/blob/main/src/model/result/text.ts#L83)
 
 #### Returns
 
@@ -99,7 +99,7 @@ Defined in: [src/core/result/text.ts:83](https://github.com/jterrazz/package-tes
 valueOf(): string;
 ```
 
-Defined in: [src/core/result/text.ts:87](https://github.com/jterrazz/package-test/blob/main/src/core/result/text.ts#L87)
+Defined in: [src/model/result/text.ts:87](https://github.com/jterrazz/package-test/blob/main/src/model/result/text.ts#L87)
 
 #### Returns
 
