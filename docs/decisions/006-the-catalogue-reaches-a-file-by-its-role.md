@@ -189,17 +189,28 @@ The release proof of this wave reads: the package's own tree green under
 catalogue's own meta-tests holding freshness, completeness, reach and channel,
 and the R8 counts above re-derivable from the branch head. All of it holds.
 
-**Suppressions are the one stated exception.** The proof as written asked for
-zero directives added to this package's own tree, and the wave adds about a
-dozen outside fixtures and goldens (`typescript check` reports 68 in total).
-They are three shapes, and none of them is debt: a test whose SUBJECT is the
-primitive the rule bans — the clock seam, `waitUntil`, the adapter deadlines,
-the marker rule's own one-line fixture; a negative spec whose violation IS the
-behaviour under test; and one skipped spec, the repro of the seam defect chapter
-10 names, which leaves the day the seam answers. A rule cannot exempt the test
-that proves it without exempting the class it guards, so the directive carries
-the reason instead. The number is written here so the next release holds it
-there: 68, and a rise asks for the same reading.
+**Suppressions are the one stated exception**, and it has two halves, both
+counted. The proof as written asked for zero directives added to this package's
+own tree: `src/` and `specs/` carry 66 `oxlint-disable` outside fixtures and
+goldens where `main` carried 51, so the wave adds 15. They are three shapes,
+and none of them is debt: a test whose SUBJECT is the primitive the rule bans —
+the clock seam, `waitUntil`, the adapter deadlines, the marker rule's own
+one-line fixture; a negative spec whose violation IS the behaviour under test;
+and one skipped spec, the repro of the seam defect chapter 16 names, which
+leaves the day the seam answers. A rule cannot exempt the test that proves it
+without exempting the class it guards, so the directive carries the reason
+instead.
+
+The second half is the RATCHET, and it is debt rather than exemption: the wave
+absorbs 107 findings of this package's own rules into `oxlint.baseline.json` —
+`e9w` 39, `j6w` 37, `d18w` 14, `d16w` 10, `w5w` 4, `d15w` 3, beside the single
+`i1` line `main` already carried. A ratchet key names a convention, never a
+pass, so those are 107 lines a reader can spend one convention at a time, and
+the baseline may only fall.
+
+Both numbers are written here so the next release holds itself to them: 66
+directives and 107 absorbed findings, and a rise in either asks for the same
+reading.
 
 **Not done in this cut**, deliberately, each with the reason:
 
