@@ -7,7 +7,7 @@ import { fixPoolFixtures } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverSpecRoots } from './checker-member.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
-import { formatViolations, runAllChecks } from './checker.js';
+import { formatViolations, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
 import type { TokenViolation } from './checker.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
@@ -71,11 +71,17 @@ function valueOf(flag: string): string | undefined {
     return index === -1 ? undefined : argv[index + 1];
 }
 
-/** The passes a tree run puts over a `specs/` root. */
-const TREE_PASSES =
-    'D4/D4b/D10 grammar, spec documents, C9 dead fixtures, C14/C15 fixture placement, B5 await-using, A7 database';
+/**
+ * What a run names when it is clean — the pass REGISTRY, never a sentence
+ * written beside it.
+ *
+ * The hand-written list stopped at the cross-file passes of 15.x while the
+ * channel grew four tree passes and a suppression gate, so the summary
+ * under-reported exactly what it exists to report.
+ */
+const TREE_PASSES = TREE_PASS_IDS.join(', ');
 /** The passes a member run puts over a package. */
-const MEMBER_PASSES = 'E3 config-present, E5b no simulated DOM, F8 no seam dependency';
+const MEMBER_PASSES = MEMBER_PASS_IDS.join(', ');
 
 /**
  * Print the findings and exit on the first error-level one. `passes` names the

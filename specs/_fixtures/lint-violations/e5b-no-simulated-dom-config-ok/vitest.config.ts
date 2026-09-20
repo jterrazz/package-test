@@ -1,8 +1,0 @@
-import { defineSpecConfig } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({
-    test: {
-        environment: 'node',
-        include: ['src/**/*.test.ts'],
-    },
-});

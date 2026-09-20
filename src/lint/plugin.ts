@@ -45,7 +45,6 @@ import { d19wProbeCluster } from './rules/d19w-probe-cluster.js';
 import { e2PresetConfig } from './rules/e2-preset-config.js';
 import { e4wProjectBinding } from './rules/e4w-project-binding.js';
 import { e5NoSimulatedDom } from './rules/e5-no-simulated-dom.js';
-import { e5bNoSimulatedDomConfig } from './rules/e5b-no-simulated-dom-config.js';
 import { e6ComponentProjectHelper } from './rules/e6-component-project-helper.js';
 import { e7wIncludePrefixExists } from './rules/e7w-include-prefix-exists.js';
 import { e8LiterateSpecificationExists } from './rules/e8-literate-specification-exists.js';
@@ -149,7 +148,6 @@ const plugin: LintPlugin = {
         'e2-preset-config': e2PresetConfig,
         'e4w-project-binding': e4wProjectBinding,
         'e5-no-simulated-dom': e5NoSimulatedDom,
-        'e5b-no-simulated-dom-config': e5bNoSimulatedDomConfig,
         'e6-component-project-helper': e6ComponentProjectHelper,
         'e7w-include-prefix-exists': e7wIncludePrefixExists,
         'e8-literate-specification-exists': e8LiterateSpecificationExists,
@@ -212,7 +210,9 @@ export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEnt
  * naming is the first of them — the fork spends two suffixes (`.test.ts(x)`
  * beside the code, `.spec.ts` under `specs/`), and the plugin's default pattern
  * knows only the first, so a facet spec would be refused for wearing the word
- * C12 requires of it.
+ * C12 requires of it. The pattern names those two and no more: a `.spec.tsx`
+ * is a suffix `roleOf` has no role for, and one the runner would collect all
+ * the same.
  *
  * It is set in an OVERRIDE, not in `rules`, because that is where the option
  * survives: a base profile turns the vitest plugin on inside an override over
@@ -279,7 +279,7 @@ export const testing: OxlintConfig = {
             rules: {
                 'vitest/consistent-test-filename': [
                     'error',
-                    { pattern: String.raw`.*\.(?:test|spec)\.[tj]sx?$` },
+                    { pattern: String.raw`.*\.(?:test\.[tj]sx?|spec\.[tj]s)$` },
                 ],
                 // J10 — one level of `describe` groups a file; a second is a
                 // Tree of contexts a reader has to hold in their head, and the

@@ -491,18 +491,6 @@ export const RULE_DOCS = {
             'A simulated DOM behaves ALMOST like a browser, and what ships is judged by a real one: the component facet renders in the Chromium the website facet already drives.',
         reach: 'tests',
     },
-    'e5b-no-simulated-dom-config': {
-        channel: 'statique',
-        convention:
-            "A vitest config declares no simulated DOM: `environment: 'happy-dom'|'jsdom'` is an error; `'node'` and `'edge-runtime'` name a real runtime and stay out of reach.",
-        facet: 'component',
-        family: 'E',
-        fix: 'Remove `environment` and collect the rendered tests with `component()`; module tests stay under node.',
-        id: 'E5b',
-        rationale:
-            'The pragma (E5) binds one file; the config binds everything the project collects — which is how a repository inherits a simulated DOM nobody chose test by test.',
-        reach: 'config',
-    },
     'e6-component-project-helper': {
         channel: 'statique',
         convention:
@@ -799,7 +787,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "The MEMBER pass re-reads rule E5b where oxlint may not reach a member's config: `environment: 'happy-dom'|'jsdom'` in a `vitest.config.*` is an error.",
+            "`environment: 'happy-dom'|'jsdom'` in a `vitest.config.*` is an error. The MEMBER pass is the one channel that holds it: a config is not always a file the repository's oxlint configuration collects, while the member pass starts from the root manifest and reaches every declared member — and one finding is one line in one report.",
         facet: 'component',
         family: 'E',
         fix: 'Remove `environment` and collect the rendered tests with `component()`.',
@@ -1266,6 +1254,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
         rationale:
             'A snapshot is written by the run that was supposed to be judged by it: nobody reads the diff, and a wrong answer becomes the expectation the moment someone re-records.',
         reach: 'tests',
+        upstream: 'vitest/no-restricted-matchers',
     },
     {
         channel: 'upstream',
@@ -1278,6 +1267,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
         rationale:
             'A tree of contexts is state a reader has to hold in their head to know what a test is about, and the name of the test stops being the sentence it was.',
         reach: 'tests',
+        upstream: 'vitest/max-nested-describe',
     },
     {
         channel: 'upstream',
@@ -1290,6 +1280,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
         rationale:
             'A stubbed global is the network replaced by a function the test wrote, and a fake timer taken without `using` outlasts the test that took it.',
         reach: 'tests',
+        upstream: 'vitest/no-restricted-vi-methods',
     },
 ];
 
