@@ -1,0 +1,3 @@
+[error] api/helpers/normalize.test.ts:1: reaches no runner under the `api` facet: import `{ api }` from `api.specification.js`, or move a module test beside its module (C18 — see docs/13-linting.md)
+
+conventions checker: 1 error(s) found under {{workdir}}/specs

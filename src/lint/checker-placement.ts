@@ -1,7 +1,8 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { isUnderSpecs } from './ast.js';
+import { reachesRunner } from './checker-facets.js';
 import type { TokenViolation } from './checker.js';
 
 /**
@@ -68,6 +69,15 @@ function* walk(dir: string, stopAtPackages = false): Generator<string> {
     }
 }
 
+/** Read a file as text, or the empty string when it cannot be read. */
+function textOf(path: string): string {
+    try {
+        return readFileSync(path, 'utf8');
+    } catch {
+        return '';
+    }
+}
+
 /** A move C12 asks for: where the file is, and where the suffix says it belongs. */
 export type PlacementMove = {
     /** The convention's imperative line, for the diagnostic. */
@@ -111,6 +121,9 @@ export function checkSpecOutsideSpecs(memberDir: string): TokenViolation[] {
  *
  * The fix is mechanical and the mover performs it: the facet folder already
  * says what the file specifies, so the only thing missing is the word.
+ *
+ * A file that reaches no runner is left to C18, whose fix is the opposite move
+ * — one file, one finding, and `--fix` never renames a module test into a spec.
  */
 export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
     return movesUnderFacet(specsRoot).map(({ from }) => {
@@ -118,7 +131,7 @@ export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
         return {
             file: rel,
             line: 1,
-            message: `${rel}:1: a \`.test.ts\` under \`specs/${rel.split(/[/\\]/u)[0] ?? ''}/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`node dist/checker.js <root> --fix\`) (C12 — see docs/13-linting.md)`,
+            message: `${rel}:1: a \`.test.ts\` under \`specs/${rel.split(/[/\\]/u)[0] ?? ''}/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`) (C12 — see docs/13-linting.md)`,
             rule: 'c12-spec-file-name',
             severity: 'error' as const,
         };
@@ -142,6 +155,13 @@ export function movesUnderFacet(specsRoot: string): PlacementMove[] {
         // A `<module>.test.ts` beside the `<module>.ts` it covers is I2's one
         // Pairing, legal anywhere — ground that is CODE keeps its unit test.
         if (parts.some((part) => part.startsWith('_'))) {
+            continue;
+        }
+        // A file that reaches no runner is C18's, and C18 says to MOVE it
+        // Beside its module. Renaming it here would answer the other rule's
+        // Finding with the opposite fix, and `--fix` would turn a module test
+        // Into a spec the tree then has to explain.
+        if (!reachesRunner(textOf(path))) {
             continue;
         }
         moves.push({

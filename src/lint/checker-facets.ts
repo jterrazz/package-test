@@ -50,6 +50,40 @@ function specificationsIn(dir: string): string[] {
         .map((entry) => join(dir, entry.name));
 }
 
+/**
+ * Every import SOURCE a file names — static, dynamic, and re-export.
+ *
+ * The source, not a substring of the file: `../website.specification` carries
+ * no extension, so a scan for `.specification.js` read a spec that reaches its
+ * runner as a module test parked in a facet tree, and told the author to move
+ * the file that specifies the product.
+ */
+const IMPORT_SOURCE = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*['"]([^'"]+)['"]/gu;
+
+/** The framework's own entry — a spec may construct the runner itself. */
+const CONSTRUCTS = /\bspecification\.[a-z]+\s*\(/u;
+
+/**
+ * Does this file reach the runner of the facet it sits under?
+ *
+ * Two shapes answer yes: importing the facet's `*.specification` module
+ * (however the import spells the extension), and constructing the runner in
+ * the file itself — a refusal spec proves the constructor that must FAIL to
+ * start, and has no specification module to import.
+ */
+export function reachesRunner(text: string): boolean {
+    for (const match of text.matchAll(IMPORT_SOURCE)) {
+        const source = match[1] ?? '';
+        if (source === '@jterrazz/test' || source.startsWith('@jterrazz/test/')) {
+            return true;
+        }
+        if (source.slice(source.lastIndexOf('/') + 1).includes('.specification')) {
+            return true;
+        }
+    }
+    return CONSTRUCTS.test(text);
+}
+
 /** Read a file as text, or `null`. */
 function textOf(path: string): null | string {
     try {
@@ -133,15 +167,7 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
             if (!isTestFileName(name)) {
                 continue;
             }
-            const text = textOf(file) ?? '';
-            // Reaching the runner is importing the facet's specification
-            // Module, or constructing one in the file itself — a refusal spec
-            // (the constructor that must FAIL to start) is the second shape.
-            if (
-                text.includes('.specification.js') ||
-                text.includes('@jterrazz/test') ||
-                text.includes('specification.')
-            ) {
+            if (reachesRunner(textOf(file) ?? '')) {
                 continue;
             }
             const rel = relative(specsRoot, file);
@@ -177,6 +203,15 @@ function* walkDirectories(dir: string): Generator<string> {
 const GROUND = new Set<string>(GROUND_DIRS);
 
 /**
+ * A golden named by a TEMPLATE rather than by a literal — `toMatch(`${x}.json`)`.
+ *
+ * Such a test reads whatever the table hands it, so the names under the ground
+ * appear nowhere in its source. It is a reader of every golden in its leaf,
+ * and counting it as none made a shared `_expected/` read as one spec's own.
+ */
+const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:`|[A-Za-z_$])/u;
+
+/**
  * C21w (warning) — ground a single spec reads belongs to that spec.
  *
  * A leaf holding several specs and one `_expected/` that only one of them
@@ -209,7 +244,11 @@ export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
             }
             const readers = tests.filter((test) => {
                 const text = textOf(test) ?? '';
-                return names.some((name) => text.includes(name)) || text.includes(`${ground}/`);
+                return (
+                    names.some((name) => text.includes(name)) ||
+                    text.includes(`${ground}/`) ||
+                    COMPUTED_GOLDEN.test(text)
+                );
             });
             if (readers.length !== 1) {
                 continue;
