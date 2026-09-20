@@ -73,11 +73,11 @@ Databases reset at the start of every chain, exactly as on api and jobs (rules B
 
 Two readings, never both.
 
-| Accessor         | Is                                                                                                                                     |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `result.value`   | what the call RETURNED — a `TextAccessor` for a string, a `JsonAccessor<T>` for anything else, where `T` is what `.call<T>()` returned |
-| `result.error`   | what it THREW, as text: an `Error`'s message, or the value itself. Empty when it returned                                              |
-| `result.table()` | a table of a declared database, for row-level assertions                                                                               |
+| Accessor         | Is                                                                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `result.value`   | what the call RETURNED — a `TextAccessor` for a string, a `JsonAccessor<T>` for anything else, the union of both for a `T` that may be either |
+| `result.error`   | what it THREW, as text: an `Error`'s message, or the value itself. Empty when it returned                                                     |
+| `result.table()` | a table of a declared database, for row-level assertions                                                                                      |
 
 A refusal is a reading, never a `try`/`catch`:
 
@@ -97,6 +97,15 @@ test('refuses an order that is not one', async () => {
 That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `await expect(result.error).toBeEmpty()` is how a chain says "and it did not refuse". The `await` is not optional: `toBeEmpty` answers a promise on every subject it takes, a dropped one passes the test while the real failure surfaces as an unhandled rejection, and rule D2 refuses the bare form.
 
 `.call<T>()` carries `T` through to the result, so one field is read where one field is what the spec means — `expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string — and a golden file is kept for what a golden file is for: a shape worth freezing whole.
+
+**The accessor follows the value, and the type says so.** A subject typed exactly `string` reads as a `TextAccessor`; one that can never be a string reads as a `JsonAccessor<T>`; one that MAY be a string (`string | undefined`, `string | number`) is typed as the union of the two, and the spec narrows it — because only the value in hand decides, and a type that guessed handed back a `JsonAccessor` whose `.value` was silently `undefined` while the runtime had built a `TextAccessor`.
+
+**What crosses is JSON, not the object.** A non-string value is serialised, so a `Map`, a `Set`, a `Date` or a class instance arrives as the plain JSON it serialises to — `{}`, `{}`, an ISO string, an object of its own fields — while `T` still claims the original type. A call whose answer is one of those projects it to plain data INSIDE the call, where the projection is visible:
+
+```typescript
+// the Map is projected where the spec can see it, not silently at the seam
+const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
+```
 
 Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch('<name>.json'|'<name>.txt')` under `_expected/`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([15](15-tokens.md), [14](14-assertions.md)).
 
