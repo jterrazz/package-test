@@ -4,7 +4,7 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 
 ## Mental model
 
-- **Five constructors, and only five.** `specification.api()`, `.jobs()`, `.cli()`, `.website()`, `.mobile()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. A sixth subject is a decision before it is a constructor.
+- **Six constructors, and only six.** `specification.api()`, `.jobs()`, `.cli()`, `.integration()`, `.website()`, `.mobile()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. A seventh subject is a decision before it is a constructor, and `component` is the one facet that is a chain rather than a constructor.
 - **Five trees with declared edges.** `model/` (what every facet is made of, no external imports), `facets/<facet>/` (the same four files in each), `seams/<dep>/` (one folder per dependency), `runner/` (the config side of the runner coupling), `lint/` (no runtime imports). The map is stated as `FRAMEWORK_LAYERS` in `oxlint.config.ts` and enforced from there.
 - **The code owns the rules.** A mechanized rule's normative sentence lives in `src/lint/manifest.ts` beside its implementation, and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
 - **The package specifies itself with itself.** `specs/` is written with `@jterrazz/test` against fixture apps, and a family of meta-tests runs the framework on its own output.
@@ -20,7 +20,10 @@ The corpus is `docs/` + `README.md`, mapped by [`docs/README.md`](docs/README.md
 | The loop, which file a change opens, what it owes | `docs/02-developing.md`                        |
 | The projects, the spec tree, the meta-tests       | `docs/03-testing.md`                           |
 | The npm release and what ships                    | `docs/04-operating.md`                         |
-| A facet: api · jobs · cli · website · mobile      | `docs/05` · `06` · `07` · `14` · `15`          |
+| A facet: api · jobs · cli · integration           | `docs/10` · `11` · `12` · `06`                 |
+| A facet: website · mobile · component             | `docs/08` · `09` · `07`                        |
+| A module test, and the doubles it may build       | `docs/05-module-tests.md`                      |
+| The element vocabulary every surface shares       | `docs/13-elements.md`                          |
 | Matchers, the `{{token}}` grammar                 | `docs/14-assertions.md` · `docs/15-tokens.md`  |
 | Contracts and services                            | `docs/16-contracts.md` · `docs/17-services.md` |
 | The principles, and what review must judge        | `docs/18-conventions.md`                       |
