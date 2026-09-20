@@ -14,7 +14,6 @@ import { a4CleanupAfterall } from './rules/a4-cleanup-afterall.js';
 import { a9wRedundantRoot } from './rules/a9w-redundant-root.js';
 import { b2KnownFixtureMarker } from './rules/b2-known-fixture-marker.js';
 import { b4GivenThen } from './rules/b4-given-then.js';
-import { b5AwaitUsing } from './rules/b5-await-using.js';
 import { b6wRedundantEnvUrl } from './rules/b6w-redundant-env-url.js';
 import { b8KebabTrigger } from './rules/b8-kebab-trigger.js';
 import { b9wProductCommand } from './rules/b9w-product-command.js';
@@ -50,7 +49,7 @@ import { i2SiblingTestNaming } from './rules/i2-sibling-test-naming.js';
 import { i4NoViMockInSrc } from './rules/i4-no-vi-mock-in-src.js';
 import { j2NoSleepInSpecs } from './rules/j2-no-sleep-in-specs.js';
 import { w1ScenarioPure } from './rules/w1-scenario-pure.js';
-import { w2wUserFacingElements } from './rules/w2w-user-facing-elements.js';
+import { w2TestIdStatesWhatIsMissing } from './rules/w2-testid-states-what-is-missing.js';
 import type { LintPlugin } from './types.js';
 
 /**
@@ -77,7 +76,6 @@ const plugin: LintPlugin = {
         'a9w-redundant-root': a9wRedundantRoot,
         'b2-known-fixture-marker': b2KnownFixtureMarker,
         'b4-given-then': b4GivenThen,
-        'b5-await-using': b5AwaitUsing,
         'b6w-redundant-env-url': b6wRedundantEnvUrl,
         'b8-kebab-trigger': b8KebabTrigger,
         'b9w-product-command': b9wProductCommand,
@@ -113,7 +111,7 @@ const plugin: LintPlugin = {
         'i4-no-vi-mock-in-src': i4NoViMockInSrc,
         'j2-no-sleep-in-specs': j2NoSleepInSpecs,
         'w1-scenario-pure': w1ScenarioPure,
-        'w2w-user-facing-elements': w2wUserFacingElements,
+        'w2-testid-states-what-is-missing': w2TestIdStatesWhatIsMissing,
     },
 };
 
@@ -124,10 +122,7 @@ const plugin: LintPlugin = {
  *     rules: { ...recommendedRules }
  *
  * Hard conventions are errors; redundancy heuristics (`<id>w-*` rule ids) are
- * warnings. `b5-await-using` is enabled but inert until re-declared with the
- * project's docker-aware runner names:
- *
- *     'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }]
+ * warnings.
  */
 export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
     Object.keys(plugin.rules).map((rule) => [

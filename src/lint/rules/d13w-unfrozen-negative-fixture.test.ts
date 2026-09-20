@@ -37,6 +37,16 @@ ruleTester.run(
                 errors: 1,
                 filename: SPEC,
             },
+            // The bounded heuristic: the helper owns the try/catch, so the
+            // Enclosing function is where both halves meet.
+            {
+                code: `const message = catchMessage(() => {
+                expect(result.stdout).toMatch('wrong.txt');
+                expect(run).toThrow();
+            });`,
+                errors: 1,
+                filename: SPEC,
+            },
         ],
         valid: [
             // The frozen opt-out is present — exempt.

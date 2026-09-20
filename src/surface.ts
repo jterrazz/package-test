@@ -43,10 +43,11 @@ export {
     type MatcherKind,
 } from './specification/matching/match.js';
 
-// Accessors a page can build: pure projections over a captured value
-export { JsonAccessor } from './specification/facets/_common/result/json.js';
-export { TableAccessor } from './specification/facets/_common/result/table.js';
-export { TextAccessor } from './specification/facets/_common/result/text.js';
+// Accessors a page can build: pure projections over a captured value. TYPES,
+// Like every other accessor — `text()` is the one that HANDS one out.
+export type { JsonAccessor } from './specification/facets/_common/result/json.js';
+export type { TableAccessor } from './specification/facets/_common/result/table.js';
+export type { TextAccessor } from './specification/facets/_common/result/text.js';
 
 // Ports — the shapes the element vocabulary and the visitors speak
 export type {
@@ -141,7 +142,6 @@ export type { Intercept, InterceptScope } from './integrations/msw/scope.js';
 
 // Mock
 export { mockOf, type MockOfOptions, type MockPort } from './vitest/mock-of.js';
-export { type MockDatePort, mockOfDate } from './vitest/mock-of-date.js';
 
 // Time — the one primitive, real in both runtimes
 export { clock, type PinnedClock } from './vitest/clock.js';

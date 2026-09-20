@@ -32,7 +32,7 @@ const FRAMEWORK_LAYERS = {
     lint: { imports: ['lint/', 'specification/facets/_common/binding'] },
     vitest: {
         imports: ['specification/', 'vitest/', 'integrations/docker/'],
-        packages: ['vitest', 'vitest-mock-extended', 'mockdate'],
+        packages: ['vitest', 'vitest-mock-extended'],
     },
 };
 
