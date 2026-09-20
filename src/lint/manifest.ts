@@ -776,10 +776,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A test under `specs/<facet>/`, where the facet root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself.',
+            'A test under `specs/<facet>/`, where the facet root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a leading-underscore folder is a spec, a `.test.ts` under `_expected/` being the GOLDEN a fixer writes. So is any first-level folder that is not a facet: a specification with no module to sit beside and no runner to reach lives in a repository suite there.',
         facet: 'model',
         family: 'C',
-        fix: 'Import `{ <facet> }` from `<facet>.specification.js`, or move a module test beside its module.',
+        fix: 'Import `{ <facet> }` from `<facet>.specification.js`, move a module test beside its module, or move a repository suite to a first-level folder of its own under `specs/`.',
         id: 'C18',
         name: 'c18-module-test-under-facet',
         rationale:

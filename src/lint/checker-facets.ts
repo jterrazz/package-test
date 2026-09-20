@@ -34,6 +34,14 @@ export const FACETS: string[] = ['api', 'cli', 'integration', 'jobs', 'mobile', 
  */
 const SKIPPED = new Set(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
+/**
+ * Does this facet-relative path cross ground? A LEADING underscore names it —
+ * the four ground directories and nothing else carry one (C13).
+ */
+function isUnderGround(relativePath: string): boolean {
+    return relativePath.split(/[/\\]/u).some((segment) => segment.startsWith('_'));
+}
+
 /** `readdirSync` that answers `[]` for anything it cannot read. */
 function entriesOf(dir: string): Dirent[] {
     try {
@@ -165,6 +173,14 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
         for (const file of walkFiles(path)) {
             const name = file.slice(file.lastIndexOf('/') + 1);
             if (!isTestFileName(name)) {
+                continue;
+            }
+            // Ground is ground, whichever of the four names it carries: a
+            // `.test.ts` under `_expected/` is a GOLDEN — the file a fixer is
+            // Expected to produce — and one under `_fixtures/` is the input of
+            // That same golden. Neither is a spec, and neither reaches a runner
+            // By construction.
+            if (isUnderGround(relative(path, file))) {
                 continue;
             }
             if (reachesRunner(textOf(file) ?? '')) {
