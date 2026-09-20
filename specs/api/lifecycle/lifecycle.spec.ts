@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { api } from '../api.specification.js';
 
 describe('lifecycle', () => {
+    // RUNTIME B7 — a sequence is expressed by SEEDING the state the second run
+    // Would have found: every chain starts on databases the framework reset.
     test('resets all databases before each spec', async () => {
         // Given - data in both databases from a previous spec
         await api

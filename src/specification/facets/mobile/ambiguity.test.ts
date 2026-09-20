@@ -51,6 +51,9 @@ describe('describeMobileAmbiguity', () => {
         expect(message).toContain('1. TextField "Email"  value="a@b.test"');
     });
 
+    // RUNTIME W4 — the vocabulary is ONE across the facets, and the part with
+    // No iOS equivalent is refused rather than approximated: a screen has no
+    // ARIA landmarks, so the fix it offers is `within(testId(…), …)`.
     test('suggests scoping first — a screen has no landmarks to name', () => {
         // Given - an unscoped ambiguous descriptor
         const message = describeMobileAmbiguity({

@@ -10,9 +10,12 @@ import {
     catalog,
     CHECKER_PASSES,
     FAMILIES,
+    META_ROWS,
     PROCESS_RULES,
     RULE_DOCS,
     RUNTIME_RULES,
+    TYPE_ROWS,
+    UPSTREAM_RULES,
 } from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
 import { anchorOf, CATALOGUE_CHAPTER } from './rule-code.js';
@@ -38,6 +41,52 @@ const ROOT = resolve(import.meta.dirname, '../..');
 const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8');
 
 const pluginRules = new Set(Object.keys(plugin.rules));
+
+/**
+ * The runtime rows a spec of this package states it proves.
+ *
+ * A refusal the framework raises has no rule file and no pass to point at, so
+ * the spec that drives it says which row it is standing for, in a line above
+ * the test: `// RUNTIME <ID> — <the sentence>`. That marker is the channel's
+ * inventory, and this reads it.
+ */
+function runtimeMarkers(): Set<string> {
+    const found = new Set<string>();
+    for (const root of ['specs', 'src']) {
+        for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
+            const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
+            if (
+                (!path.endsWith('.spec.ts') && !path.endsWith('.test.ts')) ||
+                path.includes('_fixtures/')
+            ) {
+                continue;
+            }
+            for (const match of read(path).matchAll(/\/\/ RUNTIME (?<id>[A-Z]\d+)/gu)) {
+                found.add(match.groups?.id ?? '');
+            }
+        }
+    }
+    return found;
+}
+
+/** The meta rows that have a test naming them — by row name, in this layer. */
+function metaProofs(): Set<string> {
+    const found = new Set<string>();
+    const sources = [read('src/lint/plugin.test.ts'), read('src/lint/env-allowlist.test.ts')];
+    for (const entry of readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true })) {
+        const path = String(entry).replaceAll('\\', '/');
+        if (path.endsWith('.test.ts') && !path.includes('_fixtures/')) {
+            sources.push(read(`specs/lint/${path}`));
+        }
+    }
+    for (const row of META_ROWS) {
+        const id = row.id.toLowerCase();
+        if (sources.some((text) => text.includes(`${id} —`) || text.includes(row.name))) {
+            found.add(row.name);
+        }
+    }
+    return found;
+}
 
 /**
  * The checker-only passes (the non-oxlint static channel, bundled in
@@ -349,13 +398,117 @@ describe('testing fragment — standalone oxlint config', () => {
     });
 });
 
+describe('conventions catalogue — the channels answer for themselves (meta-test)', () => {
+    /** Every id the catalogue publishes, as the corpus would cite it. */
+    const rowIds = new Set(catalog.map((entry) => entry.id));
+
+    /** The files a citation can live in — the corpus a reader follows. */
+    const citingFiles = (): string[] => {
+        const found: string[] = [];
+        for (const root of ['docs', 'skills']) {
+            for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
+                const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
+                if (path.endsWith('.md') && !path.startsWith('docs/reference/')) {
+                    found.push(path);
+                }
+            }
+        }
+        found.push('README.md');
+        return found;
+    };
+
+    test('k2 — every id the corpus cites resolves to a row', () => {
+        // Given - every `rule X` / `rules X, Y` citation in the corpus and in the messages the plugin ships. The families are the vocabulary: a citation is a family letter and a number, and nothing else is one
+        const cited = new Map<string, string>();
+        const collect = (text: string, where: string): void => {
+            const pattern = new RegExp(
+                String.raw`\brules?\s+((?:[${Object.keys(FAMILIES).join('')}]\d+w?)(?:\s*(?:,|and|/)\s*[${Object.keys(FAMILIES).join('')}]\d+w?)*)`,
+                'gu',
+            );
+            for (const match of text.matchAll(pattern)) {
+                for (const id of (match[1] ?? '').split(/[\s,/]+|and/u).filter(Boolean)) {
+                    cited.set(id.replace(/w$/u, ''), where);
+                }
+            }
+        };
+        for (const file of citingFiles()) {
+            collect(read(file), file);
+        }
+        for (const [name, rule] of Object.entries(plugin.rules)) {
+            for (const message of Object.values(rule.meta?.messages ?? {})) {
+                collect(message, name);
+            }
+        }
+
+        // Then - each resolves to a row a reader can open
+        expect(cited.size).toBeGreaterThan(0);
+        for (const [id, where] of cited) {
+            expect(rowIds.has(id), `${where} cites rule ${id}, which resolves to no row`).toBe(
+                true,
+            );
+        }
+    });
+
+    test('m1 — every constructor has a specs tree in this package', () => {
+        // Given - the six constructors, and the trees this package specifies itself on
+        const constructors = ['api', 'cli', 'integration', 'jobs', 'mobile', 'website'];
+        const trees = new Set(readdirSync(resolve(ROOT, 'specs')));
+
+        // Then - each has one, except mobile: a simulator is not a container, and the facet is proven on a consumer rather than here (docs/03)
+        for (const facet of constructors) {
+            const exempt = facet === 'mobile';
+            expect(trees.has(facet), `${facet} has no specs tree`).toBe(!exempt);
+        }
+        expect(read('docs/03-testing.md')).toContain('mobile');
+    });
+
+    test('every channel answers for its rows the way the channel can', () => {
+        // Given - the seven channels, each with the proof its rows owe
+        const proofs: [string, (entry: { id: string; name: string }) => boolean][] = [
+            ['statique', (entry) => pluginRules.has(entry.name)],
+            ['checker', (entry) => CHECKER_PASS_IDS.has(entry.name)],
+            [
+                'upstream',
+                (entry) =>
+                    read('src/lint/plugin.test.ts').includes(`optionOf('vitest/`) &&
+                    entry.name.length > 0,
+            ],
+            ['type', (entry) => read('src/type-channel.test-d.ts').includes(entry.id)],
+            ['runtime', (entry) => runtimeMarkers().has(entry.id)],
+            ['meta', (entry) => metaProofs().has(entry.name)],
+            ['process', (entry) => entry.name.length > 0],
+        ];
+
+        // Then - no row of any channel is a sentence with nothing behind it
+        for (const [channel, proven] of proofs) {
+            const rows = catalog.filter((entry) => entry.channel === channel);
+            expect(rows.length, `${channel} has no rows`).toBeGreaterThan(0);
+            for (const row of rows) {
+                expect(proven(row), `${row.name} (${channel}) has no proof`).toBe(true);
+            }
+        }
+    });
+
+    test('the four channels that are not code still carry their vocabulary', () => {
+        // Given - the rows the manifest holds outside the two rule channels
+        // Then - each names a family the catalogue publishes, so the generated chapter has a section to put it in
+        const families = [...UPSTREAM_RULES, ...TYPE_ROWS, ...META_ROWS].map(
+            (row) => FAMILIES[row.family] ?? `${row.name} names no family`,
+        );
+        expect(families.filter((title) => title.includes('names no family'))).toStrictEqual([]);
+    });
+});
+
 describe('conventions catalogue — E2E inventory (meta-test)', () => {
     // E2E specs are grouped by CONVENTIONS family (specs/lint/<group>/<id>.test.ts,
     // Their fixtures pooled in $FIXTURES) — collect the rule id from each file.
     const e2eSpecIds = new Set(
         readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true })
             .map((entry) => String(entry).replaceAll('\\', '/'))
-            .filter((entry) => entry.endsWith('.test.ts'))
+            // A spec's own ground is material it stands on, never a spec: the
+            // Reach fixture holds a file in every role, and each one is named
+            // For what it is rather than for a rule.
+            .filter((entry) => entry.endsWith('.test.ts') && !entry.includes('_fixtures/'))
             .map((entry) => entry.slice(entry.lastIndexOf('/') + 1, -'.test.ts'.length)),
     );
 
@@ -372,14 +525,35 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
     });
 
     test('every specs/lint E2E spec maps to a plugin rule or a checker pass', () => {
-        // Given - each E2E spec id
+        // Given - each E2E spec id, and the meta rows that have a spec of their own
+        const metaRows = new Set(META_ROWS.map((row) => row.name));
         for (const id of e2eSpecIds) {
-            // Then - it is a shipped rule, a known checker pass, or a CLI-contract probe
+            // Then - it is a shipped rule, a known checker pass, a meta row, or A CLI-contract probe
             expect(
-                pluginRules.has(id) || CHECKER_PASS_IDS.has(id) || CLI_CONTRACT_SPECS.has(id),
-                `${id} maps to no rule, pass, or CLI-contract spec`,
+                pluginRules.has(id) ||
+                    CHECKER_PASS_IDS.has(id) ||
+                    CLI_CONTRACT_SPECS.has(id) ||
+                    metaRows.has(id),
+                `${id} maps to no rule, pass, meta row, or CLI-contract spec`,
             ).toBeTruthy();
         }
+    });
+
+    test('the reach config enables exactly the rules the standard one does', () => {
+        // Given - the two standalone configs the lint E2E specs run with
+        const rulesOf = (path: string): string[] => {
+            const parsed: unknown = JSON.parse(read(path));
+            const rules =
+                typeof parsed === 'object' && parsed !== null && 'rules' in parsed
+                    ? parsed.rules
+                    : {};
+            return typeof rules === 'object' && rules !== null ? Object.keys(rules) : [];
+        };
+
+        // Then - the reach fixture is judged by the SAME catalogue; only C1's declared depth differs, which is what the fixture is there to state
+        expect(rulesOf('specs/_fixtures/lint-cli/oxlint.reach.json').toSorted()).toStrictEqual(
+            rulesOf('specs/_fixtures/lint-cli/oxlint.e2e.json').toSorted(),
+        );
     });
 
     test('the E2E lint config (oxlint.e2e.json) enables exactly the shipped rule set', () => {

@@ -76,6 +76,8 @@ describe('contracts — selection', () => {
 });
 
 describe('contracts — strict failures (CONVENTIONS D7)', () => {
+    // RUNTIME D7 — from the first contract the network is STRICT: an unmatched
+    // Request, an exhausted queue included, fails the spec by name.
     test('an exhausted contract rejects the action with method, URL, and the declared list', async () => {
         // Given - a contract allowed exactly once while the app calls twice
         const chain = api

@@ -68,6 +68,8 @@ describe('seeding details', () => {
         });
     });
 
+    // RUNTIME A7 — with two databases `database:` is required on every seed,
+    // And with one it is refused: the record fixes the call.
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
         // Then - .seed() without a database option violates A7, synchronously checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)

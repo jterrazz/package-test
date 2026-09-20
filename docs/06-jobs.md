@@ -31,7 +31,7 @@ afterAll(cleanup);
 | `jobs`     | yes                          | `(services) => JobHandle[]`, or a static array. Each handle is a named, triggerable job (rule A8)      |
 | `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule A9)                                    |
 
-There is **no `server`** and **no `mode`** option: jobs run in-process by definition (rule A5). A `JobHandle` carries the name you pass to `.trigger()` — the handles above respond to `'nightly-report'` and `'support-drafts'`.
+There is **no `server`** option: jobs run in-process by definition, and the record of services is the only outside world they meet (rule A2). A `JobHandle` carries the name you pass to `.trigger()` — the handles above respond to `'nightly-report'` and `'support-drafts'`.
 
 ## Why node-only
 
@@ -141,7 +141,7 @@ With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and 
 
 ## Pitfalls
 
-- **Looking for a `mode` or `server` option.** They exist only on `specification.api()` — jobs are in-process by definition (rules A5, A8).
+- **Looking for a `server` option.** It exists only on `specification.api()` and `specification.website()` — jobs are in-process by definition (rule A2); what a job reads from the outside is its `services` record (rule A8).
 - **Asserting on a job's return value.** The result surface is the observable state (tables); jobs are specified by their effects.
 - **Forgetting `times` on the leading contract of a sequence.** With no `times` the first contract is unlimited, so it answers every call and the recovery contract behind it is never reached.
 - **One giant spec that triggers two jobs.** A chain has exactly one terminal action (rule B1); sequence scenarios are expressed by seeding the state the second job would have found (rule B7).

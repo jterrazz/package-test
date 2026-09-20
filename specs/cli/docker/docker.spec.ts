@@ -126,6 +126,8 @@ describe('command — docker option (lazy container accessors)', () => {
     );
 
     test.skipIf(!HAS_DOCKER)(
+        // RUNTIME G3 — the capture is docker-aware: every container a run
+        // Spawned carries its run label, and the scope's exit removes them.
         'dispose removes containers even when the run was never asserted on',
         async () => {
             // Given - the runner's test-run id, read from the injected child env
