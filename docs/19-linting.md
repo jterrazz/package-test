@@ -15,7 +15,7 @@ import { compose, node } from '@jterrazz/typescript/oxlint';
 export default compose(node, testing);
 ```
 
-`node` is one of six profiles — `node`, `library`, `next`, `astro`, `expo`, `bun` — and a project names the one it is: `compose(<profile>, testing)`. The profile answers for the base rulebook and the framework plugins; `testing` adds this package's catalogue on top of whichever one you named. Which profile a project is, and what each adds, is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/07-lint-presets.md).
+`node` is one of the toolchain's profiles, and a project names the one it is: `compose(<profile>, testing)`. The profile answers for the base rulebook and the framework plugins; `testing` adds this package's catalogue on top of whichever one you named. Which profile a project is, and what each adds, is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/07-lint-presets.md).
 
 A published package names `library`, and its `isolatedDeclarations` refuses an inferred default export, so the config states its own type once:
 
