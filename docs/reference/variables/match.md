@@ -5,4 +5,4 @@
 const match: MatchFactories;
 ```
 
-Defined in: [src/core/matching/match.ts:150](https://github.com/jterrazz/package-test/blob/main/src/core/matching/match.ts#L150)
+Defined in: [src/model/matching/match.ts:150](https://github.com/jterrazz/package-test/blob/main/src/model/matching/match.ts#L150)

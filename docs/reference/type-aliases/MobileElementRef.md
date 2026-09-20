@@ -5,7 +5,7 @@
 type MobileElementRef = ElementRef;
 ```
 
-Defined in: [src/core/ports/device.port.ts:25](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L25)
+Defined in: [src/model/ports/device.port.ts:25](https://github.com/jterrazz/package-test/blob/main/src/model/ports/device.port.ts#L25)
 
 A user-facing element descriptor for mobile scenarios — pure data, built by
 the shared element vocabulary (`button()`, `field()`, `content()`,

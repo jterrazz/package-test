@@ -5,7 +5,7 @@
 type Intercept = (contracts, options?) => Promise<InterceptScope> & (request, response, options?) => Promise<InterceptScope>;
 ```
 
-Defined in: [src/core/contracts/intercept.ts:54](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/intercept.ts#L54)
+Defined in: [src/model/contracts/intercept.ts:54](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/intercept.ts#L54)
 
 The module-scope network double. Resolves once the engine is listening —
 which is why it is a promise, and why the canonical form awaits it:

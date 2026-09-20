@@ -5,7 +5,7 @@
 type ElementOptions = object;
 ```
 
-Defined in: [src/core/elements/elements.ts:16](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L16)
+Defined in: [src/model/elements/elements.ts:16](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L16)
 
 Options accepted by every named descriptor.
 
@@ -17,7 +17,7 @@ Options accepted by every named descriptor.
 optional exact?: boolean;
 ```
 
-Defined in: [src/core/elements/elements.ts:27](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L27)
+Defined in: [src/model/elements/elements.ts:27](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L27)
 
 Match the accessible name as a whole string. `true` by default since
 16.0.

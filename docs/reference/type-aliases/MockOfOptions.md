@@ -5,7 +5,7 @@
 type MockOfOptions = object;
 ```
 
-Defined in: [src/core/doubles/mock-of.ts:5](https://github.com/jterrazz/package-test/blob/main/src/core/doubles/mock-of.ts#L5)
+Defined in: [src/model/doubles/mock-of.ts:5](https://github.com/jterrazz/package-test/blob/main/src/model/doubles/mock-of.ts#L5)
 
 How much of the port the double answers for.
 
@@ -17,7 +17,7 @@ How much of the port the double answers for.
 optional deep?: boolean;
 ```
 
-Defined in: [src/core/doubles/mock-of.ts:13](https://github.com/jterrazz/package-test/blob/main/src/core/doubles/mock-of.ts#L13)
+Defined in: [src/model/doubles/mock-of.ts:13](https://github.com/jterrazz/package-test/blob/main/src/model/doubles/mock-of.ts#L13)
 
 Deep (the default): reading a member that was never stubbed hands back
 another double, however far down the port nests. `false` gives the flat

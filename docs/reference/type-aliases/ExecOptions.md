@@ -5,7 +5,7 @@
 type ExecOptions = object;
 ```
 
-Defined in: [src/core/ports/cli.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/core/ports/cli.port.ts#L19)
+Defined in: [src/model/ports/cli.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/model/ports/cli.port.ts#L19)
 
 Options for the long-running form of `.exec()` (CONVENTIONS B2). When
 either option is present the process is spawned and observed: it resolves
@@ -20,7 +20,7 @@ elapses (exit code 124).
 optional timeout?: number;
 ```
 
-Defined in: [src/core/ports/cli.port.ts:23](https://github.com/jterrazz/package-test/blob/main/src/core/ports/cli.port.ts#L23)
+Defined in: [src/model/ports/cli.port.ts:23](https://github.com/jterrazz/package-test/blob/main/src/model/ports/cli.port.ts#L23)
 
 Kill the process after this many milliseconds. Defaults to 10 000.
 
@@ -32,6 +32,6 @@ Kill the process after this many milliseconds. Defaults to 10 000.
 optional waitFor?: string;
 ```
 
-Defined in: [src/core/ports/cli.port.ts:21](https://github.com/jterrazz/package-test/blob/main/src/core/ports/cli.port.ts#L21)
+Defined in: [src/model/ports/cli.port.ts:21](https://github.com/jterrazz/package-test/blob/main/src/model/ports/cli.port.ts#L21)
 
 Resolve (exit code 0) when stdout/stderr contains this string.

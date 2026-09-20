@@ -5,7 +5,7 @@
 type CliInput = object;
 ```
 
-Defined in: [src/core/ports/cli.port.ts:41](https://github.com/jterrazz/package-test/blob/main/src/core/ports/cli.port.ts#L41)
+Defined in: [src/model/ports/cli.port.ts:41](https://github.com/jterrazz/package-test/blob/main/src/model/ports/cli.port.ts#L41)
 
 What one invocation is handed beyond its arguments — the two per-run inputs a
 spec document may state. Both are absent by default: the child gets an
@@ -19,7 +19,7 @@ immediately-closed stdin (never a TTY) and the adapter's own timeout.
 optional stdin?: string;
 ```
 
-Defined in: [src/core/ports/cli.port.ts:43](https://github.com/jterrazz/package-test/blob/main/src/core/ports/cli.port.ts#L43)
+Defined in: [src/model/ports/cli.port.ts:43](https://github.com/jterrazz/package-test/blob/main/src/model/ports/cli.port.ts#L43)
 
 Written to the child's stdin, which is then closed.
 
@@ -31,6 +31,6 @@ Written to the child's stdin, which is then closed.
 optional timeout?: number;
 ```
 
-Defined in: [src/core/ports/cli.port.ts:45](https://github.com/jterrazz/package-test/blob/main/src/core/ports/cli.port.ts#L45)
+Defined in: [src/model/ports/cli.port.ts:45](https://github.com/jterrazz/package-test/blob/main/src/model/ports/cli.port.ts#L45)
 
 Milliseconds after which the run is killed (exit code 124).

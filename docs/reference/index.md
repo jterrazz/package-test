@@ -41,7 +41,7 @@
 | [BrowserLinkElement](type-aliases/BrowserLinkElement.md) | A `<link>` element captured from the rendered document's head. |
 | [BrowserMetaElement](type-aliases/BrowserMetaElement.md) | A `<meta>` element captured from the rendered document's head. |
 | [BrowserOpenOptions](type-aliases/BrowserOpenOptions.md) | Per-visit options forwarded to the browser context. |
-| [BrowserPage](type-aliases/BrowserPage.md) | The rendered page captured by a browser visit — the FINAL state when a scenario ran. Extraction happens in-page (the browser IS the HTML parser); interpretation of the raw elements belongs to core. |
+| [BrowserPage](type-aliases/BrowserPage.md) | The rendered page captured by a browser visit — the FINAL state when a scenario ran. Extraction happens in-page (the browser IS the HTML parser); interpretation of the raw elements belongs to the model. |
 | [BrowserPort](type-aliases/BrowserPort.md) | Abstract browser interface for the website specification runner. One implementation lives in `integrations/playwright/` — a single shared browser instance per runner; each `open()` gets a fresh, isolated context. |
 | [CliEnv](type-aliases/CliEnv.md) | Extra environment variables to set for the child process. Values are merged on top of process.env. A `null` value unsets the variable. |
 | [CliHandle](type-aliases/CliHandle.md) | The record returned by startCli \| specification.cli. Destructure with the canonical names (CONVENTIONS A3): |

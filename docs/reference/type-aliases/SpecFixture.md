@@ -5,7 +5,7 @@
 type SpecFixture = object;
 ```
 
-Defined in: [src/core/literate/spec-document.ts:92](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L92)
+Defined in: [src/model/literate/spec-document.ts:92](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L92)
 
 One `fixture:` entry — a path with the line it was declared on.
 
@@ -17,7 +17,7 @@ One `fixture:` entry — a path with the line it was declared on.
 line: number;
 ```
 
-Defined in: [src/core/literate/spec-document.ts:93](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L93)
+Defined in: [src/model/literate/spec-document.ts:93](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L93)
 
 ***
 
@@ -27,4 +27,4 @@ Defined in: [src/core/literate/spec-document.ts:93](https://github.com/jterrazz/
 path: string;
 ```
 
-Defined in: [src/core/literate/spec-document.ts:94](https://github.com/jterrazz/package-test/blob/main/src/core/literate/spec-document.ts#L94)
+Defined in: [src/model/literate/spec-document.ts:94](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L94)

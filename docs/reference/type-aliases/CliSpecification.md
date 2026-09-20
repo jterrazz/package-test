@@ -5,7 +5,7 @@
 type CliSpecification<DatabaseKey> = object;
 ```
 
-Defined in: [src/core/chain/builder.ts:264](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L264)
+Defined in: [src/model/chain/builder.ts:264](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L264)
 
 The `cli` facet — command chain entry handed out by `specification.cli()`.
 Setup methods chain; `.exec()` is the single terminal action (CONVENTIONS
@@ -25,7 +25,7 @@ B2) — `{ waitFor?, timeout? }` covers long-running processes.
 env: (env) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/core/chain/builder.ts:266](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L266)
+Defined in: [src/model/chain/builder.ts:266](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L266)
 
 Set environment variables on the child process. `$WORKDIR` expands; `null` unsets.
 
@@ -47,7 +47,7 @@ Set environment variables on the child process. `$WORKDIR` expands; `null` unset
 exec: (args?, options?) => Promise<CliResult>;
 ```
 
-Defined in: [src/core/chain/builder.ts:285](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L285)
+Defined in: [src/model/chain/builder.ts:285](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L285)
 
 Execute the command (or sequence of commands) and resolve with the
 result. Called with no arguments (`cli.exec()`), the binary runs bare —
@@ -74,7 +74,7 @@ timeout.
 fixture: (path) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/core/chain/builder.ts:274](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L274)
+Defined in: [src/model/chain/builder.ts:274](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L274)
 
 Copy a fixture into the working directory before execution. The path is
 feature-local (`<test-dir>/fixtures/<path>`) or, with a `$FIXTURES/`
@@ -100,7 +100,7 @@ directory (or file) is copied under its own name. Chained calls layer.
 run: (file, options?) => Promise<CliResult>;
 ```
 
-Defined in: [src/core/chain/builder.ts:293](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L293)
+Defined in: [src/model/chain/builder.ts:293](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L293)
 
 Run a `<case>.spec.yaml` document — its ground (fixtures, env sets,
 servers) and every run, each asserted — and resolve with the LAST run's
@@ -127,7 +127,7 @@ directory, where the document lives.
 seed: (file, options?) => CliSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/core/chain/builder.ts:276](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L276)
+Defined in: [src/model/chain/builder.ts:276](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L276)
 
 Queue a SQL seed file from `_seeds/` to run against a database before the action.
 

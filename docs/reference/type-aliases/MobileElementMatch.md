@@ -5,7 +5,7 @@
 type MobileElementMatch = object;
 ```
 
-Defined in: [src/core/ports/device.port.ts:32](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L32)
+Defined in: [src/model/ports/device.port.ts:32](https://github.com/jterrazz/package-test/blob/main/src/model/ports/device.port.ts#L32)
 
 One candidate captured when a descriptor matched more than one element —
 the evidence the ambiguity error enumerates so the author can disambiguate
@@ -19,7 +19,7 @@ without opening the simulator.
 optional identifier?: string;
 ```
 
-Defined in: [src/core/ports/device.port.ts:34](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L34)
+Defined in: [src/model/ports/device.port.ts:34](https://github.com/jterrazz/package-test/blob/main/src/model/ports/device.port.ts#L34)
 
 The accessibility identifier (`testId()` target), when one is set.
 
@@ -31,7 +31,7 @@ The accessibility identifier (`testId()` target), when one is set.
 optional label?: string;
 ```
 
-Defined in: [src/core/ports/device.port.ts:36](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L36)
+Defined in: [src/model/ports/device.port.ts:36](https://github.com/jterrazz/package-test/blob/main/src/model/ports/device.port.ts#L36)
 
 The accessible label, whitespace-collapsed and truncated.
 
@@ -43,7 +43,7 @@ The accessible label, whitespace-collapsed and truncated.
 type: string;
 ```
 
-Defined in: [src/core/ports/device.port.ts:38](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L38)
+Defined in: [src/model/ports/device.port.ts:38](https://github.com/jterrazz/package-test/blob/main/src/model/ports/device.port.ts#L38)
 
 Element type without the `XCUIElementType` prefix — `Button`, `StaticText`.
 
@@ -55,6 +55,6 @@ Element type without the `XCUIElementType` prefix — `Button`, `StaticText`.
 optional value?: string;
 ```
 
-Defined in: [src/core/ports/device.port.ts:40](https://github.com/jterrazz/package-test/blob/main/src/core/ports/device.port.ts#L40)
+Defined in: [src/model/ports/device.port.ts:40](https://github.com/jterrazz/package-test/blob/main/src/model/ports/device.port.ts#L40)
 
 The element value (text-field content, adjustable value), when present.

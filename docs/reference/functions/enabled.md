@@ -5,7 +5,7 @@
 function enabled(element): ElementRef;
 ```
 
-Defined in: [src/core/elements/elements.ts:178](https://github.com/jterrazz/package-test/blob/main/src/core/elements/elements.ts#L178)
+Defined in: [src/model/elements/elements.ts:178](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L178)
 
 The other direction of [disabled](disabled.md) — the element takes input.
 

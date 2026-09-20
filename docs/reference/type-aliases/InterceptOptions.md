@@ -5,7 +5,7 @@
 type InterceptOptions = object;
 ```
 
-Defined in: [src/core/contracts/intercept.ts:29](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/intercept.ts#L29)
+Defined in: [src/model/contracts/intercept.ts:29](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/intercept.ts#L29)
 
 What a scope may state about the network it declares.
 
@@ -17,7 +17,7 @@ What a scope may state about the network it declares.
 optional origin?: string;
 ```
 
-Defined in: [src/core/contracts/intercept.ts:39](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/intercept.ts#L39)
+Defined in: [src/model/contracts/intercept.ts:39](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/intercept.ts#L39)
 
 The base a RELATIVE request resolves against, for the life of the scope.
 

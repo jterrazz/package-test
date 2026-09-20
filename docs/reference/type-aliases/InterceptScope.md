@@ -5,7 +5,7 @@
 type InterceptScope = AsyncDisposable;
 ```
 
-Defined in: [src/core/contracts/intercept.ts:26](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/intercept.ts#L26)
+Defined in: [src/model/contracts/intercept.ts:26](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/intercept.ts#L26)
 
 One block's worth of declared network. Disposed at the end of the scope that
 declared it: the handlers are dropped, and an unmatched request is thrown.

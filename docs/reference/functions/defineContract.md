@@ -5,7 +5,7 @@
 function defineContract(contract): Contract;
 ```
 
-Defined in: [src/core/contracts/contract.ts:71](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L71)
+Defined in: [src/model/contracts/contract.ts:71](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/contract.ts#L71)
 
 Declare one contract. Identity function — its value is the enforced shape
 and the naming convention:

@@ -5,7 +5,7 @@
 type ServiceRecord = Record<string, ServiceHandle>;
 ```
 
-Defined in: [src/core/chain/services.ts:16](https://github.com/jterrazz/package-test/blob/main/src/core/chain/services.ts#L16)
+Defined in: [src/model/chain/services.ts:16](https://github.com/jterrazz/package-test/blob/main/src/model/chain/services.ts#L16)
 
 Infrastructure services declared as a named record. Keys become the typed
 vocabulary of the whole spec: the server factory receives the same record,

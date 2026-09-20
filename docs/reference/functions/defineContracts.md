@@ -5,7 +5,7 @@
 function defineContracts(...items): Contracts;
 ```
 
-Defined in: [src/core/contracts/contract.ts:137](https://github.com/jterrazz/package-test/blob/main/src/core/contracts/contract.ts#L137)
+Defined in: [src/model/contracts/contract.ts:137](https://github.com/jterrazz/package-test/blob/main/src/model/contracts/contract.ts#L137)
 
 Compose contracts into the artifact a test imports — it's contracts all the
 way down: a composite may extend contracts, lists, and other composites,

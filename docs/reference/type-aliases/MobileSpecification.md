@@ -5,7 +5,7 @@
 type MobileSpecification = object;
 ```
 
-Defined in: [src/core/chain/builder.ts:332](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L332)
+Defined in: [src/model/chain/builder.ts:332](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L332)
 
 The `mobile` facet — screen chain entry handed out by
 `specification.mobile()`. `.open()` is the single, terminal action: it
@@ -20,7 +20,7 @@ deep link, runs the scenario, and captures the final screen.
 intercept: InterceptMethod<MobileSpecification>;
 ```
 
-Defined in: [src/core/chain/builder.ts:337](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L337)
+Defined in: [src/model/chain/builder.ts:337](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L337)
 
 Declare the chain's backend contracts — served by the declared stub
 backend (requires the runner's `backend` option). Multiple calls append.
@@ -33,7 +33,7 @@ backend (requires the runner's `backend` option). Multiple calls append.
 open: (deepLink?, scenario?) => Promise<ScreenResult>;
 ```
 
-Defined in: [src/core/chain/builder.ts:344](https://github.com/jterrazz/package-test/blob/main/src/core/chain/builder.ts#L344)
+Defined in: [src/model/chain/builder.ts:344](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L344)
 
 Relaunch the app and resolve with the captured screen. With a deep
 link, the app opens on it; with a scenario, the visitor interacts
