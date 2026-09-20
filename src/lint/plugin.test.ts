@@ -327,10 +327,7 @@ describe('conventions catalogue — completeness (meta-test)', () => {
     });
 
     test('a statique row that states a role gate has one', () => {
-        // Given - every statique row whose reach is one KIND of file. `tests`
-        // And `all` are out: a rule gated on a SHAPE (a `.fixture()` literal,
-        // A `.trigger()` name) looks at every file and finds that shape only
-        // In a test, which is what its convention says.
+        // Given - every statique row whose reach is one KIND of file — `tests` and `all` are out, because a rule gated on a SHAPE (a `.fixture()` literal, a `.trigger()` name) looks at every file and finds that shape only in a test, which is what its convention says
         const ROLE_REACH = new Set([
             'component',
             'config',
