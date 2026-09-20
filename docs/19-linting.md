@@ -83,11 +83,7 @@ This catalogue holds only what no upstream rule already holds. Oxlint ships a `v
 
 Four hygiene rules used to live here and now live there: no committed `.only`/`.skip` (`vitest/no-focused-tests`, `vitest/no-disabled-tests`), an `expect()` in every test (`vitest/expect-expect`), no two literal titles alike in a file (`vitest/no-identical-title`), a lowercase title (`vitest/prefer-lowercase-title`). The ids `jterrazz/j1-no-only-skip`, `jterrazz/j3-no-expectless-test`, `jterrazz/j4-unique-test-names` and `jterrazz/j5-lowercase-title` no longer exist; a config still naming one fails oxlint's unknown-rule check.
 
-One behaviour does not carry over by default. `prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`), which the deleted J5 exempted — the exemption is restored by the rule's own option:
-
-```jsonc
-"vitest/prefer-lowercase-title": ["error", { "allowedPrefixes": ["VALID_CATEGORIES", "HTTP", "DI"] }]
-```
+One behaviour does not carry over, and nothing restores it. `prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`), which the deleted J5 exempted; the rulebook sets no `allowedPrefixes` — a title starts lowercase, whatever its first word. An existing title that opens on an identifier is RENAMED (`the VALID_CATEGORIES table …` reads as the sentence it always was), and a consumer who disagrees overrides the rule in its own deviation fragment, which is theirs to justify — the form is [§ Enabling the plugin](#enabling-the-plugin) above, and what a fragment may deviate on is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/07-lint-presets.md).
 
 ## The rule catalogue
 
