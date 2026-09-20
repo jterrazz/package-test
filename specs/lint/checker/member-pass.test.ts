@@ -61,6 +61,23 @@ describe('checker CLI — the member pass', () => {
         expect(result.json).toMatch('seam-dependency.json');
     });
 
+    test('reads the jest allowance the same from the member as from the root', async () => {
+        // Given - the member whose tests an app BESIDE it runs, judged from the workspace root
+        const fromRoot = await cli.exec(
+            `--format json --member ${member('rn-library')} ${WORKSPACE}`,
+        );
+
+        // When - the same member is judged by the run its own gate makes, anchored at itself
+        const fromMember = await cli.exec(
+            `--format json --member ${member('rn-library')} ${member('rn-library')}`,
+        );
+
+        // Then - both are clean: a member-anchored run and a root-anchored one cannot disagree about one member
+        expect(fromRoot.exitCode).toBe(0);
+        expect(fromMember.exitCode).toBe(0);
+        expect(fromMember.stdout.text.trim()).toBe(fromRoot.stdout.text.trim());
+    });
+
     test('a member directory that does not exist is operator error', async () => {
         // Given - a typo'd member path
         const result = await cli.exec(`--member ${WORKSPACE}/packages/nope ${WORKSPACE}`);

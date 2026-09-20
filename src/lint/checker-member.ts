@@ -94,6 +94,49 @@ const JEST_REACH =
 /** One quoted entry of such a list. */
 const JEST_PATH = /['"`](?<path>[^'"`\n]*)['"`]/gu;
 
+/** The file a pnpm workspace is declared in, whichever spelling the repository uses. */
+const PNPM_WORKSPACE = ['pnpm-workspace.yaml', 'pnpm-workspace.yml'];
+
+/** Does this directory DECLARE a workspace — npm/bun `workspaces`, or pnpm's own file? */
+function declaresWorkspace(dir: string): boolean {
+    if (PNPM_WORKSPACE.some((name) => existsSync(join(dir, name)))) {
+        return true;
+    }
+    const manifest = readManifest(dir);
+    return manifest !== null && workspacePatterns(manifest).length > 0;
+}
+
+/**
+ * The workspace a member belongs to, found by walking UP from the member.
+ *
+ * The jest config that collects a member's tests is not always below it: in the
+ * layout the allowance was written for, the app owning the only working React
+ * Native toolchain roots into the library BESIDE it. Read from the member's own
+ * anchor, the walk below it found nothing, so `cd packages/native &&
+ * jterrazz-test-check` — which is what that member's own gate runs — reported
+ * F8 while the root-anchored run cleared it. Two directions, two verdicts, on
+ * one member: the chapter's contract is that a path-less run reports what the
+ * per-root and per-member runs report.
+ *
+ * The walk stops at the first directory that declares a workspace, and never
+ * leaves the checkout: a `.git` is where this repository ends and somebody
+ * else's tree begins — a directory in a clone, a FILE in a worktree, so its
+ * kind is never asked.
+ */
+function workspaceRootOf(memberDir: string): string {
+    let current = memberDir;
+    for (;;) {
+        if (declaresWorkspace(current) || existsSync(join(current, '.git'))) {
+            return current;
+        }
+        const parent = dirname(current);
+        if (parent === current) {
+            return memberDir;
+        }
+        current = parent;
+    }
+}
+
 /** Every `jest.config.*` under `rootDir`, by absolute path — read once per root. */
 const jestConfigs = new Map<string, string[]>();
 
@@ -362,11 +405,14 @@ function seamDependencies(member: {
     label: string;
     manifest: Manifest;
     memberDir: string;
-    rootDir: string;
     subject: string;
 }): TokenViolation[] {
-    const { label, manifest, memberDir, rootDir, subject } = member;
-    const jestRuns = declaresJest(manifest) || jestReachesMember(memberDir, rootDir);
+    const { label, manifest, memberDir, subject } = member;
+    // The workspace is walked UP to rather than taken from the anchor: the run
+    // Started inside the member has to read the same jest as the run started at
+    // The root, or one gate contradicts the other.
+    const jestRuns =
+        declaresJest(manifest) || jestReachesMember(memberDir, workspaceRootOf(memberDir));
     return declaredSeams(manifest, jestRuns).map((seam) => ({
         file: join(label, 'package.json'),
         line: lineOfKey(memberDir, seam.name),
@@ -416,7 +462,7 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
     return [
         ...(config === null ? configPresent(manifest, memberDir, label, subject) : []),
         ...(config === null ? [] : simulatedDom(config, rootDir)),
-        ...seamDependencies({ label, manifest, memberDir, rootDir, subject }),
+        ...seamDependencies({ label, manifest, memberDir, subject }),
         // C12's first clause: only a walk of the MEMBER sees a `.spec.ts`
         // That never reached a `specs/` tree.
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),

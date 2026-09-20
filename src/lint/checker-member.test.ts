@@ -89,6 +89,15 @@ describe('the member pass — what a workspace member owes', () => {
         expect(codes(memberAt('rn-library'))).toStrictEqual([]);
     });
 
+    test('the allowance reads the same from INSIDE the member as from the root (F8)', () => {
+        // Given - the run that member's own gate makes: anchored at the member, where the app that runs its tests is above the anchor, never below it
+        const anchored = codes(memberAt('rn-library'), memberAt('rn-library'));
+
+        // Then - the two directions agree, which is the contract the path-less run rests on
+        expect(anchored).toStrictEqual([]);
+        expect(anchored).toStrictEqual(codes(memberAt('rn-library')));
+    });
+
     test('a jest config that reaches ANOTHER member clears nothing here (F8)', () => {
         // Given - the same workspace, read from the member the playground does NOT root into
         // Then - the seam is still refused: the allowance follows the tests, not the workspace
