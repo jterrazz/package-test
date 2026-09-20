@@ -1,0 +1,39 @@
+import { importSourceVisitor } from '../../ast.js';
+import { RULE_DOCS } from '../../manifest.js';
+import { roleOf } from '../../role.js';
+import type { LintRule, RuleContext, Visitor } from '../../types.js';
+
+/** A specifier reaching into a provider folder — the internal half of contracts/. */
+const INTERNAL_UNIT = /(?:^|\/)contracts\/(?:anthropic|http|openai)\//u;
+
+/**
+ * CONVENTIONS C10 — the contracts boundary. A feature's `contracts/` folder has
+ * a PUBLIC half (`*.contracts.ts` facades: the default export is the world, the
+ * named exports are its scenarios) and an INTERNAL half (the `http/`, `openai/`
+ * and `anthropic/` unit contracts the facades compose). Outside `contracts/`,
+ * importing a unit is an error — a test routes through the facade, so a
+ * scenario is named once, next to the world it derives from.
+ */
+export const c10ContractsBoundary: LintRule = {
+    create(context: RuleContext): Visitor {
+        const { inSpecs, role } = roleOf(context.physicalFilename);
+        // Inside contracts/ the internal half is the file's own business — and
+        // That folder IS a role, so the rule asks the identity, not the path.
+        if (!inSpecs || role === 'contract') {
+            return {};
+        }
+        return importSourceVisitor(({ node, source }) => {
+            if (INTERNAL_UNIT.test(source)) {
+                context.report({ data: { source }, messageId: 'internal', node });
+            }
+        });
+    },
+    meta: {
+        docs: RULE_DOCS['c10-contracts-boundary'],
+        messages: {
+            internal:
+                'Import "{{source}}" reaches into a provider folder — only contracts/*.contracts.ts is importable from a test; add a named scenario export there instead.',
+        },
+        type: 'problem',
+    },
+};

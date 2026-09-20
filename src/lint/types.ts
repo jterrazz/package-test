@@ -92,10 +92,21 @@ export type RuleDoc = {
      */
     fix: string;
     /**
-     * The specification facet the rule guards — segments the catalogue like
-     * the constructors segment the API. `'shared'` for cross-facet rules.
+     * Which tree of the source the rule belongs to, and therefore where its
+     * implementation sits: `src/lint/rules/core/` for a rule that reaches every
+     * facet, `src/lint/rules/<facet>/` for one that guards a single
+     * constructor's vocabulary. The catalogue is grouped on it — core first,
+     * then one section per facet — so a reader adopting one facet sees the
+     * rules that reach them and nothing else.
+     *
+     * Required, like `fix` and `reach`: a rule with no tree is a rule nobody
+     * placed, and `core` is a statement (this reaches every facet), not a
+     * default to fall into. The checker's passes carry the field too, although
+     * their implementations do not split by folder — several passes share one
+     * module because they share one walk of the tree, so the field alone says
+     * which facet a pass speaks for.
      */
-    facet?: 'api' | 'cli' | 'component' | 'integration' | 'jobs' | 'mobile' | 'shared' | 'website';
+    facet: 'api' | 'cli' | 'component' | 'core' | 'integration' | 'jobs' | 'mobile' | 'website';
     /** Convention family letter, e.g. `'A'`. */
     family: string;
     /** Convention code, e.g. `'A1'`. */
