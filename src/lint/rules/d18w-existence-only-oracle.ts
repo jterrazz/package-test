@@ -71,7 +71,7 @@ export const d18wExistenceOnlyOracle: LintRule = {
         docs: RULE_DOCS['d18w-existence-only-oracle'],
         messages: {
             existenceOnly:
-                '`{{matcher}}()` passes for almost anything and is this test\'s only oracle: assert the value, a golden, or a row.',
+                "`{{matcher}}()` passes for almost anything and is this test's only oracle: assert the value, a golden, or a row.",
         },
         type: 'suggestion',
     },

@@ -1,9 +1,4 @@
-import {
-    collectedSegments,
-    facetOfSegments,
-    FACETS,
-    projectLiterals,
-} from '../config-shape.js';
+import { collectedSegments, facetOfSegments, FACETS, projectLiterals } from '../config-shape.js';
 import { RULE_DOCS } from '../manifest.js';
 import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';

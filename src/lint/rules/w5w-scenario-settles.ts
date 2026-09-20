@@ -1,34 +1,101 @@
-import { child, childList, memberPropertyName, scenarioCallbackOf, walk } from '../ast.js';
+import {
+    chainRootName,
+    child,
+    childList,
+    identifierName,
+    memberPropertyName,
+    scenarioCallbackOf,
+    walk,
+} from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
-import { isTestRole, roleOf } from '../role.js';
+import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 /** The verbs that CHANGE the screen — after one of them, something is in flight. */
-const ACTIONS = new Set([
-    'check',
-    'click',
-    'fill',
-    'press',
-    'rerender',
-    'select',
-    'tap',
-    'unmount',
-]);
+const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);
 
-/** The two verbs that WAIT — the settled screen is what they prove. */
-const SETTLERS = new Set(['gone', 'see']);
+/**
+ * The verbs a scenario may END on.
+ *
+ * `see` and `gone` are the two that WAIT — the settled screen is what they
+ * prove. `unmount` ends it too: after it there is no screen left to see, so
+ * demanding one would be asking for an assertion that cannot hold.
+ */
+const TERMINALS = new Set(['gone', 'see', 'unmount']);
 
-/** The verb a statement ends on, when it is one of the visitor's. */
-function verbOf(statement: AstNode | undefined): string | undefined {
-    let expression = child(statement, 'expression') ?? statement;
-    while (expression?.type === 'AwaitExpression') {
-        expression = child(expression, 'argument');
+/**
+ * Where the END of a scenario hides inside each statement shape — the keys to
+ * follow, rather than the node itself.
+ *
+ * A scenario ends on the last statement of a block, on either branch of an
+ * `if`, inside the body of a loop, on what a `return` returns. Reading only the
+ * outermost expression statement told an author that a loop whose every pass
+ * ends on `see()` settles nothing.
+ */
+const INSIDE: Record<string, string[]> = {
+    AwaitExpression: ['argument'],
+    DoWhileStatement: ['body'],
+    ExpressionStatement: ['expression'],
+    ForInStatement: ['body'],
+    ForOfStatement: ['body'],
+    ForStatement: ['body'],
+    IfStatement: ['alternate', 'consequent'],
+    LabeledStatement: ['body'],
+    ReturnStatement: ['argument'],
+    TryStatement: ['block', 'finalizer'],
+    WhileStatement: ['body'],
+};
+
+/** The expressions a scenario can actually end on. */
+function terminalsOf(node: AstNode | undefined): AstNode[] {
+    if (node === undefined) {
+        return [];
     }
-    if (expression?.type !== 'CallExpression') {
+    if (node.type === 'BlockStatement') {
+        return terminalsOf(childList(node, 'body').at(-1));
+    }
+    if (node.type === 'SwitchStatement') {
+        return childList(node, 'cases').flatMap((branch) =>
+            terminalsOf(childList(branch, 'consequent').at(-1)),
+        );
+    }
+    const inside = INSIDE[node.type];
+    return inside === undefined ? [node] : inside.flatMap((key) => terminalsOf(child(node, key)));
+}
+
+/** The verb of a call on the visitor — `undefined` for anything else. */
+function verbOn(node: AstNode | undefined, visitor: string): string | undefined {
+    if (node?.type !== 'CallExpression') {
         return undefined;
     }
-    const callee = child(expression, 'callee');
-    return callee === undefined ? undefined : memberPropertyName(callee);
+    const callee = child(node, 'callee');
+    if (callee === undefined || chainRootName(callee) !== visitor) {
+        return undefined;
+    }
+    return memberPropertyName(callee);
+}
+
+/** Does this expression END on one of the visitor's waiting verbs? */
+function settles(node: AstNode, visitor: string): boolean {
+    const verb = verbOn(node, visitor);
+    if (verb !== undefined) {
+        return TERMINALS.has(verb);
+    }
+    // `visitor.click().then(() => visitor.see(…))` — the wait is in the tail.
+    const callee = child(node, 'callee');
+    if (node.type !== 'CallExpression' || callee === undefined) {
+        return false;
+    }
+    if (memberPropertyName(callee) !== 'then') {
+        return false;
+    }
+    const continuation = childList(node, 'arguments').at(-1);
+    const body =
+        continuation?.type === 'ArrowFunctionExpression' ||
+        continuation?.type === 'FunctionExpression'
+            ? child(continuation, 'body')
+            : undefined;
+    return terminalsOf(body).some((terminal) => settles(terminal, visitor));
 }
 
 /**
@@ -41,12 +108,21 @@ function verbOf(statement: AstNode | undefined): string | undefined {
  * `see()` and `gone()` ARE the synchronisation — naming what the action
  * produced is what makes the capture reproducible.
  *
- * A scenario that only reads (a visit with a `see`, no action) is out of reach:
- * there is nothing in flight to settle.
+ * Everything the rule reads is the VISITOR's: the callback's own parameter is
+ * the receiver, so a `db.select()` in the Given and an `array.fill(0)` are not
+ * actions, and a `see()` on something else is not a wait. The end of the
+ * scenario is resolved through the shapes a scenario ends in — a block, a
+ * branch, a loop body, a `return`, a `.then()` — because a scenario that ends
+ * on a loop full of `see()` is settled by anything a reader would call that.
+ *
+ * A scenario that only reads is out of reach: there is nothing in flight. So
+ * is a component's, whose action often produces a CALL rather than a screen
+ * (`expect(onSubmit).toHaveBeenCalledOnce()` outside the scenario) — the
+ * vocabulary has no word for that yet, and `see()` is not it.
  */
 export const w5wScenarioSettles: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (roleOf(context.filename).role !== 'spec') {
             return {};
         }
         return {
@@ -55,13 +131,13 @@ export const w5wScenarioSettles: LintRule = {
                 if (scenario === undefined) {
                     return;
                 }
+                const visitor = identifierName(childList(scenario, 'params')[0]);
+                if (visitor === undefined) {
+                    return;
+                }
                 let acts = false;
                 walk(scenario, (inner) => {
-                    if (inner.type !== 'CallExpression') {
-                        return;
-                    }
-                    const callee = child(inner, 'callee');
-                    const verb = callee === undefined ? undefined : memberPropertyName(callee);
+                    const verb = verbOn(inner, visitor);
                     if (verb !== undefined && ACTIONS.has(verb)) {
                         acts = true;
                     }
@@ -69,14 +145,11 @@ export const w5wScenarioSettles: LintRule = {
                 if (!acts) {
                     return;
                 }
-                const body = child(scenario, 'body');
-                // A one-expression arrow body IS its last statement.
-                const last =
-                    body?.type === 'BlockStatement' ? childList(body, 'body').at(-1) : body;
-                const verb = verbOf(last);
-                if (verb === undefined || !SETTLERS.has(verb)) {
-                    context.report({ messageId: 'unsettled', node: last ?? scenario });
+                const ends = terminalsOf(child(scenario, 'body'));
+                if (ends.some((end) => settles(end, visitor))) {
+                    return;
                 }
+                context.report({ messageId: 'unsettled', node: ends[0] ?? scenario });
             },
         };
     },

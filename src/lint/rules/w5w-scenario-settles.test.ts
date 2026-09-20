@@ -23,13 +23,15 @@ ruleTester().run('w5w-scenario-settles', asOxlintRule(w5wScenarioSettles), {
             errors: [{ messageId: 'unsettled' }],
             filename: SPEC,
         },
-        // The component facet hands the same visitor to the same callback.
+        // A scenario ending on a loop full of clicks settles nothing either.
         {
-            code: `const result = await component.render(<Table />, async (visitor) => {
-                await visitor.click(button('Next'));
+            code: `const result = await website.visit('/', async (visitor) => {
+                for (const tab of ['drafts', 'live']) {
+                    await visitor.click(button(tab));
+                }
             });`,
             errors: [{ messageId: 'unsettled' }],
-            filename: COMPONENT,
+            filename: SPEC,
         },
     ],
     valid: [
@@ -63,6 +65,53 @@ ruleTester().run('w5w-scenario-settles', asOxlintRule(w5wScenarioSettles), {
                 await visitor.see(content('Page 2'));
             });`,
             filename: '/repo/specs/mobile/home/home.spec.ts',
+        },
+        // The wait is at the end of the loop the scenario ends on.
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                for (const tab of ['drafts', 'live']) {
+                    await visitor.click(button(tab));
+                    await visitor.see(content(tab + ' panel'));
+                }
+            });`,
+            filename: SPEC,
+        },
+        // Both branches name what they produced.
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                if (wide) {
+                    await visitor.click(button('Next'));
+                    await visitor.see(heading('Page 2'));
+                } else {
+                    await visitor.click(button('More'));
+                    await visitor.see(content('Page 2'));
+                }
+            });`,
+            filename: SPEC,
+        },
+        // Nothing is left to see once the tree is gone.
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(button('Close'));
+                await visitor.unmount();
+            });`,
+            filename: SPEC,
+        },
+        // A read-only scenario whose Given fills a table and an array.
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                await db.select('posts');
+                const rows = new Array(3).fill(0);
+                await visitor.see(content(rows.length + ' posts'));
+            });`,
+            filename: SPEC,
+        },
+        // A component's action often produces a CALL, which `see()` cannot name.
+        {
+            code: `const result = await component.render(<Table />, async (visitor) => {
+                await visitor.click(button('Save'));
+            });`,
+            filename: COMPONENT,
         },
     ],
 });

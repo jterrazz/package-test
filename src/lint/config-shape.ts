@@ -135,8 +135,9 @@ export function collectedSegments(configFile: string, glob: string): string[] | 
     const prefix = staticPrefix(glob)
         .split('/')
         .filter((part) => part !== '' && part !== '.');
+    // A glob climbing out of the package belongs to no facet of this tree.
     if (prefix.includes('..')) {
-        return undefined; // A glob climbing out of the package is nobody's facet.
+        return undefined;
     }
     const specs = prefix.lastIndexOf('specs');
     if (specs !== -1) {
