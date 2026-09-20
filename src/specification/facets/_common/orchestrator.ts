@@ -146,7 +146,7 @@ export class Orchestrator {
                     logs,
                 });
 
-                const output = formatStartupReport('integration', reports, { type: 'in-process' });
+                const output = formatStartupReport(reports, { type: 'in-process' });
                 console.error(output);
                 throw error;
             }
@@ -155,7 +155,7 @@ export class Orchestrator {
         this.started = true;
 
         const appInfo: AppInfo = { type: 'in-process' };
-        const output = formatStartupReport('integration', reports, appInfo);
+        const output = formatStartupReport(reports, appInfo);
         console.log(output);
     }
 

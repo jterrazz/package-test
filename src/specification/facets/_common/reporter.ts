@@ -35,11 +35,13 @@ export type AppInfo = {
 
 // ── Startup report ──
 
-export function formatStartupReport(
-    mode: 'e2e' | 'integration',
-    services: ServiceReport[],
-    app?: AppInfo,
-): string {
+/**
+ * The block printed while the world comes up: one line per declared service,
+ * then the app the subject is. There is one shape of world to report on, so the
+ * report takes no mode — the parameter that named one left with compose mode
+ * (ADR-007).
+ */
+export function formatStartupReport(services: ServiceReport[], app?: AppInfo): string {
     const lines: string[] = [];
 
     lines.push('', `${BG_CYAN}${BLACK}${BOLD} INFRA ${RESET} Starting infrastructure...`, '');
