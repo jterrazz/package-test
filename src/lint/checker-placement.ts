@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import { isUnderSpecs } from './ast.js';
 import type { TokenViolation } from './checker.js';
 
 /**
@@ -17,7 +18,10 @@ import type { TokenViolation } from './checker.js';
  * Two clauses, and each runs where it can see what it judges:
  *
  * - a `.spec.ts` with no `specs/` ancestor — the MEMBER pass, which walks a
- *   package and is the only run that sees a file outside a specs tree;
+ *   package and is the only run that sees a file outside a specs tree. The
+ *   ancestor is read by the one anchor every other pass reads (`specsAnchor`),
+ *   so a member whose own root IS the specs tree — a workspace declaring
+ *   `packages: ['specs']` — holds specs, not strays;
  * - a `.test.ts` under `specs/<facet>/` where `<facet>` is one of the six
  *   constructors — the TREE pass. A first-level folder that is NOT a facet
  *   (the package's own `specs/lint/`, a repository's consistency suites) is a
@@ -87,7 +91,7 @@ export function checkSpecOutsideSpecs(memberDir: string): TokenViolation[] {
         if (!path.endsWith('.spec.ts')) {
             continue;
         }
-        if (relative(memberDir, path).split(/[/\\]/u).includes('specs')) {
+        if (isUnderSpecs(path)) {
             continue;
         }
         const rel = relative(memberDir, path);

@@ -1,4 +1,12 @@
-import { child, childList, findProperty, propertyKeyName, stringValue, walk } from './ast.js';
+import {
+    child,
+    childList,
+    findProperty,
+    propertyKeyName,
+    specsAnchor,
+    stringValue,
+    walk,
+} from './ast.js';
 import type { AstNode } from './types.js';
 
 /**
@@ -47,26 +55,60 @@ function literalsOf(property: AstNode | undefined): LiteralString[] {
     return found;
 }
 
-/** Every project literal in the config — an object stating its own `include`. */
+/** Read one candidate object as a project, when it states an `include`. */
+function projectOf(node: AstNode | undefined): ProjectLiteral | undefined {
+    if (node?.type !== 'ObjectExpression') {
+        return undefined;
+    }
+    const includeProperty = findProperty(node, 'include');
+    if (includeProperty === undefined) {
+        return undefined;
+    }
+    const name = literalOf(findProperty(node, 'name'));
+    return {
+        include: literalsOf(includeProperty),
+        node,
+        ...(name === undefined ? {} : { name }),
+    };
+}
+
+/**
+ * Every project literal in the config — an object under `test` or in a
+ * `projects` array that states its own `include`.
+ *
+ * The two keys are what makes an `include` a PROJECT's. Vite and Vitest spell
+ * several other options with that word — `optimizeDeps.include`,
+ * `deps.optimizer.web.include`, a coverage filter — and every one of them lists
+ * package specifiers rather than globs over a tree, so an object read by its
+ * `include` alone told an author that `react-dom/client` was a folder that does
+ * not exist.
+ */
 export function projectLiterals(program: AstNode): ProjectLiteral[] {
     const projects: ProjectLiteral[] = [];
     walk(program, (node) => {
-        if (node.type !== 'ObjectExpression') {
+        if (node.type !== 'Property') {
             return;
         }
-        const includeProperty = findProperty(node, 'include');
-        if (includeProperty === undefined) {
-            return;
+        const key = propertyKeyName(node);
+        const value = child(node, 'value');
+        const candidates =
+            key === 'projects'
+                ? childList(value, 'elements')
+                : key === 'test'
+                  ? [value]
+                  : ([] as (AstNode | undefined)[]);
+        for (const candidate of candidates) {
+            const project = projectOf(candidate);
+            if (project !== undefined) {
+                projects.push(project);
+            }
         }
-        const name = literalOf(findProperty(node, 'name'));
-        projects.push({
-            include: literalsOf(includeProperty),
-            node,
-            ...(name === undefined ? {} : { name }),
-        });
     });
     return projects;
 }
+
+/** Every character a glob gives a meaning to — a segment holding one is not a path. */
+const WILDCARD = /[*?{[(!]/u;
 
 /**
  * The part of a glob that is a PATH — every segment before the first one
@@ -74,27 +116,43 @@ export function projectLiterals(program: AstNode): ProjectLiteral[] {
  */
 export function staticPrefix(glob: string): string {
     const parts = glob.split('/');
-    const wildcard = parts.findIndex((part) => part.includes('*') || part.includes('?'));
+    const wildcard = parts.findIndex((part) => WILDCARD.test(part));
     return (wildcard === -1 ? parts.slice(0, -1) : parts.slice(0, wildcard)).join('/');
 }
 
 /**
- * The facet a path collects, read the way the tree states it: the segment
- * following the nearest ancestor directory named `specs`.
+ * Where an include lands inside the specs tree that owns the config — the
+ * segments below the anchor, or `undefined` when it collects outside every
+ * tree.
+ *
+ * The glob is read RELATIVE to the config, and the config's own position is
+ * read by the one package-bounded anchor (`specsAnchor`). A checkout that
+ * happens to live under a directory named `specs` is not a specs tree, and a
+ * config that sits INSIDE one (spwn's `specs/vitest.config.ts`) collects with
+ * the tree's root already behind it.
  */
-export function facetOfPath(path: string): string | undefined {
-    const parts = path.split(/[/\\]/u).filter(Boolean);
-    const specs = parts.lastIndexOf('specs');
-    if (specs === -1) {
+export function collectedSegments(configFile: string, glob: string): string[] | undefined {
+    const prefix = staticPrefix(glob)
+        .split('/')
+        .filter((part) => part !== '' && part !== '.');
+    if (prefix.includes('..')) {
+        return undefined; // A glob climbing out of the package is nobody's facet.
+    }
+    const specs = prefix.lastIndexOf('specs');
+    if (specs !== -1) {
+        return prefix.slice(specs + 1);
+    }
+    const anchor = specsAnchor(configFile);
+    if (anchor === undefined) {
         return undefined;
     }
-    const next = parts[specs + 1];
-    return next !== undefined && FACETS.has(next) ? next : undefined;
+    return [...anchor.relative.slice(0, -1), ...prefix];
 }
 
-/** Is the path inside a `specs/` tree at all? */
-export function underSpecs(path: string): boolean {
-    return path.split(/[/\\]/u).includes('specs');
+/** The facet those segments name, when the first one is a constructor. */
+export function facetOfSegments(segments: string[] | undefined): string | undefined {
+    const first = segments?.[0];
+    return first !== undefined && FACETS.has(first) ? first : undefined;
 }
 
 /** Every `literate` block's `specification` literal in the config. */
