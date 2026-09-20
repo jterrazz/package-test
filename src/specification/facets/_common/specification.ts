@@ -41,11 +41,10 @@ export type Specification = {
 
 export const specification: Specification = {
     /**
-     * Test an HTTP app. Mode `'node'` (default) starts the declared services
-     * via testcontainers and runs the app in-process; mode `'compose'` runs
-     * `docker compose up` on `docker/compose.test.yaml` and sends real HTTP
-     * requests to the app service. Resolution: `options.mode` > `TEST_MODE`
-     * env var > `'node'`. Only `.api()` has a mode.
+     * Test an HTTP app. The declared `services` are started via testcontainers
+     * and the app `server` builds runs in-process, so an outgoing call passes
+     * through this process and `.intercept()` can answer it. There is one
+     * shape of world — the record key is the service's only name.
      */
     api: startApi,
     /**

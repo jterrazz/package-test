@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { CaptureScope } from '../../matching/match.js';
 import { textEquals } from '../../matching/structural.js';
-import { formatStdoutDiff } from './reporter.js';
+import { formatStartupReport, formatStdoutDiff } from './reporter.js';
 
 /** The diff as a reader sees it, ANSI stripped. */
 const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, '').split('\n');
@@ -45,5 +45,40 @@ describe('formatStdoutDiff — only the real cause is marked', () => {
         // Then - the reader is shown something rather than a clean block
         expect(lines).toContain('- id {{int#a}}');
         expect(lines).toContain('+ id 1');
+    });
+});
+
+describe('formatStartupReport — one shape of world, reported in one block', () => {
+    test('names every declared service, then the app the subject is', () => {
+        // Given - one service that came up and one that refused, with the app running in this process
+        const report = plain(
+            formatStartupReport(
+                [
+                    {
+                        durationMs: 120,
+                        name: 'db',
+                        type: 'postgres',
+                        connectionString: 'postgres://db',
+                    },
+                    { durationMs: 30, error: 'port taken', name: 'cache', type: 'redis' },
+                ],
+                { type: 'in-process' },
+            ),
+        );
+
+        // Then - the block carries the two services and the app line, and says nothing about a mode: compose mode left with ADR-007
+        expect(report.join('\n')).toContain('postgres (db)');
+        expect(report.join('\n')).toContain('redis (cache)');
+        expect(report.join('\n')).toContain('port taken');
+        expect(report.join('\n')).toContain('app: in-process (Hono)');
+        expect(report.join('\n')).not.toContain('e2e');
+    });
+
+    test('an app reached over HTTP is reported by its url', () => {
+        // Given - a world with no service and an app the run did not start
+        const report = formatStartupReport([], { type: 'http', url: 'http://site.test:4000' });
+
+        // Then - the url is what the reader is given
+        expect(plain(report).join('\n')).toContain('app: http://site.test:4000');
     });
 });
