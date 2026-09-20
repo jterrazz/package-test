@@ -73,6 +73,26 @@ function isModuleDouble(node: AstNode): boolean {
     );
 }
 
+/**
+ * The specifier a module double names, in either spelling.
+ *
+ * `vi.mock('./x.js', …)` states it as a string; `vi.mock(import('./x.js'), …)`
+ * states it as a dynamic import, which is the form `vitest/prefer-import-in-mock`
+ * requires. Reading only the string left an allow-listed native module with no
+ * green spelling: satisfy this rule and the upstream one fires, satisfy that one
+ * and this fires.
+ */
+function mockedSpecifier(argument: AstNode | undefined): string | undefined {
+    const literal = stringValue(argument);
+    if (literal !== undefined) {
+        return literal;
+    }
+    if (argument?.type !== 'ImportExpression') {
+        return undefined;
+    }
+    return stringValue(child(argument, 'source'));
+}
+
 /** A bundler suffix (`./payload.json?raw`, `./doc.md#frag`) is not part of the extension. */
 function withoutSuffix(source: string): string {
     return source.replace(/[?#].*$/u, '');
@@ -132,7 +152,7 @@ export const i4NoModuleDoubles: LintRule = {
                 if (!isModuleDouble(node)) {
                     return;
                 }
-                const named = stringValue(childList(node, 'arguments')[0]);
+                const named = mockedSpecifier(childList(node, 'arguments')[0]);
                 // A native module a consumer cannot inject is the one case the
                 // Ladder cannot reach, and the config says which.
                 if (named === undefined || !allowed.has(named)) {

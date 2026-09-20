@@ -45,6 +45,19 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
         // A spec under specs/ is a test too: module mocking is banned there as
         // Well — the reach is every test file, not the src/ tree.
         { code: 'vi.mock("./x.js");', errors: [{ messageId: 'viMock' }], filename: SPEC },
+        // The dynamic-import spelling is the same double, and an allow-list
+        // That does not name it does not clear it.
+        {
+            code: 'vi.mock(import("./match.js"), () => ({}));',
+            errors: [{ messageId: 'viMock' }],
+            filename: SRC_TEST,
+        },
+        {
+            code: 'vi.mock(import("expo-secure-store"), () => ({}));',
+            errors: [{ messageId: 'viMock' }],
+            filename: SRC_TEST,
+            options: [{ modules: ['@react-native-async-storage/async-storage'] }],
+        },
         // Banned directories.
         {
             code: 'export {};',
@@ -77,5 +90,18 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
         // A spec under specs/ reads real files by design — the asset clause is
         // The module role's alone.
         { code: 'import seed from "./_seeds/users.sql";', filename: SPEC },
+        // The allow-list clears the native module in BOTH spellings: the
+        // String one, and the dynamic import `vitest/prefer-import-in-mock`
+        // Asks for — an allow-listed module has a green spelling under both.
+        {
+            code: 'vi.mock("@react-native-async-storage/async-storage", () => ({}));',
+            filename: SRC_TEST,
+            options: [{ modules: ['@react-native-async-storage/async-storage'] }],
+        },
+        {
+            code: 'vi.mock(import("@react-native-async-storage/async-storage"), () => ({}));',
+            filename: SRC_TEST,
+            options: [{ modules: ['@react-native-async-storage/async-storage'] }],
+        },
     ],
 });
