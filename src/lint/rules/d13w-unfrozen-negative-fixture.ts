@@ -1,4 +1,4 @@
-import { findProperty, memberPropertyName } from '../ast.js';
+import { findProperty, memberPropertyName, walk } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
@@ -60,10 +60,85 @@ function isWrappedInExpect(node: AstNode): boolean {
  * then no longer throws). Pass `{ frozen: true }` so the fixture is never
  * rewritten and the mismatch/error still throws in update mode.
  *
- * The structural signal is precise for the wrapped forms; a `toMatch` routed
- * through a helper that owns the try/catch (`catchMessage(() => …toMatch(…))`)
- * is out of static reach — see the D13 process note for that residue.
+ * Two shapes, and the rule takes both: the WRAPPED form
+ * (`expect(() => …toMatch(…)).toThrow()`), which is exact, and the bounded
+ * heuristic of {@link inAThrowingHelper} — a golden inside a HELPER whose body
+ * also asserts a throw, which is where a helper that owns the try/catch puts
+ * it. There is no process note left behind: what the AST could not reach was
+ * ONE shape, and this is it.
  */
+const FUNCTION_NODES = new Set([
+    'ArrowFunctionExpression',
+    'FunctionDeclaration',
+    'FunctionExpression',
+]);
+
+/** Does this subtree contain a `.toThrow(…)` call or a `.rejects` member? */
+function assertsAThrow(body: AstNode): boolean {
+    let found = false;
+    walk(body, (inner: AstNode) => {
+        if (found) {
+            return;
+        }
+        const name = memberPropertyName(inner);
+        if (name === 'toThrow' || name === 'toThrowError' || name === 'rejects') {
+            found = true;
+        }
+    });
+    return found;
+}
+
+/** Is this function the callback a `test(…)` / `it(…)` was handed? */
+function isTestCallback(fn: AstNode): boolean {
+    const parent = fn.parent as AstNode | undefined;
+    if (parent?.type !== 'CallExpression') {
+        return false;
+    }
+    const callee = parent.callee as AstNode | undefined;
+    if (callee === undefined) {
+        return false;
+    }
+    const name =
+        callee.type === 'Identifier' ? (callee.name as string) : memberPropertyName(callee);
+    return name === 'it' || name === 'test';
+}
+
+/**
+ * The bounded second shape: a `toMatch('<file>')` inside a HELPER whose body
+ * also asserts a throw.
+ *
+ * This is the residue the process note used to carry — a golden routed through
+ * a helper that owns the try/catch (`catchMessage(() => …toMatch('f'))`).
+ * Inter-procedural analysis is out of an oxlint JS plugin's reach, but that
+ * helper holds both halves in one body, and that is decidable.
+ *
+ * Bounded twice, because each bound answers a real false positive found on this
+ * package's own tree. The enclosing function must not be the TEST callback
+ * itself: a test that writes a fixture under `TEST_UPDATE` and later asserts a
+ * diff has both halves in its body and neither belongs to the other. And the
+ * `toMatch` must name a FILE, never a regex: `toMatch(/^hex/)` compares a
+ * string to a pattern and has no fixture update mode could overwrite.
+ */
+function inAThrowingHelper(node: AstNode): boolean {
+    const [first] = (node.arguments as AstNode[] | undefined) ?? [];
+    const namesAFile = first?.type === 'Literal' && typeof first.value === 'string';
+    if (!namesAFile) {
+        return false;
+    }
+    let current = node.parent as AstNode | undefined;
+    while (current !== undefined) {
+        if (FUNCTION_NODES.has(current.type)) {
+            if (isTestCallback(current)) {
+                return false;
+            }
+            const body = current.body as AstNode | undefined;
+            return body !== undefined && assertsAThrow(body);
+        }
+        current = current.parent as AstNode | undefined;
+    }
+    return false;
+}
+
 export const d13wUnfrozenNegativeFixture: LintRule = {
     create(context: RuleContext): Visitor {
         if (!isTestRole(roleOf(context.filename).role)) {
@@ -75,7 +150,7 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
                 if (callee === undefined || memberPropertyName(callee) !== 'toMatch') {
                     return;
                 }
-                if (!isWrappedInExpect(node)) {
+                if (!isWrappedInExpect(node) && !inAThrowingHelper(node)) {
                     return;
                 }
                 if (hasFrozenOption((node.arguments as AstNode[] | undefined) ?? [])) {

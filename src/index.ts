@@ -81,23 +81,31 @@ export type {
     DockerSpecConfig,
     IntegrationSpecification,
     JobHandle,
+    JobsResult,
     JobsSpecification,
     MobileSpecification,
     SpecificationConfig,
     WebsiteSpecification,
 } from './specification/facets/_common/builder.js';
 
-// Results that read a disk, a database or a container — node only
-export { BaseResult, type FileAccessor } from './specification/facets/_common/result/result.js';
-export { CliResult } from './specification/facets/cli/result.js';
-export { ContainerAccessor } from './integrations/docker/container-accessor.js';
-export { CallResult } from './specification/facets/integration/result.js';
-export { HttpResult } from './specification/facets/api/result.js';
-export { ScreenResult } from './specification/facets/mobile/result.js';
-export { FetchResult, PageResult } from './specification/facets/website/result.js';
-export { DirectoryAccessor } from './specification/facets/_common/result/directory.js';
-export { FilesystemAccessor } from './specification/facets/_common/result/filesystem.js';
-export { ResponseAccessor } from './specification/facets/_common/result/response.js';
+// Results that read a disk, a database or a container — node only.
+//
+// TYPES, not values. A spec never constructs one and never asks an
+// `instanceof`: a result is what a terminal action HANDS BACK, and the only
+// thing a consumer needs the name for is annotating a helper that takes one.
+// Publishing the classes exported a constructor nobody may call and a
+// prototype chain the package is then not free to change.
+export type { FileAccessor } from './specification/facets/_common/result/result.js';
+export type { BaseResult } from './specification/facets/_common/result/result.js';
+export type { CliResult } from './specification/facets/cli/result.js';
+export type { ContainerAccessor } from './integrations/docker/container-accessor.js';
+export type { CallResult } from './specification/facets/integration/result.js';
+export type { HttpResult } from './specification/facets/api/result.js';
+export type { ScreenResult } from './specification/facets/mobile/result.js';
+export type { FetchResult, PageResult } from './specification/facets/website/result.js';
+export type { DirectoryAccessor } from './specification/facets/_common/result/directory.js';
+export type { FilesystemAccessor } from './specification/facets/_common/result/filesystem.js';
+export type { ResponseAccessor } from './specification/facets/_common/result/response.js';
 export { text } from './specification/facets/_common/result/text-subject.js';
 
 // Ports

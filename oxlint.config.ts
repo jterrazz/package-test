@@ -14,7 +14,7 @@ import { testing } from './dist/oxlint.js';
  *   for the one module that owns it.
  * - `integrations/<dep>/` — one folder = one external dependency, plus `specification/`.
  * - `vitest/` — the runner coupling: `vitest`, `vitest-mock-extended`,
- *   `mockdate`, plus `specification/` and `integrations/docker` (the matchers recognise
+ *   plus `specification/` and `integrations/docker` (the matchers recognise
  *   the zero-dependency ContainerAccessor subject).
  * - `lint/` — zero runtime imports: no external packages, and from `specification/` only
  *   the pure helpers (the token list, the case conversions, fixture markers, the
@@ -99,13 +99,7 @@ const FRAMEWORK_LAYERS = {
             // Model's, so they live with the adapter that reads them.
             'integrations/vitest-browser/commands',
         ],
-        packages: [
-            'vite',
-            'vitest',
-            'vitest-mock-extended',
-            'mockdate',
-            '@vitest/browser-playwright',
-        ],
+        packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
     },
 };
 
@@ -142,8 +136,6 @@ const config: OxlintConfig = defineConfig(
             // Builder/result type cycle into a load-order crash. The rule stays
             // ON, at the spelling the compiler erases.
             'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-            // Docker-aware runner names used across specs (CONVENTIONS B5).
-            'jterrazz/b5-await-using': ['error', { runners: ['dockerCli'] }],
             // THIS package's architecture (CONVENTIONS I1), stated where the
             // Package configures itself. The rule ships inert: an architecture is
             // The project's to declare, not the linter's to assume.

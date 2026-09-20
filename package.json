@@ -68,7 +68,6 @@
     },
     "dependencies": {
         "better-sqlite3": "^12.11.1",
-        "mockdate": "^3.0.5",
         "msw": "^2.15.0",
         "pg": "^8.22.0",
         "redis": "^6.1.0",

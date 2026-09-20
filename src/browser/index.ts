@@ -11,7 +11,6 @@
  * side only.
  */
 
-import type { ContainerAccessor as ContainerAccessorClass } from '../integrations/docker/container-accessor.js';
 import { interceptThrough } from '../integrations/msw/scope.js';
 import type { Intercept } from '../integrations/msw/scope.js';
 import { registerWorkerContracts } from '../integrations/msw/worker.js';
@@ -23,20 +22,8 @@ import type {
     processService as processFn,
     ProcessHandle as ProcessHandleClass,
 } from '../specification/facets/_common/process.js';
-import type { DirectoryAccessor as DirectoryAccessorClass } from '../specification/facets/_common/result/directory.js';
-import type { FilesystemAccessor as FilesystemAccessorClass } from '../specification/facets/_common/result/filesystem.js';
-import type { ResponseAccessor as ResponseAccessorClass } from '../specification/facets/_common/result/response.js';
-import type { BaseResult as BaseResultClass } from '../specification/facets/_common/result/result.js';
 import { TextAccessor } from '../specification/facets/_common/result/text.js';
 import type { Specification } from '../specification/facets/_common/specification.js';
-import type { HttpResult as HttpResultClass } from '../specification/facets/api/result.js';
-import type { CliResult as CliResultClass } from '../specification/facets/cli/result.js';
-import type { CallResult as CallResultClass } from '../specification/facets/integration/result.js';
-import type { ScreenResult as ScreenResultClass } from '../specification/facets/mobile/result.js';
-import type {
-    FetchResult as FetchResultClass,
-    PageResult as PageResultClass,
-} from '../specification/facets/website/result.js';
 import { nodeOnlyClass, refuse } from './node-only.js';
 
 // The page's own matchers, armed by the import that brought `component` in: a
@@ -78,21 +65,9 @@ export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
 
-// Docker — the container a CLI run spawned, read from the host.
-export const ContainerAccessor: typeof ContainerAccessorClass = nodeOnlyClass('ContainerAccessor');
-
-// Results built from a disk walk, a database or a child process.
-export const BaseResult: typeof BaseResultClass = nodeOnlyClass('BaseResult');
-export const CallResult: typeof CallResultClass = nodeOnlyClass('CallResult');
-export const CliResult: typeof CliResultClass = nodeOnlyClass('CliResult');
-export const DirectoryAccessor: typeof DirectoryAccessorClass = nodeOnlyClass('DirectoryAccessor');
-export const FetchResult: typeof FetchResultClass = nodeOnlyClass('FetchResult');
-export const FilesystemAccessor: typeof FilesystemAccessorClass =
-    nodeOnlyClass('FilesystemAccessor');
-export const HttpResult: typeof HttpResultClass = nodeOnlyClass('HttpResult');
-export const PageResult: typeof PageResultClass = nodeOnlyClass('PageResult');
-export const ResponseAccessor: typeof ResponseAccessorClass = nodeOnlyClass('ResponseAccessor');
-export const ScreenResult: typeof ScreenResultClass = nodeOnlyClass('ScreenResult');
+// The results and the accessors are TYPES on both sides now, published by the
+// One `types` entry — so there is nothing for this runtime to stub: a name that
+// Never exists at runtime cannot be called in a page either.
 
 /**
  * `text()` is real here: only its anchor differs. Under node the accessor

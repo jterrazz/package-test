@@ -138,15 +138,6 @@ export const RULE_DOCS = {
         rationale:
             'La narration Given/Then rend l’intention du test lisible sans lire les assertions.',
     },
-    'b5-await-using': {
-        channel: 'statique',
-        convention:
-            'Le résultat d’un runner docker-aware se lie avec `await using` ; une assignation nue est une erreur. Canal principal : l’inférence checker (b5-await-using-inference).',
-        family: 'B',
-        id: 'B5',
-        rationale:
-            '`await using` garantit le nettoyage des conteneurs créés par le binaire testé, même en cas d’échec.',
-    },
     'b6w-redundant-env-url': {
         channel: 'statique',
         convention:
@@ -310,7 +301,7 @@ export const RULE_DOCS = {
     'd13w-unfrozen-negative-fixture': {
         channel: 'statique',
         convention:
-            'Un `toMatch` dont l’échec EST le sujet du test (enveloppé dans `expect(() => …).toThrow()` ou `expect(…).rejects.toThrow()`) doit porter `{ frozen: true }` → sinon `TEST_UPDATE=1` réécrit silencieusement la fixture délibérément-fausse au lieu de lever → warning. Le résidu passé par un helper (`catchMessage(() => …toMatch(…))`) échappe à l’analyse statique (voir la note process D13).',
+            'Un `toMatch` dont l’échec EST le sujet du test doit porter `{ frozen: true }` → sinon `TEST_UPDATE=1` réécrit silencieusement la fixture délibérément-fausse au lieu de lever → warning. Deux formes : l’enveloppe exacte (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) et l’heuristique bornée — un `toMatch` dans une fonction dont le corps asserte aussi un throw, c’est-à-dire le helper qui possède le try/catch.',
         family: 'D',
         id: 'D13',
         rationale:
@@ -373,7 +364,7 @@ export const RULE_DOCS = {
     'f2-no-test-imports-in-prod': {
         channel: 'statique',
         convention:
-            'Un fichier de prod n’importe jamais `vitest`, `@jterrazz/test`, un `*.test.*`, un `*.fixtures.*` ni `mockOf`/`mockOfDate` (exception : `@jterrazz/test/oxlint`).',
+            'Un fichier de prod n’importe jamais `vitest`, `@jterrazz/test`, un `*.test.*`, un `*.fixtures.*` ni `mockOf` (exception : `@jterrazz/test/oxlint`).',
         family: 'F',
         id: 'F2',
         rationale:
@@ -476,15 +467,17 @@ export const RULE_DOCS = {
         rationale:
             'Séparer l’interaction de l’assertion garde la grammaire setup → action → résultat intacte et les scénarios rejouables.',
     },
-    'w2w-user-facing-elements': {
+    'w2-testid-states-what-is-missing': {
         channel: 'statique',
         convention:
-            'Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content` ; côté mobile `button`, `field`, `content`) ; `testId()` est l’unique échappatoire et déclenche un avertissement.',
+            'Les éléments d’un scénario sont user-facing (`button`, `link`, `field`, `heading`, `content` ; côté mobile `button`, `field`, `content`). `testId()` est l’unique échappatoire, et la ligne DIT ce que l’élément n’a pas : un commentaire `// testId: <ce qui manque>` sur la ligne de l’appel ou sur celle juste au-dessus. C’est une invariante, pas une justification.',
         facet: 'shared',
         family: 'W',
+        fix: 'Écrire `// testId: <pas de nom accessible | pas de rôle | …>` sur la ligne de l’appel ou celle du dessus — ou nommer l’élément avec `button()`/`link()`/`field()`/`heading()`/`content()`.',
         id: 'W2',
         rationale:
-            'Tester ce que l’utilisateur voit (rôles, labels) rend les specs robustes aux refontes DOM ; un test-id contourne cette garantie.',
+            'Tester ce que l’utilisateur voit (rôles, labels) rend les specs robustes aux refontes DOM ; un test-id contourne cette garantie, et sans l’invariante écrite personne ne sait plus si l’échappatoire est encore nécessaire.',
+        reach: 'specs',
     },
 } satisfies Record<string, RuleDoc>;
 
@@ -839,16 +832,6 @@ export const PROCESS_RULES: CatalogEntry[] = [
         name: 'd11-golden-file',
         rationale:
             'Jugement de revue — le canal statique ne distingue pas un grep légitime d’un grep paresseux.',
-    },
-    {
-        channel: 'process',
-        convention:
-            'Une fixture délibérément-fausse ou manquante, asservie à un test négatif, porte `{ frozen: true }` sur son `toMatch`. La règle statique d13w couvre les formes enveloppées (`expect(() => …).toThrow()` / `.rejects`) ; le résidu — un `toMatch` routé via un helper qui possède le try/catch (`catchMessage(() => …)`) — relève de la revue, faute d’analyse inter-procédurale.',
-        family: 'D',
-        id: 'D13',
-        name: 'd13-frozen-negative-fixture',
-        rationale:
-            'Le helper masque le point de capture au canal statique ; la revue garde la même invariante que d13w là où l’AST ne suffit pas.',
     },
     {
         channel: 'process',

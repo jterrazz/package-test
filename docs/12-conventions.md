@@ -145,13 +145,13 @@ Closed and ordered. An agent takes the FIRST rung that fits, and nothing below r
 3. **A contract** — `.intercept()` on a chain (api, jobs, integration, component, website, mobile), `intercept()` in module scope ([10](10-contracts.md)). One queue, three transports, strict from the first contract (rule D7); a streamed body is `http.stream` / `http.sse`.
 4. **A typed port double** — `mockOf<Port>()` for an injected interface, `vi.fn<Fn>()` for a function-shaped dependency. Asserting a call on one is a boundary observation; asserting ONLY on doubles the test built is not a test of anything. `T` is constrained to `object` and has no default, so a double asked for nothing answers for `object` — TypeScript falls back to the constraint where no inference site says otherwise, and the refusal lands where the double is USED rather than where it was made. State the port.
 
-**Off the ladder**, each with a destination: `vi.stubGlobal('fetch')` → `intercept()`; a raw `msw`/`nock`/`sinon` import → a contract; `vi.useFakeTimers` / `mockOfDate` → `clock`; `toMatchSnapshot` → a golden under `_expected/`; `vi.mock` of an application module → inject the port instead. A native module a consumer genuinely cannot inject is the one allow-listed exception, per specifier, with a reason.
+**Off the ladder**, each with a destination: `vi.stubGlobal('fetch')` → `intercept()`; a raw `msw`/`nock`/`sinon` import → a contract; `vi.useFakeTimers` / `vi.setSystemTime` → `clock`; `toMatchSnapshot` → a golden under `_expected/`; `vi.mock` of an application module → inject the port instead. A native module a consumer genuinely cannot inject is the one allow-listed exception, per specifier, with a reason.
 
 Where a test lives is what makes the rungs mechanizable: a module test may not carry a golden, and a module that needs a real service is an integration spec ([17](17-integration.md)). The reasoning is [ADR-005](decisions/005-the-doubles-ladder-is-closed.md).
 
 ## Time — one primitive, two depths
 
-Determinism is structural (rule D16): a value a test SAMPLES — `Date.now()`, `new Date()`, `Math.random()`, `randomUUID()` — never reaches an oracle. Time is the one of those the framework pins for you, and `clock` is the whole vocabulary. `vi.useFakeTimers()`, `vi.setSystemTime()` and `mockOfDate` are what it replaces: each of them owns a teardown a test will one day forget.
+Determinism is structural (rule D16): a value a test SAMPLES — `Date.now()`, `new Date()`, `Math.random()`, `randomUUID()` — never reaches an oracle. Time is the one of those the framework pins for you, and `clock` is the whole vocabulary. `vi.useFakeTimers()` and `vi.setSystemTime()` are what it replaces: each of them owns a teardown a test will one day forget.
 
 ```typescript
 import { clock } from '@jterrazz/test';

@@ -217,6 +217,17 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
  * The `jobs` facet — job chain entry handed out by `specification.jobs()`.
  * Jobs run in-process by definition (CONVENTIONS A5/A8).
  */
+/**
+ * What a triggered job HANDS BACK.
+ *
+ * A job writes to a database, a cache, a queue — never to a working directory
+ * the spec then walks, because a job has none: it runs in this process, where
+ * the only filesystem is the repository's. So the two accessors that read one
+ * (`file()`, `directory()`) are not on this result. A pipeline that really
+ * produces files is a binary, and `specification.cli()` is its facet.
+ */
+export type JobsResult = Omit<BaseResult, 'directory' | 'file'>;
+
 export type JobsSpecification<DatabaseKey extends string = string> = {
     /** Pin the job's `Date` at `iso` for this chain — the calendar the job reads. */
     clock: (iso: string) => JobsSpecification<DatabaseKey>;
@@ -226,7 +237,7 @@ export type JobsSpecification<DatabaseKey extends string = string> = {
     seed: (file: string, options?: { database?: DatabaseKey }) => JobsSpecification<DatabaseKey>;
 
     /** Execute the named job registered via the `jobs` option and resolve with the result. */
-    trigger: (name: string) => Promise<BaseResult>;
+    trigger: (name: string) => Promise<JobsResult>;
 };
 
 /**
