@@ -750,6 +750,18 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            "A `_seeds/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
+        family: 'C',
+        fix: "Write the instant the case is about, and pin the run's clock with `.clock()` on the chain.",
+        id: 'C23',
+        name: 'c23-seed-no-clock-read',
+        rationale:
+            "A seed that reads the clock makes the row's date the date the suite happened to run: a case about \"published yesterday\" proves something different every day, and under SQLite `datetime('now')` writes a space-separated text where an ORM writes ISO `T`, so the two misorder across a calendar day. The R8 dry run counts 36, every one of them signews-api's.",
+        reach: 'ground',
+    },
+    {
+        channel: 'checker',
+        convention:
             'Ground in a leaf holding ≥ 2 node tests (`.test.ts`, `.spec.ts`) that a single one of them reads is a warning. A `.test.tsx` tree is out of reach, as it is for C1.',
         family: 'C',
         fix: 'Give that spec its own domain folder, with the ground beside it.',

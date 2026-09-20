@@ -6,6 +6,7 @@ import {
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
+    GROUND_SEEDS,
 } from '../specification/facets/_common/ground.js';
 import {
     assertedStreams,
@@ -65,8 +66,31 @@ const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/u;
 
 const KNOWN = new Set<string>(TOKEN_KINDS);
 
-/** Directories whose files carry the token grammar (D4). */
-const FIXTURE_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS]);
+/** Directories whose files the walk judges, each by its own law. */
+const FIXTURE_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SEEDS]);
+
+/**
+ * The ways a seed asks the machine what time it is.
+ *
+ * Three spellings and nothing else, because each is decidable on sight: the
+ * quoted `'now'` argument SQLite's date functions take (`datetime('now')`,
+ * `strftime('%s', 'now')`, `julianday('now')`, `date('now', '-1 day')`), the
+ * SQL keyword every engine spells the same, and Postgres/MySQL's `NOW()`.
+ * The bare word `now` is not one of them — it is a column name as often as a
+ * clock read, and a rule that guessed would be refused rather than obeyed.
+ */
+const CLOCK_READ = /'now'|\bCURRENT_(?:TIMESTAMP|DATE|TIME)\b|\bNOW\s*\(\s*\)/iu;
+
+/** A line comment, and a block comment — a `-- datetime('now')` is prose, not state. */
+const SQL_LINE_COMMENT = /--[^\n]*/gu;
+const SQL_BLOCK_COMMENT = /\/\*[\s\S]*?\*\//gu;
+
+/** The file with its comments blanked out, line for line so a finding still points. */
+function withoutComments(text: string): string {
+    return text
+        .replaceAll(SQL_BLOCK_COMMENT, (block) => block.replaceAll(/[^\n]/gu, ' '))
+        .replaceAll(SQL_LINE_COMMENT, '');
+}
 
 /**
  * Directories the walk never enters. `_fixtures/` trees (the shared pool and
@@ -95,6 +119,7 @@ export const TREE_PASS_IDS = [
     'c18-module-test-under-facet',
     'c20-facet-folder',
     'c21w-ground-owned-by-one',
+    'c23-seed-no-clock-read',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
     'd10w-tokens-in-requests',
@@ -269,6 +294,45 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
 }
 
 /**
+ * C23 — a seed states absolute timestamps; it never reads the clock.
+ *
+ * A `_seeds/*.sql` that writes `datetime('now')` makes the row's date the date
+ * the suite happened to run, so a case about "published yesterday" proves
+ * something different every day and nothing at all across midnight. Worse under
+ * SQLite, where `datetime('now')` writes a space-separated text while an ORM
+ * writes ISO `T`: the two sort against each other, and the ordering breaks on
+ * the days the values straddle a calendar boundary.
+ *
+ * The chain already owns the answer — `.clock()` pins what the code under test
+ * reads — so the seed has nothing to ask the machine for.
+ */
+function checkSeedClockReads(path: string, rel: string, name: string): TokenViolation[] {
+    // C7 (oxlint) owns the extension rule; this pass reads the SQL alone.
+    if (!name.endsWith('.sql')) {
+        return [];
+    }
+    const text = decodeText(path);
+    if (text === null) {
+        return [];
+    }
+    const violations: TokenViolation[] = [];
+    for (const [index, line] of withoutComments(text).split('\n').entries()) {
+        const found = CLOCK_READ.exec(line);
+        if (found === null) {
+            continue;
+        }
+        violations.push({
+            file: rel,
+            line: index + 1,
+            message: `${rel}:${index + 1}: \`${found[0]}\` reads the clock — a seed states the instant the case is about, and the chain pins the run's with \`.clock()\` (C23 — see docs/13-linting.md)`,
+            rule: 'c23-seed-no-clock-read',
+            severity: 'error',
+        });
+    }
+    return violations;
+}
+
+/**
  * Walk `rootDir` and check every fixture file. Paths in the result are relative
  * to `rootDir`. Errors fail the checker; warnings are advisory.
  */
@@ -276,7 +340,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     const visit = (
         dir: string,
-        inside: null | typeof GROUND_EXPECTED | typeof GROUND_REQUESTS,
+        inside: null | typeof GROUND_EXPECTED | typeof GROUND_REQUESTS | typeof GROUND_SEEDS,
     ): void => {
         let entries;
         try {
@@ -292,7 +356,10 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     continue;
                 }
                 const next = FIXTURE_DIRS.has(entry.name)
-                    ? (entry.name as typeof GROUND_EXPECTED | typeof GROUND_REQUESTS)
+                    ? (entry.name as
+                          | typeof GROUND_EXPECTED
+                          | typeof GROUND_REQUESTS
+                          | typeof GROUND_SEEDS)
                     : inside;
                 visit(path, next);
                 continue;
@@ -324,6 +391,11 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
             }
             // Depth-1 = directly under the _requests/ or _expected/ root.
             const depth1 = dir.endsWith(`/${inside}`) || dir.endsWith(`\\${inside}`);
+
+            if (inside === GROUND_SEEDS) {
+                violations.push(...checkSeedClockReads(path, rel, entry.name));
+                continue;
+            }
 
             if (inside === GROUND_REQUESTS) {
                 if (!entry.name.endsWith('.http')) {
