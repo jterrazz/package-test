@@ -4,6 +4,7 @@ import type { DatabasePort } from '../ports/database.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
 import { Orchestrator } from './orchestrator.js';
 import { ProcessHandle } from './process.js';
+import type { AppInfo } from './reporter.js';
 
 // ── Shared types ──
 
@@ -115,11 +116,13 @@ export async function startProcessServices(
 export async function startServices(
     services: ServiceRecord,
     root: string,
+    subject?: AppInfo,
 ): Promise<StartedServices> {
     const { infrastructure } = splitProcesses(services);
     const orchestrator = new Orchestrator({
         root,
         services: infrastructure,
+        subject,
     });
     await orchestrator.start();
     await acquireIsolation(infrastructure);

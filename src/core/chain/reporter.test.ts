@@ -81,4 +81,24 @@ describe('formatStartupReport — one shape of world, reported in one block', ()
         // Then - the url is what the reader is given
         expect(plain(report).join('\n')).toContain('app: http://site.test:4000');
     });
+
+    test('a site started as a child process is not called an app in this process', () => {
+        // Given - a website runner whose server is a shell command
+        const report = formatStartupReport([], {
+            command: 'bun run src/main.ts',
+            type: 'process',
+        });
+
+        // Then - the line names the command and what it is, not Hono
+        expect(report).toContain('app: bun run src/main.ts (child process)');
+        expect(report).not.toContain('in-process');
+    });
+
+    test('a subject that is not an app gets no app line at all', () => {
+        // Given - a cli, a pipeline, a module: nothing served over HTTP
+        const report = formatStartupReport([], { type: 'none' });
+
+        // Then - the report says nothing rather than something wrong
+        expect(report).not.toContain('app:');
+    });
 });

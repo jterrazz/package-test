@@ -68,7 +68,7 @@ export async function startIntegration<Services extends ServiceRecord>(
 
     let started: null | StartedServices = null;
     if (Object.keys(services).length > 0) {
-        started = await startServices(services, root);
+        started = await startServices(services, root, { type: 'none' });
     }
 
     const config: SpecificationConfig = {

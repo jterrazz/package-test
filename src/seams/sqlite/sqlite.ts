@@ -57,7 +57,8 @@ async function loadDatabase(): Promise<typeof Database> {
         // The peer and the command, rather than letting a `bindings` stack
         // Trace surface from whichever spec happened to seed first.
         requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
-            new constructor(':memory:').close();
+            const Probe = constructor;
+            new Probe(':memory:').close();
         });
         databaseConstructor = constructor;
     }

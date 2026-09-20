@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { SpecificationConfig } from '../../core/chain/builder.js';
 import { getCallerDir } from '../../core/chain/caller.js';
 import { ProcessHandle } from '../../core/chain/process.js';
+import type { AppInfo } from '../../core/chain/reporter.js';
 import { resolveRoot } from '../../core/chain/resolve.js';
 import type { ServiceRecord, StartedServices } from '../../core/chain/services.js';
 import { releaseIsolation, startServices } from '../../core/chain/services.js';
@@ -13,6 +14,19 @@ import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
 import { createWebsiteFacet } from './website.chain.js';
 import type { WebsiteSpecification } from './website.chain.js';
+
+/**
+ * The command a `server` states, where it states one.
+ *
+ * A factory is a function of services that have not started yet, so calling it
+ * to read a command would start the world twice. The SHAPE is known either
+ * way, and the shape is the part the startup report was getting wrong.
+ */
+function commandOf(server: unknown): string | undefined {
+    return typeof server === 'object' && server !== null && 'command' in server
+        ? String(server.command)
+        : undefined;
+}
 
 /** What `server` may be handed as, and what it resolves to. */
 export type ServerSpec<Services extends ServiceRecord> =
@@ -121,12 +135,13 @@ async function startDeclared(
     services: ServiceRecord,
     root: string,
     backend: null | StubBackend,
+    subject: AppInfo,
 ): Promise<null | StartedServices> {
     if (Object.keys(services).length === 0) {
         return null;
     }
     try {
-        return await startServices(services, root);
+        return await startServices(services, root, subject);
     } catch (error) {
         await backend?.stop();
         throw error;
@@ -224,7 +239,13 @@ export async function startWebsite<Services extends ServiceRecord>(
 
     const services = servicesOf(options);
     const root = resolveRoot(options.root, callerDir);
-    const started = await startDeclared(services, root, backend);
+    // The site is a child process the runner starts and polls, or a
+    // Deployment already running; it is never an app inside this process,
+    // Which is what the report used to say of it.
+    const subject: AppInfo = options.server
+        ? { command: commandOf(options.server), type: 'process' }
+        : { type: 'http', url: options.url };
+    const started = await startDeclared(services, root, backend, subject);
     const { baseUrl, serve } = await startSite(options, {
         backend,
         backendUrl,

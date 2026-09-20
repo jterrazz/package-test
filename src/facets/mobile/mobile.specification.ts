@@ -116,7 +116,7 @@ export async function startMobile<Services extends ServiceRecord>(
     let started: null | StartedServices = null;
     if (Object.keys(services).length > 0) {
         try {
-            started = await startServices(services, root);
+            started = await startServices(services, root, { type: 'none' });
         } catch (error) {
             await appium.stop();
             throw error;
