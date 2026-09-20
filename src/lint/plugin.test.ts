@@ -188,7 +188,7 @@ describe('the upstream options this vocabulary owns (ADR-005)', () => {
 });
 
 describe('conventions catalogue — generation freshness (meta-test)', () => {
-    test('the docs/13 catalogue is byte-identical to a fresh generation', () => {
+    test('the docs/19 catalogue is byte-identical to a fresh generation', () => {
         // Given - the committed docs/19-linting.md
         const committed = read('docs/19-linting.md');
 
@@ -707,7 +707,7 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         );
     });
 
-    test('the docs/09 token table matches TOKEN_KINDS exactly', () => {
+    test('the docs/15 token table matches TOKEN_KINDS exactly', () => {
         // Given - the token reference table's first-column cells (`| `{{kind}}` |`)
         const documented = new Set(
             read('docs/15-tokens.md')
@@ -820,6 +820,37 @@ describe('the corpus’ own coordinates (meta-test K8)', () => {
         ).toStrictEqual([]);
         // And - the sweep is not vacuous: a corpus this size carries hundreds
         expect(coordinates.length).toBeGreaterThan(300);
+    });
+
+    test('every `docs/NN` the source cites names a chapter that exists', () => {
+        // Given - the chapter numbers the corpus actually has, and every one the source names — a test TITLE and a comment cite chapters too, and a renumbering moves the files while leaving those behind
+        const chapters = new Set(
+            readdirSync(resolve(ROOT, 'docs'))
+                .map((entry) => /^(?<number>\d{2})-/u.exec(entry)?.groups?.number)
+                .filter((number) => number !== undefined),
+        );
+        const cited: string[] = [];
+        for (const entry of readdirSync(resolve(ROOT, 'src'), { recursive: true })) {
+            const path = `src/${String(entry).replaceAll('\\', '/')}`;
+            if (!/\.tsx?$/u.test(path)) {
+                continue;
+            }
+            for (const hit of readFileSync(resolve(ROOT, path), 'utf8').matchAll(
+                /\bdocs\/(?<number>\d{2})\b/gu,
+            )) {
+                const number = hit.groups?.number ?? '';
+                if (!chapters.has(number)) {
+                    cited.push(`${path} -> docs/${number}`);
+                }
+            }
+        }
+
+        // Then - no citation points at a chapter number the renumbering left empty
+        expect(chapters.size).toBeGreaterThan(15);
+        expect(
+            cited,
+            'a chapter number the source cites and the corpus does not have',
+        ).toStrictEqual([]);
     });
 });
 
