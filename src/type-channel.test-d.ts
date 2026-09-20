@@ -15,7 +15,7 @@ import { mockOf, postgres, specification } from './index.js';
  * The file is a `*.test-d.ts`: it declares no test, runs in no project, and is
  * judged by the typechecker the whole repository already runs. The W6 verb rows
  * have a fuller set of their own in
- * `src/specification/facets/component/component.types.test.ts`; one row is
+ * `src/facets/component/component.types.test.ts`; one row is
  * restated here so the channel has a single entry point.
  *
  * W4 (an ARIA landmark handed to a mobile verb) is deliberately NOT here: the

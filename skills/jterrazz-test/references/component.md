@@ -66,12 +66,12 @@ export const result = await component.render(
 
 ## Goldens
 
-| Name                | Written                                                        | Does                                                                                                                  |
-| ------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it          |
-| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                                      |
-| `.aria.yaml tree`   | `await expect(result.tree).toMatch('<name>.aria.yaml')`        | The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not |
-| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                           |
+| Name                | Written                                                        | Does                                                                                                                                                                                                      |
+| ------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it                                                                                              |
+| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                                                                                                                          |
+| `.aria.yaml tree`   | `expect(result.tree).toMatch('<name>.aria.yaml')`              | The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not. Awaited on a component, where the capture crosses the browser seam; sync on a page |
+| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                                                                                                               |
 
 ## The vocabulary
 

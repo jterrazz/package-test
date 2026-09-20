@@ -66,7 +66,7 @@ export const { api, cleanup } = await specification.api({
 | ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
 | `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
-| `.http exchange`    | `await expect(result.response).toMatch('user-created.http')`   | A complete request/response pair as a file: status line, header subset, body, tokens                         |
+| `.http exchange`    | `expect(result.response).toMatch('user-created.http')`         | A complete request/response pair as a file: status line, header subset, body, tokens                         |
 | `.json body`        | `await expect(subject).toMatch('created.json')`                | A JSON payload as a file, tokens resolved and keys compared                                                  |
 | `.txt stream`       | `await expect(subject).toMatch('help.txt')`                    | A text stream as a file — stdout, stderr, a rendered body                                                    |
 | `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                  |

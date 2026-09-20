@@ -84,7 +84,7 @@ Everything else the ladder refuses is refused here by name: `vi.mock` doubles a 
 
 ### `intercept()` — the network, declared, with no chain
 
-A module that reaches the network states what it expects to find there, in the same contract vocabulary every facet uses. The scope is asynchronous and disposes asynchronously, so the canonical spelling carries **two** awaits: `await using` does not await its initializer, and the one-await form would race the real network.
+A module that reaches the network states what it expects to find there, in the same contract vocabulary every facet uses — the same double, with no chain to hang it on.
 
 ```typescript
 test('reads the feed the gateway publishes', async () => {
@@ -99,15 +99,7 @@ test('reads the feed the gateway publishes', async () => {
 });
 ```
 
-A subject that calls `fetch('/api/posts')` has no origin to resolve against under node, and msw refuses the relative url. State the base the page would have given it:
-
-```typescript
-await using _ = await intercept(contracts, { origin: 'http://console.test' });
-```
-
-`origin` rewrites every RELATIVE request against that base for the life of the scope, and restores `fetch` when the scope ends. It must be an absolute url; anything else is refused at the call with a message saying so. An absolute request in the subject is untouched.
-
-An empty contract list is refused by design: "this subject makes no network call" is said with `http.unreachable()` on every feed it could have reached, not with an intercept that guards nothing. Everything about the contracts themselves — selection, `times`, `required`, the facades, the streams — is [16 — Contracts](16-contracts.md)'s.
+The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusal of an empty contract list, and everything about the contracts themselves — selection, `times`, `required`, the facades, the streams — are [16 — Contracts § `intercept()`](16-contracts.md#intercept--the-same-double-with-no-chain)'s.
 
 ### Time
 
@@ -149,7 +141,6 @@ There is no result object here, because there is no chain to hand one back. The 
 ## Pitfalls
 
 - **Reaching for `vi.mock` to avoid injecting a port.** The mock outlives the test's intent: every importer of that specifier gets the double, and the design pressure the injection would have applied is gone. Double the port.
-- **A single `await` on `intercept()`.** `await using _ = intercept(…)` does not await the initializer, so the subject races the real network and the failure is a flake, not a diff. Write both awaits.
 - **`vi.setSystemTime` instead of `clock`.** A fake timer taken without `using` outlasts the test that took it, and the next test in the file inherits a clock nobody declared. M3 refuses it and names the primitive.
 - **Importing a `.json` payload.** I4 refuses it. Put the payload in `<file>.fixtures.ts`, where the compiler reads it.
 - **Nesting `describe`.** One level groups; two describe a structure the test file does not have. J10 refuses the second.

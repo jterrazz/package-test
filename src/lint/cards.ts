@@ -138,8 +138,8 @@ type Signature = { line: string; signature: string };
  */
 export const SIGNATURES: Record<string, Signature> = {
     '.aria.yaml tree': {
-        line: 'The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not',
-        signature: "await expect(result.tree).toMatch('<name>.aria.yaml')",
+        line: 'The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not. Awaited on a component, where the capture crosses the browser seam; sync on a page',
+        signature: "expect(result.tree).toMatch('<name>.aria.yaml')",
     },
     '.call()': {
         line: 'Calls the module, with the services it was handed; resolves to a `CallResult`',
@@ -234,7 +234,7 @@ export const SIGNATURES: Record<string, Signature> = {
     },
     '.http exchange': {
         line: 'A complete request/response pair as a file: status line, header subset, body, tokens',
-        signature: "await expect(result.response).toMatch('user-created.http')",
+        signature: "expect(result.response).toMatch('user-created.http')",
     },
     '.intercept()': {
         line: 'Declares what the network answers, from contracts — strict from the first one (rule D7)',

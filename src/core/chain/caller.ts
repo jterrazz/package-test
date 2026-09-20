@@ -45,13 +45,10 @@ function isInside(directory: string, path: string): boolean {
  * Is this stack frame a module of the framework itself, rather than of the code
  * calling it?
  *
- * Answered by IDENTITY: the frame is inside the framework's own directory.
- * Answering it by substring — `/src/core/`, `/src/integrations/`, `/src/vitest/`
- * — was answering a different question, "does this path look like the framework's
- * layout", and a consumer that happens to have its own `src/core/` matched it.
- * Its files were then skipped as framework internals, and fixture resolution
- * anchored on the wrong directory (or fell through to the cwd) with nothing
- * reported.
+ * Answered by IDENTITY — the frame is inside the framework's own directory —
+ * and never by substring: a consumer's own `src/core/` is not this package's,
+ * and reading it as one would skip the consumer's files as internals and
+ * anchor fixture resolution on the wrong directory.
  *
  * @internal
  */

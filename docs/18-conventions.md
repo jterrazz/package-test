@@ -24,7 +24,7 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | F     | Imports (single package root) & production protection                | [02](02-developing.md)                                                |
 | W     | Website & mobile specs (scenarios, user-facing elements)             | [08](08-website.md), [09](09-mobile.md)                               |
 | G     | Infrastructure                                                       | [12](12-cli.md), [17](17-services.md), [07](07-component.md)          |
-| I     | Source-code architecture (four layers, sibling module tests)         | below · [01](01-architecture.md) for this repo's own layer map        |
+| I     | Source-code architecture (declared layers, sibling module tests)     | below · [01](01-architecture.md) for this repo's own layer map        |
 | J     | Hygiene (no arbitrary sleeps, honest spec documents)                 | [19](19-linting.md)                                                   |
 | K     | Retro-propagation — every defect class grows its own guard           | below                                                                 |
 
@@ -61,9 +61,9 @@ Placement itself is **declared**, because a spec tree may legitimately have a sh
 
 A project states the shape it has — `facet` when asset-less tests sit beside their siblings at the facet root, `mirror` when the tree mirrors something outside itself — and keeps a checked shape, instead of switching the rule off and keeping none.
 
-One clause of the rule is not the project's to declare, and holds in every mode, `off` included: **a folder whose name carries a leading underscore is ground, never a domain**, so no spec lives inside one. Depth is a shape a tree may choose; the ground/member split is the naming law recapped under [H](#h--naming-recap).
+One clause of the rule is not the project's to declare, and holds in every mode, `off` included: **a folder whose name carries a leading underscore is ground, never a domain**, so no spec lives inside one. Depth is a shape a tree may choose; the ground/member split is the naming law recapped in [The naming recap](#the-naming-recap).
 
-Ground is not always inert. It may be **code** the specs stand on — the build of the subject under test, a harness the runner spawns — and code carries its unit test as a sibling under [I2](#i--architecture). So the clause lets exactly one pairing through: `<module>.test.ts` NEXT to the `<module>.ts` it is named after, inside the ground it belongs to. A test with no module beside it, or a `*.specification.ts`, is a spec that wandered in and is still reported — which is why the clause needs no `off`, and why no project has to switch off a rule it cannot switch off.
+Ground is not always inert. It may be **code** the specs stand on — the build of the subject under test, a harness the runner spawns — and code carries its unit test as a sibling under [I2](#i--source-code-architecture). So the clause lets exactly one pairing through: `<module>.test.ts` NEXT to the `<module>.ts` it is named after, inside the ground it belongs to. A test with no module beside it, or a `*.specification.ts`, is a spec that wandered in and is still reported — which is why the clause needs no `off`, and why no project has to switch off a rule it cannot switch off.
 
 ### D11 — golden-file, not a cluster of greps
 
