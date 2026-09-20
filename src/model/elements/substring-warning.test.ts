@@ -4,7 +4,6 @@ import type { MockInstance } from 'vitest';
 import type { ElementRef } from '../ports/browser.port.js';
 import {
     resetSubstringWarnings,
-    throughWindow,
     warnSubstringOnly,
     widenedForWindow,
 } from './substring-warning.js';
@@ -67,13 +66,6 @@ function surfaceOf(names: string[]): WindowProbe {
         count: async (element) => await Promise.resolve(matching(element).length),
         nameOf: async (element) => await Promise.resolve(matching(element)[0]),
     };
-}
-
-/** An action that answers the widened descriptor and refuses the whole-name one. */
-async function clickTheWidened(element: ElementRef): Promise<string> {
-    return element.exact === false
-        ? await Promise.resolve('clicked')
-        : await Promise.reject(new Error('not found'));
 }
 
 /** A silent console, and no descriptor remembered from an earlier case. */
@@ -145,38 +137,30 @@ describe('the window — what the descriptor is retried with', () => {
         expect(widened).toBeUndefined();
     });
 
-    test('retries the action once with the widened descriptor', async () => {
-        // Given - an action that answers only the substring match
-        const warn = aQuietProcess();
-        const surface = surfaceOf(['Experiments 9']);
+    test('says nothing when the substring designates SEVERAL', async () => {
+        // Given - a name two elements carry in part, which is the ambiguity the old default hid
+        aQuietProcess();
+        const surface = surfaceOf(['Read Articles', 'Articles archive']);
 
-        // Then - the window resolves it, and the warning names the spelling to write
-        const answer = await throughWindow({
-            element: { kind: 'button', name: 'Experiments' },
-            failure: new Error('not found'),
-            probe: surface,
-            run: clickTheWidened,
-            where: 'http://localhost/',
-        });
-        expect(answer).toBe('clicked');
-        expect(String(warn.mock.calls[0]?.[0])).toContain("The name to write is 'Experiments 9'");
+        // Then - the window does not guess which one the author meant (W3)
+        const widened = await widenedForWindow(
+            { kind: 'link', name: 'Articles' },
+            'http://localhost/',
+            surface,
+        );
+        expect(widened).toBeUndefined();
     });
 
-    test('hands back the original failure when the retry answers nothing either', async () => {
-        // Given - a widened descriptor whose action fails all the same
-        aQuietProcess();
+    test('warns once, naming the spelling to write', async () => {
+        // Given - the same descriptor asked for twice, as a scenario run twice would
+        const warn = aQuietProcess();
         const surface = surfaceOf(['Experiments 9']);
-        const failure = new Error('the failure the caller already had');
+        const element: ElementRef = { kind: 'button', name: 'Experiments' };
 
-        // Then - the caller is never handed an error about a descriptor nobody wrote
-        await expect(
-            throughWindow({
-                element: { kind: 'button', name: 'Experiments' },
-                failure,
-                probe: surface,
-                run: async () => await Promise.reject(new Error('about the widened one')),
-                where: 'http://localhost/',
-            }),
-        ).rejects.toBe(failure);
+        // Then - one line, carrying the name the author should be writing
+        await widenedForWindow(element, 'http://localhost/', surface);
+        await widenedForWindow(element, 'http://localhost/', surface);
+        expect(warn).toHaveBeenCalledOnce();
+        expect(String(warn.mock.calls[0]?.[0])).toContain("The name to write is 'Experiments 9'");
     });
 });

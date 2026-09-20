@@ -294,38 +294,29 @@ export class AppiumAdapter implements DevicePort {
          * so it runs once, on the first miss, not on every poll.
          */
         let scrollAttempted = false;
+        let windowAsked = false;
+        let looking = chain;
         for (;;) {
-            const resolved = await this.resolveChain(driver, chain, cardinality, {
+            const resolved = await this.resolveChain(driver, looking, cardinality, {
                 tryScroll: !scrollAttempted,
             });
             scrollAttempted = true;
             if (resolved) {
                 return resolved;
             }
+            if (!windowAsked) {
+                // The transitional window, asked on the FIRST miss rather than
+                // At the deadline: the deadline is the test's own budget, and
+                // A widening that arrives there arrives after the test is over.
+                windowAsked = true;
+                // oxlint-disable-next-line eslint/no-await-in-loop -- asked ONCE per resolution, and what it answers decides what every later pass looks for
+                looking = (await this.widenedChain(driver, chain)) ?? chain;
+            }
             if (Date.now() > deadline) {
-                return await this.atDeadline({ cardinality, chain, driver, element, verb });
+                throw await this.timeoutError(driver, element, verb);
             }
             await delay(POLL_INTERVAL_MS);
         }
-    }
-
-    /**
-     * What the deadline means: the whole-label match never answered, so the
-     * transitional window gets its one try before the refusal is raised.
-     */
-    private async atDeadline(missed: {
-        cardinality: 'any' | 'one';
-        chain: MobileElementRef[];
-        driver: Driver;
-        element: MobileElementRef;
-        verb: string;
-    }): Promise<DriverElement> {
-        const { cardinality, chain, driver, element, verb } = missed;
-        const widened = await this.widenedForWindow(driver, chain, cardinality);
-        if (widened !== null) {
-            return widened;
-        }
-        throw await this.timeoutError(driver, element, verb);
     }
 
     /** One resolution pass over the chain — `null` means "nothing yet, keep polling". */
@@ -382,19 +373,18 @@ export class AppiumAdapter implements DevicePort {
     }
 
     /**
-     * The transitional retry, level by level: a descriptor that designated
-     * nothing as a whole label but designates something as a SUBSTRING is
-     * resolved the old way, once, with the warning that names the label to
-     * write. The window is the vocabulary's, not one surface's — chapter 13 —
-     * so the screen answers it exactly as a page does.
+     * The chain to keep polling with, level by level: a descriptor that
+     * designated nothing as a whole label but designates exactly one thing as a
+     * SUBSTRING is widened, with the warning that names the label to write. The
+     * window is the vocabulary's, not one surface's — chapter 13 — so the
+     * screen answers it exactly as a page does.
      *
-     * `null` when nothing would change, which is the ordinary timeout.
+     * `null` when nothing would change, which is the ordinary wait.
      */
-    private async widenedForWindow(
+    private async widenedChain(
         driver: Driver,
         chain: MobileElementRef[],
-        cardinality: 'any' | 'one',
-    ): Promise<DriverElement | null> {
+    ): Promise<MobileElementRef[] | null> {
         let scope: MatchScope = driver;
         const widened: MobileElementRef[] = [];
         let changed = false;
@@ -412,7 +402,7 @@ export class AppiumAdapter implements DevicePort {
             widened.push(candidate);
         }
         /* oxlint-enable eslint/no-await-in-loop */
-        return changed ? await this.resolveChain(driver, widened, cardinality) : null;
+        return changed ? widened : null;
     }
 
     /** One level of the chain, widened and warned about, or `null`. */
@@ -430,7 +420,10 @@ export class AppiumAdapter implements DevicePort {
         const loose: MobileElementRef = { ...level, exact: false };
         const matches = await matching(scope, loose);
         const first = matches[0];
-        if (first === undefined) {
+        // Exactly one, never "at least one": a label several elements carry in
+        // Part is the ambiguity the old default hid, and the window may not
+        // Resolve it by guessing which one the author meant (W3).
+        if (first === undefined || (await matches.length) !== 1) {
             return null;
         }
         const evidence = await captureMatch(first);

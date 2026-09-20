@@ -212,7 +212,9 @@ Reach for the opt-out only when the name genuinely carries a variable part (a co
 
 The window reaches every LEVEL of a chain, not the target alone: `within(button('Proof of authorship'), content('Verified'))` against a button named "Proof of authorship Verified" fails on the SCOPE, and a window that only ever widened the target left that migration with no line to read at all. The chain is walked outside-in, each level asked the same question, and a level that states its own `exact` is left as the author wrote it.
 
-It costs what a miss costs: the verb waits its full actionability budget before the retry, so a descriptor living on the window is a SLOW passing test. That is the shape of the deal — the run stays green while the names are fixed, and the warning says which ones.
+The window is asked BEFORE the verb acts, not after it fails: a verb waits its whole actionability budget, which is the test's own budget, so a retry afterwards never runs — the test is already over. What it costs on the ordinary path is one count per level of the chain, which waits for nothing.
+
+It widens on exactly one match, never on several: a name two elements carry in part is the ambiguity the old default hid, and the window may not resolve it by guessing which one the author meant. That descriptor designates nothing, as W3 says, and the refusal is the one to read.
 
 ## `testId()` — the one escape hatch
 
