@@ -65,7 +65,7 @@ The fixture apps the specs drive live in the pool: `app` and `website-app` for t
 
 ## The lint suite is end-to-end
 
-`specs/lint/**` runs the REAL oxlint binary and the real checker over the fixture projects and goldens their output, grouped by convention family (`runners/`, `chains/`, `files/`, `assertions/`, `imports/`, `architecture/`, `hygiene/`, `checker/`). Because it loads `dist/oxlint.js`, `npm run build` must precede it — the same ordering `npm run lint` depends on.
+`specs/lint/**` runs the REAL oxlint binary and the real checker over the fixture projects and goldens their output, grouped by convention family (`runners/`, `chains/`, `files/`, `assertions/`, `imports/`, `architecture/`, `hygiene/`, `website/`, `checker/`, `meta/`). Because it loads `dist/oxlint.js`, `npm run build` must precede it — the same ordering `npm run lint` depends on.
 
 Its goldens are full snapshots, not greps: `specs/lint/checker/_expected/*.txt` holds the exact lines the checker prints, including the chapter each message points a consumer at. A message that changes its wording moves its golden with it, in the same commit.
 
@@ -81,6 +81,15 @@ Several truths about this package cannot be asserted from outside it, so they ar
 | `src/lint/env-allowlist.test.ts`                                 | No `process.env` read outside `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                                           |
 | `src/lint/facet-matrix.test.ts`                                  | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
 | `src/lint/package-exports.test.ts`                               | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
+| `specs/lint/meta/k4-reach-per-path.test.ts`                      | The REACH of a rule, on one fixture project laid out with every path role and a single oxlint run (rule K4)                                                                                                                                       |
+| `src/type-channel.test-d.ts`                                     | What the COMPILER refuses — A8, A11, B1, B3, D1, M2, W6 — each as an `@ts-expect-error` that fails the day the line it marks starts compiling                                                                                                     |
+
+`src/lint/plugin.test.ts` also holds the seven-channel contract: every row of
+every channel carries the proof that channel can give — a rule file and a
+fixture pair, an assertion on a resolved upstream option, a bundled checker
+pass, a `// RUNTIME <ID>` marker above the spec that drives the refusal, a line
+of the type-channel file, a named meta-test. A row that loses its proof fails
+that test rather than going quietly stale.
 
 The freshness meta-test is the reason a documentation change can turn the suite red: edit the generated catalogue by hand and it fails, correctly. Regenerate instead — the gesture is [02 — Developing](02-developing.md)'s.
 

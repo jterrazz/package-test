@@ -1,6 +1,6 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind six constructors, one chain that needs none, four source layers with declared edges, and four channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+What this package IS: one runner model behind six constructors, one chain that needs none, four source layers with declared edges, and seven channels through which its conventions are enforced. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
 | The shape                  | Held below                                                                              |
 | -------------------------- | --------------------------------------------------------------------------------------- |

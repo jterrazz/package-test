@@ -5,7 +5,7 @@ import type { CatalogEntry } from './manifest.js';
  * The conventions-catalogue generator — renders the mechanized rule catalogue
  * FROM `manifest.ts` (the source of truth) into two committed projections:
  *
- * - the full four-channel catalogue inside `docs/13-linting.md`, spliced between
+ * - the full seven-channel catalogue inside `docs/13-linting.md`, spliced between
  *   GENERATED markers ({@link spliceCatalog}) — grouped by convention family,
  *   each row anchored by its implementation name so a rule MESSAGE can link
  *   straight to it, and carrying what it REACHES and the one imperative line
@@ -130,7 +130,7 @@ function catalogueSections(): string[] {
 }
 
 /**
- * The full four-channel catalogue spliced into `docs/13-linting.md` between the
+ * The full seven-channel catalogue spliced into `docs/13-linting.md` between the
  * GENERATED markers — a counts line, then every family section. The surrounding
  * chapter prose is hand-maintained; only this region is generated.
  */
@@ -170,7 +170,7 @@ export function spliceCatalog(existing: string): string {
 
 /**
  * The agent-facing rule reference `skills/jterrazz-test/references/rules.md` —
- * the same four-channel catalogue as `docs/10`, trimmed to what an agent needs
+ * the same seven-channel catalogue as `docs/13`, trimmed to what an agent needs
  * to apply and cite a rule (Code · Implementation · Channel · Enforces), grouped
  * by family. Stamped `DO NOT EDIT`; the skill routes here for rule ids.
  */
