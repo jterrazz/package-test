@@ -53,9 +53,9 @@ export type CliSpecificationOptions<Services extends ServiceRecord = ServiceReco
     serve?: Record<string, LiterateServeRegistration>;
     /**
      * Project-root override (CONVENTIONS A9) — the single meaning of `root`:
-     * it anchors compose detection and local-bin resolution for the tested
-     * binary. It is NOT a fixtures root; `.fixture()` resolves feature-local
-     * or `$FIXTURES/` paths on its own.
+     * it anchors the local-bin resolution of the tested binary, in place of
+     * the walk to the nearest `package.json`. It is NOT a fixtures root;
+     * `.fixture()` resolves feature-local or `$FIXTURES/` paths on its own.
      */
     root?: string;
     /**

@@ -10,10 +10,10 @@ const ROOT_MARKER = 'package.json';
  * The NEAREST ancestor of `startDir` (itself included) carrying the root
  * marker, `undefined` when none does.
  *
- * The unit is the nearest thing that declares itself a project. While a compose
- * file counted as a second marker, a `docker/compose.test.yaml` at a workspace
- * root outranked the `package.json` of the very package being tested, and every
- * path the runner resolved was measured from the wrong unit.
+ * One marker, and it is the nearest thing that declares itself a project: a
+ * second marker higher in the tree would outrank the `package.json` of the very
+ * package being tested, and every path the runner resolves would be measured
+ * from the wrong unit.
  *
  * The existence probe is injected so the lint layer can pass its cached one
  * (A9's `a9w-redundant-root` derives the same root, and must derive it the
