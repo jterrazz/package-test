@@ -15,14 +15,15 @@ async function refusalOf(path: string, scenario: VisitScenario): Promise<string>
 }
 
 test('refuses an element that matches more than one node', async () => {
-    // Given - a page where "Articles" names three different links
+    // Given - a page where "Articles" names two links verbatim, and a third
+    // Only as a substring ("Read Articles") the exact default no longer reaches
     const message = await refusalOf('/ambiguous', async (visitor) => {
         // When - a scenario acts on the bare descriptor
         await visitor.click(link('Articles'));
     });
 
     // Then - the framework refuses rather than picking the first
-    expect(message).toContain('link("Articles") matched 3 elements');
+    expect(message).toContain('link("Articles") matched 2 elements');
 });
 
 test('enumerates the candidates and the rewrites that would resolve them', async () => {
@@ -59,15 +60,15 @@ test('scopes to the footer as readily as to the nav', async () => {
     expect(result.url).toContain('/articles');
 });
 
-test('narrows on a whole-name match but still refuses what stays ambiguous', async () => {
-    // Given - "Read Articles" only matches as a substring
+test('the opt-out brings the substring match back, and widens the ambiguity', async () => {
+    // Given - the same page, with the pre-16.0 matching asked for explicitly
     const message = await refusalOf('/ambiguous', async (visitor) => {
-        // When - exact drops it, leaving the two verbatim links
-        await visitor.click(link('Articles', { exact: true }));
+        // When - `{ exact: false }` lets "Read Articles" answer to "Articles" again
+        await visitor.click(link('Articles', { exact: false }));
     });
 
-    // Then - exact alone is not enough here, and the refusal says so
-    expect(message).toContain('matched 2 elements');
+    // Then - the third link is back, which is what the default used to hide
+    expect(message).toContain('matched 3 elements');
 });
 
 test('searches nested scopes outside-in', async () => {
@@ -88,7 +89,7 @@ test('sees an element only when it too designates exactly one', async () => {
     });
 
     // Then - see() is held to the same rule as the actions
-    expect(message).toContain('matched 3 elements');
+    expect(message).toContain('matched 2 elements');
 });
 
 test('names the accessible name a descriptor matched on when it is not the text', async () => {
@@ -100,5 +101,5 @@ test('names the accessible name a descriptor matched on when it is not the text'
 
     // Then - the evidence names what actually matched, not the text it shows
     expect(message).toContain('matched 2 elements');
-    expect(message).toContain('named "Delete Post a"');
+    expect(message).toContain('named "Delete post"');
 });

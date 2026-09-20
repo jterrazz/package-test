@@ -176,7 +176,7 @@ The element vocabulary is **the same one the website facet uses** (rule W2) — 
 | `content(text)` | any element whose label or value contains the text          |
 | `testId(id)`    | accessibility identifier — the escape hatch (rule W2 warns) |
 
-Names match as **substrings** by default; pass `{ exact: true }` to match whole. The ARIA landmarks (`main()`, `navigation()`, …) are website-only: passing one to a mobile verb refuses at runtime with a message naming the boundary — an iOS screen has no ARIA regions.
+A name designates the WHOLE label (the same default as the web vocabulary, compiled to `==`); pass `{ exact: false }` to match a substring (`CONTAINS`). The ARIA landmarks (`main()`, `navigation()`, …) are website-only: passing one to a mobile verb refuses at runtime with a message naming the boundary — an iOS screen has no ARIA regions.
 
 ## Designating exactly one element
 
@@ -195,7 +195,6 @@ Matched:
 
 Disambiguate with one of:
   • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any descriptor works as the scope
-  • exact name     button("Bookmark", { exact: true })   [leaves 2 of 3]
   • test id        testId("event-1-bookmark")   [also here: event-2-bookmark]
   • other element  a button() or field() may name one thing where this does not
 
@@ -212,13 +211,13 @@ await visitor.tap(within(testId('event-list'), button('Bookmark')));
 
 Scopes compose outside-in exactly as on the website facet, and every scope level must itself resolve to exactly one element — an ambiguous scope names **itself** in the refusal, so the fix lands on the right descriptor.
 
-### `{ exact: true }` — when two names genuinely overlap
+### `{ exact: false }` — when a label carries a part the test does not control
 
 ```typescript
-await visitor.tap(button('Bookmark', { exact: true }));
+await visitor.tap(button('Bookmark', { exact: false }));
 ```
 
-Same semantics as the website facet: label matching is a substring by default (`CONTAINS` in the compiled predicate), `exact` compiles to equality.
+Same semantics as the website facet: a label matches WHOLE (equality in the compiled predicate), and `{ exact: false }` compiles to `CONTAINS`.
 
 ## Result surface — `ScreenResult`
 
@@ -296,7 +295,7 @@ No `_seeds/` or `_requests/` — `specification.mobile()` has no `services` opti
 - **The first session builds WebDriverAgent (~40 s, once per simulator).** Subsequent sessions on a warm simulator are seconds. Budget the first run; do not "fix" it with retries.
 - **Passing a landmark (`main()`, `navigation()`) to a mobile verb.** They are website concepts — iOS has no ARIA regions; the runtime refusal points at `within(testId('…'), …)` as the scoping tool.
 - **Reaching for `testId()` as the default locator.** It exists as an escape hatch (rule W2 warns) — prefer `button`/`field`/`content`, the vocabulary the accessibility tree exposes to a real user.
-- **Assuming a name matches whole.** It is a substring by default: `button('Bookmark')` also matches "Bookmark all". Pass `{ exact: true }` when that is what you meant.
+- **Assuming a name still matches as a substring.** It does not since 16.0: `button('Bookmark')` no longer reaches "Bookmark all". Pass `{ exact: false }` when a part of the label is genuinely outside the test's control.
 - **Expecting `.open()` to preserve app state between specs.** It never does — every open terminates and relaunches the app; a flow that spans screens belongs in ONE scenario.
 - **Asserting on off-screen content with `result.content`.** `content` carries only _visible_ texts; the mounted-but-offscreen rows live in `result.screen`. Use the golden for the whole list, `content` for what the user currently sees.
 - **Calling `specification.mobile()` without appium installed.** The error names the exact fix — `npm install -D appium webdriverio && npx appium driver install xcuitest` — there is no silent fallback.

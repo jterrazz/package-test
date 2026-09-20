@@ -126,10 +126,11 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('named "Delete Post a"');
     });
 
-    test('suggests exact only when it would narrow the set, with what it leaves', () => {
-        // Given - one candidate matched as a substring
+    test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
+        // Given - `{ exact: false }`, which is the only way a substring
+        // Candidate is in the set at all since 16.0
         const message = describeAmbiguity({
-            element: link('Articles'),
+            element: link('Articles', { exact: false }),
             matches: [match(), match({ text: 'Read Articles' })],
             url: 'http://site.test/',
         });
@@ -137,6 +138,19 @@ describe('describeAmbiguity', () => {
         // Then - the remaining count keeps the suggestion honest
         expect(message).toContain('link("Articles", { exact: true })');
         expect(message).toContain('leaves 1 of 2');
+    });
+
+    test('never offers exact to an ordinary descriptor — it is already exact', () => {
+        // Given - a descriptor stating nothing, which is the 16.0 default
+        const message = describeAmbiguity({
+            element: link('Articles'),
+            matches: [match(), match({ text: 'Read Articles' })],
+            url: 'http://site.test/',
+        });
+
+        // Then - telling it to match the name whole would be telling it to do
+        // What it is already doing
+        expect(message).not.toContain('exact name');
     });
 
     test('omits the exact suggestion when every candidate matches the name whole', () => {

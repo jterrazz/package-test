@@ -42,7 +42,7 @@ const result = await mobile.open('news://events', async (visitor) => {
 
 - **No `expect()` inside a scenario (W1).** The scenario is pure interaction; assertions live in the Then, on the returned result.
 - Visitor verbs: `tap`, `fill`, `see(element)`. Every verb polls until ≥ 1 visible match (default 30 s, raise with `timeouts: { action }`) then enforces exactly-one (W3); `see()` is the ONLY synchronization primitive. There are no sleeps.
-- Elements are the **same vocabulary as the website facet** (W2): `button(name)`, `field(label)`, `content(text)`; `testId(id)` is the escape hatch and warns. Substring match by default; `{ exact: true }` matches whole.
+- Elements are the **same vocabulary as the website facet** (W2): `button(name)`, `field(label)`, `content(text)`; `testId(id)` is the escape hatch and owes a `// testId: <what the element lacks>` on its line or the one above (W2, error). A name designates the accessible name WHOLE since 16.0; `{ exact: false }` is the opt-out, and a name that only matches in part warns once per descriptor during 16.0 and 16.1.
 - **Landmarks are website-only** — `main()`/`navigation()` on a mobile verb refuse at runtime. A mobile scope is any descriptor: `within(testId('event-list'), button('Bookmark'))`; every scope level must itself be unambiguous.
 
 ## Result surface

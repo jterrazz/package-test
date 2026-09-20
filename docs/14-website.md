@@ -228,12 +228,10 @@ this test keep passing while the visitor interacts with something else.
 
 Matched:
   1. <a href="/articles">Articles</a>  in <nav>
-  2. <a href="/articles">Read Articles</a>  in <main>
-  3. <a href="/articles">Articles</a>  in <footer>
+  2. <a href="/articles">Articles</a>  in <footer>
 
 Disambiguate with one of:
-  • scope it       within(navigation(), link("Articles"))   [leaves 1 of 3]   [also here: main(), contentinfo()]
-  • exact name     link("Articles", { exact: true })   [leaves 2 of 3]
+  • scope it       within(navigation(), link("Articles"))   [leaves 1 of 2]   [also here: contentinfo()]
   • other element  a heading(), button() or field() may name one thing where this does not
 
 Docs: docs/14-website.md#designating-exactly-one-element (CONVENTIONS W3)
@@ -273,17 +271,20 @@ The landmarks are the ARIA landmark set and nothing more — a closed vocabulary
 | `form(name)`           | a named form landmark                 |
 | `search()`             | the search landmark                   |
 
-### `{ exact: true }` — when two names genuinely overlap
+### `{ exact: false }` — when a name carries a part the test does not control
 
-Name matching is a **substring** by default, mirroring playwright: `link('Articles')` also matches "Read Articles". When the overlap is the whole problem, match the name whole:
+**A name designates the accessible name WHOLE.** `link('Articles')` does not reach "Read Articles", and has not since 16.0. The substring default it replaced is the shape that let a test pass for years against the element beside the one it named — and the refusal never came, because there was only ever one match.
 
 ```typescript
-await visitor.click(link('Articles', { exact: true }));
+await visitor.click(link('Articles')); // exactly "Articles"
+await visitor.click(link('Articles', { exact: false })); // also "Read Articles"
 ```
 
-Every named descriptor accepts it — `button`, `link`, `field`, `heading`, `content`, and the named landmarks.
+Every named descriptor accepts the option — `button`, `link`, `field`, `heading`, `content`, and the named landmarks.
 
-Prefer scoping. `exact` fixes an accidental substring collision; it says nothing about _where_ on the page the element is, so it leaves a spec that still breaks the day the same label appears twice.
+Reach for the opt-out only when the name genuinely carries a variable part (a count, a user's name); scope with `within()` when the problem is that the same name appears twice.
+
+**The transitional warning.** For 16.0 and 16.1, a descriptor that designates NOTHING as a whole name but would have designated something as a substring prints one line naming itself, the three ways out and this deadline — once per descriptor per run. After 16.1 the substring match is gone and the same descriptor is simply not found.
 
 Navigating within a scenario changes what the capture describes:
 
@@ -506,7 +507,7 @@ No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no r
 - **Using `expect()` inside a scenario callback.** Forbidden (rule W1) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
 - **Reaching for `testId()` as the default locator.** It exists as an escape hatch (rule W2 warns) — prefer `button`/`link`/`field`/`heading`/`content`, the same vocabulary a user's accessibility tree exposes.
 - **Reaching for `testId()` to escape an ambiguity.** It silences the refusal without answering it: the test stops asserting the role and the accessible name, which is most of what a user-facing element was buying. Scope it with `within()` instead — that is the fix rule W3 is pointing at.
-- **Assuming a name matches whole.** It is a substring by default: `link('Articles')` also matches "Read Articles". Pass `{ exact: true }` when that is what you meant.
+- **Assuming a name still matches as a substring.** It does not since 16.0: `link('Articles')` no longer reaches "Read Articles". Pass `{ exact: false }` when a part of the name is genuinely outside the test's control.
 - **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
 - **Snapshotting the tree to prove focus.** The accessibility tree carries none — `see(focused(x))` is the assertion that does. Enablement and selection it DOES carry (`[disabled]`, `[selected]`), so those a golden may pin; `see(disabled(x))` is for the one control a test is about.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.

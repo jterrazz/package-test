@@ -7,6 +7,7 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../specification/facets/website/ambiguity.js';
+import { warnSubstringOnly } from '../../specification/facets/website/substring-warning.js';
 import type { ElementMatch, ElementRef } from '../../specification/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
 
@@ -51,7 +52,9 @@ export type MountedSurface = {
  */
 export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     const scope: LocatorSelectors = element.scope ? locate(root, element.scope) : root;
-    const exact = element.exact ?? false;
+    // A name designates the accessible name WHOLE since 16.0; `{ exact: false }`
+    // Is the opt-out, and an ABSENT option is the default rather than a choice.
+    const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
         return scope.getByLabelText(name, { exact });
@@ -125,12 +128,38 @@ export async function act<T>(
         return await action(locator);
     } catch (error) {
         if (locator.elements().length <= 1) {
+            reportSubstringOnly(element);
             throw error;
         }
         const culprit = ambiguousLevel(element);
         const matches = candidates(locate(page, culprit));
         const url = globalThis.location.href;
         throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));
+    }
+}
+
+/**
+ * Say so when a descriptor found NOTHING as a whole name but would have found
+ * something as a substring — the one shape the 16.0 default changes.
+ *
+ * Asked only on the failure path, and only for a descriptor that stated no
+ * `exact` of its own: an author who wrote `{ exact: false }` chose the
+ * substring, and one who wrote `{ exact: true }` was already exact.
+ */
+function reportSubstringOnly(element: ElementRef): void {
+    if (element.exact !== undefined || element.name === undefined) {
+        return;
+    }
+    try {
+        if (locate(page, element).elements().length > 0) {
+            return;
+        }
+        if (locate(page, { ...element, exact: false }).elements().length > 0) {
+            warnSubstringOnly(element, globalThis.location.href);
+        }
+    } catch {
+        // A descriptor the looser match makes ambiguous is not this warning's
+        // Business, and may not replace the failure the caller is being handed.
     }
 }
 

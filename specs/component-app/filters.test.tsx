@@ -41,12 +41,15 @@ test('carries every filter the visitor set into the summary it reports', async (
 });
 
 test('takes the summary off the screen when the visitor clears it', async () => {
-    // Given - a summary on screen, then cleared
+    // Given - a summary on screen, then cleared. The descriptor names the line
+    // WHOLE: a name designates the accessible name entire since 16.0, and
+    // `content('Showing everything')` would have answered to a prefix of it
+    const summary = content('Showing everything · published · newest');
     const result = await component.render(<Filters onApply={vi.fn<Apply>()} />, async (visitor) => {
         await visitor.click(button('Apply'));
-        await visitor.see(content('Showing everything'));
+        await visitor.see(summary);
         await visitor.click(button('Clear'));
-        await visitor.gone(content('Showing everything'));
+        await visitor.gone(summary);
     });
 
     // Then - the screen the capture describes is the one the clearing left

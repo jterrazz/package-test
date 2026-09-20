@@ -786,7 +786,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            'Un descripteur d’élément doit désigner exactement UN élément quand un verbe AGIT dessus (`click`/`tap`/`fill`) : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, `{ exact: true }`). Le framework n’agit jamais sur « le premier ». Vaut pour les deux facettes à scénario : website et mobile ; sur mobile, `see()` — qui n’agit sur rien — est satisfait par n’importe quel match visible (l’arbre XCUITest duplique légitimement un label entre conteneur et enfant).',
+            'Un descripteur d’élément doit désigner exactement UN élément quand un verbe AGIT dessus (`click`/`tap`/`fill`) : si plusieurs correspondent, l’action est refusée avec une erreur qui énumère les candidats et propose les réécritures (`within(...)`, un autre descripteur). Le framework n’agit jamais sur « le premier ». Un nom désigne le nom accessible ENTIER depuis 16.0 — `{ exact: false }` est l’échappatoire — et un descripteur qui ne trouve rien entier mais trouvait quelque chose en sous-chaîne déclenche un avertissement runtime, une fois par descripteur, pendant 16.0 et 16.1. Vaut pour les deux facettes à scénario : website et mobile ; sur mobile, `see()` — qui n’agit sur rien — est satisfait par n’importe quel match visible (l’arbre XCUITest duplique légitimement un label entre conteneur et enfant).',
         facet: 'shared',
         family: 'W',
         id: 'W3',

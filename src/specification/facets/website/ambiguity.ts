@@ -56,8 +56,9 @@ const CONTEXT_LANDMARKS: Record<string, string> = {
 
 /**
  * Render a descriptor as the source that would build it — `link('Articles')`,
- * `within(navigation(), link('Articles', { exact: true }))`. The error speaks
- * the vocabulary the author wrote, never playwright's.
+ * `within(navigation(), link('Articles', { exact: false }))`. The error speaks
+ * the vocabulary the author wrote, never playwright's — so the option appears
+ * only when the AUTHOR stated one, whichever way.
  */
 export function formatElement(element: ElementRef): string {
     const bare = formatBare(element);
@@ -69,8 +70,8 @@ function formatBare(element: ElementRef): string {
     if (element.name !== undefined) {
         args.push(JSON.stringify(element.name));
     }
-    if (element.exact) {
-        args.push('{ exact: true }');
+    if (element.exact !== undefined) {
+        args.push(`{ exact: ${String(element.exact)} }`);
     }
     return `${CONSTRUCTORS[element.kind]}(${args.join(', ')})`;
 }
@@ -126,7 +127,10 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
         );
     }
 
-    if (!element.exact && element.name !== undefined) {
+    // Only worth offering to a descriptor that opted OUT: exact is the default
+    // Since 16.0, so telling an ordinary descriptor to "match the name whole"
+    // Would be telling it to do what it is already doing.
+    if (element.exact === false && element.name !== undefined) {
         const remaining = matches.filter((match) => match.text === element.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(

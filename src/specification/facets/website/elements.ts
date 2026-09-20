@@ -6,20 +6,23 @@ import type { ElementRef } from '../../ports/browser.port.js';
  * accessibility-first locators in the browser integration. CSS/XPath is
  * deliberately not expressible; `testId()` is the single escape hatch.
  *
- * A descriptor must designate exactly ONE element (CONVENTIONS W3). Two knobs
- * narrow it, in this order of preference:
- *
- *   1. `within(scope, target)` — search inside a landmark, the way a person
- *      would say "the Articles link *in the nav*";
- *   2. `{ exact: true }` — match the accessible name whole rather than as a
- *      substring, when two names genuinely overlap.
+ * A descriptor must designate exactly ONE element (CONVENTIONS W3). A name
+ * matches the accessible name WHOLE, and `within(scope, target)` is how an
+ * overlap is narrowed — the way a person would say "the Articles link *in the
+ * nav*".
  */
 
 /** Options accepted by every named descriptor. */
 export type ElementOptions = {
     /**
-     * Match the accessible name as a whole string. Default is substring —
-     * `link('Articles')` also matches "Read Articles".
+     * Match the accessible name as a whole string. `true` by default since
+     * 16.0.
+     *
+     * A substring match is what a person does NOT mean: `link('Articles')`
+     * designated "Read Articles" as readily as "Articles", so a test could pass
+     * for years against the element beside the one it named. `{ exact: false }`
+     * is the opt-out, for a name that genuinely carries a variable part the
+     * test does not control.
      */
     exact?: boolean;
 };
@@ -32,7 +35,10 @@ const named =
     (name: string, options?: ElementOptions): ElementRef => ({
         kind,
         name,
-        ...(options?.exact ? { exact: true } : {}),
+        // The descriptor records what the AUTHOR stated, not the default: an
+        // Absent `exact` is what lets the adapter tell "nothing found under the
+        // New default" from "the author asked for a substring".
+        ...(options?.exact === undefined ? {} : { exact: options.exact }),
     });
 
 /** A button (or element with the button role), by accessible name. */
@@ -67,7 +73,7 @@ const landmark =
     (name?: string, options?: ElementOptions): ElementRef => ({
         kind,
         ...(name === undefined ? {} : { name }),
-        ...(options?.exact ? { exact: true } : {}),
+        ...(options?.exact === undefined ? {} : { exact: options.exact }),
     });
 
 /** The `banner` landmark — the page header. */
