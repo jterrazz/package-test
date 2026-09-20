@@ -38,6 +38,43 @@ describe('intercept — the network double in module scope', () => {
         await expect(response.json()).resolves.toStrictEqual({ celsius: 19 });
     });
 
+    test('resolves a relative request against the origin the scope states', async () => {
+        // Given - a subject that fetches a path, the way browser code does, and a scope that says where that path lives
+        await using _ = await intercept(http.get('/api/posts'), http.json({ posts: [] }), {
+            origin: 'http://console.test',
+        });
+
+        // Then - the contract answers it: under node a relative URL has no base until the scope gives it one
+        const response = await fetch('/api/posts');
+        await expect(response.json()).resolves.toStrictEqual({ posts: [] });
+    });
+
+    test('gives `fetch` back when the scope ends', async () => {
+        // Given - a scope that stated an origin, and ended
+        const original = globalThis.fetch;
+        {
+            await using _ = await intercept(http.get('/api/posts'), http.json({ posts: [] }), {
+                origin: 'http://console.test',
+            });
+            await fetch('/api/posts');
+        }
+
+        // Then - the platform's own fetch is back
+        expect(globalThis.fetch).toBe(original);
+    });
+
+    test('refuses an origin that is not one', async () => {
+        // Given - a scope stating a bare host
+        const scope = async (): Promise<void> => {
+            await using _ = await intercept(http.get('/api/posts'), http.json({}), {
+                origin: 'console.test',
+            });
+        };
+
+        // Then - the message says what an origin is
+        await expect(scope()).rejects.toThrow('is not an absolute URL');
+    });
+
     test('raises the undeclared call when the scope ends', async () => {
         // Given - a block that reaches a second host nothing declared
         const escape = async (): Promise<void> => {
