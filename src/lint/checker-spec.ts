@@ -348,9 +348,24 @@ function checkVolatileLiterals(document: SpecDocument): Finding[] {
 const ISO8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/u;
 const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/u;
 
-/** Everything the document itself FIXED: what it feeds in, and what its fixtures hold. */
+/**
+ * Everything the document itself FIXED — what it feeds in, what it names, and
+ * what its fixtures hold.
+ *
+ * The first three sources are the document's own words: a literal that appears
+ * in a command's arguments or in an `env:`/`serve:` value is one the DOCUMENT
+ * put there, not one a run minted. The adoptions of 15.3 found eleven warnings
+ * of exactly that shape, every one of them a value the reader could see being
+ * pinned two lines above.
+ */
 function fixedData(document: SpecDocument, dir: string): string {
-    const parts = document.runs.map((run) => run.stdin ?? '');
+    const parts = document.runs.flatMap((run) => [run.stdin ?? '', run.command]);
+    for (const token of document.env) {
+        parts.push(token.kind === 'pair' ? `${token.key}=${token.value}` : token.name);
+    }
+    for (const entry of document.serve) {
+        parts.push(entry.name, ...Object.values(entry.env));
+    }
     for (const fixture of document.fixtures) {
         let source;
         try {

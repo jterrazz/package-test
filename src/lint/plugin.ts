@@ -60,8 +60,8 @@ import { f6NoForeignTestRuntime } from './rules/f6-no-foreign-test-runtime.js';
 import { g4NoDomInModuleTest } from './rules/g4-no-dom-in-module-test.js';
 import { i1LayerBoundaries } from './rules/i1-layer-boundaries.js';
 import { i2SiblingTestNaming } from './rules/i2-sibling-test-naming.js';
-import { i4NoViMockInSrc } from './rules/i4-no-vi-mock-in-src.js';
-import { j2NoSleepInSpecs } from './rules/j2-no-sleep-in-specs.js';
+import { i4NoModuleDoubles } from './rules/i4-no-module-doubles.js';
+import { j2NoSleep } from './rules/j2-no-sleep.js';
 import { j6wGivenInTheTest } from './rules/j6w-given-in-the-test.js';
 import { w1ScenarioPure } from './rules/w1-scenario-pure.js';
 import { w2TestIdStatesWhatIsMissing } from './rules/w2-testid-states-what-is-missing.js';
@@ -74,7 +74,7 @@ import type { LintPlugin, LintRule } from './types.js';
  *
  * Registered in a consumer's (or this repo's own) `oxlint.config.ts` via
  * `jsPlugins: ['@jterrazz/test/oxlint']` and referenced as `jterrazz/<rule>` in
- * the `rules` map, e.g. `'jterrazz/j2-no-sleep-in-specs': 'error'` — or enabled
+ * the `rules` map, e.g. `'jterrazz/j2-no-sleep': 'error'` — or enabled
  * wholesale by spreading {@link recommendedRules}.
  *
  * This entry is bundled by tsdown (`dist/oxlint.js`); rules import nothing from
@@ -165,8 +165,8 @@ const plugin: LintPlugin = {
         'g4-no-dom-in-module-test': g4NoDomInModuleTest,
         'i1-layer-boundaries': i1LayerBoundaries,
         'i2-sibling-test-naming': i2SiblingTestNaming,
-        'i4-no-vi-mock-in-src': i4NoViMockInSrc,
-        'j2-no-sleep-in-specs': j2NoSleepInSpecs,
+        'i4-no-module-doubles': i4NoModuleDoubles,
+        'j2-no-sleep': j2NoSleep,
         'j6w-given-in-the-test': j6wGivenInTheTest,
         'w1-scenario-pure': w1ScenarioPure,
         'w2-testid-states-what-is-missing': w2TestIdStatesWhatIsMissing,

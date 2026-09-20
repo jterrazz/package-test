@@ -3,12 +3,14 @@ import { RULE_DOCS } from '../manifest.js';
 import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-const SPECIFICATION_SUFFIX = '.specification.ts';
+/** Both suffixes a specification wears — a `wrap` written in JSX needs the `x`. */
+const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
 
 /**
- * CONVENTIONS A1 — a runner is created in a `*.specification.ts` file under
+ * CONVENTIONS A1 — a runner is created in a `*.specification.ts(x)` file under
  * `specs/`. Any `specification.<member>(…)` call in a file that is not a
- * specification file is flagged.
+ * specification file is flagged. The `.tsx` spelling is the same file with a
+ * `wrap` written in JSX.
  *
  * Framework-internal unit tests of the constructors themselves (this repo's
  * `src/**\/*.test.ts`) disable the rule via a config override — for consumers
@@ -22,7 +24,7 @@ const SPECIFICATION_SUFFIX = '.specification.ts';
 export const a1SpecificationFile: LintRule = {
     create(context: RuleContext): Visitor {
         if (
-            context.filename.endsWith(SPECIFICATION_SUFFIX) ||
+            SPECIFICATION_SUFFIXES.some((suffix) => context.filename.endsWith(suffix)) ||
             roleOf(context.physicalFilename).role === 'component'
         ) {
             return {};

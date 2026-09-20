@@ -87,7 +87,7 @@ export const RULE_DOCS = {
     'a1-specification-file': {
         channel: 'statique',
         convention:
-            'A runner is created only in a `*.specification.ts` file under `specs/`: calling `specification.*` anywhere else is an error.',
+            'A runner is created only in a `*.specification.ts(x)` file under `specs/`: calling `specification.*` anywhere else is an error. The `.tsx` spelling is the same file with a `wrap` written in JSX. A `component`-role file is out of reach: a rendered unit starts nothing.',
         family: 'A',
         fix: 'Move the call into `specs/<facet>/<facet>.specification.ts` and export the handle from there.',
         id: 'A1',
@@ -184,9 +184,9 @@ export const RULE_DOCS = {
     'b4-given-then': {
         channel: 'statique',
         convention:
-            'Every test carries `// Given -` then `// Then -` (both, in that order); a Given declared after a Then is an error. A `<case>.spec.yaml` document has no comments: its narration is its `description:`.',
+            'Every test carries `// Given -` then `// Then -` (both, in that order); a Given declared after a Then is an error. A `test.each` table is judged ONCE, on the table, not once per row. A `<case>.spec.yaml` document has no comments: its narration is its `description:`.',
         family: 'B',
-        fix: 'Write the two markers, in order, as sentences about the subject — not about the code.',
+        fix: 'Write the two markers, in order, as sentences about the subject — not about the code (chapter 12 § The narration).',
         id: 'B4',
         rationale:
             "Given/Then narration makes a test's intent readable without reading its assertions.",
@@ -292,7 +292,7 @@ export const RULE_DOCS = {
     'c6-tomatch-extension': {
         channel: 'statique',
         convention:
-            "`toMatch`'s argument carries its extension (`'help.txt'`), except for tree snapshots (directories); a file subject with no extension is an error.",
+            "`toMatch`'s argument carries its extension (`'help.txt'`, `'<case>.aria.yaml'` for a tree golden), except for a directory snapshot; a file subject with no extension is an error.",
         family: 'C',
         fix: "Write the fixture's full name, extension included.",
         id: 'C6',
@@ -556,7 +556,7 @@ export const RULE_DOCS = {
     'f1-no-subpath-import': {
         channel: 'statique',
         convention:
-            "Everything is imported from `@jterrazz/test`; an import of `@jterrazz/test/<subpath>` is an error, except the subpaths the package's `exports` map publishes — `@jterrazz/test/oxlint` (the lint plugin) and `@jterrazz/test/vitest` (the runner configuration surface) — exempt everywhere. The list is READ from the manifest, never copied into the rule.",
+            "Everything is imported from `@jterrazz/test`; an import of `@jterrazz/test/<subpath>` is an error, except the subpaths the package's `exports` map publishes — the entries are `.`, `./vitest`, `./oxlint` and `./schema`, and the three named ones are exempt everywhere. The list is READ from the manifest, never copied into the rule, so a published entry is exempt the day it ships.",
         family: 'F',
         fix: 'Import the name from `@jterrazz/test`; it is re-exported there by design.',
         id: 'F1',
@@ -651,21 +651,21 @@ export const RULE_DOCS = {
             "Neighbouring tests (parity with Go's `foo_test.go`) keep a test and its code together and discoverable.",
         reach: 'tests',
     },
-    'i4-no-vi-mock-in-src': {
+    'i4-no-module-doubles': {
         channel: 'statique',
         convention:
-            'In a test, mocks and data are CODE: `vi.mock`, a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all forbidden. A dotted specifier (`./dashboard.post`) is still code.',
+            'A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list (a config comment states why each entry is there), a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. A dotted specifier (`./dashboard.post`) is still code. The `vi.stubGlobal` clause moved to M3 in 16.0: one owner per convention.',
         family: 'I',
-        fix: 'Use `mockOf<Port>()` for a double, a `*.fixtures.ts` neighbour for a payload, and a spec under `specs/` for a test that needs a real file.',
+        fix: 'Double the port with `mockOf<Port>()`, keep a payload in a `*.fixtures.ts` neighbour, and allow-list a native module with its reason (chapter 05 § Doubles).',
         id: 'I4',
         rationale:
             'A module test that reaches for a real file or a module mock is describing an assembled product, and that has a facet of its own.',
         reach: 'tests',
     },
-    'j2-no-sleep-in-specs': {
+    'j2-no-sleep': {
         channel: 'statique',
         convention:
-            'No arbitrary sleep (`setTimeout`/`setInterval`/`Atomics.wait`, or a `node:timers/promises` import) in any test file — synchronisation is `see()`/`gone()` inside a scenario and `waitUntil()` everywhere else.',
+            'No arbitrary sleep (`setTimeout`/`setInterval`/`Atomics.wait`, or a `node:timers/promises` import) in any test file — synchronisation is `see()`/`gone()` inside a scenario and `waitUntil(predicate)` everywhere else.',
         family: 'J',
         fix: 'Wait for the condition, not for a duration.',
         id: 'J2',
