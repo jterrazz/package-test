@@ -54,6 +54,20 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
         expect(result.stderr).toMatch('c12-spec-placement-left.txt');
     });
 
+    // Full-output golden: the checker's diagnostics are OUR product, so the
+    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
+    // Apply — the whole stream is asserted, tokens covering the run cwd.
+    test("renames under a tree that is one facet's whole, with no facet level", async () => {
+        // Given - a tree whose runner sits at its ROOT: the folders below it are domains, not facets
+        const result = await cli
+            .fixture('$FIXTURES/lint-violations/c12-spec-rooted-facet/')
+            .exec('specs');
+
+        // Then - the spec is named, and the ground module's own test beside its module is not
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch('c12-spec-rooted-facet.txt');
+    });
+
     test('names a `.spec.ts` that never reached a specs tree', async () => {
         // Given - a member holding `src/creation.spec.ts`
         const result = await cli.exec(`--member ${WORKSPACE}/packages/stray-spec ${WORKSPACE}`);

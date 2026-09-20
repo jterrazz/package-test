@@ -28,6 +28,14 @@ import type { TokenViolation } from './checker.js';
  *   (the package's own `specs/lint/`, a repository's consistency suites) is a
  *   repository suite: it covers a tree rather than the assembled product, so
  *   it keeps `.test.ts` and C1's declared depth is what judges its shape.
+ *
+ * A tree may also be ONE facet's whole, with no `specs/<facet>/` level: the
+ * runner sits at the root of `specs/` and the folders below it are domains (the
+ * `depth: 'mirror'` shape, where the tree follows a command tree instead of a
+ * facet/domain one). Such a tree carries a `*.specification.ts` at its root,
+ * and that is what says so — every `.test.ts` below it specifies the assembled
+ * product, whatever folder it sits in. Without this clause the whole shape was
+ * invisible to C12 and its specs had to be renamed by hand.
  */
 
 /** The six facet folders — a first-level name under `specs/` that IS a constructor. */
@@ -128,19 +136,41 @@ export function checkSpecOutsideSpecs(memberDir: string): TokenViolation[] {
 export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
     return movesUnderFacet(specsRoot).map(({ from }) => {
         const rel = relative(specsRoot, from);
+        const first = rel.split(/[/\\]/u)[0] ?? '';
+        // The tree the file sits in, as the reader sees it: a facet folder when
+        // There is one, and `specs/` itself when the tree IS one facet's.
+        const where = FACETS.has(first) ? `specs/${first}/` : 'specs/';
         return {
             file: rel,
             line: 1,
-            message: `${rel}:1: a \`.test.ts\` under \`specs/${rel.split(/[/\\]/u)[0] ?? ''}/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`) (C12 — see docs/19-linting.md)`,
+            message: `${rel}:1: a \`.test.ts\` under \`${where}\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`) (C12 — see docs/19-linting.md)`,
             rule: 'c12-spec-file-name',
             severity: 'error' as const,
         };
     });
 }
 
+/**
+ * Is this tree ONE facet's whole, rooted at `specs/`?
+ *
+ * A `*.specification.ts` at the ROOT of the tree is the statement: the runner
+ * is the tree's, so every folder below it is a domain of that one facet and no
+ * first level is a repository suite.
+ */
+function isRootedFacetTree(specsRoot: string): boolean {
+    try {
+        return readdirSync(specsRoot, { withFileTypes: true }).some(
+            (entry) => entry.isFile() && entry.name.includes('.specification.'),
+        );
+    } catch {
+        return false;
+    }
+}
+
 /** The renames clause two asks for, as absolute from/to pairs. */
 export function movesUnderFacet(specsRoot: string): PlacementMove[] {
     const moves: PlacementMove[] = [];
+    const rooted = isRootedFacetTree(specsRoot);
     for (const path of walk(specsRoot)) {
         if (!path.endsWith('.test.ts')) {
             continue;
@@ -148,8 +178,9 @@ export function movesUnderFacet(specsRoot: string): PlacementMove[] {
         const parts = relative(specsRoot, path).split(/[/\\]/u);
         const facet = parts[0];
         // A file loose at the specs root has no facet to belong to (C1 owns
-        // That), and a non-facet first level is a repository suite.
-        if (parts.length < 2 || facet === undefined || !FACETS.has(facet)) {
+        // That), and a non-facet first level is a repository suite — unless the
+        // Tree itself is one facet's, which its root specification says.
+        if (!rooted && (parts.length < 2 || facet === undefined || !FACETS.has(facet))) {
             continue;
         }
         // A `<module>.test.ts` beside the `<module>.ts` it covers is I2's one
