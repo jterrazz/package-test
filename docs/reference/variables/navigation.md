@@ -5,6 +5,6 @@
 const navigation: LandmarkFactory;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:89](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L89)
+Defined in: [src/specification/facets/website/elements.ts:95](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L95)
 
 The `navigation` landmark — a `<nav>`. Name it when a page has several.

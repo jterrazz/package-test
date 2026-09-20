@@ -5,7 +5,7 @@
 function redis(options?): RedisHandle;
 ```
 
-Defined in: [src/integrations/redis/redis.ts:104](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L104)
+Defined in: [src/integrations/redis/redis.ts:107](https://github.com/jterrazz/package-test/blob/main/src/integrations/redis/redis.ts#L107)
 
 Create a Redis service handle.
 
@@ -22,7 +22,7 @@ Create a Redis service handle.
 ## Example
 
 ```ts
-// The record key derives the compose service: { cache: redis() } → "cache".
+// The record key is the name it reports under: { cache: redis() } → "cache".
 const cache = redis();
 // After start: cache.connectionString is populated
 ```

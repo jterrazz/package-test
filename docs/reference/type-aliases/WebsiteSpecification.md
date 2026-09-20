@@ -5,7 +5,7 @@
 type WebsiteSpecification = object;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:306](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L306)
+Defined in: [src/specification/facets/\_common/builder.ts:317](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L317)
 
 The `website` facet — page chain entry handed out by
 `specification.website()`. Setup methods chain; action methods are
@@ -20,7 +20,7 @@ performs one raw HTTP exchange and never follows redirects.
 clock: (iso) => WebsiteSpecification;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:311](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L311)
+Defined in: [src/specification/facets/\_common/builder.ts:322](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L322)
 
 Pin the PAGE's `Date` at `iso` for this chain — what the site's own
 scripts read. A `.fetch()` opens no page and refuses the setup.
@@ -43,7 +43,7 @@ scripts read. A `.fetch()` opens no page and refuses the setup.
 fetch: (path) => Promise<FetchResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:321](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L321)
+Defined in: [src/specification/facets/\_common/builder.ts:332](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L332)
 
 Perform one raw HTTP GET — redirects surface as 3xx results, never followed.
 
@@ -55,7 +55,7 @@ Perform one raw HTTP GET — redirects surface as 3xx results, never followed.
 
 #### Returns
 
-`Promise`\<[`FetchResult`](../classes/FetchResult.md)\>
+`Promise`\<[`FetchResult`](../interfaces/FetchResult.md)\>
 
 ***
 
@@ -65,7 +65,7 @@ Perform one raw HTTP GET — redirects surface as 3xx results, never followed.
 headers: (headers) => WebsiteSpecification;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:313](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L313)
+Defined in: [src/specification/facets/\_common/builder.ts:324](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L324)
 
 Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls merge.
 
@@ -87,7 +87,7 @@ Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls m
 intercept: InterceptMethod<WebsiteSpecification>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:318](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L318)
+Defined in: [src/specification/facets/\_common/builder.ts:329](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L329)
 
 Declare the chain's backend contracts — served by the declared stub
 backend (requires the runner's `backend` option). Multiple calls append.
@@ -100,7 +100,7 @@ backend (requires the runner's `backend` option). Multiple calls append.
 visit: (path, scenario?) => Promise<PageResult>;
 ```
 
-Defined in: [src/specification/facets/\_common/builder.ts:327](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L327)
+Defined in: [src/specification/facets/\_common/builder.ts:338](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/builder.ts#L338)
 
 Render the page in the shared browser and resolve with the captured
 document. With a scenario, the visitor interacts first (the When) and
@@ -115,4 +115,4 @@ the capture reflects the FINAL page state.
 
 #### Returns
 
-`Promise`\<[`PageResult`](../classes/PageResult.md)\>
+`Promise`\<[`PageResult`](../interfaces/PageResult.md)\>

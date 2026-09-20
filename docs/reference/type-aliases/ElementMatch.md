@@ -5,7 +5,7 @@
 type ElementMatch = object;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:97](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L97)
+Defined in: [src/specification/ports/browser.port.ts:100](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L100)
 
 One candidate captured when a descriptor matched more than one element —
 the evidence the ambiguity error enumerates so the author can disambiguate
@@ -19,7 +19,7 @@ without opening a browser.
 optional accessibleName?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:103](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L103)
+Defined in: [src/specification/ports/browser.port.ts:106](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L106)
 
 The accessible name, when it differs from the text — an `aria-label` is
 what a role descriptor MATCHED on, and printing the text alone sends the
@@ -33,7 +33,7 @@ author to disambiguate a name they cannot see.
 optional context?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:105](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L105)
+Defined in: [src/specification/ports/browser.port.ts:108](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L108)
 
 Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 
@@ -45,7 +45,7 @@ Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one.
 optional detail?: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:107](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L107)
+Defined in: [src/specification/ports/browser.port.ts:110](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L110)
 
 The attribute that disambiguates most — `href` for links, `name` for fields.
 
@@ -57,7 +57,7 @@ The attribute that disambiguates most — `href` for links, `name` for fields.
 tag: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:109](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L109)
+Defined in: [src/specification/ports/browser.port.ts:112](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L112)
 
 Tag name, lower-cased.
 
@@ -69,6 +69,6 @@ Tag name, lower-cased.
 text: string;
 ```
 
-Defined in: [src/specification/ports/browser.port.ts:111](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L111)
+Defined in: [src/specification/ports/browser.port.ts:114](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/browser.port.ts#L114)
 
 Text content, whitespace-collapsed and truncated.

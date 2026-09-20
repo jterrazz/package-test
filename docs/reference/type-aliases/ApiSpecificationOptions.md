@@ -5,7 +5,7 @@
 type ApiSpecificationOptions<Services> = object;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:30](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L30)
+Defined in: [src/specification/facets/api/start-api.ts:20](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L20)
 
 Options for startApi \| specification.api.
 
@@ -17,48 +17,30 @@ Options for startApi \| specification.api.
 
 ## Properties
 
-### mode?
-
-```ts
-optional mode?: SpecificationMode;
-```
-
-Defined in: [src/specification/facets/api/start-api.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L37)
-
-Execution mode override. Resolution: `options.mode` >
-`process.env.TEST_MODE` > `'node'`. Never hardcode this in a
-specification file when `server` is defined — set it per vitest
-project via `env: { TEST_MODE: 'compose' }` (CONVENTIONS A5).
-
-***
-
 ### root?
 
 ```ts
 optional root?: string;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:45](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L45)
+Defined in: [src/specification/facets/api/start-api.ts:26](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L26)
 
-Project root override for compose detection and init scripts. When
-absent, the root is auto-discovered by walking up from the calling
-specification file to the first directory containing
-`docker/compose.test.yaml`, else the first containing `package.json`
-(CONVENTIONS A9).
+Project root override for init scripts and artefact paths. When absent,
+the root is auto-discovered by walking up from the calling specification
+file to the first directory containing `package.json` (CONVENTIONS A9).
 
 ***
 
-### server?
+### server
 
 ```ts
-optional server?: (services) => HonoApp;
+server: (services) => HonoApp;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:51](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L51)
+Defined in: [src/specification/facets/api/start-api.ts:31](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L31)
 
 The app factory — receives the started services record (fully typed)
-and returns the Hono app. Required in node mode, ignored in compose
-mode (the app runs as a compose service there).
+and returns the Hono app.
 
 #### Parameters
 
@@ -78,9 +60,9 @@ mode (the app runs as a compose service there).
 optional services?: Services;
 ```
 
-Defined in: [src/specification/facets/api/start-api.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L58)
+Defined in: [src/specification/facets/api/start-api.ts:38](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/api/start-api.ts#L38)
 
 Named infrastructure record. Keys become the `database` vocabulary of
-`.seed()` / `.table()` and drive the compose binding: a handle with no
-`composeService` option links to the compose service named exactly like
-its key, else the kebab-case conversion of the key (CONVENTIONS A6).
+`.seed()` / `.table()`, and, kebab-cased, the folder each service reads
+its init script from (`{ analyticsDb: postgres() }` →
+`docker/analytics-db/init.sql`).

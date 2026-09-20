@@ -5,7 +5,7 @@
 function postgres(options?): PostgresHandle;
 ```
 
-Defined in: [src/integrations/postgres/postgres.ts:204](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L204)
+Defined in: [src/integrations/postgres/postgres.ts:216](https://github.com/jterrazz/package-test/blob/main/src/integrations/postgres/postgres.ts#L216)
 
 Create a PostgreSQL service handle.
 
@@ -22,10 +22,10 @@ Create a PostgreSQL service handle.
 ## Example
 
 ```ts
-// Key derives the compose service (exact name or kebab-case):
-//   { db: postgres() }          → compose service "db"
-//   { analyticsDb: postgres() } → compose service "analytics-db"
-// Escape hatch for names the key cannot derive:
-const events = postgres({ composeService: "legacy_event_store" });
+// The record key is the name: it is the spec's `database` vocabulary, and
+// Kebab-cased it is the folder the init script is read from.
+//   { db: postgres() }          → docker/db/init.sql, then docker/postgres/init.sql
+//   { analyticsDb: postgres() } → docker/analytics-db/init.sql
+const events = postgres();
 // After start: events.connectionString is populated
 ```

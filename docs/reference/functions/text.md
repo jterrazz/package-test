@@ -7,7 +7,7 @@ function text(value): TextAccessor;
 
 Defined in: [src/specification/facets/\_common/result/text-subject.ts:27](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/_common/result/text-subject.ts#L27)
 
-Wrap an arbitrary string into a [TextAccessor](../classes/TextAccessor.md) anchored on the calling
+Wrap an arbitrary string into a [TextAccessor](../interfaces/TextAccessor.md) anchored on the calling
 test's directory — the same caller-detection the builders use.
 
 The product surface of a test framework is its own error messages, checker
@@ -25,7 +25,7 @@ works exactly as on any stream accessor.
 
 The ANCHOR is why this sits apart from the accessor it builds: reading the
 caller's frame means reading a stack and a real path, which is node's alone.
-[TextAccessor](../classes/TextAccessor.md) itself is a pure projection over a captured string, so
+[TextAccessor](../interfaces/TextAccessor.md) itself is a pure projection over a captured string, so
 it loads in a page — and the browser entry builds its own `text()`, where
 the golden commands resolve `_expected/` from the test's path server-side.
 
@@ -37,4 +37,4 @@ the golden commands resolve `_expected/` from the test's path server-side.
 
 ## Returns
 
-[`TextAccessor`](../classes/TextAccessor.md)
+[`TextAccessor`](../interfaces/TextAccessor.md)

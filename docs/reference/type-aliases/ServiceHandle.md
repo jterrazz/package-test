@@ -18,7 +18,7 @@ Mutable: connectionString is populated after the orchestrator starts containers.
 buildConnectionString: (host, port) => string;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:38](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L38)
+Defined in: [src/specification/ports/service.port.ts:37](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L37)
 
 Build the connection string from host and port.
 
@@ -35,30 +35,13 @@ Build the connection string from host and port.
 
 ***
 
-### composeName
-
-```ts
-composeName: null | string;
-```
-
-Defined in: [src/specification/ports/service.port.ts:20](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L20)
-
-Compose service name. Left `null` until the orchestrator binds it at
-start time (CONVENTIONS A6): a handle with no explicit `composeService`
-links to the compose service named exactly like its record key, else the
-kebab-case conversion of the key — so `{ analyticsDb: postgres() }` binds
-to the compose service `analytics-db` without any option. Set
-`composeService` explicitly only for names the key cannot derive.
-
-***
-
 ### connectionString
 
 ```ts
 connectionString: string;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:32](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L32)
+Defined in: [src/specification/ports/service.port.ts:31](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L31)
 
 Connection string — populated after start.
 
@@ -70,7 +53,7 @@ Connection string — populated after start.
 createDatabaseAdapter: () => DatabasePort | null;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:41](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L41)
+Defined in: [src/specification/ports/service.port.ts:40](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L40)
 
 Create a DatabasePort adapter (if this is a database). Returns null otherwise.
 
@@ -86,7 +69,7 @@ Create a DatabasePort adapter (if this is a database). Returns null otherwise.
 readonly defaultImage: string;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:26](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L26)
+Defined in: [src/specification/ports/service.port.ts:25](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L25)
 
 Default Docker image for this service type.
 
@@ -98,7 +81,7 @@ Default Docker image for this service type.
 readonly defaultPort: number;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:23](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L23)
+Defined in: [src/specification/ports/service.port.ts:22](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L22)
 
 Default container port for this service type.
 
@@ -110,7 +93,7 @@ Default container port for this service type.
 readonly environment: Record<string, string>;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:29](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L29)
+Defined in: [src/specification/ports/service.port.ts:28](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L28)
 
 Environment variables to pass to the container.
 
@@ -122,7 +105,7 @@ Environment variables to pass to the container.
 healthcheck: () => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:44](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L44)
+Defined in: [src/specification/ports/service.port.ts:43](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L43)
 
 Verify the service is ready and accepting connections. Throws with context if not.
 
@@ -135,16 +118,16 @@ Verify the service is ready and accepting connections. Throws with context if no
 ### initialize
 
 ```ts
-initialize: (composeDir, root) => Promise<void>;
+initialize: (dockerDir, root) => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:56](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L56)
+Defined in: [src/specification/ports/service.port.ts:55](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L55)
 
 Run initialization scripts (e.g., init.sql). Throws with SQL error
 context if it fails.
 
-`composeDir` is where the compose file lives — where a service reads its
-`init.sql` from. `root` is the project root the specification resolved
+`dockerDir` is `<root>/docker` — where a service reads its `init.sql`
+from, under its own name. `root` is the project root the specification resolved
 (A9), handed down so a service that CACHES something writes it under the
 project's own `.artifacts/`, never in a machine-global directory two
 checkouts would share.
@@ -153,7 +136,7 @@ checkouts would share.
 
 | Parameter | Type |
 | ------ | ------ |
-| `composeDir` | `string` |
+| `dockerDir` | `string` |
 | `root` | `string` |
 
 #### Returns
@@ -168,7 +151,7 @@ checkouts would share.
 isolation: () => IsolationStrategy;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:62](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L62)
+Defined in: [src/specification/ports/service.port.ts:61](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L61)
 
 Get the isolation strategy for parallel test execution.
 
@@ -184,7 +167,7 @@ Get the isolation strategy for parallel test execution.
 reset: () => Promise<void>;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:59](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L59)
+Defined in: [src/specification/ports/service.port.ts:58](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L58)
 
 Reset state between tests (truncate tables, flush cache, etc.)
 
@@ -194,13 +177,29 @@ Reset state between tests (truncate tables, flush cache, etc.)
 
 ***
 
+### serviceName
+
+```ts
+serviceName: null | string;
+```
+
+Defined in: [src/specification/ports/service.port.ts:19](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L19)
+
+The name this handle is known by. Left `null` until the orchestrator
+assigns it at start time: it is the kebab-case form of the RECORD KEY,
+so `{ analyticsDb: postgres() }` reports as `analytics-db` and reads its
+init script from `docker/analytics-db/`. The key is the only name a
+specification writes; a handle carries no second one of its own.
+
+***
+
 ### started
 
 ```ts
 started: boolean;
 ```
 
-Defined in: [src/specification/ports/service.port.ts:35](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L35)
+Defined in: [src/specification/ports/service.port.ts:34](https://github.com/jterrazz/package-test/blob/main/src/specification/ports/service.port.ts#L34)
 
 Whether this service has been started.
 

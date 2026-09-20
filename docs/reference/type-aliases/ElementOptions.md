@@ -5,7 +5,7 @@
 type ElementOptions = object;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:19](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L19)
+Defined in: [src/specification/facets/website/elements.ts:16](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L16)
 
 Options accepted by every named descriptor.
 
@@ -17,7 +17,13 @@ Options accepted by every named descriptor.
 optional exact?: boolean;
 ```
 
-Defined in: [src/specification/facets/website/elements.ts:24](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L24)
+Defined in: [src/specification/facets/website/elements.ts:27](https://github.com/jterrazz/package-test/blob/main/src/specification/facets/website/elements.ts#L27)
 
-Match the accessible name as a whole string. Default is substring —
-`link('Articles')` also matches "Read Articles".
+Match the accessible name as a whole string. `true` by default since
+16.0.
+
+A substring match is what a person does NOT mean: `link('Articles')`
+designated "Read Articles" as readily as "Articles", so a test could pass
+for years against the element beside the one it named. `{ exact: false }`
+is the opt-out, for a name that genuinely carries a variable part the
+test does not control.
