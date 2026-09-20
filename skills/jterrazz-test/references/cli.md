@@ -32,7 +32,7 @@ export const { cli, cleanup } = await specification.cli('./bin/shoply.sh', {
 | `env`       | `env: { staging: { API_URL: '…' } }`          | Named environments the documents select by name (`env: staging`)                                     |
 | `docker`    | `docker: { compose: './docker-compose.yml' }` | The compose stack this binary is run against, started with the runner                                |
 | `serve`     | `serve: { site: process({ command }) }`       | The processes a `<case>.spec.yaml` may name in its `serve:` list                                     |
-| `transform` | `transform: (text) => text.replaceAll(…)`     | Normalises the binary's output before it is asserted — a last resort for what tokens cannot say      |
+| `transform` | `transform: (text) => text.replaceAll(…)`     | Normalises every compared reading before it is asserted — a last resort for what tokens cannot say   |
 
 ## Setups (chainable)
 
