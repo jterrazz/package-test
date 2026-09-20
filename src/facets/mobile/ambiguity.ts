@@ -1,5 +1,5 @@
+import { formatElement } from '../../core/elements/ambiguity.js';
 import type { MobileElementMatch, MobileElementRef } from '../../core/ports/device.port.js';
-import { formatElement } from '../website/ambiguity.js';
 
 /**
  * The ambiguity refusal, mobile edition — CONVENTIONS W3.

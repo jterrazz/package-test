@@ -56,7 +56,7 @@ export {
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
 } from './facets/website/website.specification.js';
-export { type ProcessOptions } from './facets/website/serve.adapter.js';
+export { type ProcessOptions } from './seams/process/serve.adapter.js';
 export { type ServerSpec } from './facets/website/website.specification.js';
 export { processService as process, ProcessHandle } from './core/chain/process.js';
 export { type DatabaseKeys, type ServiceRecord } from './core/chain/services.js';

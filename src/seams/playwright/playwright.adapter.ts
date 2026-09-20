@@ -4,6 +4,12 @@ import { resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserType, Locator, Page } from 'playwright';
 
+import {
+    AmbiguousElementError,
+    describeAmbiguity,
+    formatElement,
+} from '../../core/elements/ambiguity.js';
+import { warnSubstringOnly } from '../../core/elements/substring-warning.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -15,12 +21,6 @@ import type {
     ElementRef,
     Visitor,
 } from '../../core/ports/browser.port.js';
-import {
-    AmbiguousElementError,
-    describeAmbiguity,
-    formatElement,
-} from '../../facets/website/ambiguity.js';
-import { warnSubstringOnly } from '../../facets/website/substring-warning.js';
 
 /**
  * Anything a locator can be built from — the page root, or another locator

@@ -1,4 +1,4 @@
-import type { ElementMatch, ElementRef } from '../../core/ports/browser.port.js';
+import type { ElementMatch, ElementRef } from '../ports/browser.port.js';
 
 /**
  * The ambiguity refusal — CONVENTIONS W3.

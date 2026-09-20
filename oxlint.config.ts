@@ -9,19 +9,21 @@ import { testing } from './dist/oxlint.js';
 /**
  * The five trees of this package and their sanctioned edges (CONVENTIONS I1).
  *
- * - `core/` — the chain, the results, the elements, the contracts and the
- *   intercept, the goldens, the clock and the doubles: what every facet is
- *   made of. It reaches the two seams that carry no engine of their own
- *   (docker, yaml), the msw engine through the one lazy import each of its
- *   two openers owns, and — for the type a terminal action hands back — the
- *   facet module that NAMES that result.
+ * - `core/` — the chain, the results, the elements (the descriptors, and the
+ *   ambiguity and substring readings every surface shares), the contracts and
+ *   the intercept, the goldens, the clock and the doubles: what every facet is
+ *   made of. It reaches the three seams that carry no engine of their own
+ *   (docker, process, yaml), the msw engine through the one lazy import each
+ *   of its two openers owns, and — to CONSTRUCT what a terminal action hands
+ *   back — the facet module that declares that result.
  * - `facets/<facet>/` — the same four files in every folder
  *   (`<facet>.specification.ts`, `.chain.ts`, `.result.ts`, `.project.ts`)
  *   plus what is unique to the facet. It reaches `core/` freely, and each
  *   constructor opens the one seam its runtime needs.
- * - `seams/<dep>/` — one folder = one external dependency, plus `core/` and
- *   the facet vocabulary an adapter projects into (the ambiguity readings,
- *   the cli result a container exec produces).
+ * - `seams/<dep>/` — one folder = one external dependency (or one node
+ *   builtin, as `process/` is), plus `core/` and the facet vocabulary an
+ *   adapter projects into (the device's ambiguity reading, the cli result a
+ *   container exec produces).
  * - `runner/` — the config surface: the preset, the project index, update
  *   mode, the literate plugin. It couples to `vite`/`vitest` by design.
  * - `lint/` — zero runtime imports: no external packages, and from `core/`
@@ -37,19 +39,21 @@ const FRAMEWORK_LAYERS = {
     core: {
         imports: [
             'core/',
-            // A terminal action hands back the FACET's result, and the facet
-            // Folder is where that name lives (`<facet>.result.ts`). The edge
-            // Is a type edge: the builder constructs nothing it imports here.
+            // A terminal action CONSTRUCTS the facet's result — `new
+            // HttpResult(…)`, `new PageResult(…)` — and the facet folder is
+            // where that class lives (`<facet>.result.ts`). It is a value
+            // edge, by design: one builder, seven results it names.
             'facets/api/api.result',
             'facets/cli/cli.result',
             'facets/cli/literate',
             'facets/integration/integration.result',
             'facets/mobile/mobile.result',
             'facets/website/website.result',
-            'facets/website/serve.adapter',
-            // The two seams that carry no engine: a docker lookup is a shell
-            // Read, a yaml document is a parse.
+            // The three seams that carry no engine of their own: a docker
+            // Lookup is a shell read, a yaml document is a parse, a process is
+            // `node:child_process`.
             'seams/docker/',
+            'seams/process/',
             'seams/yaml/document',
             // Update-mode detection is a pure env read the literate runner
             // Shares with the matchers — one answer to "are we rewriting?".
@@ -78,8 +82,10 @@ const FRAMEWORK_LAYERS = {
             'facets/component/component.types.ts': ['seams/vitest-browser/'],
             'facets/component/component.project.ts': ['seams/vitest-browser/commands'],
             'facets/cli/cli.project.ts': ['runner/literate-plugin'],
+            'facets/cli/literate.ts': ['seams/process/'],
+            'facets/mobile/appium-server.ts': ['seams/process/'],
             'facets/mobile/mobile.specification.ts': ['seams/appium/'],
-            'facets/website/website.specification.ts': ['seams/playwright/'],
+            'facets/website/website.specification.ts': ['seams/playwright/', 'seams/process/'],
         },
     },
     lint: {
@@ -123,6 +129,7 @@ const FRAMEWORK_LAYERS = {
             openai: ['openai'],
             playwright: ['playwright'],
             postgres: ['pg'],
+            process: [],
             redis: ['redis'],
             sqlite: ['better-sqlite3'],
             testcontainers: ['testcontainers'],
@@ -135,14 +142,13 @@ const FRAMEWORK_LAYERS = {
             // Message a MISSING optional peer produces, and a copy of that
             // Message per folder is how the four of them would have drifted.
             'seams/peer',
-            // What an adapter PROJECTS into: the ambiguity readings and the
-            // Result a container exec produces are the facet's vocabulary, and
-            // A seam that copied them would answer in a second dialect.
+            // What an adapter PROJECTS into: the device's own reading of an
+            // Ambiguity and the result a container exec produces are the
+            // Facet's vocabulary, and a seam that copied them would answer in
+            // A second dialect. The SHARED readings are `core/elements/`.
             'facets/cli/cli.result',
             'facets/mobile/ambiguity',
             'facets/mobile/projection',
-            'facets/website/ambiguity',
-            'facets/website/substring-warning',
         ],
     },
 };

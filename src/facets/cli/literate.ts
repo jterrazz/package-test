@@ -25,7 +25,7 @@ import {
 import type { CliEnv, CliOutput } from '../../core/ports/cli.port.js';
 import { stripAnsiCodes } from '../../core/result/text.js';
 import { shouldUpdateSnapshots } from '../../runner/update.js';
-import { ServeAdapter } from '../website/serve.adapter.js';
+import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import { CliResult } from './cli.result.js';
 
 /**
