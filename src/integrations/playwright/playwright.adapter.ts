@@ -90,10 +90,11 @@ function locate(root: MatchScope, element: ElementRef): Locator {
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
-        return FIELD_ROLES.map((role) => scope.getByRole(role, { exact, name })).reduce(
-            (all, one) => all.or(one),
-            scope.getByLabel(name, { exact }),
-        );
+        let field = scope.getByLabel(name, { exact });
+        for (const role of FIELD_ROLES) {
+            field = field.or(scope.getByRole(role, { exact, name }));
+        }
+        return field;
     }
     if (element.kind === 'testId') {
         return scope.getByTestId(name);

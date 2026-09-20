@@ -6,7 +6,7 @@ import { http } from '../../contracts/http.js';
 import type { CliEnv, CliOutput, CliPort } from '../../ports/cli.port.js';
 import type { DatabasePort } from '../../ports/database.port.js';
 import type { ServiceHandle } from '../../ports/service.port.js';
-import { createApiFacet, createCliFacet, SpecificationBuilder } from './builder.js';
+import { createCliFacet, SpecificationBuilder } from './builder.js';
 import { StubBackend } from './stub-backend.js';
 
 // ── Fakes — mocks are code (CONVENTIONS I4) ──
@@ -197,24 +197,9 @@ describe('builder — intercept input forms', () => {
     });
 });
 
-describe('builder — intercepts in compose mode (CONVENTIONS I3)', () => {
-    test('.intercept() throws immediately when the runner disabled intercepts', () => {
-        // Given - an api facet configured the way compose mode builds it
-        const api = createApiFacet({
-            interceptDisabledReason:
-                'intercepts are in-process (MSW) and not available in compose mode — ' +
-                'keep intercept specs in node-only vitest projects.',
-        });
-
-        // Then - the error is thrown at .intercept() call time, not at the action
-        expect(() => api.intercept(http.get('https://x.test/'), http.json({}))).toThrow(
-            '.intercept(): intercepts are in-process (MSW) and not available in compose mode — ' +
-                'keep intercept specs in node-only vitest projects.',
-        );
-    });
-
-    test('.intercept() stays available when the reason is unset (node mode)', () => {
-        // Given - a plain builder (node-mode config)
+describe('builder — the request a chain declares', () => {
+    test('.intercept() takes an inline pair and chains', () => {
+        // Given - a plain builder
         const builder = new SpecificationBuilder({}, import.meta.dirname);
 
         // Then - registering an inline intercept chains normally
@@ -400,26 +385,12 @@ describe('builder — service env injection', () => {
     });
 });
 
-describe('builder — the calendar in compose mode', () => {
-    test('.clock() throws immediately when the app runs in a container', () => {
-        // Given - an api facet configured the way compose mode builds it
-        const api = createApiFacet({
-            clockDisabledReason:
-                "the calendar it pins is this runner's, and compose mode runs the app in a " +
-                'container — assert the stamp with a `{{iso8601}}` token instead.',
-        });
-
-        // Then - the refusal is the sentence .intercept() gives, at call time: silently pinning a calendar nothing under test reads is the failure
-        expect(() => api.clock('2026-03-04T09:30:00Z')).toThrow(
-            "the calendar it pins is this runner's",
-        );
-    });
-
-    test('.clock() stays available when the reason is unset (node mode)', () => {
-        // Given - a plain builder (node-mode config)
+describe('builder — the calendar a chain pins', () => {
+    test('.clock() takes the instant and travels with the chain', () => {
+        // Given - a plain builder
         const builder = new SpecificationBuilder({}, import.meta.dirname);
 
-        // Then - the instant is accepted and travels with the chain
+        // Then - the instant is accepted
         expect(() => builder.clock('2026-03-04T09:30:00Z')).not.toThrow();
     });
 });

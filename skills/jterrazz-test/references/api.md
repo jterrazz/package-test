@@ -82,7 +82,7 @@ Location: /users/{{uuid#user}}
 ```
 specs/api/
 ├── api.specification.ts        # runner at the facet ROOT
-├── intercepts/                 # strict-contract specs (D7) — node-only; api-stack EXCLUDES this
+├── intercepts/                 # strict-contract specs (D7) — the subject runs in this process
 └── <feature>/
     ├── <feature>.test.ts
     ├── _seeds/                  # *.sql ONLY

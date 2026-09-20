@@ -4,7 +4,7 @@ import { http } from '../../../src/index.js';
 import { analyticsUrl, jobs } from '../jobs.specification.js';
 import { jobs as staticJobs, staticRuns } from '../static-jobs.specification.js';
 
-// Jobs run in-process by definition (CONVENTIONS A5/A8) — specification.jobs()
+// Jobs run in-process by definition (CONVENTIONS A8) — specification.jobs()
 // Has no mode: the same runner works regardless of TEST_MODE.
 
 describe('jobs', () => {

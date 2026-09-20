@@ -425,21 +425,58 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         return found;
     };
 
+    /** The letters a family is spelled with — what makes a citation one. */
+    const letters = Object.keys(FAMILIES).join('');
+
+    /**
+     * The four shapes a citation takes in this corpus: `rule X` / `rules X, Y`,
+     * the parenthesised tail a message and a comment end on (`(C18)`), the
+     * `CONVENTIONS X/Y` a source comment opens on, and a possessive (`D7's`).
+     *
+     * The first shape alone was the whole check, and every id the 16.0 wave
+     * retired outlived it somewhere: in a parenthesised tail, in a heading, in
+     * an example a consumer copies.
+     */
+    const citationPatterns = (): RegExp[] => [
+        new RegExp(
+            String.raw`\brules?\s+((?:[${letters}]\d+w?)(?:\s*(?:,|and|/)\s*[${letters}]\d+w?)*)`,
+            'gu',
+        ),
+        new RegExp(
+            String.raw`\bCONVENTIONS\s+((?:[${letters}]\d+w?)(?:/[${letters}]\d+w?)*)`,
+            'gu',
+        ),
+        new RegExp(String.raw`\(([${letters}]\d+w?)(?:\s+—[^)]*)?\)`, 'gu'),
+        new RegExp(String.raw`\b([${letters}]\d+w?)'s\b`, 'gu'),
+    ];
+
+    /** Every file of the LAYER that implements the surface — comments cite too. */
+    const citingSources = (): string[] => {
+        const found: string[] = [];
+        for (const root of ['src', 'specs']) {
+            for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
+                const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
+                if (path.endsWith('.ts') || path.endsWith('.tsx')) {
+                    found.push(path);
+                }
+            }
+        }
+        return found;
+    };
+
     test('k2 — every id the corpus cites resolves to a row', () => {
-        // Given - every `rule X` / `rules X, Y` citation in the corpus and in the messages the plugin ships. The families are the vocabulary: a citation is a family letter and a number, and nothing else is one
+        // Given - every citation shape the corpus uses, in the chapters, the skill, the messages the plugin ships and the comments of the code that implements them. The families are the vocabulary: a citation is a family letter and a number, and nothing else is one
         const cited = new Map<string, string>();
         const collect = (text: string, where: string): void => {
-            const pattern = new RegExp(
-                String.raw`\brules?\s+((?:[${Object.keys(FAMILIES).join('')}]\d+w?)(?:\s*(?:,|and|/)\s*[${Object.keys(FAMILIES).join('')}]\d+w?)*)`,
-                'gu',
-            );
-            for (const match of text.matchAll(pattern)) {
-                for (const id of (match[1] ?? '').split(/[\s,/]+|and/u).filter(Boolean)) {
-                    cited.set(id.replace(/w$/u, ''), where);
+            for (const pattern of citationPatterns()) {
+                for (const match of text.matchAll(pattern)) {
+                    for (const id of (match[1] ?? '').split(/[\s,/]+|and/u).filter(Boolean)) {
+                        cited.set(id.replace(/w$/u, ''), where);
+                    }
                 }
             }
         };
-        for (const file of citingFiles()) {
+        for (const file of [...citingFiles(), ...citingSources()]) {
             collect(read(file), file);
         }
         for (const [name, rule] of Object.entries(plugin.rules)) {
@@ -454,6 +491,54 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
             expect(rowIds.has(id), `${where} cites rule ${id}, which resolves to no row`).toBe(
                 true,
             );
+        }
+    });
+
+    test('k2 — every rule NAME the corpus cites resolves to a rule or a pass', () => {
+        // Given - every implementation name the corpus spells, in the chapters, the skill and the code. A retired rule leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know — the whole file, not the line
+        const known = [
+            ...Object.keys(plugin.rules),
+            ...CHECKER_PASS_IDS,
+            ...catalog.map((entry) => entry.name),
+        ];
+        // A fixture tree is named after the rule it stands for, with a tail
+        // Saying which case it holds — the inventory meta-test already pairs
+        // Each of them with its rule, so the directory listing IS the vocabulary.
+        const names = new Set([
+            ...known,
+            ...readdirSync(resolve(ROOT, 'specs/_fixtures/lint-violations')),
+            // A golden is named after the case it holds, which is the rule's
+            // Name plus what the run did to the tree.
+            ...readdirSync(resolve(ROOT, 'specs/lint/checker/_expected')).map((file) =>
+                file.replace(/\.[a-z]+$/u, ''),
+            ),
+        ]);
+        const pattern = new RegExp(
+            String.raw`(?:^|[^\w\-#])([${letters.toLowerCase()}]\d+w?(?:-[a-z0-9]+)+)(?![\w-])`,
+            'gu',
+        );
+        const cited = new Map<string, string>();
+        for (const file of [...citingFiles(), ...citingSources()]) {
+            for (const line of read(file).split('\n')) {
+                // A migration sentence NAMES what it retired — that is what it
+                // Is for, and a consumer's config still naming one is what it
+                // Warns about. The names on that line are gone by design.
+                if (line.includes('no longer exist')) {
+                    continue;
+                }
+                for (const match of line.matchAll(pattern)) {
+                    cited.set(match[1] ?? '', file);
+                }
+            }
+        }
+
+        // Then - each names something that exists
+        expect(cited.size).toBeGreaterThan(0);
+        for (const [name, where] of cited) {
+            expect(
+                names.has(name),
+                `${where} names \`${name}\`, which is no rule of this plugin`,
+            ).toBe(true);
         }
     });
 

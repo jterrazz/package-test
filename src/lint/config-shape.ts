@@ -113,6 +113,12 @@ export function projectLiterals(program: AstNode): ProjectLiteral[] {
 /** Every character a glob gives a meaning to — a segment holding one is not a path. */
 const WILDCARD = /[*?{[(!]/u;
 
+/** Directories a glob walk never enters. */
+const SKIPPED_WALK = new Set(['.git', 'dist', 'node_modules']);
+
+/** How deep below an include's prefix the walk looks for one matching file. */
+const GLOB_DEPTH = 12;
+
 /**
  * The part of a glob that is a PATH — every segment before the first one
  * carrying a wildcard. `specs/api/**\/*.spec.ts` → `specs/api`.
@@ -163,7 +169,7 @@ export function collectedSegments(configFile: string, glob: string): string[] | 
  */
 export function collectsAFile(directory: string, glob: string): boolean {
     const matcher = globMatcher(glob);
-    const walk = (dir: string, depth: number): boolean => {
+    const search = (dir: string, depth: number): boolean => {
         if (depth > GLOB_DEPTH) {
             return false;
         }
@@ -173,7 +179,7 @@ export function collectsAFile(directory: string, glob: string): boolean {
             }
             const path = join(dir, name);
             if (isDirectory(path)) {
-                if (walk(path, depth + 1)) {
+                if (search(path, depth + 1)) {
                     return true;
                 }
                 continue;
@@ -184,14 +190,8 @@ export function collectsAFile(directory: string, glob: string): boolean {
         }
         return false;
     };
-    return walk(directory, 0);
+    return search(directory, 0);
 }
-
-/** Directories a glob walk never enters. */
-const SKIPPED_WALK = new Set(['.git', 'dist', 'node_modules']);
-
-/** How deep below an include's prefix the walk looks for one matching file. */
-const GLOB_DEPTH = 12;
 
 /**
  * A glob as a regular expression over the tail of a path — `**` crosses

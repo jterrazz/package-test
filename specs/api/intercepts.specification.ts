@@ -1,7 +1,6 @@
 /**
  * Runner for the strict-intercept specs (CONVENTIONS D7). Intercepts are
- * in-process (MSW), so this specification is node-only: the vitest config
- * excludes this folder from the compose (`api-stack`) project (I3).
+ * in-process (MSW), so the app under test runs in this process.
  *
  * The app under test is a tiny in-file Hono-compatible app whose only job
  * is to make outgoing HTTP calls — the surface the intercepts guard.

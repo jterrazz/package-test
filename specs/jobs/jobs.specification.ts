@@ -1,6 +1,6 @@
 /**
  * Shared jobs specification — `specification.jobs()` has no HTTP server and
- * no mode: jobs run in-process by definition (CONVENTIONS A5/A8).
+ * jobs run in-process by definition (CONVENTIONS A8).
  */
 import { afterAll } from 'vitest';
 
@@ -49,7 +49,7 @@ async function enrichFromApi(analyticsUrl: string): Promise<void> {
 }
 
 // The `analyticsDb` key auto-binds to the `analytics-db` compose service via
-// Kebab-case derivation — no composeService needed (CONVENTIONS A6).
+// The record KEY is the service name, in kebab-case (CONVENTIONS A8).
 const analyticsHandle = postgres();
 
 export const { cleanup, jobs } = await specification.jobs({

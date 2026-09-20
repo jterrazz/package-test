@@ -120,6 +120,6 @@ Unmatched outgoing HTTP request during spec: <METHOD> <url>
 
 At chain end, every `required` contract that was never requested fails too, naming its route. A chain with **zero** contracts is not guarded (assumed perimeter).
 
-## Node-only on api (I3)
+## In-process on api, jobs and integration
 
-`api`/`jobs` contracts run through in-process MSW, and both facets run the subject in this process — so every outgoing request it makes passes through the interceptor.
+`api`, `jobs` and `integration` contracts run through in-process MSW, and all three facets run the subject in this process — so every outgoing request it makes passes through the interceptor. `website` and `mobile` run the subject in another process, and their contracts are served by the declared stub backend over the same queue.
