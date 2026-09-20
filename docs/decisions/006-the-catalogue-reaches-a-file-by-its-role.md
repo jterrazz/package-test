@@ -39,9 +39,11 @@ been run against, and every consumer paid for it.
 **One gate, by ROLE.** `roleOf(file)` returns `{ role, inSpecs, legacyDir }`,
 and the role is read from the SUFFIX: `.specification.ts(x)`, `.spec.yaml`,
 `.spec.ts`, `.test.tsx`, `.test.ts`, `vitest.config.*`, a ground ancestor, a
-`contracts/` ancestor. A statique rule reads those three fields and nothing
-else of the path. A tree is read only by the checker passes that say they read
-one — C1, C12, C18, C20, C21w.
+`contracts/` ancestor. A statique rule reads those three fields and, where it
+must know where the file sits, the ONE package-bounded anchor every pass shares
+(`specsAnchor` in `src/lint/ast.ts`) — never a bare path segment. The rules
+that need it say so: C1, C4, C8, C13, F2, F3, I1, I4. Walking a TREE is the
+checker's — C1's depth, C12, C18, C20, C21w.
 
 ### A row says what it reaches, and what to do
 
@@ -59,8 +61,11 @@ meta-test. One meta-test holds that contract for all seven.
 
 **English, and anchored.** Every sentence the catalogue publishes is English
 (K5 holds the line with a deny-list of the tokens the manifest actually
-carried), and every message ends with a generated `(<ID> — <chapter>#<rule>)`
-tail whose anchor is asserted to exist (K3).
+carried), and every message the PLUGIN ships ends with a generated
+`(<ID> — <chapter>#<rule>)` tail whose anchor is asserted to exist (K3). A
+checker finding carries its id and its chapter; several of its passes report
+under a family code (`d4`, `d4b`, `d10w`) rather than a row name, so the tail
+routes to the chapter and the id says which row.
 
 ### A row is born on a count
 
@@ -109,7 +114,7 @@ the `cli()` helper now defaults) and **C20** (folder = constructor, which the
 `integration` facet of 15.3 is the first new folder to answer to).
 
 The chapters are renumbered ONCE, in the same release, so a link repointed by
-this change is repointed for good. The renumbering itself is block B's.
+this change is repointed for good.
 
 ## Consequences
 

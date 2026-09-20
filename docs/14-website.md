@@ -273,7 +273,7 @@ The landmarks are the ARIA landmark set and nothing more — a closed vocabulary
 
 ### `{ exact: false }` — when a name carries a part the test does not control
 
-**A name designates the accessible name WHOLE.** `link('Articles')` does not reach "Read Articles", and has not since 16.0. The substring default it replaced is the shape that let a test pass for years against the element beside the one it named — and the refusal never came, because there was only ever one match.
+**A name designates the accessible name WHOLE.** `link('Articles')` does not reach "Read Articles". A substring default is the shape that lets a test pass for years against the element beside the one it named — and the refusal never comes, because there is only ever one match.
 
 ```typescript
 await visitor.click(link('Articles')); // exactly "Articles"

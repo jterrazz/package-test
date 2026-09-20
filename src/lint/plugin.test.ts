@@ -183,7 +183,7 @@ describe('the upstream options this vocabulary owns (ADR-005)', () => {
 });
 
 describe('conventions catalogue — generation freshness (meta-test)', () => {
-    test('the docs/10 catalogue is byte-identical to a fresh generation', () => {
+    test('the docs/13 catalogue is byte-identical to a fresh generation', () => {
         // Given - the committed docs/13-linting.md
         const committed = read('docs/13-linting.md');
 
@@ -667,7 +667,7 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         );
     });
 
-    test('the docs/06 token table matches TOKEN_KINDS exactly', () => {
+    test('the docs/09 token table matches TOKEN_KINDS exactly', () => {
         // Given - the token reference table's first-column cells (`| `{{kind}}` |`)
         const documented = new Set(
             read('docs/09-tokens.md')

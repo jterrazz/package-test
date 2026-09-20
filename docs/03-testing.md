@@ -28,7 +28,11 @@ What proves a change here: this package specifies itself with itself. The suites
 
 Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's.
 
-**`specs/lint/` is a repository suite, and it keeps `.test.ts`.** Its first level is not one of the six facets, so C12's rename clause never reaches it — by design: these files do not specify the assembled product through an entry, they hold the package's own conventions over fixture PROJECTS, which is what a repository suite is. C1's declared depth is what judges their shape, and `unit()` is what collects them.
+Why a file is reached by its ROLE and named by its suffix, and what was weighed against it: [ADR-006](decisions/006-the-catalogue-reaches-a-file-by-its-role.md) (proposed).
+
+**`specs/lint/` is a repository suite, and it keeps `.test.ts`.** A repository suite covers a TREE rather than one assembled product: these files run the plugin and the checker over fixture PROJECTS, one per rule, and what they specify is a convention over a repository's shape. Its first level is not one of the six facets, so C12's rename clause never reaches it, C1's declared depth is what judges it, and `unit()` is what collects it.
+
+**The `unit` project's budget is the whole suite's floor.** It collects the module tests and the lint suite and runs with no service, no browser and no container, so it is the one project a developer runs on every save: it stays under 12 seconds, and the meta-test that proves every rule's reach (`k4-reach-per-path`) runs inside it on ONE oxlint run for that reason.
 
 There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/integrations/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
 
