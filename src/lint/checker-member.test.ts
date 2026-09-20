@@ -77,6 +77,12 @@ describe('the member pass — what a workspace member owes', () => {
         expect(codes(memberAt('clean'))).toStrictEqual([]);
     });
 
+    test('the RN testing library stands where jest is the runner (F8)', () => {
+        // Given - a member whose test script is jest and whose vocabulary is the React Native one
+        // Then - nothing fires: the facet that would replace it does not reach that runtime yet
+        expect(codes(memberAt('rn-jest'))).toStrictEqual([]);
+    });
+
     test('discovers every member the root manifest declares, and the root', () => {
         // Given - a workspace whose root declares `packages/*`
         const members = discoverMembers(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
@@ -86,6 +92,7 @@ describe('the member pass — what a workspace member owes', () => {
             WORKSPACE,
             'apps/site/packages/nested',
             'packages/clean',
+            'packages/rn-jest',
             'packages/seam-dependency',
             'packages/simulated-dom',
             'packages/stray-spec',
