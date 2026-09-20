@@ -20,7 +20,7 @@ The tarball is what `files` declares and nothing else: `dist/`, minus `dist/cata
 
 The entries that reach a consumer are the whole public contract, and they are listed once — [01 — Architecture § What the tree publishes](01-architecture.md#what-the-tree-publishes). What matters here is only that the ROOT entry resolves by CONDITION: a bundler serving a page takes `browser`, node takes `import`, and both are described by one `types` entry.
 
-One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. It answers three runs — a specs tree by path, one workspace member with `--member`, and the whole project path-less — and `--format json` publishes the findings under the `jterrazz-check(<id>)` codes ([13 — Linting](13-linting.md#the-member-pass-and-the-json-contract)). When `typescript check` runs it, which install it resolves it from, and what the floor version is, are the toolchain's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
+One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. It answers three runs — a specs tree by path, one workspace member with `--member`, and the whole project path-less — and `--format json` publishes the findings under the `jterrazz-check(<id>)` codes ([19 — Linting](19-linting.md#the-member-pass-and-the-json-contract)). When `typescript check` runs it, which install it resolves it from, and what the floor version is, are the toolchain's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 
 ## What a consumer must bring
 
@@ -50,7 +50,7 @@ The package refuses to guess at its environment, so several things it uses are t
 - **Docker must be running** for the container-backed services. `sqlite()` and plain CLI specs need none.
 - **Node 24 or newer**, as `engines` states — the toolchain's floor, and vitest 5's.
 - **A chromium**, for a page or a component: `npx playwright install chromium`, once. The component facet drives the same browser the website facet does, through the same peer.
-- **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. This package's own suite runs on Vite 8.1; the Vite 7 path is exercised by a consumer, not by this suite — see [16 — Component specs](16-component.md).
+- **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. This package's own suite runs on Vite 8.1; the Vite 7 path is exercised by a consumer, not by this suite — see [07 — Component specs](07-component.md).
 
 `msw` is a direct dependency, not a peer — outgoing interception is part of the framework rather than a choice a consumer makes.
 

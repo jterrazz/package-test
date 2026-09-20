@@ -1,8 +1,8 @@
-# 06 — Jobs specs (`specification.jobs`)
+# 11 — Jobs specs (`specification.jobs`)
 
 `specification.jobs()` tests background pipelines — cron jobs, queue consumers, nightly reports — by triggering them in-process against real databases and contracted external providers. No HTTP server is involved: the subject under test is _what a job writes_, not what an endpoint returns.
 
-Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](05-api.md).
+Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](10-api.md).
 
 ## Creating the runner
 
@@ -27,7 +27,7 @@ afterAll(cleanup);
 
 | Option     | Required                     | Description                                                                                            |
 | ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](05-api.md), see [services](11-services.md) |
+| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](10-api.md), see [services](17-services.md) |
 | `jobs`     | yes                          | `(services) => JobHandle[]`, or a static array. Each handle is a named, triggerable job (rule A8)      |
 | `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule A9)                                    |
 
@@ -41,7 +41,7 @@ A job spec exercises your job function directly, wired to real containers. The p
 
 Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
 
-`.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [12 — Conventions § Time](12-conventions.md#time--one-primitive-two-depths).
+`.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 
 ```typescript
 // specs/jobs/reports/reports.spec.ts
@@ -64,9 +64,9 @@ test('nightly report classifies, prices and drafts', async () => {
 });
 ```
 
-Everything a pipeline reads from the outside world is declared: seeds set the database state, contracts pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [contracts](10-contracts.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
+Everything a pipeline reads from the outside world is declared: seeds set the database state, contracts pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [contracts](16-contracts.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
 
-Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every declared route with its consumption state (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every declared route with its consumption state (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
 
 ## Seeding and sequences for pipelines
 
@@ -127,7 +127,7 @@ The three failure families:
 | `openai.timeout()` / `anthropic.timeout()`                             | A provider that never answers within the job's timeout |
 | `openai.malformed('…')`                                                | A 200 whose body violates the provider schema          |
 
-The full builder catalogue lives in [contracts](10-contracts.md).
+The full builder catalogue lives in [contracts](16-contracts.md).
 
 ## Result surface
 
@@ -137,7 +137,7 @@ The full builder catalogue lives in [contracts](10-contracts.md).
 | --------------------------- | ----------------------------------------------------------------------- |
 | `result.table(name, opts?)` | Table subject for `toMatchRows` / `toBeEmpty` — async, `await expect()` |
 
-With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](08-assertions.md).
+With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](14-assertions.md).
 
 ## Pitfalls
 
@@ -150,4 +150,4 @@ With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and 
 
 ## Related
 
-[05 — API specs](05-api.md) · [08 — Assertions](08-assertions.md) · [10 — Contracts](10-contracts.md) · [11 — Services](11-services.md)
+[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)

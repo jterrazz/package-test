@@ -11,7 +11,7 @@ const READY_POLL_INTERVAL_MS = 250;
 /**
  * The ONE shape an external process takes — the site under test, a backend a
  * page talks to, a bundler a simulator loads from. Built by `process()`
- * (chapter 11) and accepted wherever a facet starts something outside this
+ * (chapter 17) and accepted wherever a facet starts something outside this
  * process: `website({ server })`, `services: { api: process(…) }`, and the
  * literate `serve:` registry.
  */

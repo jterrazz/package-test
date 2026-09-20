@@ -618,7 +618,7 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line,
-                message: `${rel}:${line}: result of docker-aware runner "${runner}" must be bound with \`await using\` so its containers are disposed (B5 — see docs/13-linting.md)`,
+                message: `${rel}:${line}: result of docker-aware runner "${runner}" must be bound with \`await using\` so its containers are disposed (B5 — see docs/19-linting.md)`,
                 rule: 'b5',
                 severity: 'error',
             });
@@ -710,7 +710,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `${rel}:${line}: .${verb}() must pass { database } — ${count} SQL databases are declared (A7 — see docs/13-linting.md)`,
+                    message: `${rel}:${line}: .${verb}() must pass { database } — ${count} SQL databases are declared (A7 — see docs/19-linting.md)`,
                     rule: 'a7',
                     severity: 'error',
                 });
@@ -718,7 +718,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `${rel}:${line}: .${verb}() must not pass { database } — a single SQL database is declared (A7 — see docs/13-linting.md)`,
+                    message: `${rel}:${line}: .${verb}() must not pass { database } — a single SQL database is declared (A7 — see docs/19-linting.md)`,
                     rule: 'a7',
                     severity: 'error',
                 });
@@ -816,7 +816,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `${rel}: domain directory has ground subdirs (${groundSubdirs.join(', ')}) but no *.test.ts(x) or *.spec.yaml (C9 — see docs/13-linting.md)`,
+                message: `${rel}: domain directory has ground subdirs (${groundSubdirs.join(', ')}) but no *.test.ts(x) or *.spec.yaml (C9 — see docs/19-linting.md)`,
                 rule: 'c9',
                 severity: 'error',
             });
@@ -853,7 +853,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `${relEntry}: dead fixture — no test literal in ${feature} references ${sub}/${entry.name} (C9 — see docs/13-linting.md)`,
+                    message: `${relEntry}: dead fixture — no test literal in ${feature} references ${sub}/${entry.name} (C9 — see docs/19-linting.md)`,
                     rule: 'c9',
                     severity,
                 });
@@ -893,7 +893,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `${relEntry}: dead pool fixture — no spec under ${relative(rootDir, specsRoot)} references $FIXTURES/${entry.name} (C9 — see docs/13-linting.md)`,
+                    message: `${relEntry}: dead pool fixture — no spec under ${relative(rootDir, specsRoot)} references $FIXTURES/${entry.name} (C9 — see docs/19-linting.md)`,
                     rule: 'c9',
                     severity: 'error',
                 });
@@ -1030,7 +1030,7 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
         return {
             file: relEntry,
             line: 1,
-            message: `${relEntry}: only ${relLeaf} reaches for this pool fixture — the pool is what SEVERAL leaves share; move it to ${relLeaf}/${GROUND_FIXTURES}/${entry} and reference it as '${entry}' (C14 — see docs/13-linting.md, or run the checker with --fix)`,
+            message: `${relEntry}: only ${relLeaf} reaches for this pool fixture — the pool is what SEVERAL leaves share; move it to ${relLeaf}/${GROUND_FIXTURES}/${entry} and reference it as '${entry}' (C14 — see docs/19-linting.md, or run the checker with --fix)`,
             rule: 'c14',
             severity: 'error',
         };
@@ -1094,7 +1094,7 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `${rel}:${line}: fixture "${path}" reaches outside ${relative(rootDir, ground)} — a leaf's ground sits beside it; ground several leaves share goes to the $FIXTURES pool at ${relative(rootDir, pool)} (C15 — see docs/13-linting.md)`,
+                    message: `${rel}:${line}: fixture "${path}" reaches outside ${relative(rootDir, ground)} — a leaf's ground sits beside it; ground several leaves share goes to the $FIXTURES pool at ${relative(rootDir, pool)} (C15 — see docs/19-linting.md)`,
                     rule: 'c15',
                     severity: 'error',
                 });
@@ -1156,7 +1156,7 @@ export function checkSuppressionReason(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: index + 1,
-                message: `${rel}:${index + 1}: say why: \`checker-disable-next-line <id> -- <reason>\` (J9 — see docs/13-linting.md)`,
+                message: `${rel}:${index + 1}: say why: \`checker-disable-next-line <id> -- <reason>\` (J9 — see docs/19-linting.md)`,
                 rule: 'j9-checker-suppression-reason',
                 severity: 'error',
             });

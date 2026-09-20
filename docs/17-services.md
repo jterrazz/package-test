@@ -1,4 +1,4 @@
-# 11 — Services: databases, caches, and their init scripts
+# 17 — Services: databases, caches, and their init scripts
 
 Infrastructure is declared as a **named record** of service factories on the runner. The record key is the ONLY name a service has: it is your test vocabulary in `.seed()` / `.table()` targeting, it types the `server`/`jobs` factory parameters, it is the name the startup report prints, and — kebab-cased — it is the folder the service reads its init script from. A handle carries no second name of its own.
 
@@ -90,7 +90,7 @@ export const { cleanup, website } = await specification.website({
     }
     ```
 
-In CLI mode, the record additionally drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule B6 — see [CLI specs](07-cli.md#auto-injected-connection-urls-rule-b6)).
+In CLI mode, the record additionally drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule B6 — see [CLI specs](12-cli.md#auto-injected-connection-urls-rule-b6)).
 
 ### The `database:` rule (A7)
 
@@ -177,4 +177,4 @@ Two more properties fall out of it: the winner builds on a private path and **re
 
 ## Related
 
-[05 — API specs](05-api.md) · [06 — Jobs specs](06-jobs.md) · [07 — CLI specs](07-cli.md) · [12 — Conventions](12-conventions.md)
+[10 — API specs](10-api.md) · [11 — Jobs specs](11-jobs.md) · [12 — CLI specs](12-cli.md) · [18 — Conventions](18-conventions.md)

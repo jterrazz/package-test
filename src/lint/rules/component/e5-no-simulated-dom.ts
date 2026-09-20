@@ -39,7 +39,7 @@ export const e5NoSimulatedDom: LintRule = {
     meta: {
         docs: RULE_DOCS['e5-no-simulated-dom'],
         messages: {
-            pragma: '`@vitest-environment {{environment}}` simulates a browser this framework can open for real — a rendered thing is a `.test.tsx` beside its component, collected by the `component()` project (E5 — docs/13-linting.md#e5-no-simulated-dom).',
+            pragma: '`@vitest-environment {{environment}}` simulates a browser this framework can open for real — a rendered thing is a `.test.tsx` beside its component, collected by the `component()` project (E5 — docs/19-linting.md#e5-no-simulated-dom).',
         },
         type: 'problem',
     },

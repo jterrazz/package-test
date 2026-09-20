@@ -1,4 +1,4 @@
-# 17 — Integration specs: a module against the real thing
+# 06 — Integration specs: a module against the real thing
 
 `specification.integration()` specifies a MODULE — not an entry. No HTTP, no binary, no page: the subject is a function, and it is called. What makes it a spec rather than a module test beside its code is what it stands on — a real database, a declared contract, a golden file — and that is exactly the fork this facet closes.
 
@@ -34,7 +34,7 @@ test('reads the orders the day left behind', async () => {
 
 ## Which tests belong here
 
-Three questions decide, in order ([12 — Conventions](12-conventions.md)):
+Three questions decide, in order ([18 — Conventions](18-conventions.md)):
 
 1. Does the subject answer HTTP, run as a binary, render a page or a screen? Then it is that facet's, not this one.
 2. Does it need a real service — a database, a cache, a process — or is its oracle a GOLDEN file? Then it is an integration spec.
@@ -58,8 +58,8 @@ Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.call(subject)`
 | Setup                            | Means                                                                                           |
 | -------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `.seed('rows.sql')`              | run `_seeds/rows.sql` before the call; `{ database }` targets one of several                    |
-| `.intercept(contracts)`          | declare what the outside world replies ([10](10-contracts.md))                                  |
-| `.clock('2026-03-04T09:30:00Z')` | pin the module's `Date` for this chain ([12](12-conventions.md#time--one-primitive-two-depths)) |
+| `.intercept(contracts)`          | declare what the outside world replies ([16](16-contracts.md))                                  |
+| `.clock('2026-03-04T09:30:00Z')` | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths)) |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
 
@@ -98,7 +98,7 @@ That is what keeps a spec of a refusal the same size as a spec of a success, and
 
 `.call<T>()` carries `T` through to the result, so one field is read where one field is what the spec means — `expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string — and a golden file is kept for what a golden file is for: a shape worth freezing whole.
 
-Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch('<name>.json'|'<name>.txt')` under `_expected/`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([09](09-tokens.md), [08](08-assertions.md)).
+Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch('<name>.json'|'<name>.txt')` under `_expected/`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([15](15-tokens.md), [14](14-assertions.md)).
 
 A call that a declared contract never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule D7).
 
@@ -166,4 +166,4 @@ specs/integration/
 
 ## Related
 
-[05 — API specs](05-api.md) · [08 — Assertions](08-assertions.md) · [10 — Contracts](10-contracts.md) · [11 — Services](11-services.md) · [12 — Conventions](12-conventions.md)
+[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md) · [18 — Conventions](18-conventions.md)

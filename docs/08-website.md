@@ -1,8 +1,8 @@
-# 14 — Website specs (`specification.website`)
+# 08 — Website specs (`specification.website`)
 
 `specification.website()` tests a rendered website — its raw HTTP surface (redirects, robots.txt, headers) and its rendered surface (title, head metadata, JSON-LD, console, and full user scenarios) — through a real chromium instance. It starts the site itself, or targets one already running.
 
-Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](05-api.md); for a binary use [cli](07-cli.md).
+Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](10-api.md); for a binary use [cli](12-cli.md).
 
 ## Creating the runner
 
@@ -38,15 +38,15 @@ export const { cleanup, website } = await specification.website({
 | `external` | `'allow' \| 'block'` — cross-origin policy for `.visit()`. Default `'block'` with `server`, `'allow'` with `url` — see [Cross-origin policy](#cross-origin-policy-external) |
 | `root`     | **Project-root override** (rule A9): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                |
 
-`server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [11 — Services § `process()`](11-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
+`server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
 
-The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is terminated by process group (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [cli](07-cli.md) exec adapter, so a framework's own child processes don't outlive the run.
+The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is terminated by process group (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [cli](12-cli.md) exec adapter, so a framework's own child processes don't outlive the run.
 
 The handle destructures to `{ website, cleanup, url }` (rule A3) — no `docker`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
 
 ### Services beside the site
 
-A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other facet takes ([11 — Services](11-services.md)) — started before the site, in declaration order, and stopped with the specification.
+A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other facet takes ([17 — Services](17-services.md)) — started before the site, in declaration order, and stopped with the specification.
 
 That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time.
 
@@ -144,147 +144,9 @@ test('subscribes through the form and captures the final state', async () => {
 
 **No `expect()` inside a scenario (rule W1).** A scenario is pure interaction — assertions live in the Then, on the returned result. Splitting interaction from assertion keeps the setup → action → result grammar intact, and keeps scenarios replayable independent of what they're checked against.
 
-Visitor verbs — every action auto-waits (playwright actionability); there are no sleeps anywhere in the framework:
+The visitor's verbs and the words it names elements with are [13 — Elements](13-elements.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the descriptors and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this chapter adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
 
-| Verb                      | Description                                                                        |
-| ------------------------- | ---------------------------------------------------------------------------------- |
-| `click(element)`          | Click the element                                                                  |
-| `fill(element, value)`    | Fill a form field                                                                  |
-| `press(key)`              | Press a key (e.g. `'Enter'`)                                                       |
-| `select(element, option)` | Select an option in a select field                                                 |
-| `check(element)`          | Check a checkbox or radio                                                          |
-| `hover(element)`          | Hover the element                                                                  |
-| `goto(path)`              | Navigate to another path of the site under test                                    |
-| `see(element)`            | **The synchronization primitive** — retries until visible, times out otherwise     |
-| `gone(element)`           | The absence primitive — retries until the element is hidden or out of the document |
-
-Elements are **user-facing by construction** (rule W2) — there is no CSS/XPath surface:
-
-| Element         | Locates by                                       |
-| --------------- | ------------------------------------------------ |
-| `button(name)`  | accessible name, button role                     |
-| `link(name)`    | accessible name, link role                       |
-| `field(label)`  | accessible name, input roles (or its label)      |
-| `heading(name)` | accessible name, heading role                    |
-| `content(text)` | any element containing the text                  |
-| `testId(id)`    | `data-testid` — the escape hatch (rule W2 warns) |
-
-Five more roles a visitor reads and acts on, each optionally named because a page carries several of them and one of them usually carries no name at all:
-
-| Element           | Locates by                                              |
-| ----------------- | ------------------------------------------------------- |
-| `dialog(name?)`   | a `<dialog>` or `role="dialog"`. A closed one is absent |
-| `status(name?)`   | a live region announcing a result                       |
-| `table(name?)`    | a table, by its caption or accessible name              |
-| `row(name?)`      | a row of a table or grid, by the text of its cells      |
-| `listitem(name?)` | an item of a list — the answer to an unnamed `<li>`     |
-
-And one role that is read where it SITS rather than where it shows:
-
-| Element        | Locates by                                                                                            |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| `option(name)` | an option of a select or a listbox, by its label — named inside the field holding it, with `within()` |
-
-`see(option('LinkedIn'))` asks whether the option is OFFERED, not whether it is on the screen: the options of a collapsed `<select>` are in the document and in the accessibility tree, and not one of them has a box until a visitor opens it. Which one the field is on is the `selected` modifier below.
-
-And four MODIFIERS, none a descriptor of its own — each narrows a descriptor by a STATE the vocabulary can already name the element of, and each is accepted by both `see` and `gone`:
-
-| Modifier                   | Asks                                                                           |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| `focused(element)`         | Where the keyboard is                                                          |
-| `disabled(element)`        | Whether the control refuses input — and `enabled(element)` the other direction |
-| `selected(element)`        | Which option the field is on                                                   |
-| `valued(element, 'value')` | What the field holds — its live value, never its `value` attribute             |
-
-```typescript
-await visitor.press('Escape');
-await visitor.gone(dialog('Settings'));
-await visitor.see(focused(button('Open')));
-await visitor.see(disabled(button('Publish')));
-await visitor.see(selected(option('LinkedIn')));
-await visitor.see(valued(field('Title'), 'Launch teaser'));
-```
-
-Scope an option to its field when a page carries several selects — and NAME the descriptor when you do: three constructors inside a verb is one call too deep for `unicorn/max-nested-calls`, and the name reads better besides.
-
-```typescript
-const channel = within(field('Channel'), selected(option('LinkedIn')));
-await visitor.see(channel);
-```
-
-FOCUS is a verb's business and never a golden's: the accessibility tree carries none, so a tree snapshot of a page that handed the keyboard back and one that did not are byte-identical. ENABLEMENT the tree does carry — a disabled control reads `button "Publish" [disabled]` in it, and a selected option `[selected]` — so a golden pins it for a whole outline and `see(disabled(…))` names the one control a test is about. The modifier also buys a direction a behavioural substitute cannot reach: clicking a disabled control is a timeout, not an answer.
-
-The vocabulary is shared with the mobile facet — `button`, `field`, `content`, `testId`, `within` work identically in an `.open()` scenario ([15 — Mobile specs](15-mobile.md)) — and with the component facet, where the same descriptors, the same verbs and the same W3 refusal read a mounted unit ([16 — Component specs](16-component.md)). The landmarks below are website/component-only.
-
-## Designating exactly one element
-
-**A descriptor must match exactly one element (rule W3).** When several match, the framework refuses the action instead of taking the first one:
-
-```
-Ambiguous element: link("Articles") matched 3 elements on http://site.test/ambiguous.
-
-A spec must designate exactly one element. Acting on the first match would let
-this test keep passing while the visitor interacts with something else.
-
-Matched:
-  1. <a href="/articles">Articles</a>  in <nav>
-  2. <a href="/articles">Articles</a>  in <footer>
-
-Disambiguate with one of:
-  • scope it       within(navigation(), link("Articles"))   [leaves 1 of 2]   [also here: contentinfo()]
-  • other element  a heading(), button() or field() may name one thing where this does not
-
-Docs: docs/14-website.md#designating-exactly-one-element (CONVENTIONS W3)
-```
-
-Every suggestion carries what it LEAVES, so a rewrite that would keep the spec ambiguous never reads as a fix: a landmark holding every candidate is not offered at all. The evidence also names the ACCESSIBLE name a candidate matched on when that is not its text — a role descriptor matches the name, so `button('Delete post')` finds an `aria-label="Delete Post a"` too, and printing only the text would send you after something that never matched.
-
-Taking "the first match" is the failure this rule exists to prevent: the spec stays green while the visitor acts on a different element, and nothing ever reports it. Ambiguity is an authoring mistake, not something DOM order should arbitrate.
-
-### `within(scope, target)` — the preferred fix
-
-Search inside a landmark, the way a person would say _"the Articles link **in the nav**"_:
-
-```typescript
-await visitor.click(within(navigation(), link('Articles')));
-```
-
-Scopes compose outside-in, and any descriptor works as one — including `testId()` when a container has no landmark role to stand on:
-
-```typescript
-await visitor.click(within(main(), within(region('Series'), link('Part 2'))));
-await visitor.click(within(testId('row-3'), button('Delete')));
-```
-
-The scope is checked first: if it is the ambiguous level, the refusal names **it** rather than the target, so the fix lands on the right descriptor.
-
-The landmarks are the ARIA landmark set and nothing more — a closed vocabulary keeps `within()` from becoming a second selector language. Each takes an optional accessible name, for pages carrying several of the same region:
-
-| Landmark               | Matches                               |
-| ---------------------- | ------------------------------------- |
-| `banner()`             | the page header                       |
-| `navigation(name?)`    | a `<nav>` — name it when several      |
-| `main()`               | the primary content                   |
-| `complementary(name?)` | an `<aside>`, a sidebar               |
-| `contentinfo()`        | the page footer                       |
-| `region(name)`         | a `<section>` with an accessible name |
-| `form(name)`           | a named form landmark                 |
-| `search()`             | the search landmark                   |
-
-### `{ exact: false }` — when a name carries a part the test does not control
-
-**A name designates the accessible name WHOLE.** `link('Articles')` does not reach "Read Articles". A substring default is the shape that lets a test pass for years against the element beside the one it named — and the refusal never comes, because there is only ever one match.
-
-```typescript
-await visitor.click(link('Articles')); // exactly "Articles"
-await visitor.click(link('Articles', { exact: false })); // also "Read Articles"
-```
-
-Every named descriptor accepts the option — `button`, `link`, `field`, `heading`, `content`, and the named landmarks.
-
-Reach for the opt-out only when the name genuinely carries a variable part (a count, a user's name); scope with `within()` when the problem is that the same name appears twice.
-
-**The transitional warning.** For 16.0 and 16.1, a descriptor that designates NOTHING as a whole name but would have designated something as a substring prints one line naming itself, the three ways out and this deadline — once per descriptor per run. After 16.1 the substring match is gone and the same descriptor is simply not found.
+Designating exactly one element is rule W3, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — Elements § Designating exactly one element](13-elements.md#designating-exactly-one-element).
 
 Navigating within a scenario changes what the capture describes:
 
@@ -409,7 +271,7 @@ afterAll(cleanup);
 
 `backend` requires `server` mode — with `url` it refuses (the type already forbids the combination): a deployed site cannot be pointed at a local stub. The **ownership boundary**: the framework owns the server child, so it injects the env var itself — that is the whole wiring.
 
-What the stub serves is declared per chain, as [contracts](10-contracts.md) — the feature's `contracts/` facade, exactly the form `api`/`jobs` use:
+What the stub serves is declared per chain, as [contracts](16-contracts.md) — the feature's `contracts/` facade, exactly the form `api`/`jobs` use:
 
 ```typescript
 import newsroom from './contracts/newsroom.contracts.js';
@@ -468,7 +330,7 @@ test('stamps the moment the page was opened', async () => {
 });
 ```
 
-A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [12 — Conventions § Time](12-conventions.md#time--one-primitive-two-depths).
+A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 
 ## Evidence on failure
 
@@ -519,4 +381,4 @@ No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no r
 
 ## Related
 
-[02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [09 — Tokens](09-tokens.md) · [15 — Mobile specs](15-mobile.md) · [16 — Component specs](16-component.md)
+[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [09 — Mobile specs](09-mobile.md) · [07 — Component specs](07-component.md)

@@ -4,7 +4,7 @@ import type { RuleDoc } from './types.js';
  * The rule manifest — the single source of truth for the mechanized conventions
  * catalogue (docs-as-code inversion, phase 2).
  *
- * The constitution (`docs/12-conventions.md`) holds only principles, the
+ * The constitution (`docs/18-conventions.md`) holds only principles, the
  * enforcement channels, process rules and design rationales. Every per-rule
  * normative sentence lives HERE, next to (or on) the code that enforces it. Seven
  * channels are assembled into one {@link catalog}:
@@ -25,7 +25,7 @@ import type { RuleDoc } from './types.js';
  *   (`PROCESS_RULES`).
  *
  * The catalogue generator (`catalog.ts` / `dist/catalog.js`) reads this manifest
- * to (re)write the full seven-channel catalogue in `docs/13-linting.md` and the
+ * to (re)write the full seven-channel catalogue in `docs/19-linting.md` and the
  * agent-facing `skills/jterrazz-test/references/rules.md`. `plugin.test.ts`
  * guards freshness and completeness.
  *
@@ -190,7 +190,7 @@ export const RULE_DOCS = {
             'Every test carries `// Given -` then `// Then -` (both, in that order); a Given declared after a Then is an error. A `test.each` table is judged ONCE, on the table, not once per row. A `<case>.spec.yaml` document has no comments: its narration is its `description:`.',
         facet: 'core',
         family: 'B',
-        fix: 'Write the two markers, in order, as sentences about the subject — not about the code (chapter 12 § The narration).',
+        fix: 'Write the two markers, in order, as sentences about the subject — not about the code (chapter 18 § The narration).',
         id: 'B4',
         rationale:
             "Given/Then narration makes a test's intent readable without reading its assertions.",
@@ -1008,7 +1008,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for D21w, whose criterion chapter 12 carries.",
+            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for D21w, whose criterion chapter 18 carries.",
         facet: 'cli',
         family: 'D',
         fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
@@ -1398,7 +1398,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
     {
         channel: 'upstream',
         convention:
-            "`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(contracts, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express. One escape is sanctioned, because the option carries no allow-list and the seam does not answer yet: a subject whose OWN code calls `response.body.cancel()` on an intercepted reply hangs under msw's node interceptor, so that one test keeps `vi.stubGlobal('fetch')` behind an `oxlint-disable-next-line vitest/no-restricted-vi-methods` written on the call, naming the defect (chapter 10, § A cancelled body does not settle). It leaves with the seam fix.",
+            "`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(contracts, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express. One escape is sanctioned, because the option carries no allow-list and the seam does not answer yet: a subject whose OWN code calls `response.body.cancel()` on an intercepted reply hangs under msw's node interceptor, so that one test keeps `vi.stubGlobal('fetch')` behind an `oxlint-disable-next-line vitest/no-restricted-vi-methods` written on the call, naming the defect (chapter 16, § A cancelled body does not settle). It leaves with the seam fix.",
         facet: 'core',
         family: 'M',
         fix: 'Reach for `intercept()` and `clock` — both give back what they took at the end of the scope.',

@@ -269,7 +269,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
             {
                 file: rel,
                 line: error.line,
-                message: `${error.message} (D4b — see docs/13-linting.md)`,
+                message: `${error.message} (D4b — see docs/19-linting.md)`,
                 rule: 'd4b',
                 severity: 'error',
             },
@@ -324,7 +324,7 @@ function checkSeedClockReads(path: string, rel: string, name: string): TokenViol
         violations.push({
             file: rel,
             line: index + 1,
-            message: `${rel}:${index + 1}: \`${found[0]}\` reads the clock — a seed states the instant the case is about, and the chain pins the run's with \`.clock()\` (C23 — see docs/13-linting.md)`,
+            message: `${rel}:${index + 1}: \`${found[0]}\` reads the clock — a seed states the instant the case is about, and the chain pins the run's with \`.clock()\` (C23 — see docs/19-linting.md)`,
             rule: 'c23-seed-no-clock-read',
             severity: 'error',
         });
@@ -372,7 +372,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line: 1,
-                        message: `${rel}:1: a \`${SPEC_EXTENSION}\` document is a SPEC, not ground — move it beside the test that runs it (C16 — see docs/13-linting.md)`,
+                        message: `${rel}:1: a \`${SPEC_EXTENSION}\` document is a SPEC, not ground — move it beside the test that runs it (C16 — see docs/19-linting.md)`,
                         rule: 'c16-document-outside-ground',
                         severity: 'error',
                     });
@@ -409,7 +409,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line: 1,
-                        message: `${rel}:1: a _requests/*.http file must start with a request line "METHOD /path" (D4b — see docs/13-linting.md)`,
+                        message: `${rel}:1: a _requests/*.http file must start with a request line "METHOD /path" (D4b — see docs/19-linting.md)`,
                         rule: 'd4b',
                         severity: 'error',
                     });
@@ -418,7 +418,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line,
-                        message: `${rel}:${line}: token ${token} in a _requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/13-linting.md)`,
+                        message: `${rel}:${line}: token ${token} in a _requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/19-linting.md)`,
                         rule: 'd10w',
                         severity: 'warn',
                         token,
@@ -436,7 +436,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line: 1,
-                    message: `${rel}:1: an _expected/*.http file must start with a status line "HTTP/1.1 <status>" (D4b — see docs/13-linting.md)`,
+                    message: `${rel}:1: an _expected/*.http file must start with a status line "HTTP/1.1 <status>" (D4b — see docs/19-linting.md)`,
                     rule: 'd4b',
                     severity: 'error',
                 });
@@ -463,7 +463,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line: index + 1,
-                    message: `${rel}:${index + 1}: "${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token} (D5 — see docs/13-linting.md)`,
+                    message: `${rel}:${index + 1}: "${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token} (D5 — see docs/19-linting.md)`,
                     rule: 'd5-spec-volatile-literal',
                     severity: 'error',
                 });

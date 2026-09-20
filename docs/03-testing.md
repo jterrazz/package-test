@@ -7,7 +7,7 @@ What proves a change here: this package specifies itself with itself. The suites
 | Ground          | Where                                      | Proves                                                                 |
 | --------------- | ------------------------------------------ | ---------------------------------------------------------------------- |
 | Module tests    | `src/**/<file>.test.ts`                    | One module's behaviour, beside it (rule I2)                            |
-| Component tests | `specs/component-app/<file>.test.tsx`      | A rendered unit, beside it, in a real Chromium ([16](16-component.md)) |
+| Component tests | `specs/component-app/<file>.test.tsx`      | A rendered unit, beside it, in a real Chromium ([07](07-component.md)) |
 | Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts`  | The framework's own facets, through the public surface                 |
 | Spec documents  | `specs/cli/literate/*.spec.yaml`           | The document format, collected as test files by `literate()`           |
 | Meta-tests      | `src/lint/*.test.ts`, `src/core/matching/` | The framework applied to itself and to its own projections             |
@@ -78,7 +78,7 @@ name.
 appears twice says the capability is shared, and a name that appears once says
 where it is not.
 
-A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; a leading underscore means ground, never a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([12 — Conventions](12-conventions.md)).
+A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; a leading underscore means ground, never a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
 
 The fixture apps the specs drive live in the pool: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, the `broken-*` trees for the infrastructure failure paths, and `lint-violations/` — a violation/compliant twin per lint rule.
 
@@ -145,7 +145,7 @@ write the test — not six months later, when a coverage number moved.
 
 ## The capability matrix
 
-The catalogue in [19 — Linting](13-linting.md) answers "which conventions are
+The catalogue in [19 — Linting](19-linting.md) answers "which conventions are
 mechanized". This answers the other half: for each thing the framework can DO,
 which facets declare it, and how many of the package's own test files exercise
 it there.
@@ -425,7 +425,7 @@ TEST_UPDATE=1 npx vitest --run --project unit   # or: npx vitest --run -u
 
 Update mode writes **tokens, not values**: a segment already covered by a placeholder survives, and values known to be volatile — the working directory among them — are substituted back into placeholders (rule D5). Run the suite again afterwards; a fixture that does not round-trip on the second run was not a golden, it was a transcript.
 
-Two fixture kinds are exactly wrong to update blindly, and they are the same trap twice: one that is deliberately WRONG (its diff is the behaviour under test) and one that is deliberately MISSING (its error is the behaviour under test). Update mode overwrites both into silence — [08 — Assertions](08-assertions.md) works the case.
+Two fixture kinds are exactly wrong to update blindly, and they are the same trap twice: one that is deliberately WRONG (its diff is the behaviour under test) and one that is deliberately MISSING (its error is the behaviour under test). Update mode overwrites both into silence — [14 — Assertions](14-assertions.md) works the case.
 
 ## What CI runs
 
@@ -441,4 +441,4 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 
 ## Related
 
-[01 — Architecture](01-architecture.md) · [02 — Developing](02-developing.md) · [08 — Assertions](08-assertions.md) · [12 — Conventions](12-conventions.md) · [13 — Linting](13-linting.md)
+[01 — Architecture](01-architecture.md) · [02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [18 — Conventions](18-conventions.md) · [19 — Linting](19-linting.md)

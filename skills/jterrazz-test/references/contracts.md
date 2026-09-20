@@ -1,6 +1,6 @@
 # Contracts — the outside world, declared
 
-Operative reference. Prose + examples: [docs/10-contracts.md](../../../docs/10-contracts.md). Available on `api`, `jobs` (in-process MSW) and — with the `backend` option — `website`, `mobile` (declared stub backend). One selection queue serves all four.
+Operative reference. Prose + examples: [docs/16-contracts.md](../../../docs/16-contracts.md). Available on `api`, `jobs` (in-process MSW) and — with the `backend` option — `website`, `mobile` (declared stub backend). One selection queue serves all four.
 
 **Principle: TypeScript is behavior, `.json` is data, `.http` is a document at the boundary of YOUR OWN api (`_requests/`, `_expected/`) — never a mock format.** There is no other intercept form: no `.http` intercept file, no `'adapter/file.json'` response path.
 
@@ -81,7 +81,7 @@ The prepend is why a more specific override (`/articles/gone-1`) wins over a gen
 
 Repeated `.intercept()` calls **append**. Composition/override semantics live in `defineContracts` / `.with()`, never in call order.
 
-Without a chain: `await using _ = await intercept(request, response)` in module scope — two awaits, both load-bearing. The refusal of an undeclared call lands at DISPOSAL, not at the call site, so a subject that swallows its own network failures cannot hide it. Around a `.render()` the chain's registration wins: in a `.test.tsx`, `intercept()` is for code the test calls itself. [docs/10](../../../docs/10-contracts.md#intercept--the-same-double-with-no-chain).
+Without a chain: `await using _ = await intercept(request, response)` in module scope — two awaits, both load-bearing. The refusal of an undeclared call lands at DISPOSAL, not at the call site, so a subject that swallows its own network failures cannot hide it. Around a `.render()` the chain's registration wins: in a `.test.tsx`, `intercept()` is for code the test calls itself. [docs/10](../../../docs/16-contracts.md#intercept--the-same-double-with-no-chain).
 
 ## Selection
 

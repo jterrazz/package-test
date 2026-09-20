@@ -1,6 +1,6 @@
 # TODO — the product backlog
 
-What this package intends to do next, and nothing else. A rule's backlog is chapter 12's
+What this package intends to do next, and nothing else. A rule's backlog is chapter 18's
 (§ Backlog, each line with the criterion it would be coded against); a decision that has
 been taken is a record under `docs/decisions/`; what a release carries is its GitHub
 release notes. An item delivered leaves this file.
@@ -41,7 +41,7 @@ then implement against numbers. By expected return, descending.
   served never resolves under node (msw 2.15.0; `.text()` on the same body resolves at
   once) — msw/undici interop, not this package's code, and no upstream issue names a
   mocked reply. The repro is `specs/api/intercepts/body-cancel.spec.ts`, skipped: unskip
-  it and the M3 escape chapter 10 sanctions goes with it.
+  it and the M3 escape chapter 16 sanctions goes with it.
 
 ## 3. What the contract vocabulary still cannot say
 

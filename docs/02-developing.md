@@ -37,14 +37,14 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 | A `{{token}}` or the structural comparison        | `src/core/matching/`                                                                      |
 | The `<case>.spec.yaml` grammar                    | `src/core/literate/` — read by BOTH the runner and the checker                            |
 | A mechanized rule                                 | `src/lint/manifest.ts` **and** its implementation under `src/lint/rules/<facet-or-core>/` |
-| A principle, or a criterion no machine can settle | [12 — Conventions](12-conventions.md), the constitution                                   |
+| A principle, or a criterion no machine can settle | [18 — Conventions](18-conventions.md), the constitution                                   |
 
 ### What a change owes
 
 Four things land in the SAME commit as the change that makes them true.
 
 - **The guard.** Every defect class discovered — in review, from a bug, during a migration — grows the thing that stops it recurring: a static rule, a meta-test, or a runtime refusal. That is rule K1, and it is what keeps the other channels growing instead of decaying. When no channel is possible, the change says so explicitly.
-- **The regenerated projections.** `npm run docs` rewrites all three at once — the API reference under `docs/reference/`, the rule catalogue spliced into [13 — Linting](13-linting.md) and `skills/jterrazz-test/references/rules.md`, and `schema/spec.schema.json`. Never edit one by hand: `npm run lint` runs the sync check and the freshness meta-test, and both fail on a hand edit.
+- **The regenerated projections.** `npm run docs` rewrites all three at once — the API reference under `docs/reference/`, the rule catalogue spliced into [19 — Linting](19-linting.md) and `skills/jterrazz-test/references/rules.md`, and `schema/spec.schema.json`. Never edit one by hand: `npm run lint` runs the sync check and the freshness meta-test, and both fail on a hand edit.
 - **The chapter the behaviour falsified.** A page that still describes the old behaviour is a defect that ships. The corpus is mapped by [`docs/README.md`](README.md).
 - **The skill, when the public surface moved.** `skills/jterrazz-test/` routes agents into these chapters; `README.md` is the vitrine and moves with a public API change too.
 
@@ -151,7 +151,7 @@ test('creates a user', async () => {
 });
 ```
 
-`{{uuid}}` is a placeholder from the unified [token grammar](09-tokens.md) — the response body must contain _a_ UUID there, whatever its value.
+`{{uuid}}` is a placeholder from the unified [token grammar](15-tokens.md) — the response body must contain _a_ UUID there, whatever its value.
 
 ### First CLI spec
 
@@ -220,9 +220,9 @@ What every helper accepts, on top of the project it already is:
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                              |
 | `serial`              | `fileParallelism: false` — the project's files run one at a time, for a facet whose files share one server, one database file, one app |
 
-`component()` takes four more that are the APP's — `vite`, `wrap`, `viewport`, `timezone`/`locale`, and the `root` its relative paths are read against — and [16 — Component specs](16-component.md) owns them; `unit()` takes `roots`.
+`component()` takes four more that are the APP's — `vite`, `wrap`, `viewport`, `timezone`/`locale`, and the `root` its relative paths are read against — and [07 — Component specs](07-component.md) owns them; `unit()` takes `roots`.
 
-`unit()` and `component()` are a pair by construction: `unit()` collects `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`, `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. `unit()` takes `roots?` where the modules are not at the repository root, or `include?` for the globs outright; the facet helpers collect `specs/<facet>/**/*.spec.ts` — the word for the assembled product (C12). All three carry `sequence.groupOrder` — node 0, `website` 1, `component` 2 — so the two browser projects never open two Chromiums at once on a 2-vCPU runner. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [16 — Component specs](16-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
+`unit()` and `component()` are a pair by construction: `unit()` collects `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`, `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. `unit()` takes `roots?` where the modules are not at the repository root, or `include?` for the globs outright; the facet helpers collect `specs/<facet>/**/*.spec.ts` — the word for the assembled product (C12). All three carry `sequence.groupOrder` — node 0, `website` 1, `component` 2 — so the two browser projects never open two Chromiums at once on a 2-vCPU runner. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [07 — Component specs](07-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
 
 #### What the preset sets
 
@@ -239,7 +239,7 @@ What every helper accepts, on top of the project it already is:
 | `test.restoreMocks`              | `true`                                     | A `vi.spyOn` a test forgets to restore fails a LATER file, one that did nothing wrong                                                                                                                                                                          |
 | `test.unstubGlobals`             | `true`                                     | Same for `vi.stubGlobal` — and it is what lets a test be written without an `afterEach` (rule J6w)                                                                                                                                                             |
 | `test.unstubEnvs`                | `true`                                     | Same for `vi.stubEnv`, which is the sanctioned way to state a module's env contract (rule E9w)                                                                                                                                                                 |
-| `plugins`                        | `literate()`, when `literate:` is given    | Turns every matching `<case>.spec.yaml` into a test file (see [07 — CLI specs](07-cli.md))                                                                                                                                                                     |
+| `plugins`                        | `literate()`, when `literate:` is given    | Turns every matching `<case>.spec.yaml` into a test file (see [12 — CLI specs](12-cli.md))                                                                                                                                                                     |
 
 It deliberately sets **nothing else**. `fileParallelism` is a per-project truth (a container-lifecycle suite is serial, an isolated one is not), stated by the project rather than by the preset — a helper states it for you when you pass `serial`, and a hand-written project states it itself; so do `reporters`, `environment`, `env`, `globalSetup` and every `include` — a preset that guessed those would be wrong more often than right.
 
@@ -323,7 +323,7 @@ You set exactly one variable, prefixed `TEST_` (rule E1). The framework also rea
 
 ```bash
 npx vitest --run                      # assert against fixtures
-TEST_UPDATE=1 npx vitest --run        # update fixtures (tokens preserved — see chapter 06)
+TEST_UPDATE=1 npx vitest --run        # update fixtures (tokens preserved — see chapter 15)
 npx vitest --run -u                   # same as TEST_UPDATE=1
 ```
 
@@ -356,4 +356,4 @@ specs/
 
 ## Related
 
-[05 — API specs](05-api.md) · [07 — CLI specs](07-cli.md) · [08 — Assertions](08-assertions.md) · [12 — Conventions](12-conventions.md) · [14 — Website specs](14-website.md) · [15 — Mobile specs](15-mobile.md)
+[10 — API specs](10-api.md) · [12 — CLI specs](12-cli.md) · [14 — Assertions](14-assertions.md) · [18 — Conventions](18-conventions.md) · [08 — Website specs](08-website.md) · [09 — Mobile specs](09-mobile.md)
