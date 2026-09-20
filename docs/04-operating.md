@@ -37,6 +37,14 @@ The package refuses to guess at its environment, so several things it uses are t
     in package.json (or `only-built-dependencies` in .npmrc) and reinstall.
     ```
 
+    **A native peer has a second way of not being there**, and it is the one that costs an afternoon: the package installed, and its `.node` never compiled, because the package manager withheld the install script — npm since 11, pnpm since 10 and bun since 1.2 all do, by default. `sqlite()` opens one in-memory database the first time it loads the driver, so that failure is caught where it can be named rather than surfacing as a `bindings` stack trace from whichever spec seeded first:
+
+    ```
+    sqlite() found `better-sqlite3` but its native binding is not built — npm does not run a
+    dependency's install script unless it is told to: npm install-scripts approve better-sqlite3
+    && npm rebuild better-sqlite3.
+    ```
+
     ([ADR-008](decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md), proposed, records what the four seams cost as dependencies and what the change buys under each package manager.)
 
 - **The browser provider is pinned to the runner, patch included.** `@vitest/browser-playwright@X` peers `vitest: X` EXACTLY, so the two move together in one change or not at all. This package therefore declares the provider as `*` rather than a range of its own — a second, weaker statement of a constraint the provider already makes would be wrong the day the pair moves — and `component()` asserts the equality when the project is built, naming both versions:

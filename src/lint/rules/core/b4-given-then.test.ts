@@ -33,6 +33,13 @@ ruleTester.run('b4-given-then', b4GivenThen as unknown as OxlintRule, {
             code: 'test("x", () => {});',
             errors: [{ messageId: 'missing' }, { messageId: 'missing' }],
         },
+        // A table narrated nowhere — neither on the table nor in the callback.
+        {
+            code: `test.each([{ a: 1 }])("x $a", ({ a }) => {
+                expect(a).toBe(1);
+            });`,
+            errors: [{ messageId: 'missing' }, { messageId: 'missing' }],
+        },
         // Given after Then — narrative order violated.
         {
             code: `test("x", () => {
@@ -76,6 +83,27 @@ ruleTester.run('b4-given-then', b4GivenThen as unknown as OxlintRule, {
         {
             code: `helper("x", () => {
                 doThing();
+            });`,
+        },
+        // A table narrated ONCE, on the table — the form chapter 05 shows.
+        {
+            code: `test.each([
+                { expected: "fresh", label: "a fresher post of equal score" },
+            ])(
+                // Given - $label
+                // Then - it leads the ranking
+                "ranks $label first",
+                ({ expected }) => {
+                    expect(rank(posts)[0].id).toBe(expected);
+                },
+            );`,
+        },
+        // A table narrated inside the callback is still narrated.
+        {
+            code: `test.each([{ a: 1 }])("x $a", ({ a }) => {
+                // Given - a row
+                // Then - it holds
+                expect(a).toBe(1);
             });`,
         },
         // Correct order with an assertion under Then.

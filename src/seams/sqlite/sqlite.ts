@@ -22,7 +22,7 @@ import { discoverRoot } from '../../core/chain/resolve.js';
 import type { DatabasePort } from '../../core/ports/database.port.js';
 import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
 import type { ServiceHandle } from '../../core/ports/service.port.js';
-import { loadPeer } from '../peer.js';
+import { loadPeer, requireBuiltPeer } from '../peer.js';
 
 // The first 16 bytes of every well-formed SQLite database file (see the
 // SQLite file format spec). A crashed earlier run can leave a stale/partial
@@ -46,10 +46,21 @@ const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 let databaseConstructor: null | typeof Database = null;
 
 async function loadDatabase(): Promise<typeof Database> {
-    databaseConstructor ??= await loadPeer('better-sqlite3', 'sqlite()', async () => {
-        const betterSqlite3 = await import('better-sqlite3');
-        return betterSqlite3.default;
-    });
+    if (databaseConstructor === null) {
+        const constructor = await loadPeer('better-sqlite3', 'sqlite()', async () => {
+            const betterSqlite3 = await import('better-sqlite3');
+            return betterSqlite3.default;
+        });
+        // The package can be installed and still not WORK: its binding is
+        // Compiled by an install script that npm, pnpm and bun all withhold by
+        // Default. Open one in-memory database here, where the refusal can name
+        // The peer and the command, rather than letting a `bindings` stack
+        // Trace surface from whichever spec happened to seed first.
+        requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
+            new constructor(':memory:').close();
+        });
+        databaseConstructor = constructor;
+    }
     return databaseConstructor;
 }
 

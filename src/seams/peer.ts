@@ -41,6 +41,36 @@ const INSTALLERS = [
 /** What npm's absence of a lockfile still answers. */
 const DEFAULT_INSTALLER = { command: 'npm install -D', name: 'npm' } as const;
 
+/**
+ * How each package manager is told to run the install script it withheld.
+ *
+ * Every one of them now withholds it by default — npm since 11, pnpm since 10,
+ * bun since 1.2 — so "install the package" is advice the reader has already
+ * followed and the binding is still not there.
+ */
+const BUILDERS: Record<string, (peer: string) => string> = {
+    bun: (peer) => `bun pm trust ${peer}`,
+    npm: (peer) => `npm install-scripts approve ${peer} && npm rebuild ${peer}`,
+    pnpm: (peer) =>
+        `add "${peer}" to \`onlyBuiltDependencies\` in package.json` +
+        ` (or \`only-built-dependencies\` in .npmrc), then \`pnpm rebuild ${peer}\``,
+    yarn: (peer) => `yarn rebuild ${peer}`,
+};
+
+/**
+ * What a native module that is INSTALLED but not BUILT says when it is first
+ * used. Node's own message for a missing `.node`, and the `bindings` package's
+ * for the same thing, plus the two shapes a binding built elsewhere produces.
+ */
+const UNBUILT =
+    /could not locate the bindings file|\.node['"]?$|invalid elf header|was compiled against a different node/iu;
+
+/** Is this failure a binding that was never built, rather than a bug in the seam? */
+function isUnbuilt(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return UNBUILT.test(message);
+}
+
 /** The peers whose install script has to run for the package to load at all. */
 const NATIVE_PEERS = new Set(['better-sqlite3']);
 
@@ -88,6 +118,35 @@ function buildNote(peer: string, manager: string): string {
         ` add "${peer}" to \`onlyBuiltDependencies\` in package.json` +
         ` (or \`only-built-dependencies\` in .npmrc) and reinstall.`
     );
+}
+
+/**
+ * Use a native peer that is already loaded, and say the right thing when its
+ * BINDING was never built.
+ *
+ * A native peer has two ways of not being there, and only one of them is
+ * "install it". The other is the package present on disk with no compiled
+ * `.node` beside it, because the package manager withheld the install script —
+ * which every one of them now does by default. Left alone that surfaces as a
+ * `bindings` stack trace from whichever spec opened a database first: no peer
+ * name, no facet, no command. This turns it into the same shaped refusal a
+ * missing peer gets.
+ */
+export function requireBuiltPeer(peer: string, what: string, use: () => void): void {
+    try {
+        use();
+    } catch (error) {
+        if (!isUnbuilt(error)) {
+            throw error;
+        }
+        const { name } = installerAt(process.cwd());
+        const build = (BUILDERS[name] ?? BUILDERS.npm)?.(peer) ?? `rebuild ${peer}`;
+        throw new Error(
+            `${what} found \`${peer}\` but its native binding is not built —` +
+                ` ${name} does not run a dependency's install script unless it is told to: ${build}.`,
+            { cause: error },
+        );
+    }
 }
 
 /**

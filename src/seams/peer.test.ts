@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { installerAt, loadPeer } from './peer.js';
+import { installerAt, loadPeer, requireBuiltPeer } from './peer.js';
 
 /** A project installed by the manager whose lockfile it carries. */
 function projectWith(lockfile: string): string {
@@ -59,5 +59,44 @@ describe('loadPeer — an optional peer, or a message that fixes it', () => {
 
         // Then - the resolver's own words survive, so a build failure is never read as a missing install
         await expect(failed).rejects.toHaveProperty('cause', original);
+    });
+});
+
+describe('requireBuiltPeer — installed, and still not there', () => {
+    test('names the peer, the facet and the command its manager needs', () => {
+        // Given - a native peer whose binding was never compiled
+        const fail = (): void => {
+            requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
+                throw new Error(
+                    'Could not locate the bindings file. Tried:\n → build/better_sqlite3.node',
+                );
+            });
+        };
+
+        // Then - the refusal says who asked, what is missing, and the line that fixes it
+        expect(fail).toThrow(
+            /sqlite\(\) found `better-sqlite3` but its native binding is not built/u,
+        );
+        expect(fail).toThrow(/rebuild better-sqlite3|bun pm trust|onlyBuiltDependencies/u);
+    });
+
+    test('leaves a failure that is not a missing binding alone', () => {
+        // Given - the peer working, and the seam itself throwing
+        const fail = (): void => {
+            requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
+                throw new Error('SQLITE_CANTOPEN: unable to open database file');
+            });
+        };
+
+        // Then - the original error travels, unwrapped: it is not a build problem
+        expect(fail).toThrow('SQLITE_CANTOPEN: unable to open database file');
+    });
+
+    test('says nothing when the binding loads', () => {
+        // Given - a peer whose first use succeeds
+        // Then - the guard is a pass-through
+        expect(() => {
+            requireBuiltPeer('better-sqlite3', 'sqlite()', () => undefined);
+        }).not.toThrow();
     });
 });
