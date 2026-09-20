@@ -461,6 +461,28 @@ export const RULE_DOCS = {
             'A lone status pins the response code and throws away the whole payload; a full golden captures the shape and its token grammar (it completes d12w, which needs a cluster of body probes and misses the solitary status probe).',
         reach: 'tests',
     },
+    'e2-preset-config': {
+        channel: 'statique',
+        convention:
+            'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator and through a `satisfies`/`as` annotation.',
+        family: 'E',
+        fix: "Start from `defineSpecConfig()` — budgets, the artefact dir and the `_fixtures` exclusion are the preset's.",
+        id: 'E2',
+        rationale:
+            "A config off the preset runs on vitest's five-second budget, writes artefacts at the repository root and collects `_fixtures/` as specs — none of it visible in the file that caused it.",
+        reach: 'config',
+    },
+    'e4w-project-binding': {
+        channel: 'statique',
+        convention:
+            'A project literal collecting `specs/<facet>/` is named `<facet>`, and one named for a facet is rooted there; `unit` collects outside `specs/`. Any other name is out of reach — a repository suite names its projects as it likes.',
+        family: 'E',
+        fix: 'Name the project after the facet it collects; `{ include, exclude }` stay yours.',
+        id: 'E4',
+        rationale:
+            '`--project component` has to mean the same thing in every repository: it is the one word a CI job, a Makefile target and an agent all type.',
+        reach: 'config',
+    },
     'e5-no-simulated-dom': {
         channel: 'statique',
         convention:
@@ -496,6 +518,39 @@ export const RULE_DOCS = {
         rationale:
             "The provider pinned to the runner's exact version, the service worker served from the framework's own install, the JSX transform the current Vite uses, a cold cache's pre-bundling and the artefact directories are all runs that pass here and fail on the next machine.",
         reach: 'config',
+    },
+    'e7w-include-prefix-exists': {
+        channel: 'statique',
+        convention:
+            'An `include` glob whose static prefix (the segments before the first wildcard), resolved from the config, is not a directory is a warning.',
+        family: 'E',
+        fix: 'Point the glob at the folder that exists, or delete the project that collects nothing.',
+        id: 'E7',
+        rationale:
+            'A project that collects nothing passes: the suite never ran, and the only trace is a zero nobody reads.',
+        reach: 'config',
+    },
+    'e8-literate-specification-exists': {
+        channel: 'statique',
+        convention:
+            '`literate.specification`, resolved from the config directory, names a file that exists.',
+        family: 'E',
+        fix: 'Point it at the `*.specification.ts` that exports `cli`.',
+        id: 'E8',
+        rationale:
+            'A path that resolves to nothing fails at collection time with a message about an import, several layers from the line that caused it.',
+        reach: 'config',
+    },
+    'e9w-env-assignment-in-test': {
+        channel: 'statique',
+        convention:
+            'A raw assignment onto a variable of the process environment — named or computed — in a test is a warning; a `*.specification.ts(x)` is out of reach by role.',
+        family: 'E',
+        fix: "Use `vi.stubEnv('X', 'y')`, which restores itself; a CLI default belongs to `specification.cli({ defaults })`.",
+        id: 'E9',
+        rationale:
+            'The assignment outlasts the test: the next file in the same worker inherits it, and the failure lands somewhere else.',
+        reach: 'tests',
     },
     'f1-no-subpath-import': {
         channel: 'statique',

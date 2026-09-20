@@ -1,7 +1,7 @@
-import { component, unit } from '@jterrazz/test/vitest';
+import { component, defineSpecConfig, unit } from '@jterrazz/test/vitest';
 
-export default {
+export default defineSpecConfig({
     test: {
         projects: [unit(), component({ wrap: './src/providers.tsx' })],
     },
-};
+});
