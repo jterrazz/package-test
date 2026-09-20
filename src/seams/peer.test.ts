@@ -62,16 +62,19 @@ describe('loadPeer — an optional peer, or a message that fixes it', () => {
     });
 });
 
+/** `requireBuiltPeer` over a use that fails with `message`. */
+const failingWith = (message: string) => (): void => {
+    requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
+        throw new Error(message);
+    });
+};
+
 describe('requireBuiltPeer — installed, and still not there', () => {
     test('names the peer, the facet and the command its manager needs', () => {
         // Given - a native peer whose binding was never compiled
-        const fail = (): void => {
-            requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
-                throw new Error(
-                    'Could not locate the bindings file. Tried:\n → build/better_sqlite3.node',
-                );
-            });
-        };
+        const fail = failingWith(
+            'Could not locate the bindings file. Tried:\n → build/better_sqlite3.node',
+        );
 
         // Then - the refusal says who asked, what is missing, and the line that fixes it
         expect(fail).toThrow(
@@ -82,11 +85,7 @@ describe('requireBuiltPeer — installed, and still not there', () => {
 
     test('leaves a failure that is not a missing binding alone', () => {
         // Given - the peer working, and the seam itself throwing
-        const fail = (): void => {
-            requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
-                throw new Error('SQLITE_CANTOPEN: unable to open database file');
-            });
-        };
+        const fail = failingWith('SQLITE_CANTOPEN: unable to open database file');
 
         // Then - the original error travels, unwrapped: it is not a build problem
         expect(fail).toThrow('SQLITE_CANTOPEN: unable to open database file');
@@ -96,7 +95,9 @@ describe('requireBuiltPeer — installed, and still not there', () => {
         // Given - a peer whose first use succeeds
         // Then - the guard is a pass-through
         expect(() => {
-            requireBuiltPeer('better-sqlite3', 'sqlite()', () => undefined);
+            requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
+                /* a binding that loads does nothing here */
+            });
         }).not.toThrow();
     });
 });

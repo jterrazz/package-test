@@ -27,11 +27,32 @@ export type ServiceReport = {
     logs?: string;
 };
 
-/** Describes the application under test for startup reporting. */
+/**
+ * What the subject IS, for the line the startup report closes on.
+ *
+ * Four shapes, because there are four: an app built and served inside this
+ * process (api), a child process the runner started and polls (a site's dev
+ * server), a deployment already running somewhere (`url`), and a subject that
+ * is not an app at all — a binary, a pipeline, a module, a screen — which gets
+ * no line rather than a wrong one.
+ */
 export type AppInfo = {
-    type: 'http' | 'in-process';
+    /** The command, for a child process. */
+    command?: string | undefined;
+    type: 'http' | 'in-process' | 'none' | 'process';
     url?: string | undefined;
 };
+
+/** The subject, in the words of the thing that started it. */
+function describeApp(app: AppInfo): string {
+    if (app.type === 'in-process') {
+        return 'in-process (Hono)';
+    }
+    if (app.type === 'process') {
+        return app.command === undefined ? 'a child process' : `${app.command} (child process)`;
+    }
+    return app.url ?? '';
+}
 
 // ── Startup report ──
 
@@ -67,13 +88,8 @@ export function formatStartupReport(services: ServiceReport[], app?: AppInfo): s
         }
     }
 
-    if (app) {
-        lines.push('');
-        if (app.type === 'in-process') {
-            lines.push(`  ${DIM}${ARROW} app: in-process (Hono)${RESET}`);
-        } else {
-            lines.push(`  ${DIM}${ARROW} app: ${app.url}${RESET}`);
-        }
+    if (app && app.type !== 'none') {
+        lines.push('', `  ${DIM}${ARROW} app: ${describeApp(app)}${RESET}`);
     }
 
     lines.push('');

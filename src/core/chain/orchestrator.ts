@@ -15,6 +15,13 @@ type RunningService = {
 
 export type OrchestratorOptions = {
     /**
+     * What the subject IS — the line the startup report closes on. Defaults to
+     * the api shape, which is the only facet that serves an app in this
+     * process; a facet whose subject is a binary, a pipeline or a screen says
+     * `{ type: 'none' }` and gets no line rather than a wrong one.
+     */
+    subject?: AppInfo | undefined;
+    /**
      * Named infrastructure record. Keys are the database vocabulary of the spec
      * (`.seed()` / `.table()` `database` option) and the name each handle is
      * reported and initialised under: the kebab-case form of the key is the
@@ -49,12 +56,14 @@ const DOCKER_DIR = 'docker';
 export class Orchestrator {
     private readonly services: Record<string, ServiceHandle>;
     private readonly root: string;
+    private readonly subject: AppInfo;
     private running: RunningService[] = [];
     private started = false;
 
     constructor(options: OrchestratorOptions) {
         this.services = options.services;
         this.root = options.root;
+        this.subject = options.subject ?? { type: 'in-process' };
     }
 
     /**
@@ -146,7 +155,7 @@ export class Orchestrator {
                     logs,
                 });
 
-                const output = formatStartupReport(reports, { type: 'in-process' });
+                const output = formatStartupReport(reports, this.subject);
                 console.error(output);
                 throw error;
             }
@@ -154,8 +163,7 @@ export class Orchestrator {
 
         this.started = true;
 
-        const appInfo: AppInfo = { type: 'in-process' };
-        const output = formatStartupReport(reports, appInfo);
+        const output = formatStartupReport(reports, this.subject);
         console.log(output);
     }
 
