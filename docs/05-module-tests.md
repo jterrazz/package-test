@@ -38,11 +38,11 @@ That is the fork's whole criterion, and it runs both ways: the moment a test nee
 A module test is plain vitest: `test`, `expect`, the native matchers. What the framework adds are four primitives it may reach for by name — and each of them is a scope that gives back what it took.
 
 ```typescript
-import { clock, http, intercept, mockOf, text } from '@jterrazz/test';
-import { expect, test, vi } from 'vitest';
+import { clock } from '@jterrazz/test';
+import { expect, test } from 'vitest';
 
-import { rank } from './ranking.js';
 import { twoPosts } from './ranking.fixtures.js';
+import { rank } from './ranking.js';
 
 test('ranks a fresher post above an older one of equal score', () => {
     // Given - two posts of equal score, one written this morning
@@ -123,14 +123,14 @@ A payload a module test feeds itself lives in a sibling `<file>.fixtures.ts` —
 
 ```typescript
 test.each([
-    { expected: 'fresh', label: 'a fresher post of equal score' },
-    { expected: 'high', label: 'a higher score of equal age' },
+    { expected: 'fresh', label: 'a fresher post of equal score', posts: equalScore },
+    { expected: 'high', label: 'a higher score of equal age', posts: equalAge },
 ])(
     // Given - $label
     // Then - it leads the ranking
     'ranks $label first',
-    ({ expected, rows }) => {
-        expect(rank(rows)[0]?.id).toBe(expected);
+    ({ expected, posts }) => {
+        expect(rank(posts)[0]?.id).toBe(expected);
     },
 );
 ```

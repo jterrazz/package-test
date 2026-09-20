@@ -6,6 +6,7 @@ import {
     hasMarker,
     isTestCallee,
     markerComments,
+    testCalleeHasModifier,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../types.js';
@@ -21,6 +22,12 @@ import type { AstNode, LintRule, RuleContext } from '../../types.js';
  * occurrences for multi-`Then` bodies. (The stricter "first expect after Then"
  * variant is intentionally NOT enforced: setup-phase assertions — precondition
  * checks, update-mode writes before the Then narrative — are idiomatic here.)
+ *
+ * A `test.each` table is judged ONCE, on the TABLE: its narration is written
+ * where the cases are — above the title, interpolating `$label` — because one
+ * narrative covers every row and repeating it inside the callback would say
+ * the same thing N times. So the comments are looked for across the whole call
+ * there, not only inside the callback.
  */
 export const b4GivenThen: LintRule = {
     create(context: RuleContext) {
@@ -33,7 +40,12 @@ export const b4GivenThen: LintRule = {
                 if (callback === undefined) {
                     return;
                 }
-                const markers = markerComments(context.sourceCode.getCommentsInside(callback));
+                // A table's narration sits in the argument list, before the
+                // Title; a plain test's sits in its body.
+                const scope = testCalleeHasModifier(child(node, 'callee'), 'each')
+                    ? node
+                    : callback;
+                const markers = markerComments(context.sourceCode.getCommentsInside(scope));
                 if (!hasMarker(markers, 'Given')) {
                     context.report({ data: { marker: 'Given' }, messageId: 'missing', node });
                 }
