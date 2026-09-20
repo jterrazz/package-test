@@ -246,7 +246,16 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 **An empty list is refused.** `intercept(defineContracts())` guards nothing, and a subject with no network needs no intercept at all — the message says so. "This subject makes no network call" is said the other way round: declare the call with `http.unreachable()` on every feed it could reach, and the spec fails if it makes one.
 
-**A cancelled body does not settle.** `response.body.cancel()` on an intercepted reply never resolves under node — msw's interceptor holds the stream open (reading it with `.text()`/`.json()` resolves normally). A subject whose own code cancels a body keeps `vi.stubGlobal('fetch')` with a reasoned suppression of M3 until the seam answers it; every other subject has `intercept()`.
+**A cancelled body does not settle.** `response.body.cancel()` on an intercepted reply never resolves under node — msw's interceptor holds the stream open (reading it with `.text()`/`.json()` resolves normally; measured on msw 2.15.0). It is interop between msw and undici rather than this package's code, and no upstream issue names a MOCKED reply — the nearest is [mswjs/interceptors#799](https://github.com/mswjs/interceptors/issues/799), a passthrough body, closed as fixed. The repro is `specs/api/intercepts/body-cancel.spec.ts`, skipped: it is the acceptance test of the fix.
+
+That is the ONE escape rule M3 sanctions, and it is narrow because the upstream option carries no allow-list. A subject whose own code cancels a body keeps `vi.stubGlobal('fetch')`, behind a directive written on the call that states the defect:
+
+```typescript
+// oxlint-disable-next-line vitest/no-restricted-vi-methods -- reason: the subject cancels the reply body, which never settles through intercept() under msw's node interceptor (docs/10 § A cancelled body does not settle)
+vi.stubGlobal('fetch', fetchStub);
+```
+
+Every other subject has `intercept()`, and this one gets it back the day the seam answers.
 
 **Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its contracts last and its strictness is total ([16](16-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 

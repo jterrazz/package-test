@@ -37,6 +37,11 @@ then implement against numbers. By expected return, descending.
   written by a machine is worth.
 - **The next large consumer.** A repository on another stack, to test how general the
   conventions are outside this ecosystem.
+- **A cancelled body, for 16.x.** `response.body.cancel()` on a reply `intercept()`
+  served never resolves under node (msw 2.15.0; `.text()` on the same body resolves at
+  once) — msw/undici interop, not this package's code, and no upstream issue names a
+  mocked reply. The repro is `specs/api/intercepts/body-cancel.spec.ts`, skipped: unskip
+  it and the M3 escape chapter 10 sanctions goes with it.
 
 ## 3. Asks of `@jterrazz/typescript`
 

@@ -1284,7 +1284,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
     {
         channel: 'upstream',
         convention:
-            '`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(contracts, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express.',
+            "`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(contracts, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express. One escape is sanctioned, because the option carries no allow-list and the seam does not answer yet: a subject whose OWN code calls `response.body.cancel()` on an intercepted reply hangs under msw's node interceptor, so that one test keeps `vi.stubGlobal('fetch')` behind an `oxlint-disable-next-line vitest/no-restricted-vi-methods` written on the call, naming the defect (chapter 10, § A cancelled body does not settle). It leaves with the seam fix.",
         family: 'M',
         fix: 'Reach for `intercept()` and `clock` — both give back what they took at the end of the scope.',
         id: 'M3',
