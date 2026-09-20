@@ -37,7 +37,7 @@ The response body as a text accessor (`toMatch('robots.txt')`, `.grep()`).
 get headers(): Record<string, string>;
 ```
 
-Defined in: [src/facets/website/website.result.ts:39](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L39)
+Defined in: [src/facets/website/website.result.ts:40](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L40)
 
 Response headers as a flat, lower-cased key-value map.
 
@@ -55,7 +55,7 @@ Response headers as a flat, lower-cased key-value map.
 get json(): JsonAccessor;
 ```
 
-Defined in: [src/facets/website/website.result.ts:44](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L44)
+Defined in: [src/facets/website/website.result.ts:45](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L45)
 
 The response body parsed as JSON.
 
@@ -73,7 +73,7 @@ The response body parsed as JSON.
 get location(): string | undefined;
 ```
 
-Defined in: [src/facets/website/website.result.ts:49](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L49)
+Defined in: [src/facets/website/website.result.ts:55](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L55)
 
 The `location` header of a redirect response, or undefined.
 
@@ -91,7 +91,7 @@ The `location` header of a redirect response, or undefined.
 get status(): number;
 ```
 
-Defined in: [src/facets/website/website.result.ts:54](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L54)
+Defined in: [src/facets/website/website.result.ts:60](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.result.ts#L60)
 
 The HTTP response status code — redirects surface as 3xx, never followed.
 

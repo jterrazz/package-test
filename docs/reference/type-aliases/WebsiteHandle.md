@@ -5,7 +5,7 @@
 type WebsiteHandle = object;
 ```
 
-Defined in: [src/facets/website/website.specification.ts:205](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L205)
+Defined in: [src/facets/website/website.specification.ts:213](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L213)
 
 The record returned by startWebsite \| specification.website.
 Destructure with the canonical names (CONVENTIONS A3):
@@ -20,7 +20,7 @@ Destructure with the canonical names (CONVENTIONS A3):
 cleanup: () => Promise<void>;
 ```
 
-Defined in: [src/facets/website/website.specification.ts:207](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L207)
+Defined in: [src/facets/website/website.specification.ts:215](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L215)
 
 Stop the server process and the shared browser instance.
 
@@ -36,7 +36,7 @@ Stop the server process and the shared browser instance.
 url: string;
 ```
 
-Defined in: [src/facets/website/website.specification.ts:209](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L209)
+Defined in: [src/facets/website/website.specification.ts:217](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L217)
 
 The base URL the specs run against.
 
@@ -48,4 +48,4 @@ The base URL the specs run against.
 website: WebsiteSpecification;
 ```
 
-Defined in: [src/facets/website/website.specification.ts:210](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L210)
+Defined in: [src/facets/website/website.specification.ts:218](https://github.com/jterrazz/package-test/blob/main/src/facets/website/website.specification.ts#L218)
