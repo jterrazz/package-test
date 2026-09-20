@@ -108,7 +108,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                   | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 53    |
+| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 54    |
 | Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
 | The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 67    |
 | The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 88    |
@@ -185,7 +185,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: src/lint/siblings.ts -->
 
-Today **81 modules** have no sibling test, and every one of them is claimed:
+Today **80 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -197,7 +197,7 @@ Today **81 modules** have no sibling test, and every one of them is claimed:
 | a mobile module that needs a device (2) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
 | a facet module (8)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
 | a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
-| a seam adapter (13)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
+| a seam adapter (12)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
 | a bundled CLI entry (3)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                |
 | a lint-layer module (4)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
 | a chain or runner internal (7)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |

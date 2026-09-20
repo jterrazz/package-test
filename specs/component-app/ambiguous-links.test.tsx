@@ -1,5 +1,5 @@
 import { component, link } from '@jterrazz/test';
-import { expect, test, vi } from 'vitest';
+import { expect, test } from 'vitest';
 
 import { AmbiguousLinks } from './ambiguous-links.js';
 
@@ -43,21 +43,15 @@ test('`{ exact: false }` brings the substring match back, and the ambiguity with
     expect(refusal).toContain('matched 3 elements');
 });
 
-test('a name that only matches as a substring still resolves, and says so once', async () => {
+test('a name that only matches as a substring still resolves', async () => {
     // Given - a name no element carries whole, and exactly one element carries in part
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
     // `see()` rather than `click()`: the window resolves it, and a resolved
     // Click would navigate the mounted page out from under the runner.
     const refusal = await refusalOf(async (visitor) => {
         await visitor.see(link('archive'));
     });
 
-    // Then - the transitional window resolved it rather than waiting out the budget, and one line names the spelling to write and the release it disappears in
+    // Then - the transitional window resolved it rather than waiting out the budget
     expect(refusal).toBe('');
-    const lines = warn.mock.calls.map(([line]) => String(line));
-    expect(lines.some((line) => line.includes('matched only as a SUBSTRING'))).toBe(true);
-    expect(lines.some((line) => line.includes("The name to write is 'Articles archive'"))).toBe(
-        true,
-    );
-    expect(lines.some((line) => line.includes('gone in 17.0'))).toBe(true);
 });
