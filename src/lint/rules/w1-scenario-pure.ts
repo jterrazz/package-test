@@ -1,39 +1,29 @@
-import { memberPropertyName, walk } from '../ast.js';
+import { child, identifierName, scenarioCallbackOf, walk } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';
 
-/** The scenario-carrying terminal actions: `.visit()` (website) and `.open()` (mobile). */
-const SCENARIO_ACTIONS = new Set(['open', 'visit']);
-
 /**
- * CONVENTIONS W1 — a visit (or mobile open) scenario is the When: the
- * visitor interacts, the capture reflects the final state, and assertions
- * live in the Then on the returned result. An `expect()` inside the scenario
- * callback is flagged.
+ * CONVENTIONS W1 — a scenario is the When: the visitor interacts, the capture
+ * reflects the final state, and assertions live in the Then on the returned
+ * result. An `expect()` inside the scenario callback is flagged.
+ *
+ * The three scenario-carrying actions are one list (`ast.ts`): `.visit()` on a
+ * page, `.open()` on a screen and `.render()` on a component all hand the same
+ * visitor to the same kind of callback.
  */
 export const w1ScenarioPure: LintRule = {
     create(context: RuleContext) {
         return {
             CallExpression(node: AstNode) {
-                const callee = node.callee as AstNode | undefined;
-                const member = callee ? memberPropertyName(callee) : undefined;
-                if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
-                    return;
-                }
-                const args = node.arguments as AstNode[] | undefined;
-                const scenario = args?.[1];
-                if (
-                    scenario?.type !== 'ArrowFunctionExpression' &&
-                    scenario?.type !== 'FunctionExpression'
-                ) {
+                const scenario = scenarioCallbackOf(node);
+                if (scenario === undefined) {
                     return;
                 }
                 walk(scenario, (inner: AstNode) => {
-                    if (inner.type !== 'CallExpression') {
-                        return;
-                    }
-                    const innerCallee = inner.callee as AstNode | undefined;
-                    if (innerCallee?.type === 'Identifier' && innerCallee.name === 'expect') {
+                    if (
+                        inner.type === 'CallExpression' &&
+                        identifierName(child(inner, 'callee')) === 'expect'
+                    ) {
                         context.report({ messageId: 'expectInScenario', node: inner });
                     }
                 });

@@ -1,9 +1,6 @@
-import { memberPropertyName, walk } from '../ast.js';
+import { memberPropertyName, SCENARIO_ACTIONS, walk } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, Comment, LintRule, RuleContext } from '../types.js';
-
-/** The scenario-carrying terminal actions: `.visit()` (website), `.open()` (mobile), `.render()` (component). */
-const SCENARIO_ACTIONS = new Set(['open', 'render', 'visit']);
 
 /** The invariant a `testId()` owes: what the element lacks, in the author's words. */
 const REASON = /\/\/\s*testId:\s*\S/u;
