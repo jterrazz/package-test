@@ -3,18 +3,13 @@ import type { IsolationStrategy } from '../../specification/ports/isolation.port
 import type { ServiceHandle } from '../../specification/ports/service.port.js';
 
 export type RedisOptions = {
-    /**
-     * Map to a service in docker/compose.test.yaml. Defaults to the handle's
-     * key in the declared services record.
-     */
-    composeService?: string;
     /** Override image. */
     image?: string;
 };
 
 export class RedisHandle implements ServiceHandle {
     readonly type = 'redis';
-    composeName: null | string;
+    serviceName: null | string = null;
     readonly defaultPort = 6379;
     readonly defaultImage: string;
     readonly environment: Record<string, string> = {};
@@ -25,7 +20,6 @@ export class RedisHandle implements ServiceHandle {
     private dbIndex = 0;
 
     constructor(options: RedisOptions = {}) {
-        this.composeName = options.composeService ?? null;
         this.defaultImage = options.image ?? 'redis:7';
     }
 
@@ -97,7 +91,7 @@ export class RedisHandle implements ServiceHandle {
  * Create a Redis service handle.
  *
  * @example
- * // The record key derives the compose service: { cache: redis() } → "cache".
+ * // The record key is the name it reports under: { cache: redis() } → "cache".
  * const cache = redis();
  * // After start: cache.connectionString is populated
  */

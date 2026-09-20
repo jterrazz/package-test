@@ -1,8 +1,30 @@
 import { execSync } from 'node:child_process';
 import { describe, expect, test } from 'vitest';
 
-import { findContainersByLabel } from '../../../src/index.js';
 import { cli as dockerCli } from '../docker-cli.specification.js';
+
+/**
+ * The daemon query this spec checks the runner's cleanup against.
+ *
+ * It is asked of `docker` directly, not of the framework: the container
+ * lifecycle is what is under test here, so the oracle has to be a SECOND
+ * opinion. Reading it through the same helper the dispose path uses would make
+ * the assertion agree with the code by construction — and F3 has a spec reach
+ * the framework through its public entry, which this is not part of.
+ */
+function containersLabelled(key: string, value: string): string[] {
+    try {
+        return execSync(`docker ps -aq -f label=${key}=${value}`, {
+            encoding: 'utf8',
+            timeout: 10_000,
+        })
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
+    } catch {
+        return [];
+    }
+}
 
 function dockerAvailable(): boolean {
     try {
@@ -67,13 +89,13 @@ describe('command — docker option (lazy container accessors)', () => {
                 // While the scope is live, the tracked id really carries the run
                 // Label — a direct daemon query sees it (makes the after-dispose
                 // Assertion below falsifiable).
-                expect(findContainersByLabel('fake.test.run', runId)).toContain(trackedId);
+                expect(containersLabelled('fake.test.run', runId)).toContain(trackedId);
             }
 
             // Then - scope exit disposed the container: the same label query the
             // Runner uses now comes back empty, proving async-dispose removed it.
-            expect(findContainersByLabel('fake.test.run', runId)).not.toContain(trackedId);
-            expect(findContainersByLabel('fake.test.run', runId)).toStrictEqual([]);
+            expect(containersLabelled('fake.test.run', runId)).not.toContain(trackedId);
+            expect(containersLabelled('fake.test.run', runId)).toStrictEqual([]);
         },
         60_000,
     );
@@ -122,16 +144,17 @@ describe('command — docker option (lazy container accessors)', () => {
             }
 
             // Then - scope exit removed every container carrying the run label
-            expect(findContainersByLabel('fake.test.run', runId)).toStrictEqual([]);
+            expect(containersLabelled('fake.test.run', runId)).toStrictEqual([]);
         },
         60_000,
     );
 
-    test('findContainersByLabel returns empty for unknown labels', () => {
+    test('a label no container carries queries clean, so the oracle is falsifiable', () => {
         // Given - a label value that no container carries
-        const ids = findContainersByLabel('nonexistent.label.key', 'definitely-not-a-real-run-id');
+        const ids = containersLabelled('nonexistent.label.key', 'definitely-not-a-real-run-id');
 
-        // Then - empty result, no throw
+        // Then - empty result, no throw: an empty answer above means REMOVED,
+        // Not "the query never worked"
         expect(ids).toStrictEqual([]);
     });
 });

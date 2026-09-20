@@ -22,7 +22,7 @@ The corpus is `docs/` + `README.md`, mapped by [`docs/README.md`](docs/README.md
 | The npm release and what ships                    | `docs/04-operating.md`                         |
 | A facet: api · jobs · cli · website · mobile      | `docs/05` · `06` · `07` · `14` · `15`          |
 | Matchers, the `{{token}}` grammar                 | `docs/08-assertions.md` · `docs/09-tokens.md`  |
-| Contracts, services and compose                   | `docs/10-contracts.md` · `docs/11-services.md` |
+| Contracts and services                            | `docs/10-contracts.md` · `docs/11-services.md` |
 | The principles, and what review must judge        | `docs/12-conventions.md`                       |
 | Rule ids, channels, the generated catalogue       | `docs/13-linting.md`                           |
 

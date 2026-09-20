@@ -58,7 +58,7 @@ Load the one reference that matches the task; each also names the docs chapter c
 
 | Task                                                                 | Reference                                                      | Prose chapter                                                                 |
 | -------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Writing **API** specs (HTTP, node vs compose)                        | [references/api.md](references/api.md)                         | [docs/05-api.md](../../docs/05-api.md)                                        |
+| Writing **API** specs (HTTP, in-process)                             | [references/api.md](references/api.md)                         | [docs/05-api.md](../../docs/05-api.md)                                        |
 | Writing **jobs** specs (background pipelines)                        | [references/jobs.md](references/jobs.md)                       | [docs/06-jobs.md](../../docs/06-jobs.md)                                      |
 | Writing **CLI** specs (exec, env, fixtures, docker)                  | [references/cli.md](references/cli.md)                         | [docs/07-cli.md](../../docs/07-cli.md)                                        |
 | Writing **spec documents** (`<case>.spec.yaml`)                      | [references/cli.md](references/cli.md)                         | [docs/07-cli.md](../../docs/07-cli.md)                                        |

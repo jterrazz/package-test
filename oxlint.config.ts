@@ -120,13 +120,10 @@ const config: OxlintConfig = defineConfig(
         overrides: [
             {
                 // The framework's own module tests unit-test the constructors —
-                // Creating runners (and exercising the mode option) outside a
-                // *.specification.ts file is their purpose.
+                // Creating a runner outside a *.specification.ts file is their
+                // Purpose.
                 files: ['src/**/*.test.ts'],
-                rules: {
-                    'jterrazz/a1-specification-file': 'off',
-                    'jterrazz/a5-mode-with-server': 'off',
-                },
+                rules: { 'jterrazz/a1-specification-file': 'off' },
             },
             {
                 // The vitest layer and the browser-mode seam ARE the sanctioned

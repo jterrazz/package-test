@@ -17,13 +17,13 @@ Every facet is the same four steps. A **constructor** takes options and returns 
 
 Five constructors exist and the list is closed (`src/specification/facets/_common/specification.ts`):
 
-| Constructor               | Handle destructures to                   | Subject under test                               |
-| ------------------------- | ---------------------------------------- | ------------------------------------------------ |
-| `specification.api()`     | `{ api, cleanup, docker, orchestrator }` | An HTTP API — in-process, or a compose stack     |
-| `specification.jobs()`    | `{ jobs, cleanup, orchestrator }`        | A background pipeline, triggered by name         |
-| `specification.cli()`     | `{ cli, cleanup, docker, orchestrator }` | A command binary in a fresh temp directory       |
-| `specification.website()` | `{ website, cleanup, url }`              | A rendered page — fetched, or driven in chromium |
-| `specification.mobile()`  | `{ mobile, cleanup, udid }`              | A native screen on an iOS simulator              |
+| Constructor               | Handle destructures to      | Subject under test                               |
+| ------------------------- | --------------------------- | ------------------------------------------------ |
+| `specification.api()`     | `{ api, cleanup, docker }`  | An HTTP API, built and served in this process    |
+| `specification.jobs()`    | `{ jobs, cleanup }`         | A background pipeline, triggered by name         |
+| `specification.cli()`     | `{ cli, cleanup, docker }`  | A command binary in a fresh temp directory       |
+| `specification.website()` | `{ website, cleanup, url }` | A rendered page — fetched, or driven in chromium |
+| `specification.mobile()`  | `{ mobile, cleanup, udid }` | A native screen on an iOS simulator              |
 
 The asymmetry in that column is the model, not an oversight: `jobs` never spawns a container, so it is handed no `docker`; `website` and `mobile` drive a browser and a simulator rather than an orchestrated stack, so they carry neither.
 
@@ -44,7 +44,7 @@ The source tree is four layers with declared, one-directional edges. The map is 
 | Layer            | May import                                                                                                                                                          | Holds                                                                                                                                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `specification/` | itself, plus the docker/hono/yaml integrations and two `vitest/` helpers                                                                                            | The model: the specification builder and its facets, the results and their accessors, the `{{token}}` engine, the `.http` and `<case>.spec.yaml` grammars, the contract queue, the ports |
-| `integrations/`  | its OWN external dependency, plus `specification/`                                                                                                                  | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `compose`, `docker`, `hono`, `playwright`, `vitest-browser`, `appium`, `msw`, `openai`, `anthropic`, `yaml`  |
+| `integrations/`  | its OWN external dependency, plus `specification/`                                                                                                                  | One folder per dependency: `postgres`, `redis`, `sqlite`, `testcontainers`, `docker`, `hono`, `playwright`, `vitest-browser`, `appium`, `msw`, `openai`, `anthropic`, `yaml`             |
 | `vitest/`        | `vitest`, `vite`, `@vitest/browser-playwright`, `vitest-mock-extended`, `mockdate`, `specification/`, `integrations/docker`, `integrations/vitest-browser/commands` | The CONFIG side of the runner coupling: the `expect()` matchers, update-mode detection, `mockOf`/`mockOfDate`, the preset, the `literate()` plugin and the project helpers               |
 | `lint/`          | itself, plus a short list of PURE `specification/` modules                                                                                                          | The tool-facing channel: the oxlint plugin, the conventions checker, the catalogue manifest and generator                                                                                |
 

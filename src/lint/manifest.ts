@@ -84,15 +84,6 @@ export const RULE_DOCS = {
         rationale:
             'Ancrer les runners à un nom de fichier reconnaissable rend le point d’entrée détectable et garde les tests déclaratifs.',
     },
-    'a10-duplicate-binding': {
-        channel: 'statique',
-        convention:
-            'Dans un même record `services`, deux clés ne peuvent pas se lier au même service compose (même dérivation kebab-case, ou même `composeService`).',
-        family: 'A',
-        id: 'A10',
-        rationale:
-            'Une seconde liaison masquerait silencieusement la première dans ce qui est une map.',
-    },
     'a2-known-constructors': {
         channel: 'statique',
         convention:
@@ -119,24 +110,6 @@ export const RULE_DOCS = {
         id: 'A4',
         rationale:
             'Garantir le teardown évite les conteneurs et connexions qui fuient entre fichiers.',
-    },
-    'a5-mode-with-server': {
-        channel: 'statique',
-        convention:
-            '`mode` n’existe que sur `specification.api()` et n’est jamais hardcodé quand `server` est défini — le switch vit dans `vitest.config.ts`.',
-        family: 'A',
-        id: 'A5',
-        rationale:
-            'Sortir le mode du fichier de spec permet d’exécuter le même test en node et en compose sans le modifier.',
-    },
-    'a6w-redundant-compose-service': {
-        channel: 'statique',
-        convention:
-            '`composeService:` dérivable de la clé (égal à la clé exacte ou à sa conversion kebab-case) est redondant → warning.',
-        family: 'A',
-        id: 'A6',
-        rationale:
-            'Signaler la redondance garde les records `services` minimaux et évite le bruit qui masque les vrais overrides.',
     },
     'a9w-redundant-root': {
         channel: 'statique',
@@ -773,16 +746,6 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            'Un binding ambigu (le compose déclare à la fois la clé exacte ET sa forme kebab-case) est refusé à l’exécution.',
-        family: 'A',
-        id: 'A6',
-        name: 'a6-ambiguous-binding',
-        rationale:
-            'Le framework ne devine pas — il exige un renommage ou un `composeService` explicite.',
-    },
-    {
-        channel: 'runtime',
-        convention:
             'Le framework lève à l’exécution si `database:` est absent avec ≥ 2 bases, ou présent avec une seule (double le canal checker).',
         family: 'A',
         id: 'A7',
@@ -848,16 +811,6 @@ export const RUNTIME_RULES: CatalogEntry[] = [
         name: 'w4-no-landmarks-on-mobile',
         rationale:
             'Un seul vocabulaire garde l’API mémorisable ; refuser explicitement la partie sans équivalent iOS évite une approximation silencieuse.',
-    },
-    {
-        channel: 'runtime',
-        convention:
-            '`.intercept()` n’existe que sur `api`/`jobs` et lève immédiatement en mode compose (MSW est in-process).',
-        family: 'I',
-        id: 'I3',
-        name: 'i3-intercept-compose',
-        rationale:
-            'Un child process ou un conteneur n’est pas interceptable par MSW — l’erreur oriente vers un projet node-only.',
     },
 ];
 

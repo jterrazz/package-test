@@ -12,18 +12,12 @@ const probe =
         present.includes(path);
 
 describe('findRoot — the one walk both the runner and A9 use', () => {
-    test('probes both markers at each ancestor, and the nearest one wins', () => {
-        // Given - a compose file at the monorepo root and a manifest in the package
-        const exists = probe('/mono/docker/compose.test.yaml', '/mono/apps/cli/package.json');
+    test('the NEAREST ancestor that declares itself a project wins', () => {
+        // Given - a manifest at the monorepo root and one in the package
+        const exists = probe('/mono/package.json', '/mono/apps/cli/package.json');
 
         // Then - the walk stops at the package, not at the repository
         expect(findRoot('/mono/apps/cli/specs/logs', exists)).toBe('/mono/apps/cli');
-    });
-
-    test('accepts either marker alone', () => {
-        // Given - one ancestor carrying only a compose file
-        // Then - it is a root all the same
-        expect(findRoot('/stack/specs', probe('/stack/docker/compose.test.yaml'))).toBe('/stack');
     });
 
     test('returns undefined when no ancestor carries a marker', () => {
@@ -43,12 +37,10 @@ describe('root discovery (CONVENTIONS A9)', () => {
     let base: string;
 
     beforeAll(() => {
-        // Given - <base>/project with docker/compose.test.yaml, nested tests dir,
+        // Given - <base>/project with a manifest and a nested tests dir,
         // And <base>/plain with only a package.json
         base = mkdtempSync(resolve(tmpdir(), 'root-discovery-'));
-        mkdirSync(resolve(base, 'project/docker'), { recursive: true });
         mkdirSync(resolve(base, 'project/tests/feature'), { recursive: true });
-        writeFileSync(resolve(base, 'project/docker/compose.test.yaml'), 'services: {}\n');
         writeFileSync(resolve(base, 'project/package.json'), '{"name":"project"}\n');
         mkdirSync(resolve(base, 'plain/tests/deep'), { recursive: true });
         writeFileSync(resolve(base, 'plain/package.json'), '{"name":"plain"}\n');
@@ -66,8 +58,8 @@ describe('root discovery (CONVENTIONS A9)', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('a directory with only a package.json is a root', () => {
-        // Given - a project without a compose file
+    test('a directory carrying a package.json is a root', () => {
+        // Given - a plain project
         const found = discoverRoot(resolve(base, 'plain/tests/deep'));
 
         // Then - the package.json directory wins
@@ -91,7 +83,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
     });
 
     test('falls back to the starting directory when no marker exists anywhere up', () => {
-        // Given - a bare temp tree with neither compose file nor package.json above it
+        // Given - a bare temp tree with no package.json above it
         const bare = mkdtempSync(resolve(tmpdir(), 'no-marker-'));
         try {
             // Then - the starting directory itself is the root
@@ -101,13 +93,13 @@ describe('root discovery (CONVENTIONS A9)', () => {
         }
     });
 
-    test('a workspace package wins over a compose file further up (monorepo)', () => {
-        // Given - compose at the monorepo root, package.json in a nested package
-        // (the shape that used to resolve to the repository: the walk ran twice,
-        // Compose first, so the FURTHER marker decided and every path the runner
-        // Resolved was measured from the wrong unit)
-        mkdirSync(resolve(base, 'mono/docker'), { recursive: true });
-        writeFileSync(resolve(base, 'mono/docker/compose.test.yaml'), 'services: {}\n');
+    test('a workspace package wins over the repository above it (monorepo)', () => {
+        // Given - a manifest at the monorepo root and one in a nested package
+        // (the shape that used to resolve to the repository: a second marker
+        // Was walked first, so the FURTHER one decided and every path the
+        // Runner resolved was measured from the wrong unit)
+        mkdirSync(resolve(base, 'mono'), { recursive: true });
+        writeFileSync(resolve(base, 'mono/package.json'), '{"name":"mono"}\n');
         mkdirSync(resolve(base, 'mono/packages/pkg/src'), { recursive: true });
         writeFileSync(resolve(base, 'mono/packages/pkg/package.json'), '{"name":"pkg"}\n');
 
@@ -117,19 +109,9 @@ describe('root discovery (CONVENTIONS A9)', () => {
         );
     });
 
-    test('a compose file still anchors a directory that declares no package.json', () => {
-        // Given - a test stack with no manifest beside it, under a plain parent
-        mkdirSync(resolve(base, 'stack/docker'), { recursive: true });
-        mkdirSync(resolve(base, 'stack/tests/deep'), { recursive: true });
-        writeFileSync(resolve(base, 'stack/docker/compose.test.yaml'), 'services: {}\n');
-
-        // Then - the compose file is a root marker in its own right
-        expect(discoverRoot(resolve(base, 'stack/tests/deep'))).toBe(resolve(base, 'stack'));
-    });
-
-    test('both markers in one directory resolve to that directory', () => {
-        // Given - the ordinary single-package repo: manifest and stack together
-        // Then - the nearest ancestor carrying either marker is the root
+    test('the marker in a directory resolves to that directory', () => {
+        // Given - the ordinary single-package repo
+        // Then - the nearest ancestor carrying the manifest is the root
         expect(discoverRoot(resolve(base, 'project/tests/feature'))).toBe(resolve(base, 'project'));
     });
 

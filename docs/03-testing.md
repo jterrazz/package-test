@@ -12,26 +12,25 @@ What proves a change here: this package specifies itself with itself. The suites
 | Spec documents  | `specs/cli/literate/*.spec.yaml`                    | The document format, collected as test files by `literate()`           |
 | Meta-tests      | `src/lint/*.test.ts`, `src/specification/matching/` | The framework applied to itself and to its own projections             |
 
-## The eight projects
+## The seven projects
 
-`test.projects` in `vitest.config.ts` declares eight, and which one you can run is decided by what is installed and running on the machine.
+`test.projects` in `vitest.config.ts` declares seven, and which one you can run is decided by what is installed and running on the machine.
 
-| Project       | Collects                                                                                                      | Needs                                                                |
-| ------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `unit`        | `src/**/*.test.ts` + `specs/lint/**/*.test.ts`, built by `unit()`                                             | Nothing — the lint specs need `npm run build` first                  |
-| `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                               | Nothing — the Docker specs self-skip                                 |
-| `api`         | `specs/api/**/*.spec.ts`, built by `api()` (node mode, in-process Hono)                                       | Docker                                                               |
-| `jobs`        | `specs/jobs/**`, built by `jobs()`                                                                            | Docker                                                               |
-| `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included               | Docker                                                               |
-| `api-stack`   | `specs/api/**` + `specs/jobs/**` with `TEST_MODE=compose`, minus intercepts, clock and the node-mode refusals | Docker compose                                                       |
-| `website`     | `specs/website/**`, built by `website()`                                                                      | playwright + `npx playwright install chromium`; no Docker            |
-| `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                                                   | the same chromium; no Docker. Runs in its own group, after `website` |
+| Project       | Collects                                                                                        | Needs                                                                |
+| ------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `unit`        | `src/**/*.test.ts` + `specs/lint/**/*.test.ts`, built by `unit()`                               | Nothing — the lint specs need `npm run build` first                  |
+| `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                 | Nothing — the Docker specs self-skip                                 |
+| `api`         | `specs/api/**/*.spec.ts`, built by `api()` (node mode, in-process Hono)                         | Docker                                                               |
+| `jobs`        | `specs/jobs/**`, built by `jobs()`                                                              | Docker                                                               |
+| `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included | Docker                                                               |
+| `website`     | `specs/website/**`, built by `website()`                                                        | playwright + `npx playwright install chromium`; no Docker            |
+| `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                                     | the same chromium; no Docker. Runs in its own group, after `website` |
 
-Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. One project is still written by hand and says why: `api-stack` is compose mode, which leaves the package in 16.0.
+Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's.
 
 **`specs/lint/` is a repository suite, and it keeps `.test.ts`.** Its first level is not one of the six facets, so C12's rename clause never reaches it — by design: these files do not specify the assembled product through an entry, they hold the package's own conventions over fixture PROJECTS, which is what a repository suite is. C1's declared depth is what judges their shape, and `unit()` is what collects them.
 
-There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles, the orchestrator's own lifecycle — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/integrations/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
+There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/integrations/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
 
 ```bash
 npm test                            # every project — Docker and chromium both required
@@ -39,8 +38,6 @@ npx vitest --run --project unit     # the loop: no infrastructure, after npm run
 npx vitest --run --project website  # after npx playwright install chromium
 npx vitest --run --project component  # the same chromium, a mounted unit at a time
 ```
-
-`api` and `api-stack` run the same test files and the mode switch lives ONLY in `vitest.config.ts` — that is rule A5 applied to this repository, and it is also the point of the two projects: fast feedback in-process, end-to-end confidence against the real stack, from one set of specs. `api-stack` excludes the intercept domain because `.intercept()` is in-process MSW, which compose mode has no access to, and the `initiation-errors` domain because those specs ARE the constructor's node-mode refusals — the compose ones they drive themselves.
 
 There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/specification/facets/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
 
@@ -81,7 +78,7 @@ Several truths about this package cannot be asserted from outside it, so they ar
 | `src/specification/matching/match.test.ts`, `structural.test.ts` | Every `{{token}}` matches what it should and refuses what it should not — both directions                                                                                                                                                         |
 | `src/lint/plugin.test.ts`                                        | Catalogue **freshness** (regenerating reproduces the committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`, every manifest entry maps to an implementation), plus the standing rule↔fixture inventory |
 | `src/lint/docs-typecheck.test.ts`                                | Every framework code block in `docs/*.md` and `README.md` typechecks against the real surface, so a sample cannot outlive the API it calls                                                                                                        |
-| `src/lint/env-allowlist.test.ts`                                 | No `process.env` read outside `TEST_MODE`, `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                              |
+| `src/lint/env-allowlist.test.ts`                                 | No `process.env` read outside `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                                           |
 | `src/lint/facet-matrix.test.ts`                                  | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
 | `src/lint/package-exports.test.ts`                               | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
 
@@ -107,7 +104,7 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 
 - **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.
 - **Hand-editing a golden under `specs/lint/checker/_expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
-- **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs`, `integration` and `api-stack` fail honestly.
+- **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs` and `integration` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.spec.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
 - **Writing a facet spec as `<aspect>.test.ts`.** `c12-spec-file-name` refuses it and `node dist/checker.js specs --fix` renames it with `git mv`; the reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.
 

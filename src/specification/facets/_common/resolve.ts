@@ -3,19 +3,17 @@ import { dirname, isAbsolute, resolve } from 'node:path';
 
 import type { CliEnv } from '../../ports/cli.port.js';
 
-/** What makes a directory a project root — a manifest, or a test stack. */
-const ROOT_MARKERS = ['package.json', 'docker/compose.test.yaml'];
+/** What makes a directory a project root: the thing that declares itself one. */
+const ROOT_MARKER = 'package.json';
 
 /**
- * The NEAREST ancestor of `startDir` (itself included) carrying a root marker,
- * `undefined` when none does.
+ * The NEAREST ancestor of `startDir` (itself included) carrying the root
+ * marker, `undefined` when none does.
  *
- * Both markers are probed at each ancestor, in ONE walk. Two walks — the
- * compose file all the way up, then `package.json` all the way up — made the
- * further directory win: in a workspace, a `docker/compose.test.yaml` at the
- * repository root outranked the `package.json` of the very package being
- * tested, and every path the runner resolved was measured from the wrong unit.
- * The unit is the nearest thing that declares itself a project.
+ * The unit is the nearest thing that declares itself a project. While a compose
+ * file counted as a second marker, a `docker/compose.test.yaml` at a workspace
+ * root outranked the `package.json` of the very package being tested, and every
+ * path the runner resolved was measured from the wrong unit.
  *
  * The existence probe is injected so the lint layer can pass its cached one
  * (A9's `a9w-redundant-root` derives the same root, and must derive it the
@@ -24,7 +22,7 @@ const ROOT_MARKERS = ['package.json', 'docker/compose.test.yaml'];
 export function findRoot(startDir: string, exists: (path: string) => boolean): string | undefined {
     let dir = startDir;
     for (;;) {
-        if (ROOT_MARKERS.some((marker) => exists(resolve(dir, marker)))) {
+        if (exists(resolve(dir, ROOT_MARKER))) {
             return dir;
         }
         const parent = dirname(dir);
@@ -37,8 +35,8 @@ export function findRoot(startDir: string, exists: (path: string) => boolean): s
 
 /**
  * Auto-discover the project root from a starting directory (CONVENTIONS A9):
- * walk up to the first directory that carries `package.json` or
- * `docker/compose.test.yaml`; if none does, the starting directory itself.
+ * walk up to the first directory that carries `package.json`; if none does,
+ * the starting directory itself.
  */
 export function discoverRoot(startDir: string): string {
     return findRoot(startDir, existsSync) ?? startDir;

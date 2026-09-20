@@ -41,7 +41,7 @@ function fakeService(options: {
 }): ServiceHandle {
     return {
         buildConnectionString: () => options.connectionString,
-        composeName: null,
+        serviceName: null,
         connectionString: options.connectionString,
         createDatabaseAdapter: () => (options.isDatabase ? fakeDatabase() : null),
         defaultImage: '',

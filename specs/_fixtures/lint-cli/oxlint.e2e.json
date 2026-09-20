@@ -7,12 +7,9 @@
     ],
     "rules": {
         "jterrazz/a1-specification-file": "error",
-        "jterrazz/a10-duplicate-binding": "error",
         "jterrazz/a2-known-constructors": "error",
         "jterrazz/a3-no-destructure-alias": "error",
         "jterrazz/a4-cleanup-afterall": "error",
-        "jterrazz/a5-mode-with-server": "error",
-        "jterrazz/a6w-redundant-compose-service": "warn",
         "jterrazz/a9w-redundant-root": "warn",
         "jterrazz/b2-known-fixture-marker": "error",
         "jterrazz/b4-given-then": "error",

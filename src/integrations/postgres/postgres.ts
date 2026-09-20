@@ -7,11 +7,6 @@ import type { IsolationStrategy } from '../../specification/ports/isolation.port
 import type { ServiceHandle } from '../../specification/ports/service.port.js';
 
 export type PostgresOptions = {
-    /**
-     * Map to a service in docker/compose.test.yaml. Defaults to the handle's
-     * key in the declared services record.
-     */
-    composeService?: string;
     /** Override image. */
     image?: string;
     /** Override environment variables. */
@@ -20,7 +15,7 @@ export type PostgresOptions = {
 
 export class PostgresHandle implements DatabasePort, ServiceHandle {
     readonly type = 'postgres';
-    composeName: null | string;
+    serviceName: null | string = null;
     readonly defaultPort = 5432;
     readonly defaultImage: string;
     readonly environment: Record<string, string>;
@@ -33,7 +28,6 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     private schema = 'public';
 
     constructor(options: PostgresOptions = {}) {
-        this.composeName = options.composeService ?? null;
         this.defaultImage = options.image ?? 'postgres:17';
         this.environment = {
             POSTGRES_DB: 'test',
@@ -73,14 +67,16 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         }
     }
 
-    async initialize(composeDir: string): Promise<void> {
-        if (!this.composeName) {
+    async initialize(dockerDir: string): Promise<void> {
+        if (!this.serviceName) {
             return;
         }
 
+        // Its own name first, then the type's — one database in a project needs
+        // No folder of its own, and several each get one named after their key.
         const initPaths = [
-            resolve(composeDir, `${this.composeName}/init.sql`),
-            resolve(composeDir, 'postgres/init.sql'),
+            resolve(dockerDir, `${this.serviceName}/init.sql`),
+            resolve(dockerDir, 'postgres/init.sql'),
         ];
 
         for (const initPath of initPaths) {
@@ -194,11 +190,11 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
  * Create a PostgreSQL service handle.
  *
  * @example
- * // Key derives the compose service (exact name or kebab-case):
- * //   { db: postgres() }          → compose service "db"
- * //   { analyticsDb: postgres() } → compose service "analytics-db"
- * // Escape hatch for names the key cannot derive:
- * const events = postgres({ composeService: "legacy_event_store" });
+ * // The record key is the name: it is the spec's `database` vocabulary, and
+ * // Kebab-cased it is the folder the init script is read from.
+ * //   { db: postgres() }          → docker/db/init.sql, then docker/postgres/init.sql
+ * //   { analyticsDb: postgres() } → docker/analytics-db/init.sql
+ * const events = postgres();
  * // After start: events.connectionString is populated
  */
 export function postgres(options: PostgresOptions = {}): PostgresHandle {

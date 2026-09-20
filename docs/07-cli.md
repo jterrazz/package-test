@@ -1,6 +1,6 @@
 # 07 — CLI specs (`specification.cli`)
 
-`specification.cli(bin, options)` tests a command-line binary. Every spec runs the binary in a **fresh, empty temp directory**, captures stdout/stderr/exit code, and exposes the resulting filesystem — and, in Docker-aware mode, the containers the binary spawned. The CLI is always a local binary: there is no node/compose mode (rule A5).
+`specification.cli(bin, options)` tests a command-line binary. Every spec runs the binary in a **fresh, empty temp directory**, captures stdout/stderr/exit code, and exposes the resulting filesystem — and, in Docker-aware mode, the containers the binary spawned. The CLI is always a local binary.
 
 Use it when the subject under test is a process invocation. If the process serves HTTP, test that surface with [api](05-api.md).
 
@@ -23,7 +23,7 @@ afterAll(cleanup);
 
 | Option      | Description                                                                                                                                                                                                                                   |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `root`      | **Project-root override** only (rule A9): anchors compose detection + local-bin resolution. It is _not_ a fixtures root — `.fixture()` resolves paths on its own. Auto-discovery applies when omitted                                         |
+| `root`      | **Project-root override** only (rule A9): anchors local-bin resolution and the artefact paths. It is _not_ a fixtures root — `.fixture()` resolves paths on its own. Auto-discovery applies when omitted                                      |
 | `services`  | Named record of infrastructure services (`postgres()`, `redis()`, `sqlite()`) — connection URLs are auto-injected into the child env (rule B6)                                                                                                |
 | `docker`    | Opt-in Docker awareness: `{ envVar, nameLabel, testRunLabel }` — see [Docker-aware mode](#docker-aware-mode)                                                                                                                                  |
 | `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`) — see [Spec documents](#spec-documents--casespecyaml)                                                                                                         |
@@ -470,7 +470,7 @@ export const { cli, cleanup } = await specification.cli(bin, {
 });
 ```
 
-A `serve` entry is spawned with the document's extra `KEY: value` merged into its environment, and its **cwd is the project root** — rule A9's root, the nearest ancestor of the specification file carrying a `package.json` or a `docker/compose.test.yaml`. **In a workspace that is the package's own directory, not the repository root**: a spec at `<repo>/apps/cli/specs/cli/cli.specification.ts` gives `<repo>/apps/cli/`, so `command` reads `'bun specs/harness/mcp-server.ts'` and not `'bun apps/cli/specs/harness/mcp-server.ts'`. Pass the runner's `root` option to move it.
+A `serve` entry is spawned with the document's extra `KEY: value` merged into its environment, and its **cwd is the project root** — rule A9's root, the nearest ancestor of the specification file carrying a `package.json`. **In a workspace that is the package's own directory, not the repository root**: a spec at `<repo>/apps/cli/specs/cli/cli.specification.ts` gives `<repo>/apps/cli/`, so `command` reads `'bun specs/harness/mcp-server.ts'` and not `'bun apps/cli/specs/harness/mcp-server.ts'`. Pass the runner's `root` option to move it.
 
 `ready` is a regex over the child's output whose **first capture group** is the port the server chose (named or not — it is group 1 either way); the framework injects no `PORT`, the server announces one. `url(port)` builds the URL, and `env` names the variable it is bound to in every run's child.
 
@@ -621,7 +621,7 @@ test('destroy removes the container created in an earlier run', async () => {
 
 Container accessor surface: `exists`, `running`/`toBeRunning`, `status`, `id`, `file(path)` (content read inside the container), `exec(cmd)` (returns stdout/stderr), `stdout`/`stderr` (container logs). Looking up an absent container returns `exists: false` instead of throwing. `result.containerIds` lists every container captured for the run.
 
-The runner handle also destructures to `{ cli, cleanup, docker, orchestrator }`. The `docker(containerId)` reader is the escape hatch for reading an **arbitrary** container by raw id (e.g. one a follow-up command referenced): it lazily runs `docker inspect` and returns the same `ContainerAccessor` type, so `await expect(docker(id)).toBeRunning()` and the sync reads work identically. Unlike `result.container(name)` it does not need `nameLabel` — it looks up by id directly; an unknown id yields `exists: false`.
+The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(containerId)` reader is the escape hatch for reading an **arbitrary** container by raw id (e.g. one a follow-up command referenced): it lazily runs `docker inspect` and returns the same `ContainerAccessor` type, so `await expect(docker(id)).toBeRunning()` and the sync reads work identically. Unlike `result.container(name)` it does not need `nameLabel` — it looks up by id directly; an unknown id yields `exists: false`.
 
 ## Pitfalls
 

@@ -237,7 +237,7 @@ function removeDatabaseFiles(path: string): void {
 
 export class SqliteHandle implements DatabasePort, ServiceHandle {
     readonly type = 'sqlite';
-    composeName: null | string = null;
+    serviceName: null | string = null;
     readonly defaultPort = 0;
     readonly defaultImage = '';
     readonly environment: Record<string, string> = {};
@@ -284,7 +284,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
      * rather than proceeding into a second concurrent `prisma db push` on the
      * same file (which is what `database is locked` was).
      */
-    async initialize(_composeDir?: string, root?: string): Promise<void> {
+    async initialize(_dockerDir?: string, root?: string): Promise<void> {
         const projectRoot = root ?? discoverRoot(process.cwd());
         this.templatePath = resolve(
             sqliteTemplateDir(projectRoot),

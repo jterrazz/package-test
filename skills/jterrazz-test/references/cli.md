@@ -2,7 +2,7 @@
 
 Operative reference. Prose + examples: [docs/07-cli.md](../../../docs/07-cli.md). Assertions: [docs/08-assertions.md](../../../docs/08-assertions.md). Tokens: [references/tokens.md](tokens.md).
 
-Runs a command binary against fixture projects in fresh, empty temp directories. Inherently e2e — no node/compose split.
+Runs a command binary against fixture projects in fresh, empty temp directories. Inherently e2e.
 
 ## Runner (in `*.specification.ts`, `afterAll(cleanup)`)
 
@@ -14,7 +14,7 @@ export const { cli, cleanup } = await specification.cli(
 afterAll(cleanup);
 ```
 
-`specification.cli(bin, { root?, services?, docker?, transform?, env?, serve? })` → `{ cli, cleanup, docker, orchestrator }`. `env` / `serve` are the two registries a [spec document](#spec-documents--casespecyaml) names by word.
+`specification.cli(bin, { root?, services?, docker?, transform?, env?, serve? })` → `{ cli, cleanup, docker }`. `env` / `serve` are the two registries a [spec document](#spec-documents--casespecyaml) names by word.
 
 - Exercise the **product command**, not a third-party binary — `specification.cli()` on a `node_modules/.bin` binary is a B9 warning. Drive `cli.exec('build')`, `cli.exec('check')`, … and assert via the real output. Suppress with a reason only when the product genuinely IS that binary.
 - `transform` is a last-resort escape hatch for output noise not covered by tokens (D6) — a token-equivalent transform is a warning.

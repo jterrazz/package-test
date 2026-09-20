@@ -122,4 +122,4 @@ At chain end, every `required` contract that was never requested fails too, nami
 
 ## Node-only on api (I3)
 
-`api`/`jobs` contracts run through in-process MSW. A compose-mode `specification.api()` runner throws immediately (`intercepts are in-process (MSW) and not available in compose mode`). Keep contract specs in a node-only vitest project (this repo's `api-stack` project excludes `specs/api/intercepts/**`). `specification.jobs()` is always node.
+`api`/`jobs` contracts run through in-process MSW, and both facets run the subject in this process — so every outgoing request it makes passes through the interceptor.

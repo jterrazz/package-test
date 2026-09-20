@@ -42,7 +42,7 @@ export const { cleanup, website } = await specification.website({
 
 The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is terminated by process group (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [cli](07-cli.md) exec adapter, so a framework's own child processes don't outlive the run.
 
-The handle destructures to `{ website, cleanup, url }` (rule A3) — no `docker`, no `orchestrator`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
+The handle destructures to `{ website, cleanup, url }` (rule A3) — no `docker`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
 
 ### Services beside the site
 
@@ -69,7 +69,7 @@ export const { cleanup, website } = await specification.website({
 afterAll(cleanup);
 ```
 
-A declared database is not seeded by the chain — a website chain has no `.seed()`. It is seeded by whatever owns it: the compose service's `init.sql`, or a `before:` command on the `process()` that migrates it.
+A declared database is not seeded by the chain — a website chain has no `.seed()`. It is seeded by whatever owns it: the service's own `docker/<service>/init.sql`, or a `before:` command on the `process()` that migrates it.
 
 ## Two terminal actions: `.fetch()` and `.visit()`
 

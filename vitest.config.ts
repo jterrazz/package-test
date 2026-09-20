@@ -49,25 +49,6 @@ export default defineSpecConfig({
             // Docker daemon is the one thing every file of this project
             // Shares. Run in parallel they starve each other's healthchecks.
             integration({ serial: true }),
-            {
-                test: {
-                    name: 'api-stack',
-                    // Parallel: each worker gets its own compose project (test-worker-N)
-                    include: ['specs/api/**/*.spec.ts', 'specs/jobs/**/*.spec.ts'],
-                    // Intercepts are in-process (MSW) — node-only (CONVENTIONS I3/D7).
-                    // `.clock()` is in-process too: compose mode runs the app in
-                    // Its own container, where this runner's calendar is nothing.
-                    // The initiation errors are the NODE constructor's refusals,
-                    // And they drive the compose ones themselves.
-                    // Added to the preset's list, not replacing it: vite concatenates.
-                    exclude: [
-                        'specs/api/clock/**',
-                        'specs/api/initiation-errors/**',
-                        'specs/api/intercepts/**',
-                    ],
-                    env: { TEST_MODE: 'compose' },
-                },
-            },
             // Needs playwright + `npx playwright install chromium`; no Docker.
             website(),
             component({

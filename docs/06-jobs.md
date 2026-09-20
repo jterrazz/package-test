@@ -15,7 +15,7 @@ import { nightlyReport, supportDrafts } from '../../src/jobs.js';
 export const { jobs, cleanup } = await specification.jobs({
     services: {
         db: postgres(),
-        analyticsDb: postgres(), // → kebab-derived compose service "analytics-db"
+        analyticsDb: postgres(), // → "analytics-db", init from docker/analytics-db/
     },
     jobs: ({ db, analyticsDb }) => [nightlyReport(db, analyticsDb), supportDrafts(db)],
 });
@@ -35,7 +35,7 @@ There is **no `server`** and **no `mode`** option: jobs run in-process by defini
 
 ## Why node-only
 
-A job spec exercises your job function directly, wired to real containers. There is nothing meaningful to run "in compose" — the pipeline has no network surface of its own, and testing the scheduler that invokes it is out of scope. This is why `mode` does not exist on `specification.jobs()`: adding it would only create a switch with one valid position. End-to-end coverage of the deployed artifact belongs to `specification.api()` in compose mode.
+A job spec exercises your job function directly, wired to real containers. The pipeline has no network surface of its own, and testing the scheduler that invokes it is out of scope — the job IS the subject, and the trigger name is how a spec reaches it.
 
 ## The chain
 
@@ -66,7 +66,7 @@ test('nightly report classifies, prices and drafts', async () => {
 
 Everything a pipeline reads from the outside world is declared: seeds set the database state, contracts pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [contracts](10-contracts.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
 
-Because jobs run in-process by definition, `.intercept()` is always available (there is no compose mode to disable it). It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every declared route with its consumption state (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every declared route with its consumption state (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
 
 ## Seeding and sequences for pipelines
 

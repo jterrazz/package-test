@@ -14,7 +14,7 @@ export const { mobile, cleanup } = await specification.mobile({
 afterAll(cleanup);
 ```
 
-Returns `{ mobile, cleanup, udid }` — no `docker`, no `orchestrator`. Checklist:
+Returns `{ mobile, cleanup, udid }` — no `docker`. Checklist:
 
 - `app: { bundleId }` — the installed app; `.open()` launches by bundle id, it does not build or install.
 - `device: { name, os?, udid? }` — resolved via `xcrun simctl` and booted when shut down. Zero or several matches refuse with the device listing; narrow with `os:` or pin `udid:`.

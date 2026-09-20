@@ -50,7 +50,7 @@ Four things land in the SAME commit as the change that makes them true.
 
 ## Using the framework
 
-The rest of this chapter takes a consuming project from `npm install` to two passing specs: one HTTP API spec backed by a real Postgres container, and one CLI spec running a binary in a fresh temp directory. It also explains the two framework environment variables (`TEST_MODE`, `TEST_UPDATE`) and where the node/compose switch lives.
+The rest of this chapter takes a consuming project from `npm install` to two passing specs: one HTTP API spec backed by a real Postgres container, and one CLI spec running a binary in a fresh temp directory. It also explains the one framework environment variable (`TEST_UPDATE`).
 
 ### Install
 
@@ -64,9 +64,9 @@ Peer dependencies:
 | -------- | -------- | ------------------------------------------------------------- |
 | `vitest` | yes      | Everything — the framework registers its matchers into vitest |
 
-`msw` (outgoing HTTP interception for `.intercept()`) ships as a direct dependency — no separate install. In-process API specs (`specification.api()` in node mode) pass your web app to `server`; the adapter only needs an object with a `request()` method, so bring your own web framework (e.g. `hono`) in your project.
+`msw` (outgoing HTTP interception for `.intercept()`) ships as a direct dependency — no separate install. API specs pass your web app to `server`; the adapter only needs an object with a `request()` method, so bring your own web framework (e.g. `hono`) in your project.
 
-**Docker** must be running for container-backed services (`postgres()`, `redis()`) and for compose mode. `sqlite()` and plain CLI specs need no Docker.
+**Docker** must be running for container-backed services (`postgres()`, `redis()`). `sqlite()` and plain CLI specs need no Docker.
 
 Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch` types while `toBeEmpty` does not.
 
@@ -88,12 +88,12 @@ import { match, mockOf, openai, required, waitUntil } from '@jterrazz/test';
 A **specification file** (`*.specification.ts`, under `specs/`) creates a runner once per suite. A **test file** imports the runner and writes specs. Every spec is one chain: zero or more setups, then exactly one terminal action, resolving to a typed result you assert on with `expect()`.
 
 ```
-specification.api(…)         → { api, cleanup, docker, orchestrator }
-specification.jobs(…)        → { jobs, cleanup, orchestrator }         // no docker — jobs never spawn containers
-specification.cli(…)         → { cli, cleanup, docker, orchestrator }
+specification.api(…)         → { api, cleanup, docker }
+specification.jobs(…)        → { jobs, cleanup }                       // no docker — jobs never spawn containers
+specification.cli(…)         → { cli, cleanup, docker }
 specification.integration(…) → { integration, cleanup }                // a module, against real services or a golden
-specification.website(…)     → { website, cleanup, url }               // no docker, no orchestrator — a browser, not a container
-specification.mobile(…)      → { mobile, cleanup, udid }               // no docker, no orchestrator — a simulator, not a container
+specification.website(…)     → { website, cleanup, url }               // no docker — a browser, not a container
+specification.mobile(…)      → { mobile, cleanup, udid }               // no docker — a simulator, not a container
 ```
 
 The destructured names are canonical — no aliasing (`{ api: myApi }` is an error, rule A3) — and every specification file registers `afterAll(cleanup)` (rule A4).
@@ -108,11 +108,10 @@ import { createApp } from '../../src/app.js';
 
 export const { api, cleanup } = await specification.api({
     services: {
-        db: postgres(), // binds to the compose service named "db"
+        db: postgres(), // reported as "db"; its init reads docker/db/init.sql
     },
     server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
-    // mode: never hardcoded here — see "TEST_MODE" below
-    // root: absent — auto-discovered by walking up to docker/compose.test.yaml
+    // root: absent — auto-discovered by walking up to the nearest package.json
 });
 
 afterAll(cleanup);
@@ -199,7 +198,7 @@ Each CLI spec runs in a fresh, empty temp directory. ANSI escape sequences are s
 
 ```typescript
 // vitest.config.ts
-import { component, defineSpecConfig, unit, website } from '@jterrazz/test/vitest';
+import { api, component, defineSpecConfig, unit, website } from '@jterrazz/test/vitest';
 
 export default defineSpecConfig({
     test: {
@@ -207,23 +206,10 @@ export default defineSpecConfig({
             unit(), // `**/*.test.ts` outside specs/ — no browser, no pipeline
             component({ vite: './vite.config.ts', wrap: './src/providers.tsx' }),
             website(), // `specs/website/**` — the served product, in its own group
-            { test: { name: 'api', include: ['specs/api/**/*.spec.ts'] } }, // node mode
-            apiStack, // the same files, with TEST_MODE=compose
+            api(), // `specs/api/**/*.spec.ts` — the app through HTTP, in-process
         ],
     },
 });
-```
-
-where `apiStack` is the second HTTP project, stated next to the first:
-
-```typescript
-const apiStack = {
-    test: {
-        env: { TEST_MODE: 'compose' },
-        include: ['specs/api/**/*.spec.ts'],
-        name: 'api-stack',
-    },
-};
 ```
 
 What every helper accepts, on top of the project it already is:
@@ -237,8 +223,6 @@ What every helper accepts, on top of the project it already is:
 `component()` takes four more that are the APP's — `vite`, `wrap`, `viewport`, `timezone`/`locale`, and the `root` its relative paths are read against — and [16 — Component specs](16-component.md) owns them; `unit()` takes `roots`.
 
 `unit()` and `component()` are a pair by construction: `unit()` collects `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`, `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. `unit()` takes `roots?` where the modules are not at the repository root, or `include?` for the globs outright; the facet helpers collect `specs/<facet>/**/*.spec.ts` — the word for the assembled product (C12). All three carry `sequence.groupOrder` — node 0, `website` 1, `component` 2 — so the two browser projects never open two Chromiums at once on a 2-vCPU runner. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [16 — Component specs](16-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
-
-`mode` (node vs compose) is a property of `specification.api()` only, and it is **never hardcoded in a specification file** (rule A5) — the switch lives here, via the `TEST_MODE` environment variable. The same HTTP test files run twice: once in-process (fast feedback), once against the real compose stack (end-to-end confidence). Zero switching logic in the specs themselves.
 
 #### What the preset sets
 
@@ -323,16 +307,14 @@ What it does **not** write there: the fresh temp directory each CLI spec runs in
 
 ### Framework environment variables
 
-You set exactly two variables, both prefixed `TEST_` (rule E1). The framework also reads vitest's own `VITEST_POOL_ID` (set by vitest, not you) to isolate each parallel worker's database schema/index:
+You set exactly one variable, prefixed `TEST_` (rule E1). The framework also reads vitest's own `VITEST_POOL_ID` (set by vitest, not you) to isolate each parallel worker's database schema/index:
 
-| Variable      | Values                        | Meaning                                                                                   |
-| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `TEST_MODE`   | `node` (default) \| `compose` | Execution mode for `specification.api()`. Priority: `mode` param > `TEST_MODE` > `'node'` |
-| `TEST_UPDATE` | `1`                           | Rewrite snapshot fixtures from actual output (same effect as `vitest -u`)                 |
+| Variable      | Values | Meaning                                                                   |
+| ------------- | ------ | ------------------------------------------------------------------------- |
+| `TEST_UPDATE` | `1`    | Rewrite snapshot fixtures from actual output (same effect as `vitest -u`) |
 
 ```bash
-npx vitest --run                      # node mode, assert against fixtures
-TEST_MODE=compose npx vitest --run    # compose mode
+npx vitest --run                      # assert against fixtures
 TEST_UPDATE=1 npx vitest --run        # update fixtures (tokens preserved — see chapter 06)
 npx vitest --run -u                   # same as TEST_UPDATE=1
 ```
@@ -359,7 +341,6 @@ specs/
 
 ## Pitfalls
 
-- **Hardcoding `mode: 'compose'` in a specification file.** Forbidden when `server` is defined (rule A5) — put the switch in `vitest.config.ts`. The only exception: a non-Node app (no `server` possible), where `mode: 'compose'` is mandatory and permanent.
 - **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `jobs`, `cli`, `website`, `mobile` are enforced (rule A3).
 - **Forgetting `afterAll(cleanup)`.** Infrastructure leaks across suites; rule A4 requires it in every specification file.
 - **Importing from a subpath** (`@jterrazz/test/services`). Subpaths do not exist in v9 — everything comes from `@jterrazz/test` (rule F1).

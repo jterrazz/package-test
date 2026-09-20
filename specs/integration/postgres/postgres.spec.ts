@@ -92,20 +92,21 @@ describe('postgres — the handle against a real container', () => {
     });
 
     test('runs the init script the compose directory carries', async () => {
-        // Given - a compose directory holding postgres/init.sql
+        // Given - a docker/ directory holding postgres/init.sql
         const result = await integration.call(async ({ db }) => {
-            const composeDir = mkdtempSync(resolve(tmpdir(), 'postgres-init-'));
-            mkdirSync(resolve(composeDir, 'postgres'), { recursive: true });
+            const dockerDir = mkdtempSync(resolve(tmpdir(), 'postgres-init-'));
+            mkdirSync(resolve(dockerDir, 'postgres'), { recursive: true });
             writeFileSync(
-                resolve(composeDir, 'postgres/init.sql'),
+                resolve(dockerDir, 'postgres/init.sql'),
                 'CREATE TABLE IF NOT EXISTS "init_probe" (id SERIAL, val TEXT);' +
                     ' INSERT INTO "init_probe" (val) VALUES (\'ok\');',
             );
-            const initDb = postgres({ composeService: 'db' });
+            const initDb = postgres();
+            initDb.serviceName = 'db';
             initDb.connectionString = db.connectionString;
             initDb.started = true;
 
-            await initDb.initialize(composeDir);
+            await initDb.initialize(dockerDir);
             const rows = await db.query('init_probe', ['val']);
             await db.seed('DROP TABLE "init_probe"');
             return rows;
@@ -143,19 +144,20 @@ describe('postgres — the handle against a real container', () => {
         });
 
         test('a broken init script names the file and the SQL error', async () => {
-            // Given - a compose directory whose init.sql declares a bogus type
+            // Given - a docker/ directory whose init.sql declares a bogus type
             const result = await integration.call(async ({ db }) => {
-                const composeDir = mkdtempSync(resolve(tmpdir(), 'postgres-init-broken-'));
-                mkdirSync(resolve(composeDir, 'postgres'), { recursive: true });
+                const dockerDir = mkdtempSync(resolve(tmpdir(), 'postgres-init-broken-'));
+                mkdirSync(resolve(dockerDir, 'postgres'), { recursive: true });
                 writeFileSync(
-                    resolve(composeDir, 'postgres/init.sql'),
+                    resolve(dockerDir, 'postgres/init.sql'),
                     'CREATE TABLE "broken" (id INTEGERRR);',
                 );
-                const initDb = postgres({ composeService: 'db' });
+                const initDb = postgres();
+                initDb.serviceName = 'db';
                 initDb.connectionString = db.connectionString;
                 initDb.started = true;
 
-                await initDb.initialize(composeDir);
+                await initDb.initialize(dockerDir);
             });
 
             // Then - the message carries the script's path and the type error

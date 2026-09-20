@@ -6,39 +6,26 @@ Operative reference. Prose + examples: [docs/05-api.md](../../../docs/05-api.md)
 
 ```typescript
 export const { api, cleanup } = await specification.api({
-    services: { db: postgres() }, // named record → compose service "db"
+    services: { db: postgres() }, // named record → reported as "db"
     server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
-    // mode / root: usually omitted
+    // root: usually omitted
 });
 afterAll(cleanup);
 ```
 
-Returns `{ api, cleanup, docker, orchestrator }`. Checklist:
+Returns `{ api, cleanup, docker }`. The app runs IN THIS PROCESS, built by `server(services)` — which is why `.intercept()` and `.clock()` are real here. Checklist:
 
-- `services` — named record. Keys type `server`'s param, name the `database:` option, and drive the compose binding: exact name, else kebab-case of the key (`analyticsDb` → `analytics-db`); both present → ambiguity error (A6); `composeService` is the escape hatch.
-- `server: (services) => honoApp` — required in node mode, ignored in compose mode (any object with a `request()` method works).
-- `mode` (`'node' | 'compose'`) exists ONLY on `.api()`. Resolution: option > `TEST_MODE` env > `'node'`. Keep it OUT of the spec file — the switch lives in `vitest.config.ts` via `env: { TEST_MODE: 'compose' }` (A5).
-- `root` auto-discovered (walk up to the NEAREST directory carrying `package.json` or `docker/compose.test.yaml` — the package, not the repository); override only when the convention does not fit. It is the project root, NOT a fixtures root.
+- `services` — named record. The key is the service's only name: it types `server`'s param, names the `database:` option, is what the startup report prints, and kebab-cased it is the folder the init script sits in (`analyticsDb` → `docker/analytics-db/init.sql`).
+- `server: (services) => honoApp` — required (any object with a `request()` method works).
+- `root` auto-discovered (walk up to the NEAREST directory carrying `package.json` — the package, not the repository); override only when the convention does not fit. It is the project root, NOT a fixtures root.
 
-### node vs compose (one definition, two projects)
-
-Same test files, mode switched only in `vitest.config.ts`:
+### The project
 
 ```typescript
-projects: [
-    { test: { name: 'api', include: ['specs/api/**/*.test.ts', 'specs/jobs/**/*.test.ts'] } },
-    {
-        test: {
-            name: 'api-stack',
-            include: ['specs/api/**/*.test.ts', 'specs/jobs/**/*.test.ts'],
-            exclude: ['specs/api/intercepts/**'], // in-process MSW is node-only (I3/D7)
-            env: { TEST_MODE: 'compose' },
-        },
-    },
-];
-```
+import { api } from '@jterrazz/test/vitest';
 
-In compose mode `server` is ignored (the app runs in the stack); the services-record keys stay the `database:` vocabulary, so the same seeds and table assertions work in both modes.
+projects: [api()]; // `specs/api/**/*.spec.ts`
+```
 
 ## Setup (chainable)
 
