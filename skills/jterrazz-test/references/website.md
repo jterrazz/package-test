@@ -24,17 +24,22 @@ export const { cleanup, website } = await specification.website({
 
 ## Options
 
-| Name       | Written                            | Does                                                                                         |
-| ---------- | ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| `services` | `services: { main: postgres() }`   | Named infrastructure the chain gets, isolated per worker and reset per chain                 |
-| `server`   | `server: () => App`                | The app to start in this process — a Hono app, a fetch handler, a factory                    |
-| `url`      | `url: 'https://staging.site.test'` | An already-running deployment to drive instead of starting one (XOR with `server`, rule A11) |
+| Name       | Written                            | Does                                                                                               |
+| ---------- | ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `services` | `services: { main: postgres() }`   | Named infrastructure the chain gets, isolated per worker and reset per chain                       |
+| `root`     | `root: './apps/api'`               | Project-root override (rule A9); auto-discovered from the calling file when absent                 |
+| `server`   | `server: () => App`                | The app to start in this process — a Hono app, a fetch handler, a factory                          |
+| `url`      | `url: 'https://staging.site.test'` | An already-running deployment to drive instead of starting one (XOR with `server`, rule A11)       |
+| `backend`  | `backend: { env: 'API_URL' }`      | A stub backend started before the site, its URL injected into the child env                        |
+| `external` | `external: 'block'`                | Cross-origin request policy for visits — blocked with a local server, allowed against a deployment |
 
 ## Setups (chainable)
 
-| Name           | Written                 | Does                                                                                    |
-| -------------- | ----------------------- | --------------------------------------------------------------------------------------- |
-| `.intercept()` | `.intercept(contracts)` | Declares what the network answers, from contracts — strict from the first one (rule D7) |
+| Name           | Written                                 | Does                                                                                    |
+| -------------- | --------------------------------------- | --------------------------------------------------------------------------------------- |
+| `.clock()`     | `.clock('2026-03-04T09:30:00Z')`        | Pins `Date` for this chain — the one primitive for time                                 |
+| `.intercept()` | `.intercept(contracts)`                 | Declares what the network answers, from contracts — strict from the first one (rule D7) |
+| `.headers()`   | `.headers({ 'Accept-Language': 'fr' })` | Request headers for this chain                                                          |
 
 ## Terminal actions (exactly one)
 
@@ -45,12 +50,26 @@ export const { cleanup, website } = await specification.website({
 
 ## The result
 
-| Name       | Written          | Does                                                                      |
-| ---------- | ---------------- | ------------------------------------------------------------------------- |
-| `.tree`    | `result.tree`    | The accessibility tree of the surface — the outline a screen reader walks |
-| `.console` | `result.console` | Every console message the page emitted, one `[type] text` line each       |
-| `.content` | `result.content` | The rendered text a reader sees — not the markup                          |
-| `.status`  | `result.status`  | The HTTP status of the response, or of the document                       |
+| Name          | Written                   | Does                                                                      |
+| ------------- | ------------------------- | ------------------------------------------------------------------------- |
+| `.status`     | `result.status`           | The HTTP status of the response, or of the document                       |
+| `.tree`       | `result.tree`             | The accessibility tree of the surface — the outline a screen reader walks |
+| `.content`    | `result.content`          | The rendered text a reader sees — not the markup                          |
+| `.console`    | `result.console`          | Every console message the page emitted, one `[type] text` line each       |
+| `.errors`     | `result.errors`           | Console messages of type `error` only, plus any uncaught page error       |
+| `.html`       | `result.html`             | The mounted markup — the escape hatch for a class or an attribute         |
+| `.title`      | `result.title`            | The document title, as a stream subject                                   |
+| `.url`        | `result.url`              | The URL the page ended on, after every redirect                           |
+| `.head`       | `result.head`             | The parsed `<head>` — every meta, link and script the document declares   |
+| `.jsonLd`     | `result.jsonLd`           | The JSON-LD blocks the document carries, parsed                           |
+| `.canonical`  | `result.canonical`        | The canonical URL the document declares, or `null`                        |
+| `.alternates` | `result.alternates`       | The `hreflang` alternates the document declares, by language              |
+| `.links`      | `result.links`            | Every anchor of the page, with its href and its accessible name           |
+| `.meta()`     | `result.meta('og:title')` | One meta tag by name or property                                          |
+| `.body`       | `result.body`             | The raw response body of a fetch, as a stream subject                     |
+| `.json`       | `result.json`             | The body parsed as JSON — stdout for a binary, the response for a fetch   |
+| `.headers`    | `result.headers`          | The response headers of a fetch, lower-cased                              |
+| `.location`   | `result.location`         | The `Location` header of a redirect — never followed                      |
 
 ## Goldens
 
@@ -58,10 +77,14 @@ export const { cleanup, website } = await specification.website({
 | ------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`               | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it          |
 | `.aria.yaml tree`   | `await expect(result.tree).toMatch('<name>.aria.yaml')` | The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not |
+| `.json body`        | `await expect(subject).toMatch('created.json')`         | A JSON payload as a file, tokens resolved and keys compared                                                           |
+| `.txt stream`       | `await expect(subject).toMatch('help.txt')`             | A text stream as a file — stdout, stderr, a rendered body                                                             |
 
 ## The vocabulary
 
-Descriptors, modifiers and verbs reachable here: `see` · `click` · `fill` · `press` · `gone` · `button` · `field` · `heading` · `link` · `content` · `testId` · `within` · `focused` · `selected` · `valued`.
+The visitor's verbs: `see` · `fill` · `click` · `gone` · `press` · `hover` · `check` · `select` · `goto`.
+
+The descriptors, landmarks and modifiers: `button` · `field` · `content` · `testId` · `heading` · `link` · `dialog` · `status` · `table` · `row` · `listitem` · `option` · `banner` · `complementary` · `contentinfo` · `form` · `main` · `navigation` · `region` · `search` · `within` · `focused` · `selected` · `valued` · `disabled` · `enabled`.
 
 All of them are defined once, in [13 — Elements](../../../docs/13-elements.md): the same words, the same W3 refusal, the same exact-by-default matching, on every surface that draws.
 

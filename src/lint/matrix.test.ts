@@ -38,15 +38,14 @@ describe('capability matrix (meta-test K6)', () => {
         );
     });
 
-    test('mobile is empty for one reason, and the reason is the one chapter 03 states', () => {
-        // Given - the mobile column, which has no tree (M1)
+    test('an empty mobile cell names M1, and the day one fills the exemption goes', () => {
+        // Given - the mobile column, which has no tree of its own today (M1)
         const rows = matrixRows(ROOT);
         const declared = rows.filter((row) => row.capability.columns.includes('mobile'));
 
-        // Then - every mobile cell is zero, and every one of them names M1
+        // Then - each EMPTY mobile cell names M1; a cell that fills retires its exemption
         expect(declared.length).toBeGreaterThan(0);
-        for (const row of declared) {
-            expect(row.cells.mobile, `${row.capability.name} on mobile`).toBe(0);
+        for (const row of declared.filter((candidate) => candidate.cells.mobile === 0)) {
             expect(row.capability.exempt?.mobile, `${row.capability.name} on mobile`).toContain(
                 'M1',
             );
@@ -70,7 +69,7 @@ describe('capability matrix (meta-test K6)', () => {
         // Given - the four layers the chapter publishes
         // Then - none of them is a claim with nothing behind it
         const found = layers(ROOT);
-        expect(found).toHaveLength(4);
+        expect(found).toHaveLength(5);
         for (const layer of found) {
             expect(layer.count, `${layer.layer} is empty`).toBeGreaterThan(0);
         }

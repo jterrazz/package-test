@@ -24,10 +24,11 @@ export const { cleanup, jobs } = await specification.jobs({
 
 ## Options
 
-| Name       | Written                          | Does                                                                         |
-| ---------- | -------------------------------- | ---------------------------------------------------------------------------- |
-| `services` | `services: { main: postgres() }` | Named infrastructure the chain gets, isolated per worker and reset per chain |
-| `jobs`     | `jobs: JobsRegistry`             | The pipeline registry the trigger name is looked up in                       |
+| Name       | Written                          | Does                                                                               |
+| ---------- | -------------------------------- | ---------------------------------------------------------------------------------- |
+| `services` | `services: { main: postgres() }` | Named infrastructure the chain gets, isolated per worker and reset per chain       |
+| `root`     | `root: './apps/api'`             | Project-root override (rule A9); auto-discovered from the calling file when absent |
+| `jobs`     | `jobs: JobsRegistry`             | The pipeline registry the trigger name is looked up in                             |
 
 ## Setups (chainable)
 
@@ -51,9 +52,10 @@ export const { cleanup, jobs } = await specification.jobs({
 
 ## Goldens
 
-| Name                | Written                                   | Does                                                                                                         |
-| ------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')` | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
+| Name                | Written                                                        | Does                                                                                                         |
+| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
+| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
 
 ## Read next
 

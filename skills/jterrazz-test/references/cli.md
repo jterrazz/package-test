@@ -24,10 +24,15 @@ export const { cli, cleanup } = await specification.cli('./bin/shoply.sh', {
 
 ## Options
 
-| Name       | Written                                     | Does                                                                                                 |
-| ---------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `services` | `services: { main: postgres() }`            | Named infrastructure the chain gets, isolated per worker and reset per chain                         |
-| `defaults` | `defaults?: Record<string, null \| string>` | Environment applied to EVERY run of the binary; a chained `.env()` and a document `env:` win over it |
+| Name        | Written                                       | Does                                                                                                 |
+| ----------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `services`  | `services: { main: postgres() }`              | Named infrastructure the chain gets, isolated per worker and reset per chain                         |
+| `root`      | `root: './apps/api'`                          | Project-root override (rule A9); auto-discovered from the calling file when absent                   |
+| `defaults`  | `defaults?: Record<string, null \| string>`   | Environment applied to EVERY run of the binary; a chained `.env()` and a document `env:` win over it |
+| `env`       | `env: { staging: { API_URL: '…' } }`          | Named environments the documents select by name (`env: staging`)                                     |
+| `docker`    | `docker: { compose: './docker-compose.yml' }` | The compose stack this binary is run against, started with the runner                                |
+| `serve`     | `serve: { site: process({ command }) }`       | The processes a `<case>.spec.yaml` may name in its `serve:` list                                     |
+| `transform` | `transform: (text) => text.replaceAll(…)`     | Normalises the binary's output before it is asserted — a last resort for what tokens cannot say      |
 
 ## Setups (chainable)
 
@@ -46,23 +51,28 @@ export const { cli, cleanup } = await specification.cli('./bin/shoply.sh', {
 
 ## The result
 
-| Name           | Written                                 | Does                                                                           |
-| -------------- | --------------------------------------- | ------------------------------------------------------------------------------ |
-| `.json`        | `result.json`                           | Stdout parsed as JSON                                                          |
-| `.table()`     | `.table('users', { database: 'main' })` | The rows a service holds after the action — the oracle of anything that writes |
-| `.file()`      | `.file('out/report.json')`              | One file in the working directory, as a stream subject                         |
-| `.directory()` | `.directory('out')`                     | A tree snapshot of one directory the run left behind                           |
-| `.stdout`      | `result.stdout`                         | The output stream, as a stream subject                                         |
-| `.stderr`      | `result.stderr`                         | The error stream, as a stream subject                                          |
-| `.exitCode`    | `result.exitCode`                       | The process exit code                                                          |
+| Name            | Written                                 | Does                                                                           |
+| --------------- | --------------------------------------- | ------------------------------------------------------------------------------ |
+| `.table()`      | `.table('users', { database: 'main' })` | The rows a service holds after the action — the oracle of anything that writes |
+| `.file()`       | `.file('out/report.json')`              | One file in the working directory, as a stream subject                         |
+| `.directory()`  | `.directory('out')`                     | A tree snapshot of one directory the run left behind                           |
+| `.stdout`       | `result.stdout`                         | The output stream, as a stream subject                                         |
+| `.stderr`       | `result.stderr`                         | The error stream, as a stream subject                                          |
+| `.exitCode`     | `result.exitCode`                       | The process exit code                                                          |
+| `.filesystem`   | `result.filesystem`                     | The whole working directory as one subject — the shape of what the run wrote   |
+| `.container()`  | `.container('db')`                      | One container the run started, by name — its logs and its exec surface         |
+| `.containerIds` | `result.containerIds`                   | The ids of the containers the run left running, for a leak assertion           |
+| `.json`         | `result.json`                           | The body parsed as JSON — stdout for a binary, the response for a fetch        |
 
 ## Goldens
 
-| Name                | Written                                                         | Does                                                                                                         |
-| ------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                       | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
-| `directory golden`  | `await expect(result.directory('out')).toMatch('scaffold.txt')` | A whole directory captured as one file — the shape of a scaffold                                             |
-| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                      | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                  |
+| Name                | Written                                                        | Does                                                                                                         |
+| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
+| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
+| `.json body`        | `await expect(subject).toMatch('created.json')`                | A JSON payload as a file, tokens resolved and keys compared                                                  |
+| `.txt stream`       | `await expect(subject).toMatch('help.txt')`                    | A text stream as a file — stdout, stderr, a rendered body                                                    |
+| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                  |
 
 ## Read next
 

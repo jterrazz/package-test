@@ -166,9 +166,37 @@ export const SIGNATURES: Record<string, Signature> = {
         line: "The child process environment for this chain — `$WORKDIR` expands, `null` unsets; wins over the constructor's `defaults`",
         signature: ".env({ TZ: 'UTC' })",
     },
+    '.alternates': {
+        line: 'The `hreflang` alternates the document declares, by language',
+        signature: 'result.alternates',
+    },
+    '.body': {
+        line: 'The raw response body of a fetch, as a stream subject',
+        signature: 'result.body',
+    },
+    '.canonical': {
+        line: 'The canonical URL the document declares, or `null`',
+        signature: 'result.canonical',
+    },
+    '.container()': {
+        line: 'One container the run started, by name — its logs and its exec surface',
+        signature: ".container('db')",
+    },
+    '.containerIds': {
+        line: 'The ids of the containers the run left running, for a leak assertion',
+        signature: 'result.containerIds',
+    },
     '.error': {
         line: 'What the subject threw, as a subject of its own — a refusal is an answer',
         signature: 'result.error',
+    },
+    '.errors': {
+        line: 'Console messages of type `error` only, plus any uncaught page error',
+        signature: 'result.errors',
+    },
+    '.filesystem': {
+        line: 'The whole working directory as one subject — the shape of what the run wrote',
+        signature: 'result.filesystem',
     },
     '.exec()': {
         line: 'Runs the binary — the ONLY execution method (rule B2). Bare for no arguments',
@@ -188,6 +216,14 @@ export const SIGNATURES: Record<string, Signature> = {
         signature: ".fixture('a-project')",
     },
     '.get()': { line: 'Sends `GET <path>`', signature: ".get('/users')" },
+    '.head': {
+        line: 'The parsed `<head>` — every meta, link and script the document declares',
+        signature: 'result.head',
+    },
+    '.headers': {
+        line: 'The response headers of a fetch, lower-cased',
+        signature: 'result.headers',
+    },
     '.headers()': {
         line: 'Request headers for this chain',
         signature: ".headers({ 'Accept-Language': 'fr' })",
@@ -204,7 +240,27 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'Declares what the network answers, from contracts — strict from the first one (rule D7)',
         signature: '.intercept(contracts)',
     },
-    '.json': { line: 'Stdout parsed as JSON', signature: 'result.json' },
+    '.json': {
+        line: 'The body parsed as JSON — stdout for a binary, the response for a fetch',
+        signature: 'result.json',
+    },
+    '.json body': {
+        line: 'A JSON payload as a file, tokens resolved and keys compared',
+        signature: "await expect(subject).toMatch('created.json')",
+    },
+    '.jsonLd': {
+        line: 'The JSON-LD blocks the document carries, parsed',
+        signature: 'result.jsonLd',
+    },
+    '.links': {
+        line: 'Every anchor of the page, with its href and its accessible name',
+        signature: 'result.links',
+    },
+    '.location': {
+        line: 'The `Location` header of a redirect — never followed',
+        signature: 'result.location',
+    },
+    '.meta()': { line: 'One meta tag by name or property', signature: "result.meta('og:title')" },
     '.open()': {
         line: 'Opens the app, optionally at a deep link, and runs the scenario before capturing',
         signature: ".open('news://events', async (visitor) => { … })",
@@ -231,6 +287,10 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'Loads a `_seeds/*.sql` file into the named service before the action',
         signature: ".seed('users.sql')",
     },
+    '.screen': {
+        line: 'The device screen as a tree — the outline a golden pins',
+        signature: 'result.screen',
+    },
     '.status': {
         line: 'The HTTP status of the response, or of the document',
         signature: 'result.status',
@@ -241,15 +301,20 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'The rows a service holds after the action — the oracle of anything that writes',
         signature: ".table('users', { database: 'main' })",
     },
-    '.text': { line: 'The rendered text of the mounted unit', signature: 'result.text' },
     '.tree': {
         line: 'The accessibility tree of the surface — the outline a screen reader walks',
         signature: 'result.tree',
     },
+    '.title': { line: 'The document title, as a stream subject', signature: 'result.title' },
     '.trigger()': {
         line: 'Triggers the job by NAME, the way the scheduler would',
         signature: ".trigger('daily-digest')",
     },
+    '.txt stream': {
+        line: 'A text stream as a file — stdout, stderr, a rendered body',
+        signature: "await expect(subject).toMatch('help.txt')",
+    },
+    '.url': { line: 'The URL the page ended on, after every redirect', signature: 'result.url' },
     '.value': {
         line: 'What the call returned — a JSON accessor for an object, a text accessor for a string',
         signature: 'result.value',
@@ -275,6 +340,10 @@ export const SIGNATURES: Record<string, Signature> = {
         signature: "expect(subject).toMatch('<name>.<ext>')",
     },
     app: { line: 'The built app bundle the simulator installs', signature: 'app: string' },
+    backend: {
+        line: 'A stub backend started before the site, its URL injected into the child env',
+        signature: "backend: { env: 'API_URL' }",
+    },
     'clock()': {
         line: 'Pins `Date` (`clock.at`) or the scheduler too (`clock.run` + `clock.advance`), for the scope',
         signature: "using _ = clock.at('2026-03-04T09:30:00Z')",
@@ -283,13 +352,25 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'Environment applied to EVERY run of the binary; a chained `.env()` and a document `env:` win over it',
         signature: 'defaults?: Record<string, null | string>',
     },
+    clock: {
+        line: "The project's pinned `Date` — every render of the project starts there",
+        signature: "clock: '2026-03-04T09:30:00Z'",
+    },
     device: {
         line: 'Which simulator to resolve — by name, or by the platform version',
         signature: 'device: { name?, platform? }',
     },
-    'directory golden': {
-        line: 'A whole directory captured as one file — the shape of a scaffold',
-        signature: "await expect(result.directory('out')).toMatch('scaffold.txt')",
+    docker: {
+        line: 'The compose stack this binary is run against, started with the runner',
+        signature: "docker: { compose: './docker-compose.yml' }",
+    },
+    env: {
+        line: 'Named environments the documents select by name (`env: staging`)',
+        signature: "env: { staging: { API_URL: '…' } }",
+    },
+    external: {
+        line: 'Cross-origin request policy for visits — blocked with a local server, allowed against a deployment',
+        signature: "external: 'block'",
     },
     'intercept()': {
         line: 'The chain-less double: declares the network for the scope. `{ origin }` states what a relative request resolves against',
@@ -299,6 +380,10 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'The pipeline registry the trigger name is looked up in',
         signature: 'jobs: JobsRegistry',
     },
+    locale: {
+        line: "The project's locale — what `Intl` answers in every render",
+        signature: "locale: 'en-US'",
+    },
     'match.*': {
         line: 'The token vocabulary in code — the same families a golden writes as `{{token}}`',
         signature: 'expect(value).toStrictEqual({ id: match.uuid() })',
@@ -306,6 +391,14 @@ export const SIGNATURES: Record<string, Signature> = {
     'mockOf()': {
         line: 'A typed double for an INJECTED port — deep by default, `{ deep: false }` for the flat proxy',
         signature: 'mockOf<Port>({ deep })',
+    },
+    root: {
+        line: 'Project-root override (rule A9); auto-discovered from the calling file when absent',
+        signature: "root: './apps/api'",
+    },
+    serve: {
+        line: 'The processes a `<case>.spec.yaml` may name in its `serve:` list',
+        signature: 'serve: { site: process({ command }) }',
     },
     server: {
         line: 'The app to start in this process — a Hono app, a fetch handler, a factory',
@@ -315,9 +408,33 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'Named infrastructure the chain gets, isolated per worker and reset per chain',
         signature: 'services: { main: postgres() }',
     },
+    timeouts: {
+        line: 'How long a device is given to launch, to settle and to find an element',
+        signature: 'timeouts: { launch: 60_000 }',
+    },
+    timezone: {
+        line: "The project's timezone — what every render's `Date` is read in",
+        signature: "timezone: 'UTC'",
+    },
+    'toMatchRows()': {
+        line: 'Compares a table to a column list and one array of cells per row',
+        signature: "expect(result.table('users')).toMatchRows({ columns, rows })",
+    },
+    transform: {
+        line: "Normalises the binary's output before it is asserted — a last resort for what tokens cannot say",
+        signature: 'transform: (text) => text.replaceAll(…)',
+    },
     url: {
         line: 'An already-running deployment to drive instead of starting one (XOR with `server`, rule A11)',
         signature: "url: 'https://staging.site.test'",
+    },
+    viewport: {
+        line: "The project's page size — the frame every render of it starts in",
+        signature: 'viewport: { height: 720, width: 1280 }',
+    },
+    vite: {
+        line: 'The Vite config the page is built with — a path, an object, or a promise of one',
+        signature: "vite: './vite.config.ts'",
     },
     wrap: {
         line: "The project's frame around every render — a module path whose default export is `(ui) => ReactNode`",
@@ -533,16 +650,24 @@ export function deadSignatures(): string[] {
     return Object.keys(SIGNATURES).filter((name) => !declared.has(name));
 }
 
-/** The element vocabulary a kind reaches, as a sentence — chapter 13 owns the words. */
+/** A list of names as one line of inline code. */
+function quoted(names: string[]): string {
+    return names.map((name) => `\`${name}\``).join(' · ');
+}
+
+/** The element vocabulary a kind reaches, as two sentences — chapter 13 owns the words. */
 function vocabulary(kind: Kind): string[] {
     const verbs = capabilitiesOf(kind, 'Verb');
-    if (verbs.length === 0) {
+    const descriptors = capabilitiesOf(kind, 'Descriptor');
+    if (verbs.length === 0 && descriptors.length === 0) {
         return [];
     }
     return [
         '## The vocabulary',
         '',
-        `Descriptors, modifiers and verbs reachable here: ${verbs.map((verb) => `\`${verb}\``).join(' · ')}.`,
+        `The visitor's verbs: ${quoted(verbs)}.`,
+        '',
+        `The descriptors, landmarks and modifiers: ${quoted(descriptors)}.`,
         '',
         'All of them are defined once, in [13 — Elements](../../../docs/13-elements.md): the same words, the same W3 refusal, the same exact-by-default matching, on every surface that draws.',
     ];

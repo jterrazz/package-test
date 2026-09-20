@@ -4,13 +4,13 @@ What proves a change here: this package specifies itself with itself. The suites
 
 **The suffix says the kind.** `.test.ts` is the UNIT's word and sits beside the module it covers; `.test.tsx` is the same law for a rendered unit; `.spec.ts` is the ASSEMBLED product's word and lives under `specs/<facet>/`; a literate document stays `<case>.spec.yaml`. C12 holds both directions and its `--fix` renames with `git mv`, so a reader can tell what a file proves without opening it.
 
-| Ground          | Where                                      | Proves                                                                 |
-| --------------- | ------------------------------------------ | ---------------------------------------------------------------------- |
-| Module tests    | `src/**/<file>.test.ts`                    | One module's behaviour, beside it (rule I2)                            |
-| Component tests | `specs/component-app/<file>.test.tsx`      | A rendered unit, beside it, in a real Chromium ([07](07-component.md)) |
-| Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts`  | The framework's own facets, through the public surface                 |
-| Spec documents  | `specs/cli/literate/*.spec.yaml`           | The document format, collected as test files by `literate()`           |
-| Meta-tests      | `src/lint/*.test.ts`, `src/core/matching/` | The framework applied to itself and to its own projections             |
+| Ground          | Where                                     | Proves                                                                 |
+| --------------- | ----------------------------------------- | ---------------------------------------------------------------------- |
+| Module tests    | `src/**/<file>.test.ts`                   | One module's behaviour, beside it (rule I2)                            |
+| Component tests | `specs/component-app/<file>.test.tsx`     | A rendered unit, beside it, in a real Chromium ([07](07-component.md)) |
+| Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts` | The framework's own facets, through the public surface                 |
+| Spec documents  | `specs/cli/literate/*.spec.yaml`          | The document format, collected as test files by `literate()`           |
+| Meta-tests      | `src/lint/*.test.ts`                      | The framework applied to itself and to its own projections             |
 
 ## The seven projects
 
@@ -86,16 +86,17 @@ The fixture apps the specs drive live in the pool: `app` and `website-app` for t
 
 ## The layered reading
 
-The package proves itself in four layers, and they are meant to be read from the inside out: a module against its own exports, a rule against its own fixtures, a facet against its own tree, and the corpus against what a meta-test says it must keep true. Each layer judges something the one below it cannot.
+The package proves itself in five layers, and they are meant to be read from the inside out: a module against its own exports, a rule against its own fixtures, a facet against its own tree, the built binary against a fixture project, and the CORPUS against what a meta-test says it must keep true. Each layer judges something the one below it cannot — and the meta-tests are counted apart rather than folded into the module tests, because what they judge is the one thing a test beside a module cannot see.
 
 <!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: src/lint/matrix.ts -->
 
-| Layer                             | Where                                                   | What it judges                                                           | Files |
-| --------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests                      | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 66    |
-| Rule tests                        | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs           | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 80    |
-| The lint suite and the meta-tests | `specs/lint/**`                                         | the built binary end to end, and what the corpus must keep true          | 88    |
+| Layer                   | Where                                                   | What it judges                                                           | Files |
+| ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
+| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 51    |
+| Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
+| The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 64    |
+| The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 88    |
+| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 15    |
 
 <!-- /GENERATED:layers -->
 
@@ -174,31 +175,44 @@ skill's `references/matrix.md`.
 
 <!-- GENERATED:matrix — do not edit by hand; run `npm run docs`. Source: src/lint/matrix.ts -->
 
-What the framework can do, and how many of this package’s own test files exercise it, per facet. A blank (`—`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.
+What the framework can do, and how many of this package’s own test FILES carry the literal that exercises it, per facet (comments stripped, so a sentence about a capability never counts as a test of it). A blank (`—`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.
 
 ### Constructor option
 
-| Capability | api | jobs | cli | integration | website | mobile | component | module |
-| ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `services` | 2   | 1    | 1   | 2           | 1       | —      | —         | —      |
-| `server`   | 4   | —    | —   | —           | 2       | —      | —         | —      |
-| `jobs`     | —   | 2    | —   | —           | —       | —      | —         | —      |
-| `url`      | —   | —    | —   | —           | 0       | —      | —         | —      |
-| `device`   | —   | —    | —   | —           | —       | 0      | —         | —      |
-| `app`      | —   | —    | —   | —           | —       | 0      | —         | —      |
-| `defaults` | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `wrap`     | —   | —    | —   | —           | —       | —      | 5         | —      |
+| Capability  | api | jobs | cli | integration | website | mobile | component | module |
+| ----------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `services`  | 2   | 1    | 1   | 2           | 1       | 0      | —         | —      |
+| `root`      | 2   | 1    | 0   | 2           | 0       | 0      | 0         | —      |
+| `server`    | 4   | —    | —   | —           | 2       | —      | —         | —      |
+| `jobs`      | —   | 2    | —   | —           | —       | —      | —         | —      |
+| `url`       | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `backend`   | —   | —    | —   | —           | 0       | 0      | —         | —      |
+| `external`  | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `device`    | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `app`       | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `timeouts`  | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `defaults`  | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `env`       | —   | —    | 4   | —           | —       | —      | —         | —      |
+| `docker`    | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `serve`     | —   | —    | 4   | —           | —       | —      | —         | —      |
+| `transform` | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `wrap`      | —   | —    | —   | —           | —       | —      | 1         | —      |
+| `vite`      | —   | —    | —   | —           | —       | —      | 1         | —      |
+| `clock`     | —   | —    | —   | —           | —       | —      | 0         | —      |
+| `locale`    | —   | —    | —   | —           | —       | —      | 0         | —      |
+| `timezone`  | —   | —    | —   | —           | —       | —      | 0         | —      |
+| `viewport`  | —   | —    | —   | —           | —       | —      | 0         | —      |
 
 ### Setup
 
 | Capability     | api | jobs | cli | integration | website | mobile | component | module |
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.clock()`     | 1   | 0    | —   | 1           | —       | —      | 1         | —      |
-| `.intercept()` | 3   | 2    | —   | 1           | 0       | —      | 4         | —      |
-| `.seed()`      | 4   | 1    | 2   | 2           | —       | —      | —         | —      |
-| `.headers()`   | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.fixture()`   | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.env()`       | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `.clock()`     | 1   | 0    | —   | 1           | 1       | —      | 1         | —      |
+| `.intercept()` | 3   | 1    | —   | 1           | 0       | 0      | 4         | —      |
+| `.seed()`      | 4   | 1    | 1   | 2           | —       | —      | —         | —      |
+| `.headers()`   | 1   | —    | —   | —           | 1       | —      | —         | —      |
+| `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
+| `.env()`       | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
 | `.viewport()`  | —   | —    | —   | —           | —       | —      | 1         | —      |
 
@@ -206,15 +220,15 @@ What the framework can do, and how many of this package’s own test files exerc
 
 | Capability   | api | jobs | cli | integration | website | mobile | component | module |
 | ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.get()`     | 10  | —    | —   | —           | —       | —      | —         | —      |
-| `.post()`    | 2   | —    | —   | —           | —       | —      | —         | —      |
+| `.get()`     | 9   | —    | —   | —           | —       | —      | —         | —      |
+| `.post()`    | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.put()`     | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.request()` | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 1    | —   | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —    | —   | 6           | —       | —      | —         | —      |
 | `.exec()`    | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.run()`     | —   | —    | 3   | —           | —       | —      | —         | —      |
+| `.run()`     | —   | —    | 2   | —           | —       | —      | —         | —      |
 | `.visit()`   | —   | —    | —   | —           | 9       | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 2       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
@@ -225,62 +239,105 @@ What the framework can do, and how many of this package’s own test files exerc
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `see`      | —   | —    | —   | —           | 5       | 0      | 14        | —      |
-| `click`    | —   | —    | —   | —           | 3       | 0      | 4         | —      |
 | `fill`     | —   | —    | —   | —           | 3       | 0      | 2         | —      |
-| `press`    | —   | —    | —   | —           | 0       | 0      | 2         | —      |
-| `gone`     | —   | —    | —   | —           | 2       | 0      | 4         | —      |
+| `click`    | —   | —    | —   | —           | 3       | —      | 4         | —      |
+| `gone`     | —   | —    | —   | —           | 2       | —      | 4         | —      |
+| `press`    | —   | —    | —   | —           | 0       | —      | 2         | —      |
+| `hover`    | —   | —    | —   | —           | 0       | —      | 1         | —      |
+| `check`    | —   | —    | —   | —           | 0       | —      | 2         | —      |
+| `select`   | —   | —    | —   | —           | 1       | —      | 2         | —      |
+| `goto`     | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `tap`      | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `rerender` | —   | —    | —   | —           | —       | —      | 1         | —      |
 | `unmount`  | —   | —    | —   | —           | —       | —      | 1         | —      |
-| `button`   | —   | —    | —   | —           | 3       | 0      | 4         | —      |
-| `field`    | —   | —    | —   | —           | 3       | 0      | 3         | —      |
-| `heading`  | —   | —    | —   | —           | 0       | 0      | 1         | —      |
-| `link`     | —   | —    | —   | —           | 2       | 0      | 2         | —      |
-| `content`  | —   | —    | —   | —           | 3       | 0      | 10        | —      |
-| `testId`   | —   | —    | —   | —           | 0       | 0      | 1         | —      |
-| `within`   | —   | —    | —   | —           | 2       | —      | 5         | —      |
-| `focused`  | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `selected` | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `valued`   | —   | —    | —   | —           | 1       | —      | 2         | —      |
+
+### Descriptor
+
+| Capability      | api | jobs | cli | integration | website | mobile | component | module |
+| --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `button`        | —   | —    | —   | —           | 3       | 0      | 4         | —      |
+| `field`         | —   | —    | —   | —           | 3       | 0      | 3         | —      |
+| `content`       | —   | —    | —   | —           | 3       | 0      | 10        | —      |
+| `testId`        | —   | —    | —   | —           | 0       | 0      | 1         | —      |
+| `heading`       | —   | —    | —   | —           | 0       | —      | 1         | —      |
+| `link`          | —   | —    | —   | —           | 2       | —      | 2         | —      |
+| `dialog`        | —   | —    | —   | —           | 0       | —      | 1         | —      |
+| `status`        | —   | —    | —   | —           | 0       | —      | 2         | —      |
+| `table`         | —   | —    | —   | —           | 0       | —      | 1         | —      |
+| `row`           | —   | —    | —   | —           | 0       | —      | 1         | —      |
+| `listitem`      | —   | —    | —   | —           | 0       | —      | 1         | —      |
+| `option`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `banner`        | —   | —    | —   | —           | 0       | —      | 0         | —      |
+| `complementary` | —   | —    | —   | —           | 0       | —      | 0         | —      |
+| `contentinfo`   | —   | —    | —   | —           | 1       | —      | 0         | —      |
+| `form`          | —   | —    | —   | —           | 0       | —      | 0         | —      |
+| `main`          | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `navigation`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
+| `region`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `search`        | —   | —    | —   | —           | 0       | —      | 0         | —      |
+| `within`        | —   | —    | —   | —           | 2       | —      | 5         | —      |
+| `focused`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `selected`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `valued`        | —   | —    | —   | —           | 1       | —      | 2         | —      |
+| `disabled`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `enabled`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
 
 ### Result accessor
 
-| Capability     | api | jobs | cli | integration | website | mobile | component | module |
-| -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`    | 7   | —    | —   | —           | —       | —      | —         | —      |
-| `.json`        | 4   | —    | 4   | —           | —       | —      | —         | —      |
-| `.text`        | —   | —    | —   | —           | —       | —      | 2         | —      |
-| `.table()`     | 4   | 1    | 1   | 1           | —       | —      | —         | —      |
-| `.file()`      | —   | —    | 5   | —           | —       | —      | —         | —      |
-| `.directory()` | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.value`       | —   | —    | —   | 6           | —       | —      | —         | —      |
-| `.error`       | 1   | —    | —   | 5           | —       | —      | —         | —      |
-| `.tree`        | —   | —    | —   | —           | 2       | 0      | 3         | —      |
-| `.html`        | —   | —    | —   | —           | —       | —      | 5         | —      |
-| `.console`     | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.content`     | —   | —    | —   | —           | 4       | —      | —         | —      |
-| `.stdout`      | —   | —    | 6   | —           | —       | —      | —         | —      |
-| `.stderr`      | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.exitCode`    | —   | —    | 8   | —           | —       | —      | —         | —      |
-| `.status`      | 4   | —    | —   | —           | 2       | —      | —         | —      |
+| Capability      | api | jobs | cli | integration | website | mobile | component | module |
+| --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.response`     | 7   | —    | —   | —           | —       | —      | —         | —      |
+| `.status`       | 3   | —    | —   | —           | 2       | —      | —         | —      |
+| `.table()`      | 4   | 1    | 1   | 1           | —       | —      | —         | —      |
+| `.file()`       | 0   | —    | 5   | 0           | —       | —      | —         | —      |
+| `.directory()`  | 0   | —    | 2   | 0           | —       | —      | —         | —      |
+| `.stdout`       | —   | —    | 5   | —           | —       | —      | —         | —      |
+| `.stderr`       | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —    | 8   | —           | —       | —      | —         | —      |
+| `.filesystem`   | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `.container()`  | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `.value`        | —   | —    | —   | 6           | —       | —      | —         | —      |
+| `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
+| `.tree`         | —   | —    | —   | —           | 2       | —      | 3         | —      |
+| `.content`      | —   | —    | —   | —           | 4       | 0      | 11        | —      |
+| `.console`      | —   | —    | —   | —           | 1       | —      | 3         | —      |
+| `.errors`       | —   | —    | —   | —           | 4       | —      | 5         | —      |
+| `.html`         | —   | —    | —   | —           | 0       | —      | 5         | —      |
+| `.title`        | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `.url`          | —   | —    | —   | —           | 2       | —      | —         | —      |
+| `.head`         | —   | —    | —   | —           | 2       | —      | —         | —      |
+| `.jsonLd`       | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `.canonical`    | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `.alternates`   | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `.links`        | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `.meta()`       | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `.body`         | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `.json`         | —   | —    | 2   | —           | 1       | —      | —         | —      |
+| `.headers`      | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `.location`     | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `.screen`       | —   | —    | —   | —           | —       | 0      | —         | —      |
 
 ### Golden
 
 | Capability          | api | jobs | cli | integration | website | mobile | component | module |
 | ------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch('<name>')` | 3   | 0    | 6   | 6           | 4       | —      | 2         | 11     |
-| `.http exchange`    | 3   | —    | —   | —           | —       | —      | —         | —      |
+| `toMatch('<name>')` | 3   | 0    | 6   | 5           | 4       | —      | 1         | 6      |
+| `toMatchRows()`     | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
+| `.http exchange`    | 3   | —    | —   | —           | —       | —      | —         | 7      |
 | `.aria.yaml tree`   | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `directory golden`  | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `{ frozen }`        | 2   | —    | 5   | —           | —       | —      | —         | —      |
+| `.json body`        | 0   | —    | 2   | 5           | 1       | —      | —         | 9      |
+| `.txt stream`       | 1   | —    | 8   | 2           | 2       | —      | —         | 12     |
+| `{ frozen }`        | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
 
 | Capability    | api | jobs | cli | integration | website | mobile | component | module |
 | ------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 2      |
-| `intercept()` | —   | —    | —   | —           | —       | —      | —         | 4      |
+| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 4      |
+| `intercept()` | —   | —    | —   | —           | —       | —      | —         | 1      |
 | `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 5      |
-| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 23     |
+| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 22     |
 
 ### Token
 
@@ -295,116 +352,26 @@ What the framework can do, and how many of this package’s own test files exerc
 | `{{hex}}`      | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
 | `{{int}}`      | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{ip}}`       | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{iso8601}}`  | 1   | —    | 0   | 0           | 0       | —      | —         | 2      |
-| `{{number}}`   | 0   | —    | 1   | 0           | 0       | —      | —         | 1      |
+| `{{iso8601}}`  | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
+| `{{number}}`   | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{path}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{port}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
 | `{{semver}}`   | 0   | —    | 2   | 0           | 0       | —      | —         | 1      |
 | `{{sha}}`      | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{string}}`   | 1   | —    | 1   | 0           | 0       | —      | —         | 1      |
+| `{{string}}`   | 0   | —    | 1   | 0           | 0       | —      | —         | 1      |
 | `{{time}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{ulid}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{url}}`      | 0   | —    | 2   | 0           | 0       | —      | —         | 1      |
-| `{{uuid}}`     | 1   | —    | 1   | 0           | 0       | —      | —         | 3      |
+| `{{uuid}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 3      |
 | `{{workdir}}`  | 0   | —    | 5   | 0           | 0       | —      | —         | 1      |
 
 ### Exemptions
 
-- `url` · **website** — the package serves its own fixture site, so `server` is what it proves; `url` targets an already-running deployment, which is a consumer shape (A11 states the XOR)
-- `device` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `app` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `.clock()` · **jobs** — owed: the surface ships and this package does not specify it here yet
-- `.intercept()` · **website** — owed: the surface ships and this package does not specify it here yet
-- `.open()` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `see` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `click` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `fill` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `press` · **website** — owed: the surface ships and this package does not specify it here yet
-- `press` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `gone` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `button` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `field` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `heading` · **website** — owed: the surface ships and this package does not specify it here yet
-- `heading` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `link` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `content` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `testId` · **website** — owed: the surface ships and this package does not specify it here yet
-- `testId` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `.tree` · **mobile** — no mobile tree: an iOS simulator is not something CI provisions (M1)
-- `toMatch('<name>')` · **jobs** — a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory
-- `{{any}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{any}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{any}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{base64}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{base64}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{base64}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{base64}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{date}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{date}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{date}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{date}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{duration}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{duration}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{duration}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{email}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{email}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{email}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{email}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{float}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{float}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{float}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{float}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{hex}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{hex}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{hex}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{hex}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{int}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{int}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{int}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{int}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ip}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ip}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ip}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ip}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{iso8601}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{iso8601}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{iso8601}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{number}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{number}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{number}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{path}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{path}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{path}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{path}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{port}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{port}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{port}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{port}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{semver}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{semver}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{semver}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{sha}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{sha}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{sha}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{sha}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{string}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{string}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{time}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{time}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{time}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{time}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ulid}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ulid}}` · **cli** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ulid}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{ulid}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{url}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{url}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{url}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{uuid}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{uuid}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{workdir}}` · **api** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{workdir}}` · **integration** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
-- `{{workdir}}` · **website** — the engine owns the family (proven in the module column); a facet uses the ones its goldens need
+- no mobile tree: an iOS simulator is not something CI provisions (M1) — `services`·mobile, `root`·mobile, `backend`·mobile, `device`·mobile, `app`·mobile, `timeouts`·mobile, `.intercept()`·mobile, `.open()`·mobile, `see`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `content`·mobile, `testId`·mobile, `.content`·mobile, `.screen`·mobile
+- the surface ships and this package does not specify it here yet — `root`·cli, `root`·website, `root`·component, `backend`·website, `external`·website, `clock`·component, `locale`·component, `timezone`·component, `viewport`·component, `.clock()`·jobs, `.intercept()`·website, `press`·website, `hover`·website, `check`·website, `goto`·website, `testId`·website, `heading`·website, `dialog`·website, `status`·website, `table`·website, `row`·website, `listitem`·website, `banner`·website, `banner`·component, `complementary`·website, `complementary`·component, `contentinfo`·component, `form`·website, `form`·component, `search`·website, `search`·component, `.file()`·api, `.file()`·integration, `.directory()`·api, `.directory()`·integration, `.html`·website, `.title`·website, `.links`·website, `toMatchRows()`·component, `.json body`·api
+- the package serves its own fixture site, so `server` is what it proves; `url` targets an already-running deployment, which is a consumer shape (A11 states the XOR) — `url`·website
+- a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory — `toMatch('<name>')`·jobs
+- the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·api, `{{iso8601}}`·cli, `{{iso8601}}`·integration, `{{iso8601}}`·website, `{{number}}`·api, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·api, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·api, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·api, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->
 
