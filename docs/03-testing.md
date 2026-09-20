@@ -143,7 +143,9 @@ the one CI calls ([What CI runs](#what-ci-runs)), so the floor is judged on
 every push. It only ever rises: lowering it is an edit to a committed file,
 with a commit body saying why.
 
-**One floor, over the whole suite.** The baseline is keyed by scope and the CLI
+### One floor, over the whole suite
+
+The baseline is keyed by scope and the CLI
 takes `--scope`, so a project can keep its own; this repository records `all`
 and nothing else, because the projects overlap — the browser projects and the
 node ones both execute `model/`, and four floors summing to more than the tree
@@ -151,11 +153,15 @@ would ratchet on which project happened to run. A scope missing any of the four
 metrics is refused rather than read as a zero, since a floor of zero forbids
 nothing.
 
+### Why a ratchet and not a threshold
+
 A fixed threshold would be a number somebody picked. Set it where the project
 stands and it forbids nothing; set it where the project should be and every run
 is red until it gets there, which is how a gate becomes something people pass
 with `--no-verify`. A ratchet asks the only question a gate can answer
 honestly: is this change worse than the last one?
+
+### What the report excludes
 
 What the report EXCLUDES is the shape of the answer, not a way to raise the
 number: `node_modules/` (Browser Mode instruments the page's bundle, and
