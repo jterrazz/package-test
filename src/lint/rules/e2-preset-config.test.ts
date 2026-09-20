@@ -40,6 +40,11 @@ ruleTester().run('e2-preset-config', asOxlintRule(e2PresetConfig), {
             code: `export default defineSpecConfig({}) satisfies UserConfig;`,
             filename: CONFIG,
         },
+        // Layered with vitest's own merge — what it layers over is the preset.
+        {
+            code: `export default mergeConfig(defineSpecConfig({}), { test: { pool: 'forks' } });`,
+            filename: CONFIG,
+        },
         // Not a config: out of reach by role.
         { code: `export default defineConfig({});`, filename: '/repo/vite.config.ts' },
     ],

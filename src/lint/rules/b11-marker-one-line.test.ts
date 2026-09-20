@@ -88,5 +88,27 @@ ruleTester().run('b11-marker-one-line', asOxlintRule(b11MarkerOneLine), {
 });`,
             filename: TEST_FILE,
         },
+        // A formatter's directive is an instruction, and folding it in would
+        // Turn it off — `-ignore` is the word every formatter uses.
+        {
+            code: `test('ships', () => {
+    // Given - a table of orders
+    // oxfmt-ignore
+    const orders = [1, 2, 3];
+    // Then - it leaves
+    expect(ship(orders)).toBe(true);
+});`,
+            filename: TEST_FILE,
+        },
+        {
+            code: `test('ships', () => {
+    // Given - a table of orders
+    // prettier-ignore
+    const orders = [1, 2, 3];
+    // Then - it leaves
+    expect(ship(orders)).toBe(true);
+});`,
+            filename: TEST_FILE,
+        },
     ],
 });

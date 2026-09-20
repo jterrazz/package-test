@@ -17,10 +17,12 @@ import type { AstNode, Comment, LintRule, RuleContext } from '../types.js';
  * A suppression written under a marker is not a wrapped sentence: folding it
  * into the marker line would DISABLE it, and reporting it would tell the author
  * to do exactly that. The one place the two shapes meet is here, so the list
- * lives here.
+ * lives here — the linters' `-disable`/`-enable` pair and the formatters'
+ * `-ignore`, which is the word every one of them uses (`oxfmt-ignore` is the
+ * estate's).
  */
 const DIRECTIVE =
-    /^(?:oxlint|eslint|checker|prettier|biome|dprint)-(?:disable|enable)|^@ts-|^(?:v8|c8|node|istanbul) ignore|^type-coverage:/u;
+    /^(?:oxlint|eslint|checker|prettier|biome|dprint)-(?:disable|enable)|^(?:prettier|oxfmt|biome|dprint)-ignore|^@ts-|^(?:v8|c8|node|istanbul) ignore|^type-coverage:/u;
 
 /** Is the comment an instruction to a tool rather than a sentence to a reader? */
 function isDirective(comment: Comment): boolean {

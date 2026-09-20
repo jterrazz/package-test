@@ -47,3 +47,40 @@ ruleTester().run('e9w-env-assignment-in-test', asOxlintRule(e9wEnvAssignmentInTe
         },
     ],
 });
+
+ruleTester().run(
+    'e9w-env-assignment-in-test — the other two spellings',
+    asOxlintRule(e9wEnvAssignmentInTest),
+    {
+        invalid: [
+            // Replacing the whole environment outlasts the test just the same.
+            {
+                code: `test('reads the token', () => {
+                process.env = { ...process.env, API_TOKEN: 'secret' };
+                expect(read()).toBe('secret');
+            });`,
+                errors: [{ messageId: 'rawAssignment' }],
+                filename: TEST_FILE,
+            },
+            // And so does taking a variable away.
+            {
+                code: `test('reads no token', () => {
+                delete process.env.API_TOKEN;
+                expect(read()).toBe(undefined);
+            });`,
+                errors: [{ messageId: 'rawAssignment' }],
+                filename: TEST_FILE,
+            },
+        ],
+        valid: [
+            // Deleting something else is nobody's business here.
+            {
+                code: `test('drops the key', () => {
+                delete config.token;
+                expect(read()).toBe(undefined);
+            });`,
+                filename: TEST_FILE,
+            },
+        ],
+    },
+);

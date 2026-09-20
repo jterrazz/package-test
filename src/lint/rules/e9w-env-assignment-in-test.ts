@@ -3,13 +3,21 @@ import { RULE_DOCS } from '../manifest.js';
 import { isTestRole, roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-/** Is the target a variable of the process environment, named or computed? */
+/**
+ * Is the target the process environment, or a variable of it?
+ *
+ * Three spellings write it: a named variable, a computed one, and a
+ * replacement of the whole object (spread into a fresh one), which outlasts
+ * the test exactly as the other two do.
+ */
 function isEnvTarget(node: AstNode | undefined): boolean {
+    if (memberPath(node) === 'process.env') {
+        return true;
+    }
     if (node?.type !== 'MemberExpression') {
         return false;
     }
-    const object = child(node, 'object');
-    return memberPath(object) === 'process.env';
+    return memberPath(child(node, 'object')) === 'process.env';
 }
 
 /**
@@ -32,6 +40,13 @@ export const e9wEnvAssignmentInTest: LintRule = {
         return {
             AssignmentExpression(node: AstNode) {
                 if (isEnvTarget(child(node, 'left'))) {
+                    context.report({ messageId: 'rawAssignment', node });
+                }
+            },
+            // Deleting a variable of the environment is a write too: it is
+            // Gone for every file the worker runs afterwards.
+            UnaryExpression(node: AstNode) {
+                if (node.operator === 'delete' && isEnvTarget(child(node, 'argument'))) {
                     context.report({ messageId: 'rawAssignment', node });
                 }
             },
