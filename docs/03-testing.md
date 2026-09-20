@@ -117,9 +117,21 @@ person who ran it, `html` for the one chasing a line, and `json-summary`, which
 is the one a machine reads.
 
 `npm run coverage` records where the suite stands in `coverage.baseline.json`;
-`npm run coverage:check` (and `make check`, which chains build, lint, test and
-this) refuses a run that fell below it. The floor only ever rises: lowering it
-is an edit to a committed file, with a commit body saying why.
+`npm run coverage:check` refuses a run that fell below it. Neither runs the
+suite: both read the report of the LAST `--coverage` run, which is why
+`make check` runs the suite WITH coverage (`npm test -- --coverage`) before the
+gate — a plain `npm test` would leave it judging an older run, or, on a fresh
+clone where `.artifacts/` does not exist yet, nothing at all. The floor only
+ever rises: lowering it is an edit to a committed file, with a commit body
+saying why.
+
+**One floor, over the whole suite.** The baseline is keyed by scope and the CLI
+takes `--scope`, so a project can keep its own; this repository records `all`
+and nothing else, because the projects overlap — the browser projects and the
+node ones both execute `core/`, and four floors summing to more than the tree
+would ratchet on which project happened to run. A scope missing any of the four
+metrics is refused rather than read as a zero, since a floor of zero forbids
+nothing.
 
 A fixed threshold would be a number somebody picked. Set it where the project
 stands and it forbids nothing; set it where the project should be and every run
@@ -141,22 +153,32 @@ missing is the LIST of the ones that do not, and why — a module with real
 behaviour, no sibling test and nobody able to say what covers it is the silence
 this section closes.
 
-`src/lint/siblings.ts` declares the kinds, and **K7** fails on a module that
-matches none of them. Today 83 modules have no sibling test, all claimed:
+`src/lint/siblings.ts` declares the kinds, each naming the PATHS it claims —
+never a prefix, because a kind claiming `src/seams/` would claim every module
+written there next year and K7 would be a poster. **K7** fails on a module that
+matches none of them, which is what makes a new, unclaimed module fail the
+suite on the day it lands.
 
-| Kind                           | Proven instead by                                                       |
-| ------------------------------ | ----------------------------------------------------------------------- |
-| composition root or barrel (4) | `package-exports.test.ts`, and every spec that imports the entry        |
-| type-only declaration (11)     | the compiler, plus `type-channel.test-d.ts` for what it must refuse     |
-| constant data (3)              | the readers that assert on it — `preset.test.ts`, `plugin.test.ts`      |
-| the facet file set (13)        | the ONE builder they name (`builder.test.ts`, `facet-matrix.test.ts`)   |
-| a facet's vitest project (7)   | `projects.test.ts`, which builds every one of them                      |
-| a facet module (10)            | the facet's own tree under `specs/<facet>/`                             |
-| a result accessor (7)          | every spec that asserts on a result, over `result.test.ts` for the base |
-| a seam adapter (13)            | the facet that drives it, or `specs/integration/<seam>/`                |
-| a bundled CLI entry (3)        | `specs/lint/`, which runs the built binary end to end                   |
-| a lint-layer module (5)        | the rule tests beside each rule, and `specs/lint/`                      |
-| a chain or runner internal (7) | the facet specs that drive the chain                                    |
+<!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: src/lint/siblings.ts -->
+
+Today **82 modules** have no sibling test, and every one of them is claimed:
+
+| Kind                                    | Proven instead by                                                                                                                                                                                                                              |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| composition root or barrel (4)          | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                       |
+| type-only declaration (11)              | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                           |
+| constant data (3)                       | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifest)                                                                                                  |
+| the facet file set, as a re-export (13) | the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name                                                                                       |
+| a facet's vitest project (7)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                |
+| a mobile module that needs a device (2) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
+| a facet module (8)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
+| a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
+| a seam adapter (13)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
+| a bundled CLI entry (3)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                |
+| a lint-layer module (4)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
+| a chain or runner internal (7)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |
+
+<!-- /GENERATED:siblings -->
 
 A new module that matches no kind fails the meta-test, which is the moment to
 write the test — not six months later, when a coverage number moved.

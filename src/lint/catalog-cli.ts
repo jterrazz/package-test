@@ -6,6 +6,7 @@ import { renderSchema } from '../core/literate/spec-document.js';
 import { KINDS, renderCard, renderFork, spliceFork } from './cards.js';
 import { renderRules, spliceCatalog } from './catalog.js';
 import { renderMatrix, spliceLayers, spliceMatrix } from './matrix.js';
+import { spliceSiblings } from './siblings.js';
 
 /**
  * CLI entry for the conventions-catalogue generator (bundled as
@@ -21,7 +22,8 @@ import { renderMatrix, spliceLayers, spliceMatrix } from './matrix.js';
  *   from the same manifest;
  * - `schema/spec.schema.json`, the published JSON Schema of the `<case>.spec.yaml`
  *   document, from the grammar's own constants;
- * - the layered reading and the capability matrix inside `docs/03-testing.md`
+ * - the layered reading, the capability matrix and the siblingless-module table
+ *   inside `docs/03-testing.md`
  *   (each between its own GENERATED markers) and the agent-facing `skills/jterrazz-test/references/matrix.md`,
  *   from the facet declaration and a scan of the package's own trees;
  * - one signature card per kind of test, `skills/jterrazz-test/references/<kind>.md`,
@@ -48,7 +50,7 @@ if (nextDocs !== docs) {
 writeFileSync(rulesPath, renderRules());
 
 const testing = readFileSync(testingPath, 'utf8');
-const nextTesting = spliceLayers(spliceMatrix(testing, root), root);
+const nextTesting = spliceSiblings(spliceLayers(spliceMatrix(testing, root), root), root);
 if (nextTesting !== testing) {
     writeFileSync(testingPath, nextTesting);
 }

@@ -1,7 +1,8 @@
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { classified, siblingless, SIBLINGLESS_KINDS } from './siblings.js';
+import { classified, SIBLINGLESS_KINDS, spliceSiblings } from './siblings.js';
 
 /** The repository root, from this module's place inside `src/lint/`. */
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -41,11 +42,30 @@ describe('modules with no sibling test (meta-test K7)', () => {
         }
     });
 
-    test('the count is what the release proof reports', () => {
-        // Given - the list, which the coverage commit body names
-        // Then - it is not empty and not the whole tree: a number that reaches either end means the classifier stopped reading the tree it walks
-        const count = siblingless(ROOT).length;
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeLessThan(120);
+    test('a module no kind LISTS is unclaimed, whatever tree it is written in', () => {
+        // Given - a new module in each of the trees a prefix kind used to swallow
+        const newcomers = [
+            'src/core/chain/lens.ts',
+            'src/facets/api/lens.ts',
+            'src/lint/lens.ts',
+            'src/runner/lens.ts',
+            'src/seams/docker/lens.ts',
+        ];
+
+        // Then - none of them is claimed: K7 asks for the test, or for the kind
+        for (const path of newcomers) {
+            expect(
+                SIBLINGLESS_KINDS.some((kind) => kind.claims(path)),
+                `${path} is claimed by a kind that never listed it`,
+            ).toBe(false);
+        }
+    });
+
+    test('the table chapter 03 publishes is byte-identical to a fresh generation', () => {
+        // Given - the kind table, which carries today's count per kind
+        const chapter = readFileSync(resolve(ROOT, 'docs/03-testing.md'), 'utf8');
+
+        // Then - regenerating reproduces it exactly (edit the source, not the projection)
+        expect(spliceSiblings(chapter, ROOT)).toBe(chapter);
     });
 });
