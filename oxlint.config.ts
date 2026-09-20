@@ -85,6 +85,9 @@ const FRAMEWORK_LAYERS = {
     lint: {
         imports: [
             'lint/',
+            // The coverage ratchet reads the report the preset asked for, and
+            // There is ONE answer to where a tool writes what it generates.
+            'core/artifacts/artifacts',
             // The .spec.yaml grammar is read by the runner AND by the checker —
             // One parser, so the file lint accepts is the one the runner runs.
             'core/literate/spec-document',

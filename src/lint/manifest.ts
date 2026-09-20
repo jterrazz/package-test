@@ -1216,6 +1216,19 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
+            'A source module with no `<file>.test.ts` beside it falls into one declared kind, and the kind states where its proof is instead.',
+        facet: 'core',
+        family: 'K',
+        fix: 'Write the sibling test, or write the kind that claims it and the one line saying what covers it.',
+        id: 'K7',
+        name: 'k7-siblingless-module-declared',
+        rationale:
+            'I2 says a module test lives beside its module; it never said every module has one. What was missing is the list of the ones that do not, and why.',
+        reach: 'module',
+    },
+    {
+        channel: 'meta',
+        convention:
             'Every capability a facet DECLARES — a constructor option, a setup, a terminal action, a verb, a result accessor, a golden kind, a `{{token}}` family — is exercised by at least one of the package\u2019s own test files in that facet, or its row names the reason it is not.',
         facet: 'core',
         family: 'K',

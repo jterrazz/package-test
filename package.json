@@ -31,6 +31,7 @@
     "files": [
         "dist",
         "!dist/catalog.*",
+        "!dist/coverage.*",
         "schema"
     ],
     "type": "module",
@@ -64,7 +65,9 @@
         "docs": "npm run build && node dist/catalog.js && typescript docs",
         "lint": "typescript check && node dist/checker.js specs",
         "lint:fix": "typescript fix && node dist/checker.js specs --fix",
-        "test": "vitest --run"
+        "test": "vitest --run",
+        "coverage": "npm run build && vitest --run --coverage && node dist/coverage.js --write",
+        "coverage:check": "node dist/coverage.js"
     },
     "dependencies": {
         "msw": "^2.15.0",
@@ -80,6 +83,7 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@vitest/browser-playwright": "5.0.1",
+        "@vitest/coverage-v8": "^5.0.1",
         "better-sqlite3": "^12.11.1",
         "hono": "^4.12.30",
         "pg": "^8.22.0",

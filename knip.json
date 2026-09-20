@@ -5,7 +5,8 @@
         "src/runner/index.ts",
         "src/lint/plugin.ts",
         "src/lint/checker-cli.ts",
-        "src/lint/catalog-cli.ts"
+        "src/lint/catalog-cli.ts",
+        "src/lint/coverage-cli.ts"
     ],
     "ignore": ["specs/_fixtures/**"],
     "ignoreDependencies": [
