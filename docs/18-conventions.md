@@ -38,6 +38,41 @@ The conventions bind **every test file of the repository**, that plain unit test
 
 The reason for the wide reach: a repository has **one** way to write a test, so a reader moving between a sibling module test and a spec of a surface reads the same shape and the tooling has a single target. A rule that applied only to framework tests would leave the majority of test files — the plain ones — unguarded.
 
+## The third door: a repository suite
+
+Two doors carry every test the fork names: a UNIT sits beside the module it
+covers (`<file>.test.ts`, I2), and the ASSEMBLED product sits under
+`specs/<facet>/` and reaches the runner that folder promises (`<aspect>.spec.ts`,
+C12 and C18). A few specifications have neither address, and they are not
+mistakes.
+
+What they specify is a REPOSITORY's own surface: the subpaths its
+`package.json` publishes, a `.d.ts` beside every `.js` it ships, the lint guards
+a tree owes, the files a build is expected to write. There is no one module to
+sit beside — they resolve every module there is — and no runner to reach, since
+nothing is started. Put under a facet folder, C18 refuses them ("reaches no
+runner"); put beside a module under `src/`, I2 refuses them ("no neighbour
+`exports.ts` found"). Both refusals are right, and a legitimate file shape with
+no green position is a hole in the conventions, not a defect in the file.
+
+**The third door is a FIRST-LEVEL folder under `specs/` that is not a facet
+name.** It is a repository suite: it covers a TREE rather than a product served
+through an entry. C12's rename clause does not reach it, C18 and C20 do not
+reach it, and C1's declared depth is what judges its shape. This package's own
+`specs/lint/` is one; a package whose product IS its published tree writes the
+same shape — a suite folder named for what it covers, holding one test that
+resolves every subpath the manifest publishes and one that holds each `.d.ts`
+to the `.js` beside it.
+
+The files there carry `.test.ts` — the UNIT's word — because what they prove is
+read without assembling anything, and `unit()` is what collects them (`roots`,
+or `include` outright). A facet helper would put them in a project whose budget
+and services they never use.
+
+One thing the door does not license: a module test parked under `specs/` to
+escape I2. The question to ask of a file before it goes through is whether any
+single module could hold its test — if one could, that module is its address.
+
 ## Process rules (review-borne)
 
 Three rules cannot be mechanized — they turn on judgement no single channel can settle. They are listed in the catalogue for completeness, but their full rationale lives here.

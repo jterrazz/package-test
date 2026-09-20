@@ -17,6 +17,17 @@ describe('lint — c18-module-test-under-facet (CONVENTIONS C18)', () => {
         expect(result.stderr).toMatch('c18-module-test-under-facet.txt');
     });
 
+    test('leaves a golden under `_expected/` alone, as it leaves `_fixtures/`', async () => {
+        // Given - the compliant twin, whose ground holds a `.test.ts` that IS a golden: the file a fixer is expected to write
+        const result = await cli
+            .fixture('$FIXTURES/lint-violations/c18-module-test-under-facet-ok/')
+            .exec('specs');
+
+        // Then - ground is ground whichever of the four names it carries: nothing under an underscored folder reaches a runner
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch('c18-module-test-under-facet-ok.txt');
+    });
+
     test('accepts a spec that imports the runner of its facet', async () => {
         // Given - the compliant twin, whose second spec names the specification module with no extension
         const result = await cli
