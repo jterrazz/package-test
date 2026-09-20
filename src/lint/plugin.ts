@@ -62,6 +62,7 @@ import { i1LayerBoundaries } from './rules/i1-layer-boundaries.js';
 import { i2SiblingTestNaming } from './rules/i2-sibling-test-naming.js';
 import { i4NoViMockInSrc } from './rules/i4-no-vi-mock-in-src.js';
 import { j2NoSleepInSpecs } from './rules/j2-no-sleep-in-specs.js';
+import { j6wGivenInTheTest } from './rules/j6w-given-in-the-test.js';
 import { w1ScenarioPure } from './rules/w1-scenario-pure.js';
 import { w2TestIdStatesWhatIsMissing } from './rules/w2-testid-states-what-is-missing.js';
 import { w5wScenarioSettles } from './rules/w5w-scenario-settles.js';
@@ -166,6 +167,7 @@ const plugin: LintPlugin = {
         'i2-sibling-test-naming': i2SiblingTestNaming,
         'i4-no-vi-mock-in-src': i4NoViMockInSrc,
         'j2-no-sleep-in-specs': j2NoSleepInSpecs,
+        'j6w-given-in-the-test': j6wGivenInTheTest,
         'w1-scenario-pure': w1ScenarioPure,
         'w2-testid-states-what-is-missing': w2TestIdStatesWhatIsMissing,
         'w5w-scenario-settles': w5wScenarioSettles,
