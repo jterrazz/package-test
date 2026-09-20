@@ -382,7 +382,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | ------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `clock()`     | —   | —    | —   | —           | —       | —      | —         | 4      |
 | `intercept()` | —   | —    | —   | —           | —       | —      | —         | 1      |
-| `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 5      |
+| `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 6      |
 | `match.*`     | —   | —    | —   | —           | —       | —      | —         | 22     |
 
 ### Token
