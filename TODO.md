@@ -72,7 +72,21 @@ these carries a written reason, and the reason is `owed`. Each is one spec:
   it is ONE vocabulary on three facets; a name proven on one of them is a claim
   with a third of its evidence.
 
-## 5. Asks of `@jterrazz/typescript`
+## 5. `docs/reference/` is regenerated only from a plain clone
+
+`typescript docs` writes the typedoc projection with a `Defined in:` line per symbol,
+and the link it writes is the one the git origin gives it. In a worktree under
+`home/<brand>/work/worktrees/` the origin resolves to a local path, so a regeneration
+there replaces every `https://github.com/jterrazz/package-test/blob/main/…` link with a
+bare path — a whole-file diff that looks like content and is only an address.
+
+The three-tree restructure moved every source path, so the projection genuinely IS
+stale: `src/vitest/mock-of.ts` no longer exists. It must be regenerated ONCE, from a
+plain clone with the GitHub origin, before 16.0 is cut, and committed in the linked
+form. Until then `Docs (sync)` is red on `docs/reference/` alone, and every other pass
+of `typescript check` is green.
+
+## 6. Asks of `@jterrazz/typescript`
 
 - **The member walk misses a `specs/`-rooted member.** `discover_specs_roots`, in the toolchain's check command, looks for a CHILD directory named `specs` and never considers the
   member directory itself, so a workspace declaring `packages: ['specs']` (spwn's shape)
