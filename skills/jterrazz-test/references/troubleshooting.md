@@ -4,16 +4,16 @@ Operative index. Each fix names the rule and the chapter whose **Pitfalls** sect
 
 ## Assertions & accessors
 
-| Symptom                                                  | Fix                                                                                                               |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `result.stdout.toContain is not a function`              | Accessors are read-only — write `expect(result.stdout).toContain(...)` (D1). [14](../../../docs/14-assertions.md) |
-| `result.grep is not a function`                          | `grep` lives on the text handle — `result.stdout.grep(pattern)` (returns a `TextAccessor`), never `result.grep()` |
-| A wall of `.grep()` on one shared run                    | Anti-pattern (D11) — one fixture project per use case, snapshot the whole output; grep is the scalpel             |
-| An amas of `.response.body` probes / a lone status probe | Golden it: `expect(result.response).toMatch('case.http')` (d12w / d15w). [10](../../../docs/10-api.md)            |
-| `"fixture ... does not exist"`                           | All expected fixtures live FLAT under `<test-dir>/expected/` (a slash = subfolder). Create with `TEST_UPDATE=1`   |
-| Fails on a uuid/timestamp/path that changes              | Tokenize: `{{uuid}}`, `{{iso8601}}`, `{{workdir}}`, `{{uuid#ref}}`; in code `match.*`. [tokens.md](tokens.md)     |
-| Noisy stdout comparison                                  | ANSI is already stripped (`.text` stays raw); prefer tokens; `transform` is last-resort (D6)                      |
-| `toMatch(/regex/)` throws on an accessor                 | Accessor `toMatch` takes a fixture NAME (D14) — use `expect(x.text).toMatch(/re/)` for a regex                    |
+| Symptom                                                  | Fix                                                                                                                              |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `result.stdout.toContain is not a function`              | Accessors are read-only — write `expect(result.stdout).toContain(...)` (D1). [14](../../../docs/14-assertions.md)                |
+| `result.grep is not a function`                          | `grep` lives on the text handle — `result.stdout.grep(pattern)` (returns a `TextAccessor`), never `result.grep()`                |
+| A wall of `.grep()` on one shared run                    | Anti-pattern (D11) — one fixture project per use case, snapshot the whole output; grep is the scalpel                            |
+| An amas of `.response.body` probes / a lone status probe | Golden it: `expect(result.response).toMatch('case.http')` (d12w / d15w). [10](../../../docs/10-api.md)                           |
+| `"fixture ... does not exist"`                           | All expected fixtures live FLAT under `<test-dir>/expected/` (a slash = subfolder). Create with `TEST_UPDATE=1`                  |
+| Fails on a uuid/timestamp/path that changes              | Tokenize: `{{uuid}}`, `{{iso8601}}`, `{{workdir}}`, `{{uuid#ref}}`; in code `match.*`. [15 — Tokens](../../../docs/15-tokens.md) |
+| Noisy stdout comparison                                  | ANSI is already stripped (`.text` stays raw); prefer tokens; `transform` is last-resort (D6)                                     |
+| `toMatch(/regex/)` throws on an accessor                 | Accessor `toMatch` takes a fixture NAME (D14) — use `expect(x.text).toMatch(/re/)` for a regex                                   |
 
 ## Runners, services, seeding
 

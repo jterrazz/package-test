@@ -18,21 +18,26 @@ import {
  */
 const ROOT = resolve(import.meta.dirname, '../..');
 const DOCS = resolve(ROOT, 'docs');
+const CARDS = resolve(ROOT, 'skills/jterrazz-test/references');
 const README = resolve(ROOT, 'README.md');
 const INDEX_MODULE = resolve(ROOT, 'src/index.js');
 const TSC_BIN = resolve(ROOT, 'node_modules/typescript/bin/tsc');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 
 /**
- * Every framework code block published to a consumer: the `docs/` reference and
- * the README headline samples. Both are surfaces a stale sample would ship
- * through, so both are guarded.
+ * Every framework code block published to a consumer: the `docs/` reference,
+ * the README headline samples, and the generated signature cards an agent
+ * reads before writing a test. All three are surfaces a stale sample would
+ * ship through, so all three are guarded — the cards especially, because
+ * nobody proof-reads a generated file.
  */
 function frameworkBlocks(): DocBlock[] {
     const markdowns: string[] = [readFileSync(README, 'utf8')];
-    for (const file of readdirSync(DOCS)) {
-        if (file.endsWith('.md')) {
-            markdowns.push(readFileSync(resolve(DOCS, file), 'utf8'));
+    for (const directory of [DOCS, CARDS]) {
+        for (const file of readdirSync(directory)) {
+            if (file.endsWith('.md')) {
+                markdowns.push(readFileSync(resolve(directory, file), 'utf8'));
+            }
         }
     }
     return markdowns.flatMap((markdown) =>
@@ -72,6 +77,9 @@ describe('docs-typecheck — the published samples typecheck', () => {
         // And - the rendered examples are among them: a chapter whose examples
         // Are all JSX must not be the one this guard silently skips
         expect(blocks.some((block) => block.jsx)).toBeTruthy();
+        // And - so are the generated cards: a card an agent copies from is the
+        // One surface nobody proof-reads, so the guard must actually reach it
+        expect(blocks.some((block) => block.code.includes('specification.mobile'))).toBe(true);
 
         // Then - tsc --noEmit accepts them all (no drift from the real API)
         mkdirSync(CACHE, { recursive: true });
