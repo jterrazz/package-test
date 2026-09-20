@@ -52,104 +52,93 @@ async function startAndCapture(
     return { failure, output };
 }
 
+/** What one refused startup left behind: the error it threw, the report it printed. */
+type Capture = { failure: Error | undefined; output: string };
+
 describe('initiation errors', () => {
-    describe('postgres init script failure', () => {
-        let caught: Error | undefined;
-        let output: string;
+    // Three refusals, each costing a container start, captured once and read by
+    // Eight tests. The hook is the price of the containers, not of the Given:
+    // Every test below reads a value this file named, and names which one.
+    let brokenInit: Capture;
+    let multiService: Capture;
+    let multiPostgres: Capture;
 
-        beforeAll(async () => {
-            // Given - postgres with broken init.sql (start once, assert many)
-            ({ failure: caught, output } = await startAndCapture(BROKEN_POSTGRES_INIT, {
-                db: postgres(),
-            }));
-        }, 30_000);
-
-        test('throws with the init script path and the underlying SQL error', () => {
-            // Given - the captured startup failure (init.sql declares a bogus TEXTTTT column type)
-            // Then - the error names the failing init script by path AND surfaces the specific SQL error, not a generic "startup failed" wrapper
-            expect(caught?.message).toContain('init script failed');
-            expect(caught?.message).toContain('postgres/init.sql');
-            expect(caught?.message.toLowerCase()).toContain('textttt');
-            expect(caught?.message.toLowerCase()).toContain('does not exist');
+    beforeAll(async () => {
+        // Given - the three broken starts, each run once
+        brokenInit = await startAndCapture(BROKEN_POSTGRES_INIT, { db: postgres() });
+        multiService = await startAndCapture(BROKEN_MULTI_INIT, {
+            cache: redis(),
+            db: postgres(),
         });
-
-        test('error report shows the failed service, named after its record key', () => {
-            // Given - the captured startup report
-            // Then - formatted report includes failure markers AND the unique failing line (the SQL type error) so the report pinpoints the cause, not just that some init failed
-            expect(output).toContain('INFRA');
-            expect(output).toContain('Starting infrastructure...');
-            expect(output).toContain('postgres (db)');
-            expect(output).toContain('init script failed');
-            expect(output.toLowerCase()).toContain('textttt');
-            expect(output).toContain('app: in-process (Hono)');
+        // Insertion order matters: `db` must be wired (and succeed) before
+        // `brokenDb` fails, and the kebab-case of each key names the folder its
+        // Init sits in.
+        multiPostgres = await startAndCapture(BROKEN_SECOND_POSTGRES, {
+            db: postgres(),
+            brokenDb: postgres(),
         });
+    }, 90_000);
 
-        test('error report includes postgres container logs', () => {
-            // Given - the captured startup report
-            // Then - report includes container log lines from the failing postgres
-            expect(output).toContain('database system is ready to accept connections');
-        });
+    test('postgres init script failure — throws with the init script path and the underlying SQL error', () => {
+        // Given - the captured startup failure (init.sql declares a bogus TEXTTTT column type)
+        // Then - the error names the failing init script by path AND surfaces the specific SQL error, not a generic "startup failed" wrapper
+        expect(brokenInit.failure?.message).toContain('init script failed');
+        expect(brokenInit.failure?.message).toContain('postgres/init.sql');
+        expect(brokenInit.failure?.message.toLowerCase()).toContain('textttt');
+        expect(brokenInit.failure?.message.toLowerCase()).toContain('does not exist');
     });
 
-    describe('multi-service failure — redis succeeds, postgres fails', () => {
-        let output: string;
-
-        beforeAll(async () => {
-            // Given - redis (ok) + postgres with broken init.sql (start once)
-            ({ output } = await startAndCapture(BROKEN_MULTI_INIT, {
-                cache: redis(),
-                db: postgres(),
-            }));
-        }, 30_000);
-
-        test('error report shows both services under their record keys', () => {
-            // Given - the captured startup report
-            // Then - report shows redis success, then postgres failure
-            expect(output).toContain('redis (cache)');
-            expect(output).toContain('postgres (db)');
-            expect(output).toContain('init script failed');
-        });
-
-        test('redis appears before postgres in report', () => {
-            // Given - the captured startup report
-            // Then - redis line comes before postgres line
-            const redisIndex = output.indexOf('redis (cache)');
-            const postgresIndex = output.indexOf('postgres (db)');
-            expect(redisIndex).toBeLessThan(postgresIndex);
-        });
+    test('postgres init script failure — error report shows the failed service, named after its record key', () => {
+        // Given - the captured startup report
+        // Then - formatted report includes failure markers AND the unique failing line (the SQL type error) so the report pinpoints the cause, not just that some init failed
+        expect(brokenInit.output).toContain('INFRA');
+        expect(brokenInit.output).toContain('Starting infrastructure...');
+        expect(brokenInit.output).toContain('postgres (db)');
+        expect(brokenInit.output).toContain('init script failed');
+        expect(brokenInit.output.toLowerCase()).toContain('textttt');
+        expect(brokenInit.output).toContain('app: in-process (Hono)');
     });
 
-    describe('multi-postgres failure — first succeeds, second fails', () => {
-        let caught: Error | undefined;
-        let output: string;
+    test('postgres init script failure — error report includes postgres container logs', () => {
+        // Given - the captured startup report
+        // Then - report includes container log lines from the failing postgres
+        expect(brokenInit.output).toContain('database system is ready to accept connections');
+    });
 
-        beforeAll(async () => {
-            // Given - db (ok init) + brokenDb (bad init) — start once. Insertion order matters: db must be wired (and succeed) before brokenDb fails, and the kebab-case of each key names the folder its init sits in.
-            ({ failure: caught, output } = await startAndCapture(BROKEN_SECOND_POSTGRES, {
-                db: postgres(),
-                brokenDb: postgres(),
-            }));
-        }, 30_000);
+    test('multi-service failure — redis succeeds, postgres fails — error report shows both services under their record keys', () => {
+        // Given - the captured startup report
+        // Then - report shows redis success, then postgres failure
+        expect(multiService.output).toContain('redis (cache)');
+        expect(multiService.output).toContain('postgres (db)');
+        expect(multiService.output).toContain('init script failed');
+    });
 
-        test('error report names both databases by their record keys', () => {
-            // Given - the captured startup report
-            // Then - first postgres succeeded, second failed
-            expect(output).toContain('postgres (db)');
-            expect(output).toContain('postgres (broken-db)');
-            expect(output).toContain('init script failed');
-        });
+    test('multi-service failure — redis succeeds, postgres fails — redis appears before postgres in report', () => {
+        // Given - the captured startup report
+        // Then - redis line comes before postgres line
+        const redisIndex = multiService.output.indexOf('redis (cache)');
+        const postgresIndex = multiService.output.indexOf('postgres (db)');
+        expect(redisIndex).toBeLessThan(postgresIndex);
+    });
 
-        test('thrown error identifies the broken database', () => {
-            // Given - the captured startup failure
-            // Then - error includes the broken init path
-            expect(caught?.message).toContain('init script failed');
-            expect(caught?.message).toContain('broken-db/init.sql');
-        });
+    test('multi-postgres failure — first succeeds, second fails — error report names both databases by their record keys', () => {
+        // Given - the captured startup report
+        // Then - first postgres succeeded, second failed
+        expect(multiPostgres.output).toContain('postgres (db)');
+        expect(multiPostgres.output).toContain('postgres (broken-db)');
+        expect(multiPostgres.output).toContain('init script failed');
+    });
 
-        test('second postgres failure includes its own container logs', () => {
-            // Given - the captured startup report
-            // Then - logs are from the broken-db container
-            expect(output).toContain('database system is ready to accept connections');
-        });
+    test('multi-postgres failure — first succeeds, second fails — thrown error identifies the broken database', () => {
+        // Given - the captured startup failure
+        // Then - error includes the broken init path
+        expect(multiPostgres.failure?.message).toContain('init script failed');
+        expect(multiPostgres.failure?.message).toContain('broken-db/init.sql');
+    });
+
+    test('multi-postgres failure — first succeeds, second fails — second postgres failure includes its own container logs', () => {
+        // Given - the captured startup report
+        // Then - logs are from the broken-db container
+        expect(multiPostgres.output).toContain('database system is ready to accept connections');
     });
 });

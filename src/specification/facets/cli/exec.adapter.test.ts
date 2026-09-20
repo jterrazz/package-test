@@ -1,3 +1,4 @@
+/* oxlint-disable vitest/no-restricted-vi-methods -- this file tests the ADAPTER's own deadline: `clock` pins the calendar, and what has to move here is the timer queue the adapter waits on, which only vitest's fake timers hold */
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { buildEnv, observeProcess } from './exec.adapter.js';

@@ -70,41 +70,37 @@ describe('command — directory snapshot', () => {
         ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 
-    describe('update mode', () => {
-        test('writes the fixture under TEST_UPDATE=1', async () => {
-            // Given - fresh scaffold and a non-existent fixture name
-            const fixtureName = `transient-fixture-${Date.now()}`;
+    test('update mode — writes the fixture under TEST_UPDATE=1', async () => {
+        // Given - fresh scaffold and a non-existent fixture name
+        const fixtureName = `transient-fixture-${Date.now()}`;
 
-            const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
+        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
 
-            // When - update mode writes the fixture
-            process.env.TEST_UPDATE = '1';
-            try {
-                await expect(result.directory('out')).toMatch(fixtureName);
-            } finally {
-                delete process.env.TEST_UPDATE;
-            }
+        // When - update mode writes the fixture
+        process.env.TEST_UPDATE = '1';
+        try {
+            await expect(result.directory('out')).toMatch(fixtureName);
+        } finally {
+            delete process.env.TEST_UPDATE;
+        }
 
-            // Then - running again without update mode now matches
-            const result2 = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
-            await expect(result2.directory('out')).toMatch(fixtureName);
+        // Then - running again without update mode now matches
+        const result2 = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
+        await expect(result2.directory('out')).toMatch(fixtureName);
 
-            // Cleanup committed transient fixture
-            rmSync(resolve(import.meta.dirname, '_expected', fixtureName), {
-                force: true,
-                recursive: true,
-            });
+        // Cleanup committed transient fixture
+        rmSync(resolve(import.meta.dirname, '_expected', fixtureName), {
+            force: true,
+            recursive: true,
         });
     });
 
-    describe('files() helper', () => {
-        test('lists files recursively, sorted', async () => {
-            // Given - a scaffold run
-            const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
+    test('files() helper — lists files recursively, sorted', async () => {
+        // Given - a scaffold run
+        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
 
-            // Then - the tree listing is complete and sorted
-            const files = await result.directory('out').files();
-            expect(files).toStrictEqual(['docs/README.md', 'go.mod', 'main.go', 'src/index.txt']);
-        });
+        // Then - the tree listing is complete and sorted
+        const files = await result.directory('out').files();
+        expect(files).toStrictEqual(['docs/README.md', 'go.mod', 'main.go', 'src/index.txt']);
     });
 });

@@ -65,6 +65,71 @@ describe('the composable fragment — what a consumer wires', () => {
     });
 });
 
+/** The rules of the fragment's override over the test globs. */
+function testGlobRules(): Record<string, unknown> {
+    const layer = (testing.overrides ?? []).find((entry) =>
+        entry.files.some((glob) => glob.includes('test,spec')),
+    );
+    return { ...layer?.rules };
+}
+
+/** One upstream entry, read as the pair `['error', <options>]` it has to be. */
+function optionOf(rule: string): { options: Record<string, string>; severity: unknown } {
+    const entry: unknown = testGlobRules()[rule];
+    const pair: unknown[] = Array.isArray(entry) ? entry : [];
+    const [severity, options] = pair;
+    const named: Record<string, string> = {};
+    if (typeof options === 'object' && options !== null) {
+        for (const [key, value] of Object.entries(options)) {
+            named[key] = String(value);
+        }
+    }
+    return { options: named, severity };
+}
+
+describe('the upstream options this vocabulary owns (ADR-005)', () => {
+    test('d20 — the seven snapshot matchers are refused, each naming the golden', () => {
+        // Given - the option the fragment sets on vitest's own rule
+        const { options: matchers, severity } = optionOf('vitest/no-restricted-matchers');
+
+        // Then - every matcher vitest offers for snapshots is named, with a destination
+        expect(severity).toBe('error');
+        expect(Object.keys(matchers).toSorted()).toStrictEqual([
+            'toMatchAriaSnapshot',
+            'toMatchFileSnapshot',
+            'toMatchInlineSnapshot',
+            'toMatchScreenshot',
+            'toMatchSnapshot',
+            'toThrowErrorMatchingInlineSnapshot',
+            'toThrowErrorMatchingSnapshot',
+        ]);
+        for (const [matcher, message] of Object.entries(matchers)) {
+            expect(message.length, `${matcher} states no fix`).toBeGreaterThan(0);
+        }
+    });
+
+    test('m3 — the four vi methods that take a seam, and not the one that restores itself', () => {
+        // Given - the option the fragment sets
+        const { options: methods, severity } = optionOf('vitest/no-restricted-vi-methods');
+
+        // Then - the clock and the global stub are named; `stubEnv` is sanctioned
+        expect(severity).toBe('error');
+        expect(Object.keys(methods).toSorted()).toStrictEqual([
+            'setSystemTime',
+            'stubGlobal',
+            'useFakeTimers',
+            'useRealTimers',
+        ]);
+        expect(methods).not.toHaveProperty('stubEnv');
+    });
+
+    test('j10 — one level of describe, and no more', () => {
+        // Given - the option the fragment sets
+        // Then - a second level of context is refused
+        expect(testGlobRules()['vitest/max-nested-describe']).toStrictEqual(['error', { max: 1 }]);
+    });
+});
+
 describe('conventions catalogue — generation freshness (meta-test)', () => {
     test('the docs/10 catalogue is byte-identical to a fresh generation', () => {
         // Given - the committed docs/13-linting.md

@@ -226,6 +226,49 @@ export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEnt
 /** The globs an upstream test rule is set over — the three suffixes, and a specs tree. */
 const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/**/*.{ts,tsx}'];
 
+/**
+ * D20 — the seven matchers vitest offers for snapshots, each pointed back at
+ * the one golden mechanism this vocabulary has.
+ *
+ * A snapshot is written by the run that was supposed to be judged by it: the
+ * file lands beside the test, nobody reads the diff, and a wrong answer becomes
+ * the expectation the moment someone re-records. `toMatch('<name>.<ext>')`
+ * under `_expected/` is the same convenience with the file where a reviewer
+ * looks, tokens for what legitimately moves, and `TEST_UPDATE=1` as the one
+ * door that rewrites it.
+ */
+const SNAPSHOT_MATCHERS: Record<string, string> = {
+    toMatchAriaSnapshot:
+        "The ARIA tree is a golden: `expect(result.tree).toMatch('<case>.aria.yaml')`.",
+    toMatchFileSnapshot: "Name the file yourself: `expect(subject).toMatch('<case>.<ext>')`.",
+    toMatchInlineSnapshot:
+        "An inline snapshot is the run judging itself: `expect(subject).toMatch('<case>.<ext>')`, or compare to a literal with `toStrictEqual`.",
+    toMatchScreenshot:
+        'A screenshot is not a golden this dialect can read: assert the ARIA tree, the content, or the markup.',
+    toMatchSnapshot:
+        "The golden is `expect(subject).toMatch('<name>.<ext>')` under `_expected/`; under `src/` compare to a literal with `toStrictEqual`.",
+    toThrowErrorMatchingInlineSnapshot:
+        "State the message: `expect(fn).toThrow('<what the subject says>')`.",
+    toThrowErrorMatchingSnapshot:
+        "State the message: `expect(fn).toThrow('<what the subject says>')`.",
+};
+
+/**
+ * M3 — the four `vi` methods that take a seam this vocabulary owns.
+ *
+ * `stubGlobal` replaces the network with a function the test wrote; the three
+ * timer methods take the clock without giving it back at the end of the scope.
+ * `stubEnv` is NOT here: it restores itself and is the sanctioned way to state
+ * an env a module reads. `vi.mock`/`vi.doMock` stay on I4, whose allow-list the
+ * option cannot express.
+ */
+const RESTRICTED_VI_METHODS: Record<string, string> = {
+    setSystemTime: '`vi.setSystemTime` → `clock.at(iso)`, which gives the calendar back.',
+    stubGlobal: "`vi.stubGlobal('fetch')` → `await using _ = await intercept(defineContracts(…))`.",
+    useFakeTimers: '`vi.useFakeTimers` → `clock.at(iso)` and `clock.advance(ms)`.',
+    useRealTimers: '`vi.useRealTimers` → nothing: `using` gives the clock back at the scope end.',
+};
+
 export const testing: OxlintConfig = {
     jsPlugins: ['@jterrazz/test/oxlint'],
     overrides: [
@@ -240,6 +283,12 @@ export const testing: OxlintConfig = {
                     'error',
                     { pattern: String.raw`.*\.(?:test|spec)\.[tj]sx?$` },
                 ],
+                // J10 — one level of `describe` groups a file; a second is a
+                // Tree of contexts a reader has to hold in their head, and the
+                // Name of the test stops being the sentence it was.
+                'vitest/max-nested-describe': ['error', { max: 1 }],
+                'vitest/no-restricted-matchers': ['error', SNAPSHOT_MATCHERS],
+                'vitest/no-restricted-vi-methods': ['error', RESTRICTED_VI_METHODS],
             },
         },
     ],

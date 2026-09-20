@@ -1102,6 +1102,56 @@ export const CHECKER_PASSES: CatalogEntry[] = [
 ];
 
 /**
+ * The **upstream** channel — a convention an oxlint plugin rule ALREADY knows
+ * how to enforce, turned on with the option that states it (ADR-005).
+ *
+ * One owner per convention: a ban a `vitest/*` rule can carry as an option is
+ * set from the `testing` fragment rather than rewritten as a `jterrazz/*` rule,
+ * and the fragment is where a reader finds the option. A core rule whose
+ * options OTHER owners already set (`no-restricted-imports`,
+ * `no-restricted-globals`) is the exception: an override replaces options
+ * rather than merging them, so F6 and G4 are this plugin's own.
+ */
+export const UPSTREAM_RULES: CatalogEntry[] = [
+    {
+        channel: 'upstream',
+        convention:
+            'No vitest snapshot matcher: `toMatchSnapshot`, `toMatchInlineSnapshot`, `toMatchFileSnapshot`, `toMatchAriaSnapshot`, `toMatchScreenshot`, `toThrowErrorMatchingSnapshot` and `toThrowErrorMatchingInlineSnapshot` are refused by `vitest/no-restricted-matchers`, whose option the `testing` fragment sets (ADR-005).',
+        family: 'D',
+        fix: "Write the golden: `expect(subject).toMatch('<name>.<ext>')` under `_expected/`; under `src/` compare to a literal with `toStrictEqual`.",
+        id: 'D20',
+        name: 'd20-golden-not-snapshot',
+        rationale:
+            'A snapshot is written by the run that was supposed to be judged by it: nobody reads the diff, and a wrong answer becomes the expectation the moment someone re-records.',
+        reach: 'tests',
+    },
+    {
+        channel: 'upstream',
+        convention:
+            'At most one level of `describe` — `vitest/max-nested-describe` with `{ max: 1 }`, set by the `testing` fragment.',
+        family: 'J',
+        fix: 'Flatten the nesting: the test name is the sentence, and one level groups the file.',
+        id: 'J10',
+        name: 'j10-one-describe-level',
+        rationale:
+            'A tree of contexts is state a reader has to hold in their head to know what a test is about, and the name of the test stops being the sentence it was.',
+        reach: 'tests',
+    },
+    {
+        channel: 'upstream',
+        convention:
+            '`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express.',
+        family: 'M',
+        fix: 'Reach for `intercept()` and `clock` — both give back what they took at the end of the scope.',
+        id: 'M3',
+        name: 'm3-no-vi-time-or-global-stub',
+        rationale:
+            'A stubbed global is the network replaced by a function the test wrote, and a fake timer taken without `using` outlasts the test that took it.',
+        reach: 'tests',
+    },
+];
+
+/**
  * The **runtime** channel — refusals and behaviours the framework enforces at
  * execution time, where static analysis abstains (non-literal arguments) or
  * cannot reach (network, container lifecycle). Several double a static pass.
@@ -1258,6 +1308,7 @@ for (const [name, doc] of Object.entries(RULE_DOCS)) {
 
 export const catalog: CatalogEntry[] = [
     ...statiqueEntries,
+    ...UPSTREAM_RULES,
     ...CHECKER_PASSES,
     ...RUNTIME_RULES,
     ...PROCESS_RULES,
