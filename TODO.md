@@ -57,7 +57,22 @@ rule about either one is a chapter-12 backlog line, and it waits on the surface.
   "the call never happened". `http.never(request)` — or `required: false` with
   `times: 0` — states it, and fails at chain end if the subject reached the route.
 
-## 4. Asks of `@jterrazz/typescript`
+## 4. The five cells the matrix says this package owes itself
+
+The capability matrix (`docs/03-testing.md`, generated) is green because each of
+these carries a written reason, and the reason is `owed`. Each is one spec:
+
+- **`.clock()` on jobs** — the setup is on the facet; no `specs/jobs/` spec pins
+  a calendar. The api and integration clock specs cover the same chain setup,
+  which is exactly why nobody noticed.
+- **`.intercept()` on website** — the website facet gained it in 15.3 and the
+  package never specified it there.
+- **`press`, `heading`, `testId` on website** — three of the vocabulary's names
+  that only the component tree exercises. The vocabulary's whole claim is that
+  it is ONE vocabulary on three facets; a name proven on one of them is a claim
+  with a third of its evidence.
+
+## 5. Asks of `@jterrazz/typescript`
 
 - **The member walk misses a `specs/`-rooted member.** `discover_specs_roots`, in the toolchain's check command, looks for a CHILD directory named `specs` and never considers the
   member directory itself, so a workspace declaring `packages: ['specs']` (spwn's shape)

@@ -72,7 +72,11 @@ function runtimeMarkers(): Set<string> {
 /** The meta rows that have a test naming them — by row name, in this layer. */
 function metaProofs(): Set<string> {
     const found = new Set<string>();
-    const sources = [read('src/lint/plugin.test.ts'), read('src/lint/env-allowlist.test.ts')];
+    const sources = [
+        read('src/lint/plugin.test.ts'),
+        read('src/lint/env-allowlist.test.ts'),
+        read('src/lint/matrix.test.ts'),
+    ];
     for (const entry of readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true })) {
         const path = String(entry).replaceAll('\\', '/');
         if (path.endsWith('.test.ts') && !path.includes('_fixtures/')) {

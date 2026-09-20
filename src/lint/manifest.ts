@@ -1216,6 +1216,19 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
+            'Every capability a facet DECLARES — a constructor option, a setup, a terminal action, a verb, a result accessor, a golden kind, a `{{token}}` family — is exercised by at least one of the package\u2019s own test files in that facet, or its row names the reason it is not.',
+        facet: 'core',
+        family: 'K',
+        fix: 'Write the spec, or state the reason on the capability row — a blank cell says nothing and a zero with no reason is a surface nobody holds.',
+        id: 'K6',
+        name: 'k6-matrix-no-empty-cell',
+        rationale:
+            'A suite proves what it runs, never what it does not: a facet can grow a method and be green forever without one test touching it.',
+        reach: 'specs',
+    },
+    {
+        channel: 'meta',
+        convention:
             'Every constructor has a `specs/<facet>/` tree in this package. Two subjects answer differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component-app/`; `mobile` has no tree at all, because CI provisions no simulator.',
         facet: 'core',
         family: 'M',
