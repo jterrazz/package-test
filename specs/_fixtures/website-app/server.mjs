@@ -68,6 +68,16 @@ const pages = {
     <meta name="framework-transitions-enabled" content="">
     <meta name="framework-transitions-fallback" content="animate">
     </head><body><h1>Framework</h1></body></html>`,
+    // The transitional window's own page. The button's accessible name is NOT
+    // Its text content: the two block children glue to "Experiments9" when read
+    // As text and join as "Experiments 9" when the browser computes the name —
+    // And the name is what a descriptor matches. The field is named by its
+    // Label alone, which is nowhere in its text at all.
+    '/window': `<!doctype html><html lang="en"><head>${head('Fixture — Window', '/window')}
+    </head><body><h1>Window</h1><main>
+    <button type="button"><span style="display:block">Experiments</span><span style="display:block">9</span></button>
+    <label for="journal">Journal entry</label><input id="journal" type="text">
+    </main></body></html>`,
     '/noisy': `<!doctype html><html lang="en"><head><title>Fixture — Noisy</title></head>
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
     // The ambiguity fixture: "Articles" appears three times — twice as the

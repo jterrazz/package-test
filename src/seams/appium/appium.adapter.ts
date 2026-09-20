@@ -427,7 +427,7 @@ export class AppiumAdapter implements DevicePort {
             return null;
         }
         const evidence = await captureMatch(first);
-        warnSubstringOnly(level, this.options.udid, evidence.label);
+        await warnSubstringOnly(level, this.options.udid, evidence.label);
         return loose;
     }
 

@@ -5,7 +5,7 @@ import type { BrowserCommand } from 'vitest/node';
 import { GROUND_EXPECTED } from '../../model/chain/ground.js';
 
 /**
- * The two things a page cannot do for itself, run on the server side of
+ * The three things a page cannot do for itself, run on the server side of
  * Browser Mode and reached from the page through `server.commands`.
  *
  * **The ARIA tree.** Browser Mode's own locators expose no `ariaSnapshot()`, so
@@ -44,6 +44,16 @@ export const ariaTree: BrowserCommand<[], string> = async (context) => {
     return await frame.locator('body').ariaSnapshot();
 };
 
+/**
+ * A line the page has for whoever is running the suite, written on the node
+ * side's stderr — the one channel vitest's default reporter passes through.
+ * The console is captured and dropped, so a page that printed to it printed to
+ * nobody.
+ */
+export const notify: BrowserCommand<[string], void> = (_context, line) => {
+    process.stderr.write(`${line}\n`);
+};
+
 /** The golden's current content, or `null` when it does not exist yet. */
 export const goldenRead: BrowserCommand<[string], null | string> = (context, name) => {
     const path = goldenPath(context.testPath, name);
@@ -62,4 +72,4 @@ export const goldenWrite: BrowserCommand<[string, string], string> = (context, n
  * The commands, as `component()` registers them — one list, so the names the
  * page calls and the names the project registers cannot drift.
  */
-export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite };
+export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite, notify };

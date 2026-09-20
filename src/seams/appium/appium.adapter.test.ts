@@ -189,7 +189,7 @@ describe('appium adapter — the transitional window for a name matched in part'
     test('taps the element the label CONTAINS, and names the label to write', async () => {
         // Given - a screen whose only button is labelled "Continue to payment", and a scenario naming part of it
         resetSubstringWarnings();
-        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const printed = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
         const { remote, state } = substringDriver();
         const adapter = new AppiumAdapter({
             remote,
@@ -206,9 +206,9 @@ describe('appium adapter — the transitional window for a name matched in part'
             },
         });
 
-        // Then - the tap reached the button through the window, with the one line the author has to act on
+        // Then - the tap reached the button through the window, and the line went where a plain run shows it
         expect(state.taps).toBe(1);
-        expect(String(warn.mock.calls[0]?.[0])).toContain(
+        expect(String(printed.mock.calls[0]?.[0])).toContain(
             "The name to write is 'Continue to payment'",
         );
     });

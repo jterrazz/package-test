@@ -216,6 +216,8 @@ The window is asked BEFORE the verb acts, not after it fails: a verb waits its w
 
 It widens on exactly one match, never on several: a name two elements carry in part is the ambiguity the old default hid, and the window may not resolve it by guessing which one the author meant. That descriptor designates nothing, as W3 says, and the refusal is the one to read.
 
+**The line goes to stderr**, and never to the console. Vitest CAPTURES the console and its default reporter prints nothing of what it captured, so a warning written with `console.warn` is invisible in the very run that fired it — `npm test` showed zero lines on a run that had one, and a deadline nobody can see is a deadline nobody meets. The node-side adapters write the line to the runner's own stderr; a mounted component, which runs IN the page and has no stderr, hands it back to the node side through `server.commands`. Nothing but a plain `vitest --run` is needed to read it.
+
 ## `testId()` — the one escape hatch
 
 `testId(id)` reads `data-testid` on the web and the accessibility identifier on a device. It is the ONLY descriptor that names something a user cannot perceive, and rule W2 is an error on it: a `testId()` carries a same-line comment naming what the element lacks.

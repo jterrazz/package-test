@@ -149,6 +149,11 @@ const PROBE: WindowProbe = {
         const [match] = candidates(locate(page, element));
         return await Promise.resolve(match?.accessibleName ?? match?.text);
     },
+    // The page has no stderr, and the console it does have is captured and
+    // Dropped by the reporter: the line goes out to the node side to be printed.
+    print: async (line) => {
+        await commands.notify(line);
+    },
 };
 
 /**
