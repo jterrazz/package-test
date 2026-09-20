@@ -157,7 +157,7 @@ export const RULE_DOCS = {
     'b11-marker-one-line': {
         channel: 'statique',
         convention:
-            'A marker is exactly one line: a `//` comment directly under one, at the same indentation, is a wrapped marker and an error. A tool’s directive is not a sentence â a linter’s `-disable`/`-enable`, a formatter’s `-ignore`, a `@ts-` pragma and a coverage line stand where they are.',
+            'A marker is exactly one line: a `//` comment directly under one, at the same indentation, is a wrapped marker and an error. A tool’s directive is not a sentence — a linter’s `-disable`/`-enable`, a formatter’s `-ignore`, a `@ts-` pragma and a coverage line stand where they are.',
         family: 'B',
         fix: 'Fold the continuation into the sentence, or separate it with a blank line.',
         id: 'B11',
@@ -460,7 +460,7 @@ export const RULE_DOCS = {
     'e2-preset-config': {
         channel: 'statique',
         convention:
-            'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator, through a `satisfies`/`as` annotation, and through one `mergeConfig(defineSpecConfig(â¦), â¦)` â vitest’s own way of layering over the preset.',
+            'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator, through a `satisfies`/`as` annotation, and through one `mergeConfig(defineSpecConfig(…), …)` — vitest’s own way of layering over the preset.',
         family: 'E',
         fix: "Start from `defineSpecConfig()` — budgets, the artefact dir and the `_fixtures` exclusion are the preset's.",
         id: 'E2',
@@ -471,7 +471,7 @@ export const RULE_DOCS = {
     'e4w-project-binding': {
         channel: 'statique',
         convention:
-            'A project literal collecting `specs/<facet>/` is named `<facet>`, and one named for a facet is rooted there; `unit` collects outside `specs/`. What an include collects is read from the GLOB and the config’s own place in its package, never from the absolute path. Any other name is out of reach â a repository suite names its projects as it likes.',
+            'A project literal collecting `specs/<facet>/` is named `<facet>`, and one named for a facet is rooted there; `unit` collects outside `specs/`. What an include collects is read from the GLOB and the config’s own place in its package, never from the absolute path. Any other name is out of reach — a repository suite names its projects as it likes.',
         family: 'E',
         fix: 'Name the project after the facet it collects; `{ include, exclude }` stay yours.',
         id: 'E4',
