@@ -14,7 +14,8 @@ const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
  *
  * - a `module`-role test OUTSIDE `specs/` whose neighbour module does not exist;
  * - a `component`-role test (`*.test.tsx`) with no neighbour of any tree;
- * - any file under a retired test root (`__tests__/`, a package's `tests/`).
+ * - any file under a retired test root (`__tests__/`, a package's `tests/` or
+ *   `test/` — hoverfly-lsp keeps thirteen specs under the singular).
  *
  * The orphan clause reads `role` and `inSpecs`, never a `src` segment: a
  * REPOSITORY suite — a `.test.ts` under a `specs/` tree whose C1 depth is
