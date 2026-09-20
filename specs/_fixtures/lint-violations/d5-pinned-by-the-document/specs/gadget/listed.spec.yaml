@@ -1,0 +1,11 @@
+description: lists the stamps the console answered with
+fixture: $FIXTURES/console/
+env:
+    - frozen
+serve:
+    - console
+runs:
+    - command: widget stamps list
+      exit: 0
+      stdout: |
+          stamped {{iso8601}}

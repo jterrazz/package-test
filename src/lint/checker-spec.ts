@@ -321,12 +321,36 @@ const VOLATILE = [
  * A `{{token}}` is removed before the test: the token IS the answer the rule
  * asks for, and a path written after one is the token's tail, not a literal.
  */
-export function volatileLiteralIn(line: string): undefined | { found: string; token: string } {
+/**
+ * The whole word the match sits inside — the string the pinned-value carve-out
+ * looks up.
+ *
+ * A pattern matches the SHAPE that makes a value volatile (`/tmp/`, a loopback
+ * origin) and not the value itself, so asking whether the document pinned
+ * `/tmp/` would exempt every temp path once any of them was named. The word the
+ * match belongs to is what the document either states or does not.
+ */
+function wordAround(text: string, index: number): string {
+    let start = index;
+    let end = index;
+    while (start > 0 && !/[\s"'(),;=]/u.test(text[start - 1] ?? '')) {
+        start -= 1;
+    }
+    while (end < text.length && !/[\s"'(),;=]/u.test(text[end] ?? '')) {
+        end += 1;
+    }
+    return text.slice(start, end);
+}
+
+export function volatileLiteralIn(
+    line: string,
+): undefined | { found: string; token: string; word: string } {
     const bare = line.replaceAll(/\{\{[^}]*\}\}/gu, ' ');
     for (const { pattern, token } of VOLATILE) {
         const found = pattern.exec(bare);
         if (found !== null) {
-            return { found: found[0].trim(), token };
+            const at = found.index + found[0].length - found[0].trimStart().length;
+            return { found: found[0].trim(), token, word: wordAround(bare, at) };
         }
     }
     return undefined;
@@ -338,21 +362,31 @@ export function volatileLiteralIn(line: string): undefined | { found: string; to
  * temp path belonged to that run. It is the exact shape of a value the update
  * writer would have tokenised, which is why finding one means a token was
  * overwritten by hand.
+ *
+ * Unless the document FIXED it — the same carve-out d5w rests on, for the same
+ * reason: a path the command was handed, or one a `fixture:` ships, is a value
+ * the document states rather than one the run minted.
  */
-function checkVolatileLiterals(document: SpecDocument): Finding[] {
+function checkVolatileLiterals(document: SpecDocument, dir: string): Finding[] {
     const findings: Finding[] = [];
+    let fixed: null | string = null;
     for (const stream of assertedStreams(document)) {
         for (const [index, text] of stream.text.split('\n').entries()) {
             const volatileLiteral = volatileLiteralIn(text);
-            if (volatileLiteral !== undefined) {
-                findings.push(
-                    finding(
-                        'd5-spec-volatile-literal',
-                        stream.line + index,
-                        `"${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token}`,
-                    ),
-                );
+            if (volatileLiteral === undefined) {
+                continue;
             }
+            fixed ??= fixedData(document, dir);
+            if (fixed.includes(volatileLiteral.word)) {
+                continue;
+            }
+            findings.push(
+                finding(
+                    'd5-spec-volatile-literal',
+                    stream.line + index,
+                    `"${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token}`,
+                ),
+            );
         }
     }
     return findings;
@@ -371,6 +405,11 @@ const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
  * in a command's arguments or in an `env:`/`serve:` value is one the DOCUMENT
  * put there, not one a run minted — a reader sees it being pinned two lines
  * above the stream that asserts it.
+ *
+ * The last is the ground beside it. A document's sibling `_fixtures/` is its
+ * material whether or not a `fixture:` line names the exact file: the tree is
+ * there to be read by the run, and a value it holds is one the repository
+ * committed.
  */
 function fixedData(document: SpecDocument, dir: string): string {
     const parts = document.runs.flatMap((run) => [run.stdin ?? '', run.command]);
@@ -380,6 +419,21 @@ function fixedData(document: SpecDocument, dir: string): string {
     for (const entry of document.serve) {
         parts.push(entry.name, ...Object.values(entry.env));
     }
+    const visit = (path: string): void => {
+        let stat;
+        try {
+            stat = statSync(path);
+        } catch {
+            return;
+        }
+        if (!stat.isDirectory()) {
+            parts.push(readText(path));
+            return;
+        }
+        for (const entry of readdirSync(path)) {
+            visit(join(path, entry));
+        }
+    };
     for (const fixture of document.fixtures) {
         let source;
         try {
@@ -387,23 +441,9 @@ function fixedData(document: SpecDocument, dir: string): string {
         } catch {
             continue;
         }
-        const visit = (path: string): void => {
-            let stat;
-            try {
-                stat = statSync(path);
-            } catch {
-                return;
-            }
-            if (!stat.isDirectory()) {
-                parts.push(readText(path));
-                return;
-            }
-            for (const entry of readdirSync(path)) {
-                visit(join(path, entry));
-            }
-        };
         visit(source);
     }
+    visit(join(dir, GROUND_FIXTURES));
     return parts.join('\n');
 }
 
@@ -659,7 +699,7 @@ export function checkSpecConventions(text: string, rel: string, path: string): T
         ...checkBlockScalars(file, (scalar) => lineAt(scalar)),
         ...checkFileName(rel),
         ...checkDescription(file.document),
-        ...checkVolatileLiterals(file.document),
+        ...checkVolatileLiterals(file.document, dir),
         ...checkPinnedValues(file.document, dir),
         ...checkEmptyAssertions(file.document),
         ...checkSilentRefusals(file.document),
