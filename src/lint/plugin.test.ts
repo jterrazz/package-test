@@ -771,23 +771,23 @@ function coordinatesOf(from: string, text: string): Coordinate[] {
     return found;
 }
 
-describe('the corpus’ own coordinates (meta-test K8)', () => {
-    /** Every markdown page a reader follows, hand-written or generated. */
-    const pages = (): string[] => {
-        const found: string[] = ['README.md', 'AGENTS.md', 'TODO.md'];
-        for (const root of ['docs', 'skills']) {
-            for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
-                const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
-                // The typedoc projection is regenerated from a clone, not
-                // Written here, and its internal links are typedoc's own.
-                if (path.endsWith('.md') && !path.startsWith('docs/reference/')) {
-                    found.push(path);
-                }
+/** Every markdown page a reader follows, hand-written or generated. */
+function pages(): string[] {
+    const found: string[] = ['README.md', 'AGENTS.md', 'TODO.md'];
+    for (const root of ['docs', 'skills']) {
+        for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
+            const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
+            // The typedoc projection is regenerated from a clone, not written
+            // Here, and its internal links are typedoc's own.
+            if (path.endsWith('.md') && !path.startsWith('docs/reference/')) {
+                found.push(path);
             }
         }
-        return found.filter((path) => existsSync(resolve(ROOT, path)));
-    };
+    }
+    return found.filter((path) => existsSync(resolve(ROOT, path)));
+}
 
+describe('the corpus’ own coordinates (meta-test K8)', () => {
     /** Where a link lands on disk, from the page that carries it. */
     const landingOf = (coordinate: Coordinate): string => {
         const file = coordinate.target.split('#')[0];
@@ -820,5 +820,19 @@ describe('the corpus’ own coordinates (meta-test K8)', () => {
         ).toStrictEqual([]);
         // And - the sweep is not vacuous: a corpus this size carries hundreds
         expect(coordinates.length).toBeGreaterThan(300);
+    });
+});
+
+describe('the corpus never offers an option the rulebook refuses', () => {
+    test('no page restores the all-caps title exemption with `allowedPrefixes`', () => {
+        // Given - every page, and the option WRITTEN AS A SETTING (a key, not the word): the rulebook sets no `allowedPrefixes`, so a chapter offering one sends a consumer to a config oxlint rejects, and naming it in prose to say it does not exist has to stay legal
+        const swept = pages();
+        const claimed = swept.filter((path) =>
+            /allowedPrefixes["']?\s*:/u.test(readFileSync(resolve(ROOT, path), 'utf8')),
+        );
+
+        // Then - a title opening on an identifier is renamed, or deviated on in the consumer's own fragment
+        expect(swept.length).toBeGreaterThan(20);
+        expect(claimed, 'a page offering `allowedPrefixes` as a setting').toStrictEqual([]);
     });
 });
