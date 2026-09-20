@@ -1,10 +1,13 @@
-import { child, identifierName, walk } from '../ast.js';
+import { child, childList, identifierName, walk } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import { roleOf } from '../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
 /** The helper every vitest config in this vocabulary starts from. */
 const PRESET = 'defineSpecConfig';
+
+/** Vitest's own way of layering one config over another. */
+const MERGE = 'mergeConfig';
 
 /** Wrappers that annotate an expression without changing what it IS. */
 const ANNOTATIONS = new Set(['TSAsExpression', 'TSNonNullExpression', 'TSSatisfiesExpression']);
@@ -34,6 +37,30 @@ function initialiserOf(program: AstNode, name: string): AstNode | undefined {
 }
 
 /**
+ * Is this expression the preset, or a merge that STARTS from it?
+ *
+ * `mergeConfig(defineSpecConfig(...), overrides)` is the vitest-sanctioned way
+ * to layer a config, and what it layers over is the preset: the budgets and
+ * the paths are there. The merge is followed one argument deep — a preset
+ * buried under two merges is a config a reader can no longer place.
+ */
+function startsFromThePreset(node: AstNode | undefined): boolean {
+    if (node?.type !== 'CallExpression') {
+        return false;
+    }
+    const callee = identifierName(child(node, 'callee'));
+    if (callee === PRESET) {
+        return true;
+    }
+    if (callee !== MERGE) {
+        return false;
+    }
+    return childList(node, 'arguments').some(
+        (argument) => identifierName(child(unwrap(argument), 'callee')) === PRESET,
+    );
+}
+
+/**
  * CONVENTIONS E2 — a `vitest.config.*` starts from `defineSpecConfig()`.
  *
  * The preset is where the budgets, the artefact directories, the `_fixtures/`
@@ -44,7 +71,8 @@ function initialiserOf(program: AstNode, name: string): AstNode | undefined {
  * and not a recommendation.
  *
  * `export default <Identifier>` and a `satisfies`/`as` annotation both resolve:
- * the typed-identifier form is a legitimate spelling of the same config.
+ * the typed-identifier form is a legitimate spelling of the same config, and so
+ * is `mergeConfig(defineSpecConfig(…), …)`.
  */
 export const e2PresetConfig: LintRule = {
     create(context: RuleContext): Visitor {
@@ -62,11 +90,8 @@ export const e2PresetConfig: LintRule = {
                     if (name !== undefined) {
                         exported = initialiserOf(program, name);
                     }
-                    if (exported?.type === 'CallExpression') {
-                        const callee = identifierName(child(exported, 'callee'));
-                        if (callee === PRESET) {
-                            return;
-                        }
+                    if (startsFromThePreset(exported)) {
+                        return;
                     }
                     context.report({ messageId: 'offPreset', node });
                 });

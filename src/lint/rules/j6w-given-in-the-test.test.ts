@@ -31,6 +31,9 @@ ruleTester().run('j6w-given-in-the-test', asOxlintRule(j6wGivenInTheTest), {
         },
         // A4's own idiom, in a test file that owns a runner's cleanup.
         { code: `afterAll(cleanup);`, filename: TEST_FILE },
+        // The same idiom with a `vi` member: a restore handed over by name.
+        { code: `afterEach(vi.restoreAllMocks);`, filename: TEST_FILE },
+        { code: `afterEach(vi.useRealTimers);`, filename: TEST_FILE },
         // The Given, in the test.
         {
             code: `test('ships', () => {

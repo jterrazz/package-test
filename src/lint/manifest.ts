@@ -157,7 +157,7 @@ export const RULE_DOCS = {
     'b11-marker-one-line': {
         channel: 'statique',
         convention:
-            'A marker is exactly one line: a `//` comment directly under one, at the same indentation, is a wrapped marker and an error.',
+            'A marker is exactly one line: a `//` comment directly under one, at the same indentation, is a wrapped marker and an error. A tool’s directive is not a sentence â a linter’s `-disable`/`-enable`, a formatter’s `-ignore`, a `@ts-` pragma and a coverage line stand where they are.',
         family: 'B',
         fix: 'Fold the continuation into the sentence, or separate it with a blank line.',
         id: 'B11',
@@ -460,7 +460,7 @@ export const RULE_DOCS = {
     'e2-preset-config': {
         channel: 'statique',
         convention:
-            'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator and through a `satisfies`/`as` annotation.',
+            'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator, through a `satisfies`/`as` annotation, and through one `mergeConfig(defineSpecConfig(â¦), â¦)` â vitest’s own way of layering over the preset.',
         family: 'E',
         fix: "Start from `defineSpecConfig()` — budgets, the artefact dir and the `_fixtures` exclusion are the preset's.",
         id: 'E2',
@@ -471,7 +471,7 @@ export const RULE_DOCS = {
     'e4w-project-binding': {
         channel: 'statique',
         convention:
-            'A project literal collecting `specs/<facet>/` is named `<facet>`, and one named for a facet is rooted there; `unit` collects outside `specs/`. Any other name is out of reach — a repository suite names its projects as it likes.',
+            'A project literal collecting `specs/<facet>/` is named `<facet>`, and one named for a facet is rooted there; `unit` collects outside `specs/`. What an include collects is read from the GLOB and the config’s own place in its package, never from the absolute path. Any other name is out of reach â a repository suite names its projects as it likes.',
         family: 'E',
         fix: 'Name the project after the facet it collects; `{ include, exclude }` stay yours.',
         id: 'E4',
@@ -518,7 +518,7 @@ export const RULE_DOCS = {
     'e7w-include-prefix-exists': {
         channel: 'statique',
         convention:
-            'An `include` glob whose static prefix (the segments before the first wildcard), resolved from the config, is not a directory is a warning.',
+            'An `include` glob of a PROJECT — an object under `test` or in `projects`, never `optimizeDeps.include` and its kin — whose static prefix (the segments before the first wildcard, brace or bracket), resolved from the config, is not a directory is a warning.',
         family: 'E',
         fix: 'Point the glob at the folder that exists, or delete the project that collects nothing.',
         id: 'E7',
@@ -529,7 +529,7 @@ export const RULE_DOCS = {
     'e8-literate-specification-exists': {
         channel: 'statique',
         convention:
-            '`literate.specification`, resolved from the config directory, names a file that exists.',
+            '`literate.specification`, resolved from the config directory, names a file that exists. The config directory is what the path is read against; a project that moves Vite’s `root` states its door relative to the config all the same.',
         family: 'E',
         fix: 'Point it at the `*.specification.ts` that exports `cli`.',
         id: 'E8',
@@ -540,7 +540,7 @@ export const RULE_DOCS = {
     'e9w-env-assignment-in-test': {
         channel: 'statique',
         convention:
-            'A raw assignment onto a variable of the process environment — named or computed — in a test is a warning; a `*.specification.ts(x)` is out of reach by role.',
+            'A test writes the process environment through `vi.stubEnv` alone: a raw assignment onto a variable of it (named or computed), a replacement of `process.env` itself, and a `delete` of one of its variables are each a warning; a `*.specification.ts(x)` is out of reach by role.',
         family: 'E',
         fix: "Use `vi.stubEnv('X', 'y')`, which restores itself; a CLI default belongs to `specification.cli({ defaults })`.",
         id: 'E9',
@@ -671,7 +671,7 @@ export const RULE_DOCS = {
     'j6w-given-in-the-test': {
         channel: 'statique',
         convention:
-            "A `beforeEach`/`beforeAll` in a test file is a warning, and so is an `afterEach`/`afterAll` whose body does more than restore (`cleanup`, `vi.useRealTimers`, `vi.restoreAllMocks`, `vi.resetAllMocks`, `vi.unstubAllGlobals`, `vi.unstubAllEnvs`). `afterAll(cleanup)` in a `*.specification.ts` is A4's own idiom and out of reach by role.",
+            "A `beforeEach`/`beforeAll` in a test file is a warning, and so is an `afterEach`/`afterAll` whose body does more than restore (`cleanup`, `vi.useRealTimers`, `vi.restoreAllMocks`, `vi.resetAllMocks`, `vi.unstubAllGlobals`, `vi.unstubAllEnvs`) — handed over by name (`afterEach(vi.restoreAllMocks)`) or called in the body. `afterAll(cleanup)` in a `*.specification.ts` is A4's own idiom and out of reach by role.",
         family: 'J',
         fix: 'Call a function from each test instead of a hook; `clock.at()` and `intercept()` restore themselves.',
         id: 'J6',
