@@ -7,5 +7,9 @@
 - combobox "Channel":
   - option "X" [selected]
   - option "LinkedIn"
+- text: Topic
+- combobox "Topic":
+  - option "News" [selected]
+  - option "Opinion"
 - button "Subscribe"
 - button "Clear" [disabled]
