@@ -421,7 +421,7 @@ export const SIGNATURES: Record<string, Signature> = {
         signature: "expect(result.table('users')).toMatchRows({ columns, rows })",
     },
     transform: {
-        line: "Normalises the binary's output before it is asserted — a last resort for what tokens cannot say",
+        line: 'Normalises every compared reading before it is asserted — a last resort for what tokens cannot say',
         signature: 'transform: (text) => text.replaceAll(…)',
     },
     url: {

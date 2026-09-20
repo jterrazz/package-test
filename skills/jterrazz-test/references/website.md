@@ -32,7 +32,7 @@ export const { cleanup, website } = await specification.website({
 | `url`       | `url: 'https://staging.site.test'`        | An already-running deployment to drive instead of starting one (XOR with `server`, rule A11)       |
 | `backend`   | `backend: { env: 'API_URL' }`             | A stub backend started before the site, its URL injected into the child env                        |
 | `external`  | `external: 'block'`                       | Cross-origin request policy for visits — blocked with a local server, allowed against a deployment |
-| `transform` | `transform: (text) => text.replaceAll(…)` | Normalises the binary's output before it is asserted — a last resort for what tokens cannot say    |
+| `transform` | `transform: (text) => text.replaceAll(…)` | Normalises every compared reading before it is asserted — a last resort for what tokens cannot say |
 
 ## Setups (chainable)
 
