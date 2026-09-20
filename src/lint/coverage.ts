@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { COVERAGE_DIR } from '../core/artifacts/artifacts.js';
+import { COVERAGE_DIR } from '../model/artifacts/artifacts.js';
 
 /**
  * The coverage ratchet — a floor that only ever rises.

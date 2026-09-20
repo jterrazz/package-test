@@ -1,9 +1,9 @@
-import type { ContractInput } from '../../core/contracts/contract.js';
+import type { ContractInput } from '../../model/contracts/contract.js';
 import type {
     ContractRequest,
     ContractResponder,
     ContractResponse,
-} from '../../core/contracts/types.js';
+} from '../../model/contracts/types.js';
 import type { ComponentUi, DomMount } from '../../seams/vitest-browser/ui.js';
 import type { componentVerbs } from '../../seams/vitest-browser/vitest-browser.adapter.js';
 import type { RenderResult } from './component.result.js';

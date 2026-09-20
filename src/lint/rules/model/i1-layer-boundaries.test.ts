@@ -14,24 +14,24 @@ const ruleTester = new RuleTester();
 
 /** This package's own architecture — the map its `oxlint.config.ts` declares. */
 const FRAMEWORK_LAYERS = {
-    core: {
-        imports: ['core/', 'seams/docker/', 'facets/cli/cli.result'],
-        seams: {
-            'core/chain/builder.ts': ['seams/msw/'],
-        },
-    },
     facets: {
-        imports: ['facets/', 'core/'],
+        imports: ['facets/', 'model/'],
         seams: { 'facets/api/api.specification.ts': ['seams/hono/'] },
     },
-    lint: { imports: ['lint/', 'core/chain/binding'] },
+    lint: { imports: ['lint/', 'model/chain/binding'] },
+    model: {
+        imports: ['model/', 'seams/docker/', 'facets/cli/cli.result'],
+        seams: {
+            'model/chain/builder.ts': ['seams/msw/'],
+        },
+    },
     runner: {
-        imports: ['core/', 'runner/', 'seams/docker/'],
+        imports: ['model/', 'runner/', 'seams/docker/'],
         packages: ['vitest', 'vitest-mock-extended'],
     },
     seams: {
         folders: { postgres: ['pg'], redis: ['redis'] },
-        imports: ['core/'],
+        imports: ['model/'],
     },
 };
 
@@ -43,7 +43,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         {
             code: 'import { Client } from "pg";',
             errors: [{ messageId: 'foreignDependency' }],
-            filename: '/repo/src/core/matching/match.ts',
+            filename: '/repo/src/model/matching/match.ts',
             options: framework,
         },
         // A folder only imports its own declared dependency.
@@ -64,12 +64,12 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         {
             code: 'import { registerContracts } from "../../seams/msw/server.js";',
             errors: [{ messageId: 'crossLayer' }],
-            filename: '/repo/src/core/chain/orchestrator.ts',
+            filename: '/repo/src/model/chain/orchestrator.ts',
             options: framework,
         },
         // A layer whose imports list names only pure helpers.
         {
-            code: 'import { SpecificationBuilder } from "../../core/chain/builder.js";',
+            code: 'import { SpecificationBuilder } from "../../model/chain/builder.js";',
             errors: [{ messageId: 'crossLayer' }],
             filename: '/repo/src/lint/rules/some-rule.ts',
             options: framework,
@@ -85,19 +85,19 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         // Node builtins are allowed everywhere.
         {
             code: 'import { join } from "node:path";',
-            filename: '/repo/src/core/chain/fixtures.ts',
+            filename: '/repo/src/model/chain/fixtures.ts',
             options: framework,
         },
         // In-layer relative imports.
         {
             code: 'import { TOKEN_KINDS } from "./match.js";',
-            filename: '/repo/src/core/matching/structural.ts',
+            filename: '/repo/src/model/matching/structural.ts',
             options: framework,
         },
         // A declared prefix edge.
         {
             code: 'import { ContainerAccessor } from "../../seams/docker/container-accessor.js";',
-            filename: '/repo/src/core/result/result.ts',
+            filename: '/repo/src/model/result/result.ts',
             options: framework,
         },
         // A declared EXACT module edge (not a prefix).
@@ -109,7 +109,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         // The seam, from the module that owns it.
         {
             code: 'import type { ContractRegistration } from "../../seams/msw/server.js";',
-            filename: '/repo/src/core/chain/builder.ts',
+            filename: '/repo/src/model/chain/builder.ts',
             options: framework,
         },
         // A folder importing its own dependency, and the layer's imports.
@@ -119,7 +119,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
             options: framework,
         },
         {
-            code: 'import type { DatabasePort } from "../../core/ports/database.port.js";',
+            code: 'import type { DatabasePort } from "../../model/ports/database.port.js";',
             filename: '/repo/src/seams/postgres/postgres.ts',
             options: framework,
         },
@@ -131,14 +131,14 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         },
         // An exact-module edge reached with its extension.
         {
-            code: 'import { toKebabCase } from "../../core/chain/binding.js";',
+            code: 'import { toKebabCase } from "../../model/chain/binding.js";',
             filename: '/repo/src/lint/rules/b8-kebab-trigger.ts',
             options: framework,
         },
         // Module tests are exempt (F2/I4 govern them).
         {
             code: 'import { describe } from "vitest";',
-            filename: '/repo/src/core/matching/match.test.ts',
+            filename: '/repo/src/model/matching/match.test.ts',
             options: framework,
         },
         // A file under no declared layer is out of scope — here, the
@@ -158,7 +158,7 @@ ruleTester.run('i1-layer-boundaries (no map)', i1LayerBoundaries as unknown as O
         // Architecture is the project's to state, not the linter's to assume.
         // A consumer whose directories HAPPEN to be named like the framework's
         // Was judged against a map describing a different package.
-        { code: 'import { Client } from "pg";', filename: '/app/src/core/orders/order.ts' },
+        { code: 'import { Client } from "pg";', filename: '/app/src/model/orders/order.ts' },
         {
             code: 'import { stripe } from "stripe";',
             filename: '/app/src/integrations/billing/billing.ts',
@@ -170,13 +170,13 @@ ruleTester.run('i1-layer-boundaries (no map)', i1LayerBoundaries as unknown as O
         },
         {
             code: 'import { Client } from "pg";',
-            filename: '/app/src/core/orders/order.ts',
+            filename: '/app/src/model/orders/order.ts',
             options: [{ layers: {} }],
         },
         // A map that names OTHER layers leaves this file alone.
         {
             code: 'import { Client } from "pg";',
-            filename: '/app/src/core/orders/order.ts',
+            filename: '/app/src/model/orders/order.ts',
             options: [{ layers: { domain: { imports: ['domain/'] } } }],
         },
     ],

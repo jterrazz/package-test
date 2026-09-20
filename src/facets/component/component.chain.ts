@@ -1,10 +1,10 @@
-import { contractsOf, isContract, isContracts } from '../../core/contracts/contract.js';
-import type { Contract, ContractInput } from '../../core/contracts/contract.js';
+import { contractsOf, isContract, isContracts } from '../../model/contracts/contract.js';
+import type { Contract, ContractInput } from '../../model/contracts/contract.js';
 import type {
     ContractRequest,
     ContractResponder,
     ContractResponse,
-} from '../../core/contracts/types.js';
+} from '../../model/contracts/types.js';
 import { registerWorkerContracts, resetWorkerContracts } from '../../seams/msw/worker.js';
 import {
     afterThisTest,

@@ -1,4 +1,4 @@
-import { KNOWN_FIXTURE_MARKERS } from '../../../core/chain/fixtures.js';
+import { KNOWN_FIXTURE_MARKERS } from '../../../model/chain/fixtures.js';
 import { memberPropertyName, stringValue } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../types.js';
@@ -24,7 +24,7 @@ function leadingText(node: AstNode | undefined): string | undefined {
 
 /**
  * CONVENTIONS B2 — a `$…` marker in a `.fixture()` path literal must be one of
- * the known markers (`$FIXTURES`). The list is imported from the same core
+ * the known markers (`$FIXTURES`). The list is imported from the same model
  * module the runtime resolution uses, so the two channels can never drift.
  */
 export const b2KnownFixtureMarker: LintRule = {

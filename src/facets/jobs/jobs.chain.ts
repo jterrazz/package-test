@@ -10,5 +10,5 @@
  * The constructor beside it imports its chain from HERE, so the name a facet
  * answers to is stated in the facet's own folder.
  */
-export { createJobsFacet } from '../../core/chain/builder.js';
-export type { JobsSpecification } from '../../core/chain/builder.js';
+export { createJobsFacet } from '../../model/chain/builder.js';
+export type { JobsSpecification } from '../../model/chain/builder.js';

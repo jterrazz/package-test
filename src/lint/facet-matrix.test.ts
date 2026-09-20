@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'vitest';
 
-// oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
-import * as elements from '../core/elements/elements.js';
-import type { Visitor } from '../core/ports/browser.port.js';
-import type { MobileElementKind, MobileVisitor } from '../core/ports/device.port.js';
 import type { HttpResult } from '../facets/api/api.result.js';
 import type { ApiSpecificationOptions } from '../facets/api/api.specification.js';
 import type { CliResult } from '../facets/cli/cli.result.js';
@@ -27,6 +23,10 @@ import type {
     MobileSpecification,
     WebsiteSpecification,
 } from '../index.js';
+// oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
+import * as elements from '../model/elements/elements.js';
+import type { Visitor } from '../model/ports/browser.port.js';
+import type { MobileElementKind, MobileVisitor } from '../model/ports/device.port.js';
 import { CAPABILITIES, COLUMNS, memberOf, methodsByRole } from './facet-matrix.js';
 import type { CapabilityGroup, Column, FacetRole } from './facet-matrix.js';
 
@@ -428,7 +428,7 @@ describe('facet capability declaration (K1 guard)', () => {
         expect(declared('component', 'Verb')).toStrictEqual(published(componentVisitor));
     });
 
-    test('the vocabulary is exactly what `core/elements/` exports', () => {
+    test('the vocabulary is exactly what `model/elements/` exports', () => {
         // Given - the element module, which is the vocabulary's one home
         const exported = Object.keys(elements).toSorted();
 

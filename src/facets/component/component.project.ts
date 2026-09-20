@@ -6,7 +6,7 @@ import type { Plugin, UserConfig, UserConfigFn } from 'vite';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../core/artifacts/artifacts.js';
+import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../model/artifacts/artifacts.js';
 import type { FacetProjectOptions } from '../../runner/facet-project.js';
 import { projectDefaults } from '../../runner/preset.js';
 import { COMPONENT_COMMANDS } from '../../seams/vitest-browser/commands.js';

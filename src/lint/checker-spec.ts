@@ -1,16 +1,16 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { resolveFixtureSource } from '../core/chain/fixtures.js';
-import { GROUND_FIXTURES } from '../core/chain/ground.js';
+import { resolveFixtureSource } from '../model/chain/fixtures.js';
+import { GROUND_FIXTURES } from '../model/chain/ground.js';
 import {
     assertedStreams,
     DOCUMENT_KEYS,
     readSpecFile,
     RUN_KEYS,
     SPEC_EXTENSION,
-} from '../core/literate/spec-document.js';
-import type { SpecDocument, SpecFile } from '../core/literate/spec-document.js';
+} from '../model/literate/spec-document.js';
+import type { SpecDocument, SpecFile } from '../model/literate/spec-document.js';
 import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../seams/yaml/document.js';
 import type { Node, Pair, YAMLMap } from '../seams/yaml/document.js';
 import type { Severity, TokenViolation } from './checker.js';

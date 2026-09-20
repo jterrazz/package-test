@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { button, content, testId, within } from '../../core/elements/elements.js';
-import type { MobileElementMatch } from '../../core/ports/device.port.js';
+import { button, content, testId, within } from '../../model/elements/elements.js';
+import type { MobileElementMatch } from '../../model/ports/device.port.js';
 import { describeMobileAmbiguity } from './ambiguity.js';
 
 const match = (overrides: Partial<MobileElementMatch> = {}): MobileElementMatch => ({

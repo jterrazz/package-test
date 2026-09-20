@@ -21,7 +21,7 @@ describe('framework frames are recognised by identity', () => {
     const base = mkdtempSync(resolve(tmpdir(), 'caller-frames-'));
     /** The framework as a consumer installs it: everything under one directory. */
     const framework = join(base, 'framework', 'dist');
-    /** A consumer app that has its OWN src/core, src/integrations, src/vitest. */
+    /** A consumer app that has its OWN src/model, src/integrations, src/vitest. */
     const app = join(base, 'app');
 
     for (const dir of [
@@ -54,8 +54,8 @@ describe('framework frames are recognised by identity', () => {
         expect(isFrameworkFrame(join(framework, 'index.js'), framework)).toBeTruthy();
     });
 
-    test("a consumer's own src/core file is a CALLER, not an internal", () => {
-        // Given - an app with its own src/core/, which the substring check (`filePath.includes('/src/core/')`) read as framework-internal
+    test("a consumer's own src/model file is a CALLER, not an internal", () => {
+        // Given - an app with its own src/model/, which the substring check (`filePath.includes('/src/model/')`) read as framework-internal
         // Then - identity says otherwise: the frame anchors fixture resolution
         expect(isFrameworkFrame(join(app, 'src', 'core', 'container.ts'), framework)).toBeFalsy();
     });
@@ -89,7 +89,7 @@ describe('framework frames are recognised by identity', () => {
         // Given - a sibling facet's module, judged against the tree this module derives from its own location (no explicit frameworkTree)
         const other = resolve(import.meta.dirname, '..', 'matching', 'match.ts');
 
-        // Then - the whole source layer is the framework, not just this folder: A stale SOURCE_LOCATION shrinks the tree to `core/chain/` and every other framework frame starts anchoring fixture resolution on itself
+        // Then - the whole source layer is the framework, not just this folder: A stale SOURCE_LOCATION shrinks the tree to `model/chain/` and every other framework frame starts anchoring fixture resolution on itself
         expect(isFrameworkFrame(other)).toBeTruthy();
     });
 

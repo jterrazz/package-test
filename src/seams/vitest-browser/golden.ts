@@ -1,7 +1,7 @@
 import { expect, inject } from 'vitest';
 
-import { GROUND_EXPECTED } from '../../core/chain/ground.js';
-import type { MatchFixtureOptions } from '../../core/result/match-options.js';
+import { GROUND_EXPECTED } from '../../model/chain/ground.js';
+import type { MatchFixtureOptions } from '../../model/result/match-options.js';
 import {
     compareStreamText,
     nativeContain,
@@ -9,8 +9,8 @@ import {
     requireExtension,
     textContains,
     textIsEmpty,
-} from '../../core/result/text-assertions.js';
-import { TextAccessor } from '../../core/result/text.js';
+} from '../../model/result/text-assertions.js';
+import { TextAccessor } from '../../model/result/text.js';
 import { readGolden, writeGolden } from './vitest-browser.adapter.js';
 
 /**

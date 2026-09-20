@@ -10,5 +10,5 @@
  * The constructor beside it imports its chain from HERE, so the name a facet
  * answers to is stated in the facet's own folder.
  */
-export { createApiFacet } from '../../core/chain/builder.js';
-export type { ApiSpecification } from '../../core/chain/builder.js';
+export { createApiFacet } from '../../model/chain/builder.js';
+export type { ApiSpecification } from '../../model/chain/builder.js';

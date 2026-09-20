@@ -2,7 +2,7 @@ import type { ContainerPort } from '../ports/container.port.js';
 
 /**
  * Integration registry — the seam that keeps `specification/` free of external
- * dependencies (CONVENTIONS I1). Core code (the orchestrator) consumes the
+ * dependencies (CONVENTIONS I1). Model code (the orchestrator) consumes the
  * container runtime through this registry; the concrete implementation lives
  * under `integrations/` and is wired in by the package entry point
  * (`src/index.ts`), which is the composition root every consumer goes through

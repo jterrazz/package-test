@@ -5,7 +5,7 @@ import {
     COVERAGE_DIR,
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
-} from '../core/artifacts/artifacts.js';
+} from '../model/artifacts/artifacts.js';
 import { defineSpecConfig } from './preset.js';
 
 describe('defineSpecConfig() — artefact paths', () => {

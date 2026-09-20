@@ -1,14 +1,14 @@
-import type { JobHandle, SpecificationConfig } from '../../core/chain/builder.js';
-import { getCallerDir } from '../../core/chain/caller.js';
-import type { Orchestrator } from '../../core/chain/orchestrator.js';
-import { resolveRoot } from '../../core/chain/resolve.js';
+import type { JobHandle, SpecificationConfig } from '../../model/chain/builder.js';
+import { getCallerDir } from '../../model/chain/caller.js';
+import type { Orchestrator } from '../../model/chain/orchestrator.js';
+import { resolveRoot } from '../../model/chain/resolve.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../core/chain/services.js';
-import type { DatabaseKeys, ServiceRecord, StartedServices } from '../../core/chain/services.js';
-import { registerMatchers } from '../../core/goldens/matchers.js';
+} from '../../model/chain/services.js';
+import type { DatabaseKeys, ServiceRecord, StartedServices } from '../../model/chain/services.js';
+import { registerMatchers } from '../../model/goldens/matchers.js';
 import { createJobsFacet } from './jobs.chain.js';
 import type { JobsSpecification } from './jobs.chain.js';
 

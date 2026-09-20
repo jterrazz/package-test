@@ -10,5 +10,5 @@
  * The constructor beside it imports its chain from HERE, so the name a facet
  * answers to is stated in the facet's own folder.
  */
-export { createCliFacet } from '../../core/chain/builder.js';
-export type { CliSpecification } from '../../core/chain/builder.js';
+export { createCliFacet } from '../../model/chain/builder.js';
+export type { CliSpecification } from '../../model/chain/builder.js';

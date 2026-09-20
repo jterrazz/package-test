@@ -10,5 +10,5 @@
  * The constructor beside it imports its chain from HERE, so the name a facet
  * answers to is stated in the facet's own folder.
  */
-export { createMobileFacet } from '../../core/chain/builder.js';
-export type { MobileSpecification } from '../../core/chain/builder.js';
+export { createMobileFacet } from '../../model/chain/builder.js';
+export type { MobileSpecification } from '../../model/chain/builder.js';

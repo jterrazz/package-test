@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Client } from 'pg';
 
-import type { DatabasePort } from '../../core/ports/database.port.js';
-import type { IsolationStrategy } from '../../core/ports/isolation.port.js';
-import type { ServiceHandle } from '../../core/ports/service.port.js';
+import type { DatabasePort } from '../../model/ports/database.port.js';
+import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
+import type { ServiceHandle } from '../../model/ports/service.port.js';
 import { loadPeer } from '../peer.js';
 
 /**

@@ -1,8 +1,8 @@
-import type { SpecificationConfig } from '../../core/chain/builder.js';
-import type { DeviceScreen } from '../../core/ports/device.port.js';
-import { JsonAccessor } from '../../core/result/json.js';
-import { BaseResult } from '../../core/result/result.js';
-import { TextAccessor } from '../../core/result/text.js';
+import type { SpecificationConfig } from '../../model/chain/builder.js';
+import type { DeviceScreen } from '../../model/ports/device.port.js';
+import { JsonAccessor } from '../../model/result/json.js';
+import { BaseResult } from '../../model/result/result.js';
+import { TextAccessor } from '../../model/result/text.js';
 
 /** Result from a `.open()` action — the screen as the device saw it, final state. */
 export class ScreenResult extends BaseResult {

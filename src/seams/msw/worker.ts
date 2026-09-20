@@ -10,7 +10,7 @@
  * before `onUnhandledRequest` ever runs — an extension test would let a real
  * `/api/posts.json` through on the same ground.
  */
-import type { Contract } from '../../core/contracts/contract.js';
+import type { Contract } from '../../model/contracts/contract.js';
 import { buildContractHandlers } from './handlers.js';
 import type { ContractRegistration } from './handlers.js';
 

@@ -45,7 +45,7 @@ describe('modules with no sibling test (meta-test K7)', () => {
     test('a module no kind LISTS is unclaimed, whatever tree it is written in', () => {
         // Given - a new module in each of the trees a prefix kind used to swallow
         const newcomers = [
-            'src/core/chain/lens.ts',
+            'src/model/chain/lens.ts',
             'src/facets/api/lens.ts',
             'src/lint/lens.ts',
             'src/runner/lens.ts',

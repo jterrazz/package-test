@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path';
 
-import { RENAMED_GROUND_DIRS } from '../../../core/chain/ground.js';
+import { RENAMED_GROUND_DIRS } from '../../../model/chain/ground.js';
 import { specsAnchor } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';

@@ -3,7 +3,9 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import type { remote } from 'webdriverio';
 
-import { AmbiguousElementError, formatElement } from '../../core/elements/ambiguity.js';
+import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
+import { projectScreen } from '../../facets/mobile/projection.js';
+import { AmbiguousElementError, formatElement } from '../../model/elements/ambiguity.js';
 import type {
     DeviceOpenOptions,
     DevicePort,
@@ -12,9 +14,7 @@ import type {
     MobileElementMatch,
     MobileElementRef,
     MobileVisitor,
-} from '../../core/ports/device.port.js';
-import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
-import { projectScreen } from '../../facets/mobile/projection.js';
+} from '../../model/ports/device.port.js';
 
 /** The session factory — webdriverio's `remote`, the adapter's single seam onto it. */
 type RemoteFn = typeof remote;

@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { disabled, focused, option, selected, valued } from '../../core/elements/elements.js';
-import type { ElementRef, Visitor } from '../../core/ports/browser.port.js';
-import type { MobileVisitor } from '../../core/ports/device.port.js';
+import { disabled, focused, option, selected, valued } from '../../model/elements/elements.js';
+import type { ElementRef, Visitor } from '../../model/ports/browser.port.js';
+import type { MobileVisitor } from '../../model/ports/device.port.js';
 import type { ComponentChain, ComponentVisitor } from './component.types.js';
 
 /**

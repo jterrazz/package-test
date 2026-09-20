@@ -6,9 +6,9 @@ import {
     AmbiguousElementError,
     describeAmbiguity,
     formatElement,
-} from '../../core/elements/ambiguity.js';
-import { warnSubstringOnly } from '../../core/elements/substring-warning.js';
-import type { ElementMatch, ElementRef } from '../../core/ports/browser.port.js';
+} from '../../model/elements/ambiguity.js';
+import { warnSubstringOnly } from '../../model/elements/substring-warning.js';
+import type { ElementMatch, ElementRef } from '../../model/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
 
 /**

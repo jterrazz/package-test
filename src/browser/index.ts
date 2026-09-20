@@ -11,14 +11,14 @@
  * side only.
  */
 
+import type { Specification } from '../facets/specification.js';
 import type {
     processService as processFn,
     ProcessHandle as ProcessHandleClass,
-} from '../core/chain/process.js';
-import { interceptThrough } from '../core/contracts/intercept.js';
-import type { Intercept } from '../core/contracts/intercept.js';
-import { TextAccessor } from '../core/result/text.js';
-import type { Specification } from '../facets/specification.js';
+} from '../model/chain/process.js';
+import { interceptThrough } from '../model/contracts/intercept.js';
+import type { Intercept } from '../model/contracts/intercept.js';
+import { TextAccessor } from '../model/result/text.js';
 import { registerWorkerContracts } from '../seams/msw/worker.js';
 import type { postgres as postgresFn } from '../seams/postgres/postgres.js';
 import type { redis as redisFn } from '../seams/redis/redis.js';

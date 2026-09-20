@@ -2,7 +2,7 @@ import type { Dirent } from 'node:fs';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { GROUND_DIRS, GROUND_FIXTURES } from '../core/chain/ground.js';
+import { GROUND_DIRS, GROUND_FIXTURES } from '../model/chain/ground.js';
 import type { TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 
