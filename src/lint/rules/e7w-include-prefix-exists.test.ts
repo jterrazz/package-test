@@ -15,6 +15,13 @@ ruleTester().run('e7w-include-prefix-exists', asOxlintRule(e7wIncludePrefixExist
             errors: [{ messageId: 'missingPrefix' }],
             filename: CONFIG,
         },
+        // The folder is there and the suite is not: the suffix moved
+        // (`.test.ts` → `.spec.ts`) and the glob stayed behind.
+        {
+            code: `export default defineSpecConfig({ test: { projects: [{ name: 'api', include: ['specs/api/**/*.test.ts'] }] } });`,
+            errors: [{ messageId: 'collectsNothing' }],
+            filename: CONFIG,
+        },
     ],
     valid: [
         {

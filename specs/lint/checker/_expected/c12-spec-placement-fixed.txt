@@ -1,1 +1,2 @@
 conventions checker: renamed api/users/creation.test.ts → api/users/creation.spec.ts (C12)
+conventions checker: vitest.config.ts: specs/api/**/*.test.ts still names `.test.ts` — the files it collected are `.spec.ts` now, and the project collects nothing until the glob follows (C12)
