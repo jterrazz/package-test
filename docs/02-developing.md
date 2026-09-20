@@ -251,6 +251,7 @@ It deliberately sets **nothing else**. `fileParallelism` is a per-project truth 
 Two behaviours worth knowing:
 
 - **Projects inherit the defaults too.** Vitest resolves each project as its own config and it inherits nothing from the root, so the preset merges the budgets, the exclusions and the cache dir into every inline project. A project declared as a glob string, a promise or a function is handed back untouched.
+- **Each glob is stated once.** A project's `exclude` REPLACES vitest's own defaults, so every project carries the preset's list in full; the root's list, which vitest concatenates into each project on top of that, then holds only what YOU stated there. The no-tests banner is the one place a consumer ever reads that list, and it read as three merges of the same three globs.
 - **Arrays are ADDITIVE.** Vite's merge concatenates them, so your `exclude` adds to the preset's — you never spread `configDefaults.exclude` again — and your `plugins` join `literate()` rather than replacing it. Scalars (`testTimeout`, `name`, …) are plain overrides: what you state wins.
 
 With `projects`, put `literate()` in the ONE project that collects those documents — its glob has to join that project's include — rather than in the top-level `literate:` key:

@@ -1,7 +1,6 @@
-import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { projectDefaults } from './preset.js';
+import { onProjectDefaults } from './preset.js';
 
 /**
  * The node facets' canonical projects.
@@ -42,7 +41,7 @@ export function facetProject(
     facet: string,
     options: FacetProjectOptions,
 ): TestProjectInlineConfiguration {
-    return mergeConfig(projectDefaults(), {
+    return onProjectDefaults({
         test: {
             ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
             include: options.include ?? [`specs/${facet}/**/*.spec.ts`],
@@ -51,5 +50,5 @@ export function facetProject(
             sequence: { groupOrder: 0 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },
-    }) as TestProjectInlineConfiguration;
+    });
 }

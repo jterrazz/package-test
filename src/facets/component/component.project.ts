@@ -3,12 +3,11 @@ import { createRequire } from 'node:module';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Plugin, UserConfig, UserConfigFn } from 'vite';
-import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../model/artifacts/artifacts.js';
 import type { FacetProjectOptions } from '../../runner/facet-project.js';
-import { projectDefaults } from '../../runner/preset.js';
+import { onProjectDefaults } from '../../runner/preset.js';
 import { COMPONENT_COMMANDS } from '../../seams/vitest-browser/commands.js';
 
 /** `component()` — rendered units, beside the components they cover. */
@@ -406,7 +405,7 @@ export async function component(
                 // Which is a diagnostic. Both are artefacts, so both are moved.
                 expect: { toMatchScreenshot: { screenshotDirectory: SCREENSHOTS_DIR } },
                 headless: true,
-                instances: [{ browser: 'chromium' }],
+                instances: [{ browser: 'chromium' as const }],
                 provider: playwright({
                     contextOptions: {
                         locale: options.locale ?? 'en-US',
@@ -434,5 +433,5 @@ export async function component(
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },
     };
-    return mergeConfig(projectDefaults(), project) as TestProjectInlineConfiguration;
+    return onProjectDefaults(project);
 }

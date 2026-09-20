@@ -179,6 +179,66 @@ function rootDefaults(): ViteUserConfig {
     };
 }
 
+/** A glob list with its repeats taken out, or nothing where there is no list. */
+function eachOnce(globs: string[] | undefined): string[] | undefined {
+    return globs === undefined ? undefined : [...new Set(globs)];
+}
+
+/**
+ * The glob lists vite CONCATENATES rather than overrides, each glob kept once.
+ *
+ * A project built ON the defaults and then merged INTO them by
+ * `defineSpecConfig` carried every default twice. Glob matching is idempotent,
+ * so nothing collected differently — but the no-tests banner is the one place a
+ * consumer ever reads that list, and it read as three merges of the same three
+ * globs.
+ */
+function statedOnce<T extends { exclude?: string[]; include?: string[] }>(test: T): T {
+    const exclude = eachOnce(test.exclude);
+    const include = eachOnce(test.include);
+    return {
+        ...test,
+        ...(exclude === undefined ? {} : { exclude }),
+        ...(include === undefined ? {} : { include }),
+    };
+}
+
+/**
+ * Build a project ON the defaults — the ONE way a project is built here.
+ *
+ * @internal
+ */
+export function onProjectDefaults(
+    stated: TestProjectInlineConfiguration,
+): TestProjectInlineConfiguration {
+    const merged = mergeConfig(projectDefaults(), stated) as TestProjectInlineConfiguration;
+    return merged.test === undefined ? merged : { ...merged, test: statedOnce(merged.test) };
+}
+
+/**
+ * Is every project an inline object — one this preset merged its defaults into?
+ * A project named by a glob or handed as a promise carries a config this call
+ * never saw, and the root's exclusions are the only ones it gets from here.
+ */
+function allInline(projects: TestProjectConfiguration[]): boolean {
+    return projects.every(
+        (project) => typeof project === 'object' && project !== null && !('then' in project),
+    );
+}
+
+/**
+ * The root's exclusions, beside projects that already carry them.
+ *
+ * With `projects`, the root collects nothing itself: its `exclude` only travels
+ * INTO each project, where vitest CONCATENATES it with the project's own — so
+ * every preset glob reached the banner twice. The preset's own are dropped
+ * here, since each inline project states them in full; what the CONSUMER stated
+ * at the root stays, because no project holds a copy of that.
+ */
+function rootExcludeBeside(projects: TestProjectConfiguration[], exclude: string[]): string[] {
+    return allInline(projects) ? exclude.filter((glob) => !EXCLUDE.includes(glob)) : exclude;
+}
+
 /**
  * A project inherits NOTHING from the root `test` block — vitest resolves each
  * project as its own config — so the defaults are merged into every inline one.
@@ -189,7 +249,7 @@ function withProjectDefaults(project: TestProjectConfiguration): TestProjectConf
     if (typeof project !== 'object' || project === null || 'then' in project) {
         return project;
     }
-    return mergeConfig(projectDefaults(), project) as TestProjectConfiguration;
+    return onProjectDefaults(project);
 }
 
 export function defineSpecConfig(config: SpecConfig = {}): ViteUserConfig {
@@ -200,13 +260,24 @@ export function defineSpecConfig(config: SpecConfig = {}): ViteUserConfig {
         : userConfig;
 
     const merged = mergeConfig(rootDefaults(), stated) as ViteUserConfig;
-    const projects = merged.test?.projects;
-    if (!projects) {
+    const root = merged.test === undefined ? undefined : statedOnce(merged.test);
+    if (root === undefined) {
         return merged;
     }
+    const { projects } = root;
+    if (projects === undefined) {
+        return { ...merged, test: root };
+    }
 
+    const inline = projects.map(withProjectDefaults);
     return {
         ...merged,
-        test: { ...merged.test, projects: projects.map(withProjectDefaults) },
+        test: {
+            ...root,
+            ...(root.exclude === undefined
+                ? {}
+                : { exclude: rootExcludeBeside(inline, root.exclude) }),
+            projects: inline,
+        },
     };
 }

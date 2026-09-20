@@ -1,8 +1,7 @@
-import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import type { FacetProjectOptions } from './facet-project.js';
-import { projectDefaults } from './preset.js';
+import { onProjectDefaults } from './preset.js';
 
 /**
  * The project helpers — one per kind of test, each the canonical project that
@@ -49,7 +48,7 @@ export type UnitProjectOptions = FacetProjectOptions & {
  */
 export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfiguration {
     const fromRoots = options.roots?.map((root) => `${root.replace(/\/+$/u, '')}/**/*.test.ts`);
-    return mergeConfig(projectDefaults(), {
+    return onProjectDefaults({
         test: {
             exclude: options.exclude ?? ['specs/**', '**/*.test.tsx'],
             include: options.include ?? fromRoots ?? ['**/*.test.ts'],
@@ -59,5 +58,5 @@ export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfigu
             sequence: { groupOrder: 0 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },
-    }) as TestProjectInlineConfiguration;
+    });
 }
