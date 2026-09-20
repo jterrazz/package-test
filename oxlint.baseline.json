@@ -25,6 +25,7 @@
     "jterrazz/d16w-ambient-value": 10,
     "jterrazz/d18w-existence-only-oracle": 19,
     "jterrazz/d19w-probe-cluster": 1,
+    "jterrazz/e9w-env-assignment-in-test": 21,
     "jterrazz/i1-layer-boundaries": 1,
     "promise/avoid-new": 12,
     "promise/param-names": 2,

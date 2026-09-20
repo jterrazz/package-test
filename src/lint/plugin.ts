@@ -43,9 +43,14 @@ import { d16wAmbientValue } from './rules/d16w-ambient-value.js';
 import { d17wDoubleOnlyOracle } from './rules/d17w-double-only-oracle.js';
 import { d18wExistenceOnlyOracle } from './rules/d18w-existence-only-oracle.js';
 import { d19wProbeCluster } from './rules/d19w-probe-cluster.js';
+import { e2PresetConfig } from './rules/e2-preset-config.js';
+import { e4wProjectBinding } from './rules/e4w-project-binding.js';
 import { e5NoSimulatedDom } from './rules/e5-no-simulated-dom.js';
 import { e5bNoSimulatedDomConfig } from './rules/e5b-no-simulated-dom-config.js';
 import { e6ComponentProjectHelper } from './rules/e6-component-project-helper.js';
+import { e7wIncludePrefixExists } from './rules/e7w-include-prefix-exists.js';
+import { e8LiterateSpecificationExists } from './rules/e8-literate-specification-exists.js';
+import { e9wEnvAssignmentInTest } from './rules/e9w-env-assignment-in-test.js';
 import { f1NoSubpathImport } from './rules/f1-no-subpath-import.js';
 import { f2NoTestImportsInProd } from './rules/f2-no-test-imports-in-prod.js';
 import { f3SpecsPublicEntry } from './rules/f3-specs-public-entry.js';
@@ -141,9 +146,14 @@ const plugin: LintPlugin = {
         'd12w-response-body-probe': d12wResponseBodyProbe,
         'd13w-unfrozen-negative-fixture': d13wUnfrozenNegativeFixture,
         'd15w-status-only-probe': d15wStatusOnlyProbe,
+        'e2-preset-config': e2PresetConfig,
+        'e4w-project-binding': e4wProjectBinding,
         'e5-no-simulated-dom': e5NoSimulatedDom,
         'e5b-no-simulated-dom-config': e5bNoSimulatedDomConfig,
         'e6-component-project-helper': e6ComponentProjectHelper,
+        'e7w-include-prefix-exists': e7wIncludePrefixExists,
+        'e8-literate-specification-exists': e8LiterateSpecificationExists,
+        'e9w-env-assignment-in-test': e9wEnvAssignmentInTest,
         'f1-no-subpath-import': f1NoSubpathImport,
         'f2-no-test-imports-in-prod': f2NoTestImportsInProd,
         'f3-specs-public-entry': f3SpecsPublicEntry,
