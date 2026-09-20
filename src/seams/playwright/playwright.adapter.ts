@@ -10,7 +10,7 @@ import {
     formatElement,
 } from '../../model/elements/ambiguity.js';
 import { accessibleNameIn } from '../../model/elements/aria-name.js';
-import { widenedForWindow } from '../../model/elements/substring-warning.js';
+import { widenedForWindow, WINDOW_SETTLE_MS } from '../../model/elements/substring-warning.js';
 import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type {
     BrowserConsoleMessage,
@@ -176,7 +176,41 @@ function probeOf(page: Page): WindowProbe {
     return {
         count: async (element) => await locate(page, element).count(),
         nameOf: async (element) => await wholeNameOf(page, element),
+        settles: async (element) => await settles(page, element),
     };
+}
+
+/**
+ * Does the descriptor arrive if the page is given the settle budget?
+ *
+ * A poll rather than `waitFor`, for the reason the rest of this adapter has no
+ * `.first()`: waiting on the locator itself would have to narrow a strict
+ * locator to one element, and a count answers the same question without
+ * touching the mechanism W3 rests on. The locator is rebuilt every round, so a
+ * navigation that replaced the document is read on the new one.
+ */
+async function settles(page: Page, element: ElementRef): Promise<boolean> {
+    const deadline = Date.now() + WINDOW_SETTLE_MS;
+    for (;;) {
+        // oxlint-disable-next-line eslint/no-await-in-loop -- a poll asks, waits, asks again: the rounds are sequential by definition
+        if ((await countOrZero(page, element)) > 0) {
+            return true;
+        }
+        if (Date.now() >= deadline) {
+            return false;
+        }
+        // oxlint-disable-next-line eslint/no-await-in-loop -- same round: the wait between two looks is what a poll IS
+        await sleep(VALUE_POLL_MS);
+    }
+}
+
+/** A count taken mid-navigation throws; the page is simply not answering yet. */
+async function countOrZero(page: Page, element: ElementRef): Promise<number> {
+    try {
+        return await locate(page, element).count();
+    } catch {
+        return 0;
+    }
 }
 
 /**

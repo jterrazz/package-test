@@ -1,4 +1,4 @@
-import { button, field } from '@jterrazz/test';
+import { button, field, heading, link } from '@jterrazz/test';
 import { expect, test, vi } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -70,4 +70,19 @@ test('prints the accessible name, and that name resolves when it is written back
     // Then - it designated the button as a WHOLE name: nothing was widened, and nothing was printed
     expect(name).toBe('Experiments 9');
     expect(written).toHaveLength(0);
+});
+
+test('says nothing about a descriptor that is exact on the page being navigated TO', async () => {
+    // Given - a click that navigates to a slow page, and a heading the page being LEFT carries only as a substring
+    const lines = await linesOf(
+        async () =>
+            await website.visit('/window', async (visitor) => {
+                await visitor.click(link('Open the list'));
+                // When - the verb is asked while the destination is still in flight
+                await visitor.see(heading('All articles'));
+            }),
+    );
+
+    // Then - the window waited for the surface to settle rather than judging the page being left
+    expect(lines).toStrictEqual([]);
 });
