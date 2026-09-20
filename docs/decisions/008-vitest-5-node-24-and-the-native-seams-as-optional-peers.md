@@ -1,6 +1,6 @@
 # ADR-008: Vitest 5, Node 24, the native seams as optional peers, and every artefact under `.artifacts/`
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-20
 
 ## Context

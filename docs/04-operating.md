@@ -26,7 +26,7 @@ One binary ships with them: `jterrazz-test-check`, the conventions checker, poin
 
 The package refuses to guess at its environment, so several things it uses are the consuming project's to install.
 
-- **`vitest ^5` is the required peer**, and the only one: the framework registers its matchers into vitest, and there is no standalone runner. Why 5 alone, why the four native seams became optional peers, and where every artefact goes: [ADR-008](decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md) (proposed).
+- **`vitest ^5` is the required peer**, and the only one: the framework registers its matchers into vitest, and there is no standalone runner. Why 5 alone, why the four native seams became optional peers, and where every artefact goes: [ADR-008](decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md).
 - **Every seam is an OPTIONAL peer**, loaded lazily by the one module that owns it and NAMED at startup when it is missing: `playwright` for a page, `appium`/`webdriverio` for a screen, `@vitest/browser-playwright`, `vitest-browser-react`, `vite`, `react` and `react-dom` for a component, and the four native ones — `better-sqlite3`, `pg`, `redis`, `testcontainers` — for the services a chain declares. A project that specifies none of those installs none of them.
 
     The refusal names the facet that asked, the peer, and the install command of the package manager the project's own lockfile names. Under pnpm a native binding also has to be listed to be BUILT, so the message adds that line:
@@ -45,7 +45,7 @@ The package refuses to guess at its environment, so several things it uses are t
     && npm rebuild better-sqlite3.
     ```
 
-    ([ADR-008](decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md), proposed, records what the four seams cost as dependencies and what the change buys under each package manager.)
+    ([ADR-008](decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md) records what the four seams cost as dependencies and what the change buys under each package manager.)
 
 - **The browser provider is pinned to the runner, patch included.** `@vitest/browser-playwright@X` peers `vitest: X` EXACTLY, so the two move together in one change or not at all. This package therefore declares the provider as `*` rather than a range of its own — a second, weaker statement of a constraint the provider already makes would be wrong the day the pair moves — and `component()` asserts the equality when the project is built, naming both versions:
 

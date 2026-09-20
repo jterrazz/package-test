@@ -249,7 +249,7 @@ test('links the analytics event to the created order', async () => {
 
 > This project declares two databases, so `database:` is mandatory on every `.seed()` and `.table()` (rule A7). With a single database you would write `api.seed('catalog.sql')` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
 
-The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md) (proposed).
+The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).
 
 ## Pitfalls
 
