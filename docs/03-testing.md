@@ -115,7 +115,7 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 - **Hand-editing a golden under `specs/lint/checker/_expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
 - **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs` and `integration` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.spec.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
-- **Writing a facet spec as `<aspect>.test.ts`.** `c12-spec-file-name` refuses it and `node dist/checker.js specs --fix` renames it with `git mv`; the reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.
+- **Writing a facet spec as `<aspect>.test.ts`.** `c12-spec-file-name` refuses it and `jterrazz-test-check specs --fix` renames it with `git mv` — and names every include glob of the member that still says `.test.ts`, since a glob the rename leaves behind collects nothing and the run stays green with fewer files. The reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.
 
 ## Related
 

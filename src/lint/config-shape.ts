@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 import {
     child,
     childList,
@@ -7,6 +9,7 @@ import {
     stringValue,
     walk,
 } from './ast.js';
+import { isDirectory, listDirectory } from './fs-cache.js';
 import type { AstNode } from './types.js';
 
 /**
@@ -148,6 +151,74 @@ export function collectedSegments(configFile: string, glob: string): string[] | 
         return undefined;
     }
     return [...anchor.relative.slice(0, -1), ...prefix];
+}
+
+/**
+ * Does any file under `directory` match this glob?
+ *
+ * A prefix that exists is not a suite that runs: a glob left naming `.test.ts`
+ * after a rename to `.spec.ts` collects NOTHING, the run stays green with
+ * fewer files, and the only trace is a number nobody compares. The walk stops
+ * at the first match and never enters a package's or a tool's own tree.
+ */
+export function collectsAFile(directory: string, glob: string): boolean {
+    const matcher = globMatcher(glob);
+    const walk = (dir: string, depth: number): boolean => {
+        if (depth > GLOB_DEPTH) {
+            return false;
+        }
+        for (const name of listDirectory(dir) ?? []) {
+            if (SKIPPED_WALK.has(name)) {
+                continue;
+            }
+            const path = join(dir, name);
+            if (isDirectory(path)) {
+                if (walk(path, depth + 1)) {
+                    return true;
+                }
+                continue;
+            }
+            if (matcher.test(path)) {
+                return true;
+            }
+        }
+        return false;
+    };
+    return walk(directory, 0);
+}
+
+/** Directories a glob walk never enters. */
+const SKIPPED_WALK = new Set(['.git', 'dist', 'node_modules']);
+
+/** How deep below an include's prefix the walk looks for one matching file. */
+const GLOB_DEPTH = 12;
+
+/**
+ * A glob as a regular expression over the tail of a path — `**` crosses
+ * separators, `*` and `?` do not, and `{a,b}` is an alternation.
+ */
+function globMatcher(glob: string): RegExp {
+    let source = '';
+    for (let index = 0; index < glob.length; index += 1) {
+        const character = glob[index] ?? '';
+        if (character === '*') {
+            const double = glob[index + 1] === '*';
+            source += double ? '.*' : '[^/]*';
+            index += double ? 1 : 0;
+            continue;
+        }
+        source +=
+            character === '?'
+                ? '[^/]'
+                : character === '{'
+                  ? '('
+                  : character === '}'
+                    ? ')'
+                    : character === ','
+                      ? '|'
+                      : character.replaceAll(/[.+^$()|[\]\\]/gu, String.raw`\$&`);
+    }
+    return new RegExp(`(?:^|/)${source}$`, 'u');
 }
 
 /** The facet those segments name, when the first one is a constructor. */

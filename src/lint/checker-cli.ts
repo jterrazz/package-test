@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
-import { existsSync, renameSync, statSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { existsSync, readFileSync, renameSync, statSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 
 import { fixPoolFixtures } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverSpecRoots } from './checker-member.js';
@@ -9,6 +9,7 @@ import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
 import { formatViolations, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
 import type { TokenViolation } from './checker.js';
+import { packageRootOf } from './role.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**
@@ -40,7 +41,13 @@ import type { TokenViolation } from './checker.js';
  * block scalars), C14, which MOVES a single-reader pool fixture beside its leaf
  * and rewrites the literals that named it, and C12, which RENAMES a `.test.ts`
  * under a facet folder to `.spec.ts` — then checks what is left, so a run that
- * fixes everything exits 0.
+ * fixes everything exits 0. With no path it applies them to every `specs/` root
+ * it discovers: `--fix` means the same thing whichever run the operator typed.
+ *
+ * After a C12 rename it NAMES every include glob of the owning member that
+ * still says `.test.ts`. A glob the rename left behind collects nothing, the
+ * run stays green with fewer files, and nothing else in the toolchain would
+ * have said a word.
  *
  * C12's rename goes through `git mv` where the tree is a git working tree, so
  * the history follows the file across a migration that touches hundreds of
@@ -171,21 +178,76 @@ function fixSpecSuffixes(root: string): string[] {
     return renamed;
 }
 
+/** Where a member states what it collects, whatever extension it writes it in. */
+const CONFIG_NAMES = [
+    'vitest.config.ts',
+    'vitest.config.mts',
+    'vitest.config.cts',
+    'vitest.config.js',
+    'vitest.config.mjs',
+    'vitest.config.cjs',
+];
+
+/** Any string in a config that ends in the suffix the mover just retired. */
+const TEST_GLOB = /['"`](?<glob>[^'"`]*\*[^'"`]*\.test\.ts)['"`]/gu;
+
+/**
+ * The include globs a rename leaves behind.
+ *
+ * A consumer that names its suffix in an `include` loses the whole suite the
+ * moment the mover renames it: vitest collects fewer files, exits 0, and the
+ * only trace is a number nobody compares. The mover owns that consequence —
+ * it cannot rewrite a config it does not parse, so it NAMES every glob that
+ * still says `.test.ts` in the configs of the member it just moved files
+ * under, and the author updates them in the same commit as the rename.
+ */
+function staleIncludes(root: string): string[] {
+    const member = packageRootOf(root) ?? dirname(root);
+    const found: string[] = [];
+    for (const directory of new Set([root, member, dirname(root)])) {
+        for (const name of CONFIG_NAMES) {
+            const path = join(directory, name);
+            if (!existsSync(path)) {
+                continue;
+            }
+            const text = readFileSync(path, 'utf8');
+            for (const match of text.matchAll(TEST_GLOB)) {
+                const glob = match.groups?.glob ?? '';
+                if (glob !== '') {
+                    found.push(`${relative(member, path)}: ${glob}`);
+                }
+            }
+        }
+    }
+    return found;
+}
+
+/** Apply every rewritable pass over one tree, printing what it did. */
+function applyFixes(root: string): void {
+    const renamed = fixSpecSuffixes(root);
+    for (const rename of renamed) {
+        console.log(`conventions checker: renamed ${rename} (C12)`);
+    }
+    for (const glob of renamed.length === 0 ? [] : staleIncludes(root)) {
+        console.log(
+            `conventions checker: ${glob} still names \`.test.ts\` — the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (C12)`,
+        );
+    }
+    const written = fixSpecFiles(root);
+    if (written.length > 0) {
+        console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
+    }
+    for (const move of fixPoolFixtures(root)) {
+        console.log(`conventions checker: moved ${move} (C14) — stage the rename`);
+    }
+}
+
 // ── One specs tree ──
 
 if (positional !== undefined) {
     const root = requireDirectory(positional, 'directory');
     if (fix) {
-        for (const rename of fixSpecSuffixes(root)) {
-            console.log(`conventions checker: renamed ${rename} (C12)`);
-        }
-        const written = fixSpecFiles(root);
-        if (written.length > 0) {
-            console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
-        }
-        for (const move of fixPoolFixtures(root)) {
-            console.log(`conventions checker: moved ${move} (C14) — stage the rename`);
-        }
+        applyFixes(root);
     }
     report(runAllChecks(root), `under ${root}`, TREE_PASSES);
 }
@@ -196,10 +258,19 @@ const root = resolve('.');
 const found: TokenViolation[] = [];
 for (const specsRoot of discoverSpecRoots(root)) {
     const prefix = relative(root, specsRoot);
+    if (fix) {
+        applyFixes(specsRoot);
+    }
     for (const violation of runAllChecks(specsRoot)) {
         // A tree pass reports relative to the tree it walked; the project-wide
-        // Run has to say WHICH tree, or two members' findings read alike.
-        found.push({ ...violation, file: `${prefix}/${violation.file}` });
+        // Run has to say WHICH tree, or two members' findings read alike — in
+        // The path it reports AND in the line a human reads, which begins with
+        // That path.
+        found.push({
+            ...violation,
+            file: `${prefix}/${violation.file}`,
+            message: `${prefix}/${violation.message}`,
+        });
     }
 }
 found.push(...checkMembers(root));

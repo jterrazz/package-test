@@ -862,7 +862,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         convention:
             'The keys of a `<case>.spec.yaml` follow the canonical order — `kind, description, fixture, env, serve, runs` at document level, `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run. Fixable (`--fix`).',
         family: 'D',
-        fix: 'Run `node dist/checker.js <root> --fix`; it rewrites the order.',
+        fix: 'Run `jterrazz-test-check <root> --fix`; it rewrites the order.',
         id: 'D4b',
         name: 'd4b-spec-key-order',
         rationale:
@@ -874,7 +874,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         convention:
             '`stdout`, `stderr`, `stdin` and `files.*.equals` of a `<case>.spec.yaml` are written as block scalars (`|` keeps the trailing newline, `|-` drops it), never as a quoted string carrying `\\n`. Fixable (`--fix`).',
         family: 'D',
-        fix: 'Run `node dist/checker.js <root> --fix`; it rewrites the scalar.',
+        fix: 'Run `jterrazz-test-check <root> --fix`; it rewrites the scalar.',
         id: 'D4b',
         name: 'd4b-spec-block-scalar',
         rationale:
@@ -884,10 +884,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`; anywhere else is an error. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `jobs`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and C1’s declared depth is what judges it. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
+            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`; anywhere else is an error. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `jobs`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A `.test.ts` that reaches no runner is C18’s, whose fix is the opposite move, and the mover leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and C1’s declared depth is what judges it. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
         facet: 'shared',
         family: 'C',
-        fix: 'Move the `.spec.ts` under `specs/<facet>/` (or rename it `.test.ts` beside its module); rename the facet `.test.ts` to `.spec.ts` — `node dist/checker.js <root> --fix` does it with `git mv`.',
+        fix: 'Move the `.spec.ts` under `specs/<facet>/` (or rename it `.test.ts` beside its module); rename the facet `.test.ts` to `.spec.ts` — `jterrazz-test-check <root> --fix` does it with `git mv`, and names every include glob of the member that still says `.test.ts`.',
         id: 'C12',
         name: 'c12-spec-file-name',
         rationale:
@@ -1005,7 +1005,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         convention:
             'A pool fixture is SHARED, or it is local: a directory of `<specs>/_fixtures/` referenced (`$FIXTURES/<name>`) from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/_fixtures/<name>/`, referenced by the relative form. Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved and the literals rewritten.',
         family: 'C',
-        fix: 'Run `node dist/checker.js <root> --fix`; it moves the directory and rewrites what named it.',
+        fix: 'Run `jterrazz-test-check <root> --fix`; it moves the directory and rewrites what named it.',
         id: 'C14',
         name: 'c14-pool-fixture-shared',
         rationale:
