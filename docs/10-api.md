@@ -4,7 +4,24 @@
 
 Use it when the subject under test is an HTTP surface. For background pipelines use [jobs](11-jobs.md); for binaries use [cli](12-cli.md).
 
-## Creating the runner
+## What it specifies
+
+An api spec answers one question: **given this state and this request, what does the HTTP app answer, and what does it leave behind?** The subject is the assembled app met through its own entry — the handler chain, the middleware, the serialisation, the database writes — and the request is a complete HTTP exchange, written as a file a person can read. A single handler function called directly is a module test's ([05](05-module-tests.md)); a repository against a real database with no HTTP in sight is an integration spec's ([06](06-integration.md)).
+
+### The app runs in THIS process
+
+| Aspect             | What it means                                                              |
+| ------------------ | -------------------------------------------------------------------------- |
+| Your app           | In-process, built by `server(services)` — no container, no socket          |
+| Services           | Real containers, started by testcontainers from each handle's own defaults |
+| What it proves     | Application logic against real databases, caches and processes             |
+| Parallel isolation | Per-worker schema / db-index / file copy (rule G2)                         |
+
+Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this facet does not claim it.
+
+`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. See [services](17-services.md).
+
+## The constructor
 
 ```typescript
 // specs/api/api.specification.ts
@@ -42,20 +59,73 @@ afterAll(cleanup);
 
 Without `root`, the framework walks **up from the specification file** to the **nearest** directory carrying `package.json` — the package being tested, not the repository around it. Passing a `root` that points at the directory the walk would have found anyway is redundant (future lint warning).
 
-## The app runs here
+## The chain
 
-| Aspect             | What it means                                                              |
-| ------------------ | -------------------------------------------------------------------------- |
-| Your app           | In-process, built by `server(services)` — no container, no socket          |
-| Services           | Real containers, started by testcontainers from each handle's own defaults |
-| What it proves     | Application logic against real databases, caches and processes             |
-| Parallel isolation | Per-worker schema / db-index / file copy (rule G2)                         |
+### Setups (chainable)
 
-Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this facet does not claim it.
+| Setup                             | Description                                                                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `.seed('file.sql')`               | Load `_seeds/file.sql` into the database                                                                                        |
+| `.seed('file.sql', { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
+| `.headers({ 'Name': 'value' })`   | Set request headers; repeated calls merge                                                                                       |
+| `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |
+| `.intercept(trigger, response)`   | Inline intercept for one-off cases                                                                                              |
+| `.clock('2026-03-04T09:30:00Z')`  | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths)) |
 
-`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. See [services](17-services.md).
+Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
-## `.http` request files — full format
+```typescript
+test('serves french content', async () => {
+    // Given - headers inline
+    const result = await api.headers({ 'Accept-Language': 'fr' }).get('/welcome');
+
+    // Then
+    expect(result.response.body).toEqual({ message: 'Bienvenue' });
+});
+```
+
+#### Isolation between specs (rules B1, B7)
+
+Databases are **reset at the start of every chain**. A spec never depends on a previous spec, and there is no "flow" mode — sequential scenarios are expressed through seeds:
+
+```typescript
+test('starts clean between specs', async () => {
+    // Given - nothing (every chain resets the databases: one spec = ONE action)
+    const result = await api.get('/orders');
+
+    // Then
+    await expect(result.table('orders', { database: 'db' })).toBeEmpty();
+});
+```
+
+### Actions (terminal)
+
+Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the result.
+
+| Action                  | Description                                                   |
+| ----------------------- | ------------------------------------------------------------- |
+| `.request('file.http')` | Execute the complete request from `_requests/file.http`       |
+| `.get(path)`            | Inline GET — for simple cases where a file would be excessive |
+| `.post(path, body?)`    | Inline POST                                                   |
+| `.put(path, body?)`     | Inline PUT                                                    |
+| `.delete(path)`         | Inline DELETE                                                 |
+
+The inline `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header. There is no filename form inline — file-based requests always go through `.request('file.http')`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
+
+There is no `.run()` and no label argument: the vitest test name is the spec's only description (rule B3).
+
+```typescript
+test('returns 404 with a useful body', async () => {
+    // Given - empty database
+    const result = await api.get('/users/999');
+
+    // Then - inline assertions when a fixture file would be excessive
+    expect(result.status).toBe(404);
+    expect(result.response.body).toEqual({ error: 'User 999 not found' });
+});
+```
+
+### `.http` request files — full format
 
 Requests live in `_requests/`, one file per request, extension `.http` (rule C2). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
 
@@ -90,71 +160,7 @@ Location: /users/{{uuid#user}}
 - Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule C3).
 - Body and headers both accept `{{token}}` placeholders, including `#ref` captures — `{{uuid#user}}` above must be the _same_ UUID in the `Location` header and the body. See [tokens](15-tokens.md).
 
-## Actions (terminal)
-
-Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the result.
-
-| Action                  | Description                                                   |
-| ----------------------- | ------------------------------------------------------------- |
-| `.request('file.http')` | Execute the complete request from `_requests/file.http`       |
-| `.get(path)`            | Inline GET — for simple cases where a file would be excessive |
-| `.post(path, body?)`    | Inline POST                                                   |
-| `.put(path, body?)`     | Inline PUT                                                    |
-| `.delete(path)`         | Inline DELETE                                                 |
-
-The inline `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header. There is no filename form inline — file-based requests always go through `.request('file.http')`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
-
-There is no `.run()` and no label argument: the vitest test name is the spec's only description (rule B3).
-
-```typescript
-test('returns 404 with a useful body', async () => {
-    // Given - empty database
-    const result = await api.get('/users/999');
-
-    // Then - inline assertions when a fixture file would be excessive
-    expect(result.status).toBe(404);
-    expect(result.response.body).toEqual({ error: 'User 999 not found' });
-});
-```
-
-## Setups (chainable)
-
-| Setup                             | Description                                                                                                                     |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `.seed('file.sql')`               | Load `_seeds/file.sql` into the database                                                                                        |
-| `.seed('file.sql', { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
-| `.headers({ 'Name': 'value' })`   | Set request headers; repeated calls merge                                                                                       |
-| `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |
-| `.intercept(trigger, response)`   | Inline intercept for one-off cases                                                                                              |
-| `.clock('2026-03-04T09:30:00Z')`  | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths)) |
-
-Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
-
-```typescript
-test('serves french content', async () => {
-    // Given - headers inline
-    const result = await api.headers({ 'Accept-Language': 'fr' }).get('/welcome');
-
-    // Then
-    expect(result.response.body).toEqual({ message: 'Bienvenue' });
-});
-```
-
-### Isolation between specs (rules B1, B7)
-
-Databases are **reset at the start of every chain**. A spec never depends on a previous spec, and there is no "flow" mode — sequential scenarios are expressed through seeds:
-
-```typescript
-test('starts clean between specs', async () => {
-    // Given - nothing (every chain resets the databases: one spec = ONE action)
-    const result = await api.get('/orders');
-
-    // Then
-    await expect(result.table('orders', { database: 'db' })).toBeEmpty();
-});
-```
-
-## Result surface
+## The result
 
 The result of an API action exposes read-only accessors (rule D1); all assertions go through `expect()`:
 
@@ -169,7 +175,9 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 
 Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.jobs()` has no `docker` member — jobs never spawn containers.)
 
-## Full example — multi-database order flow
+## Unique here
+
+### Full example — a multi-database order flow
 
 ```http
 ### _requests/new-order.http

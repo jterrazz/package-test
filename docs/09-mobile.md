@@ -4,7 +4,11 @@
 
 Use it when the subject under test is an installed native app. For a browser-rendered page use [website](08-website.md); for a JSON/HTTP API surface use [api](10-api.md).
 
-## Creating the runner
+## What it specifies
+
+A mobile spec answers one question: **given this backend and this visitor, what does the native app draw on a simulator, and what does the screen read like to someone who cannot see it?** The subject is the installed app met through a deep link, driven by the accessibility tree the platform publishes. A React Native component rendered off a device is jest's for now, not this facet's ([07](07-component.md) states the boundary and the spike that would move it).
+
+## The constructor
 
 ```typescript
 // specs/mobile/mobile.specification.ts
@@ -58,7 +62,7 @@ The appium server is spawned from the caller project's `node_modules/.bin/appium
 
 The handle destructures to `{ mobile, cleanup, udid }` (rule A3) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session. With the `backend` option it additionally carries `backendUrl`.
 
-## Declared timeouts
+### Declared timeouts
 
 Every verb auto-waits — there is no sleep and no conditional helper. `timeouts` states how long, for the two waits a project legitimately needs to move:
 
@@ -84,43 +88,9 @@ afterAll(cleanup);
 
 Raise it to the slowest **honest** path and no further: the timeout is what turns a hang into a legible refusal naming the element and what was on screen instead.
 
-## Declared backend
+## The chain
 
-A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [contracts](16-contracts.md) — the feature's `contracts/` facade, exactly the form `api`/`jobs` use:
-
-```typescript
-// specs/mobile/mobile.specification.ts
-export const { backendUrl, cleanup, mobile } = await specification.mobile({
-    app: { bundleId: 'com.jterrazz.fakenews' },
-    backend: { port: 4820 },
-    device: { name: 'iPhone 17', os: '26.5' },
-});
-
-afterAll(cleanup);
-```
-
-```typescript
-// specs/mobile/events/feed.spec.ts
-import newsroom from './contracts/newsroom.contracts.js';
-
-test('renders the events feed from the declared backend', async () => {
-    // Given - the backend under contract for this chain
-    const result = await mobile.intercept(newsroom).open('news://events');
-
-    // Then - the screen rendered what the stub declared
-    expect(result.screen).toMatch('events.screen.json');
-});
-```
-
-| `backend` field | Description                                                                       |
-| --------------- | --------------------------------------------------------------------------------- |
-| `port`          | Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port |
-
-**The ownership boundary.** The framework owns the simulator and the appium server — it does NOT own the JS bundler: Metro belongs to the caller's repo, exactly like `next build` belongs to a website's. So nothing is injected anywhere; the handle exposes `backendUrl` and **the caller wires it into its own bundler env** (e.g. `EXPO_PUBLIC_API_URL=<backendUrl> npx expo start`). This is why `port` exists: Metro inlines `EXPO_PUBLIC_*` values at bundle-serve time, and a stable port lets a warm Metro survive between runs instead of re-bundling against a fresh URL.
-
-The stub behaves exactly as on the website facet ([08 — Website specs](08-website.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared contract is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero contracts leaves the stub unguarded.
-
-## One terminal action: `.open(deepLink?, scenario?)`
+### One terminal action: `.open(deepLink?, scenario?)`
 
 `.open()` is terminal and deterministic: it **terminates and relaunches the app** (fresh state every spec), applies the deep link when given, runs the scenario, then captures the final screen — the projected accessibility tree plus the visible texts:
 
@@ -136,7 +106,7 @@ test('shows the events feed behind its deep link', async () => {
 
 Without a deep link, the app opens on its launch screen. There is **one driver session per runner**, created lazily on the first `.open()` and reused — the expensive part is WebDriverAgent startup, not the app relaunch.
 
-## Open scenarios — the When
+### Open scenarios — the When
 
 A scenario is the interaction that happens **before** the capture — the open's When. The capture always reflects the **final** screen state, after the scenario ran:
 
@@ -173,14 +143,14 @@ await visitor.tap(within(testId('event-list'), button('Bookmark')));
 
 `see()` resolving through render work is the point: a deep link into a Metro cold bundle, a network round-trip, an animation — the poll absorbs them all without a single sleep.
 
-## Result surface — `ScreenResult`
+## The result
 
 | Member           | Type           | Description                                                                  |
 | ---------------- | -------------- | ---------------------------------------------------------------------------- |
 | `result.screen`  | `JsonAccessor` | The projected accessibility tree — the one-golden-per-screen surface         |
 | `result.content` | `TextAccessor` | The visible texts, one per line in reading order — the scalpel for one probe |
 
-## The `screen` golden — one per screen
+### The `screen` golden — one per screen
 
 `result.screen` is the **stable, assertion-friendly projection** of the XCUITest page source. The raw source is deep and noisy — React Native wraps every view in layers of unlabeled `XCUIElementTypeOther` nodes — so the projection collapses it: wrapper nodes with no label, no value and no identifier are dropped (their children hoisted), an element repeated as its own child appears once, type names lose the `XCUIElementType` prefix, and a value or identifier merely echoing the label is omitted:
 
@@ -210,11 +180,49 @@ test('renders the events feed', async () => {
 
 The tree describes the **whole mounted hierarchy**, including rows below the fold; `result.content` carries only what is visible. Volatile parts (dates, counters) are covered by the usual `{{token}}` grammar ([15 — Tokens](15-tokens.md)); generate with `TEST_UPDATE=1`.
 
-## Evidence on failure
+## Unique here
+
+### Declared backend
+
+A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [contracts](16-contracts.md) — the feature's `contracts/` facade, exactly the form `api`/`jobs` use:
+
+```typescript
+// specs/mobile/mobile.specification.ts
+export const { backendUrl, cleanup, mobile } = await specification.mobile({
+    app: { bundleId: 'com.jterrazz.fakenews' },
+    backend: { port: 4820 },
+    device: { name: 'iPhone 17', os: '26.5' },
+});
+
+afterAll(cleanup);
+```
+
+```typescript
+// specs/mobile/events/feed.spec.ts
+import newsroom from './contracts/newsroom.contracts.js';
+
+test('renders the events feed from the declared backend', async () => {
+    // Given - the backend under contract for this chain
+    const result = await mobile.intercept(newsroom).open('news://events');
+
+    // Then - the screen rendered what the stub declared
+    expect(result.screen).toMatch('events.screen.json');
+});
+```
+
+| `backend` field | Description                                                                       |
+| --------------- | --------------------------------------------------------------------------------- |
+| `port`          | Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port |
+
+**The ownership boundary.** The framework owns the simulator and the appium server — it does NOT own the JS bundler: Metro belongs to the caller's repo, exactly like `next build` belongs to a website's. So nothing is injected anywhere; the handle exposes `backendUrl` and **the caller wires it into its own bundler env** (e.g. `EXPO_PUBLIC_API_URL=<backendUrl> npx expo start`). This is why `port` exists: Metro inlines `EXPO_PUBLIC_*` values at bundle-serve time, and a stable port lets a warm Metro survive between runs instead of re-bundling against a fresh URL.
+
+The stub behaves exactly as on the website facet ([08 — Website specs](08-website.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared contract is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero contracts leaves the stub unguarded.
+
+### Evidence on failure
 
 When a scenario throws — an element never appears, a `see()` times out — the error carries a screenshot of the state the scenario died in, referenced by its temp path in the error message. A timeout additionally includes a compact excerpt of the labels currently on screen, so the failure reads without relaunching anything. The original error is never masked.
 
-## Requirements
+### Requirements — what the machine must have
 
 Provisioning the simulator environment is not this package's job. The framework needs, in this order:
 
@@ -228,7 +236,7 @@ npm install -D appium webdriverio && npx appium driver install xcuitest
 
 Calling `specification.mobile()` (or `.open()`) without them throws exactly that guidance — there is nothing else to search for.
 
-## Folder layout
+### Folder layout
 
 ```
 specs/mobile/

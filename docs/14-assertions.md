@@ -76,11 +76,11 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 Always `await expect(…)` (IO). `database:` is **mandatory when the services record declares ≥ 2 databases, forbidden with exactly 1** (rule A7).
 
-| Matcher                          | Sync/async | Example                                                                                                                                     |
-| -------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `toMatchRows({ columns, rows })` | async      | see below                                                                                                                                   |
-| `toBeEmpty()`                    | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()`                                                                      |
-| `toBeEmpty()` on a text subject  | async      | `await expect(result.error).toBeEmpty()` — the integration facet's "and it did not refuse" ([06](06-integration.md#the-result--callresult)) |
+| Matcher                          | Sync/async | Example                                                                                                                         |
+| -------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `toMatchRows({ columns, rows })` | async      | see below                                                                                                                       |
+| `toBeEmpty()`                    | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()`                                                          |
+| `toBeEmpty()` on a text subject  | async      | `await expect(result.error).toBeEmpty()` — the integration facet's "and it did not refuse" ([06](06-integration.md#the-result)) |
 
 ```typescript
 await expect(result.table('orders', { database: 'db' })).toMatchRows({

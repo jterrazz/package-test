@@ -4,7 +4,11 @@
 
 Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](10-api.md); for a binary use [cli](12-cli.md).
 
-## Creating the runner
+## What it specifies
+
+A website spec answers one question: **given this backend and this visitor, what does the served site put on the screen, and what does it report to the console?** The subject is the assembled product met through an address — a running server the runner started, or a deployment already up — and everything it reads is what a visitor can see: the rendered text, the accessibility tree, the document head, the console. A single rendered unit inside that page is a component spec ([07](07-component.md)); a route module or a loader behind it is a module test ([05](05-module-tests.md)).
+
+## The constructor
 
 Exactly one of `server` (start the site locally) or `url` (target a running site) is required — passing both, or neither, throws immediately.
 
@@ -71,9 +75,11 @@ afterAll(cleanup);
 
 A declared database is not seeded by the chain — a website chain has no `.seed()`. It is seeded by whatever owns it: the service's own `docker/<service>/init.sql`, or a `before:` command on the `process()` that migrates it.
 
-## Two terminal actions: `.fetch()` and `.visit()`
+## The chain
 
-### `.fetch(path)` — one raw HTTP exchange
+### Two terminal actions: `.fetch()` and `.visit()`
+
+#### `.fetch(path)` — one raw HTTP exchange
 
 `.fetch(path)` performs a single request and never follows redirects — the redirect itself is the result, not something to chase:
 
@@ -107,7 +113,7 @@ test('serves robots.txt as plain text', async () => {
 | `result.body`     | `TextAccessor`        | Raw response body — `toMatch('robots.txt')`, `.grep()`     |
 | `result.json`     | `JsonAccessor`        | Response body parsed as JSON                               |
 
-### `.visit(path, scenario?)` — a rendered page
+#### `.visit(path, scenario?)` — a rendered page
 
 `.visit()` renders the page in a real chromium and resolves with the captured document. There is **one browser process per runner**, launched lazily on the first `.visit()` — a spec file that only calls `.fetch()` never pays the browser-launch cost. Each visit gets a fresh, isolated browser context.
 
@@ -122,7 +128,7 @@ test('captures the full head surface of a rendered page', async () => {
 });
 ```
 
-## Visit scenarios — the When
+### Visit scenarios — the When
 
 A scenario is the interaction that happens **before** the capture — the visit's When. The capture always reflects the **final** page state, after the scenario ran:
 
@@ -164,7 +170,38 @@ test('navigates to another page and captures where it landed', async () => {
 });
 ```
 
-## Result surface — `PageResult`
+### Setup: `.headers()`
+
+`.headers({...})` sets HTTP headers for both terminal actions — the raw `.fetch()` exchange and the browser context behind `.visit()`. Repeated calls merge. The main use case is a User-Agent override, e.g. asserting on what an AI crawler sees:
+
+```typescript
+test('sends chain headers on the raw exchange', async () => {
+    // Given - an AI crawler user agent
+    const result = await website.headers({ 'User-Agent': 'GPTBot/1.0' }).fetch('/robots.txt');
+
+    // Then - the exchange succeeds like any other client
+    expect(result.status).toBe(200);
+    expect(result.body).toContain('Allow: /');
+});
+```
+
+### Setup: `.clock()`
+
+`.clock('2026-03-04T09:30:00Z')` pins the calendar of the PAGE — what the site's own scripts read when they call `new Date()` — before the first byte is parsed, so a stamp rendered on load is the stated instant and not the moment the navigation happened to start. It is released with the visit.
+
+```typescript
+test('stamps the moment the page was opened', async () => {
+    // Given - the page's calendar pinned for this visit
+    const result = await website.clock('2026-03-04T09:30:00Z').visit('/clock');
+
+    // Then - the rendered stamp is the stated instant
+    expect(result.content).toContain('2026-03-04T09:30:00.000Z');
+});
+```
+
+A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
+
+## The result
 
 | Member              | Type                  | Description                                                                     |
 | ------------------- | --------------------- | ------------------------------------------------------------------------------- |
@@ -197,7 +234,7 @@ test('lays the article out as a reader walks it', async () => {
 
 It is produced by the same Playwright `ariaSnapshot()` the component facet calls, so a page's outline and a component's outline are the same kind of golden and comparable to each other. Deterministic where a screenshot is not, and it says what the markup MEANS rather than what it is made of.
 
-## The `head` golden — one per page
+### The `head` golden — one per page
 
 `result.head` is the **stable, assertion-friendly projection** of the document head — title, canonical, hreflang alternates, and named metas collapsed into one object. It is the one golden a page needs for its SEO surface:
 
@@ -226,7 +263,7 @@ test('parses every json-ld block into one array', async () => {
 });
 ```
 
-## Console assertions
+### Console assertions
 
 The console splits into the full stream and the error-only stream — the same shape as `stdout`/`stderr` on a cli result:
 
@@ -250,7 +287,9 @@ test('separates console errors from the full stream', async () => {
 });
 ```
 
-## Declared backend
+## Unique here
+
+### Declared backend
 
 A site under test usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) BEFORE the server command and injects its URL into the server child's environment under `backend.env` — the site reads it the same way it would in production:
 
@@ -295,48 +334,17 @@ Two pieces of plumbing are handled for you:
 - **CORS** — the stub answers the `OPTIONS` preflight and stamps permissive `Access-Control-Allow-*` headers on every response, so client-side fetches from the site's origin just work.
 - **`external: 'block'`** — the stub's origin is allow-listed automatically; declared-backend fetches are never aborted as third-party noise.
 
-## Cross-origin policy (`external`)
+### Cross-origin policy (`external`)
 
 `external: 'block'` aborts every request leaving the site under test during a `.visit()` — analytics beacons, third-party CDNs, ad scripts never fire, so a visit stays deterministic. `'allow'` lets them through.
 
 The default follows the mode: `'block'` with `server` (you own the deployment, third-party noise is not the point), `'allow'` with `url` (a deployed site legitimately loads third-party assets). Override with the top-level `external` option when a spec needs the opposite of its mode's default.
 
-## Setup: `.headers()`
-
-`.headers({...})` sets HTTP headers for both terminal actions — the raw `.fetch()` exchange and the browser context behind `.visit()`. Repeated calls merge. The main use case is a User-Agent override, e.g. asserting on what an AI crawler sees:
-
-```typescript
-test('sends chain headers on the raw exchange', async () => {
-    // Given - an AI crawler user agent
-    const result = await website.headers({ 'User-Agent': 'GPTBot/1.0' }).fetch('/robots.txt');
-
-    // Then - the exchange succeeds like any other client
-    expect(result.status).toBe(200);
-    expect(result.body).toContain('Allow: /');
-});
-```
-
-## Setup: `.clock()`
-
-`.clock('2026-03-04T09:30:00Z')` pins the calendar of the PAGE — what the site's own scripts read when they call `new Date()` — before the first byte is parsed, so a stamp rendered on load is the stated instant and not the moment the navigation happened to start. It is released with the visit.
-
-```typescript
-test('stamps the moment the page was opened', async () => {
-    // Given - the page's calendar pinned for this visit
-    const result = await website.clock('2026-03-04T09:30:00Z').visit('/clock');
-
-    // Then - the rendered stamp is the stated instant
-    expect(result.content).toContain('2026-03-04T09:30:00.000Z');
-});
-```
-
-A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
-
-## Evidence on failure
+### Evidence on failure
 
 When a scenario throws — an element never becomes visible, a `see()` times out — the error carries a full-page screenshot of the state the scenario died in, referenced by its temp path in the error message. The original error is never masked; the screenshot is attached evidence, not a replacement.
 
-## Playwright — optional peer dependency
+### Playwright — the optional peer
 
 Playwright is not a hard dependency: `.fetch()`-only spec files never need it. `.visit()` imports it lazily, and needs it installed:
 
@@ -348,7 +356,7 @@ Calling `.visit()` without playwright installed throws exactly that guidance —
 
 Provisioning the environment is not this package's job. In CI, the shared validate workflow does it: `browsers: true` (jterrazz-actions) installs cached chromium, versioned from the caller's lockfile, between Build and Test. On a workstation, `j install` provisions `playwright-browsers` once.
 
-## Folder layout
+### Folder layout
 
 ```
 specs/website/

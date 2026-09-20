@@ -143,7 +143,7 @@ There is no result object here, because there is no chain to hand one back. The 
 
 - **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<facet>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is C18's error in one direction and C12's in the other.
 - **It is the only kind that may build its own double.** Below this chapter a double is DECLARED — a contract, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
-- **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration facet is where that goes ([06](06-integration.md#without-services--the-golden-half)).
+- **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration facet is where that goes ([06](06-integration.md#the-golden-half--a-pure-module-no-services-at-all)).
 - **It is the kind the budget is written for.** The `unit` project is the fast one, and this package gates its own at twelve seconds so the loop stays a loop.
 
 ## Pitfalls
