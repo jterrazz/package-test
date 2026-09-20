@@ -110,7 +110,7 @@ export const RULE_DOCS = {
         id: 'A2',
         rationale:
             'A closed surface stops parallel constructors being invented and keeps the API memorable.',
-        reach: 'specification',
+        reach: 'all',
     },
     'a3-no-destructure-alias': {
         channel: 'statique',
@@ -120,7 +120,7 @@ export const RULE_DOCS = {
         fix: 'Drop the alias and keep the canonical name.',
         id: 'A3',
         rationale: 'One instance name per facet makes every spec readable with no local context.',
-        reach: 'specification',
+        reach: 'all',
     },
     'a4-cleanup-afterall': {
         channel: 'statique',
@@ -141,7 +141,7 @@ export const RULE_DOCS = {
         id: 'A9',
         rationale:
             'Detection by convention has to stay the default; an explicit `root` is only justified where it fails.',
-        reach: 'specification',
+        reach: 'all',
     },
     'b10-when-between-markers': {
         channel: 'statique',
@@ -218,7 +218,7 @@ export const RULE_DOCS = {
         id: 'B9',
         rationale:
             "A spec has to exercise the product's real command; per-tool assertions go through `result.grep`.",
-        reach: 'specification',
+        reach: 'all',
     },
     'c1-domain-structure': {
         channel: 'statique',
