@@ -107,6 +107,11 @@ export type RuleDoc = {
      * shapes that are not a role: `tests` (every file that declares tests),
      * `specs` (a tree), `member` (a package), and `all`.
      *
+     * `module` is the COLOCATED unit test — a `.test.ts` beside the module it
+     * covers, outside every specs tree. A `module`-role file under `specs/` is
+     * a repository suite: it covers a tree rather than a unit, and the passes
+     * that judge a tree are the ones that reach it.
+     *
      * Required, like `fix`: a reader deciding whether a rule applies to the
      * file in front of them should not have to read its implementation, and a
      * row that left it blank was answering "somewhere".

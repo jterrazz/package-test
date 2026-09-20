@@ -24,9 +24,9 @@ const STRUCTURAL_MATCHERS = new Set(['toEqual', 'toMatch', 'toMatchObject', 'toS
 const PINS = new Set(['clock.advance', 'clock.at']);
 
 /** Does this test pin the clock it then reads? */
-function pinsTheClock(callback: AstNode): boolean {
+function pinsTheClock(scope: AstNode): boolean {
     let pinned = false;
-    walk(callback, (inner) => {
+    walk(scope, (inner) => {
         if (inner.type !== 'CallExpression') {
             return;
         }

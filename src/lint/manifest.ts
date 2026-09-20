@@ -694,7 +694,7 @@ export const RULE_DOCS = {
     'w2-testid-states-what-is-missing': {
         channel: 'statique',
         convention:
-            "A scenario's elements are user-facing (`button`, `link`, `field`, `heading`, `content`; on mobile `button`, `field`, `content`). `testId()` is the one escape hatch, and the line STATES what the element lacks: a `// testId: <what is missing>` comment on the call's own line or the one directly above. It is an invariant, not a rationale.",
+            "In a test file, a scenario's elements are user-facing (`button`, `link`, `field`, `heading`, `content`; on mobile `button`, `field`, `content`). `testId()` is the one escape hatch, and the line STATES what the element lacks: a `// testId: <what is missing>` comment on the call's own line or the one directly above. It is an invariant, not a rationale.",
         facet: 'shared',
         family: 'W',
         fix: 'Write `// testId: <no accessible name | no role | …>` on the call’s line or the one above — or name the element with `button()`/`link()`/`field()`/`heading()`/`content()`.',
@@ -706,14 +706,14 @@ export const RULE_DOCS = {
     'w5w-scenario-settles': {
         channel: 'statique',
         convention:
-            'A scenario that ACTS (`click`, `fill`, `select`, `check`, `press`, `tap`, `rerender`, `unmount`) ends on `await visitor.see(…)` or `await visitor.gone(…)`. A scenario that only reads is out of reach.',
+            'A `.spec.ts` scenario that ACTS (`click`, `fill`, `select`, `check`, `press`, `tap`, `rerender`) on the visitor it was handed ends on `visitor.see(…)`, `visitor.gone(…)` or `visitor.unmount()` — through the block, branch, loop or `.then()` it ends in. A scenario that only reads is out of reach, and so is a component test, whose action often produces a CALL rather than a screen.',
         facet: 'shared',
         family: 'W',
         fix: 'End on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`.',
         id: 'W5',
         rationale:
             'The capture is taken when the callback returns: a scenario ending on a click hands the golden whatever was on the screen at that instant, and the failure reads as flakiness rather than as a missing wait.',
-        reach: 'tests',
+        reach: 'spec',
     },
 } satisfies Record<string, RuleDoc>;
 
@@ -774,14 +774,14 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Every `checker-disable-next-line` / `checker-disable-line` directive carries ` -- <reason>`. The word inside a string is prose, not a directive.',
+            'Every `checker-disable-next-line` / `checker-disable-line` directive carries ` -- <reason>`, wherever a checker pass can be silenced: a test, a document, a fixture under ground. The word inside a string is prose, not a directive.',
         family: 'J',
         fix: 'Write `checker-disable-next-line <id> -- <reason>`.',
         id: 'J9',
         name: 'j9-checker-suppression-reason',
         rationale:
             "A suppression with no reason is a rule turned off by someone no longer here: the next reader cannot tell whether the pass was wrong or simply in the way, so the line survives every review. The toolchain's own gate reads `oxlint-disable*` and nothing else.",
-        reach: 'tests',
+        reach: 'specs',
     },
     {
         channel: 'checker',

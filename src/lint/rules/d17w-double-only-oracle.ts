@@ -60,14 +60,18 @@ function doubleBindings(root: AstNode): Set<string> {
  * passes. Something the subject PRODUCED has to appear — a returned value, a
  * state read back, an error.
  *
- * The reach is the `module` role alone. On a component a callback prop IS the
- * contract with the parent, and `expect(onClose).toHaveBeenCalledOnce()` is the
- * only honest way to read it; on a spec the double is rare and the result
- * accessors are the subject.
+ * The reach is the colocated module test — a `.test.ts` beside its module,
+ * outside every specs tree, which is what `module` reach means everywhere in
+ * the catalogue. On a component a callback prop IS the contract with the
+ * parent, and `expect(onClose).toHaveBeenCalledOnce()` is the only honest way
+ * to read it; on a spec the double is rare and the result accessors are the
+ * subject; and a `module`-role file under `specs/` is a repository suite,
+ * which the tree passes judge.
  */
 export const d17wDoubleOnlyOracle: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'module') {
+        const identity = roleOf(context.filename);
+        if (identity.role !== 'module' || identity.inSpecs) {
             return {};
         }
         return {

@@ -58,7 +58,7 @@ function specificationsIn(dir: string): string[] {
  * runner as a module test parked in a facet tree, and told the author to move
  * the file that specifies the product.
  */
-const IMPORT_SOURCE = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*['"]([^'"]+)['"]/gu;
+const IMPORT_SOURCE = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*['"](?<source>[^'"]+)['"]/gu;
 
 /** The framework's own entry — a spec may construct the runner itself. */
 const CONSTRUCTS = /\bspecification\.[a-z]+\s*\(/u;
@@ -73,7 +73,7 @@ const CONSTRUCTS = /\bspecification\.[a-z]+\s*\(/u;
  */
 export function reachesRunner(text: string): boolean {
     for (const match of text.matchAll(IMPORT_SOURCE)) {
-        const source = match[1] ?? '';
+        const source = match.groups?.source ?? '';
         if (source === '@jterrazz/test' || source.startsWith('@jterrazz/test/')) {
             return true;
         }
