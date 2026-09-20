@@ -1,11 +1,14 @@
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import type { FileRole } from './role.js';
+import type { FileRole, LegacyDir } from './role.js';
 import { isTestFile, isTestRole, roleOf } from './role.js';
 
 /** This package's own root — the one `tests/` guard reads a real package.json at. */
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
+
+/** The retired root a path sits under, as the field a rule reads. */
+const legacyOf = (path: string): LegacyDir => roleOf(path).legacyDir;
 
 describe('roleOf — the kind a path states', () => {
     test('tells a rendered unit from a plain one by the suffix alone', () => {
@@ -68,16 +71,24 @@ describe('roleOf — the kind a path states', () => {
         expect(roleOf('/repo/src/matching/match.test.ts').inSpecs).toBeFalsy();
     });
 
-    test('names the retired test roots, and nothing that merely spells one', () => {
-        // Given - the two shapes I2 refuses, and a `tests` segment with no package above it
-        // Then - `legacyDir` is the third field, and the `tests` clause is anchored on a package root
-        expect(roleOf('/repo/src/matching/__tests__/match.test.ts').legacyDir).toBe('__tests__');
-        expect(roleOf(`${REPO_ROOT}/tests/smoke.test.ts`).legacyDir).toBe('tests');
-        // The singular spelling is the same root under another name.
-        expect(roleOf(`${REPO_ROOT}/test/corpus.test.ts`).legacyDir).toBe('test');
-        expect(roleOf('/no-such-root-xyz/tests/smoke.test.ts').legacyDir).toBeNull();
-        expect(roleOf('/no-such-root-xyz/test/smoke.test.ts').legacyDir).toBeNull();
-        expect(roleOf('/repo/specs/api/users/create.test.ts').legacyDir).toBeNull();
+    test('names the retired test roots, in both of their spellings', () => {
+        // Given - the three shapes I2 refuses, each anchored on a real package root
+        // Then - `legacyDir` is the third field a rule reads
+        expect([
+            legacyOf('/repo/src/matching/__tests__/match.test.ts'),
+            legacyOf(`${REPO_ROOT}/tests/smoke.test.ts`),
+            legacyOf(`${REPO_ROOT}/test/corpus.test.ts`),
+        ]).toStrictEqual(['__tests__', 'tests', 'test']);
+    });
+
+    test('names nothing that merely spells one', () => {
+        // Given - a `tests` or `test` segment with no package above it, and a specs tree
+        // Then - the clause is anchored on a package root, so a checkout under `~/tests/` is nobody's business
+        expect([
+            legacyOf('/no-such-root-xyz/tests/smoke.test.ts'),
+            legacyOf('/no-such-root-xyz/test/smoke.test.ts'),
+            legacyOf('/repo/specs/api/users/create.test.ts'),
+        ]).toStrictEqual([null, null, null]);
     });
 });
 

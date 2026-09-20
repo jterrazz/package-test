@@ -116,10 +116,10 @@ function resolveRelativeAgainst(origin: string): () => void {
         );
     }
     const original = globalThis.fetch;
-    globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
         typeof input === 'string' && input.startsWith('/')
-            ? original(new URL(input, base).toString(), init)
-            : original(input, init);
+            ? await original(new URL(input, base).toString(), init)
+            : await original(input, init);
     return () => {
         globalThis.fetch = original;
     };
