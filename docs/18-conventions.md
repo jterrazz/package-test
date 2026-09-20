@@ -118,7 +118,9 @@ Family I governs the source tree rather than the spec tree, and it splits in two
 
 ## The fork — which kind of test this is
 
-Three questions, in order. The answer fixes the folder, the constructor (or none), and the project.
+The questions are asked IN ORDER, and the first yes is the kind. The answer fixes the folder, the constructor (or none), and the project. The table is generated from `src/lint/cards.ts`, where the signature cards read the same rows.
+
+<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: src/lint/cards.ts -->
 
 | Question                                                               | Kind             | Lives at                                      | Constructor                   | Project       |
 | ---------------------------------------------------------------------- | ---------------- | --------------------------------------------- | ----------------------------- | ------------- |
@@ -131,6 +133,8 @@ Three questions, in order. The answer fixes the folder, the constructor (or none
 | Is it a module that needs a real service, or whose oracle is a golden? | integration      | `specs/integration/<domain>/<aspect>.spec.ts` | `specification.integration()` | `integration` |
 | Is it a module alone?                                                  | module           | `<file>.test.ts` beside `<file>.ts`           | none                          | `unit`        |
 | Is it the repository itself — a suite over several apps?               | repository suite | `specs/<family>/<aspect>.test.ts`             | none                          | any name      |
+
+<!-- /GENERATED:fork -->
 
 The SUFFIX says the kind, and the checker holds it (rule C12): `.test.ts(x)`
 beside the code for a unit, `.spec.ts` under `specs/<facet>/` for the assembled
