@@ -13,9 +13,9 @@ import { isFile } from './fs-cache.js';
  * The SUFFIX decides the kind, and nothing else: `.test.ts` beside a module,
  * `.test.tsx` beside a component, `.spec.ts` under `specs/`, `.spec.yaml` for a
  * document, `.specification.ts(x)` for the file that builds a runner. A rule
- * reads the three fields this module returns and NOTHING else of the path — the
- * gates that used to probe for a `src` or a `specs` segment disagreed with each
- * other and with the project that actually runs the file.
+ * reads the three fields this module returns and NOTHING else of the path: a
+ * gate probing for a `src` or a `specs` segment answers about the machine the
+ * checkout sits on, not about the project that runs the file.
  */
 
 /** The kinds the catalogue tells apart. */

@@ -39,9 +39,9 @@ const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 /**
  * `better-sqlite3`'s constructor, loaded the first time a database is opened.
  *
- * The binding is an OPTIONAL peer: it is a native module every install used to
- * compile, and a repository that never declares `sqlite()` has no use for one.
- * Loading it here also puts the pnpm build note where the failure happens.
+ * The binding is an OPTIONAL peer: it is a native module to compile, and a
+ * repository that never declares `sqlite()` has no use for one. Loading it
+ * here also puts the pnpm build note where the failure happens.
  */
 let databaseConstructor: null | typeof Database = null;
 
@@ -192,7 +192,7 @@ export function sqliteTemplateName(options: SqliteOptions = {}): string {
  * The directory a project caches its schema templates in —
  * `<root>/.artifacts/vitest/sqlite/`, created on demand.
  *
- * A project, not a machine. The template used to live in the OS tmpdir, where
+ * A project, not a machine. A template in the OS tmpdir is shared, where
  * two checkouts of the same repository shared one file: whichever ran first
  * built it, the other silently inherited that schema, and a branch that changed
  * the schema poisoned the branch beside it. A path under the project root

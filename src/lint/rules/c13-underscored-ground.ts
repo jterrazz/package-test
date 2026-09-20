@@ -6,7 +6,7 @@ import { isDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 
-/** The three suffixes that declare tests — `.spec.ts` joined them in 16.0. */
+/** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 
 /**

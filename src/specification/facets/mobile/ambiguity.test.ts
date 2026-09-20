@@ -66,7 +66,7 @@ describe('describeMobileAmbiguity', () => {
     });
 
     test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
-        // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all since 16.0
+        // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
         const message = describeMobileAmbiguity({
             element: button('Bookmark', { exact: false }),
             matches: [match(), match({ label: 'Bookmark all' })],
@@ -78,7 +78,7 @@ describe('describeMobileAmbiguity', () => {
     });
 
     test('never offers exact to an ordinary descriptor — it is already exact', () => {
-        // Given - a descriptor stating nothing, which is the 16.0 default
+        // Given - a descriptor stating nothing, which is the whole-label default
         const message = describeMobileAmbiguity({
             element: button('Bookmark'),
             matches: [match(), match({ label: 'Bookmark all' })],

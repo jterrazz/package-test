@@ -76,8 +76,8 @@ const FIELD_ROLES = [
  */
 export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     const scope: LocatorSelectors = element.scope ? locate(root, element.scope) : root;
-    // A name designates the accessible name WHOLE since 16.0; `{ exact: false }`
-    // Is the opt-out, and an ABSENT option is the default rather than a choice.
+    // A name designates the accessible name WHOLE; `{ exact: false }` is the
+    // Opt-out, and an ABSENT option is the default rather than a choice.
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
@@ -168,7 +168,7 @@ export async function act<T>(
 
 /**
  * Say so when a descriptor found NOTHING as a whole name but would have found
- * something as a substring — the one shape the 16.0 default changes.
+ * something as a substring — the one shape the whole-name default changes.
  *
  * Asked only on the failure path, and only for a descriptor that stated no
  * `exact` of its own: an author who wrote `{ exact: false }` chose the

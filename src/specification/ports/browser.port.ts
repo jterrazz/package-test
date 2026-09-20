@@ -49,9 +49,9 @@ export type ElementRef = {
      * Match the accessible name as a whole string rather than a substring.
      *
      * ABSENT means "the author said nothing", which the adapters read as the
-     * 16.0 default — exact — while keeping the information that no choice was
-     * made, so a name that matches only as a substring can be reported once
-     * with the transitional warning.
+     * default — exact — while keeping the information that no choice was made,
+     * so a name that matches only as a substring can be reported once with the
+     * transitional warning.
      */
     exact?: boolean;
     /**

@@ -127,7 +127,7 @@ describe('describeAmbiguity', () => {
     });
 
     test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
-        // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all since 16.0
+        // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
         const message = describeAmbiguity({
             element: link('Articles', { exact: false }),
             matches: [match(), match({ text: 'Read Articles' })],
@@ -140,7 +140,7 @@ describe('describeAmbiguity', () => {
     });
 
     test('never offers exact to an ordinary descriptor — it is already exact', () => {
-        // Given - a descriptor stating nothing, which is the 16.0 default
+        // Given - a descriptor stating nothing, which is the whole-name default
         const message = describeAmbiguity({
             element: link('Articles'),
             matches: [match(), match({ text: 'Read Articles' })],

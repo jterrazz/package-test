@@ -9,7 +9,7 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
 /** The only directories a `contracts/` root may hold — the provider carriers. */
 const PROVIDERS = new Set(['anthropic', 'http', 'openai']);
 
-/** The three suffixes that declare tests — `.spec.ts` joined them in 16.0. */
+/** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 /** A file oxlint itself visits — the AST half of the rule reports on those. */
 const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;

@@ -98,8 +98,8 @@ function withoutSuffix(source: string): string {
  *   `.txt`, `.sql`, …) — a test needing a real file is a specification and
  *   belongs under `specs/`. A contract unit legitimately imports its payload.
  *
- * The `vi.stubGlobal` clause left with 16.0: an upstream rule carries it as an
- * option now (M3), and one owner per convention is ADR-005's law.
+ * `vi.stubGlobal` is not here: an upstream rule carries it as an option (M3),
+ * and one owner per convention is ADR-005's law.
  *
  * A specifier whose extension is not on the data list is CODE, dotted or not:
  * `<subject>.<role>` module names are a naming convention, not a file type.

@@ -2,7 +2,7 @@
 import type { ElementRef } from '../../ports/browser.port.js';
 
 /**
- * The transitional warning for a name that used to match as a SUBSTRING.
+ * The transitional warning for a name that matches only as a SUBSTRING.
  *
  * Until 16.0 a descriptor's name matched any element whose accessible name
  * CONTAINED it, so `link('Articles')` also designated "Read Articles" — and a
