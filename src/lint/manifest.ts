@@ -1272,7 +1272,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
     {
         channel: 'upstream',
         convention:
-            '`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express.',
+            '`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(contracts, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express.',
         family: 'M',
         fix: 'Reach for `intercept()` and `clock` — both give back what they took at the end of the scope.',
         id: 'M3',

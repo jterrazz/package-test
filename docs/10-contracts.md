@@ -238,6 +238,16 @@ Both keywords are the rulebook's, not taste: a function returning a promise is `
 
 It is real in both runtimes — msw's server under node, msw's worker in a page — so a module test and a component test declare the outside world the same way. What it replaces is `vi.stubGlobal('fetch')` and a direct `msw/node` import, which rules F6 and F8 refuse a test and a consumer respectively.
 
+**A subject that fetches a PATH states where the path lives.** `fetch('/api/posts')` is browser code: under node the URL has no base, so the request fails before any contract can answer it. `intercept(contracts, { origin: 'http://console.test' })` gives the block that base — the relative call resolves against it, the contracts match as they would any other request (a path-form contract ignores the origin, an absolute one compares it), and `fetch` is put back when the scope ends. It is the seam's own wrapping, so no test has to own one.
+
+```typescript
+await using _ = await intercept(posts, { origin: 'http://console.test' });
+```
+
+**An empty list is refused.** `intercept(defineContracts())` guards nothing, and a subject with no network needs no intercept at all — the message says so. "This subject makes no network call" is said the other way round: declare the call with `http.unreachable()` on every feed it could reach, and the spec fails if it makes one.
+
+**A cancelled body does not settle.** `response.body.cancel()` on an intercepted reply never resolves under node — msw's interceptor holds the stream open (reading it with `.text()`/`.json()` resolves normally). A subject whose own code cancels a body keeps `vi.stubGlobal('fetch')` with a reasoned suppression of M3 until the seam answers it; every other subject has `intercept()`.
+
 **Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its contracts last and its strictness is total ([16](16-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
 ## Two engines, one queue

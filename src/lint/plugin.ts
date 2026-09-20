@@ -256,13 +256,16 @@ const SNAPSHOT_MATCHERS: Record<string, string> = {
  *
  * `stubGlobal` replaces the network with a function the test wrote; the three
  * timer methods take the clock without giving it back at the end of the scope.
+ * The one case that had no answer — a subject fetching a relative URL under
+ * node — is `intercept`'s `origin` option, which the message names.
  * `stubEnv` is NOT here: it restores itself and is the sanctioned way to state
  * an env a module reads. `vi.mock`/`vi.doMock` stay on I4, whose allow-list the
  * option cannot express.
  */
 const RESTRICTED_VI_METHODS: Record<string, string> = {
     setSystemTime: '`vi.setSystemTime` → `clock.at(iso)`, which gives the calendar back.',
-    stubGlobal: "`vi.stubGlobal('fetch')` → `await using _ = await intercept(defineContracts(…))`.",
+    stubGlobal:
+        "`vi.stubGlobal('fetch')` → `await using _ = await intercept(defineContracts(…))`; a subject that fetches a PATH states where it resolves: `intercept(contracts, { origin: 'http://<host>.test' })`.",
     useFakeTimers: '`vi.useFakeTimers` → `clock.at(iso)` and `clock.advance(ms)`.',
     useRealTimers: '`vi.useRealTimers` → nothing: `using` gives the clock back at the scope end.',
 };

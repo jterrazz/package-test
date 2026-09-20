@@ -29,6 +29,20 @@ import type { ContractRegistration } from './handlers.js';
  */
 export type InterceptScope = AsyncDisposable;
 
+/** What a scope may state about the network it declares. */
+export type InterceptOptions = {
+    /**
+     * The base a RELATIVE request resolves against, for the life of the scope.
+     *
+     * A module that calls `fetch('/api/posts')` is browser code: under node the
+     * URL cannot be parsed at all, so the request fails before any contract can
+     * answer it and the test's only way out was to replace `fetch` itself. With
+     * an origin stated, the relative call resolves here and the declared
+     * contracts — path form or absolute — match it as they would any other.
+     */
+    origin?: string;
+};
+
 /**
  * The module-scope network double. Resolves once the engine is listening —
  * which is why it is a promise, and why the canonical form awaits it:
@@ -41,10 +55,14 @@ export type InterceptScope = AsyncDisposable;
  * first handler is in place, so the shape refuses the racy spelling: a promise
  * is not an `AsyncDisposable`, and the compiler says so.
  */
-export type Intercept = ((contracts: ContractInput) => Promise<InterceptScope>) &
+export type Intercept = ((
+    contracts: ContractInput,
+    options?: InterceptOptions,
+) => Promise<InterceptScope>) &
     ((
         request: ContractRequest,
         response: ContractResponder | ContractResponse,
+        options?: InterceptOptions,
     ) => Promise<InterceptScope>);
 
 /**
@@ -74,6 +92,39 @@ export function declared(
     return [{ request: requestOrContracts, response: maybeResponse }];
 }
 
+/** Is this argument the options object rather than a response? */
+function isOptions(value: unknown): value is InterceptOptions {
+    return (
+        typeof value === 'object' && value !== null && !Array.isArray(value) && 'origin' in value
+    );
+}
+
+/**
+ * Resolve every relative request against `origin` for the life of the scope.
+ *
+ * The framework owns the seam so a test never has to: this is the one place
+ * `fetch` is wrapped, it is put back when the scope ends, and what it does is
+ * the one thing a page would have done for free — turn `/api/posts` into a URL.
+ */
+function resolveRelativeAgainst(origin: string): () => void {
+    let base: URL;
+    try {
+        base = new URL(origin);
+    } catch {
+        throw new Error(
+            `intercept(): \`origin\` states where a relative request resolves — \`${origin}\` is not an absolute URL (e.g. 'http://console.test').`,
+        );
+    }
+    const original = globalThis.fetch;
+    globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
+        typeof input === 'string' && input.startsWith('/')
+            ? original(new URL(input, base).toString(), init)
+            : original(input, init);
+    return () => {
+        globalThis.fetch = original;
+    };
+}
+
 /**
  * Build the module-scope double on one engine. The node entry hands it msw's
  * server, the page's entry hands it msw's worker: one shape, two transports,
@@ -84,27 +135,51 @@ export function declared(
 export function interceptThrough(
     register: (contracts: readonly Contract[]) => Promise<ContractRegistration>,
 ): Intercept {
-    async function intercept(contracts: ContractInput): Promise<InterceptScope>;
+    async function intercept(
+        contracts: ContractInput,
+        options?: InterceptOptions,
+    ): Promise<InterceptScope>;
     async function intercept(
         request: ContractRequest,
         response: ContractResponder | ContractResponse,
+        options?: InterceptOptions,
     ): Promise<InterceptScope>;
     async function intercept(
         requestOrContracts: ContractInput | ContractRequest,
-        maybeResponse?: ContractResponder | ContractResponse,
+        maybeResponseOrOptions?: ContractResponder | ContractResponse | InterceptOptions,
+        maybeOptions?: InterceptOptions,
     ): Promise<InterceptScope> {
-        const contracts = declared(requestOrContracts, maybeResponse);
+        const options = isOptions(maybeOptions)
+            ? maybeOptions
+            : isOptions(maybeResponseOrOptions)
+              ? maybeResponseOrOptions
+              : undefined;
+        const contracts = declared(
+            requestOrContracts,
+            options === maybeResponseOrOptions
+                ? undefined
+                : (maybeResponseOrOptions as ContractResponder | ContractResponse | undefined),
+        );
         if (contracts.length === 0) {
             throw new Error(
                 'intercept(): declare at least one contract — an empty list guards nothing, ' +
                     'and a subject with no network needs no intercept at all.',
             );
         }
-        const registration = await register(contracts);
+        const restoreOrigin =
+            options?.origin === undefined ? undefined : resolveRelativeAgainst(options.origin);
+        let registration;
+        try {
+            registration = await register(contracts);
+        } catch (error) {
+            restoreOrigin?.();
+            throw error;
+        }
         return {
             [Symbol.asyncDispose]: async () => {
                 const violation = registration.violation();
                 registration.cleanup();
+                restoreOrigin?.();
                 await Promise.resolve();
                 if (violation) {
                     throw violation;
