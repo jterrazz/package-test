@@ -4,7 +4,13 @@
 
 Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](10-api.md).
 
-## Creating the runner
+## What it specifies
+
+A jobs spec answers one question: **when this name is triggered, what does the pipeline do to the world it was handed?** The subject is the assembled job — its handler, its services, the network it reaches — met through the one door the scheduler would use, `.trigger(name)`. What a single pure function inside that pipeline returns is a module test's ([05](05-module-tests.md)); what the pipeline leaves in a database is this chapter's.
+
+A job spec exercises your job function directly, wired to real containers. The pipeline has no network surface of its own, and testing the scheduler that invokes it is out of scope — the job IS the subject, and the trigger name is how a spec reaches it.
+
+## The constructor
 
 ```typescript
 // specs/jobs/jobs.specification.ts
@@ -32,10 +38,6 @@ afterAll(cleanup);
 | `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule A9)                                    |
 
 There is **no `server`** option: jobs run in-process by definition, and the record of services is the only outside world they meet (rule A2). A `JobHandle` carries the name you pass to `.trigger()` — the handles above respond to `'nightly-report'` and `'support-drafts'`.
-
-## Why node-only
-
-A job spec exercises your job function directly, wired to real containers. The pipeline has no network surface of its own, and testing the scheduler that invokes it is out of scope — the job IS the subject, and the trigger name is how a spec reaches it.
 
 ## The chain
 
@@ -68,7 +70,7 @@ Everything a pipeline reads from the outside world is declared: seeds set the da
 
 Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every declared route with its consumption state (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
 
-## Seeding and sequences for pipelines
+### Seeding and sequences for pipelines
 
 Selection is **first non-exhausted match wins**, so a multi-call scenario is a finite contract in front of an unlimited tail — `times` says how many calls the first one answers:
 
@@ -93,7 +95,19 @@ test('retries then recovers from provider rate-limit', async () => {
 
 The number in `times` IS the assertion: it says the job retries exactly once. A contract with no `times` is unlimited, which is what you want for a route the pipeline may hit any number of times.
 
-## Error-case testing
+## The result
+
+`.trigger()` resolves to a result whose primary subjects are the databases:
+
+| Member                      | Description                                                             |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `result.table(name, opts?)` | Table subject for `toMatchRows` / `toBeEmpty` — async, `await expect()` |
+
+With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](14-assertions.md).
+
+## Unique here
+
+### Error-case testing — a provider that fails on purpose
 
 Provider failure modes are first-class response builders — this is where jobs specs earn their keep, because these paths are nearly impossible to reproduce against live providers:
 
@@ -128,16 +142,6 @@ The three failure families:
 | `openai.malformed('…')`                                                | A 200 whose body violates the provider schema          |
 
 The full builder catalogue lives in [contracts](16-contracts.md).
-
-## Result surface
-
-`.trigger()` resolves to a result whose primary subjects are the databases:
-
-| Member                      | Description                                                             |
-| --------------------------- | ----------------------------------------------------------------------- |
-| `result.table(name, opts?)` | Table subject for `toMatchRows` / `toBeEmpty` — async, `await expect()` |
-
-With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](14-assertions.md).
 
 ## Pitfalls
 

@@ -4,7 +4,11 @@
 
 Use it when the subject under test is a process invocation. If the process serves HTTP, test that surface with [api](10-api.md).
 
-## Creating the runner
+## What it specifies
+
+A CLI spec answers one question: **given this file tree, this environment and this argv, what does the binary print, what does it exit with, and what does it leave on disk?** The subject is the built command met through a child process — never an imported function, which is a module test's ([05](05-module-tests.md)). Most of them are written as literate documents rather than as code; the three doors below say when each one is right.
+
+## The constructor
 
 ```typescript
 // specs/cli/cli.specification.ts
@@ -21,16 +25,19 @@ afterAll(cleanup);
 
 ### Options
 
-| Option      | Description                                                                                                                                                                                                                                   |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `root`      | **Project-root override** only (rule A9): anchors local-bin resolution and the artefact paths. It is _not_ a fixtures root — `.fixture()` resolves paths on its own. Auto-discovery applies when omitted                                      |
-| `services`  | Named record of infrastructure services (`postgres()`, `redis()`, `sqlite()`) — connection URLs are auto-injected into the child env (rule B6)                                                                                                |
-| `docker`    | Opt-in Docker awareness: `{ envVar, nameLabel, testRunLabel }` — see [Docker-aware mode](#docker-aware-mode)                                                                                                                                  |
-| `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`) — see [Spec documents](#spec-documents--casespecyaml)                                                                                                         |
-| `serve`     | Named **servers** a spec document starts (`serve: [mcp]`): `{ command, ready, url, env }` — see [Spec documents](#spec-documents--casespecyaml)                                                                                               |
-| `transform` | **Escape hatch only** (rule D6): a normalizer applied to streams before comparison, for application noise not covered by tokens. ANSI stripping is already the default; a transform that only re-implements standard tokens is a lint warning |
+| Option      | Description                                                                                                                                                                                                                                                               |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `root`      | **Project-root override** only (rule A9): anchors local-bin resolution and the artefact paths. It is _not_ a fixtures root — `.fixture()` resolves paths on its own. Auto-discovery applies when omitted                                                                  |
+| `services`  | Named record of infrastructure services (`postgres()`, `redis()`, `sqlite()`) — connection URLs are auto-injected into the child env (rule B6)                                                                                                                            |
+| `docker`    | Opt-in Docker awareness: `{ envVar, nameLabel, testRunLabel }` — see [Docker-aware mode](#docker-aware-mode)                                                                                                                                                              |
+| `defaults`  | Environment applied to **every** run of this binary — the variables the product needs to be deterministic at all (`TZ`, `NO_COLOR`, `LANG`, a config home under the spec's own workdir). Stated once per app; a chained `.env()` and a document's `env:` both win over it |
+| `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`) — see [Spec documents](#spec-documents--casespecyaml)                                                                                                                                     |
+| `serve`     | Named **servers** a spec document starts (`serve: [mcp]`): `{ command, ready, url, env }` — see [Spec documents](#spec-documents--casespecyaml)                                                                                                                           |
+| `transform` | **Escape hatch only** (rule D6): a normalizer applied to streams before comparison, for application noise not covered by tokens. ANSI stripping is already the default; a transform that only re-implements standard tokens is a lint warning                             |
 
-## `.exec()` — the single execution method
+## The chain
+
+### `.exec()` — the single execution method
 
 `.exec(args?, options?)` is the **only** way to run the binary — there is no `.spawn()` (rule B2). It covers short commands, long-running processes, and sequences. Called with **no arguments**, the binary runs bare (no CLI args) — clearer than the `.exec('')` idiom:
 
@@ -51,7 +58,7 @@ test('shows help', async () => {
 });
 ```
 
-### Long-running processes: `waitFor` / `timeout`
+#### Long-running processes: `waitFor` / `timeout`
 
 ```typescript
 test('dev server boots', async () => {
@@ -73,7 +80,7 @@ test('dev server boots', async () => {
 
 Quoting is identical between the one-shot and `waitFor` forms: both run the full command line through the shell (`spawnSync` vs `spawn`, `shell: true`), so a quoted argument behaves the same either way — there is no naive whitespace split.
 
-### Sequences: array form
+#### Sequences: array form
 
 ```typescript
 test('build then start chain stops at first failure', async () => {
@@ -87,7 +94,7 @@ test('build then start chain stops at first failure', async () => {
 
 Commands run sequentially in the same cwd; the sequence stops at the first failure. This is still one terminal action — one spec, one `.exec()` (rule B1). An empty array throws (`exec([]) requires at least one command`), and `{ waitFor, timeout }` cannot be combined with the array form.
 
-## Working-directory semantics
+### Working-directory semantics
 
 Every spec gets a brand-new temp directory (`mkdtemp`) as its cwd. The runner never writes into your fixtures.
 
@@ -156,7 +163,7 @@ test('seeds a single fixture file', async () => {
 
 Tree snapshots are directories under `_expected/` (`_expected/shop-scaffold/`) — the one `toMatch` argument that takes no extension (rule C6).
 
-## `.env()` — child process environment
+### `.env()` — child process environment
 
 ```typescript
 test('isolates HOME per spec', async () => {
@@ -174,7 +181,7 @@ test('isolates HOME per spec', async () => {
 - `null` **removes** a variable from the child env — shield the spec from the developer's shell.
 - Repeated `.env()` calls merge; later keys win.
 
-### Auto-injected connection URLs (rule B6)
+#### Auto-injected connection URLs (rule B6)
 
 When the runner has `services`, the framework injects into the child env, automatically:
 
@@ -205,7 +212,7 @@ test('migrates a legacy schema', async () => {
 });
 ```
 
-## File state is the shape of a fixture tree
+### File state is the shape of a fixture tree
 
 CLI-mode `.seed()` is **SQL only** — it carries database state, nothing else (rule C7). To put files or config trees into the cwd, use `.fixture()` with a fixture laid out exactly as the cwd should look. There is no "seed handler" or path-prefix dispatch.
 
@@ -225,7 +232,7 @@ test('deploys from a shaped workspace', async () => {
 });
 ```
 
-### Where a fixture lives
+#### Where a fixture lives
 
 The two doors are not interchangeable, and the question that picks between them is **how many leaves read this tree**.
 
@@ -235,7 +242,7 @@ A LEAF'S OWN ground sits beside it, as `<domain>/_fixtures/<name>/`, and is reac
 
 So: one reader, beside the leaf. Two or more, in the pool. Write it local first — promotion is a `--fix` away, and demotion is the rule the checker enforces.
 
-## The chain never reaches a real system
+### The chain never reaches a real system
 
 A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a chain proves must come out of its fixture, never out of the machine that happened to run it. A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network connection, or reads the operator's home directory is **a test escaping the sandbox, not extra realism** — it passes on the one laptop where those tools are installed and configured, fails everywhere else, and either way it proves something about that laptop rather than about the binary under test. The HTTP half of the same rule is D7, in [contracts](16-contracts.md).
 
@@ -263,7 +270,7 @@ test('reports what the cluster holds', async () => {
 });
 ```
 
-### The shape of a stub fixture
+#### The shape of a stub fixture
 
 A stub fixture is a `bin/` holding one script per binary the run must not find for real:
 
@@ -319,7 +326,11 @@ Pick by what the stub is standing in for. **Data-driven** when the answer is a d
 
 A served stub — a `serve:` server in a spec document — routes the same way over `$TEST_WORKDIR`, which is where that document's `fixture:` landed: see [Registration — once per app](#registration--once-per-app).
 
-## Streams, JSON, grep
+## The result
+
+A CLI result carries the streams, the exit code, the files the run left and — under Docker-aware mode — the containers it touched. Every accessor and every matcher it accepts is [14 — Assertions](14-assertions.md)'s; what follows is the part only this facet has.
+
+### Streams, JSON, grep
 
 ```typescript
 test('fails on unknown command with a useful error', async () => {
@@ -355,7 +366,9 @@ test('lints a shop and reports per-file blocks', async () => {
 
 **Tool output → snapshot per scoped use case (rule D11).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch('<use-case>.txt')` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](14-assertions.md).
 
-## Spec documents — `<case>.spec.yaml`
+## Unique here
+
+### Spec documents — `<case>.spec.yaml`
 
 A terminal session is already a specification: a command, its exit code, what it printed, what it left on disk. A **spec document** writes it as that — one scenario per `<case>.spec.yaml`, living **beside the spec** (never under `_expected/`, which holds goldens, not scenarios). Nothing here is new capability: it is the chain's semantics in the shape of a data file an editor can validate.
 
@@ -382,7 +395,7 @@ runs:
           }
 ```
 
-### The ground
+#### The ground
 
 Everything above `runs:`. Any key outside the table below is a refusal naming the key and its line.
 
@@ -394,7 +407,7 @@ Everything above `runs:`. Any key outside the table below is a refusal naming th
 | `env:`         | string or list                              | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)          |
 | `serve:`       | string, list of strings, or `- name: { … }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server |
 
-### The runs
+#### The runs
 
 `runs:` is a list of at least one run, executed **in order**, all in ONE working directory, and **every** one asserted. This is where the format goes past `.exec([...])`, which stops at the first non-zero exit and keeps only the last output: here a non-zero exit does not end the session, because each exit code is part of what the document states.
 
@@ -415,7 +428,7 @@ Everything above `runs:`. Any key outside the table below is a refusal naming th
 
 The whole [token vocabulary](15-tokens.md) works in `stdout`, `stderr` and the `files:` texts — `{{url}}`, `{{int}}`, `{{workdir}}`, `{{any}}`, `#ref` captures — and **never** in `description`, `command` or `exit`, which are prose and data. For wording that varies WITHIN a line (a duration phrase, a hostname, a count in a sentence), reach for `{{string}}`, which stops at the end of the line; keep `{{any}}` for a span that genuinely crosses lines.
 
-### `files:` — what the run left behind
+#### `files:` — what the run left behind
 
 Each key is a path relative to the working directory (never absolute, never escaping it). Each value is one of four forms:
 
@@ -448,7 +461,7 @@ runs:
 
 Written as one mapping at the end of the session, that pair could not be stated at all: a working directory only ever holds its latest state.
 
-### Registration — once per app
+#### Registration — once per app
 
 The document names its ground by WORD; the code says what those words mean, in the `specification.cli()` options:
 
@@ -476,7 +489,7 @@ A `serve` entry is spawned with the document's extra `KEY: value` merged into it
 
 **`TEST_WORKDIR` is seeded into every served child** — the document's working directory in the resolved form `{{workdir}}` holds and `$WORKDIR` expands to. The servers start after `fixture:` has been copied, so a stub reads the world the document laid down (`$TEST_WORKDIR/answers/dashboard/posts.json`) exactly as a stub binary reads `${0%/*}/../answers/`: a scenario is a layer of files, not a flag threaded through the server. The mapping form overrides it like any other key — `- mcp: { TEST_WORKDIR: /elsewhere }` points that one server somewhere else.
 
-### The schema
+#### The schema
 
 The document's JSON Schema ships with the package at `schema/spec.schema.json`, published as the `@jterrazz/test/schema` export, and is generated from the grammar's own constants — it cannot describe a shape the parser does not read. Point an editor at it and every key, every type and every closed set is checked as you type:
 
@@ -486,7 +499,7 @@ The document's JSON Schema ships with the package at `schema/spec.schema.json`, 
 
 A schema says which keys exist, not which ORDER they come in — JSON Schema has no vocabulary for the sequence of an object's members. The canonical order (`kind, description, fixture, env, serve, runs`, and `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run) is the `d4b-spec-key-order` lint pass's, which also rewrites it: `npx jterrazz-test-check specs --fix`. The full document family is in [19 — linting](19-linting.md).
 
-### The three doors, one engine
+#### The three doors, one engine
 
 | Door       | Use it when                                                                                    |
 | ---------- | ---------------------------------------------------------------------------------------------- |
@@ -524,7 +537,7 @@ test('scaffolds a shop and leaves the tree we expect', async () => {
 
 The path is relative to the test file's directory, where the document lives. Setup chained before the call layers **underneath** the document's own ground: a chained `.fixture()` is copied first, the document's `fixture:` entries over it, and its `env:` wins over a chained `.env()`. `{ frozen: true }` opts one document out of the update rewrite — the same guard as `toMatch(name, { frozen: true })`, for a deliberately-wrong document whose failure rendering is the subject of a negative test.
 
-### Failure and update
+#### Failure and update
 
 On a mismatch the failure renders the description, the command, everything the comparison rejected, and where to open the document:
 
@@ -553,7 +566,7 @@ A line the comparison ACCEPTED is rendered as equal, with its token — a `{{url
 
 `TEST_UPDATE=1` rewrites **only `exit`, `stdout` and `stderr`, per run**. The ground, the commands and the `files:` assertions are never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. An empty stream loses its key, since absence already asserts emptiness. Placeholders survive by **pattern match**, not by line index, so a token stays a token wherever the line moved to: see [update mode](15-tokens.md#update-mode-tokens-are-preserved).
 
-### When to reach for code
+#### When to reach for code
 
 The format states one binary, one working directory, one linear session. Reach for the chain when the spec needs:
 
@@ -565,7 +578,29 @@ The format states one binary, one working directory, one linear session. Reach f
 
 A document that starts wanting a conditional is a chain wearing a header. Write it in code.
 
-## Docker-aware mode
+### The `cli()` project — the default door, wired
+
+The project helper collects both halves of this facet: the `.spec.ts` files, and the documents — a `<case>.spec.yaml` is a test file of its own, so the literate plugin's glob has to join the include of the project that collects them, never the root config.
+
+```typescript
+// vitest.config.ts
+import { cli, defineSpecConfig, unit } from '@jterrazz/test/vitest';
+
+export default defineSpecConfig({ test: { projects: [unit(), cli()] } });
+```
+
+Called bare, it assumes the path convention: every `specs/cli/**/*.spec.yaml` becomes a test bound to `specs/cli/cli.specification.ts`. Three knobs change that, and nothing else needs stating:
+
+| `literate`                        | Collects                                                 |
+| --------------------------------- | -------------------------------------------------------- |
+| omitted                           | the convention above — the door every CLI suite opens on |
+| `{ specification: './other.ts' }` | the same documents, bound to another runner              |
+| `{ include: [...] }`              | a narrower glob                                          |
+| `false`                           | no documents at all — a suite written entirely in code   |
+
+A member without `"type": "module"` cannot `require()` the ESM-only helpers: name the file `vitest.config.mts` there.
+
+### Docker-aware mode
 
 For CLIs that spawn Docker containers, declare the `docker` option (rule G3):
 

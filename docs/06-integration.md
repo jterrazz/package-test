@@ -32,7 +32,7 @@ test('reads the orders the day left behind', async () => {
 });
 ```
 
-## Which tests belong here
+## What it specifies
 
 Three questions decide, in order ([18 — Conventions](18-conventions.md)):
 
@@ -69,7 +69,7 @@ const result = await integration.call(async ({ db }) => await listOrders(db.conn
 
 Databases reset at the start of every chain, exactly as on api and jobs (rules B1, B7): one spec is one call, and no spec depends on a previous one.
 
-## The result — `CallResult`
+## The result
 
 Two readings, never both.
 
@@ -102,7 +102,9 @@ Both accessors are the package's ordinary subjects, so the golden mechanism reac
 
 A call that a declared contract never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule D7).
 
-## Without services — the golden half
+## Unique here
+
+### The golden half — a pure module, no services at all
 
 `specification.integration()` with no options is the pure-module runner: nothing starts, and what earns the folder is the golden.
 
@@ -125,7 +127,7 @@ test.each(CASES)('renders $name', async ({ name, input }) => {
 
 The golden is named by a template literal, and the checker's C9 dead-fixture pass reads that form: a fixture whose name matches the literal's static ends is one the table could have asked for, so a wall of `_expected/` files stays alive without a hand-written literal each.
 
-## The project
+### The `integration()` project
 
 `integration()` from `@jterrazz/test/vitest` is the canonical project: it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node facets.
 
@@ -143,7 +145,7 @@ integration({
 });
 ```
 
-## Folder layout
+### Folder layout
 
 ```
 specs/integration/
