@@ -13,7 +13,7 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../types.js';
  * exactly as blindly as one under `specs/`, and went unseen while the rule
  * gated on the folder.
  */
-export const j2NoSleepInSpecs: LintRule = {
+export const j2NoSleep: LintRule = {
     create(context: RuleContext) {
         if (!isTestRole(roleOf(context.filename).role)) {
             return {};
@@ -51,11 +51,11 @@ export const j2NoSleepInSpecs: LintRule = {
         return visitor;
     },
     meta: {
-        docs: RULE_DOCS['j2-no-sleep-in-specs'],
+        docs: RULE_DOCS['j2-no-sleep'],
         messages: {
-            sleep: 'No arbitrary sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else.',
+            sleep: 'No arbitrary sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil(predicate)` everywhere else.',
             timersImport:
-                'No timer-based sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil()` everywhere else.',
+                'No timer-based sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil(predicate)` everywhere else.',
         },
         type: 'problem',
     },

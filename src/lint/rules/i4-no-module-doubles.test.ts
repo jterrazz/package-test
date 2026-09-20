@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { i4NoViMockInSrc } from './i4-no-vi-mock-in-src.js';
+import { i4NoModuleDoubles } from './i4-no-module-doubles.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -15,7 +15,7 @@ const ruleTester = new RuleTester();
 const SRC_TEST = '/repo/src/specification/matching/match.test.ts';
 const SPEC = '/repo/specs/cli/exec/exec.spec.ts';
 
-ruleTester.run('i4-no-vi-mock-in-src', i4NoViMockInSrc as unknown as OxlintRule, {
+ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRule, {
     invalid: [
         // Module mocking is banned under src/.
         { code: 'vi.mock("./match.js");', errors: [{ messageId: 'viMock' }], filename: SRC_TEST },

@@ -79,8 +79,8 @@
             }
         ],
         "jterrazz/i2-sibling-test-naming": "error",
-        "jterrazz/i4-no-vi-mock-in-src": "error",
-        "jterrazz/j2-no-sleep-in-specs": "error",
+        "jterrazz/i4-no-module-doubles": "error",
+        "jterrazz/j2-no-sleep": "error",
         "jterrazz/j6w-given-in-the-test": "warn",
         "jterrazz/w1-scenario-pure": "error",
         "jterrazz/w2-testid-states-what-is-missing": "error",

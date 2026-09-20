@@ -43,17 +43,17 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
         // Then - `tests` reaches all four test roles, `module` only the plain one, `specification` and `config` only their own file
         expect(about(output, 'src/widget.test.ts')).toStrictEqual(
             expect.arrayContaining([
-                'j2-no-sleep-in-specs',
+                'j2-no-sleep',
                 'e9w-env-assignment-in-test',
                 'g4-no-dom-in-module-test',
             ]),
         );
         expect(about(output, 'src/panel.test.tsx')).toStrictEqual(
-            expect.arrayContaining(['j2-no-sleep-in-specs', 'e9w-env-assignment-in-test']),
+            expect.arrayContaining(['j2-no-sleep', 'e9w-env-assignment-in-test']),
         );
         expect(about(output, 'src/panel.test.tsx')).not.toContain('g4-no-dom-in-module-test');
         expect(about(output, 'specs/api/orders/total.spec.ts')).toStrictEqual(
-            expect.arrayContaining(['j2-no-sleep-in-specs', 'e9w-env-assignment-in-test']),
+            expect.arrayContaining(['j2-no-sleep', 'e9w-env-assignment-in-test']),
         );
         expect(about(output, 'specs/api/orders/total.spec.ts')).not.toContain(
             'g4-no-dom-in-module-test',
@@ -67,7 +67,7 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
 
         // Then - the test rules reach it, and the ones that would call it misplaced do not: C1's declared depth is what judges its shape, and I2's orphan clause stops at the specs boundary
         expect(suite).toStrictEqual(
-            expect.arrayContaining(['j2-no-sleep-in-specs', 'e9w-env-assignment-in-test']),
+            expect.arrayContaining(['j2-no-sleep', 'e9w-env-assignment-in-test']),
         );
         expect(suite).not.toContain('c1-domain-structure');
         expect(suite).not.toContain('i2-sibling-test-naming');
@@ -83,7 +83,7 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
             'a3-no-destructure-alias',
         );
         expect(about(output, 'vitest.config.ts')).toContain('e2-preset-config');
-        expect(about(output, 'vitest.config.ts')).not.toContain('j2-no-sleep-in-specs');
+        expect(about(output, 'vitest.config.ts')).not.toContain('j2-no-sleep');
         expect(about(output, 'vitest.config.ts')).not.toContain('e9w-env-assignment-in-test');
     });
 });

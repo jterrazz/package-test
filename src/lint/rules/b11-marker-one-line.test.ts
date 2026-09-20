@@ -70,7 +70,7 @@ ruleTester().run('b11-marker-one-line', asOxlintRule(b11MarkerOneLine), {
         {
             code: `test('ships', () => {
     // Given - a paid order
-    // oxlint-disable-next-line jterrazz/j2-no-sleep-in-specs -- the clock primitive under test
+    // oxlint-disable-next-line jterrazz/j2-no-sleep -- the clock primitive under test
     const order = paid();
     // Then - it leaves
     expect(order).toBe(true);
