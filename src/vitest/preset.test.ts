@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { COVERAGE_DIR, VITEST_ARTIFACTS_DIR } from '../specification/artifacts/artifacts.js';
+import {
+    ATTACHMENTS_DIR,
+    COVERAGE_DIR,
+    REPORTER_OUTPUT_FILES,
+    VITEST_ARTIFACTS_DIR,
+} from '../specification/artifacts/artifacts.js';
 import { defineSpecConfig } from './preset.js';
 
 describe('defineSpecConfig() — artefact paths', () => {
@@ -11,6 +16,31 @@ describe('defineSpecConfig() — artefact paths', () => {
         // Then - both writers point inside the one artefact folder
         expect(config.cacheDir).toBe(VITEST_ARTIFACTS_DIR);
         expect(config.test?.coverage).toStrictEqual({ reportsDirectory: COVERAGE_DIR });
+    });
+
+    test('routes every path Vitest 5 pins under .artifacts/vitest', () => {
+        // Given - the preset alone: the attachments a test annotates, the failure screenshots, and the four reporters that became file writers
+        const config = defineSpecConfig();
+
+        // Then - none of them lands on `.vitest/` at the repository root, which is the one folder the estate's artefact rule does not cover
+        expect(config.test?.attachmentsDir).toBe(ATTACHMENTS_DIR);
+        expect(config.test?.outputFile).toStrictEqual(REPORTER_OUTPUT_FILES);
+        expect(
+            Object.values(REPORTER_OUTPUT_FILES).every((path) =>
+                path.startsWith(VITEST_ARTIFACTS_DIR),
+            ),
+        ).toBe(true);
+    });
+
+    test('gives a project the attachments directory too', () => {
+        // Given - a config with one inline project
+        const config = defineSpecConfig({
+            test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
+        });
+
+        // Then - the project carries it on its own: a project inherits nothing from the root
+        const [project] = config.test?.projects ?? [];
+        expect(project).toMatchObject({ test: { attachmentsDir: ATTACHMENTS_DIR } });
     });
 
     test('gives every inline project the cache dir too', () => {
@@ -103,6 +133,47 @@ describe('defineSpecConfig() — what the consumer states wins', () => {
 
         // Then - there is no object to merge into, so nothing is invented
         expect(config.test?.projects).toStrictEqual(['packages/*']);
+    });
+});
+
+describe('defineSpecConfig() — the hygiene a suite does not have to write', () => {
+    test('never retries: a flaky test is fixed or deleted', () => {
+        // Given - the preset alone
+        const config = defineSpecConfig();
+
+        // Then - the policy is the default, so no repository has to state it
+        expect(config.test?.retry).toBe(0);
+    });
+
+    test('gives back what a test took — the spies, the globals, the environment', () => {
+        // Given - the preset alone
+        const config = defineSpecConfig();
+
+        // Then - the three restores are on, which is what lets `clock.at()` and `vi.stubEnv()` be written with no teardown hook (J6w)
+        expect(config.test?.restoreMocks).toBe(true);
+        expect(config.test?.unstubGlobals).toBe(true);
+        expect(config.test?.unstubEnvs).toBe(true);
+    });
+
+    test('carries the same hygiene into a project', () => {
+        // Given - a project that states only its own include
+        const config = defineSpecConfig({
+            test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
+        });
+
+        // Then - a project resolves as its own config, so the defaults are merged into it
+        const [project] = config.test?.projects ?? [];
+        expect(project).toMatchObject({
+            test: { restoreMocks: true, retry: 0, unstubEnvs: true, unstubGlobals: true },
+        });
+    });
+
+    test('what a config states wins over all of it', () => {
+        // Given - a repository whose subject IS the retry
+        const config = defineSpecConfig({ test: { retry: 2 } });
+
+        // Then - the preset is a default, not a ceiling
+        expect(config.test?.retry).toBe(2);
     });
 });
 
