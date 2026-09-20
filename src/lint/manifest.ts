@@ -672,6 +672,17 @@ export const RULE_DOCS = {
             'A fixed sleep makes tests slow and flaky; waiting on a condition is deterministic.',
         reach: 'tests',
     },
+    'j6w-given-in-the-test': {
+        channel: 'statique',
+        convention:
+            "A `beforeEach`/`beforeAll` in a test file is a warning, and so is an `afterEach`/`afterAll` whose body does more than restore (`cleanup`, `vi.useRealTimers`, `vi.restoreAllMocks`, `vi.resetAllMocks`, `vi.unstubAllGlobals`, `vi.unstubAllEnvs`). `afterAll(cleanup)` in a `*.specification.ts` is A4's own idiom and out of reach by role.",
+        family: 'J',
+        fix: 'Call a function from each test instead of a hook; `clock.at()` and `intercept()` restore themselves.',
+        id: 'J6',
+        rationale:
+            'A hook moves the setup out of the only place a reader looks, shares it with every test in the file, and half of them come to depend on it quietly.',
+        reach: 'tests',
+    },
     'w1-scenario-pure': {
         channel: 'statique',
         convention:

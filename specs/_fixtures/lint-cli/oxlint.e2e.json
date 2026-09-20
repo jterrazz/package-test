@@ -81,6 +81,7 @@
         "jterrazz/i2-sibling-test-naming": "error",
         "jterrazz/i4-no-vi-mock-in-src": "error",
         "jterrazz/j2-no-sleep-in-specs": "error",
+        "jterrazz/j6w-given-in-the-test": "warn",
         "jterrazz/w1-scenario-pure": "error",
         "jterrazz/w2-testid-states-what-is-missing": "error",
         "jterrazz/w5w-scenario-settles": "warn"
