@@ -116,53 +116,51 @@ describe('postgres — the handle against a real container', () => {
         expect(result.value).toMatch('init-ok.json');
     });
 
-    describe('what the database refuses', () => {
-        /*
-         * CONVENTIONS D11 scalpel (e): the reason inside each message is
-         * postgres's own wording, unstable across image versions — probe the
-         * framework's half of the sentence, never snapshot the driver's.
-         */
+    /*
+     * CONVENTIONS D11 scalpel (e): the reason inside each message is
+     * postgres's own wording, unstable across image versions — probe the
+     * framework's half of the sentence, never snapshot the driver's.
+     */
 
-        test('a failing statement surfaces the database own complaint', async () => {
-            // Given - a statement naming a table that does not exist
-            const result = await integration.call(async ({ db }) => {
-                await db.seed('SELECT * FROM "nonexistent_table_xyz"');
-            });
-
-            // Then - the refusal names the table the statement asked for
-            expect(result.error).toContain('nonexistent_table_xyz');
+    test('what the database refuses — a failing statement surfaces the database own complaint', async () => {
+        // Given - a statement naming a table that does not exist
+        const result = await integration.call(async ({ db }) => {
+            await db.seed('SELECT * FROM "nonexistent_table_xyz"');
         });
 
-        test('a query on a table that does not exist names that table', async () => {
-            // Given - a read of a table no schema declares
-            const result = await integration.call(
-                async ({ db }) => await db.query('nonexistent_table_xyz', ['id']),
+        // Then - the refusal names the table the statement asked for
+        expect(result.error).toContain('nonexistent_table_xyz');
+    });
+
+    test('what the database refuses — a query on a table that does not exist names that table', async () => {
+        // Given - a read of a table no schema declares
+        const result = await integration.call(
+            async ({ db }) => await db.query('nonexistent_table_xyz', ['id']),
+        );
+
+        // Then - the refusal names it
+        expect(result.error).toContain('nonexistent_table_xyz');
+    });
+
+    test('what the database refuses — a broken init script names the file and the SQL error', async () => {
+        // Given - a docker/ directory whose init.sql declares a bogus type
+        const result = await integration.call(async ({ db }) => {
+            const dockerDir = mkdtempSync(resolve(tmpdir(), 'postgres-init-broken-'));
+            mkdirSync(resolve(dockerDir, 'postgres'), { recursive: true });
+            writeFileSync(
+                resolve(dockerDir, 'postgres/init.sql'),
+                'CREATE TABLE "broken" (id INTEGERRR);',
             );
+            const initDb = postgres();
+            initDb.serviceName = 'db';
+            initDb.connectionString = db.connectionString;
+            initDb.started = true;
 
-            // Then - the refusal names it
-            expect(result.error).toContain('nonexistent_table_xyz');
+            await initDb.initialize(dockerDir);
         });
 
-        test('a broken init script names the file and the SQL error', async () => {
-            // Given - a docker/ directory whose init.sql declares a bogus type
-            const result = await integration.call(async ({ db }) => {
-                const dockerDir = mkdtempSync(resolve(tmpdir(), 'postgres-init-broken-'));
-                mkdirSync(resolve(dockerDir, 'postgres'), { recursive: true });
-                writeFileSync(
-                    resolve(dockerDir, 'postgres/init.sql'),
-                    'CREATE TABLE "broken" (id INTEGERRR);',
-                );
-                const initDb = postgres();
-                initDb.serviceName = 'db';
-                initDb.connectionString = db.connectionString;
-                initDb.started = true;
-
-                await initDb.initialize(dockerDir);
-            });
-
-            // Then - the message carries the script's path and the type error
-            expect(result.error).toContain('init script failed');
-            expect(result.error).toContain('postgres/init.sql');
-        });
+        // Then - the message carries the script's path and the type error
+        expect(result.error).toContain('init script failed');
+        expect(result.error).toContain('postgres/init.sql');
     });
 });

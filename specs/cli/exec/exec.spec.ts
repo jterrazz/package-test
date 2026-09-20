@@ -55,141 +55,135 @@ describe('command — exec', () => {
         expect(result.stdout.text).toBe('');
     });
 
-    describe('fresh working dir', () => {
-        test('runs in a fresh empty temp dir when no fixture is set', async () => {
-            // Given - no .fixture() — scaffold writes into the cwd
-            const result = await cli.exec('scaffold');
+    test('fresh working dir — runs in a fresh empty temp dir when no fixture is set', async () => {
+        // Given - no .fixture() — scaffold writes into the cwd
+        const result = await cli.exec('scaffold');
 
-            // Then - the scaffold output exists in the temp workdir
-            expect(result.exitCode).toBe(0);
-            expect(result.file('out/main.go').exists).toBeTruthy();
-        });
-
-        test('two bare runs get independent temp dirs', async () => {
-            // Given - two independent runs without a fixture
-            const a = await cli.exec('scaffold');
-            const b = await cli.exec('scaffold-extra');
-
-            // Then - a does NOT see b's UNEXPECTED.txt and vice versa
-            expect(a.file('out/UNEXPECTED.txt').exists).toBeFalsy();
-            expect(b.file('out/UNEXPECTED.txt').exists).toBeTruthy();
-        });
+        // Then - the scaffold output exists in the temp workdir
+        expect(result.exitCode).toBe(0);
+        expect(result.file('out/main.go').exists).toBeTruthy();
     });
 
-    describe('multi-exec', () => {
-        test('runs commands sequentially in same directory', async () => {
-            // Given - build then start (start needs dist/ from build)
-            const result = await cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start']);
+    test('fresh working dir — two bare runs get independent temp dirs', async () => {
+        // Given - two independent runs without a fixture
+        const a = await cli.exec('scaffold');
+        const b = await cli.exec('scaffold-extra');
 
-            // Then - the last command's whole output is surfaced
-            expect(result.exitCode).toBe(0);
-            expect(result.stdout).toMatch('start.txt');
-        });
-
-        test('stops on first failure', async () => {
-            // Given - fail then build (fail exits non-zero, build should not run)
-            const result = await cli.fixture('$FIXTURES/cli-app/').exec(['fail', 'build']);
-
-            // Then - stopped at fail
-            expect(result.exitCode).toBe(2);
-            expect(result.stderr).toContain('Fatal: something went wrong');
-        });
-
-        test('preserves files between commands', async () => {
-            // Given - build creates dist/, then we check it still exists
-            const result = await cli.fixture('$FIXTURES/cli-app/').exec(['build', 'check']);
-
-            // Then - the sequence shares one working directory
-            expect(result.exitCode).toBe(0);
-            expect(result.file('dist/index.js').exists).toBeTruthy();
-        });
+        // Then - a does NOT see b's UNEXPECTED.txt and vice versa
+        expect(a.file('out/UNEXPECTED.txt').exists).toBeFalsy();
+        expect(b.file('out/UNEXPECTED.txt').exists).toBeTruthy();
     });
 
-    describe('long-running (exec with waitFor/timeout — CONVENTIONS D11(b))', () => {
-        test('resolves when the waitFor pattern is matched in stdout', async () => {
-            // Given - a watch-mode process that prints then keeps running
-            const result = await cli
-                .fixture('$FIXTURES/cli-app/')
-                .exec('dev', { timeout: 10_000, waitFor: 'Hello from CLI app' });
+    test('multi-exec — runs commands sequentially in same directory', async () => {
+        // Given - build then start (start needs dist/ from build)
+        const result = await cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start']);
 
-            // Then - resolved at the pattern with the output captured so far
-            expect(result.exitCode).toBe(0);
-            expect(result.stdout).toContain('Starting dev mode');
-            expect(result.stdout).toContain('Hello from CLI app');
-        });
+        // Then - the last command's whole output is surfaced
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch('start.txt');
+    });
 
-        test('resolves when the waitFor pattern is matched in stderr', async () => {
-            // Given - a process whose readiness banner goes to stderr
-            const result = await cli
-                .fixture('$FIXTURES/cli-app/')
-                .exec('dev-stderr', { timeout: 10_000, waitFor: 'Listening on stderr' });
+    test('multi-exec — stops on first failure', async () => {
+        // Given - fail then build (fail exits non-zero, build should not run)
+        const result = await cli.fixture('$FIXTURES/cli-app/').exec(['fail', 'build']);
 
-            // Then - resolved at the stderr pattern with the output captured so far
-            expect(result.exitCode).toBe(0);
-            expect(result.stderr).toContain('Listening on stderr');
-        });
+        // Then - stopped at fail
+        expect(result.exitCode).toBe(2);
+        expect(result.stderr).toContain('Fatal: something went wrong');
+    });
 
-        test('waitFor without timeout defaults to 10s', async () => {
-            // Given - only waitFor is set
-            const result = await cli
-                .fixture('$FIXTURES/cli-app/')
-                .exec('dev', { waitFor: 'Hello from CLI app' });
+    test('multi-exec — preserves files between commands', async () => {
+        // Given - build creates dist/, then we check it still exists
+        const result = await cli.fixture('$FIXTURES/cli-app/').exec(['build', 'check']);
 
-            // Then - the pattern resolved well before the default timeout
-            expect(result.exitCode).toBe(0);
-        });
+        // Then - the sequence shares one working directory
+        expect(result.exitCode).toBe(0);
+        expect(result.file('dist/index.js').exists).toBeTruthy();
+    });
 
-        test('returns non-zero when the process exits without matching', async () => {
-            // Given - help exits immediately without matching pattern
-            const result = await cli
-                .fixture('$FIXTURES/cli-app/')
-                .exec('help', { timeout: 5000, waitFor: 'NONEXISTENT_PATTERN' });
+    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — resolves when the waitFor pattern is matched in stdout', async () => {
+        // Given - a watch-mode process that prints then keeps running
+        const result = await cli
+            .fixture('$FIXTURES/cli-app/')
+            .exec('dev', { timeout: 10_000, waitFor: 'Hello from CLI app' });
 
-            // Then - exit code 1 (pattern not matched before process exited)
-            expect(result.exitCode).toBe(1);
-        });
+        // Then - resolved at the pattern with the output captured so far
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toContain('Starting dev mode');
+        expect(result.stdout).toContain('Hello from CLI app');
+    });
 
-        test('kills a long-running process at the timeout', async () => {
-            // Given - dev runs forever but the pattern never appears
-            const result = await cli
-                .fixture('$FIXTURES/cli-app/')
-                .exec('dev', { timeout: 2000, waitFor: 'NONEXISTENT_PATTERN' });
+    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — resolves when the waitFor pattern is matched in stderr', async () => {
+        // Given - a process whose readiness banner goes to stderr
+        const result = await cli
+            .fixture('$FIXTURES/cli-app/')
+            .exec('dev-stderr', { timeout: 10_000, waitFor: 'Listening on stderr' });
 
-            // Then - exit code 124 (timeout)
-            expect(result.exitCode).toBe(124);
-        });
+        // Then - resolved at the stderr pattern with the output captured so far
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toContain('Listening on stderr');
+    });
 
-        test('terminates the whole process group, not just the direct child', async () => {
-            // Given - a command that spawns a looping background grandchild (like a tsdown --watch under a dev command) and records its pid
-            const result = await cli
-                .fixture('$FIXTURES/cli-app/')
-                .exec('spawn-daemon', { timeout: 10_000, waitFor: 'daemon ready' });
-            expect(result.exitCode).toBe(0);
-            const daemonPid = Number(result.file('daemon.pid').content.trim());
-            expect(daemonPid).toBeGreaterThan(0);
+    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — waitFor without timeout defaults to 10s', async () => {
+        // Given - only waitFor is set
+        const result = await cli
+            .fixture('$FIXTURES/cli-app/')
+            .exec('dev', { waitFor: 'Hello from CLI app' });
 
-            // Then - the grandchild is dead too: killing only the shell child would orphan it (signal 0 probes liveness without signalling)
-            await expect
-                .poll(
-                    () => {
-                        try {
-                            process.kill(daemonPid, 0);
-                            return true;
-                        } catch {
-                            return false;
-                        }
-                    },
-                    { timeout: 5000 },
-                )
-                .toBe(false);
-        });
+        // Then - the pattern resolved well before the default timeout
+        expect(result.exitCode).toBe(0);
+    });
 
-        test('rejects waitFor options on a command sequence', async () => {
-            // Given - an array of commands plus long-running options
-            // Then - the combination is refused: `.exec()` answers a promise, so the refusal arrives as a rejection
-            await expect(
-                cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start'], { waitFor: 'x' }),
-            ).rejects.toThrow('not supported with a command sequence');
-        });
+    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — returns non-zero when the process exits without matching', async () => {
+        // Given - help exits immediately without matching pattern
+        const result = await cli
+            .fixture('$FIXTURES/cli-app/')
+            .exec('help', { timeout: 5000, waitFor: 'NONEXISTENT_PATTERN' });
+
+        // Then - exit code 1 (pattern not matched before process exited)
+        expect(result.exitCode).toBe(1);
+    });
+
+    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — kills a long-running process at the timeout', async () => {
+        // Given - dev runs forever but the pattern never appears
+        const result = await cli
+            .fixture('$FIXTURES/cli-app/')
+            .exec('dev', { timeout: 2000, waitFor: 'NONEXISTENT_PATTERN' });
+
+        // Then - exit code 124 (timeout)
+        expect(result.exitCode).toBe(124);
+    });
+
+    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — terminates the whole process group, not just the direct child', async () => {
+        // Given - a command that spawns a looping background grandchild (like a tsdown --watch under a dev command) and records its pid
+        const result = await cli
+            .fixture('$FIXTURES/cli-app/')
+            .exec('spawn-daemon', { timeout: 10_000, waitFor: 'daemon ready' });
+        expect(result.exitCode).toBe(0);
+        const daemonPid = Number(result.file('daemon.pid').content.trim());
+        expect(daemonPid).toBeGreaterThan(0);
+
+        // Then - the grandchild is dead too: killing only the shell child would orphan it (signal 0 probes liveness without signalling)
+        await expect
+            .poll(
+                () => {
+                    try {
+                        process.kill(daemonPid, 0);
+                        return true;
+                    } catch {
+                        return false;
+                    }
+                },
+                { timeout: 5000 },
+            )
+            .toBe(false);
+    });
+
+    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — rejects waitFor options on a command sequence', async () => {
+        // Given - an array of commands plus long-running options
+        // Then - the combination is refused: `.exec()` answers a promise, so the refusal arrives as a rejection
+        await expect(
+            cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start'], { waitFor: 'x' }),
+        ).rejects.toThrow('not supported with a command sequence');
     });
 });
