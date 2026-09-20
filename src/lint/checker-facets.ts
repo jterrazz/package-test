@@ -2,25 +2,20 @@ import type { Dirent } from 'node:fs';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import {
-    GROUND_DIRS,
-    GROUND_FIXTURES,
-    GROUND_REQUESTS,
-    GROUND_SEEDS,
-} from '../specification/facets/_common/ground.js';
+import { GROUND_DIRS, GROUND_FIXTURES } from '../specification/facets/_common/ground.js';
 import type { TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 
 /**
  * The FACET passes — what a tree says about itself, read from the tree.
  *
- * A statique rule sees one file; these four need the shape around it: which
+ * A statique rule sees one file; these three need the shape around it: which
  * folder a file sits under, what the specification at that folder's root
  * constructs, which ground lives below it, and who reads that ground. The four
  * hold the one law the fork rests on — **folder = constructor** — from both
  * sides: a facet folder has the runner its name promises (C20), a spec under it
- * reaches that runner (C18), the ground below it is ground that facet can read
- * (C19), and ground one spec alone reads belongs to that spec (C21w).
+ * reaches that runner (C18), and ground one spec alone reads belongs to that
+ * spec (C21w).
  *
  * A first-level folder that is NOT a facet is a repository suite — it covers a
  * tree rather than a product, C1's declared depth judges its shape, and none of
@@ -29,12 +24,6 @@ import { isNodeTestFileName, isTestFileName } from './role.js';
 
 /** The six facet folders — a first-level name under `specs/` that IS a constructor. */
 export const FACETS: string[] = ['api', 'cli', 'integration', 'jobs', 'mobile', 'website'];
-
-/** The facets whose world is a SCREEN: no database, no request document. */
-const SCREEN_FACETS = new Set<string>(['mobile', 'website']);
-
-/** The ground a screen facet cannot read — its backend answers through contracts. */
-const BACKEND_GROUND = new Set<string>([GROUND_REQUESTS, GROUND_SEEDS]);
 
 /**
  * Directories no facet walk enters.
@@ -161,44 +150,6 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
                 line: 1,
                 message: `${rel}:1: reaches no runner under the \`${facet}\` facet: import \`{ ${facet} }\` from \`${facet}.specification.js\`, or move a module test beside its module (C18 — see docs/13-linting.md)`,
                 rule: 'c18-module-test-under-facet',
-                severity: 'error',
-            });
-        }
-    }
-    return violations;
-}
-
-/**
- * C19 — the ground under a facet is ground that facet can READ.
- *
- * `specification.website()` and `specification.mobile()` drive a screen: they
- * own no database and send no request document, so a `_seeds/` or `_requests/`
- * below them has no reader. The state their backend answers with is stated in
- * contracts, and ground nothing reads is ground a reader trusts.
- */
-export function checkGroundPerFacet(specsRoot: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
-    for (const { facet, path } of facetFoldersOf(specsRoot)) {
-        if (!SCREEN_FACETS.has(facet)) {
-            continue;
-        }
-        const constructs = specificationsIn(path).some((file) =>
-            (textOf(file) ?? '').includes(`specification.${facet}(`),
-        );
-        if (!constructs) {
-            continue;
-        }
-        for (const directory of walkDirectories(path)) {
-            const name = directory.slice(directory.lastIndexOf('/') + 1);
-            if (!BACKEND_GROUND.has(name)) {
-                continue;
-            }
-            const rel = relative(specsRoot, directory);
-            violations.push({
-                file: rel,
-                line: 1,
-                message: `${rel}:1: \`${name}/\` has no reader on the \`${facet}\` facet: state the backend with contracts (C19 — see docs/13-linting.md)`,
-                rule: 'c19-ground-per-facet',
                 severity: 'error',
             });
         }

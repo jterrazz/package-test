@@ -408,7 +408,12 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         for (const root of ['docs', 'skills']) {
             for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
                 const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
-                if (path.endsWith('.md') && !path.startsWith('docs/reference/')) {
+                // A decision record is written once and never edited: it names
+                // The rules its decision REMOVED, and those ids resolve to
+                // Nothing by design. The generated reference is nobody's prose.
+                const historical =
+                    path.startsWith('docs/reference/') || path.startsWith('docs/decisions/');
+                if (path.endsWith('.md') && !historical) {
                     found.push(path);
                 }
             }

@@ -16,7 +16,7 @@ The manual of this repository: what the framework is, how it is changed, what pr
 | [10 — Contracts](10-contracts.md)           | `defineContract` / `defineContracts`, the facade layout, selection (`times`, `required`), provider builders                                     |
 | [11 — Services](11-services.md)             | `postgres` / `redis` / `sqlite` / `process`, the services record, init scripts, per-worker isolation                                            |
 | [12 — Conventions](12-conventions.md)       | The constitution: the principles, the rule families, the process rules, the naming recap, retro-propagation (K)                                 |
-| [13 — Linting](13-linting.md)               | The oxlint plugin (`@jterrazz/test/oxlint`), the conventions checker, and the GENERATED four-channel rule catalogue                             |
+| [13 — Linting](13-linting.md)               | The oxlint plugin (`@jterrazz/test/oxlint`), the conventions checker, and the GENERATED seven-channel rule catalogue                            |
 | [14 — Website specs](14-website.md)         | `specification.website()`: `.fetch()` / `.visit()`, visit scenarios, the element vocabulary, the `head` golden                                  |
 | [15 — Mobile specs](15-mobile.md)           | `specification.mobile()`: `.open()`, simulator resolution, open scenarios, the shared vocabulary, the `screen` golden                           |
 | [16 — Component specs](16-component.md)     | `component`: a rendered unit in Chromium — the chain, the visitor, `tree`/`html`, the `component()` project, the hook and DOM-function recipes  |

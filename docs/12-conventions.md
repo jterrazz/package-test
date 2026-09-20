@@ -81,7 +81,7 @@ Every other use is converted to a full snapshot. A single "kitchen-sink" project
 
 ### K1 — retro-propagation
 
-Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other three channels growing instead of decaying. When a defect class is mechanizable, its rule joins `src/lint/manifest.ts` and the catalogue regenerates.
+Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its rule joins `src/lint/manifest.ts` and the catalogue regenerates.
 
 ## The naming recap
 
@@ -120,16 +120,24 @@ Family I governs the source tree rather than the spec tree, and it splits in two
 
 Three questions, in order. The answer fixes the folder, the constructor (or none), and the project.
 
-| Question                                                               | Kind        | Lives at                                     | Constructor                   | Project       |
-| ---------------------------------------------------------------------- | ----------- | -------------------------------------------- | ----------------------------- | ------------- |
-| Does it render in a browser as a whole served page?                    | website     | `specs/website/<domain>/`                    | `specification.website()`     | `website`     |
-| Does it render as a component (React, a DOM function, a hook)?         | component   | `<file>.test.tsx` beside `<file>.tsx`        | none — the `component` chain  | `component`   |
-| Does it render on a simulator?                                         | mobile      | `specs/mobile/<domain>/`                     | `specification.mobile()`      | `mobile`      |
-| Does it answer HTTP?                                                   | api         | `specs/api/<domain>/`                        | `specification.api()`         | `api`         |
-| Is it triggered by name, in-process?                                   | jobs        | `specs/jobs/<domain>/`                       | `specification.jobs()`        | `jobs`        |
-| Is it a binary?                                                        | cli         | `specs/cli/<domain>/` (+ `<case>.spec.yaml`) | `specification.cli(bin)`      | `cli`         |
-| Is it a module that needs a real service, or whose oracle is a golden? | integration | `specs/integration/<domain>/`                | `specification.integration()` | `integration` |
-| Is it a module alone?                                                  | module      | `<file>.test.ts` beside `<file>.ts`          | none                          | `unit`        |
+| Question                                                               | Kind             | Lives at                                      | Constructor                   | Project       |
+| ---------------------------------------------------------------------- | ---------------- | --------------------------------------------- | ----------------------------- | ------------- |
+| Does it render in a browser as a whole served page?                    | website          | `specs/website/<domain>/<aspect>.spec.ts`     | `specification.website()`     | `website`     |
+| Does it render as a component (React, a DOM function, a hook)?         | component        | `<file>.test.tsx` beside `<file>.tsx`         | none — the `component` chain  | `component`   |
+| Does it render on a simulator?                                         | mobile           | `specs/mobile/<domain>/<aspect>.spec.ts`      | `specification.mobile()`      | `mobile`      |
+| Does it answer HTTP?                                                   | api              | `specs/api/<domain>/<aspect>.spec.ts`         | `specification.api()`         | `api`         |
+| Is it triggered by name, in-process?                                   | jobs             | `specs/jobs/<domain>/<aspect>.spec.ts`        | `specification.jobs()`        | `jobs`        |
+| Is it a binary?                                                        | cli              | `specs/cli/<domain>/` (+ `<case>.spec.yaml`)  | `specification.cli(bin)`      | `cli`         |
+| Is it a module that needs a real service, or whose oracle is a golden? | integration      | `specs/integration/<domain>/<aspect>.spec.ts` | `specification.integration()` | `integration` |
+| Is it a module alone?                                                  | module           | `<file>.test.ts` beside `<file>.ts`           | none                          | `unit`        |
+| Is it the repository itself — a suite over several apps?               | repository suite | `specs/<family>/<aspect>.test.ts`             | none                          | any name      |
+
+The SUFFIX says the kind, and the checker holds it (rule C12): `.test.ts(x)`
+beside the code for a unit, `.spec.ts` under `specs/<facet>/` for the assembled
+product, `<case>.spec.yaml` for a literate document, `<facet>.specification.ts`
+for the file that builds a runner. A repository suite is the one tree under
+`specs/` that keeps `.test.ts`: its first level is not a facet, it covers a tree
+rather than a product, and C1's declared depth is what judges its shape.
 
 The fork is the SUBJECT, never the amount of machinery. A rendered component needs a real browser, a Vite pipeline, a network double and a golden engine — all of them the framework's — and it is still a unit, so it sits beside its code. A module that needs a real database needs nothing new at all, and it is still an assembled thing, so it sits under `specs/` ([17](17-integration.md)).
 
@@ -190,6 +198,54 @@ afterEach(() => {
 That form works, and it is the migration shape rather than the destination: `using _ = clock.at(…)` inside the test states the instant where the test that needs it can be read, and cannot be forgotten.
 
 A facet pins the same instant for the chain it is stated on — `.clock(iso)` on api, jobs, integration, component, and on a website visit (the PAGE's calendar, through the browser). A cli spec is another process: its instant travels through the product's own env (`TZ`) or is absorbed by a `{{iso8601}}` token in the golden.
+
+## The backlog — the criterion written, coded on its first occurrence
+
+A rule is written when its defect class has been SEEN once and its criterion is
+decidable (rule K1). A class nobody has seen yet is not a rule: it is a line
+here, with the criterion it would be written against, so the day it appears the
+guard is a translation rather than a design. The R8 dry run of 16.0 — the whole
+catalogue run over every repository of the workbench — is what moves a line
+either way.
+
+| Line                           | The criterion, ready to code                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| B12 marker between statements  | a Given/When/Then marker whose offset falls inside a `VariableDeclaration` with ≥ 2 declarators                                                                                                                                                                                                                                                                                                                                |
+| B13 no intercept in a loop     | an `.intercept(` call inside a `for`/`while` body, or a `.map(`/`forEach(` callback, in a test file                                                                                                                                                                                                                                                                                                                            |
+| B15 pinned path tail           | a `toMatch(` fixture name whose directory part repeats the leaf's own domain folder                                                                                                                                                                                                                                                                                                                                            |
+| C17 fixtures sibling           | a `_fixtures/` directory whose only referrer sits in a sibling domain rather than beside it                                                                                                                                                                                                                                                                                                                                    |
+| C19 ground per facet           | a `_seeds/` or `_requests/` under a facet whose specification constructs `website()` or `mobile()` — a screen owns no database                                                                                                                                                                                                                                                                                                 |
+| D21w expected pinned value     | a uuid, or an iso8601 whose time is NOT midnight UTC, in a file under `_expected/` that appears in no `_seeds/`, `_requests/`, `_fixtures/`, `contracts/` or referring test of the same leaf, nor in the `$FIXTURES` pool. The hour is part of the criterion: a clock read during a run is never exactly midnight, a publication date always is — the first dry run returned 108 findings, every one of them a `datePublished` |
+| D22w empty golden              | a file under `_expected/` whose trimmed content is exactly `{{any}}`                                                                                                                                                                                                                                                                                                                                                           |
+| D25 duplicate contract payload | two response payloads with the same content hash under one `contracts/` tree, outside the shared pool                                                                                                                                                                                                                                                                                                                          |
+| D26w inline request body       | a request body written inline in a test that also carries a `_requests/` directory                                                                                                                                                                                                                                                                                                                                             |
+| E10 no retry                   | a `retry:` option on `test(`/`describe(`, or `test.retry(`, or `retry` in a vitest config — react-query's `retry: false` is not one                                                                                                                                                                                                                                                                                            |
+| I5 no namespace spy            | a `vi.spyOn(<namespace import>, …)` — a module's own export spied through its namespace object                                                                                                                                                                                                                                                                                                                                 |
+
+**Parked**, for a criterion that is not settled: **D23** no negated golden (15
+hits on the workbench, every one a `toMatch(/re/)` the criterion must exclude)
+and **D24** unreachable contract (the criterion has to compare filter arguments,
+not just methods and urls).
+
+## What stays human, and why
+
+Every convention a machine can settle is a row with a channel. These are the
+ones no channel can decide — listed with the reason, and with what the machine
+takes of them anyway, so neither side is silently dropped.
+
+| Convention                                        | Why no channel decides it                                             | What the machine takes                                 |
+| ------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
+| C1 grouping — own domain vs sibling aspects       | what the assets will become is a reading of the domain                | C21w flags the one-owner half                          |
+| D11 the legitimacy of a probe                     | absence, cut output and a third-party format are meanings, not shapes | d12w / d15w / D19w draw the cluster boundary           |
+| D13 residue routed through a helper               | inter-procedural analysis is out of an oxlint JS plugin's reach       | d13w's bounded heuristic                               |
+| K1 — whether a defect is a CLASS                  | a judgement about what will happen again                              | K2–K5 hold the catalogue complete and true             |
+| the truth of a Given/Then sentence, or of a title | a sentence can be well-formed and false                               | B4/B10/B11 and `vitest/valid-title` hold the shape     |
+| whether an updated golden is RIGHT                | correctness is the diff, read at review                               | d5 / D21w hold the volatile classes                    |
+| whether an allow-listed `vi.mock` has no seam     | the claim is disputable, and recorded in the config comment           | I4 holds the list                                      |
+| `exact` versus `within` when both disambiguate    | taste between two user-facing forms                                   | W2 forces a reason on the escape hatch; W3 offers both |
+| one fixture per answer of the system              | a reading of what the chain proves                                    | J4 holds unique descriptions                           |
+| contract realism                                  | only a recorded exchange could judge it                               | —                                                      |
+| the depth a repository declares                   | reviewed once, when the tree is born                                  | C1 thereafter                                          |
 
 ## Maintaining the constitution
 

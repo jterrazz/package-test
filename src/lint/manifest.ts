@@ -6,20 +6,26 @@ import type { RuleDoc } from './types.js';
  *
  * The constitution (`docs/12-conventions.md`) holds only principles, the
  * enforcement channels, process rules and design rationales. Every per-rule
- * normative sentence lives HERE, next to (or on) the code that enforces it. Four
+ * normative sentence lives HERE, next to (or on) the code that enforces it. Seven
  * channels are assembled into one {@link catalog}:
  *
  * - **statique** — the `jterrazz/*` oxlint rules (`RULE_DOCS`, attached to each
  *   rule's `meta.docs`);
+ * - **upstream** — the options this vocabulary sets on rules the `vitest`
+ *   plugin owns (`UPSTREAM_RULES`, ADR-005);
  * - **checker** — the non-oxlint static passes bundled as `dist/checker.js`
  *   (`CHECKER_PASSES`);
  * - **runtime** — refusals/behaviours the framework enforces at execution time
  *   (`RUNTIME_RULES`);
+ * - **type** — what the compiler refuses, proven by `src/type-channel.test-d.ts`
+ *   (`TYPE_ROWS`);
+ * - **meta** — what this package's own tests hold about the catalogue and about
+ *   itself (`META_ROWS`);
  * - **process** — review-borne rules no channel can fully mechanize
  *   (`PROCESS_RULES`).
  *
  * The catalogue generator (`catalog.ts` / `dist/catalog.js`) reads this manifest
- * to (re)write the full four-channel catalogue in `docs/13-linting.md` and the
+ * to (re)write the full seven-channel catalogue in `docs/13-linting.md` and the
  * agent-facing `skills/jterrazz-test/references/rules.md`. `plugin.test.ts`
  * guards freshness and completeness.
  *
@@ -157,17 +163,6 @@ export const RULE_DOCS = {
         id: 'B11',
         rationale:
             'The narration is a sentence about the subject; a paragraph hides its second half from every reader that only looks at the marker line.',
-        reach: 'tests',
-    },
-    'b12-marker-between-statements': {
-        channel: 'statique',
-        convention:
-            'A marker sits between statements: one inside a `const a = …, b = …` declarator chain is an error.',
-        family: 'B',
-        fix: 'Split the declaration so the marker sits between two statements.',
-        id: 'B12',
-        rationale:
-            'A marker inside a statement opens a section with no body, and the offsets that judge the order read a narrative the reader cannot see.',
         reach: 'tests',
     },
     'b2-known-fixture-marker': {
@@ -755,18 +750,6 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'No `_seeds/` or `_requests/` under a facet that drives a SCREEN (`website`, `mobile`), read from the constructor its specification calls.',
-        family: 'C',
-        fix: 'State what the backend answers with contracts.',
-        id: 'C19',
-        name: 'c19-ground-per-facet',
-        rationale:
-            'A screen facet owns no database and sends no request document: ground nothing reads is ground the next reader trusts.',
-        reach: 'ground',
-    },
-    {
-        channel: 'checker',
-        convention:
             "A first-level folder named for one of the six facets holds a `*.specification.ts(x)` calling `specification.<facet>(`. Positive-only: any other first-level name is a repository suite, judged by C1's declared depth alone.",
         family: 'C',
         fix: 'Create the specification the folder promises, or rename the folder.',
@@ -786,29 +769,6 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         name: 'c21w-ground-owned-by-one',
         rationale:
             'Ground one spec reads, parked where several sit, reads as shared: everyone assumes someone else depends on it and nobody dares touch it.',
-        reach: 'ground',
-    },
-    {
-        channel: 'checker',
-        convention:
-            'A uuid or an iso8601 instant in a file under `_expected/` that nothing in its leaf — its specs, its other ground — or the `$FIXTURES` pool puts there is a warning.',
-        family: 'D',
-        fix: 'Token it, or seed the value so the leaf itself pins it.',
-        id: 'D21',
-        name: 'd21w-expected-pinned-value',
-        rationale:
-            'The literal came from a run: the next one mints another, and the golden fails for a reason that has nothing to do with the subject.',
-        reach: 'ground',
-    },
-    {
-        channel: 'checker',
-        convention: 'A golden whose whole content is `{{any}}` is a warning.',
-        family: 'D',
-        fix: 'Regenerate with `TEST_UPDATE=1` and keep tokens for the parts that move.',
-        id: 'D22',
-        name: 'd22w-empty-golden',
-        rationale:
-            'It states that the subject produced something: the diff is silent, and every change to what it covers goes unseen.',
         reach: 'ground',
     },
     {

@@ -13,7 +13,7 @@ import { renderRules, spliceCatalog } from './catalog.js';
  *
  * Regenerates three committed projections:
  *
- * - the full four-channel catalogue inside `docs/13-linting.md` (between the
+ * - the full seven-channel catalogue inside `docs/13-linting.md` (between the
  *   GENERATED markers), from `src/lint/manifest.ts`;
  * - the agent-facing rule reference `skills/jterrazz-test/references/rules.md`,
  *   from the same manifest;

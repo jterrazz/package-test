@@ -25,10 +25,8 @@ import {
 import {
     checkFacetFolder,
     checkGroundOwnedByOne,
-    checkGroundPerFacet,
     checkModuleTestUnderFacet,
 } from './checker-facets.js';
-import { checkEmptyGolden, checkExpectedPinnedValue } from './checker-goldens.js';
 import { checkTestUnderFacet } from './checker-placement.js';
 import { checkSpecConventions, checkSpecDescriptionsUnique } from './checker-spec.js';
 
@@ -91,7 +89,6 @@ export const CHECKER_PASS_IDS = [
     'c15-local-fixture-reach',
     'c16-document-outside-ground',
     'c18-module-test-under-facet',
-    'c19-ground-per-facet',
     'c20-facet-folder',
     'c21w-ground-owned-by-one',
     'c8-spec-registered-name',
@@ -104,8 +101,6 @@ export const CHECKER_PASS_IDS = [
     'd4b-spec-block-scalar',
     'd4b-spec-key-order',
     'd4b-spec-shape',
-    'd21w-expected-pinned-value',
-    'd22w-empty-golden',
     'd5-spec-volatile-literal',
     'd5w-spec-pinned-value',
     'e3-config-present',
@@ -378,10 +373,7 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
         ...checkTestUnderFacet(rootDir),
         ...checkFacetFolder(rootDir),
         ...checkModuleTestUnderFacet(rootDir),
-        ...checkGroundPerFacet(rootDir),
         ...checkGroundOwnedByOne(rootDir),
-        ...checkExpectedPinnedValue(rootDir),
-        ...checkEmptyGolden(rootDir),
         ...checkSuppressionReason(rootDir),
         ...checkConventionFiles(rootDir),
         ...checkSpecDescriptionsUnique(rootDir),
