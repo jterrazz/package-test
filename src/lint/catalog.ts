@@ -51,11 +51,18 @@ function table(headers: string[], rows: string[][]): string[] {
     return [line(headers), separator, ...rows.map(line)];
 }
 
+/**
+ * How the channels are ordered inside a family's table: the ones a reader can
+ * run first, then the ones the framework raises, then the judgement.
+ */
 const CHANNEL_ORDER: Record<CatalogEntry['channel'], number> = {
     statique: 0,
-    checker: 1,
-    runtime: 2,
-    process: 3,
+    upstream: 1,
+    checker: 2,
+    runtime: 3,
+    type: 4,
+    meta: 5,
+    process: 6,
 };
 
 /**
@@ -77,12 +84,19 @@ function families(): string[] {
 
 /** Per-channel row counts, for the generated intro line. */
 function counts(): Record<CatalogEntry['channel'], number> {
-    return {
-        checker: catalog.filter((entry) => entry.channel === 'checker').length,
-        process: catalog.filter((entry) => entry.channel === 'process').length,
-        runtime: catalog.filter((entry) => entry.channel === 'runtime').length,
-        statique: catalog.filter((entry) => entry.channel === 'statique').length,
+    const tally: Record<CatalogEntry['channel'], number> = {
+        checker: 0,
+        meta: 0,
+        process: 0,
+        runtime: 0,
+        statique: 0,
+        type: 0,
+        upstream: 0,
     };
+    for (const entry of catalog) {
+        tally[entry.channel] += 1;
+    }
+    return tally;
 }
 
 /**
@@ -122,7 +136,22 @@ function catalogueSections(): string[] {
  */
 function renderDocsCatalog(): string {
     const c = counts();
-    const intro = `Every rule the framework enforces, across its four channels — **statique** (${c.statique} oxlint rules), **checker** (${c.checker} bundled passes), **runtime** (${c.runtime} execution-time refusals), **process** (${c.process} review-borne rules) — sourced from one manifest so the code and the catalogue can never drift.`;
+    // The channels with rows are the ones named; one that has none yet is not
+    // Announced with a zero, because a reader would go looking for it.
+    const named = [
+        [c.statique, '**statique** (oxlint rules)'],
+        [c.upstream, '**upstream** (options set on an upstream rule)'],
+        [c.checker, '**checker** (bundled passes)'],
+        [c.runtime, '**runtime** (execution-time refusals)'],
+        [c.type, '**type** (what the compiler refuses)'],
+        [c.meta, '**meta** (what a meta-test holds)'],
+        [c.process, '**process** (review-borne rules)'],
+    ] as const;
+    const channels = named
+        .filter(([count]) => count > 0)
+        .map(([count, label]) => label.replace(' (', ` — ${String(count)} (`))
+        .join(', ');
+    const intro = `Every rule the framework enforces, across its enforcement channels — ${channels} — sourced from one manifest so the code and the catalogue can never drift.`;
     const inner = [intro, ...catalogueSections()].join('\n\n');
     return `${DOCS_START}\n\n${inner}\n\n${DOCS_END}`;
 }

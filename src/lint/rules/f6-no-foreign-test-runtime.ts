@@ -71,8 +71,7 @@ export const f6NoForeignTestRuntime: LintRule = {
     meta: {
         docs: RULE_DOCS['f6-no-foreign-test-runtime'],
         messages: {
-            foreignRuntime:
-                '`{{source}}` is a second test runtime in a test file: {{fix}} (F6 — docs/13-linting.md#f6-no-foreign-test-runtime).',
+            foreignRuntime: '`{{source}}` is a second test runtime in a test file: {{fix}}.',
         },
         type: 'problem',
     },

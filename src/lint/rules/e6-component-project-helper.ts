@@ -73,7 +73,7 @@ export const e6ComponentProjectHelper: LintRule = {
         docs: RULE_DOCS['e6-component-project-helper'],
         messages: {
             handRolled:
-                'Use `component({ vite })` — the provider, the worker and the pipeline are its, and a hand-rolled `browser:` block is the run that passes here and fails on the next machine (E6 — docs/13-linting.md#e6-component-project-helper).',
+                'Use `component({ vite })` — the provider, the worker and the pipeline are its, and a hand-rolled `browser:` block is the run that passes here and fails on the next machine.',
         },
         type: 'problem',
     },

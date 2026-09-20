@@ -79,7 +79,7 @@ export const f3SpecsPublicEntry: LintRule = {
         docs: RULE_DOCS['f3-specs-public-entry'],
         messages: {
             deepImport:
-                'specs/ must not deep-import framework internals — reach the framework via its public entry (@jterrazz/test, or src/index.js in this repo), not "{{source}}" (F3 — see docs/13-linting.md). Exempt: the published subpaths {{published}}. A probe whose subject is not on the public entry is a module test beside its module.',
+                'specs/ must not deep-import framework internals — reach the framework via its public entry (@jterrazz/test, or src/index.js in this repo), not "{{source}}". Exempt: the published subpaths {{published}}. A probe whose subject is not on the public entry is a module test beside its module.',
         },
         type: 'problem',
     },

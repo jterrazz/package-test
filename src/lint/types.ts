@@ -63,16 +63,33 @@ export type Visitor = Record<string, (node: AstNode) => void>;
  * generator reads these to (re)write `docs/13-linting.md` and the annex.
  */
 export type RuleDoc = {
-    /** Enforcement channel — the four faces the manifest assembles. */
-    channel: 'checker' | 'process' | 'runtime' | 'statique';
-    /** The French normative sentence (the constitution's per-rule text, moved here). */
+    /**
+     * Enforcement channel — ONE per row, and the row says which.
+     *
+     * A convention enforced two ways is two rows, because the two answer
+     * different questions: what `statique` sees in one file is not what
+     * `checker` sees across a tree, and neither is what `runtime` refuses.
+     * Writing a single row with two channels made the catalogue unable to say
+     * which pass a reader should expect a finding from.
+     *
+     * - `statique` — a `jterrazz/*` oxlint rule;
+     * - `upstream` — an option this vocabulary sets on an oxlint plugin rule
+     *   someone else owns (ADR-005);
+     * - `checker` — a pass of `dist/checker.js`, over a tree or a member;
+     * - `runtime` — a refusal the framework raises while a spec runs;
+     * - `type` — what the compiler refuses, proven by a `test-d` assertion;
+     * - `meta` — what one of the package's own meta-tests holds;
+     * - `process` — a review judgement no channel can decide.
+     */
+    channel: 'checker' | 'meta' | 'process' | 'runtime' | 'statique' | 'type' | 'upstream';
+    /** The normative sentence — the constitution's per-rule text, moved here. */
     convention: string;
     /**
      * One imperative line: what to DO about it. A ban with no destination is an
      * argument rather than a rule, so the catalogue and the message carry the
-     * same fix. A row that states none renders `—`.
+     * same fix.
      */
-    fix?: string;
+    fix: string;
     /**
      * The specification facet the rule guards — segments the catalogue like
      * the constructors segment the API. `'shared'` for cross-facet rules.
@@ -85,17 +102,24 @@ export type RuleDoc = {
     /** One line: why the rule exists. */
     rationale: string;
     /**
-     * Which files the rule looks at — the vocabulary of `roleOf` plus the two
-     * shapes that are not a role (`tests`, everything the conventions bind, and
-     * `all`). A row that states none renders `—`.
+     * Which files the rule looks at — the vocabulary of `roleOf` plus the
+     * shapes that are not a role: `tests` (every file that declares tests),
+     * `specs` (a tree), `member` (a package), and `all`.
+     *
+     * Required, like `fix`: a reader deciding whether a rule applies to the
+     * file in front of them should not have to read its implementation, and a
+     * row that left it blank was answering "somewhere".
      */
-    reach?:
+    reach:
         | 'all'
         | 'component'
         | 'config'
+        | 'contract'
         | 'document'
         | 'ground'
+        | 'member'
         | 'module'
+        | 'spec'
         | 'specification'
         | 'specs'
         | 'tests';

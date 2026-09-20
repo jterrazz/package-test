@@ -70,13 +70,13 @@ export const i2SiblingTestNaming: LintRule = {
         docs: RULE_DOCS['i2-sibling-test-naming'],
         messages: {
             orphanComponent:
-                'A component test must sit NEXT to what it renders — no neighbour "{{expected}}" found (I2 — see docs/13-linting.md). A hook or a DOM function is the `.ts` of the same basename, with its Host in the test file.',
+                'A component test must sit NEXT to what it renders — no neighbour "{{expected}}" found. A hook or a DOM function is the `.ts` of the same basename, with its Host in the test file.',
             orphanTest:
-                'A module test must sit NEXT to the module it tests — no neighbour "{{expected}}" found (I2 — see docs/13-linting.md). A test needing more than its module is a specification: move it under specs/ as a `.spec.ts`.',
+                'A module test must sit NEXT to the module it tests — no neighbour "{{expected}}" found. A test needing more than its module is a specification: move it under specs/ as a `.spec.ts`.',
             rootTests:
-                'A root-level tests/ directory is banned — module tests are siblings under src/, product specifications live in specs/ (I2 — see docs/13-linting.md).',
+                'A root-level tests/ directory is banned — module tests are siblings under src/, product specifications live in specs/.',
             testsDir:
-                '__tests__/ directories are banned — the test of <file>.ts is its neighbour <file>.test.ts (I2 — see docs/13-linting.md).',
+                '__tests__/ directories are banned — the test of <file>.ts is its neighbour <file>.test.ts.',
         },
         type: 'problem',
     },
