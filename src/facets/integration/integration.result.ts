@@ -18,8 +18,29 @@ export type CallResultOptions = BaseResultOptions & {
  * What `result.value` is, decided by what the call returned: a string reads as
  * a stream, anything else as JSON. `.call<T>()` already knows T, so the test
  * reads one field (`result.value.value.ok`) without narrowing a union first.
+ *
+ * Three answers, because a type has three ways of relating to `string`:
+ *
+ * - EXACTLY a string — a `TextAccessor`, and nothing to narrow;
+ * - it MAY be a string (`string | undefined`, `string | number`, `any`) — the
+ *   UNION, which the test narrows. The type used to read the static type only
+ *   while the accessor was built from the RUNTIME value, so a subject typed
+ *   `string | undefined` was handed back as a `JsonAccessor`: `.value.value`
+ *   compiled, the runtime had built a `TextAccessor`, and the read silently
+ *   answered `undefined`;
+ * - never a string — a `JsonAccessor<Returned>`.
+ *
+ * `Returned` there is what the value CLAIMS, not what survived the crossing:
+ * the accessor is built from `JSON.stringify`, so a `Map`, a `Date` or a class
+ * instance arrives as the plain JSON it serialises to (`{}`, an ISO string, an
+ * object of its own fields). A subject whose answer is one of those is
+ * projected to plain data inside the call, where the test can see it happen.
  */
-export type CallValue<Returned> = Returned extends string ? TextAccessor : JsonAccessor<Returned>;
+export type CallValue<Returned> = [Returned] extends [string]
+    ? TextAccessor
+    : [Extract<Returned, string>] extends [never]
+      ? JsonAccessor<Returned>
+      : JsonAccessor<Exclude<Returned, string>> | TextAccessor;
 
 /**
  * The result of an in-process call — the integration facet's whole surface.
@@ -63,10 +84,14 @@ export class CallResult<Returned = unknown> extends BaseResult {
     /**
      * What the call RETURNED. A string reads as a stream (`<name>.txt`),
      * anything else as JSON (`<name>.json`) — the same two subjects every
-     * other facet's results are built from.
+     * other facet's results are built from, chosen on the value in hand and
+     * typed by {@link CallValue}, which answers for the three ways a type can
+     * relate to `string`.
      *
-     * A call that threw returns the empty value: what it produced is
-     * {@link CallResult.error}.
+     * A call that threw has no value to choose an accessor on, so `value` is
+     * the JSON reading of `null` whatever the declared type promises: what a
+     * refusal produced is {@link CallResult.error}, and that is where a spec
+     * reads it.
      */
     get value(): CallValue<Returned> {
         const produced = this.outcome.threw ? null : this.outcome.value;
