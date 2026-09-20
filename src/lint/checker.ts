@@ -20,6 +20,7 @@ import {
     checkLocalFixtureReach,
     checkPoolFixtureSharing,
 } from './checker-crossfile.js';
+import { checkTestUnderFacet } from './checker-placement.js';
 import { checkSpecConventions, checkSpecDescriptionsUnique } from './checker-spec.js';
 
 /**
@@ -345,6 +346,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
  */
 export function runAllChecks(rootDir: string): TokenViolation[] {
     return [
+        ...checkTestUnderFacet(rootDir),
         ...checkConventionFiles(rootDir),
         ...checkSpecDescriptionsUnique(rootDir),
         ...checkDeadFixtures(rootDir),

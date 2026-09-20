@@ -2,11 +2,13 @@
 
 What proves a change here: this package specifies itself with itself. The suites under `specs/` are written with `@jterrazz/test` against fixture apps, the module tests sit beside the modules they cover, and a family of meta-tests runs the framework on its own output. This chapter says which suite answers for what, and what a change owes each of them.
 
+**The suffix says the kind.** `.test.ts` is the UNIT's word and sits beside the module it covers; `.test.tsx` is the same law for a rendered unit; `.spec.ts` is the ASSEMBLED product's word and lives under `specs/<facet>/`; a literate document stays `<case>.spec.yaml`. C12 holds both directions and its `--fix` renames with `git mv`, so a reader can tell what a file proves without opening it.
+
 | Ground          | Where                                               | Proves                                                                 |
 | --------------- | --------------------------------------------------- | ---------------------------------------------------------------------- |
 | Module tests    | `src/**/<file>.test.ts`                             | One module's behaviour, beside it (rule I2)                            |
 | Component tests | `specs/component-app/<file>.test.tsx`               | A rendered unit, beside it, in a real Chromium ([16](16-component.md)) |
-| Product specs   | `specs/<facet>/<domain>/<aspect>.test.ts`           | The framework's own facets, through the public surface                 |
+| Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts`           | The framework's own facets, through the public surface                 |
 | Spec documents  | `specs/cli/literate/*.spec.yaml`                    | The document format, collected as test files by `literate()`           |
 | Meta-tests      | `src/lint/*.test.ts`, `src/specification/matching/` | The framework applied to itself and to its own projections             |
 
@@ -16,9 +18,9 @@ What proves a change here: this package specifies itself with itself. The suites
 
 | Project       | Collects                                                                                                      | Needs                                                                |
 | ------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `unit`        | `src/**/*.test.ts` + `specs/lint/**`, built by `unit()`                                                       | Nothing — the lint specs need `npm run build` first                  |
+| `unit`        | `src/**/*.test.ts` + `specs/lint/**/*.test.ts`, built by `unit()`                                             | Nothing — the lint specs need `npm run build` first                  |
 | `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                               | Nothing — the Docker specs self-skip                                 |
-| `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                                 | Docker                                                               |
+| `api`         | `specs/api/**/*.spec.ts`, built by `api()` (node mode, in-process Hono)                                       | Docker                                                               |
 | `jobs`        | `specs/jobs/**`, built by `jobs()`                                                                            | Docker                                                               |
 | `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included               | Docker                                                               |
 | `api-stack`   | `specs/api/**` + `specs/jobs/**` with `TEST_MODE=compose`, minus intercepts, clock and the node-mode refusals | Docker compose                                                       |
@@ -26,6 +28,8 @@ What proves a change here: this package specifies itself with itself. The suites
 | `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                                                   | the same chromium; no Docker. Runs in its own group, after `website` |
 
 Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. One project is still written by hand and says why: `api-stack` is compose mode, which leaves the package in 16.0.
+
+**`specs/lint/` is a repository suite, and it keeps `.test.ts`.** Its first level is not one of the six facets, so C12's rename clause never reaches it — by design: these files do not specify the assembled product through an entry, they hold the package's own conventions over fixture PROJECTS, which is what a repository suite is. C1's declared depth is what judges their shape, and `unit()` is what collects them.
 
 There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles, the orchestrator's own lifecycle — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/integrations/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
 
@@ -50,7 +54,7 @@ specs/
 │   ├── api.specification.ts          # runners at the facet root
 │   ├── intercepts.specification.ts
 │   └── requests/                     # a domain
-│       ├── requests.test.ts
+│       ├── requests.spec.ts
 │       ├── _requests/                # ground: complete requests, *.http
 │       └── _expected/                # ground: every expected fixture, flat
 └── _fixtures/                        # the SHARED pool, reached as $FIXTURES/…
@@ -104,7 +108,8 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 - **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.
 - **Hand-editing a golden under `specs/lint/checker/_expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
 - **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs`, `integration` and `api-stack` fail honestly.
-- **Adding a test at a facet root.** `specs/<facet>/<aspect>.test.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
+- **Adding a test at a facet root.** `specs/<facet>/<aspect>.spec.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
+- **Writing a facet spec as `<aspect>.test.ts`.** `c12-spec-file-name` refuses it and `node dist/checker.js specs --fix` renames it with `git mv`; the reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.
 
 ## Related
 

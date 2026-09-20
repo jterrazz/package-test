@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { isTestFileName } from './role.js';
+
 /**
  * CONVENTIONS E1 — the framework reads only its own generic-prefixed env vars.
  * This module holds the allowlist and the scanner the meta-test uses to prove
@@ -24,7 +26,7 @@ export function sourceFiles(dir: string): string[] {
             }
         } else if (
             entry.name.endsWith('.ts') &&
-            !entry.name.endsWith('.test.ts') &&
+            !isTestFileName(entry.name) &&
             !entry.name.endsWith('.fixtures.ts')
         ) {
             files.push(path);

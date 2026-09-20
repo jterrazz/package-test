@@ -2,7 +2,8 @@ import { importSourceVisitor } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../types.js';
 
-const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
+/** The three suffixes that declare tests — `.spec.ts` joined them in 16.0. */
+const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 const FIXTURES_IMPORT = /\.fixtures(?:\.[cm]?[jt]sx?)?$/u;
 
 /**

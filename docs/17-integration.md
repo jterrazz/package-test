@@ -15,7 +15,7 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/integration/orders/orders.test.ts
+// specs/integration/orders/orders.spec.ts
 import { expect, test } from 'vitest';
 
 import { listOrders } from '../../../src/orders/orders.js';
@@ -127,7 +127,7 @@ The golden is named by a template literal, and the checker's C9 dead-fixture pas
 
 ## The project
 
-`integration()` from `@jterrazz/test/vitest` is the canonical project: it collects `specs/integration/**/*.test.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node facets.
+`integration()` from `@jterrazz/test/vitest` is the canonical project: it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node facets.
 
 ```typescript
 import { defineSpecConfig, integration, unit } from '@jterrazz/test/vitest';

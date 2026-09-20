@@ -53,7 +53,7 @@ export default defineSpecConfig({
                 test: {
                     name: 'api-stack',
                     // Parallel: each worker gets its own compose project (test-worker-N)
-                    include: ['specs/api/**/*.test.ts', 'specs/jobs/**/*.test.ts'],
+                    include: ['specs/api/**/*.spec.ts', 'specs/jobs/**/*.spec.ts'],
                     // Intercepts are in-process (MSW) — node-only (CONVENTIONS I3/D7).
                     // `.clock()` is in-process too: compose mode runs the app in
                     // Its own container, where this runner's calendar is nothing.

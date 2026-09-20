@@ -2,7 +2,9 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
 
+import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
+import { isTestFileName } from './role.js';
 
 /**
  * The MEMBER pass — what a workspace member owes, read from the member itself
@@ -129,7 +131,7 @@ function holdsTests(dir: string): boolean {
                 }
                 continue;
             }
-            if (/\.test\.[cm]?tsx?$/u.test(entry.name)) {
+            if (isTestFileName(entry.name)) {
                 return true;
             }
         }
@@ -265,6 +267,21 @@ function seamDependencies(
 }
 
 /**
+ * Re-anchor a member-relative finding on the root the run reports against, so
+ * one member's path reads the same alone as inside a whole-workspace run.
+ */
+function anchoredToRoot(violations: TokenViolation[], label: string): TokenViolation[] {
+    if (label === '.') {
+        return violations;
+    }
+    const anchored: TokenViolation[] = [];
+    for (const violation of violations) {
+        anchored.push({ ...violation, file: join(label, violation.file) });
+    }
+    return anchored;
+}
+
+/**
  * Run E3, E5b and F8 over ONE member. `memberDir` is absolute; `rootDir`
  * anchors the paths the findings report, so a member's finding reads the same
  * whether the pass ran over it alone or over the whole workspace.
@@ -284,6 +301,9 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         ...(config === null ? configPresent(manifest, memberDir, label, subject) : []),
         ...(config === null ? [] : simulatedDom(config, rootDir)),
         ...seamDependencies(manifest, memberDir, label, subject),
+        // C12's first clause: only a walk of the MEMBER sees a `.spec.ts`
+        // That never reached a `specs/` tree.
+        ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
     ];
 }
 

@@ -418,9 +418,12 @@ function componentGlobs(options: ComponentProjectOptions): {
 
 /**
  * A module test runs beside the module it covers: no DOM, no browser, no
- * pipeline. `.test.tsx` is excluded because a rendered thing is a component
- * test — a project's dependency scan reads every file its globs match, and a
- * `.tsx` collected here would be optimised for a page that never opens.
+ * pipeline. Its suffix is `.test.ts` and its place is OUTSIDE `specs/`, where
+ * the assembled product is specified in `.spec.ts` — the two exclusions say
+ * exactly that. `.test.tsx` is the third exclusion because a rendered thing is
+ * a component test: a project's dependency scan reads every file its globs
+ * match, and a `.tsx` collected here would be optimised for a page that never
+ * opens.
  */
 export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfiguration {
     const fromRoots = options.roots?.map((root) => `${root.replace(/\/+$/u, '')}/**/*.test.ts`);
@@ -448,7 +451,7 @@ export function website(options: WebsiteProjectOptions = {}): TestProjectInlineC
         test: {
             ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
             ...(options.serial === true ? { fileParallelism: false } : {}),
-            include: options.include ?? ['specs/website/**/*.test.ts'],
+            include: options.include ?? ['specs/website/**/*.spec.ts'],
             name: 'website',
             sequence: { groupOrder: 1 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
@@ -525,7 +528,8 @@ export async function component(
 /**
  * The node facets' canonical projects.
  *
- * Each one collects the facet's own tree, carries the preset's budgets and
+ * Each one collects the facet's own tree — `specs/<facet>/**\/*.spec.ts`, the
+ * suffix that says "the assembled product" — carries the preset's budgets and
  * artefact directory, and runs in group 0 — the browser facets follow, so two
  * Chromiums never share a slot on a two-vCPU runner. `{ include, exclude,
  * timeout, serial }` is what a repository states when its tree, its budget or
@@ -538,7 +542,7 @@ function facetProject(facet: string, options: FacetProjectOptions): TestProjectI
     return mergeConfig(projectDefaults(), {
         test: {
             ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
-            include: options.include ?? [`specs/${facet}/**/*.test.ts`],
+            include: options.include ?? [`specs/${facet}/**/*.spec.ts`],
             ...(options.serial === true ? { fileParallelism: false } : {}),
             name: facet,
             sequence: { groupOrder: 0 },

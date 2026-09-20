@@ -92,6 +92,7 @@ describe('the member pass — what a workspace member owes', () => {
             'packages/clean',
             'packages/seam-dependency',
             'packages/simulated-dom',
+            'packages/stray-spec',
             'packages/tested-no-config',
         ]);
     });
@@ -108,7 +109,14 @@ describe('the member pass — what a workspace member owes', () => {
         // Given - the whole fixture workspace
         const found = checkMembers(WORKSPACE).map((violation) => violation.rule);
 
-        // Then - one E3, one E5b and three F8, whatever the order they walk in
-        expect(found.toSorted()).toStrictEqual(['e3', 'e5b', 'f8', 'f8', 'f8']);
+        // Then - one E3, one E5b, three F8 and one C12, whatever the order they walk in
+        expect(found.toSorted()).toStrictEqual([
+            'c12-spec-file-name',
+            'e3',
+            'e5b',
+            'f8',
+            'f8',
+            'f8',
+        ]);
     });
 });

@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-import { existsSync, statSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { existsSync, renameSync, statSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
 
 import { fixPoolFixtures } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverSpecRoots } from './checker-member.js';
+import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
 import { formatViolations, runAllChecks } from './checker.js';
 import type { TokenViolation } from './checker.js';
@@ -35,10 +37,15 @@ import type { TokenViolation } from './checker.js';
  * warnings are reported but never fail the run.
  *
  * `--fix` applies the rewritable passes — the two document ones (key order and
- * block scalars) and C14, which MOVES a single-reader pool fixture beside its
- * leaf and rewrites the literals that named it — then checks what is left, so a
- * run that fixes everything exits 0. The move is a plain rename: the checker
- * never runs git, and the author stages what the working tree now shows.
+ * block scalars), C14, which MOVES a single-reader pool fixture beside its leaf
+ * and rewrites the literals that named it, and C12, which RENAMES a `.test.ts`
+ * under a facet folder to `.spec.ts` — then checks what is left, so a run that
+ * fixes everything exits 0.
+ *
+ * C12's rename goes through `git mv` where the tree is a git working tree, so
+ * the history follows the file across a migration that touches hundreds of
+ * them; outside one it falls back to a plain rename. C14's move stays a plain
+ * rename and the author stages what the working tree now shows.
  */
 
 const argv = process.argv.slice(2);
@@ -127,11 +134,45 @@ if (member !== undefined) {
     report(checkMember(dir, root), `for member ${relative(root, dir) || '.'}`, MEMBER_PASSES);
 }
 
+/**
+ * Rename one file, keeping git's record of it where there is one.
+ *
+ * `git mv` is tried first and its failure is not an error: a path outside a
+ * working tree, or one git does not track yet, renames exactly as well with
+ * `renameSync` — what must not happen is a migration that loses the history of
+ * every spec it touches because the tool reached for the blunter call.
+ */
+function renameKeepingHistory(from: string, to: string): void {
+    const moved = spawnSync('git', ['mv', from, to], {
+        cwd: dirname(from),
+        stdio: 'ignore',
+    });
+    if (moved.status !== 0) {
+        renameSync(from, to);
+    }
+}
+
+/** C12's mover: every `.test.ts` under a facet folder becomes a `.spec.ts`. */
+function fixSpecSuffixes(root: string): string[] {
+    const renamed: string[] = [];
+    for (const { from, to } of movesUnderFacet(root)) {
+        if (to === undefined || existsSync(to)) {
+            continue;
+        }
+        renameKeepingHistory(from, to);
+        renamed.push(`${relative(root, from)} → ${relative(root, to)}`);
+    }
+    return renamed;
+}
+
 // ── One specs tree ──
 
 if (positional !== undefined) {
     const root = requireDirectory(positional, 'directory');
     if (fix) {
+        for (const rename of fixSpecSuffixes(root)) {
+            console.log(`conventions checker: renamed ${rename} (C12)`);
+        }
         const written = fixSpecFiles(root);
         if (written.length > 0) {
             console.log(`conventions checker: rewrote ${written.length} spec document(s)`);

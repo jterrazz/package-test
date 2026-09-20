@@ -1,0 +1,3 @@
+[error] api/users/creation.test.ts:1: a `.test.ts` under `specs/api/` specifies the assembled product — rename it `.spec.ts` (fixable: `node dist/checker.js <root> --fix`) (C12 — see docs/13-linting.md)
+
+conventions checker: 1 error(s) found under {{workdir}}/specs

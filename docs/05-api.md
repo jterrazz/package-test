@@ -201,7 +201,7 @@ Location: /orders/{{uuid#order}}
 ```
 
 ```typescript
-// specs/api/orders/orders.test.ts
+// specs/api/orders/orders.spec.ts
 import { expect, test } from 'vitest';
 import { match } from '@jterrazz/test';
 import { api } from '../api.specification.js';

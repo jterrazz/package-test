@@ -151,18 +151,45 @@ export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEnt
  *     import { testing } from '@jterrazz/test/oxlint';
  *     export default compose(node, testing);
  *
- * `jsPlugins` registers the tool-facing entry; `rules` is {@link recommendedRules};
- * `overrides` relaxes `import/exports-last` for `*.specification.ts` — the A4 idiom
+ * `jsPlugins` registers the tool-facing entry; `rules` is {@link recommendedRules}
+ * plus the UPSTREAM options this vocabulary owns; `overrides` relaxes
+ * `import/exports-last` for `*.specification.ts` — the A4 idiom
  * (`export const { cli, cleanup } … ; afterAll(cleanup)`) legitimately ends a spec
  * file on a non-export statement, so the relaxation ships here rather than being
  * hand-rolled in every consumer.
+ *
+ * An upstream rule that can carry a convention as an OPTION is set here rather
+ * than duplicated as a `jterrazz/*` rule: one owner per convention. The file
+ * naming is the first of them — the fork spends two suffixes (`.test.ts(x)`
+ * beside the code, `.spec.ts` under `specs/`), and the plugin's default pattern
+ * knows only the first, so a facet spec would be refused for wearing the word
+ * C12 requires of it.
+ *
+ * It is set in an OVERRIDE, not in `rules`, because that is where the option
+ * survives: a base profile turns the vitest plugin on inside an override over
+ * the test globs, and an override's entry REPLACES a top-level one rather than
+ * merging with it. A fragment that wrote the option at the top level would be
+ * silently overruled by whichever profile it was composed with.
  */
+
+/** The globs an upstream test rule is set over — the three suffixes, and a specs tree. */
+const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/**/*.{ts,tsx}'];
+
 export const testing: OxlintConfig = {
     jsPlugins: ['@jterrazz/test/oxlint'],
     overrides: [
         {
             files: ['**/*.specification.ts'],
             rules: { 'import/exports-last': 'off' },
+        },
+        {
+            files: TEST_GLOBS,
+            rules: {
+                'vitest/consistent-test-filename': [
+                    'error',
+                    { pattern: String.raw`.*\.(?:test|spec)\.[tj]sx?$` },
+                ],
+            },
         },
     ],
     rules: recommendedRules,

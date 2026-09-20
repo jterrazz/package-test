@@ -27,7 +27,7 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/api/users/users.test.ts
+// specs/api/users/users.spec.ts
 import { expect, test } from 'vitest';
 import { api } from '../api.specification.js';
 
@@ -60,7 +60,7 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/cli/build/build.test.ts
+// specs/cli/build/build.spec.ts
 import { expect, test } from 'vitest';
 import { cli } from '../cli.specification.js';
 
@@ -104,7 +104,7 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/website/visit/head.test.ts
+// specs/website/visit/head.spec.ts
 import { expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
@@ -134,7 +134,7 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/mobile/events/feed.test.ts
+// specs/mobile/events/feed.spec.ts
 import { expect, test } from 'vitest';
 import { mobile } from '../mobile.specification.js';
 
@@ -180,11 +180,11 @@ import { defineSpecConfig } from '@jterrazz/test/vitest';
 export default defineSpecConfig({
     test: {
         projects: [
-            { test: { name: 'http', include: ['specs/api/**/*.test.ts'] } },
+            { test: { name: 'http', include: ['specs/api/**/*.spec.ts'] } },
             {
                 test: {
                     name: 'http-stack',
-                    include: ['specs/api/**/*.test.ts'],
+                    include: ['specs/api/**/*.spec.ts'],
                     env: { TEST_MODE: 'compose' },
                 },
             },

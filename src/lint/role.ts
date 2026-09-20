@@ -113,6 +113,22 @@ export function roleOf(filename: string): FileIdentity {
 /** The roles that ARE a test — what a rule reaching "every test file" means. */
 const TEST_ROLES = new Set<FileRole>(['component', 'module', 'spec']);
 
+/**
+ * The three suffixes that DECLARE tests, as a name-level predicate.
+ *
+ * `roleOf` is the answer for a rule handed a file; the passes that WALK a tree
+ * only ever hold a name, and this is the same vocabulary for them — one place
+ * to read, so a tree walk and a rule never disagree on what a test is.
+ */
+export function isTestFileName(name: string): boolean {
+    return name.endsWith('.test.ts') || name.endsWith('.test.tsx') || name.endsWith('.spec.ts');
+}
+
+/** A test that runs under node's project — a `.test.tsx` renders and is not one. */
+export function isNodeTestFileName(name: string): boolean {
+    return name.endsWith('.test.ts') || name.endsWith('.spec.ts');
+}
+
 /** Is this one of the three files that DECLARE tests? */
 export function isTestRole(role: FileRole): boolean {
     return TEST_ROLES.has(role);

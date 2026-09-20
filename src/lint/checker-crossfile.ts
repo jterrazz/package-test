@@ -12,6 +12,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import { GROUND_DIRS, GROUND_FIXTURES } from '../specification/facets/_common/ground.js';
 import { parseSpecDocument, SPEC_EXTENSION } from '../specification/literate/spec-document.js';
 import type { Severity, TokenViolation } from './checker.js';
+import { isNodeTestFileName, isTestFileName } from './role.js';
 
 /**
  * The cross-file checker passes — the analyses oxlint cannot express because
@@ -243,12 +244,12 @@ function collectSpecLiterals(path: string): Set<string> {
 /**
  * Is this a file a leaf's ground may be referenced from?
  *
- * `.test.tsx` counts as much as `.test.ts`: a rendered unit's golden — its ARIA
- * tree — sits in the same `_expected/`, read by a test the suffix alone tells
- * apart.
+ * Every test suffix counts, and so does a document: a rendered unit's golden —
+ * its ARIA tree — sits in the same `_expected/` as a spec's, read by a file the
+ * suffix alone tells apart.
  */
 function isReferrer(name: string): boolean {
-    return name.endsWith('.test.ts') || name.endsWith('.test.tsx') || name.endsWith(SPEC_EXTENSION);
+    return isTestFileName(name) || name.endsWith(SPEC_EXTENSION);
 }
 
 function isDir(path: string): boolean {
@@ -585,7 +586,7 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
         return violations;
     }
 
-    for (const testFile of listFiles(rootDir, (path) => path.endsWith('.test.ts'))) {
+    for (const testFile of listFiles(rootDir, isNodeTestFileName)) {
         const text = readSource(testFile);
         const runners = new Set<string>();
         for (const binding of namedImports(text)) {
@@ -671,7 +672,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
         return violations;
     }
 
-    for (const testFile of listFiles(rootDir, (path) => path.endsWith('.test.ts'))) {
+    for (const testFile of listFiles(rootDir, isNodeTestFileName)) {
         const text = readSource(testFile);
         // Which enforced specs does this test import? Enforce only when exactly
         // One applies (mixed DB configurations are ambiguous → skip).
@@ -766,7 +767,7 @@ function isConventionalSubdir(path: string): boolean {
     }
     // A real _seeds/_expected/… holds leaf fixtures: never a test, never a
     // Nested ground subdir (those signal a feature dir named like one).
-    const files = listFiles(path, (candidate) => candidate.endsWith('.test.ts'));
+    const files = listFiles(path, isTestFileName);
     if (files.length > 0) {
         return false;
     }
