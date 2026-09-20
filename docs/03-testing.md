@@ -45,6 +45,8 @@ npx vitest --run --project component  # the same chromium, a mounted unit at a t
 
 There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/facets/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
 
+A second hole is the RENDERER's, and it is not this repository's to close: a React Native screen never reaches the real Chromium the component facet mounts in, so jest stays on that surface until the `react-native-web` spike says otherwise — [07 — Component specs](07-component.md) lists it with the other three shapes the facet does not take.
+
 ## How a spec tree is laid out
 
 The layout is the one the conventions enforce on every consumer (rule C1), and this repository is its first consumer. A facet carries its runners at its ROOT and its tests one level down, in domain folders:
