@@ -1,6 +1,6 @@
 # ADR-006: The catalogue reaches a file by its role, states its reach, and is born on a count
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-20
 
 ## Context

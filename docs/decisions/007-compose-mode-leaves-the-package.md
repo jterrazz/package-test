@@ -1,6 +1,6 @@
 # ADR-007: Compose mode leaves the package
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-20
 
 ## Context

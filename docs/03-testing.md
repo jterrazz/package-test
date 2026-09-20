@@ -28,7 +28,7 @@ What proves a change here: this package specifies itself with itself. The suites
 
 Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. A member without `"type": "module"` writes its config as `vitest.config.mts`: the helpers ship ESM only, a CJS config would have to `require()` them, and `roleOf` already reads `.mts` as the config role — so the rules that judge a config still find it.
 
-Why a file is reached by its ROLE and named by its suffix, and what was weighed against it: [ADR-006](decisions/006-the-catalogue-reaches-a-file-by-its-role.md) (proposed).
+Why a file is reached by its ROLE and named by its suffix, and what was weighed against it: [ADR-006](decisions/006-the-catalogue-reaches-a-file-by-its-role.md).
 
 **`specs/lint/` is a repository suite, and it keeps `.test.ts`.** A repository suite covers a TREE rather than one assembled product: these files run the plugin and the checker over fixture PROJECTS, one per rule, and what they specify is a convention over a repository's shape. Its first level is not one of the six facets, so C12's rename clause never reaches it, C1's declared depth is what judges it, and `unit()` is what collects it.
 
