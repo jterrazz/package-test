@@ -80,7 +80,7 @@ const settings = mockOf<Settings>({ deep: false });
 const onDone = vi.fn<() => void>();
 ```
 
-Everything else the ladder refuses is refused here by name: `vi.mock` doubles a module for everyone, so it is I4's error unless a native module a consumer cannot inject earns an allow-list entry with its reason; `vi.stubGlobal` is the network replaced by a function the test wrote, so it is M3's ([18 — Conventions § The doubles ladder](18-conventions.md#the-doubles-ladder)).
+Everything else the ladder refuses is refused here by name: `vi.mock` doubles a module for everyone, so it is I4's error unless a native module a consumer cannot inject earns an allow-list entry with its reason — matched in either spelling, `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` asks for, so the two rules have a spelling they both accept; `vi.stubGlobal` is the network replaced by a function the test wrote, so it is M3's ([18 — Conventions § The doubles ladder](18-conventions.md#the-doubles-ladder)).
 
 ### `intercept()` — the network, declared, with no chain
 
