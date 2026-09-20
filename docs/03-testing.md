@@ -61,6 +61,23 @@ specs/
 └── _fixtures/                        # the SHARED pool, reached as $FIXTURES/…
 ```
 
+**A domain shared by two facets carries the same name in both.** Six
+capabilities belong to no facet in particular — a runner's `lifecycle`, the
+declared network (`intercepts`), the ground a chain loads (`seeding`), what a
+result answers (`assertions`), the `{{token}}` engine (`tokens`) and the pinned
+calendar (`clock`) — and where a facet specifies one, its domain folder is
+called that, so `specs/api/clock/` and `specs/website/clock/` are the same
+question asked of two constructors. A domain present in every facet is core
+behaviour; one present in a single facet is that facet's own, and keeps its own
+name.
+
+`requests/` and `responses/` are api's, `env/`, `exec/`, `directory/`,
+`docker/` and `literate/` are cli's, `call/`, `golden/`, `postgres/` and
+`redis/` are integration's, `triggering/` is jobs', `visit/`, `fetch/`,
+`console/` and `services/` are website's. The tree is the reading: a name that
+appears twice says the capability is shared, and a name that appears once says
+where it is not.
+
 A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; a leading underscore means ground, never a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([12 — Conventions](12-conventions.md)).
 
 The fixture apps the specs drive live in the pool: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, the `broken-*` trees for the infrastructure failure paths, and `lint-violations/` — a violation/compliant twin per lint rule.
