@@ -101,8 +101,14 @@ function isOptions(value: unknown): value is InterceptOptions {
  * The framework owns the seam so a test never has to: this is the one place
  * `fetch` is wrapped, it is put back when the scope ends, and what it does is
  * the one thing a page would have done for free — turn `/api/posts` into a URL.
+ *
+ * Validating the origin and INSTALLING the wrapper are two steps because they
+ * happen at two moments: the refusal of a bad origin belongs before anything
+ * starts, while the wrapper may only go on once the engine is listening — it
+ * has to sit ON TOP of whatever `fetch` the engine installed, and be taken off
+ * before the engine takes its own back.
  */
-function resolveRelativeAgainst(origin: string): () => void {
+function resolveRelativeAgainst(origin: string): () => () => void {
     let base: URL;
     try {
         base = new URL(origin);
@@ -111,13 +117,18 @@ function resolveRelativeAgainst(origin: string): () => void {
             `intercept(): \`origin\` states where a relative request resolves — \`${origin}\` is not an absolute URL (e.g. 'http://console.test').`,
         );
     }
-    const original = globalThis.fetch;
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
-        typeof input === 'string' && input.startsWith('/')
-            ? await original(new URL(input, base).toString(), init)
-            : await original(input, init);
     return () => {
-        globalThis.fetch = original;
+        const engine = globalThis.fetch;
+        globalThis.fetch = async (
+            input: RequestInfo | URL,
+            init?: RequestInit,
+        ): Promise<Response> =>
+            typeof input === 'string' && input.startsWith('/')
+                ? await engine(new URL(input, base).toString(), init)
+                : await engine(input, init);
+        return () => {
+            globalThis.fetch = engine;
+        };
     };
 }
 
@@ -162,20 +173,15 @@ export function interceptThrough(
                     'and a subject with no network needs no intercept at all.',
             );
         }
-        const restoreOrigin =
+        const installOrigin =
             options?.origin === undefined ? undefined : resolveRelativeAgainst(options.origin);
-        let registration;
-        try {
-            registration = await register(contracts);
-        } catch (error) {
-            restoreOrigin?.();
-            throw error;
-        }
+        const registration = await register(contracts);
+        const restoreOrigin = installOrigin?.();
         return {
             [Symbol.asyncDispose]: async () => {
+                restoreOrigin?.();
                 const violation = registration.violation();
                 registration.cleanup();
-                restoreOrigin?.();
                 await Promise.resolve();
                 if (violation) {
                     throw violation;
