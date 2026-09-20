@@ -51,8 +51,8 @@ function testsItsNeighbour(filename: string): boolean {
  * product command/area with one or more `<aspect>.test.ts` files plus their
  * shared asset dirs.
  *
- * - a `*.test.ts` sits at facet/domain depth — exactly
- *   `specs/<facet>/<domain>/<file>.test.ts`. A test directly at the facet root
+ * - a spec sits at facet/domain depth — exactly
+ *   `specs/<facet>/<domain>/<aspect>.spec.ts`. A test directly at the facet root
  *   (or nested deeper than a domain) is rejected.
  * - a `*.specification.ts` sits at the facet root — exactly
  *   `specs/<facet>/<file>.specification.ts`, never inside a domain.
@@ -60,8 +60,8 @@ function testsItsNeighbour(filename: string): boolean {
  * `depth: 'facet'`
  *
  * The same facet root, one degree looser: the folder follows the assets. A
- * `*.test.ts` sits EITHER at the facet root (`specs/<facet>/<aspect>.test.ts`)
- * or one domain folder down (`specs/<facet>/<domain>/<aspect>.test.ts`) — a
+ * spec sits EITHER at the facet root (`specs/<facet>/<aspect>.spec.ts`)
+ * or one domain folder down (`specs/<facet>/<domain>/<aspect>.spec.ts`) — a
  * test earns a domain folder when it carries assets of its own, and sits
  * beside its siblings when it does not. Anything deeper is rejected, and so is
  * a test loose at the specs root. A `*.specification.ts` sits at the facet
@@ -70,9 +70,10 @@ function testsItsNeighbour(filename: string): boolean {
  * `depth: 'mirror'`
  *
  * The tree mirrors something outside itself (a command tree, a source tree), so
- * the depth is that structure's and no fixed number can name it. A `*.test.ts`
+ * the depth is that structure's and no fixed number can name it. A spec
  * sits at ANY depth of at least one directory under `specs/`, and is NAMED
- * AFTER the directory holding it — `<dir>/<dir>.test.ts`. That naming is what
+ * AFTER the directory holding it — `<dir>/<dir>.spec.ts`, the suffix C12 gives
+ * every file of a facet tree. That naming is what
  * keeps the shape checkable: one test per mirrored node, no test loose at the
  * specs root. Specification files are unconstrained: a mirror has no facet
  * level to anchor them to.
@@ -181,17 +182,17 @@ export const c1DomainStructure: LintRule = {
             specNotAtFacetRoot:
                 'A `*.specification.ts` must sit at the facet root: `specs/<facet>/<name>.specification.ts`.',
             testAtFacetRoot:
-                'A `*.test.ts` must live in a domain folder: `specs/<facet>/<domain>/<aspect>.test.ts` — tests directly at the facet root are forbidden.',
+                'A spec must live in a domain folder: `specs/<facet>/<domain>/<aspect>.spec.ts` — tests directly at the facet root are forbidden.',
             testAtSpecsRoot:
-                'A `*.test.ts` must live in a directory under specs/ — with `depth: "mirror"` the tree mirrors a structure, and the specs root mirrors nothing.',
+                'A spec must live in a directory under specs/ — with `depth: "mirror"` the tree mirrors a structure, and the specs root mirrors nothing.',
             testNotMirroringDirectory:
-                'A `*.test.ts` must be named after the directory holding it — `{{directory}}/{{directory}}.test.ts` — with `depth: "mirror"`.',
+                'A spec must be named after the directory holding it — `{{directory}}/{{directory}}.spec.ts` — with `depth: "mirror"`.',
             testOutsideFacet:
-                'A `*.test.ts` must live in a facet folder — `specs/<facet>/<aspect>.test.ts`, or one domain deeper: with `depth: "facet"` the specs root holds facets, not tests.',
+                'A spec must live in a facet folder — `specs/<facet>/<aspect>.spec.ts`, or one domain deeper: with `depth: "facet"` the specs root holds facets, not tests.',
             testTooDeep:
-                'A `*.test.ts` must sit at facet/domain depth: `specs/<facet>/<domain>/<aspect>.test.ts` — no deeper nesting.',
+                'A spec must sit at facet/domain depth: `specs/<facet>/<domain>/<aspect>.spec.ts` — no deeper nesting.',
             testTooDeepForFacet:
-                'A `*.test.ts` must sit at the facet root or one domain folder down — `specs/<facet>/<aspect>.test.ts` or `specs/<facet>/<domain>/<aspect>.test.ts`: with `depth: "facet"` nothing nests deeper.',
+                'A spec must sit at the facet root or one domain folder down — `specs/<facet>/<aspect>.spec.ts` or `specs/<facet>/<domain>/<aspect>.spec.ts`: with `depth: "facet"` nothing nests deeper.',
         },
         schema: [
             {
