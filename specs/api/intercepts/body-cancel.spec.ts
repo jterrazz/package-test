@@ -7,11 +7,17 @@ import { api, QUOTES_URL } from '../intercepts.specification.js';
  * The repro of a SEAM defect, kept where the fix will be proven.
  *
  * `response.body.cancel()` on a reply `intercept()` served never resolves under
- * node: msw's interceptor holds the stream open, and the call hangs until the
- * test's budget kills it (measured on msw 2.15.0 — 30 s, then 5 s; reading the
- * same body with `.text()` resolves at once). It is interop between msw and
- * undici, not this package's code, and no upstream issue names a MOCKED reply —
- * the nearest is mswjs/interceptors#799, a passthrough body, closed as fixed.
+ * node: the call hangs until the test's budget kills it, while reading the same
+ * body with `.text()` resolves at once.
+ *
+ * The cause is msw's own tee, above the interceptor: msw hands the caller ONE
+ * BRANCH of a teed stream, keeping the other for its `response` lifecycle
+ * event, and a tee branch's `cancel()` resolves only once BOTH branches have
+ * been cancelled — which msw's never is. Measured on msw 2.15.0 with
+ * `@mswjs/interceptors` 0.41.9: a real server cancels in 12 ms, the
+ * interceptor alone cancels in 12 ms, and msw hangs on a PASSTHROUGH request
+ * exactly as it does on a mocked one (docs/16 § A cancelled body does not
+ * settle).
  *
  * Until it answers, a subject whose own code cancels a body is the ONE case
  * with no `intercept()` to reach for: it keeps `vi.stubGlobal('fetch')` behind
