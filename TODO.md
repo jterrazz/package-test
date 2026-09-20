@@ -67,6 +67,16 @@ rule about either one is a chapter-12 backlog line, and it waits on the surface.
   `find_binary` lacks the hoisted-`.bin` clause its check command carries, so the command the
   adopt flow prescribes "where red" refuses to write the file in exactly the repositories
   that need it most.
+- **The grab-bag roster has no project-level exemption, and `core` is on it.** The tree
+  this package's three-tree restructure names `src/core/` — the model every facet is made
+  of — fails `Names (tree)` (`lib/check-names.js`, closed roster). The roster is right in
+  general and wrong here: `core` names a subject when a package's OTHER trees are
+  `facets/`, `seams/` and `runner/`, because it is what those three are made of. The flag
+  the pass reads (`--ignore-pattern`) is the caller's, not the project's, so a project
+  cannot state the exemption where it states everything else. Ask: let a project DECLARE a
+  tree root the roster does not judge, or read `--ignore-pattern` from the package
+  manifest. Until it lands, `npx typescript check` is red on that one line here.
+
 - **`typescript fix` lints its own generated wrapper.** It is written
   beside the consumer config with an absolute `.ts` import, where the react profile's
   import rules reach it — a red `fix` on a tree that is clean.

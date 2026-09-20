@@ -11,19 +11,19 @@
  * side only.
  */
 
-import { interceptThrough } from '../integrations/msw/scope.js';
-import type { Intercept } from '../integrations/msw/scope.js';
-import { registerWorkerContracts } from '../integrations/msw/worker.js';
-import type { postgres as postgresFn } from '../integrations/postgres/postgres.js';
-import type { redis as redisFn } from '../integrations/redis/redis.js';
-import type { sqlite as sqliteFn } from '../integrations/sqlite/sqlite.js';
-import { registerBrowserMatchers } from '../integrations/vitest-browser/golden.js';
 import type {
     processService as processFn,
     ProcessHandle as ProcessHandleClass,
-} from '../specification/facets/_common/process.js';
-import { TextAccessor } from '../specification/facets/_common/result/text.js';
-import type { Specification } from '../specification/facets/_common/specification.js';
+} from '../core/chain/process.js';
+import { interceptThrough } from '../core/contracts/intercept.js';
+import type { Intercept } from '../core/contracts/intercept.js';
+import { TextAccessor } from '../core/result/text.js';
+import type { Specification } from '../facets/specification.js';
+import { registerWorkerContracts } from '../seams/msw/worker.js';
+import type { postgres as postgresFn } from '../seams/postgres/postgres.js';
+import type { redis as redisFn } from '../seams/redis/redis.js';
+import type { sqlite as sqliteFn } from '../seams/sqlite/sqlite.js';
+import { registerBrowserMatchers } from '../seams/vitest-browser/golden.js';
 import { nodeOnlyClass, refuse } from './node-only.js';
 
 // The page's own matchers, armed by the import that brought `component` in: a
@@ -31,7 +31,7 @@ import { nodeOnlyClass, refuse } from './node-only.js';
 registerBrowserMatchers();
 
 // ── The component facet — real here, and only here ──
-export { component } from '../specification/facets/component/component.chain.js';
+export { component } from '../facets/component/component.chain.js';
 
 /**
  * The module-scope network double, on msw's WORKER — the same contracts and

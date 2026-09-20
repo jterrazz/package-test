@@ -7,14 +7,14 @@ import {
     GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
-} from '../specification/facets/_common/ground.js';
+} from '../core/chain/ground.js';
 import {
     assertedStreams,
     readSpecFile,
     SPEC_EXTENSION,
     SpecSyntaxError,
-} from '../specification/literate/spec-document.js';
-import { TOKEN_KINDS } from '../specification/matching/match.js';
+} from '../core/literate/spec-document.js';
+import { TOKEN_KINDS } from '../core/matching/match.js';
 import {
     checkDatabaseProperty,
     checkDeadFixtures,

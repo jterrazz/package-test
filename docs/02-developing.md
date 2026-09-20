@@ -30,12 +30,12 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 
 | Changing…                                         | Opens                                                                                       |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| A facet's chain, setups or terminal actions       | `src/specification/facets/<facet>/`, over `_common/builder.ts`                              |
-| What a result exposes                             | `src/specification/facets/_common/result/` — accessors stay READ-ONLY                       |
-| A matcher, or update-mode behaviour               | `src/vitest/` — the only place the runner is coupled                                        |
-| An external dependency's adapter                  | `src/integrations/<dep>/`, which imports that dep and `specification/` and no more          |
-| A `{{token}}` or the structural comparison        | `src/specification/matching/`                                                               |
-| The `<case>.spec.yaml` grammar                    | `src/specification/literate/` — read by BOTH the runner and the checker                     |
+| A facet's chain, setups or terminal actions       | `src/facets/<facet>/`, over `core/chain/builder.ts`                                         |
+| What a result exposes                             | `src/core/result/` — accessors stay READ-ONLY                                               |
+| A matcher, or update-mode behaviour               | `src/core/goldens/` and `src/runner/` — the two sides of the runner coupling                |
+| An external dependency's adapter                  | `src/seams/<dep>/`, which imports that dep and `core/` and no more                          |
+| A `{{token}}` or the structural comparison        | `src/core/matching/`                                                                        |
+| The `<case>.spec.yaml` grammar                    | `src/core/literate/` — read by BOTH the runner and the checker                              |
 | A mechanized rule                                 | `src/lint/manifest.ts` **and** its implementation under `src/lint/rules/` or a checker pass |
 | A principle, or a criterion no machine can settle | [12 — Conventions](12-conventions.md), the constitution                                     |
 

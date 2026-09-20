@@ -4,13 +4,13 @@ What proves a change here: this package specifies itself with itself. The suites
 
 **The suffix says the kind.** `.test.ts` is the UNIT's word and sits beside the module it covers; `.test.tsx` is the same law for a rendered unit; `.spec.ts` is the ASSEMBLED product's word and lives under `specs/<facet>/`; a literate document stays `<case>.spec.yaml`. C12 holds both directions and its `--fix` renames with `git mv`, so a reader can tell what a file proves without opening it.
 
-| Ground          | Where                                               | Proves                                                                 |
-| --------------- | --------------------------------------------------- | ---------------------------------------------------------------------- |
-| Module tests    | `src/**/<file>.test.ts`                             | One module's behaviour, beside it (rule I2)                            |
-| Component tests | `specs/component-app/<file>.test.tsx`               | A rendered unit, beside it, in a real Chromium ([16](16-component.md)) |
-| Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts`           | The framework's own facets, through the public surface                 |
-| Spec documents  | `specs/cli/literate/*.spec.yaml`                    | The document format, collected as test files by `literate()`           |
-| Meta-tests      | `src/lint/*.test.ts`, `src/specification/matching/` | The framework applied to itself and to its own projections             |
+| Ground          | Where                                      | Proves                                                                 |
+| --------------- | ------------------------------------------ | ---------------------------------------------------------------------- |
+| Module tests    | `src/**/<file>.test.ts`                    | One module's behaviour, beside it (rule I2)                            |
+| Component tests | `specs/component-app/<file>.test.tsx`      | A rendered unit, beside it, in a real Chromium ([16](16-component.md)) |
+| Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts`  | The framework's own facets, through the public surface                 |
+| Spec documents  | `specs/cli/literate/*.spec.yaml`           | The document format, collected as test files by `literate()`           |
+| Meta-tests      | `src/lint/*.test.ts`, `src/core/matching/` | The framework applied to itself and to its own projections             |
 
 ## The seven projects
 
@@ -34,7 +34,7 @@ Why a file is reached by its ROLE and named by its suffix, and what was weighed 
 
 **The `unit` project's budget is the whole suite's floor.** It collects the module tests and the lint suite and runs with no service, no browser and no container, so it is the one project a developer runs on every save: it stays under 12 seconds, and the meta-test that proves every rule's reach (`k4-reach-per-path`) runs inside it on ONE oxlint run for that reason.
 
-There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/integrations/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
+There is no folder under `specs/` that belongs to no constructor. A probe of a container seam — the postgres and redis handles — is a module against a real service, so it is an integration spec: `specs/integration/<seam>/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the one adapter the public entry does not publish (`TestcontainersAdapter`), are module tests beside their modules under `src/seams/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (rule F3).
 
 ```bash
 npm test                            # every project — Docker and chromium both required
@@ -43,7 +43,7 @@ npx vitest --run --project website  # after npx playwright install chromium
 npx vitest --run --project component  # the same chromium, a mounted unit at a time
 ```
 
-There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/specification/facets/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
+There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/facets/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
 
 ## How a spec tree is laid out
 
@@ -77,16 +77,16 @@ Its goldens are full snapshots, not greps: `specs/lint/checker/_expected/*.txt` 
 
 Several truths about this package cannot be asserted from outside it, so they are asserted by running it on itself. Each of these exists because a defect class was found once and made unrepeatable (rule K1).
 
-| Meta-test                                                        | Holds                                                                                                                                                                                                                                             |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/specification/matching/match.test.ts`, `structural.test.ts` | Every `{{token}}` matches what it should and refuses what it should not — both directions                                                                                                                                                         |
-| `src/lint/plugin.test.ts`                                        | Catalogue **freshness** (regenerating reproduces the committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`, every manifest entry maps to an implementation), plus the standing rule↔fixture inventory |
-| `src/lint/docs-typecheck.test.ts`                                | Every framework code block in `docs/*.md` and `README.md` typechecks against the real surface, so a sample cannot outlive the API it calls                                                                                                        |
-| `src/lint/env-allowlist.test.ts`                                 | No `process.env` read outside `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                                           |
-| `src/lint/facet-matrix.test.ts`                                  | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
-| `src/lint/package-exports.test.ts`                               | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
-| `specs/lint/meta/k4-reach-per-path.test.ts`                      | The REACH of a rule, on one fixture project laid out with every path role and a single oxlint run (rule K4)                                                                                                                                       |
-| `src/type-channel.test-d.ts`                                     | What the COMPILER refuses — A8, A11, B1, B3, D1, M2, W6 — each as an `@ts-expect-error` that fails the day the line it marks starts compiling                                                                                                     |
+| Meta-test                                               | Holds                                                                                                                                                                                                                                             |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/core/matching/match.test.ts`, `structural.test.ts` | Every `{{token}}` matches what it should and refuses what it should not — both directions                                                                                                                                                         |
+| `src/lint/plugin.test.ts`                               | Catalogue **freshness** (regenerating reproduces the committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`, every manifest entry maps to an implementation), plus the standing rule↔fixture inventory |
+| `src/lint/docs-typecheck.test.ts`                       | Every framework code block in `docs/*.md` and `README.md` typechecks against the real surface, so a sample cannot outlive the API it calls                                                                                                        |
+| `src/lint/env-allowlist.test.ts`                        | No `process.env` read outside `TEST_UPDATE` and vitest's own `VITEST_POOL_ID` (rule E1)                                                                                                                                                           |
+| `src/lint/facet-matrix.test.ts`                         | The documented per-facet method matrix still matches the real facet interfaces                                                                                                                                                                    |
+| `src/lint/package-exports.test.ts`                      | The subpath exemption is read from the manifest's `exports` map, not from a list a rule remembers                                                                                                                                                 |
+| `specs/lint/meta/k4-reach-per-path.test.ts`             | The REACH of a rule, on one fixture project laid out with every path role and a single oxlint run (rule K4)                                                                                                                                       |
+| `src/type-channel.test-d.ts`                            | What the COMPILER refuses — A8, A11, B1, B3, D1, M2, W6 — each as an `@ts-expect-error` that fails the day the line it marks starts compiling                                                                                                     |
 
 `src/lint/plugin.test.ts` also holds the seven-channel contract: every row of
 every channel carries the proof that channel can give — a rule file and a

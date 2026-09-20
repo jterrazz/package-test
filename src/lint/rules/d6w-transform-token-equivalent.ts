@@ -1,4 +1,4 @@
-import { TOKEN_KINDS } from '../../specification/matching/match.js';
+import { TOKEN_KINDS } from '../../core/matching/match.js';
 import { findProperty, memberPropertyName, specificationMember, stringValue } from '../ast.js';
 import { RULE_DOCS } from '../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../types.js';

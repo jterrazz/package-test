@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path';
 
-import { GROUND_SEEDS } from '../../specification/facets/_common/ground.js';
+import { GROUND_SEEDS } from '../../core/chain/ground.js';
 import { listDirectory } from '../fs-cache.js';
 import { RULE_DOCS } from '../manifest.js';
 import { isTestRole, roleOf } from '../role.js';
