@@ -12,11 +12,6 @@
  */
 
 import type { ContainerAccessor as ContainerAccessorClass } from '../integrations/docker/container-accessor.js';
-import type {
-    findContainersByLabel as findContainersByLabelFn,
-    inspectContainer as inspectContainerFn,
-    removeContainers as removeContainersFn,
-} from '../integrations/docker/docker-lookup.js';
 import { interceptThrough } from '../integrations/msw/scope.js';
 import type { Intercept } from '../integrations/msw/scope.js';
 import { registerWorkerContracts } from '../integrations/msw/worker.js';
@@ -24,7 +19,6 @@ import type { postgres as postgresFn } from '../integrations/postgres/postgres.j
 import type { redis as redisFn } from '../integrations/redis/redis.js';
 import type { sqlite as sqliteFn } from '../integrations/sqlite/sqlite.js';
 import { registerBrowserMatchers } from '../integrations/vitest-browser/golden.js';
-import type { Orchestrator as OrchestratorClass } from '../specification/facets/_common/orchestrator.js';
 import type {
     processService as processFn,
     ProcessHandle as ProcessHandleClass,
@@ -84,13 +78,8 @@ export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
 
-// Docker — the container lifecycle and the `docker` CLI behind it.
+// Docker — the container a CLI run spawned, read from the host.
 export const ContainerAccessor: typeof ContainerAccessorClass = nodeOnlyClass('ContainerAccessor');
-export const findContainersByLabel: typeof findContainersByLabelFn = () =>
-    refuse('findContainersByLabel()');
-export const inspectContainer: typeof inspectContainerFn = () => refuse('inspectContainer()');
-export const removeContainers: typeof removeContainersFn = () => refuse('removeContainers()');
-export const Orchestrator: typeof OrchestratorClass = nodeOnlyClass('Orchestrator');
 
 // Results built from a disk walk, a database or a child process.
 export const BaseResult: typeof BaseResultClass = nodeOnlyClass('BaseResult');

@@ -20,10 +20,8 @@ Operative index. Each fix names the rule and the chapter whose **Pitfalls** sect
 | Symptom                                                                                         | Fix                                                                                                                                                                                   |
 | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `specification.app does not exist`                                                              | Only six constructors: `.api()`, `.jobs()`, `.cli()`, `.integration()`, `.website()`, `.mobile()` (A2)                                                                                |
-| `seed() targets database "..." not found`                                                       | `database` takes the services RECORD KEY (`{ analyticsDb: ... }` → `'analyticsDb'`), not the compose name                                                                             |
+| `seed() targets database "..." not found`                                                       | `database` takes the services RECORD KEY (`{ analyticsDb: ... }` → `'analyticsDb'`), not its kebab-case form                                                                          |
 | `N databases are declared — pass { database }` / `redundant database option`                    | A7 cuts both ways: mandatory with ≥ 2 DBs, forbidden with 1                                                                                                                           |
-| Service ignores compose image/env                                                               | A handle binds to the compose service named like its key, else kebab-case; use `composeService` only for non-derivable names                                                          |
-| `Ambiguous compose binding for service key "..."`                                               | Compose declares both the exact key and its kebab-case form — rename one or set `composeService` (A6)                                                                                 |
 | cli spec can't find its files                                                                   | Every `.exec()` runs in a fresh temp dir — populate it with `.fixture('$FIXTURES/name/')` or `.fixture('file')`. No `.project()` (C7)                                                 |
 | cli spec green on one machine, red on another / needs a real `kubectl`, `gh`                    | The chain is escaping the sandbox — mount a stub fixture and pin `PATH: '$WORKDIR/bin:/usr/bin:/bin'` + `HOME: '$WORKDIR'`. [07](../../../docs/07-cli.md)                             |
 | `database is locked` on a cold sqlite cache / a suite pinned to `fileParallelism: false` for it | Fixed since 14.1.0 — the template build takes an exclusive lock and the losers WAIT. Upgrade, then drop the pin. [11](../../../docs/11-services.md#one-worker-builds-the-others-wait) |
@@ -32,13 +30,11 @@ Operative index. Each fix names the rule and the chapter whose **Pitfalls** sect
 
 ## Intercepts, docker, modes
 
-| Symptom                                            | Fix                                                                                                       |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `Unmatched outgoing HTTP request during spec: ...` | Strict contracts (D7) — declare the call (or raise its `times`); the error lists every declared route     |
-| `.intercept(): ... not available in compose mode`  | Contracts run through in-process MSW (I3) — move the spec to a node-only project; `api-stack` excludes it |
-| `jobs.trigger` fails in the compose project        | It doesn't — `specification.jobs()` has no mode, always runs in-process whatever `TEST_MODE` says         |
-| `CliResult.container: runner was not configured`   | `.container(name)` needs `docker: { envVar, nameLabel, testRunLabel }` in the cli options                 |
-| Leaked containers after a docker-aware spec        | Bind the result with `await using` (B5) so containers are force-removed at scope exit                     |
+| Symptom                                            | Fix                                                                                                   |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `Unmatched outgoing HTTP request during spec: ...` | Strict contracts (D7) — declare the call (or raise its `times`); the error lists every declared route |
+| `CliResult.container: runner was not configured`   | `.container(name)` needs `docker: { envVar, nameLabel, testRunLabel }` in the cli options             |
+| Leaked containers after a docker-aware spec        | Bind the result with `await using` (B5) so containers are force-removed at scope exit                 |
 
 ## Layout & architecture
 

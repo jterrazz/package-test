@@ -17,10 +17,10 @@ describe('redis handle', () => {
         expect(connectionString).toBe('redis://127.0.0.1:6380');
     });
 
-    test('binds to the compose service it was given', () => {
-        // Given - an explicit composeService option
-        // Then - the handle carries that compose name
-        expect(redis({ composeService: 'cache' }).composeName).toBe('cache');
+    test('carries no name of its own until the stack assigns the record key', () => {
+        // Given - a freshly created handle, before any stack starts it
+        // Then - the record key is the only name in play, and it is not known yet
+        expect(redis().serviceName).toBeNull();
     });
 
     test('defaults to the redis:7 image and takes an override', () => {

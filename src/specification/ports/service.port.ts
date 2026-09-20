@@ -10,14 +10,13 @@ export type ServiceHandle = {
     readonly type: string;
 
     /**
-     * Compose service name. Left `null` until the orchestrator binds it at
-     * start time (CONVENTIONS A6): a handle with no explicit `composeService`
-     * links to the compose service named exactly like its record key, else the
-     * kebab-case conversion of the key — so `{ analyticsDb: postgres() }` binds
-     * to the compose service `analytics-db` without any option. Set
-     * `composeService` explicitly only for names the key cannot derive.
+     * The name this handle is known by. Left `null` until the orchestrator
+     * assigns it at start time: it is the kebab-case form of the RECORD KEY,
+     * so `{ analyticsDb: postgres() }` reports as `analytics-db` and reads its
+     * init script from `docker/analytics-db/`. The key is the only name a
+     * specification writes; a handle carries no second one of its own.
      */
-    composeName: null | string;
+    serviceName: null | string;
 
     /** Default container port for this service type. */
     readonly defaultPort: number;
@@ -47,13 +46,13 @@ export type ServiceHandle = {
      * Run initialization scripts (e.g., init.sql). Throws with SQL error
      * context if it fails.
      *
-     * `composeDir` is where the compose file lives — where a service reads its
-     * `init.sql` from. `root` is the project root the specification resolved
+     * `dockerDir` is `<root>/docker` — where a service reads its `init.sql`
+     * from, under its own name. `root` is the project root the specification resolved
      * (A9), handed down so a service that CACHES something writes it under the
      * project's own `.artifacts/`, never in a machine-global directory two
      * checkouts would share.
      */
-    initialize: (composeDir: string, root: string) => Promise<void>;
+    initialize: (dockerDir: string, root: string) => Promise<void>;
 
     /** Reset state between tests (truncate tables, flush cache, etc.) */
     reset: () => Promise<void>;

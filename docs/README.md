@@ -5,16 +5,16 @@ The manual of this repository: what the framework is, how it is changed, what pr
 | Chapter                                     | Holds                                                                                                                                           |
 | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | [01 — Architecture](01-architecture.md)     | The runner model behind the six constructors, the four source layers and their edges, the four enforcement channels, what the tarball publishes |
-| [02 — Developing](02-developing.md)         | The repository's own loop and what a change owes; then install, first API spec, first CLI spec, the vitest preset, `TEST_MODE` / `TEST_UPDATE`  |
+| [02 — Developing](02-developing.md)         | The repository's own loop and what a change owes; then install, first API spec, first CLI spec, the vitest preset, `TEST_UPDATE`                |
 | [03 — Testing](03-testing.md)               | The nine vitest projects, the spec-tree layout, the end-to-end lint suite, the meta-test channel, goldens and update mode                       |
 | [04 — Operating](04-operating.md)           | The npm release: the version bump, the GitHub release that triggers it, what leaves the tree, what a consumer must bring                        |
-| [05 — API specs](05-api.md)                 | `specification.api()`: options, node vs compose, `.http` request files, inline actions, seeds, intercepts                                       |
+| [05 — API specs](05-api.md)                 | `specification.api()`: options, the in-process app, `.http` request files, inline actions, seeds, intercepts                                    |
 | [06 — Jobs specs](06-jobs.md)               | `specification.jobs()`: in-process pipelines, `.trigger()`, provider error cases                                                                |
 | [07 — CLI specs](07-cli.md)                 | `specification.cli()`: `.exec()`, `.env()`, fixtures and projects, `<case>.spec.yaml` documents, services, Docker-aware mode                    |
 | [08 — Assertions](08-assertions.md)         | The reference: every matcher, grouped by subject, sync/async rules, `toMatch` resolution, diffs                                                 |
 | [09 — Tokens](09-tokens.md)                 | The `{{token}}` grammar: all 21 tokens, `#ref` captures, `match.*`, update mode                                                                 |
 | [10 — Contracts](10-contracts.md)           | `defineContract` / `defineContracts`, the facade layout, selection (`times`, `required`), provider builders                                     |
-| [11 — Services](11-services.md)             | `postgres` / `redis` / `sqlite` / `process`, the services record, compose conventions, per-worker isolation                                     |
+| [11 — Services](11-services.md)             | `postgres` / `redis` / `sqlite` / `process`, the services record, init scripts, per-worker isolation                                            |
 | [12 — Conventions](12-conventions.md)       | The constitution: the principles, the rule families, the process rules, the naming recap, retro-propagation (K)                                 |
 | [13 — Linting](13-linting.md)               | The oxlint plugin (`@jterrazz/test/oxlint`), the conventions checker, and the GENERATED four-channel rule catalogue                             |
 | [14 — Website specs](14-website.md)         | `specification.website()`: `.fetch()` / `.visit()`, visit scenarios, the element vocabulary, the `head` golden                                  |

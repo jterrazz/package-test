@@ -10,7 +10,7 @@ import { isTestFileName } from './role.js';
  */
 
 /** The only env vars the framework is allowed to read (E1). */
-export const ENV_ALLOWLIST = new Set(['TEST_MODE', 'TEST_UPDATE', 'VITEST_POOL_ID']);
+export const ENV_ALLOWLIST = new Set(['TEST_UPDATE', 'VITEST_POOL_ID']);
 
 const STATIC_READ = /process\.env(?:\.(?<dot>[A-Za-z_]\w*)|\[\s*['"](?<bracket>[^'"]+)['"])/gu;
 const DYNAMIC_READ = /process\.env\[\s*(?!['"])/u;

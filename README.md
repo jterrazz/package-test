@@ -19,7 +19,7 @@ import { postgres, specification } from '@jterrazz/test';
 import { createApp } from '../../src/app.js';
 
 export const { api, cleanup } = await specification.api({
-    services: { db: postgres() }, // → compose service "db"
+    services: { db: postgres() }, // → reported as "db"; init from docker/db/
     server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
 });
 
@@ -153,51 +153,35 @@ Actions are **terminal**: `.request()`, `.get()`, `.trigger()`, `.exec()`, `.cal
 
 One constructor per tested interface, each returning a record destructured with its canonical name:
 
-| Constructor                        | Returns                                  | Terminal actions                                             |
-| ---------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
-| `specification.api(options)`       | `{ api, cleanup, docker, orchestrator }` | `.request(file)`, `.get()`, `.post()`, `.put()`, `.delete()` |
-| `specification.jobs(options)`      | `{ jobs, cleanup, orchestrator }`        | `.trigger(name)`                                             |
-| `specification.cli(bin, options)`  | `{ cli, cleanup, docker, orchestrator }` | `.exec(args, { waitFor?, timeout? }?)`                       |
-| `specification.integration(opts?)` | `{ integration, cleanup }`               | `.call((services) => …)`                                     |
-| `specification.website(options)`   | `{ website, cleanup, url }`              | `.fetch(path)`, `.visit(path, scenario?)`                    |
-| `specification.mobile(options)`    | `{ mobile, cleanup, udid }`              | `.open(deepLink?, scenario?)`                                |
+| Constructor                        | Returns                     | Terminal actions                                             |
+| ---------------------------------- | --------------------------- | ------------------------------------------------------------ |
+| `specification.api(options)`       | `{ api, cleanup, docker }`  | `.request(file)`, `.get()`, `.post()`, `.put()`, `.delete()` |
+| `specification.jobs(options)`      | `{ jobs, cleanup }`         | `.trigger(name)`                                             |
+| `specification.cli(bin, options)`  | `{ cli, cleanup, docker }`  | `.exec(args, { waitFor?, timeout? }?)`                       |
+| `specification.integration(opts?)` | `{ integration, cleanup }`  | `.call((services) => …)`                                     |
+| `specification.website(options)`   | `{ website, cleanup, url }` | `.fetch(path)`, `.visit(path, scenario?)`                    |
+| `specification.mobile(options)`    | `{ mobile, cleanup, udid }` | `.open(deepLink?, scenario?)`                                |
 
 A rendered component has no constructor: it starts nothing, so it is reached through the `component` chain directly (docs/16).
 
-### `specification.api({ services, server, mode?, root? })`
+### `specification.api({ services, server, root? })`
 
-One definition, two execution modes — the switch lives in `vitest.config.ts`, never in the specification file:
-
-- **`node`** (default): starts the declared services via testcontainers and runs the app in-process (Hono). Fastest feedback loop.
-- **`compose`**: runs `docker compose up` on `docker/compose.test.yaml` and sends real HTTP to the app service (`server` is ignored). Proves the shipped artifact.
-
-Resolution: `options.mode` > `TEST_MODE` env var > `'node'`. Only `.api()` has a mode.
+The declared services start in real containers; the app is built by `server(services)` and runs **in this process**, so a request reaches it without a socket, `.intercept()` sees its outgoing calls, and `.clock()` pins the `Date` it reads.
 
 ```typescript
-// vitest.config.ts — the mode switch lives HERE
-import { defineSpecConfig } from '@jterrazz/test/vitest';
+// vitest.config.ts
+import { api, defineSpecConfig } from '@jterrazz/test/vitest';
 
 export default defineSpecConfig({
-    test: {
-        projects: [
-            { test: { name: 'http', include: ['specs/api/**/*.spec.ts'] } },
-            {
-                test: {
-                    name: 'http-stack',
-                    include: ['specs/api/**/*.spec.ts'],
-                    env: { TEST_MODE: 'compose' },
-                },
-            },
-        ],
-    },
+    test: { projects: [api()] }, // `specs/api/**/*.spec.ts`
 });
 ```
 
-`services` is a named record. Keys type the `server` factory parameters, name databases for `.seed()`/`.table()` (`{ database: 'analyticsDb' }`), and drive the compose binding — a handle with no `composeService` option links to the compose service named exactly like its key, else the kebab-case conversion of the key (`analyticsDb` → `analytics-db`). If both names exist the binding is ambiguous and throws; `composeService` is the escape hatch for non-derivable names.
+`services` is a named record, and the key is the only name a service has. It types the `server` factory parameters, names databases for `.seed()`/`.table()` (`{ database: 'analyticsDb' }`), is what the startup report prints, and — kebab-cased — is the folder its init script sits in (`analyticsDb` → `docker/analytics-db/init.sql`).
 
 ### `specification.jobs({ services, jobs, root? })`
 
-Background jobs run in-process by definition — no HTTP server, no mode:
+Background jobs run in-process by definition — no HTTP server:
 
 ```typescript
 export const { jobs, cleanup } = await specification.jobs({
@@ -242,7 +226,7 @@ const page = await website.visit('/', async (visitor) => {
 });
 ```
 
-The handle destructures to `{ website, cleanup, url }` — no `docker`, no `orchestrator`. `.visit()` needs playwright (`npm install -D playwright && npx playwright install chromium`) — an optional peer dependency, only loaded when a spec actually renders a page. Full reference: [docs/14-website.md](docs/14-website.md).
+The handle destructures to `{ website, cleanup, url }` — no `docker`. `.visit()` needs playwright (`npm install -D playwright && npx playwright install chromium`) — an optional peer dependency, only loaded when a spec actually renders a page. Full reference: [docs/14-website.md](docs/14-website.md).
 
 ### `specification.mobile({ app, device, backend?, root? })`
 
@@ -265,7 +249,7 @@ The handle destructures to `{ mobile, cleanup, udid }` (plus `backendUrl` with `
 
 ### Root auto-discovery
 
-When `root` is absent, the framework walks up from the specification file to the **nearest** directory carrying `package.json` or `docker/compose.test.yaml`. In a workspace that is the member being tested, not the repository root above it. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (compose detection + local-bin resolution, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
+When `root` is absent, the framework walks up from the specification file to the **nearest** directory carrying `package.json`. In a workspace that is the member being tested, not the repository root above it. Pass `root` only when the convention does not fit. `root` is strictly the **project root** (local-bin resolution, init scripts, the artefact paths, or the cwd of a `specification.website()` server command) — it is not a fixtures root; `.fixture()` resolves its own paths.
 
 ## vitest config — `defineSpecConfig()`
 
@@ -438,13 +422,13 @@ test('deploy spawns a labelled container', async () => {
 
 ## Service factories
 
-| Factory      | Options                          | Connection string                     |
-| ------------ | -------------------------------- | ------------------------------------- |
-| `postgres()` | `composeService`, `image`, `env` | `postgresql://user:pass@host:port/db` |
-| `redis()`    | `composeService`, `image`        | `redis://host:port`                   |
-| `sqlite()`   | `init` or `prismaSchema`         | `file:/…/….sqlite`                    |
+| Factory      | Options                  | Connection string                     |
+| ------------ | ------------------------ | ------------------------------------- |
+| `postgres()` | `image`, `env`           | `postgresql://user:pass@host:port/db` |
+| `redis()`    | `image`                  | `redis://host:port`                   |
+| `sqlite()`   | `init` or `prismaSchema` | `file:/…/….sqlite`                    |
 
-`docker/compose.test.yaml` is the single source of truth for test infrastructure; `docker/<service>/init.sql` runs when the corresponding service starts. Parallel isolation is automatic per vitest worker: postgres clones a schema, redis assigns a database index, sqlite copies the template file, compose mode gets a dedicated project.
+`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. Parallel isolation is automatic per vitest worker: postgres clones a schema, redis assigns a database index, sqlite copies the template file.
 
 `sqlite()` caches its schema template inside the project — `.artifacts/vitest/sqlite/template-<key>.sqlite` — so two checkouts never share one, and workers racing for a cold cache wait for the one that is building rather than all building at once. Details: [docs/11-services.md](docs/11-services.md#where-the-template-lives).
 
@@ -482,7 +466,7 @@ specs/<facet>/                  # api | jobs | cli | integration | website | mob
 
 A test with its OWN asset dirs gets its own domain folder; tests without local assets group as sibling `<aspect>.test.ts` files inside a named group folder (the folder follows the assets). `.fixture(path)` is the one verb that copies into the cwd: domain-local (`_fixtures/…`) or shared (`$FIXTURES/…` → `specs/_fixtures/…`), with rsync trailing-slash semantics and layering. `.seed()` is SQL-only.
 
-Every test contains `// Given -` and `// Then -` comments (always both; `// When -` only if the action is not obvious — the chain IS the when). User-facing framework env vars: `TEST_MODE` and `TEST_UPDATE` — the only ones you set; the framework also reads vitest's `VITEST_POOL_ID` for per-worker isolation.
+Every test contains `// Given -` and `// Then -` comments (always both; `// When -` only if the action is not obvious — the chain IS the when). User-facing framework env var: `TEST_UPDATE` — the only one you set; the framework also reads vitest's `VITEST_POOL_ID` for per-worker isolation.
 
 ### Convention enforcement — the shipped lint plugin
 
@@ -490,7 +474,7 @@ These conventions are not just prose: the package ships an oxlint plugin (`@jter
 
 ## Requirements
 
-- **Docker** - testcontainers for node mode, docker compose for compose mode; not needed for `sqlite()`, plain cli specs, website specs, or mobile specs
+- **Docker** - testcontainers for the container-backed services; not needed for `sqlite()`, plain cli specs, website specs, or mobile specs
 - **vitest** - peer dependency
 - **playwright** - optional peer dependency, only needed for `.visit()`: `npm install -D playwright && npx playwright install chromium`
 - **appium + webdriverio** - optional peer dependencies, only needed for `specification.mobile()`: `npm install -D appium webdriverio && npx appium driver install xcuitest` — plus Xcode, a simulator, and the app installed on it

@@ -244,7 +244,7 @@ It is real in both runtimes — msw's server under node, msw's worker in a page 
 
 | Facets              | Engine                                            | Notes                                                                               |
 | ------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `api`, `jobs`       | **MSW**, in-process                               | Node-only: a compose-mode runner refuses `.intercept()` (rule I3)                   |
+| `api`, `jobs`       | **MSW**, in-process                               | The app runs here, so its outgoing requests pass through this process               |
 | `website`, `mobile` | the **declared stub backend** (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
 
 Both consume the **same** selection queue, so a contract behaves identically on either side: first match wins, `times` exhausts, `required` verifies at chain end. The old divergence — consume-once on MSW, sticky-last on the stub — is gone; "sticky" is now just the default (`times` omitted), written down.
@@ -390,7 +390,6 @@ At chain end the same channel verifies `required` contracts: one that was declar
 Two scoping notes:
 
 - **A chain with zero contracts does not guard its network** — a deliberate, documented boundary.
-- **`.intercept()` is not available in compose mode** on `api`: MSW is in-process, so a compose-mode runner throws immediately. Keep contract specs in a node-only vitest project — this repo does exactly that (`api-stack` excludes `specs/api/intercepts/**`).
 
 ## Pitfalls
 

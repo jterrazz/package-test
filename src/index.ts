@@ -1,14 +1,7 @@
-import { parseComposeFile } from './integrations/compose/compose-parser.js';
-import { ComposeStackAdapter } from './integrations/compose/compose.js';
 import { interceptThrough } from './integrations/msw/scope.js';
 import type { Intercept } from './integrations/msw/scope.js';
-import { postgres } from './integrations/postgres/postgres.js';
-import { redis } from './integrations/redis/redis.js';
 import { TestcontainersAdapter } from './integrations/testcontainers/testcontainers.js';
-import {
-    registerComposeServiceFactory,
-    registerContainerIntegrations,
-} from './specification/facets/_common/registry.js';
+import { registerContainerIntegrations } from './specification/facets/_common/registry.js';
 
 // ── The surface both runtimes share (browser-safe) ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
@@ -32,7 +25,6 @@ export {
     type ApiHandle,
     type ApiSpecificationOptions,
     type HonoApp,
-    type SpecificationMode,
 } from './specification/facets/api/start-api.js';
 export {
     type CliHandle,
@@ -99,11 +91,6 @@ export type {
 export { BaseResult, type FileAccessor } from './specification/facets/_common/result/result.js';
 export { CliResult } from './specification/facets/cli/result.js';
 export { ContainerAccessor } from './integrations/docker/container-accessor.js';
-export {
-    findContainersByLabel,
-    inspectContainer,
-    removeContainers,
-} from './integrations/docker/docker-lookup.js';
 export { CallResult } from './specification/facets/integration/result.js';
 export { HttpResult } from './specification/facets/api/result.js';
 export { ScreenResult } from './specification/facets/mobile/result.js';
@@ -127,29 +114,16 @@ export type { ServiceHandle } from './specification/ports/service.port.js';
 export type { ServerPort, ServerResponse } from './specification/ports/server.port.js';
 export type { ContainerPort } from './specification/ports/container.port.js';
 
-// Advanced usage — the orchestrator is public; the Exec/Fetch/Hono adapters are
-// Internal wiring (driven by the constructors) and deliberately not re-exported.
-export { Orchestrator } from './specification/facets/_common/orchestrator.js';
-
 // Services
 export { postgres, type PostgresOptions } from './integrations/postgres/postgres.js';
 export { redis, type RedisOptions } from './integrations/redis/redis.js';
 export { sqlite, type SqliteOptions } from './integrations/sqlite/sqlite.js';
 
 // ── Composition root (CONVENTIONS I1) ──
-// `specification/` never imports an external dependency: the orchestrator reaches the
-// Container runtimes (testcontainers, docker compose + yaml parser) and the
-// Service auto-detection factories (postgres, redis) through the integration
-// Registry, wired here — the single entry point every consumer imports (F1).
+// `specification/` never imports an external dependency: the orchestrator
+// Reaches the container runtime through the integration registry, wired here —
+// The single entry point every consumer imports (F1).
 
 registerContainerIntegrations({
-    createComposeStack: (composeFile, projectName) =>
-        new ComposeStackAdapter(composeFile, projectName),
     createContainer: (options) => new TestcontainersAdapter(options),
-    parseComposeFile,
 });
-
-registerComposeServiceFactory('postgres', (service) =>
-    postgres({ composeService: service.name, env: service.environment }),
-);
-registerComposeServiceFactory('redis', (service) => redis({ composeService: service.name }));

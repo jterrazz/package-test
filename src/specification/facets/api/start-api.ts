@@ -5,16 +5,9 @@ import { createApiFacet } from '../_common/builder.js';
 import type { ApiSpecification, SpecificationConfig } from '../_common/builder.js';
 import { getCallerDir } from '../_common/caller.js';
 import { createDockerReader } from '../_common/docker-reader.js';
-import { Orchestrator } from '../_common/orchestrator.js';
 import { resolveRoot } from '../_common/resolve.js';
-import {
-    declaredDatabaseKeys,
-    getWorkerId,
-    releaseIsolation,
-    startServices,
-} from '../_common/services.js';
+import { declaredDatabaseKeys, releaseIsolation, startServices } from '../_common/services.js';
 import type { DatabaseKeys, ServiceRecord } from '../_common/services.js';
-import { FetchAdapter } from './fetch.adapter.js';
 
 // ── Types ──
 
@@ -23,37 +16,24 @@ export type HonoApp = {
     request: (path: string, init?: RequestInit) => Promise<Response> | Response;
 };
 
-/** Execution mode — exists ONLY on `specification.api()` (CONVENTIONS A5). */
-export type SpecificationMode = 'compose' | 'node';
-
 /** Options for {@link startApi | specification.api}. */
 export type ApiSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /**
-     * Execution mode override. Resolution: `options.mode` >
-     * `process.env.TEST_MODE` > `'node'`. Never hardcode this in a
-     * specification file when `server` is defined — set it per vitest
-     * project via `env: { TEST_MODE: 'compose' }` (CONVENTIONS A5).
-     */
-    mode?: SpecificationMode;
-    /**
-     * Project root override for compose detection and init scripts. When
-     * absent, the root is auto-discovered by walking up from the calling
-     * specification file to the first directory containing
-     * `docker/compose.test.yaml`, else the first containing `package.json`
-     * (CONVENTIONS A9).
+     * Project root override for init scripts and artefact paths. When absent,
+     * the root is auto-discovered by walking up from the calling specification
+     * file to the first directory containing `package.json` (CONVENTIONS A9).
      */
     root?: string;
     /**
      * The app factory — receives the started services record (fully typed)
-     * and returns the Hono app. Required in node mode, ignored in compose
-     * mode (the app runs as a compose service there).
+     * and returns the Hono app.
      */
-    server?: (services: Services) => HonoApp;
+    server: (services: Services) => HonoApp;
     /**
      * Named infrastructure record. Keys become the `database` vocabulary of
-     * `.seed()` / `.table()` and drive the compose binding: a handle with no
-     * `composeService` option links to the compose service named exactly like
-     * its key, else the kebab-case conversion of the key (CONVENTIONS A6).
+     * `.seed()` / `.table()`, and, kebab-cased, the folder each service reads
+     * its init script from (`{ analyticsDb: postgres() }` →
+     * `docker/analytics-db/init.sql`).
      */
     services?: Services;
 };
@@ -73,21 +53,7 @@ export type ApiHandle<DatabaseKey extends string = string> = {
      * usable with `await expect(...).toBeRunning()` and read accessors.
      */
     docker: (containerId: string) => ContainerAccessor;
-    /** The orchestrator managing the test infrastructure lifecycle. */
-    orchestrator: Orchestrator;
 };
-
-// ── Mode resolution ──
-
-function resolveMode(explicit: SpecificationMode | undefined): SpecificationMode {
-    const value = explicit ?? process.env.TEST_MODE ?? 'node';
-    if (value !== 'compose' && value !== 'node') {
-        throw new Error(
-            `Invalid test mode "${value}" — expected 'node' or 'compose' (options.mode or TEST_MODE).`,
-        );
-    }
-    return value;
-}
 
 // ── Constructor ──
 
@@ -99,85 +65,29 @@ export async function startApi<Services extends ServiceRecord>(
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);
-    const mode = resolveMode(options.mode);
     const services = (options.services ?? {}) as Services;
     const databaseKeys = declaredDatabaseKeys(services);
 
-    if (mode === 'node') {
-        if (!options.server) {
-            throw new Error(
-                "specification.api(): 'server' is required in node mode — provide " +
-                    'server: (services) => app, or run in compose mode (TEST_MODE=compose).',
-            );
-        }
-
-        const { database, databases, orchestrator, stopProcesses } = await startServices(
-            services,
-            root,
-        );
-        const app = options.server(services);
-
-        const config: SpecificationConfig = {
-            database,
-            databaseKeys,
-            databases,
-            server: new HonoAdapter(app),
-        };
-
-        return {
-            api: createApiFacet(config),
-            cleanup: async () => {
-                await stopProcesses();
-                await releaseIsolation(services);
-                await orchestrator.stop();
-            },
-            docker: createDockerReader(callerDir),
-            orchestrator,
-        };
-    }
-
-    // Compose mode — docker compose up, real HTTP against the app service.
-    const workerId = getWorkerId();
-    const orchestrator = new Orchestrator({
-        mode: 'e2e',
-        projectName: `test-worker-${workerId}`,
-        root,
+    const { database, databases, orchestrator, stopProcesses } = await startServices(
         services,
-    });
+        root,
+    );
+    const app = options.server(services);
 
-    await orchestrator.startCompose();
-
-    const appUrl = orchestrator.getAppUrl();
-    if (!appUrl) {
-        throw new Error(
-            'specification.api(): could not detect app URL from compose. Ensure an app service with ports is defined.',
-        );
-    }
-
-    const databases = orchestrator.getDatabases();
     const config: SpecificationConfig = {
-        database: orchestrator.getDatabase() ?? undefined,
+        database,
         databaseKeys,
-        databases: databases.size > 0 ? databases : undefined,
-        // The app runs in its own container, so pinning THIS process's `Date`
-        // Would freeze a calendar nothing under test reads. A stamp a compose
-        // Spec asserts on is a `{{iso8601}}` token, never a frozen instant.
-        clockDisabledReason:
-            "the calendar it pins is this runner's, and compose mode runs the app in a " +
-            'container — assert the stamp with a `{{iso8601}}` token instead.',
-        // The app runs in its own container — MSW cannot reach it (I3).
-        interceptDisabledReason:
-            'intercepts are in-process (MSW) and not available in compose mode — ' +
-            'keep intercept specs in node-only vitest projects.',
-        server: new FetchAdapter(appUrl),
+        databases,
+        server: new HonoAdapter(app),
     };
 
     return {
         api: createApiFacet(config),
         cleanup: async () => {
-            await orchestrator.stopCompose();
+            await stopProcesses();
+            await releaseIsolation(services);
+            await orchestrator.stop();
         },
         docker: createDockerReader(callerDir),
-        orchestrator,
     };
 }

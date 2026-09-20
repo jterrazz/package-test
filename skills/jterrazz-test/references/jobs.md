@@ -2,7 +2,7 @@
 
 Operative reference. Prose + examples: [docs/06-jobs.md](../../../docs/06-jobs.md). Mocking provider calls: [references/contracts.md](contracts.md). Tokens: [references/tokens.md](tokens.md).
 
-Background jobs run **in-process by definition** — no HTTP server, no `mode`. `specification.jobs()` never reads `TEST_MODE`; its services always start via testcontainers.
+Background jobs run **in-process by definition** — no HTTP server. Its services start via testcontainers.
 
 ## Runner (in `*.specification.ts`, `afterAll(cleanup)`)
 
@@ -14,7 +14,7 @@ export const { jobs, cleanup } = await specification.jobs({
 afterAll(cleanup);
 ```
 
-Returns `{ jobs, cleanup, orchestrator }`. A `JobHandle` is `{ name: string; execute: () => Promise<void> }`.
+Returns `{ jobs, cleanup }`. A `JobHandle` is `{ name: string; execute: () => Promise<void> }`.
 
 ## Setup + action
 

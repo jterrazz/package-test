@@ -11,10 +11,7 @@ import { a1SpecificationFile } from './rules/a1-specification-file.js';
 import { a2KnownConstructors } from './rules/a2-known-constructors.js';
 import { a3NoDestructureAlias } from './rules/a3-no-destructure-alias.js';
 import { a4CleanupAfterall } from './rules/a4-cleanup-afterall.js';
-import { a5ModeWithServer } from './rules/a5-mode-with-server.js';
-import { a6wRedundantComposeService } from './rules/a6w-redundant-compose-service.js';
 import { a9wRedundantRoot } from './rules/a9w-redundant-root.js';
-import { a10DuplicateBinding } from './rules/a10-duplicate-binding.js';
 import { b2KnownFixtureMarker } from './rules/b2-known-fixture-marker.js';
 import { b4GivenThen } from './rules/b4-given-then.js';
 import { b5AwaitUsing } from './rules/b5-await-using.js';
@@ -74,12 +71,9 @@ const plugin: LintPlugin = {
     meta: { name: 'jterrazz' },
     rules: {
         'a1-specification-file': a1SpecificationFile,
-        'a10-duplicate-binding': a10DuplicateBinding,
         'a2-known-constructors': a2KnownConstructors,
         'a3-no-destructure-alias': a3NoDestructureAlias,
         'a4-cleanup-afterall': a4CleanupAfterall,
-        'a5-mode-with-server': a5ModeWithServer,
-        'a6w-redundant-compose-service': a6wRedundantComposeService,
         'a9w-redundant-root': a9wRedundantRoot,
         'b2-known-fixture-marker': b2KnownFixtureMarker,
         'b4-given-then': b4GivenThen,

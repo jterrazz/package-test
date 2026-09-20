@@ -13,7 +13,7 @@ export const { website, cleanup } = await specification.website({
 afterAll(cleanup);
 ```
 
-Returns `{ website, cleanup, url }` — no `docker`, no `orchestrator`. Checklist:
+Returns `{ website, cleanup, url }` — no `docker`. Checklist:
 
 - Exactly one of `server` / `url` — both or neither throws immediately.
 - `server: { command, ready?, port?, timeout? }` — a free OS port injected as `PORT`, polled on `ready` (default `/`, any HTTP status counts as ready), `timeout` default 30 000 ms. On teardown: SIGTERM, then SIGKILL after a 2 s grace (same escalation as the cli exec adapter).

@@ -106,8 +106,8 @@ Two further rules decide WHERE a fixture lives, and they are the same question a
 | Seeds           | `_seeds/<name>.sql` (database state)                                                                                        |
 | Fixtures        | `_fixtures/<name>` (file state) — the leaf's own; the shared pool is `specs/_fixtures/`, reached by `$FIXTURES/`            |
 | Snapshots       | `_expected/<name>` (all expected, flat, extension included — incl. response `.http`)                                        |
-| Service keys    | derive the compose service: exact name, else kebab-case (unless explicit `composeService:`)                                 |
-| Framework env   | `TEST_MODE`, `TEST_UPDATE`                                                                                                  |
+| Service keys    | name the service: the report prints the key, and its kebab-case form is the folder its init script sits in                  |
+| Framework env   | `TEST_UPDATE`                                                                                                               |
 
 ## I — Source-code architecture
 
@@ -134,7 +134,7 @@ Three questions, in order. The answer fixes the folder, the constructor (or none
 
 The fork is the SUBJECT, never the amount of machinery. A rendered component needs a real browser, a Vite pipeline, a network double and a golden engine — all of them the framework's — and it is still a unit, so it sits beside its code. A module that needs a real database needs nothing new at all, and it is still an assembled thing, so it sits under `specs/` ([17](17-integration.md)).
 
-The table is total: **a folder under `specs/` is a constructor's name, and there is no ninth row**. A probe of an adapter against a real service — a database driver, a cache handle, the orchestrator that starts them — answers the seventh question, so it is an integration spec like any other; what it cannot reach through the package's public entry it should not be reaching from a spec at all, and that probe is a module test beside its module (rule F3).
+The table is total: **a folder under `specs/` is a constructor's name, and there is no ninth row**. A probe of an adapter against a real service — a database driver, a cache handle — answers the seventh question, so it is an integration spec like any other; what it cannot reach through the package's public entry it should not be reaching from a spec at all, and that probe is a module test beside its module (rule F3).
 
 ## The doubles ladder
 

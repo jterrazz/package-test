@@ -118,7 +118,6 @@ export async function startServices(
 ): Promise<StartedServices> {
     const { infrastructure } = splitProcesses(services);
     const orchestrator = new Orchestrator({
-        mode: 'integration',
         root,
         services: infrastructure,
     });

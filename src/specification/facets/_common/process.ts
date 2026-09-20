@@ -26,7 +26,7 @@ export class ProcessHandle implements ServiceHandle {
     readonly environment: Record<string, string> = {};
     readonly type = 'process';
 
-    composeName: null | string = null;
+    serviceName: null | string = null;
     connectionString = '';
     started = false;
 

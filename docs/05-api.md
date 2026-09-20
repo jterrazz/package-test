@@ -1,6 +1,6 @@
 # 05 — API specs (`specification.api`)
 
-`specification.api()` tests an HTTP API through real requests. One definition drives two execution modes: **node** (your app runs in-process, services in containers — fastest feedback) and **compose** (the whole stack runs in Docker Compose — end-to-end confidence). The specs are identical in both modes; only `TEST_MODE` changes.
+`specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the services the runner started in real containers — so a request reaches it without a socket, and a contract, a clock and a golden all mean something because the app shares this process's world.
 
 Use it when the subject under test is an HTTP surface. For background pipelines use [jobs](06-jobs.md); for binaries use [cli](07-cli.md).
 
@@ -14,9 +14,9 @@ import { createApp } from '../../src/app.js';
 
 export const { api, cleanup } = await specification.api({
     services: {
-        db: postgres(), // → compose service "db"
-        analyticsDb: postgres(), // → kebab-derived compose service "analytics-db"
-        cache: redis(), // → compose service "cache"
+        db: postgres(), // → reported as "db", init from docker/db/
+        analyticsDb: postgres(), // → "analytics-db", init from docker/analytics-db/
+        cache: redis(), // → "cache"
     },
     server: ({ db, analyticsDb, cache }) =>
         createApp({
@@ -24,7 +24,6 @@ export const { api, cleanup } = await specification.api({
             analyticsDatabaseUrl: analyticsDb.connectionString,
             redisUrl: cache.connectionString,
         }),
-    // mode: absent → env TEST_MODE → default 'node'
     // root: absent → auto-discovery (see below)
 });
 
@@ -33,33 +32,28 @@ afterAll(cleanup);
 
 ### Options
 
-| Option     | Required                     | Description                                                                                                                                                                                        |
-| ---------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `services` | yes (if the app needs infra) | Named record of service factories (`postgres()`, `redis()`, `sqlite()`). Keys are your test vocabulary — see [services](11-services.md)                                                            |
-| `server`   | yes in node mode             | `(services) => app` — receives the started services record, fully typed. **Ignored in compose mode** (the app runs inside the stack) (rule A8)                                                     |
-| `mode`     | no — and usually forbidden   | `'node' \| 'compose'`. Priority: param > `TEST_MODE` > `'node'`. Never hardcoded when `server` is defined (rule A5); only mandatory-and-permanent for non-Node apps that cannot provide a `server` |
-| `root`     | no                           | Override for root resolution — reserved for cases where the convention is not enough (rule A9)                                                                                                     |
+| Option     | Required                     | Description                                                                                                                             |
+| ---------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `services` | yes (if the app needs infra) | Named record of service factories (`postgres()`, `redis()`, `sqlite()`). Keys are your test vocabulary — see [services](11-services.md) |
+| `server`   | yes                          | `(services) => app` — receives the started services record, fully typed (rule A8)                                                       |
+| `root`     | no                           | Override for root resolution — reserved for cases where the convention is not enough (rule A9)                                          |
 
 ### Root resolution (rule A9)
 
-Without `root`, the framework walks **up from the specification file** to the **nearest** directory carrying `package.json` or `docker/compose.test.yaml` — the package being tested, not the repository around it. Passing a `root` that points at the directory the walk would have found anyway is redundant (future lint warning).
+Without `root`, the framework walks **up from the specification file** to the **nearest** directory carrying `package.json` — the package being tested, not the repository around it. Passing a `root` that points at the directory the walk would have found anyway is redundant (future lint warning).
 
-## Node vs compose — deep dive
+## The app runs here
 
-| Aspect             | `node` (default)                                           | `compose`                                                          |
-| ------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| Your app           | In-process, built by `server(services)`                    | Runs inside the `docker/compose.test.yaml` stack; `server` ignored |
-| Services           | Real containers (testcontainers), config read from compose | The compose stack itself                                           |
-| Speed              | Fast — no app container build                              | Slower — full stack boot                                           |
-| What it proves     | Application logic against real databases                   | The shipped artifact: Dockerfile, wiring, networking               |
-| Parallel isolation | Per-worker schema/db-index/file copy (rule G2)             | Dedicated compose project per vitest worker (rule G2)              |
-| Switch location    | `vitest.config.ts` project without `TEST_MODE`             | `vitest.config.ts` project with `env: { TEST_MODE: 'compose' }`    |
+| Aspect             | What it means                                                              |
+| ------------------ | -------------------------------------------------------------------------- |
+| Your app           | In-process, built by `server(services)` — no container, no socket          |
+| Services           | Real containers, started by testcontainers from each handle's own defaults |
+| What it proves     | Application logic against real databases, caches and processes             |
+| Parallel isolation | Per-worker schema / db-index / file copy (rule G2)                         |
 
-In both modes the `services` record keys remain the vocabulary for `.seed()` and `result.table()` — `{ database: 'analyticsDb' }` means the same thing whether the database was started by testcontainers or by compose (rule A5/A8).
+Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this facet does not claim it.
 
-`docker/compose.test.yaml` is the single source of truth for test infrastructure in both modes: node mode reads each service's image and environment from it; compose mode runs it wholesale. `docker/<service>/init.sql` runs when the corresponding service starts (rule G1). See [services](11-services.md).
-
-**App URL discovery (compose mode, as implemented):** the app service is the first service in `docker/compose.test.yaml` declaring a `build:` key (services without `build:` are treated as infrastructure and auto-wired by image type). The framework resolves that service's first `ports:` container port to its host-mapped port and targets `http://localhost:<mapped>`. If no `build:` service with ports exists, `specification.api()` fails with "could not detect app URL from compose".
+`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. See [services](11-services.md).
 
 ## `.http` request files — full format
 
@@ -134,7 +128,7 @@ test('returns 404 with a useful body', async () => {
 | `.intercept(trigger, response)`   | Inline intercept for one-off cases                                                                                              |
 | `.clock('2026-03-04T09:30:00Z')`  | Pin the app's `Date` for this chain, released when the action resolves ([12](12-conventions.md#time--one-primitive-two-depths)) |
 
-Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). `.intercept()` is **node-only** — a compose-mode runner throws immediately, so keep intercept specs in a node-only vitest project (the `api-stack` project excludes `specs/api/intercepts/**`). `.clock()` is node-only for the same reason, and refuses compose mode outright rather than pinning a calendar nothing under test reads: it pins THIS process's `Date`, which is the app's only while the app runs in-process. Under compose, a stamp is asserted with a `{{iso8601}}` token ([09](09-tokens.md)).
+Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](10-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
 ```typescript
 test('serves french content', async () => {
@@ -173,7 +167,7 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 
 `expect(result.response).toMatch('user-created.http')` resolves against `_expected/`, like every other subject (rule D3) — there is no per-subject resolution. The full matcher reference is in [assertions](08-assertions.md).
 
-Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker, orchestrator }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.jobs()` has no `docker` member — jobs never spawn containers.)
+Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.jobs()` has no `docker` member — jobs never spawn containers.)
 
 ## Full example — multi-database order flow
 
@@ -250,11 +244,10 @@ test('links the analytics event to the created order', async () => {
 ## Pitfalls
 
 - **`mode` in the specification file while `server` is defined** — error (rule A5). The switch belongs in `vitest.config.ts`.
-- **`composeService` derivable from the record key** (`db: postgres({ composeService: 'db' })`, or `analyticsDb: postgres({ composeService: 'analytics-db' })`) — redundant, the key already binds by exact name or kebab-case derivation (rule A6).
 - **Omitting `database:` with ≥ 2 databases, or passing it with 1** — both are convention violations (rule A7).
 - **Expecting unlisted response headers to be constrained.** Response `_expected/*.http` header matching is subset-only; if a header must be _absent_, that is not expressible in the file — assert on it in code.
 - **Chaining two actions** (`api.get(...).get(...)`) or reusing state across tests. One chain = one terminal action; databases reset per chain (rules B1, B7).
-- **Calling `.intercept()` in a compose-mode project** — it throws (MSW is in-process). And remember strict mode: after the first `.intercept()`, an unmatched or queue-exhausted outgoing request fails the spec (rule D7).
+- **Forgetting that `.intercept()` is strict.** After the first `.intercept()`, an unmatched or queue-exhausted outgoing request fails the spec (rule D7).
 - **Putting the request body in the test file when it has any substance.** Requests of more than a line or two belong in `_requests/*.http` — inline `.post()` is for trivial cases.
 
 ## Related
