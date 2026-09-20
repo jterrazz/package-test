@@ -437,15 +437,13 @@ The freshness meta-test is the reason a documentation change can turn the suite 
 
 ## Goldens and update mode
 
-A fixture the framework compares against is regenerated, never hand-tuned:
+A fixture this repository compares against is regenerated, never hand-tuned, and the gesture here is the `unit` project:
 
 ```bash
 TEST_UPDATE=1 npx vitest --run --project unit   # or: npx vitest --run -u
 ```
 
-Update mode writes **tokens, not values**: a segment already covered by a placeholder survives, and values known to be volatile — the working directory among them — are substituted back into placeholders (rule D5). Run the suite again afterwards; a fixture that does not round-trip on the second run was not a golden, it was a transcript.
-
-Two fixture kinds are exactly wrong to update blindly, and they are the same trap twice: one that is deliberately WRONG (its diff is the behaviour under test) and one that is deliberately MISSING (its error is the behaviour under test). Update mode overwrites both into silence — [14 — Assertions](14-assertions.md) works the case.
+What update mode writes, what it preserves and the discipline it asks for are [15 — Tokens § Update mode](15-tokens.md#update-mode-tokens-are-preserved)'s, whole.
 
 ## What CI runs
 

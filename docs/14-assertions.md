@@ -8,15 +8,16 @@ This chapter is the exhaustive matrix: every matcher, for every valid subject, w
 
 ### Sync vs async (rule D2)
 
-`await expect(…)` is used **only** for matchers that perform IO:
+`await expect(…)` is used **only** for matchers that perform IO, and this table is the whole list — the types say the same thing, so a mistaken `await` is a toolchain error (`typescript(await-thenable)`) in a consumer and a missed one is an assertion that never runs:
 
-| IO matcher subjects                         | Why                        |
-| ------------------------------------------- | -------------------------- |
-| `result.table(…)`                           | Runs a SQL query           |
-| `result.filesystem` / `result.directory(…)` | Walks the disk             |
-| container subjects                          | Talks to the Docker daemon |
+| IO matcher subjects                                                 | Why                                  |
+| ------------------------------------------------------------------- | ------------------------------------ |
+| `result.table(…)`, and `toBeEmpty()` on it                          | Runs a SQL query                     |
+| `result.filesystem` / `result.directory(…)`                         | Walks the disk                       |
+| container subjects                                                  | Talks to the Docker daemon           |
+| every accessor of a COMPONENT result (`tree`, `html`, `content`, …) | The capture crosses the browser seam |
 
-Everything else is synchronous — `await`-ing it is harmless but wrong-by-convention; _not_ awaiting an IO matcher means the assertion never runs.
+Everything else is synchronous, and that includes the subjects it is easiest to get wrong: `result.value`, `result.error`, `result.response`, `result.stdout`, `result.stderr`, `result.json` — and `result.tree` on a WEBSITE page, which is captured on the node side and is a plain text subject there. Only a component's accessors are read inside the page.
 
 ### `toMatch` resolution (rule D3)
 
@@ -209,15 +210,19 @@ The runner handle itself also exposes a `docker(containerId)` reader (returned b
 
 **The sync container-read exception (as implemented):** container property reads — `exists`, `running`, `status`, `file(path).exists`, `file(path).content`, log streams — are synchronous, backed by one-shot `docker inspect` / `docker exec` shell-outs captured lazily on first access. This is the documented exception to the "await only IO matchers" rule (D2): only the _matchers_ (`toBeRunning`) are async; property reads stay sync so container assertions read exactly like host-side ones.
 
-## `result.tree` — the accessibility outline (website, mobile, component)
+## `result.tree` — the accessibility outline (website, component)
 
-The one golden a rendered surface wants. It is the outline a screen reader walks, it is the same dialect on a page, a screen and a mounted unit, and it is deterministic where a screenshot is not — a font hint or a scrollbar moves a picture and moves nothing here.
+The one golden a rendered surface wants. It is the outline a screen reader walks, it is the same dialect on a page and on a mounted unit, and it is deterministic where a screenshot is not — a font hint or a scrollbar moves a picture and moves nothing here.
 
 ```typescript
+// A website page: the capture is already on the node side.
+expect(result.tree).toMatch('home.aria.yaml');
+
+// A component: the capture is read INSIDE the page, so the read is IO.
 await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml');
 ```
 
-`toMatch` is **awaited** on it: a tree captured inside a page crosses the browser seam through a server command, so the read is IO. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([13 — Elements](13-elements.md#modifiers)).
+The `await` is the component's, not the tree's: a subject captured inside a page crosses the browser seam through a server command, and every accessor of a `component` result is awaited for that reason. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([13 — Elements](13-elements.md#modifiers)).
 
 ## `result.html` — the markup (component)
 
@@ -236,14 +241,14 @@ Reach for it after the tree, not instead of it. A test that asserts only on mark
 `result.value` is a **JSON accessor** when the call returned an object and a **text accessor** when it returned a string, so the same golden vocabulary reaches both:
 
 ```typescript
-await expect(result.value).toMatch('found.json');
+expect(result.value).toMatch('found.json');
 expect(result.value.text).toContain('Alice');
 ```
 
 `result.error` is what the call THREW, read as a subject of its own — a refusal is an answer, and it deserves a golden like any other:
 
 ```typescript
-await expect(result.error).toMatch('refused.txt');
+expect(result.error).toMatch('refused.txt');
 await expect(result.error).toBeEmpty(); // nothing was thrown
 ```
 
@@ -294,9 +299,9 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Common mistakes
 
-- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` is a type error in v9; accessors are read-only (rule D1). Write `expect(result.stdout).toContain('x')`.
+- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule D1). Write `expect(result.stdout).toContain('x')`.
 - **Missing `await` on IO matchers.** `expect(result.table('users')).toMatchRows(…)` without `await` never queries the database and the test passes vacuously (rule D2).
-- **`await`-ing sync matchers.** `await expect(result.stdout).toMatch(…)` runs, but violates D2 — the sync/async split is part of the readable contract.
+- **Putting `await` in front of a sync matcher.** A `toMatch` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract D2 states and the types carry.
 - **`toMatch('help')` without extension.** The extension is part of the name (rule C6). The only extensionless arguments are tree-snapshot directory names.
 - **Expecting a per-subject fixture root.** Every `toMatch` subject — response, stream, JSON, or tree — resolves against `_expected/`; only `.request()` reads from `_requests/` (rule D3).
 - **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.text` is for (rule D6).

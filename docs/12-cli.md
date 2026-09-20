@@ -382,12 +382,12 @@ serve:
     - mcp: { MCP_STUB_WITHHOLD: get-article }
 
 runs:
-    - command: shoply repositories
+    - command: repositories
       exit: 1
       stderr: |
           Error: no directory with home/ and apps/ above the current directory
           Hint: run inside the shoply checkout
-    - command: shoply repositories --json
+    - command: repositories --json
       exit: 0
       stdout: |
           {
@@ -413,16 +413,16 @@ Everything above `runs:`. Any key outside the table below is a refusal naming th
 
 **A run is judged the moment it ends**, before the next command starts — its exit code, its streams and its `files:` all read at that one instant. So a document states the working directory as it was BETWEEN two commands, not only as the session left it. A run that disagrees throws there and then, and the runs below it do not execute: once the sequence has diverged, what the rest would print is a consequence, not a fact about the program.
 
-| Key        | Shape                         | Meaning                                                                                                                     |
-| ---------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `command:` | **mandatory**                 | The argv line, handed to the same adapter as `.exec('…')` — the full line through the shell, so quoting behaves identically |
-| `stdin:`   | optional block scalar         | Written to the child, which then reads EOF. Absent keeps today's immediately-closed pipe; a TTY is never given              |
-| `timeout:` | optional integer              | Milliseconds before the run is killed (exit code 124)                                                                       |
-| `waitFor:` | optional, **last run only**   | Long-running form: resolve as soon as this text appears, as `.exec(args, { waitFor })` does                                 |
-| `exit:`    | **mandatory** literal integer | The exit code the command must return                                                                                       |
-| `stdout:`  | optional block scalar         | Expected stdout, **byte-exact**. Absent asserts an EMPTY stream                                                             |
-| `stderr:`  | optional block scalar         | Expected stderr, byte-exact. Absent asserts an EMPTY stream                                                                 |
-| `files:`   | optional mapping              | On-disk assertions under the working directory, read the moment THIS run ends (below)                                       |
+| Key        | Shape                         | Meaning                                                                                                                                                                                                                                              |
+| ---------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `command:` | **mandatory**                 | The argv AFTER the binary — exactly what `.exec('…')` takes. The binary is the runner's (`specification.cli(bin)`), so naming it here would pass it to itself as the first argument. The line goes through the shell, so quoting behaves identically |
+| `stdin:`   | optional block scalar         | Written to the child, which then reads EOF. Absent keeps today's immediately-closed pipe; a TTY is never given                                                                                                                                       |
+| `timeout:` | optional integer              | Milliseconds before the run is killed (exit code 124)                                                                                                                                                                                                |
+| `waitFor:` | optional, **last run only**   | Long-running form: resolve as soon as this text appears, as `.exec(args, { waitFor })` does                                                                                                                                                          |
+| `exit:`    | **mandatory** literal integer | The exit code the command must return                                                                                                                                                                                                                |
+| `stdout:`  | optional block scalar         | Expected stdout, **byte-exact**. Absent asserts an EMPTY stream                                                                                                                                                                                      |
+| `stderr:`  | optional block scalar         | Expected stderr, byte-exact. Absent asserts an EMPTY stream                                                                                                                                                                                          |
+| `files:`   | optional mapping              | On-disk assertions under the working directory, read the moment THIS run ends (below)                                                                                                                                                                |
 
 **`|` and `|-` are the whole newline story.** A block scalar written `|` keeps the final newline of its text; `|-` drops it. The comparison is byte-exact against that, so a command whose output ends with `\n` is written `|`, and one that ends mid-line is written `|-`. There is no normalisation to remember, and no empty last line to spell.
 
@@ -449,11 +449,11 @@ Each run's mapping is read against the working directory **as that run left it**
 ```yaml
 description: the lock appears with the first apply and is released by the second
 runs:
-    - command: spwn status
+    - command: status
       exit: 0
       files:
           .spwn/lock: absent # nothing has claimed the tree yet
-    - command: spwn apply --hold
+    - command: apply --hold
       exit: 0
       files:
           .spwn/lock: { contains: 'pid: {{int}}' } # the same path, one command later

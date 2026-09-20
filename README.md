@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Declarative testing framework for modules, APIs, jobs, CLIs, rendered components, websites and native apps. Seven constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none.
+Declarative testing framework for modules, APIs, jobs, CLIs, rendered components, websites and native apps. Six constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none, and the module test, which needs neither.
 
 A spec reads as a sentence: given → action → assertions. The vitest test name is its only description, every assertion goes through `expect()` with subject-typed matchers, and the infrastructure a spec declares — Postgres, Redis, SQLite, a child process, a real Chromium, an iOS simulator — is started, isolated per worker and cleaned up for you.
 
@@ -8,7 +8,7 @@ A spec reads as a sentence: given → action → assertions. The vitest test nam
 npm install -D @jterrazz/test vitest
 ```
 
-Everything a spec needs imports from `@jterrazz/test`. The other three entries are tools no spec imports: `@jterrazz/test/vitest` (what `vitest.config.ts` imports), `@jterrazz/test/oxlint` (the zero-runtime lint plugin) and `@jterrazz/test/schema` (the document JSON Schema).
+Everything a spec needs imports from `@jterrazz/test`; the entries beside it are tools no spec imports, and they are listed once — [docs/01 § What the tree publishes](docs/01-architecture.md#what-the-tree-publishes).
 
 ## One kind of test, one example
 
@@ -45,7 +45,7 @@ test('finds the post the migration wrote', async () => {
     const result = await integration.seed('posts.sql').call(({ db }) => findPost(db, 'p-1'));
 
     // Then - the row comes back as the repository shapes it
-    await expect(result.value).toMatch('found.json');
+    expect(result.value).toMatch('found.json');
 });
 ```
 
@@ -73,7 +73,7 @@ test('says how much of the collection the table is showing', async () => {
 
 ```typescript
 // specs/website/subscribe/subscribe.spec.ts
-import { button, field } from '@jterrazz/test';
+import { button, content, field } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -83,6 +83,7 @@ test('subscribes through the form and captures the final state', async () => {
     const result = await website.visit('/', async (visitor) => {
         await visitor.fill(field('Email'), 'visitor@site.test');
         await visitor.click(button('Subscribe'));
+        await visitor.see(content('Thanks for subscribing'));
     });
 
     // Then - the page says so, and the console is clean
@@ -103,8 +104,8 @@ import { mobile } from '../mobile.specification.js';
 test('bookmarks an event from its detail screen', async () => {
     // Given - a visitor on the events feed
     const result = await mobile.open('news://events', async (visitor) => {
-        await visitor.tap(button('Enquête Fauci COVID-19'));
-        await visitor.see(content('rapports'));
+        await visitor.tap(button('Fauci inquiry'));
+        await visitor.see(content('reports'));
         await visitor.tap(button('Bookmark'));
     });
 
@@ -127,7 +128,10 @@ test('creates a user and returns its location', async () => {
 
     // Then - the response matches the golden, tokens and all
     expect(result.response).toMatch('user-created.http');
-    await expect(result.table('users')).toMatchRows([{ name: 'Alice' }]);
+    await expect(result.table('users')).toMatchRows({
+        columns: ['name'],
+        rows: [['Alice']],
+    });
 });
 ```
 
@@ -144,10 +148,10 @@ test('writes one digest row per active subscriber', async () => {
     const result = await jobs.seed('subscribers.sql').trigger('daily-digest');
 
     // Then - only the active ones were written
-    await expect(result.table('digests')).toMatchRows([
-        { to: 'a@site.test' },
-        { to: 'b@site.test' },
-    ]);
+    await expect(result.table('digests')).toMatchRows({
+        columns: ['to'],
+        rows: [['a@site.test'], ['b@site.test']],
+    });
 });
 ```
 
@@ -173,6 +177,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
 | What the framework is, its trees, its channels, its four entries | [docs/01](docs/01-architecture.md)                               |
 | Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)        |
+| What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)       |
 | Each kind of test, one chapter, the same seven sections          | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md)     |
 | Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                   |
 | Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                 |
@@ -183,14 +188,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 
 The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships oxlint cannot. Every diagnostic ends in a rule id and an anchor into the generated catalogue.
 
-## Requirements
-
-- **Node 24+** and **vitest 5** — the two required peers.
-- **Docker** — for `postgres()` and `redis()`; not needed for `sqlite()`, a CLI spec, a website spec or a component spec.
-- **Optional peers, one per thing a repository declares** — `better-sqlite3`, `pg`, `redis`, `testcontainers` for the services; `playwright` for a page or a component, with `@vitest/browser-playwright` pinned to the runner's exact version; `appium` + `webdriverio` for a simulator. Each is loaded the first time it is needed and the refusal names the peer, the facet that asked and the install command — under pnpm, the `onlyBuiltDependencies` line too.
-- **A web framework** — supplied by your project for an in-process app; the adapter only needs an object with a `request()` method, so it is not a peer.
-
-Full detail, and what the tarball leaves behind: [docs/04](docs/04-operating.md).
+Node 24 and vitest 5 are the required peers; everything else — a browser, a database driver, a simulator — is an optional peer, loaded the first time a spec needs it and named in the refusal when it is not there. What to install, and when: [docs/04](docs/04-operating.md#what-a-consumer-must-bring).
 
 ## Docs
 

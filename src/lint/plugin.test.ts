@@ -720,3 +720,105 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         expect([...documented].sort()).toStrictEqual([...TOKEN_KINDS].sort());
     });
 });
+
+/**
+ * Meta-test K8 — every coordinate inside the corpus resolves.
+ *
+ * A chapter reaches another chapter by a relative path and a heading anchor,
+ * and both halves rot silently: a renamed heading leaves a link that scrolls
+ * nowhere, a renumbered chapter leaves one that 404s. The 16.0 renumbering
+ * moved every file at once and the map's own row still pointed at a heading
+ * the same commit had replaced.
+ *
+ * K3 already holds the anchors a rule MESSAGE points at; this holds the ones
+ * the prose does. Generated pages are swept too — a card nobody proof-reads is
+ * exactly where a dead coordinate survives.
+ */
+/** GitHub's heading slug: lowercased, punctuation dropped, spaces hyphenated. */
+function slugOf(heading: string): string {
+    return heading
+        .trim()
+        .toLowerCase()
+        .replaceAll(/[^\s\w-]/gu, '')
+        .replaceAll(/\s/gu, '-');
+}
+
+/** Every anchor a page offers: the slug of each of its headings. */
+function anchorsOf(text: string): Set<string> {
+    const found = new Set<string>();
+    for (const line of text.split('\n')) {
+        const heading = /^#{1,6}\s+(?<title>.+?)\s*$/u.exec(line)?.groups?.title;
+        if (heading !== undefined) {
+            found.add(slugOf(heading));
+        }
+    }
+    return found;
+}
+
+/** One link of one page, as a coordinate to check. */
+type Coordinate = { fragment: string | undefined; from: string; target: string };
+
+/** Every relative link a page carries — an absolute url is somebody else's. */
+function coordinatesOf(from: string, text: string): Coordinate[] {
+    const found: Coordinate[] = [];
+    for (const match of text.matchAll(/\]\((?<target>[^)\s]+)\)/gu)) {
+        const target = match.groups?.target ?? '';
+        if (target.startsWith('http') || target.startsWith('mailto:')) {
+            continue;
+        }
+        found.push({ fragment: target.split('#')[1], from, target });
+    }
+    return found;
+}
+
+describe('the corpus’ own coordinates (meta-test K8)', () => {
+    /** Every markdown page a reader follows, hand-written or generated. */
+    const pages = (): string[] => {
+        const found: string[] = ['README.md', 'AGENTS.md', 'TODO.md'];
+        for (const root of ['docs', 'skills']) {
+            for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
+                const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
+                // The typedoc projection is regenerated from a clone, not
+                // Written here, and its internal links are typedoc's own.
+                if (path.endsWith('.md') && !path.startsWith('docs/reference/')) {
+                    found.push(path);
+                }
+            }
+        }
+        return found.filter((path) => existsSync(resolve(ROOT, path)));
+    };
+
+    /** Where a link lands on disk, from the page that carries it. */
+    const landingOf = (coordinate: Coordinate): string => {
+        const file = coordinate.target.split('#')[0];
+        return file === undefined || file === ''
+            ? resolve(ROOT, coordinate.from)
+            : resolve(ROOT, coordinate.from, '..', file);
+    };
+
+    test('every relative link lands on a file, and every anchor on a heading', () => {
+        // Given - the pages, and the anchors each of them offers
+        const texts = new Map(
+            pages().map((path) => [path, readFileSync(resolve(ROOT, path), 'utf8')]),
+        );
+        const coordinates = [...texts].flatMap(([path, text]) => coordinatesOf(path, text));
+
+        // Then - no link points at a file or a heading that is not there
+        const dangling = coordinates.filter((coordinate) => {
+            const landing = landingOf(coordinate);
+            if (!existsSync(landing)) {
+                return true;
+            }
+            if (coordinate.fragment === undefined || !landing.endsWith('.md')) {
+                return false;
+            }
+            return !anchorsOf(readFileSync(landing, 'utf8')).has(coordinate.fragment);
+        });
+        expect(
+            dangling.map((coordinate) => `${coordinate.from} -> ${coordinate.target}`),
+            'a coordinate the corpus publishes and does not have',
+        ).toStrictEqual([]);
+        // And - the sweep is not vacuous: a corpus this size carries hundreds
+        expect(coordinates.length).toBeGreaterThan(300);
+    });
+});

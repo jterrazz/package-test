@@ -24,7 +24,7 @@ Each has a `make` alias that installs first, which is what CI calls — [03 — 
 
 `oxlint.config.ts` loads this package's OWN plugin from `./dist/oxlint.js`, and the end-to-end lint specs load it too. Node's type-stripping does not resolve a `.js` specifier back to its `.ts` source, so **`npm run build` must precede `npm run lint`** and must precede the `unit` project. A lint run on a stale bundle judges the previous build's rules.
 
-That config is also where this repository DECLARES its own architecture: `i1-layer-boundaries` ships inert, and `FRAMEWORK_LAYERS` in `oxlint.config.ts` is the enforced statement of the four layers [01 — Architecture](01-architecture.md) describes.
+That config is also where this repository DECLARES its own architecture: `i1-layer-boundaries` ships inert, and `FRAMEWORK_LAYERS` in `oxlint.config.ts` is the enforced statement of the five trees [01 — Architecture](01-architecture.md) describes.
 
 ### Which file a change opens
 
@@ -70,7 +70,7 @@ Peer dependencies:
 
 Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch` types while `toBeEmpty` does not.
 
-Everything imports from the single package root — the only importable subpaths are the ones the package's `exports` map publishes for TOOLS (`@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/vitest` for what `vitest.config.ts` needs, `@jterrazz/test/schema` for an editor validating a `<case>.spec.yaml`); internal subpaths do not exist (rules F1 and F3, which read that map):
+Everything a spec needs imports from the single package root; the tool subpaths beside it are the ones the `exports` map publishes, and they are listed once — [01 § What the tree publishes](01-architecture.md#what-the-tree-publishes). F1 and F3 read that map, so a specifier it does not publish is refused:
 
 ```typescript
 // the runners, the services, and what a chain stands on
@@ -108,7 +108,7 @@ import { createApp } from '../../src/app.js';
 
 export const { api, cleanup } = await specification.api({
     services: {
-        db: postgres(), // reported as "db"; its init reads docker/db/init.sql
+        db: postgres(), // reported as "db"; its init reads docker/db/ (chapter 17)
     },
     server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
     // root: absent — auto-discovered by walking up to the nearest package.json
@@ -118,7 +118,7 @@ afterAll(cleanup);
 ```
 
 ```http
-### specs/api/users/requests/create-user.http — the COMPLETE request
+### specs/api/users/_requests/create-user.http — the COMPLETE request
 POST /users
 Content-Type: application/json
 
@@ -126,7 +126,7 @@ Content-Type: application/json
 ```
 
 ```http
-### specs/api/users/expected/user-created.http — status + header subset + body
+### specs/api/users/_expected/user-created.http — status + header subset + body
 HTTP/1.1 201 Created
 Content-Type: application/json
 
@@ -184,7 +184,7 @@ test('shows help', async () => {
 ```
 
 ```
-### specs/cli/help/expected/help.txt — tokens work in text snapshots too
+### specs/cli/help/_expected/help.txt — tokens work in text snapshots too
 my-cli v{{semver}}
 Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
@@ -305,29 +305,17 @@ The `.artifacts/<tool>/` convention is [`@jterrazz/typescript`](https://github.c
 
 What this framework writes there:
 
-| Path                                             | Written by                        | Lifetime                        |
-| ------------------------------------------------ | --------------------------------- | ------------------------------- |
-| `.artifacts/vitest/`                             | vite's transform cache            | Reused across runs              |
-| `.artifacts/vitest/coverage/`                    | the coverage provider you install | Rewritten per coverage run      |
-| `.artifacts/vitest/sqlite/template-<key>.sqlite` | `sqlite()`'s schema template      | Reused until the schema changes |
+| Path                                             | Written by                   | Lifetime                        |
+| ------------------------------------------------ | ---------------------------- | ------------------------------- |
+| `.artifacts/vitest/`                             | vite's transform cache       | Reused across runs              |
+| `.artifacts/vitest/coverage/`                    | v8, which the preset selects | Rewritten per coverage run      |
+| `.artifacts/vitest/sqlite/template-<key>.sqlite` | `sqlite()`'s schema template | Reused until the schema changes |
 
 What it does **not** write there: the fresh temp directory each CLI spec runs in, the per-worker SQLite copies, the profile dirs a browser or a simulator needs. Those are per-RUN scratch, they stay in the OS temp dir, and moving them into the project would only put a `package.json` above a spec that must not see one.
 
 ### Framework environment variables
 
-You set exactly one variable, prefixed `TEST_` (rule E1). The framework also reads vitest's own `VITEST_POOL_ID` (set by vitest, not you) to isolate each parallel worker's database schema/index:
-
-| Variable      | Values | Meaning                                                                   |
-| ------------- | ------ | ------------------------------------------------------------------------- |
-| `TEST_UPDATE` | `1`    | Rewrite snapshot fixtures from actual output (same effect as `vitest -u`) |
-
-```bash
-npx vitest --run                      # assert against fixtures
-TEST_UPDATE=1 npx vitest --run        # update fixtures (tokens preserved — see chapter 15)
-npx vitest --run -u                   # same as TEST_UPDATE=1
-```
-
-In update mode the framework writes **tokens, not values**: segments already covered by a placeholder are preserved, and values it knows to be dynamic (`{{workdir}}`) are substituted automatically (rule D5).
+You set exactly one variable, prefixed `TEST_` (rule E1): `TEST_UPDATE=1` turns on update mode, which [15 — Tokens § Update mode](15-tokens.md#update-mode-tokens-are-preserved) owns whole — what it writes, what it preserves, and the discipline it asks of a reviewer. The framework also reads vitest's own `VITEST_POOL_ID` (set by vitest, not you) to isolate each parallel worker's database schema and index.
 
 ### Directory layout at a glance
 
@@ -344,14 +332,14 @@ specs/
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)
     └── help/
-        └── help.test.ts
+        └── help.spec.ts           # under specs/, the suffix is .spec.ts (rule C12)
 ```
 
 ## Pitfalls
 
 - **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `jobs`, `cli`, `website`, `mobile` are enforced (rule A3).
 - **Forgetting `afterAll(cleanup)`.** Infrastructure leaks across suites; rule A4 requires it in every specification file.
-- **Importing from a subpath** (`@jterrazz/test/services`). Subpaths do not exist in v9 — everything comes from `@jterrazz/test` (rule F1).
+- **Importing from a subpath the `exports` map does not publish** (`@jterrazz/test/services`). Everything a spec needs comes from `@jterrazz/test` (rule F1).
 - **Writing `// Given` without `// Then`** (or vice versa). Every test carries both comments (rule B4); `// When` only when the action is not obvious — the chain _is_ the when.
 
 ## Related

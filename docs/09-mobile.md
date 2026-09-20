@@ -133,7 +133,7 @@ The element vocabulary is [13 — Elements](13-elements.md)'s, the same one the 
 
 **Four descriptors reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value contains the text) and `testId(id)` (the accessibility identifier, rule W2's escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
 
-**W3 is relaxed for `see()` alone.** A descriptor must match exactly one element when a verb ACTS on it, so `tap` and `fill` refuse an ambiguous one and print the candidates with their accessibility identifiers ([13 — Elements § Designating exactly one element](13-elements.md#designating-exactly-one-element)). `see()` acts on nothing, so any visible match satisfies it — an XCUITest tree legitimately exposes the same label twice, and a synchronization primitive refusing on that would punish honest screens.
+**W3 is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous descriptor and print the candidates with their accessibility identifiers; `see()` does not — [13 — Elements § `see()` and `gone()`](13-elements.md#see-and-gone-are-the-synchronization) says why, once.
 
 A mobile scope is any descriptor, most often a `testId()` on the containing view, because iOS has no landmarks:
 
@@ -257,7 +257,6 @@ No `_seeds/` or `_requests/` — `specification.mobile()` has no `services` opti
 - **The first session builds WebDriverAgent (~40 s, once per simulator).** Subsequent sessions on a warm simulator are seconds. Budget the first run; do not "fix" it with retries.
 - **Passing a landmark (`main()`, `navigation()`) to a mobile verb.** They are website concepts — iOS has no ARIA regions; the runtime refusal points at `within(testId('…'), …)` as the scoping tool.
 - **Reaching for `testId()` as the default locator.** It exists as an escape hatch (rule W2 warns) — prefer `button`/`field`/`content`, the vocabulary the accessibility tree exposes to a real user.
-- **Assuming a name still matches as a substring.** It does not since 16.0: `button('Bookmark')` no longer reaches "Bookmark all". Pass `{ exact: false }` when a part of the label is genuinely outside the test's control.
 - **Expecting `.open()` to preserve app state between specs.** It never does — every open terminates and relaunches the app; a flow that spans screens belongs in ONE scenario.
 - **Asserting on off-screen content with `result.content`.** `content` carries only _visible_ texts; the mounted-but-offscreen rows live in `result.screen`. Use the golden for the whole list, `content` for what the user currently sees.
 - **Calling `specification.mobile()` without appium installed.** The error names the exact fix — `npm install -D appium webdriverio && npx appium driver install xcuitest` — there is no silent fallback.

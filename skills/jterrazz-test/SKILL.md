@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Testing conventions for @jterrazz projects — unit/integration/e2e structure, vitest, testcontainers, golden files, mocks. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain unit test included.
+description: Testing conventions for @jterrazz projects — the eight kinds (module, integration, component, website, mobile, api, jobs, cli), vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
 metadata:
     version: '16'
 ---
@@ -27,15 +27,15 @@ The SUFFIX is the kind, and the checker holds it: `.test.ts(x)` beside the code,
 
 ## Mental model (read once)
 
-- **One import point** — everything a spec needs comes from `@jterrazz/test` (rule F1). The only other specifiers are the four entries the package publishes: `.`, `./vitest` (what `vitest.config.ts` imports), `./oxlint` (the lint plugin) and `./schema` (the document JSON Schema). They are listed once, in [docs/01](../../docs/01-architecture.md).
-- **Seven constructors, and one facet with none** — `specification.{api,jobs,cli,integration,website,mobile}()` live in a `*.specification.ts` at the facet root, destructured with the canonical name and always `afterAll(cleanup)`. A rendered component starts nothing, so it has no constructor and no facet folder: import `component` and write `<file>.test.tsx` beside the thing it renders.
+- **One import point** — everything a spec needs comes from `@jterrazz/test` (rule F1). The tool entries beside it are listed once, in [docs/01 § What the tree publishes](../../docs/01-architecture.md#what-the-tree-publishes).
+- **Six constructors, and two kinds with none** — `specification.{api,jobs,cli,integration,website,mobile}()` live in a `*.specification.ts` at the facet root, destructured with the canonical name and always `afterAll(cleanup)`. A rendered component starts nothing, so it has no constructor and no facet folder: import `component` and write `<file>.test.tsx` beside the thing it renders. A module test starts nothing either and needs neither.
 - **One chain, one action** — setups (`.seed()`, `.fixture()`, `.env()`, `.headers()`, `.intercept()`, `.clock()`, `.wrap()`, `.viewport()`) chain before exactly one terminal action, which resolves to a typed result. Databases reset per chain; there is no `.spawn()` and no label.
 - **One vocabulary for anything that draws** — the same descriptors, modifiers and verbs on website, component and mobile, with `see()` as the synchronization primitive, W3 refusing an ambiguous descriptor, `within()` narrowing it, and names matching the accessible name WHOLE since 16.0. [docs/13](../../docs/13-elements.md).
 - **The doubles ladder, in order** — the real thing → a declared service (`postgres()`, `redis()`, `sqlite()`, `process()`) → a contract (`.intercept()` on a chain, `await using _ = await intercept(…)` in module scope) → a typed port double (`mockOf<T>()`, `vi.fn<Fn>()`). Take the FIRST rung that fits; `vi.stubGlobal`, raw `msw`, `nock` and `sinon` are off it.
 - **One time primitive** — `clock`. `using _ = clock.at('<iso>')` pins the calendar for the scope; `clock.run()` takes the scheduler too and `await clock.advance(ms)` makes queued work due. On a chain it is `.clock('<iso>')`. Never `vi.useFakeTimers`, never `vi.setSystemTime`.
 - **Goldens first** — snapshot the whole surface per scoped use case (`expect(x).toMatch('case.http')`), token the volatile parts, and write the file with `TEST_UPDATE=1`. `toContain` is the scalpel, not the default; vitest's own snapshot matchers are refused.
 - **Given/Then, on every test** — a `// Given -` line then a `// Then -` line, both, in that order, as sentences about the subject. A `test.each` table is narrated once, on the table.
-- **The project helpers name the kind** — `unit()`, `integration()`, `component()`, `website()`, `mobile()`, `api()`, `jobs()`, `cli()` from `@jterrazz/test/vitest`, under `defineSpecConfig()`, each taking `{ include, exclude, timeout }`. `--project api` means the same tree in every repository. A member without `"type": "module"` names the file `vitest.config.mts`.
+- **The project helpers name the kind** — `unit()`, `integration()`, `component()`, `website()`, `mobile()`, `api()`, `jobs()`, `cli()` from `@jterrazz/test/vitest`, under `defineSpecConfig()`. What each one takes is [docs/02 § vitest.config](../../docs/02-developing.md#vitest-config-the-preset)'s. `--project api` means the same tree in every repository. A member without `"type": "module"` names the file `vitest.config.mts`.
 - **`TEST_UPDATE=1` writes, it does not judge** — run it, READ the diff, then run again without it. A fixture that must stay wrong on purpose is `{ frozen: true }`.
 - **Artefacts live under `.artifacts/<tool>/`** — the vite cache, coverage, the sqlite template, browser attachments and screenshots. One `.gitignore` line: `.artifacts/`.
 - **The rules reach every test file**, with or without a framework import, and every diagnostic ends in an id and an anchor — `(I2 — docs/19-linting.md#i2-…)`. Suppress with a directive that carries a reason; the ids are [references/rules.md](references/rules.md).

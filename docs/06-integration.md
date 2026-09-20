@@ -152,7 +152,7 @@ specs/integration/
 ├── integration.specification.ts   # the runner, at the facet root
 ├── pure.specification.ts          # a second runner: no services, goldens only
 └── orders/                        # a domain
-    ├── orders.test.ts
+    ├── orders.spec.ts             # under specs/, the suffix is .spec.ts (rule C12)
     ├── _seeds/two-orders.sql      # ground: database state
     └── _expected/                 # ground: every expected fixture, flat
 ```

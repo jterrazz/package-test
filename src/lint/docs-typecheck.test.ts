@@ -113,6 +113,48 @@ describe('docs-typecheck — the published samples typecheck', () => {
     }, 60_000);
 });
 
+/**
+ * The result accessors the compiler types as SYNCHRONOUS, whatever facet they
+ * came from. `tsc` alone does not catch an `await` on one — awaiting a
+ * non-promise is legal TypeScript — but the toolchain's `await-thenable` pass
+ * refuses it in every consumer, so a chapter that prescribes the awaited form
+ * hands the reader a file their own gate rejects.
+ *
+ * A component's accessors are deliberately absent: their capture crosses the
+ * browser seam, so `await` is right there and chapter 14 says so.
+ */
+const SYNC_SUBJECTS = ['error', 'json', 'response', 'stderr', 'stdout', 'value'];
+
+/**
+ * `toBeEmpty()` is not in the sweep: it answers a promise on EVERY subject, so
+ * the awaited form is the right one there and chapter 06 leans on it.
+ */
+
+describe('docs-typecheck — the corpus does not await a sync matcher', () => {
+    test('no page writes `await expect(result.<sync>).toMatch(`', () => {
+        // Given - every page a consumer is routed to
+        const pages = [
+            { name: 'README.md', text: readFileSync(README, 'utf8') },
+            ...[DOCS, CARDS].flatMap((directory) =>
+                readdirSync(directory)
+                    .filter((file) => file.endsWith('.md'))
+                    .map((file) => ({
+                        name: file,
+                        text: readFileSync(resolve(directory, file), 'utf8'),
+                    })),
+            ),
+        ];
+
+        // Then - none of them awaits a matcher the compiler types as sync
+        const offenders = pages.flatMap(({ name, text }) =>
+            SYNC_SUBJECTS.filter((subject) =>
+                text.includes(`await expect(result.${subject}).toMatch(`),
+            ).map((subject) => `${name}: await expect(result.${subject}).toMatch(`),
+        );
+        expect(offenders, 'the toolchain refuses this as await-thenable').toStrictEqual([]);
+    });
+});
+
 // Sanity: the harness paths the test depends on exist (guards silent skips).
 describe('docs-typecheck — harness', () => {
     test('the tsc binary and docs directory are present', () => {
