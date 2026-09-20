@@ -7,7 +7,7 @@ import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { COMPONENT_COMMANDS } from '../integrations/vitest-browser/commands.js';
-import { VITEST_ARTIFACTS_DIR } from '../specification/artifacts/artifacts.js';
+import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../specification/artifacts/artifacts.js';
 import { literate } from './literate-plugin.js';
 import type { LiterateOptions } from './literate-plugin.js';
 import { projectDefaults } from './preset.js';
@@ -488,10 +488,13 @@ export async function component(
         optimizeDeps: { include: SEAM_DEPENDENCIES.filter(resolves) },
         plugins: [mswWorkerPlugin(), ...consumerPlugins],
         test: {
-            attachmentsDir: `${VITEST_ARTIFACTS_DIR}/attachments`,
             browser: {
                 commands: COMPONENT_COMMANDS,
                 enabled: true,
+                // A reference screenshot is a golden, and it has its own option
+                // In Vitest 5 — separate from the failure screenshot below,
+                // Which is a diagnostic. Both are artefacts, so both are moved.
+                expect: { toMatchScreenshot: { screenshotDirectory: SCREENSHOTS_DIR } },
                 headless: true,
                 instances: [{ browser: 'chromium' }],
                 provider: playwright({
@@ -500,10 +503,9 @@ export async function component(
                         timezoneId: options.timezone ?? 'UTC',
                     },
                 }),
-                // Browser Mode leaks `.vitest-attachments/` at the repository
-                // Root and `__screenshots__/` beside the test; both are
-                // Artefacts and belong under `.artifacts/<tool>/`.
-                screenshotDirectory: `${VITEST_ARTIFACTS_DIR}/screenshots`,
+                // Browser Mode drops a failure screenshot beside the test by
+                // Default; it is an artefact and belongs under `.artifacts/<tool>/`.
+                screenshotDirectory: SCREENSHOTS_DIR,
                 viewport: viewportOf(options),
             },
             ...componentGlobs(options),

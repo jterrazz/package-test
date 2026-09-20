@@ -1,4 +1,5 @@
 import type { ContainerPort } from '../../specification/ports/container.port.js';
+import { loadPeer } from '../peer.js';
 
 /**
  * Container adapter using testcontainers.
@@ -24,7 +25,11 @@ export class TestcontainersAdapter implements ContainerPort {
     }
 
     async start(): Promise<void> {
-        const { GenericContainer, Wait } = await import('testcontainers');
+        const { GenericContainer, Wait } = await loadPeer(
+            'testcontainers',
+            'a declared service',
+            async () => await import('testcontainers'),
+        );
 
         let builder = new GenericContainer(this.image).withExposedPorts(this.containerPort);
 

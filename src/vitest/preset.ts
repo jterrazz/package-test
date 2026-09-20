@@ -5,7 +5,12 @@ import type {
     ViteUserConfig,
 } from 'vitest/config';
 
-import { COVERAGE_DIR, VITEST_ARTIFACTS_DIR } from '../specification/artifacts/artifacts.js';
+import {
+    ATTACHMENTS_DIR,
+    COVERAGE_DIR,
+    REPORTER_OUTPUT_FILES,
+    VITEST_ARTIFACTS_DIR,
+} from '../specification/artifacts/artifacts.js';
 import { literate } from './literate-plugin.js';
 import type { LiterateOptions } from './literate-plugin.js';
 
@@ -57,6 +62,28 @@ const HOOK_TIMEOUT_MS = 30_000;
 const EXCLUDE = [...configDefaults.exclude, '**/_fixtures/**'];
 
 /**
+ * What a test may never carry into the next one, and the one policy the
+ * framework states rather than lints.
+ *
+ * `retry: 0` is the policy: a flaky test is fixed or deleted, never re-rolled
+ * until it passes. A retry turns a real defect into a slow one and hides the
+ * day it becomes permanent.
+ *
+ * The three restores are the other half of the same idea. `vi.spyOn`,
+ * `vi.stubGlobal` and `vi.stubEnv` each own a teardown, and a test that forgets
+ * one leaks into whatever runs next — a failure that appears in a FILE that did
+ * nothing wrong and disappears when that file is run alone. Turning them on
+ * here is what lets `clock.at()` and `vi.stubEnv()` be written without an
+ * `afterEach`, which is the shape rule J6w asks for.
+ */
+const HYGIENE = {
+    restoreMocks: true,
+    retry: 0,
+    unstubEnvs: true,
+    unstubGlobals: true,
+} as const;
+
+/**
  * Options are a vite/vitest config plus one key of the framework's own.
  * Everything stated here wins over the preset's defaults.
  */
@@ -87,8 +114,10 @@ export function projectDefaults(): TestProjectInlineConfiguration {
     return {
         cacheDir: VITEST_ARTIFACTS_DIR,
         test: {
+            attachmentsDir: ATTACHMENTS_DIR,
             exclude: EXCLUDE,
             hookTimeout: HOOK_TIMEOUT_MS,
+            ...HYGIENE,
             testTimeout: TEST_TIMEOUT_MS,
         },
     };
@@ -99,9 +128,12 @@ function rootDefaults(): ViteUserConfig {
     return {
         cacheDir: VITEST_ARTIFACTS_DIR,
         test: {
+            attachmentsDir: ATTACHMENTS_DIR,
             coverage: { reportsDirectory: COVERAGE_DIR },
             exclude: EXCLUDE,
             hookTimeout: HOOK_TIMEOUT_MS,
+            ...HYGIENE,
+            outputFile: REPORTER_OUTPUT_FILES,
             testTimeout: TEST_TIMEOUT_MS,
         },
     };

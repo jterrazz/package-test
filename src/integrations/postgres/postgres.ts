@@ -1,10 +1,24 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { Client } from 'pg';
+import type { Client } from 'pg';
 
 import type { DatabasePort } from '../../specification/ports/database.port.js';
 import type { IsolationStrategy } from '../../specification/ports/isolation.port.js';
 import type { ServiceHandle } from '../../specification/ports/service.port.js';
+import { loadPeer } from '../peer.js';
+
+/**
+ * `pg`'s client constructor, loaded on the first connection.
+ *
+ * The driver is an OPTIONAL peer: a repository that specifies a CLI never
+ * reaches this line, and the import used to be paid for by every install.
+ */
+async function clientConstructor(): Promise<typeof Client> {
+    return await loadPeer('pg', 'postgres()', async () => {
+        const pg = await import('pg');
+        return pg.Client;
+    });
+}
 
 export type PostgresOptions = {
     /** Override image. */
@@ -55,7 +69,8 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
 
         // Healthcheck uses a throwaway client (connection might not be established yet)
         try {
-            const client = new Client({ connectionString: this.connectionString });
+            const PgClient = await clientConstructor();
+            const client = new PgClient({ connectionString: this.connectionString });
             await client.connect();
             await client.query('SELECT 1');
             await client.end();
@@ -101,7 +116,8 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         if (this.client) {
             return this.client;
         }
-        const client = new Client({ connectionString: this.connectionString });
+        const PgClient = await clientConstructor();
+        const client = new PgClient({ connectionString: this.connectionString });
         client.on('error', () => {
             // Connection dropped (container stopped) — reset so next call reconnects
             this.client = null;

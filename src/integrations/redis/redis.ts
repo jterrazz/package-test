@@ -1,6 +1,7 @@
 import type { DatabasePort } from '../../specification/ports/database.port.js';
 import type { IsolationStrategy } from '../../specification/ports/isolation.port.js';
 import type { ServiceHandle } from '../../specification/ports/service.port.js';
+import { loadPeer } from '../peer.js';
 
 export type RedisOptions = {
     /** Override image. */
@@ -37,7 +38,11 @@ export class RedisHandle implements ServiceHandle {
         }
 
         try {
-            const { createClient } = await import('redis');
+            const { createClient } = await loadPeer(
+                'redis',
+                'redis()',
+                async () => await import('redis'),
+            );
             const client = createClient({ url: this.connectionString });
             await client.connect();
             await client.ping();
@@ -57,7 +62,11 @@ export class RedisHandle implements ServiceHandle {
     }
 
     async reset(): Promise<void> {
-        const { createClient } = await import('redis');
+        const { createClient } = await loadPeer(
+            'redis',
+            'redis()',
+            async () => await import('redis'),
+        );
         const client = createClient({ url: this.connectionString, database: this.dbIndex });
         await client.connect();
         try {

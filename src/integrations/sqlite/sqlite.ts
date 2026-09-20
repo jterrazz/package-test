@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
 import { createHash } from 'node:crypto';
 import {
     closeSync,
@@ -22,6 +22,7 @@ import { discoverRoot } from '../../specification/facets/_common/resolve.js';
 import type { DatabasePort } from '../../specification/ports/database.port.js';
 import type { IsolationStrategy } from '../../specification/ports/isolation.port.js';
 import type { ServiceHandle } from '../../specification/ports/service.port.js';
+import { loadPeer } from '../peer.js';
 
 // The first 16 bytes of every well-formed SQLite database file (see the
 // SQLite file format spec). A crashed earlier run can leave a stale/partial
@@ -35,6 +36,37 @@ const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
  * bytes. Does not validate anything beyond the header — good enough to
  * reject a 0-byte or truncated leftover without opening the file.
  */
+/**
+ * `better-sqlite3`'s constructor, loaded the first time a database is opened.
+ *
+ * The binding is an OPTIONAL peer: it is a native module every install used to
+ * compile, and a repository that never declares `sqlite()` has no use for one.
+ * Loading it here also puts the pnpm build note where the failure happens.
+ */
+let databaseConstructor: null | typeof Database = null;
+
+async function loadDatabase(): Promise<typeof Database> {
+    databaseConstructor ??= await loadPeer('better-sqlite3', 'sqlite()', async () => {
+        const betterSqlite3 = await import('better-sqlite3');
+        return betterSqlite3.default;
+    });
+    return databaseConstructor;
+}
+
+/**
+ * The constructor, once loaded. The read accessors (`seed`, `query`, `reset`)
+ * are reached only AFTER `initialize()` has opened a database, so by the time
+ * one of them runs the peer is in hand — which is what lets them stay sync.
+ */
+function database(): typeof Database {
+    if (databaseConstructor === null) {
+        throw new Error(
+            'sqlite(): the database is not open yet — `initialize()` loads the driver before any read.',
+        );
+    }
+    return databaseConstructor;
+}
+
 export function isValidSqliteTemplate(path: string): boolean {
     if (!existsSync(path)) {
         return false;
@@ -285,6 +317,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
      * same file (which is what `database is locked` was).
      */
     async initialize(_dockerDir?: string, root?: string): Promise<void> {
+        await loadDatabase();
         const projectRoot = root ?? discoverRoot(process.cwd());
         this.templatePath = resolve(
             sqliteTemplateDir(projectRoot),
@@ -348,18 +381,18 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
                 });
 
                 // Checkpoint WAL so the template is a single file (safe to copy)
-                const tmpDb = new Database(buildPath);
+                const tmpDb = new (database())(buildPath);
                 tmpDb.pragma('wal_checkpoint(TRUNCATE)');
                 tmpDb.close();
             } else if (this.initSql) {
                 // Use raw SQL to create schema
                 const sql = readFileSync(this.initSql, 'utf8');
-                const templateDb = new Database(buildPath);
+                const templateDb = new (database())(buildPath);
                 templateDb.exec(sql);
                 templateDb.close();
             } else {
                 // Empty database — consumer will seed
-                const templateDb = new Database(buildPath);
+                const templateDb = new (database())(buildPath);
                 templateDb.close();
             }
 
@@ -372,7 +405,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     private getDb(): Database.Database {
         const dbPath = this.workerDbPath || this.templatePath;
         if (!this.db) {
-            this.db = new Database(dbPath);
+            this.db = new (database())(dbPath);
             this.db.pragma('journal_mode = WAL');
         }
         return this.db;
