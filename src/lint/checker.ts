@@ -28,7 +28,11 @@ import {
     checkModuleTestUnderFacet,
 } from './checker-facets.js';
 import { checkTestUnderFacet } from './checker-placement.js';
-import { checkSpecConventions, checkSpecDescriptionsUnique } from './checker-spec.js';
+import {
+    checkSpecConventions,
+    checkSpecDescriptionsUnique,
+    volatileLiteralIn,
+} from './checker-spec.js';
 
 /**
  * The conventions checker — the non-oxlint static channel.
@@ -373,6 +377,23 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     rule: 'd4',
                     severity: 'error',
                     token,
+                });
+            }
+            // d5 reaches GROUND, not documents alone: a golden that pins a
+            // Loopback port, a temp directory or somebody's home passed once,
+            // On one machine — the same literal, in the other half of the
+            // Same tree.
+            for (const [index, line] of text.split('\n').entries()) {
+                const volatileLiteral = volatileLiteralIn(line);
+                if (volatileLiteral === undefined) {
+                    continue;
+                }
+                violations.push({
+                    file: rel,
+                    line: index + 1,
+                    message: `${rel}:${index + 1}: "${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token} (D5 — see docs/13-linting.md)`,
+                    rule: 'd5-spec-volatile-literal',
+                    severity: 'error',
                 });
             }
         }

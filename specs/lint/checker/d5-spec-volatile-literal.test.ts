@@ -17,6 +17,20 @@ describe('lint — d5 spec volatile literal (CONVENTIONS D5)', () => {
         expect(result.stderr).toMatch('d5-spec-volatile-literal.txt');
     });
 
+    // Full-output golden: the checker's diagnostics are OUR product, so the
+    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
+    // Apply — the whole stderr is asserted, tokens covering the run cwd.
+    test('rejects the same literal under `_expected/`, which is the other half of the reach', async () => {
+        // Given - a golden file pinning a temp directory and a loopback port
+        const result = await cli
+            .fixture('$FIXTURES/lint-violations/d5-ground-volatile-literal/')
+            .exec('.');
+
+        // Then - ground is judged by the list documents are judged by: one rule, one reach
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch('d5-ground-volatile-literal.txt');
+    });
+
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli.fixture('$FIXTURES/lint-violations/spec-document-ok/').exec('.');
