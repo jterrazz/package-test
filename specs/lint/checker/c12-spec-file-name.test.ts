@@ -48,7 +48,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
             .fixture('$FIXTURES/lint-violations/c12-spec-placement/')
             .exec('specs --fix');
 
-        // Then - one rename, the include glob it left behind named, and the two files that are not this rule's: `specs/build/` is nobody's facet, and the module test parked under one is C18's to MOVE
+        // Then - one rename; the glob and the literal entry it broke, and nothing else: not the commented-out glob, not the `src/` one whose files it never touched, not the repository suite's
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch('c12-spec-placement-fixed.txt');
         expect(result.stderr).toMatch('c12-spec-placement-left.txt');
