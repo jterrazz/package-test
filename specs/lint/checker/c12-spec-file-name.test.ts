@@ -42,15 +42,16 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
         expect(result.stderr).toMatch('c12-spec-placement.txt');
     });
 
-    test('leaves a repository suite under a non-facet folder alone', async () => {
-        // Given - the same tree, after the fixer has taken the one file it owns
+    test('renames the spec, and leaves the two files that are not its own', async () => {
+        // Given - the same tree, where `specs/build/` is a repository suite and `specs/api/helpers/normalize.test.ts` reaches no runner
         const result = await cli
             .fixture('$FIXTURES/lint-violations/c12-spec-placement/')
             .exec('specs --fix');
 
-        // Then - `specs/build/` is nobody's facet: it covers a tree, so it keeps `.test.ts`
-        expect(result.exitCode).toBe(0);
+        // Then - one rename: `specs/build/` is nobody's facet, and the module test parked under one is C18's to MOVE, not this rule's to rename
+        expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch('c12-spec-placement-fixed.txt');
+        expect(result.stderr).toMatch('c12-spec-placement-left.txt');
     });
 
     test('names a `.spec.ts` that never reached a specs tree', async () => {

@@ -18,12 +18,12 @@ describe('lint — c18-module-test-under-facet (CONVENTIONS C18)', () => {
     });
 
     test('accepts a spec that imports the runner of its facet', async () => {
-        // Given - the compliant twin
+        // Given - the compliant twin, whose second spec names the specification module with no extension
         const result = await cli
             .fixture('$FIXTURES/lint-violations/c18-module-test-under-facet-ok/')
             .exec('specs');
 
-        // Then - the clean summary
+        // Then - the clean summary: the import SOURCE is what reaches the runner, however it spells the extension
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch('c18-module-test-under-facet-ok.txt');
     });
