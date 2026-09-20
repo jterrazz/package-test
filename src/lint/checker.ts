@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import {
+    GROUND_DIRS,
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
@@ -19,7 +20,15 @@ import {
     checkDockerRunnerAwaitUsing,
     checkLocalFixtureReach,
     checkPoolFixtureSharing,
+    checkSuppressionReason,
 } from './checker-crossfile.js';
+import {
+    checkFacetFolder,
+    checkGroundOwnedByOne,
+    checkGroundPerFacet,
+    checkModuleTestUnderFacet,
+} from './checker-facets.js';
+import { checkEmptyGolden, checkExpectedPinnedValue } from './checker-goldens.js';
 import { checkTestUnderFacet } from './checker-placement.js';
 import { checkSpecConventions, checkSpecDescriptionsUnique } from './checker-spec.js';
 
@@ -64,6 +73,9 @@ const FIXTURE_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS]);
  */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
+/** The four ground names — what a document may never sit under (C16). */
+const GROUND_NAMES = new Set<string>(GROUND_DIRS);
+
 /**
  * The logical passes bundled into `dist/checker.js` — the authoritative
  * registry both the manifest catalogue (docs) and the E2E inventory meta-test
@@ -77,6 +89,11 @@ export const CHECKER_PASS_IDS = [
     'c12-spec-file-name',
     'c14-pool-fixture-shared',
     'c15-local-fixture-reach',
+    'c16-document-outside-ground',
+    'c18-module-test-under-facet',
+    'c19-ground-per-facet',
+    'c20-facet-folder',
+    'c21w-ground-owned-by-one',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
     'd10w-tokens-in-requests',
@@ -87,6 +104,8 @@ export const CHECKER_PASS_IDS = [
     'd4b-spec-block-scalar',
     'd4b-spec-key-order',
     'd4b-spec-shape',
+    'd21w-expected-pinned-value',
+    'd22w-empty-golden',
     'd5-spec-volatile-literal',
     'd5w-spec-pinned-value',
     'e3-config-present',
@@ -94,6 +113,7 @@ export const CHECKER_PASS_IDS = [
     'f8-no-seam-dependency',
     'j3w-spec-empty-assertion',
     'j4-spec-description-unique',
+    'j9-checker-suppression-reason',
     'j5-spec-description',
 ] as const;
 
@@ -259,10 +279,19 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 visit(path, next);
                 continue;
             }
-            // A spec document lives BESIDE its test, not under `_expected/` —
-            // It is the scenario, not a golden — so it is checked wherever the
-            // Walk finds it.
+            // A spec document lives BESIDE its test, not under ground — it IS
+            // The scenario, not material a scenario stands on — so it is
+            // Checked wherever the walk finds it, and C16 says where that is.
             if (entry.name.endsWith(SPEC_EXTENSION)) {
+                if (rel.split(/[/\\]/u).some((segment) => GROUND_NAMES.has(segment))) {
+                    violations.push({
+                        file: rel,
+                        line: 1,
+                        message: `${rel}:1: a \`${SPEC_EXTENSION}\` document is a SPEC, not ground — move it beside the test that runs it (C16 — see docs/13-linting.md)`,
+                        rule: 'c16-document-outside-ground',
+                        severity: 'error',
+                    });
+                }
                 const text = decodeText(path);
                 if (text !== null) {
                     violations.push(
@@ -347,6 +376,13 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
 export function runAllChecks(rootDir: string): TokenViolation[] {
     return [
         ...checkTestUnderFacet(rootDir),
+        ...checkFacetFolder(rootDir),
+        ...checkModuleTestUnderFacet(rootDir),
+        ...checkGroundPerFacet(rootDir),
+        ...checkGroundOwnedByOne(rootDir),
+        ...checkExpectedPinnedValue(rootDir),
+        ...checkEmptyGolden(rootDir),
+        ...checkSuppressionReason(rootDir),
         ...checkConventionFiles(rootDir),
         ...checkSpecDescriptionsUnique(rootDir),
         ...checkDeadFixtures(rootDir),

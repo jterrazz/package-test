@@ -1,0 +1,3 @@
+[error] jobs:1: `specs/jobs/` is a facet folder with no `jobs.specification.ts` constructing `specification.jobs()` — create it, or rename the folder (C20 — see docs/13-linting.md)
+
+conventions checker: 1 error(s) found under {{workdir}}/specs

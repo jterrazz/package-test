@@ -730,6 +730,101 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            'A `<case>.spec.yaml` is a SPEC, not ground: a document under `_expected/`, `_requests/`, `_seeds/` or `_fixtures/` is an error.',
+        family: 'C',
+        fix: 'Move the document beside the test that runs it.',
+        id: 'C16',
+        name: 'c16-document-outside-ground',
+        rationale:
+            'A document IS the scenario; filed under ground it reads as material a scenario stands on, and the reader cannot tell which files are run.',
+        reach: 'document',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'A test under `specs/<facet>/`, where the facet root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself.',
+        family: 'C',
+        fix: 'Import `{ <facet> }` from `<facet>.specification.js`, or move a module test beside its module.',
+        id: 'C18',
+        name: 'c18-module-test-under-facet',
+        rationale:
+            "A test reaching no runner under a facet is a module test paying the facet's budget and services to prove something that belongs beside its module.",
+        reach: 'specs',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'No `_seeds/` or `_requests/` under a facet that drives a SCREEN (`website`, `mobile`), read from the constructor its specification calls.',
+        family: 'C',
+        fix: 'State what the backend answers with contracts.',
+        id: 'C19',
+        name: 'c19-ground-per-facet',
+        rationale:
+            'A screen facet owns no database and sends no request document: ground nothing reads is ground the next reader trusts.',
+        reach: 'ground',
+    },
+    {
+        channel: 'checker',
+        convention:
+            "A first-level folder named for one of the six facets holds a `*.specification.ts(x)` calling `specification.<facet>(`. Positive-only: any other first-level name is a repository suite, judged by C1's declared depth alone.",
+        family: 'C',
+        fix: 'Create the specification the folder promises, or rename the folder.',
+        id: 'C20',
+        name: 'c20-facet-folder',
+        rationale:
+            'Folder = constructor is the law the fork rests on; a facet folder with no runner tells the reader something false before they open a file.',
+        reach: 'specs',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Ground in a leaf holding ≥ 2 node tests (`.test.ts`, `.spec.ts`) that a single one of them reads is a warning. A `.test.tsx` tree is out of reach, as it is for C1.',
+        family: 'C',
+        fix: 'Give that spec its own domain folder, with the ground beside it.',
+        id: 'C21',
+        name: 'c21w-ground-owned-by-one',
+        rationale:
+            'Ground one spec reads, parked where several sit, reads as shared: everyone assumes someone else depends on it and nobody dares touch it.',
+        reach: 'ground',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'A uuid or an iso8601 instant in a file under `_expected/` that nothing in its leaf — its specs, its other ground — or the `$FIXTURES` pool puts there is a warning.',
+        family: 'D',
+        fix: 'Token it, or seed the value so the leaf itself pins it.',
+        id: 'D21',
+        name: 'd21w-expected-pinned-value',
+        rationale:
+            'The literal came from a run: the next one mints another, and the golden fails for a reason that has nothing to do with the subject.',
+        reach: 'ground',
+    },
+    {
+        channel: 'checker',
+        convention: 'A golden whose whole content is `{{any}}` is a warning.',
+        family: 'D',
+        fix: 'Regenerate with `TEST_UPDATE=1` and keep tokens for the parts that move.',
+        id: 'D22',
+        name: 'd22w-empty-golden',
+        rationale:
+            'It states that the subject produced something: the diff is silent, and every change to what it covers goes unseen.',
+        reach: 'ground',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'Every `checker-disable-next-line` / `checker-disable-line` directive carries ` -- <reason>`. The word inside a string is prose, not a directive.',
+        family: 'J',
+        fix: 'Write `checker-disable-next-line <id> -- <reason>`.',
+        id: 'J9',
+        name: 'j9-checker-suppression-reason',
+        rationale:
+            "A suppression with no reason is a rule turned off by someone no longer here: the next reader cannot tell whether the pass was wrong or simply in the way, so the line survives every review. The toolchain's own gate reads `oxlint-disable*` and nothing else.",
+        reach: 'tests',
+    },
+    {
+        channel: 'checker',
+        convention:
             'Every workspace member with tests OF ITS OWN (a `test` script that does not delegate to members, or a `*.test.ts(x)` outside another package’s tree) declares a vitest config (`vitest.config.*`). The MEMBER pass judges the member itself, with or without a `specs/` root; a root that only delegates owes nothing.',
         facet: 'shared',
         family: 'E',
