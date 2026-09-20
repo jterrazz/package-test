@@ -66,12 +66,10 @@ function matchesPath(target: string, patterns: string[]): boolean {
  *         },
  *     }]
  *
- * With no layer map the rule is INERT. It used to ship the framework's own
- * architecture as its law — four layers named `core` / `integrations` / `lint`
- * / `vitest`, and the framework's own dependency table — and applied it to every
- * consumer that enabled the catalogue. A consumer with those directory names
- * was judged against a map describing a different package; a consumer with any
- * other architecture got a rule that could never say anything true. An
+ * With no layer map the rule is INERT, and it ships none of its own: a
+ * built-in map would judge a consumer with those directory names against a
+ * description of a different package, and a consumer with any other
+ * architecture against a rule that could never say anything true. An
  * architecture is the project's to state.
  *
  * Per layer: `packages` are the external dependencies it may import, `imports`

@@ -37,9 +37,9 @@ export const { api, cleanup } = await specification.api({
 
 ## `process()` — the one shape an external process takes
 
-A site's dev server, an API the site calls, the bundler a simulator loads from: each of them is a command, a way of knowing it is ready, and a lifetime. There used to be three shapes for that — `website({ server })` took its own options object, a literate document took a `serve:` entry, and anything else was a `beforeAll` spawning a child and an `afterAll` that sometimes forgot to kill it. `process()` is the one shape, and the framework owns the lifetime.
+A site's dev server, an API the site calls, the bundler a simulator loads from: each of them is a command, a way of knowing it is ready, and a lifetime. `process()` is the one shape for all three, and the framework owns the lifetime — without it each would be declared somewhere else, and the last one would be a `beforeAll` spawning a child and an `afterAll` that sometimes forgets to kill it.
 
-The options type is `ProcessOptions`. It is what 15.2 published as `ServeOptions`, when the only process the framework owned was a website's server; the old name stays as a deprecated alias for the 15.x line and is removed in 16.0.
+The options type is `ProcessOptions` — one shape for the one external process every facet starts.
 
 | Option    | Means                                                                                                                                                                                   |
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

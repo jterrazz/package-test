@@ -27,14 +27,12 @@ export type SpecsAnchor = {
  * searched no higher than the nearest `package.json`. `undefined` when the file
  * is not under one.
  *
- * One anchor for every specs-aware rule. Rules used to hand-roll the search and
- * disagreed with each other — `lastIndexOf('specs')` (C1) took the innermost
- * match, `indexOf('specs')` (F3) the outermost, so one nested tree read as two
- * different facets. And any bare "is `specs` a segment of this path" test
- * matched directories that have nothing to do with the project: a checkout
- * living under `~/specs/` turned the whole repository into a specs tree, which
- * silently disabled F2's protection of production code. The package boundary
- * makes the search stop where the project does.
+ * One anchor for every specs-aware rule, because two searches are two
+ * answers: an innermost match and an outermost one read a nested tree as two
+ * different facets, and a bare "is `specs` a segment of this path" test
+ * answers about the machine — a checkout living under `~/specs/` would be one
+ * whole specs tree, with F2's protection of production code silently off. The
+ * package boundary makes the search stop where the project does.
  */
 export function specsAnchor(filename: string): SpecsAnchor | undefined {
     const relative = [basename(filename)];

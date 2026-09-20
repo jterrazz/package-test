@@ -17,7 +17,7 @@ async function refusalOf(path: string, scenario: VisitScenario): Promise<string>
 // RUNTIME W3 — a descriptor a verb ACTS on must designate exactly one
 // Element; the refusal enumerates the candidates and the rewrites.
 test('refuses an element that matches more than one node', async () => {
-    // Given - a page where "Articles" names two links verbatim, and a third only as a substring ("Read Articles") the exact default no longer reaches
+    // Given - a page where "Articles" names two links verbatim, and a third only as a substring ("Read Articles"), which the whole-name default does not reach
     const message = await refusalOf('/ambiguous', async (visitor) => {
         // When - a scenario acts on the bare descriptor
         await visitor.click(link('Articles'));
@@ -68,7 +68,7 @@ test('the opt-out brings the substring match back, and widens the ambiguity', as
         await visitor.click(link('Articles', { exact: false }));
     });
 
-    // Then - the third link is back, which is what the default used to hide
+    // Then - the third link answers too, which is what the substring form costs
     expect(message).toContain('matched 3 elements');
 });
 

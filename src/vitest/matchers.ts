@@ -375,9 +375,9 @@ async function toMatchRows(received: unknown, expected: unknown): Promise<Matche
     if (!(received instanceof TableAccessor)) {
         throw new TypeError('toMatchRows: unsupported subject — expected result.table(...).');
     }
-    // The shape is stated before the query runs: handing the adapter an
-    // Absent `columns` used to surface as a TypeError from inside SQL
-    // Generation, which names neither the matcher nor what it wanted.
+    // The shape is stated before the query runs: an absent `columns` reaching
+    // The adapter surfaces as a TypeError from inside SQL generation, which
+    // Names neither the matcher nor what it wanted.
     if (!isRowsExpectation(expected)) {
         throw new TypeError(
             'toMatchRows takes { columns, rows } — a column list and one array of cells per row ' +

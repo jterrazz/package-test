@@ -179,7 +179,7 @@ describe('isValidSqliteTemplate (regression guard)', () => {
 
 describe('sqlite() initialize() — stale template recovery', () => {
     test('rebuilds instead of reusing a pre-existing 0-byte template', async () => {
-        // Given - the template path a crashed earlier run left behind as a 0-byte file (this is the exact real-world failure: initialize() used to early-return on `existsSync()` alone and never ran the init SQL, so every later run hit "no such table" against the empty file forever after).
+        // Given - the template path a crashed earlier run left behind as a 0-byte file (an early return on `existsSync()` alone never runs the init SQL, and every later run hits "no such table" against the empty file forever after).
         const root = mkdtempSync(resolve(tmpdir(), 'sqlite-guard-root-'));
         const initSqlPath = resolve(root, 'init.sql');
         writeFileSync(

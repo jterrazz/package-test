@@ -369,9 +369,8 @@ const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
  *
  * The first three sources are the document's own words: a literal that appears
  * in a command's arguments or in an `env:`/`serve:` value is one the DOCUMENT
- * put there, not one a run minted. The adoptions of 15.3 found eleven warnings
- * of exactly that shape, every one of them a value the reader could see being
- * pinned two lines above.
+ * put there, not one a run minted — a reader sees it being pinned two lines
+ * above the stream that asserts it.
  */
 function fixedData(document: SpecDocument, dir: string): string {
     const parts = document.runs.flatMap((run) => [run.stdin ?? '', run.command]);

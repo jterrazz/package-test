@@ -44,9 +44,10 @@ export type IntegrationHandle<
  *
  * The fork is the SUBJECT. A module alone is a module test, beside its code,
  * with no runner at all. A module that needs a real database, or whose oracle
- * is a golden file, is this — and it used to be neither: a `specs/` folder
- * with plain vitest, a hand-built sqlite template, a `beforeAll` that started
- * a container, and a `toMatchSnapshot` where the package has a golden engine.
+ * is a golden file, is this one — which is what spares it the shape it would
+ * otherwise take: plain vitest under a `specs/` folder, a hand-built sqlite
+ * template, a `beforeAll` starting a container, and a `toMatchSnapshot` beside
+ * a framework that owns a golden engine.
  */
 export async function startIntegration<Services extends ServiceRecord>(
     options: IntegrationSpecificationOptions<Services> = {},

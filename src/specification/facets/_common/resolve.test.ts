@@ -93,7 +93,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
     });
 
     test('a workspace package wins over the repository above it (monorepo)', () => {
-        // Given - a manifest at the monorepo root and one in a nested package (the shape that used to resolve to the repository: a second marker was walked first, so the FURTHER one decided and every path the runner resolved was measured from the wrong unit)
+        // Given - a manifest at the monorepo root and one in a nested package (the shape where walking past the first marker measures every path the runner resolves from the wrong unit)
         mkdirSync(resolve(base, 'mono'), { recursive: true });
         writeFileSync(resolve(base, 'mono/package.json'), '{"name":"mono"}\n');
         mkdirSync(resolve(base, 'mono/packages/pkg/src'), { recursive: true });

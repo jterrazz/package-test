@@ -11,7 +11,7 @@ import { loadPeer } from '../peer.js';
  * `pg`'s client constructor, loaded on the first connection.
  *
  * The driver is an OPTIONAL peer: a repository that specifies a CLI never
- * reaches this line, and the import used to be paid for by every install.
+ * reaches this line, and never pays for the import.
  */
 async function clientConstructor(): Promise<typeof Client> {
     return await loadPeer('pg', 'postgres()', async () => {

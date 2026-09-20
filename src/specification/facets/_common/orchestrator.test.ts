@@ -13,7 +13,7 @@ describe('the orchestrator measures from the root it is given', () => {
     });
 
     test('requires a root — the caller resolved it, there is no second opinion', () => {
-        // Given - a construction that omits the root (the shape that used to fall back to `process.cwd()`, silently disagreeing with the runner's own A9 walk from the calling specification file)
+        // Given - a construction that omits the root (the shape where a fallback to `process.cwd()` would silently disagree with the runner's own A9 walk from the calling specification file)
         // @ts-expect-error - `root` is required; this line is the guard
         const orchestrator = new Orchestrator({ services: {} });
 

@@ -23,7 +23,7 @@ test('refuses a descriptor matching several elements, and says how to fix it', a
     expect(refusal).toContain('CONVENTIONS W3');
 });
 
-test('a name designates the accessible name WHOLE — the 16.0 default', async () => {
+test('a name designates the accessible name WHOLE — the default', async () => {
     // Given - the same three links, one of which only CONTAINS the name
     const result = await component.render(<AmbiguousLinks />, async (visitor) => {
         await visitor.see(link('Articles archive'));

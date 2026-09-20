@@ -5,9 +5,9 @@ import { dirname, resolve } from 'node:path';
  * Loading an OPTIONAL peer, and saying the right thing when it is not there.
  *
  * Four native seams — `better-sqlite3`, `pg`, `redis`, `testcontainers` — are
- * peers rather than dependencies from 16.0: a consumer that specifies a CLI has
- * no business compiling a SQLite binding, and a package that carried all four
- * made every install pay for the services one repository happened to use.
+ * peers rather than dependencies: a consumer that specifies a CLI has no
+ * business compiling a SQLite binding, and a package carrying all four would
+ * make every install pay for the services one repository happens to use.
  *
  * A peer being absent is then an ordinary state, and the message is what turns
  * it into a one-line fix. Two things make it actionable:

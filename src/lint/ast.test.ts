@@ -56,7 +56,7 @@ describe('specsAnchor', () => {
     });
 
     test('takes the NEAREST specs ancestor, not the outermost', () => {
-        // Given - a fixture project nested inside the repo's own specs tree — the exact shape where C1 (lastIndexOf) and F3 (indexOf) used to disagree, reading one file as two different facets
+        // Given - a fixture project nested inside the repo's own specs tree — the shape where an innermost search and an outermost one read one file as two different facets
         const file = join(nested, 'integrations', 'adapter.test.ts');
 
         // Then - one answer: the innermost tree owns the file

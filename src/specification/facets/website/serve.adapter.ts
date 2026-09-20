@@ -52,16 +52,6 @@ export type ProcessOptions = {
     timeout?: number;
 };
 
-/**
- * What `ProcessOptions` was called in 15.2, when the only process the
- * framework owned was a website's server.
- *
- * @deprecated Renamed to {@link ProcessOptions} in 15.3 — the shape is the
- * one external process every facet starts, not a website's alone. The alias
- * is removed in 16.0.
- */
-export type ServeOptions = ProcessOptions;
-
 const delay = async (ms: number): Promise<void> => {
     await new Promise((resolve) => setTimeout(resolve, ms));
 };

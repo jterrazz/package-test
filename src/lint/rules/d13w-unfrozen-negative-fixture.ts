@@ -107,10 +107,10 @@ function isTestCallback(fn: AstNode): boolean {
  * The bounded second shape: a `toMatch('<file>')` inside a HELPER whose body
  * also asserts a throw.
  *
- * This is the residue the process note used to carry — a golden routed through
- * a helper that owns the try/catch (`catchMessage(() => …toMatch('f'))`).
- * Inter-procedural analysis is out of an oxlint JS plugin's reach, but that
- * helper holds both halves in one body, and that is decidable.
+ * The shape is a golden routed through a helper that owns the try/catch
+ * (`catchMessage(() => …toMatch('f'))`). Inter-procedural analysis is out of
+ * an oxlint JS plugin's reach, but that helper holds both halves in one body,
+ * and that is decidable.
  *
  * Bounded twice, because each bound answers a real false positive found on this
  * package's own tree. The enclosing function must not be the TEST callback

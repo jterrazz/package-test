@@ -86,7 +86,8 @@ function locate(root: MatchScope, element: ElementRef): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
     // Playwright's own option bags are exact-optional: an absent `name` is no
     // Name filter at all. `exact` is the framework's default, not playwright's
-    // — a name designates the accessible name WHOLE since 16.0.
+    // — a name designates the accessible name WHOLE, and `{ exact: false }` is
+    // The opt-out.
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
@@ -168,7 +169,7 @@ async function act<T>(
 
 /**
  * Say so when a descriptor found NOTHING as a whole name but would have found
- * something as a substring — the one shape the 16.0 default changes.
+ * something as a substring — the one shape the whole-name default changes.
  *
  * Asked only on the failure path, and only for a descriptor that stated no
  * `exact` of its own: an author who wrote `{ exact: false }` chose the

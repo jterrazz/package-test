@@ -71,7 +71,7 @@ function compilePredicate(
     options?: { anyVisibility?: boolean },
 ): string {
     const name = escapePredicate(element.name ?? '');
-    // A label designates the WHOLE label since 16.0 — the same default as the
+    // A label designates the WHOLE label — the same default as the
     // Web vocabulary, compiled to equality; `{ exact: false }` is the opt-out
     // And compiles to `CONTAINS`.
     const contains = (attribute: string): string =>

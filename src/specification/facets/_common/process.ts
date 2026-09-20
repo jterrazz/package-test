@@ -8,12 +8,11 @@ import type { ProcessOptions } from '../website/serve.adapter.js';
 /**
  * An external process, declared like any other service.
  *
- * Before this there were three shapes for the same thing: `website({ server })`
- * took a `ServeOptions`, a literate document took a `serve:` entry, and a
- * project that needed a second process — an API behind the site, Metro behind
- * the simulator — started one by hand in a `beforeAll` and killed it in an
- * `afterAll` it sometimes forgot. `process()` is the one shape, and the
- * framework owns the lifetime.
+ * One shape for every one of them: a site's dev server, an API behind the
+ * site, the bundler a simulator loads from. Without it each is declared
+ * somewhere else — a facet option, a document's `serve:` entry, a `beforeAll`
+ * spawning a child and an `afterAll` that sometimes forgets to kill it — and
+ * the lifetime belongs to whoever remembered. Here it is the framework's.
  *
  * It sits in a `services` record beside `postgres()`, `redis()` and
  * `sqlite()`, so it starts after them and can be handed their connection
