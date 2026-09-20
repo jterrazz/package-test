@@ -43,7 +43,21 @@ then implement against numbers. By expected return, descending.
   mocked reply. The repro is `specs/api/intercepts/body-cancel.spec.ts`, skipped: unskip
   it and the M3 escape chapter 10 sanctions goes with it.
 
-## 3. Asks of `@jterrazz/typescript`
+## 3. What the contract vocabulary still cannot say
+
+Found by package-analytics' 15.3 adoption (2026-09-20). Both are product lines: a
+rule about either one is a chapter-12 backlog line, and it waits on the surface.
+
+- **A contract cannot state an ABSENT header.** A response's headers are matched as a
+  SUBSET, which proves presence and nothing else, so "this reply carries no
+  `set-cookie`" is not sayable. Either a `without: { headers: [...] }` filter beside the
+  subset, or a captured-request accessor the test reads and asserts on itself.
+- **There is no must-never-be-called contract.** A negative test leans on
+  `http.unreachable()` plus an empty `result.error`, which says "the call failed", not
+  "the call never happened". `http.never(request)` — or `required: false` with
+  `times: 0` — states it, and fails at chain end if the subject reached the route.
+
+## 4. Asks of `@jterrazz/typescript`
 
 - **The member walk misses a `specs/`-rooted member.** `discover_specs_roots`, in the toolchain's check command, looks for a CHILD directory named `specs` and never considers the
   member directory itself, so a workspace declaring `packages: ['specs']` (spwn's shape)
