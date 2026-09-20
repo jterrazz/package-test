@@ -25,10 +25,11 @@ export const { api, cleanup } = await specification.api({
 
 ## Options
 
-| Name       | Written                          | Does                                                                         |
-| ---------- | -------------------------------- | ---------------------------------------------------------------------------- |
-| `services` | `services: { main: postgres() }` | Named infrastructure the chain gets, isolated per worker and reset per chain |
-| `server`   | `server: () => App`              | The app to start in this process — a Hono app, a fetch handler, a factory    |
+| Name       | Written                          | Does                                                                               |
+| ---------- | -------------------------------- | ---------------------------------------------------------------------------------- |
+| `services` | `services: { main: postgres() }` | Named infrastructure the chain gets, isolated per worker and reset per chain       |
+| `root`     | `root: './apps/api'`             | Project-root override (rule A9); auto-discovered from the calling file when absent |
+| `server`   | `server: () => App`              | The app to start in this process — a Hono app, a fetch handler, a factory          |
 
 ## Setups (chainable)
 
@@ -51,21 +52,24 @@ export const { api, cleanup } = await specification.api({
 
 ## The result
 
-| Name        | Written                                 | Does                                                                           |
-| ----------- | --------------------------------------- | ------------------------------------------------------------------------------ |
-| `.response` | `result.response`                       | The HTTP response — status, headers, body, matched against an `.http` golden   |
-| `.json`     | `result.json`                           | Stdout parsed as JSON                                                          |
-| `.table()`  | `.table('users', { database: 'main' })` | The rows a service holds after the action — the oracle of anything that writes |
-| `.error`    | `result.error`                          | What the subject threw, as a subject of its own — a refusal is an answer       |
-| `.status`   | `result.status`                         | The HTTP status of the response, or of the document                            |
+| Name           | Written                                 | Does                                                                           |
+| -------------- | --------------------------------------- | ------------------------------------------------------------------------------ |
+| `.response`    | `result.response`                       | The HTTP response — status, headers, body, matched against an `.http` golden   |
+| `.status`      | `result.status`                         | The HTTP status of the response, or of the document                            |
+| `.table()`     | `.table('users', { database: 'main' })` | The rows a service holds after the action — the oracle of anything that writes |
+| `.file()`      | `.file('out/report.json')`              | One file in the working directory, as a stream subject                         |
+| `.directory()` | `.directory('out')`                     | A tree snapshot of one directory the run left behind                           |
 
 ## Goldens
 
-| Name                | Written                                                      | Does                                                                                                         |
-| ------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                    | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
-| `.http exchange`    | `await expect(result.response).toMatch('user-created.http')` | A complete request/response pair as a file: status line, header subset, body, tokens                         |
-| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                   | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                  |
+| Name                | Written                                                        | Does                                                                                                         |
+| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
+| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
+| `.http exchange`    | `await expect(result.response).toMatch('user-created.http')`   | A complete request/response pair as a file: status line, header subset, body, tokens                         |
+| `.json body`        | `await expect(subject).toMatch('created.json')`                | A JSON payload as a file, tokens resolved and keys compared                                                  |
+| `.txt stream`       | `await expect(subject).toMatch('help.txt')`                    | A text stream as a file — stdout, stderr, a rendered body                                                    |
+| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                  |
 
 ## Read next
 

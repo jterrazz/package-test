@@ -24,9 +24,10 @@ export const { cleanup, integration } = await specification.integration({
 
 ## Options
 
-| Name       | Written                          | Does                                                                         |
-| ---------- | -------------------------------- | ---------------------------------------------------------------------------- |
-| `services` | `services: { main: postgres() }` | Named infrastructure the chain gets, isolated per worker and reset per chain |
+| Name       | Written                          | Does                                                                               |
+| ---------- | -------------------------------- | ---------------------------------------------------------------------------------- |
+| `services` | `services: { main: postgres() }` | Named infrastructure the chain gets, isolated per worker and reset per chain       |
+| `root`     | `root: './apps/api'`             | Project-root override (rule A9); auto-discovered from the calling file when absent |
 
 ## Setups (chainable)
 
@@ -44,17 +45,22 @@ export const { cleanup, integration } = await specification.integration({
 
 ## The result
 
-| Name       | Written                                 | Does                                                                                 |
-| ---------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
-| `.table()` | `.table('users', { database: 'main' })` | The rows a service holds after the action — the oracle of anything that writes       |
-| `.value`   | `result.value`                          | What the call returned — a JSON accessor for an object, a text accessor for a string |
-| `.error`   | `result.error`                          | What the subject threw, as a subject of its own — a refusal is an answer             |
+| Name           | Written                                 | Does                                                                                 |
+| -------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
+| `.table()`     | `.table('users', { database: 'main' })` | The rows a service holds after the action — the oracle of anything that writes       |
+| `.file()`      | `.file('out/report.json')`              | One file in the working directory, as a stream subject                               |
+| `.directory()` | `.directory('out')`                     | A tree snapshot of one directory the run left behind                                 |
+| `.value`       | `result.value`                          | What the call returned — a JSON accessor for an object, a text accessor for a string |
+| `.error`       | `result.error`                          | What the subject threw, as a subject of its own — a refusal is an answer             |
 
 ## Goldens
 
-| Name                | Written                                   | Does                                                                                                         |
-| ------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')` | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
+| Name                | Written                                                        | Does                                                                                                         |
+| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
+| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
+| `.json body`        | `await expect(subject).toMatch('created.json')`                | A JSON payload as a file, tokens resolved and keys compared                                                  |
+| `.txt stream`       | `await expect(subject).toMatch('help.txt')`                    | A text stream as a file — stdout, stderr, a rendered body                                                    |
 
 ## Read next
 

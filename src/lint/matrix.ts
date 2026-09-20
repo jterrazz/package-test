@@ -30,11 +30,22 @@ import type { Capability, Column } from './facet-matrix.js';
  * refactor of a loop and says nothing more.
  */
 
-/** Where each column's test files live, relative to the repository root. */
-const COLUMN_TREES: Record<Column, { extensions: string[]; roots: string[] }> = {
+/**
+ * Where each column's test files live, relative to the repository root.
+ *
+ * `files` is for the one column that has no constructor: what a component
+ * render is given — the providers, the Vite pipeline, the viewport — belongs
+ * to the PROJECT, so the file that states component's options is this
+ * repository's own `vitest.config.ts`.
+ */
+const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roots: string[] }> = {
     api: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/api'] },
     cli: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/cli'] },
-    component: { extensions: ['.test.tsx', '.specification.ts'], roots: ['specs/component-app'] },
+    component: {
+        extensions: ['.test.tsx', '.specification.ts'],
+        files: ['vitest.config.ts'],
+        roots: ['specs/component-app'],
+    },
     integration: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/integration'] },
     jobs: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/jobs'] },
     mobile: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/mobile'] },
@@ -62,13 +73,31 @@ function filesUnder(dir: string, extensions: string[]): string[] {
     return found;
 }
 
+/**
+ * The source with its comments removed.
+ *
+ * A cell counts the files that EXERCISE a capability, and a sentence about one
+ * is not an exercise of it: before this, the comment naming `.intercept()` in
+ * `specs/jobs/jobs.specification.ts` counted as a second jobs file, and the
+ * word "wrapped" in a component test counted as a `wrap`.
+ */
+function withoutComments(source: string): string {
+    return source
+        .replaceAll(/\/\*[\s\S]*?\*\//gu, '')
+        .replaceAll(/(?<before>^|[^:\\])\/\/[^\n]*/gu, '$<before>')
+        .replaceAll(/^\s*#[^\n]*/gmu, '');
+}
+
 /** The source of every test file a column owns, read once per generation. */
 function sourcesOf(root: string): Record<Column, string[]> {
     const read = (column: Column): string[] => {
         const tree = COLUMN_TREES[column];
-        return tree.roots
-            .flatMap((relative) => filesUnder(resolve(root, relative), tree.extensions))
-            .map((path) => readFileSync(path, 'utf8'));
+        return [
+            ...tree.roots.flatMap((relative) =>
+                filesUnder(resolve(root, relative), tree.extensions),
+            ),
+            ...(tree.files ?? []).map((relative) => resolve(root, relative)),
+        ].map((path) => withoutComments(readFileSync(path, 'utf8')));
     };
     // Written out rather than folded: the compiler then holds the invariant
     // That every column has a tree, which a `fromEntries` cast would drop.
@@ -118,6 +147,22 @@ export function capabilities(): Capability[] {
     return [...CAPABILITIES, ...tokens];
 }
 
+/** The probe, as a matcher. */
+const ESCAPE = /[$()*+.?[\\\]^{|}]/gu;
+
+/**
+ * A probe matched where it is WRITTEN, not wherever its letters occur.
+ *
+ * A probe that opens on an identifier character is anchored on a word
+ * boundary that also refuses a leading dot, so the landmark `table(` is not
+ * found inside the accessor `.table(` and `row(` is not found inside
+ * `narrow(`. A probe that opens on a dot is already anchored by that dot.
+ */
+function matcherOf(probe: string): RegExp {
+    const lead = /^[$A-Z_a-z]/u.test(probe) ? String.raw`(?<![$.\w])` : '';
+    return new RegExp(lead + probe.replaceAll(ESCAPE, String.raw`\$&`), 'u');
+}
+
 /** The matrix, derived. `root` is the repository root. */
 export function matrixRows(root: string): MatrixRow[] {
     const sources = sourcesOf(root);
@@ -125,8 +170,8 @@ export function matrixRows(root: string): MatrixRow[] {
         if (!capability.columns.includes(column)) {
             return null;
         }
-        const probe = capability.probeByColumn?.[column] ?? capability.probe;
-        return sources[column].filter((source) => source.includes(probe)).length;
+        const matcher = matcherOf(capability.probeByColumn?.[column] ?? capability.probe);
+        return sources[column].filter((source) => matcher.test(source)).length;
     };
     return capabilities().map((capability) => ({
         capability,
@@ -187,11 +232,13 @@ export function renderMatrixBody(root: string): string {
         ).join('\n');
         return `### ${group}\n\n${body}`;
     });
-    const notes = exemptions(rows).map(
-        ({ column, name, why }) => `- \`${name}\` · **${column}** — ${why}`,
-    );
+    const byReason = new Map<string, string[]>();
+    for (const { column, name, why } of exemptions(rows)) {
+        byReason.set(why, [...(byReason.get(why) ?? []), `\`${name}\`·${column}`]);
+    }
+    const notes = [...byReason].map(([why, cells]) => `- ${why} — ${cells.join(', ')}`);
     const intro =
-        'What the framework can do, and how many of this package\u2019s own test files exercise it, per facet. A blank (`—`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
+        'What the framework can do, and how many of this package\u2019s own test FILES carry the literal that exercises it, per facet (comments stripped, so a sentence about a capability never counts as a test of it). A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
     return [intro, ...sections, '### Exemptions', notes.join('\n')].join('\n\n');
 }
 
@@ -237,20 +284,47 @@ function countUnder(root: string, roots: string[], extensions: string[]): number
     return roots.flatMap((relative) => filesUnder(resolve(root, relative), extensions)).length;
 }
 
-/** The four layers, innermost first — the order a reader should read them in. */
+/** Files directly inside `dir` (not below it) whose name ends in one of `extensions`. */
+function filesDirectlyIn(dir: string, extensions: string[]): number {
+    try {
+        return readdirSync(dir, { withFileTypes: true }).filter(
+            (entry) => entry.isFile() && extensions.some((ext) => entry.name.endsWith(ext)),
+        ).length;
+    } catch {
+        return 0;
+    }
+}
+
+/**
+ * The five layers, innermost first — the order a reader should read them in.
+ *
+ * The meta-tests are their own layer rather than a corner of the module tests:
+ * they judge the CORPUS — the catalogue's freshness, the reach of every rule,
+ * the matrix, the cards, the coverage floor — which is the one thing a module
+ * test beside a module cannot see.
+ */
 export function layers(root: string): Layer[] {
-    const moduleTests = countUnder(root, ['src'], ['.test.ts', '.test.tsx']);
+    const allModuleTests = countUnder(root, ['src'], ['.test.ts', '.test.tsx']);
     const ruleTests = countUnder(root, ['src/lint/rules'], ['.test.ts']);
+    const metaTests = filesDirectlyIn(resolve(root, 'src/lint'), ['.test.ts']);
+    // A `*.specification.ts` builds a runner; it is not itself a spec, and
+    // Counting it here would credit the layer with files that assert nothing.
     const facetSpecs = COLUMNS.filter((column) => column !== 'module').reduce(
         (total, column) =>
             total +
-            countUnder(root, COLUMN_TREES[column].roots, [...COLUMN_TREES[column].extensions]),
+            countUnder(
+                root,
+                COLUMN_TREES[column].roots,
+                COLUMN_TREES[column].extensions.filter(
+                    (extension) => extension !== '.specification.ts',
+                ),
+            ),
         0,
     );
     const lintSuite = countUnder(root, ['specs/lint'], ['.test.ts']);
     return [
         {
-            count: moduleTests - ruleTests,
+            count: allModuleTests - ruleTests - metaTests,
             judges: 'one module, through its own exports, with nothing started',
             layer: 'Module tests',
             where: '`src/**/*.test.ts` beside the module',
@@ -269,9 +343,15 @@ export function layers(root: string): Layer[] {
         },
         {
             count: lintSuite,
-            judges: 'the built binary end to end, and what the corpus must keep true',
-            layer: 'The lint suite and the meta-tests',
+            judges: 'the built binary end to end, over fixture projects',
+            layer: 'The lint suite',
             where: '`specs/lint/**`',
+        },
+        {
+            count: metaTests,
+            judges: 'the corpus itself: the catalogue, the matrix, the cards, the floor',
+            layer: 'Meta-tests',
+            where: '`src/lint/*.test.ts`',
         },
     ];
 }

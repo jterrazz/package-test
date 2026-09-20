@@ -25,10 +25,20 @@ export const { cleanup, mobile } = await specification.mobile({
 
 ## Options
 
-| Name     | Written                        | Does                                                             |
-| -------- | ------------------------------ | ---------------------------------------------------------------- |
-| `device` | `device: { name?, platform? }` | Which simulator to resolve — by name, or by the platform version |
-| `app`    | `app: string`                  | The built app bundle the simulator installs                      |
+| Name       | Written                          | Does                                                                               |
+| ---------- | -------------------------------- | ---------------------------------------------------------------------------------- |
+| `services` | `services: { main: postgres() }` | Named infrastructure the chain gets, isolated per worker and reset per chain       |
+| `root`     | `root: './apps/api'`             | Project-root override (rule A9); auto-discovered from the calling file when absent |
+| `backend`  | `backend: { env: 'API_URL' }`    | A stub backend started before the site, its URL injected into the child env        |
+| `device`   | `device: { name?, platform? }`   | Which simulator to resolve — by name, or by the platform version                   |
+| `app`      | `app: string`                    | The built app bundle the simulator installs                                        |
+| `timeouts` | `timeouts: { launch: 60_000 }`   | How long a device is given to launch, to settle and to find an element             |
+
+## Setups (chainable)
+
+| Name           | Written                 | Does                                                                                    |
+| -------------- | ----------------------- | --------------------------------------------------------------------------------------- |
+| `.intercept()` | `.intercept(contracts)` | Declares what the network answers, from contracts — strict from the first one (rule D7) |
 
 ## Terminal actions (exactly one)
 
@@ -38,13 +48,16 @@ export const { cleanup, mobile } = await specification.mobile({
 
 ## The result
 
-| Name    | Written       | Does                                                                      |
-| ------- | ------------- | ------------------------------------------------------------------------- |
-| `.tree` | `result.tree` | The accessibility tree of the surface — the outline a screen reader walks |
+| Name       | Written          | Does                                                    |
+| ---------- | ---------------- | ------------------------------------------------------- |
+| `.content` | `result.content` | The rendered text a reader sees — not the markup        |
+| `.screen`  | `result.screen`  | The device screen as a tree — the outline a golden pins |
 
 ## The vocabulary
 
-Descriptors, modifiers and verbs reachable here: `see` · `click` · `fill` · `press` · `gone` · `button` · `field` · `heading` · `link` · `content` · `testId`.
+The visitor's verbs: `see` · `fill` · `tap`.
+
+The descriptors, landmarks and modifiers: `button` · `field` · `content` · `testId`.
 
 All of them are defined once, in [13 — Elements](../../../docs/13-elements.md): the same words, the same W3 refusal, the same exact-by-default matching, on every surface that draws.
 

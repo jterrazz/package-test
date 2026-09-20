@@ -29,9 +29,15 @@ export const result = await component.render(
 
 ## Options
 
-| Name   | Written                       | Does                                                                                                |
-| ------ | ----------------------------- | --------------------------------------------------------------------------------------------------- |
-| `wrap` | `wrap: './src/providers.tsx'` | The project's frame around every render — a module path whose default export is `(ui) => ReactNode` |
+| Name       | Written                                  | Does                                                                                                |
+| ---------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `root`     | `root: './apps/api'`                     | Project-root override (rule A9); auto-discovered from the calling file when absent                  |
+| `wrap`     | `wrap: './src/providers.tsx'`            | The project's frame around every render — a module path whose default export is `(ui) => ReactNode` |
+| `vite`     | `vite: './vite.config.ts'`               | The Vite config the page is built with — a path, an object, or a promise of one                     |
+| `clock`    | `clock: '2026-03-04T09:30:00Z'`          | The project's pinned `Date` — every render of the project starts there                              |
+| `locale`   | `locale: 'en-US'`                        | The project's locale — what `Intl` answers in every render                                          |
+| `timezone` | `timezone: 'UTC'`                        | The project's timezone — what every render's `Date` is read in                                      |
+| `viewport` | `viewport: { height: 720, width: 1280 }` | The project's page size — the frame every render of it starts in                                    |
 
 ## Setups (chainable)
 
@@ -50,22 +56,28 @@ export const result = await component.render(
 
 ## The result
 
-| Name    | Written       | Does                                                                      |
-| ------- | ------------- | ------------------------------------------------------------------------- |
-| `.text` | `result.text` | The rendered text of the mounted unit                                     |
-| `.tree` | `result.tree` | The accessibility tree of the surface — the outline a screen reader walks |
-| `.html` | `result.html` | The mounted markup — the escape hatch for a class or an attribute         |
+| Name       | Written          | Does                                                                      |
+| ---------- | ---------------- | ------------------------------------------------------------------------- |
+| `.tree`    | `result.tree`    | The accessibility tree of the surface — the outline a screen reader walks |
+| `.content` | `result.content` | The rendered text a reader sees — not the markup                          |
+| `.console` | `result.console` | Every console message the page emitted, one `[type] text` line each       |
+| `.errors`  | `result.errors`  | Console messages of type `error` only, plus any uncaught page error       |
+| `.html`    | `result.html`    | The mounted markup — the escape hatch for a class or an attribute         |
 
 ## Goldens
 
-| Name                | Written                                                 | Does                                                                                                                  |
-| ------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`               | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it          |
-| `.aria.yaml tree`   | `await expect(result.tree).toMatch('<name>.aria.yaml')` | The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not |
+| Name                | Written                                                        | Does                                                                                                                  |
+| ------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it          |
+| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                                      |
+| `.aria.yaml tree`   | `await expect(result.tree).toMatch('<name>.aria.yaml')`        | The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not |
+| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                           |
 
 ## The vocabulary
 
-Descriptors, modifiers and verbs reachable here: `see` · `click` · `fill` · `press` · `gone` · `rerender` · `unmount` · `button` · `field` · `heading` · `link` · `content` · `testId` · `within` · `focused` · `selected` · `valued`.
+The visitor's verbs: `see` · `fill` · `click` · `gone` · `press` · `hover` · `check` · `select` · `rerender` · `unmount`.
+
+The descriptors, landmarks and modifiers: `button` · `field` · `content` · `testId` · `heading` · `link` · `dialog` · `status` · `table` · `row` · `listitem` · `option` · `banner` · `complementary` · `contentinfo` · `form` · `main` · `navigation` · `region` · `search` · `within` · `focused` · `selected` · `valued` · `disabled` · `enabled`.
 
 All of them are defined once, in [13 — Elements](../../../docs/13-elements.md): the same words, the same W3 refusal, the same exact-by-default matching, on every surface that draws.
 
