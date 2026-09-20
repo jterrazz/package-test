@@ -1,0 +1,14 @@
+{
+    "alternates": {
+        "en": "https://site.test/framework",
+        "fr": "https://site.test/fr/framework",
+        "x-default": "https://site.test/framework"
+    },
+    "canonical": "https://site.test/framework",
+    "metas": {
+        "description": "A tiny site the specs can trust.",
+        "og:title": "Fixture — Framework",
+        "og:image": "https://site.test/assets/card.png"
+    },
+    "title": "Fixture — Framework"
+}

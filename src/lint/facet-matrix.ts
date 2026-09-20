@@ -185,7 +185,12 @@ export const CAPABILITIES: Capability[] = [
     { columns: ['cli'], group: 'Constructor option', name: 'env', probe: 'env:' },
     { columns: ['cli'], group: 'Constructor option', name: 'docker', probe: 'docker:' },
     { columns: ['cli'], group: 'Constructor option', name: 'serve', probe: 'serve:' },
-    { columns: ['cli'], group: 'Constructor option', name: 'transform', probe: 'transform:' },
+    {
+        columns: ['cli', 'website'],
+        group: 'Constructor option',
+        name: 'transform',
+        probe: 'transform:',
+    },
     { columns: ['component'], group: 'Constructor option', name: 'wrap', probe: 'wrap:' },
     { columns: ['component'], group: 'Constructor option', name: 'vite', probe: 'vite:' },
     {

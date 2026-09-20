@@ -94,6 +94,14 @@ export type WebsiteSpecificationOptions<Services extends ServiceRecord = Service
      * API it was started beside.
      */
     services?: Services;
+    /**
+     * Escape hatch: normaliser applied to every compared reading of a result
+     * — the head projection and the json-ld among them — before the
+     * comparison (CONVENTIONS D6). Does NOT mutate the raw `.text` accessor.
+     * Prefer `{{token}}` placeholders in fixtures; this is for what a token
+     * cannot name, a meta a FRAMEWORK owns and the page never asked for.
+     */
+    transform?: ((text: string) => string) | undefined;
 } & (
     | {
           /**
@@ -274,6 +282,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         baseUrl,
         browser: getBrowser,
         external: options.external ?? (options.server ? 'block' : 'allow'),
+        transform: options.transform,
     };
 
     return {

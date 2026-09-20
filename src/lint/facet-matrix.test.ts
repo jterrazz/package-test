@@ -202,6 +202,7 @@ const websiteOptions = {
     root: true,
     server: true,
     services: true,
+    transform: true,
     url: true,
 } satisfies Record<KeysOf<WebsiteSpecificationOptions>, Published>;
 

@@ -33,14 +33,15 @@ export const { cleanup, website } = await specification.website({
 
 ### Options
 
-| Option     | Description                                                                                                                                                                 |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server`   | How the site is started locally: a `process()`, the `ProcessOptions` object itself, or `(services) => …` returning either. Exactly one of `server` / `url`                  |
-| `url`      | Target an already-running site (deployed, preview, dev server). Exactly one of `server` / `url`                                                                             |
-| `services` | A named record started BEFORE the site and stopped with it — a database it reads, a `process()` backend it calls. See [Services beside the site](#services-beside-the-site) |
-| `backend`  | `{ env, port? }` — start a declared stub backend and inject its URL into the server child. Requires `server` mode — see [Declared backend](#declared-backend)               |
-| `external` | `'allow' \| 'block'` — cross-origin policy for `.visit()`. Default `'block'` with `server`, `'allow'` with `url` — see [Cross-origin policy](#cross-origin-policy-external) |
-| `root`     | **Project-root override** (rule A9): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                |
+| Option      | Description                                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `server`    | How the site is started locally: a `process()`, the `ProcessOptions` object itself, or `(services) => …` returning either. Exactly one of `server` / `url`                                                                           |
+| `url`       | Target an already-running site (deployed, preview, dev server). Exactly one of `server` / `url`                                                                                                                                      |
+| `services`  | A named record started BEFORE the site and stopped with it — a database it reads, a `process()` backend it calls. See [Services beside the site](#services-beside-the-site)                                                          |
+| `backend`   | `{ env, port? }` — start a declared stub backend and inject its URL into the server child. Requires `server` mode — see [Declared backend](#declared-backend)                                                                        |
+| `external`  | `'allow' \| 'block'` — cross-origin policy for `.visit()`. Default `'block'` with `server`, `'allow'` with `url` — see [Cross-origin policy](#cross-origin-policy-external)                                                          |
+| `root`      | **Project-root override** (rule A9): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                                                                         |
+| `transform` | **Escape hatch only** (rule D6): a normaliser applied to every compared reading — the head projection and the json-ld among them — before the comparison, for framework noise no token can name. It never mutates what the page said |
 
 `server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
 
@@ -252,6 +253,18 @@ test('exposes canonical, alternates, and named metas directly', async () => {
     expect(result.head).toMatch('home.head.json');
 });
 ```
+
+**A meta the FRAMEWORK owns is dropped by the runner, not absorbed by the golden.** A view-transitions router writes its own metas into every head; a golden that swallows them says the site declares something it never did, and every page's golden grows the same two lines. `transform` is the door — the same option `specification.cli()` has, for the same reason (rule D6):
+
+```typescript
+export const { cleanup, website } = await specification.website({
+    server: { command: 'npm run preview', ready: '/' },
+    // the router's own metas, which no `{{token}}` can name
+    transform: (text) => text.replaceAll(/,?"astro-view-transitions-[a-z]+":\s*"[^"]*"/gu, ''),
+});
+```
+
+It applies to every COMPARED reading of a result — the head projection, the json-ld, the content, the console — so it answers for whatever it is handed; what the page said is still read whole through `meta()`, `canonical()` and the rest. Prefer a `{{token}}` wherever the noise has a shape the grammar already names.
 
 Structured data gets the same treatment — every `ld+json` block on the page, in one golden:
 
