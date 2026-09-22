@@ -10,7 +10,7 @@ What proves a change here: this package specifies itself with itself. The suites
 | Component tests | `specs/component-app/<file>.test.tsx`     | A rendered unit, beside it, in a real Chromium ([07](07-component.md)) |
 | Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts` | The framework's own facets, through the public surface                 |
 | Spec documents  | `specs/cli/literate/*.spec.yaml`          | The document format, collected as test files by `literate()`           |
-| Meta-tests      | `src/lint/*.test.ts`                      | The framework applied to itself and to its own projections             |
+| Meta-tests      | `lint/*.test.ts`                          | The framework applied to itself and to its own projections             |
 
 ## The seven projects
 
@@ -78,11 +78,11 @@ It says nothing about where a METHOD may appear. `.seed()` is used inside jobs'
 Given there and not the subject; a capability earns a folder when it is what
 the specs in it are ABOUT.
 
-The vocabulary is declared in `src/lint/domains.ts` and `domains.test.ts` holds
+The vocabulary is declared in `lint/domains.ts` and `domains.test.ts` holds
 the tree equal to it in both directions — a folder nothing declares fails, and
 a declared name nothing carries fails too.
 
-<!-- GENERATED:domains — do not edit by hand; run `npm run docs`. Source: src/lint/domains.ts -->
+<!-- GENERATED:domains — do not edit by hand; run `npm run docs`. Source: lint/domains.ts -->
 
 | Facet         | Shared domains it carries                                        | Its own                                               |
 | ------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
@@ -104,15 +104,15 @@ The fixture apps the specs drive live in the pool: `app` and `website-app` for t
 
 The package proves itself in five layers, and they are meant to be read from the inside out: a module against its own exports, a rule against its own fixtures, a facet against its own tree, the built binary against a fixture project, and the CORPUS against what a meta-test says it must keep true. Each layer judges something the one below it cannot — and the meta-tests are counted apart rather than folded into the module tests, because what they judge is the one thing a test beside a module cannot see.
 
-<!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: src/lint/matrix.ts -->
+<!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: lint/matrix.ts -->
 
-| Layer                   | Where                                                   | What it judges                                                           | Files |
-| ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 53    |
-| Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
-| The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 66    |
-| The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 87    |
-| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 19    |
+| Layer                   | Where                                               | What it judges                                                           | Files |
+| ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 53    |
+| Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 66    |
+| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 94    |
+| Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 19    |
 
 <!-- /GENERATED:layers -->
 
@@ -177,13 +177,13 @@ missing is the LIST of the ones that do not, and why — a module with real
 behaviour, no sibling test and nobody able to say what covers it is the silence
 this section closes.
 
-`src/lint/siblings.ts` declares the kinds, each naming the PATHS it claims —
+`lint/siblings.ts` declares the kinds, each naming the PATHS it claims —
 never a prefix, because a kind claiming `src/seams/` would claim every module
 written there next year and K7 would be a poster. **K7** fails on a module that
 matches none of them, which is what makes a new, unclaimed module fail the
 suite on the day it lands.
 
-<!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: src/lint/siblings.ts -->
+<!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
 Today **80 modules** have no sibling test, and every one of them is claimed:
 
@@ -215,11 +215,11 @@ which facets declare it, and how many of the package's own test files exercise
 it there.
 
 It is generated by `npm run docs` from the facet declaration
-(`src/lint/facet-matrix.ts`), the `{{token}}` list the runner and the checker
+(`lint/facet-matrix.ts`), the `{{token}}` list the runner and the checker
 already share, and a scan of the trees each column owns. The same table is the
 skill's `references/matrix.md`.
 
-<!-- GENERATED:matrix — do not edit by hand; run `npm run docs`. Source: src/lint/matrix.ts -->
+<!-- GENERATED:matrix — do not edit by hand; run `npm run docs`. Source: lint/matrix.ts -->
 
 What the framework can do, and how many of this package’s own test FILES carry the literal that exercises it, per facet (comments stripped, so a sentence about a capability never counts as a test of it). A blank (`—`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.
 
@@ -369,23 +369,23 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability           | api | jobs | cli | integration | website | mobile | component | module |
 | -------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 11     |
-| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 6      |
-| `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
-| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 9      |
+| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 2      |
+| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 1      |
+| `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 1      |
+| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 3      |
 | `.aria.yaml tree`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 10     |
-| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 14     |
-| `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
+| `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 4      |
+| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 8      |
+| `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 2      |
 
 ### Time & doubles
 
 | Capability    | api | jobs | cli | integration | website | mobile | component | module |
 | ------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 4      |
+| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 2      |
 | `intercept()` | —   | —    | —   | —           | —       | —      | —         | 1      |
-| `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 6      |
-| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 22     |
+| `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 1      |
+| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 7      |
 
 ### Token
 
@@ -429,38 +429,38 @@ Several truths about this package cannot be asserted from outside it, so they ar
 
 The table is GENERATED from the files, because the channel grows faster than a hand-kept list: what a row holds is the file's own `describe` titles, so a meta-test that lands is a row the next `npm run docs` writes.
 
-<!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: src/lint/meta-tests.ts -->
+<!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/meta-tests.ts -->
 
-**20 files** are the channel — every `*.test.ts` directly under `src/lint/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**20 files** are the channel — every `*.test.ts` directly under `lint/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                   | Holds                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Tests |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| `src/lint/ast.test.ts`                      | specsAnchor                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 7     |
-| `src/lint/cards.test.ts`                    | signature cards — generation freshness (meta-test) · signature cards — completeness against the facet declaration (meta-test) · the skill routes to the cards (meta-test) · signature cards — what a card says                                                                                                                                                                                                                                                                                       | 15    |
-| `src/lint/checker-crossfile.test.ts`        | checker suppression — suppressedLines (checker-disable comments)                                                                                                                                                                                                                                                                                                                                                                                                                                     | 9     |
-| `src/lint/checker-member.test.ts`           | the member pass — what a workspace member owes                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 18    |
-| `src/lint/checker-migration.test.ts`        | the 16 → 17 mover (C13 --fix)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3     |
-| `src/lint/checker-spec.test.ts`             | fixSpecDocument — key order and block scalars                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5     |
-| `src/lint/checker.test.ts`                  | conventions checker — findUnknownTokens (D4) · conventions checker — findKnownTokens (D10) · conventions checker — checkConventionFiles (D4)                                                                                                                                                                                                                                                                                                                                                         | 8     |
-| `src/lint/coverage.test.ts`                 | the coverage ratchet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 8     |
-| `src/lint/docs-typecheck.test.ts`           | docs-typecheck — block selection · docs-typecheck — the published samples typecheck · docs-typecheck — the corpus does not await a sync matcher · docs-typecheck — harness                                                                                                                                                                                                                                                                                                                           | 6     |
-| `src/lint/domains.test.ts`                  | the spec tree’s domain vocabulary                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 4     |
-| `src/lint/env-allowlist.test.ts`            | framework env reads — e1-env-allowlist (meta-test)                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 4     |
-| `src/lint/facet-matrix.test.ts`             | facet capability declaration (K1 guard)                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 6     |
-| `src/lint/matrix.test.ts`                   | capability matrix (meta-test K6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 5     |
-| `src/lint/meta-tests.test.ts`               | the meta-test channel, read off its own files                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3     |
-| `src/lint/oxlint-pin.test.ts`               | the oxlint pin — the toolchain owns it and this manifest mirrors it                                                                                                                                                                                                                                                                                                                                                                                                                                  | 2     |
-| `src/lint/package-exports.test.ts`          | package-exports — F1 reads the published contract · package-exports — the root has two runtimes and one type surface · package-exports — the tarball carries what a message points at                                                                                                                                                                                                                                                                                                                | 8     |
-| `src/lint/plugin.test.ts`                   | the composable fragment — what a consumer wires · the upstream options this vocabulary owns (ADR-005) · conventions catalogue — generation freshness (meta-test) · conventions catalogue — completeness (meta-test) · testing fragment — standalone oxlint config · conventions catalogue — the channels answer for themselves (meta-test) · conventions catalogue — E2E inventory (meta-test) · the corpus’ own coordinates (meta-test K8) · the corpus never offers an option the rulebook refuses | 34    |
-| `src/lint/role.test.ts`                     | roleOf — the kind a path states · isTestRole — the three kinds that DECLARE tests · isTestFile — what the test conventions reach                                                                                                                                                                                                                                                                                                                                                                     | 14    |
-| `src/lint/siblings.test.ts`                 | modules with no sibling test (meta-test K7)                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 4     |
+| `lint/ast.test.ts`                          | specsAnchor                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 7     |
+| `lint/cards.test.ts`                        | signature cards — generation freshness (meta-test) · signature cards — completeness against the facet declaration (meta-test) · the skill routes to the cards (meta-test) · signature cards — what a card says                                                                                                                                                                                                                                                                                       | 15    |
+| `lint/checker-crossfile.test.ts`            | checker suppression — suppressedLines (checker-disable comments)                                                                                                                                                                                                                                                                                                                                                                                                                                     | 9     |
+| `lint/checker-member.test.ts`               | the member pass — what a workspace member owes                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 18    |
+| `lint/checker-migration.test.ts`            | the 16 → 17 mover (C13 --fix)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3     |
+| `lint/checker-spec.test.ts`                 | fixSpecDocument — key order and block scalars                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5     |
+| `lint/checker.test.ts`                      | conventions checker — findUnknownTokens (D4) · conventions checker — findKnownTokens (D10) · conventions checker — checkConventionFiles (D4)                                                                                                                                                                                                                                                                                                                                                         | 8     |
+| `lint/coverage.test.ts`                     | the coverage ratchet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 8     |
+| `lint/docs-typecheck.test.ts`               | docs-typecheck — block selection · docs-typecheck — the published samples typecheck · docs-typecheck — the corpus does not await a sync matcher · docs-typecheck — harness                                                                                                                                                                                                                                                                                                                           | 6     |
+| `lint/domains.test.ts`                      | the spec tree’s domain vocabulary                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 4     |
+| `lint/env-allowlist.test.ts`                | framework env reads — e1-env-allowlist (meta-test)                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 4     |
+| `lint/facet-matrix.test.ts`                 | facet capability declaration (K1 guard)                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 6     |
+| `lint/matrix.test.ts`                       | capability matrix (meta-test K6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 5     |
+| `lint/meta-tests.test.ts`                   | the meta-test channel, read off its own files                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3     |
+| `lint/oxlint-pin.test.ts`                   | the oxlint pin — the toolchain owns it and this manifest mirrors it                                                                                                                                                                                                                                                                                                                                                                                                                                  | 2     |
+| `lint/package-exports.test.ts`              | package-exports — F1 reads the published contract · package-exports — the root has two runtimes and one type surface · package-exports — the tarball carries what a message points at                                                                                                                                                                                                                                                                                                                | 8     |
+| `lint/plugin.test.ts`                       | the composable fragment — what a consumer wires · the upstream options this vocabulary owns (ADR-005) · conventions catalogue — generation freshness (meta-test) · conventions catalogue — completeness (meta-test) · testing fragment — standalone oxlint config · conventions catalogue — the channels answer for themselves (meta-test) · conventions catalogue — E2E inventory (meta-test) · the corpus’ own coordinates (meta-test K8) · the corpus never offers an option the rulebook refuses | 34    |
+| `lint/role.test.ts`                         | roleOf — the kind a path states · isTestRole — the three kinds that DECLARE tests · isTestFile — what the test conventions reach                                                                                                                                                                                                                                                                                                                                                                     | 14    |
+| `lint/siblings.test.ts`                     | modules with no sibling test (meta-test K7)                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 4     |
 | `specs/lint/meta/k4-reach-per-path.test.ts` | lint — k4-reach-per-path (meta-test)                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 4     |
 
 <!-- /GENERATED:meta-tests -->
 
 One proof of the channel declares no test and appears in no row: `src/type-channel.test-d.ts` states what the COMPILER refuses — A8, A11, B1, B2, B3, D1, M2, W6 — as an `@ts-expect-error` per row, and `typescript check` fails the day the line it marks starts compiling. It runs under the typechecker the whole repository already runs, never under a vitest project.
 
-`src/lint/plugin.test.ts` also holds the seven-channel contract: every row of
+`lint/plugin.test.ts` also holds the seven-channel contract: every row of
 every channel carries the proof that channel can give — a rule file and a
 fixture pair, an assertion on a resolved upstream option, a bundled checker
 pass, a `// RUNTIME <ID>` marker above the spec that drives the refusal, a line

@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — Mobile specs
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [09-mobile.md](../../../docs/09-mobile.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [09-mobile.md](../../../docs/09-mobile.md).
 
 **Specifies** — Given this backend and this visitor, what does the native app draw, and how does the screen read?
 

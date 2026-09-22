@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — CLI specs
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [12-cli.md](../../../docs/12-cli.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [12-cli.md](../../../docs/12-cli.md).
 
 **Specifies** — Given this file tree, this environment and this argv, what does the binary print, exit with, and leave on disk?
 

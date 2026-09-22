@@ -150,23 +150,23 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability           | api | jobs | cli | integration | website | mobile | component | module |
 | -------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 11     |
-| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 6      |
-| `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
-| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 9      |
+| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 2      |
+| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 1      |
+| `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 1      |
+| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 3      |
 | `.aria.yaml tree`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 10     |
-| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 14     |
-| `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
+| `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 4      |
+| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 8      |
+| `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 2      |
 
 ### Time & doubles
 
 | Capability    | api | jobs | cli | integration | website | mobile | component | module |
 | ------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 4      |
+| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 2      |
 | `intercept()` | —   | —    | —   | —           | —       | —      | —         | 1      |
-| `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 6      |
-| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 22     |
+| `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 1      |
+| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 7      |
 
 ### Token
 

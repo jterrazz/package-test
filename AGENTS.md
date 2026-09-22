@@ -6,7 +6,7 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 
 - **Six constructors, and only six.** `specification.api()`, `.jobs()`, `.cli()`, `.integration()`, `.website()`, `.mobile()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. A seventh subject is a decision before it is a constructor, and `component` is the one facet that is a chain rather than a constructor.
 - **Five trees with declared edges.** `model/` (what every facet is made of, no external imports), `facets/<facet>/` (the same four files in each), `seams/<dep>/` (one folder per dependency), `runner/` (the config side of the runner coupling), `lint/` (no runtime imports). The map is stated as `FRAMEWORK_LAYERS` in `oxlint.config.ts` and enforced from there.
-- **The code owns the rules.** A mechanized rule's normative sentence lives in `src/lint/manifest.ts` beside its implementation, and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
+- **The code owns the rules.** A mechanized rule's normative sentence lives in `lint/manifest.ts` beside its implementation, and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
 - **The package specifies itself with itself.** `specs/` is written with `@jterrazz/test` against fixture apps, and a family of meta-tests runs the framework on its own output.
 - **The build precedes the lint.** `oxlint.config.ts` and the lint specs load `./dist/oxlint.js`, so `npm run build` comes first — always.
 
@@ -47,4 +47,4 @@ npx vitest --run --project unit   # the loop, no infrastructure
 - **A discovery grows a guard, in the same change** (rule K1) — a static rule, a meta-test, or a runtime refusal, or an explicit note of why no channel can hold it.
 - **Never edit a generated file.** `docs/reference/`, the catalogue between the `GENERATED:catalog` markers of `docs/19-linting.md`, `skills/jterrazz-test/references/rules.md` and `schema/spec.schema.json` all come from `npm run docs`. A hand edit fails the sync check and the freshness meta-test.
 - **Four things land with the change that makes them true** — the guard, the regenerated projections, the chapter the behaviour falsified, and the skill when the public surface moved. Each is stated once, in `docs/02-developing.md` § What a change owes.
-- **A rule belongs in the code, a principle in the constitution.** `src/lint/manifest.ts` for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.
+- **A rule belongs in the code, a principle in the constitution.** `lint/manifest.ts` for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.

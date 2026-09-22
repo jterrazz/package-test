@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — Jobs specs
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [11-jobs.md](../../../docs/11-jobs.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [11-jobs.md](../../../docs/11-jobs.md).
 
 **Specifies** — When this name is triggered, what does the pipeline do to the world it was handed?
 

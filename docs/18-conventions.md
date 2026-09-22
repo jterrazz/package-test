@@ -2,7 +2,7 @@
 
 This chapter is the **constitution**: the principles, the non-mechanizable criteria, and the design rationales behind the conventions. It is hand-maintained and stable.
 
-The **mechanized per-rule catalogue** does not live here — it is **generated from the code** (`src/lint/manifest.ts`, where each rule carries its own normative text) into the [19 — Linting](19-linting.md) catalogue and the agent-facing [`skills/jterrazz-test/references/rules.md`](../skills/jterrazz-test/references/rules.md).
+The **mechanized per-rule catalogue** does not live here — it is **generated from the code** (`lint/manifest.ts`, where each rule carries its own normative text) into the [19 — Linting](19-linting.md) catalogue and the agent-facing [`skills/jterrazz-test/references/rules.md`](../skills/jterrazz-test/references/rules.md).
 
 This is the **docs-as-code inversion**: the code is the source of truth for the mechanized rules (a rule and its normative text live together, so they cannot drift), and this constitution is the source of truth for the principles. There is **no duplication** — a machine-checkable rule is written once, in the code. The broader repo-layout doctrine this follows — a written corpus, thin injection layers, a compiler that projects; committed projections against CI-built presentations — is `jterrazz-studio`'s repo-structure chapter, its canonical home for every language.
 
@@ -143,7 +143,7 @@ Every other use is converted to a full snapshot. A single "kitchen-sink" project
 
 ### K1 — retro-propagation
 
-Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its rule joins `src/lint/manifest.ts` and the catalogue regenerates.
+Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its rule joins `lint/manifest.ts` and the catalogue regenerates.
 
 ## The naming recap
 
@@ -180,9 +180,9 @@ Family I governs the source tree rather than the spec tree, and it splits in two
 
 ## The fork — which kind of test this is
 
-The questions are asked IN ORDER, and the first yes is the kind. The answer fixes the folder, the constructor (or none), and the project. The table is generated from `src/lint/cards.ts`, where the signature cards read the same rows.
+The questions are asked IN ORDER, and the first yes is the kind. The answer fixes the folder, the constructor (or none), and the project. The table is generated from `lint/cards.ts`, where the signature cards read the same rows.
 
-<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: src/lint/cards.ts -->
+<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/cards.ts -->
 
 | Question                                                               | Kind             | Lives at                                      | Constructor                   | Project       |
 | ---------------------------------------------------------------------- | ---------------- | --------------------------------------------- | ----------------------------- | ------------- |
@@ -317,14 +317,14 @@ takes of them anyway, so neither side is silently dropped.
 
 ## Maintaining the constitution
 
-- A new **mechanizable** rule is added to the **code** (`src/lint/manifest.ts` + its implementation), not here — then `npm run docs` regenerates the catalogue. The freshness meta-test fails if the committed catalogue is no longer byte-identical.
+- A new **mechanizable** rule is added to the **code** (`lint/manifest.ts` + its implementation), not here — then `npm run docs` regenerates the catalogue. The freshness meta-test fails if the committed catalogue is no longer byte-identical.
 - A new **principle** or a non-mechanizable criterion is added here, in its family section or as a process rule.
 - Never duplicate a mechanized rule in this constitution: the code is its single source of truth.
 
 ## Pitfalls
 
 - **Treating these docs as the spec.** They explain and illustrate; this constitution and the generated catalogue ([19 — Linting](19-linting.md)) decide. When you find a discrepancy in the docs, fix the docs in the same change — [02 — Developing](02-developing.md) § What a change owes.
-- **Editing the generated catalogue by hand.** The [19 — Linting](19-linting.md) catalogue and `skills/jterrazz-test/references/rules.md` are GENERATED from `src/lint/manifest.ts` — a hand edit is overwritten by the next `npm run docs` and fails the freshness meta-test. Change the rule's text in the code; regenerate.
+- **Editing the generated catalogue by hand.** The [19 — Linting](19-linting.md) catalogue and `skills/jterrazz-test/references/rules.md` are GENERATED from `lint/manifest.ts` — a hand edit is overwritten by the next `npm run docs` and fails the freshness meta-test. Change the rule's text in the code; regenerate.
 - **Adding a mechanized rule to the constitution.** A machine-checkable rule lives in the code (its `meta.docs` / the manifest), not in this chapter. The constitution holds principles and non-mechanizable criteria only.
 
 ## Related

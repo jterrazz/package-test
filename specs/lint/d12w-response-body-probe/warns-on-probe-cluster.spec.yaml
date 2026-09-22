@@ -1,0 +1,7 @@
+description: a cluster of raw body probes in one test is a warning, and the run still passes
+fixture: ./fixtures/probe-cluster/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/api/events/events.test.ts:3:1  jterrazz(d12w-response-body-probe)

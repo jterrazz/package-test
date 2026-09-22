@@ -1,7 +1,7 @@
 import { compose, defineConfig, library } from '@jterrazz/typescript/oxlint';
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
-// Self-lint with our own plugin (the tool-facing lint layer under src/lint/),
+// Self-lint with our own plugin (the tool-facing lint layer at the root, lint/),
 // Loaded from the built bundle. Node's TS type-stripping does not resolve
 // `.js` specifiers to `.ts` sources, so `npm run build` must precede lint.
 import { testing } from './dist/oxlint.js';
@@ -176,7 +176,7 @@ const config: OxlintConfig = defineConfig(
                 // The framework's own module tests unit-test the constructors —
                 // Creating a runner outside a *.specification.ts file is their
                 // Purpose.
-                files: ['src/**/*.test.ts'],
+                files: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
                 rules: { 'jterrazz/a1-specification-file': 'off' },
             },
             {

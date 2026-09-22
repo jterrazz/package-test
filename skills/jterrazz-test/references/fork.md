@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — the fork
 
-> Generated from `src/lint/cards.ts` by `npm run docs`. Ask the questions IN ORDER; the first yes is the kind. The constitution is [18 — Conventions](../../../docs/18-conventions.md).
+> Generated from `lint/cards.ts` by `npm run docs`. Ask the questions IN ORDER; the first yes is the kind. The constitution is [18 — Conventions](../../../docs/18-conventions.md).
 
 | Question                                                               | Kind             | Lives at                                      | Constructor                   | Project       |
 | ---------------------------------------------------------------------- | ---------------- | --------------------------------------------- | ----------------------------- | ------------- |

@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — Component specs
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [07-component.md](../../../docs/07-component.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [07-component.md](../../../docs/07-component.md).
 
 **Specifies** — Given this network and this parent, what does the component put on the screen, and what does it report back?
 

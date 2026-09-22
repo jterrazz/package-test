@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — rule reference
 
-> Generated from `src/lint/manifest.ts` by `npm run docs` — every mechanized convention across the seven enforcement channels (statique · upstream · checker · runtime · type · meta · process). Rule ids are stable: cite them in suppressions and reviews. Narrative lives in `docs/18-conventions.md` (the constitution) and `docs/19-linting.md` (the static plugin + checker).
+> Generated from `lint/manifest.ts` by `npm run docs` — every mechanized convention across the seven enforcement channels (statique · upstream · checker · runtime · type · meta · process). Rule ids are stable: cite them in suppressions and reviews. Narrative lives in `docs/18-conventions.md` (the constitution) and `docs/19-linting.md` (the static plugin + checker).
 
 ## model — every facet, whichever constructor you reach for
 

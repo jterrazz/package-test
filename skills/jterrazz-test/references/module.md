@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — Module tests
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [05-module-tests.md](../../../docs/05-module-tests.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [05-module-tests.md](../../../docs/05-module-tests.md).
 
 **Specifies** — Given these inputs and these ports, what does this module return, and what does it ask of its collaborators?
 

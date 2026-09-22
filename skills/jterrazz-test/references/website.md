@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — Website specs
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [08-website.md](../../../docs/08-website.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [08-website.md](../../../docs/08-website.md).
 
 **Specifies** — Given this backend and this visitor, what does the served site show, and what does it report to the console?
 

@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — API specs
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [10-api.md](../../../docs/10-api.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [10-api.md](../../../docs/10-api.md).
 
 **Specifies** — Given this state and this request, what does the HTTP app answer, and what does it leave behind?
 

@@ -1,0 +1,5 @@
+description: a single scalpel probe below the threshold stays silent
+fixture: ./fixtures/one-probe/
+runs:
+    - command: .
+      exit: 0

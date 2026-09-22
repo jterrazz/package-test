@@ -2,7 +2,7 @@
 
 # `@jterrazz/test` — Integration specs
 
-> Generated from `src/lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [06-integration.md](../../../docs/06-integration.md).
+> Generated from `lint/cards.ts` and the facet declaration by `npm run docs`. The chapter is [06-integration.md](../../../docs/06-integration.md).
 
 **Specifies** — Given real services or a golden oracle, what does this module return, and what does it write?
 

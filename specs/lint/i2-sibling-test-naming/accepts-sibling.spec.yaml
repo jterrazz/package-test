@@ -1,0 +1,5 @@
+description: a module test beside the module it covers passes
+fixture: ./fixtures/sibling/
+runs:
+    - command: .
+      exit: 0

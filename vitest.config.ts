@@ -7,6 +7,7 @@ import {
     defineSpecConfig,
     integration,
     jobs,
+    literate,
     unit,
     website,
 } from './src/runner/index.js';
@@ -27,10 +28,21 @@ export default defineSpecConfig({
             // Binary, so it needs `npm run build` (dist/oxlint.js) and it runs
             // Where the modules run. `unit()`'s include and exclude guard each
             // Other, so stating one states both.
-            unit({
-                exclude: [],
-                include: ['src/**/*.test.ts', 'specs/lint/**/*.test.ts'],
-            }),
+            // A lint rule's documents (`specs/lint/<rule>/<case>.spec.yaml`) are
+            // Collected here too, bound to the one runner whose normalised
+            // Report they golden.
+            {
+                ...unit({
+                    exclude: [],
+                    include: ['src/**/*.test.ts', 'lint/**/*.test.ts', 'specs/lint/**/*.test.ts'],
+                }),
+                plugins: [
+                    literate({
+                        include: ['specs/lint/*/*.spec.yaml'],
+                        specification: './specs/lint/report.specification.ts',
+                    }),
+                ],
+            },
             // The cli helper wires the literate door: the package's documents
             // Are collected as TEST FILES by the project that owns the facet.
             // The glob stops at depth 1 so the deliberately-wrong twins under

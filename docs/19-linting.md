@@ -54,7 +54,7 @@ A rule that takes options is declared, not suppressed — an `off` loses the che
 - Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. If you don't compose `testing`, no `jterrazz/*` rule runs. When and how `typescript check` decides to RUN the checker is the toolchain's, not this chapter's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 - Rules are individually addressable as `jterrazz/<rule-id>` if you want to deviate — prefer scoped `overrides` with a comment over global downgrades.
 - `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rule F2 — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. F1 and F3 exempt every subpath the package's `exports` map publishes, this one among them.
-- **The oxlint version is the toolchain's to pin.** `@jterrazz/typescript` owns the range every profile runs the binary at; a repository whose own code imports oxlint — this one does, from every rule test, through `oxlint/plugins-dev` — declares `oxlint` in its `devDependencies` at exactly that range, so the line here MIRRORS the pin instead of holding a second opinion about it and a plain `npm ci` hoists one oxlint rather than two. `src/lint/oxlint-pin.test.ts` fails the day the two diverge.
+- **The oxlint version is the toolchain's to pin.** `@jterrazz/typescript` owns the range every profile runs the binary at; a repository whose own code imports oxlint — this one does, from every rule test, through `oxlint/plugins-dev` — declares `oxlint` in its `devDependencies` at exactly that range, so the line here MIRRORS the pin instead of holding a second opinion about it and a plain `npm ci` hoists one oxlint rather than two. `lint/oxlint-pin.test.ts` fails the day the two diverge.
 
 ### Standalone — without `@jterrazz/typescript`
 
@@ -87,11 +87,11 @@ One behaviour does not carry over, and nothing restores it. `prefer-lowercase-ti
 
 ## The rule catalogue
 
-The catalogue below is **generated** from `src/lint/manifest.ts` (each rule carries its normative text as `meta.docs`) — do not edit it by hand; run `npm run docs`. It is the **full seven-channel catalogue** (statique, upstream, checker, runtime, type, meta, process), grouped by convention family. The same set, trimmed to what an agent needs to apply and cite a rule, is regenerated alongside it into [`skills/jterrazz-test/references/rules.md`](../skills/jterrazz-test/references/rules.md).
+The catalogue below is **generated** from `lint/manifest.ts` (each rule carries its normative text as `meta.docs`) — do not edit it by hand; run `npm run docs`. It is the **full seven-channel catalogue** (statique, upstream, checker, runtime, type, meta, process), grouped by convention family. The same set, trimmed to what an agent needs to apply and cite a rule, is regenerated alongside it into [`skills/jterrazz-test/references/rules.md`](../skills/jterrazz-test/references/rules.md).
 
-One convention code may carry more than one ROW, when one convention is held over two shapes: `d5-spec-volatile-literal` and `d5w-spec-pinned-value` are D5's two halves, and `c12-spec-file-name` is one row with two clauses on two runs. A finding is published as `jterrazz-check(<code>)`, where the code is the id's first segment (`src/lint/rule-code.ts`) — so a ratchet key names a convention, never a pass, and one defect is one line of debt.
+One convention code may carry more than one ROW, when one convention is held over two shapes: `d5-spec-volatile-literal` and `d5w-spec-pinned-value` are D5's two halves, and `c12-spec-file-name` is one row with two clauses on two runs. A finding is published as `jterrazz-check(<code>)`, where the code is the id's first segment (`lint/rule-code.ts`) — so a ratchet key names a convention, never a pass, and one defect is one line of debt.
 
-Seven columns. **Code** and **Implementation** are the two names a rule answers to — the convention id you cite in a review, and the rule id you address in a config; the Implementation cell also carries the row's anchor, so a rule MESSAGE ending in `docs/19-linting.md#<rule-id>` lands on the row. **Channel** is which of the seven enforces it. **Reach** is which files it looks at, in the vocabulary of `roleOf` (`src/lint/role.ts`): `module` a `*.test.ts`, `component` a `*.test.tsx`, `specification` a `*.specification.ts`, `config` a `vitest.config.*`, `ground` a `fixtures`/`expected`/`requests`/`seeds` tree, plus the two shapes that are not a role — `tests` (any file a test conventions bind) and `all`. **Convention** is the normative sentence, **Fix** the one imperative line that resolves it, **Rationale** why the rule exists. A `—` in Reach or Fix is a row that states none.
+Seven columns. **Code** and **Implementation** are the two names a rule answers to — the convention id you cite in a review, and the rule id you address in a config; the Implementation cell also carries the row's anchor, so a rule MESSAGE ending in `docs/19-linting.md#<rule-id>` lands on the row. **Channel** is which of the seven enforces it. **Reach** is which files it looks at, in the vocabulary of `roleOf` (`lint/role.ts`): `module` a `*.test.ts`, `component` a `*.test.tsx`, `specification` a `*.specification.ts`, `config` a `vitest.config.*`, `ground` a `fixtures`/`expected`/`requests`/`seeds` tree, plus the two shapes that are not a role — `tests` (any file a test conventions bind) and `all`. **Convention** is the normative sentence, **Fix** the one imperative line that resolves it, **Rationale** why the rule exists. A `—` in Reach or Fix is a row that states none.
 
 The catalogue is grouped **model first, then one section per facet**, because a
 family is a kind of convention and not an audience: `C — Files & folders` mixes
@@ -100,12 +100,12 @@ adopting one constructor reads `model` — the tree every facet is made of — a
 their own section, and stops. The grouping is the `facet` field of each manifest
 row — required, like `fix` and `reach` — and for a statique rule it is also
 where the implementation sits
-(`src/lint/rules/model/`, `src/lint/rules/api/`, …). The checker's passes carry
+(`lint/rules/model/`, `lint/rules/api/`, …). The checker's passes carry
 the field without the folder: several passes share one module because they share
 one walk of the tree, and splitting the walk to split the file would cost a
 second traversal per pass.
 
-<!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: src/lint/manifest.ts -->
+<!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: lint/manifest.ts -->
 
 Every rule the framework enforces, across its enforcement channels — **statique** — 55 (oxlint rules), **upstream** — 3 (options set on an upstream rule), **checker** — 29 (bundled passes), **runtime** — 13 (execution-time refusals), **type** — 8 (what the compiler refuses), **meta** — 8 (what a meta-test holds), **process** — 3 (review-borne rules) — sourced from one manifest so the code and the catalogue can never drift.
 
@@ -460,16 +460,16 @@ The same binary also runs the analyses oxlint structurally cannot — those that
 
 ## The generated catalogue (docs-as-code)
 
-The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `src/lint/manifest.ts`), and the manifest assembles all seven channels — statique (the oxlint rules), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like D11/K1). A generator (`src/lint/catalog.ts`, bundled as `dist/catalog.js`, chained into `npm run docs` **before** `typescript docs`) renders two committed projections deterministically:
+The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `lint/manifest.ts`), and the manifest assembles all seven channels — statique (the oxlint rules), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like D11/K1). A generator (`lint/catalog.ts`, bundled as `dist/catalog.js`, chained into `npm run docs` **before** `typescript docs`) renders two committed projections deterministically:
 
 - the **full catalogue above**, spliced between GENERATED markers in this file;
 - **[`skills/jterrazz-test/references/rules.md`](../skills/jterrazz-test/references/rules.md)** — the same set, trimmed for agents.
 
-The narrative constitution lives in [18 — Conventions](18-conventions.md): principles, the enforcement channels, non-mechanizable criteria, and design rationales — no per-rule normative lines, so there is no duplication. A meta-test (`src/lint/plugin.test.ts`) guards the contract: **freshness** (re-running the generator reproduces both committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`; every manifest entry maps to a plugin rule, a checker pass, or a documented runtime/process rule), plus the standing E2E inventory (every rule has a `specs/lint/**` spec + fixture pair).
+The narrative constitution lives in [18 — Conventions](18-conventions.md): principles, the enforcement channels, non-mechanizable criteria, and design rationales — no per-rule normative lines, so there is no duplication. A meta-test (`lint/plugin.test.ts`) guards the contract: **freshness** (re-running the generator reproduces both committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`; every manifest entry maps to a plugin rule, a checker pass, or a documented runtime/process rule), plus the standing E2E inventory (every rule has a `specs/lint/**` spec + fixture pair).
 
 ## Doc typechecking (meta-test)
 
-A vitest meta-test (`src/lint/docs-typecheck.ts`) extracts the ` ```typescript ` blocks from `docs/*.md` that import the framework, rewrites `@jterrazz/test` to the repo source, and runs the real `tsc --noEmit` over them — so a sample drifting from the API (a removed `.spawn()`, a renamed accessor) fails CI as a type error. Precision over coverage: only self-contained framework blocks are checked; prose fragments leaning on ambient vitest globals, and blocks importing consumer app code (`createApp`, `../../src/app.js`), are skipped.
+A vitest meta-test (`lint/docs-typecheck.ts`) extracts the ` ```typescript ` blocks from `docs/*.md` that import the framework, rewrites `@jterrazz/test` to the repo source, and runs the real `tsc --noEmit` over them — so a sample drifting from the API (a removed `.spawn()`, a renamed accessor) fails CI as a type error. Precision over coverage: only self-contained framework blocks are checked; prose fragments leaning on ambient vitest globals, and blocks importing consumer app code (`createApp`, `../../src/app.js`), are skipped.
 
 ## Suppressions
 
@@ -496,7 +496,7 @@ The plugin is loaded from the **built bundle**. In this repo `jsPlugins: ['./dis
 
 ## Stability
 
-Oxlint's JS-plugin API is **alpha** (oxlint 1.74): the plugin declares the small structural slice it uses locally (`src/lint/types.ts`) instead of importing oxlint types, so upstream churn surfaces as a compile break in one file, not across the rules. Expect to re-validate the plugin on oxlint majors; the E2E specs (`specs/lint/**`, one violation/compliant fixture pair per rule) run the real binary and are the canary.
+Oxlint's JS-plugin API is **alpha** (oxlint 1.74): the plugin declares the small structural slice it uses locally (`lint/types.ts`) instead of importing oxlint types, so upstream churn surfaces as a compile break in one file, not across the rules. Expect to re-validate the plugin on oxlint majors; the E2E specs (`specs/lint/**`, one violation/compliant fixture pair per rule) run the real binary and are the canary.
 
 ## Pitfalls
 

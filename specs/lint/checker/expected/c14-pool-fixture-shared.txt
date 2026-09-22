@@ -1,3 +1,0 @@
-[error] specs/fixtures/lonely-stub: only widget reaches for this pool fixture — the pool is what SEVERAL leaves share; move it to widget/fixtures/lonely-stub and reference it as './fixtures/lonely-stub/' (C14 — see docs/19-linting.md, or run the checker with --fix)
-
-conventions checker: 1 error(s) found under {{workdir}}

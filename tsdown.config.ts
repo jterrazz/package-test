@@ -23,9 +23,9 @@ export default defineConfig([
         clean: true,
         dts: true,
         entry: {
-            catalog: 'src/lint/catalog-cli.ts',
-            checker: 'src/lint/checker-cli.ts',
-            coverage: 'src/lint/coverage-cli.ts',
+            catalog: 'lint/catalog-cli.ts',
+            checker: 'lint/checker-cli.ts',
+            coverage: 'lint/coverage-cli.ts',
             index: 'src/index.ts',
             vitest: 'src/runner/index.ts',
         },
@@ -53,7 +53,7 @@ export default defineConfig([
         clean: false,
         dts: true,
         entry: {
-            oxlint: 'src/lint/plugin.ts',
+            oxlint: 'lint/plugin.ts',
         },
         format: ['esm', 'cjs'],
         hash: false,

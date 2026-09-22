@@ -3,10 +3,10 @@
     "entry": [
         "src/index.ts",
         "src/runner/index.ts",
-        "src/lint/plugin.ts",
-        "src/lint/checker-cli.ts",
-        "src/lint/catalog-cli.ts",
-        "src/lint/coverage-cli.ts"
+        "lint/plugin.ts",
+        "lint/checker-cli.ts",
+        "lint/catalog-cli.ts",
+        "lint/coverage-cli.ts"
     ],
     "ignore": ["specs/**/{fixtures,expected,seeds,requests}/**", "src/**/{fixtures,expected}/**"],
     // Knip's oxlint plugin reads `oxlint.config.ts` and asks this package to
