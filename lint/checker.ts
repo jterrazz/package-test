@@ -18,6 +18,7 @@ import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import {
     checkDatabaseProperty,
     checkDeadFixtures,
+    checkDiskTargetsExist,
     checkDockerRunnerAwaitUsing,
     checkLocalFixtureReach,
     checkPoolFixtureSharing,
@@ -121,6 +122,7 @@ export const TREE_PASS_IDS = [
     'c20-facet-folder',
     'c21w-ground-owned-by-one',
     'c23-seed-no-clock-read',
+    'c8-disk-target-exists',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
     'd10w-tokens-in-requests',
@@ -496,6 +498,7 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
         ...checkDeadFixtures(rootDir),
         ...checkPoolFixtureSharing(rootDir),
         ...checkLocalFixtureReach(rootDir),
+        ...checkDiskTargetsExist(rootDir),
         ...checkDockerRunnerAwaitUsing(rootDir),
         ...checkDatabaseProperty(rootDir),
     ];

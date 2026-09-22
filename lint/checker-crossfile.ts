@@ -368,7 +368,8 @@ function hasNonLiteralFixtureArg(text: string): boolean {
 
 /**
  * `// checker-disable-next-line <id>[,<id>] -- reason` suppresses the passes
- * named by id (`a7`, `b5`, `c9`, or `*`) on the next non-blank line;
+ * named by id (`a7`, `b5`, `c9`, or `*`) on the next line of code — blank
+ * lines and other comments (another tool's directive) are stepped over;
  * `checker-disable-line` suppresses its own line. Mirrors the oxlint-disable
  * idiom the repo already uses for negative specs.
  */
@@ -387,8 +388,11 @@ export function suppressedLines(text: string, id: string): Set<number> {
         // (`checker-…` → `Checker-…`).
         let match = /checker-disable-next-line\s+(?<ids>.*)$/iu.exec(line);
         if (match !== null && applies(match.groups?.ids ?? '')) {
+            // The next line of CODE: a directive of another tool may stand
+            // Between, since each of them also claims the next line.
             for (let next = index + 1; next < lines.length; next += 1) {
-                if ((lines[next] ?? '').trim().length > 0) {
+                const following = (lines[next] ?? '').trim();
+                if (following.length > 0 && !following.startsWith('//')) {
                     suppressed.add(next + 1);
                     break;
                 }
@@ -931,17 +935,19 @@ type FixtureReference = {
     /** Where the path's literal starts; a document entry points at its line. */
     column: number;
     file: string;
+    /** What the path names: its wrapper, or a document entry's trailing `/`. */
+    kind: 'directory' | 'file';
     line: number;
     path: string;
 };
 
 /** A fixture, named by a wrapper with a plain string argument. */
 const FIXTURE_CALL =
-    /\.fixture\(\s*(?:file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
+    /\.fixture\(\s*(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
 /** The disk, named anywhere: a `file(…)` or `directory(…)` call with a plain string argument. */
 const DISK_CALL =
-    /(?<![.\w])(?:file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
+    /(?<![.\w])(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
 /**
  * Every fixture path a spec file names, with the line it names it on. A
@@ -956,6 +962,7 @@ function collectFixtureReferences(file: string, pattern = FIXTURE_CALL): Fixture
             return parseSpecDocument(readText(file), file).fixtures.map((fixture) => ({
                 column: 1,
                 file,
+                kind: fixture.path.endsWith('/') ? 'directory' : 'file',
                 line: fixture.line,
                 path: fixture.path,
             }));
@@ -967,9 +974,16 @@ function collectFixtureReferences(file: string, pattern = FIXTURE_CALL): Fixture
     const references: FixtureReference[] = [];
     for (const match of text.matchAll(pattern)) {
         const path = match.groups?.path;
-        if (path !== undefined && path.length > 0 && isRelativePath(path)) {
+        // A template with a hole names whatever it is handed: out of static reach.
+        if (path !== undefined && path.length > 0 && isRelativePath(path) && !path.includes('${')) {
             const at = match.index + match[0].lastIndexOf(`${match.groups?.quote ?? ''}${path}`);
-            references.push({ column: columnAt(text, at), file, line: lineAt(text, at), path });
+            references.push({
+                column: columnAt(text, at),
+                file,
+                kind: match.groups?.kind === 'directory' ? 'directory' : 'file',
+                line: lineAt(text, at),
+                path,
+            });
         }
     }
     return references;
@@ -1127,6 +1141,56 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
                     line,
                     message: `"${path}" leaves ${relative(rootDir, leaf)} — a leaf's ground sits beside it; ground several leaves share goes to the pool at ${relative(rootDir, pool)}`,
                     rule: 'c15',
+                    severity: 'error',
+                });
+            }
+        }
+    }
+    return violations;
+}
+
+/** What a path names on disk, if anything. */
+function entryKind(path: string): 'directory' | 'file' | undefined {
+    try {
+        return statSync(path).isDirectory() ? 'directory' : 'file';
+    } catch {
+        return undefined;
+    }
+}
+
+/**
+ * CONVENTIONS C8 — every path a spec names exists, as what it says it is.
+ *
+ * A `file()` or `directory()` with a literal path, and a document's `fixture:`,
+ * resolved from the spec's own directory: a path that names nothing, a
+ * `file()` naming a directory, or a `directory()` naming a file is reported at
+ * the path. The catch is the typo that would only fail a run — a test later,
+ * far from the line that made it.
+ */
+export function checkDiskTargetsExist(rootDir: string): TokenViolation[] {
+    const violations: TokenViolation[] = [];
+    for (const specsRoot of findSpecsRoots(rootDir)) {
+        const pool = join(specsRoot, GROUND_FIXTURES);
+        for (const file of listReferrers(specsRoot, pool)) {
+            const suppressed = file.endsWith(SPEC_EXTENSION)
+                ? new Set<number>()
+                : suppressedLines(readText(file), 'c8');
+            for (const { column, kind, line, path } of collectFixtureReferences(file, DISK_CALL)) {
+                const target = resolve(dirname(file), path);
+                const found = entryKind(target);
+                if (found === kind || suppressed.has(line)) {
+                    continue;
+                }
+                const spelled = found === 'directory' ? `${path}/` : path.replace(/\/+$/u, '');
+                violations.push({
+                    column,
+                    file: relative(rootDir, file),
+                    line,
+                    message:
+                        found === undefined
+                            ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} does not exist`
+                            : `${kind}('${path}') names a ${found} — write ${found}('${spelled}')`,
+                    rule: 'c8-disk-target-exists',
                     severity: 'error',
                 });
             }

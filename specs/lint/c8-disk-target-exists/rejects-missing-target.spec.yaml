@@ -1,0 +1,8 @@
+description: a path that names nothing, or names a directory as a file, is refused where it is written
+fixture: ./fixtures/missing/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/cli/build/build.spec.ts:8:48  jterrazz-check(c8)
+          specs/cli/build/build.spec.ts:12:40  jterrazz-check(c8)

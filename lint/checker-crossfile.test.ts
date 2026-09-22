@@ -20,6 +20,18 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([3]));
     });
 
+    test("disable-next-line steps over another tool's directive to the line of code", () => {
+        // Given - a checker directive above an oxlint one, both claiming the next line
+        const text = [
+            '// checker-disable-next-line c8 -- reason',
+            '// oxlint-disable-next-line jterrazz/c6-tomatch-extension -- reason',
+            "expect(out).toMatch(file('./expected/help'));",
+        ].join('\n');
+
+        // Then - the statement is the suppressed line, not the second directive
+        expect(suppressedLines(text, 'c8')).toStrictEqual(new Set([3]));
+    });
+
     test('disable-line suppresses its OWN line', () => {
         // Given - a same-line directive
         const text = ['const a = 1;', 'api.seed("x.sql"); // checker-disable-line a7'].join('\n');

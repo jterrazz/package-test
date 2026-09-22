@@ -8,6 +8,7 @@ import {
     yamlSyntaxErrors,
 } from '../../seams/yaml/document.js';
 import type { Node, Pair, YAMLMap, YamlSource } from '../../seams/yaml/document.js';
+import { GROUND_FIXTURES } from '../chain/ground.js';
 import { isRelativePath } from '../chain/spec-path.js';
 
 /**
@@ -288,6 +289,13 @@ function readFixtures(context: Context, node: Node | null): SpecFixture[] {
                 context.fileName,
                 line,
                 `fixture: "${value}" is not a relative path — name it from this document (./… or ../…)`,
+            );
+        }
+        if (!value.split('/').includes(GROUND_FIXTURES)) {
+            throw new SpecSyntaxError(
+                context.fileName,
+                line,
+                `fixture: "${value}" reaches no ${GROUND_FIXTURES}/ folder — file state lives in ./${GROUND_FIXTURES}/ beside the document, or in the pool (C24)`,
             );
         }
         return { line, path: value };

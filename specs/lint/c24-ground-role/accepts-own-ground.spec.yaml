@@ -1,0 +1,5 @@
+description: each verb reading the ground folder named for it passes
+fixture: ./fixtures/own/
+runs:
+    - command: .
+      exit: 0

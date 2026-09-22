@@ -124,7 +124,7 @@ describe('request errors', () => {
     test('throws on nonexistent request file', async () => {
         // Given - reference to a nonexistent .http file
         // Then - the chain rejects with ENOENT
-        // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing file IS the behaviour under test
+        // checker-disable-next-line c8 -- negative spec: the missing file IS the behaviour under test
         await expect(api.request(file('./requests/nonexistent.http'))).rejects.toThrow('ENOENT');
     });
 });

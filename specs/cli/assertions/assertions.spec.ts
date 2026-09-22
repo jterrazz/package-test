@@ -134,7 +134,7 @@ describe('command — stdout accessor', () => {
 
         // Then - the failure explains how to create the fixture frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
         expect(() => {
-            // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
+            // checker-disable-next-line c8 -- negative spec: the missing fixture IS the behaviour under test
             expect(result.stdout).toMatch(file('./expected/never-created.txt'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
@@ -165,7 +165,8 @@ describe('command — stdout accessor', () => {
 
         // Then - the matcher enforces CONVENTIONS C6 frozen - a negative assertion; keep it update-safe alongside the rest of the sweep
         expect(() => {
-            // oxlint-disable-next-line jterrazz/c6-tomatch-extension, jterrazz/c8-referenced-fixture-exists -- negative spec: the missing extension IS the behaviour under test
+            // checker-disable-next-line c8 -- negative spec: the golden with no extension exists nowhere, and that IS the behaviour under test
+            // oxlint-disable-next-line jterrazz/c6-tomatch-extension -- negative spec: the missing extension IS the behaviour under test
             expect(result.stdout).toMatch(file('./expected/no-extension'), { frozen: true });
         }).toThrow(/extension is part of the path/u);
     });
@@ -536,7 +537,7 @@ describe('command — fixture tree layering', () => {
 
     test('a directory named by file() is refused with the form to write', async () => {
         // Given - the shared cli-app project named as if it were one file
-        // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: a directory named by file() IS the behaviour under test
+        // checker-disable-next-line c8 -- negative spec: a directory named by file() IS the behaviour under test
         const run = cli.fixture(file('../../fixtures/cli-app')).exec('help');
 
         // Then - the path states the kind, so the wrong one is refused rather than guessed

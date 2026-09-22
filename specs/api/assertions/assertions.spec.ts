@@ -59,7 +59,7 @@ describe('api assertion details', () => {
 
         // Then - clear error pointing at TEST_UPDATE frozen - the missing fixture is the behaviour under test; under TEST_UPDATE it must still throw "does not exist" rather than be spuriously created
         expect(() => {
-            // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
+            // checker-disable-next-line c8 -- negative spec: the missing fixture IS the behaviour under test
             expect(result.response).toMatch(file('./expected/nonexistent.http'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });

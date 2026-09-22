@@ -25,7 +25,7 @@
         "jterrazz/c4-contract-shape": "error",
         "jterrazz/c6-tomatch-extension": "error",
         "jterrazz/c7-seeds-sql-only": "error",
-        "jterrazz/c8-referenced-fixture-exists": "error",
+        "jterrazz/c24-ground-role": "error",
         "jterrazz/d12w-response-body-probe": "warn",
         "jterrazz/d13w-unfrozen-negative-fixture": "warn",
         "jterrazz/d15w-status-only-probe": "warn",

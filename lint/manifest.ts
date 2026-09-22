@@ -312,16 +312,16 @@ export const RULE_DOCS = {
         rationale: '`.seed()` carries database state only — no seed handlers, no prefix dispatch.',
         reach: 'ground',
     },
-    'c8-referenced-fixture-exists': {
+    'c24-ground-role': {
         channel: 'statique',
         convention:
-            "A path literal a `file()` or `directory()` names must be an entry that exists, of the kind the wrapper names, resolved from the spec file's directory; a missing path is an error.",
+            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The first ground folder a literal path passes through is the one judged; a document's `fixture:` is held by its grammar.",
         facet: 'model',
         family: 'C',
-        fix: 'Create the file, or fix the name — the message prints the path it looked for.',
-        id: 'C8',
+        fix: 'Move the file into the folder its verb reads, and spell the path through it.',
+        id: 'C24',
         rationale:
-            'Catching a typo statically avoids a failure that would only surface at run time.',
+            'Four reserved names are a vocabulary only if each means one thing: a seed parked in `fixtures/` or a golden in `requests/` makes the folder lie about what it holds, and the next reader trusts the folder.',
         reach: 'tests',
     },
     'd16-sampled-oracle': {
@@ -1086,7 +1086,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A path leaves its leaf only into the pool: a path a file verb or a document's `fixture:` names, whose target is neither under the spec's own directory nor under `<specs>/fixtures/`, is an error — ground shared by several leaves goes in the pool.",
+            "A path leaves its leaf only into the pool: a path a `file()`, a `directory()` or a document's `fixture:` names, whose target is neither under the spec's own directory nor under `<specs>/fixtures/`, is an error — ground shared by several leaves goes in the pool. A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too.",
         facet: 'model',
         family: 'C',
         fix: "Copy it under this leaf's own ground, or promote it to the pool at `specs/fixtures/`.",
@@ -1094,6 +1094,19 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         name: 'c15-local-fixture-reach',
         rationale:
             "A leaf reaching into a neighbour's fixtures is the pool through another door, without the pool's visibility: the neighbour breaks a spec two folders away without knowing.",
+        reach: 'ground',
+    },
+    {
+        channel: 'checker',
+        convention:
+            "Every `file()` and `directory()` a spec names with a literal path — and every `fixture:` of a document — names an entry that exists, of the kind the wrapper says, resolved from the spec file's directory: a missing path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. A computed path is out of reach, and the runtime refuses it with the path it resolved to.",
+        facet: 'model',
+        family: 'C',
+        fix: 'Create the entry, or fix the path — the message names what it resolved to.',
+        id: 'C8',
+        name: 'c8-disk-target-exists',
+        rationale:
+            'A typo in a path fails a run, a test later, far from the line that made it; statically it is one report line at the path.',
         reach: 'ground',
     },
     {

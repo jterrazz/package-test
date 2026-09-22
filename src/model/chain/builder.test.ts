@@ -290,7 +290,9 @@ describe('builder — sql seed targeting', () => {
         });
 
         // Then - the error names the missing key and enumerates the record
-        await expect(cli.seed(file('./x.sql'), { database: 'ghost' }).exec('run')).rejects.toThrow(
+        await expect(
+            cli.seed(file('./seeds/x.sql'), { database: 'ghost' }).exec('run'),
+        ).rejects.toThrow(
             'seed() targets database "ghost" but it was not found. Available: analytics, db',
         );
     });
@@ -303,7 +305,7 @@ describe('builder — sql seed targeting', () => {
         });
 
         // Then - a bare SQL seed is rejected until it names its target database
-        expect(() => cli.seed(file('./users.sql'))).toThrow('2 databases are declared');
+        expect(() => cli.seed(file('./seeds/users.sql'))).toThrow('2 databases are declared');
     });
 });
 
@@ -417,16 +419,19 @@ describe('builder — a string is a value, and the disk is file() or directory()
     });
 
     test('a directory spreads and a file copies, and each refuses the other on disk', async () => {
-        // Given - this very directory, and a real file beside this test
+        // Given - a directory and a file this test stands on
         const cli = createCliFacet({ command: new FakeCommandAdapter() });
-        const run = cli.fixture(directory('../chain/')).fixture(file('./builder.ts')).exec('go');
+        const run = cli
+            .fixture(directory('./fixtures/shop/'))
+            .fixture(file('./fixtures/config.json'))
+            .exec('go');
 
-        // Then - both copy; a file named as a directory is refused with the resolved kind
+        // Then - both copy; each named as the other is refused with the kind on disk
         await expect(run).resolves.toBeDefined();
-        await expect(cli.fixture(directory('./builder.ts/')).exec('go')).rejects.toThrow(
+        await expect(cli.fixture(directory('./fixtures/config.json/')).exec('go')).rejects.toThrow(
             /names a file — a path ending in \/ is a directory/u,
         );
-        await expect(cli.fixture(file('../chain')).exec('go')).rejects.toThrow(
+        await expect(cli.fixture(file('./fixtures/shop')).exec('go')).rejects.toThrow(
             /names a directory — end its path in \//u,
         );
     });

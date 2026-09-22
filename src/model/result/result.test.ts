@@ -16,7 +16,7 @@ describe('database option rule (CONVENTIONS A7)', () => {
     test('with a single database, passing database is redundant and throws', () => {
         // Given - one declared database ("db")
         // Then - the explicit option is rejected as redundant, synchronously
-        expect(() => cli.seed(file('./anything.sql'), { database: 'db' })).toThrow(
+        expect(() => cli.seed(file('./seeds/anything.sql'), { database: 'db' })).toThrow(
             'seed(): redundant database option — "db" is the only declared database.',
         );
     });

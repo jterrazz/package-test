@@ -86,7 +86,7 @@ describe('seeding details', () => {
         // Given - reference to nonexistent seed
         // Then - the chain rejects with ENOENT
         await expect(
-            // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing file IS the behaviour under test
+            // checker-disable-next-line c8 -- negative spec: the missing file IS the behaviour under test
             api.seed(file('./seeds/nonexistent.sql'), { database: 'db' }).get('/users'),
         ).rejects.toThrow('ENOENT');
     });

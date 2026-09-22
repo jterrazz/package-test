@@ -1,0 +1,8 @@
+description: a file handed to a verb that reads another ground folder is refused where it is named
+fixture: ./fixtures/crossed/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/api/orders/orders.spec.ts:6:40  jterrazz(c24-ground-role)
+          specs/api/orders/orders.spec.ts:9:42  jterrazz(c24-ground-role)

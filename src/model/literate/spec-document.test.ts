@@ -133,6 +133,23 @@ describe('spec document — reading', () => {
         },
     );
 
+    test('a fixture that reaches no fixtures/ folder is refused on its line (C24)', () => {
+        // Given - a path to a golden folder handed to fixture:
+        const source = [
+            'description: states its ground',
+            'fixture: ./expected/tree/',
+            'runs:',
+            '  - command: help',
+            '    exit: 0',
+            '',
+        ].join('\n');
+
+        // Then - file state lives in fixtures/, and the grammar says so where the path is written
+        expect(() => parseSpecDocument(source, 'case.spec.yaml')).toThrow(
+            /^case\.spec\.yaml:2: fixture: "\.\/expected\/tree\/" reaches no fixtures\/ folder/u,
+        );
+    });
+
     test('env and fixture take a bare string or a list, and serve carries extra env', () => {
         // Given - the three ground keys in both their forms
         const document = parseSpecDocument(
