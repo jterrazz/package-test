@@ -28,6 +28,23 @@ ruleTester.run('c24-ground-role', c24GroundRole as unknown as OxlintRule, {
         },
         { code: "expect(r.stdout).toMatch(file('./out.txt'));", errors: 1, filename: MODULE_TEST },
         { code: "cli.run(file('./expected/case.spec.yaml'));", errors: 1, filename: SPEC },
+        // A `const` is followed to the verb it reaches.
+        {
+            code: "const rows = file('./fixtures/rows.sql');\napi.seed(rows);",
+            errors: 1,
+            filename: SPEC,
+        },
+        {
+            code: "test('x', async () => {\n    const golden = file('./requests/out.txt');\n    expect(r.stdout).toMatch(golden);\n});",
+            errors: 1,
+            filename: SPEC,
+        },
+        // The nearest declaration is the one the language reads.
+        {
+            code: "const shop = directory('./fixtures/shop/');\ntest('x', () => {\n    const shop = directory('./expected/shop/');\n    cli.fixture(shop);\n});",
+            errors: 1,
+            filename: SPEC,
+        },
     ],
     valid: [
         { code: "api.seed(file('./seeds/rows.sql'), { database: 'db' });", filename: SPEC },
@@ -42,6 +59,15 @@ ruleTester.run('c24-ground-role', c24GroundRole as unknown as OxlintRule, {
         // A value is not the disk, and a computed path is out of reach.
         { code: "expect(r.stdout.text).toMatch('./fixtures/x');", filename: SPEC },
         { code: 'api.seed(file(path));', filename: SPEC },
+        { code: "const rows = file('./seeds/rows.sql');\napi.seed(rows);", filename: SPEC },
+        {
+            code: "const shop = directory('./expected/shop/');\ntest('x', () => {\n    const shop = directory('./fixtures/shop/');\n    cli.fixture(shop);\n});",
+            filename: SPEC,
+        },
+        // A binding that is not a const may be reassigned: out of reach.
+        { code: "let rows = file('./fixtures/rows.sql');\napi.seed(rows);", filename: SPEC },
+        // A parameter names what its caller hands it.
+        { code: 'function seeded(rows) {\n    return api.seed(rows);\n}', filename: SPEC },
         // Production code is no test: the verbs there are the product's.
         { code: "client.post('/x', file('./fixtures/y.json'));", filename: '/repo/src/client.ts' },
     ],

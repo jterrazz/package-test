@@ -1,0 +1,5 @@
+description: a file bound to a const and handed to the verb whose folder it names passes
+fixture: ./fixtures/bound-own/
+runs:
+    - command: .
+      exit: 0
