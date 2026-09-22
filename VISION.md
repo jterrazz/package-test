@@ -497,3 +497,15 @@ dependency bump, and a decision (rare, reasoned) is not a measurement.
     offers besides the golden. Keep it, or let an empty stream be
     `expect(result.stderr.text).toBe('')`, with no framework matcher on a
     stream but the golden?
+
+## Iteration 3 — the orchestrator's calls on questions 26–31 (2026-09-23)
+
+| # | Decision |
+| --- | --- |
+| 26 | The mover is idempotent: it runs only on what C13 finds still 16.x-shaped, never on a 17 tree. |
+| 27 | The mover walks every tree a test stands on (`src/` and `lint/` module tests too). |
+| 28 | A green run prints one summary line per reporter (`test.baseline.json: 106 held across N rules`); the full list prints only when the verdict fails. Q22 holds: a failing verdict and its evidence share one log. |
+| 29 | No legacy: the mover rewrites a directive naming a renamed rule (`d8w-text-bypass` → `d8w-raw-bypass`), and a directive naming a retired rule is dead (the Suppressions pass reports it). |
+| 30 | Every rule reads paths relative to the project root, never absolute segments. |
+| 31 | `toBeEmpty` on a stream retires: `expect(result.stdout.text).toBe('')` is Vitest's own. |
+| oxlint twice | `typescript check` still runs oxlint twice (human log + JSON). Building the log from the JSON makes it one run: to decide by the owner. |
