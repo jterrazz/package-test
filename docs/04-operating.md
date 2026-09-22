@@ -92,7 +92,9 @@ text, `await expect(result.stderr).toBeEmpty()` to
 Its gate is per file: it moves only a file C13 still finds 16.x-shaped — one
 with a 16 ground folder beside it, or one naming a 16 pool by `$FIXTURES/` —
 so a second run, a run over a tree already on 17, or a 17 file beside a 16 one
-in the same tree changes nothing. It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave
+in the same tree changes nothing. The one gesture outside that gate is the
+directive rename below: it runs on every file of every run, and a renamed
+directive no longer matches. It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave
 has run. What it leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
@@ -111,8 +113,8 @@ baseline` records those in `test.baseline.json` — rename the file, then run
   tells a 16 string from a 17 value, so the compiler names each call the
   types refuse, and each is written by hand.
 - **A suppression follows the rule it names.** `d8w-text-bypass` no longer exists
-  under that name: the mover rewrites a directive naming it to `d8w-raw-bypass`,
-  and the line a `-next-line` or `-line` directive covers reads `.raw` — the
+  under that name: the mover rewrites a directive naming it to `d8w-raw-bypass`
+  on every file, a tree an earlier mover already moved included, and the line a `-next-line` or `-line` directive covers reads `.raw` — the
   capture 16's `.text` was. A directive naming a rule 17 retired names nothing,
   and the toolchain's Suppressions pass reports it: delete it.
 - **A computed name is out of its reach.** A template or a variable naming a

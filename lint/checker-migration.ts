@@ -39,11 +39,13 @@ import { isTestFileName } from './role.js';
  *    `expect(result.stderr.text).toBe('')`, the `await` dropped with the
  *    promise (a table keeps its `toBeEmpty`);
  * 4. a source the second gesture touched imports the two names it now calls;
- * 5. a suppression directive naming a rule 17 renamed names its new id
- *    (`d8w-text-bypass` → `d8w-raw-bypass`), and the one line a `-next-line`
- *    or `-line` directive covers reads `.raw` where 16 read `.text` — the raw
- *    capture it always compared. A directive naming a rule 17 retired is left:
- *    the toolchain's Suppressions pass reports it as dead.
+ * 5. in EVERY file walked, 16.x-shaped or not, a suppression directive naming
+ *    a rule 17 renamed names its new id (`d8w-text-bypass` → `d8w-raw-bypass`),
+ *    and the one line a `-next-line` or `-line` directive covers reads `.raw`
+ *    where 16 read `.text` — the raw capture it always compared. No 17 file
+ *    can name the 16 id, and a renamed directive no longer matches, so the
+ *    gesture is idempotent. A directive naming a rule 17 retired is left: the
+ *    toolchain's Suppressions pass reports it as dead.
  *
  * The `…File`/`…Directory` verbs of the 17 prototype are read too
  * (`.seedFile('./seeds/x.sql')` → `.seed(file('./seeds/x.sql'))`), so a tree
@@ -55,8 +57,12 @@ import { isTestFileName } from './role.js';
  * `expected/` — a string with no file behind it is a value, and stays one.
  */
 
-/** What the mover did, relative to the tree it walked. */
-export type Migration = { renamed: string[]; rewritten: string[] };
+/**
+ * What the mover did, relative to the tree it walked: the folders renamed, the
+ * 16.x-shaped files rewritten, and the other files whose directives alone
+ * were renamed.
+ */
+export type Migration = { directives: string[]; renamed: string[]; rewritten: string[] };
 
 /** A rename, injected so the CLI can keep git's history of what it moves. */
 export type Rename = (from: string, to: string) => void;
@@ -485,7 +491,8 @@ function renameFolders(root: string, folders: string[], rename: Rename): string[
 }
 
 /**
- * Rename the 16 folders, and rewrite the files that stood on one.
+ * Rename the 16 folders, rewrite the files that stood on one, and rename the
+ * directives of every other file.
  *
  * Which file stood on a 16 folder is read from the folders found BEFORE the
  * renames: a directory that held one, and the pool when it was `_fixtures/`.
@@ -494,26 +501,29 @@ function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Re
     const sixteenDirs = new Set(folders.map((dir) => dirname(dir)));
     const sixteenPool = folders.includes(join(specsRoot, `_${GROUND_FIXTURES}`));
     const migration: Migration = {
+        directives: [],
         renamed: renameFolders(root, folders, rename),
         rewritten: [],
     };
-    if (folders.length === 0) {
-        return migration;
-    }
     for (const file of files()) {
         const text = readFileSync(file, 'utf8');
         const isSixteen =
             sixteenDirs.has(dirname(file)) || (sixteenPool && text.includes(POOL_PREFIX));
-        const next = isSixteen ? movedToSeventeen(text, file, specsRoot) : text;
+        const isDocument = file.endsWith(SPEC_EXTENSION);
+        const next = isSixteen
+            ? movedToSeventeen(text, file, specsRoot)
+            : isDocument
+              ? text
+              : renameDirectives(text);
         if (next !== text) {
             writeFileSync(file, next);
-            migration.rewritten.push(relative(root, file));
+            migration[isSixteen ? 'rewritten' : 'directives'].push(relative(root, file));
         }
     }
     return migration;
 }
 
-/** Apply the 16 → 17 migration to the 16.x-shaped files of a specs tree. */
+/** Apply the 16 → 17 migration to a specs tree: its 16.x-shaped files, and every file's directives. */
 export function migrateTo17(root: string, rename: Rename): Migration {
     return migrate(
         root,

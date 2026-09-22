@@ -535,6 +535,11 @@ function reportMigration(migration: Migration): void {
             `conventions checker: named ${migration.rewritten.length} file(s)' ground by path (C13)`,
         );
     }
+    if (migration.directives.length > 0) {
+        console.log(
+            `conventions checker: renamed the directives naming a renamed rule in ${migration.directives.length} file(s)`,
+        );
+    }
 }
 
 /** Apply every rewritable pass over one tree, printing what it did. */

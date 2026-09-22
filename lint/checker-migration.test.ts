@@ -80,7 +80,11 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         });
 
         // Then - nothing to rename, nothing to rewrite
-        expect(migrateTo17(root, renameSync)).toStrictEqual({ renamed: [], rewritten: [] });
+        expect(migrateTo17(root, renameSync)).toStrictEqual({
+            directives: [],
+            renamed: [],
+            rewritten: [],
+        });
     });
 
     test('never runs on a tree C13 finds on 17: its bare strings are values, or refusals kept on purpose', () => {
@@ -104,7 +108,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         const migration = migrateTo17(root, renameSync);
 
         // Then - nothing renamed, nothing rewritten, the spec byte for byte as it was
-        expect(migration).toStrictEqual({ renamed: [], rewritten: [] });
+        expect(migration).toStrictEqual({ directives: [], renamed: [], rewritten: [] });
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
     });
 
@@ -250,6 +254,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
 
         // Then - the folder is bare, the golden is named by its path, the stream compares its text; the nested package and specs/ are untouched
         expect(migration).toStrictEqual({
+            directives: [],
             renamed: ['src/report/_expected → src/report/expected'],
             rewritten: ['src/report/report.test.ts'],
         });
@@ -281,6 +286,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
 
         // Then - nothing to rename, nothing to rewrite
         expect(migrateModuleTestsTo17(member, renameSync)).toStrictEqual({
+            directives: [],
             renamed: [],
             rewritten: [],
         });
@@ -316,20 +322,60 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test("a directive in a tree on 17 is not the mover's: it is left as written", () => {
-        // Given - a 17 tree (no 16 folder) that still names the 16 id
-        const source = [
-            '// oxlint-disable-next-line jterrazz/d8w-text-bypass -- left by hand',
-            "expect(result.stdout.text).toContain('built');",
+    test('a directive naming a renamed rule is renamed on a tree on 17 too, once', () => {
+        // Given - a 17 tree (no 16 folder) an earlier, ungated mover left naming the 16 id
+        const root = tree16({
+            'cli/build/build.spec.ts': [
+                '// oxlint-disable-next-line jterrazz/d8w-text-bypass -- asserts the colour codes themselves',
+                "expect(result.stdout.text).toContain('[31m');",
+                "expect(result.stdout).toMatch(file('./expected/build.txt'));",
+                '',
+            ].join('\n'),
+            'cli/build/expected/build.txt': '',
+        });
+
+        // When - the mover runs, twice
+        const first = migrateTo17(root, renameSync);
+        const second = migrateTo17(root, renameSync);
+
+        // Then - the directive and its line are renamed on the first run, nothing else moves, and the second run finds nothing
+        expect(first).toStrictEqual({
+            directives: ['cli/build/build.spec.ts'],
+            renamed: [],
+            rewritten: [],
+        });
+        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
+            [
+                '// oxlint-disable-next-line jterrazz/d8w-raw-bypass -- asserts the colour codes themselves',
+                "expect(result.stdout.raw).toContain('[31m');",
+                "expect(result.stdout).toMatch(file('./expected/build.txt'));",
+                '',
+            ].join('\n'),
+        );
+        expect(second).toStrictEqual({ directives: [], renamed: [], rewritten: [] });
+    });
+
+    test('renames the directive of a module test on 17 too', () => {
+        // Given - a member whose module tests stand on bare ground, one suppressing D8w by its 16 id
+        const member = tree16(
+            {
+                'package.json': '{}\n',
+                'src/report/report.test.ts': [
+                    "expect(accessor.stdout.text).toContain('[0m'); // oxlint-disable-line jterrazz/d8w-text-bypass -- colour",
+                    '',
+                ].join('\n'),
+            },
             '',
-        ].join('\n');
-        const root = tree16({ 'cli/build/build.spec.ts': source });
+        );
 
-        // When - the mover runs
-        migrateTo17(root, renameSync);
+        // When - the mover runs over the member's module tests
+        const migration = migrateModuleTestsTo17(member, renameSync);
 
-        // Then - untouched: the toolchain's Suppressions pass names a directive naming no rule
-        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
+        // Then - the directive names the 17 id and the line reads the raw capture
+        expect(migration.directives).toStrictEqual(['src/report/report.test.ts']);
+        expect(readFileSync(join(member, 'src/report/report.test.ts'), 'utf8')).toBe(
+            "expect(accessor.stdout.raw).toContain('[0m'); // oxlint-disable-line jterrazz/d8w-raw-bypass -- colour\n",
+        );
     });
 
     test('the gate is per file: a 17 file is left byte for byte beside a 16 one in the same tree', () => {
