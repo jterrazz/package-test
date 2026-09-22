@@ -66,6 +66,28 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
     });
 
+    test('the root member run judges the ratchet, and prints the tree finding it fails on', async () => {
+        // Given - the broken ratchet, judged by the run typescript check makes
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-ratchet/'))
+            .exec('--member .');
+
+        // Then - the verdict and its evidence, the same log the path-less run prints
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
+    });
+
+    test('with no ratchet, the root member run judges and prints only its own findings', async () => {
+        // Given - a dead fixture under specs/, no test.baseline.json
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/c9-dead-fixtures/'))
+            .exec('--member .');
+
+        // Then - the tree finding is the per-root run's: this run neither prints nor fails on it
+        expect(result.exitCode).toBe(0);
+        await expect(result.stderr).toBeEmpty();
+    });
+
     test('the plugin diagnostics are read from the report typescript check hands over', async () => {
         // Given - no oxlint installed, and a report holding one diagnostic of the plugin
         const result = await cli

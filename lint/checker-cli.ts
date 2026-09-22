@@ -8,7 +8,7 @@ import { checkMember, checkMembers, discoverSpecRoots } from './checker-member.j
 import { migrateTo17 } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
-import { formatViolations, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
+import { formatViolation, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
 import type { TokenViolation } from './checker.js';
 import {
     CHECKER_NAMESPACE,
@@ -63,8 +63,7 @@ import { codeOf } from './rule-code.js';
  *
  * The verdict is the RATCHET's (`ratchet.ts`), and one run owns it: the run
  * over the whole project — path-less, a named project root, or `--member` on
- * the project root itself, the run `typescript check` always makes, which
- * prints the root member's findings and counts the project's. It counts
+ * the project root itself, the run `typescript check` always makes. It counts
  * every checker finding of the project and every diagnostic of this package's
  * oxlint plugin (the toolchain sets those aside, so they are judged here or
  * nowhere) against `test.baseline.json` at the root: within it, exit 0; grown,
@@ -72,6 +71,8 @@ import { codeOf } from './rule-code.js';
  * any ERROR finding and on any plugin diagnostic. Every other run under a
  * project that keeps a baseline reports what it found and leaves the verdict
  * to that one run; without a baseline it fails on an ERROR finding, as ever.
+ * The run that judges prints what it judges — every finding it counted and
+ * every plugin diagnostic — so a verdict and its evidence are one log.
  * `baseline [root]` writes the file from the current counts.
  *
  * The plugin's diagnostics come from `--oxlint-report <file>` when it is given
@@ -151,8 +152,23 @@ function codeOfFinding(violation: TokenViolation): string {
     return `${CHECKER_NAMESPACE}(${codeOf(violation.rule)})`;
 }
 
-/** Print the findings: one JSON array, or the lines a human reads. */
-function printFindings(violations: TokenViolation[]): void {
+/** A plugin diagnostic on the checker's own report line — the verdict counts it, so the log shows it. */
+function formatDiagnostic({
+    code,
+    column,
+    file,
+    line,
+    message,
+    severity,
+}: PluginDiagnostic): string {
+    return `${file}:${line}:${column}: ${severity === 'error' ? 'error' : 'warning'} ${code}: ${message}`;
+}
+
+/**
+ * Print the findings: one JSON array of the checker's own, or the lines a
+ * human reads — the plugin's diagnostics after them, when the run judges any.
+ */
+function printFindings(violations: TokenViolation[], plugin: PluginDiagnostic[] = []): void {
     if (json) {
         console.log(
             JSON.stringify(
@@ -167,11 +183,12 @@ function printFindings(violations: TokenViolation[]): void {
         );
         return;
     }
-    if (violations.length > 0) {
-        const stream = violations.some(({ severity }) => severity === 'error')
-            ? console.error
-            : console.warn;
-        stream(formatViolations(violations));
+    const lines = [...violations.map(formatViolation), ...plugin.map(formatDiagnostic)];
+    if (lines.length > 0) {
+        const failing =
+            violations.some(({ severity }) => severity === 'error') ||
+            plugin.some(({ severity }) => severity === 'error');
+        (failing ? console.error : console.warn)(lines.join('\n'));
     }
 }
 
@@ -228,27 +245,28 @@ function verdict(
     process.exit(0);
 }
 
-/** What a ratchet run prints and what it counts — the same findings, or the member's own over the project's. */
+/** What a ratchet run judges — the project's findings under a file, its own without one. */
 type RatchetRun = {
     /** Every finding of the project: what the file counts. */
     counted: () => TokenViolation[];
+    /** What the run itself found: what it judges when the project keeps no file. */
+    own: TokenViolation[];
     passes: string;
     plugin: PluginDiagnostic[];
-    /** What the run itself found, and prints. */
-    printed: TokenViolation[];
     root: string;
     what: string;
 };
 
 /**
  * The ratchet run's verdict: the project's findings and its plugin diagnostics,
- * counted against `test.baseline.json` at `root` — or, with no file, judged
- * one by one.
+ * counted against `test.baseline.json` at `root` — or, with no file, its own
+ * findings and the plugin diagnostics judged one by one. Either way it prints
+ * exactly what it judges, so a verdict and its evidence are one log.
  */
-function ratchet({ counted, passes, plugin, printed, root, what }: RatchetRun): never {
-    printFindings(printed);
+function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): never {
     if (keepsBaseline(root)) {
         const findings = counted();
+        printFindings(findings, plugin);
         const counts = countsOf([
             ...findings.map(codeOfFinding),
             ...plugin.map((diagnostic) => diagnostic.code),
@@ -268,6 +286,7 @@ function ratchet({ counted, passes, plugin, printed, root, what }: RatchetRun): 
         }
         process.exit(0);
     }
+    printFindings(own, plugin);
     const unrecorded = countsOf(plugin.map((diagnostic) => diagnostic.code));
     for (const [key, count] of Object.entries(unrecorded).toSorted(([a], [b]) =>
         a < b ? -1 : 1,
@@ -278,7 +297,7 @@ function ratchet({ counted, passes, plugin, printed, root, what }: RatchetRun): 
         say("Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.");
         process.exit(1);
     }
-    verdict(printed, what, passes);
+    verdict(own, what, passes);
 }
 
 /** A directory that must exist — a typo'd path is operator error, not a clean tree. */
@@ -564,13 +583,13 @@ if (member !== undefined) {
     const what = `for member ${relative(root, dir) || '.'}`;
     if (dir === root) {
         // The project root's own member run — the one `typescript check`
-        // Always makes — is the ratchet run: it prints what the root member
-        // Owes, and judges the whole project's counts.
+        // Always makes — is the ratchet run: it judges, and prints, the whole
+        // Project's counts where a file keeps them.
         ratchet({
             counted: () => projectFindings(root),
+            own: checkMember(dir, root),
             passes: MEMBER_PASSES,
             plugin: pluginDiagnostics(root, reportFile),
-            printed: checkMember(dir, root),
             root,
             what,
         });
@@ -600,9 +619,9 @@ if (positional !== undefined && discoverSpecRoots(root).length === 0) {
 const findings = projectFindings(root);
 ratchet({
     counted: () => findings,
+    own: findings,
     passes: `${TREE_PASSES}, ${MEMBER_PASSES}`,
     plugin: pluginDiagnostics(root, reportFile),
-    printed: findings,
     root,
     what: `under ${root}`,
 });
