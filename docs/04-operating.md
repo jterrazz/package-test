@@ -80,8 +80,9 @@ path — `.seed('x.sql')` to `.seed(file('./seeds/x.sql'))`,
 `.fixture('$FIXTURES/app/')` to `.fixture(directory('../../fixtures/app/'))`,
 `toMatch('help.txt')` to `toMatch(file('./expected/help.txt'))`,
 `.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
-wrappers from the entry the specification file already uses. Four things it
-leaves to the reader:
+wrappers from the entry the specification file already uses. It is 17.0's
+alone: C13 and its mover retire in 17.1, once the estate's wave has run. Four
+things it leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
   moves a string only when a file of that name sits in the spec's `expected/`;
