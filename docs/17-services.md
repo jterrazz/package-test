@@ -1,6 +1,6 @@
 # 17 — Services: databases, caches, and their init scripts
 
-Infrastructure is declared as a **named record** of service factories on the runner. The record key is the ONLY name a service has: it is your test vocabulary in `.seed()` / `.table()` targeting, it types the `server`/`jobs` factory parameters, it is the name the startup report prints, and — kebab-cased — it is the folder the service reads its init script from. A handle carries no second name of its own.
+Infrastructure is declared as a **named record** of service factories on the runner. The record key is the ONLY name a service has: it is your test vocabulary in `.seedFile()` / `.table()` targeting, it types the `server`/`jobs` factory parameters, it is the name the startup report prints, and — kebab-cased — it is the folder the service reads its init script from. A handle carries no second name of its own.
 
 ## Service factories
 
@@ -81,7 +81,7 @@ export const { cleanup, website } = await specification.website({
 
 ## The services record — three jobs for one key
 
-1. **Vocabulary.** The key is how tests target the service: `.seed('x.sql', { database: 'analyticsDb' })`, `result.table('events', { database: 'analyticsDb' })`. Typed — a typo is a compile error.
+1. **Vocabulary.** The key is how tests target the service: `.seedFile('./seeds/x.sql', { database: 'analyticsDb' })`, `result.table('events', { database: 'analyticsDb' })`. Typed — a typo is a compile error.
 2. **Typing.** The `server` / `jobs` factory receives the exact same record, fully typed, once everything is started (rule A8).
 3. **Identity.** The key is the name the service is known by: the startup report prints it, and its **kebab-case** conversion is the folder the init script is read from — `analyticsDb` reports as `analytics-db` and initialises from `docker/analytics-db/init.sql`, with no option to state anywhere:
 
@@ -96,15 +96,15 @@ In CLI mode, the record additionally drives env injection into the child process
 
 ### The `database:` rule (A7)
 
-With **2 or more databases** in the record, `database:` is mandatory on every `.seed()` and `.table()`. With exactly **one**, it is forbidden (redundant). There is no in-between: the option is either always present or never present within a project.
+With **2 or more databases** in the record, `database:` is mandatory on every `.seedFile()` and `.table()`. With exactly **one**, it is forbidden (redundant). There is no in-between: the option is either always present or never present within a project.
 
 ```typescript
 // one database → no database: anywhere
-await migrateCli.seed('legacy-schema.sql').exec('up');
+await migrateCli.seedFile('./seeds/legacy-schema.sql').exec('up');
 await expect(result.table('schema_migrations')).toMatchRows({ … });
 
 // two databases → database: everywhere
-await api.seed('catalog.sql', { database: 'db' }).request('new-order.http');
+await api.seedFile('./seeds/catalog.sql', { database: 'db' }).requestFile('./requests/new-order.http');
 await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({ … });
 ```
 
@@ -157,7 +157,7 @@ export const { cli, cleanup } = await specification.cli('shoply', {
 });
 ```
 
-`sqlite()` builds a template database once (from `init` SQL or by running `prisma db push` on `prismaSchema`), then hands each worker its own copy. `.seed()` and `result.table()` work identically to Postgres.
+`sqlite()` builds a template database once (from `init` SQL or by running `prisma db push` on `prismaSchema`), then hands each worker its own copy. `.seedFile()` and `result.table()` work identically to Postgres.
 
 `prismaSchema` is resolved against the **current working directory** and passed to the CLI as `npx prisma db push --force-reset --schema <absolute path>` — the schema is named explicitly, so it does not have to be the one Prisma would discover from a `prisma.config.ts` at the cwd. Declare no `prismaSchema` and the bare invocation runs, leaving discovery to Prisma.
 
@@ -181,7 +181,7 @@ Two more properties fall out of it: the winner builds on a private path and **re
 - **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule B1), and workers are isolated (rule G2).
 - **Passing `root` that auto-discovery would have found.** Redundant override (rule A9).
 - **Reading a green local run as proof that `prismaSchema` is wired.** The template is cached across runs, so a checkout that built it once never re-runs `db push` — a schema path that would fail on a fresh clone (or in CI) stays invisible. Delete `.artifacts/vitest/sqlite/` to test the cold path.
-- **Counting `sqlite()` + `redis()` as "2 databases" for rule A7.** The rule counts **databases**; with one SQL database and one redis, `database:` stays forbidden on `.seed()`/`.table()` and `DATABASE_URL`/`REDIS_URL` are both unambiguous for CLI injection (rule B6).
+- **Counting `sqlite()` + `redis()` as "2 databases" for rule A7.** The rule counts **databases**; with one SQL database and one redis, `database:` stays forbidden on `.seedFile()`/`.table()` and `DATABASE_URL`/`REDIS_URL` are both unambiguous for CLI injection (rule B6).
 
 ## Related
 

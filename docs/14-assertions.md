@@ -2,7 +2,7 @@
 
 Every assertion goes through `expect()` (rule D1). The framework auto-registers its matchers into vitest and types them **by subject**: a table subject only offers table matchers, a stream subject only stream matchers — the wrong pairing is a compile error. Result accessors are read-only; there are no assertion methods on accessors (`result.stdout.toContain(…)` does not exist — the methods live on `expect()`).
 
-This chapter is the exhaustive matrix: every matcher, for every valid subject, with its sync/async rule and its resolution target.
+This chapter is the exhaustive matrix: every matcher, for every valid subject, with its sync/async rule and the file it reads.
 
 ## The two global rules
 
@@ -13,17 +13,22 @@ This chapter is the exhaustive matrix: every matcher, for every valid subject, w
 | IO matcher subjects                                                 | Why                                  |
 | ------------------------------------------------------------------- | ------------------------------------ |
 | `result.table(…)`, and `toBeEmpty()` on it                          | Runs a SQL query                     |
-| `result.filesystem` / `result.directory(…)`                         | Walks the disk                       |
+| `toMatchDirectory` on `result.filesystem` / `result.directory(…)`   | Walks the disk                       |
 | container subjects                                                  | Talks to the Docker daemon           |
 | every accessor of a COMPONENT result (`tree`, `html`, `content`, …) | The capture crosses the browser seam |
 
 Everything else is synchronous, and that includes the subjects it is easiest to get wrong: `result.value`, `result.error`, `result.response`, `result.stdout`, `result.stderr`, `result.json` — and `result.tree` on a WEBSITE page, which is captured on the node side and is a plain text subject there. Only a component's accessors are read inside the page.
 
-### `toMatch` resolution (rule D3)
+### A golden is named by its path (rule D3)
 
-`.request(file)` reads `requests/<file>`. Everything else is expected output: `expect(...).toMatch(name)` **always** resolves against `expected/<name>`, for every subject — `response`, `stdout`, `stderr`, `json`, `directory`, `filesystem`. There is no per-subject resolution.
+A matcher that reads a file says so in its name, and takes the path relative to the spec file, spelled in full — the type refuses a bare name (rule B2):
 
-`expected/` is flat: `toMatch('help.txt')` → `expected/help.txt`. A slash in the name creates a subfolder: `toMatch('build/verbose.txt')` → `expected/build/verbose.txt` (rule C5). The extension is part of the name and mandatory (`'help.txt'`, never `'help'`) — except for tree snapshots, which are directories: `toMatch('shop-scaffold')` → `expected/shop-scaffold/` (rule C6).
+- `toMatchFile('./expected/help.txt')` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule C6); a path may name a subfolder, `./expected/build/verbose.txt`, and update mode creates it (rule C5).
+- `toMatchDirectory('./expected/shop-scaffold/')` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.
+
+Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule D3). By convention it sits in `expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
+
+`toMatch`, `toBe` and `toContain` are vitest's and take a VALUE. On a stream accessor `toMatch` reads the comparable text (a substring or a regex, ANSI stripped); on a JSON, response or tree subject it is refused, naming the two file matchers (rule D14).
 
 All file-based comparisons understand the [`{{token}}` grammar](15-tokens.md); all code-side dynamic values use `match.*`.
 
@@ -48,9 +53,9 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 
 ## `result.response` — HTTP response (api)
 
-| Matcher             | Sync/async | Resolves against  | Example                                                |
-| ------------------- | ---------- | ----------------- | ------------------------------------------------------ |
-| `toMatch('x.http')` | sync       | `expected/x.http` | `expect(result.response).toMatch('user-created.http')` |
+| Matcher                   | Sync/async | Example                                                               |
+| ------------------------- | ---------- | --------------------------------------------------------------------- |
+| `toMatchFile('./….http')` | sync       | `expect(result.response).toMatchFile('./expected/user-created.http')` |
 
 Checks, in order: the status line, the listed headers (**subset** — unlisted response headers are unconstrained, rule C3), then the body. Placeholders apply in headers _and_ body, with `#ref` captures shared across both:
 
@@ -64,14 +69,14 @@ Location: /orders/{{uuid#order}}
 On mismatch the failure shows which part diverged. A status mismatch is a three-line message naming the fixture:
 
 ```
-Response status mismatch (user-created.http)
+Response status mismatch (./expected/user-created.http)
   expected: 201
   received: 500
 ```
 
 A header mismatch has the same shape (`Response header mismatch (name)`, with `header:` / `expected:` / `received:` lines; a missing header shows `received: (absent)`). A body mismatch prints a line-by-line structural diff (`Response mismatch (name)`, `- Expected` / `+ Received`) of the expected body — with matchers and tokens rendered as their placeholder text (`{{uuid#order}}`) — against the actual body. The diff is literal: it does not annotate captured ref values, and a failed `{{uuid#order}}` re-occurrence surfaces only as the two differing lines.
 
-`.not`: `expect(result.response).not.toMatch('user-created.http')` passes when any part diverges. Rarely useful — prefer positive fixtures.
+`.not`: `expect(result.response).not.toMatchFile('./expected/user-created.http')` passes when any part diverges. Rarely useful — prefer positive fixtures.
 
 ## `result.table(name, { database }?)` — database tables (api, jobs, cli)
 
@@ -111,34 +116,35 @@ A failing `toMatchRows` prints the expected grid against the actual rows for the
 
 Streams are compared **after ANSI stripping** (rule D6); the raw capture stays available as `.text`.
 
-| Matcher               | Sync/async | Resolves against | Example                                                           |
-| --------------------- | ---------- | ---------------- | ----------------------------------------------------------------- |
-| `toMatch('x.txt')`    | sync       | `expected/x.txt` | `expect(result.stdout).toMatch('help.txt')`                       |
-| `toContain('needle')` | sync       | —                | `expect(result.stderr).toContain("Unknown command 'frobnicate'")` |
+| Matcher                  | Sync/async | Example                                                           |
+| ------------------------ | ---------- | ----------------------------------------------------------------- |
+| `toMatchFile('./….txt')` | sync       | `expect(result.stdout).toMatchFile('./expected/help.txt')`        |
+| `toContain('needle')`    | sync       | `expect(result.stderr).toContain("Unknown command 'frobnicate'")` |
+| `toMatch(value)`         | sync       | `expect(result.stdout).toMatch(/built in \d+ms/u)`                |
 
-`toMatch` on a stream is a full-text snapshot; the fixture may contain any [token](15-tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
+`toMatchFile` on a stream is a full-text snapshot; the golden may contain any [token](15-tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
 
-> `toMatch` on **any accessor subject** (`result.stdout`, `result.json`, `result.response`, `result.directory`, `result.filesystem`) takes a **fixture name with its extension** (`'help.txt'`), never a regex. Passing a `RegExp` — the instinct carried over from vitest-native `toMatch` — throws immediately, naming the subject and pointing at the escape hatch: for a raw-regex assertion, reach through to the text with `expect(result.stdout.text).toMatch(/re/)`.
+> `toMatch` on a stream is vitest's: a substring or a regex, read on the comparable text (ANSI stripped, the runner's `transform` applied). A golden is never `toMatch`: `toMatchFile` takes the path, and a bare name or a regex handed to it throws at once, naming the verb and the form to write.
 
 `toContain` failures print the needle and the (stripped) haystack in a diff-style layout so the near-miss is visible. `.not.toContain(…)` asserts absence.
 
 ```typescript
 // .grep() returns a TextAccessor — chainable and snapshot-able, so the same
-// Token grammar and expected/ resolution apply as on the stream itself.
+// Token grammar applies as on the stream itself.
 expect(result.stdout.grep('products/ok.yaml')).not.toContain('error'); // absence probe
-expect(result.stdout.grep('products/broken.yaml')).toMatch('broken-block.txt'); // snapshot a block
+expect(result.stdout.grep('products/broken.yaml')).toMatchFile('./expected/broken-block.txt'); // snapshot a block
 ```
 
 ## `text(value)` — any string as a stream subject
 
-`text(value)` wraps an arbitrary string in the same `TextAccessor` streams surface, anchored on the calling test's directory via the same caller-detection the runners use. It promotes an ad-hoc string — most often a thrown **error message**, a checker line, or a report — into a first-class snapshot subject: ANSI is stripped before comparison (raw stays on `.text`), the [`{{token}}`](15-tokens.md) grammar applies to the fixture, and `.grep()` composes exactly as on a captured stream.
+`text(value)` wraps an arbitrary string in the same `TextAccessor` streams surface, anchored on the calling test's directory via the same caller-detection the runners use — the directory its golden's path is read from. It promotes an ad-hoc string — most often a thrown **error message**, a checker line, or a report — into a first-class snapshot subject: ANSI is stripped before comparison (raw stays on `.text`), the [`{{token}}`](15-tokens.md) grammar applies to the fixture, and `.grep()` composes exactly as on a captured stream.
 
 The product surface of a test framework **is** its error messages and reports; golden them in full instead of reconstructing them with a cluster of `toContain` probes.
 
-| Matcher               | Sync/async | Resolves against | Example                                            |
-| --------------------- | ---------- | ---------------- | -------------------------------------------------- |
-| `toMatch('x.txt')`    | sync       | `expected/x.txt` | `expect(text(message)).toMatch('parse-error.txt')` |
-| `toContain('needle')` | sync       | —                | `expect(text(message)).toContain('did you mean')`  |
+| Matcher                  | Sync/async | Example                                                           |
+| ------------------------ | ---------- | ----------------------------------------------------------------- |
+| `toMatchFile('./….txt')` | sync       | `expect(text(message)).toMatchFile('./expected/parse-error.txt')` |
+| `toContain('needle')`    | sync       | `expect(text(message)).toContain('did you mean')`                 |
 
 ```typescript
 import { text } from '@jterrazz/test';
@@ -153,18 +159,20 @@ async function catchMessage(assertion: () => unknown): Promise<string> {
     throw new Error('expected the assertion to throw, but it passed');
 }
 
-const message = await catchMessage(() => expect(result.response).toMatch('wrong-body.http'));
+const message = await catchMessage(() =>
+    expect(result.response).toMatchFile('./expected/wrong-body.http'),
+);
 // Volatile fragments (paths, durations, ids) go through tokens: {{path}}, {{duration}}, {{uuid}}…
-expect(text(message)).toMatch('errors/wrong-body-error.txt');
+expect(text(message)).toMatchFile('./expected/errors/wrong-body-error.txt');
 ```
 
 ## `result.json` — parsed stdout (cli)
 
-| Matcher             | Sync/async | Resolves against  | Example                                      |
-| ------------------- | ---------- | ----------------- | -------------------------------------------- |
-| `toMatch('x.json')` | sync       | `expected/x.json` | `expect(result.json).toMatch('config.json')` |
+| Matcher                   | Sync/async | Example                                                     |
+| ------------------------- | ---------- | ----------------------------------------------------------- |
+| `toMatchFile('./….json')` | sync       | `expect(result.json).toMatchFile('./expected/config.json')` |
 
-Deep-equal against the JSON fixture; the fixture may embed tokens (`"id": "{{uuid}}"`). Failure prints a structural object diff (missing keys, extra keys, per-key value mismatches). For partial checks, read `.value` and use native `toMatchObject`.
+Deep-equal against the JSON golden; the fixture may embed tokens (`"id": "{{uuid}}"`). Failure prints a structural object diff (missing keys, extra keys, per-key value mismatches). For partial checks, read `.value` and use native `toMatchObject`.
 
 ## `result.file(path)` — single files in the cwd (cli)
 
@@ -177,18 +185,18 @@ A pure read accessor — no framework matcher; assert on its properties with nat
 
 ## `result.directory(name)` — tree snapshots (cli)
 
-| Matcher          | Sync/async | Resolves against              | Example                                                              |
-| ---------------- | ---------- | ----------------------------- | -------------------------------------------------------------------- |
-| `toMatch('dir')` | **async**  | `expected/dir/` (a directory) | `await expect(result.directory('my-shop')).toMatch('shop-scaffold')` |
+| Matcher                    | Sync/async | Example                                                                                   |
+| -------------------------- | ---------- | ----------------------------------------------------------------------------------------- |
+| `toMatchDirectory('./…/')` | **async**  | `await expect(result.directory('my-shop')).toMatchDirectory('./expected/shop-scaffold/')` |
 
-Compares the tree rooted at `<cwd>/name` against the fixture directory `expected/shop-scaffold/` — structure _and_ file contents (contents honour tokens). Failure is a structured diff in three groups: `added` (on disk, not in fixture), `removed` (in fixture, not on disk), `changed` (content mismatch, with a per-file diff). No extension on the argument — tree snapshots are directories (rule C6).
+Compares the tree rooted at `<cwd>/name` against the golden directory `./expected/shop-scaffold/` — structure _and_ file contents (contents honour tokens). Failure is a structured diff in three groups: `added` (on disk, not in the golden), `removed` (in the golden, not on disk), `changed` (content mismatch, with a per-file diff). The path ends in `/` — the type and the matcher both refuse one that does not.
 
 ## `result.filesystem` — the whole cwd (cli)
 
-| Matcher / accessor | Sync/async | Resolves against | Example                                                            |
-| ------------------ | ---------- | ---------------- | ------------------------------------------------------------------ |
-| `toMatch('dir')`   | **async**  | `expected/dir/`  | `await expect(result.filesystem).toMatch('upgraded-shop')`         |
-| `.files()`         | async read | —                | `expect(await result.filesystem.files()).toContain('shoply.lock')` |
+| Matcher / accessor         | Sync/async | Example                                                                         |
+| -------------------------- | ---------- | ------------------------------------------------------------------------------- |
+| `toMatchDirectory('./…/')` | **async**  | `await expect(result.filesystem).toMatchDirectory('./expected/upgraded-shop/')` |
+| `.files()`                 | async read | `expect(await result.filesystem.files()).toContain('shoply.lock')`              |
 
 Same semantics as `result.directory(…)`, rooted at the cwd itself. `.files()` returns the sorted recursive file list — a read, so follow it with native matchers.
 
@@ -216,10 +224,10 @@ The one golden a rendered surface wants. It is the outline a screen reader walks
 
 ```typescript
 // A website page: the capture is already on the node side.
-expect(result.tree).toMatch('home.aria.yaml');
+expect(result.tree).toMatchFile('./expected/home.aria.yaml');
 
 // A component: the capture is read INSIDE the page, so the read is IO.
-await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml');
+await expect(result.tree).toMatchFile('./expected/two-of-two-hundred.aria.yaml');
 ```
 
 The `await` is the component's, not the tree's: a subject captured inside a page crosses the browser seam through a server command, and every accessor of a `component` result is awaited for that reason. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([13 — Elements](13-elements.md#modifiers)).
@@ -241,14 +249,14 @@ Reach for it after the tree, not instead of it. A test that asserts only on mark
 `result.value` is a **JSON accessor** when the call returned an object and a **text accessor** when it returned a string, so the same golden vocabulary reaches both:
 
 ```typescript
-expect(result.value).toMatch('found.json');
+expect(result.value).toMatchFile('./expected/found.json');
 expect(result.value.text).toContain('Alice');
 ```
 
 `result.error` is what the call THREW, read as a subject of its own — a refusal is an answer, and it deserves a golden like any other:
 
 ```typescript
-expect(result.error).toMatch('refused.txt');
+expect(result.error).toMatchFile('./expected/refused.txt');
 await expect(result.error).toBeEmpty(); // nothing was thrown
 ```
 
@@ -282,32 +290,34 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Matcher summary
 
-| Matcher       | Valid subjects                                                                                                                                      | Sync/async                                | Fixture root |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------ |
-| `toMatch`     | `response`, `stdout`, `stderr`, `json`, `directory(…)`, `filesystem`                                                                                | sync, except directory/filesystem (async) | `expected/`  |
-| `toMatchRows` | `table(…)`                                                                                                                                          | async                                     | — (inline)   |
-| `toBeEmpty`   | `table(…)`, `error`, `console` and every text accessor                                                                                              | async (every subject)                     | —            |
-| `toContain`   | `stdout`, `stderr` (host and container-exec streams), container logs                                                                                | sync                                      | —            |
-| `toBeRunning` | `container(…)`                                                                                                                                      | async                                     | —            |
-| native vitest | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) | per vitest                                | —            |
+| Matcher            | Valid subjects                                                                                                                                                                  | Sync/async                         | Reads                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------- |
+| `toMatchFile`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                     | sync, except inside a page (async) | the path it is given |
+| `toMatchDirectory` | `directory(…)`, `filesystem`                                                                                                                                                    | async                              | the path it is given |
+| `toMatchRows`      | `table(…)`                                                                                                                                                                      | async                              | — (inline)           |
+| `toBeEmpty`        | `table(…)`, `error`, `console` and every text accessor                                                                                                                          | async (every subject)              | —                    |
+| `toContain`        | `stdout`, `stderr` (host and container-exec streams), container logs                                                                                                            | sync                               | —                    |
+| `toBeRunning`      | `container(…)`                                                                                                                                                                  | async                              | —                    |
+| native vitest      | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) — and `toMatch` on a stream | per vitest                         | —                    |
 
 `.not` is supported on every framework matcher.
 
 ## Update mode
 
-`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching `toMatch` fixture from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The engine, the flag, the discipline it asks for and the frozen two-pass are all [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matcher the flag reaches, and that is `toMatch`, on every fixture subject.
+`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching golden from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The engine, the flag, the discipline it asks for and the frozen two-pass are all [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matchers the flag reaches, and they are `toMatchFile` and `toMatchDirectory`, on every subject.
 
 ## Common mistakes
 
 - **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule D1). Write `expect(result.stdout).toContain('x')`.
 - **Missing `await` on IO matchers.** `expect(result.table('users')).toMatchRows(…)` without `await` never queries the database and the test passes vacuously (rule D2).
-- **Putting `await` in front of a sync matcher.** A `toMatch` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract D2 states and the types carry.
-- **`toMatch('help')` without extension.** The extension is part of the name (rule C6). The only extensionless arguments are tree-snapshot directory names.
-- **Expecting a per-subject fixture root.** Every `toMatch` subject — response, stream, JSON, or tree — resolves against `expected/`; only `.request()` reads from `requests/` (rule D3).
+- **Putting `await` in front of a sync matcher.** A `toMatchFile` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract D2 states and the types carry.
+- **`toMatchFile('./expected/help')` without extension.** The extension is part of the path (rule C6); a tree is `toMatchDirectory('./expected/help/')`.
+- **A golden written as a value.** `expect(result.stdout).toMatch('help.txt')` is a substring check that passes when the output contains the words "help.txt". A golden is `toMatchFile('./expected/help.txt')` (rule D14).
+- **A bare name.** `toMatchFile('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rule B2).
 - **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.text` is for (rule D6).
 - **`database:` on a single-database project** (or missing on a multi-database one) — rule A7 cuts both ways.
-- **Using `.not.toMatch` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
-- **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it with the real output, destroying the negative case. Freeze any `toMatch` whose mismatch (or missing fixture) is the behaviour under test (rule `d13w-unfrozen-negative-fixture`).
+- **Using `.not.toMatchFile` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
+- **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it with the real output, destroying the negative case. Freeze any golden matcher whose mismatch (or missing golden) is the behaviour under test (rule `d13w-unfrozen-negative-fixture`).
 
 ## Related
 

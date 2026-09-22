@@ -71,10 +71,28 @@ Nothing persistent. Inside a consuming project the framework writes only under `
 
 Containers are the one resource that outlives a process badly, which is why `afterAll(cleanup)` is a rule and not a suggestion: a suite that forgets it leaks its infrastructure into the next one.
 
-## What a 16.0 adoption meets
+## What a 17.0 adoption meets
 
-The renames and the new rows land through the toolchain's own flow, with three
-things to know before they surprise a reader:
+`npx jterrazz-test-check specs --fix` is the migration: it renames the four
+ground folders to their bare names, deepest first, and rewrites every literal
+call and document to the file verbs with full relative paths — `.seed('x.sql')`
+to `.seedFile('./seeds/x.sql')`, `.fixture('$FIXTURES/app/')` to
+`.fixtureDirectory('../../fixtures/app/')`, `toMatch('help.txt')` to
+`toMatchFile('./expected/help.txt')`. Four things it leaves to the reader:
+
+- **A `toMatch` literal with no golden behind it stays a value.** The mover
+  moves a string only when a file of that name sits in the spec's `expected/`;
+  anything else was already a substring check, and still is.
+- **A computed name is out of its reach.** A template or a variable naming a
+  seed, a fixture or a golden is left as written, and the first run names each
+  one the verb refuses.
+- **A domain named with a reserved word** (`requests/`, `fixtures/`, …) is
+  renamed by hand: C1 refuses it, and only its author knows the subject.
+- **Element names are exact.** A partial name that 16.x widened now designates
+  nothing; write the accessible name whole, as the ARIA tree prints it.
+
+The toolchain's own flow carries three more things to know before they surprise
+a reader:
 
 - **A member whose ROOT is the specs tree** (`packages: ['specs']`) is judged by
   `jterrazz-test-check .` or by a path-less run from that member. The

@@ -208,19 +208,7 @@ Every named descriptor accepts the option — `button`, `link`, `field`, `headin
 
 Reach for the opt-out only when the name genuinely carries a variable part (a count, a user's name); scope with `within()` when the problem is that the same name appears twice.
 
-**The transitional window.** Exact-by-default arrived in 16.0, where substring was the rule before it. Through 16.x, a descriptor that designates NOTHING as a whole name but WOULD have designated something as a substring is RESOLVED as a substring, once, and prints one line naming itself, the whole name it matched — the spelling to write — the three ways out and this deadline. The line is printed once per descriptor per run, by whichever adapter did the looking: a page's, a mounted component's, a screen's. It is a runtime warning and not a lint rule on purpose: whether a name matched whole or in part is a fact about a RUN, and a verdict fed by a previous run's artefact is not deterministic. In 17.0 the fallback is gone and the same descriptor is simply not found.
-
-The window reaches every LEVEL of a chain, not the target alone: `within(button('Proof of authorship'), content('Verified'))` against a button named "Proof of authorship Verified" fails on the SCOPE, and a window that only ever widened the target left that migration with no line to read at all. The chain is walked outside-in, each level asked the same question, and a level that states its own `exact` is left as the author wrote it.
-
-The window is asked BEFORE the verb acts, not after it fails: a verb waits its whole actionability budget, which is the test's own budget, so a retry afterwards never runs — the test is already over. What it costs on the ordinary path is one count per level of the chain, which waits for nothing.
-
-**A widening is decided on a SETTLED surface.** A count is one observation, and a `see()` fired right after a navigating `click()` takes it on the page being left: a descriptor that is perfectly exact on the destination read as substring-only, non-deterministically, and the tell was the printed name coming back equal to the name already written. So a level that designates nothing and has exactly one substring match is given five seconds to arrive before anything is printed, and the verdict is reached once per descriptor per run — a scenario that clicks the same link in ten tests waits on the first of them. Nothing else waits: a descriptor with no substring match at all, which is every ordinary `gone()`, is still two counts and no pause.
-
-It widens on exactly one match, never on several: a name two elements carry in part is the ambiguity the old default hid, and the window may not resolve it by guessing which one the author meant. That descriptor designates nothing, as W3 says, and the refusal is the one to read.
-
-**The name it prints is the ACCESSIBLE name, and the whole of it.** It is read off the element's ARIA snapshot — the browser's own name computation, which is what the descriptor matched on — and never off the text content: a button holding two inline children reads as `Experiments9` through its text and is named "Experiments 9", and a field's name is its label, which its text carries nothing of. Nor is it truncated: a name cut at eighty characters, mid-word, designates nothing when it is written back. The one descriptor whose printed name is TEXT is `content()`, because text is what it matches. On a device the name is what the device reports as the element's label.
-
-**The line goes to stderr**, and never to the console. Vitest CAPTURES the console and its default reporter prints nothing of what it captured, so a warning written with `console.warn` is invisible in the very run that fired it — `npm test` showed zero lines on a run that had one, and a deadline nobody can see is a deadline nobody meets. The node-side adapters write the line to the runner's own stderr; a mounted component, which runs IN the page and has no stderr, hands it back to the node side through `server.commands`. Nothing but a plain `vitest --run` is needed to read it.
+A name only part of an accessible name designates nothing, on every surface and at every level of a chain: `within(button('Proof of authorship'), content('Verified'))` against a button named "Proof of authorship Verified" fails on the SCOPE. The name to write is the ACCESSIBLE name, whole — what the ARIA tree (`result.tree`) prints for the element, never its text content: a button holding two inline children reads as `Experiments9` through its text and is named "Experiments 9", and a field's name is its label, which its text carries nothing of. On a device it is the element's label.
 
 ## `testId()` — the one escape hatch
 
@@ -236,7 +224,7 @@ The comment is an INVARIANT, not a rationale: it states the property of the mark
 ## Pitfalls
 
 - **Asserting focus with a golden.** The accessibility tree carries no focus state. `see(focused(x))` / `gone(focused(x))` are the verbs that do.
-- **Expecting a name to match a prefix.** It does not since 16.0. Read the transitional warning; it names the three ways out.
+- **Expecting a name to match a prefix.** It does not: write the name whole, read off the ARIA tree, or scope it with `within(…)`.
 - **Answering an ambiguity with `{ exact: false }`.** The option widens the match; ambiguity wants narrowing. Scope it.
 - **Reaching for `testId()` first.** It is the last rung, and W2 asks for the line saying why. A heading, a button or a field usually names the thing already.
 - **Putting an `expect()` inside a scenario.** W1 refuses it: a scenario is interaction, the Then is on the result.

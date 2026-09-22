@@ -56,11 +56,11 @@ specs/
 ├── api/
 │   ├── api.specification.ts          # runners at the facet root
 │   ├── intercepts.specification.ts
-│   └── requests/                     # a domain
-│       ├── requests.spec.ts
-│       ├── requests/                # ground: complete requests, *.http
-│       └── expected/                # ground: every expected fixture, flat
-└── fixtures/                        # the SHARED pool, reached as $FIXTURES/…
+│   └── sending/                      # a domain
+│       ├── sending.spec.ts
+│       ├── requests/                 # ground: complete requests, *.http
+│       └── expected/                 # ground: every golden it reads
+└── fixtures/                         # the SHARED pool, reached by ../../fixtures/…
 ```
 
 **A domain shared by two facets carries the same name in both.** Six
@@ -73,7 +73,7 @@ question asked of two constructors. Everything else is one facet's own, and a
 name that is one facet's own is never another's: two names for one capability
 is the drift the vocabulary exists to stop.
 
-It says nothing about where a METHOD may appear. `.seed()` is used inside jobs'
+It says nothing about where a METHOD may appear. `.seedFile()` is used inside jobs'
 `triggering/` scenarios and integration's `call/` ones, because seeding is the
 Given there and not the subject; a capability earns a folder when it is what
 the specs in it are ABOUT.
@@ -94,9 +94,9 @@ a declared name nothing carries fails too.
 
 <!-- /GENERATED:domains -->
 
-A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; a leading underscore means ground, never a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
+A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; `fixtures/`, `expected/`, `requests/` and `seeds/` are ground, never a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
 
-The fixture apps the specs drive live in the pool: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, the `broken-*` trees for the infrastructure failure paths, and `lint-violations/` — a violation/compliant twin per lint rule.
+The fixture apps the specs drive live in the pool: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, the `broken-*` trees for the infrastructure failure paths, and `lint-violations/` — a violation/compliant twin per lint rule not yet specified by documents (a rule that is keeps its trees beside them).
 
 **The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component-app/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel, a responsive note, a control that refuses input and a pair of links whose names overlap. It is not under `fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
@@ -112,7 +112,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 66    |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 94    |
-| Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 20    |
+| Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 20    |
 
 <!-- /GENERATED:layers -->
 
@@ -120,9 +120,12 @@ The counts are generated: a layer that stops growing while the surface does is v
 
 ## The lint suite is end-to-end
 
-`specs/lint/**` runs the REAL oxlint binary and the real checker over the fixture projects and goldens their output, grouped by convention family (`runners/`, `chains/`, `files/`, `assertions/`, `imports/`, `architecture/`, `hygiene/`, `website/`, `checker/`, `meta/`). Because it loads `dist/oxlint.js`, `npm run build` must precede it — the same ordering `npm run lint` depends on.
+`specs/lint/**` runs the REAL oxlint binary and the real checker over fixture projects and goldens their output. Because it loads `dist/oxlint.js` and `dist/checker.js`, `npm run build` must precede it — the same ordering `npm run lint` depends on.
 
-Its goldens are full snapshots, not greps: `specs/lint/checker/expected/*.txt` holds the exact lines the checker prints, including the chapter each message points a consumer at. A message that changes its wording moves its golden with it, in the same commit.
+A rule is specified in one of two forms, and the first is the one a new rule takes:
+
+- **Documents.** `specs/lint/<rule-id>/<case>.spec.yaml`, the trees it lints in a local `fixtures/`: a tree in, the command, the report out. The runner is `specs/lint/report.specification.ts` — one wrapper for both channels (`command: .` lints with oxlint, `command: checker .` runs the checker) and a `transform` that NORMALISES the report: an oxlint diagnostic reads `file:line:column  plugin(rule)`, so the golden proves where the rule fired and not only that it did; a checker line, whose wording is this package's product, is asserted as written. The `unit` project collects these documents through `literate()`. Four rules take this form today — one static rule, one warning, one checker pass, one autofix.
+- **A test file per rule**, grouped by convention family (`runners/`, `chains/`, `files/`, `assertions/`, `imports/`, `architecture/`, `hygiene/`, `website/`, `checker/`, `meta/`), over a violation/compliant twin in `specs/fixtures/lint-violations/`. The checker's goldens are full snapshots: `specs/lint/checker/expected/*.txt` holds the exact lines the checker prints, including the chapter each message points a consumer at. A message that changes its wording moves its golden with it, in the same commit.
 
 ## Coverage is a ratchet, not a threshold
 

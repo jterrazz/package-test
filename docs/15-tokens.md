@@ -177,12 +177,12 @@ Pass `{ frozen: true }` as the second argument to opt a single fixture out:
 
 ```typescript
 // A deliberately-wrong fixture: its diff rendering is the subject.
-expect(() => expect(result.response).toMatch('wrong-body.http', { frozen: true })).toThrow(
-    /Response mismatch/,
-);
+expect(() =>
+    expect(result.response).toMatchFile('./expected/wrong-body.http', { frozen: true }),
+).toThrow(/Response mismatch/);
 ```
 
-A frozen fixture is **never written** in update mode — a frozen mismatch still throws its diff, and a frozen _missing_ fixture still throws "does not exist" (never created). Its failure says so rather than pointing at update mode: write the file by hand, or drop `{ frozen }` for one `TEST_UPDATE=1` run and put it back. It is available on every fixture subject (`result.response`, `result.stdout`/`result.stderr`, `result.json`, `result.directory`, `result.filesystem`). The static rule `d13w-unfrozen-negative-fixture` flags a `toMatch` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
+A frozen fixture is **never written** in update mode — a frozen mismatch still throws its diff, and a frozen _missing_ fixture still throws "does not exist" (never created). Its failure says so rather than pointing at update mode: write the file by hand, or drop `{ frozen }` for one `TEST_UPDATE=1` run and put it back. It is available on every golden subject (`result.response`, `result.stdout`/`result.stderr`, `result.json`, `result.directory`, `result.filesystem`). The static rule `d13w-unfrozen-negative-fixture` flags a `toMatchFile`/`toMatchDirectory` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
 
 ### The discipline — update mode writes, it does not judge
 
@@ -246,7 +246,7 @@ accept native JSON numbers.
 - **Reading "always-true" as unframed.** `{{any}}` is only unconditional as the _whole_ value. Embedded (`A {{any}} Z`), the frame around it must still match — and a non-string/number actual cannot satisfy an embedded token at all.
 - **Hand-writing values that update mode would tokenize.** Run `TEST_UPDATE=1` first, then tighten: placeholders you wrote once are preserved forever after.
 - **Escaping into `transform` for tokenizable noise.** Only application noise _not_ covered by the grammar justifies a transform (rule D6).
-- **Leaving a deliberately-wrong fixture unfrozen.** A negative test whose `toMatch` asserts a mismatch (wrapped in `expect(() => …).toThrow()` / `.rejects`) must pass `{ frozen: true }` — otherwise `TEST_UPDATE=1` overwrites the wrong fixture with the real output and the assertion silently stops testing anything (rule `d13w-unfrozen-negative-fixture`).
+- **Leaving a deliberately-wrong fixture unfrozen.** A negative test whose golden matcher asserts a mismatch (wrapped in `expect(() => …).toThrow()` / `.rejects`) must pass `{ frozen: true }` — otherwise `TEST_UPDATE=1` overwrites the wrong fixture with the real output and the assertion silently stops testing anything (rule `d13w-unfrozen-negative-fixture`).
 
 ## Related
 

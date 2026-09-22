@@ -69,7 +69,7 @@ Peer dependencies:
 
 **Docker** must be running for container-backed services (`postgres()`, `redis()`). `sqlite()` and plain CLI specs need no Docker.
 
-Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch` types while `toBeEmpty` does not.
+Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatchFile` types while `toBeEmpty` does not.
 
 Everything a spec needs imports from the single package root; the tool subpaths beside it are the ones the `exports` map publishes, and they are listed once — [01 § What the tree publishes](01-architecture.md#what-the-tree-publishes). F1 and F3 read that map, so a specifier it does not publish is refused:
 
@@ -141,10 +141,10 @@ import { api } from '../api.specification.js';
 
 test('creates a user', async () => {
     // Given - empty database
-    const result = await api.request('create-user.http');
+    const result = await api.requestFile('./requests/create-user.http');
 
     // Then - response matches the fixture; row landed in the database
-    expect(result.response).toMatch('user-created.http');
+    expect(result.response).toMatchFile('./expected/user-created.http');
     await expect(result.table('users')).toMatchRows({
         columns: ['name'],
         rows: [['Alice']],
@@ -180,7 +180,7 @@ test('shows help', async () => {
 
     // Then - full snapshot of stdout against expected/help.txt
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toMatch('help.txt');
+    expect(result.stdout).toMatchFile('./expected/help.txt');
 });
 ```
 
@@ -330,7 +330,7 @@ specs/
 │       ├── seeds/                 # *.sql
 │       ├── requests/              # *.http — complete requests (inputs)
 │       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
-│       └── expected/              # all expected fixtures, flat — incl. response *.http (a slash in the name creates a subfolder)
+│       └── expected/              # every golden it reads — incl. response *.http, named in full by each toMatchFile
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)
     └── help/

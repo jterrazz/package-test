@@ -42,10 +42,12 @@ import { integration } from '../integration.specification.js';
 
 test('finds the post the migration wrote', async () => {
     // Given - a seeded database
-    const result = await integration.seed('posts.sql').call(({ db }) => findPost(db, 'p-1'));
+    const result = await integration
+        .seedFile('./seeds/posts.sql')
+        .call(({ db }) => findPost(db, 'p-1'));
 
     // Then - the row comes back as the repository shapes it
-    expect(result.value).toMatch('found.json');
+    expect(result.value).toMatchFile('./expected/found.json');
 });
 ```
 
@@ -65,7 +67,7 @@ test('says how much of the collection the table is showing', async () => {
     });
 
     // Then - the table is qualified by what it is not showing
-    await expect(result.tree).toMatch('one-of-two-hundred.aria.yaml');
+    await expect(result.tree).toMatchFile('./expected/one-of-two-hundred.aria.yaml');
 });
 ```
 
@@ -124,10 +126,12 @@ import { api } from '../api.specification.js';
 
 test('creates a user and returns its location', async () => {
     // Given - an empty users table
-    const result = await api.seed('empty.sql').request('create-user.http');
+    const result = await api
+        .seedFile('./seeds/empty.sql')
+        .requestFile('./requests/create-user.http');
 
     // Then - the response matches the golden, tokens and all
-    expect(result.response).toMatch('user-created.http');
+    expect(result.response).toMatchFile('./expected/user-created.http');
     await expect(result.table('users')).toMatchRows({
         columns: ['name'],
         rows: [['Alice']],
@@ -145,7 +149,7 @@ import { jobs } from '../jobs.specification.js';
 
 test('writes one digest row per active subscriber', async () => {
     // Given - two active subscribers and one cancelled
-    const result = await jobs.seed('subscribers.sql').trigger('daily-digest');
+    const result = await jobs.seedFile('./seeds/subscribers.sql').trigger('daily-digest');
 
     // Then - only the active ones were written
     await expect(result.table('digests')).toMatchRows({
@@ -160,13 +164,14 @@ test('writes one digest row per active subscriber', async () => {
 ```yaml
 # specs/cli/scaffold/new-project.spec.yaml
 description: scaffolds a project into an empty directory
-fixture: empty-dir
+fixture: ./fixtures/empty-dir/
 runs:
     - command: new my-app
-      exitCode: 0
-      stdout: scaffolded.txt
+      exit: 0
+      stdout: |
+          Scaffolded my-app in {{workdir}}/my-app
       files:
-          my-app/package.json: package.json
+          my-app/package.json: exists
 ```
 
 ## The map

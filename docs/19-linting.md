@@ -77,6 +77,8 @@ npx jterrazz-test-check specs
 
 It walks `specs/` (or the path you pass), reports token/reference/cross-file violations, and exits non-zero on an error — wire it into CI next to `oxlint`.
 
+`--fix` applies the rewritable passes, then checks what is left. The first of them is the 16 → 17 mover (C13's fixer): it renames every `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` to its bare name and rewrites each literal call and document to the file verbs — `.seed('x.sql')` → `.seedFile('./seeds/x.sql')`, `.request('x.http')` → `.requestFile('./requests/x.http')`, `.fixture('$FIXTURES/app/')` → `.fixtureDirectory('../../fixtures/app/')`, `toMatch('help.txt')` → `toMatchFile('./expected/help.txt')` when that golden exists, a golden tree → `toMatchDirectory`. Run it once on a 16.x tree, read the diff, and fix by hand what it names and cannot move: a computed argument, a domain named with a reserved word.
+
 ## What oxlint's own `vitest` plugin owns
 
 This catalogue holds only what no upstream rule already holds. Oxlint ships a `vitest` plugin, and `@jterrazz/typescript` turns it on over the test globs in every profile — so a consumer composing `compose(<profile>, testing)` gets both layers and each convention is enforced exactly once.
@@ -424,7 +426,7 @@ What it checks:
 - **the tree passes** — what a folder says about itself, which no single file can answer for: a facet folder holds the runner its name promises (C20), a spec under it reaches that runner (C18), a `.test.ts` under a facet folder wears the wrong word and a `.spec.ts` outside every specs tree wears the other one (C12, fixable), a document is never filed under ground (C16), and ground a single spec of a leaf reads belongs beside that spec (C21w, warning).
 - **J9** — every `checker-disable-next-line` / `checker-disable-line` carries its ` -- <reason>`. The toolchain's own suppression gate reads `oxlint-disable*` and nothing else, so this channel carries its own.
 
-It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). Exit 1 on any error, 0 when only warnings remain.
+It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `fixtures/` trees (verbatim `.fixtureDirectory()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). Exit 1 on any error, 0 when only warnings remain.
 
 ## The member pass, and the JSON contract
 
@@ -456,7 +458,7 @@ The same binary also runs the analyses oxlint structurally cannot — those that
 
 - **C9 — dead fixtures & orphan dirs.** The mirror of C8: a fixture file no test literal references is dead weight, and a domain directory with conventional subdirs but no `*.test.ts` is an orphan. A referenced `expected/<name>/` (or `fixtures/<name>/`) tree counts entirely as used; a `$FIXTURES` pool entry unreferenced across all of `specs/**` is dead. A non-literal fixture argument (a template with an expression, a variable) makes the reference set incomplete, so that feature is downgraded to **warning**.
 - **B5 — await-using (inference).** The **primary** B5 channel. It reads the docker-aware runners straight from the `docker:` option of the imported spec file, then flags every `<runner>….exec()` result bound without `await using`. No hand-maintained runner list — unlike the oxlint rule, which stays for explicitly-configured runners.
-- **A7 — database property.** A spec's `services:` record fixes how many SQL databases exist; the importing tests must (≥ 2) or must not (== 1) pass `{ database }` to every `.seed()` / `.table()`. Non-literal records (a handle variable in `services`) and files importing more than one enforced runner are skipped (ambiguous). Doubled by the runtime channel (the framework throws).
+- **A7 — database property.** A spec's `services:` record fixes how many SQL databases exist; the importing tests must (≥ 2) or must not (== 1) pass `{ database }` to every `.seedFile()` / `.table()`. Non-literal records (a handle variable in `services`) and files importing more than one enforced runner are skipped (ambiguous). Doubled by the runtime channel (the framework throws).
 
 ## The generated catalogue (docs-as-code)
 
@@ -482,7 +484,7 @@ The **cross-file checker passes** carry their own suppression comment (oxlint di
 
 ```typescript
 // checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
-expect(() => api.seed('one-user.sql')).toThrow(/* … */);
+expect(() => api.seedFile('./seeds/one-user.sql')).toThrow(/* … */);
 ```
 
 `// checker-disable-next-line <id>[,<id>] -- reason` suppresses the named passes (`a7`, `b5`, `c9`, or `*`) on the next non-blank line; `// checker-disable-line <id>` suppresses its own line. The text after `--` is stripped before the ids are matched, so it never affects suppression — it is required by house convention (every suppression explains itself), not by the checker. The idiomatic use is a negative spec that deliberately violates a convention to exercise the runtime channel.

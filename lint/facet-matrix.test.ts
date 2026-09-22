@@ -33,8 +33,8 @@ import type { CapabilityGroup, Column, FacetRole } from './facet-matrix.js';
 /**
  * Meta-test (K1 guard) — the capability declaration IS the facet surfaces.
  *
- * The matrix, the eight signature cards and chapter 03's table are all one
- * projection of `CAPABILITIES`, and an agent writes tests from the card. So a
+ * The matrix and chapter 03's table are one projection of `CAPABILITIES`, and
+ * a reader writes tests from the chapter. So a
  * row that names a member no interface has publishes a method that does not
  * exist (`result.json` on an api result once did), and a member with no row
  * hides one that does (`.clock()` and `.headers()` on website did).

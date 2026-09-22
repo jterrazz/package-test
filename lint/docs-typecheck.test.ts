@@ -74,8 +74,8 @@ describe('docs-typecheck — the published samples typecheck', () => {
         // And - the rendered examples are among them: a chapter whose examples
         // Are all JSX must not be the one this guard silently skips
         expect(blocks.some((block) => block.jsx)).toBeTruthy();
-        // And - so are the generated cards: a card an agent copies from is the
-        // One surface nobody proof-reads, so the guard must actually reach it
+        // And - so are the mobile samples: the facet no CI provisions is the
+        // One whose samples nothing else would ever compile
         expect(blocks.some((block) => block.code.includes('specification.mobile'))).toBe(true);
 
         // Then - tsc --noEmit accepts them all (no drift from the real API)

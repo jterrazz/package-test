@@ -8,7 +8,7 @@ import { cell, table } from './catalog.js';
  *
  * Several truths about this package cannot be asserted from outside it, so they
  * are asserted by running it on itself: the catalogue's freshness, the reach of
- * every rule, the capability matrix, the cards, the coverage floor. Chapter 03
+ * every rule, the capability matrix, the skill, the coverage floor. Chapter 03
  * owns the channel — and the table it published was written by hand, so it
  * named eight families while the channel had grown past a dozen files. A page
  * that lags the channel it owns is the defect this generator removes: the rows

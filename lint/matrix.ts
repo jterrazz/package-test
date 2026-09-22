@@ -288,7 +288,7 @@ function filesDirectlyIn(dir: string, extensions: string[]): number {
  *
  * The meta-tests are their own layer rather than a corner of the module tests:
  * they judge the CORPUS — the catalogue's freshness, the reach of every rule,
- * the matrix, the cards, the coverage floor — which is the one thing a module
+ * the matrix, the skill, the coverage floor — which is the one thing a module
  * test beside a module cannot see.
  */
 export function layers(root: string): Layer[] {
@@ -337,7 +337,7 @@ export function layers(root: string): Layer[] {
         },
         {
             count: metaTests,
-            judges: 'the corpus itself: the catalogue, the matrix, the cards, the floor',
+            judges: 'the corpus itself: the catalogue, the matrix, the skill, the floor',
             layer: 'Meta-tests',
             where: '`lint/*.test.ts`',
         },
