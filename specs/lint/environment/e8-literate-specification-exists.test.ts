@@ -7,7 +7,7 @@ describe('lint — e8-literate-specification-exists (CONVENTIONS E8)', () => {
     test('rejects a literate door pointing at no file', async () => {
         // Given - a project violating E8
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e8-literate-specification-exists/')
+            .fixtureDirectory('../../fixtures/lint-violations/e8-literate-specification-exists/')
             .exec('.');
 
         // Then - the diagnostic names the rule
@@ -20,9 +20,7 @@ describe('lint — e8-literate-specification-exists (CONVENTIONS E8)', () => {
     test('accepts a literate door that resolves', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory(
-                '../../_fixtures/lint-violations/e8-literate-specification-exists-ok/',
-            )
+            .fixtureDirectory('../../fixtures/lint-violations/e8-literate-specification-exists-ok/')
             .exec('.');
 
         // Then - clean exit, no E8 diagnostic

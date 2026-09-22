@@ -407,7 +407,7 @@ export async function ariaTree(): Promise<string> {
     return await commands.ariaTree();
 }
 
-/** A golden's content, read server-side from `_expected/` beside the test. */
+/** A golden's content, read server-side from `expected/` beside the test. */
 export async function readGolden(name: string): Promise<null | string> {
     return await commands.goldenRead(name);
 }

@@ -223,7 +223,7 @@ export const RULE_DOCS = {
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth, a `*.specification.ts` at the facet root), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. A first-level folder that is no facet — a repository suite, `surface/` or `lint/` — is judged by the same depth as a facet is. In every mode, `off` included: a directory with a leading underscore is GROUND, never a domain — no spec lives inside one. One exception, and only one: ground may be CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is I2). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — I2 holds its neighbourhood.',
+            'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth, a `*.specification.ts` at the facet root), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. A first-level folder that is no facet — a repository suite, `surface/` or `lint/` — is judged by the same depth as a facet is. In every mode, `off` included: a directory named `fixtures/`, `expected/`, `requests/` or `seeds/` is GROUND, never a facet, domain or suite folder — no spec lives inside one, so a domain named with a reserved word is refused. One exception, and only one: ground may be CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is I2). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — I2 holds its neighbourhood.',
         facet: 'model',
         family: 'C',
         fix: 'Move the file to the depth the tree declares, or declare the depth the tree actually has.',
@@ -255,24 +255,24 @@ export const RULE_DOCS = {
             'Data exists only as served by a contract — a file with no owner is dead weight no test ever loads.',
         reach: 'contract',
     },
-    'c13-underscored-ground': {
+    'c13-bare-ground': {
         channel: 'statique',
         convention:
-            "Under `specs/`, a spec's ground carries a leading underscore: `_fixtures/`, `_expected/`, `_requests/`, `_seeds/`. A `fixtures/`, `expected/`, `requests/` or `seeds/` directory is a pre-14 name — an error naming the rename.",
+            "Under `specs/`, a spec's ground carries a bare, reserved name: `fixtures/`, `expected/`, `requests/`, `seeds/`. An `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` directory is the 16.x name — an error naming the rename.",
         facet: 'model',
         family: 'C',
-        fix: 'Rename the directory with the leading underscore the resolvers read.',
+        fix: 'Rename the directory to its bare name, and the paths that name it (`jterrazz-test-check specs --fix` does both).',
         id: 'C13',
         rationale:
-            'No resolver reads the underscore-less name any more: left as is, the tree goes invisible rather than wrong, and the failure lands one step past its cause.',
+            'Every path names its folder in full, so the old name still runs — and a repository that keeps it speaks two dialects of one law. The rule names the rename instead of letting the two drift.',
         reach: 'specs',
     },
     'c2-http-only-requests': {
         channel: 'statique',
-        convention: '`_requests/` holds `.http` files only; any other extension is an error.',
+        convention: '`requests/` holds `.http` files only; any other extension is an error.',
         facet: 'api',
         family: 'C',
-        fix: 'Write the request as a complete `.http` document, or move the file to `_fixtures/`.',
+        fix: 'Write the request as a complete `.http` document, or move the file to `fixtures/`.',
         id: 'C2',
         rationale:
             'A request input is a complete `.http` — one format per folder forbids ad-hoc ones.',
@@ -304,10 +304,10 @@ export const RULE_DOCS = {
     },
     'c7-seeds-sql-only': {
         channel: 'statique',
-        convention: '`_seeds/` holds `*.sql` files only; any other file is an error.',
+        convention: '`seeds/` holds `*.sql` files only; any other file is an error.',
         facet: 'model',
         family: 'C',
-        fix: 'Write the seed as SQL, or move the file to `_fixtures/` as the material it is.',
+        fix: 'Write the seed as SQL, or move the file to `fixtures/` as the material it is.',
         id: 'C7',
         rationale:
             '`.seedFile()` carries database state only — no seed handlers, no prefix dispatch.',
@@ -486,10 +486,10 @@ export const RULE_DOCS = {
             'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator, through a `satisfies`/`as` annotation, and through one `mergeConfig(defineSpecConfig(…), …)` — vitest’s own way of layering over the preset.',
         facet: 'model',
         family: 'E',
-        fix: "Start from `defineSpecConfig()` — budgets, the artefact dir and the `_fixtures` exclusion are the preset's.",
+        fix: "Start from `defineSpecConfig()` — budgets, the artefact dir and the ground exclusion are the preset's.",
         id: 'E2',
         rationale:
-            "A config off the preset runs on vitest's five-second budget, writes artefacts at the repository root and collects `_fixtures/` as specs — none of it visible in the file that caused it.",
+            "A config off the preset runs on vitest's five-second budget, writes artefacts at the repository root and collects `fixtures/` as specs — none of it visible in the file that caused it.",
         reach: 'config',
     },
     'e4w-project-binding': {
@@ -752,7 +752,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A `<case>.spec.yaml` is a SPEC, not ground: a document under `_expected/`, `_requests/`, `_seeds/` or `_fixtures/` is an error.',
+            'A `<case>.spec.yaml` is a SPEC, not ground: a document under `expected/`, `requests/`, `seeds/` or `fixtures/` is an error.',
         facet: 'cli',
         family: 'C',
         fix: 'Move the document beside the test that runs it.',
@@ -765,7 +765,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A test under `specs/<facet>/`, where the facet root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a leading-underscore folder is a spec, a `.test.ts` under `_expected/` being the GOLDEN a fixer writes. So is any first-level folder that is not a facet: a specification with no module to sit beside and no runner to reach lives in a repository suite there.',
+            'A test under `specs/<facet>/`, where the facet root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder is a spec, a `.test.ts` under `expected/` being the GOLDEN a fixer writes. So is any first-level folder that is not a facet: a specification with no module to sit beside and no runner to reach lives in a repository suite there.',
         facet: 'model',
         family: 'C',
         fix: 'Import `{ <facet> }` from `<facet>.specification.js`, move a module test beside its module, or move a repository suite to a first-level folder of its own under `specs/`.',
@@ -791,7 +791,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A `_seeds/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
+            "A `seeds/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
         facet: 'model',
         family: 'C',
         fix: "Write the instant the case is about, and pin the run's clock with `.clock()` on the chain.",
@@ -833,11 +833,11 @@ export const CHECKER_PASSES: CatalogEntry[] = [
             'Every workspace member with tests OF ITS OWN (a `test` script that does not delegate to members, or a `*.test.ts(x)` outside another package’s tree) declares a vitest config (`vitest.config.*`). The MEMBER pass judges the member itself, with or without a `specs/` root; a root that only delegates owes nothing.',
         facet: 'model',
         family: 'E',
-        fix: 'Write `export default defineSpecConfig()` in the member — the preset carries the budgets, the artefact directory and the `_fixtures/` exclusion.',
+        fix: 'Write `export default defineSpecConfig()` in the member — the preset carries the budgets, the artefact directory and the ground exclusion.',
         id: 'E3',
         name: 'e3-config-present',
         rationale:
-            "Without a config, vitest's 5 s budget and an unexcluded `_fixtures/` are running the member's tests: the default is not chosen, it is inherited.",
+            "Without a config, vitest's 5 s budget and unexcluded ground folders are running the member's tests: the default is not chosen, it is inherited.",
         reach: 'member',
     },
     {
@@ -869,7 +869,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Every `{{token}}` in an `_expected/` fixture — or in an expected stream of a `<case>.spec.yaml` document — belongs to the frozen vocabulary; an unknown token is an error.',
+            'Every `{{token}}` in an `expected/` fixture — or in an expected stream of a `<case>.spec.yaml` document — belongs to the frozen vocabulary; an unknown token is an error.',
         facet: 'model',
         family: 'D',
         fix: 'Write a token the grammar knows; the message prints the full list.',
@@ -882,7 +882,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A malformed ref of a known kind (`{{iso8601#}}`, `{{uuid #id}}`) in a text file under `_expected/` is an error.',
+            'A malformed ref of a known kind (`{{iso8601#}}`, `{{uuid #id}}`) in a text file under `expected/` is an error.',
         facet: 'model',
         family: 'D',
         fix: 'Write `{{kind#name}}` with no space, and a name for the ref.',
@@ -894,7 +894,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`) under `_requests/`, a status line (`HTTP/1.1 <status>`) under `_expected/`.',
+            'The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`) under `requests/`, a status line (`HTTP/1.1 <status>`) under `expected/`.',
         facet: 'api',
         family: 'D',
         fix: 'Write the opening line the folder calls for, or move the file to the other one.',
@@ -984,7 +984,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `_expected/`. A `{{token}}` is not a literal, and neither is a value the DOCUMENT pinned: in a stream, a word the same document states in a command argument, an `env:`/`serve:` value, a `stdin:`, a `fixture:` it names or its own sibling `_fixtures/` is excluded before it is judged.',
+            'No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `expected/`. A `{{token}}` is not a literal, and neither is a value the DOCUMENT pinned: in a stream, a word the same document states in a command argument, an `env:`/`serve:` value, a `stdin:`, a `fixture:` it names or its own sibling `fixtures/` is excluded before it is judged.',
         facet: 'cli',
         family: 'D',
         fix: 'Write the token the message names — `{{workdir}}`, `{{url}}` — in place of the literal.',
@@ -997,7 +997,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for D21w, whose criterion chapter 18 carries.",
+            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `expected/` the same class waits for D21w, whose criterion chapter 18 carries.",
         facet: 'cli',
         family: 'D',
         fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
@@ -1048,7 +1048,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A known token in a file under `_requests/` → warning: requests are inputs, never matched.',
+            'A known token in a file under `requests/` → warning: requests are inputs, never matched.',
         facet: 'api',
         family: 'D',
         fix: 'Write the literal value the request actually sends.',
@@ -1061,7 +1061,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'No dead fixtures: every file under `_seeds/`/`_requests/`/`_fixtures/` and every top-level entry of `_expected/` must be referenced; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the fixtures its `fixture:` entries name.',
+            'No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the fixtures its `fixture:` entries name.',
         facet: 'model',
         family: 'C',
         fix: 'Reference it from the spec it stands under, or delete it.',
@@ -1074,7 +1074,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A pool fixture is SHARED, or it is local: a directory of `<specs>/_fixtures/` referenced (`$FIXTURES/<name>`) from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/_fixtures/<name>/`, referenced by the relative form. Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved and the literals rewritten.',
+            'A pool fixture is SHARED, or it is local: a directory of the pool `<specs>/fixtures/` reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/fixtures/<name>/`, named by the path from the leaf (`./fixtures/<name>/`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved and the literals rewritten.',
         facet: 'model',
         family: 'C',
         fix: 'Run `jterrazz-test-check <root> --fix`; it moves the directory and rewrites what named it.',
@@ -1087,10 +1087,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A local fixture is read only from its own directory: a `fixture:`/`.fixture()` path containing `..`, or whose target leaves the `_fixtures/` of the spec naming it, is an error — ground shared by several leaves goes in the `$FIXTURES` pool.',
+            "A path leaves its leaf only into the pool: a path a file verb or a document's `fixture:` names, whose target is neither under the spec's own directory nor under `<specs>/fixtures/`, is an error — ground shared by several leaves goes in the pool.",
         facet: 'model',
         family: 'C',
-        fix: "Copy it under this leaf's own `_fixtures/`, or promote it to the pool.",
+        fix: "Copy it under this leaf's own ground, or promote it to the pool at `specs/fixtures/`.",
         id: 'C15',
         name: 'c15-local-fixture-reach',
         rationale:
@@ -1435,7 +1435,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            'An `_expected/*.http` starts with a status line, and its headers are matched as a SUBSET: the ones listed must match, unlisted response headers are unconstrained.',
+            'An `expected/*.http` starts with a status line, and its headers are matched as a SUBSET: the ones listed must match, unlisted response headers are unconstrained.',
         facet: 'api',
         family: 'C',
         fix: 'List the headers the case is about; leave the rest out.',

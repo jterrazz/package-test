@@ -8,7 +8,7 @@
         "src/lint/catalog-cli.ts",
         "src/lint/coverage-cli.ts"
     ],
-    "ignore": ["specs/_fixtures/**"],
+    "ignore": ["specs/**/{fixtures,expected,seeds,requests}/**", "src/**/{fixtures,expected}/**"],
     // Knip's oxlint plugin reads `oxlint.config.ts` and asks this package to
     // Declare every lint plugin the composed rulebook names. They are
     // `@jterrazz/typescript`'s: this config composes its fragments and holds no

@@ -76,7 +76,7 @@ export const { cleanup, jobs } = await specification.jobs({
             name: 'enrich-from-api',
         },
     ],
-    root: '../_fixtures/app',
+    root: '../fixtures/app',
     services: {
         analyticsDb: analyticsHandle,
         db: postgres(),

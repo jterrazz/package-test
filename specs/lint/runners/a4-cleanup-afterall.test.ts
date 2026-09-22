@@ -7,7 +7,7 @@ describe('lint — a4-cleanup-afterall (CONVENTIONS A4)', () => {
     test('rejects a specification file that never registers cleanup with afterAll', async () => {
         // Given - a project violating A4
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/a4-cleanup-afterall/')
+            .fixtureDirectory('../../fixtures/lint-violations/a4-cleanup-afterall/')
             .exec('.');
 
         // Then - oxlint reports the a4-cleanup-afterall diagnostic
@@ -18,7 +18,7 @@ describe('lint — a4-cleanup-afterall (CONVENTIONS A4)', () => {
     test('accepts a specification file calling afterAll(cleanup)', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/a4-cleanup-afterall-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/a4-cleanup-afterall-ok/')
             .exec('.');
 
         // Then - clean run, no a4-cleanup-afterall diagnostic

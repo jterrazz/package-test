@@ -9,22 +9,22 @@ describe('lint — c23-seed-no-clock-read (CONVENTIONS C23)', () => {
     test('rejects every spelling of a clock read, and reads past a comment', async () => {
         // Given - a seed writing `datetime('now', …)`, `CURRENT_TIMESTAMP` and `NOW()`, under a comment that names one of them
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/c23-seed-no-clock-read/')
+            .fixtureDirectory('../../fixtures/lint-violations/c23-seed-no-clock-read/')
             .exec('specs');
 
         // Then - three findings, one per row, and none for the comment
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./_expected/c23-seed-no-clock-read.txt');
+        expect(result.stderr).toMatchFile('./expected/c23-seed-no-clock-read.txt');
     });
 
     test('accepts a seed that states the instants the case is about', async () => {
         // Given - the compliant twin, whose chain pins the run's clock instead
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/c23-seed-no-clock-read-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/c23-seed-no-clock-read-ok/')
             .exec('specs');
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./_expected/c23-seed-no-clock-read-ok.txt');
+        expect(result.stdout).toMatchFile('./expected/c23-seed-no-clock-read-ok.txt');
     });
 });

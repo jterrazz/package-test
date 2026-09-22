@@ -9,13 +9,13 @@ import { afterAll } from 'vitest';
 export const { cleanup, website } = await specification.website({
     server: ({ api }) =>
         processService({
-            command: 'node specs/_fixtures/website-app/server.mjs',
+            command: 'node specs/fixtures/website-app/server.mjs',
             env: { API_URL: api.connectionString },
             ready: '/',
         }),
     services: {
         api: processService({
-            command: 'node specs/_fixtures/api-app/server.mjs',
+            command: 'node specs/fixtures/api-app/server.mjs',
             ready: '/health',
         }),
     },

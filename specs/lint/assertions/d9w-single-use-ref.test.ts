@@ -7,7 +7,7 @@ describe('lint — d9w-single-use-ref (CONVENTIONS D9)', () => {
     test('warns on a single-use capture ref', async () => {
         // Given - a project tripping the D9 heuristic
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d9w-single-use-ref/')
+            .fixtureDirectory('../../fixtures/lint-violations/d9w-single-use-ref/')
             .exec('.');
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — d9w-single-use-ref (CONVENTIONS D9)', () => {
     test('stays silent for a plain matcher', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d9w-single-use-ref-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d9w-single-use-ref-ok/')
             .exec('.');
 
         // Then - clean run, no d9w-single-use-ref diagnostic

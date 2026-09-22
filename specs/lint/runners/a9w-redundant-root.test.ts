@@ -7,7 +7,7 @@ describe('lint — a9w-redundant-root (CONVENTIONS A9)', () => {
     test('warns when root points at the directory the walk-up already finds', async () => {
         // Given - a project violating A9
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/a9w-redundant-root/')
+            .fixtureDirectory('../../fixtures/lint-violations/a9w-redundant-root/')
             .exec('.');
 
         // Then - oxlint reports the a9w-redundant-root diagnostic warnings do not fail the run - the diagnostic is advisory
@@ -18,7 +18,7 @@ describe('lint — a9w-redundant-root (CONVENTIONS A9)', () => {
     test('stays silent without a root override', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/a9w-redundant-root-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/a9w-redundant-root-ok/')
             .exec('.');
 
         // Then - clean run, no a9w-redundant-root diagnostic

@@ -58,9 +58,9 @@ specs/
 │   ├── intercepts.specification.ts
 │   └── requests/                     # a domain
 │       ├── requests.spec.ts
-│       ├── _requests/                # ground: complete requests, *.http
-│       └── _expected/                # ground: every expected fixture, flat
-└── _fixtures/                        # the SHARED pool, reached as $FIXTURES/…
+│       ├── requests/                # ground: complete requests, *.http
+│       └── expected/                # ground: every expected fixture, flat
+└── fixtures/                        # the SHARED pool, reached as $FIXTURES/…
 ```
 
 **A domain shared by two facets carries the same name in both.** Six
@@ -86,7 +86,7 @@ a declared name nothing carries fails too.
 
 | Facet         | Shared domains it carries                                        | Its own                                               |
 | ------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
-| `api`         | `assertions/`, `clock/`, `intercepts/`, `lifecycle/`, `seeding/` | `initiation-errors/`, `requests/`, `responses/`       |
+| `api`         | `assertions/`, `clock/`, `intercepts/`, `lifecycle/`, `seeding/` | `initiation-errors/`, `responses/`, `sending/`        |
 | `cli`         | `assertions/`, `seeding/`, `tokens/`                             | `directory/`, `docker/`, `env/`, `exec/`, `literate/` |
 | `integration` | `clock/`, `intercepts/`                                          | `call/`, `golden/`, `postgres/`, `redis/`             |
 | `jobs`        | —                                                                | `triggering/`                                         |
@@ -98,7 +98,7 @@ A test at a facet root is forbidden and a `*.specification.ts` inside a domain i
 
 The fixture apps the specs drive live in the pool: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, the `broken-*` trees for the infrastructure failure paths, and `lint-violations/` — a violation/compliant twin per lint rule.
 
-**The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component-app/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel, a responsive note, a control that refuses input and a pair of links whose names overlap. It is not under `_fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
+**The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component-app/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel, a responsive note, a control that refuses input and a pair of links whose names overlap. It is not under `fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
 ## The layered reading
 
@@ -112,7 +112,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
 | The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 67    |
 | The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 87    |
-| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 18    |
+| Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 19    |
 
 <!-- /GENERATED:layers -->
 
@@ -122,7 +122,7 @@ The counts are generated: a layer that stops growing while the surface does is v
 
 `specs/lint/**` runs the REAL oxlint binary and the real checker over the fixture projects and goldens their output, grouped by convention family (`runners/`, `chains/`, `files/`, `assertions/`, `imports/`, `architecture/`, `hygiene/`, `website/`, `checker/`, `meta/`). Because it loads `dist/oxlint.js`, `npm run build` must precede it — the same ordering `npm run lint` depends on.
 
-Its goldens are full snapshots, not greps: `specs/lint/checker/_expected/*.txt` holds the exact lines the checker prints, including the chapter each message points a consumer at. A message that changes its wording moves its golden with it, in the same commit.
+Its goldens are full snapshots, not greps: `specs/lint/checker/expected/*.txt` holds the exact lines the checker prints, including the chapter each message points a consumer at. A message that changes its wording moves its golden with it, in the same commit.
 
 ## Coverage is a ratchet, not a threshold
 
@@ -165,7 +165,7 @@ honestly: is this change worse than the last one?
 
 What the report EXCLUDES is the shape of the answer, not a way to raise the
 number: `node_modules/` (Browser Mode instruments the page's bundle, and
-react-dom alone is 19 000 statements), `specs/` and `_fixtures/` (a spec is a
+react-dom alone is 19 000 statements), `specs/` and `fixtures/` (a spec is a
 test and the app it drives is ground), the type-only and config files.
 
 ## Modules with no sibling test
@@ -369,13 +369,13 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability           | api | jobs | cli | integration | website | mobile | component | module |
 | -------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 10     |
-| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 5      |
+| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 11     |
+| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 6      |
 | `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
-| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 8      |
+| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 9      |
 | `.aria.yaml tree`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 10     |
-| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 13     |
+| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 14     |
 | `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
@@ -431,7 +431,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: src/lint/meta-tests.ts -->
 
-**19 files** are the channel — every `*.test.ts` directly under `src/lint/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**20 files** are the channel — every `*.test.ts` directly under `src/lint/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                   | Holds                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Tests |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
@@ -439,6 +439,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `src/lint/cards.test.ts`                    | signature cards — generation freshness (meta-test) · signature cards — completeness against the facet declaration (meta-test) · the skill routes to the cards (meta-test) · signature cards — what a card says                                                                                                                                                                                                                                                                                       | 15    |
 | `src/lint/checker-crossfile.test.ts`        | checker suppression — suppressedLines (checker-disable comments)                                                                                                                                                                                                                                                                                                                                                                                                                                     | 9     |
 | `src/lint/checker-member.test.ts`           | the member pass — what a workspace member owes                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 18    |
+| `src/lint/checker-migration.test.ts`        | the 16 → 17 mover (C13 --fix)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3     |
 | `src/lint/checker-spec.test.ts`             | fixSpecDocument — key order and block scalars                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5     |
 | `src/lint/checker.test.ts`                  | conventions checker — findUnknownTokens (D4) · conventions checker — findKnownTokens (D10) · conventions checker — checkConventionFiles (D4)                                                                                                                                                                                                                                                                                                                                                         | 8     |
 | `src/lint/coverage.test.ts`                 | the coverage ratchet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 8     |
@@ -487,7 +488,7 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 ## Pitfalls
 
 - **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.
-- **Hand-editing a golden under `specs/lint/checker/_expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
+- **Hand-editing a golden under `specs/lint/checker/expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
 - **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs` and `integration` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.spec.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
 - **Writing a facet spec with the unit’s suffix.** `c12-spec-file-name` refuses it and `jterrazz-test-check specs --fix` renames it with `git mv` — and names every `include`/`exclude` entry of the member the rename broke — the globs whose prefix covers a file it moved and the literals naming one — since an entry the rename leaves behind collects nothing and the run stays green with fewer files. The reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.

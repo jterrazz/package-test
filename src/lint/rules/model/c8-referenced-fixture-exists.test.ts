@@ -18,39 +18,39 @@ const ruleTester = new RuleTester();
 const SPECS = resolve(import.meta.dirname, '../../../../specs');
 const EXEC = `${SPECS}/cli/exec/exec.spec.ts`;
 const SEEDING = `${SPECS}/cli/seeding/seeding.spec.ts`;
-const REQUESTS = `${SPECS}/api/requests/requests.spec.ts`;
+const REQUESTS = `${SPECS}/api/sending/sending.spec.ts`;
 const DIRECTORY = `${SPECS}/cli/directory/directory.spec.ts`;
 
 ruleTester.run('c8-referenced-fixture-exists', c8ReferencedFixtureExists as unknown as OxlintRule, {
     invalid: [
         {
-            code: 'expect(result.stdout).toMatchFile("./_expected/missing.txt");',
+            code: 'expect(result.stdout).toMatchFile("./expected/missing.txt");',
             errors: 1,
             filename: EXEC,
         },
-        { code: 'cli.seedFile("./_seeds/ghost.sql");', errors: 1, filename: SEEDING },
-        { code: 'api.requestFile("./_requests/ghost.http");', errors: 1, filename: REQUESTS },
-        { code: 'cli.fixtureFile("./_fixtures/ghost.txt");', errors: 1, filename: SEEDING },
+        { code: 'cli.seedFile("./seeds/ghost.sql");', errors: 1, filename: SEEDING },
+        { code: 'api.requestFile("./requests/ghost.http");', errors: 1, filename: REQUESTS },
+        { code: 'cli.fixtureFile("./fixtures/ghost.txt");', errors: 1, filename: SEEDING },
         // The pool, reached by the path that climbs to it — and the entry is not there.
-        { code: 'cli.fixtureDirectory("../../_fixtures/ghost/");', errors: 1, filename: EXEC },
+        { code: 'cli.fixtureDirectory("../../fixtures/ghost/");', errors: 1, filename: EXEC },
         // The verb states the kind: a directory is not a file, a file is not a tree.
-        { code: 'cli.fixtureFile("../../_fixtures/cli-app");', errors: 1, filename: EXEC },
+        { code: 'cli.fixtureFile("../../fixtures/cli-app");', errors: 1, filename: EXEC },
         {
-            code: 'await expect(result.filesystem).toMatchDirectory("./_expected/help.txt/");',
+            code: 'await expect(result.filesystem).toMatchDirectory("./expected/help.txt/");',
             errors: 1,
             filename: EXEC,
         },
     ],
     valid: [
-        { code: 'expect(result.stdout).toMatchFile("./_expected/help.txt");', filename: EXEC },
+        { code: 'expect(result.stdout).toMatchFile("./expected/help.txt");', filename: EXEC },
         {
-            code: 'await expect(result.directory("out")).toMatchDirectory("./_expected/cli-scaffold/out/");',
+            code: 'await expect(result.directory("out")).toMatchDirectory("./expected/cli-scaffold/out/");',
             filename: DIRECTORY,
         },
-        { code: 'cli.seedFile("./_seeds/users.sql");', filename: SEEDING },
-        { code: 'api.requestFile("./_requests/create-user.http");', filename: REQUESTS },
-        { code: 'cli.fixtureFile("./_fixtures/note.txt");', filename: SEEDING },
-        { code: 'cli.fixtureDirectory("../../_fixtures/cli-app/");', filename: EXEC },
+        { code: 'cli.seedFile("./seeds/users.sql");', filename: SEEDING },
+        { code: 'api.requestFile("./requests/create-user.http");', filename: REQUESTS },
+        { code: 'cli.fixtureFile("./fixtures/note.txt");', filename: SEEDING },
+        { code: 'cli.fixtureDirectory("../../fixtures/cli-app/");', filename: EXEC },
         // Not a relative path — the type's refusal (B2), not existence.
         { code: 'cli.seedFile("users.sql");', filename: SEEDING },
         // Non-literal argument is out of static reach — skipped.

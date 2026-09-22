@@ -364,7 +364,7 @@ function configPresent(
             file: join(label, 'package.json'),
             line: 1,
             message:
-                `${subject}: no vitest.config.ts — vitest's 5 s budget and an unexcluded \`_fixtures/\` ` +
+                `${subject}: no vitest.config.ts — vitest's 5 s budget and an unexcluded \`fixtures/\` ` +
                 `are running your tests; write \`export default defineSpecConfig()\` ` +
                 `(E3 — see docs/19-linting.md#e3-config-present)`,
             rule: 'e3',

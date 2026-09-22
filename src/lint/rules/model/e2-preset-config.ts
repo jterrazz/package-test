@@ -63,7 +63,7 @@ function startsFromThePreset(node: AstNode | undefined): boolean {
 /**
  * CONVENTIONS E2 — a `vitest.config.*` starts from `defineSpecConfig()`.
  *
- * The preset is where the budgets, the artefact directories, the `_fixtures/`
+ * The preset is where the budgets, the artefact directories, the ground
  * exclusion and the Vitest 5 paths live; a config that starts from `defineConfig`
  * runs the same tests with vitest's five-second budget, writes its attachments
  * at the repository root, and collects the ground its specs stand on as specs.
@@ -102,7 +102,7 @@ export const e2PresetConfig: LintRule = {
         docs: RULE_DOCS['e2-preset-config'],
         messages: {
             offPreset:
-                "Start from `defineSpecConfig()` — budgets, the artefact dir and the `_fixtures` exclusion are the preset's.",
+                "Start from `defineSpecConfig()` — budgets, the artefact dir and the ground exclusion are the preset's.",
         },
         type: 'problem',
     },

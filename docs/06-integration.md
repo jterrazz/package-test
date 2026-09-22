@@ -57,7 +57,7 @@ Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.call(subject)`
 
 | Setup                            | Means                                                                                           |
 | -------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `.seed('rows.sql')`              | run `_seeds/rows.sql` before the call; `{ database }` targets one of several                    |
+| `.seed('rows.sql')`              | run `seeds/rows.sql` before the call; `{ database }` targets one of several                     |
 | `.intercept(contracts)`          | declare what the outside world replies ([16](16-contracts.md))                                  |
 | `.clock('2026-03-04T09:30:00Z')` | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths)) |
 
@@ -107,7 +107,7 @@ That is what keeps a spec of a refusal the same size as a spec of a success, and
 const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
 ```
 
-Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch('<name>.json'|'<name>.txt')` under `_expected/`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([15](15-tokens.md), [14](14-assertions.md)).
+Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch('<name>.json'|'<name>.txt')` under `expected/`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([15](15-tokens.md), [14](14-assertions.md)).
 
 A call that a declared contract never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule D7).
 
@@ -134,7 +134,7 @@ test.each(CASES)('renders $name', async ({ name, input }) => {
 });
 ```
 
-The golden is named by a template literal, and the checker's C9 dead-fixture pass reads that form: a fixture whose name matches the literal's static ends is one the table could have asked for, so a wall of `_expected/` files stays alive without a hand-written literal each.
+The golden is named by a template literal, and the checker's C9 dead-fixture pass reads that form: a fixture whose name matches the literal's static ends is one the table could have asked for, so a wall of `expected/` files stays alive without a hand-written literal each.
 
 ### The `integration()` project
 
@@ -162,8 +162,8 @@ specs/integration/
 ├── pure.specification.ts          # a second runner: no services, goldens only
 └── orders/                        # a domain
     ├── orders.spec.ts             # under specs/, the suffix is .spec.ts (rule C12)
-    ├── _seeds/two-orders.sql      # ground: database state
-    └── _expected/                 # ground: every expected fixture, flat
+    ├── seeds/two-orders.sql      # ground: database state
+    └── expected/                 # ground: every expected fixture, flat
 ```
 
 **`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the contracts it declared are checked when that call ends, and a contract declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification — it does not inherit the first's obligations.

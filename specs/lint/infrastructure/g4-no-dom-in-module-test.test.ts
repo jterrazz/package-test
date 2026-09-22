@@ -7,7 +7,7 @@ describe('lint — g4-no-dom-in-module-test (CONVENTIONS G4)', () => {
     test('rejects a DOM global in a module test', async () => {
         // Given - a `.test.ts` reaching for `document`
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/g4-no-dom-in-module-test/')
+            .fixtureDirectory('../../fixtures/lint-violations/g4-no-dom-in-module-test/')
             .exec('.');
 
         // Then - oxlint reports the g4-no-dom-in-module-test diagnostic
@@ -18,7 +18,7 @@ describe('lint — g4-no-dom-in-module-test (CONVENTIONS G4)', () => {
     test('accepts the same document where the kind has one', async () => {
         // Given - the compliant twin: the rendered kind, a `.test.tsx`
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/g4-no-dom-in-module-test-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/g4-no-dom-in-module-test-ok/')
             .exec('.');
 
         // Then - clean run, no g4-no-dom-in-module-test diagnostic

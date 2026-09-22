@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import { isGroundName } from '../model/chain/ground.js';
 import { isUnderSpecs } from './ast.js';
 import { reachesRunner } from './checker-facets.js';
 import type { TokenViolation } from './checker.js';
@@ -185,7 +186,7 @@ export function movesUnderFacet(specsRoot: string): PlacementMove[] {
         }
         // A `<module>.test.ts` beside the `<module>.ts` it covers is I2's one
         // Pairing, legal anywhere — ground that is CODE keeps its unit test.
-        if (parts.some((part) => part.startsWith('_'))) {
+        if (parts.some((part) => isGroundName(part))) {
             continue;
         }
         // A file that reaches no runner is C18's, and C18 says to MOVE it

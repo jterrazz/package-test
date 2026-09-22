@@ -2,7 +2,7 @@ import type { Dirent } from 'node:fs';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { GROUND_DIRS, GROUND_FIXTURES } from '../model/chain/ground.js';
+import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../model/chain/ground.js';
 import type { TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 
@@ -28,18 +28,15 @@ export const FACETS: string[] = ['api', 'cli', 'integration', 'jobs', 'mobile', 
 /**
  * Directories no facet walk enters.
  *
- * The `$FIXTURES` pool is verbatim material — the reusable apps AND the trees
+ * The pool (`specs/fixtures/`) is verbatim material — the reusable apps AND the trees
  * that fail on purpose — never live specs, so every pass prunes it exactly as
  * the token checker does.
  */
 const SKIPPED = new Set(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
-/**
- * Does this facet-relative path cross ground? A LEADING underscore names it —
- * the four ground directories and nothing else carry one (C13).
- */
+/** Does this facet-relative path cross ground — a folder with one of the four reserved names? */
 function isUnderGround(relativePath: string): boolean {
-    return relativePath.split(/[/\\]/u).some((segment) => segment.startsWith('_'));
+    return relativePath.split(/[/\\]/u).some((segment) => isGroundName(segment));
 }
 
 /** `readdirSync` that answers `[]` for anything it cannot read. */
@@ -176,8 +173,8 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
                 continue;
             }
             // Ground is ground, whichever of the four names it carries: a
-            // `.test.ts` under `_expected/` is a GOLDEN — the file a fixer is
-            // Expected to produce — and one under `_fixtures/` is the input of
+            // `.test.ts` under `expected/` is a GOLDEN — the file a fixer is
+            // Expected to produce — and one under `fixtures/` is the input of
             // That same golden. Neither is a spec, and neither reaches a runner
             // By construction.
             if (isUnderGround(relative(path, file))) {
@@ -223,14 +220,14 @@ const GROUND = new Set<string>(GROUND_DIRS);
  *
  * Such a test reads whatever the table hands it, so the names under the ground
  * appear nowhere in its source. It is a reader of every golden in its leaf,
- * and counting it as none made a shared `_expected/` read as one spec's own.
+ * and counting it as none made a shared `expected/` read as one spec's own.
  */
 const COMPUTED_GOLDEN = /\.toMatch(?:File|Directory)\(\s*(?:`|[A-Za-z_$])/u;
 
 /**
  * C21w (warning) — ground a single spec reads belongs to that spec.
  *
- * A leaf holding several specs and one `_expected/` that only one of them
+ * A leaf holding several specs and one `expected/` that only one of them
  * names reads as shared material: the next author assumes someone else depends
  * on it and nobody dares touch it. The fix is C1's — the spec that stands on
  * its own ground earns its own domain folder.

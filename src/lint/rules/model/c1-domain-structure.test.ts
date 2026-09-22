@@ -181,10 +181,10 @@ function groundTree(files: Record<string, string>): string {
 const CODE_GROUND = groundTree({
     // Ground that is CODE: the build of the subject under test, with its own
     // Unit test beside it — and a spec that only wandered in.
-    'cli/_binary/binary.test.ts': '',
-    'cli/_binary/binary.ts': '',
-    'cli/_binary/orphan.test.ts': '',
-    'cli/_binary/binary.specification.ts': '',
+    'cli/fixtures/binary/binary.test.ts': '',
+    'cli/fixtures/binary/binary.ts': '',
+    'cli/fixtures/binary/orphan.test.ts': '',
+    'cli/fixtures/binary/binary.specification.ts': '',
 });
 
 ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as OxlintRule, {
@@ -193,29 +193,35 @@ ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as O
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
-            filename: `${CODE_GROUND}/cli/_binary/orphan.test.ts`,
+            filename: `${CODE_GROUND}/cli/fixtures/binary/orphan.test.ts`,
         },
         // A runner never belongs to the ground, module beside it or not.
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
-            filename: `${CODE_GROUND}/cli/_binary/binary.specification.ts`,
+            filename: `${CODE_GROUND}/cli/fixtures/binary/binary.specification.ts`,
         },
         // The clause holds in every mode, `off` included.
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
-            filename: `${CODE_GROUND}/cli/_binary/orphan.test.ts`,
+            filename: `${CODE_GROUND}/cli/fixtures/binary/orphan.test.ts`,
             options: [{ depth: 'off' }],
         },
+        // The four names are reserved: a domain named with one is ground, and refused.
+        ...['expected', 'fixtures', 'requests', 'seeds'].map((reserved) => ({
+            code: 'const x = 1;',
+            errors: [{ messageId: 'specInGround' }],
+            filename: `${CODE_GROUND}/api/${reserved}/${reserved}.spec.ts`,
+        })),
     ],
     valid: [
         // `binary.ts` + `binary.test.ts`: I2's pairing, inside the ground it
         // Belongs to — the depth rules never reach it.
-        { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/_binary/binary.test.ts` },
+        { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/fixtures/binary/binary.test.ts` },
         {
             code: 'const x = 1;',
-            filename: `${CODE_GROUND}/cli/_binary/binary.test.ts`,
+            filename: `${CODE_GROUND}/cli/fixtures/binary/binary.test.ts`,
             options: [{ depth: 'mirror' }],
         },
     ],

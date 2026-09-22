@@ -13,7 +13,7 @@ const CONFIG = '/repo/vitest.config.ts';
  */
 const UNDER_A_SPECS_PATH = resolve(
     import.meta.dirname,
-    '../../../../specs/_fixtures/lint-violations/e4w-project-binding-ok/vitest.config.ts',
+    '../../../../specs/fixtures/lint-violations/e4w-project-binding-ok/vitest.config.ts',
 );
 
 ruleTester().run('e4w-project-binding', asOxlintRule(e4wProjectBinding), {

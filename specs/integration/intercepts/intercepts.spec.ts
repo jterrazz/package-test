@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { http } from '../../../src/index.js';
-import { quoteOrder } from '../../_fixtures/orders/orders.js';
+import { quoteOrder } from '../../fixtures/orders/orders.js';
 import { integration } from '../pure.specification.js';
 
 const PRICING = 'https://pricing.spec.test';
@@ -14,7 +14,7 @@ describe('integration — the world the module reaches', () => {
             .call(async () => await quoteOrder(PRICING, 'ORD-1'));
 
         // Then - the module answered with what the provider replied
-        expect(result.value).toMatchFile('./_expected/quoted.json');
+        expect(result.value).toMatchFile('./expected/quoted.json');
     });
 
     test('reads the refusal of the module when the provider says no', async () => {
@@ -24,7 +24,7 @@ describe('integration — the world the module reaches', () => {
             .call(async () => await quoteOrder(PRICING, 'ORD-2'));
 
         // Then - the module's message is the reading, not the status
-        expect(result.error).toMatchFile('./_expected/unavailable.txt');
+        expect(result.error).toMatchFile('./expected/unavailable.txt');
     });
 
     test('fails the chain on a call no contract accepted', async () => {

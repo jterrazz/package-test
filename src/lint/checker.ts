@@ -39,14 +39,14 @@ import {
  * The conventions checker — the non-oxlint static channel.
  *
  * Oxlint only visits JS/TS sources; the D4 token grammar also constrains the
- * DATA fixtures under `_expected/**` and `_requests/**`. This module walks a specs
+ * DATA fixtures under `expected/**` and `requests/**`. This module walks a specs
  * tree and reports:
  *
- * - **unknown / malformed tokens** in `_expected/` fixtures — any text file, not
+ * - **unknown / malformed tokens** in `expected/` fixtures — any text file, not
  *   just `.http`/`.json`/`.txt` (D4);
- * - the **HTTP first-line grammar** of depth-1 `_requests/*.http` (a request line)
- *   and `_expected/*.http` (a status line) (D4b);
- * - **tokens leaking into `_requests/`** — requests are inputs, never matched, so
+ * - the **HTTP first-line grammar** of depth-1 `requests/*.http` (a request line)
+ *   and `expected/*.http` (a status line) (D4b);
+ * - **tokens leaking into `requests/`** — requests are inputs, never matched, so
  *   a `{{token}}` there is almost always a mistake (D10, warning);
  * - the **`<case>.spec.yaml` grammar** wherever a scenario document sits: its
  *   shape (D4b), read through the runner's own parser, plus the token
@@ -93,7 +93,7 @@ function withoutComments(text: string): string {
 }
 
 /**
- * Directories the walk never enters. `_fixtures/` trees (the shared pool and
+ * Directories the walk never enters. `fixtures/` trees (the shared pool and
  * the leaf-local ones) are verbatim fixture cwd material — file STATE, not
  * assertion fixtures — so the token grammar has no meaning inside them.
  */
@@ -207,7 +207,7 @@ export function findUnknownTokens(text: string): { line: number; token: string }
     return violations;
 }
 
-/** Known tokens present in a text — for the `_requests/` leak warning (D10). */
+/** Known tokens present in a text — for the `requests/` leak warning (D10). */
 export function findKnownTokens(text: string): { line: number; token: string }[] {
     const found: { line: number; token: string }[] = [];
     const lines = text.split('\n');
@@ -296,7 +296,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
 /**
  * C23 — a seed states absolute timestamps; it never reads the clock.
  *
- * A `_seeds/*.sql` that writes `datetime('now')` makes the row's date the date
+ * A `seeds/*.sql` that writes `datetime('now')` makes the row's date the date
  * the suite happened to run, so a case about "published yesterday" proves
  * something different every day and nothing at all across midnight. Worse under
  * SQLite, where `datetime('now')` writes a space-separated text while an ORM
@@ -389,7 +389,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
             if (inside === null) {
                 continue;
             }
-            // Depth-1 = directly under the _requests/ or _expected/ root.
+            // Depth-1 = directly under the requests/ or expected/ root.
             const depth1 = dir.endsWith(`/${inside}`) || dir.endsWith(`\\${inside}`);
 
             if (inside === GROUND_SEEDS) {
@@ -409,7 +409,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line: 1,
-                        message: `${rel}:1: a _requests/*.http file must start with a request line "METHOD /path" (D4b — see docs/19-linting.md)`,
+                        message: `${rel}:1: a requests/*.http file must start with a request line "METHOD /path" (D4b — see docs/19-linting.md)`,
                         rule: 'd4b',
                         severity: 'error',
                     });
@@ -418,7 +418,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line,
-                        message: `${rel}:${line}: token ${token} in a _requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/19-linting.md)`,
+                        message: `${rel}:${line}: token ${token} in a requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/19-linting.md)`,
                         rule: 'd10w',
                         severity: 'warn',
                         token,
@@ -427,7 +427,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 continue;
             }
 
-            // _expected/ — every text file carries the token grammar (D4).
+            // expected/ — every text file carries the token grammar (D4).
             const text = decodeText(path);
             if (text === null) {
                 continue; // Binary snapshot — skip.
@@ -436,7 +436,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line: 1,
-                    message: `${rel}:1: an _expected/*.http file must start with a status line "HTTP/1.1 <status>" (D4b — see docs/19-linting.md)`,
+                    message: `${rel}:1: an expected/*.http file must start with a status line "HTTP/1.1 <status>" (D4b — see docs/19-linting.md)`,
                     rule: 'd4b',
                     severity: 'error',
                 });

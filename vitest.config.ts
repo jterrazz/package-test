@@ -13,7 +13,7 @@ import {
 
 /**
  * The package eats its own preset: `defineSpecConfig()` sets the artefact
- * paths, the budgets and the `_fixtures/` exclusion, and every project below
+ * paths, the budgets and the `fixtures/` exclusion, and every project below
  * states only what makes it different. Every facet the package specifies
  * itself on comes from its own helper — the canonical name, include and group
  * order are the framework's, so `--project api` means the same thing here as
@@ -34,7 +34,7 @@ export default defineSpecConfig({
             // The cli helper wires the literate door: the package's documents
             // Are collected as TEST FILES by the project that owns the facet.
             // The glob stops at depth 1 so the deliberately-wrong twins under
-            // `literate/_fixtures/` stay inputs to the negative specs.
+            // `literate/fixtures/` stay inputs to the negative specs.
             cli({
                 literate: {
                     include: ['specs/cli/literate/*.spec.yaml'],

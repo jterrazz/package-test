@@ -7,7 +7,7 @@ describe('lint — e5-no-simulated-dom (CONVENTIONS E5)', () => {
     test('rejects a simulated-DOM pragma in a test file', async () => {
         // Given - a test file asking vitest for happy-dom
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e5-no-simulated-dom/')
+            .fixtureDirectory('../../fixtures/lint-violations/e5-no-simulated-dom/')
             .exec('.');
 
         // Then - oxlint reports the e5-no-simulated-dom diagnostic
@@ -18,7 +18,7 @@ describe('lint — e5-no-simulated-dom (CONVENTIONS E5)', () => {
     test('accepts a test that needs no environment at all', async () => {
         // Given - the compliant twin: a plain module test under node
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e5-no-simulated-dom-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/e5-no-simulated-dom-ok/')
             .exec('.');
 
         // Then - clean run, no e5-no-simulated-dom diagnostic

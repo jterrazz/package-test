@@ -22,11 +22,11 @@ describe('api assertions', () => {
     test('response matches expected file', async () => {
         // Given - seeded data
         const result = await api
-            .seedFile('./_seeds/two-users.sql', { database: 'db' })
+            .seedFile('./seeds/two-users.sql', { database: 'db' })
             .get('/users');
 
-        // Then - status + body match _expected/all-users.http
-        expect(result.response).toMatchFile('./_expected/all-users.http');
+        // Then - status + body match expected/all-users.http
+        expect(result.response).toMatchFile('./expected/all-users.http');
     });
 });
 
@@ -35,22 +35,22 @@ describe('api assertions', () => {
 /*
  * These probe the framework's OWN mismatch-diff error messages — the diff
  * formatting IS the product surface under test, so it is goldened in full
- * (_expected/*-error.txt) rather than reconstructed line-by-line via probes.
- * The passing paths already assert whole-response correctness via .toMatchFile('./_expected/<file>.http').
+ * (expected/*-error.txt) rather than reconstructed line-by-line via probes.
+ * The passing paths already assert whole-response correctness via .toMatchFile('./expected/<file>.http').
  */
 
 describe('api assertion details', () => {
     test('toMatch shows diff on body mismatch', async () => {
         // Given - response differs from expected file
         const result = await api
-            .seedFile('./_seeds/two-users.sql', { database: 'db' })
+            .seedFile('./seeds/two-users.sql', { database: 'db' })
             .get('/users');
 
         // Then - error names the fixture and shows the full -/+ diff of both values frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The error golden below legitimately updates, but the wrong fixture must never be rewritten
         const message = await catchMessage(() => {
-            expect(result.response).toMatchFile('./_expected/wrong-body.http', { frozen: true });
+            expect(result.response).toMatchFile('./expected/wrong-body.http', { frozen: true });
         });
-        expect(text(message)).toMatchFile('./_expected/errors/wrong-body-error.txt');
+        expect(text(message)).toMatchFile('./expected/errors/wrong-body-error.txt');
     });
 
     test('toMatch fails on nonexistent fixture with an update hint', async () => {
@@ -60,7 +60,7 @@ describe('api assertion details', () => {
         // Then - clear error pointing at TEST_UPDATE frozen - the missing fixture is the behaviour under test; under TEST_UPDATE it must still throw "does not exist" rather than be spuriously created
         expect(() => {
             // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing fixture IS the behaviour under test
-            expect(result.response).toMatchFile('./_expected/nonexistent.http', { frozen: true });
+            expect(result.response).toMatchFile('./expected/nonexistent.http', { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 });
@@ -70,9 +70,7 @@ describe('api assertion details', () => {
 describe('shared assertions', () => {
     test('toMatchRows — http — matches single column', async () => {
         // Given - one user seeded
-        const result = await api
-            .seedFile('./_seeds/one-user.sql', { database: 'db' })
-            .get('/users');
+        const result = await api.seedFile('./seeds/one-user.sql', { database: 'db' }).get('/users');
 
         // Then - table matches
         await expect(result.table('users', { database: 'db' })).toMatchRows({
@@ -83,9 +81,7 @@ describe('shared assertions', () => {
 
     test('toMatchRows — http — matches multi-column', async () => {
         // Given - one user seeded
-        const result = await api
-            .seedFile('./_seeds/one-user.sql', { database: 'db' })
-            .get('/users');
+        const result = await api.seedFile('./seeds/one-user.sql', { database: 'db' }).get('/users');
 
         // Then - table matches with both columns
         await expect(result.table('users', { database: 'db' })).toMatchRows({
@@ -99,7 +95,7 @@ describe('shared assertions', () => {
     test('table details — queries a specific database by key', async () => {
         // Given - seed analytics directly
         const result = await api
-            .seedFile('./_seeds/two-events.sql', { database: 'analyticsDb' })
+            .seedFile('./seeds/two-events.sql', { database: 'analyticsDb' })
             .get('/events');
 
         // Then - multi-column check on analytics-db
@@ -115,7 +111,7 @@ describe('shared assertions', () => {
     test('table details — shows diff on multi-column mismatch', async () => {
         // Given - two users in table, expecting wrong values
         const result = await api
-            .seedFile('./_seeds/two-users.sql', { database: 'db' })
+            .seedFile('./seeds/two-users.sql', { database: 'db' })
             .get('/users');
 
         // Then - error shows both columns in the full -/+ diff
@@ -128,13 +124,13 @@ describe('shared assertions', () => {
                 ],
             });
         });
-        expect(text(message)).toMatchFile('./_expected/errors/table-multi-column-error.txt');
+        expect(text(message)).toMatchFile('./expected/errors/table-multi-column-error.txt');
     });
 
     test('table details — shows diff on extra rows', async () => {
         // Given - table has more rows than expected
         const result = await api
-            .seedFile('./_seeds/two-users.sql', { database: 'db' })
+            .seedFile('./seeds/two-users.sql', { database: 'db' })
             .get('/users');
 
         // Then - row count mismatch + extra rows with + marker (full diff)
@@ -144,7 +140,7 @@ describe('shared assertions', () => {
                 rows: [['Alice']],
             });
         });
-        expect(text(message)).toMatchFile('./_expected/errors/table-extra-rows-error.txt');
+        expect(text(message)).toMatchFile('./expected/errors/table-extra-rows-error.txt');
     });
 
     test('table details — shows diff on missing rows', async () => {
@@ -158,7 +154,7 @@ describe('shared assertions', () => {
                 rows: [['Alice']],
             });
         });
-        expect(text(message)).toMatchFile('./_expected/errors/table-missing-rows-error.txt');
+        expect(text(message)).toMatchFile('./expected/errors/table-missing-rows-error.txt');
     });
 
     test('table details — supports toBeEmpty', async () => {

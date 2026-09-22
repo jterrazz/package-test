@@ -1,5 +1,5 @@
 description: a served stub reads the working directory the document laid down
-fixture: ./_fixtures/workdir-answers/
+fixture: ./fixtures/workdir-answers/
 serve: echo
 runs:
     - command: backend-fetch workdir

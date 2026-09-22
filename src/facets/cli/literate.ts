@@ -84,7 +84,7 @@ export type LiterateRunOptions = {
     displayPath: string;
     /** Absolute path of the `.spec.yaml` file. */
     filePath: string;
-    /** Directory `_expected/` fixtures of follow-up assertions resolve against. */
+    /** Directory `expected/` fixtures of follow-up assertions resolve against. */
     testDir: string;
     /** The shared working directory every run executes in. */
     workDir: string;

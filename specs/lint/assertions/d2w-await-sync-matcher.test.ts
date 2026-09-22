@@ -7,7 +7,7 @@ describe('lint — d2w-await-sync-matcher (CONVENTIONS D2)', () => {
     test('warns on await of a synchronous matcher', async () => {
         // Given - a project tripping the D2 heuristic
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d2w-await-sync-matcher/')
+            .fixtureDirectory('../../fixtures/lint-violations/d2w-await-sync-matcher/')
             .exec('.');
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — d2w-await-sync-matcher (CONVENTIONS D2)', () => {
     test('stays silent without the redundant await', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d2w-await-sync-matcher-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d2w-await-sync-matcher-ok/')
             .exec('.');
 
         // Then - clean run, no d2w-await-sync-matcher diagnostic

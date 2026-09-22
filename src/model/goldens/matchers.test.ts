@@ -300,25 +300,25 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
     test('json: a frozen missing fixture throws instead of being written', () => {
         // Given - a json subject and a fixture name that does not exist on disk
         const accessor = new JsonAccessor('{ "id": 1 }', scratch);
-        const fixturePath = resolve(scratch, '_expected', 'frozen.json');
+        const fixturePath = resolve(scratch, 'expected', 'frozen.json');
 
         // Then - update mode is bypassed: it throws the does-not-exist error, no write
         expect(() => {
-            expect(accessor).toMatchFile('./_expected/frozen.json', { frozen: true });
+            expect(accessor).toMatchFile('./expected/frozen.json', { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
 
     test('json: a frozen wrong fixture keeps its content and throws its diff', () => {
         // Given - a deliberately-wrong committed json fixture
-        const fixturePath = resolve(scratch, '_expected', 'wrong.json');
-        mkdirSync(resolve(scratch, '_expected'), { recursive: true });
+        const fixturePath = resolve(scratch, 'expected', 'wrong.json');
+        mkdirSync(resolve(scratch, 'expected'), { recursive: true });
         writeFileSync(fixturePath, '{\n    "id": 999\n}\n');
         const accessor = new JsonAccessor('{ "id": 1 }', scratch);
 
         // Then - frozen mismatch still throws and never overwrites
         expect(() => {
-            expect(accessor).toMatchFile('./_expected/wrong.json', { frozen: true });
+            expect(accessor).toMatchFile('./expected/wrong.json', { frozen: true });
         }).toThrow();
         expect(readFileSync(fixturePath, 'utf8')).toBe('{\n    "id": 999\n}\n');
     });
@@ -326,10 +326,10 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
     test('json: without frozen, update mode writes the fixture (control)', () => {
         // Given - the same missing fixture, but NOT frozen
         const accessor = new JsonAccessor('{ "id": 1 }', scratch);
-        const fixturePath = resolve(scratch, '_expected', 'written.json');
+        const fixturePath = resolve(scratch, 'expected', 'written.json');
 
         // Then - update mode writes it and passes
-        expect(accessor).toMatchFile('./_expected/written.json');
+        expect(accessor).toMatchFile('./expected/written.json');
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
@@ -339,11 +339,11 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
             { body: { ok: true }, headers: { 'content-type': 'application/json' }, status: 200 },
             scratch,
         );
-        const fixturePath = resolve(scratch, '_expected', 'frozen.http');
+        const fixturePath = resolve(scratch, 'expected', 'frozen.http');
 
         // Then - frozen bypasses the write, throwing the does-not-exist error
         expect(() => {
-            expect(accessor).toMatchFile('./_expected/frozen.http', { frozen: true });
+            expect(accessor).toMatchFile('./expected/frozen.http', { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
@@ -354,10 +354,10 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
             { body: { ok: true }, headers: { 'content-type': 'application/json' }, status: 200 },
             scratch,
         );
-        const fixturePath = resolve(scratch, '_expected', 'written.http');
+        const fixturePath = resolve(scratch, 'expected', 'written.http');
 
         // Then - update mode writes and passes
-        expect(accessor).toMatchFile('./_expected/written.http');
+        expect(accessor).toMatchFile('./expected/written.http');
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
@@ -367,11 +367,11 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         mkdirSync(actualRoot, { recursive: true });
         writeFileSync(resolve(actualRoot, 'file.txt'), 'hello\n');
         const accessor = new DirectoryAccessor(actualRoot, scratch);
-        const fixtureDir = resolve(scratch, '_expected', 'frozen-tree');
+        const fixtureDir = resolve(scratch, 'expected', 'frozen-tree');
 
         // Then - frozen bypasses the write (async matcher rejects), nothing created
         await expect(
-            expect(accessor).toMatchDirectory('./_expected/frozen-tree/', { frozen: true }),
+            expect(accessor).toMatchDirectory('./expected/frozen-tree/', { frozen: true }),
         ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixtureDir)).toBeFalsy();
     });
@@ -382,10 +382,10 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         mkdirSync(actualRoot, { recursive: true });
         writeFileSync(resolve(actualRoot, 'file.txt'), 'hello\n');
         const accessor = new DirectoryAccessor(actualRoot, scratch);
-        const fixtureFile = resolve(scratch, '_expected', 'written-tree', 'file.txt');
+        const fixtureFile = resolve(scratch, 'expected', 'written-tree', 'file.txt');
 
         // Then - update mode copies the tree and passes
-        await expect(accessor).toMatchDirectory('./_expected/written-tree/');
+        await expect(accessor).toMatchDirectory('./expected/written-tree/');
         expect(existsSync(fixtureFile)).toBeTruthy();
     });
 });
@@ -451,7 +451,7 @@ describe('the hint a missing golden gives names a run that does something', () =
 
         // Then - update mode is where it comes from
         expect(() => {
-            expect(subject).toMatchFile('./_expected/nowhere.txt');
+            expect(subject).toMatchFile('./expected/nowhere.txt');
         }).toThrow('Run with TEST_UPDATE=1');
     });
 
@@ -462,7 +462,7 @@ describe('the hint a missing golden gives names a run that does something', () =
 
         // Then - the hint names the two things that do work, and not the one that silently writes nothing: `{ frozen }` IS the no-write switch
         expect(() => {
-            expect(subject).toMatchFile('./_expected/nowhere.txt', { frozen: true });
+            expect(subject).toMatchFile('./expected/nowhere.txt', { frozen: true });
         }).toThrow('Write the file by hand');
     });
 });

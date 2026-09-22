@@ -10,9 +10,7 @@ import { api } from '../api.specification.js';
 describe('seeding', () => {
     test('loads a single seed file', async () => {
         // Given - one user seeded
-        const result = await api
-            .seedFile('./_seeds/one-user.sql', { database: 'db' })
-            .get('/users');
+        const result = await api.seedFile('./seeds/one-user.sql', { database: 'db' }).get('/users');
 
         // Then - user is in the database
         await expect(result.table('users', { database: 'db' })).toMatchRows({
@@ -24,8 +22,8 @@ describe('seeding', () => {
     test('loads multiple seed files in order', async () => {
         // Given - two seed files applied sequentially
         const result = await api
-            .seedFile('./_seeds/one-user.sql', { database: 'db' })
-            .seedFile('./_seeds/third-user.sql', { database: 'db' })
+            .seedFile('./seeds/one-user.sql', { database: 'db' })
+            .seedFile('./seeds/third-user.sql', { database: 'db' })
             .get('/users');
 
         // Then - both seeds applied
@@ -42,7 +40,7 @@ describe('seeding details', () => {
     test('seeds a specific database with database option', async () => {
         // Given - seed events in analytics-db
         const result = await api
-            .seedFile('./_seeds/one-event.sql', { database: 'analyticsDb' })
+            .seedFile('./seeds/one-event.sql', { database: 'analyticsDb' })
             .get('/events');
 
         // Then - event appears in analytics database
@@ -55,8 +53,8 @@ describe('seeding details', () => {
     test('seeds both databases independently', async () => {
         // Given - seed users in default db and events in analytics-db
         const result = await api
-            .seedFile('./_seeds/two-users.sql', { database: 'db' })
-            .seedFile('./_seeds/two-events.sql', { database: 'analyticsDb' })
+            .seedFile('./seeds/two-users.sql', { database: 'db' })
+            .seedFile('./seeds/two-events.sql', { database: 'analyticsDb' })
             .get('/users');
 
         // Then - users in default db
@@ -77,7 +75,7 @@ describe('seeding details', () => {
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
         // Then - .seedFile() without a database option violates A7, synchronously checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
-        expect(() => api.seedFile('./_seeds/one-user.sql')).toThrow(
+        expect(() => api.seedFile('./seeds/one-user.sql')).toThrow(
             'seedFile(): 2 databases are declared ("analyticsDb", "db") — pass { database: <key> } to target one of them.',
         );
     });
@@ -87,7 +85,7 @@ describe('seeding details', () => {
         // Then - the chain rejects with ENOENT
         await expect(
             // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing file IS the behaviour under test
-            api.seedFile('./_seeds/nonexistent.sql', { database: 'db' }).get('/users'),
+            api.seedFile('./seeds/nonexistent.sql', { database: 'db' }).get('/users'),
         ).rejects.toThrow('ENOENT');
     });
 
@@ -98,7 +96,7 @@ describe('seeding details', () => {
         // Then - the chain rejects naming the unknown key
         await expect(
             untypedApi
-                .seedFile('./_seeds/one-user.sql', { database: 'nonexistent-db' })
+                .seedFile('./seeds/one-user.sql', { database: 'nonexistent-db' })
                 .get('/users'),
         ).rejects.toThrow('seedFile() targets database "nonexistent-db" but it was not found');
     });
@@ -116,7 +114,7 @@ describe('seeding details', () => {
 
             try {
                 // Then - the chain fails because nothing can execute the SQL
-                await expect(bareApi.seedFile('./_seeds/one-user.sql').get('/')).rejects.toThrow(
+                await expect(bareApi.seedFile('./seeds/one-user.sql').get('/')).rejects.toThrow(
                     'seedFile() requires a database adapter',
                 );
             } finally {

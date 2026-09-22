@@ -16,7 +16,7 @@ output, and reports; those deserve the same goldening as any other output.
 
 ```typescript
 const message = await catchMessage(() => expect(result.response).toMatch('wrong-body.http'));
-expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to _expected/
+expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to expected/
 ```
 
 ANSI is stripped before every comparison (the raw form stays on `.text`),
@@ -27,7 +27,7 @@ The ANCHOR is why this sits apart from the accessor it builds: reading the
 caller's frame means reading a stack and a real path, which is node's alone.
 [TextAccessor](../interfaces/TextAccessor.md) itself is a pure projection over a captured string, so
 it loads in a page — and the browser entry builds its own `text()`, where
-the golden commands resolve `_expected/` from the test's path server-side.
+the golden commands resolve `expected/` from the test's path server-side.
 
 ## Parameters
 

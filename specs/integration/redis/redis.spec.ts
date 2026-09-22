@@ -20,7 +20,7 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - the scheme is the one a redis client expects
-        expect(result.value).toMatchFile('./_expected/connection-string.json');
+        expect(result.value).toMatchFile('./expected/connection-string.json');
     });
 
     test('passes its healthcheck on a reachable container', async () => {
@@ -59,7 +59,7 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - the key is gone
-        expect(result.value).toMatchFile('./_expected/flushed.json');
+        expect(result.value).toMatchFile('./expected/flushed.json');
     });
 
     test('takes keys again after a reset', async () => {
@@ -87,6 +87,6 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - the new key is there and the flushed one is not
-        expect(result.value).toMatchFile('./_expected/reset-then-write.json');
+        expect(result.value).toMatchFile('./expected/reset-then-write.json');
     });
 });

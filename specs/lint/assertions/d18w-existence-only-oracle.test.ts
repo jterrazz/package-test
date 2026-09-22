@@ -7,7 +7,7 @@ describe('lint — d18w-existence-only-oracle (CONVENTIONS D18)', () => {
     test('rejects a test whose one assertion is an existence check', async () => {
         // Given - a project violating D18
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d18w-existence-only-oracle/')
+            .fixtureDirectory('../../fixtures/lint-violations/d18w-existence-only-oracle/')
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — d18w-existence-only-oracle (CONVENTIONS D18)', () => {
     test('accepts an assertion that says what came back', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d18w-existence-only-oracle-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d18w-existence-only-oracle-ok/')
             .exec('.');
 
         // Then - clean exit, no D18 diagnostic

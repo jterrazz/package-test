@@ -57,10 +57,10 @@ const NON_RUNNER_BINDINGS = new Set(['cleanup', 'docker', 'orchestrator']);
 const CONSTRUCTORS = 'api|cli|jobs';
 
 /**
- * The pool (`.../specs/_fixtures`) is verbatim fixture material — the
+ * The pool (`.../specs/fixtures`) is verbatim fixture material — the
  * reusable apps AND the lint-violation trees that fail on purpose — never live
  * specs. The cross-file walks prune it (like the token checker skips
- * `_fixtures/`); {@link checkPoolFixtures} inspects its top level separately.
+ * `fixtures/`); {@link checkPoolFixtures} inspects its top level separately.
  */
 function isPool(dir: string): boolean {
     return basename(dir) === GROUND_FIXTURES && basename(dirname(dir)) === 'specs';
@@ -246,7 +246,7 @@ function collectSpecLiterals(path: string): Set<string> {
  * Is this a file a leaf's ground may be referenced from?
  *
  * Every test suffix counts, and so does a document: a rendered unit's golden —
- * its ARIA tree — sits in the same `_expected/` as a spec's, read by a file the
+ * its ARIA tree — sits in the same `expected/` as a spec's, read by a file the
  * suffix alone tells apart.
  */
 function isReferrer(name: string): boolean {
@@ -770,7 +770,7 @@ function isConventionalSubdir(path: string): boolean {
     if (!isDir(path)) {
         return false;
     }
-    // A real _seeds/_expected/… holds leaf fixtures: never a test, never a
+    // A real seeds/expected/… holds leaf fixtures: never a test, never a
     // Nested ground subdir (those signal a feature dir named like one).
     const files = listFiles(path, isTestFileName);
     if (files.length > 0) {
@@ -788,7 +788,7 @@ function isConventionalSubdir(path: string): boolean {
 export function checkDeadFixtures(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const dir of listDirs(rootDir)) {
-        // A `specs/_fixtures` pool is not a feature; it is scanned separately.
+        // A `specs/fixtures` pool is not a feature; it is scanned separately.
         if (basename(dir) === 'specs') {
             continue;
         }
@@ -869,7 +869,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-/** Unreferenced top-level entries of the pool (`specs/_fixtures`). */
+/** Unreferenced top-level entries of the pool (`specs/fixtures`). */
 function checkPoolFixtures(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const pool of findPools(rootDir)) {
@@ -1025,9 +1025,9 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
 
 /**
  * CONVENTIONS C14 — a pool fixture is SHARED, or it is local. A directory of the
- * specs-root `_fixtures/` pool that exactly one spec directory reaches for is
- * misplaced: it belongs beside that leaf, as `<leaf>/_fixtures/<name>/`, named by
- * the path from the leaf (`./_fixtures/<name>/`).
+ * specs-root `fixtures/` pool that exactly one spec directory reaches for is
+ * misplaced: it belongs beside that leaf, as `<leaf>/fixtures/<name>/`, named by
+ * the path from the leaf (`./fixtures/<name>/`).
  *
  * The catch: a fixture built for one scenario and parked in the pool reads as
  * shared ground. Every later author assumes some other spec depends on it, so
@@ -1081,7 +1081,7 @@ export function fixPoolFixtures(rootDir: string): string[] {
  * CONVENTIONS C15 — a path leaves its leaf only into the pool. Every verb that
  * reads the disk names its entry from the spec file; a path whose target
  * stays under the spec's own directory is the leaf's ground, one under the
- * specs-root `_fixtures/` is the pool, and anything else reaches into a
+ * specs-root `fixtures/` is the pool, and anything else reaches into a
  * sibling's ground — the pool by another door, with none of its visibility.
  *
  * The catch: a leaf quietly depending on a neighbour's ground. The neighbour's

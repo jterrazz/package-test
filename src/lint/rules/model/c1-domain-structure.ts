@@ -1,3 +1,4 @@
+import { isGroundName } from '../../../model/chain/ground.js';
 import { specsAnchor } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
@@ -80,10 +81,11 @@ function testsItsNeighbour(filename: string): boolean {
  *
  * `depth: 'off'` — no DEPTH check; the tree's shape is guarded elsewhere.
  *
- * The ground clause holds in every mode, `off` included: a directory whose name
- * carries a LEADING UNDERSCORE is ground — what the specs of a row stand on —
- * and never a domain, so no SPEC may live inside one. That is not a question of
- * depth, which is why no project's declared shape switches it off.
+ * The ground clause holds in every mode, `off` included: a directory named
+ * `fixtures/`, `expected/`, `requests/` or `seeds/` is ground — what the specs of
+ * a row stand on — and never a facet, domain or suite folder, so no SPEC may live
+ * inside one: a domain named with a reserved word is refused here. That is not a
+ * question of depth, which is why no project's declared shape switches it off.
  *
  * Ground is not always inert, though: it may be CODE the specs stand on — the
  * build of the subject under test, a harness the runner spawns. A `<module>.ts`
@@ -110,7 +112,7 @@ export const c1DomainStructure: LintRule = {
                 if (isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX)) {
                     const ground = anchor.relative
                         .slice(0, -1)
-                        .find((segment) => segment.startsWith('_'));
+                        .find((segment) => isGroundName(segment));
                     if (ground !== undefined) {
                         if (!testsItsNeighbour(context.filename)) {
                             context.report({ data: { ground }, messageId: 'specInGround', node });
@@ -178,7 +180,7 @@ export const c1DomainStructure: LintRule = {
         docs: RULE_DOCS['c1-domain-structure'],
         messages: {
             specInGround:
-                'A spec must not live under "{{ground}}/" — a leading underscore marks GROUND (what the specs of a row stand on: _fixtures/, _expected/, _requests/, _seeds/), never a domain. Ground that is CODE keeps its own unit test: `<module>.test.ts` NEXT to the `<module>.ts` it tests (I2), and nothing else.',
+                'A spec must not live under "{{ground}}/" — fixtures/, expected/, requests/ and seeds/ are reserved: they name GROUND (what the specs of a row stand on), never a facet, domain or suite folder. Rename a domain that took one of them. Ground that is CODE keeps its own unit test: `<module>.test.ts` NEXT to the `<module>.ts` it tests (I2), and nothing else.',
             specNotAtFacetRoot:
                 'A `*.specification.ts` must sit at the facet root: `specs/<facet>/<name>.specification.ts`.',
             testAtFacetRoot:

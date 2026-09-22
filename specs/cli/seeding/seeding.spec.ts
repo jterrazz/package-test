@@ -8,8 +8,8 @@ describe('command — seeding', () => {
     test('runs a SQL seed against the declared service database', async () => {
         // Given - a SQL seed applied to the single sqlite service
         const result = await cli
-            .fixtureDirectory('../../_fixtures/cli-app/')
-            .seedFile('./_seeds/users.sql')
+            .fixtureDirectory('../../fixtures/cli-app/')
+            .seedFile('./seeds/users.sql')
             .exec('help');
 
         // Then - the rows are queryable through the table accessor
@@ -23,9 +23,9 @@ describe('command — seeding', () => {
     test('combines a SQL seed and a file fixture in one chain', async () => {
         // Given - a SQL seed (database state) plus a file fixture (file state)
         const result = await cli
-            .fixtureDirectory('../../_fixtures/cli-app/')
-            .fixtureFile('./_fixtures/note.txt')
-            .seedFile('./_seeds/users.sql')
+            .fixtureDirectory('../../fixtures/cli-app/')
+            .fixtureFile('./fixtures/note.txt')
+            .seedFile('./seeds/users.sql')
             .exec('help');
 
         // Then - the fixture landed in the cwd AND the SQL seed reached the db

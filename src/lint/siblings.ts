@@ -39,7 +39,7 @@ function sources(root: string): string[] {
             (path) =>
                 /\.tsx?$/u.test(path) &&
                 !/\.(?:test|test-d|fixtures)\.tsx?$/u.test(path) &&
-                !path.includes('/_fixtures/'),
+                !path.includes('/fixtures/'),
         );
 }
 

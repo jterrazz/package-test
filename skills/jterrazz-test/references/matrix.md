@@ -150,13 +150,13 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability           | api | jobs | cli | integration | website | mobile | component | module |
 | -------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 10     |
-| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 5      |
+| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 11     |
+| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 6      |
 | `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
-| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 8      |
+| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 9      |
 | `.aria.yaml tree`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 10     |
-| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 13     |
+| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 14     |
 | `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles

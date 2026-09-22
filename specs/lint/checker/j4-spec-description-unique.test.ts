@@ -9,22 +9,22 @@ describe('lint — j4 spec description unique (CONVENTIONS J4)', () => {
     test('rejects two documents of one directory sharing a description', async () => {
         // Given - two .spec.yaml files whose description: is the same sentence
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/j4-spec-description-unique/')
+            .fixtureDirectory('../../fixtures/lint-violations/j4-spec-description-unique/')
             .exec('.');
 
         // Then - the second one is named, with the first it collides with
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./_expected/j4-spec-description-unique.txt');
+        expect(result.stderr).toMatchFile('./expected/j4-spec-description-unique.txt');
     });
 
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/spec-document-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/spec-document-ok/')
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./_expected/clean.txt');
+        expect(result.stdout).toMatchFile('./expected/clean.txt');
     });
 });

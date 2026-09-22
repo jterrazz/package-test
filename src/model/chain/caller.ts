@@ -63,8 +63,8 @@ export function isFrameworkFrame(filePath: string, frameworkTree = FRAMEWORK_TRE
 
 /**
  * Detect the directory of the first stack frame that lives outside this
- * package. Used to anchor fixture resolution (`_seeds/`, `_requests/`,
- * `_expected/`, …) on the calling test / specification file.
+ * package. Used to anchor fixture resolution (`seeds/`, `requests/`,
+ * `expected/`, …) on the calling test / specification file.
  *
  * @internal
  */
@@ -97,6 +97,6 @@ export function getCallerDir(): string {
     // By code living in node_modules (e.g. a published rule pack declaring
     // Tests itself). There is no consumer test file to anchor on — fall back
     // To the working directory; such packs assert on results directly and
-    // Never resolve `_expected/` fixtures.
+    // Never resolve `expected/` fixtures.
     return process.cwd();
 }

@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
 
 /** The fixture workspace: one member per finding, plus one that is clean. */
-const WORKSPACE = resolve(import.meta.dirname, '../../specs/_fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../specs/fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
 
 /** The codes a run produced, in order. */

@@ -51,15 +51,16 @@ const TEST_TIMEOUT_MS = 30_000;
 const HOOK_TIMEOUT_MS = 30_000;
 
 /**
- * What a spec STANDS ON is never itself a test: `_fixtures/` holds inputs —
- * deliberately-wrong twins, fixture projects a spec lints — and collecting them
- * runs a repository's own counter-examples as if they were its suite. Every
+ * What a spec STANDS ON is never itself a test: the four ground folders hold
+ * inputs and goldens — deliberately-wrong twins, fixture projects a spec lints —
+ * and collecting them runs a repository's own counter-examples as if they were
+ * its suite. Every
  * config that ever hit it added the same line by hand.
  *
  * Merged, not replaced: vite concatenates arrays, so a consumer's `exclude`
  * ADDS to this list and never has to spread `configDefaults.exclude` again.
  */
-const EXCLUDE = [...configDefaults.exclude, '**/_fixtures/**'];
+const EXCLUDE = [...configDefaults.exclude, 'specs/**/{fixtures,expected,seeds,requests}/**'];
 
 /**
  * What a test may never carry into the next one, and the one policy the
@@ -149,7 +150,6 @@ const COVERAGE = {
         '**/node_modules/**',
         // A spec is a test, and the fixture app a spec drives is ground.
         'specs/**',
-        '**/_fixtures/**',
         '**/*.d.ts',
         '**/*.test-d.ts',
         '**/*.fixtures.ts',

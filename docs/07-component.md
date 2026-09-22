@@ -158,7 +158,7 @@ expect(result.html).toContain('row row--live');
 await expect(result.errors).toBeEmpty();
 ```
 
-The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [08 — Website specs](08-website.md) produces for a whole page. Goldens live in `_expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([15 — Tokens](15-tokens.md)).
+The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [08 — Website specs](08-website.md) produces for a whole page. Goldens live in `expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([15 — Tokens](15-tokens.md)).
 
 ## Unique here
 

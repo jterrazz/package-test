@@ -39,7 +39,7 @@ ruleTester.run('d15w-status-only-probe', d15wStatusOnlyProbe as unknown as Oxlin
         {
             code: `test('created', async () => {
                 expect(result.status).toBe(201);
-                expect(result.response).toMatchFile('./_expected/created.http');
+                expect(result.response).toMatchFile('./expected/created.http');
             });`,
             filename: SPEC,
         },
@@ -69,7 +69,7 @@ ruleTester.run('d15w-status-only-probe', d15wStatusOnlyProbe as unknown as Oxlin
         // The golden form — no status probe at all.
         {
             code: `test('golden', async () => {
-                expect(result.response).toMatchFile('./_expected/created.http');
+                expect(result.response).toMatchFile('./expected/created.http');
             });`,
             filename: SPEC,
         },

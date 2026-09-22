@@ -5,7 +5,7 @@
 type RelativePath<Extension> = `../${string}${Extension}` | `./${string}${Extension}`;
 ```
 
-Defined in: src/model/chain/spec-path.ts:9
+Defined in: [src/model/chain/spec-path.ts:9](https://github.com/jterrazz/package-test/blob/main/src/model/chain/spec-path.ts#L9)
 
 A path a spec names a file by, spelled relative to the spec file itself.
 

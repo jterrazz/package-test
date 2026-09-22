@@ -9,11 +9,11 @@ refactored for real, released ONCE (`@jterrazz/test` 17.0,
 
 The three branches:
 
-| Clone | What it shows |
-| --- | --- |
-| `home/jterrazz/work/repositories/package-test` | the test API, the manual, the lint rules' home and spec form, the package's own specs migrated |
+| Clone                                                | What it shows                                                                                        |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `home/jterrazz/work/repositories/package-test`       | the test API, the manual, the lint rules' home and spec form, the package's own specs migrated       |
 | `home/jterrazz/work/repositories/package-typescript` | the toolchain: the naming rule, the repository spine, the end of generated reference, its own layout |
-| `home/signews/work/repositories/signews-api` | the effect on a real application (api, jobs, integration, seeds, requests, goldens) |
+| `home/signews/work/repositories/signews-api`         | the effect on a real application (api, jobs, integration, seeds, requests, goldens)                  |
 
 ## The goal in one sentence
 
@@ -27,9 +27,9 @@ Today a bare string is sometimes a value and sometimes a file name resolved
 against a hidden folder:
 
 ```ts
-expect(result.stdout).toMatch('scaffolded.txt');   // looks like a value, is _expected/scaffolded.txt
-await jobs.seed('subscribers.sql');                 // hides _seeds/, hides local vs shared
-await cli.fixture('$FIXTURES/shop/');               // a magic prefix for the pool
+expect(result.stdout).toMatch('scaffolded.txt'); // looks like a value, is _expected/scaffolded.txt
+await jobs.seed('subscribers.sql'); // hides _seeds/, hides local vs shared
+await cli.fixture('$FIXTURES/shop/'); // a magic prefix for the pool
 ```
 
 In 17 every verb that reads the disk ends in `File` or `Directory`, and its
@@ -52,7 +52,7 @@ toMatchDirectory(path: RelativePath<'/'>)
 ```ts
 expect(result.stdout).toMatchFile('./expected/scaffolded.txt');
 await jobs.seedFile('./seeds/subscribers.sql').trigger('digest');
-await cli.fixtureDirectory('../../fixtures/shop/').exec('build');   // the shared pool, visible in the path
+await cli.fixtureDirectory('../../fixtures/shop/').exec('build'); // the shared pool, visible in the path
 ```
 
 - `seed()`, `request()`, `fixture()` and the file form of `toMatch(name)` are
@@ -68,13 +68,13 @@ await cli.fixtureDirectory('../../fixtures/shop/').exec('build');   // the share
 
 ## 2. Ground folders are bare, reserved names
 
-| 16 | 17 | Holds |
-| --- | --- | --- |
-| `_fixtures/` | `fixtures/` | input files and file-system state |
-| `_seeds/` | `seeds/` | database state, `.sql` |
-| `_requests/` | `requests/` | input requests, `.http` |
-| `_expected/` | `expected/` | everything asserted, response `.http` included |
-| `specs/_fixtures/` | `specs/fixtures/` | the shared pool |
+| 16                             | 17                | Holds                                          |
+| ------------------------------ | ----------------- | ---------------------------------------------- |
+| `_fixtures/`                   | `fixtures/`       | input files and file-system state              |
+| `_seeds/`                      | `seeds/`          | database state, `.sql`                         |
+| `_requests/`                   | `requests/`       | input requests, `.http`                        |
+| `_expected/`                   | `expected/`       | everything asserted, response `.http` included |
+| `_fixtures/` at the specs root | `specs/fixtures/` | the shared pool                                |
 
 - The four names are reserved under `specs/`: C1 refuses a facet, domain or
   suite folder that takes one of them.
@@ -129,10 +129,10 @@ specs/lint/i2-sibling-test-naming/
 description: a module test with no neighbour module is refused
 fixture: ./fixtures/orphan/
 runs:
-  - command: .
-    exit: 1
-    stdout: |
-      src/orphan.test.ts:1:1  jterrazz(i2-sibling-test-naming)
+    - command: .
+      exit: 1
+      stdout: |
+          src/orphan.test.ts:1:1  jterrazz(i2-sibling-test-naming)
 ```
 
 ## 5. Knowledge has one owner each
@@ -152,14 +152,14 @@ runs:
 
 ## What the branches show, and what they defer
 
-| Area | package-test | package-typescript | signews-api |
-| --- | --- | --- | --- |
-| §1 verbs + types | implemented, own specs migrated | its own `.spec.yaml` migrated | migrated |
-| §2 folders | renamed | ignore globs + own specs renamed | renamed |
-| §3 names | own sites renamed | the rule, tested | ratchet delta shown |
-| §4 spine | `src/lint` → `lint/`, rule specs as `.spec.yaml` | the spine check; `rules/` → `lint/` | follows |
-| §5 knowledge | reference + skill references deleted | `docs` command, typedoc, Docs (sync) deleted | — |
-| §6 exact names | window removed | — | — |
+| Area             | package-test                                     | package-typescript                           | signews-api         |
+| ---------------- | ------------------------------------------------ | -------------------------------------------- | ------------------- |
+| §1 verbs + types | implemented, own specs migrated                  | its own `.spec.yaml` migrated                | migrated            |
+| §2 folders       | renamed                                          | ignore globs + own specs renamed             | renamed             |
+| §3 names         | own sites renamed                                | the rule, tested                             | ratchet delta shown |
+| §4 spine         | `src/lint` → `lint/`, rule specs as `.spec.yaml` | the spine check; `rules/` → `lint/`          | follows             |
+| §5 knowledge     | reference + skill references deleted             | `docs` command, typedoc, Docs (sync) deleted | —                   |
+| §6 exact names   | window removed                                   | —                                            | —                   |
 
 Each branch keeps one commit per unit, so the owner can read the vision
 commit by commit.

@@ -8,7 +8,7 @@ import { redis, specification } from '../../src/index.js';
  * service and every chain calls the adapter with the live connection string.
  */
 export const { cleanup, integration } = await specification.integration({
-    root: '../_fixtures/app',
+    root: '../fixtures/app',
     services: { cache: redis() },
 });
 

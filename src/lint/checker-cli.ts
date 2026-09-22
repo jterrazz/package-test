@@ -5,6 +5,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 
 import { fixPoolFixtures } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverSpecRoots } from './checker-member.js';
+import { migrateTo17 } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
 import { formatViolations, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
@@ -48,8 +49,9 @@ import { codeOf } from './rule-code.js';
  * ratchet records under. Exit 1 on any ERROR-level violation either way;
  * warnings are reported but never fail the run.
  *
- * `--fix` applies the rewritable passes — the two document ones (key order and
- * block scalars), C14, which MOVES a single-reader pool fixture beside its leaf
+ * `--fix` applies the rewritable passes — C13, which moves a 16.x tree to 17
+ * (bare ground folders, every file named by its path: `checker-migration.ts`),
+ * the two document ones (key order and block scalars), C14, which MOVES a single-reader pool fixture beside its leaf
  * and rewrites the literals that named it, and C12, which RENAMES a `.test.ts`
  * under a facet folder to `.spec.ts` — then checks what is left, so a run that
  * fixes everything exits 0. With no path it applies them to every `specs/` root
@@ -335,6 +337,15 @@ function staleIncludes(root: string, renamed: Rename[]): string[] {
 
 /** Apply every rewritable pass over one tree, printing what it did. */
 function applyFixes(root: string): void {
+    const migration = migrateTo17(root, renameKeepingHistory);
+    for (const move of migration.renamed) {
+        console.log(`conventions checker: renamed ${move} (C13)`);
+    }
+    if (migration.rewritten.length > 0) {
+        console.log(
+            `conventions checker: named ${migration.rewritten.length} file(s)' ground by path (C13)`,
+        );
+    }
     const renamed = fixSpecSuffixes(root);
     for (const { from, to } of renamed) {
         console.log(

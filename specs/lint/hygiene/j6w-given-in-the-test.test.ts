@@ -7,7 +7,7 @@ describe('lint — j6w-given-in-the-test (CONVENTIONS J6)', () => {
     test('warns on a Given built in a hook', async () => {
         // Given - a project whose setup lives above its tests
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/j6w-given-in-the-test/')
+            .fixtureDirectory('../../fixtures/lint-violations/j6w-given-in-the-test/')
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — j6w-given-in-the-test (CONVENTIONS J6)', () => {
     test('accepts a Given each test calls for itself', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/j6w-given-in-the-test-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/j6w-given-in-the-test-ok/')
             .exec('.');
 
         // Then - clean run, no J6 diagnostic

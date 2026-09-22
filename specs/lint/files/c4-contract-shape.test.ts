@@ -7,7 +7,7 @@ describe('lint — c4-contract-shape (CONVENTIONS C4)', () => {
     test('rejects a malformed contracts/ tree', async () => {
         // Given - a contracts/ root holding a unit contract, a stray payload and a non-provider folder
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/c4-contract-shape/')
+            .fixtureDirectory('../../fixtures/lint-violations/c4-contract-shape/')
             .exec('.');
 
         // Then - oxlint reports the c4-contract-shape diagnostic
@@ -18,7 +18,7 @@ describe('lint — c4-contract-shape (CONVENTIONS C4)', () => {
     test('accepts a well-formed contracts/ tree', async () => {
         // Given - the compliant twin: a *.contracts.ts facade over provider folders
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/c4-contract-shape-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/c4-contract-shape-ok/')
             .exec('.');
 
         // Then - clean run, no c4-contract-shape diagnostic

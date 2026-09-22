@@ -8,7 +8,7 @@ import { afterAll } from 'vitest';
  * two metas here, and the same shape for any noise a `{{token}}` cannot name.
  */
 export const { cleanup, website } = await specification.website({
-    server: { command: 'node specs/_fixtures/website-app/server.mjs', ready: '/' },
+    server: { command: 'node specs/fixtures/website-app/server.mjs', ready: '/' },
     transform: (text) => text.replaceAll(/,?"framework-transitions-[a-z]+":\s*"[^"]*"/gu, ''),
 });
 

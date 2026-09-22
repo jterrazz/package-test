@@ -7,7 +7,7 @@ describe('lint — d12w-response-body-probe (CONVENTIONS D12)', () => {
     test('warns on a cluster of raw body probes in one test', async () => {
         // Given - a project whose test accumulates a body-probe cluster
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d12w-response-body-probe/')
+            .fixtureDirectory('../../fixtures/lint-violations/d12w-response-body-probe/')
             .exec('.');
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — d12w-response-body-probe (CONVENTIONS D12)', () => {
     test('stays silent on a single scalpel probe', async () => {
         // Given - the compliant twin, one probe below the threshold
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d12w-response-body-probe-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d12w-response-body-probe-ok/')
             .exec('.');
 
         // Then - clean run, no d12w-response-body-probe diagnostic

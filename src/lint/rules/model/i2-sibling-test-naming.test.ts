@@ -18,7 +18,7 @@ const ruleTester = new RuleTester();
 // A specs tree, which is the half of I2's orphan clause that reads `inSpecs`.
 // The guard on the `tests/` clause — a `tests` segment with no package above it
 // Is an ordinary folder name — is `roleOf`'s, and `role.test.ts` holds it.
-const FIXTURES = resolve(import.meta.dirname, '../../../../specs/_fixtures/lint-violations');
+const FIXTURES = resolve(import.meta.dirname, '../../../../specs/fixtures/lint-violations');
 // The repo root DOES carry a package.json — the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../../..');
 

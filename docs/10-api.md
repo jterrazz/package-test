@@ -65,7 +65,7 @@ Without `root`, the framework walks **up from the specification file** to the **
 
 | Setup                             | Description                                                                                                                     |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `.seed('file.sql')`               | Load `_seeds/file.sql` into the database                                                                                        |
+| `.seed('file.sql')`               | Load `seeds/file.sql` into the database                                                                                         |
 | `.seed('file.sql', { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
 | `.headers({ 'Name': 'value' })`   | Set request headers; repeated calls merge                                                                                       |
 | `.intercept(contract)`            | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |
@@ -104,7 +104,7 @@ Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the r
 
 | Action                  | Description                                                   |
 | ----------------------- | ------------------------------------------------------------- |
-| `.request('file.http')` | Execute the complete request from `_requests/file.http`       |
+| `.request('file.http')` | Execute the complete request from `requests/file.http`        |
 | `.get(path)`            | Inline GET — for simple cases where a file would be excessive |
 | `.post(path, body?)`    | Inline POST                                                   |
 | `.put(path, body?)`     | Inline PUT                                                    |
@@ -127,10 +127,10 @@ test('returns 404 with a useful body', async () => {
 
 ### `.http` request files — full format
 
-Requests live in `_requests/`, one file per request, extension `.http` (rule C2). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
+Requests live in `requests/`, one file per request, extension `.http` (rule C2). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
 
 ```http
-### _requests/create-user.http
+### requests/create-user.http
 POST /users
 Content-Type: application/json
 Accept-Language: fr
@@ -143,12 +143,12 @@ Format rules:
 - First line: `METHOD /path` — the file must start with it (rule C2). The path is relative to the app under test.
 - Header lines: `Name: value`, one per line, immediately after the request line.
 - Blank line, then the body (optional — a GET usually has none).
-- Executed with `api.request('create-user.http')` — the argument is the file name inside the feature's `_requests/` folder.
+- Executed with `api.request('create-user.http')` — the argument is the file name inside the feature's `requests/` folder.
 
-Expected responses live in `_expected/`, like every other expected fixture, same extension, and start with a status line (rule C3):
+Expected responses live in `expected/`, like every other expected fixture, same extension, and start with a status line (rule C3):
 
 ```http
-### _expected/user-created.http
+### expected/user-created.http
 HTTP/1.1 201 Created
 Content-Type: application/json
 Location: /users/{{uuid#user}}
@@ -171,7 +171,7 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 | `result.response.body`      | parsed body      | Raw body for native assertions (`toEqual`, `toMatchObject`)                      |
 | `result.table(name, opts?)` | table subject    | Database table — subject for `toMatchRows` / `toBeEmpty` (async, `await expect`) |
 
-`expect(result.response).toMatch('user-created.http')` resolves against `_expected/`, like every other subject (rule D3) — there is no per-subject resolution. The full matcher reference is in [assertions](14-assertions.md).
+`expect(result.response).toMatch('user-created.http')` resolves against `expected/`, like every other subject (rule D3) — there is no per-subject resolution. The full matcher reference is in [assertions](14-assertions.md).
 
 Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.jobs()` has no `docker` member — jobs never spawn containers.)
 
@@ -180,7 +180,7 @@ Beyond the result, the `specification.api()` handle destructures to `{ api, clea
 ### Full example — a multi-database order flow
 
 ```http
-### _requests/new-order.http
+### requests/new-order.http
 POST /orders
 Content-Type: application/json
 
@@ -188,7 +188,7 @@ Content-Type: application/json
 ```
 
 ```http
-### _expected/order-created.http
+### expected/order-created.http
 HTTP/1.1 201 Created
 Content-Type: application/json
 Location: /orders/{{uuid#order}}
@@ -254,10 +254,10 @@ The app runs in THIS process, always: there is no second mode, no container bind
 ## Pitfalls
 
 - **Omitting `database:` with ≥ 2 databases, or passing it with 1** — both are convention violations (rule A7).
-- **Expecting unlisted response headers to be constrained.** Response `_expected/*.http` header matching is subset-only; if a header must be _absent_, that is not expressible in the file — assert on it in code.
+- **Expecting unlisted response headers to be constrained.** Response `expected/*.http` header matching is subset-only; if a header must be _absent_, that is not expressible in the file — assert on it in code.
 - **Chaining two actions** (`api.get(...).get(...)`) or reusing state across tests. One chain = one terminal action; databases reset per chain (rules B1, B7).
 - **Forgetting that `.intercept()` is strict.** After the first `.intercept()`, an unmatched or queue-exhausted outgoing request fails the spec (rule D7).
-- **Putting the request body in the test file when it has any substance.** Requests of more than a line or two belong in `_requests/*.http` — inline `.post()` is for trivial cases.
+- **Putting the request body in the test file when it has any substance.** Requests of more than a line or two belong in `requests/*.http` — inline `.post()` is for trivial cases.
 
 ## Related
 

@@ -7,7 +7,7 @@ describe('lint — e6-component-project-helper (CONVENTIONS E6)', () => {
     test('rejects a hand-rolled browser project', async () => {
         // Given - a config wiring Browser Mode by hand
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e6-component-project-helper/')
+            .fixtureDirectory('../../fixtures/lint-violations/e6-component-project-helper/')
             .exec('.');
 
         // Then - oxlint reports the e6-component-project-helper diagnostic
@@ -18,7 +18,7 @@ describe('lint — e6-component-project-helper (CONVENTIONS E6)', () => {
     test('accepts the project the helper builds', async () => {
         // Given - the compliant twin: `component()` beside `unit()`
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e6-component-project-helper-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/e6-component-project-helper-ok/')
             .exec('.');
 
         // Then - clean run, no e6-component-project-helper diagnostic

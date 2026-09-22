@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { cli } from '../checker.specification.js';
 
 /** The fixture workspace the member pass is exercised against. */
-const WORKSPACE = resolve(import.meta.dirname, '../../_fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../fixtures/member-workspace');
 const member = (name: string): string => `${WORKSPACE}/packages/${name}`;
 
 describe('checker CLI — the member pass', () => {
@@ -58,7 +58,7 @@ describe('checker CLI — the member pass', () => {
 
         // Then - stdout is the diagnostic array, and nothing else
         expect(result.exitCode).toBe(1);
-        expect(result.json).toMatchFile('./_expected/seam-dependency.json');
+        expect(result.json).toMatchFile('./expected/seam-dependency.json');
     });
 
     test('reads the jest allowance the same from the member as from the root', async () => {

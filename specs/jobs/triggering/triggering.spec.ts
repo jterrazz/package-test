@@ -11,7 +11,7 @@ describe('jobs', () => {
     test('trigger executes a registered job', async () => {
         // Given - two users seeded, then the sync-events job runs
         const result = await jobs
-            .seedFile('./_seeds/two-users.sql', { database: 'db' })
+            .seedFile('./seeds/two-users.sql', { database: 'db' })
             .trigger('sync-events');
 
         // Then - the job copied one event per user into the analytics database
@@ -26,7 +26,7 @@ describe('jobs', () => {
 
     test('trigger resets databases at the start of each chain', async () => {
         // Given - a previous spec left synced events behind
-        await jobs.seedFile('./_seeds/two-users.sql', { database: 'db' }).trigger('sync-events');
+        await jobs.seedFile('./seeds/two-users.sql', { database: 'db' }).trigger('sync-events');
         const result = await jobs.trigger('sync-events');
 
         // Then - no users were seeded this time, so no events were produced

@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import nestedApp from './_fixtures/nested-app/vitest.config.js';
+import nestedApp from './fixtures/nested-app/vitest.config.js';
 import { api, cli, component, integration, jobs, mobile, unit, website } from './projects.js';
 
 /** The `test` block of a project, whatever the helper wrapped around it. */
@@ -187,7 +187,7 @@ describe('component() — the browser project', () => {
 
     test('reads a relative path against the config that stated it, not the cwd', () => {
         // Given - the config of an app in a subdirectory, loaded from the package root the way knip and the type-checker load every config
-        const nested = resolve(import.meta.dirname, '_fixtures/nested-app');
+        const nested = resolve(import.meta.dirname, 'fixtures/nested-app');
         const project = testOf(nestedApp);
 
         // Then - both of its relative paths landed beside it, and neither here
@@ -280,9 +280,9 @@ describe('the node facet helpers — one canonical project per kind', () => {
         // Then - all three are the repository's, the name stays canonical
         expect(stated.include).toStrictEqual(['suites/api/**/*.test.ts']);
         // The preset's own exclusions are never dropped — vite concatenates,
-        // So a repository ADDS to `_fixtures/` rather than having to restate it.
+        // So a repository ADDS to the ground exclusion rather than having to restate it.
         expect(stated.exclude).toContain('specs/api/slow/**');
-        expect(stated.exclude).toContain('**/_fixtures/**');
+        expect(stated.exclude).toContain('specs/**/{fixtures,expected,seeds,requests}/**');
         expect(stated.testTimeout).toBe(90_000);
         expect(stated.name).toBe('api');
     });

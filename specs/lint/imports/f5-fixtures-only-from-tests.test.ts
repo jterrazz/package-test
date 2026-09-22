@@ -7,7 +7,7 @@ describe('lint — f5-fixtures-only-from-tests (CONVENTIONS F5)', () => {
     test('rejects a fixtures module imported from a non-test file', async () => {
         // Given - a project violating F5
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/f5-fixtures-only-from-tests/')
+            .fixtureDirectory('../../fixtures/lint-violations/f5-fixtures-only-from-tests/')
             .exec('.');
 
         // Then - oxlint reports the f5-fixtures-only-from-tests diagnostic
@@ -18,7 +18,7 @@ describe('lint — f5-fixtures-only-from-tests (CONVENTIONS F5)', () => {
     test('accepts a fixtures module imported from its test', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/f5-fixtures-only-from-tests-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/f5-fixtures-only-from-tests-ok/')
             .exec('.');
 
         // Then - clean run, no f5-fixtures-only-from-tests diagnostic

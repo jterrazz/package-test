@@ -33,7 +33,7 @@ import { c7SeedsSqlOnly } from './rules/model/c7-seeds-sql-only.js';
 import { c8ReferencedFixtureExists } from './rules/model/c8-referenced-fixture-exists.js';
 import { c10ContractsBoundary } from './rules/model/c10-contracts-boundary.js';
 import { c11ContractDataPairing } from './rules/model/c11-contract-data-pairing.js';
-import { c13UnderscoredGround } from './rules/model/c13-underscored-ground.js';
+import { c13BareGround } from './rules/model/c13-bare-ground.js';
 import { d2AwaitIoMatcher } from './rules/model/d2-await-io-matcher.js';
 import { d2wAwaitSyncMatcher } from './rules/model/d2w-await-sync-matcher.js';
 import { d6wTransformTokenEquivalent } from './rules/model/d6w-transform-token-equivalent.js';
@@ -124,7 +124,7 @@ const plugin: LintPlugin = {
         'c1-domain-structure': c1DomainStructure,
         'c10-contracts-boundary': c10ContractsBoundary,
         'c11-contract-data-pairing': c11ContractDataPairing,
-        'c13-underscored-ground': c13UnderscoredGround,
+        'c13-bare-ground': c13BareGround,
         'c2-http-only-requests': c2HttpOnlyRequests,
         'c4-contract-shape': c4ContractShape,
         'c6-tomatch-extension': c6ToMatchExtension,

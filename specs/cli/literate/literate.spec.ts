@@ -12,7 +12,7 @@ import { cli } from '../literate-cli.specification.js';
  * `specs/cli/literate/*.spec.yaml` as test files — so every scenario here is
  * proven twice, once per entry point, against one engine.
  *
- * The `_fixtures/` twins are the deliberately-wrong inputs: a document whose
+ * The `fixtures/` twins are the deliberately-wrong inputs: a document whose
  * golden or shape is wrong on purpose, kept out of the plugin's glob so the
  * runner never tries to pass them.
  */
@@ -164,7 +164,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 describe('spec documents — refusals', () => {
     test('a key outside the closed set names the key, the line and the vocabulary', async () => {
         // Given - a `when:` line
-        const message = await failureOf(cli.run('_fixtures/unknown-key.spec.yaml'));
+        const message = await failureOf(cli.run('fixtures/unknown-key.spec.yaml'));
 
         // Then - the closed vocabulary is spelled out in the refusal
         expect(message).toContain('unknown key "when:"');
@@ -175,51 +175,49 @@ describe('spec documents — refusals', () => {
     test('a wrong stdout renders the description, the command and a line diff', async () => {
         // Given - a golden nobody updated (frozen: its mismatch IS the subject)
         const message = await failureOf(
-            cli.run('_fixtures/wrong-stdout.spec.yaml', { frozen: true }),
+            cli.run('fixtures/wrong-stdout.spec.yaml', { frozen: true }),
         );
 
         // Then - the whole rendering, tokens covering the path and the run cwd
-        expect(text(message)).toMatchFile('./_expected/wrong-stdout-error.txt');
+        expect(text(message)).toMatchFile('./expected/wrong-stdout-error.txt');
     });
 
     test('a wrong exit code names both codes and what stderr carried', async () => {
         // Given - a golden claiming a failing command succeeds
-        const message = await failureOf(
-            cli.run('_fixtures/wrong-exit.spec.yaml', { frozen: true }),
-        );
+        const message = await failureOf(cli.run('fixtures/wrong-exit.spec.yaml', { frozen: true }));
 
         // Then - the whole rendering, stderr included
-        expect(text(message)).toMatchFile('./_expected/wrong-exit-error.txt');
+        expect(text(message)).toMatchFile('./expected/wrong-exit-error.txt');
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
         // Given - a contains that does not, an absent that is there, and a missing file that should exist
         const message = await failureOf(
-            cli.run('_fixtures/wrong-files.spec.yaml', { frozen: true }),
+            cli.run('fixtures/wrong-files.spec.yaml', { frozen: true }),
         );
 
         // Then - the whole rendering, one line per rejected assertion
-        expect(text(message)).toMatchFile('./_expected/wrong-files-error.txt');
+        expect(text(message)).toMatchFile('./expected/wrong-files-error.txt');
     });
 
     test('the stack carries ONE frame, on the run that failed', async () => {
         // Given - a golden whose run is deliberately wrong
-        const error = await errorOf(cli.run('_fixtures/wrong-stdout.spec.yaml', { frozen: true }));
+        const error = await errorOf(cli.run('fixtures/wrong-stdout.spec.yaml', { frozen: true }));
 
         // Then - no engine frames, no generated-module frame: the `command:` line, which is what the message names too
         expect(frames(error)).toStrictEqual([
-            `at ${resolve(import.meta.dirname, '_fixtures/wrong-stdout.spec.yaml')}:3:1`,
+            `at ${resolve(import.meta.dirname, 'fixtures/wrong-stdout.spec.yaml')}:3:1`,
         ]);
-        expect(error.message).toContain('_fixtures/wrong-stdout.spec.yaml:3');
+        expect(error.message).toContain('fixtures/wrong-stdout.spec.yaml:3');
     });
 
     test('a grammar refusal points at the offending line, not at the engine', async () => {
         // Given - a document carrying a key outside the closed set (line 2)
-        const error = await errorOf(cli.run('_fixtures/unknown-key.spec.yaml'));
+        const error = await errorOf(cli.run('fixtures/unknown-key.spec.yaml'));
 
         // Then - the frame is that line, not a parser frame
         expect(frames(error)).toStrictEqual([
-            `at ${resolve(import.meta.dirname, '_fixtures/unknown-key.spec.yaml')}:2:1`,
+            `at ${resolve(import.meta.dirname, 'fixtures/unknown-key.spec.yaml')}:2:1`,
         ]);
     });
 
@@ -416,14 +414,12 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
 
     test('a frozen document is never rewritten under TEST_UPDATE', async () => {
         // Given - a deliberately-wrong golden, run in update mode
-        const target = resolve(import.meta.dirname, '_fixtures/wrong-stdout.spec.yaml');
+        const target = resolve(import.meta.dirname, 'fixtures/wrong-stdout.spec.yaml');
         const before = readFileSync(target, 'utf8');
         process.env.TEST_UPDATE = '1';
         let message: string;
         try {
-            message = await failureOf(
-                cli.run('_fixtures/wrong-stdout.spec.yaml', { frozen: true }),
-            );
+            message = await failureOf(cli.run('fixtures/wrong-stdout.spec.yaml', { frozen: true }));
         } finally {
             delete process.env.TEST_UPDATE;
         }

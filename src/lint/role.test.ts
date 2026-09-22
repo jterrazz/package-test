@@ -47,14 +47,14 @@ describe('roleOf — the kind a path states', () => {
     test('ground is what a spec stands on, and it swallows what sits inside it', () => {
         // Given - a fixture project's own source file
         // Then - it is ground, never a member of the row
-        expect(roleOf('/repo/specs/_fixtures/app/server.ts').role).toBe('ground');
-        expect(roleOf('/repo/specs/api/users/_expected/user.http').role).toBe('ground');
+        expect(roleOf('/repo/specs/fixtures/app/server.ts').role).toBe('ground');
+        expect(roleOf('/repo/specs/api/users/expected/user.http').role).toBe('ground');
     });
 
     test("a ground module's own test keeps its kind — I2's one pairing", () => {
         // Given - a `<module>.test.ts` inside ground
         // Then - the suffix wins: it is a module test, not inert material
-        expect(roleOf('/repo/specs/_fixtures/app/server.test.ts').role).toBe('module');
+        expect(roleOf('/repo/specs/fixtures/app/server.test.ts').role).toBe('module');
     });
 
     test('a contracts/ unit is its own role — the half C10 keeps internal', () => {

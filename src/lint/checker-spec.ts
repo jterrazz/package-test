@@ -52,7 +52,7 @@ function finding(
     return { line, message, rule, severity };
 }
 
-/** Directories the walks never enter — `_fixtures/` holds INPUTS, never scenarios. */
+/** Directories the walks never enter — `fixtures/` holds INPUTS, never scenarios. */
 const PRUNED = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
 function listSpecFiles(dir: string): string[] {
@@ -316,7 +316,7 @@ const VOLATILE = [
 /**
  * The volatile literal on this line, if it carries one — the reader BOTH halves
  * of d5's reach use, so a document's expected stream and a file under
- * `_expected/` are judged by one list.
+ * `expected/` are judged by one list.
  *
  * A `{{token}}` is removed before the test: the token IS the answer the rule
  * asks for, and a path written after one is the token's tail, not a literal.
@@ -406,7 +406,7 @@ const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
  * put there, not one a run minted — a reader sees it being pinned two lines
  * above the stream that asserts it.
  *
- * The last is the ground beside it. A document's sibling `_fixtures/` is its
+ * The last is the ground beside it. A document's sibling `fixtures/` is its
  * material whether or not a `fixture:` line names the exact file: the tree is
  * there to be read by the run, and a value it holds is one the repository
  * committed.

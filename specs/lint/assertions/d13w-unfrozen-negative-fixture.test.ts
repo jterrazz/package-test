@@ -7,7 +7,7 @@ describe('lint — d13w-unfrozen-negative-fixture (CONVENTIONS D13)', () => {
     test('warns on a wrapped negative toMatch without frozen', async () => {
         // Given - a project whose negative toMatch omits { frozen: true }
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d13w-unfrozen-negative-fixture/')
+            .fixtureDirectory('../../fixtures/lint-violations/d13w-unfrozen-negative-fixture/')
             .exec('.');
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — d13w-unfrozen-negative-fixture (CONVENTIONS D13)', () => {
     test('stays silent when the negative fixture is frozen', async () => {
         // Given - the compliant twin, the same assertion with { frozen: true }
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d13w-unfrozen-negative-fixture-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d13w-unfrozen-negative-fixture-ok/')
             .exec('.');
 
         // Then - clean run, no d13w-unfrozen-negative-fixture diagnostic

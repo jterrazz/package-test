@@ -7,7 +7,7 @@ describe('lint — e9w-env-assignment-in-test (CONVENTIONS E9)', () => {
     test('warns on a raw process.env assignment in a test', async () => {
         // Given - a project violating E9
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e9w-env-assignment-in-test/')
+            .fixtureDirectory('../../fixtures/lint-violations/e9w-env-assignment-in-test/')
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — e9w-env-assignment-in-test (CONVENTIONS E9)', () => {
     test('accepts the self-restoring stub', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e9w-env-assignment-in-test-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/e9w-env-assignment-in-test-ok/')
             .exec('.');
 
         // Then - clean exit, no E9 diagnostic

@@ -7,7 +7,7 @@ describe('lint — w1-scenario-pure (CONVENTIONS W1)', () => {
     test('rejects an expect() inside a visit scenario', async () => {
         // Given - a scenario asserting mid-flight
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/w1-scenario-pure/')
+            .fixtureDirectory('../../fixtures/lint-violations/w1-scenario-pure/')
             .exec('.');
 
         // Then - oxlint reports the w1-scenario-pure diagnostic
@@ -18,7 +18,7 @@ describe('lint — w1-scenario-pure (CONVENTIONS W1)', () => {
     test('accepts a pure scenario asserting on the result', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/w1-scenario-pure-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/w1-scenario-pure-ok/')
             .exec('.');
 
         // Then - clean run, no w1-scenario-pure diagnostic

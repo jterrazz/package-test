@@ -18,7 +18,7 @@ import { onProjectDefaults } from './preset.js';
 export type FacetProjectOptions = {
     /**
      * Globs this project stays out of. On a facet helper they ADD to the
-     * preset's (`_fixtures/` and vitest's own), because vite concatenates. On
+     * preset's (`fixtures/` and vitest's own), because vite concatenates. On
      * `unit()` and `component()`, whose canonical `exclude` exists only to
      * guard their canonical `include`, stating one replaces it — so state
      * both or neither there.

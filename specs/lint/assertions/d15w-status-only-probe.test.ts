@@ -7,7 +7,7 @@ describe('lint — d15w-status-only-probe (CONVENTIONS D15)', () => {
     test('warns on a test whose only assertion is a status probe', async () => {
         // Given - a project whose test asserts nothing but an HTTP status
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d15w-status-only-probe/')
+            .fixtureDirectory('../../fixtures/lint-violations/d15w-status-only-probe/')
             .exec('.');
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — d15w-status-only-probe (CONVENTIONS D15)', () => {
     test('stays silent on a status probe beside a golden', async () => {
         // Given - the compliant twin, a status probe alongside a full-response golden
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d15w-status-only-probe-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d15w-status-only-probe-ok/')
             .exec('.');
 
         // Then - clean run, no d15w-status-only-probe diagnostic

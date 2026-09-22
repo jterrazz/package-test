@@ -7,7 +7,7 @@ describe('lint — d16-sampled-oracle (CONVENTIONS D16)', () => {
     test('rejects an oracle that samples the clock', async () => {
         // Given - a project violating D16
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d16-sampled-oracle/')
+            .fixtureDirectory('../../fixtures/lint-violations/d16-sampled-oracle/')
             .exec('.');
 
         // Then - the diagnostic names the rule
@@ -18,7 +18,7 @@ describe('lint — d16-sampled-oracle (CONVENTIONS D16)', () => {
     test('accepts an oracle the test states', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d16-sampled-oracle-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d16-sampled-oracle-ok/')
             .exec('.');
 
         // Then - clean exit, no D16 diagnostic

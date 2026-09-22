@@ -1,6 +1,7 @@
 import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { isGroundName } from '../model/chain/ground.js';
 import { cell, table } from './catalog.js';
 
 /**
@@ -40,18 +41,18 @@ export const SHARED_DOMAINS = [
 
 /** Each facet's own domains — a name here may not appear under another facet. */
 export const FACET_DOMAINS: Record<string, string[]> = {
-    api: ['initiation-errors', 'requests', 'responses'],
+    api: ['initiation-errors', 'responses', 'sending'],
     cli: ['directory', 'docker', 'env', 'exec', 'literate'],
     integration: ['call', 'golden', 'postgres', 'redis'],
     jobs: ['triggering'],
     website: ['console', 'fetch', 'services', 'visit'],
 };
 
-/** The domain folders a facet carries on disk, sorted. Ground (`_…`) is not a domain. */
+/** The domain folders a facet carries on disk, sorted. Ground is not a domain. */
 export function domainsOf(root: string, facet: string): string[] {
     try {
         return readdirSync(resolve(root, 'specs', facet), { withFileTypes: true })
-            .filter((entry) => entry.isDirectory() && !entry.name.startsWith('_'))
+            .filter((entry) => entry.isDirectory() && !isGroundName(entry.name))
             .map((entry) => entry.name)
             .toSorted();
     } catch {

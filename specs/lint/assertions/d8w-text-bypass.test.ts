@@ -7,7 +7,7 @@ describe('lint — d8w-text-bypass (CONVENTIONS D8)', () => {
     test('warns on a raw .text assertion', async () => {
         // Given - a project tripping the D8 heuristic
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d8w-text-bypass/')
+            .fixtureDirectory('../../fixtures/lint-violations/d8w-text-bypass/')
             .exec('.');
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — d8w-text-bypass (CONVENTIONS D8)', () => {
     test('stays silent on the typed subject', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/d8w-text-bypass-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/d8w-text-bypass-ok/')
             .exec('.');
 
         // Then - clean run, no d8w-text-bypass diagnostic

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
-// ── Placeholders in _expected/*.http — both modes ──
+// ── Placeholders in expected/*.http — both modes ──
 
 describe('responses', () => {
     test('matches dynamic values via placeholders', async () => {
@@ -10,7 +10,7 @@ describe('responses', () => {
         const result = await api.get('/session');
 
         // Then - the fixture matches via {{uuid#session}} / {{iso8601}} placeholders, with the #session ref asserting both uuid occurrences are equal. the matcher also asserts the status line and the content-type header (via a {{string}} placeholder) as a subset — headers absent from the fixture are unconstrained.
-        expect(result.response).toMatchFile('./_expected/session.http');
+        expect(result.response).toMatchFile('./expected/session.http');
     });
 
     test('fails when a ref captures two different values', async () => {
@@ -19,7 +19,7 @@ describe('responses', () => {
 
         // Then - the second occurrence of {{...#val}} must equal the capture, and does not frozen - a deliberately-wrong fixture asserting the mismatch; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatchFile('./_expected/session-wrong-ref.http', {
+            expect(result.response).toMatchFile('./expected/session-wrong-ref.http', {
                 frozen: true,
             });
         }).toThrow(/Response mismatch/u);
@@ -33,11 +33,11 @@ describe('response mismatch messages', () => {
 
         // Then - the failure names the fixture and both status codes frozen - a deliberately-wrong fixture asserting the status mismatch; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatchFile('./_expected/session-wrong-status.http', {
+            expect(result.response).toMatchFile('./expected/session-wrong-status.http', {
                 frozen: true,
             });
         }).toThrow(
-            /Response status mismatch \(\.\/_expected\/session-wrong-status\.http\)[\s\S]*expected: 201[\s\S]*received: 200/u,
+            /Response status mismatch \(\.\/expected\/session-wrong-status\.http\)[\s\S]*expected: 201[\s\S]*received: 200/u,
         );
     });
 
@@ -47,15 +47,15 @@ describe('response mismatch messages', () => {
 
         // Then - the failure names the header and shows expected vs received frozen - a deliberately-wrong fixture asserting the header mismatch; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatchFile('./_expected/session-wrong-header.http', {
+            expect(result.response).toMatchFile('./expected/session-wrong-header.http', {
                 frozen: true,
             });
         }).toThrow(
-            /Response header mismatch \(\.\/_expected\/session-wrong-header\.http\)[\s\S]*header: content-type[\s\S]*expected: text\/html[\s\S]*received: application\/json/u,
+            /Response header mismatch \(\.\/expected\/session-wrong-header\.http\)[\s\S]*header: content-type[\s\S]*expected: text\/html[\s\S]*received: application\/json/u,
         );
     });
 
-    // RUNTIME C3 — an `_expected/*.http` starts with a status line and its
+    // RUNTIME C3 — an `expected/*.http` starts with a status line and its
     // Headers are matched as a SUBSET: the ones listed must match, the rest are
     // Unconstrained.
     test('reports a subset-header mismatch when the header is absent', async () => {
@@ -64,11 +64,11 @@ describe('response mismatch messages', () => {
 
         // Then - the failure shows the header as absent frozen - a deliberately-wrong fixture asserting the absent-header case; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatchFile('./_expected/session-missing-header.http', {
+            expect(result.response).toMatchFile('./expected/session-missing-header.http', {
                 frozen: true,
             });
         }).toThrow(
-            /Response header mismatch \(\.\/_expected\/session-missing-header\.http\)[\s\S]*header: x-request-id[\s\S]*received: \(absent\)/u,
+            /Response header mismatch \(\.\/expected\/session-missing-header\.http\)[\s\S]*header: x-request-id[\s\S]*received: \(absent\)/u,
         );
     });
 });

@@ -15,11 +15,11 @@ const stripAnsi = (text: string): string => text.replaceAll(/\[[0-9;]*m/gu, '')
 /** A Hono-compatible app the constructor never reaches: startup fails first. */
 const unreachedApp = { request: () => Response.json({}, { status: 200 }) };
 
-const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, '../../_fixtures/broken-postgres-init');
-const BROKEN_MULTI_INIT = resolve(import.meta.dirname, '../../_fixtures/broken-multi-init');
+const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, '../../fixtures/broken-postgres-init');
+const BROKEN_MULTI_INIT = resolve(import.meta.dirname, '../../fixtures/broken-multi-init');
 const BROKEN_SECOND_POSTGRES = resolve(
     import.meta.dirname,
-    '../../_fixtures/broken-second-postgres',
+    '../../fixtures/broken-second-postgres',
 );
 
 /*

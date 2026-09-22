@@ -7,10 +7,10 @@ import { isTestRole, roleOf } from '../../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
- * CONVENTIONS C7 — `.seed()` carries DATABASE state only: `_seeds/` contains
+ * CONVENTIONS C7 — `.seed()` carries DATABASE state only: `seeds/` contains
  * nothing but `*.sql` fragments. File state goes through `.fixture()`; there
  * is no seed handler and no prefix dispatch. Anchored on the feature's visited
- * test file (cached readdir of the sibling `_seeds/`).
+ * test file (cached readdir of the sibling `seeds/`).
  */
 export const c7SeedsSqlOnly: LintRule = {
     create(context: RuleContext): Visitor {
@@ -33,7 +33,7 @@ export const c7SeedsSqlOnly: LintRule = {
     meta: {
         docs: RULE_DOCS['c7-seeds-sql-only'],
         messages: {
-            notSql: '_seeds/{{entry}} is not a .sql file — _seeds/ carries database state only; file state goes through .fixture().',
+            notSql: 'seeds/{{entry}} is not a .sql file — seeds/ carries database state only; file state goes through .fixture().',
         },
         type: 'problem',
     },

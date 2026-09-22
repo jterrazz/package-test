@@ -6,13 +6,13 @@ Real systems generate UUIDs, timestamps, ports, and paths. The framework handles
 
 | Fixture kind   | Files                                                                              | Coverage                                                                                                       |
 | -------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| HTTP responses | `_expected/*.http`                                                                 | **body and headers**                                                                                           |
-| JSON snapshots | `_expected/*.json`                                                                 | any string value                                                                                               |
-| Text snapshots | `_expected/*.txt` (and other text files under `_expected/`)                        | anywhere in the text                                                                                           |
+| HTTP responses | `expected/*.http`                                                                  | **body and headers**                                                                                           |
+| JSON snapshots | `expected/*.json`                                                                  | any string value                                                                                               |
+| Text snapshots | `expected/*.txt` (and other text files under `expected/`)                          | anywhere in the text                                                                                           |
 | Spec documents | `<case>.spec.yaml`, beside the spec ([12](12-cli.md#spec-documents--casespecyaml)) | both streams of every run, and `files:` assertions — **never the description or the command**, which are prose |
 
 ```http
-### _expected/order-created.http — tokens in a header AND the body
+### expected/order-created.http — tokens in a header AND the body
 HTTP/1.1 201 Created
 Location: /orders/{{uuid#order}}
 
@@ -20,7 +20,7 @@ Location: /orders/{{uuid#order}}
 ```
 
 ```
-### _expected/help.txt — tokens in a TEXT snapshot
+### expected/help.txt — tokens in a TEXT snapshot
 shoply v{{semver}}
 Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
@@ -95,7 +95,7 @@ Every token matches one value of its family at its position. The normative defin
 Any token becomes a capture by suffixing `#name`: `{{uuid#order}}`. The **first occurrence captures** the actual value; every subsequent occurrence of the same ref **must be equal** (rule D4). Refs are scoped to the current spec — one namespace shared by all fixture files and code-side `match.ref()` within that spec, resetting between specs.
 
 ```http
-### _expected/order-created.http — {{uuid#order}} appears 3 times → all must be equal
+### expected/order-created.http — {{uuid#order}} appears 3 times → all must be equal
 HTTP/1.1 201 Created
 Location: /orders/{{uuid#order}}
 
@@ -165,7 +165,7 @@ Done in {{duration}}
 
 `TEST_UPDATE=1` leaves the fixture byte-identical: every changed segment was already covered by a token. If the CLI adds a new line `Cache dir: /tmp/shoply-spec-x9y8z7/.cache`, the update writes `Cache dir: {{workdir}}/.cache` — `{{workdir}}` is substituted automatically; a timestamp in a _new_ line would be written literally, for you to tokenize by hand (or it will fail on the next run, which is the signal).
 
-The same preservation and `{{workdir}}` substitution apply identically across every fixture kind — text snapshots (`_expected/*.txt`), JSON goldens (`_expected/*.json`), `.http` response bodies (`_expected/*.http`), and the streams of a `<case>.spec.yaml` (whose ground, commands and `files:` an update never rewrites). A cwd embedded in a JSON string value is written back as `{{workdir}}` exactly as it is in a text line, so an updated JSON golden matches the next run's (different) cwd instead of pinning a run-specific temp path.
+The same preservation and `{{workdir}}` substitution apply identically across every fixture kind — text snapshots (`expected/*.txt`), JSON goldens (`expected/*.json`), `.http` response bodies (`expected/*.http`), and the streams of a `<case>.spec.yaml` (whose ground, commands and `files:` an update never rewrites). A cwd embedded in a JSON string value is written back as `{{workdir}}` exactly as it is in a text line, so an updated JSON golden matches the next run's (different) cwd instead of pinning a run-specific temp path.
 
 This is why `transform` on `specification.cli` is only an escape hatch (rule D6): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is a future lint warning.
 
@@ -196,7 +196,7 @@ The round-trip is not a step the suite performs for you, and deliberately so: up
 
 **The frozen two-pass.** A frozen fixture is never written, so changing one on purpose is two deliberate passes: drop `{ frozen: true }`, run once under `TEST_UPDATE=1`, read the diff, and put the option back in the same commit. The friction is the feature — a negative fixture should cost something to change.
 
-**What update mode never touches.** The ground of a `<case>.spec.yaml` — its `description:`, its commands, its `env:`/`serve:`/`fixture:` and its `files:` — is authored, never rewritten; only the expected streams move. A `_requests/*.http` is an input, not an expectation, and is never written either.
+**What update mode never touches.** The ground of a `<case>.spec.yaml` — its `description:`, its commands, its `env:`/`serve:`/`fixture:` and its `files:` — is authored, never rewritten; only the expected streams move. A `requests/*.http` is an input, not an expectation, and is never written either.
 
 ## Known limitations
 

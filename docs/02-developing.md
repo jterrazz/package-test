@@ -121,7 +121,7 @@ afterAll(cleanup);
 ```
 
 ```http
-### specs/api/users/_requests/create-user.http — the COMPLETE request
+### specs/api/users/requests/create-user.http — the COMPLETE request
 POST /users
 Content-Type: application/json
 
@@ -129,7 +129,7 @@ Content-Type: application/json
 ```
 
 ```http
-### specs/api/users/_expected/user-created.http — status + header subset + body
+### specs/api/users/expected/user-created.http — status + header subset + body
 HTTP/1.1 201 Created
 Content-Type: application/json
 
@@ -180,14 +180,14 @@ test('shows help', async () => {
     // Given
     const result = await cli.exec('--help');
 
-    // Then - full snapshot of stdout against _expected/help.txt
+    // Then - full snapshot of stdout against expected/help.txt
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toMatch('help.txt');
 });
 ```
 
 ```
-### specs/cli/help/_expected/help.txt — tokens work in text snapshots too
+### specs/cli/help/expected/help.txt — tokens work in text snapshots too
 my-cli v{{semver}}
 Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
@@ -235,7 +235,7 @@ What every helper accepts, on top of the project it already is:
 | `test.coverage.reportsDirectory` | [the artefact path](#artefacts-live-under-artifacts) | Where a tool writes what it generates is the toolchain's convention ([`@jterrazz/typescript` — Developing](https://github.com/jterrazz/package-typescript/blob/main/docs/02-developing.md)); the preset sets it so no consumer writes it. The **provider is yours to install** (`@vitest/coverage-v8`) |
 | `test.testTimeout`               | `30_000`                                             | Vitest's 5s never survived a container boot, a `prisma db push` or a `next build`                                                                                                                                                                                                                      |
 | `test.hookTimeout`               | `30_000`                                             | Same reason, for the `beforeAll` that starts the infrastructure                                                                                                                                                                                                                                        |
-| `test.exclude`                   | vitest's defaults + `**/_fixtures/**`                | What a spec stands on is an input, never a suite — a repository must not run its own counter-examples                                                                                                                                                                                                  |
+| `test.exclude`                   | vitest's defaults + `**/fixtures/**`                 | What a spec stands on is an input, never a suite — a repository must not run its own counter-examples                                                                                                                                                                                                  |
 | `test.attachmentsDir`            | `.artifacts/vitest/attachments`                      | Vitest 5 writes `context.annotate()` attachments to `.vitest/` at the repository root                                                                                                                                                                                                                  |
 | `test.outputFile`                | `.artifacts/vitest/{json,junit,html,blob}`           | Vitest 5 turned the json and junit reporters into FILE writers; all four are artefacts                                                                                                                                                                                                                 |
 | `test.retry`                     | `0`                                                  | A flaky test is fixed or deleted — a retry turns a real defect into a slow one and hides it                                                                                                                                                                                                            |
@@ -291,7 +291,7 @@ Swap the import, drop what the preset already says, keep what is yours:
                  test: {
                      name: 'api',
                      include: ['specs/api/**/*.spec.ts'],
--                    exclude: [...configDefaults.exclude, '**/_fixtures/**', 'specs/api/heavy/**'],
+-                    exclude: [...configDefaults.exclude, '**/fixtures/**', 'specs/api/heavy/**'],
 +                    exclude: ['specs/api/heavy/**'],
 -                    testTimeout: 30_000,
                  },
@@ -329,10 +329,10 @@ specs/
 │   ├── api.specification.ts
 │   └── users/
 │       ├── users.spec.ts          # <aspect>.spec.ts inside its domain (rule C1)
-│       ├── _seeds/                 # *.sql
-│       ├── _requests/              # *.http — complete requests (inputs)
+│       ├── seeds/                 # *.sql
+│       ├── requests/              # *.http — complete requests (inputs)
 │       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
-│       └── _expected/              # all expected fixtures, flat — incl. response *.http (a slash in the name creates a subfolder)
+│       └── expected/              # all expected fixtures, flat — incl. response *.http (a slash in the name creates a subfolder)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)
     └── help/

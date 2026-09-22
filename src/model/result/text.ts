@@ -23,14 +23,14 @@ export function stripAnsiCodes(value: string): string {
  * grammar.
  *
  * Text operations are **closed** over the type: `.grep(pattern)` returns a
- * `TextAccessor` (not a bare string), preserving the `_expected/`-resolution
+ * `TextAccessor` (not a bare string), preserving the `expected/`-resolution
  * context and the `transform`, so results are chainable
  * (`result.stdout.grep(a).grep(b)`) and snapshot-able
  * (`expect(result.stdout.grep('users.ts')).toMatch('block.txt')`).
  *
  * Assertions go through `expect()` matchers: `expect(result.stdout).toContain(...)`
  * and `expect(result.stdout).toMatch('name.txt')` (resolved against
- * `_expected/<name>`, flat — with `{{token}}` support, CONVENTIONS D4).
+ * `expected/<name>`, flat — with `{{token}}` support, CONVENTIONS D4).
  */
 export class TextAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */

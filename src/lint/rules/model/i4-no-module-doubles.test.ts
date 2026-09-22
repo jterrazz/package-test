@@ -89,7 +89,7 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
         },
         // A spec under specs/ reads real files by design — the asset clause is
         // The module role's alone.
-        { code: 'import seed from "./_seeds/users.sql";', filename: SPEC },
+        { code: 'import seed from "./seeds/users.sql";', filename: SPEC },
         // The allow-list clears the native module in BOTH spellings: the
         // String one, and the dynamic import `vitest/prefer-import-in-mock`
         // Asks for — an allow-listed module has a green spelling under both.

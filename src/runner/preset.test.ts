@@ -70,12 +70,12 @@ describe('defineSpecConfig() — defaults', () => {
         expect(config.test?.hookTimeout).toBe(30_000);
     });
 
-    test('excludes what a spec stands on — `_fixtures/` is an input, not a suite', () => {
+    test('excludes what a spec stands on — ground is an input, not a suite', () => {
         // Given - the preset alone
         const config = defineSpecConfig();
 
-        // Then - the underscored ground never gets collected
-        expect(config.test?.exclude).toContain('**/_fixtures/**');
+        // Then - the four ground folders never get collected
+        expect(config.test?.exclude).toContain('specs/**/{fixtures,expected,seeds,requests}/**');
         expect(config.test?.exclude).toContain('**/node_modules/**');
     });
 
@@ -91,7 +91,7 @@ describe('defineSpecConfig() — defaults', () => {
             test: { hookTimeout: 30_000, testTimeout: 30_000 },
         });
         expect((project as { test: { exclude: string[] } }).test.exclude).toContain(
-            '**/_fixtures/**',
+            'specs/**/{fixtures,expected,seeds,requests}/**',
         );
     });
 });
@@ -111,7 +111,7 @@ describe('defineSpecConfig() — what the consumer states wins', () => {
 
         // Then - vite concatenates: the preset's exclusions survive, so a consumer never has to spread `configDefaults.exclude` by hand
         expect(config.test?.exclude).toContain('specs/smoke/**');
-        expect(config.test?.exclude).toContain('**/_fixtures/**');
+        expect(config.test?.exclude).toContain('specs/**/{fixtures,expected,seeds,requests}/**');
     });
 
     test('a project overrides the preset per project', () => {
@@ -159,7 +159,7 @@ describe('defineSpecConfig() — every glob stated once', () => {
         expect(excludeOf(config)).toStrictEqual([
             '**/node_modules/**',
             '**/.git/**',
-            '**/_fixtures/**',
+            'specs/**/{fixtures,expected,seeds,requests}/**',
             'specs/**',
             '**/*.test.tsx',
         ]);
@@ -186,7 +186,7 @@ describe('defineSpecConfig() — every glob stated once', () => {
         const config = defineSpecConfig({ test: { projects: ['packages/*'] } });
 
         // Then - the root is the only place its exclusions can come from, so nothing is dropped
-        expect(config.test?.exclude).toContain('**/_fixtures/**');
+        expect(config.test?.exclude).toContain('specs/**/{fixtures,expected,seeds,requests}/**');
     });
 });
 

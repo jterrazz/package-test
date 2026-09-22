@@ -160,8 +160,17 @@ const FRAMEWORK_LAYERS = {
  */
 const selfTesting = { ...testing, jsPlugins: ['./dist/oxlint.js'] };
 
+/** The four reserved ground folders, under `specs/` and beside a module test. */
+const GROUND_GLOBS = [
+    'specs/**/{fixtures,expected,seeds,requests}/**',
+    'src/**/{fixtures,expected}/**',
+];
+
 const config: OxlintConfig = defineConfig(
     compose(library, selfTesting, {
+        // Ground is what a spec stands on and what it is measured against — an
+        // Input broken on purpose, a golden byte for byte — never source.
+        ignorePatterns: GROUND_GLOBS,
         overrides: [
             {
                 // The framework's own module tests unit-test the constructors —

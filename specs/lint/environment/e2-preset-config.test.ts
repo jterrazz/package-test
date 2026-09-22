@@ -7,7 +7,7 @@ describe('lint — e2-preset-config (CONVENTIONS E2)', () => {
     test('rejects a config that does not start from the preset', async () => {
         // Given - a project violating E2
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e2-preset-config/')
+            .fixtureDirectory('../../fixtures/lint-violations/e2-preset-config/')
             .exec('.');
 
         // Then - the diagnostic names the rule
@@ -18,7 +18,7 @@ describe('lint — e2-preset-config (CONVENTIONS E2)', () => {
     test('accepts a config that starts from the preset', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/e2-preset-config-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/e2-preset-config-ok/')
             .exec('.');
 
         // Then - clean exit, no E2 diagnostic

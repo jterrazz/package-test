@@ -44,7 +44,7 @@ export type FileIdentity = {
 };
 
 /** The four ground names — what the specs of a row stand ON, never a spec. */
-const GROUND = new Set(['_expected', '_fixtures', '_requests', '_seeds']);
+const GROUND = new Set(['expected', 'fixtures', 'requests', 'seeds']);
 
 /** A vitest config, whatever extension the project writes it in. */
 const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;

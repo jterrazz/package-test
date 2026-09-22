@@ -7,7 +7,7 @@ describe('lint — i2-sibling-test-naming (CONVENTIONS I2)', () => {
     test('rejects a src/ module test with no neighbour module', async () => {
         // Given - a project violating I2
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/i2-sibling-test-naming/')
+            .fixtureDirectory('../../fixtures/lint-violations/i2-sibling-test-naming/')
             .exec('.');
 
         // Then - oxlint reports the i2-sibling-test-naming diagnostic
@@ -18,7 +18,7 @@ describe('lint — i2-sibling-test-naming (CONVENTIONS I2)', () => {
     test('accepts the sibling test naming', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../_fixtures/lint-violations/i2-sibling-test-naming-ok/')
+            .fixtureDirectory('../../fixtures/lint-violations/i2-sibling-test-naming-ok/')
             .exec('.');
 
         // Then - clean run, no i2-sibling-test-naming diagnostic

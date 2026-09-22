@@ -18,7 +18,7 @@ import { specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
 export const { cleanup, website } = await specification.website({
-    server: { command: 'node specs/_fixtures/website-app/server.mjs', ready: '/' },
+    server: { command: 'node specs/fixtures/website-app/server.mjs', ready: '/' },
 });
 
 afterAll(cleanup);
@@ -376,13 +376,13 @@ specs/website/
 ├── website.specification.ts    # runner at the facet ROOT (rule C1)
 └── <domain>/
     ├── <aspect>.spec.ts
-    ├── _expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
+    ├── expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
     └── contracts/               # what the declared backend serves — with the `backend` option
         ├── newsroom.contracts.ts
         └── http/…
 ```
 
-No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `_expected/<name>`.
+No `seeds/` or `requests/` — a website chain has no `.seed()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `expected/<name>`.
 
 ## Pitfalls
 
