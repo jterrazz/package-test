@@ -285,4 +285,50 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             rewritten: [],
         });
     });
+
+    test('a directive naming a renamed rule names its new id, and the line it covers reads the raw capture', () => {
+        // Given - a 16 tree whose tests suppress D8w by its 16 id, on the next line and on its own
+        const root = tree16({
+            'cli/build/_expected/build.txt': '',
+            'cli/build/build.spec.ts': [
+                '// oxlint-disable-next-line jterrazz/d8w-text-bypass -- asserts the colour codes themselves',
+                "expect(result.stdout.text).toContain('[31m');",
+                "expect(result.stderr.text).not.toContain('[0m'); // oxlint-disable-line jterrazz/d8w-text-bypass -- same",
+                '// oxlint-disable-next-line jterrazz/j2-no-sleep -- another rule',
+                "expect(result.stdout.text).toContain('built');",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - the two directives name d8w-raw-bypass and their lines read .raw; the other directive, and its line, stay
+        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
+            [
+                '// oxlint-disable-next-line jterrazz/d8w-raw-bypass -- asserts the colour codes themselves',
+                "expect(result.stdout.raw).toContain('[31m');",
+                "expect(result.stderr.raw).not.toContain('[0m'); // oxlint-disable-line jterrazz/d8w-raw-bypass -- same",
+                '// oxlint-disable-next-line jterrazz/j2-no-sleep -- another rule',
+                "expect(result.stdout.text).toContain('built');",
+                '',
+            ].join('\n'),
+        );
+    });
+
+    test("a directive in a tree on 17 is not the mover's: it is left as written", () => {
+        // Given - a 17 tree (no 16 folder) that still names the 16 id
+        const source = [
+            '// oxlint-disable-next-line jterrazz/d8w-text-bypass -- left by hand',
+            "expect(result.stdout.text).toContain('built');",
+            '',
+        ].join('\n');
+        const root = tree16({ 'cli/build/build.spec.ts': source });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - untouched: the toolchain's Suppressions pass names a directive naming no rule
+        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
+    });
 });

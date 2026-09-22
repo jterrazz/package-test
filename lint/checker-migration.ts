@@ -34,7 +34,12 @@ import { isTestFileName } from './role.js';
  *    `expect(result.stdout).toContain('x')` → `expect(result.stdout.text).toContain('x')`
  *    (`.not` included, a `.grep(…)` subject too; a `toMatch(file(…))` golden
  *    stays on the accessor);
- * 4. a source the second gesture touched imports the two names it now calls.
+ * 4. a source the second gesture touched imports the two names it now calls;
+ * 5. a suppression directive naming a rule 17 renamed names its new id
+ *    (`d8w-text-bypass` → `d8w-raw-bypass`), and the one line a `-next-line`
+ *    or `-line` directive covers reads `.raw` where 16 read `.text` — the raw
+ *    capture it always compared. A directive naming a rule 17 retired is left:
+ *    the toolchain's Suppressions pass reports it as dead.
  *
  * The `…File`/`…Directory` verbs of the 17 prototype are read too
  * (`.seedFile('./seeds/x.sql')` → `.seed(file('./seeds/x.sql'))`), so a tree
@@ -166,10 +171,53 @@ const STREAM_VALUE =
 
 /** Rewrite the 16 (and prototype) calls of one source file; `root` is the specs tree. */
 function migrateSource(text: string, file: string, root: string): string {
-    return migrateVerbs(text, file, root).replaceAll(
+    return migrateVerbs(renameDirectives(text), file, root).replaceAll(
         STREAM_VALUE,
         'expect($<space>$<subject>.text$<close>$<not>.$<matcher>(',
     );
+}
+
+/** The rules 17 renamed: the 16 id → the id a directive names now. */
+const RENAMED_RULES: Readonly<Record<string, string>> = {
+    'd8w-text-bypass': 'd8w-raw-bypass',
+};
+
+/** A suppression directive, and whether it covers its own line or the next. */
+const DIRECTIVE = /(?:oxlint|eslint)-(?:disable|enable)(?<scope>-next-line|-line)?\b/u;
+
+/** The raw read a 16 `.text` was, in a value comparison: `expect(<x>.text).toContain(`. */
+const RAW_READ = /\.text(?=\s*\)(?:\.not)?\.(?:toContain|toMatch)\()/gu;
+
+/**
+ * A directive naming a renamed rule names its new id. A 16 `.text` WAS the raw
+ * capture, so the line a `d8w-text-bypass` directive covers reads `.raw` —
+ * the same bytes it compared, and the accessor `d8w-raw-bypass` warns about.
+ */
+function renameDirectives(text: string): string {
+    const lines = text.split('\n');
+    for (const [index, line] of lines.entries()) {
+        const directive = DIRECTIVE.exec(line);
+        if (directive === null) {
+            continue;
+        }
+        const scope = directive.groups?.scope;
+        let renamed = line;
+        for (const [from, to] of Object.entries(RENAMED_RULES)) {
+            renamed = renamed.replaceAll(
+                new RegExp(`\\bjterrazz/${from}\\b`, 'gu'),
+                `jterrazz/${to}`,
+            );
+        }
+        if (renamed === line) {
+            continue;
+        }
+        const covered = scope === '-next-line' ? index + 1 : index;
+        lines[index] = renamed;
+        if (scope !== undefined) {
+            lines[covered] = (lines[covered] ?? '').replaceAll(RAW_READ, '.raw');
+        }
+    }
+    return lines.join('\n');
 }
 
 /** The verbs that name the disk, moved to `file()`/`directory()`. */
