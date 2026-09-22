@@ -578,7 +578,7 @@ export const RULE_DOCS = {
     'f2-no-test-imports-in-prod': {
         channel: 'statique',
         convention:
-            'A production file never imports `vitest`, `@jterrazz/test`, a `*.test.*`, a `*.fixtures.*` or `mockOf` (one exception: `@jterrazz/test/oxlint`).',
+            'A production file never imports `vitest`, `@jterrazz/test`, a `*.test.*`, a `*.fixtures.*`, anything under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder, or `mockOf` (one exception: `@jterrazz/test/oxlint`). The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`.',
         facet: 'model',
         family: 'F',
         fix: 'Move the code that needs the import into a test, or inject what it needs as a port.',

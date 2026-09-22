@@ -1,3 +1,4 @@
+import { isGroundName } from '../../../src/model/chain/ground.js';
 import { importSourceVisitor, isUnderSpecs } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
@@ -7,11 +8,18 @@ const CONFIG_FILE = /(?:^|[/\\])[\w.-]*\.config\.[cm]?[jt]s$/u;
 const TEST_IMPORT = /\.(?:test|fixtures)(?:\.[cm]?[jt]sx?)?$/u;
 const TOOL_SUBPATH = '@jterrazz/test/oxlint';
 
+/** A relative import that passes through one of the four ground folders. */
+function reachesGround(source: string): boolean {
+    return source.startsWith('.') && source.split('/').some((segment) => isGroundName(segment));
+}
+
 /**
  * CONVENTIONS F2 — production code never imports a test artefact. In a
  * non-test file (not `*.test.ts` / `*.fixtures.ts` / `*.specification.ts`,
  * not under `specs/`, not a tool config), importing `vitest`,
- * `@jterrazz/test`, a `*.test.*` module or a `*.fixtures.*` module is flagged.
+ * `@jterrazz/test`, a `*.test.*` module, a `*.fixtures.*` module, or anything
+ * under a ground folder (`fixtures/`, `expected/`, `requests/`, `seeds/` — the
+ * names mean ground wherever a test stands on a file) is flagged.
  *
  * Sanctioned exception: `@jterrazz/test/oxlint`, the tool-facing, zero-runtime
  * lint entry (F1) — a shared oxlint preset legitimately imports it from prod
@@ -37,6 +45,8 @@ export const f2NoTestImportsInProd: LintRule = {
                     context.report({ data: { source }, messageId: 'testImport', node });
                 } else if (TEST_IMPORT.test(source)) {
                     context.report({ data: { source }, messageId: 'testImport', node });
+                } else if (reachesGround(source)) {
+                    context.report({ data: { source }, messageId: 'groundImport', node });
                 }
             }),
         };
@@ -45,6 +55,8 @@ export const f2NoTestImportsInProd: LintRule = {
     meta: {
         docs: RULE_DOCS['f2-no-test-imports-in-prod'],
         messages: {
+            groundImport:
+                'Production code must not import "{{source}}" — a fixtures/, expected/, requests/ or seeds/ folder is what a test stands on, and only a test may read it.',
             testImport:
                 'Production code must not import the test artefact "{{source}}" — test imports are only legal from specs/, *.test.ts, *.fixtures.ts or *.specification.ts.',
         },

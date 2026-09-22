@@ -1,0 +1,8 @@
+description: production code importing what a test stands on is refused, from expected/ and fixtures/ alike
+fixture: ./fixtures/ground/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/report/report.ts:1:20  jterrazz(f2-no-test-imports-in-prod)
+          src/report/report.ts:2:22  jterrazz(f2-no-test-imports-in-prod)

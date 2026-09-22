@@ -280,7 +280,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
         // The preset's own exclusions are never dropped — vite concatenates,
         // So a repository ADDS to the ground exclusion rather than having to restate it.
         expect(stated.exclude).toContain('specs/api/slow/**');
-        expect(stated.exclude).toContain('specs/**/{fixtures,expected,seeds,requests}/**');
+        expect(stated.exclude).toContain('**/{fixtures,expected,seeds,requests}/**');
         expect(stated.testTimeout).toBe(90_000);
         expect(stated.name).toBe('api');
     });

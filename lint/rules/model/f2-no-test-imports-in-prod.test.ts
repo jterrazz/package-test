@@ -20,10 +20,19 @@ ruleTester.run('f2-no-test-imports-in-prod', f2NoTestImportsInProd as unknown as
         { code: 'import { mockOf } from "@jterrazz/test";', errors: 1, filename: PROD_FILE },
         { code: 'import { helper } from "./user.test.js";', errors: 1, filename: PROD_FILE },
         { code: 'import { data } from "./user.fixtures.js";', errors: 1, filename: PROD_FILE },
+        // Ground, wherever it sits: beside the module as much as under specs/.
+        { code: 'import rows from "./fixtures/rows.js";', errors: 1, filename: PROD_FILE },
+        { code: 'import golden from "../expected/user.json";', errors: 1, filename: PROD_FILE },
     ],
     valid: [
-        // Prod importing prod.
+        // Prod importing prod — a name that merely contains a ground word included.
         { code: 'import { other } from "./other.js";', filename: PROD_FILE },
+        { code: 'import { seedsOf } from "./seeds-of.js";', filename: PROD_FILE },
+        // A test reads its ground.
+        {
+            code: 'import rows from "./fixtures/rows.js";',
+            filename: '/repo/src/domain/user.test.ts',
+        },
         // Test files import test artefacts freely.
         {
             code: 'import { mockOf } from "@jterrazz/test";',

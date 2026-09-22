@@ -1,0 +1,7 @@
+description: production code importing vitest is refused
+fixture: ./fixtures/vitest-import/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/service.ts:1:24  jterrazz(f2-no-test-imports-in-prod)

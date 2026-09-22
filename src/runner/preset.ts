@@ -54,13 +54,15 @@ const HOOK_TIMEOUT_MS = 30_000;
  * What a spec STANDS ON is never itself a test: the four ground folders hold
  * inputs and goldens — deliberately-wrong twins, fixture projects a spec lints —
  * and collecting them runs a repository's own counter-examples as if they were
- * its suite. Every
- * config that ever hit it added the same line by hand.
+ * its suite. The names are ground wherever a test stands on a file — beside a
+ * module under `src/` as much as under `specs/` — which is the glob the
+ * toolchain ignores too. Every config that ever hit it added the same line by
+ * hand.
  *
  * Merged, not replaced: vite concatenates arrays, so a consumer's `exclude`
  * ADDS to this list and never has to spread `configDefaults.exclude` again.
  */
-const EXCLUDE = [...configDefaults.exclude, 'specs/**/{fixtures,expected,seeds,requests}/**'];
+const EXCLUDE = [...configDefaults.exclude, '**/{fixtures,expected,seeds,requests}/**'];
 
 /**
  * What a test may never carry into the next one, and the one policy the
@@ -148,8 +150,10 @@ const COVERAGE = {
         // Without this line react-dom alone is 19 000 statements and the
         // Project's own number disappears under its dependencies.
         '**/node_modules/**',
-        // A spec is a test, and the fixture app a spec drives is ground.
+        // A spec is a test, and the fixture app a spec drives is ground —
+        // Beside a module as much as under `specs/`.
         'specs/**',
+        '**/{fixtures,expected,seeds,requests}/**',
         '**/*.d.ts',
         '**/*.test-d.ts',
         '**/*.fixtures.ts',
