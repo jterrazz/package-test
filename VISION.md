@@ -231,3 +231,24 @@ commit by commit.
 12. The 16→17 mover is C13's `--fix`. After the migration wave, doctrine says
     no legacy: does C13 and its mover retire in 17.1, or stay as long as a
     16.x tree can still arrive?
+
+### Raised by the package-typescript branch
+
+13. The spine check (`names-root-foreign`, a warning) fires on every root
+    folder outside the spine. Framework-imposed roots (`public/`, `app/`,
+    `ios/`, `android/`) and `scripts/` would warn in every Next, Astro and
+    Expo repository: allow them by name, or let a repository declare its
+    extra roots?
+14. `setup` is refused by §3, and `vitest.setup.ts` / `setup.ts` exist across
+    the estate: keep `setup` refused (a setup file is named for what it
+    prepares), or exempt a runner's setup file?
+15. The rulebook's shared plugins could not stay in `rules/core/` (`core` is a
+    refused grab-bag name) and became `lint/language/`. `lint/` in
+    package-typescript holds decision files per plugin, not one folder per
+    rule: is "one folder per rule" the law for rule SHIPPERS only?
+16. With the docs pipeline gone, the `library` lint profile is identical to
+    `node`: fold the two profiles into one?
+17. The ignore globs are `**/specs/**/<name>/**` (four globs, no braces), so a
+    workspace root's config also reaches `apps/<member>/specs/…`.
+18. A Names finding is now recorded on the ratchet as `names/<rule>`: the
+    ratchet has three reporters (oxlint, the test checker, Names).
