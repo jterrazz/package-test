@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
+import { isGroundName } from '../src/model/chain/ground.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
 import { isTestFileName } from './role.js';
@@ -445,6 +446,70 @@ function anchoredToRoot(violations: TokenViolation[], label: string): TokenViola
  * anchors the paths the findings report, so a member's finding reads the same
  * whether the pass ran over it alone or over the whole workspace.
  */
+/**
+ * The words a repository invents for what `expected/` already means — the
+ * snapshot folders of other runners and the plural a reader reaches for.
+ */
+const GROUND_SYNONYMS = new Set(['__snapshots__', 'golden', 'goldens', 'snapshots']);
+
+/** A module of code: what makes a folder a place code lives, never ground. */
+const CODE_MODULE = /\.[cm]?[jt]sx?$/u;
+
+/**
+ * Is this synonym-named folder one a test would stand on? Under a `specs/`
+ * tree, always; elsewhere, when it holds no module of code — a `goldens/`
+ * folder of matcher source is named for what its code does, and a folder of
+ * `.snap` or `.json` files is ground by another word.
+ */
+function holdsGround(path: string): boolean {
+    if (path.split(sep).includes('specs')) {
+        return true;
+    }
+    try {
+        return !readdirSync(path).some((name) => CODE_MODULE.test(name));
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * C25 — one word per meaning: a folder a test stands on named `snapshots/`,
+ * `__snapshots__/`, `golden/` or `goldens/` is refused, anywhere in the
+ * member. What it would hold is what a test asserts, and that is `expected/`.
+ * The walk stops at a nested package (its own member) and never enters ground:
+ * a fixture project may carry the word on purpose.
+ */
+function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
+    const found: TokenViolation[] = [];
+    const walk = (dir: string): void => {
+        let entries;
+        try {
+            entries = readdirSync(dir, { withFileTypes: true });
+        } catch {
+            return;
+        }
+        for (const entry of entries) {
+            const path = join(dir, entry.name);
+            if (!entry.isDirectory() || SKIPPED.has(entry.name) || isGroundName(entry.name)) {
+                continue;
+            }
+            if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path)) {
+                found.push({
+                    file: join(label, relative(memberDir, path), '/'),
+                    line: 1,
+                    message: `\`${entry.name}/\` names what \`expected/\` already means — a golden sits in expected/ beside the test that reads it`,
+                    rule: 'c25-no-ground-synonym',
+                    severity: 'error',
+                });
+            } else if (dir === memberDir || !existsSync(join(path, 'package.json'))) {
+                walk(path);
+            }
+        }
+    };
+    walk(memberDir);
+    return found;
+}
+
 export function checkMember(memberDir: string, rootDir: string): TokenViolation[] {
     const manifest = readManifest(memberDir);
     if (manifest === null) {
@@ -463,6 +528,7 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         // C12's first clause: only a walk of the MEMBER sees a `.spec.ts`
         // That never reached a `specs/` tree.
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
+        ...groundSynonyms(memberDir, label),
     ];
 }
 

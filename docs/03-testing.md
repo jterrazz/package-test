@@ -88,7 +88,7 @@ a declared name nothing carries fails too.
 | ------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
 | `api`         | `assertions/`, `clock/`, `intercepts/`, `lifecycle/`, `seeding/` | `initiation-errors/`, `responses/`, `sending/`        |
 | `cli`         | `assertions/`, `seeding/`, `tokens/`                             | `directory/`, `docker/`, `env/`, `exec/`, `literate/` |
-| `integration` | `clock/`, `intercepts/`                                          | `call/`, `golden/`, `postgres/`, `redis/`             |
+| `integration` | `clock/`, `intercepts/`                                          | `call/`, `postgres/`, `redis/`, `table/`              |
 | `jobs`        | —                                                                | `triggering/`                                         |
 | `website`     | `assertions/`, `clock/`                                          | `console/`, `fetch/`, `services/`, `visit/`           |
 

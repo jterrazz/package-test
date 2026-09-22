@@ -1,0 +1,8 @@
+description: a folder named for goldens in another word is refused, in specs/ and beside a module alike
+fixture: ./fixtures/synonyms/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/orders/golden/:1:1  jterrazz-check(c25)
+          src/__snapshots__/:1:1  jterrazz-check(c25)

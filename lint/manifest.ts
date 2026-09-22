@@ -1112,6 +1112,19 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            'One word per meaning: a folder named `snapshots/`, `__snapshots__/`, `golden/` or `goldens/` is an error anywhere in a member when a test would stand on it — any such folder under `specs/`, and elsewhere one that holds no module of code (a `goldens/` folder of matcher source is named for what its code does). What it would hold is what a test asserts, and that is `expected/`. Ground is not entered: a fixture project may carry the word on purpose.',
+        facet: 'model',
+        family: 'C',
+        fix: 'Rename the folder `expected/`, and the paths that name it.',
+        id: 'C25',
+        name: 'c25-no-ground-synonym',
+        rationale:
+            'Four reserved names are a vocabulary only while nobody adds a fifth: a second word for the goldens is a second place a reader has to look, and the rules that read `expected/` never see it.',
+        reach: 'all',
+    },
+    {
+        channel: 'checker',
+        convention:
             "B5's one channel: docker-aware runners are inferred from the `docker:` option of the imported specification file, and every `.exec()` result bound without `await using` is reported.",
         facet: 'model',
         family: 'B',

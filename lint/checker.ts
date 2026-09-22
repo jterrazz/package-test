@@ -149,6 +149,7 @@ export const TREE_PASS_IDS = [
  */
 export const MEMBER_PASS_IDS = [
     'c12-spec-file-name',
+    'c25-no-ground-synonym',
     'e3-config-present',
     'e5b-no-simulated-dom-config-member',
     'f8-no-seam-dependency',

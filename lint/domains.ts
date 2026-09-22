@@ -43,7 +43,7 @@ export const SHARED_DOMAINS = [
 export const FACET_DOMAINS: Record<string, string[]> = {
     api: ['initiation-errors', 'responses', 'sending'],
     cli: ['directory', 'docker', 'env', 'exec', 'literate'],
-    integration: ['call', 'golden', 'postgres', 'redis'],
+    integration: ['call', 'postgres', 'redis', 'table'],
     jobs: ['triggering'],
     website: ['console', 'fetch', 'services', 'visit'],
 };

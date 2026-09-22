@@ -26,7 +26,7 @@ describe('checker CLI — the member pass', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('packages/clean');
         expect(result.stdout).toContain(
-            'c12-spec-file-name, e3-config-present, e5b-no-simulated-dom-config-member, f8-no-seam-dependency',
+            'c12-spec-file-name, c25-no-ground-synonym, e3-config-present, e5b-no-simulated-dom-config-member, f8-no-seam-dependency',
         );
         expect(result.stdout).not.toContain('c9-dead-fixtures');
     });
