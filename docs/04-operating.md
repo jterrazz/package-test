@@ -80,12 +80,17 @@ path — `.seed('x.sql')` to `.seed(file('./seeds/x.sql'))`,
 `.fixture('$FIXTURES/app/')` to `.fixture(directory('../../fixtures/app/'))`,
 `toMatch('help.txt')` to `toMatch(file('./expected/help.txt'))`,
 `.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
-wrappers from the entry the specification file already uses. Three things it
+wrappers from the entry the specification file already uses. Four things it
 leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
   moves a string only when a file of that name sits in the spec's `expected/`;
   anything else was already a substring check, and still is.
+- **The ratchet splits by owner.** `oxlint.baseline.json` is gone:
+  `typescript baseline` records `typescript.baseline.json` and refuses a
+  `jterrazz/…` or `jterrazz-check/…` key in it, and `jterrazz-test-check
+baseline` records those in `test.baseline.json` — rename the file, then run
+  the two gestures once ([19 § The ratchet](19-linting.md#the-ratchet-testbaselinejson)).
 - **A computed name is out of its reach.** A template or a variable naming a
   seed, a fixture or a golden is left as written, and the first run names each
   one the verb refuses.

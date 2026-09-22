@@ -41,4 +41,28 @@ describe('lint — checker CLI contract', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toContain('no such directory');
     });
+
+    test('`baseline` records the project where it stands, and the next run is held by it', async () => {
+        // Given - a project with one dead fixture and no ratchet, recorded then judged
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/c9-dead-fixtures/'))
+            .exec(['baseline .', '.']);
+
+        // Then - the file holds the one finding, and the run it holds exits 0
+        expect(result.exitCode).toBe(0);
+        expect(result.file('test.baseline.json').content).toBe(
+            '{\n    "jterrazz-check/c9": 1\n}\n',
+        );
+    });
+
+    test('a ratchet the project broke fails the run, naming each key and the gesture', async () => {
+        // Given - a recorded debt the project paid, and a finding nobody recorded
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-ratchet/'))
+            .exec('.');
+
+        // Then - both breaches, and the command that records the new state
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
+    });
 });

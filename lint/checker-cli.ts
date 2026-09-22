@@ -10,6 +10,17 @@ import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
 import { formatViolations, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
 import type { TokenViolation } from './checker.js';
+import {
+    CHECKER_NAMESPACE,
+    countsOf,
+    judge,
+    keepsBaseline,
+    pluginDiagnostics,
+    readBaseline,
+    TEST_BASELINE,
+    writeBaseline,
+} from './ratchet.js';
+import type { PluginDiagnostic } from './ratchet.js';
 import { packageRootOf } from './role.js';
 import { codeOf } from './rule-code.js';
 
@@ -20,6 +31,7 @@ import { codeOf } from './rule-code.js';
  *     node dist/checker.js [dir] [--fix]              # a specs tree, or a project root
  *     node dist/checker.js --format json              # every root, every member
  *     node dist/checker.js --member <dir>             # one workspace member
+ *     node dist/checker.js baseline [root]            # record test.baseline.json
  *
  * Three runs, one reporter. A PATH is read for what it IS. Name a specs tree
  * — a directory with a `specs` segment in its path — and it walks that tree
@@ -35,8 +47,8 @@ import { codeOf } from './rule-code.js';
  *
  * With NO path it runs both over the whole project: every `specs/` root it
  * discovers from the root manifest's workspaces, and every member. That is the
- * run `@jterrazz/typescript`'s ratchet rests on, so the contract is exactly
- * "a path-less run reports what the per-root and per-member runs report".
+ * run the ratchet rests on, so the contract is exactly "a path-less run
+ * reports what the per-root and per-member runs report".
  *
  * A NAMED root that turns out to hold no `specs/` tree at all is refused, loud
  * and non-zero. Pointed at a project root, the facet passes used to key on its
@@ -46,8 +58,20 @@ import { codeOf } from './rule-code.js';
  *
  * `--format json` prints `[{ code, file, line, severity, message }]` on stdout
  * and nothing else, where `code` is `jterrazz-check(<id>)` — the namespace the
- * ratchet records under. Exit 1 on any ERROR-level violation either way;
- * warnings are reported but never fail the run.
+ * ratchet records under.
+ *
+ * The verdict is the RATCHET's (`ratchet.ts`), and one run owns it: the run
+ * over the whole project — path-less, a named project root, or `--member` on
+ * the project root itself, the run `typescript check` always makes, which
+ * prints the root member's findings and counts the project's. It counts
+ * every checker finding of the project and every diagnostic of this package's
+ * oxlint plugin (the toolchain sets those aside, so they are judged here or
+ * nowhere) against `test.baseline.json` at the root: within it, exit 0; grown,
+ * new, or an entry at zero, exit 1. A project that keeps no baseline fails on
+ * any ERROR finding and on any plugin diagnostic. Every other run under a
+ * project that keeps a baseline reports what it found and leaves the verdict
+ * to that one run; without a baseline it fails on an ERROR finding, as ever.
+ * `baseline [root]` writes the file from the current counts.
  *
  * `--fix` applies the rewritable passes — C13, which moves a 16.x tree to 17
  * (bare ground folders, every file named by its path: `checker-migration.ts`),
@@ -69,7 +93,9 @@ import { codeOf } from './rule-code.js';
  * rename and the author stages what the working tree now shows.
  */
 
-const argv = process.argv.slice(2);
+const cliArguments = process.argv.slice(2);
+const recording = cliArguments[0] === 'baseline';
+const argv = recording ? cliArguments.slice(1) : cliArguments;
 const fix = argv.includes('--fix');
 const json = valueOf('--format') === 'json';
 const member = valueOf('--member');
@@ -105,22 +131,29 @@ const TREE_PASSES = TREE_PASS_IDS.join(', ');
 const MEMBER_PASSES = MEMBER_PASS_IDS.join(', ');
 
 /**
- * Print the findings and exit on the first error-level one. `passes` names the
- * ones that ACTUALLY ran: a member run that claimed the tree passes would be
- * telling the reader a `specs/` tree was judged when none was walked.
+ * The project whose ratchet judges a partial run: the directory the run was
+ * started from, where `typescript check` starts every run it makes, when it
+ * keeps a `test.baseline.json`. A run started anywhere else judges itself.
  */
-function report(violations: TokenViolation[], what: string, passes: string): never {
-    const errors = violations.filter((violation) => violation.severity === 'error');
+function judgingProject(): string | undefined {
+    return keepsBaseline(process.cwd()) ? process.cwd() : undefined;
+}
 
+/** The published code of a finding — the key the ratchet records it under. */
+function codeOfFinding(violation: TokenViolation): string {
+    // The published code is the CONVENTION code — the id's first segment —
+    // Whatever a pass calls itself internally: two spellings of one rule would
+    // Be two lines of debt.
+    return `${CHECKER_NAMESPACE}(${codeOf(violation.rule)})`;
+}
+
+/** Print the findings: one JSON array, or the lines a human reads. */
+function printFindings(violations: TokenViolation[]): void {
     if (json) {
         console.log(
             JSON.stringify(
                 violations.map((violation) => ({
-                    // The published code is the CONVENTION code — the id's
-                    // First segment — whatever a pass calls itself internally:
-                    // It is the key the toolchain's ratchet records under, and
-                    // Two spellings of one rule would be two lines of debt.
-                    code: `jterrazz-check(${codeOf(violation.rule)})`,
+                    code: codeOfFinding(violation),
                     file: violation.file,
                     line: violation.line,
                     message: violation.message,
@@ -128,23 +161,120 @@ function report(violations: TokenViolation[], what: string, passes: string): nev
                 })),
             ),
         );
-        process.exit(errors.length > 0 ? 1 : 0);
+        return;
     }
-
     if (violations.length > 0) {
-        const stream = errors.length > 0 ? console.error : console.warn;
+        const stream = violations.some(({ severity }) => severity === 'error')
+            ? console.error
+            : console.warn;
         stream(formatViolations(violations));
     }
+}
+
+/** A line of the verdict, on the stream a human reads it from; never in the JSON. */
+function say(line: string): void {
+    if (!json) {
+        console.error(line);
+    }
+}
+
+/**
+ * Print the findings and exit on the first error-level one. `passes` names the
+ * ones that ACTUALLY ran: a member run that claimed the tree passes would be
+ * telling the reader a `specs/` tree was judged when none was walked.
+ *
+ * `deferredTo` is the project root whose `test.baseline.json` judges this run's
+ * findings: the run reports them and exits 0, the ratchet run decides.
+ */
+function report(
+    violations: TokenViolation[],
+    what: string,
+    passes: string,
+    deferredTo?: string,
+): never {
+    printFindings(violations);
+    verdict(violations, what, passes, deferredTo);
+}
+
+/** The verdict of a run whose findings are printed: exit 1 on an error, unless another run judges them. */
+function verdict(
+    violations: TokenViolation[],
+    what: string,
+    passes: string,
+    deferredTo?: string,
+): never {
+    const errors = violations.filter((violation) => violation.severity === 'error');
+    if (deferredTo !== undefined && violations.length > 0) {
+        say(
+            `conventions checker: ${violations.length} finding(s) ${what}, judged by ${join(deferredTo, TEST_BASELINE)}`,
+        );
+        process.exit(0);
+    }
     if (errors.length > 0) {
-        console.error(`\nconventions checker: ${errors.length} error(s) found ${what}`);
+        say(`\nconventions checker: ${errors.length} error(s) found ${what}`);
         process.exit(1);
     }
-    // The success line names what actually ran — every pass, not just the token
-    // Scan (the old "no unknown tokens" wording under-reported the C9/B5/A7 passes).
-    console.log(
-        `conventions checker: all passes clean ${what} (${passes})${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
-    );
+    if (!json) {
+        // The success line names what actually ran — every pass, not just the
+        // Token scan.
+        console.log(
+            `conventions checker: all passes clean ${what} (${passes})${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
+        );
+    }
     process.exit(0);
+}
+
+/** What a ratchet run prints and what it counts — the same findings, or the member's own over the project's. */
+type RatchetRun = {
+    /** Every finding of the project: what the file counts. */
+    counted: () => TokenViolation[];
+    passes: string;
+    plugin: PluginDiagnostic[];
+    /** What the run itself found, and prints. */
+    printed: TokenViolation[];
+    root: string;
+    what: string;
+};
+
+/**
+ * The ratchet run's verdict: the project's findings and its plugin diagnostics,
+ * counted against `test.baseline.json` at `root` — or, with no file, judged
+ * one by one.
+ */
+function ratchet({ counted, passes, plugin, printed, root, what }: RatchetRun): never {
+    printFindings(printed);
+    if (keepsBaseline(root)) {
+        const findings = counted();
+        const counts = countsOf([
+            ...findings.map(codeOfFinding),
+            ...plugin.map((diagnostic) => diagnostic.code),
+        ]);
+        const broken = judge(counts, readBaseline(root));
+        for (const reason of broken) {
+            say(`baseline-ratchet  ${TEST_BASELINE}  ${reason}`);
+        }
+        if (broken.length > 0) {
+            say("Run 'jterrazz-test-check baseline' to record where the project stands.");
+            process.exit(1);
+        }
+        if (!json) {
+            console.log(
+                `conventions checker: ${findings.length + plugin.length} finding(s) held by ${TEST_BASELINE} ${what} (${passes})`,
+            );
+        }
+        process.exit(0);
+    }
+    const unrecorded = countsOf(plugin.map((diagnostic) => diagnostic.code));
+    for (const [key, count] of Object.entries(unrecorded).toSorted(([a], [b]) =>
+        a < b ? -1 : 1,
+    )) {
+        say(`${key}  ${count} diagnostic(s), and the project keeps no ${TEST_BASELINE}`);
+    }
+    if (plugin.length > 0) {
+        say("Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.");
+        process.exit(1);
+    }
+    verdict(printed, what, passes);
 }
 
 /** A directory that must exist — a typo'd path is operator error, not a clean tree. */
@@ -157,12 +287,31 @@ function requireDirectory(path: string, what: string): string {
     return resolved;
 }
 
-// ── One member ──
-
-if (member !== undefined) {
-    const root = resolve(positional ?? '.');
-    const dir = requireDirectory(member, 'member directory');
-    report(checkMember(dir, root), `for member ${relative(root, dir) || '.'}`, MEMBER_PASSES);
+/**
+ * Every finding of the project at `root`: each `specs/` root it discovers, with
+ * the rewritable passes applied first under `--fix`, and every member.
+ */
+function projectFindings(root: string): TokenViolation[] {
+    const found: TokenViolation[] = [];
+    for (const specsRoot of discoverSpecRoots(root)) {
+        const prefix = relative(root, specsRoot);
+        if (fix) {
+            applyFixes(specsRoot);
+        }
+        for (const violation of runAllChecks(specsRoot)) {
+            // A tree pass reports relative to the tree it walked; the
+            // Project-wide run has to say WHICH tree, or two members' findings
+            // Read alike — in the path it reports AND in the line a human
+            // Reads, which begins with that path.
+            found.push({
+                ...violation,
+                file: `${prefix}/${violation.file}`,
+                message: `${prefix}/${violation.message}`,
+            });
+        }
+    }
+    found.push(...checkMembers(root));
+    return found;
 }
 
 /**
@@ -376,6 +525,45 @@ function isSpecsTree(dir: string): boolean {
     return dir.split(/[/\\]/u).includes('specs');
 }
 
+// ── Record the ratchet ──
+
+if (recording) {
+    const root = requireDirectory(positional ?? '.', 'project root');
+    const findings = projectFindings(root);
+    const plugin = pluginDiagnostics(root);
+    const counts = countsOf([
+        ...findings.map(codeOfFinding),
+        ...plugin.map((diagnostic) => diagnostic.code),
+    ]);
+    writeBaseline(root, counts);
+    console.log(
+        `${TEST_BASELINE} written — ${findings.length + plugin.length} finding(s) across ${Object.keys(counts).length} rule(s)`,
+    );
+    process.exit(0);
+}
+
+// ── One member ──
+
+if (member !== undefined) {
+    const root = resolve(positional ?? '.');
+    const dir = requireDirectory(member, 'member directory');
+    const what = `for member ${relative(root, dir) || '.'}`;
+    if (dir === root) {
+        // The project root's own member run — the one `typescript check`
+        // Always makes — is the ratchet run: it prints what the root member
+        // Owes, and judges the whole project's counts.
+        ratchet({
+            counted: () => projectFindings(root),
+            passes: MEMBER_PASSES,
+            plugin: pluginDiagnostics(root),
+            printed: checkMember(dir, root),
+            root,
+            what,
+        });
+    }
+    report(checkMember(dir, root), what, MEMBER_PASSES, judgingProject());
+}
+
 // ── One specs tree ──
 
 if (positional !== undefined && isSpecsTree(requireDirectory(positional, 'directory'))) {
@@ -383,36 +571,24 @@ if (positional !== undefined && isSpecsTree(requireDirectory(positional, 'direct
     if (fix) {
         applyFixes(root);
     }
-    report(runAllChecks(root), `under ${root}`, TREE_PASSES);
+    report(runAllChecks(root), `under ${root}`, TREE_PASSES, judgingProject());
 }
 
 // ── The whole project: every specs root, every member ──
 
 const root = positional === undefined ? resolve('.') : requireDirectory(positional, 'directory');
-const specsRoots = discoverSpecRoots(root);
-if (positional !== undefined && specsRoots.length === 0) {
+if (positional !== undefined && discoverSpecRoots(root).length === 0) {
     console.error(
         `conventions checker: no \`specs/\` tree under ${root} — name a specs tree, or a project root that holds one`,
     );
     process.exit(1);
 }
-const found: TokenViolation[] = [];
-for (const specsRoot of specsRoots) {
-    const prefix = relative(root, specsRoot);
-    if (fix) {
-        applyFixes(specsRoot);
-    }
-    for (const violation of runAllChecks(specsRoot)) {
-        // A tree pass reports relative to the tree it walked; the project-wide
-        // Run has to say WHICH tree, or two members' findings read alike — in
-        // The path it reports AND in the line a human reads, which begins with
-        // That path.
-        found.push({
-            ...violation,
-            file: `${prefix}/${violation.file}`,
-            message: `${prefix}/${violation.message}`,
-        });
-    }
-}
-found.push(...checkMembers(root));
-report(found, `under ${root}`, `${TREE_PASSES}, ${MEMBER_PASSES}`);
+const findings = projectFindings(root);
+ratchet({
+    counted: () => findings,
+    passes: `${TREE_PASSES}, ${MEMBER_PASSES}`,
+    plugin: pluginDiagnostics(root),
+    printed: findings,
+    root,
+    what: `under ${root}`,
+});

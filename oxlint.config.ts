@@ -1,4 +1,4 @@
-import { compose, defineConfig, library } from '@jterrazz/typescript/oxlint';
+import { compose, defineConfig, node } from '@jterrazz/typescript/oxlint';
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 // Self-lint with our own plugin (the tool-facing lint layer at the root, lint/),
@@ -161,10 +161,7 @@ const FRAMEWORK_LAYERS = {
 const selfTesting = { ...testing, jsPlugins: ['./dist/oxlint.js'] };
 
 const config: OxlintConfig = defineConfig(
-    compose(library, selfTesting, {
-        // The preset ignores the ground under `specs/` only; the ground a
-        // Module test stands on, beside its module, is this package's to name.
-        ignorePatterns: ['src/**/{fixtures,expected}/**'],
+    compose(node, selfTesting, {
         overrides: [
             {
                 // The framework's own module tests unit-test the constructors —
