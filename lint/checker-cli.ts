@@ -32,6 +32,7 @@ import { codeOf } from './rule-code.js';
  *     node dist/checker.js --format json              # every root, every member
  *     node dist/checker.js --member <dir>             # one workspace member
  *     node dist/checker.js baseline [root]            # record test.baseline.json
+ *     node dist/checker.js … --oxlint-report <file>   # read the plugin's diagnostics from a report
  *
  * Three runs, one reporter. A PATH is read for what it IS. Name a specs tree
  * — a directory with a `specs` segment in its path — and it walks that tree
@@ -73,6 +74,11 @@ import { codeOf } from './rule-code.js';
  * to that one run; without a baseline it fails on an ERROR finding, as ever.
  * `baseline [root]` writes the file from the current counts.
  *
+ * The plugin's diagnostics come from `--oxlint-report <file>` when it is given
+ * — the JSON report `typescript check` already wrote for its own pass, so a
+ * check runs oxlint once — and from the project's own oxlint otherwise (a
+ * standalone run, a member run). A report path that names no file is refused.
+ *
  * `--fix` applies the rewritable passes — C13, which moves a 16.x tree to 17
  * (bare ground folders, every file named by its path: `checker-migration.ts`),
  * the two document ones (key order and block scalars), C14, which MOVES a single-reader pool fixture beside its leaf
@@ -99,14 +105,12 @@ const argv = recording ? cliArguments.slice(1) : cliArguments;
 const fix = argv.includes('--fix');
 const json = valueOf('--format') === 'json';
 const member = valueOf('--member');
-const positional = argv.find((argument, index) => {
-    if (argument.startsWith('--')) {
-        return false;
-    }
-    // The value of a `--flag value` pair is not a path.
-    const previous = argv[index - 1];
-    return previous !== '--format' && previous !== '--member';
-});
+const oxlintReport = valueOf('--oxlint-report');
+/** The flags that take a value: the argument after one is that value, never a path. */
+const VALUED_FLAGS = new Set(['--format', '--member', '--oxlint-report']);
+const positional = argv.find(
+    (argument, index) => !argument.startsWith('--') && !VALUED_FLAGS.has(argv[index - 1] ?? ''),
+);
 
 /** The value of `--flag value` or `--flag=value`, or undefined. */
 function valueOf(flag: string): string | undefined {
@@ -520,12 +524,27 @@ function isSpecsTree(dir: string): boolean {
     return dir.split(/[/\\]/u).includes('specs');
 }
 
+/** The report `--oxlint-report` names, which must be a file — a typo'd path would count nothing. */
+function requireReport(path: string | undefined): string | undefined {
+    if (path === undefined) {
+        return undefined;
+    }
+    const resolved = resolve(path);
+    if (!existsSync(resolved) || !statSync(resolved).isFile()) {
+        console.error(`conventions checker: no such oxlint report: ${resolved}`);
+        process.exit(1);
+    }
+    return resolved;
+}
+
+const reportFile = requireReport(oxlintReport);
+
 // ── Record the ratchet ──
 
 if (recording) {
     const root = requireDirectory(positional ?? '.', 'project root');
     const findings = projectFindings(root);
-    const plugin = pluginDiagnostics(root);
+    const plugin = pluginDiagnostics(root, reportFile);
     const counts = countsOf([
         ...findings.map(codeOfFinding),
         ...plugin.map((diagnostic) => diagnostic.code),
@@ -550,7 +569,7 @@ if (member !== undefined) {
         ratchet({
             counted: () => projectFindings(root),
             passes: MEMBER_PASSES,
-            plugin: pluginDiagnostics(root),
+            plugin: pluginDiagnostics(root, reportFile),
             printed: checkMember(dir, root),
             root,
             what,
@@ -582,7 +601,7 @@ const findings = projectFindings(root);
 ratchet({
     counted: () => findings,
     passes: `${TREE_PASSES}, ${MEMBER_PASSES}`,
-    plugin: pluginDiagnostics(root),
+    plugin: pluginDiagnostics(root, reportFile),
     printed: findings,
     root,
     what: `under ${root}`,

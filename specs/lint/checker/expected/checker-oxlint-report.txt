@@ -1,0 +1,2 @@
+jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no test.baseline.json
+Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.

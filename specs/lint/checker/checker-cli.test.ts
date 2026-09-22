@@ -65,4 +65,28 @@ describe('lint — checker CLI contract', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
     });
+
+    test('the plugin diagnostics are read from the report typescript check hands over', async () => {
+        // Given - no oxlint installed, and a report holding one diagnostic of the plugin
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-oxlint-report/'))
+            .exec('--oxlint-report oxlint-report.json');
+
+        // Then - the value of the flag is no project root, and the one diagnostic is counted
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(file('./expected/checker-oxlint-report.txt'));
+    });
+
+    // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
+    // Full-output golden would couple this to the diagnostic formatting.
+    test('a report path that names no file fails loudly instead of counting nothing', async () => {
+        // Given - a report that was never written
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-oxlint-report/'))
+            .exec('--oxlint-report missing.json');
+
+        // Then - the checker refuses it rather than judging an empty report
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toContain('no such oxlint report');
+    });
 });

@@ -154,4 +154,48 @@ describe("the plugin's diagnostics — judged here or nowhere", () => {
             /for the ratchet and it wrote no JSON report/u,
         );
     });
+
+    test('a report typescript check wrote is read, and no oxlint is run', () => {
+        // Given - a project whose oxlint prints prose, and a report beside it
+        const root = projectWithOxlint('Found 3 errors');
+        const report = join(root, 'handed.json');
+        writeFileSync(
+            report,
+            JSON.stringify({
+                diagnostics: [
+                    {
+                        code: 'jterrazz(c24-ground-role)',
+                        filename: 'specs/a.spec.ts',
+                        labels: [{ span: { column: 9, line: 4 } }],
+                        message: 'crossed',
+                        severity: 'error',
+                    },
+                ],
+            }),
+        );
+
+        // Then - the report's diagnostic, the binary never asked
+        expect(pluginDiagnostics(root, report)).toStrictEqual([
+            {
+                code: 'jterrazz(c24-ground-role)',
+                column: 9,
+                file: 'specs/a.spec.ts',
+                line: 4,
+                message: 'crossed',
+                severity: 'error',
+            },
+        ]);
+    });
+
+    test('a report that holds no JSON is a failure that names the file', () => {
+        // Given - a handed report that is prose
+        const root = mkdtempSync(join(tmpdir(), 'ratchet-report-'));
+        const report = join(root, 'handed.json');
+        writeFileSync(report, 'Found 3 errors');
+
+        // Then - the run refuses to count what it could not read
+        expect(() => pluginDiagnostics(root, report)).toThrow(
+            /handed\.json .* holds no JSON report/u,
+        );
+    });
 });

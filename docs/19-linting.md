@@ -408,6 +408,7 @@ jterrazz-test-check apps/console                         # a project root: every
 jterrazz-test-check --member packages/web                # one workspace member
 jterrazz-test-check --format json                        # every root, every member
 jterrazz-test-check baseline                             # record test.baseline.json
+jterrazz-test-check --oxlint-report lint.json            # the plugin's diagnostics read from a report
 npx jterrazz-test-check specs   # or `node node_modules/@jterrazz/test/dist/checker.js specs`
 ```
 
@@ -466,7 +467,7 @@ The workspace it searches is walked UP to, from the member, and never taken from
 
 This package records and judges its own debt. `test.baseline.json`, at the project root, is `{ "<key>": count }` for its two rulebooks — `jterrazz/<rule>` for every diagnostic of the oxlint plugin, `jterrazz-check/<code>` for every checker finding — and `@jterrazz/typescript` sets both namespaces aside from its own `typescript.baseline.json`: one finding, one file, one judge. `jterrazz-test-check baseline [root]` writes it from where the project stands.
 
-ONE run owns the verdict: the run over the whole project — path-less, a named project root, or `--member` on the project root, the run `typescript check` always makes, which prints what the root member owes and counts the rest without printing it. It counts the project's checker findings and the plugin's diagnostics — running the project's own oxlint, with its own config and without `--type-aware`, since the toolchain no longer judges them — and fails on a count above its entry, a key with findings and no entry, or an entry at zero. Severity is not read: a warning is exactly the debt a ratchet holds down. A project with no file fails on any error finding and any plugin diagnostic, naming the gesture that records them. Every other run under a project that keeps the file — one `specs/` root, another member — prints what it found and leaves the verdict to that run.
+ONE run owns the verdict: the run over the whole project — path-less, a named project root, or `--member` on the project root, the run `typescript check` always makes, which prints what the root member owes and counts the rest without printing it. It counts the project's checker findings and the plugin's diagnostics, which the toolchain no longer judges — read from the JSON report `typescript check` hands over with `--oxlint-report <file>`, so a check runs oxlint once, or, without the flag, from a run of the project's own oxlint, with its own config and without `--type-aware` — and fails on a count above its entry, a key with findings and no entry, or an entry at zero. Severity is not read: a warning is exactly the debt a ratchet holds down. A project with no file fails on any error finding and any plugin diagnostic, naming the gesture that records them. Every other run under a project that keeps the file — one `specs/` root, another member — prints what it found and leaves the verdict to that run.
 
 The toolchain's side of this — when the pass runs, which install it resolves the binary from, and what the floor version is — is `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 

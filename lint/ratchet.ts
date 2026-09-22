@@ -124,32 +124,13 @@ type OxlintReport = {
     }[];
 };
 
-/**
- * The diagnostics of THIS package's oxlint plugin over the project at `root`.
- *
- * The checker runs the project's own oxlint, with the project's own config —
- * the one `typescript check` runs — and keeps the `jterrazz(*)` diagnostics:
- * the toolchain sets them aside, so they are judged here or nowhere. No
- * `--type-aware`: the plugin's rules read the syntax tree and the disk, never
- * a type. A project with no oxlint installed has none to report.
- */
-export function pluginDiagnostics(root: string): PluginDiagnostic[] {
-    const oxlint = oxlintOf(root);
-    if (oxlint === undefined) {
-        return [];
-    }
-    const run = spawnSync(oxlint, ['--format', 'json'], {
-        cwd: root,
-        encoding: 'utf8',
-        maxBuffer: 256 * 1024 * 1024,
-    });
+/** The `jterrazz(*)` diagnostics of one oxlint JSON report; `source` names where it came from. */
+function diagnosticsIn(json: string, source: string): PluginDiagnostic[] {
     let report: OxlintReport;
     try {
-        report = JSON.parse(run.stdout) as OxlintReport;
+        report = JSON.parse(json) as OxlintReport;
     } catch {
-        throw new Error(
-            `the checker ran ${oxlint} for the ratchet and it wrote no JSON report:\n${run.stderr}`,
-        );
+        throw new Error(`the checker read ${source} for the ratchet and it holds no JSON report`);
     }
     return (report.diagnostics ?? [])
         .filter((diagnostic) => (diagnostic.code ?? '').startsWith(`${PLUGIN}(`))
@@ -164,4 +145,37 @@ export function pluginDiagnostics(root: string): PluginDiagnostic[] {
                 severity: diagnostic.severity === 'error' ? 'error' : 'warn',
             };
         });
+}
+
+/**
+ * The diagnostics of THIS package's oxlint plugin over the project at `root`:
+ * the toolchain sets them aside, so they are judged here or nowhere.
+ *
+ * With `report`, the path of the JSON report `typescript check` already wrote
+ * (`--oxlint-report`), they are read from it: one oxlint run per check.
+ * Without it, the checker runs the project's own oxlint, with the project's
+ * own config, and no `--type-aware` — the plugin's rules read the syntax tree
+ * and the disk, never a type. A project with no oxlint installed has none to
+ * report.
+ */
+export function pluginDiagnostics(root: string, report?: string): PluginDiagnostic[] {
+    if (report !== undefined) {
+        return diagnosticsIn(readFileSync(report, 'utf8'), report);
+    }
+    const oxlint = oxlintOf(root);
+    if (oxlint === undefined) {
+        return [];
+    }
+    const run = spawnSync(oxlint, ['--format', 'json'], {
+        cwd: root,
+        encoding: 'utf8',
+        maxBuffer: 256 * 1024 * 1024,
+    });
+    try {
+        return diagnosticsIn(run.stdout, oxlint);
+    } catch {
+        throw new Error(
+            `the checker ran ${oxlint} for the ratchet and it wrote no JSON report:\n${run.stderr}`,
+        );
+    }
 }
