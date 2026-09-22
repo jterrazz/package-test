@@ -156,17 +156,18 @@ runs:
 
 ## What the branches show, and what they defer
 
-| Area             | package-test                                                                                                                                                                                                                                                                                                                             | package-typescript                                                             | signews-api         |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------- |
-| §1 verbs + types | shown (iteration 1, variant A): `file()`/`directory()` branded, the simple verbs take them, `toMatch` vitest's plus the golden half, type and runtime refusals; own specs, lint fixtures and chapters migrated by the mover                                                                                                              | own documents and chains on the File/Directory verbs (the mover, then by hand) | migrated            |
-| §2 folders       | shown: renamed everywhere, C1 refuses a reserved domain, C13 flipped with the 16→17 mover as its `--fix`, C15 restated, the bare-ground bridge deleted                                                                                                                                                                                   | ignore globs; own specs on the bare ground, its underscore bridge deleted      | renamed             |
-| §3 names         | shown: the three `types` sites renamed (`oxlint-api`, `exchange`, `component.shape`)                                                                                                                                                                                                                                                     | the rule, tested                                                               | ratchet delta shown |
-| §4 spine         | shown: `src/lint` → `lint/`, I1 reads the spine; 4 rules as `.spec.yaml`. Deferred: 81 rule specs, `lint/` one folder per rule                                                                                                                                                                                                           | the spine check (`bin/`, `lib/`, `presets/` reported); `rules/` → `lint/`      | follows             |
-| §5 knowledge     | shown: reference, typedoc, skill references and cards deleted; SKILL.md 106 lines, held by a meta-test                                                                                                                                                                                                                                   | `docs` command, typedoc, Docs (sync) deleted                                   | —                   |
-| §6 exact names   | shown: the window removed from the three adapters, with its commands and its name reading                                                                                                                                                                                                                                                | —                                                                              | —                   |
-| guards (iter. 1) | shown: role C24 (static), locality C15/C14 over the wrappers, existence C8 (checker pass; the oxlint C8 retired), F2 refusing ground imports, C25 refusing golden synonyms                                                                                                                                                               | ignores the four names at any depth                                            | —                   |
-| iteration 2      | shown: `.text` the comparable text and `.raw` the capture, `toContain` vitest's and refused on a stream by the types, D8w restated on `.raw` (`d8w-raw-bypass`), the mover's stream gesture; C8 over module tests (member pass); C24 through a `const`; C26 `file()` built in the test only; `schema/` under `jterrazz.typescript.roots` | `--oxlint-report` handed over; `jterrazz.typescript.roots` read                | —                   |
-| ratchet, report  | shown: `test.baseline.json` recorded by `jterrazz-test-check baseline` and judged by the checker; the checker's report line; `lintReport` published, refusing oxlint's graphical frames; iteration 2: `--oxlint-report <file>` read, the judging run prints every finding it counts and every plugin diagnostic                          | `typescript.baseline.json`, jterrazz keys refused                              | —                   |
+| Area             | package-test                                                                                                                                                                                                                                                                                                                                                                  | package-typescript                                                             | signews-api         |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------- |
+| §1 verbs + types | shown (iteration 1, variant A): `file()`/`directory()` branded, the simple verbs take them, `toMatch` vitest's plus the golden half, type and runtime refusals; own specs, lint fixtures and chapters migrated by the mover                                                                                                                                                   | own documents and chains on the File/Directory verbs (the mover, then by hand) | migrated            |
+| §2 folders       | shown: renamed everywhere, C1 refuses a reserved domain, C13 flipped with the 16→17 mover as its `--fix`, C15 restated, the bare-ground bridge deleted                                                                                                                                                                                                                        | ignore globs; own specs on the bare ground, its underscore bridge deleted      | renamed             |
+| §3 names         | shown: the three `types` sites renamed (`oxlint-api`, `exchange`, `component.shape`)                                                                                                                                                                                                                                                                                          | the rule, tested                                                               | ratchet delta shown |
+| §4 spine         | shown: `src/lint` → `lint/`, I1 reads the spine; 4 rules as `.spec.yaml`. Deferred: 81 rule specs, `lint/` one folder per rule                                                                                                                                                                                                                                                | the spine check (`bin/`, `lib/`, `presets/` reported); `rules/` → `lint/`      | follows             |
+| §5 knowledge     | shown: reference, typedoc, skill references and cards deleted; SKILL.md 106 lines, held by a meta-test                                                                                                                                                                                                                                                                        | `docs` command, typedoc, Docs (sync) deleted                                   | —                   |
+| §6 exact names   | shown: the window removed from the three adapters, with its commands and its name reading                                                                                                                                                                                                                                                                                     | —                                                                              | —                   |
+| guards (iter. 1) | shown: role C24 (static), locality C15/C14 over the wrappers, existence C8 (checker pass; the oxlint C8 retired), F2 refusing ground imports, C25 refusing golden synonyms                                                                                                                                                                                                    | ignores the four names at any depth                                            | —                   |
+| iteration 2      | shown: `.text` the comparable text and `.raw` the capture, `toContain` vitest's and refused on a stream by the types, D8w restated on `.raw` (`d8w-raw-bypass`), the mover's stream gesture; C8 over module tests (member pass); C24 through a `const`; C26 `file()` built in the test only; `schema/` under `jterrazz.typescript.roots`                                      | `--oxlint-report` handed over; `jterrazz.typescript.roots` read                | —                   |
+| iteration 3      | shown: the mover gated on C13 (a tree with no 16 folder left byte for byte) and walking every member's module tests, C13 beside a module test; a directive naming `d8w-text-bypass` renamed, its line read as `.raw`; `toBeEmpty` a table's matcher alone (types, both runtimes, the mover); every rule reading a path below its package root; the green ratchet run one line | —                                                                              | —                   |
+| ratchet, report  | shown: `test.baseline.json` recorded by `jterrazz-test-check baseline` and judged by the checker; the checker's report line; `lintReport` published, refusing oxlint's graphical frames; iteration 2: `--oxlint-report <file>` read, the judging run prints every finding it counts and every plugin diagnostic                                                               | `typescript.baseline.json`, jterrazz keys refused                              | —                   |
 
 Each branch keeps one commit per unit, so the owner can read the vision
 commit by commit.
@@ -191,7 +192,9 @@ commit, prototype plumbing that never reaches the release.
   (static), d12w-response-body-probe (warn), c15-local-fixture-reach (checker),
   c14-pool-fixture-shared (autofix); iteration 1 added c24-ground-role and
   f2-no-test-imports-in-prod (static), c8-disk-target-exists (checker) and
-  c25-no-ground-synonym (member pass). To convert: a1, a2, a3, a4, a9w, b4, b6w,
+  c25-no-ground-synonym (member pass); iteration 3 added c13-bare-ground's
+  mover (a 17 tree left, a 16 tree and a 16 module test moved) and its
+  module-test clause, its tree clause keeping its family test. To convert: a1, a2, a3, a4, a9w, b4, b6w,
   b8, b9w, b10, b11, c1, c2, c4, c6, c7, c10, c11, c13, d2, d2w, d6w, d8w,
   d9w, d13w, d15w, d16, d16w, d17w, d18w, d19w, e2, e4w, e5, e6, e7w, e8, e9w,
   f1, f3–f6, g4, i1, i4, j2, j6w, w1, w2, w5w; the checker's a7, b5, c8-spec,
@@ -509,3 +512,68 @@ dependency bump, and a decision (rare, reasoned) is not a measurement.
 | 30           | Every rule reads paths relative to the project root, never absolute segments.                                                                                                                                    |
 | 31           | `toBeEmpty` on a stream retires: `expect(result.stdout.text).toBe('')` is Vitest's own.                                                                                                                          |
 | oxlint twice | `typescript check` still runs oxlint twice (human log + JSON). Building the log from the JSON makes it one run: to decide by the owner.                                                                          |
+
+### What the package-test branch decided (iteration 3)
+
+- **26** — the gate is per TREE, on the tree's own 16 folders (the four
+  names C13 reads): a `specs/` tree, or a member's module tests. A 16 tree
+  migrates whole in one run, specs with no ground beside them included; a 16
+  tree holding no ground folder at all is not moved — nothing in it tells a 16
+  string from a 17 value — and chapter 04 lists it among what the reader
+  finishes by hand. The ungated run had rewritten the mover's own unit test
+  (its Given already read `.text`, so it proved nothing); it is restored.
+- **27** — `migrateModuleTestsTo17(member)` walks what C8's member pass walks
+  (every test outside `specs/`, never ground, never a nested package). The
+  path-less run and a named project root apply it to every member; a named
+  specs tree moves that tree alone. C13 now reaches every test (reach
+  `tests`): a 16 folder beside a module test is refused, the old pool probed
+  only under a specs root. The migration's command becomes the path-less
+  `jterrazz-test-check --fix`.
+- **29** — the renamed-rule table has one row, `d8w-text-bypass` →
+  `d8w-raw-bypass`: `c13-underscored-ground` enforced the opposite law, and
+  `b2`/the oxlint `c8` retired, so none is a rename. The line a `-next-line`
+  or `-line` directive covers moves its read from `.text` to `.raw`: 16's
+  `.text` WAS the raw capture, and renaming the directive alone would leave
+  it covering nothing while the test silently compared another text. A range
+  directive is renamed only. The gesture runs under question 26's gate.
+- **30** — "the project root" is read as the NEAREST package root (the
+  directory holding the file's `package.json`), so a workspace member's file
+  is read below the member, as `specsAnchor` already was. A path no package
+  holds is read whole — the rule tests' `/repo/…` cases. Sites moved:
+  `roleOf` (ground, contract, the retired roots), I1's layer path, C4's
+  `contracts` index, I4's banned folders, C25's "under `specs/`", and the
+  CLI's "is this a specs tree".
+- **31** — the types refuse a stream; the node matcher refuses one naming
+  `expect(<stream>.text).toBe('')`; the page, which holds no table, registers
+  `toBeEmpty` only to refuse, as a rejection like the node one. D2 keeps
+  `toBeEmpty` as an IO matcher (a table's is a query). The mover's gesture
+  drops the `await` with the promise.
+- **28** — green: `test.baseline.json: <n> held across <k> rules`, then what
+  ran (the passes, as the clean line names them). `--format json` prints the
+  findings whatever the verdict, and the runs that defer to the file (one
+  specs root, another member) still print what they found — they judge
+  nothing.
+
+### Raised by the package-test branch, iteration 3
+
+32. Question 26's gate is per tree, so a tree with ONE 16 folder left
+    anywhere re-runs every gesture over every file, a 17 negative spec
+    beside it included. Gate per file instead (the test files C13 flags), at
+    the cost of leaving a 16 spec with no ground beside it unmoved?
+33. A tree already moved by an ungated mover (signews-api, migrating now from
+    a snapshot of this package) has no 16 folder left, so the gated mover
+    never renames its `d8w-text-bypass` directives: the Suppressions pass
+    names them and they are fixed by hand. Accept, or let the unambiguous
+    gestures (a directive rename) run on every tree?
+34. `projectSegments` reads a path whole when no `package.json` holds it: a
+    loose file outside every package still reads absolute segments. Accept
+    as the rule tests' escape, or refuse to judge such a file?
+35. "One summary line per reporter" is met by the checker alone:
+    `typescript.baseline.json`'s line is package-typescript's to align.
+36. The mover now spells a renamed rule's old id, and chapter 04 must name it
+    on the line that says it "no longer exists" — the k2 meta-test skips only
+    such lines. A migration table read by k2 would replace the phrase
+    convention.
+37. The brief names `make fix`; this repository's Makefile has no `fix`
+    target (`npm run lint:fix` is the gesture). Add the target, or change
+    the brief?
