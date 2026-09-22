@@ -1,0 +1,13 @@
+import { file } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+import { cli } from '../cli.specification.js';
+
+test('a fixture named by a bare string is refused where it is written', async () => {
+    // Given - the 16 spelling, kept on purpose: the refusal is the behaviour
+    const result = await cli.exec('refuse');
+
+    // Then - refused at the call, and the report says so
+    expect(() => cli.fixture('shop/' as never)).toThrow(/a string is a value/u);
+    expect(result.stdout).toMatch(file('./expected/refused.txt'));
+});

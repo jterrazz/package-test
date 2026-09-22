@@ -89,9 +89,10 @@ value read its text — `expect(result.stdout).toContain('x')` to
 text, `await expect(result.stderr).toBeEmpty()` to
 `expect(result.stderr.text).toBe('')`. A table keeps its `toBeEmpty`.
 
-It runs only on a tree C13 still finds 16.x-shaped — one holding a 16 ground
-folder — so a second run, or a run over a tree already on 17, changes nothing.
-It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave
+Its gate is per file: it moves only a file C13 still finds 16.x-shaped — one
+with a 16 ground folder beside it, or one naming a 16 pool by `$FIXTURES/` —
+so a second run, a run over a tree already on 17, or a 17 file beside a 16 one
+in the same tree changes nothing. It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave
 has run. What it leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
@@ -106,7 +107,7 @@ baseline` records those in `test.baseline.json` — rename the file, then run
   `file()` where the string was, inside the helper, and C26 refuses it there:
   a path resolves against the spec that starts the chain, so the helper takes
   the `file()` as a parameter and each test builds its own.
-- **A 16.x tree with no ground folder at all is not moved.** Nothing in it
+- **A 16.x file with no 16 folder beside it is not moved.** Nothing in it
   tells a 16 string from a 17 value, so the compiler names each call the
   types refuse, and each is written by hand.
 - **A suppression follows the rule it names.** `d8w-text-bypass` no longer exists

@@ -332,6 +332,49 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
     });
 
+    test('the gate is per file: a 17 file is left byte for byte beside a 16 one in the same tree', () => {
+        // Given - one leaf still on 16 (its golden folder), and another leaf on 17 whose negative spec keeps the 16 spellings on purpose
+        const refusal = [
+            "import { file } from '@jterrazz/test';",
+            "await expect(cli.fixture('cli-app/' as never).exec('build')).rejects.toThrow();",
+            '// @ts-expect-error — a stream is compared as its text',
+            "expect(result.stdout).toContain('built');",
+            "expect(result.stdout).toMatch(file('./expected/refused.txt'));",
+            '',
+        ].join('\n');
+        const root = tree16({
+            'cli/build/_expected/build.txt': '',
+            'cli/build/build.spec.ts': "expect(result.stdout).toMatch('build.txt');\n",
+            'cli/refusal/expected/refused.txt': '',
+            'cli/refusal/refusal.spec.ts': refusal,
+            'fixtures/cli-app/index.ts': '',
+        });
+
+        // When - the mover runs
+        const migration = migrateTo17(root, renameSync);
+
+        // Then - the 16 leaf moves; the 17 leaf is not the mover's, whatever its tree holds
+        expect(migration.rewritten).toStrictEqual(['cli/build/build.spec.ts']);
+        expect(readFileSync(join(root, 'cli/refusal/refusal.spec.ts'), 'utf8')).toBe(refusal);
+    });
+
+    test('a 16 pool reaches only the files that name it', () => {
+        // Given - a 16 pool, a spec naming it by the 16 prefix, and a 17 spec that does not
+        const other = "await expect(api.seed('users.sql' as never)).rejects.toThrow();\n";
+        const root = tree16({
+            '_fixtures/shop/index.ts': '',
+            'api/orders/orders.spec.ts': other,
+            'cli/build/build.spec.ts': "await cli.fixture('$FIXTURES/shop/').exec('build');\n",
+        });
+
+        // When - the mover runs
+        const migration = migrateTo17(root, renameSync);
+
+        // Then - the pool is bare, the spec that names it moves, the other is left
+        expect(migration.rewritten).toStrictEqual(['cli/build/build.spec.ts']);
+        expect(readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')).toBe(other);
+    });
+
     test('a stream asserted empty is an empty text, and a table keeps its matcher', () => {
         // Given - 16's toBeEmpty on streams, awaited and negated, beside a table's
         const root = tree16({

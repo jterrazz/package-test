@@ -1,0 +1,11 @@
+description: --fix moves the 16 leaf of a tree and leaves its 17 leaf, the refusal it keeps on purpose included
+fixture: ./fixtures/on-16-and-17/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/cli/build/expected/build.txt: exists
+          specs/cli/build/build.spec.ts:
+              contains: toMatch(file('./expected/build.txt'))
+          specs/cli/refusal/refusal.spec.ts:
+              contains: cli.fixture('shop/' as never)

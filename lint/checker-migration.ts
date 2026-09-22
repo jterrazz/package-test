@@ -9,18 +9,19 @@ import { isTestFileName } from './role.js';
  * The 16 → 17 mover — what `jterrazz-test-check --fix` does to a tree written
  * for 16.x.
  *
- * It runs only on what C13 still finds 16.x-shaped: a tree holding at least
- * one `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder. A tree
- * with none is on 17 and is left exactly as it is — its bare strings are
- * values, or the deliberate refusals a negative spec exists to keep. Two trees
- * are walked: a `specs/` tree, and the module tests of a member (every test
- * outside `specs/`, never ground, never a nested package), each judged 16 or
- * 17 on its own folders.
+ * Its gate is per FILE: a file is 16.x-shaped when a 16 folder it stands on
+ * is still there — an `_fixtures/`, `_expected/`, `_requests/` or `_seeds/`
+ * folder beside it, or the 16 pool (`<specs>/_fixtures/`) when the file names
+ * it by `$FIXTURES/`. Every other file is on 17 and no 16 gesture touches it,
+ * whatever the rest of its tree holds: its bare strings are values, or the
+ * deliberate refusals a negative spec exists to keep. Two trees are walked: a
+ * `specs/` tree, and the module tests of a member (every test outside
+ * `specs/`, never ground, never a nested package).
  *
  * Its gestures, in this order:
  *
  * 1. every 16 ground folder takes its bare name (C13), deepest first;
- * 2. every call names the disk with `file()` or `directory()`, by the path from
+ * 2. in a 16.x-shaped file, every call names the disk with `file()` or `directory()`, by the path from
  *    the spec: `.seed('x.sql')` → `.seed(file('./seeds/x.sql'))`,
  *    `.request('x.http')` → `.request(file('./requests/x.http'))`,
  *    `.fixture('$FIXTURES/app/')` → `.fixture(directory('../../fixtures/app/'))`,
@@ -185,7 +186,7 @@ const STREAM_EMPTY = new RegExp(
 
 /** Rewrite the 16 (and prototype) calls of one source file; `root` is the specs tree. */
 function migrateSource(text: string, file: string, root: string): string {
-    return migrateVerbs(renameDirectives(text), file, root)
+    return migrateVerbs(text, file, root)
         .replaceAll(STREAM_VALUE, 'expect($<space>$<subject>.text$<close>$<not>.$<matcher>(')
         .replaceAll(STREAM_EMPTY, "expect($<space>$<subject>.text$<close>$<not>.toBe('')");
 }
@@ -454,11 +455,23 @@ const OLD_SEGMENT = /(?<=['"/ ])_(?<name>fixtures|expected|requests|seeds)(?=\/)
  */
 type Walked = { files: () => string[]; folders: string[]; specsRoot: string };
 
-/** Rename the folders, then rewrite the files — on a tree that still holds a 16 folder, and only there. */
-function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Rename): Migration {
-    if (folders.length === 0) {
-        return { renamed: [], rewritten: [] };
+/** The 16 pool prefix — a file spelling it stands on the pool. */
+const POOL_PREFIX = '$FIXTURES/';
+
+/** The text a 16.x-shaped file takes: every gesture, directives included. */
+function movedToSeventeen(text: string, file: string, specsRoot: string): string {
+    if (file.endsWith(SPEC_EXTENSION)) {
+        return migrateDocument(text, file, specsRoot).replaceAll(OLD_SEGMENT, '$<name>');
     }
+    const bare = migrateSource(renameDirectives(text), file, specsRoot).replaceAll(
+        OLD_SEGMENT,
+        '$<name>',
+    );
+    return bare === text ? bare : importWrappers(bare, file);
+}
+
+/** Rename every 16 folder to its bare name, deepest first; what moved, relative to `root`. */
+function renameFolders(root: string, folders: string[], rename: Rename): string[] {
     const renamed: string[] = [];
     for (const dir of folders) {
         const bare = RENAMED_GROUND_DIRS[dir.split(sep).at(-1) ?? ''];
@@ -468,24 +481,39 @@ function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Re
             renamed.push(`${relative(root, dir)} → ${relative(root, target)}`);
         }
     }
-    const rewritten: string[] = [];
-    for (const file of files()) {
-        const text = readFileSync(file, 'utf8');
-        const isDocument = file.endsWith(SPEC_EXTENSION);
-        const moved = isDocument
-            ? migrateDocument(text, file, specsRoot)
-            : migrateSource(text, file, specsRoot);
-        const bare = moved.replaceAll(OLD_SEGMENT, '$<name>');
-        const next = isDocument || bare === text ? bare : importWrappers(bare, file);
-        if (next !== text) {
-            writeFileSync(file, next);
-            rewritten.push(relative(root, file));
-        }
-    }
-    return { renamed, rewritten };
+    return renamed;
 }
 
-/** Apply the 16 → 17 migration to a specs tree that still holds a 16 folder. */
+/**
+ * Rename the 16 folders, and rewrite the files that stood on one.
+ *
+ * Which file stood on a 16 folder is read from the folders found BEFORE the
+ * renames: a directory that held one, and the pool when it was `_fixtures/`.
+ */
+function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Rename): Migration {
+    const sixteenDirs = new Set(folders.map((dir) => dirname(dir)));
+    const sixteenPool = folders.includes(join(specsRoot, `_${GROUND_FIXTURES}`));
+    const migration: Migration = {
+        renamed: renameFolders(root, folders, rename),
+        rewritten: [],
+    };
+    if (folders.length === 0) {
+        return migration;
+    }
+    for (const file of files()) {
+        const text = readFileSync(file, 'utf8');
+        const isSixteen =
+            sixteenDirs.has(dirname(file)) || (sixteenPool && text.includes(POOL_PREFIX));
+        const next = isSixteen ? movedToSeventeen(text, file, specsRoot) : text;
+        if (next !== text) {
+            writeFileSync(file, next);
+            migration.rewritten.push(relative(root, file));
+        }
+    }
+    return migration;
+}
+
+/** Apply the 16 → 17 migration to the 16.x-shaped files of a specs tree. */
 export function migrateTo17(root: string, rename: Rename): Migration {
     return migrate(
         root,
@@ -524,7 +552,7 @@ function moduleTests(member: string): Omit<Walked, 'specsRoot'> {
     return { files: () => files, folders };
 }
 
-/** Apply the 16 → 17 migration to the module tests of a member that still stand on a 16 folder. */
+/** Apply the 16 → 17 migration to the module tests of a member, gated per file like a specs tree. */
 export function migrateModuleTestsTo17(member: string, rename: Rename): Migration {
     return migrate(member, { ...moduleTests(member), specsRoot: join(member, 'specs') }, rename);
 }
