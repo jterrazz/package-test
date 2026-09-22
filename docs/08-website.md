@@ -144,7 +144,7 @@ test('subscribes through the form and captures the final state', async () => {
     });
 
     // Then - the capture reflects the page after the interaction
-    expect(result.content).toContain('Thanks for subscribing');
+    expect(result.content.text).toContain('Thanks for subscribing');
     await expect(result.errors).toBeEmpty();
 });
 ```
@@ -167,7 +167,7 @@ test('navigates to another page and captures where it landed', async () => {
 
     // Then - the result is the destination page
     expect(result.url).toContain('/articles');
-    expect(result.content).toContain('All articles');
+    expect(result.content.text).toContain('All articles');
 });
 ```
 
@@ -182,7 +182,7 @@ test('sends chain headers on the raw exchange', async () => {
 
     // Then - the exchange succeeds like any other client
     expect(result.status).toBe(200);
-    expect(result.body).toContain('Allow: /');
+    expect(result.body.text).toContain('Allow: /');
 });
 ```
 
@@ -196,7 +196,7 @@ test('stamps the moment the page was opened', async () => {
     const result = await website.clock('2026-03-04T09:30:00Z').visit('/clock');
 
     // Then - the rendered stamp is the stated instant
-    expect(result.content).toContain('2026-03-04T09:30:00.000Z');
+    expect(result.content.text).toContain('2026-03-04T09:30:00.000Z');
 });
 ```
 
@@ -296,7 +296,7 @@ test('separates console errors from the full stream', async () => {
 
     // Then - the full stream carries both, the error stream only the error
     expect(result.console).toMatch(file('./expected/noisy.console.txt'));
-    expect(result.errors).toContain('boom');
+    expect(result.errors.text).toContain('boom');
 });
 ```
 
@@ -333,7 +333,7 @@ test('renders the events feed from the declared backend', async () => {
     const result = await website.intercept(newsroom).visit('/events');
 
     // Then - the page rendered what the stub declared
-    expect(result.content).toContain('Enquête Fauci COVID-19');
+    expect(result.content.text).toContain('Enquête Fauci COVID-19');
     await expect(result.errors).toBeEmpty();
 });
 ```

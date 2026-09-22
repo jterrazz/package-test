@@ -28,7 +28,7 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the run the operator asked for had nothing to walk, and says so
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('no `specs/` tree under');
+        expect(result.stderr.text).toContain('no `specs/` tree under');
     });
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
@@ -39,7 +39,7 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the checker rejects it (exit 1) rather than passing vacuously
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('no such directory');
+        expect(result.stderr.text).toContain('no such directory');
     });
 
     test('`baseline` records the project where it stands, and the next run is held by it', async () => {
@@ -109,6 +109,6 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the checker refuses it rather than judging an empty report
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('no such oxlint report');
+        expect(result.stderr.text).toContain('no such oxlint report');
     });
 });

@@ -13,7 +13,7 @@ describe('lint — e4w-project-binding (CONVENTIONS E4)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('e4w-project-binding');
+        expect(result.stdout.text).toContain('e4w-project-binding');
     });
 
     test('accepts a project named for the facet it collects', async () => {
@@ -24,6 +24,6 @@ describe('lint — e4w-project-binding (CONVENTIONS E4)', () => {
 
         // Then - clean exit, no E4 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('e4w-project-binding');
+        expect(result.stdout.text).not.toContain('e4w-project-binding');
     });
 });

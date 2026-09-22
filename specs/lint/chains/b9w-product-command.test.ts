@@ -13,7 +13,7 @@ describe('lint — b9w-product-command (CONVENTIONS B9)', () => {
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('b9w-product-command');
+        expect(result.stdout.text).toContain('b9w-product-command');
     });
 
     test('stays silent on the product command wrapper', async () => {
@@ -24,6 +24,6 @@ describe('lint — b9w-product-command (CONVENTIONS B9)', () => {
 
         // Then - clean run, no b9w-product-command diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('b9w-product-command');
+        expect(result.stdout.text).not.toContain('b9w-product-command');
     });
 });

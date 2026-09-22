@@ -30,7 +30,7 @@ test('a name designates the accessible name WHOLE — the default', async () => 
     });
 
     // Then - "Articles archive" is one element, not two, and the longer name is still on the screen: the descriptor narrowed, not the DOM
-    expect(result.content).toContain('Articles archive');
+    expect(result.content.text).toContain('Articles archive');
 });
 
 test('`{ exact: false }` brings the substring match back, and the ambiguity with it', async () => {

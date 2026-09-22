@@ -68,7 +68,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
         // Then - the document asserted itself; the result is still a CliResult
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('Usage: cli <command>');
+        expect(result.stdout.text).toContain('Usage: cli <command>');
     });
 
     test('a two-run sequence shares one working directory', async () => {
@@ -84,7 +84,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
         const result = await cli.run(file('./frozen-env.spec.yaml'));
 
         // Then - the set's value reached the child, and so did the pair
-        expect(result.stdout).toContain('MY_VAR=from-the-frozen-set');
+        expect(result.stdout.text).toContain('MY_VAR=from-the-frozen-set');
     });
 
     test('a served URL matches through {{url}} whatever port was free', async () => {
@@ -92,7 +92,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
         const result = await cli.run(file('./served-url.spec.yaml'));
 
         // Then - the document matched the URL by token; the raw value is a real one
-        expect(result.stdout.comparableText).toMatch(/backend http:\/\/127\.0\.0\.1:\d+\//u);
+        expect(result.stdout.text).toMatch(/backend http:\/\/127\.0\.0\.1:\d+\//u);
     });
 
     test('a served stub answers out of the workdir the document laid down', async () => {
@@ -139,7 +139,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
         const result = await cli.run(file('./piped-input.spec.yaml'));
 
         // Then - the document's own golden already proved it; the result agrees
-        expect(result.stdout).toContain('SHOUT THIS');
+        expect(result.stdout.text).toContain('SHOUT THIS');
     });
 
     test('files: asserts what the run left on disk', async () => {

@@ -13,5 +13,5 @@ test('refuses to publish until the checklist is acknowledged', async () => {
     });
 
     // Then - the markup agrees with what the verbs answered
-    expect(result.html).not.toContain('disabled');
+    expect(result.html.text).not.toContain('disabled');
 });

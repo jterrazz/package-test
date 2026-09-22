@@ -15,7 +15,7 @@ export class ScreenResult extends BaseResult {
 
     /**
      * The visible screen texts as one stream, in reading order — the scalpel
-     * for a targeted probe: `expect(result.content).toContain('Bookmarked')`.
+     * for a targeted probe: `expect(result.content.text).toContain('Bookmarked')`.
      */
     get content(): TextAccessor {
         return new TextAccessor(this.capturedScreen.texts.join('\n'), 'content', this.testDir, {

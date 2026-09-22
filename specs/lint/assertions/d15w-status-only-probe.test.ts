@@ -13,7 +13,7 @@ describe('lint — d15w-status-only-probe (CONVENTIONS D15)', () => {
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d15w-status-only-probe');
+        expect(result.stdout.text).toContain('d15w-status-only-probe');
     });
 
     test('stays silent on a status probe beside a golden', async () => {
@@ -24,6 +24,6 @@ describe('lint — d15w-status-only-probe (CONVENTIONS D15)', () => {
 
         // Then - clean run, no d15w-status-only-probe diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d15w-status-only-probe');
+        expect(result.stdout.text).not.toContain('d15w-status-only-probe');
     });
 });

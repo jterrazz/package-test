@@ -6,9 +6,7 @@ import {
     compareStreamText,
     GOLDEN_MATCHER,
     matchThroughGolden,
-    nativeContain,
     requireExtension,
-    textContains,
     textIsEmpty,
 } from '../../model/result/text-assertions.js';
 import { TextAccessor } from '../../model/result/text.js';
@@ -38,7 +36,7 @@ async function matchGolden(
     frozen: boolean,
 ): Promise<MatcherResult> {
     requireExtension(name, 'stream');
-    const actual = accessor.comparableText;
+    const actual = accessor.text;
     const stored = await readGolden(name);
 
     if (stored === null) {
@@ -81,13 +79,6 @@ async function toMatchGolden(
     return await matchGolden(received, expected.path, options?.frozen === true);
 }
 
-function toContain(received: unknown, expected: unknown): MatcherResult {
-    if (received instanceof TextAccessor) {
-        return textContains(received, String(expected));
-    }
-    return nativeContain(received, expected);
-}
-
 function toBeEmpty(received: unknown): MatcherResult {
     if (!(received instanceof TextAccessor)) {
         throw new TypeError('toBeEmpty: unsupported subject — expected a text accessor.');
@@ -107,6 +98,6 @@ export function registerBrowserMatchers(): void {
         return;
     }
     registered = true;
-    expect.extend({ [GOLDEN_MATCHER]: toMatchGolden, toBeEmpty, toContain });
+    expect.extend({ [GOLDEN_MATCHER]: toMatchGolden, toBeEmpty });
     matchThroughGolden(chai);
 }

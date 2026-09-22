@@ -13,7 +13,7 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
 
         // Then - oxlint reports one diagnostic per missing marker (1 + 1 + 2). counted by DIAGNOSTIC, not by name: every message ends with its generated anchor, so the rule name appears twice on each line
         expect(result.exitCode).toBe(1);
-        expect(result.stdout.grep('scenario.test.ts')).toContain('b4-given-then');
+        expect(result.stdout.grep('scenario.test.ts').text).toContain('b4-given-then');
         const missing = result.stdout.text.match(/jterrazz\(b4-given-then\)/gu) ?? [];
         expect(missing).toHaveLength(4);
     });
@@ -38,6 +38,6 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
 
         // Then - clean exit, no B4 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('b4-given-then');
+        expect(result.stdout.text).not.toContain('b4-given-then');
     });
 });

@@ -9,7 +9,7 @@ describe('website — the visit pins the calendar of the page', () => {
         const result = await website.clock('2026-03-04T09:30:00Z').visit('/clock');
 
         // Then - the stamp is the stated instant, not the run's
-        expect(result.content).toContain('2026-03-04T09:30:00.000Z');
+        expect(result.content.text).toContain('2026-03-04T09:30:00.000Z');
     });
 
     test('a raw exchange refuses the setup rather than ignoring it', async () => {
@@ -28,6 +28,6 @@ describe('website — the visit pins the calendar of the page', () => {
         });
 
         // Then - the stamp moved on: the pin lasted exactly one chain
-        expect(result.content).not.toContain('2026-03-04T09:30:00.000Z');
+        expect(result.content.text).not.toContain('2026-03-04T09:30:00.000Z');
     });
 });

@@ -18,5 +18,5 @@ test('separates console errors from the full stream', async () => {
 
     // Then - the full stream carries both, the error stream only the error
     expect(result.console).toMatch(file('./expected/noisy.console.txt'));
-    expect(result.errors).toContain('boom');
+    expect(result.errors.text).toContain('boom');
 });

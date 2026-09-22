@@ -179,12 +179,24 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         // Given - a stream subject, ANSI included
         const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m', 'stdout', '/tmp');
 
-        // Then - vitest's own refusal on the accessor, and vitest's own match on its text
+        // Then - vitest's own refusal on the accessor, and vitest's own match on its comparable text
         expect(() => {
             expect(subject).toMatch(/built in/u);
         }).toThrow('.toMatch() expects to receive a string, but got object');
-        expect(subject.text).toMatch(/built in \ds/u);
-        expect(subject.comparableText).not.toMatch('failed');
+        expect(subject.text).toMatch(/^built in \ds$/u);
+        expect(subject.text).not.toMatch('failed');
+    });
+
+    test("toContain on a stream is vitest's: its .text answers, and no override reads the accessor", () => {
+        // Given - a stream subject, ANSI included
+        const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m', 'stdout', '/tmp');
+
+        // Then - the comparable text holds the words; the accessor itself is no list vitest can search
+        expect(subject.text).toContain('built in 3s');
+        expect(() => {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a stream handed to toContain
+            expect(subject as unknown as string[]).toContain('built in 3s');
+        }).toThrow(/to include 'built in 3s'/u);
     });
 
     test('a file golden refuses a tree subject, naming directory()', () => {

@@ -13,7 +13,7 @@ describe('lint — f5-fixtures-only-from-tests (CONVENTIONS F5)', () => {
 
         // Then - oxlint reports the f5-fixtures-only-from-tests diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('f5-fixtures-only-from-tests');
+        expect(result.stdout.text).toContain('f5-fixtures-only-from-tests');
     });
 
     test('accepts a fixtures module imported from its test', async () => {
@@ -24,6 +24,6 @@ describe('lint — f5-fixtures-only-from-tests (CONVENTIONS F5)', () => {
 
         // Then - clean run, no f5-fixtures-only-from-tests diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('f5-fixtures-only-from-tests');
+        expect(result.stdout.text).not.toContain('f5-fixtures-only-from-tests');
     });
 });

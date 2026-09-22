@@ -8,7 +8,7 @@ describe('website — a process declared beside the site', () => {
         const result = await website.visit('/services');
 
         // Then - it names the loopback URL of the process declared beside it
-        expect(result.content).toContain('http://127.0.0.1:');
+        expect(result.content.text).toContain('http://127.0.0.1:');
     });
 
     test('every process of the run carries the id the facet minted', async () => {
@@ -16,6 +16,6 @@ describe('website — a process declared beside the site', () => {
         const result = await website.visit('/services');
 
         // Then - the id is there, and it is not something the spec sampled
-        expect(result.content).not.toContain('unset');
+        expect(result.content.text).not.toContain('unset');
     });
 });

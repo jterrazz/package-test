@@ -131,7 +131,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the refusal names the table the statement asked for
-        expect(result.error).toContain('nonexistent_table_xyz');
+        expect(result.error.text).toContain('nonexistent_table_xyz');
     });
 
     test('what the database refuses — a query on a table that does not exist names that table', async () => {
@@ -141,7 +141,7 @@ describe('postgres — the handle against a real container', () => {
         );
 
         // Then - the refusal names it
-        expect(result.error).toContain('nonexistent_table_xyz');
+        expect(result.error.text).toContain('nonexistent_table_xyz');
     });
 
     test('what the database refuses — a broken init script names the file and the SQL error', async () => {
@@ -162,7 +162,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the message carries the script's path and the type error
-        expect(result.error).toContain('init script failed');
-        expect(result.error).toContain('postgres/init.sql');
+        expect(result.error.text).toContain('init script failed');
+        expect(result.error.text).toContain('postgres/init.sql');
     });
 });

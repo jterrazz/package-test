@@ -12,7 +12,7 @@ test('renders for the page size the test gave it', async () => {
         });
 
     // Then - the narrow branch is what the page shows
-    expect(result.content).toContain('Narrow layout');
+    expect(result.content.text).toContain('Narrow layout');
 });
 
 test('is restored to the project size for the next test', async () => {
@@ -22,7 +22,7 @@ test('is restored to the project size for the next test', async () => {
     });
 
     // Then - the project's 1280x720 is what this render got
-    expect(result.content).toContain('Wide layout');
+    expect(result.content.text).toContain('Wide layout');
 });
 
 test('captures the text the page renders, not everything the document holds', async () => {
@@ -32,7 +32,7 @@ test('captures the text the page renders, not everything the document holds', as
     });
 
     // Then - `content` is what a reader sees; the markup keeps the rest
-    expect(result.content).not.toContain('rebeccapurple');
-    expect(result.content).not.toContain('Drafted, never shown');
-    expect(result.html).toContain('Drafted, never shown');
+    expect(result.content.text).not.toContain('rebeccapurple');
+    expect(result.content.text).not.toContain('Drafted, never shown');
+    expect(result.html.text).toContain('Drafted, never shown');
 });

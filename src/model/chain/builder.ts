@@ -136,7 +136,7 @@ export type SpecificationConfig = {
     services?: Record<string, ServiceHandle> | undefined;
     /**
      * Optional normaliser applied to command stdout/stderr before every
-     * comparison. Does not mutate the raw `.text` accessor.
+     * comparison, and read by `.text`; `.raw` keeps the capture.
      */
     transform?: ((text: string) => string) | undefined;
 };

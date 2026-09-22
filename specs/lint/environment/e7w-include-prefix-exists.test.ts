@@ -13,7 +13,7 @@ describe('lint — e7w-include-prefix-exists (CONVENTIONS E7)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('e7w-include-prefix-exists');
+        expect(result.stdout.text).toContain('e7w-include-prefix-exists');
     });
 
     test('accepts an include rooted in a folder that exists', async () => {
@@ -24,6 +24,6 @@ describe('lint — e7w-include-prefix-exists (CONVENTIONS E7)', () => {
 
         // Then - clean exit, no E7 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('e7w-include-prefix-exists');
+        expect(result.stdout.text).not.toContain('e7w-include-prefix-exists');
     });
 });

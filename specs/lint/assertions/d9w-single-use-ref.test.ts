@@ -13,7 +13,7 @@ describe('lint — d9w-single-use-ref (CONVENTIONS D9)', () => {
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d9w-single-use-ref');
+        expect(result.stdout.text).toContain('d9w-single-use-ref');
     });
 
     test('stays silent for a plain matcher', async () => {
@@ -24,6 +24,6 @@ describe('lint — d9w-single-use-ref (CONVENTIONS D9)', () => {
 
         // Then - clean run, no d9w-single-use-ref diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d9w-single-use-ref');
+        expect(result.stdout.text).not.toContain('d9w-single-use-ref');
     });
 });

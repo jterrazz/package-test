@@ -18,13 +18,14 @@ describe('text() — ad-hoc string as a golden subject', () => {
         );
     });
 
-    test('strips ANSI before comparison while .text stays raw', () => {
+    test('strips ANSI before comparison while .raw keeps the escapes', () => {
         // Given - a coloured message
         const coloured = '\u001B[31mred\u001B[0m plain\n';
 
         // Then - the raw form keeps the escapes, the comparison sees them stripped
-        // oxlint-disable-next-line jterrazz/d8w-text-bypass -- proving text().text preserves the raw ANSI the matcher strips: the raw accessor IS the subject
-        expect(text(coloured).text).toContain('\u001B[31m');
+        // oxlint-disable-next-line jterrazz/d8w-raw-bypass -- proving text().raw preserves the ANSI the matcher strips: the raw accessor IS the subject
+        expect(text(coloured).raw).toContain('\u001B[31m');
+        expect(text(coloured).text).toBe('red plain\n');
         expect(text(coloured)).toMatch(file('./expected/text-ansi.txt'));
     });
 

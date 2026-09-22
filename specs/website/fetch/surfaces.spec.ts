@@ -28,5 +28,5 @@ test('sends chain headers on the raw exchange', async () => {
 
     // Then - the exchange succeeds like any other client
     expect(result.status).toBe(200);
-    expect(result.body).toContain('Allow: /');
+    expect(result.body.text).toContain('Allow: /');
 });

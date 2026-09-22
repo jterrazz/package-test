@@ -13,7 +13,7 @@ describe('lint — c2-http-only-requests (CONVENTIONS C2)', () => {
 
         // Then - oxlint reports the c2-http-only-requests diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('c2-http-only-requests');
+        expect(result.stdout.text).toContain('c2-http-only-requests');
     });
 
     test('accepts a requests/ directory of .http files only', async () => {
@@ -24,6 +24,6 @@ describe('lint — c2-http-only-requests (CONVENTIONS C2)', () => {
 
         // Then - clean run, no c2-http-only-requests diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('c2-http-only-requests');
+        expect(result.stdout.text).not.toContain('c2-http-only-requests');
     });
 });

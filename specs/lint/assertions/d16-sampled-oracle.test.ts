@@ -13,7 +13,7 @@ describe('lint — d16-sampled-oracle (CONVENTIONS D16)', () => {
 
         // Then - the diagnostic names the rule
         expect(result.exitCode).toBe(1);
-        expect(result.stdout.grep('scenario.test.ts')).toContain('d16-sampled-oracle');
+        expect(result.stdout.grep('scenario.test.ts').text).toContain('d16-sampled-oracle');
     });
 
     test('accepts an oracle the test states', async () => {
@@ -24,6 +24,6 @@ describe('lint — d16-sampled-oracle (CONVENTIONS D16)', () => {
 
         // Then - clean exit, no D16 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d16-sampled-oracle');
+        expect(result.stdout.text).not.toContain('d16-sampled-oracle');
     });
 });

@@ -43,7 +43,7 @@ describe('command — exec', () => {
 
         // Then - non-zero exit with a useful stderr
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('Unknown command');
+        expect(result.stderr.text).toContain('Unknown command');
     });
 
     test('captures stderr on exit zero (Unix-style status banners)', async () => {
@@ -96,7 +96,7 @@ describe('command — exec', () => {
 
         // Then - stopped at fail
         expect(result.exitCode).toBe(2);
-        expect(result.stderr).toContain('Fatal: something went wrong');
+        expect(result.stderr.text).toContain('Fatal: something went wrong');
     });
 
     test('multi-exec — preserves files between commands', async () => {
@@ -118,8 +118,8 @@ describe('command — exec', () => {
 
         // Then - resolved at the pattern with the output captured so far
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('Starting dev mode');
-        expect(result.stdout).toContain('Hello from CLI app');
+        expect(result.stdout.text).toContain('Starting dev mode');
+        expect(result.stdout.text).toContain('Hello from CLI app');
     });
 
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — resolves when the waitFor pattern is matched in stderr', async () => {
@@ -130,7 +130,7 @@ describe('command — exec', () => {
 
         // Then - resolved at the stderr pattern with the output captured so far
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Listening on stderr');
+        expect(result.stderr.text).toContain('Listening on stderr');
     });
 
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — waitFor without timeout defaults to 10s', async () => {

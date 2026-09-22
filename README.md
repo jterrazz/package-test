@@ -89,7 +89,7 @@ test('subscribes through the form and captures the final state', async () => {
     });
 
     // Then - the page says so, and the console is clean
-    expect(result.content).toContain('Thanks for subscribing');
+    expect(result.content.text).toContain('Thanks for subscribing');
     await expect(result.errors).toBeEmpty();
 });
 ```
@@ -112,7 +112,7 @@ test('bookmarks an event from its detail screen', async () => {
     });
 
     // Then - the capture reflects the screen after the interaction
-    expect(result.content).toContain('Bookmarked');
+    expect(result.content.text).toContain('Bookmarked');
 });
 ```
 

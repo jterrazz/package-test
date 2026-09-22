@@ -13,7 +13,7 @@ describe('lint — d6w-transform-token-equivalent (CONVENTIONS D6)', () => {
 
         // Then - oxlint reports the d6w-transform-token-equivalent diagnostic warnings do not fail the run - the diagnostic is advisory
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d6w-transform-token-equivalent');
+        expect(result.stdout.text).toContain('d6w-transform-token-equivalent');
     });
 
     test('stays silent for a transform covering real applicative noise', async () => {
@@ -24,6 +24,6 @@ describe('lint — d6w-transform-token-equivalent (CONVENTIONS D6)', () => {
 
         // Then - clean run, no d6w-transform-token-equivalent diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d6w-transform-token-equivalent');
+        expect(result.stdout.text).not.toContain('d6w-transform-token-equivalent');
     });
 });

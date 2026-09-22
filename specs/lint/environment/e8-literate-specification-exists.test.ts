@@ -13,7 +13,7 @@ describe('lint — e8-literate-specification-exists (CONVENTIONS E8)', () => {
 
         // Then - the diagnostic names the rule
         expect(result.exitCode).toBe(1);
-        expect(result.stdout.grep('vitest.config.ts')).toContain(
+        expect(result.stdout.grep('vitest.config.ts').text).toContain(
             'e8-literate-specification-exists',
         );
     });
@@ -28,6 +28,6 @@ describe('lint — e8-literate-specification-exists (CONVENTIONS E8)', () => {
 
         // Then - clean exit, no E8 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('e8-literate-specification-exists');
+        expect(result.stdout.text).not.toContain('e8-literate-specification-exists');
     });
 });

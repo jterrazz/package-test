@@ -13,7 +13,7 @@ describe('lint — a4-cleanup-afterall (CONVENTIONS A4)', () => {
 
         // Then - oxlint reports the a4-cleanup-afterall diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('a4-cleanup-afterall');
+        expect(result.stdout.text).toContain('a4-cleanup-afterall');
     });
 
     test('accepts a specification file calling afterAll(cleanup)', async () => {
@@ -24,6 +24,6 @@ describe('lint — a4-cleanup-afterall (CONVENTIONS A4)', () => {
 
         // Then - clean run, no a4-cleanup-afterall diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('a4-cleanup-afterall');
+        expect(result.stdout.text).not.toContain('a4-cleanup-afterall');
     });
 });

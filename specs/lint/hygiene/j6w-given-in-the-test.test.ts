@@ -13,7 +13,7 @@ describe('lint — j6w-given-in-the-test (CONVENTIONS J6)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('j6w-given-in-the-test');
+        expect(result.stdout.text).toContain('j6w-given-in-the-test');
     });
 
     test('accepts a Given each test calls for itself', async () => {
@@ -24,6 +24,6 @@ describe('lint — j6w-given-in-the-test (CONVENTIONS J6)', () => {
 
         // Then - clean run, no J6 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('j6w-given-in-the-test');
+        expect(result.stdout.text).not.toContain('j6w-given-in-the-test');
     });
 });

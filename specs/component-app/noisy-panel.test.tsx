@@ -10,9 +10,9 @@ test('separates the console errors from the whole stream', async () => {
     });
 
     // Then - the full stream carries both, the error stream only the error
-    expect(result.console).toContain('[warn] the panel is deprecated');
-    expect(result.console).toContain('[error] the panel could not reach the cache');
-    expect(result.errors).toContain('the panel could not reach the cache');
+    expect(result.console.text).toContain('[warn] the panel is deprecated');
+    expect(result.console.text).toContain('[error] the panel could not reach the cache');
+    expect(result.errors.text).toContain('the panel could not reach the cache');
 });
 
 test('scopes through a test id where the container carries no role', async () => {
@@ -23,5 +23,5 @@ test('scopes through a test id where the container carries no role', async () =>
     });
 
     // Then - the escape hatch found its anchor, which is an attribute and not anything a user can see
-    expect(result.html).toContain('data-testid="panel-body"');
+    expect(result.html.text).toContain('data-testid="panel-body"');
 });

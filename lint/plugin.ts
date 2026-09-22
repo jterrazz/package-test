@@ -38,7 +38,7 @@ import { c24GroundRole } from './rules/model/c24-ground-role.js';
 import { d2AwaitIoMatcher } from './rules/model/d2-await-io-matcher.js';
 import { d2wAwaitSyncMatcher } from './rules/model/d2w-await-sync-matcher.js';
 import { d6wTransformTokenEquivalent } from './rules/model/d6w-transform-token-equivalent.js';
-import { d8wTextBypass } from './rules/model/d8w-text-bypass.js';
+import { d8wRawBypass } from './rules/model/d8w-raw-bypass.js';
 import { d9wSingleUseRef } from './rules/model/d9w-single-use-ref.js';
 import { d13wUnfrozenNegativeFixture } from './rules/model/d13w-unfrozen-negative-fixture.js';
 import { d16SampledOracle } from './rules/model/d16-sampled-oracle.js';
@@ -138,7 +138,7 @@ const plugin: LintPlugin = {
         'd2-await-io-matcher': d2AwaitIoMatcher,
         'd2w-await-sync-matcher': d2wAwaitSyncMatcher,
         'd6w-transform-token-equivalent': d6wTransformTokenEquivalent,
-        'd8w-text-bypass': d8wTextBypass,
+        'd8w-raw-bypass': d8wRawBypass,
         'd9w-single-use-ref': d9wSingleUseRef,
         'd12w-response-body-probe': d12wResponseBodyProbe,
         'd13w-unfrozen-negative-fixture': d13wUnfrozenNegativeFixture,

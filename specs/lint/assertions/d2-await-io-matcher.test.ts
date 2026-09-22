@@ -13,7 +13,7 @@ describe('lint — d2-await-io-matcher (CONVENTIONS D2)', () => {
 
         // Then - oxlint reports the d2-await-io-matcher diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('d2-await-io-matcher');
+        expect(result.stdout.text).toContain('d2-await-io-matcher');
     });
 
     test('accepts an awaited IO matcher', async () => {
@@ -24,6 +24,6 @@ describe('lint — d2-await-io-matcher (CONVENTIONS D2)', () => {
 
         // Then - clean run, no d2-await-io-matcher diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d2-await-io-matcher');
+        expect(result.stdout.text).not.toContain('d2-await-io-matcher');
     });
 });

@@ -13,7 +13,7 @@ describe('lint — a3-no-destructure-alias (CONVENTIONS A3)', () => {
 
         // Then - oxlint reports the a3-no-destructure-alias diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('a3-no-destructure-alias');
+        expect(result.stdout.text).toContain('a3-no-destructure-alias');
     });
 
     test('accepts the canonical destructured names', async () => {
@@ -24,6 +24,6 @@ describe('lint — a3-no-destructure-alias (CONVENTIONS A3)', () => {
 
         // Then - clean run, no a3-no-destructure-alias diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('a3-no-destructure-alias');
+        expect(result.stdout.text).not.toContain('a3-no-destructure-alias');
     });
 });

@@ -13,7 +13,7 @@ describe('lint — a9w-redundant-root (CONVENTIONS A9)', () => {
 
         // Then - oxlint reports the a9w-redundant-root diagnostic warnings do not fail the run - the diagnostic is advisory
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('a9w-redundant-root');
+        expect(result.stdout.text).toContain('a9w-redundant-root');
     });
 
     test('stays silent without a root override', async () => {
@@ -24,6 +24,6 @@ describe('lint — a9w-redundant-root (CONVENTIONS A9)', () => {
 
         // Then - clean run, no a9w-redundant-root diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('a9w-redundant-root');
+        expect(result.stdout.text).not.toContain('a9w-redundant-root');
     });
 });

@@ -13,7 +13,7 @@ describe('lint — f4-no-test-to-test-import (CONVENTIONS F4)', () => {
 
         // Then - oxlint reports the f4-no-test-to-test-import diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('f4-no-test-to-test-import');
+        expect(result.stdout.text).toContain('f4-no-test-to-test-import');
     });
 
     test('accepts importing the fixtures neighbour instead', async () => {
@@ -24,6 +24,6 @@ describe('lint — f4-no-test-to-test-import (CONVENTIONS F4)', () => {
 
         // Then - clean run, no f4-no-test-to-test-import diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('f4-no-test-to-test-import');
+        expect(result.stdout.text).not.toContain('f4-no-test-to-test-import');
     });
 });

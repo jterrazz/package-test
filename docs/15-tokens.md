@@ -26,7 +26,7 @@ Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
 ```
 
-Stream comparisons strip ANSI escape sequences **before** token matching (rule D6), so fixtures never contain color codes — `.text` remains the raw capture.
+Stream comparisons strip ANSI escape sequences **before** token matching (rule D6), so fixtures never contain color codes — `.text` is the stripped text, `.raw` the capture as it was.
 
 ## The vocabulary — all 21 tokens
 

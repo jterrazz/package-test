@@ -21,7 +21,12 @@ import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
  *    tree → `toMatch(directory('./expected/<name>/'))`, `.run('x.spec.yaml')` →
  *    `.run(file('./x.spec.yaml'))` — and a document's `fixture:` names its path
  *    the same way;
- * 3. a source the second gesture touched imports the two names it now calls.
+ * 3. a stream compared as a VALUE reads its text: 16 overrode `toContain` and
+ *    `toMatch` on a stream accessor, 17 leaves both to vitest, so
+ *    `expect(result.stdout.text).toContain('x')` → `expect(result.stdout.text).toContain('x')`
+ *    (`.not` included, a `.grep(…)` subject too; a `toMatch(file(…))` golden
+ *    stays on the accessor);
+ * 4. a source the second gesture touched imports the two names it now calls.
  *
  * The `…File`/`…Directory` verbs of the 17 prototype are read too
  * (`.seedFile('./seeds/x.sql')` → `.seed(file('./seeds/x.sql'))`), so a tree
@@ -143,8 +148,24 @@ const PROTOTYPE_VERBS: Record<string, [verb: string, wrap: string]> = {
     toMatchFile: ['toMatch', 'file'],
 };
 
+/**
+ * A stream accessor handed to `expect()` whole — the result members that are
+ * text in every facet, with any `.grep(…)` after them. `body` and `value` are
+ * out: on an api or integration result they are json as often as text.
+ */
+const STREAM_VALUE =
+    /expect\((?<space>\s*)(?<subject>[\w$.]*?\.(?:content|console|error|errors|html|stderr|stdout|title|tree)(?:\.grep\([^()]*\))*)(?<close>\s*,?\s*\))(?<not>(?:\.not)?)\.(?<matcher>toContain|toMatch)\((?!\s*(?:directory|file)\()/gu;
+
 /** Rewrite the 16 (and prototype) calls of one source file; `root` is the specs tree. */
 function migrateSource(text: string, file: string, root: string): string {
+    return migrateVerbs(text, file, root).replaceAll(
+        STREAM_VALUE,
+        'expect($<space>$<subject>.text$<close>$<not>.$<matcher>(',
+    );
+}
+
+/** The verbs that name the disk, moved to `file()`/`directory()`. */
+function migrateVerbs(text: string, file: string, root: string): string {
     const specDir = dirname(file);
     return text
         .replaceAll(

@@ -184,6 +184,13 @@ type GoldenMatch<T, R> = T extends { readonly capturedInPage: true }
         ? (golden: DiskDirectoryType, options?: MatchFixtureOptionsType) => Promise<void>
         : unknown;
 
+/**
+ * A stream accessor, structurally: the augmentation is loaded twice (src and
+ * the bundled dist), and CaptureScope's private state makes the two class
+ * copies nominally distinct.
+ */
+type StreamMarker = { readonly raw: string; readonly streamName: string };
+
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.
 
@@ -217,9 +224,15 @@ declare module 'vitest' {
         // Class copies nominally distinct.
         toBeEmpty: T extends TableAccessorType
             ? () => Promise<void>
-            : T extends { readonly comparableText: string }
+            : T extends StreamMarker
               ? () => Promise<void>
               : never;
+        /**
+         * Vitest's `toContain`. A stream is not a string: it is compared as
+         * `result.stdout.text`, and handed whole it is refused here — vitest
+         * would read it as an empty list, and `.not.toContain` would pass.
+         */
+        toContain: T extends StreamMarker ? never : (item: unknown) => R;
         /** Assert the container is running. Async — docker-backed subject. */
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**

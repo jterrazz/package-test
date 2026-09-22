@@ -46,8 +46,8 @@ test('renders inside the frame the project wraps every render in', async () => {
     });
 
     // Then - the rows are in the markup and in the rendered text
-    expect(result.html).toContain('A second post');
-    expect(result.content).toContain('Showing 2 of 200 posts');
+    expect(result.html.text).toContain('A second post');
+    expect(result.content.text).toContain('Showing 2 of 200 posts');
 });
 
 test('fails the render when the component asks for what no contract declared', async () => {
@@ -85,7 +85,7 @@ test('serves a transport failure the way a server that is not running does', asy
     });
 
     // Then - the component took its "nothing answered" branch, not an error status
-    expect(result.content).toContain('Could not load posts');
+    expect(result.content.text).toContain('Could not load posts');
 });
 
 /** The failure a golden assertion threw, as text — the subject of the test below. */

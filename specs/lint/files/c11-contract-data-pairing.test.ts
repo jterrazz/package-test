@@ -13,7 +13,7 @@ describe('lint — c11-contract-data-pairing (CONVENTIONS C11)', () => {
 
         // Then - oxlint reports the c11-contract-data-pairing diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('c11-contract-data-pairing');
+        expect(result.stdout.text).toContain('c11-contract-data-pairing');
     });
 
     test('accepts payloads paired with their contract', async () => {
@@ -24,6 +24,6 @@ describe('lint — c11-contract-data-pairing (CONVENTIONS C11)', () => {
 
         // Then - clean run, no c11-contract-data-pairing diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('c11-contract-data-pairing');
+        expect(result.stdout.text).not.toContain('c11-contract-data-pairing');
     });
 });

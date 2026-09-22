@@ -43,7 +43,7 @@ test('a port double is a render prop, and records what the unit told it', async 
         });
 
     // Then - the page rendered it, and the port heard it
-    expect(result.content).toContain('announced');
+    expect(result.content.text).toContain('announced');
     expect(port.announce).toHaveBeenCalledWith('announced');
 });
 

@@ -13,7 +13,7 @@ describe('lint — d2w-await-sync-matcher (CONVENTIONS D2)', () => {
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d2w-await-sync-matcher');
+        expect(result.stdout.text).toContain('d2w-await-sync-matcher');
     });
 
     test('stays silent without the redundant await', async () => {
@@ -24,6 +24,6 @@ describe('lint — d2w-await-sync-matcher (CONVENTIONS D2)', () => {
 
         // Then - clean run, no d2w-await-sync-matcher diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d2w-await-sync-matcher');
+        expect(result.stdout.text).not.toContain('d2w-await-sync-matcher');
     });
 });

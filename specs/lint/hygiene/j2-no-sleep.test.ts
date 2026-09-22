@@ -13,7 +13,7 @@ describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
 
         // Then - oxlint reports the j2-no-sleep diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('j2-no-sleep');
+        expect(result.stdout.text).toContain('j2-no-sleep');
     });
 
     test('accepts framework-level synchronisation, and a double that settles late', async () => {
@@ -24,6 +24,6 @@ describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
 
         // Then - clean run, no j2-no-sleep diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('j2-no-sleep');
+        expect(result.stdout.text).not.toContain('j2-no-sleep');
     });
 });

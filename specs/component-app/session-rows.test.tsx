@@ -18,8 +18,8 @@ test('renders a vanilla DOM list in the same browser, under the same visitor', a
     );
 
     // Then - the class tones are what the markup carries, and nothing complained
-    expect(result.html).toContain('row row--live');
-    expect(result.html).toContain('row row--idle');
+    expect(result.html.text).toContain('row row--live');
+    expect(result.html.text).toContain('row row--idle');
     await expect(result.errors).toBeEmpty();
 });
 
@@ -35,5 +35,5 @@ test('names a list item by its role where the list holds exactly one', async () 
     );
 
     // Then - the role named the row the list holds
-    expect(result.content).toContain('only one');
+    expect(result.content.text).toContain('only one');
 });

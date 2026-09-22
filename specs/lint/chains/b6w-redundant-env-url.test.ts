@@ -13,7 +13,7 @@ describe('lint — b6w-redundant-env-url (CONVENTIONS B6)', () => {
 
         // Then - oxlint reports the b6w-redundant-env-url diagnostic warnings do not fail the run - the diagnostic is advisory
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('b6w-redundant-env-url');
+        expect(result.stdout.text).toContain('b6w-redundant-env-url');
     });
 
     test('stays silent for non-URL env variables', async () => {
@@ -24,6 +24,6 @@ describe('lint — b6w-redundant-env-url (CONVENTIONS B6)', () => {
 
         // Then - clean run, no b6w-redundant-env-url diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('b6w-redundant-env-url');
+        expect(result.stdout.text).not.toContain('b6w-redundant-env-url');
     });
 });

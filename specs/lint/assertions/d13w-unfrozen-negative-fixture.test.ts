@@ -13,7 +13,7 @@ describe('lint — d13w-unfrozen-negative-fixture (CONVENTIONS D13)', () => {
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d13w-unfrozen-negative-fixture');
+        expect(result.stdout.text).toContain('d13w-unfrozen-negative-fixture');
     });
 
     test('stays silent when the negative fixture is frozen', async () => {
@@ -24,6 +24,6 @@ describe('lint — d13w-unfrozen-negative-fixture (CONVENTIONS D13)', () => {
 
         // Then - clean run, no d13w-unfrozen-negative-fixture diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d13w-unfrozen-negative-fixture');
+        expect(result.stdout.text).not.toContain('d13w-unfrozen-negative-fixture');
     });
 });

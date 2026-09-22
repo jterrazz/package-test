@@ -154,7 +154,7 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 
 ```typescript
 await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
-expect(result.html).toContain('row row--live');
+expect(result.html.text).toContain('row row--live');
 await expect(result.errors).toBeEmpty();
 ```
 

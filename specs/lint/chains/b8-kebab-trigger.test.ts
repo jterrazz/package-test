@@ -13,7 +13,7 @@ describe('lint — b8-kebab-trigger (CONVENTIONS B8)', () => {
 
         // Then - oxlint reports the b8-kebab-trigger diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('b8-kebab-trigger');
+        expect(result.stdout.text).toContain('b8-kebab-trigger');
     });
 
     test('accepts a kebab-case job name', async () => {
@@ -24,6 +24,6 @@ describe('lint — b8-kebab-trigger (CONVENTIONS B8)', () => {
 
         // Then - clean run, no b8-kebab-trigger diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('b8-kebab-trigger');
+        expect(result.stdout.text).not.toContain('b8-kebab-trigger');
     });
 });

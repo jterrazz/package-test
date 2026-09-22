@@ -15,7 +15,7 @@ describe('checker CLI — the member pass', () => {
 
         // Then - E3 fired: the pass is about a member, never about a tree
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('no vitest.config.ts');
+        expect(result.stderr.text).toContain('no vitest.config.ts');
     });
 
     test('says nothing about a member that owes nothing', async () => {
@@ -24,11 +24,11 @@ describe('checker CLI — the member pass', () => {
 
         // Then - the run is clean, says which member it judged, and names the passes that actually ran — from the registry itself, and never the tree ones, which walked nothing
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('packages/clean');
-        expect(result.stdout).toContain(
+        expect(result.stdout.text).toContain('packages/clean');
+        expect(result.stdout.text).toContain(
             'c12-spec-file-name, c25-no-ground-synonym, e3-config-present, e5b-no-simulated-dom-config-member, f8-no-seam-dependency',
         );
-        expect(result.stdout).not.toContain('c9-dead-fixtures');
+        expect(result.stdout.text).not.toContain('c9-dead-fixtures');
     });
 
     test("a root whose only tests are its members' owes no config", async () => {
@@ -37,7 +37,7 @@ describe('checker CLI — the member pass', () => {
 
         // Then - the root is silent, and it is named by its manifest
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('for member .');
+        expect(result.stdout.text).toContain('for member .');
     });
 
     test('a member a nested glob claims is judged like any other', async () => {
@@ -48,7 +48,7 @@ describe('checker CLI — the member pass', () => {
 
         // Then - the retired seam gets the sentence that names its facet
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('is a seam `@jterrazz/test` replaced');
+        expect(result.stdout.text).toContain('is a seam `@jterrazz/test` replaced');
     });
 
     test('--format json publishes the code the ratchet records under', async () => {
@@ -85,6 +85,6 @@ describe('checker CLI — the member pass', () => {
 
         // Then - the run fails loudly rather than reporting a clean member
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('no such member directory');
+        expect(result.stderr.text).toContain('no such member directory');
     });
 });

@@ -13,7 +13,7 @@ describe('lint — c4-contract-shape (CONVENTIONS C4)', () => {
 
         // Then - oxlint reports the c4-contract-shape diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('c4-contract-shape');
+        expect(result.stdout.text).toContain('c4-contract-shape');
     });
 
     test('accepts a well-formed contracts/ tree', async () => {
@@ -24,6 +24,6 @@ describe('lint — c4-contract-shape (CONVENTIONS C4)', () => {
 
         // Then - clean run, no c4-contract-shape diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('c4-contract-shape');
+        expect(result.stdout.text).not.toContain('c4-contract-shape');
     });
 });

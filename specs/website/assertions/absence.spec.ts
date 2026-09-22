@@ -12,7 +12,7 @@ test('sees a confirmation that was not on the page before the click', async () =
     });
 
     // Then - the capture describes the page the click left behind
-    expect(result.content).toContain('Thanks for subscribing');
+    expect(result.content.text).toContain('Thanks for subscribing');
 });
 
 test('says where the keyboard is after a field was filled', async () => {

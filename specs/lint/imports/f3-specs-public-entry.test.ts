@@ -13,7 +13,7 @@ describe('lint — f3-specs-public-entry (CONVENTIONS F3)', () => {
 
         // Then - oxlint reports the f3-specs-public-entry diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('f3-specs-public-entry');
+        expect(result.stdout.text).toContain('f3-specs-public-entry');
     });
 
     test('accepts the public entry import', async () => {
@@ -24,6 +24,6 @@ describe('lint — f3-specs-public-entry (CONVENTIONS F3)', () => {
 
         // Then - clean run, no f3-specs-public-entry diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('f3-specs-public-entry');
+        expect(result.stdout.text).not.toContain('f3-specs-public-entry');
     });
 });

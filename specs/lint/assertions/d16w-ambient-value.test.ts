@@ -13,7 +13,7 @@ describe('lint — d16w-ambient-value (CONVENTIONS D16)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d16w-ambient-value');
+        expect(result.stdout.text).toContain('d16w-ambient-value');
     });
 
     test('accepts a Given that pins every instant', async () => {
@@ -24,6 +24,6 @@ describe('lint — d16w-ambient-value (CONVENTIONS D16)', () => {
 
         // Then - clean exit, no D16 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d16w-ambient-value');
+        expect(result.stdout.text).not.toContain('d16w-ambient-value');
     });
 });

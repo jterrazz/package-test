@@ -13,7 +13,7 @@ describe('lint — a2-known-constructors (CONVENTIONS A2)', () => {
 
         // Then - oxlint reports the a2-known-constructors diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('a2-known-constructors');
+        expect(result.stdout.text).toContain('a2-known-constructors');
     });
 
     test('accepts the three known constructors', async () => {
@@ -24,6 +24,6 @@ describe('lint — a2-known-constructors (CONVENTIONS A2)', () => {
 
         // Then - clean run, no a2-known-constructors diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('a2-known-constructors');
+        expect(result.stdout.text).not.toContain('a2-known-constructors');
     });
 });

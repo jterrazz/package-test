@@ -13,7 +13,7 @@ describe('lint — d17w-double-only-oracle (CONVENTIONS D17)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d17w-double-only-oracle');
+        expect(result.stdout.text).toContain('d17w-double-only-oracle');
     });
 
     test('accepts a call log beside what the subject produced', async () => {
@@ -24,6 +24,6 @@ describe('lint — d17w-double-only-oracle (CONVENTIONS D17)', () => {
 
         // Then - clean exit, no D17 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d17w-double-only-oracle');
+        expect(result.stdout.text).not.toContain('d17w-double-only-oracle');
     });
 });

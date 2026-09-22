@@ -79,6 +79,6 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
 
         // Then - the member pass is the only run that sees outside a specs tree
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toContain('a `.spec.ts` lives under `specs/<facet>/`');
+        expect(result.stderr.text).toContain('a `.spec.ts` lives under `specs/<facet>/`');
     });
 });

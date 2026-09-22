@@ -42,7 +42,7 @@
         "jterrazz/d2-await-io-matcher": "error",
         "jterrazz/d2w-await-sync-matcher": "warn",
         "jterrazz/d6w-transform-token-equivalent": "warn",
-        "jterrazz/d8w-text-bypass": "warn",
+        "jterrazz/d8w-raw-bypass": "warn",
         "jterrazz/d9w-single-use-ref": "warn",
         "jterrazz/e2-preset-config": "error",
         "jterrazz/e4w-project-binding": "warn",

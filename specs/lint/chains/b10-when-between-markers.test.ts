@@ -25,6 +25,6 @@ describe('lint — b10-when-between-markers (CONVENTIONS B10)', () => {
 
         // Then - clean exit, no B10 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('b10-when-between-markers');
+        expect(result.stdout.text).not.toContain('b10-when-between-markers');
     });
 });

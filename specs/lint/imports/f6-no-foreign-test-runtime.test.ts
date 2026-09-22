@@ -13,7 +13,7 @@ describe('lint — f6-no-foreign-test-runtime (CONVENTIONS F6)', () => {
 
         // Then - oxlint reports the f6-no-foreign-test-runtime diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('f6-no-foreign-test-runtime');
+        expect(result.stdout.text).toContain('f6-no-foreign-test-runtime');
     });
 
     test("accepts the framework's own chain", async () => {
@@ -24,6 +24,6 @@ describe('lint — f6-no-foreign-test-runtime (CONVENTIONS F6)', () => {
 
         // Then - clean run, no f6-no-foreign-test-runtime diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('f6-no-foreign-test-runtime');
+        expect(result.stdout.text).not.toContain('f6-no-foreign-test-runtime');
     });
 });

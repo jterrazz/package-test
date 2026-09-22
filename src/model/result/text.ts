@@ -13,34 +13,32 @@ export function stripAnsiCodes(value: string): string {
  * Read-only accessor for a captured text handle — THE universal one: stdout,
  * stderr, container logs, and file text all surface as a `TextAccessor`.
  *
- * Backed by a primitive string, exposed via {@link text}, but also provides
- * `toString()` / `valueOf()` for string coercion, so common patterns like
- * `String(result.stdout)` and template-literal interpolation still work.
- *
- * ANSI escape sequences are stripped by default before every comparison
- * (CONVENTIONS D6) — `.text` stays raw. The runner `transform` option remains
- * an escape hatch for application noise not covered by the `{{token}}`
- * grammar.
+ * `.text` is the COMPARABLE text — ANSI escape sequences stripped (CONVENTIONS
+ * D6), the runner's `transform` applied — the same text a golden compares, so
+ * a stream compared as a value reads exactly what its golden would:
+ * `expect(result.stdout.text).toContain('built')`. `.raw` is the stream as it
+ * was captured. `toString()` / `valueOf()` give `.text`, so `String(stream)`
+ * and template-literal interpolation read what a reader means.
  *
  * Text operations are **closed** over the type: `.grep(pattern)` returns a
  * `TextAccessor` (not a bare string), preserving the `expected/`-resolution
  * context and the `transform`, so results are chainable
  * (`result.stdout.grep(a).grep(b)`) and snapshot-able
- * (`expect(result.stdout.grep('users.ts')).toMatch('block.txt')`).
+ * (`expect(result.stdout.grep('users.ts')).toMatch(file('./expected/block.txt'))`).
  *
- * Assertions go through `expect()` matchers: `expect(result.stdout).toContain(...)`
- * and `expect(result.stdout).toMatch('name.txt')` (resolved against
- * `expected/<name>`, flat — with `{{token}}` support, CONVENTIONS D4).
+ * Its matchers are vitest's on `.text`, and the golden half of `toMatch` on
+ * the accessor itself: `expect(result.stdout).toMatch(file('./expected/help.txt'))`
+ * (with `{{token}}` support, CONVENTIONS D4).
  */
 export class TextAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;
+    /** The stream as it was captured: never transformed, ANSI preserved. */
+    readonly raw: string;
     /** @internal Stream label used in failure messages ("stdout" / "stderr"). */
     readonly streamName: string;
     /** @internal Test-file directory — fixture resolution root for matchers. */
     readonly testDir: string;
-    /** The raw captured text (never transformed, ANSI preserved). */
-    readonly text: string;
     /** @internal Normaliser applied before comparisons, never to fixtures. */
     readonly transform?: ((text: string) => string) | undefined;
 
@@ -53,16 +51,16 @@ export class TextAccessor {
             transform?: ((text: string) => string) | undefined;
         } = {},
     ) {
-        this.text = value;
+        this.raw = value;
         this.streamName = streamName;
         this.testDir = testDir;
         this.transform = options.transform;
         this.captures = options.captures ?? new CaptureScope();
     }
 
-    /** @internal The text as compared by matchers — ANSI stripped, transform applied. */
-    get comparableText(): string {
-        const stripped = stripAnsiCodes(this.text);
+    /** The text a golden compares, and a value matcher reads: ANSI stripped, `transform` applied. */
+    get text(): string {
+        const stripped = stripAnsiCodes(this.raw);
         return this.transform ? this.transform(stripped) : stripped;
     }
 
@@ -74,7 +72,7 @@ export class TextAccessor {
      * whole surface by default, reach for `.grep()` for targeted checks.
      */
     grep(pattern: string): TextAccessor {
-        return new TextAccessor(grepBlocks(this.text, pattern), this.streamName, this.testDir, {
+        return new TextAccessor(grepBlocks(this.raw, pattern), this.streamName, this.testDir, {
             captures: this.captures,
             transform: this.transform,
         });

@@ -22,7 +22,7 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
 
         // Then - the fixture matched THIS run's cwd (fresh cwd per spec means A stale literal path could never pass — the token is exact)
-        expect(result.stdout.comparableText).toContain('cwd /');
+        expect(result.stdout.text).toContain('cwd /');
         expect(result.stdout).toMatch(file('./expected/version.txt'));
     });
 
@@ -125,17 +125,17 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
 });
 
 describe('command — ANSI stripped by default (CONVENTIONS D6)', () => {
-    test('comparisons see clean text while .text stays raw', async () => {
+    test('comparisons see clean text while .raw keeps the escapes', async () => {
         // Given - output wrapped in ANSI escapes, no transform configured
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('ansi');
 
         // Then - matchers compare the stripped form
-        expect(result.stdout).toContain('red plain bold');
+        expect(result.stdout.text).toContain('red plain bold');
         expect(result.stdout).toMatch(file('./expected/ansi.txt'));
 
         // Then - the raw accessor keeps the escapes
-        // oxlint-disable-next-line jterrazz/d8w-text-bypass -- the raw `.text` accessor IS the subject: this test proves it retains ANSI escapes while matchers see the stripped form.
-        expect(result.stdout.text).toContain('\u001B[31m');
+        // oxlint-disable-next-line jterrazz/d8w-raw-bypass -- the raw accessor IS the subject: this test proves it retains ANSI escapes while matchers see the stripped form.
+        expect(result.stdout.raw).toContain('\u001B[31m');
     });
 
     test('json accessor parses through ANSI noise without a transform', async () => {

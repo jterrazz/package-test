@@ -2,10 +2,7 @@ import { child, childList, identifierName, memberPropertyName } from '../../ast.
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
-/**
- * The text matcher that tempts a raw `.text` bypass (D8). `toMatch` is not one:
- * it is vitest's own, and a stream is compared through its text.
- */
+/** The value matcher that tempts a `.raw` bypass (D8). */
 const TEXT_MATCHERS = new Set(['toContain']);
 
 /** A regex literal, or `new RegExp(…)`. */
@@ -20,15 +17,14 @@ function isRegExp(node: AstNode | undefined): boolean {
 }
 
 /**
- * CONVENTIONS D8 (warning) — `.text` is the raw stream escape hatch for a probe. Asserting
- * `expect(result.text).toContain(…)` throws away the typed subject (its ANSI
- * stripping, its transform) for a substring check. Prefer asserting on the
- * accessor subject itself.
+ * CONVENTIONS D8 (warning) — `.raw` is the stream as it was captured, the
+ * escape hatch for a test that proves what the comparison strips. Asserting
+ * `expect(result.stdout.raw).toContain(…)` throws away what `.text` applies
+ * before every comparison — ANSI stripping and the runner's transform.
  *
- * A RegExp argument is exempt: a pattern carries no token grammar to lose, so
- * the raw text and the accessor say the same thing.
+ * A RegExp argument is exempt: a pattern carries no token grammar to lose.
  */
-export const d8wTextBypass: LintRule = {
+export const d8wRawBypass: LintRule = {
     create(context: RuleContext) {
         return {
             CallExpression(node: AstNode) {
@@ -49,17 +45,17 @@ export const d8wTextBypass: LintRule = {
                     return;
                 }
                 const subject = (expectCall.arguments as AstNode[] | undefined)?.[0];
-                if (subject !== undefined && memberPropertyName(subject) === 'text') {
-                    context.report({ data: { matcher }, messageId: 'textBypass', node });
+                if (subject !== undefined && memberPropertyName(subject) === 'raw') {
+                    context.report({ data: { matcher }, messageId: 'rawBypass', node });
                 }
             },
         };
     },
     meta: {
-        docs: RULE_DOCS['d8w-text-bypass'],
+        docs: RULE_DOCS['d8w-raw-bypass'],
         messages: {
-            textBypass:
-                'expect(x.text).{{matcher}}(…) asserts on the raw stream — prefer the typed accessor subject (expect(x)) so the token grammar and fixture resolution apply.',
+            rawBypass:
+                'expect(x.raw).{{matcher}}(…) asserts on the stream as captured — compare x.text, the text a golden compares (ANSI stripped, transform applied).',
         },
         type: 'suggestion',
     },

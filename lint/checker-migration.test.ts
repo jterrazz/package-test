@@ -159,4 +159,43 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         // Then - nothing inside ground moved
         expect(migration.renamed).toStrictEqual([]);
     });
+
+    test('a stream compared as a value reads its text, and a golden stays on the accessor', () => {
+        // Given - the 16 value matchers on stream accessors, beside a golden and a text already read
+        const root = tree16({
+            'cli/build/build.spec.ts': [
+                "import { file } from '@jterrazz/test';",
+                "expect(result.stdout.text).toContain('built');",
+                "expect(result.stderr.text).not.toContain('warning');",
+                "expect(result.stdout.grep('users.ts').text).toMatch(/users/u);",
+                'expect(',
+                '    result.tree,',
+                ").toContain('button');",
+                "expect(result.stdout).toMatch(file('./expected/build.txt'));",
+                "expect(result.stdout.text).toContain('done');",
+                "expect(result.body).toContain('x');",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - each value comparison reads .text; the golden, the text, and an ambiguous member stay
+        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
+            [
+                "import { file } from '@jterrazz/test';",
+                "expect(result.stdout.text).toContain('built');",
+                "expect(result.stderr.text).not.toContain('warning');",
+                "expect(result.stdout.grep('users.ts').text).toMatch(/users/u);",
+                'expect(',
+                '    result.tree.text,',
+                ").toContain('button');",
+                "expect(result.stdout).toMatch(file('./expected/build.txt'));",
+                "expect(result.stdout.text).toContain('done');",
+                "expect(result.body).toContain('x');",
+                '',
+            ].join('\n'),
+        );
+    });
 });

@@ -13,7 +13,7 @@ describe('lint — d18w-existence-only-oracle (CONVENTIONS D18)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d18w-existence-only-oracle');
+        expect(result.stdout.text).toContain('d18w-existence-only-oracle');
     });
 
     test('accepts an assertion that says what came back', async () => {
@@ -24,6 +24,6 @@ describe('lint — d18w-existence-only-oracle (CONVENTIONS D18)', () => {
 
         // Then - clean exit, no D18 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d18w-existence-only-oracle');
+        expect(result.stdout.text).not.toContain('d18w-existence-only-oracle');
     });
 });

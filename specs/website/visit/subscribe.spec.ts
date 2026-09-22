@@ -13,7 +13,7 @@ test('subscribes through the form and captures the final state', async () => {
     });
 
     // Then - the capture reflects the page after the interaction
-    expect(result.content).toContain('Thanks for subscribing');
+    expect(result.content.text).toContain('Thanks for subscribing');
     await expect(result.errors).toBeEmpty();
 });
 
@@ -26,5 +26,5 @@ test('navigates to another page and captures where it landed', async () => {
 
     // Then - the result is the destination page
     expect(result.url).toContain('/articles');
-    expect(result.content).toContain('All articles');
+    expect(result.content.text).toContain('All articles');
 });

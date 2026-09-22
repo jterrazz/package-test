@@ -13,7 +13,7 @@ describe('lint — i4-no-module-doubles (CONVENTIONS I4)', () => {
 
         // Then - oxlint reports the i4-no-module-doubles diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('i4-no-module-doubles');
+        expect(result.stdout.text).toContain('i4-no-module-doubles');
     });
 
     test('accepts code-only module tests', async () => {
@@ -24,6 +24,6 @@ describe('lint — i4-no-module-doubles (CONVENTIONS I4)', () => {
 
         // Then - clean run, no i4-no-module-doubles diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('i4-no-module-doubles');
+        expect(result.stdout.text).not.toContain('i4-no-module-doubles');
     });
 });

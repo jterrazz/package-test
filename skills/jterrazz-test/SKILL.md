@@ -72,14 +72,14 @@ What a test stands on is named by one of two calls, with the path relative to th
 | `expect(x).toMatch(file('./expected/out.txt'))`                          | a golden file, `{{token}}`s resolved        |
 | `await expect(result.filesystem).toMatch(directory('./expected/tree/'))` | a golden tree                               |
 
-`toMatch` with a string or a RegExp is vitest's own: a stream is compared through its text, `expect(result.stdout.text).toMatch(/built/)`. Ground sits in four reserved folders — `fixtures/`, `expected/`, `requests/`, `seeds/` — each verb reads its own, and the shared pool is `specs/fixtures/`, reached by the path that climbs to it. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
+`toMatch` with a string or a RegExp, and `toContain`, are vitest's own: a stream is compared through its text — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `fixtures/`, `expected/`, `requests/`, `seeds/` — each verb reads its own, and the shared pool is `specs/fixtures/`, reached by the path that climbs to it. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
 
 ## Pitfalls
 
 - **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./seeds/users.sql')`.
 - **A domain named `fixtures`, `expected`, `requests` or `seeds`** — the names are reserved for ground; C1 refuses a spec under one.
 - **Reaching into a sibling leaf** — a path may leave its leaf only into `specs/fixtures/` (C15). Shared ground goes to the pool.
-- **`expect(result.stdout).toMatch('help.txt')`** — a stream is not a string, and a string is a value. A golden is `.toMatch(file('./expected/help.txt'))`; a value is `expect(result.stdout.text).toMatch('help')`.
+- **`expect(result.stdout).toContain('built')`** — a stream is not a string, and it does not compile: a value matcher reads the stream's `.text`, the text a golden compares. A golden is `.toMatch(file('./expected/help.txt'))`.
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
 - **Awaiting a sync matcher, or not awaiting an IO one** — `toMatchRows`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (D2).
 - **A double before the real thing** — the ladder is: the real thing → a declared service → a contract (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits.

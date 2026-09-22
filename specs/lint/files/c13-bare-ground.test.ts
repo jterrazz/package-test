@@ -13,7 +13,7 @@ describe('lint — c13-bare-ground (CONVENTIONS C13)', () => {
 
         // Then - oxlint reports the c13-bare-ground diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('c13-bare-ground');
+        expect(result.stdout.text).toContain('c13-bare-ground');
     });
 
     test('accepts ground named with the bare reserved name', async () => {
@@ -24,6 +24,6 @@ describe('lint — c13-bare-ground (CONVENTIONS C13)', () => {
 
         // Then - clean run, no c13-bare-ground diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('c13-bare-ground');
+        expect(result.stdout.text).not.toContain('c13-bare-ground');
     });
 });

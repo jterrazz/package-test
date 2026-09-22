@@ -12,8 +12,8 @@ test('names a field by its accessible name, whatever its label wraps', async () 
     });
 
     // Then - both fields answered to the name the screen reader reads
-    expect(result.tree).toContain('combobox "Channel"');
-    expect(result.content).toContain('newsletter · hexagonal');
+    expect(result.tree.text).toContain('combobox "Channel"');
+    expect(result.content.text).toContain('newsletter · hexagonal');
 });
 
 test('reads back what a wrapped field holds', async () => {
@@ -24,5 +24,5 @@ test('reads back what a wrapped field holds', async () => {
     });
 
     // Then - the outline carries the field it read
-    expect(result.tree).toContain('textbox "Title"');
+    expect(result.tree.text).toContain('textbox "Title"');
 });

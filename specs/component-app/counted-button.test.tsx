@@ -10,7 +10,7 @@ test('the name a descriptor matches is the computed one, not the text', async ()
     });
 
     // Then - the partial name designates nothing, and the outline names the button as the browser computed it, spaces and all
-    expect(result.tree).toContain('button "Experiments 9"');
+    expect(result.tree.text).toContain('button "Experiments 9"');
 });
 
 test('the computed name, written whole, designates the button', async () => {
@@ -21,5 +21,5 @@ test('the computed name, written whole, designates the button', async () => {
     });
 
     // Then - it resolved: the outline's name is a name that can be written
-    expect(result.content).toContain('opened');
+    expect(result.content.text).toContain('opened');
 });

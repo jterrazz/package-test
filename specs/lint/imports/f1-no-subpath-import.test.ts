@@ -13,7 +13,7 @@ describe('lint — f1-no-subpath-import (CONVENTIONS F1)', () => {
 
         // Then - oxlint reports the f1-no-subpath-import diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('f1-no-subpath-import');
+        expect(result.stdout.text).toContain('f1-no-subpath-import');
     });
 
     test('accepts the single public entry point and every published subpath', async () => {
@@ -24,6 +24,6 @@ describe('lint — f1-no-subpath-import (CONVENTIONS F1)', () => {
 
         // Then - clean run, no f1-no-subpath-import diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('f1-no-subpath-import');
+        expect(result.stdout.text).not.toContain('f1-no-subpath-import');
     });
 });

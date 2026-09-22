@@ -13,7 +13,7 @@ describe('lint — e5-no-simulated-dom (CONVENTIONS E5)', () => {
 
         // Then - oxlint reports the e5-no-simulated-dom diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('e5-no-simulated-dom');
+        expect(result.stdout.text).toContain('e5-no-simulated-dom');
     });
 
     test('accepts a test that needs no environment at all', async () => {
@@ -24,6 +24,6 @@ describe('lint — e5-no-simulated-dom (CONVENTIONS E5)', () => {
 
         // Then - clean run, no e5-no-simulated-dom diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('e5-no-simulated-dom');
+        expect(result.stdout.text).not.toContain('e5-no-simulated-dom');
     });
 });

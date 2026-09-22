@@ -121,7 +121,7 @@ test('bookmarks an event from its detail screen', async () => {
     });
 
     // Then - the capture reflects the screen after the interaction
-    expect(result.content).toContain('Bookmarked');
+    expect(result.content.text).toContain('Bookmarked');
 });
 ```
 

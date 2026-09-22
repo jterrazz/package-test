@@ -128,3 +128,19 @@ export async function typeRows(): Promise<void> {
     const mailer = mockOf<Mailer>();
     await mailer.send('reader@site.test');
 }
+
+/**
+ * D14, the value half — a stream is not a string: a value matcher reads its
+ * `.text`, and vitest's `toContain` handed the accessor would search an empty
+ * list, so `.not` would pass on anything.
+ */
+export async function streamValueRows(): Promise<void> {
+    const { cli } = await specification.cli('./bin.sh');
+    const out = await cli.exec();
+    // @ts-expect-error D14 — a stream compared as a value is its text
+    expect(out.stdout).toContain('built');
+    // @ts-expect-error D14 — a stream compared as a value is its text
+    expect(out.stderr).not.toContain('warning');
+    expect(out.stdout.text).toContain('built');
+    expect(['built']).toContain('built');
+}

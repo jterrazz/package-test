@@ -68,7 +68,7 @@ test('dev server boots', async () => {
         .exec('dev --port 0', { waitFor: 'Listening on', timeout: 10_000 });
 
     // Then
-    expect(result.stdout).toContain('Listening on');
+    expect(result.stdout.text).toContain('Listening on');
 });
 ```
 
@@ -332,8 +332,8 @@ test('fails on unknown command with a useful error', async () => {
 
     // Then
     expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain("Unknown command 'frobnicate'");
-    expect(result.stdout.text).toBe(''); // .text = raw, never transformed
+    expect(result.stderr.text).toContain("Unknown command 'frobnicate'");
+    expect(result.stdout.text).toBe(''); // .text: ANSI stripped, transform applied
 });
 
 test('emits machine-readable config', async () => {
@@ -351,11 +351,11 @@ test('lints a shop and reports per-file blocks', async () => {
 
     // Then - snapshot the whole surface; grep is the scalpel for targeted probes
     expect(result.stdout).toMatch(file('./expected/lint-output.txt')); // full snapshot, tokens for volatile parts
-    expect(result.stdout.grep('products/ok.yaml')).not.toContain('error'); // absence probe
+    expect(result.stdout.grep('products/ok.yaml').text).not.toContain('error'); // absence probe
 });
 ```
 
-`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison (rule D6), with `.text` exposing the raw capture. Text operations are **closed** over the type: `.grep(pattern)` returns a `TextAccessor` (not a string), so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch(file('./expected/block.txt'))`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
+`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison (rule D6): `.text` is that comparable text — the runner's `transform` applied too — and `.raw` the capture as it was. Text operations are **closed** over the type: `.grep(pattern)` returns a `TextAccessor` (not a string), so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch(file('./expected/block.txt'))`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
 
 **Tool output → snapshot per scoped use case (rule D11).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch(file('./expected/<use-case>.txt'))` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](14-assertions.md).
 
@@ -630,8 +630,8 @@ test('deploy spawns a labelled container', async () => {
     // Reads INSIDE the container, same vocabulary as on the host
     expect(shop.file('/app/shoply.yaml').content).toContain('name: alpha');
     const inside = await shop.exec('ls /app');
-    expect(inside.stdout).toContain('shoply.yaml');
-    expect(shop.stdout).toContain('shop ready'); // container logs
+    expect(inside.stdout.text).toContain('shoply.yaml');
+    expect(shop.stdout.text).toContain('shop ready'); // container logs
 
     // Absent ≠ crash
     expect(result.container('nope').exists).toBe(false);

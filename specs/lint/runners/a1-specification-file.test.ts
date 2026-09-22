@@ -13,7 +13,7 @@ describe('lint — a1-specification-file (CONVENTIONS A1)', () => {
 
         // Then - oxlint reports the a1-specification-file diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('a1-specification-file');
+        expect(result.stdout.text).toContain('a1-specification-file');
     });
 
     test('accepts the same runner created in a *.specification.ts file', async () => {
@@ -24,6 +24,6 @@ describe('lint — a1-specification-file (CONVENTIONS A1)', () => {
 
         // Then - clean run, no a1-specification-file diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('a1-specification-file');
+        expect(result.stdout.text).not.toContain('a1-specification-file');
     });
 });

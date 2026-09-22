@@ -13,7 +13,7 @@ describe('lint — d19w-probe-cluster (CONVENTIONS D19)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('d19w-probe-cluster');
+        expect(result.stdout.text).toContain('d19w-probe-cluster');
     });
 
     test('accepts two targeted probes', async () => {
@@ -24,6 +24,6 @@ describe('lint — d19w-probe-cluster (CONVENTIONS D19)', () => {
 
         // Then - clean exit, no D19 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('d19w-probe-cluster');
+        expect(result.stdout.text).not.toContain('d19w-probe-cluster');
     });
 });

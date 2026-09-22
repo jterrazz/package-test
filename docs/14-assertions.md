@@ -28,7 +28,7 @@ A string is a value; the disk is named by one of two calls, `file()` and `direct
 
 Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule D3). By convention it sits in `expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
 
-`toMatch`, `toBe` and `toContain` are vitest's and take a VALUE. On a stream accessor `toMatch` reads the comparable text (a substring or a regex, ANSI stripped); on a JSON, response or tree subject it is refused, naming the two file matchers (rule D14).
+`toMatch`, `toBe` and `toContain` are vitest's and take a VALUE. A stream accessor is not one: it is compared as `result.stdout.text`, the comparable text — ANSI stripped, the runner's `transform` applied, the text its golden compares — and `toContain` handed the accessor itself does not compile. On a JSON, response or tree subject `toMatch` with a value is refused, naming the two file matchers (rule D14).
 
 All file-based comparisons understand the [`{{token}}` grammar](15-tokens.md); all code-side dynamic values use `match.*`.
 
@@ -43,10 +43,11 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 | `result.filesystem.cwd`                     | `string`       | `expect(result.filesystem.cwd).toContain('/tmp/')`                                                           |
 | `result.response.body`                      | parsed body    | `expect(result.response.body).toEqual({ error: 'User 999 not found' })`                                      |
 | `result.json.value`                         | parsed JSON    | `expect(result.json.value).toMatchObject({ name: 'shoply' })`                                                |
-| `result.stdout.grep(pattern)`               | `TextAccessor` | `expect(result.stdout.grep('broken.yaml')).toContain('missing price')`                                       |
+| `result.stdout.grep(pattern)`               | `TextAccessor` | `expect(result.stdout.grep('broken.yaml').text).toContain('missing price')`                                  |
 | `result.file(path).exists`                  | `boolean`      | `expect(result.file('dist/index.js').exists).toBe(true)`                                                     |
 | `result.file(path).content`                 | `string`       | `expect(result.file('shoply.yaml').content).toContain('name: my-shop')`                                      |
-| `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — raw capture, never stripped                                          |
+| `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                   |
+| `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                  |
 | `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                |
 | `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                           |
 | `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [12](12-cli.md#spec-documents--casespecyaml) |
@@ -114,37 +115,37 @@ A failing `toMatchRows` prints the expected grid against the actual rows for the
 
 ## `result.stdout` / `result.stderr` — stream subjects (cli, container `exec`)
 
-Streams are compared **after ANSI stripping** (rule D6); the raw capture stays available as `.text`.
+Streams are compared **after ANSI stripping** (rule D6): `.text` is that comparable text, `.raw` the capture as it was.
 
-| Matcher                    | Sync/async | Example                                                           |
-| -------------------------- | ---------- | ----------------------------------------------------------------- |
-| `toMatch(file('./….txt'))` | sync       | `expect(result.stdout).toMatch(file('./expected/help.txt'))`      |
-| `toContain('needle')`      | sync       | `expect(result.stderr).toContain("Unknown command 'frobnicate'")` |
-| `toMatch(value)`           | sync       | `expect(result.stdout.text).toMatch(/built in \d+ms/u)`           |
+| Matcher                    | Sync/async | Example                                                                |
+| -------------------------- | ---------- | ---------------------------------------------------------------------- |
+| `toMatch(file('./….txt'))` | sync       | `expect(result.stdout).toMatch(file('./expected/help.txt'))`           |
+| `toContain('needle')`      | sync       | `expect(result.stderr.text).toContain("Unknown command 'frobnicate'")` |
+| `toMatch(value)`           | sync       | `expect(result.stdout.text).toMatch(/built in \d+ms/u)`                |
 
 `toMatch(file(…))` on a stream is a full-text snapshot; the golden may contain any [token](15-tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
 
-> `toMatch` with a value is vitest's, untouched: a stream accessor is not a string, so it is compared through its text — `expect(result.stdout.text).toMatch(/built/)`. The golden is the same matcher handed the disk: `toMatch(file('./expected/help.txt'))`.
+> `toMatch` and `toContain` with a value are vitest's, untouched: a stream accessor is not a string, so it is compared through its text — `expect(result.stdout.text).toMatch(/built/)`. The golden is `toMatch` handed the disk: `toMatch(file('./expected/help.txt'))`.
 
-`toContain` failures print the needle and the (stripped) haystack in a diff-style layout so the near-miss is visible. `.not.toContain(…)` asserts absence.
+`toContain` is vitest's, so its failure is vitest's, printing the needle and the comparable haystack. `.not.toContain(…)` asserts absence.
 
 ```typescript
 // .grep() returns a TextAccessor — chainable and snapshot-able, so the same
 // Token grammar applies as on the stream itself.
-expect(result.stdout.grep('products/ok.yaml')).not.toContain('error'); // absence probe
+expect(result.stdout.grep('products/ok.yaml').text).not.toContain('error'); // absence probe
 expect(result.stdout.grep('products/broken.yaml')).toMatch(file('./expected/broken-block.txt')); // snapshot a block
 ```
 
 ## `text(value)` — any string as a stream subject
 
-`text(value)` wraps an arbitrary string in the same `TextAccessor` streams surface, anchored on the calling test's directory via the same caller-detection the runners use — the directory its golden's path is read from. It promotes an ad-hoc string — most often a thrown **error message**, a checker line, or a report — into a first-class snapshot subject: ANSI is stripped before comparison (raw stays on `.text`), the [`{{token}}`](15-tokens.md) grammar applies to the fixture, and `.grep()` composes exactly as on a captured stream.
+`text(value)` wraps an arbitrary string in the same `TextAccessor` streams surface, anchored on the calling test's directory via the same caller-detection the runners use — the directory its golden's path is read from. It promotes an ad-hoc string — most often a thrown **error message**, a checker line, or a report — into a first-class snapshot subject: ANSI is stripped before comparison (`.text` is the stripped text, `.raw` the string as given), the [`{{token}}`](15-tokens.md) grammar applies to the fixture, and `.grep()` composes exactly as on a captured stream.
 
 The product surface of a test framework **is** its error messages and reports; golden them in full instead of reconstructing them with a cluster of `toContain` probes.
 
 | Matcher                    | Sync/async | Example                                                             |
 | -------------------------- | ---------- | ------------------------------------------------------------------- |
 | `toMatch(file('./….txt'))` | sync       | `expect(text(message)).toMatch(file('./expected/parse-error.txt'))` |
-| `toContain('needle')`      | sync       | `expect(text(message)).toContain('did you mean')`                   |
+| `toContain('needle')`      | sync       | `expect(text(message).text).toContain('did you mean')`              |
 
 ```typescript
 import { text } from '@jterrazz/test';
@@ -206,13 +207,13 @@ Available when the runner declares `docker: { envVar, nameLabel, testRunLabel }`
 
 The runner handle itself also exposes a `docker(containerId)` reader (returned by `specification.api()` and `specification.cli()`, not `specification.jobs()`): given a raw container id, it lazily runs `docker inspect` and returns the **same** `ContainerAccessor` type — so it works with `await expect(spec.docker(id)).toBeRunning()` and every read accessor below. An unknown id yields an accessor with `exists: false` rather than throwing.
 
-| Subject / matcher                                     | Sync/async | Example                                                                                           |
-| ----------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
-| `container.exists` (read)                             | sync       | `expect(result.container('nope').exists).toBe(false)`                                             |
-| `expect(container).toBeRunning()`                     | **async**  | `await expect(shop).toBeRunning()`                                                                |
-| `container.file(path).content` (read)                 | sync API   | `expect(shop.file('/app/shoply.yaml').content).toContain('name: alpha')`                          |
-| `container.exec(cmd)` (read)                          | async read | `const inside = await shop.exec('ls /app')` then `expect(inside.stdout).toContain('shoply.yaml')` |
-| `container.stdout` / `.stderr` (logs, stream subject) | sync       | `expect(shop.stdout).toContain('shop ready')`                                                     |
+| Subject / matcher                                     | Sync/async | Example                                                                                                |
+| ----------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
+| `container.exists` (read)                             | sync       | `expect(result.container('nope').exists).toBe(false)`                                                  |
+| `expect(container).toBeRunning()`                     | **async**  | `await expect(shop).toBeRunning()`                                                                     |
+| `container.file(path).content` (read)                 | sync API   | `expect(shop.file('/app/shoply.yaml').content).toContain('name: alpha')`                               |
+| `container.exec(cmd)` (read)                          | async read | `const inside = await shop.exec('ls /app')` then `expect(inside.stdout.text).toContain('shoply.yaml')` |
+| `container.stdout` / `.stderr` (logs, stream subject) | sync       | `expect(shop.stdout.text).toContain('shop ready')`                                                     |
 
 `container.exec()` resolves to a result whose `stdout`/`stderr` are ordinary stream subjects — the same matchers as host streams. `.not.toBeRunning()` asserts a stopped (but existing) container; for a _removed_ container assert `exists` instead.
 
@@ -237,7 +238,7 @@ The `await` is the component's, not the tree's: a subject captured inside a page
 The escape hatch for what the tree cannot say: a class name, a `data-` attribute, an element the accessibility tree flattens away.
 
 ```typescript
-expect(result.html).toContain('row row--live');
+expect(result.html.text).toContain('row row--live');
 ```
 
 Reach for it after the tree, not instead of it. A test that asserts only on markup is testing an implementation the user never meets, which is the failure the vocabulary exists to prevent.
@@ -290,15 +291,14 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Matcher summary
 
-| Matcher                 | Valid subjects                                                                                                                                                                                | Sync/async                         | Reads                |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------- |
-| `toMatch(file(…))`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                                   | sync, except inside a page (async) | the path it is given |
-| `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                  | async                              | the path it is given |
-| `toMatchRows`           | `table(…)`                                                                                                                                                                                    | async                              | — (inline)           |
-| `toBeEmpty`             | `table(…)`, `error`, `console` and every text accessor                                                                                                                                        | async (every subject)              | —                    |
-| `toContain`             | `stdout`, `stderr` (host and container-exec streams), container logs                                                                                                                          | sync                               | —                    |
-| `toBeRunning`           | `container(…)`                                                                                                                                                                                | async                              | —                    |
-| native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) — and `toMatch` with a value, on a string | per vitest                         | —                    |
+| Matcher                 | Valid subjects                                                                                                                                                                                        | Sync/async                         | Reads                |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------- |
+| `toMatch(file(…))`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                                           | sync, except inside a page (async) | the path it is given |
+| `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                          | async                              | the path it is given |
+| `toMatchRows`           | `table(…)`                                                                                                                                                                                            | async                              | — (inline)           |
+| `toBeEmpty`             | `table(…)`, `error`, `console` and every text accessor                                                                                                                                                | async (every subject)              | —                    |
+| `toBeRunning`           | `container(…)`                                                                                                                                                                                        | async                              | —                    |
+| native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.raw`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) — and `toMatch` with a value, on a string | per vitest                         | —                    |
 
 `.not` is supported on every framework matcher.
 
@@ -308,13 +308,13 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Common mistakes
 
-- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule D1). Write `expect(result.stdout).toContain('x')`.
+- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule D1). Write `expect(result.stdout.text).toContain('x')`.
 - **Missing `await` on IO matchers.** `expect(result.table('users')).toMatchRows(…)` without `await` never queries the database and the test passes vacuously (rule D2).
 - **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract D2 states and the types carry.
 - **`file('./expected/help')` without extension.** The extension is part of the path (rule C6); a tree is `directory('./expected/help/')`.
 - **A golden written as a value.** `expect(result.stdout.text).toMatch('help.txt')` is a substring check that passes when the output contains the words "help.txt". A golden is `toMatch(file('./expected/help.txt'))` (rule D14).
 - **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rule B2).
-- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.text` is for (rule D6).
+- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for (rule D6) — and a substring check on it warns (D8).
 - **`database:` on a single-database project** (or missing on a multi-database one) — rule A7 cuts both ways.
 - **Using `.not.toMatch(file(…))` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
 - **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it with the real output, destroying the negative case. Freeze any golden matcher whose mismatch (or missing golden) is the behaviour under test (rule `d13w-unfrozen-negative-fixture`).

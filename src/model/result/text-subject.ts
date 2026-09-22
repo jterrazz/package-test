@@ -10,13 +10,13 @@ import { TextAccessor } from './text.js';
  * `text()` makes an ad-hoc string a first-class snapshot subject:
  *
  * ```typescript
- * const message = await catchMessage(() => expect(result.response).toMatch('wrong-body.http'));
- * expect(text(message)).toMatch('wrong-body-error.txt'); // resolves to expected/
+ * const message = await catchMessage(() => expect(result.response).toMatch(file('./expected/wrong-body.http')));
+ * expect(text(message)).toMatch(file('./expected/wrong-body-error.txt'));
  * ```
  *
- * ANSI is stripped before every comparison (the raw form stays on `.text`),
- * the `{{token}}` grammar applies to the fixture, and `.grep()` composition
- * works exactly as on any stream accessor.
+ * ANSI is stripped before every comparison (`.text` is the stripped text,
+ * `.raw` the string as given), the `{{token}}` grammar applies to the golden,
+ * and `.grep()` composition works exactly as on any stream accessor.
  *
  * The ANCHOR is why this sits apart from the accessor it builds: reading the
  * caller's frame means reading a stack and a real path, which is node's alone.

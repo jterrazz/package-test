@@ -69,7 +69,7 @@ export type CliSpecificationOptions<Services extends ServiceRecord = ServiceReco
     /**
      * Escape hatch: normaliser applied to result.stdout / result.stderr
      * before every comparison, AFTER the default ANSI strip (CONVENTIONS
-     * D6). Does NOT mutate the raw `.text` accessor. Prefer `{{token}}`
+     * D6), and read by `.text`; `.raw` keeps the capture. Prefer `{{token}}`
      * placeholders in fixtures.
      */
     transform?: ((text: string) => string) | undefined;

@@ -37,9 +37,7 @@ import {
     compareStreamText,
     GOLDEN_MATCHER,
     matchThroughGolden,
-    nativeContain,
     requireExtension,
-    textContains,
     textIsEmpty,
 } from '../result/text-assertions.js';
 import { TextAccessor } from '../result/text.js';
@@ -61,7 +59,7 @@ function formatJson(value: unknown): string {
 function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'stream');
     const filePath = resolveSpecPath('toMatch', name, accessor.testDir);
-    const actual = accessor.comparableText;
+    const actual = accessor.text;
 
     if (shouldUpdateSnapshots() && !frozen) {
         // Update mode writes TOKENS, not values: placeholder-covered lines of
@@ -350,13 +348,6 @@ async function matchDirectoryGolden(
     );
 }
 
-function toContain(received: unknown, expected: unknown): MatcherResult {
-    if (received instanceof TextAccessor) {
-        return textContains(received, String(expected));
-    }
-    return nativeContain(received, expected);
-}
-
 /** The one argument shape `toMatchRows` reads: a column list, and cells per row. */
 type RowsExpectation = { columns: string[]; rows: readonly (readonly unknown[])[] };
 
@@ -474,7 +465,6 @@ export async function registerMatchers(): Promise<void> {
             [GOLDEN_MATCHER]: toMatchGolden,
             toBeEmpty,
             toBeRunning,
-            toContain,
             toMatchRows,
         });
         matchThroughGolden(chai);

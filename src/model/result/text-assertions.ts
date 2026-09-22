@@ -42,7 +42,7 @@ export function compareStreamText(
     name: string,
     expected: string,
 ): TextComparison {
-    const actual = accessor.comparableText;
+    const actual = accessor.text;
     if (textEquals(expected, actual, accessor.captures)) {
         return {
             message: () => `expected ${accessor.streamName} not to match ${name}`,
@@ -65,28 +65,13 @@ export function compareStreamText(
 
 /** `expect(stream).toBeEmpty()` — the stream you usually want silent. */
 export function textIsEmpty(accessor: TextAccessor): TextComparison {
-    const content = accessor.comparableText;
+    const content = accessor.text;
     const pass = content === '';
     return {
         message: () =>
             pass
                 ? `expected ${accessor.streamName} not to be empty`
                 : `Expected ${accessor.streamName} to be empty, but it contains:\n${content}`,
-        pass,
-    };
-}
-
-/** `expect(stream).toContain('…')` — the scalpel, never the default (D11). */
-export function textContains(accessor: TextAccessor, expected: string): TextComparison {
-    const actual = accessor.comparableText;
-    const pass = actual.includes(expected);
-    return {
-        message: () =>
-            pass
-                ? `expected ${accessor.streamName} not to contain ${JSON.stringify(expected)}`
-                : `${accessor.streamName} does not contain expected substring.\n` +
-                  `  expected to contain: ${JSON.stringify(expected)}\n` +
-                  `  actual: ${JSON.stringify(actual.length > 500 ? `${actual.slice(0, 500)}…` : actual)}`,
         pass,
     };
 }
@@ -110,7 +95,8 @@ type Chai = {
  * `toMatch` routes a `file()` or a `directory()` to the golden comparison and
  * EVERYTHING else to vitest's own matcher, untouched: a string or a RegExp is a
  * value, and on a value `toMatch` means exactly what vitest says it means — a
- * stream accessor included, which is compared as `result.stdout.text`.
+ * stream is compared as `result.stdout.text`. It is the one vitest matcher
+ * wrapped: `toContain` and every other value matcher are vitest's, on `.text`.
  *
  * Both builds call this, each with the `chai` its `vitest` hands out, after
  * registering the golden under {@link GOLDEN_MATCHER}.
@@ -127,47 +113,5 @@ export function matchThroughGolden(chai: Chai): void {
                 }
                 return vitestToMatch.apply(this, args);
             },
-    );
-}
-
-/**
- * `toContain` on a subject that is NOT an accessor.
- *
- * The matcher is overridden globally, for every subject in the project, so
- * whatever the framework does not own has to keep meaning what vitest's own
- * matcher meant. Stated once here because the two builds register two different
- * `expect.extend` calls: a copy in the page is how `expect(['ab']).toContain('b')`
- * ends up passing on one side of the seam and failing on the other.
- */
-
-/** vitest's `toContain` for a plain string (substring) or an iterable (membership). */
-export function nativeContain(received: unknown, expected: unknown): TextComparison {
-    if (typeof received === 'string') {
-        const pass = received.includes(String(expected));
-        return {
-            message: () =>
-                `expected ${JSON.stringify(received)} ${pass ? 'not ' : ''}to contain ${JSON.stringify(expected)}`,
-            pass,
-        };
-    }
-    if (isIterable(received)) {
-        const pass = [...received].includes(expected);
-        return {
-            message: () =>
-                `expected iterable ${pass ? 'not ' : ''}to contain ${JSON.stringify(expected)}`,
-            pass,
-        };
-    }
-    throw new TypeError(
-        `toContain: unsupported subject of type ${typeof received} — expected a stream accessor, string, or iterable.`,
-    );
-}
-
-/** Does this value hand out its members? A Set and an array both do; a DOM node does not. */
-function isIterable(value: unknown): value is Iterable<unknown> {
-    return (
-        value !== null &&
-        value !== undefined &&
-        typeof (value as Iterable<unknown>)[Symbol.iterator] === 'function'
     );
 }

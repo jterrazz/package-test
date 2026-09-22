@@ -68,7 +68,7 @@ test('a name only part of an accessible name designates nothing', async () => {
     });
 
     // Then - exact names: the partial name found nothing, and the page still carries the longer one
-    expect(result.content).toContain('Read Articles');
+    expect(result.content.text).toContain('Read Articles');
 });
 
 test('the opt-out brings the substring match back, and widens the ambiguity', async () => {

@@ -48,11 +48,7 @@ describe('command result — one capture scope per spec execution', () => {
         // Given - a uuid captured from the stdout text
         const result = makeResult();
         expect(
-            textEquals(
-                '{"sessionId":"{{uuid#sid}}"}',
-                result.stdout.comparableText,
-                result.stdout.captures,
-            ),
+            textEquals('{"sessionId":"{{uuid#sid}}"}', result.stdout.text, result.stdout.captures),
         ).toBeTruthy();
 
         // Then - the JSON accessor sees the same capture and enforces equality

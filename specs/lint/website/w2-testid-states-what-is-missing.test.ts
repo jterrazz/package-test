@@ -13,7 +13,7 @@ describe('lint — w2-testid-states-what-is-missing (CONVENTIONS W2)', () => {
 
         // Then - it is an error now: the hatch costs one line
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('w2-testid-states-what-is-missing');
+        expect(result.stdout.text).toContain('w2-testid-states-what-is-missing');
     });
 
     test('accepts the hatch when the line above says what the element lacks', async () => {
@@ -26,6 +26,6 @@ describe('lint — w2-testid-states-what-is-missing (CONVENTIONS W2)', () => {
 
         // Then - clean run, no w2-testid-states-what-is-missing diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('w2-testid-states-what-is-missing');
+        expect(result.stdout.text).not.toContain('w2-testid-states-what-is-missing');
     });
 });

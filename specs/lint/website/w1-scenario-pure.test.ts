@@ -13,7 +13,7 @@ describe('lint — w1-scenario-pure (CONVENTIONS W1)', () => {
 
         // Then - oxlint reports the w1-scenario-pure diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('w1-scenario-pure');
+        expect(result.stdout.text).toContain('w1-scenario-pure');
     });
 
     test('accepts a pure scenario asserting on the result', async () => {
@@ -24,6 +24,6 @@ describe('lint — w1-scenario-pure (CONVENTIONS W1)', () => {
 
         // Then - clean run, no w1-scenario-pure diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('w1-scenario-pure');
+        expect(result.stdout.text).not.toContain('w1-scenario-pure');
     });
 });

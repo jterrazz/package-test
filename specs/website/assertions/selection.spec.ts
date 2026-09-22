@@ -25,7 +25,7 @@ test('names an option of a field, and which one the field is on', async () => {
     });
 
     // Then - an option is answered by presence, never by a box on the screen, and the selection is in the tree the page hands back
-    expect(result.tree).toContain('option "LinkedIn" [selected]');
+    expect(result.tree.text).toContain('option "LinkedIn" [selected]');
 });
 
 test('names a field by its accessible name, whatever its label wraps', async () => {
@@ -36,7 +36,7 @@ test('names a field by its accessible name, whatever its label wraps', async () 
     });
 
     // Then - the field answered to the name the tree shows, not to the text of the element around it
-    expect(result.tree).toContain('combobox "Topic"');
+    expect(result.tree.text).toContain('combobox "Topic"');
 });
 
 test('says what a field holds, which no accessibility tree carries', async () => {
@@ -48,6 +48,6 @@ test('says what a field holds, which no accessibility tree carries', async () =>
     });
 
     // Then - a tree carries a field's value too, so the modifier is not the only way to read one: it is how the ONE field a test is about is waited for
-    expect(result.tree).toContain('visitor@site.test');
+    expect(result.tree.text).toContain('visitor@site.test');
     await expect(result.errors).toBeEmpty();
 });

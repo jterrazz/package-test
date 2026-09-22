@@ -43,7 +43,7 @@ import type { ComponentChain, ComponentScenario, RenderSubject } from './compone
  *         await visitor.see(content('Showing 2 of 200 posts'));
  *     });
  *
- * await expect(result.tree).toMatch('two-of-two-hundred.aria.yaml');
+ * await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
  * ```
  */
 

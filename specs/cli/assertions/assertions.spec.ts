@@ -31,20 +31,20 @@ function catchMessage(assertion: () => unknown): string {
 
 /*
  * This file is the framework's own matcher/accessor self-test: the toContain probes
- * demonstrate the .text/.toContain/.file accessors and matcher behaviour themselves —
+ * demonstrate the .text/.raw/.file accessors and matcher behaviour themselves —
  * the fixture CLI's output is the vehicle, not the assertion target. Whole-output
- * correctness is exercised by the toMatch('<file>') golden cases throughout.
+ * correctness is exercised by the toMatch(file(…)) golden cases throughout.
  */
-/* oxlint-disable jterrazz/d8w-text-bypass -- The raw `.text` accessor IS the subject
-   under test here (see the note above); every `.text` assertion is deliberate, not a
-   bypass. Whole-output goldens are covered by the toMatch('<file>') cases in this file. */
+/* oxlint-disable jterrazz/d8w-raw-bypass -- The raw `.raw` accessor IS the subject
+   under test here (see the note above): every `.raw` assertion proves what the
+   comparison strips. Whole-output goldens are the toMatch(file(…)) cases in this file. */
 
 describe('command — stdout accessor', () => {
-    test('text exposes the raw string', async () => {
+    test('text exposes the comparable string', async () => {
         // Given - a help run
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
 
-        // Then - raw text is readable
+        // Then - the text is readable
         expect(result.stdout.text).toContain('Usage: cli <command>');
     });
 
@@ -171,15 +171,15 @@ describe('command — stdout accessor', () => {
         }).toThrow(/extension is part of the path/u);
     });
 
-    test('toContain matcher checks the captured text', async () => {
+    test("toContain is vitest's, on the captured text", async () => {
         // Given - a help run
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
 
-        // Then - expect().toContain works on the accessor and stays native for strings/arrays
-        expect(result.stdout).toContain('Usage: cli <command>');
+        // Then - vitest's own substring check and its own failure, on .text as on any string or array
+        expect(result.stdout.text).toContain('Usage: cli <command>');
         expect(() => {
-            expect(result.stdout).toContain('NOT_THERE');
-        }).toThrow(/does not contain expected substring/u);
+            expect(result.stdout.text).toContain('NOT_THERE');
+        }).toThrow(/to contain 'NOT_THERE'/u);
         expect('plain string').toContain('plain');
         expect(['a', 'b']).toContain('b');
     });
@@ -443,9 +443,9 @@ describe('command — transform option', () => {
 
             const result = await transformCli.exec('ansi');
 
-            // Then - raw .text still contains the original ANSI escapes
-            expect(result.stdout.text).toContain('\u001B[31m');
-            expect(result.stdout.text).toContain('\u001B[0m');
+            // Then - .raw still contains the original ANSI escapes
+            expect(result.stdout.raw).toContain('\u001B[31m');
+            expect(result.stdout.raw).toContain('\u001B[0m');
 
             // Then - comparison passes because the transform stripped ANSI from the actual
             expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
@@ -454,12 +454,13 @@ describe('command — transform option', () => {
         }
     });
 
-    test('transform does NOT mutate result.stdout.text', async () => {
+    test('transform does NOT mutate result.stdout.raw, and .text is its output', async () => {
         // Given - a runner with an ANSI-stripping transform
         const result = await transformCli.exec('ansi');
 
-        // Then - pristine output preserved
-        expect(result.stdout.text).toBe('\u001B[31mred\u001B[0m plain \u001B[1mbold\u001B[0m\n');
+        // Then - pristine output preserved, and the value a reader compares is the transformed one
+        expect(result.stdout.raw).toBe('\u001B[31mred\u001B[0m plain \u001B[1mbold\u001B[0m\n');
+        expect(result.stdout.text).toBe('red plain bold\n');
     });
 
     test('transform only runs on actual, never on fixture', async () => {
@@ -505,7 +506,7 @@ describe('command — transform option', () => {
         const result = await transformCli.exec('ansi-json');
 
         // Then - raw stdout still has ANSI wrapping the JSON — would NOT parse
-        expect(result.stdout.text).toContain('\u001B[32m');
+        expect(result.stdout.raw).toContain('\u001B[32m');
 
         // Then - .json.value works because the transform stripped ANSI before parse
         expect(result.json.value).toStrictEqual({ status: 'ok', value: 42 });

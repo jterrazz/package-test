@@ -17,9 +17,6 @@ import { cli as defaultsCli } from '../defaults-cli.specification.js';
  * unstable by nature. Each test probes the one variable whose injection/merge/unset
  * behaviour it exercises.
  */
-/* oxlint-disable jterrazz/d8w-text-bypass -- A full-output golden is unstable here
-   (the env dump carries ephemeral ports/paths, see the note above); grepping the one
-   variable under test via `.text` is the sanctioned scalpel, not a bypass. */
 
 /**
  * Run `action` with the runner's temp root reached through a SYMLINK — macOS's

@@ -37,7 +37,7 @@ test('carries every filter the visitor set into the summary it reports', async (
 
     // Then - the component reported exactly what was on the form
     expect(onApply).toHaveBeenCalledExactlyOnceWith('hexagonal · with drafts · oldest');
-    expect(result.content).toContain('Showing hexagonal · with drafts · oldest');
+    expect(result.content.text).toContain('Showing hexagonal · with drafts · oldest');
 });
 
 test('takes the summary off the screen when the visitor clears it', async () => {
@@ -51,7 +51,7 @@ test('takes the summary off the screen when the visitor clears it', async () => 
     });
 
     // Then - the screen the capture describes is the one the clearing left
-    expect(result.content).not.toContain('Showing everything');
+    expect(result.content.text).not.toContain('Showing everything');
 });
 
 test('names the options a field offers, and the one it is on', async () => {
@@ -65,7 +65,7 @@ test('names the options a field offers, and the one it is on', async () => {
     });
 
     // Then - the tree carries the selection the verbs answered about; not one of those options ever had a box on the screen to be seen through
-    expect(result.tree).toContain('option "Oldest" [selected]');
+    expect(result.tree.text).toContain('option "Oldest" [selected]');
     await expect(result.errors).toBeEmpty();
 });
 
@@ -80,8 +80,8 @@ test('says what a text field holds, in both directions', async () => {
     });
 
     // Then - the field ended empty, and the outline says so too
-    expect(result.tree).toContain('textbox "Search"');
-    expect(result.tree).not.toContain('hexagonal');
+    expect(result.tree.text).toContain('textbox "Search"');
+    expect(result.tree.text).not.toContain('hexagonal');
 });
 
 test('submits from the keyboard the way a form does', async () => {

@@ -15,6 +15,6 @@ test('renders a streamed reply as its pieces land', async () => {
         });
 
     // Then - the panel holds every piece, in order, and said nothing else
-    expect(result.content).toContain('Hello, world');
+    expect(result.content.text).toContain('Hello, world');
     await expect(result.console).toBeEmpty();
 });

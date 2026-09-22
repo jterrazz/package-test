@@ -15,6 +15,6 @@ test('renders under the router stub the test gives it', async () => {
         });
 
     // Then - the route parameter reached the component, and nothing complained
-    expect(result.content).toContain('Reading: the-post');
+    expect(result.content.text).toContain('Reading: the-post');
     await expect(result.errors).toBeEmpty();
 });

@@ -13,7 +13,7 @@ describe('lint — c7-seeds-sql-only (CONVENTIONS C7)', () => {
 
         // Then - oxlint reports the c7-seeds-sql-only diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('c7-seeds-sql-only');
+        expect(result.stdout.text).toContain('c7-seeds-sql-only');
     });
 
     test('accepts a seeds/ directory of .sql fragments only', async () => {
@@ -24,6 +24,6 @@ describe('lint — c7-seeds-sql-only (CONVENTIONS C7)', () => {
 
         // Then - clean run, no c7-seeds-sql-only diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('c7-seeds-sql-only');
+        expect(result.stdout.text).not.toContain('c7-seeds-sql-only');
     });
 });

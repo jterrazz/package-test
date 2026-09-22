@@ -13,7 +13,7 @@ describe('lint — c6-tomatch-extension (CONVENTIONS C6)', () => {
 
         // Then - oxlint reports the c6-tomatch-extension diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('c6-tomatch-extension');
+        expect(result.stdout.text).toContain('c6-tomatch-extension');
     });
 
     test('accepts extensions and directory-tree snapshots', async () => {
@@ -24,6 +24,6 @@ describe('lint — c6-tomatch-extension (CONVENTIONS C6)', () => {
 
         // Then - clean run, no c6-tomatch-extension diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('c6-tomatch-extension');
+        expect(result.stdout.text).not.toContain('c6-tomatch-extension');
     });
 });

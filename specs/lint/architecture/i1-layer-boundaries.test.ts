@@ -13,7 +13,7 @@ describe('lint — i1-layer-boundaries (CONVENTIONS I1)', () => {
 
         // Then - oxlint reports the i1-layer-boundaries diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('i1-layer-boundaries');
+        expect(result.stdout.text).toContain('i1-layer-boundaries');
     });
 
     test('accepts node builtins and in-layer imports', async () => {
@@ -24,6 +24,6 @@ describe('lint — i1-layer-boundaries (CONVENTIONS I1)', () => {
 
         // Then - clean run, no i1-layer-boundaries diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('i1-layer-boundaries');
+        expect(result.stdout.text).not.toContain('i1-layer-boundaries');
     });
 });

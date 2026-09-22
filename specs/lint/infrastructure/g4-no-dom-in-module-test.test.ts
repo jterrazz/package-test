@@ -13,7 +13,7 @@ describe('lint — g4-no-dom-in-module-test (CONVENTIONS G4)', () => {
 
         // Then - oxlint reports the g4-no-dom-in-module-test diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('g4-no-dom-in-module-test');
+        expect(result.stdout.text).toContain('g4-no-dom-in-module-test');
     });
 
     test('accepts the same document where the kind has one', async () => {
@@ -24,6 +24,6 @@ describe('lint — g4-no-dom-in-module-test (CONVENTIONS G4)', () => {
 
         // Then - clean run, no g4-no-dom-in-module-test diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('g4-no-dom-in-module-test');
+        expect(result.stdout.text).not.toContain('g4-no-dom-in-module-test');
     });
 });

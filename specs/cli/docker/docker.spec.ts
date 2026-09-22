@@ -74,7 +74,7 @@ describe('command — docker option (lazy container accessors)', () => {
 
                 const inside = await neo.exec('ls /workspace');
                 expect(inside.exitCode).toBe(0);
-                expect(inside.stdout).toContain('out.txt');
+                expect(inside.stdout.text).toContain('out.txt');
 
                 // Absent container name → accessor with exists=false, no throw.
                 expect(result.container('nope').exists).toBeFalsy();
@@ -120,7 +120,7 @@ describe('command — docker option (lazy container accessors)', () => {
             // Then - the container's stdout accessor supports the stream matchers
             const shop = result.container('shop');
             expect(shop.exists).toBeTruthy();
-            expect(shop.stdout).toContain('booting-shop');
+            expect(shop.stdout.text).toContain('booting-shop');
         },
         60_000,
     );

@@ -419,16 +419,16 @@ export const RULE_DOCS = {
             '`transform` is the escape hatch for noise the tokens do not cover — not a second copy of them.',
         reach: 'tests',
     },
-    'd8w-text-bypass': {
+    'd8w-raw-bypass': {
         channel: 'statique',
         convention:
-            "`expect(x.text).toContain` short-circuits the typed accessor subject → warning. A RegExp argument is exempt: a pattern carries no token grammar to lose, so the raw text and the accessor say the same thing. `toMatch` is not a bypass: it is vitest's, and a stream is compared through its text.",
+            "`expect(x.raw).toContain` compares the stream as it was captured → warning. A stream compared as a value reads `x.text` — ANSI stripped, the runner's `transform` applied, the text a golden compares. A RegExp argument is exempt: a pattern carries no token grammar to lose.",
         facet: 'model',
         family: 'D',
-        fix: 'Assert on the accessor itself (`expect(x)`), which carries the tokens and the fixture resolution.',
+        fix: 'Compare `x.text`; keep `.raw` for a test that proves what the comparison strips, with the suppression saying so.',
         id: 'D8',
         rationale:
-            "Asserting on `.text` throws away what the typed subject applies before a comparison — ANSI stripping and the runner's transform.",
+            "`.raw` keeps the colour codes and skips the runner's transform, so a substring found there is not the text any golden of the same stream would be compared against.",
         reach: 'tests',
     },
     'd9w-single-use-ref': {

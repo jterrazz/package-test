@@ -13,7 +13,7 @@ describe('lint — e9w-env-assignment-in-test (CONVENTIONS E9)', () => {
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('e9w-env-assignment-in-test');
+        expect(result.stdout.text).toContain('e9w-env-assignment-in-test');
     });
 
     test('accepts the self-restoring stub', async () => {
@@ -24,6 +24,6 @@ describe('lint — e9w-env-assignment-in-test (CONVENTIONS E9)', () => {
 
         // Then - clean exit, no E9 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('e9w-env-assignment-in-test');
+        expect(result.stdout.text).not.toContain('e9w-env-assignment-in-test');
     });
 });

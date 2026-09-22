@@ -13,7 +13,7 @@ describe('lint — b11-marker-one-line (CONVENTIONS B11)', () => {
 
         // Then - the wrapped marker is reported
         expect(result.exitCode).toBe(1);
-        expect(result.stdout.grep('scenario.test.ts')).toContain('b11-marker-one-line');
+        expect(result.stdout.grep('scenario.test.ts').text).toContain('b11-marker-one-line');
     });
 
     test('accepts one-line markers and a note set apart by a blank line', async () => {
@@ -24,6 +24,6 @@ describe('lint — b11-marker-one-line (CONVENTIONS B11)', () => {
 
         // Then - clean exit, no B11 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('b11-marker-one-line');
+        expect(result.stdout.text).not.toContain('b11-marker-one-line');
     });
 });

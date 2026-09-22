@@ -13,7 +13,7 @@ describe('lint — c10-contracts-boundary (CONVENTIONS C10)', () => {
 
         // Then - oxlint reports the c10-contracts-boundary diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toContain('c10-contracts-boundary');
+        expect(result.stdout.text).toContain('c10-contracts-boundary');
     });
 
     test('accepts a test importing the contracts facade', async () => {
@@ -24,6 +24,6 @@ describe('lint — c10-contracts-boundary (CONVENTIONS C10)', () => {
 
         // Then - clean run, no c10-contracts-boundary diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('c10-contracts-boundary');
+        expect(result.stdout.text).not.toContain('c10-contracts-boundary');
     });
 });

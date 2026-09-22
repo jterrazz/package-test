@@ -13,7 +13,7 @@ describe('lint — e2-preset-config (CONVENTIONS E2)', () => {
 
         // Then - the diagnostic names the rule
         expect(result.exitCode).toBe(1);
-        expect(result.stdout.grep('vitest.config.ts')).toContain('e2-preset-config');
+        expect(result.stdout.grep('vitest.config.ts').text).toContain('e2-preset-config');
     });
 
     test('accepts a config that starts from the preset', async () => {
@@ -24,6 +24,6 @@ describe('lint — e2-preset-config (CONVENTIONS E2)', () => {
 
         // Then - clean exit, no E2 diagnostic
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).not.toContain('e2-preset-config');
+        expect(result.stdout.text).not.toContain('e2-preset-config');
     });
 });
