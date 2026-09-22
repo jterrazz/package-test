@@ -291,6 +291,7 @@ describe('builder — sql seed targeting', () => {
 
         // Then - the error names the missing key and enumerates the record
         await expect(
+            // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
             cli.seed(file('./seeds/x.sql'), { database: 'ghost' }).exec('run'),
         ).rejects.toThrow(
             'seed() targets database "ghost" but it was not found. Available: analytics, db',
@@ -305,6 +306,7 @@ describe('builder — sql seed targeting', () => {
         });
 
         // Then - a bare SQL seed is rejected until it names its target database
+        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => cli.seed(file('./seeds/users.sql'))).toThrow('2 databases are declared');
     });
 });
@@ -410,9 +412,11 @@ describe('builder — a string is a value, and the disk is file() or directory()
         expect(() => cli.fixture('./fixtures/shop/' as never)).toThrow(
             /^fixture\("\.\/fixtures\/shop\/"\): a string is a value — name the disk with file/u,
         );
+        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => cli.seed(directory('./seeds/') as never)).toThrow(
             /it takes one file, not a directory/u,
         );
+        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => cli.seed(file('./seeds/rows.json') as never)).toThrow(
             /the file seed\(\) reads ends in \.sql/u,
         );
@@ -428,9 +432,11 @@ describe('builder — a string is a value, and the disk is file() or directory()
 
         // Then - both copy; each named as the other is refused with the kind on disk
         await expect(run).resolves.toBeDefined();
+        // checker-disable-next-line c8 -- the kind on disk is the refusal under test: each path names the other kind on purpose
         await expect(cli.fixture(directory('./fixtures/config.json/')).exec('go')).rejects.toThrow(
             /names a file — a path ending in \/ is a directory/u,
         );
+        // checker-disable-next-line c8 -- the kind on disk is the refusal under test: each path names the other kind on purpose
         await expect(cli.fixture(file('./fixtures/shop')).exec('go')).rejects.toThrow(
             /names a directory — end its path in \//u,
         );

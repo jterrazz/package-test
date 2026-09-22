@@ -27,6 +27,7 @@ describe('the disk — file() and directory()', () => {
 
     test('directory() names a path ending in /, branded as a directory', () => {
         // Given - the shared pool, climbed to from a leaf
+        // checker-disable-next-line c8 -- the wrapper's own brand and refusal are under test: nothing reads the disk
         const named = directory('../../fixtures/shop/');
 
         // Then - a directory, not a file
@@ -48,6 +49,7 @@ describe('the disk — file() and directory()', () => {
     test('file() refuses a trailing slash, and directory() requires one', () => {
         // Given - each wrapper handed the other's path
         // Then - each names the one to use
+        // checker-disable-next-line c8 -- the wrapper's own brand and refusal are under test: nothing reads the disk
         expect(() => file('./fixtures/shop/' as never)).toThrow(/name it with directory\(\)/u);
         expect(() => directory('./fixtures/shop' as never)).toThrow(
             /a directory's path ends in \//u,

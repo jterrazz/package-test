@@ -1099,7 +1099,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "Every `file()` and `directory()` a spec names with a literal path — and every `fixture:` of a document — names an entry that exists, of the kind the wrapper says, resolved from the spec file's directory: a missing path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. A computed path is out of reach, and the runtime refuses it with the path it resolved to.",
+            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every `fixture:` of a document names an entry that exists, of the kind the wrapper says, resolved from the test file's directory: a missing path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed path is out of reach, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
         facet: 'model',
         family: 'C',
         fix: 'Create the entry, or fix the path — the message names what it resolved to.',

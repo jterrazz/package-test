@@ -1,0 +1,7 @@
+description: a module test naming a golden that is not beside its module is refused where the path is written
+fixture: ./fixtures/module-missing/
+runs:
+    - command: checker --member .
+      exit: 1
+      stderr: |
+          src/report/report.test.ts:12:41  jterrazz-check(c8)

@@ -44,6 +44,7 @@ describe('matchThroughGolden', () => {
         const toMatch = chai.Assertion.prototype.toMatch as (this: unknown, value: unknown) => void;
 
         // When - a file, a string and a RegExp reach toMatch
+        // checker-disable-next-line c8 -- the routing under test hands the path to a recorder: nothing reads the disk
         toMatch.call(chai.Assertion.prototype, file('./expected/out.txt'));
         toMatch.call(chai.Assertion.prototype, 'out');
         toMatch.call(chai.Assertion.prototype, /out/u);

@@ -956,7 +956,11 @@ const DISK_CALL =
  * out of static reach and stays silent (the checker doctrine: precision over
  * recall).
  */
-function collectFixtureReferences(file: string, pattern = FIXTURE_CALL): FixtureReference[] {
+function collectFixtureReferences(
+    file: string,
+    pattern = FIXTURE_CALL,
+    codeOnly = false,
+): FixtureReference[] {
     if (file.endsWith(SPEC_EXTENSION)) {
         try {
             return parseSpecDocument(readText(file), file).fixtures.map((fixture) => ({
@@ -971,8 +975,12 @@ function collectFixtureReferences(file: string, pattern = FIXTURE_CALL): Fixture
         }
     }
     const text = readSource(file);
+    const quoted = codeOnly ? stringMask(text) : [];
     const references: FixtureReference[] = [];
     for (const match of text.matchAll(pattern)) {
+        if (quoted[match.index] === true) {
+            continue;
+        }
         const path = match.groups?.path;
         // A template with a hole names whatever it is handed: out of static reach.
         if (path !== undefined && path.length > 0 && isRelativePath(path) && !path.includes('${')) {
@@ -987,6 +995,32 @@ function collectFixtureReferences(file: string, pattern = FIXTURE_CALL): Fixture
         }
     }
     return references;
+}
+
+/**
+ * Which indexes of `text` (comments already blanked) sit inside a string
+ * literal. A template is read whole as a string: a call inside `${…}` is out
+ * of reach, which a precision-over-recall pass accepts.
+ */
+function stringMask(text: string): boolean[] {
+    const mask: boolean[] = [];
+    let quote = '';
+    for (let index = 0; index < text.length; index += 1) {
+        const char = text[index] ?? '';
+        if (quote === '') {
+            quote = char === '"' || char === "'" || char === '`' ? char : '';
+            mask[index] = quote !== '';
+        } else {
+            mask[index] = true;
+            if (char === '\\') {
+                index += 1;
+                mask[index] = true;
+            } else if (char === quote) {
+                quote = '';
+            }
+        }
+    }
+    return mask;
 }
 
 /** Every spec file of a tree that may name a fixture, the pool excluded. */
@@ -1159,44 +1193,50 @@ function entryKind(path: string): 'directory' | 'file' | undefined {
 }
 
 /**
- * CONVENTIONS C8 — every path a spec names exists, as what it says it is.
+ * CONVENTIONS C8 — every path a test names exists, as what it says it is.
  *
  * A `file()` or `directory()` with a literal path, and a document's `fixture:`,
- * resolved from the spec's own directory: a path that names nothing, a
+ * resolved from the test's own directory: a path that names nothing, a
  * `file()` naming a directory, or a `directory()` naming a file is reported at
  * the path. The catch is the typo that would only fail a run — a test later,
- * far from the line that made it.
+ * far from the line that made it. A call written inside a string (a rule's
+ * test case, a sample) is text, not a call, and is not read.
  */
-export function checkDiskTargetsExist(rootDir: string): TokenViolation[] {
+export function diskTargetFindings(file: string, rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
-    for (const specsRoot of findSpecsRoots(rootDir)) {
-        const pool = join(specsRoot, GROUND_FIXTURES);
-        for (const file of listReferrers(specsRoot, pool)) {
-            const suppressed = file.endsWith(SPEC_EXTENSION)
-                ? new Set<number>()
-                : suppressedLines(readText(file), 'c8');
-            for (const { column, kind, line, path } of collectFixtureReferences(file, DISK_CALL)) {
-                const target = resolve(dirname(file), path);
-                const found = entryKind(target);
-                if (found === kind || suppressed.has(line)) {
-                    continue;
-                }
-                const spelled = found === 'directory' ? `${path}/` : path.replace(/\/+$/u, '');
-                violations.push({
-                    column,
-                    file: relative(rootDir, file),
-                    line,
-                    message:
-                        found === undefined
-                            ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} does not exist`
-                            : `${kind}('${path}') names a ${found} — write ${found}('${spelled}')`,
-                    rule: 'c8-disk-target-exists',
-                    severity: 'error',
-                });
-            }
+    const suppressed = file.endsWith(SPEC_EXTENSION)
+        ? new Set<number>()
+        : suppressedLines(readText(file), 'c8');
+    for (const { column, kind, line, path } of collectFixtureReferences(file, DISK_CALL, true)) {
+        const target = resolve(dirname(file), path);
+        const found = entryKind(target);
+        if (found === kind || suppressed.has(line)) {
+            continue;
         }
+        const bare = path.replace(/\/+$/u, '');
+        const spelled = found === 'directory' ? `${bare}/` : bare;
+        violations.push({
+            column,
+            file: relative(rootDir, file),
+            line,
+            message:
+                found === undefined
+                    ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} does not exist`
+                    : `${kind}('${path}') names a ${found} — write ${found}('${spelled}')`,
+            rule: 'c8-disk-target-exists',
+            severity: 'error',
+        });
     }
     return violations;
+}
+
+/** C8 over every `specs/` tree below `rootDir` — its specs and its documents. */
+export function checkDiskTargetsExist(rootDir: string): TokenViolation[] {
+    return findSpecsRoots(rootDir).flatMap((specsRoot) =>
+        listReferrers(specsRoot, join(specsRoot, GROUND_FIXTURES)).flatMap((file) =>
+            diskTargetFindings(file, rootDir),
+        ),
+    );
 }
 
 /** Is `path` inside `directory` (strictly — a directory is not inside itself)? */

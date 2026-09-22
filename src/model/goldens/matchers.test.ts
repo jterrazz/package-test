@@ -205,6 +205,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
 
         // Then - the refusal names the wrapper a tree takes
         expect(() => {
+            // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
             expect(subject).toMatch(file('./expected/tree.txt'), { frozen: true });
         }).toThrow(/a directory or the working directory is toMatch\(directory\(…\)\)/u);
     });
@@ -215,6 +216,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
 
         // Then - the file is refused, naming the subjects a file golden compares against
         expect(() => {
+            // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
             expect(subject).toMatch(file('./expected/abc.txt'));
         }).toThrow(/a file golden is compared against a stream, json or response accessor/u);
     });
@@ -225,6 +227,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
 
         // Then - the refusal is awaited like the golden it stands for
         await expect(
+            // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
             expect(subject).toMatch(directory('./expected/out/'), { frozen: true }),
         ).rejects.toThrow(/a directory golden is compared against/u);
     });
@@ -267,6 +270,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - update mode is bypassed: it throws the does-not-exist error, no write
         expect(() => {
+            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./expected/frozen.json'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
@@ -281,6 +285,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - frozen mismatch still throws and never overwrites
         expect(() => {
+            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./expected/wrong.json'), { frozen: true });
         }).toThrow();
         expect(readFileSync(fixturePath, 'utf8')).toBe('{\n    "id": 999\n}\n');
@@ -292,6 +297,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixturePath = resolve(scratch, 'expected', 'written.json');
 
         // Then - update mode writes it and passes
+        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(accessor).toMatch(file('./expected/written.json'));
         expect(existsSync(fixturePath)).toBeTruthy();
     });
@@ -306,6 +312,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - frozen bypasses the write, throwing the does-not-exist error
         expect(() => {
+            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./expected/frozen.http'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
@@ -320,6 +327,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixturePath = resolve(scratch, 'expected', 'written.http');
 
         // Then - update mode writes and passes
+        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(accessor).toMatch(file('./expected/written.http'));
         expect(existsSync(fixturePath)).toBeTruthy();
     });
@@ -334,6 +342,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - frozen bypasses the write (async matcher rejects), nothing created
         await expect(
+            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(directory('./expected/frozen-tree/'), { frozen: true }),
         ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixtureDir)).toBeFalsy();
@@ -348,6 +357,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixtureFile = resolve(scratch, 'expected', 'written-tree', 'file.txt');
 
         // Then - update mode copies the tree and passes
+        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         await expect(accessor).toMatch(directory('./expected/written-tree/'));
         expect(existsSync(fixtureFile)).toBeTruthy();
     });
@@ -414,6 +424,7 @@ describe('the hint a missing golden gives names a run that does something', () =
 
         // Then - update mode is where it comes from
         expect(() => {
+            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(subject).toMatch(file('./expected/nowhere.txt'));
         }).toThrow('Run with TEST_UPDATE=1');
     });
@@ -425,6 +436,7 @@ describe('the hint a missing golden gives names a run that does something', () =
 
         // Then - the hint names the two things that do work, and not the one that silently writes nothing: `{ frozen }` IS the no-write switch
         expect(() => {
+            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(subject).toMatch(file('./expected/nowhere.txt'), { frozen: true });
         }).toThrow('Write the file by hand');
     });

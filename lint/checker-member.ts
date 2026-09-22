@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
+import { diskTargetFindings } from './checker-crossfile.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
 import { isTestFileName } from './role.js';
@@ -510,6 +511,40 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
     return found;
 }
 
+/**
+ * C8 over the module tests of a member — every test that does not live under
+ * a `specs/` tree (the tree pass reads those): a `file()`/`directory()` in
+ * `src/` or `lint/` names ground beside its module, and names it as surely.
+ * The walk stops at a nested package and never enters ground.
+ */
+function moduleTestTargets(memberDir: string, rootDir: string): TokenViolation[] {
+    const found: TokenViolation[] = [];
+    const walk = (dir: string): void => {
+        let entries;
+        try {
+            entries = readdirSync(dir, { withFileTypes: true });
+        } catch {
+            return;
+        }
+        for (const entry of entries) {
+            const path = join(dir, entry.name);
+            if (entry.isFile() && isTestFileName(entry.name)) {
+                found.push(...diskTargetFindings(path, rootDir));
+            } else if (
+                entry.isDirectory() &&
+                !SKIPPED.has(entry.name) &&
+                !isGroundName(entry.name) &&
+                entry.name !== 'specs' &&
+                !existsSync(join(path, 'package.json'))
+            ) {
+                walk(path);
+            }
+        }
+    };
+    walk(memberDir);
+    return found;
+}
+
 export function checkMember(memberDir: string, rootDir: string): TokenViolation[] {
     const manifest = readManifest(memberDir);
     if (manifest === null) {
@@ -529,6 +564,7 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         // That never reached a `specs/` tree.
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
         ...groundSynonyms(memberDir, label),
+        ...moduleTestTargets(memberDir, rootDir),
     ];
 }
 
