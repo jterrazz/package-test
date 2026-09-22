@@ -1,6 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { i4NoModuleDoubles } from './i4-no-module-doubles.js';
 
 RuleTester.describe = describe;
@@ -14,6 +15,9 @@ const ruleTester = new RuleTester();
 
 const SRC_TEST = '/repo/src/specification/matching/match.test.ts';
 const SPEC = '/repo/specs/cli/exec/exec.spec.ts';
+
+/** A package checked out under a folder named `__mocks__/`. */
+const UNDER_MOCKS = checkoutUnder('__mocks__', ['src']);
 
 ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRule, {
     invalid: [
@@ -71,6 +75,8 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
         },
     ],
     valid: [
+        // A `__mocks__` folder above the package is the machine's: the checkout's module is its own code.
+        { code: 'export {};', filename: `${UNDER_MOCKS}/src/widget.ts` },
         // The sanctioned tools.
         { code: 'const port = mockOf<DatabasePort>();', filename: SRC_TEST },
         // Code imports are fine, with or without extension.

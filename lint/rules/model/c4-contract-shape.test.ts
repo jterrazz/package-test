@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { c4ContractShape } from './c4-contract-shape.js';
 
 RuleTester.describe = describe;
@@ -15,6 +16,9 @@ const ruleTester = new RuleTester();
 const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
 
 const FEATURE = '/repo/specs/api/feature/contracts';
+
+/** A package checked out under a folder named `contracts/`. */
+const UNDER_CONTRACTS = checkoutUnder('contracts', ['specs/api/feature']);
 const FACADE = `${FEATURE}/newsroom.contracts.ts`;
 const UNIT = `${FEATURE}/http/events.ts`;
 
@@ -76,6 +80,11 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
         },
     ],
     valid: [
+        // A `contracts` folder above the package is the machine's: a helper of the checkout is no contract.
+        {
+            code: 'export const helper = 1;',
+            filename: `${UNDER_CONTRACTS}/specs/api/feature/helper.ts`,
+        },
         // The canonical facade: composed default + a named scenario factory.
         {
             code: `import { defineContracts } from '@jterrazz/test';\nimport events from './http/events.js';\nimport gone from './http/article-gone.js';\nconst world = defineContracts(events);\nexport default world;\nexport const withArticleGone = (id: string) => world.with(gone(id));`,

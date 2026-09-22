@@ -1,9 +1,10 @@
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
-import { importSourceVisitor, segments } from '../../ast.js';
+import { importSourceVisitor } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import { packageRootOf, projectSegments } from '../../role.js';
 
 /** What one layer under `src/` may import. */
 export type LayerOptions = {
@@ -36,21 +37,20 @@ function matchesPackage(source: string, packages: string[]): boolean {
 }
 
 /**
- * The path a layer map names a file by: relative to the (last) `src` segment,
- * or `lint/…` for the rules a package ships at its root — a `lint/` beside a
- * `src/` (the repository spine). `undefined` anywhere else.
+ * The path a layer map names a file by: relative to the (last) `src` segment
+ * below the package root, or `lint/…` for the rules a package ships at its
+ * root — a `lint/` beside a `src/` (the repository spine). `undefined`
+ * anywhere else.
  */
 function pathInLayers(path: string): string | undefined {
-    const parts = segments(path);
+    const parts = projectSegments(path);
     const srcIndex = parts.lastIndexOf('src');
     if (srcIndex !== -1) {
         return parts.slice(srcIndex + 1).join('/');
     }
     const lintIndex = parts.lastIndexOf('lint');
-    const root = parts.slice(0, lintIndex);
-    const besideSrc = isDirectory(
-        `${path.startsWith('/') ? '/' : ''}${[...root, 'src'].join('/')}`,
-    );
+    const base = packageRootOf(dirname(path)) ?? (path.startsWith('/') ? '/' : '');
+    const besideSrc = isDirectory(join(base, ...parts.slice(0, lintIndex), 'src'));
     return lintIndex === -1 || !besideSrc ? undefined : parts.slice(lintIndex).join('/');
 }
 

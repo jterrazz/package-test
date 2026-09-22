@@ -1,4 +1,7 @@
 /* oxlint-disable vitest/expect-expect, vitest/valid-describe-callback, vitest/valid-title -- this module DECLARES no suite of its own: it hands the runner's primitives to oxlint's RuleTester, which declares one per rule case, so a literal title and an assertion are the CALLER's to carry */
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { it as declareCase, describe as declareSuite } from 'vitest';
 
@@ -42,4 +45,21 @@ export function ruleTester(): RuleTester {
 export function asOxlintRule(rule: LintRule): OxlintRule {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the two shapes describe the same object; only oxlint's is unpublished
     return rule as unknown as OxlintRule;
+}
+
+/**
+ * A package checked out under a folder named `<folder>/`, on disk: its root,
+ * where its manifest sits, with the `folders` it holds already made. What a
+ * rule reads of a path starts at that root, so the folder above it must answer
+ * for nothing.
+ */
+export function checkoutUnder(folder: string, folders: string[] = []): string {
+    const scratch = mkdtempSync(join(tmpdir(), 'checkout-'));
+    const root = join(scratch, folder, 'checkout');
+    mkdirSync(root, { recursive: true });
+    writeFileSync(join(root, 'package.json'), '{}\n');
+    for (const inside of folders) {
+        mkdirSync(join(root, inside), { recursive: true });
+    }
+    return root;
 }

@@ -1,4 +1,4 @@
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
 import { isUnderSpecs, segments } from './ast.js';
 import { isFile } from './fs-cache.js';
@@ -16,6 +16,10 @@ import { isFile } from './fs-cache.js';
  * reads the three fields this module returns and NOTHING else of the path: a
  * gate probing for a `src` or a `specs` segment answers about the machine the
  * checkout sits on, not about the project that runs the file.
+ *
+ * A folder the path names is read BELOW the package root that holds the file
+ * ({@link projectSegments}): a checkout under a folder named `fixtures/`,
+ * `contracts/` or `__tests__/` is the machine's business, never the project's.
  */
 
 /** The kinds the catalogue tells apart. */
@@ -52,24 +56,22 @@ const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
 /**
  * The retired test root this path sits under.
  *
- * `__tests__/` is retired wherever it appears. A `tests/` or `test/` directory
- * is only the retired ROOT when it sits directly under a package — a `test`
- * segment deeper in a tree is an ordinary domain name, and a checkout living
- * under `~/tests/` is nobody's business but the filesystem's.
+ * `__tests__/` is retired wherever it appears in the project. A `tests/` or
+ * `test/` directory is only the retired ROOT when it sits directly under the
+ * package — a `test` segment deeper in a tree is an ordinary domain name.
  *
  * Both spellings, because both exist: hoverfly-lsp keeps thirteen corpus tests
  * under `packages/*\/test/`, and a rule that named only the plural told it
  * nothing.
  */
-function legacyDirOf(parts: string[]): LegacyDir {
+function legacyDirOf(filename: string): LegacyDir {
+    const parts = projectSegments(filename);
     if (parts.slice(0, -1).includes('__tests__')) {
         return '__tests__';
     }
-    for (const name of ['tests', 'test'] as const) {
-        const index = parts.indexOf(name);
-        if (index > 0 && isFile(`/${parts.slice(0, index).join('/')}/package.json`)) {
-            return name;
-        }
+    const first = parts.length > 1 ? parts[0] : undefined;
+    if (packageRootOf(dirname(filename)) !== undefined && (first === 'tests' || first === 'test')) {
+        return first;
     }
     return null;
 }
@@ -85,9 +87,9 @@ function legacyDirOf(parts: string[]): LegacyDir {
  * only what carries no suffix of its own.
  */
 export function roleOf(filename: string): FileIdentity {
-    const parts = segments(filename);
+    const parts = projectSegments(filename);
     const base = parts.at(-1) ?? '';
-    const identity = { inSpecs: isUnderSpecs(filename), legacyDir: legacyDirOf(parts) };
+    const identity = { inSpecs: isUnderSpecs(filename), legacyDir: legacyDirOf(filename) };
 
     if (base.endsWith('.specification.ts') || base.endsWith('.specification.tsx')) {
         return { ...identity, role: 'specification' };
@@ -164,6 +166,17 @@ export function packageRootOf(directory: string): string | undefined {
         }
         current = parent;
     }
+}
+
+/**
+ * The segments of a path below the package root that holds it — what a rule
+ * reads of a path, so a folder above the project never answers for it. A path
+ * no package holds (a rule's test case, written against `/repo/…`) is read
+ * whole.
+ */
+export function projectSegments(filename: string): string[] {
+    const root = packageRootOf(dirname(filename));
+    return segments(root === undefined ? filename : relative(root, filename));
 }
 
 /** The basename, for the one message that names the neighbour a test wants. */

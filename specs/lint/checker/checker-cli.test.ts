@@ -18,6 +18,17 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr).toMatch(file('./expected/checker-project-root.txt'));
     });
 
+    test('a project checked out under a folder named `specs/` is a project root, not a tree', async () => {
+        // Given - a package whose checkout sits under `specs/`, with a finding one level down its own tree
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-under-specs/'))
+            .exec('specs/checkout');
+
+        // Then - the `specs` above the package is the machine's: the run walks the project's own tree
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(file('./expected/checker-under-specs.txt'));
+    });
+
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
     // Full-output golden would couple this to the diagnostic formatting.
     test('a root holding no specs tree at all is refused, not reported clean', async () => {

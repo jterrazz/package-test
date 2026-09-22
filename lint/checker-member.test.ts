@@ -1,7 +1,9 @@
-import { resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
+import { checkoutUnder } from './rule-tester.fixtures.js';
 
 /** The fixture workspace: one member per finding, plus one that is clean. */
 const WORKSPACE = resolve(import.meta.dirname, '../specs/fixtures/member-workspace');
@@ -144,6 +146,15 @@ describe('the member pass — what a workspace member owes', () => {
 
         // Then - the path-less run walks it, the way the toolchain's own does
         expect(roots).toContain('packages/clean/web/specs');
+    });
+
+    test('a folder of code named like ground is read below the member, never above it (C25)', () => {
+        // Given - a package checked out under a folder named `specs/`, whose `src/goldens/` is matcher source
+        const member = checkoutUnder('specs', ['src/goldens']);
+        writeFileSync(join(member, 'src/goldens/matchers.ts'), 'export const golden = 1;\n');
+
+        // Then - the `specs` above the checkout is the machine's: the folder holds code, and stays
+        expect(codes(member, member)).toStrictEqual([]);
     });
 
     test('every member is judged in one run', () => {

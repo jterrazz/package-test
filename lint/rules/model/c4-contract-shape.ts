@@ -1,10 +1,10 @@
 import { dirname, join } from 'node:path';
 
-import { findProperty, memberPropertyName, segments, stringValue, walk } from '../../ast.js';
+import { findProperty, memberPropertyName, stringValue, walk } from '../../ast.js';
 import { isDirectory, listDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
+import { projectSegments, roleOf } from '../../role.js';
 
 /** The only directories a `contracts/` root may hold — the provider carriers. */
 const PROVIDERS = new Set(['anthropic', 'http', 'openai']);
@@ -213,7 +213,7 @@ function checkUnit(context: RuleContext, program: AstNode, base: string, provide
 export const c4ContractShape: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        const parts = segments(file);
+        const parts = projectSegments(file);
         // `src/**/contracts/` is the framework's own contract MODULE, not a
         // Feature's contract tree — only specs carry the convention.
         if (!roleOf(file).inSpecs) {

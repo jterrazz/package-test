@@ -35,7 +35,7 @@ import { codeOf } from './rule-code.js';
  *     node dist/checker.js … --oxlint-report <file>   # read the plugin's diagnostics from a report
  *
  * Three runs, one reporter. A PATH is read for what it IS. Name a specs tree
- * — a directory with a `specs` segment in its path — and it walks that tree
+ * — a directory with a `specs` segment below its package root — and it walks that tree
  * with every tree pass: the token/HTTP grammar (D4 / D4b / D10), the
  * `<case>.spec.yaml` document conventions, the cross-file passes (C9 dead
  * fixtures, C14/C15 fixture placement, B5 await-using inference, A7 database
@@ -535,12 +535,14 @@ function applyFixes(root: string): void {
  * Is this directory a specs tree?
  *
  * The `specs` SEGMENT is the anchor every other pass reads (`specsAnchor`), so
- * the CLI reads it too: `specs`, `apps/web/specs` and `specs/api` are trees —
- * a subtree of one is still inside it — and everything else is a project root
- * holding zero or more of them.
+ * the CLI reads it too, below the package root that holds the directory:
+ * `specs`, `apps/web/specs` and `specs/api` are trees — a subtree of one is
+ * still inside it — and everything else is a project root holding zero or more
+ * of them, a checkout under a folder named `specs/` included.
  */
 function isSpecsTree(dir: string): boolean {
-    return dir.split(/[/\\]/u).includes('specs');
+    const owner = packageRootOf(dir);
+    return (owner === undefined ? dir : relative(owner, dir)).split(/[/\\]/u).includes('specs');
 }
 
 /** The report `--oxlint-report` names, which must be a file — a typo'd path would count nothing. */

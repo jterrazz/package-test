@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { i1LayerBoundaries } from './i1-layer-boundaries.js';
 
 RuleTester.describe = describe;
@@ -40,6 +41,9 @@ const framework = [{ layers: FRAMEWORK_LAYERS }];
 
 /** This repository's root: a `lint/` beside a `src/`, the spine the rule reads. */
 const SPINE = resolve(import.meta.dirname, '../../..');
+
+/** The same spine, checked out under a folder named `src/`. */
+const UNDER_SRC = checkoutUnder('src', ['src']);
 
 ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unknown as OxlintRule, {
     invalid: [
@@ -82,6 +86,13 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
             code: 'import { z } from "zod";',
             errors: [{ messageId: 'foreignDependency' }],
             filename: `${SPINE}/lint/rules/some-rule.ts`,
+            options: framework,
+        },
+        // A `src` folder above the package is the machine's: the map reads the checkout's own `lint/`.
+        {
+            code: 'import { z } from "zod";',
+            errors: [{ messageId: 'foreignDependency' }],
+            filename: `${UNDER_SRC}/lint/rules/some-rule.ts`,
             options: framework,
         },
     ],

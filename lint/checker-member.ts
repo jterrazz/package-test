@@ -458,12 +458,12 @@ const CODE_MODULE = /\.[cm]?[jt]sx?$/u;
 
 /**
  * Is this synonym-named folder one a test would stand on? Under a `specs/`
- * tree, always; elsewhere, when it holds no module of code — a `goldens/`
+ * tree of the member (never a folder above it), always; elsewhere, when it holds no module of code — a `goldens/`
  * folder of matcher source is named for what its code does, and a folder of
  * `.snap` or `.json` files is ground by another word.
  */
-function holdsGround(path: string): boolean {
-    if (path.split(sep).includes('specs')) {
+function holdsGround(path: string, memberDir: string): boolean {
+    if (relative(memberDir, path).split(sep).includes('specs')) {
         return true;
     }
     try {
@@ -494,7 +494,7 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
             if (!entry.isDirectory() || SKIPPED.has(entry.name) || isGroundName(entry.name)) {
                 continue;
             }
-            if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path)) {
+            if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path, memberDir)) {
                 found.push({
                     file: join(label, relative(memberDir, path), '/'),
                     line: 1,

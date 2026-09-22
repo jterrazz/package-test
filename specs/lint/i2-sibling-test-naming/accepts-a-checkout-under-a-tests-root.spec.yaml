@@ -1,0 +1,5 @@
+description: a checkout under a folder named __tests__ is no retired test root, and its module test passes
+fixture: ./fixtures/under-a-tests-root/
+runs:
+    - command: __tests__/checkout
+      exit: 0

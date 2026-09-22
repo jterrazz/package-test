@@ -1,8 +1,9 @@
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import type { FileRole, LegacyDir } from './role.js';
-import { isTestFile, isTestRole, roleOf } from './role.js';
+import { isTestFile, isTestRole, projectSegments, roleOf } from './role.js';
+import { checkoutUnder } from './rule-tester.fixtures.js';
 
 /** This package's own root — the one `tests/` guard reads a real package.json at. */
 const REPO_ROOT = resolve(import.meta.dirname, '..');
@@ -89,6 +90,49 @@ describe('roleOf — the kind a path states', () => {
             legacyOf('/no-such-root-xyz/test/smoke.test.ts'),
             legacyOf('/repo/specs/api/users/create.test.ts'),
         ]).toStrictEqual([null, null, null]);
+    });
+});
+
+describe('roleOf — read below the package root', () => {
+    test('a checkout under a folder named like ground, a contract or a retired root is none of them', () => {
+        // Given - three packages checked out under `fixtures/`, `contracts/` and `__tests__/`
+        const under = ['fixtures', 'contracts', '__tests__'].map((folder) => checkoutUnder(folder));
+
+        // Then - a module of each is the project's own code, and its test sits under no retired root
+        expect(under.map((root) => roleOf(join(root, 'src/widget.ts')).role)).toStrictEqual([
+            'other',
+            'other',
+            'other',
+        ]);
+        expect(under.map((root) => legacyOf(join(root, 'src/widget.test.ts')))).toStrictEqual([
+            null,
+            null,
+            null,
+        ]);
+    });
+
+    test('the folders inside the project still say what they are', () => {
+        // Given - the same checkout under `fixtures/`, with its own ground, contracts and retired root
+        const root = checkoutUnder('fixtures');
+
+        // Then - ground, contract and `__tests__` are read where the project names them
+        expect(roleOf(join(root, 'specs/api/orders/fixtures/app.ts')).role).toBe('ground');
+        expect(roleOf(join(root, 'specs/api/orders/contracts/http/latest.ts')).role).toBe(
+            'contract',
+        );
+        expect(legacyOf(join(root, 'src/__tests__/widget.test.ts'))).toBe('__tests__');
+        expect(legacyOf(join(root, 'tests/widget.test.ts'))).toBe('tests');
+    });
+
+    test('a path no package holds is read whole', () => {
+        // Given - a rule case written against a root that is not on disk
+        // Then - every segment answers, as the case spells it
+        expect(projectSegments('/no-such-root-xyz/specs/api/x.spec.ts')).toStrictEqual([
+            'no-such-root-xyz',
+            'specs',
+            'api',
+            'x.spec.ts',
+        ]);
     });
 });
 
