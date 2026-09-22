@@ -66,6 +66,18 @@ describe('lint — checker CLI contract', () => {
         );
     });
 
+    test('a green ratchet run prints one line for what the file holds, and not the findings it holds', async () => {
+        // Given - a project with one dead fixture, recorded, then judged
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/c9-dead-fixtures/'))
+            .exec(['baseline .', '.']);
+
+        // Then - the summary alone; the held finding prints only when a verdict fails
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch(file('./expected/checker-held.txt'));
+        expect(result.stderr.text).toBe('');
+    });
+
     test('a ratchet the project broke fails the run, naming each key and the gesture', async () => {
         // Given - a recorded debt the project paid, and a finding nobody recorded
         const result = await cli

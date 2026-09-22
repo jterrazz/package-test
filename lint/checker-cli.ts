@@ -72,8 +72,9 @@ import { codeOf } from './rule-code.js';
  * any ERROR finding and on any plugin diagnostic. Every other run under a
  * project that keeps a baseline reports what it found and leaves the verdict
  * to that one run; without a baseline it fails on an ERROR finding, as ever.
- * The run that judges prints what it judges — every finding it counted and
- * every plugin diagnostic — so a verdict and its evidence are one log.
+ * A green verdict is one line — `test.baseline.json: <n> held across <k>
+ * rules` — and a failing one prints every finding it counted and every plugin
+ * diagnostic before its reasons, so a verdict and its evidence are one log.
  * `baseline [root]` writes the file from the current counts.
  *
  * The plugin's diagnostics come from `--oxlint-report <file>` when it is given
@@ -268,12 +269,14 @@ type RatchetRun = {
 function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): never {
     if (keepsBaseline(root)) {
         const findings = counted();
-        printFindings(findings, plugin);
         const counts = countsOf([
             ...findings.map(codeOfFinding),
             ...plugin.map((diagnostic) => diagnostic.code),
         ]);
         const broken = judge(counts, readBaseline(root));
+        if (json || broken.length > 0) {
+            printFindings(findings, plugin);
+        }
         for (const reason of broken) {
             say(`baseline-ratchet  ${TEST_BASELINE}  ${reason}`);
         }
@@ -282,9 +285,7 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
             process.exit(1);
         }
         if (!json) {
-            console.log(
-                `conventions checker: ${findings.length + plugin.length} finding(s) held by ${TEST_BASELINE} ${what} (${passes})`,
-            );
+            console.log(heldSummary(findings.length + plugin.length, counts, what, passes));
         }
         process.exit(0);
     }
@@ -300,6 +301,21 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
         process.exit(1);
     }
     verdict(own, what, passes);
+}
+
+/**
+ * The one line a green ratchet run prints: what the file holds, by count and
+ * by rule, and what ran. The findings themselves print only with a failing
+ * verdict, where they are the evidence.
+ */
+function heldSummary(
+    total: number,
+    counts: Record<string, number>,
+    what: string,
+    passes: string,
+): string {
+    const rules = Object.keys(counts).length;
+    return `${TEST_BASELINE}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'} — conventions checker ${what} (${passes})`;
 }
 
 /** A directory that must exist — a typo'd path is operator error, not a clean tree. */
