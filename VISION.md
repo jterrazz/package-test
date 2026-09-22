@@ -289,3 +289,34 @@ report  src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module
 golden  specs/api/orders/create.spec.ts:7:5  jterrazz-check(c15)
 golden  src/orphan.test.ts:1:1  jterrazz(i2-sibling-test-naming)
 ```
+
+## Iteration 1 — §1 decided: variant A
+
+A string is a value; `file()` and `directory()` are the disk. Verbs keep
+simple names and take either:
+
+```ts
+.seed(file('./seeds/subscribers.sql'))
+.post('/orders', file('./requests/order.json'))
+.request(file('./requests/create-user.http'))
+expect(result.response).toMatch(file('./expected/created.http'))
+expect(result.stdout.text).toMatch(/built/)            // Vitest's own
+await expect(result.directory('out')).toMatch(directory('./expected/scaffold/'))
+cli.run(file('./build.spec.yaml'))
+cli.fixture(file('./fixtures/config.json'))            // copied under its name
+cli.fixture(directory('../../fixtures/shop/'))          // spread into the workdir
+```
+
+`seedFile`, `requestFile`, `fixtureFile`, `fixtureDirectory`, `toMatchFile`,
+`toMatchDirectory` and `runFile` do not exist. A document's `fixture:` key
+takes the same two forms (`{ file: ./… }` / `{ directory: ./… }`, or the
+trailing `/` if the grammar stays one key — the branch decides and says so).
+
+The guards, one per level:
+
+| Level | Guard |
+| --- | --- |
+| type | `file()`/`directory()` accept `RelativePath` only; each verb accepts only their branded return (or a value where a value makes sense) |
+| role | static rule: the verb and the ground folder agree — `seed` → `seeds/*.sql`, `request`/body → `requests/`, `toMatch` → `expected/`, `fixture` → `fixtures/` |
+| locality | a path stays in its leaf or reaches `specs/fixtures/`, nothing else (C15); a pool entry one leaf uses moves beside it (C14, autofix); a leaf's ground reached from a sibling is refused (C17) |
+| existence | the checker verifies statically that every `file()`/`directory()` target exists; at runtime a missing target fails with its resolved path |
