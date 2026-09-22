@@ -261,22 +261,22 @@ commit, prototype plumbing that never reaches the release.
 
 ## Iteration 1 — the owner's answers (2026-09-22)
 
-| # | Decision |
-| --- | --- |
-| baseline | The ratchet splits by owner: `typescript.baseline.json` (oxlint's own rules, Names) and `test.baseline.json` (every `jterrazz(*)` static rule and every checker finding). Each package's command writes its own file. |
-| 1, 13 | A repository may carry roots beyond the spine, but only CODIFIED ones: the toolchain knows the ecosystem-imposed roots by name (npm `bin/`, framework roots like `public/`, `app/`, `ios/`, `android/`, `prisma/`), and a repository declares any other in its config, each with a reason. Code the package ships goes under `src/` (package-typescript's `lib/` and `presets/` move there). The composable base packages keep a permissive list. |
-| 2 | Confirmed: no `lint/` in a repository that ships no rules. |
-| 3, 5, 7 | Wait for the §1 variant choice (below). `runFile` is refused as a name. |
-| 4 | `snapshots/`, `golden/`, `goldens/`, `__snapshots__/` are refused: only `expected/`. |
-| 6 | `toMatch` is Vitest's, with no override: a stream is compared as `result.stdout.text`. |
-| 8 | The four ground names are reserved everywhere a test stands on a file, not only under `specs/`. A rule makes production code unable to import test material: a non-test module importing a `*.test.ts`, a `*.fixtures.ts` or anything under a ground folder is an error. |
-| 9 | Only what sets a spec's world up is codified. `_binary/` and `_stubs/` retire: a program a spec runs is a fixture. No fifth name. |
-| 10 | Polish the report normalisation and publish it once (the rule specs of both packages use it). |
-| 11 | The checker prints the same line as oxlint (proposal below); no legacy format kept. |
-| 12 | No legacy: the 16→17 mover retires in 17.1. |
-| 14 | `setup` is allowed. |
-| 15 | `core` is allowed. |
-| 16, 17, 18 | Accepted as proposed. |
+| #          | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseline   | The ratchet splits by owner: `typescript.baseline.json` (oxlint's own rules, Names) and `test.baseline.json` (every `jterrazz(*)` static rule and every checker finding). Each package's command writes its own file.                                                                                                                                                                                                                             |
+| 1, 13      | A repository may carry roots beyond the spine, but only CODIFIED ones: the toolchain knows the ecosystem-imposed roots by name (npm `bin/`, framework roots like `public/`, `app/`, `ios/`, `android/`, `prisma/`), and a repository declares any other in its config, each with a reason. Code the package ships goes under `src/` (package-typescript's `lib/` and `presets/` move there). The composable base packages keep a permissive list. |
+| 2          | Confirmed: no `lint/` in a repository that ships no rules.                                                                                                                                                                                                                                                                                                                                                                                        |
+| 3, 5, 7    | Wait for the §1 variant choice (below). `runFile` is refused as a name.                                                                                                                                                                                                                                                                                                                                                                           |
+| 4          | `snapshots/`, `golden/`, `goldens/`, `__snapshots__/` are refused: only `expected/`.                                                                                                                                                                                                                                                                                                                                                              |
+| 6          | `toMatch` is Vitest's, with no override: a stream is compared as `result.stdout.text`.                                                                                                                                                                                                                                                                                                                                                            |
+| 8          | The four ground names are reserved everywhere a test stands on a file, not only under `specs/`. A rule makes production code unable to import test material: a non-test module importing a `*.test.ts`, a `*.fixtures.ts` or anything under a ground folder is an error.                                                                                                                                                                          |
+| 9          | Only what sets a spec's world up is codified. `_binary/` and `_stubs/` retire: a program a spec runs is a fixture. No fifth name.                                                                                                                                                                                                                                                                                                                 |
+| 10         | Polish the report normalisation and publish it once (the rule specs of both packages use it).                                                                                                                                                                                                                                                                                                                                                     |
+| 11         | The checker prints the same line as oxlint (proposal below); no legacy format kept.                                                                                                                                                                                                                                                                                                                                                               |
+| 12         | No legacy: the 16→17 mover retires in 17.1.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 14         | `setup` is allowed.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 15         | `core` is allowed.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 16, 17, 18 | Accepted as proposed.                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### Proposed report line (question 11)
 
@@ -314,9 +314,23 @@ trailing `/` if the grammar stays one key — the branch decides and says so).
 
 The guards, one per level:
 
-| Level | Guard |
-| --- | --- |
-| type | `file()`/`directory()` accept `RelativePath` only; each verb accepts only their branded return (or a value where a value makes sense) |
-| role | static rule: the verb and the ground folder agree — `seed` → `seeds/*.sql`, `request`/body → `requests/`, `toMatch` → `expected/`, `fixture` → `fixtures/` |
-| locality | a path stays in its leaf or reaches `specs/fixtures/`, nothing else (C15); a pool entry one leaf uses moves beside it (C14, autofix); a leaf's ground reached from a sibling is refused (C17) |
-| existence | the checker verifies statically that every `file()`/`directory()` target exists; at runtime a missing target fails with its resolved path |
+| Level     | Guard                                                                                                                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type      | `file()`/`directory()` accept `RelativePath` only; each verb accepts only their branded return (or a value where a value makes sense)                                                         |
+| role      | static rule: the verb and the ground folder agree — `seed` → `seeds/*.sql`, `request`/body → `requests/`, `toMatch` → `expected/`, `fixture` → `fixtures/`                                    |
+| locality  | a path stays in its leaf or reaches `specs/fixtures/`, nothing else (C15); a pool entry one leaf uses moves beside it (C14, autofix); a leaf's ground reached from a sibling is refused (C17) |
+| existence | the checker verifies statically that every `file()`/`directory()` target exists; at runtime a missing target fails with its resolved path                                                     |
+
+## Iteration 1 — per-repository settings
+
+A repository's human decisions for the family live in `package.json` under
+`jterrazz`, one sub-property per package, each package reading only its own:
+
+```json
+{ "jterrazz": { "typescript": { "roots": { "scripts": "the release scripts CI runs" } }, "test": {} } }
+```
+
+The ratchets stay out of it: `typescript.baseline.json` and
+`test.baseline.json` at the root are measurements a tool rewrites on every
+`chore(lint)`, `package.json` ships in the tarball and churns with every
+dependency bump, and a decision (rare, reasoned) is not a measurement.
