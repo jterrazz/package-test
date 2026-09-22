@@ -243,9 +243,10 @@ commit by commit.
     the estate: keep `setup` refused (a setup file is named for what it
     prepares), or exempt a runner's setup file?
 15. The rulebook's shared plugins could not stay in `rules/core/` (`core` is a
-    refused grab-bag name) and became `lint/language/`. `lint/` in
-    package-typescript holds decision files per plugin, not one folder per
-    rule: is "one folder per rule" the law for rule SHIPPERS only?
+    refused grab-bag name) and became `language/` under package-typescript's
+    `lint/`. `lint/` in package-typescript holds decision files per plugin,
+    not one folder per rule: is "one folder per rule" the law for rule
+    SHIPPERS only?
 16. With the docs pipeline gone, the `library` lint profile is identical to
     `node`: fold the two profiles into one?
 17. The ignore globs are `**/specs/**/<name>/**` (four globs, no braces), so a
