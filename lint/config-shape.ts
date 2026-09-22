@@ -10,7 +10,7 @@ import {
     walk,
 } from './ast.js';
 import { isDirectory, listDirectory } from './fs-cache.js';
-import type { AstNode } from './types.js';
+import type { AstNode } from './oxlint-api.js';
 
 /**
  * What a `vitest.config.*` states about the projects it runs — read once, for

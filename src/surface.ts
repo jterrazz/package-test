@@ -31,7 +31,7 @@ export type {
     ComponentScenario,
     ComponentVisitor,
     RenderSubject,
-} from './facets/component/component.types.js';
+} from './facets/component/component.shape.js';
 export type { RenderResult } from './facets/component/component.result.js';
 export type { RenderedText } from './facets/component/rendered-text.js';
 export type { ComponentUi, DomMount } from './seams/vitest-browser/ui.js';
@@ -131,7 +131,7 @@ export type {
     ContractResponseValue,
     MatchableRequest,
     StreamBody,
-} from './model/contracts/types.js';
+} from './model/contracts/exchange.js';
 // The module-scope double — the VALUE is each entry's (one engine per runtime);
 // The shape is stated here so the two surfaces can only publish the same one.
 export type { Intercept, InterceptOptions, InterceptScope } from './model/contracts/intercept.js';

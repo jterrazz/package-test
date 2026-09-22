@@ -493,7 +493,7 @@ The plugin is loaded from the **built bundle**. In this repo `jsPlugins: ['./dis
 
 ## Stability
 
-Oxlint's JS-plugin API is **alpha** (oxlint 1.74): the plugin declares the small structural slice it uses locally (`lint/types.ts`) instead of importing oxlint types, so upstream churn surfaces as a compile break in one file, not across the rules. Expect to re-validate the plugin on oxlint majors; the E2E specs (`specs/lint/**`, one violation/compliant fixture pair per rule) run the real binary and are the canary.
+Oxlint's JS-plugin API is **alpha** (oxlint 1.74): the plugin declares the small structural slice it uses locally (`lint/oxlint-api.ts`) instead of importing oxlint types, so upstream churn surfaces as a compile break in one file, not across the rules. Expect to re-validate the plugin on oxlint majors; the E2E specs (`specs/lint/**`, one violation/compliant fixture pair per rule) run the real binary and are the canary.
 
 ## Pitfalls
 

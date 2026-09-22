@@ -1,8 +1,8 @@
 import { isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
 import type { FileIdentity } from '../../role.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 

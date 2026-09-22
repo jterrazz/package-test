@@ -8,8 +8,8 @@ import {
     walk,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The verbs that CHANGE the screen — after one of them, something is in flight. */
 const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);

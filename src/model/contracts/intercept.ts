@@ -17,7 +17,7 @@ import type { ContractRegistration } from '../../seams/msw/handlers.js';
  */
 import { contractsOf, isContract, isContracts } from './contract.js';
 import type { Contract, ContractInput } from './contract.js';
-import type { ContractRequest, ContractResponder, ContractResponse } from './types.js';
+import type { ContractRequest, ContractResponder, ContractResponse } from './exchange.js';
 
 /**
  * One block's worth of declared network. Disposed at the end of the scope that

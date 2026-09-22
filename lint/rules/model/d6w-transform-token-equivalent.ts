@@ -1,7 +1,7 @@
 import { TOKEN_KINDS } from '../../../src/model/matching/match.js';
 import { findProperty, memberPropertyName, specificationMember, stringValue } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 const KNOWN_TOKEN_LITERAL = new RegExp(
     `^\\{\\{(?:${TOKEN_KINDS.join('|')})(?:#[\\w.-]+)?\\}\\}$`,

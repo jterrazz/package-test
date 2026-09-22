@@ -19,7 +19,7 @@ import { CaptureScope } from '../matching/match.js';
 import { hasPlaceholders, placeholderPatternSource, textEquals } from '../matching/structural.js';
 import { describeRoute } from './contract.js';
 import type { Contract } from './contract.js';
-import type { MatchableRequest } from './types.js';
+import type { MatchableRequest } from './exchange.js';
 
 /** Base used to parse origin-relative observed URLs (`/events?x=1`). */
 const RELATIVE_BASE = 'http://contract.invalid';

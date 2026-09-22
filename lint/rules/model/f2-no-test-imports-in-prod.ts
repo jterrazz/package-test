@@ -1,6 +1,6 @@
 import { importSourceVisitor, isUnderSpecs } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../types.js';
+import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
 const TEST_FILE = /\.(?:(?:test|fixtures|specification)\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 const CONFIG_FILE = /(?:^|[/\\])[\w.-]*\.config\.[cm]?[jt]s$/u;

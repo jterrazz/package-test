@@ -7,8 +7,8 @@ import {
     nodeStart,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The doubles whose implementation STAGES the world rather than waits on it. */
 const DOUBLE_FACTORIES = new Set(['fn', 'mockImplementation', 'mockImplementationOnce', 'mockOf']);

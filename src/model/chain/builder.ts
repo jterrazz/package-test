@@ -14,7 +14,11 @@ import type { ContractRegistration } from '../../seams/msw/server.js';
 import { clock as timeClock } from '../clock/clock.js';
 import { contractsOf, isContract, isContracts } from '../contracts/contract.js';
 import type { Contract, ContractInput } from '../contracts/contract.js';
-import type { ContractRequest, ContractResponder, ContractResponse } from '../contracts/types.js';
+import type {
+    ContractRequest,
+    ContractResponder,
+    ContractResponse,
+} from '../contracts/exchange.js';
 import { parseRequestFile } from '../http-files/http-file.js';
 import type { BrowserPort, VisitScenario } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../ports/cli.port.js';

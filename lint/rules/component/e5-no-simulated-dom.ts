@@ -1,7 +1,7 @@
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
 import type { FileRole } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The pragma vitest reads to swap a test file's environment. */
 const PRAGMA = /@vitest-environment\s+(?<environment>[\w-]+)/u;

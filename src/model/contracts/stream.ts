@@ -1,5 +1,5 @@
 import { pause } from '../timing/pause.js';
-import type { StreamBody } from './types.js';
+import type { StreamBody } from './exchange.js';
 
 /**
  * A declared stream, made real — ONE serialisation for all three engines.

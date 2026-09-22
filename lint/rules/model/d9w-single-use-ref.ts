@@ -4,8 +4,8 @@ import { isRelativePath } from '../../../src/model/chain/spec-path.js';
 import { memberPropertyName, stringValue, walk } from '../../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The relative path a golden matcher names, when the call is one and names it literally. */
 function goldenPathOf(node: AstNode): string | undefined {

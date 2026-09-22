@@ -1,6 +1,6 @@
 import { memberPropertyName, propertyKeyName } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 const URL_KEY = /^[A-Z0-9]+(?:_[A-Z0-9]+)*_URL$/u;
 

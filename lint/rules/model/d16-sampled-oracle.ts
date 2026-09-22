@@ -10,8 +10,8 @@ import {
     walk,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * The matchers whose ARGUMENT is a whole expected shape — a sampled value

@@ -10,8 +10,8 @@ import {
     walk,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The three ways this vocabulary makes a double. */
 const DOUBLE_FACTORIES = new Set(['mockOf', 'vi.fn', 'vi.spyOn']);

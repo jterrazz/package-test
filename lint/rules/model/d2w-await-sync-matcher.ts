@@ -1,6 +1,6 @@
 import { memberPropertyName } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /** Always-synchronous matchers — awaiting them is redundant noise (D2). */
 const SYNC_MATCHERS = new Set(['toBe', 'toContain', 'toEqual', 'toHaveLength']);

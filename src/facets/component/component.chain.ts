@@ -4,7 +4,7 @@ import type {
     ContractRequest,
     ContractResponder,
     ContractResponse,
-} from '../../model/contracts/types.js';
+} from '../../model/contracts/exchange.js';
 import { registerWorkerContracts, resetWorkerContracts } from '../../seams/msw/worker.js';
 import {
     afterThisTest,
@@ -24,7 +24,7 @@ import {
 } from '../../seams/vitest-browser/vitest-browser.adapter.js';
 import type { MountedSurface } from '../../seams/vitest-browser/vitest-browser.adapter.js';
 import { RenderResult } from './component.result.js';
-import type { ComponentChain, ComponentScenario, RenderSubject } from './component.types.js';
+import type { ComponentChain, ComponentScenario, RenderSubject } from './component.shape.js';
 
 /**
  * `component` — the chain a rendered unit is specified through.

@@ -1,6 +1,6 @@
 import { memberPropertyName } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /** The six constructors, and only six. */
 const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile', 'website']);

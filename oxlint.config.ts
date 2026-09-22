@@ -48,7 +48,7 @@ const FRAMEWORK_LAYERS = {
             // Provide" are asked of `seams/vitest-browser/`, which owns the
             // `vitest` import the way `src/runner/` owns the config side.
             'facets/component/component.chain.ts': ['seams/msw/', 'seams/vitest-browser/'],
-            'facets/component/component.types.ts': ['seams/vitest-browser/'],
+            'facets/component/component.shape.ts': ['seams/vitest-browser/'],
             'facets/component/component.project.ts': ['seams/vitest-browser/commands'],
             'facets/cli/cli.project.ts': ['runner/literate-plugin'],
             'facets/cli/literate.ts': ['seams/process/'],

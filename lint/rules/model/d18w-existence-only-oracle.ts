@@ -1,7 +1,7 @@
 import { assertionOf, child, childList, findTestCallback, isTestCallee, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** Matchers that pass for almost any value — the shape of an existence check. */
 const EXISTENCE_MATCHERS = new Set(['toBeDefined', 'toBeTruthy']);

@@ -1,7 +1,7 @@
 import { findTestCallback, isTestCallee, memberPropertyName, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** An HTTP status code lives in this range — the numeric-literal gate. */
 const MIN_STATUS = 100;

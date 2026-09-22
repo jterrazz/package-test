@@ -3,8 +3,8 @@ import { dirname, resolve } from 'node:path';
 import { literateSpecifications } from '../../config-shape.js';
 import { isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * CONVENTIONS E8 — `literate.specification` names a file that exists.

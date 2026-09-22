@@ -1,7 +1,7 @@
 import { child, childList, identifierName, memberPath, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The hooks that BUILD something — there is no restore-only form of these. */
 const BUILDERS = new Set(['beforeAll', 'beforeEach']);

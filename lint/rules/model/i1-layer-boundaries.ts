@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { importSourceVisitor, segments } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../types.js';
+import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
 /** What one layer under `src/` may import. */
 export type LayerOptions = {

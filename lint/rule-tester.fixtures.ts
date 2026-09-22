@@ -2,7 +2,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { it as declareCase, describe as declareSuite } from 'vitest';
 
-import type { LintRule } from './types.js';
+import type { LintRule } from './oxlint-api.js';
 
 /**
  * One wiring of oxlint's `RuleTester`, for every rule test in this layer.

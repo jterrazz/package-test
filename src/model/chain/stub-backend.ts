@@ -25,10 +25,10 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 import type { Contract } from '../contracts/contract.js';
+import { isStreamBody } from '../contracts/exchange.js';
+import type { MatchableRequest } from '../contracts/exchange.js';
 import { ContractQueue } from '../contracts/queue.js';
 import { toReadableStream } from '../contracts/stream.js';
-import { isStreamBody } from '../contracts/types.js';
-import type { MatchableRequest } from '../contracts/types.js';
 
 /** Options for the stub backend server. */
 type StubBackendOptions = {

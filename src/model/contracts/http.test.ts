@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
 import { match } from '../matching/match.js';
+import { isStreamBody, STREAM_BODY } from './exchange.js';
+import type { MatchableRequest } from './exchange.js';
 import { http } from './http.js';
-import { isStreamBody, STREAM_BODY } from './types.js';
-import type { MatchableRequest } from './types.js';
 
 const URL = 'https://api.example.com/things';
 

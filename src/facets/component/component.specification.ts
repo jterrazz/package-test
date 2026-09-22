@@ -1,4 +1,4 @@
-import type { ComponentChain } from './component.types.js';
+import type { ComponentChain } from './component.shape.js';
 
 /**
  * `component`, as node sees it.

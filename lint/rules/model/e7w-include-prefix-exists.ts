@@ -3,8 +3,8 @@ import { dirname, resolve } from 'node:path';
 import { collectsAFile, projectLiterals, staticPrefix } from '../../config-shape.js';
 import { isDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * CONVENTIONS E7w (warning) — an `include` whose static prefix is not a

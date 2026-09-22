@@ -1,7 +1,7 @@
 import { importSourceVisitor } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { declaredSubpaths } from '../../package-exports.js';
-import type { LintRule, RuleContext, Visitor } from '../../types.js';
 
 const PACKAGE = '@jterrazz/test';
 

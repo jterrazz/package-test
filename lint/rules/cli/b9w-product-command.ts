@@ -1,6 +1,6 @@
 import { specificationMember, stringValue, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
 /** A path segment that marks a third-party package's installed binary. */
 const THIRD_PARTY_BIN = /node_modules[/\\]\.bin[/\\]/u;

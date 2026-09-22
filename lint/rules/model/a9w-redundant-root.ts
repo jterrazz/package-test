@@ -4,7 +4,7 @@ import { findRoot } from '../../../src/model/chain/resolve.js';
 import { findProperty, specificationMember, stringValue } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /**
  * The root the convention would derive: the

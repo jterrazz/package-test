@@ -8,8 +8,8 @@ import {
     nodeStart,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, Comment, LintRule, RuleContext } from '../../types.js';
 
 /**
  * A directive, not prose — a tool's instruction that happens to be a comment.

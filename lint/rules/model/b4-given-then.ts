@@ -9,7 +9,7 @@ import {
     testCalleeHasModifier,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /**
  * CONVENTIONS B4 — every test carries `// Given -` and `// Then -` (always both),

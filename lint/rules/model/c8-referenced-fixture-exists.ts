@@ -4,7 +4,7 @@ import { isRelativePath } from '../../../src/model/chain/spec-path.js';
 import { memberPropertyName, specsAnchor, stringValue } from '../../ast.js';
 import { isDirectory, isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;

@@ -1,4 +1,4 @@
-import type { ContractRequest, ContractResponseValue } from './types.js';
+import type { ContractRequest, ContractResponseValue } from './exchange.js';
 
 /**
  * A declared external interaction: what to match (`request`) and what to reply

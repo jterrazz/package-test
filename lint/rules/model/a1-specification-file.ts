@@ -1,7 +1,7 @@
 import { specificationMember } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** Both suffixes a specification wears — a `wrap` written in JSX needs the `x`. */
 const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];

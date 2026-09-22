@@ -1,4 +1,4 @@
-import type { RuleDoc } from './types.js';
+import type { RuleDoc } from './oxlint-api.js';
 
 /**
  * The rule manifest — the single source of truth for the mechanized conventions

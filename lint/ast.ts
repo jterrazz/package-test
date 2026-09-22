@@ -1,7 +1,7 @@
 import { basename, dirname, join } from 'node:path';
 
 import { isFile } from './fs-cache.js';
-import type { AstNode, Comment } from './types.js';
+import type { AstNode, Comment } from './oxlint-api.js';
 
 /**
  * Shared AST helpers for the rule files. Everything here is pure and

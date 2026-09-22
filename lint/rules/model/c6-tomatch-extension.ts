@@ -1,7 +1,7 @@
 import { memberPropertyName, stringValue } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * CONVENTIONS C6 — the extension is part of a golden file's path and mandatory

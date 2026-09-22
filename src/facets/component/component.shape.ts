@@ -3,7 +3,7 @@ import type {
     ContractRequest,
     ContractResponder,
     ContractResponse,
-} from '../../model/contracts/types.js';
+} from '../../model/contracts/exchange.js';
 import type { ComponentUi, DomMount } from '../../seams/vitest-browser/ui.js';
 import type { componentVerbs } from '../../seams/vitest-browser/vitest-browser.adapter.js';
 import type { RenderResult } from './component.result.js';

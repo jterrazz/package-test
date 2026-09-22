@@ -2,8 +2,8 @@ import { dirname, join } from 'node:path';
 
 import { listDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The provider folders that may carry data files. */
 const PROVIDERS = ['anthropic', 'http', 'openai'];

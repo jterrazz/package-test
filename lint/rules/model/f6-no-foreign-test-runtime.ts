@@ -1,8 +1,8 @@
 import { importSourceVisitor } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
 import type { FileRole } from '../../role.js';
-import type { LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * A foreign runtime, and what the framework offers in its place. The message a

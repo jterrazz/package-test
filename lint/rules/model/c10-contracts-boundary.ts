@@ -1,7 +1,7 @@
 import { importSourceVisitor } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** A specifier reaching into a provider folder — the internal half of contracts/. */
 const INTERNAL_UNIT = /(?:^|\/)contracts\/(?:anthropic|http|openai)\//u;

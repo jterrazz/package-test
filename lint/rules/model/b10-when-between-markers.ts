@@ -7,8 +7,8 @@ import {
     markerComments,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
 
 /**
  * CONVENTIONS B10 — `// When -` is optional, but where it is written it narrates

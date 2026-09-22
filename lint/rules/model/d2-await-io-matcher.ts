@@ -1,6 +1,6 @@
 import { memberPropertyName } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /** Matchers backed by IO (SQL query, disk walk, docker) — must be awaited (D2). */
 const IO_MATCHERS = new Set(['toBeEmpty', 'toBeRunning', 'toMatchDirectory', 'toMatchRows']);

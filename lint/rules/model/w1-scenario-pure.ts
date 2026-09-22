@@ -1,6 +1,6 @@
 import { child, identifierName, scenarioCallbackOf, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /**
  * CONVENTIONS W1 — a scenario is the When: the visitor interacts, the capture

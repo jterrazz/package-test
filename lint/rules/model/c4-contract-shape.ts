@@ -3,8 +3,8 @@ import { dirname, join } from 'node:path';
 import { findProperty, memberPropertyName, segments, stringValue, walk } from '../../ast.js';
 import { isDirectory, listDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The only directories a `contracts/` root may hold — the provider carriers. */
 const PROVIDERS = new Set(['anthropic', 'http', 'openai']);

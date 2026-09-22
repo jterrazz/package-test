@@ -4,7 +4,7 @@ import { RENAMED_GROUND_DIRS } from '../../../src/model/chain/ground.js';
 import { specsAnchor } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;

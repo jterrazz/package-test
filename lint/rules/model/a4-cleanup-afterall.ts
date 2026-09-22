@@ -1,7 +1,7 @@
 import { propertyKeyName, specificationMember, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** Does this declarator destructure `cleanup` out of a specification call? */
 function destructuresCleanup(node: AstNode): boolean {

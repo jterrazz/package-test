@@ -1,7 +1,7 @@
 import { child, childList, identifierName, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The helper every vitest config in this vocabulary starts from. */
 const PRESET = 'defineSpecConfig';

@@ -1,7 +1,7 @@
 import { child, identifierName, propertyKeyName, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** Is this property the RUNNER's browser block, rather than a key that shares its name? */
 function isRunnerBrowserBlock(node: AstNode): boolean {

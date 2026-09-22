@@ -3,8 +3,8 @@ import { dirname, join } from 'node:path';
 import { GROUND_SEEDS } from '../../../src/model/chain/ground.js';
 import { listDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * CONVENTIONS C7 — `.seed()` carries DATABASE state only: `seeds/` contains

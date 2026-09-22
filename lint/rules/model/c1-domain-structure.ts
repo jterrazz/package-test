@@ -2,7 +2,7 @@ import { isGroundName } from '../../../src/model/chain/ground.js';
 import { specsAnchor } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
 /** The two node suffixes a spec tree collects — `.test.ts` beside ground code, `.spec.ts` for the product. */
 const NODE_TEST_SUFFIXES = ['.spec.ts', '.test.ts'];

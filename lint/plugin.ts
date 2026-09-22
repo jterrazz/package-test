@@ -7,6 +7,7 @@
  */
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
+import type { LintPlugin, LintRule } from './oxlint-api.js';
 import { anchorOf } from './rule-code.js';
 import { c2HttpOnlyRequests } from './rules/api/c2-http-only-requests.js';
 import { d12wResponseBodyProbe } from './rules/api/d12w-response-body-probe.js';
@@ -63,7 +64,6 @@ import { j6wGivenInTheTest } from './rules/model/j6w-given-in-the-test.js';
 import { w1ScenarioPure } from './rules/model/w1-scenario-pure.js';
 import { w2TestIdStatesWhatIsMissing } from './rules/model/w2-testid-states-what-is-missing.js';
 import { w5wScenarioSettles } from './rules/model/w5w-scenario-settles.js';
-import type { LintPlugin, LintRule } from './types.js';
 
 /**
  * The `@jterrazz/test` oxlint plugin — the tool-facing lint layer that enforces

@@ -3,8 +3,8 @@ import { dirname, join } from 'node:path';
 import { GROUND_REQUESTS } from '../../../src/model/chain/ground.js';
 import { listDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * CONVENTIONS C2 — `requests/` contains only `.http` files (a request file is

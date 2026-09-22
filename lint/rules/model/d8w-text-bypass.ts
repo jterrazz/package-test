@@ -1,6 +1,6 @@
 import { child, childList, identifierName, memberPropertyName } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /** Text-oriented matchers that tempt a raw `.text` bypass (D8). */
 const TEXT_MATCHERS = new Set(['toContain', 'toMatch']);

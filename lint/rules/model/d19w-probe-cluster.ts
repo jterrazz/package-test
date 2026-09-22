@@ -8,8 +8,8 @@ import {
     walk,
 } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** How many probes on one subject make a cluster, unless the option says otherwise. */
 const DEFAULT_THRESHOLD = 3;

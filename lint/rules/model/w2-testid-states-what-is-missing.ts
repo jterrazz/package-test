@@ -1,7 +1,7 @@
 import { memberPropertyName, SCENARIO_ACTIONS, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
-import type { AstNode, Comment, LintRule, RuleContext } from '../../types.js';
 
 /** The invariant a `testId()` owes: what the element lacks, in the author's words. */
 const REASON = /\/\/\s*testId:\s*\S/u;

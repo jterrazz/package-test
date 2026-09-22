@@ -1,6 +1,6 @@
+import type { ContractRequest, ContractResponse } from '../../model/contracts/exchange.js';
 import { matchesText } from '../../model/contracts/filters.js';
 import type { TextFilter } from '../../model/contracts/filters.js';
-import type { ContractRequest, ContractResponse } from '../../model/contracts/types.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 

@@ -1,7 +1,12 @@
 import { CaptureScope } from '../matching/match.js';
 import { structuralSubset } from '../matching/structural.js';
-import { STREAM_BODY } from './types.js';
-import type { ContractRequest, ContractResponse, MatchableRequest, StreamBody } from './types.js';
+import { STREAM_BODY } from './exchange.js';
+import type {
+    ContractRequest,
+    ContractResponse,
+    MatchableRequest,
+    StreamBody,
+} from './exchange.js';
 
 function wrapJson(data: unknown): ContractResponse {
     return { status: 200, body: data };

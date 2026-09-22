@@ -1,7 +1,7 @@
 import { collectedSegments, facetOfSegments, FACETS, projectLiterals } from '../../config-shape.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
  * CONVENTIONS E4w (warning) — a project that collects a facet root is NAMED for

@@ -88,7 +88,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'src/model/contracts/types.ts',
+            'src/model/contracts/exchange.ts',
             'src/model/ports/browser.port.ts',
             'src/model/ports/cli.port.ts',
             'src/model/ports/container.port.ts',
@@ -98,7 +98,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/model/ports/server.port.ts',
             'src/model/ports/service.port.ts',
             'lint/config-shape.ts',
-            'lint/types.ts',
+            'lint/oxlint-api.ts',
         ),
         name: 'type-only declaration',
         why: 'it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse',

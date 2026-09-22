@@ -1,6 +1,6 @@
 import { memberPropertyName, stringValue } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /** Stable kebab-case job identifier: `nightly-report`, `send-welcome-emails`. */
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;

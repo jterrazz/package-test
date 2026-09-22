@@ -1,6 +1,6 @@
 import { propertyKeyName, specificationMember } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../types.js';
+import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /** Unwrap `await <expr>` down to the call expression, if that is what it is. */
 function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {

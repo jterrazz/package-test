@@ -1,7 +1,7 @@
 import { child, identifierName, isNode, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
+import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /** The globals that only exist where a document does. */
 const DOM_GLOBALS = new Set(['document', 'HTMLElement', 'navigator', 'window']);

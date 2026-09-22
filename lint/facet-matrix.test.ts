@@ -6,7 +6,7 @@ import type { CliResult } from '../src/facets/cli/cli.result.js';
 import type { CliSpecificationOptions } from '../src/facets/cli/cli.specification.js';
 import type { ComponentProjectOptions } from '../src/facets/component/component.project.js';
 import type { RenderResult } from '../src/facets/component/component.result.js';
-import type { ComponentChain, ComponentVisitor } from '../src/facets/component/component.types.js';
+import type { ComponentChain, ComponentVisitor } from '../src/facets/component/component.shape.js';
 import type { CallResult } from '../src/facets/integration/integration.result.js';
 import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.specification.js';
 import type { JobsSpecificationOptions } from '../src/facets/jobs/jobs.specification.js';

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { disabled, focused, option, selected, valued } from '../../model/elements/elements.js';
 import type { ElementRef, Visitor } from '../../model/ports/browser.port.js';
 import type { MobileVisitor } from '../../model/ports/device.port.js';
-import type { ComponentChain, ComponentVisitor } from './component.types.js';
+import type { ComponentChain, ComponentVisitor } from './component.shape.js';
 
 /**
  * The verb rows of CONVENTIONS W6, held by the COMPILER.
