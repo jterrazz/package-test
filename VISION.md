@@ -578,3 +578,17 @@ dependency bump, and a decision (rare, reasoned) is not a measurement.
 37. The brief names `make fix`; this repository's Makefile has no `fix`
     target (`npm run lint:fix` is the gesture). Add the target, or change
     the brief?
+
+## Iteration 3 — the owner's answers and the calls on questions 32–37 (2026-09-23)
+
+| # | Decision |
+| --- | --- |
+| variant A repetition | Accepted by the owner: `file()` stays on every verb, `seed` and `request` included. |
+| tracked files | Owner: every tree gate judges TRACKED files only (`git ls-files --cached`), so a baseline is the same on a clean checkout and locally; `config/` joins the ecosystem roots. |
+| 32 | The mover's gate is per FILE: a file already 17-shaped is never rewritten, whatever the rest of its tree holds. |
+| 33 | Renaming a retired directive id is idempotent, so that gesture runs on every `--fix`, outside the 16.x gate. |
+| 34 | A file outside every package is read relative to the git root, never by absolute segments. |
+| 35 | `typescript check` prints the same one summary line per ratchet file on a green run. |
+| 36 | Accepted as is. |
+| 37 | The spine grows a Makefile contract: every repository answers `make install`, `build`, `lint`, `fix`, `test` and `check`, the toolchain checks the targets exist, and the flows speak only these six. |
+| coverage | Every decision of this file and every rule has a spec that FAILS when the behaviour is broken; an audit per package maps decision → spec, an adversarial pass tries to break a "covered" row, makers fill the gaps. Locked by the catalogue meta-tests, the capability matrix and the coverage ratchet. |
