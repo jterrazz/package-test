@@ -1,3 +1,3 @@
-[error] specs/widget/widget.test.ts:9: .seed() must pass { database } — 2 SQL databases are declared (A7 — see docs/19-linting.md)
+specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): .seed() must pass { database } — 2 SQL databases are declared
 
 conventions checker: 1 error(s) found under {{workdir}}

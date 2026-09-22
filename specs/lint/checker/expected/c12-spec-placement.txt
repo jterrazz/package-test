@@ -1,4 +1,4 @@
-[error] api/users/creation.test.ts:1: a `.test.ts` under `specs/api/` specifies the assembled product — rename it `.spec.ts` (fixable: `jterrazz-test-check <root> --fix`) (C12 — see docs/19-linting.md)
-[error] api/helpers/normalize.test.ts:1: reaches no runner under the `api` facet: import `{ api }` from `api.specification.js`, or move a module test beside its module (C18 — see docs/19-linting.md)
+api/users/creation.test.ts:1:1: error jterrazz-check(c12): a `.test.ts` under `specs/api/` specifies the assembled product — rename it `.spec.ts` (fixable: `jterrazz-test-check <root> --fix`)
+api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the `api` facet: import `{ api }` from `api.specification.js`, or move a module test beside its module
 
 conventions checker: 2 error(s) found under {{workdir}}/specs

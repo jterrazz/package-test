@@ -272,6 +272,11 @@ function isDir(path: string): boolean {
 }
 
 /** The 1-based line number of a source offset. */
+/** The 1-based column of `index` on its line. */
+function columnAt(text: string, index: number): number {
+    return index - text.lastIndexOf('\n', index - 1);
+}
+
 function lineAt(text: string, index: number): number {
     let line = 1;
     for (let i = 0; i < index && i < text.length; i += 1) {
@@ -634,7 +639,7 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line,
-                message: `${rel}:${line}: result of docker-aware runner "${runner}" must be bound with \`await using\` so its containers are disposed (B5 — see docs/19-linting.md)`,
+                message: `result of docker-aware runner "${runner}" must be bound with \`await using\` so its containers are disposed`,
                 rule: 'b5',
                 severity: 'error',
             });
@@ -726,7 +731,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `${rel}:${line}: .${verb}() must pass { database } — ${count} SQL databases are declared (A7 — see docs/19-linting.md)`,
+                    message: `.${verb}() must pass { database } — ${count} SQL databases are declared`,
                     rule: 'a7',
                     severity: 'error',
                 });
@@ -734,7 +739,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `${rel}:${line}: .${verb}() must not pass { database } — a single SQL database is declared (A7 — see docs/19-linting.md)`,
+                    message: `.${verb}() must not pass { database } — a single SQL database is declared`,
                     rule: 'a7',
                     severity: 'error',
                 });
@@ -832,7 +837,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `${rel}: domain directory has ground subdirs (${groundSubdirs.join(', ')}) but no *.test.ts(x) or *.spec.yaml (C9 — see docs/19-linting.md)`,
+                message: `domain directory has ground subdirs (${groundSubdirs.join(', ')}) but no *.test.ts(x) or *.spec.yaml`,
                 rule: 'c9',
                 severity: 'error',
             });
@@ -869,7 +874,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `${relEntry}: dead fixture — no test literal in ${feature} references ${sub}/${entry.name} (C9 — see docs/19-linting.md)`,
+                    message: `dead fixture — no test literal in ${feature} references ${sub}/${entry.name}`,
                     rule: 'c9',
                     severity,
                 });
@@ -909,7 +914,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `${relEntry}: dead pool fixture — no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} references ${entry.name} (C9 — see docs/19-linting.md)`,
+                    message: `dead pool fixture — no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} references ${entry.name}`,
                     rule: 'c9',
                     severity: 'error',
                 });
@@ -923,6 +928,8 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
 
 /** One fixture reference: the path a spec named, and where it named it. */
 type FixtureReference = {
+    /** Where the path's literal starts; a document entry points at its line. */
+    column: number;
     file: string;
     line: number;
     path: string;
@@ -947,6 +954,7 @@ function collectFixtureReferences(file: string, pattern = FIXTURE_CALL): Fixture
     if (file.endsWith(SPEC_EXTENSION)) {
         try {
             return parseSpecDocument(readText(file), file).fixtures.map((fixture) => ({
+                column: 1,
                 file,
                 line: fixture.line,
                 path: fixture.path,
@@ -960,7 +968,8 @@ function collectFixtureReferences(file: string, pattern = FIXTURE_CALL): Fixture
     for (const match of text.matchAll(pattern)) {
         const path = match.groups?.path;
         if (path !== undefined && path.length > 0 && isRelativePath(path)) {
-            references.push({ file, line: lineAt(text, match.index), path });
+            const at = match.index + match[0].lastIndexOf(`${match.groups?.quote ?? ''}${path}`);
+            references.push({ column: columnAt(text, at), file, line: lineAt(text, at), path });
         }
     }
     return references;
@@ -1053,7 +1062,7 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
         return {
             file: relEntry,
             line: 1,
-            message: `${relEntry}: only ${relLeaf} reaches for this pool fixture — the pool is what SEVERAL leaves share; move it to ${relLeaf}/${GROUND_FIXTURES}/${entry} and reference it as './${GROUND_FIXTURES}/${entry}/' (C14 — see docs/19-linting.md, or run the checker with --fix)`,
+            message: `only ${relLeaf} reaches for this pool fixture — the pool is what SEVERAL leaves share; move it to ${relLeaf}/${GROUND_FIXTURES}/${entry} and reference it as directory('./${GROUND_FIXTURES}/${entry}/') — \`--fix\` does both`,
             rule: 'c14',
             severity: 'error',
         };
@@ -1106,16 +1115,17 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
         const pool = join(specsRoot, GROUND_FIXTURES);
         for (const file of listReferrers(specsRoot, pool)) {
             const leaf = dirname(file);
-            for (const { line, path } of collectFixtureReferences(file, DISK_CALL)) {
+            for (const { column, line, path } of collectFixtureReferences(file, DISK_CALL)) {
                 const target = resolve(leaf, path);
                 if (isWithin(leaf, target) || isWithin(pool, target)) {
                     continue;
                 }
                 const rel = relative(rootDir, file);
                 violations.push({
+                    column,
                     file: rel,
                     line,
-                    message: `${rel}:${line}: "${path}" leaves ${relative(rootDir, leaf)} — a leaf's ground sits beside it; ground several leaves share goes to the pool at ${relative(rootDir, pool)} (C15 — see docs/19-linting.md)`,
+                    message: `"${path}" leaves ${relative(rootDir, leaf)} — a leaf's ground sits beside it; ground several leaves share goes to the pool at ${relative(rootDir, pool)}`,
                     rule: 'c15',
                     severity: 'error',
                 });
@@ -1183,7 +1193,7 @@ export function checkSuppressionReason(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: index + 1,
-                message: `${rel}:${index + 1}: say why: \`checker-disable-next-line <id> -- <reason>\` (J9 — see docs/19-linting.md)`,
+                message: `say why: \`checker-disable-next-line <id> -- <reason>\``,
                 rule: 'j9-checker-suppression-reason',
                 severity: 'error',
             });

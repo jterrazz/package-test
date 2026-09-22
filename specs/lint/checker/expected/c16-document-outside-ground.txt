@@ -1,4 +1,4 @@
-[error] widget/expected/builds.spec.yaml:1: a `.spec.yaml` document is a SPEC, not ground — move it beside the test that runs it (C16 — see docs/19-linting.md)
-[error] widget: domain directory has ground subdirs (expected) but no *.test.ts(x) or *.spec.yaml (C9 — see docs/19-linting.md)
+widget/expected/builds.spec.yaml:1:1: error jterrazz-check(c16): a `.spec.yaml` document is a SPEC, not ground — move it beside the test that runs it
+widget:1:1: error jterrazz-check(c9): domain directory has ground subdirs (expected) but no *.test.ts(x) or *.spec.yaml
 
 conventions checker: 2 error(s) found under {{workdir}}/specs

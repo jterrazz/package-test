@@ -117,7 +117,7 @@ export function checkSpecOutsideSpecs(memberDir: string): TokenViolation[] {
         violations.push({
             file: rel,
             line: 1,
-            message: `${rel}:1: a \`.spec.ts\` lives under \`specs/<facet>/\` — move it there, or rename it \`.test.ts\` beside the module it covers (C12 — see docs/19-linting.md)`,
+            message: `a \`.spec.ts\` lives under \`specs/<facet>/\` — move it there, or rename it \`.test.ts\` beside the module it covers`,
             rule: 'c12-spec-file-name',
             severity: 'error',
         });
@@ -144,7 +144,7 @@ export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
         return {
             file: rel,
             line: 1,
-            message: `${rel}:1: a \`.test.ts\` under \`${where}\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`) (C12 — see docs/19-linting.md)`,
+            message: `a \`.test.ts\` under \`${where}\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)`,
             rule: 'c12-spec-file-name',
             severity: 'error' as const,
         };

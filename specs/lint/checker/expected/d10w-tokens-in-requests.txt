@@ -1,1 +1,1 @@
-[warn] specs/widget/requests/create.http:4: token {{string}} in a requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/19-linting.md)
+specs/widget/requests/create.http:4:1: warning jterrazz-check(d10w): token {{string}} in a requests/ file — requests are inputs, never matched; tokens are not validated here

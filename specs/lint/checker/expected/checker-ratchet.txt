@@ -1,4 +1,4 @@
-[error] specs/widget/seeds/dead.sql: dead fixture — no test literal in widget references seeds/dead.sql (C9 — see docs/19-linting.md)
+specs/widget/seeds/dead.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in widget references seeds/dead.sql
 baseline-ratchet  test.baseline.json  jterrazz-check/c9 has 1 finding(s) and no entry — it is new debt
 baseline-ratchet  test.baseline.json  jterrazz-check/c14 is at zero — the ratchet moved, delete its entry
 Run 'jterrazz-test-check baseline' to record where the project stands.

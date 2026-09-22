@@ -301,13 +301,8 @@ function projectFindings(root: string): TokenViolation[] {
         for (const violation of runAllChecks(specsRoot)) {
             // A tree pass reports relative to the tree it walked; the
             // Project-wide run has to say WHICH tree, or two members' findings
-            // Read alike — in the path it reports AND in the line a human
-            // Reads, which begins with that path.
-            found.push({
-                ...violation,
-                file: `${prefix}/${violation.file}`,
-                message: `${prefix}/${violation.message}`,
-            });
+            // Read alike.
+            found.push({ ...violation, file: `${prefix}/${violation.file}` });
         }
     }
     found.push(...checkMembers(root));

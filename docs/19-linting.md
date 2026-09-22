@@ -405,8 +405,18 @@ jterrazz-test-check specs                                # one specs tree
 jterrazz-test-check apps/console                         # a project root: every specs tree below it
 jterrazz-test-check --member packages/web                # one workspace member
 jterrazz-test-check --format json                        # every root, every member
+jterrazz-test-check baseline                             # record test.baseline.json
 npx jterrazz-test-check specs   # or `node node_modules/@jterrazz/test/dist/checker.js specs`
 ```
+
+**It prints the line oxlint's findings normalise to**, the compiler convention every editor's problem matcher parses — one line per finding, the message last:
+
+```
+specs/api/orders/create.spec.ts:7:5: error jterrazz-check(c15): "../users/fixtures/x/" leaves api/orders — …
+specs/api/requests/x.http:3:1: warning jterrazz-check(d10): token {{uuid}} in a requests/ file — …
+```
+
+The code is the convention code — the id's first segment — so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A golden that proves a finding keeps only `file:line:column  jterrazz-check(<code>)`: `lintReport`, exported from the package root, normalises oxlint's `unix` lines and these alike, and drops every other line — a rule's spec document binds its runner with `specification.cli(bin, { transform: lintReport })`, so a reworded message moves no golden.
 
 **A path is read for what it IS.** A directory with a `specs` segment in its
 path is a tree, walked as one. Anything else is a project root, and takes the
@@ -426,7 +436,7 @@ What it checks:
 - **the tree passes** — what a folder says about itself, which no single file can answer for: a facet folder holds the runner its name promises (C20), a spec under it reaches that runner (C18), a `.test.ts` under a facet folder wears the wrong word and a `.spec.ts` outside every specs tree wears the other one (C12, fixable), a document is never filed under ground (C16), and ground a single spec of a leaf reads belongs beside that spec (C21w, warning).
 - **J9** — every `checker-disable-next-line` / `checker-disable-line` carries its ` -- <reason>`. The toolchain's own suppression gate reads `oxlint-disable*` and nothing else, so this channel carries its own.
 
-It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). Exit 1 on any error, 0 when only warnings remain.
+It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). The exit code is the ratchet's ([below](#the-ratchet-testbaselinejson)): with no `test.baseline.json`, 1 on any error and 0 when only warnings remain.
 
 ## The member pass, and the JSON contract
 

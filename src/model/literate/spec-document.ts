@@ -162,10 +162,13 @@ export type SpecRunUpdate = {
 /** A refusal from the grammar, carrying the line it happened on. */
 export class SpecSyntaxError extends Error {
     readonly line: number;
+    /** The refusal alone, without the position the message leads with. */
+    readonly reason: string;
 
     constructor(fileName: string, line: number, message: string) {
         super(`${fileName}:${line}: ${message}`);
         this.line = line;
+        this.reason = message;
         this.name = 'SpecSyntaxError';
     }
 }

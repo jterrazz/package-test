@@ -162,6 +162,9 @@ export {
     type RelativePath,
 } from './model/chain/spec-path.js';
 
+// A linter's report as a golden keeps it — the transform a rule's specs share
+export { lintReport } from './model/result/lint-report.js';
+
 // Matcher options (per-call `toMatch(file(…), { frozen })`)
 export type { MatchFixtureOptions } from './model/result/match-options.js';
 
