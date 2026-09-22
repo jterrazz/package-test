@@ -152,25 +152,26 @@ runs:
 
 ## What the branches show, and what they defer
 
-| Area             | package-test                                                                                                                   | package-typescript                           | signews-api         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- | ------------------- |
-| §1 verbs + types | shown: the six verbs, `RelativePath` exported, the type and runtime refusals, own specs and lint fixtures migrated             | its own `.spec.yaml` migrated                | migrated            |
-| §2 folders       | shown: renamed everywhere, C1 refuses a reserved domain, C13 flipped with the 16→17 mover as its `--fix`, C15 restated         | ignore globs + own specs renamed             | renamed             |
-| §3 names         | shown: the three `types` sites renamed (`oxlint-api`, `exchange`, `component.shape`)                                           | the rule, tested                             | ratchet delta shown |
-| §4 spine         | shown: `src/lint` → `lint/`, I1 reads the spine; 4 rules as `.spec.yaml`. Deferred: 81 rule specs, `lint/` one folder per rule | the spine check; `rules/` → `lint/`          | follows             |
-| §5 knowledge     | shown: reference, typedoc, skill references and cards deleted; SKILL.md 106 lines, held by a meta-test                         | `docs` command, typedoc, Docs (sync) deleted | —                   |
-| §6 exact names   | shown: the window removed from the three adapters, with its commands and its name reading                                      | —                                            | —                   |
+| Area             | package-test                                                                                                                                           | package-typescript                                                             | signews-api         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------- |
+| §1 verbs + types | shown: the six verbs, `RelativePath` exported, the type and runtime refusals, own specs and lint fixtures migrated                                     | own documents and chains on the File/Directory verbs (the mover, then by hand) | migrated            |
+| §2 folders       | shown: renamed everywhere, C1 refuses a reserved domain, C13 flipped with the 16→17 mover as its `--fix`, C15 restated, the bare-ground bridge deleted | ignore globs; own specs on the bare ground, its underscore bridge deleted      | renamed             |
+| §3 names         | shown: the three `types` sites renamed (`oxlint-api`, `exchange`, `component.shape`)                                                                   | the rule, tested                                                               | ratchet delta shown |
+| §4 spine         | shown: `src/lint` → `lint/`, I1 reads the spine; 4 rules as `.spec.yaml`. Deferred: 81 rule specs, `lint/` one folder per rule                         | the spine check (`bin/`, `lib/`, `presets/` reported); `rules/` → `lint/`      | follows             |
+| §5 knowledge     | shown: reference, typedoc, skill references and cards deleted; SKILL.md 106 lines, held by a meta-test                                                 | `docs` command, typedoc, Docs (sync) deleted                                   | —                   |
+| §6 exact names   | shown: the window removed from the three adapters, with its commands and its name reading                                                              | —                                                                              | —                   |
 
 Each branch keeps one commit per unit, so the owner can read the vision
 commit by commit.
 
+The two package clones consume each other: each declares the other as a
+`file:../<clone>` devDependency, installed as a packed copy (`install-links`
+in its `.npmrc`), so the toolchain judges package-test and package-test runs
+package-typescript's specs. Each clone carries it in one `build(vision)`
+commit, prototype plumbing that never reaches the release.
+
 ### Deferred in package-test
 
-- **The toolchain bridge.** The installed `@jterrazz/typescript` 10.3.1 still
-  names the underscored folders, so this repository states the bare ground
-  itself: tsconfig `exclude`, oxlint and oxfmt `ignorePatterns`, knip `ignore`,
-  and the `--ignore-pattern` pair its `lint` scripts hand the tree gates. All
-  of it goes when the package-typescript 11 globs ship.
 - **`lint/` one folder per rule.** The rules moved to the root as they were,
   `lint/rules/<facet>/<rule>.ts` beside its test.
 - **The lint rule specs still to convert in the refactor** — 81 files under
@@ -214,7 +215,11 @@ commit by commit.
    lives under `src/` too (`src/model/result/expected/`,
    `src/runner/fixtures/`). Are the four names reserved everywhere a test
    stands on a file, and do the ignore globs become
-   `**/{fixtures,expected}/**` rather than `specs/**/…`?
+   `**/{fixtures,expected}/**` rather than `specs/**/…`? Until it is
+   answered, package-test's oxlint config states
+   `src/**/{fixtures,expected}/**` itself: the toolchain's globs stop at
+   `specs/`, and e2-preset-config would judge the fixture project's
+   `vitest.config.ts`.
 9. The toolchain's tree sweep also treats `_stubs/` and `_binary/` as ground.
    17 has four names and only four: this branch moved its `_binary/` code
    ground under `fixtures/binary/`. Do `_stubs`/`_binary` retire from the
