@@ -1,0 +1,10 @@
+description: --fix renames a module test's 16 ground folder and names its golden by its path
+fixture: ./fixtures/on-16-module/
+runs:
+    - command: checker --fix
+      exit: 0
+      files:
+          src/report/_expected/total.json: absent
+          src/report/expected/total.json: exists
+          src/report/report.test.ts:
+              contains: toMatch(file('./expected/total.json'))

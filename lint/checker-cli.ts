@@ -4,8 +4,9 @@ import { existsSync, readFileSync, renameSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { fixPoolFixtures } from './checker-crossfile.js';
-import { checkMember, checkMembers, discoverSpecRoots } from './checker-member.js';
-import { migrateTo17 } from './checker-migration.js';
+import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
+import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
+import type { Migration } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
 import { formatViolation, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
@@ -86,7 +87,8 @@ import { codeOf } from './rule-code.js';
  * and rewrites the literals that named it, and C12, which RENAMES a `.test.ts`
  * under a facet folder to `.spec.ts` — then checks what is left, so a run that
  * fixes everything exits 0. With no path it applies them to every `specs/` root
- * it discovers: `--fix` means the same thing whichever run the operator typed.
+ * it discovers, and moves the module tests of every member that still stand on
+ * a 16 folder: `--fix` means the same thing whichever run the operator typed.
  *
  * After a C12 rename it NAMES the entries of the owning member's configs that
  * the rename BROKE — a glob whose prefix covers a file it moved, or a literal
@@ -328,6 +330,11 @@ function projectFindings(root: string): TokenViolation[] {
             found.push({ ...violation, file: `${prefix}/${violation.file}` });
         }
     }
+    if (fix) {
+        for (const memberDir of discoverMembers(root)) {
+            reportMigration(migrateModuleTestsTo17(memberDir, renameKeepingHistory));
+        }
+    }
     found.push(...checkMembers(root));
     return found;
 }
@@ -502,9 +509,8 @@ function staleIncludes(root: string, renamed: Rename[]): string[] {
     return paths.flatMap((path) => staleEntriesIn(path, owner, renamed));
 }
 
-/** Apply every rewritable pass over one tree, printing what it did. */
-function applyFixes(root: string): void {
-    const migration = migrateTo17(root, renameKeepingHistory);
+/** Print what the 16 → 17 mover did. */
+function reportMigration(migration: Migration): void {
     for (const move of migration.renamed) {
         console.log(`conventions checker: renamed ${move} (C13)`);
     }
@@ -513,6 +519,11 @@ function applyFixes(root: string): void {
             `conventions checker: named ${migration.rewritten.length} file(s)' ground by path (C13)`,
         );
     }
+}
+
+/** Apply every rewritable pass over one tree, printing what it did. */
+function applyFixes(root: string): void {
+    reportMigration(migrateTo17(root, renameKeepingHistory));
     const renamed = fixSpecSuffixes(root);
     for (const { from, to } of renamed) {
         console.log(

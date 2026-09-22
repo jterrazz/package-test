@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { c13BareGround } from './c13-bare-ground.js';
 
 RuleTester.describe = describe;
@@ -17,6 +18,9 @@ const ruleTester = new RuleTester();
 // Against the shared E2E fixture trees rather than on synthetic paths.
 const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
 
+/** A package whose module test still stands on the 16 `_expected/`. */
+const MODULE_16 = checkoutUnder('work', ['src/report/_expected']);
+
 ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
     invalid: [
         // The violation fixture keeps the 16.x `_expected/` beside its spec.
@@ -24,6 +28,12 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
             code: 'test("x", () => {});',
             errors: 1,
             filename: `${FIXTURES}/c13-bare-ground/specs/app/widget/widget.test.ts`,
+        },
+        // A module test stands on ground as surely as a spec: its 16 folder is named too.
+        {
+            code: 'test("x", () => {});',
+            errors: 1,
+            filename: `${MODULE_16}/src/report/report.test.ts`,
         },
     ],
     valid: [
@@ -38,7 +48,7 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
             code: 'export const helper = () => {};',
             filename: `${FIXTURES}/c13-bare-ground/specs/app/widget/helper.ts`,
         },
-        // Outside a specs/ tree the rule is inert.
+        // A module test with no 16 folder beside it is on 17.
         {
             code: 'test("x", () => {});',
             filename: '/repo/src/specification/matching/match.test.ts',

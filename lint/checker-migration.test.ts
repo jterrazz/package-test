@@ -3,12 +3,12 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { migrateTo17 } from './checker-migration.js';
+import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
 
-/** A specs tree written for 16.x, on disk. */
-function tree16(files: Record<string, string>): string {
+/** A tree written for 16.x, on disk: a specs tree, or (`at: ''`) a member. */
+function tree16(files: Record<string, string>, at = 'specs'): string {
     const scratch = mkdtempSync(join(tmpdir(), 'migrate-'));
-    const root = join(scratch, 'specs');
+    const root = join(scratch, at);
     for (const [path, content] of Object.entries(files)) {
         mkdirSync(dirname(join(root, path)), { recursive: true });
         writeFileSync(join(root, path), content);
@@ -224,5 +224,65 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
                 '',
             ].join('\n'),
         );
+    });
+
+    test('moves the module tests of a member that still stand on a 16 folder, and only those', () => {
+        // Given - a member whose module test reads a 16 golden, beside a nested package and a specs tree it must not walk
+        const member = tree16(
+            {
+                'package.json': '{}\n',
+                'packages/nested/package.json': '{}\n',
+                'packages/nested/src/x/_expected/y.txt': '',
+                'specs/cli/build/build.spec.ts': "expect(result.stdout).toContain('built');\n",
+                'src/report/_expected/total.txt': '',
+                'src/report/report.test.ts': [
+                    "import { match } from '../index.js';",
+                    "expect(accessor).toMatch('total.txt');",
+                    "expect(accessor.stdout).toContain('total');",
+                    '',
+                ].join('\n'),
+            },
+            '',
+        );
+
+        // When - the mover runs over the member's module tests
+        const migration = migrateModuleTestsTo17(member, renameSync);
+
+        // Then - the folder is bare, the golden is named by its path, the stream compares its text; the nested package and specs/ are untouched
+        expect(migration).toStrictEqual({
+            renamed: ['src/report/_expected → src/report/expected'],
+            rewritten: ['src/report/report.test.ts'],
+        });
+        expect(readFileSync(join(member, 'src/report/report.test.ts'), 'utf8')).toBe(
+            [
+                "import { file } from '@jterrazz/test';",
+                '',
+                "import { match } from '../index.js';",
+                "expect(accessor).toMatch(file('./expected/total.txt'));",
+                "expect(accessor.stdout.text).toContain('total');",
+                '',
+            ].join('\n'),
+        );
+        expect(readFileSync(join(member, 'specs/cli/build/build.spec.ts'), 'utf8')).toBe(
+            "expect(result.stdout).toContain('built');\n",
+        );
+    });
+
+    test('leaves the module tests of a member on 17 as they are', () => {
+        // Given - a member whose module tests stand on bare ground only
+        const member = tree16(
+            {
+                'package.json': '{}\n',
+                'src/report/expected/total.txt': '',
+                'src/report/report.test.ts': "expect(() => seed('rows.sql' as never)).toThrow();\n",
+            },
+            '',
+        );
+
+        // Then - nothing to rename, nothing to rewrite
+        expect(migrateModuleTestsTo17(member, renameSync)).toStrictEqual({
+            renamed: [],
+            rewritten: [],
+        });
     });
 });

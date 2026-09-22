@@ -3,6 +3,7 @@ import { dirname, join, relative, sep } from 'node:path';
 
 import { GROUND_FIXTURES, isGroundName, RENAMED_GROUND_DIRS } from '../src/model/chain/ground.js';
 import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
+import { isTestFileName } from './role.js';
 
 /**
  * The 16 → 17 mover — what `jterrazz-test-check --fix` does to a tree written
@@ -11,7 +12,10 @@ import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
  * It runs only on what C13 still finds 16.x-shaped: a tree holding at least
  * one `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder. A tree
  * with none is on 17 and is left exactly as it is — its bare strings are
- * values, or the deliberate refusals a negative spec exists to keep.
+ * values, or the deliberate refusals a negative spec exists to keep. Two trees
+ * are walked: a `specs/` tree, and the module tests of a member (every test
+ * outside `specs/`, never ground, never a nested package), each judged 16 or
+ * 17 on its own folders.
  *
  * Its gestures, in this order:
  *
@@ -427,4 +431,39 @@ export function migrateTo17(root: string, rename: Rename): Migration {
         { files: () => specFiles(root), folders: oldGroundFolders(root), specsRoot: root },
         rename,
     );
+}
+
+/**
+ * Every module test of a member and every 16 ground folder they stand on —
+ * outside `specs/` (the tree pass's), never inside ground, never into a
+ * nested package.
+ */
+function moduleTests(member: string): Omit<Walked, 'specsRoot'> {
+    const files: string[] = [];
+    const folders: string[] = [];
+    const walk = (dir: string): void => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+            const path = join(dir, entry.name);
+            if (entry.isFile() && isTestFileName(entry.name)) {
+                files.push(path);
+            } else if (entry.isDirectory() && RENAMED_GROUND_DIRS[entry.name] !== undefined) {
+                folders.push(path);
+            } else if (
+                entry.isDirectory() &&
+                !SKIPPED.has(entry.name) &&
+                !isGroundName(entry.name) &&
+                entry.name !== 'specs' &&
+                !existsSync(join(path, 'package.json'))
+            ) {
+                walk(path);
+            }
+        }
+    };
+    walk(member);
+    return { files: () => files, folders };
+}
+
+/** Apply the 16 → 17 migration to the module tests of a member that still stand on a 16 folder. */
+export function migrateModuleTestsTo17(member: string, rename: Rename): Migration {
+    return migrate(member, { ...moduleTests(member), specsRoot: join(member, 'specs') }, rename);
 }

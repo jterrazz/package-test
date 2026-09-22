@@ -258,14 +258,14 @@ export const RULE_DOCS = {
     'c13-bare-ground': {
         channel: 'statique',
         convention:
-            "Under `specs/`, a spec's ground carries a bare, reserved name: `fixtures/`, `expected/`, `requests/`, `seeds/`. An `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` directory is the 16.x name — an error naming the rename. The rule and its mover are the 16 → 17 migration: they retire in 17.1. The mover (`--fix`) runs only on a tree the rule still finds 16.x-shaped, and leaves a tree with no 16 folder as it is.",
+            "The ground a test stands on carries a bare, reserved name: `fixtures/`, `expected/`, `requests/`, `seeds/` — a spec's under `specs/`, and a module test's beside its module. An `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` directory beside a test (or as the pool) is the 16.x name — an error naming the rename. The rule and its mover are the 16 → 17 migration: they retire in 17.1. The mover (`--fix`) moves every `specs/` tree and every member's module tests the rule still finds 16.x-shaped, and leaves a tree with no 16 folder as it is.",
         facet: 'model',
         family: 'C',
-        fix: 'Rename the directory to its bare name, and the paths that name it (`jterrazz-test-check specs --fix` does both).',
+        fix: 'Rename the directory to its bare name, and the paths that name it (`jterrazz-test-check --fix` does both).',
         id: 'C13',
         rationale:
             'Every path names its folder in full, so the old name still runs — and a repository that keeps it speaks two dialects of one law. The rule names the rename instead of letting the two drift.',
-        reach: 'specs',
+        reach: 'tests',
     },
     'c2-http-only-requests': {
         channel: 'statique',
