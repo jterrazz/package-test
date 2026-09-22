@@ -258,3 +258,34 @@ commit, prototype plumbing that never reaches the release.
     workspace root's config also reaches `apps/<member>/specs/…`.
 18. A Names finding is now recorded on the ratchet as `names/<rule>`: the
     ratchet has three reporters (oxlint, the test checker, Names).
+
+## Iteration 1 — the owner's answers (2026-09-22)
+
+| # | Decision |
+| --- | --- |
+| baseline | The ratchet splits by owner: `typescript.baseline.json` (oxlint's own rules, Names) and `test.baseline.json` (every `jterrazz(*)` static rule and every checker finding). Each package's command writes its own file. |
+| 1, 13 | A repository may carry roots beyond the spine, but only CODIFIED ones: the toolchain knows the ecosystem-imposed roots by name (npm `bin/`, framework roots like `public/`, `app/`, `ios/`, `android/`, `prisma/`), and a repository declares any other in its config, each with a reason. Code the package ships goes under `src/` (package-typescript's `lib/` and `presets/` move there). The composable base packages keep a permissive list. |
+| 2 | Confirmed: no `lint/` in a repository that ships no rules. |
+| 3, 5, 7 | Wait for the §1 variant choice (below). `runFile` is refused as a name. |
+| 4 | `snapshots/`, `golden/`, `goldens/`, `__snapshots__/` are refused: only `expected/`. |
+| 6 | `toMatch` is Vitest's, with no override: a stream is compared as `result.stdout.text`. |
+| 8 | The four ground names are reserved everywhere a test stands on a file, not only under `specs/`. A rule makes production code unable to import test material: a non-test module importing a `*.test.ts`, a `*.fixtures.ts` or anything under a ground folder is an error. |
+| 9 | Only what sets a spec's world up is codified. `_binary/` and `_stubs/` retire: a program a spec runs is a fixture. No fifth name. |
+| 10 | Polish the report normalisation and publish it once (the rule specs of both packages use it). |
+| 11 | The checker prints the same line as oxlint (proposal below); no legacy format kept. |
+| 12 | No legacy: the 16→17 mover retires in 17.1. |
+| 14 | `setup` is allowed. |
+| 15 | `core` is allowed. |
+| 16, 17, 18 | Accepted as proposed. |
+
+### Proposed report line (question 11)
+
+Both channels print the compiler convention every editor's problem matcher
+parses, and a golden keeps only the part that proves the finding:
+
+```
+report  specs/api/orders/create.spec.ts:7:5: error jterrazz-check(c15): a path may leave its leaf only into specs/fixtures/
+report  src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module
+golden  specs/api/orders/create.spec.ts:7:5  jterrazz-check(c15)
+golden  src/orphan.test.ts:1:1  jterrazz(i2-sibling-test-naming)
+```
