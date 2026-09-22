@@ -438,10 +438,8 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
                 const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
                 // A decision record is written once and never edited: it names
                 // The rules its decision REMOVED, and those ids resolve to
-                // Nothing by design. The generated reference is nobody's prose.
-                const historical =
-                    path.startsWith('docs/reference/') || path.startsWith('docs/decisions/');
-                if (path.endsWith('.md') && !historical) {
+                // Nothing by design.
+                if (path.endsWith('.md') && !path.startsWith('docs/decisions/')) {
                     found.push(path);
                 }
             }
@@ -777,15 +775,13 @@ function coordinatesOf(from: string, text: string): Coordinate[] {
     return found;
 }
 
-/** Every markdown page a reader follows, hand-written or generated. */
+/** Every markdown page a reader follows. */
 function pages(): string[] {
     const found: string[] = ['README.md', 'AGENTS.md', 'TODO.md'];
     for (const root of ['docs', 'skills']) {
         for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
             const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
-            // The typedoc projection is regenerated from a clone, not written
-            // Here, and its internal links are typedoc's own.
-            if (path.endsWith('.md') && !path.startsWith('docs/reference/')) {
+            if (path.endsWith('.md')) {
                 found.push(path);
             }
         }

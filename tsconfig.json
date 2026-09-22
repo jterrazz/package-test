@@ -6,14 +6,5 @@
             "@jterrazz/test": ["./src/browser/index.ts"]
         }
     },
-    "include": ["${configDir}/**/*.ts", "${configDir}/**/*.tsx", "${configDir}/**/*.js"],
-    "exclude": [
-        "${configDir}/node_modules",
-        "${configDir}/dist",
-        "${configDir}/.artifacts",
-        "${configDir}/specs/**/fixtures",
-        "${configDir}/specs/**/expected",
-        "${configDir}/src/**/fixtures",
-        "${configDir}/src/**/expected"
-    ]
+    "include": ["${configDir}/**/*.ts", "${configDir}/**/*.tsx", "${configDir}/**/*.js"]
 }
