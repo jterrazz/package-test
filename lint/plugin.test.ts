@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
-import { anchor, renderRules, spliceCatalog } from './catalog.js';
+import { anchor, spliceCatalog } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
 import {
     catalog,
@@ -213,12 +213,6 @@ describe('conventions catalogue — generation freshness (meta-test)', () => {
         for (const id of links) {
             expect(generated, `dead anchor docs/19-linting.md#${id}`).toContain(anchor(id));
         }
-    });
-
-    test('the generated skill rule reference is byte-identical to a fresh generation', () => {
-        // Given - the committed agent-facing rule reference
-        // Then - the generator reproduces it exactly (run `npm run docs`)
-        expect(renderRules()).toBe(read('skills/jterrazz-test/references/rules.md'));
     });
 });
 

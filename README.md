@@ -193,5 +193,5 @@ Node 24 and vitest 5 are the required peers; everything else — a browser, a da
 ## Docs
 
 - The corpus: [docs/README.md](docs/README.md) — the spine, one chapter per kind, the shared references, the enforcement.
-- API reference: [docs/reference/](docs/reference/) — compiled from source by `npm run docs`.
-- Agent skill: [skills/jterrazz-test/](skills/jterrazz-test/) — the fork, the mental model, and a generated signature card per kind.
+- The API: the types the package publishes — your editor reads them.
+- Agent skill: [skills/jterrazz-test/SKILL.md](skills/jterrazz-test/SKILL.md) — which kind of test, the pitfalls, and the chapter to read next.

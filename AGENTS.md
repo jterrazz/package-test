@@ -29,7 +29,7 @@ The corpus is `docs/` + `README.md`, mapped by [`docs/README.md`](docs/README.md
 | The principles, and what review must judge        | `docs/18-conventions.md`                       |
 | Rule ids, channels, the generated catalogue       | `docs/19-linting.md`                           |
 
-Decisions this package alone took are in `docs/decisions/`. The agent-facing projection of the corpus is `skills/jterrazz-test/` — a routing layer, not a second copy.
+Decisions this package alone took are in `docs/decisions/`. The agent-facing skill is `skills/jterrazz-test/SKILL.md` — a short, hand-written routing page, not a second copy.
 
 ## Setup & commands
 
@@ -38,13 +38,13 @@ npm install                       # or make install
 npm run build                     # MUST precede lint and the unit project
 npm run lint                      # typescript check + the conventions checker
 npm test                          # every project — needs Docker and chromium
-npm run docs                      # regenerate the three committed projections
+npm run docs                      # regenerate the generated tables and the schema
 npx vitest --run --project unit   # the loop, no infrastructure
 ```
 
 ## Standing rules
 
 - **A discovery grows a guard, in the same change** (rule K1) — a static rule, a meta-test, or a runtime refusal, or an explicit note of why no channel can hold it.
-- **Never edit a generated file.** `docs/reference/`, the catalogue between the `GENERATED:catalog` markers of `docs/19-linting.md`, `skills/jterrazz-test/references/rules.md` and `schema/spec.schema.json` all come from `npm run docs`. A hand edit fails the sync check and the freshness meta-test.
-- **Four things land with the change that makes them true** — the guard, the regenerated projections, the chapter the behaviour falsified, and the skill when the public surface moved. Each is stated once, in `docs/02-developing.md` § What a change owes.
+- **Never edit a generated table.** The catalogue between the `GENERATED:catalog` markers of `docs/19-linting.md`, the other `GENERATED` blocks of the chapters and `schema/spec.schema.json` all come from `npm run docs`. A hand edit fails the freshness meta-test.
+- **Four things land with the change that makes them true** — the guard, the regenerated tables, the chapter the behaviour falsified, and the skill when the public surface moved. Each is stated once, in `docs/02-developing.md` § What a change owes.
 - **A rule belongs in the code, a principle in the constitution.** `lint/manifest.ts` for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.

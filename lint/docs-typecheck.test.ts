@@ -18,26 +18,23 @@ import {
  */
 const ROOT = resolve(import.meta.dirname, '..');
 const DOCS = resolve(ROOT, 'docs');
-const CARDS = resolve(ROOT, 'skills/jterrazz-test/references');
 const README = resolve(ROOT, 'README.md');
+const SKILL = resolve(ROOT, 'skills/jterrazz-test/SKILL.md');
 const INDEX_MODULE = resolve(ROOT, 'src/index.js');
 const TSC_BIN = resolve(ROOT, 'node_modules/typescript/bin/tsc');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 
 /**
- * Every framework code block published to a consumer: the `docs/` reference,
- * the README headline samples, and the generated signature cards an agent
- * reads before writing a test. All three are surfaces a stale sample would
- * ship through, so all three are guarded — the cards especially, because
- * nobody proof-reads a generated file.
+ * Every framework code block published to a reader: the `docs/` chapters, the
+ * README headline samples, and the skill an agent reads before writing a test.
+ * All three are surfaces a stale sample would ship through, so all three are
+ * guarded.
  */
 function frameworkBlocks(): DocBlock[] {
-    const markdowns: string[] = [readFileSync(README, 'utf8')];
-    for (const directory of [DOCS, CARDS]) {
-        for (const file of readdirSync(directory)) {
-            if (file.endsWith('.md')) {
-                markdowns.push(readFileSync(resolve(directory, file), 'utf8'));
-            }
+    const markdowns: string[] = [readFileSync(README, 'utf8'), readFileSync(SKILL, 'utf8')];
+    for (const file of readdirSync(DOCS)) {
+        if (file.endsWith('.md')) {
+            markdowns.push(readFileSync(resolve(DOCS, file), 'utf8'));
         }
     }
     return markdowns.flatMap((markdown) =>
@@ -135,14 +132,10 @@ describe('docs-typecheck — the corpus does not await a sync matcher', () => {
         // Given - every page a consumer is routed to
         const pages = [
             { name: 'README.md', text: readFileSync(README, 'utf8') },
-            ...[DOCS, CARDS].flatMap((directory) =>
-                readdirSync(directory)
-                    .filter((file) => file.endsWith('.md'))
-                    .map((file) => ({
-                        name: file,
-                        text: readFileSync(resolve(directory, file), 'utf8'),
-                    })),
-            ),
+            { name: 'SKILL.md', text: readFileSync(SKILL, 'utf8') },
+            ...readdirSync(DOCS)
+                .filter((file) => file.endsWith('.md'))
+                .map((file) => ({ name: file, text: readFileSync(resolve(DOCS, file), 'utf8') })),
         ];
 
         // Then - none of them awaits a matcher the compiler types as sync

@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { COLUMNS } from './facet-matrix.js';
-import { layers, matrixRows, renderMatrix, spliceLayers, spliceMatrix } from './matrix.js';
+import { layers, matrixRows, spliceLayers, spliceMatrix } from './matrix.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
@@ -52,11 +52,10 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
-    test('the committed projections are byte-identical to a fresh generation', () => {
-        // Given - the two files `npm run docs` writes from the matrix
-        // Then - regenerating reproduces them exactly (edit the source, not the projection)
+    test('the committed projection is byte-identical to a fresh generation', () => {
+        // Given - the matrix `npm run docs` splices into chapter 03
+        // Then - regenerating reproduces it exactly (edit the source, not the projection)
         expect(spliceMatrix(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
-        expect(renderMatrix(ROOT)).toBe(read('skills/jterrazz-test/references/matrix.md'));
     });
 
     test('the layered reading is byte-identical to a fresh generation', () => {

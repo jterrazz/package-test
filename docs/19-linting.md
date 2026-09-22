@@ -87,7 +87,7 @@ One behaviour does not carry over, and nothing restores it. `prefer-lowercase-ti
 
 ## The rule catalogue
 
-The catalogue below is **generated** from `lint/manifest.ts` (each rule carries its normative text as `meta.docs`) — do not edit it by hand; run `npm run docs`. It is the **full seven-channel catalogue** (statique, upstream, checker, runtime, type, meta, process), grouped by convention family. The same set, trimmed to what an agent needs to apply and cite a rule, is regenerated alongside it into [`skills/jterrazz-test/references/rules.md`](../skills/jterrazz-test/references/rules.md).
+The catalogue below is **generated** from `lint/manifest.ts` (each rule carries its normative text as `meta.docs`) — do not edit it by hand; run `npm run docs`. It is the **full seven-channel catalogue** (statique, upstream, checker, runtime, type, meta, process), grouped by convention family.
 
 One convention code may carry more than one ROW, when one convention is held over two shapes: `d5-spec-volatile-literal` and `d5w-spec-pinned-value` are D5's two halves, and `c12-spec-file-name` is one row with two clauses on two runs. A finding is published as `jterrazz-check(<code>)`, where the code is the id's first segment (`lint/rule-code.ts`) — so a ratchet key names a convention, never a pass, and one defect is one line of debt.
 
@@ -460,12 +460,9 @@ The same binary also runs the analyses oxlint structurally cannot — those that
 
 ## The generated catalogue (docs-as-code)
 
-The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `lint/manifest.ts`), and the manifest assembles all seven channels — statique (the oxlint rules), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like D11/K1). A generator (`lint/catalog.ts`, bundled as `dist/catalog.js`, chained into `npm run docs` **before** `typescript docs`) renders two committed projections deterministically:
+The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `lint/manifest.ts`), and the manifest assembles all seven channels — statique (the oxlint rules), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like D11/K1). A generator (`lint/catalog.ts`, bundled as `dist/catalog.js`, what `npm run docs` runs) splices the **full catalogue above** between GENERATED markers in this file, deterministically.
 
-- the **full catalogue above**, spliced between GENERATED markers in this file;
-- **[`skills/jterrazz-test/references/rules.md`](../skills/jterrazz-test/references/rules.md)** — the same set, trimmed for agents.
-
-The narrative constitution lives in [18 — Conventions](18-conventions.md): principles, the enforcement channels, non-mechanizable criteria, and design rationales — no per-rule normative lines, so there is no duplication. A meta-test (`lint/plugin.test.ts`) guards the contract: **freshness** (re-running the generator reproduces both committed projections byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`; every manifest entry maps to a plugin rule, a checker pass, or a documented runtime/process rule), plus the standing E2E inventory (every rule has a `specs/lint/**` spec + fixture pair).
+The narrative constitution lives in [18 — Conventions](18-conventions.md): principles, the enforcement channels, non-mechanizable criteria, and design rationales — no per-rule normative lines, so there is no duplication. A meta-test (`lint/plugin.test.ts`) guards the contract: **freshness** (re-running the generator reproduces the committed catalogue byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`; every manifest entry maps to a plugin rule, a checker pass, or a documented runtime/process rule), plus the standing E2E inventory (every rule has a `specs/lint/**` spec + fixture pair).
 
 ## Doc typechecking (meta-test)
 
