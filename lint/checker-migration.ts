@@ -8,19 +8,27 @@ import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
  * The 16 → 17 mover — what `jterrazz-test-check <specs> --fix` does to a tree
  * written for 16.x.
  *
- * Two gestures, in this order:
+ * Three gestures, in this order:
  *
  * 1. every `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` folder takes its
  *    bare name (C13), deepest first;
- * 2. every call and document names its file by the path from the spec:
- *    `.seed('x.sql')` → `.seedFile('./seeds/x.sql')`, `.request('x.http')` →
- *    `.requestFile('./requests/x.http')`, `.fixture('$FIXTURES/app/')` →
- *    `.fixtureDirectory('../../fixtures/app/')`, `toMatch('help.txt')` →
- *    `toMatchFile('./expected/help.txt')`, a golden tree → `toMatchDirectory`,
- *    and a document's `fixture:` the same way.
+ * 2. every call names the disk with `file()` or `directory()`, by the path from
+ *    the spec: `.seed('x.sql')` → `.seed(file('./seeds/x.sql'))`,
+ *    `.request('x.http')` → `.request(file('./requests/x.http'))`,
+ *    `.fixture('$FIXTURES/app/')` → `.fixture(directory('../../fixtures/app/'))`,
+ *    `.fixture('x.toml')` → `.fixture(file('./fixtures/x.toml'))`,
+ *    `toMatch('help.txt')` → `toMatch(file('./expected/help.txt'))`, a golden
+ *    tree → `toMatch(directory('./expected/<name>/'))`, `.run('x.spec.yaml')` →
+ *    `.run(file('./x.spec.yaml'))` — and a document's `fixture:` names its path
+ *    the same way;
+ * 3. a source the second gesture touched imports the two names it now calls.
+ *
+ * The `…File`/`…Directory` verbs of the 17 prototype are read too
+ * (`.seedFile('./seeds/x.sql')` → `.seed(file('./seeds/x.sql'))`), so a tree
+ * caught between the two moves in one run.
  *
  * Only LITERAL arguments move: a name computed at run time is out of static
- * reach, and the run that follows names each one the verb refuses. A
+ * reach, and the run that follows names each one the verb refuses. A 16
  * `toMatch` literal moves only when a golden of that name sits in the spec's
  * `expected/` — a string with no file behind it is a value, and stays one.
  */
@@ -43,17 +51,26 @@ function callOf(match: unknown[]): Call {
 }
 
 /** A quoted literal, captured with its quote. */
-const LITERAL = String.raw`(?<quote>['"])(?<value>[^'"\n]*)\k<quote>`;
+const LITERAL = '(?<quote>[\'"`])(?<value>[^\'"`\\n]*)\\k<quote>';
 
-/** Every directory under `root` (itself excluded), deepest first. */
-function directoriesDeepestFirst(root: string): string[] {
+/**
+ * Every 16.x ground folder of the tree, deepest first. The walk never enters
+ * ground — a 16 folder or a bare one: what sits inside is material a spec
+ * stands on (a fixture project's own `specs/` tree included), and renaming in
+ * there would rewrite the input a negative spec exists to keep.
+ */
+function oldGroundFolders(root: string): string[] {
     const found: string[] = [];
     const walk = (dir: string): void => {
         for (const entry of readdirSync(dir, { withFileTypes: true })) {
-            if (entry.isDirectory() && !SKIPPED.has(entry.name)) {
-                const path = join(dir, entry.name);
-                walk(path);
+            if (!entry.isDirectory() || SKIPPED.has(entry.name)) {
+                continue;
+            }
+            const path = join(dir, entry.name);
+            if (RENAMED_GROUND_DIRS[entry.name] !== undefined) {
                 found.push(path);
+            } else if (!isGroundName(entry.name)) {
+                walk(path);
             }
         }
     };
@@ -106,51 +123,208 @@ function isDirectoryAt(path: string): boolean {
     return existsSync(path) && statSync(path).isDirectory();
 }
 
-/** Rewrite the 16 calls of one source file; `root` is the specs tree. */
+/** A literal the mover may rewrite: no interpolation to evaluate. */
+function isPlain(value: string): boolean {
+    return !value.includes('${');
+}
+
+/** `.<verb>(<space><quote><value><quote>` → `.<next>(<space><wrap>(<quote><path><quote>)`. */
+function wrapped(next: string, wrap: string, { quote, space }: Call, path: string): string {
+    return `.${next}(${space}${wrap}(${quote}${path}${quote})`;
+}
+
+/** The prototype's `…File`/`…Directory` verbs → the simple verb and the wrapper it takes. */
+const PROTOTYPE_VERBS: Record<string, [verb: string, wrap: string]> = {
+    fixtureDirectory: ['fixture', 'directory'],
+    fixtureFile: ['fixture', 'file'],
+    requestFile: ['request', 'file'],
+    seedFile: ['seed', 'file'],
+    toMatchDirectory: ['toMatch', 'directory'],
+    toMatchFile: ['toMatch', 'file'],
+};
+
+/** Rewrite the 16 (and prototype) calls of one source file; `root` is the specs tree. */
 function migrateSource(text: string, file: string, root: string): string {
     const specDir = dirname(file);
     return text
+        .replaceAll(
+            new RegExp(
+                String.raw`\.(?<verb>${Object.keys(PROTOTYPE_VERBS).join('|')})\((?<space>\s*)${LITERAL}`,
+                'gu',
+            ),
+            (...match) => {
+                const call = callOf(match);
+                const { value } = call;
+                const [verb, wrap] = PROTOTYPE_VERBS[String(match[1])] ?? [];
+                return verb === undefined || wrap === undefined
+                    ? match[0]
+                    : wrapped(verb, wrap, call, value);
+            },
+        )
         .replaceAll(new RegExp(String.raw`\.seed\((?<space>\s*)${LITERAL}`, 'gu'), (...match) => {
-            const { quote, space, value } = callOf(match);
-            return value.endsWith('.sql') && !value.startsWith('.')
-                ? `.seedFile(${space}${quote}./seeds/${value}${quote}`
+            const call = callOf(match);
+            const { value } = call;
+            return value.endsWith('.sql') && !value.startsWith('.') && isPlain(value)
+                ? wrapped('seed', 'file', call, `./seeds/${value}`)
                 : match[0];
         })
         .replaceAll(
             new RegExp(String.raw`\.request\((?<space>\s*)${LITERAL}`, 'gu'),
             (...match) => {
-                const { quote, space, value } = callOf(match);
-                return value.endsWith('.http') && !value.startsWith('.')
-                    ? `.requestFile(${space}${quote}./requests/${value}${quote}`
+                const call = callOf(match);
+                const { value } = call;
+                return value.endsWith('.http') && !value.startsWith('.') && isPlain(value)
+                    ? wrapped('request', 'file', call, `./requests/${value}`)
                     : match[0];
             },
         )
         .replaceAll(
             new RegExp(String.raw`\.fixture\((?<space>\s*)${LITERAL}`, 'gu'),
             (...match) => {
-                const { quote, space, value } = callOf(match);
-                const path = fixturePath(value, specDir, root);
+                const call = callOf(match);
+                const { value } = call;
+                const path = isPlain(value) ? fixturePath(value, specDir, root) : undefined;
                 if (path === undefined) {
                     return match[0];
                 }
-                const verb = value.endsWith('/') ? 'fixtureDirectory' : 'fixtureFile';
-                return `.${verb}(${space}${quote}${path}${quote}`;
+                return wrapped('fixture', path.endsWith('/') ? 'directory' : 'file', call, path);
             },
         )
         .replaceAll(
             new RegExp(String.raw`\.toMatch\((?<space>\s*)${LITERAL}`, 'gu'),
             (...match) => {
-                const { quote, space, value } = callOf(match);
+                const call = callOf(match);
+                const { value } = call;
                 const name = value.replace(/\/+$/u, '');
                 const golden = join(specDir, 'expected', name);
-                if (name.length === 0 || !existsSync(golden)) {
+                if (name.length === 0 || !isPlain(value) || !existsSync(golden)) {
                     return match[0];
                 }
                 return isDirectoryAt(golden)
-                    ? `.toMatchDirectory(${space}${quote}./expected/${name}/${quote}`
-                    : `.toMatchFile(${space}${quote}./expected/${name}${quote}`;
+                    ? wrapped('toMatch', 'directory', call, `./expected/${name}/`)
+                    : wrapped('toMatch', 'file', call, `./expected/${name}`);
             },
+        )
+        .replaceAll(new RegExp(String.raw`\.run\((?<space>\s*)${LITERAL}`, 'gu'), (...match) => {
+            const call = callOf(match);
+            const { value } = call;
+            if (!value.endsWith(SPEC_EXTENSION) || !isPlain(value)) {
+                return match[0];
+            }
+            const path = value.startsWith('./') || value.startsWith('../') ? value : `./${value}`;
+            return wrapped('run', 'file', call, path);
+        });
+}
+
+/** A call of one of the two wrappers — never a result accessor (`result.file(…)`). */
+const WRAPPER_CALL = /(?<![.\w])(?<name>directory|file)\(/gu;
+
+/** The names a named import brings in, and where its braces sit. */
+const NAMED_IMPORT =
+    /^import\s*\{(?<names>[^}]*)\}\s*from\s*(?<quote>['"])(?<from>[^'"]+)\k<quote>;?/gmu;
+
+/** Is this the specifier of the package's own entry — published, or this repository's source? */
+function isEntry(from: string): boolean {
+    return from === '@jterrazz/test' || /(?:^|\/)src\/index\.js$/u.test(from);
+}
+
+/**
+ * The specifier this file should import the wrappers from: the entry its
+ * specification file imports `specification` from, rebased onto this file —
+ * a consumer's `@jterrazz/test`, or a repository's own source entry.
+ */
+function entryFor(text: string, file: string): string {
+    for (const match of text.matchAll(NAMED_IMPORT)) {
+        const from = match.groups?.from ?? '';
+        if (!from.startsWith('.') || !/\.specification\.[jt]s$/u.test(from)) {
+            continue;
+        }
+        const specification = join(dirname(file), from.replace(/\.js$/u, '.ts'));
+        if (!existsSync(specification)) {
+            continue;
+        }
+        for (const inner of readFileSync(specification, 'utf8').matchAll(NAMED_IMPORT)) {
+            const entry = inner.groups?.from ?? '';
+            if (isEntry(entry)) {
+                return entry.startsWith('.')
+                    ? pathFrom(dirname(file), join(dirname(specification), entry))
+                    : entry;
+            }
+        }
+    }
+    return '@jterrazz/test';
+}
+
+/** Add the wrappers to an import of the entry the file already has — `undefined` when it has none. */
+function mergedIntoEntry(text: string, called: Set<string>): string | undefined {
+    for (const match of text.matchAll(NAMED_IMPORT)) {
+        const from = match.groups?.from ?? '';
+        if (!isEntry(from)) {
+            continue;
+        }
+        const present = (match.groups?.names ?? '')
+            .split(',')
+            .map((name) => name.trim())
+            .filter((name) => name.length > 0);
+        const names = [...new Set([...present, ...called])].toSorted((a, b) =>
+            a.toLowerCase() < b.toLowerCase() ? -1 : 1,
         );
+        const quote = match.groups?.quote ?? "'";
+        return text.replace(
+            match[0],
+            `import { ${names.join(', ')} } from ${quote}${from}${quote};`,
+        );
+    }
+    return undefined;
+}
+
+/** Every import statement, with where it comes from. */
+const IMPORT_STATEMENT = /^import[\s\S]*?from\s*(?<quote>['"])(?<from>[^'"]+)\k<quote>;?$/gmu;
+
+/**
+ * Insert a new import line: a package import sits with the packages, before the
+ * first relative one; a relative entry sits last, with its own kind.
+ */
+function withImport(text: string, line: string, entry: string): string {
+    const imports = [...text.matchAll(IMPORT_STATEMENT)];
+    const firstRelative = entry.startsWith('.')
+        ? undefined
+        : imports.find((match) => (match.groups?.from ?? '').startsWith('.'));
+    const at = firstRelative?.index;
+    if (at !== undefined) {
+        const before = text.slice(0, at);
+        if (before.trim().length === 0) {
+            return `${before}${line}\n\n${text.slice(at)}`;
+        }
+        const gap = before.endsWith('\n\n') ? at - 1 : at;
+        return `${text.slice(0, gap)}${line}\n${text.slice(gap)}`;
+    }
+    const last = imports.at(-1);
+    if (last?.index === undefined) {
+        return `${line}\n${text}`;
+    }
+    const end = last.index + last[0].length;
+    return `${text.slice(0, end)}\n${line}${text.slice(end)}`;
+}
+
+/** Make the file import every wrapper it calls. */
+function importWrappers(text: string, file: string): string {
+    const called = new Set(
+        [...text.matchAll(WRAPPER_CALL)].map((match) => match.groups?.name ?? ''),
+    );
+    if (called.size === 0) {
+        return text;
+    }
+    const merged = mergedIntoEntry(text, called);
+    if (merged !== undefined) {
+        return merged;
+    }
+    const entry = entryFor(text, file);
+    return withImport(
+        text,
+        `import { ${[...called].toSorted().join(', ')} } from '${entry}';`,
+        entry,
+    );
 }
 
 /** Rewrite the `fixture:` entries of one document. */
@@ -190,7 +364,7 @@ const OLD_SEGMENT = /(?<=['"/ ])_(?<name>fixtures|expected|requests|seeds)(?=\/)
  */
 export function migrateTo17(root: string, rename: Rename): Migration {
     const renamed: string[] = [];
-    for (const dir of directoriesDeepestFirst(root)) {
+    for (const dir of oldGroundFolders(root)) {
         const bare = RENAMED_GROUND_DIRS[dir.split(sep).at(-1) ?? ''];
         const target = bare === undefined ? undefined : join(dirname(dir), bare);
         if (target !== undefined && !existsSync(target)) {
@@ -201,10 +375,12 @@ export function migrateTo17(root: string, rename: Rename): Migration {
     const rewritten: string[] = [];
     for (const file of specFiles(root)) {
         const text = readFileSync(file, 'utf8');
-        const moved = file.endsWith(SPEC_EXTENSION)
+        const isDocument = file.endsWith(SPEC_EXTENSION);
+        const moved = isDocument
             ? migrateDocument(text, file, root)
             : migrateSource(text, file, root);
-        const next = moved.replaceAll(OLD_SEGMENT, '$<name>');
+        const bare = moved.replaceAll(OLD_SEGMENT, '$<name>');
+        const next = isDocument || bare === text ? bare : importWrappers(bare, file);
         if (next !== text) {
             writeFileSync(file, next);
             rewritten.push(relative(root, file));

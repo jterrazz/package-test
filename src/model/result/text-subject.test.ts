@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from 'vitest';
 
+import { file } from '../chain/spec-path.js';
 import { registerMatchers } from '../goldens/matchers.js';
 import { text } from './text-subject.js';
 import { TextAccessor } from './text.js';
@@ -12,7 +13,9 @@ describe('text() — ad-hoc string as a golden subject', () => {
     test('toMatch resolves against expected/ next to the calling test', () => {
         // Given - a message goldened at expected/text-basic.txt
         // Then - the fixture next to THIS test file resolves via caller detection
-        expect(text('the operation could not complete\n')).toMatchFile('./expected/text-basic.txt');
+        expect(text('the operation could not complete\n')).toMatch(
+            file('./expected/text-basic.txt'),
+        );
     });
 
     test('strips ANSI before comparison while .text stays raw', () => {
@@ -22,7 +25,7 @@ describe('text() — ad-hoc string as a golden subject', () => {
         // Then - the raw form keeps the escapes, the comparison sees them stripped
         // oxlint-disable-next-line jterrazz/d8w-text-bypass -- proving text().text preserves the raw ANSI the matcher strips: the raw accessor IS the subject
         expect(text(coloured).text).toContain('\u001B[31m');
-        expect(text(coloured)).toMatchFile('./expected/text-ansi.txt');
+        expect(text(coloured)).toMatch(file('./expected/text-ansi.txt'));
     });
 
     test('supports the {{token}} grammar in the fixture', () => {
@@ -30,7 +33,7 @@ describe('text() — ad-hoc string as a golden subject', () => {
         const message = 'failed at /tmp/spec-abc123/out.txt after 42ms\n';
 
         // Then - {{path}}/{{number}} placeholders absorb the volatile parts
-        expect(text(message)).toMatchFile('./expected/text-tokens.txt');
+        expect(text(message)).toMatch(file('./expected/text-tokens.txt'));
     });
 
     test('.grep() composes and stays snapshot-able', () => {
@@ -39,6 +42,6 @@ describe('text() — ad-hoc string as a golden subject', () => {
 
         // Then - grep keeps only the matching block, still a TextAccessor
         expect(text(report).grep('error')).toBeInstanceOf(TextAccessor);
-        expect(text(report).grep('error')).toMatchFile('./expected/text-grep.txt');
+        expect(text(report).grep('error')).toMatch(file('./expected/text-grep.txt'));
     });
 });

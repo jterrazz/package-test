@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — e7w-include-prefix-exists (CONVENTIONS E7)', () => {
@@ -7,7 +8,7 @@ describe('lint — e7w-include-prefix-exists (CONVENTIONS E7)', () => {
     test('warns on an include whose folder does not exist', async () => {
         // Given - a project violating E7
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e7w-include-prefix-exists/')
+            .fixture(directory('../../fixtures/lint-violations/e7w-include-prefix-exists/'))
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +19,7 @@ describe('lint — e7w-include-prefix-exists (CONVENTIONS E7)', () => {
     test('accepts an include rooted in a folder that exists', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e7w-include-prefix-exists-ok/')
+            .fixture(directory('../../fixtures/lint-violations/e7w-include-prefix-exists-ok/'))
             .exec('.');
 
         // Then - clean exit, no E7 diagnostic

@@ -1,11 +1,12 @@
-import { expect, inject } from 'vitest';
+import { chai, expect, inject } from 'vitest';
 
-import { requireRelativePath } from '../../model/chain/spec-path.js';
+import { isDiskFile } from '../../model/chain/spec-path.js';
 import type { MatchFixtureOptions } from '../../model/result/match-options.js';
 import {
     compareStreamText,
+    GOLDEN_MATCHER,
+    matchThroughGolden,
     nativeContain,
-    nativeMatch,
     requireExtension,
     textContains,
     textIsEmpty,
@@ -61,26 +62,23 @@ async function matchGolden(
     return comparison;
 }
 
-async function toMatchFile(
+/** `toMatch(file())` in a page — a golden file against a captured text; a directory golden is node's. */
+async function toMatchGolden(
     received: unknown,
     expected: unknown,
     options?: MatchFixtureOptions,
 ): Promise<MatcherResult> {
-    requireRelativePath('toMatchFile', expected);
-    if (!(received instanceof TextAccessor)) {
+    if (!isDiskFile(expected)) {
         throw new TypeError(
-            'toMatchFile: unsupported subject — in a page, a golden file is compared against a captured text (result.tree, result.html, text(…)).',
+            'toMatch(directory(…)): in a page there is no working directory — a golden tree is compared under node.',
         );
     }
-    return await matchGolden(received, expected, options?.frozen === true);
-}
-
-/** Vitest's `toMatch`, reading a stream accessor as the text it compares. */
-function toMatch(received: unknown, expected: unknown): MatcherResult {
-    if (received instanceof TextAccessor) {
-        return nativeMatch(received.comparableText, expected);
+    if (!(received instanceof TextAccessor)) {
+        throw new TypeError(
+            `toMatch(file(${JSON.stringify(expected.path)})): in a page, a golden file is compared against a captured text (result.tree, result.html, text(…)).`,
+        );
     }
-    return nativeMatch(received, expected);
+    return await matchGolden(received, expected.path, options?.frozen === true);
 }
 
 function toContain(received: unknown, expected: unknown): MatcherResult {
@@ -109,5 +107,6 @@ export function registerBrowserMatchers(): void {
         return;
     }
     registered = true;
-    expect.extend({ toBeEmpty, toContain, toMatch, toMatchFile });
+    expect.extend({ [GOLDEN_MATCHER]: toMatchGolden, toBeEmpty, toContain });
+    matchThroughGolden(chai);
 }

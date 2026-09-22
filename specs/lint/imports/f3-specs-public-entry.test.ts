@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — f3-specs-public-entry (CONVENTIONS F3)', () => {
@@ -7,7 +8,7 @@ describe('lint — f3-specs-public-entry (CONVENTIONS F3)', () => {
     test('rejects a deep internal src import from specs/', async () => {
         // Given - a project violating F3
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f3-specs-public-entry/')
+            .fixture(directory('../../fixtures/lint-violations/f3-specs-public-entry/'))
             .exec('.');
 
         // Then - oxlint reports the f3-specs-public-entry diagnostic
@@ -18,7 +19,7 @@ describe('lint — f3-specs-public-entry (CONVENTIONS F3)', () => {
     test('accepts the public entry import', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f3-specs-public-entry-ok/')
+            .fixture(directory('../../fixtures/lint-violations/f3-specs-public-entry-ok/'))
             .exec('.');
 
         // Then - clean run, no f3-specs-public-entry diagnostic

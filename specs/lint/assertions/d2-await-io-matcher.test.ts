@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — d2-await-io-matcher (CONVENTIONS D2)', () => {
@@ -7,7 +8,7 @@ describe('lint — d2-await-io-matcher (CONVENTIONS D2)', () => {
     test('rejects an un-awaited IO matcher', async () => {
         // Given - a project violating D2
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/d2-await-io-matcher/')
+            .fixture(directory('../../fixtures/lint-violations/d2-await-io-matcher/'))
             .exec('.');
 
         // Then - oxlint reports the d2-await-io-matcher diagnostic
@@ -18,7 +19,7 @@ describe('lint — d2-await-io-matcher (CONVENTIONS D2)', () => {
     test('accepts an awaited IO matcher', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/d2-await-io-matcher-ok/')
+            .fixture(directory('../../fixtures/lint-violations/d2-await-io-matcher-ok/'))
             .exec('.');
 
         // Then - clean run, no d2-await-io-matcher diagnostic

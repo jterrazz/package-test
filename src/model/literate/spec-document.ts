@@ -706,7 +706,7 @@ export const SPEC_SCHEMA: SpecSchema = {
         },
         fixture: {
             description:
-                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`). A trailing `/` spreads a directory's contents; without it the file or directory is copied under its own name. The shared pool is reached by the path that climbs to it.",
+                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The shared pool is reached by the path that climbs to it.",
             oneOf: [
                 { pattern: RELATIVE_PATH_PATTERN, type: 'string' },
                 {

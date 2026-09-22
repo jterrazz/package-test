@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { file } from '@jterrazz/test';
 
 import { cli } from '../cli.specification.js';
 
@@ -7,5 +8,5 @@ test('writes the report', async () => {
     const result = await cli.exec('report');
 
     // Then - the summary is the golden
-    expect(result.stdout).toMatchFile('./expected/summary.txt');
+    expect(result.stdout).toMatch(file('./expected/summary.txt'));
 });

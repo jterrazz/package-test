@@ -1,10 +1,10 @@
-import { findProperty, memberPropertyName, walk } from '../../ast.js';
+import { findProperty, goldenOf, memberPropertyName, walk } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
 
 /**
- * Does `arguments[1]` of a `toMatchFile(path, options)` call carry `{ frozen: true }`?
+ * Does `arguments[1]` of a `toMatch(file(path), options)` call carry `{ frozen: true }`?
  * A frozen fixture opts out of update-mode rewriting, so it is exempt.
  */
 function hasFrozenOption(args: AstNode[]): boolean {
@@ -104,27 +104,22 @@ function isTestCallback(fn: AstNode): boolean {
 }
 
 /**
- * The bounded second shape: a `toMatch('<file>')` inside a HELPER whose body
- * also asserts a throw.
+ * The bounded second shape: a `toMatch(file('<path>'))` inside a HELPER whose
+ * body also asserts a throw.
  *
  * The shape is a golden routed through a helper that owns the try/catch
- * (`catchMessage(() => …toMatch('f'))`). Inter-procedural analysis is out of
+ * (`catchMessage(() => …toMatch(file('./expected/f.txt')))`). Inter-procedural analysis is out of
  * an oxlint JS plugin's reach, but that helper holds both halves in one body,
  * and that is decidable.
  *
  * Bounded twice, because each bound answers a real false positive found on this
  * package's own tree. The enclosing function must not be the TEST callback
  * itself: a test that writes a fixture under `TEST_UPDATE` and later asserts a
- * diff has both halves in its body and neither belongs to the other. And the
- * `toMatch` must name a FILE, never a regex: `toMatch(/^hex/)` compares a
- * string to a pattern and has no fixture update mode could overwrite.
+ * diff has both halves in its body and neither belongs to the other. The
+ * caller only reaches here for a golden — a `toMatch` whose argument names the
+ * disk.
  */
 function inAThrowingHelper(node: AstNode): boolean {
-    const [first] = (node.arguments as AstNode[] | undefined) ?? [];
-    const namesAFile = first?.type === 'Literal' && typeof first.value === 'string';
-    if (!namesAFile) {
-        return false;
-    }
     let current = node.parent as AstNode | undefined;
     while (current !== undefined) {
         if (FUNCTION_NODES.has(current.type)) {
@@ -146,9 +141,7 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
         }
         return {
             CallExpression(node: AstNode) {
-                const callee = node.callee as AstNode | undefined;
-                const matcher = callee === undefined ? undefined : memberPropertyName(callee);
-                if (matcher !== 'toMatchFile' && matcher !== 'toMatchDirectory') {
+                if (goldenOf(node) === undefined) {
                     return;
                 }
                 if (!isWrappedInExpect(node) && !inAThrowingHelper(node)) {

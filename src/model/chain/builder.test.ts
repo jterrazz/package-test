@@ -7,6 +7,7 @@ import type { CliEnv, CliOutput, CliPort } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
 import { createCliFacet, SpecificationBuilder } from './builder.js';
+import { directory, file } from './spec-path.js';
 import { StubBackend } from './stub-backend.js';
 
 // ── Fakes — mocks are code (CONVENTIONS I4) ──
@@ -277,7 +278,7 @@ describe('builder — adapter requirements', () => {
 // ── SQL seed targeting ──
 
 describe('builder — sql seed targeting', () => {
-    test('seedFile() with an unknown database key lists the available keys', async () => {
+    test('seed() with an unknown database key lists the available keys', async () => {
         // Given - two named databases in the config
         const cli = createCliFacet({
             command: new FakeCommandAdapter(),
@@ -289,8 +290,8 @@ describe('builder — sql seed targeting', () => {
         });
 
         // Then - the error names the missing key and enumerates the record
-        await expect(cli.seedFile('./x.sql', { database: 'ghost' }).exec('run')).rejects.toThrow(
-            'seedFile() targets database "ghost" but it was not found. Available: analytics, db',
+        await expect(cli.seed(file('./x.sql'), { database: 'ghost' }).exec('run')).rejects.toThrow(
+            'seed() targets database "ghost" but it was not found. Available: analytics, db',
         );
     });
 
@@ -302,7 +303,7 @@ describe('builder — sql seed targeting', () => {
         });
 
         // Then - a bare SQL seed is rejected until it names its target database
-        expect(() => cli.seedFile('./users.sql')).toThrow('2 databases are declared');
+        expect(() => cli.seed(file('./users.sql'))).toThrow('2 databases are declared');
     });
 });
 
@@ -395,29 +396,38 @@ describe('builder — the calendar a chain pins', () => {
     });
 });
 
-describe('builder — a fixture verb states the kind of what it names', () => {
-    test('refuses a directory path without its trailing slash, and a file path with one', () => {
-        // Given - a cli facet over a fake binary
+describe('builder — a string is a value, and the disk is file() or directory()', () => {
+    test('refuses a bare string where a verb reads the disk, naming the wrapper', () => {
+        // Given - a cli facet over a fake binary, called by a caller the compiler does not see
         const cli = createCliFacet({ command: new FakeCommandAdapter() });
 
-        // Then - the path states the kind, and each verb refuses the other's
-        expect(() => cli.fixtureDirectory('./fixtures/shop' as never)).toThrow(
-            /a directory's path ends in \/ — its contents are spread/u,
+        // Then - each verb that reads the disk refuses the string and names file()
+        expect(() => cli.seed('./seeds/rows.sql' as never)).toThrow(
+            /^seed\("\.\/seeds\/rows\.sql"\): a string is a value — name the file with file\(\)/u,
         );
-        expect(() => cli.fixtureFile('./fixtures/shop/')).toThrow(
-            /a path ending in \/ is a directory — spread it with fixtureDirectory\(\)/u,
+        expect(() => cli.fixture('./fixtures/shop/' as never)).toThrow(
+            /^fixture\("\.\/fixtures\/shop\/"\): a string is a value — name the disk with file/u,
+        );
+        expect(() => cli.seed(directory('./seeds/') as never)).toThrow(
+            /it takes one file, not a directory/u,
+        );
+        expect(() => cli.seed(file('./seeds/rows.json') as never)).toThrow(
+            /the file seed\(\) reads ends in \.sql/u,
         );
     });
 
-    test('refuses a file named by fixtureDirectory, naming fixtureFile', async () => {
-        // Given - a real file beside this test, named as if it were a directory
+    test('a directory spreads and a file copies, and each refuses the other on disk', async () => {
+        // Given - this very directory, and a real file beside this test
         const cli = createCliFacet({ command: new FakeCommandAdapter() });
-        const run = cli.fixtureDirectory('../chain/').fixtureFile('./builder.ts').exec('go');
+        const run = cli.fixture(directory('../chain/')).fixture(file('./builder.ts')).exec('go');
 
-        // Then - the directory copies, and the pass reaches the file verb that holds
+        // Then - both copy; a file named as a directory is refused with the resolved kind
         await expect(run).resolves.toBeDefined();
-        await expect(cli.fixtureDirectory('./builder.ts/').exec('go')).rejects.toThrow(
-            /names a file — use fixtureFile\(\)/u,
+        await expect(cli.fixture(directory('./builder.ts/')).exec('go')).rejects.toThrow(
+            /names a file — a path ending in \/ is a directory/u,
+        );
+        await expect(cli.fixture(file('../chain')).exec('go')).rejects.toThrow(
+            /names a directory — end its path in \//u,
         );
     });
 });

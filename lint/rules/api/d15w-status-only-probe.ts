@@ -63,7 +63,7 @@ function isStatusProbe(node: AstNode): boolean {
  * CONVENTIONS D11/D15 (warning) — a spec test whose ONLY assertions are HTTP
  * status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal
  * 100–599) throws away the full-response golden. Pin the whole response instead:
- * `expect(result.response).toMatchFile('./expected/case.http')`.
+ * `expect(result.response).toMatch(file('./expected/case.http'))`.
  *
  * This complements d12w (which needs a CLUSTER of ≥3 body probes): the lone
  * `expect(result.status).toBe(422)` as a test's sole assertion falls below that
@@ -112,7 +112,7 @@ export const d15wStatusOnlyProbe: LintRule = {
         docs: RULE_DOCS['d15w-status-only-probe'],
         messages: {
             statusOnlyProbe:
-                "The test's only assertion(s) are status probes — pin the full response: expect(result.response).toMatchFile('./expected/case.http').",
+                "The test's only assertion(s) are status probes — pin the full response: expect(result.response).toMatch(file('./expected/case.http')).",
         },
         type: 'suggestion',
     },

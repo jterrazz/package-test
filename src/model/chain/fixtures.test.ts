@@ -17,6 +17,7 @@ describe('fixtures — source resolution', () => {
         testDir = resolve(specsRoot, 'cli/feature');
         mkdirSync(resolve(specsRoot, 'fixtures/cli-app'), { recursive: true });
         mkdirSync(resolve(testDir, 'fixtures'), { recursive: true });
+        writeFileSync(resolve(testDir, 'fixtures/local.txt'), 'local\n');
     });
 
     afterAll(() => {
@@ -45,13 +46,21 @@ describe('fixtures — source resolution', () => {
             // Given - a name that leaves its folder implicit
             // Then - the refusal says how a file is named
             expect(() => copyPlan(path, testDir, '/work')).toThrow(
-                /a file is named by a path relative to the spec file/u,
+                /a path is relative to the spec file/u,
             );
         },
     );
+
+    test('a path that names nothing is refused with the path it resolved to', () => {
+        // Given - a file the leaf does not carry
+        // Then - the refusal carries the absolute path it looked at
+        expect(() => copyPlan('./fixtures/absent.txt', testDir, '/work')).toThrow(
+            `fixture: "./fixtures/absent.txt" names nothing — ${resolve(testDir, 'fixtures/absent.txt')} does not exist.`,
+        );
+    });
 });
 
-describe('fixtures — copy semantics (rsync trailing slash)', () => {
+describe('fixtures — copy semantics (the trailing slash says which)', () => {
     let base: string;
     let testDir: string;
     let workDir: string;
@@ -84,15 +93,20 @@ describe('fixtures — copy semantics (rsync trailing slash)', () => {
         expect(readFileSync(resolve(workDir, 'single.txt'), 'utf8')).toBe('single\n');
     });
 
-    test('a document directory without a trailing slash is copied as <cwd>/<basename>', () => {
+    test('a directory named without its trailing slash is refused, naming the form to write', () => {
         // Given - a directory fixture, no trailing slash
-        const { dest, src } = copyPlan('./fixtures/proj', testDir, freshWorkDir());
-        cpSync(src, dest, { recursive: true });
+        // Then - the path says one kind and the disk the other
+        expect(() => copyPlan('./fixtures/proj', testDir, freshWorkDir())).toThrow(
+            /names a directory — end its path in \/ \(directory\('\.\/fixtures\/proj\/'\)\)/u,
+        );
+    });
 
-        // Then - the directory itself appears under the cwd
-        expect(dest).toBe(resolve(workDir, 'proj'));
-        expect(readFileSync(resolve(workDir, 'proj/a.txt'), 'utf8')).toBe('a\n');
-        expect(readFileSync(resolve(workDir, 'proj/nested/b.txt'), 'utf8')).toBe('b\n');
+    test('a file named with a trailing slash is refused', () => {
+        // Given - a file fixture in spread form
+        // Then - the refusal names file()
+        expect(() => copyPlan('./fixtures/single.txt/', testDir, freshWorkDir())).toThrow(
+            /names a file — a path ending in \/ is a directory \(file\('\.\/fixtures\/single\.txt'\)\)/u,
+        );
     });
 
     test('a directory with a trailing slash spreads its contents into the cwd', () => {

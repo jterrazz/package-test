@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — c10-contracts-boundary (CONVENTIONS C10)', () => {
@@ -7,7 +8,7 @@ describe('lint — c10-contracts-boundary (CONVENTIONS C10)', () => {
     test('rejects a test importing an internal unit contract', async () => {
         // Given - a test reaching into contracts/http/ instead of the facade
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c10-contracts-boundary/')
+            .fixture(directory('../../fixtures/lint-violations/c10-contracts-boundary/'))
             .exec('.');
 
         // Then - oxlint reports the c10-contracts-boundary diagnostic
@@ -18,7 +19,7 @@ describe('lint — c10-contracts-boundary (CONVENTIONS C10)', () => {
     test('accepts a test importing the contracts facade', async () => {
         // Given - the compliant twin: the test imports *.contracts.ts
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c10-contracts-boundary-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c10-contracts-boundary-ok/'))
             .exec('.');
 
         // Then - clean run, no c10-contracts-boundary diagnostic

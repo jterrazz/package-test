@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
@@ -9,22 +10,22 @@ describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
     test('rejects a facet folder with no specification', async () => {
         // Given - a tree violating C20
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c20-facet-folder/')
+            .fixture(directory('../../fixtures/lint-violations/c20-facet-folder/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./expected/c20-facet-folder.txt');
+        expect(result.stderr).toMatch(file('./expected/c20-facet-folder.txt'));
     });
 
     test('accepts a facet folder holding the runner it promises', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c20-facet-folder-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c20-facet-folder-ok/'))
             .exec('specs');
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/c20-facet-folder-ok.txt');
+        expect(result.stdout).toMatch(file('./expected/c20-facet-folder-ok.txt'));
     });
 });

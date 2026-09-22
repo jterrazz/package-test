@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { file } from '../../../src/index.js';
 import { integration } from '../pure.specification.js';
 
 /**
@@ -23,7 +24,7 @@ describe('integration — a table of cases, one golden each', () => {
         }));
 
         // Then - the golden the row names is the oracle
-        expect(result.value).toMatchFile(`./expected/${name}.json`);
+        expect(result.value).toMatch(file(`./expected/${name}.json`));
         await expect(result.error).toBeEmpty();
     });
 

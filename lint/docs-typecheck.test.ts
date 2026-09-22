@@ -128,7 +128,7 @@ const SYNC_SUBJECTS = ['error', 'json', 'response', 'stderr', 'stdout', 'value']
  */
 
 describe('docs-typecheck — the corpus does not await a sync matcher', () => {
-    test('no page writes `await expect(result.<sync>).toMatchFile(`', () => {
+    test('no page writes `await expect(result.<sync>).toMatch(file(`', () => {
         // Given - every page a consumer is routed to
         const pages = [
             { name: 'README.md', text: readFileSync(README, 'utf8') },
@@ -141,8 +141,8 @@ describe('docs-typecheck — the corpus does not await a sync matcher', () => {
         // Then - none of them awaits a matcher the compiler types as sync
         const offenders = pages.flatMap(({ name, text }) =>
             SYNC_SUBJECTS.filter((subject) =>
-                text.includes(`await expect(result.${subject}).toMatchFile(`),
-            ).map((subject) => `${name}: await expect(result.${subject}).toMatchFile(`),
+                text.includes(`await expect(result.${subject}).toMatch(file(`),
+            ).map((subject) => `${name}: await expect(result.${subject}).toMatch(file(`),
         );
         expect(offenders, 'the toolchain refuses this as await-thenable').toStrictEqual([]);
     });

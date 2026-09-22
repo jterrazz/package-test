@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -18,7 +19,7 @@ test('serves robots.txt as plain text', async () => {
     // Then - the whole file matches one golden
     expect(result.status).toBe(200);
     expect(result.headers['content-type']).toBe('text/plain');
-    expect(result.body).toMatchFile('./expected/robots.txt');
+    expect(result.body).toMatch(file('./expected/robots.txt'));
 });
 
 test('sends chain headers on the raw exchange', async () => {

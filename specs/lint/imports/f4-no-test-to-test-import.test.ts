@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — f4-no-test-to-test-import (CONVENTIONS F4)', () => {
@@ -7,7 +8,7 @@ describe('lint — f4-no-test-to-test-import (CONVENTIONS F4)', () => {
     test('rejects a test file importing another test file', async () => {
         // Given - a project violating F4
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f4-no-test-to-test-import/')
+            .fixture(directory('../../fixtures/lint-violations/f4-no-test-to-test-import/'))
             .exec('.');
 
         // Then - oxlint reports the f4-no-test-to-test-import diagnostic
@@ -18,7 +19,7 @@ describe('lint — f4-no-test-to-test-import (CONVENTIONS F4)', () => {
     test('accepts importing the fixtures neighbour instead', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f4-no-test-to-test-import-ok/')
+            .fixture(directory('../../fixtures/lint-violations/f4-no-test-to-test-import-ok/'))
             .exec('.');
 
         // Then - clean run, no f4-no-test-to-test-import diagnostic

@@ -112,7 +112,7 @@ test('says how much of the collection the table is showing', async () => {
     });
 
     // Then - the table is qualified by what it is not showing
-    await expect(result.tree).toMatchFile('./expected/one-of-two-hundred.aria.yaml');
+    await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
     await expect(result.console).toBeEmpty();
 });
 ```
@@ -150,10 +150,10 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 | `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message                                                                                              |
 | `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error                                                                                                      |
 
-`toMatchFile` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
+`toMatch(file(…))` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
 ```typescript
-await expect(result.tree).toMatchFile('./expected/two-of-two-hundred.aria.yaml');
+await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
 expect(result.html).toContain('row row--live');
 await expect(result.errors).toBeEmpty();
 ```
@@ -236,7 +236,7 @@ const result = await component.render((container) => {
 - **Hand-rolling `browser:` in a config.** Rule E6 refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule G4 refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
 - **Asserting focus with a golden.** The accessibility tree carries no focus state, so a tree snapshot proves nothing about the keyboard. `see(focused(x))` / `gone(focused(x))` are the verbs that do.
-- **Expecting `toMatchFile` to be synchronous here.** It is not: `await expect(result.tree).toMatchFile('./expected/….aria.yaml')`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
+- **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
 - **Reading the W3 refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — Elements § A name designates the accessible name WHOLE](13-elements.md#a-name-designates-the-accessible-name-whole)'s.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.
 - **Giving the project the app's whole Vite config and expecting the app's root.** Only the pipeline is adopted; the project's root stays the directory of `vitest.config.ts`, which is what makes its `include` globs mean what they say.

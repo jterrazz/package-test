@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — c6-tomatch-extension (CONVENTIONS C6)', () => {
@@ -7,7 +8,7 @@ describe('lint — c6-tomatch-extension (CONVENTIONS C6)', () => {
     test('rejects a toMatch fixture name without its extension', async () => {
         // Given - a project violating C6
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c6-tomatch-extension/')
+            .fixture(directory('../../fixtures/lint-violations/c6-tomatch-extension/'))
             .exec('.');
 
         // Then - oxlint reports the c6-tomatch-extension diagnostic
@@ -18,7 +19,7 @@ describe('lint — c6-tomatch-extension (CONVENTIONS C6)', () => {
     test('accepts extensions and directory-tree snapshots', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c6-tomatch-extension-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c6-tomatch-extension-ok/'))
             .exec('.');
 
         // Then - clean run, no c6-tomatch-extension diagnostic

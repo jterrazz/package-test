@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — f1-no-subpath-import (CONVENTIONS F1)', () => {
@@ -7,7 +8,7 @@ describe('lint — f1-no-subpath-import (CONVENTIONS F1)', () => {
     test('rejects an @jterrazz/test subpath import', async () => {
         // Given - a project violating F1
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f1-no-subpath-import/')
+            .fixture(directory('../../fixtures/lint-violations/f1-no-subpath-import/'))
             .exec('.');
 
         // Then - oxlint reports the f1-no-subpath-import diagnostic
@@ -18,7 +19,7 @@ describe('lint — f1-no-subpath-import (CONVENTIONS F1)', () => {
     test('accepts the single public entry point and every published subpath', async () => {
         // Given - the compliant twin: a spec on the entry point, and a vitest.config.ts on `@jterrazz/test/vitest` — a subpath the package's own `exports` map publishes
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f1-no-subpath-import-ok/')
+            .fixture(directory('../../fixtures/lint-violations/f1-no-subpath-import-ok/'))
             .exec('.');
 
         // Then - clean run, no f1-no-subpath-import diagnostic

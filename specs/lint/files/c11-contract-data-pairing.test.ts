@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — c11-contract-data-pairing (CONVENTIONS C11)', () => {
@@ -7,7 +8,7 @@ describe('lint — c11-contract-data-pairing (CONVENTIONS C11)', () => {
     test('rejects an orphan payload in a provider folder', async () => {
         // Given - a *.response.json whose owning contract does not exist
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c11-contract-data-pairing/')
+            .fixture(directory('../../fixtures/lint-violations/c11-contract-data-pairing/'))
             .exec('.');
 
         // Then - oxlint reports the c11-contract-data-pairing diagnostic
@@ -18,7 +19,7 @@ describe('lint — c11-contract-data-pairing (CONVENTIONS C11)', () => {
     test('accepts payloads paired with their contract', async () => {
         // Given - the compliant twin: every payload has its <stem>.ts sibling
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c11-contract-data-pairing-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c11-contract-data-pairing-ok/'))
             .exec('.');
 
         // Then - clean run, no c11-contract-data-pairing diagnostic

@@ -46,7 +46,7 @@ ruleTester.run('d9w-single-use-ref', d9wSingleUseRef as unknown as OxlintRule, {
         // A ref that lives ONLY in a referenced fixture, used once: reported on
         // The referencing toMatch node (the rule enhancement — no code site).
         {
-            code: 'expect(result.stdout).toMatchFile("./expected/lonely.txt");',
+            code: 'expect(result.stdout).toMatch(file("./expected/lonely.txt"));',
             errors: 1,
             filename: WIDGET,
         },
@@ -59,7 +59,7 @@ ruleTester.run('d9w-single-use-ref', d9wSingleUseRef as unknown as OxlintRule, {
         },
         // A code ref (once) plus the same ref in a referenced fixture (once) = two uses.
         {
-            code: 'expect(a).toEqual(match.ref("order")); expect(result.stdout).toMatchFile("./expected/shared.txt");',
+            code: 'expect(a).toEqual(match.ref("order")); expect(result.stdout).toMatch(file("./expected/shared.txt"));',
             filename: WIDGET,
         },
         // No capture refs at all.

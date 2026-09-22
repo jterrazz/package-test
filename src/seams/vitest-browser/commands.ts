@@ -34,7 +34,7 @@ function goldenPath(testPath: string | undefined, name: string): string {
             'golden: the command carries no test path — a golden is read from a test file.',
         );
     }
-    return resolveSpecPath('toMatchFile', name, dirname(testPath));
+    return resolveSpecPath('toMatch', name, dirname(testPath));
 }
 
 /** The ARIA snapshot of the rendered `<body>`, as YAML. */

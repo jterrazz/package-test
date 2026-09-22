@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — c21w-ground-owned-by-one (CONVENTIONS C21)', () => {
@@ -9,22 +10,22 @@ describe('lint — c21w-ground-owned-by-one (CONVENTIONS C21)', () => {
     test('warns on ground a single spec of the leaf reads', async () => {
         // Given - a tree violating C21
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c21w-ground-owned-by-one/')
+            .fixture(directory('../../fixtures/lint-violations/c21w-ground-owned-by-one/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/c21w-ground-owned-by-one.txt');
+        expect(result.stdout).toMatch(file('./expected/c21w-ground-owned-by-one.txt'));
     });
 
     test('accepts ground that sits beside the spec that reads it', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c21w-ground-owned-by-one-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c21w-ground-owned-by-one-ok/'))
             .exec('specs');
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/c21w-ground-owned-by-one-ok.txt');
+        expect(result.stdout).toMatch(file('./expected/c21w-ground-owned-by-one-ok.txt'));
     });
 });

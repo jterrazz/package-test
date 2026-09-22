@@ -60,7 +60,6 @@
     "unicorn/no-lonely-if": 2,
     "unicorn/prefer-single-call": 2,
     "vitest/max-expects": 51,
-    "vitest/prefer-each": 1,
     "vitest/prefer-strict-boolean-matchers": 281,
     "vitest/require-to-throw-message": 3
 }

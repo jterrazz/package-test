@@ -1,4 +1,4 @@
-import { cpSync, mkdtempSync, readFileSync, statSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { relative, resolve } from 'node:path';
 
@@ -31,8 +31,8 @@ import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';
-import { requireRelativePath } from './spec-path.js';
-import type { RelativePath } from './spec-path.js';
+import { isDiskDirectory, isDiskFile, requireDiskFile, requireDiskTarget } from './spec-path.js';
+import type { DiskFile, DiskTarget } from './spec-path.js';
 import type { StubBackend } from './stub-backend.js';
 
 // ── Types ──
@@ -148,21 +148,17 @@ type SeedEntry = {
     path: string;
 };
 
-/** A file, or a directory's contents, to copy into the working directory before execution. */
-type FixtureEntry = {
-    kind: 'directory' | 'file';
-    /** Relative to the spec file; a directory's ends in `/`. */
-    path: string;
-};
-
 /** An HTTP request to perform against the server adapter. */
 export type RequestEntry = {
-    /** Inline body value — objects are JSON-serialized, strings sent raw. */
+    /**
+     * The body: a value (objects JSON-serialized, strings sent raw), or a
+     * `file()` whose content is sent — parsed first when it is `.json`.
+     */
     body?: unknown;
     method: string;
     path: string;
-    /** A `.http` file, relative to the spec, to load method/path/headers/body from. */
-    requestFile?: string | undefined;
+    /** A `.http` document to load method/path/headers/body from. */
+    request?: DiskFile | undefined;
 };
 
 /**
@@ -189,9 +185,9 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
     headers: (headers: Record<string, string>) => ApiSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<ApiSpecification<DatabaseKey>>;
-    /** Queue a SQL seed file, relative to the spec file, to run before the action. */
-    seedFile: (
-        path: RelativePath<'.sql'>,
+    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run before the action. */
+    seed: (
+        source: DiskFile<'.sql'>,
         options?: { database?: DatabaseKey },
     ) => ApiSpecification<DatabaseKey>;
 
@@ -199,12 +195,12 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
     delete: (path: string) => Promise<HttpResult>;
     /** Send a GET request and resolve with the result. */
     get: (path: string) => Promise<HttpResult>;
-    /** Send a POST request (optional inline JSON body) and resolve with the result. */
+    /** Send a POST request — the body a value or a `file()` — and resolve with the result. */
     post: (path: string, body?: unknown) => Promise<HttpResult>;
-    /** Send a PUT request (optional inline JSON body) and resolve with the result. */
+    /** Send a PUT request — the body a value or a `file()` — and resolve with the result. */
     put: (path: string, body?: unknown) => Promise<HttpResult>;
-    /** Send the complete request described by a `.http` file, relative to the spec file. */
-    requestFile: (path: RelativePath<'.http'>) => Promise<HttpResult>;
+    /** Send the complete request a `.http` document describes, `file('./requests/<name>.http')`. */
+    request: (source: DiskFile<'.http'>) => Promise<HttpResult>;
 };
 
 /**
@@ -227,9 +223,9 @@ export type JobsSpecification<DatabaseKey extends string = string> = {
     clock: (iso: string) => JobsSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
-    /** Queue a SQL seed file, relative to the spec file, to run before the action. */
-    seedFile: (
-        path: RelativePath<'.sql'>,
+    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run before the action. */
+    seed: (
+        source: DiskFile<'.sql'>,
         options?: { database?: DatabaseKey },
     ) => JobsSpecification<DatabaseKey>;
 
@@ -254,9 +250,9 @@ export type IntegrationSpecification<
     clock: (iso: string) => IntegrationSpecification<Services, DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<IntegrationSpecification<Services, DatabaseKey>>;
-    /** Queue a SQL seed file, relative to the spec file, to run before the call. */
-    seedFile: (
-        path: RelativePath<'.sql'>,
+    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run before the call. */
+    seed: (
+        source: DiskFile<'.sql'>,
         options?: { database?: DatabaseKey },
     ) => IntegrationSpecification<Services, DatabaseKey>;
 
@@ -277,19 +273,15 @@ export type CliSpecification<DatabaseKey extends string = string> = {
     /** Set environment variables on the child process. `$WORKDIR` expands; `null` unsets. */
     env: (env: CliEnv) => CliSpecification<DatabaseKey>;
     /**
-     * Spread a directory's CONTENTS into the working directory before
-     * execution. The path is relative to the spec file and ends in `/`; the
-     * shared pool is reached by the path that climbs to it. Chained calls layer.
+     * Lay file state into the working directory before execution: a
+     * `directory()`'s CONTENTS are spread into it, a `file()` is copied under
+     * its own name. The shared pool is reached by the path that climbs to it.
+     * Chained calls layer.
      */
-    fixtureDirectory: (path: RelativePath<'/'>) => CliSpecification<DatabaseKey>;
-    /**
-     * Copy one file into the working directory, under its own name, before
-     * execution. The path is relative to the spec file. Chained calls layer.
-     */
-    fixtureFile: (path: RelativePath) => CliSpecification<DatabaseKey>;
-    /** Queue a SQL seed file, relative to the spec file, to run against a database before the action. */
-    seedFile: (
-        path: RelativePath<'.sql'>,
+    fixture: (source: DiskTarget) => CliSpecification<DatabaseKey>;
+    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run against a database before the action. */
+    seed: (
+        source: DiskFile<'.sql'>,
         options?: { database?: DatabaseKey },
     ) => CliSpecification<DatabaseKey>;
 
@@ -305,10 +297,10 @@ export type CliSpecification<DatabaseKey extends string = string> = {
      * Run a `<case>.spec.yaml` document — its ground (fixtures, env sets,
      * servers) and every run, each asserted — and resolve with the LAST run's
      * result, so a `.test.ts` can add an assertion the document cannot express
-     * (a directory golden, a grep). The path is relative to the test file's own
-     * directory, where the document lives.
+     * (a directory golden, a grep). The document is named with `file()`, from
+     * the test file beside it.
      */
-    run: (file: string, options?: LiterateRunFlags) => Promise<CliResult>;
+    run: (document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags) => Promise<CliResult>;
 };
 
 /**
@@ -365,7 +357,7 @@ export type MobileSpecification = {
 /**
  * Fluent builder for declaring a single test specification.
  *
- * Chain setup methods ({@link seedFile}, {@link fixtureFile}, {@link env}), then call
+ * Chain setup methods ({@link seed}, {@link fixture}, {@link env}), then call
  * an action ({@link get}, {@link post}, {@link exec}, {@link trigger}) —
  * actions are terminal: they execute the specification and resolve to a
  * typed result.
@@ -387,7 +379,7 @@ export class SpecificationBuilder
     private commandEnv: CliEnv = {};
     private readonly config: SpecificationConfig;
     private readonly contracts: Contract[] = [];
-    private readonly fixtures: FixtureEntry[] = [];
+    private readonly fixtures: DiskTarget[] = [];
     private requestHeaders: Record<string, string> = {};
     private readonly seeds: SeedEntry[] = [];
     private readonly testDir: string;
@@ -416,55 +408,33 @@ export class SpecificationBuilder
     }
 
     /**
-     * Queue a SQL seed file, relative to the spec file, to run before the action.
+     * Queue a SQL seed, named with `file()`, to run before the action.
      *
      * With two or more declared databases the `database` option is mandatory;
      * with exactly one it is forbidden (CONVENTIONS A7).
      *
      * @example
-     *   api.seedFile('./seeds/users.sql', { database: 'db' }).get('/users');
+     *   api.seed(file('./seeds/users.sql'), { database: 'db' }).get('/users');
      */
-    seedFile(path: RelativePath<'.sql'>, options?: { database?: string }): this {
-        requireRelativePath('seedFile', path);
-        validateDatabaseOption('seedFile', this.config, options?.database);
-        this.seeds.push({ database: options?.database, path });
+    seed(source: DiskFile<'.sql'>, options?: { database?: string }): this {
+        const seed = requireDiskFile('seed', source, '.sql');
+        validateDatabaseOption('seed', this.config, options?.database);
+        this.seeds.push({ database: options?.database, path: seed.path });
         return this;
     }
 
     /**
-     * Spread a directory's contents, relative to the spec file, into the
-     * working directory before execution. Chained fixtures layer in order — a
-     * later one overwrites files written by an earlier one.
+     * Lay file state into the working directory before execution: a
+     * `directory()`'s contents are spread into it, a `file()` is copied under
+     * its own name. Chained fixtures layer in order — a later one overwrites
+     * files written by an earlier one.
      *
      * @example
-     *   cli.fixtureDirectory('../../fixtures/cli-app/').exec('build');   // the shared pool
+     *   cli.fixture(directory('../../fixtures/cli-app/')).exec('build');   // the shared pool
+     *   cli.fixture(file('./fixtures/config.toml')).exec('migrate');
      */
-    fixtureDirectory(path: RelativePath<'/'>): this {
-        requireRelativePath('fixtureDirectory', path);
-        if (!path.endsWith('/')) {
-            throw new TypeError(
-                `fixtureDirectory(${JSON.stringify(path)}): a directory's path ends in / — its contents are spread into the working directory.`,
-            );
-        }
-        this.fixtures.push({ kind: 'directory', path });
-        return this;
-    }
-
-    /**
-     * Copy one file, relative to the spec file, into the working directory
-     * under its own name before execution.
-     *
-     * @example
-     *   cli.fixtureFile('./fixtures/config.toml').exec('migrate');
-     */
-    fixtureFile(path: RelativePath): this {
-        requireRelativePath('fixtureFile', path);
-        if (path.endsWith('/')) {
-            throw new TypeError(
-                `fixtureFile(${JSON.stringify(path)}): a path ending in / is a directory — spread it with fixtureDirectory().`,
-            );
-        }
-        this.fixtures.push({ kind: 'file', path });
+    fixture(source: DiskTarget): this {
+        this.fixtures.push(requireDiskTarget('fixture', source));
         return this;
     }
 
@@ -487,7 +457,7 @@ export class SpecificationBuilder
 
     /**
      * Set HTTP headers for the request. Multiple calls merge; chain headers
-     * win over headers from a `.requestFile()` document.
+     * win over headers from a `.request()` document.
      *
      * @example
      *   api.headers({ 'Accept-Language': 'fr' }).get("/articles");
@@ -566,16 +536,16 @@ export class SpecificationBuilder
     // ── HTTP actions (terminal) ──
 
     /**
-     * Send the complete request a `.http` file describes, relative to the spec
-     * file — first line `METHOD /path`, then headers until a blank line, then
-     * the body. Headers set via `.headers()` merge on top of the file's headers.
+     * Send the complete request a `.http` document describes — first line
+     * `METHOD /path`, then headers until a blank line, then the body. Headers
+     * set via `.headers()` merge on top of the document's headers.
      *
      * @example
-     *   const result = await api.requestFile('./requests/create-user.http');
+     *   const result = await api.request(file('./requests/create-user.http'));
      */
-    async requestFile(path: RelativePath<'.http'>): Promise<HttpResult> {
-        requireRelativePath('requestFile', path);
-        return await this.executeHttp({ method: '', path: '', requestFile: path });
+    async request(source: DiskFile<'.http'>): Promise<HttpResult> {
+        const request = requireDiskFile('request', source, '.http');
+        return await this.executeHttp({ method: '', path: '', request });
     }
 
     /**
@@ -591,10 +561,12 @@ export class SpecificationBuilder
     /**
      * Send a POST request to the server adapter and resolve with the result.
      *
-     * @param body - Optional inline JSON body. Prefer
-     *   `.requestFile('./requests/name.http')` for a complete request.
+     * @param body - Optional body: a value, or a `file()` whose content is
+     *   sent. Prefer `.request(file('./requests/name.http'))` for a complete
+     *   request.
      * @example
      *   const result = await api.post("/api/items", { name: "Widget" });
+     *   const result = await api.post("/api/items", file('./requests/widget.json'));
      */
     async post(path: string, body?: unknown): Promise<HttpResult> {
         return await this.executeHttp({ body, method: 'POST', path });
@@ -656,14 +628,15 @@ export class SpecificationBuilder
      * entries over it, and its `env:` wins over a chained `.env()`.
      *
      * @example
-     *   const result = await cli.run('no-estate.spec.yaml');
-     *   await expect(result.directory('out')).toMatchDirectory('./expected/scaffold/');
+     *   const result = await cli.run(file('./no-estate.spec.yaml'));
+     *   await expect(result.directory('out')).toMatch(directory('./expected/scaffold/'));
      */
-    async run(file: string, options?: LiterateRunFlags): Promise<CliResult> {
+    async run(document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags): Promise<CliResult> {
+        const source = requireDiskFile('run', document, '.spec.yaml');
         const workDir = this.prepareWorkDir();
         return await this.executeSetup(
             workDir,
-            async () => await this.runLiterateAction(workDir, file, options),
+            async () => await this.runLiterateAction(workDir, source.path, options),
         );
     }
 
@@ -678,7 +651,7 @@ export class SpecificationBuilder
      * @example
      *   const result = await website.fetch('/robots.txt');
      *   expect(result.status).toBe(200);
-     *   expect(result.body).toMatchFile('./expected/robots.txt');
+     *   expect(result.body).toMatch(file('./expected/robots.txt'));
      */
     async fetch(path: string): Promise<FetchResult> {
         if (this.pinnedClock !== null) {
@@ -698,7 +671,7 @@ export class SpecificationBuilder
      *
      * @example
      *   const result = await website.visit('/articles');
-     *   expect(result.head).toMatchFile('./expected/articles.head.json');
+     *   expect(result.head).toMatch(file('./expected/articles.head.json'));
      *
      *   const result = await website.visit('/', async (visitor) => {
      *       await visitor.click(link('Articles'));
@@ -719,7 +692,7 @@ export class SpecificationBuilder
      *
      * @example
      *   const result = await mobile.open('news://events');
-     *   expect(result.screen).toMatchFile('./expected/events.screen.json');
+     *   expect(result.screen).toMatch(file('./expected/events.screen.json'));
      *
      *   const result = await mobile.open('news://events', async (visitor) => {
      *       await visitor.tap(button('Enquête Fauci COVID-19'));
@@ -746,9 +719,9 @@ export class SpecificationBuilder
      *
      * @example
      *   const result = await integration
-     *       .seedFile('./seeds/rows.sql')
+     *       .seed(file('./seeds/rows.sql'))
      *       .call(({ db }) => find(db.connectionString, id));
-     *   expect(result.value).toMatchFile('./expected/found.json');
+     *   expect(result.value).toMatch(file('./expected/found.json'));
      */
     async call<T>(subject: (services: never) => Promise<T> | T): Promise<CallResult<T>> {
         return await this.executeSetup(null, async () => await this.runCallAction(subject));
@@ -805,7 +778,7 @@ export class SpecificationBuilder
                 db = this.config.databases.get(entry.database);
                 if (!db) {
                     throw new Error(
-                        `seedFile() targets database "${entry.database}" but it was not found. Available: ${[...this.config.databases.keys()].join(', ')}`,
+                        `seed() targets database "${entry.database}" but it was not found. Available: ${[...this.config.databases.keys()].join(', ')}`,
                     );
                 }
             } else {
@@ -813,10 +786,10 @@ export class SpecificationBuilder
             }
 
             if (!db) {
-                throw new Error('seedFile() requires a database adapter');
+                throw new Error('seed() requires a database adapter');
             }
 
-            const sql = readFileSync(resolveSpecPath('seedFile', entry.path, this.testDir), 'utf8');
+            const sql = readFileSync(resolveSpecPath('seed', entry.path, this.testDir), 'utf8');
             await db.seed(sql);
         }
 
@@ -824,15 +797,7 @@ export class SpecificationBuilder
         // A later fixture overwrites an earlier file.
         if (this.fixtures.length > 0 && workDir) {
             for (const entry of this.fixtures) {
-                const verb = entry.kind === 'file' ? 'fixtureFile' : 'fixtureDirectory';
-                const { dest, src } = copyPlan(entry.path, this.testDir, workDir, verb);
-                const isDirectory = statSync(src).isDirectory();
-                if (isDirectory !== (entry.kind === 'directory')) {
-                    throw new TypeError(
-                        `${verb}(${JSON.stringify(entry.path)}) names a ${isDirectory ? 'directory' : 'file'} — ` +
-                            `use ${isDirectory ? 'fixtureDirectory' : 'fixtureFile'}().`,
-                    );
-                }
+                const { dest, src } = copyPlan(entry.path, this.testDir, workDir);
                 cpSync(src, dest, { recursive: true });
             }
         }
@@ -919,12 +884,22 @@ export class SpecificationBuilder
         let { body, method, path } = request;
         let fileHeaders: Record<string, string> | undefined;
 
-        if (request.requestFile) {
+        if (isDiskDirectory(body)) {
+            throw new TypeError(
+                `.${method.toLowerCase()}(${JSON.stringify(path)}, directory(${JSON.stringify(body.path)})): a body is one file — name it with file().`,
+            );
+        }
+        if (isDiskFile(body)) {
+            const content = readFileSync(resolveSpecPath('body', body.path, this.testDir), 'utf8');
+            body = body.path.endsWith('.json') ? JSON.parse(content) : content;
+        }
+
+        if (request.request) {
             const raw = readFileSync(
-                resolveSpecPath('requestFile', request.requestFile, this.testDir),
+                resolveSpecPath('request', request.request.path, this.testDir),
                 'utf8',
             );
-            const parsed = parseRequestFile(raw, request.requestFile);
+            const parsed = parseRequestFile(raw, request.request.path);
             body = parsed.body;
             fileHeaders = parsed.headers;
             method = parsed.method;
@@ -1105,15 +1080,15 @@ export class SpecificationBuilder
 
     private async runLiterateAction(
         workDir: string,
-        file: string,
+        document: string,
         options?: LiterateRunFlags,
     ): Promise<CliResult> {
-        const filePath = resolve(this.testDir, file);
+        const filePath = resolveSpecPath('run', document, this.testDir);
         return await runSpecDocument({
             baseEnv: this.childEnv(workDir),
             frozen: options?.frozen,
             config: this.config,
-            displayPath: relative(process.cwd(), filePath) || file,
+            displayPath: relative(process.cwd(), filePath) || document,
             filePath,
             testDir: this.testDir,
             workDir,
@@ -1216,8 +1191,8 @@ export function createApiFacet(config: SpecificationConfig): ApiSpecification {
         intercept: interceptOn(start),
         post: async (path, body) => await start().post(path, body),
         put: async (path, body) => await start().put(path, body),
-        requestFile: async (path) => await start().requestFile(path),
-        seedFile: (path, options) => start().seedFile(path, options),
+        request: async (source) => await start().request(source),
+        seed: (source, options) => start().seed(source, options),
     };
 }
 
@@ -1230,7 +1205,7 @@ export function createJobsFacet(config: SpecificationConfig): JobsSpecification 
     return {
         clock: (iso) => start().clock(iso),
         intercept: interceptOn(start),
-        seedFile: (path, options) => start().seedFile(path, options),
+        seed: (source, options) => start().seed(source, options),
         trigger: async (name) => await start().trigger(name),
     };
 }
@@ -1248,7 +1223,7 @@ export function createIntegrationFacet<
         call: async (subject) => await start().call(subject),
         clock: (iso) => start().clock(iso),
         intercept: interceptOn(start),
-        seedFile: (path, options) => start().seedFile(path, options),
+        seed: (source, options) => start().seed(source, options),
     };
 }
 
@@ -1289,9 +1264,8 @@ export function createCliFacet(config: SpecificationConfig): CliSpecification {
     return {
         env: (env) => start().env(env),
         exec: async (args, options) => await start().exec(args, options),
-        fixtureDirectory: (path) => start().fixtureDirectory(path),
-        fixtureFile: (path) => start().fixtureFile(path),
-        run: async (file, options) => await start().run(file, options),
-        seedFile: (path, options) => start().seedFile(path, options),
+        fixture: (source) => start().fixture(source),
+        run: async (document, options) => await start().run(document, options),
+        seed: (source, options) => start().seed(source, options),
     };
 }

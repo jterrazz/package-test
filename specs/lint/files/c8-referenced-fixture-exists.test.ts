@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — c8-referenced-fixture-exists (CONVENTIONS C8)', () => {
@@ -7,7 +8,7 @@ describe('lint — c8-referenced-fixture-exists (CONVENTIONS C8)', () => {
     test('rejects a toMatch referencing a missing fixture', async () => {
         // Given - a project violating C8
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c8-referenced-fixture-exists/')
+            .fixture(directory('../../fixtures/lint-violations/c8-referenced-fixture-exists/'))
             .exec('.');
 
         // Then - oxlint reports the c8-referenced-fixture-exists diagnostic
@@ -18,7 +19,7 @@ describe('lint — c8-referenced-fixture-exists (CONVENTIONS C8)', () => {
     test('accepts a reference that exists on disk', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c8-referenced-fixture-exists-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c8-referenced-fixture-exists-ok/'))
             .exec('.');
 
         // Then - clean run, no c8-referenced-fixture-exists diagnostic

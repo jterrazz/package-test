@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — c7-seeds-sql-only (CONVENTIONS C7)', () => {
@@ -7,7 +8,7 @@ describe('lint — c7-seeds-sql-only (CONVENTIONS C7)', () => {
     test('rejects a non-.sql file under seeds/', async () => {
         // Given - a project violating C7
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c7-seeds-sql-only/')
+            .fixture(directory('../../fixtures/lint-violations/c7-seeds-sql-only/'))
             .exec('.');
 
         // Then - oxlint reports the c7-seeds-sql-only diagnostic
@@ -18,7 +19,7 @@ describe('lint — c7-seeds-sql-only (CONVENTIONS C7)', () => {
     test('accepts a seeds/ directory of .sql fragments only', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c7-seeds-sql-only-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c7-seeds-sql-only-ok/'))
             .exec('.');
 
         // Then - clean run, no c7-seeds-sql-only diagnostic

@@ -4,6 +4,6 @@
 [warn] specs/grammar/requests/req.http:3: token {{string}} in a requests/ file — requests are inputs, never matched; tokens are not validated here (D10 — see docs/19-linting.md)
 [error] specs/grammar/seeds/dead.sql: dead fixture — no test literal in grammar references seeds/dead.sql (C9 — see docs/19-linting.md)
 [error] specs/docker/docker.test.ts:8: result of docker-aware runner "dockerCli" must be bound with `await using` so its containers are disposed (B5 — see docs/19-linting.md)
-[error] specs/db/db.test.ts:8: .seedFile() must pass { database } — 2 SQL databases are declared (A7 — see docs/19-linting.md)
+[error] specs/db/db.test.ts:9: .seed() must pass { database } — 2 SQL databases are declared (A7 — see docs/19-linting.md)
 
 conventions checker: 6 error(s) found under {{workdir}}

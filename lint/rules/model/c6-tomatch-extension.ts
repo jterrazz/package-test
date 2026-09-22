@@ -1,12 +1,13 @@
-import { memberPropertyName, stringValue } from '../../ast.js';
+import { goldenOf } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
 
 /**
  * CONVENTIONS C6 — the extension is part of a golden file's path and mandatory
- * in `toMatchFile` (`'./expected/help.txt'`, never `'./expected/help'`). A tree
- * is `toMatchDirectory`, whose path ends in `/` — out of this rule's reach.
+ * in `toMatch(file(…))` (`'./expected/help.txt'`, never `'./expected/help'`). A
+ * tree is `toMatch(directory(…))`, whose path ends in `/` — out of this rule's
+ * reach.
  */
 export const c6ToMatchExtension: LintRule = {
     create(context: RuleContext): Visitor {
@@ -17,20 +18,20 @@ export const c6ToMatchExtension: LintRule = {
         }
         return {
             CallExpression(node: AstNode) {
-                const callee = node.callee as AstNode | undefined;
-                if (callee === undefined || memberPropertyName(callee) !== 'toMatchFile') {
-                    return;
-                }
-                const argument = (node.arguments as AstNode[] | undefined)?.[0];
-                const name = stringValue(argument);
-                if (name === undefined || name.length === 0) {
+                const golden = goldenOf(node);
+                const name = golden?.kind === 'file' ? golden.path : undefined;
+                if (golden === undefined || name === undefined || name.length === 0) {
                     return;
                 }
                 const base = name.split('/').at(-1) ?? '';
                 if (base.includes('.')) {
                     return;
                 }
-                context.report({ data: { name }, messageId: 'missingExtension', node: argument });
+                context.report({
+                    data: { name },
+                    messageId: 'missingExtension',
+                    node: golden.node,
+                });
             },
         };
     },
@@ -38,7 +39,7 @@ export const c6ToMatchExtension: LintRule = {
         docs: RULE_DOCS['c6-tomatch-extension'],
         messages: {
             missingExtension:
-                'toMatchFile("{{name}}") is missing its extension — the extension is part of the golden\'s path ("./expected/help.txt", never "./expected/help"); a tree is toMatchDirectory("./expected/<name>/").',
+                'toMatch(file("{{name}}")) is missing its extension — the extension is part of the golden\'s path ("./expected/help.txt", never "./expected/help"); a tree is toMatch(directory("./expected/<name>/")).',
         },
         type: 'problem',
     },

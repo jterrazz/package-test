@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { file } from '@jterrazz/test';
 
 import { cli } from '../../setup/widget.specification.js';
 
@@ -8,6 +9,6 @@ describe('widget', () => {
         const result = await cli.exec('build');
 
         // Then - it matches the recorded fixture
-        expect(result.stdout).toMatchFile('./expected/out.txt');
+        expect(result.stdout).toMatch(file('./expected/out.txt'));
     });
 });

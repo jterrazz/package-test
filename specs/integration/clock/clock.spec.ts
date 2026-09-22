@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { file } from '../../../src/index.js';
 import { integration } from '../pure.specification.js';
 
 describe('integration — the calendar the module reads', () => {
@@ -10,7 +11,7 @@ describe('integration — the calendar the module reads', () => {
             .call(() => ({ stampedAt: new Date().toISOString() }));
 
         // Then - the stamp is that instant, not the run's
-        expect(result.value).toMatchFile('./expected/stamped.json');
+        expect(result.value).toMatch(file('./expected/stamped.json'));
     });
 
     test('gives the calendar back to the next chain', async () => {
@@ -21,6 +22,6 @@ describe('integration — the calendar the module reads', () => {
         const result = await integration.call(() => ({ stampedAt: new Date().toISOString() }));
 
         // Then - the reading moved on: the pin lasted exactly one chain
-        expect(result.value).not.toMatchFile('./expected/stamped.json');
+        expect(result.value).not.toMatch(file('./expected/stamped.json'));
     });
 });

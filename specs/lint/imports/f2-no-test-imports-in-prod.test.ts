@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — f2-no-test-imports-in-prod (CONVENTIONS F2)', () => {
@@ -7,7 +8,7 @@ describe('lint — f2-no-test-imports-in-prod (CONVENTIONS F2)', () => {
     test('rejects a vitest import from production code', async () => {
         // Given - a project violating F2
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f2-no-test-imports-in-prod/')
+            .fixture(directory('../../fixtures/lint-violations/f2-no-test-imports-in-prod/'))
             .exec('.');
 
         // Then - oxlint reports the f2-no-test-imports-in-prod diagnostic
@@ -18,7 +19,7 @@ describe('lint — f2-no-test-imports-in-prod (CONVENTIONS F2)', () => {
     test('accepts production code without test artefacts', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f2-no-test-imports-in-prod-ok/')
+            .fixture(directory('../../fixtures/lint-violations/f2-no-test-imports-in-prod-ok/'))
             .exec('.');
 
         // Then - clean run, no f2-no-test-imports-in-prod diagnostic

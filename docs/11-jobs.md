@@ -41,7 +41,7 @@ There is **no `server`** option: jobs run in-process by definition, and the reco
 
 ## The chain
 
-Setups: `.seedFile()`, `.intercept()`, `.clock()`. Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
+Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
 
 `.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 
@@ -54,7 +54,7 @@ import pipeline from './contracts/pipeline.contracts.js';
 test('nightly report classifies, prices and drafts', async () => {
     // Given - pending articles + the world the pipeline reaches out to
     const result = await jobs
-        .seedFile('./seeds/pending-articles.sql', { database: 'db' })
+        .seed(file('./seeds/pending-articles.sql'), { database: 'db' })
         .intercept(pipeline)
         .trigger('nightly-report');
 
@@ -78,7 +78,7 @@ Selection is **first non-exhausted match wins**, so a multi-call scenario is a f
 test('retries then recovers from provider rate-limit', async () => {
     // Given - the first call is rate-limited, everything after it succeeds
     const result = await jobs
-        .seedFile('./seeds/pending-articles.sql', { database: 'db' })
+        .seed(file('./seeds/pending-articles.sql'), { database: 'db' })
         .intercept([
             { request: openai.chat(), response: openai.error(429), times: 1 },
             { request: openai.chat(), response: openai.reply({ category: 'BOOKS' }) },
@@ -103,7 +103,7 @@ The number in `times` IS the assertion: it says the job retries exactly once. A 
 | --------------------------- | ----------------------------------------------------------------------- |
 | `result.table(name, opts?)` | Table subject for `toMatchRows` / `toBeEmpty` — async, `await expect()` |
 
-With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seedFile()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](14-assertions.md).
+With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](14-assertions.md).
 
 ## Unique here
 

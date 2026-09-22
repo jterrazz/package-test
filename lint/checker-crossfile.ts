@@ -31,14 +31,14 @@ import { isNodeTestFileName, isTestFileName } from './role.js';
  *   references is dead weight; a feature dir with ground subdirs but no
  *   `<feature>.test.ts` is an orphan. A `<case>.spec.yaml` counts as a test
  *   AND as a referrer: the paths of its `fixture:` entries keep those trees
- *   alive exactly as a `.fixtureDirectory('…')` literal does.
+ *   alive exactly as a `.fixture(directory('…'))` literal does.
  * - **B5 await-using (inference)** — the docker-aware runners of a spec file
  *   are derived from its `docker:` option, then every `<runner>….exec()` bound
  *   without `await using` in an importing test is flagged. The primary B5
  *   channel now (the oxlint rule needs the runner names spelled out by hand).
  * - **A7 database property** — a spec's `services:` record fixes how many SQL
  *   databases exist; importing tests must (≥2) or must not (==1) pass
- *   `{ database }` to every `.seedFile()` / `.table()`.
+ *   `{ database }` to every `.seed()` / `.table()`.
  * - **C14 / C15 where a fixture lives** — a pool entry only ONE spec directory
  *   reaches for belongs beside that leaf (autofixed), and a path leaves its
  *   leaf only into the pool.
@@ -301,7 +301,7 @@ function collectLiterals(text: string): Set<string> {
 
 /**
  * A golden NAMED by a template literal with a hole — the table form chapter 17
- * prescribes for the golden half (`toMatchFile(`./expected/${name}.json`)` under a
+ * prescribes for the golden half (`toMatch(file(`./expected/${name}.json`))` under a
  * `test.each`). The hole's value is not readable here, but its static ends are:
  * a fixture whose name starts with `prefix` and ends with `suffix` is one the
  * table could have asked for, which is all C9 needs to stop calling it dead.
@@ -333,29 +333,30 @@ function collectLiteralPatterns(text: string): LiteralPattern[] {
 }
 
 /**
- * Does the text pass a NON-literal argument to a verb that reads the disk
- * (`.seedFile`/`.requestFile`/`.fixtureFile`/`.fixtureDirectory`/`toMatchFile`/
- * `toMatchDirectory`)? A template with an expression or a variable makes the
- * reference set incomplete, so the feature is reported at warn level instead
- * of error (a false positive would be worse than a miss).
+ * Does the text name the disk with a NON-literal — a `file(…)`/`directory(…)`
+ * whose path is computed, or a verb that reads the disk (`.seed`, `.request`,
+ * `.fixture`, `.run`) handed a variable rather than the wrapper? Either makes
+ * the reference set incomplete, so the feature is reported at warn level
+ * instead of error (a false positive would be worse than a miss).
  */
-const FIXTURE_VERB_ARG =
-    /(?:\.(?:seedFile|requestFile|fixtureFile|fixtureDirectory)|\btoMatch(?:File|Directory))\s*\(\s*(?<arg>[^,)]*)/gu;
+const DISK_ARG = /(?<![.\w])(?:file|directory)\s*\(\s*(?<arg>[^,)]*)/gu;
+const DISK_VERB_ARG = /\.(?:seed|request|fixture|run)\s*\(\s*(?<arg>[^,)]*)/gu;
+
+/** A plain string literal: quoted, or a template with no hole. */
+const PLAIN_STRING = /^(?:'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`$\\]|\\.)*`)$/u;
+
+/** The trimmed first arguments `pattern` captures in `text`, the empty ones dropped. */
+function argumentsOf(text: string, pattern: RegExp): string[] {
+    return [...text.matchAll(pattern)]
+        .map((match) => (match.groups?.arg ?? '').trim())
+        .filter((arg) => arg.length > 0);
+}
+
 function hasNonLiteralFixtureArg(text: string): boolean {
-    for (const match of text.matchAll(FIXTURE_VERB_ARG)) {
-        const arg = (match.groups?.arg ?? '').trim();
-        if (arg.length === 0) {
-            continue;
-        }
-        const isPlainString =
-            /^'(?:[^'\\\n]|\\.)*'$/u.test(arg) ||
-            /^"(?:[^"\\\n]|\\.)*"$/u.test(arg) ||
-            /^`(?:[^`$\\]|\\.)*`$/u.test(arg);
-        if (!isPlainString) {
-            return true;
-        }
-    }
-    return false;
+    const verbTakesABinding = argumentsOf(text, DISK_VERB_ARG).some(
+        (arg) => !/^(?:file|directory)\s*\(/u.test(arg),
+    );
+    return verbTakesABinding || argumentsOf(text, DISK_ARG).some((arg) => !PLAIN_STRING.test(arg));
 }
 
 // ── Suppression (checker channel) ────────────────────────────────────────────
@@ -663,7 +664,7 @@ function localRunnerBindings(text: string): Set<string> {
     return locals;
 }
 
-/** The identifier immediately before a `.seedFile(`/`.table(` member, if any. */
+/** The identifier immediately before a `.seed(`/`.table(` member, if any. */
 function memberObjectIdentifier(text: string, dotIndex: number): null | string {
     const before = text.slice(0, dotIndex);
     const match = /(?<name>[A-Za-z_$][\w$]*)\s*$/u.exec(before);
@@ -708,7 +709,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
         const suppressed = suppressedLines(readText(testFile), 'a7');
         const rel = relative(rootDir, testFile);
 
-        for (const match of text.matchAll(/\.(?<verb>seedFile|table)\s*\(/gu)) {
+        for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/gu)) {
             const verb = match.groups?.verb ?? '';
             const object = memberObjectIdentifier(text, match.index);
             // Skip calls dispatched on a runner the test declared itself.
@@ -927,13 +928,13 @@ type FixtureReference = {
     path: string;
 };
 
-/** A fixture verb called with a plain string argument. */
+/** A fixture, named by a wrapper with a plain string argument. */
 const FIXTURE_CALL =
-    /\.fixture(?:File|Directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
+    /\.fixture\(\s*(?:file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
-/** Any verb that reads the disk, called with a plain string argument. */
-const FILE_VERB_CALL =
-    /(?:\.(?:seedFile|requestFile|fixtureFile|fixtureDirectory)|\btoMatch(?:File|Directory))\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
+/** The disk, named anywhere: a `file(…)` or `directory(…)` call with a plain string argument. */
+const DISK_CALL =
+    /(?<![.\w])(?:file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
 /**
  * Every fixture path a spec file names, with the line it names it on. A
@@ -1088,8 +1089,8 @@ export function fixPoolFixtures(rootDir: string): string[] {
 }
 
 /**
- * CONVENTIONS C15 — a path leaves its leaf only into the pool. Every verb that
- * reads the disk names its entry from the spec file; a path whose target
+ * CONVENTIONS C15 — a path leaves its leaf only into the pool. Every `file()`
+ * and `directory()` names its entry from the spec file; a path whose target
  * stays under the spec's own directory is the leaf's ground, one under the
  * specs-root `fixtures/` is the pool, and anything else reaches into a
  * sibling's ground — the pool by another door, with none of its visibility.
@@ -1105,7 +1106,7 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
         const pool = join(specsRoot, GROUND_FIXTURES);
         for (const file of listReferrers(specsRoot, pool)) {
             const leaf = dirname(file);
-            for (const { line, path } of collectFixtureReferences(file, FILE_VERB_CALL)) {
+            for (const { line, path } of collectFixtureReferences(file, DISK_CALL)) {
                 const target = resolve(leaf, path);
                 if (isWithin(leaf, target) || isWithin(pool, target)) {
                     continue;

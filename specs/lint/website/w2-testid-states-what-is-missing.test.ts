@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — w2-testid-states-what-is-missing (CONVENTIONS W2)', () => {
@@ -7,7 +8,7 @@ describe('lint — w2-testid-states-what-is-missing (CONVENTIONS W2)', () => {
     test('refuses a testId() that states nothing about the element', async () => {
         // Given - a scenario reaching for the escape hatch with no invariant written
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/w2-testid-states-what-is-missing/')
+            .fixture(directory('../../fixtures/lint-violations/w2-testid-states-what-is-missing/'))
             .exec('.');
 
         // Then - it is an error now: the hatch costs one line
@@ -18,7 +19,9 @@ describe('lint — w2-testid-states-what-is-missing (CONVENTIONS W2)', () => {
     test('accepts the hatch when the line above says what the element lacks', async () => {
         // Given - the compliant twin, whose testId() carries its invariant
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/w2-testid-states-what-is-missing-ok/')
+            .fixture(
+                directory('../../fixtures/lint-violations/w2-testid-states-what-is-missing-ok/'),
+            )
             .exec('.');
 
         // Then - clean run, no w2-testid-states-what-is-missing diagnostic

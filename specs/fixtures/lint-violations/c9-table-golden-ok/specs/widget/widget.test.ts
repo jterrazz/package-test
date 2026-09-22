@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { file } from '@jterrazz/test';
 
 import { api } from '../../setup/db.specification.js';
 
@@ -10,6 +11,6 @@ describe('widget', () => {
         const result = await api.get('/');
 
         // Then - the golden is named by the row, not by a hand-written literal
-        expect(result.body).toMatchFile(`./expected/${name}.json`, { frozen: true });
+        expect(result.body).toMatch(file(`./expected/${name}.json`), { frozen: true });
     });
 });

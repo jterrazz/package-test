@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { file } from '@jterrazz/test';
 
 test('creates an event', () => {
     // Given - an API result
@@ -6,5 +7,5 @@ test('creates an event', () => {
 
     // Then - the status probe sits alongside a full-response golden: scalpel, silent
     expect(result.status).toBe(201);
-    expect(result.response).toMatchFile('./expected/created.http');
+    expect(result.response).toMatch(file('./expected/created.http'));
 });

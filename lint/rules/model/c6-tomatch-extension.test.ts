@@ -18,30 +18,33 @@ ruleTester.run('c6-tomatch-extension', c6ToMatchExtension as unknown as OxlintRu
     invalid: [
         // No extension.
         {
-            code: 'expect(result.stdout).toMatchFile("./expected/help");',
+            code: 'expect(result.stdout).toMatch(file("./expected/help"));',
             errors: 1,
             filename: VIOLATION,
         },
         // A path in a subfolder still needs its extension.
         {
-            code: 'expect(result.stdout).toMatchFile("./expected/build/verbose");',
+            code: 'expect(result.stdout).toMatch(file("./expected/build/verbose"));',
             errors: 1,
             filename: VIOLATION,
         },
     ],
     valid: [
         // Extension present.
-        { code: 'expect(result.stdout).toMatchFile("./expected/help.txt");', filename: VIOLATION },
+        {
+            code: 'expect(result.stdout).toMatch(file("./expected/help.txt"));',
+            filename: VIOLATION,
+        },
         // A tree is the directory matcher's.
         {
-            code: 'await expect(result.directory("out")).toMatchDirectory("./expected/tree/");',
+            code: 'await expect(result.directory("out")).toMatch(directory("./expected/tree/"));',
             filename: VIOLATION,
         },
         // Vitest's toMatch takes a value, and is untouched.
         { code: 'expect(text).toMatch("hello");', filename: VIOLATION },
         // Outside specs/ the rule is inert.
         {
-            code: 'expect(text).toMatchFile("./expected/substring");',
+            code: 'expect(text).toMatch(file("./expected/substring"));',
             filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],

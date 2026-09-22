@@ -2,6 +2,7 @@ import { readFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
@@ -9,31 +10,31 @@ const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
 describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
     test('matches dynamic values via typed tokens including {{workdir}}', async () => {
         // Given - output mixing a semver, a uuid, a timestamp, the cwd, and a duration
-        const result = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('version');
+        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
 
         // Then - the committed fixture matches through the token grammar
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/version.txt');
+        expect(result.stdout).toMatch(file('./expected/version.txt'));
     });
 
     test('{{workdir}} is the exact cwd of the spec — a different path fails', async () => {
         // Given - two runs, each with its own temp cwd
-        const result = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('version');
+        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
 
         // Then - the fixture matched THIS run's cwd (fresh cwd per spec means A stale literal path could never pass — the token is exact)
         expect(result.stdout.comparableText).toContain('cwd /');
-        expect(result.stdout).toMatchFile('./expected/version.txt');
+        expect(result.stdout).toMatch(file('./expected/version.txt'));
     });
 
     test('tokens match inside tree-snapshot file contents', async () => {
         // Given - a scaffold whose out/report.txt embeds a fresh uuid
         const result = await cli
-            .fixtureDirectory('../../fixtures/cli-app/')
+            .fixture(directory('../../fixtures/cli-app/'))
             .exec('scaffold-dynamic');
 
         // Then - the committed tree fixture matches via the {{uuid}} token
         expect(result.exitCode).toBe(0);
-        await expect(result.directory('out')).toMatchDirectory('./expected/dynamic-tree/');
+        await expect(result.directory('out')).toMatch(directory('./expected/dynamic-tree/'));
     });
 
     test('update mode substitutes the workdir and preserves tokens (CONVENTIONS D5)', async () => {
@@ -41,10 +42,10 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
         const fixtureName = `version-transient-${Date.now()}.txt`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
-            const result = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('version');
+            const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
             process.env.TEST_UPDATE = '1';
             try {
-                expect(result.stdout).toMatchFile(`./expected/${fixtureName}`);
+                expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
             } finally {
                 delete process.env.TEST_UPDATE;
             }
@@ -55,8 +56,8 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
             expect(written).not.toMatch(/cwd \//u);
 
             // Then - a second run (different cwd) matches the updated fixture
-            const second = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('version');
-            expect(second.stdout).toMatchFile(`./expected/${fixtureName}`);
+            const second = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
+            expect(second.stdout).toMatch(file(`./expected/${fixtureName}`));
         } finally {
             rmSync(fixturePath, { force: true });
         }
@@ -67,11 +68,11 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
         const fixtureName = `json-cwd-transient-${Date.now()}.json`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
-            const result = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('json-cwd');
+            const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json-cwd');
             const rawCwd = (result.json.value as { cwd: string }).cwd;
             process.env.TEST_UPDATE = '1';
             try {
-                expect(result.json).toMatchFile(`./expected/${fixtureName}`);
+                expect(result.json).toMatch(file(`./expected/${fixtureName}`));
             } finally {
                 delete process.env.TEST_UPDATE;
             }
@@ -83,8 +84,8 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
             expect(written).not.toContain(rawCwd);
 
             // Then - a second run (different cwd) matches the updated fixture
-            const second = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('json-cwd');
-            expect(second.json).toMatchFile(`./expected/${fixtureName}`);
+            const second = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json-cwd');
+            expect(second.json).toMatch(file(`./expected/${fixtureName}`));
         } finally {
             rmSync(fixturePath, { force: true });
         }
@@ -103,10 +104,10 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
             );
 
             // When - update mode rewrites from actual output
-            const result = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('version');
+            const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
             process.env.TEST_UPDATE = '1';
             try {
-                expect(result.stdout).toMatchFile(`./expected/${fixtureName}`);
+                expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
             } finally {
                 delete process.env.TEST_UPDATE;
             }
@@ -126,11 +127,11 @@ describe('command — tokens in text snapshots (CONVENTIONS D4)', () => {
 describe('command — ANSI stripped by default (CONVENTIONS D6)', () => {
     test('comparisons see clean text while .text stays raw', async () => {
         // Given - output wrapped in ANSI escapes, no transform configured
-        const result = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('ansi');
+        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('ansi');
 
         // Then - matchers compare the stripped form
         expect(result.stdout).toContain('red plain bold');
-        expect(result.stdout).toMatchFile('./expected/ansi.txt');
+        expect(result.stdout).toMatch(file('./expected/ansi.txt'));
 
         // Then - the raw accessor keeps the escapes
         // oxlint-disable-next-line jterrazz/d8w-text-bypass -- the raw `.text` accessor IS the subject: this test proves it retains ANSI escapes while matchers see the stripped form.
@@ -139,7 +140,7 @@ describe('command — ANSI stripped by default (CONVENTIONS D6)', () => {
 
     test('json accessor parses through ANSI noise without a transform', async () => {
         // Given - JSON wrapped in ANSI codes
-        const result = await cli.fixtureDirectory('../../fixtures/cli-app/').exec('ansi-json');
+        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('ansi-json');
 
         // Then - parsing works because ANSI is stripped by default
         expect(result.json.value).toStrictEqual({ status: 'ok', value: 42 });

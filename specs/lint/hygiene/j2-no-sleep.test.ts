@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
@@ -7,7 +8,7 @@ describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
     test('rejects an arbitrary setTimeout sleep in a spec', async () => {
         // Given - a project violating J2
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/j2-no-sleep/')
+            .fixture(directory('../../fixtures/lint-violations/j2-no-sleep/'))
             .exec('.');
 
         // Then - oxlint reports the j2-no-sleep diagnostic
@@ -18,7 +19,7 @@ describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
     test('accepts framework-level synchronisation, and a double that settles late', async () => {
         // Given - the compliant twin: a `waitFor`, and a double written as a plain object literal whose method holds a timer
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/j2-no-sleep-ok/')
+            .fixture(directory('../../fixtures/lint-violations/j2-no-sleep-ok/'))
             .exec('.');
 
         // Then - clean run, no j2-no-sleep diagnostic

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — f5-fixtures-only-from-tests (CONVENTIONS F5)', () => {
@@ -7,7 +8,7 @@ describe('lint — f5-fixtures-only-from-tests (CONVENTIONS F5)', () => {
     test('rejects a fixtures module imported from a non-test file', async () => {
         // Given - a project violating F5
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f5-fixtures-only-from-tests/')
+            .fixture(directory('../../fixtures/lint-violations/f5-fixtures-only-from-tests/'))
             .exec('.');
 
         // Then - oxlint reports the f5-fixtures-only-from-tests diagnostic
@@ -18,7 +19,7 @@ describe('lint — f5-fixtures-only-from-tests (CONVENTIONS F5)', () => {
     test('accepts a fixtures module imported from its test', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/f5-fixtures-only-from-tests-ok/')
+            .fixture(directory('../../fixtures/lint-violations/f5-fixtures-only-from-tests-ok/'))
             .exec('.');
 
         // Then - clean run, no f5-fixtures-only-from-tests diagnostic

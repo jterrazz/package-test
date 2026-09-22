@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { directory, file } from '@jterrazz/test';
 
 import { cli } from '../../setup/runner.specification.js';
 
@@ -7,6 +8,6 @@ test('prints help and scaffolds a tree', async () => {
     const result = await cli.exec('help');
 
     // Then - stream fixture carries its extension; tree snapshots are directories
-    expect(result.stdout).toMatchFile('./expected/help.txt');
-    await expect(result.directory('out')).toMatchDirectory('./expected/tree/');
+    expect(result.stdout).toMatch(file('./expected/help.txt'));
+    await expect(result.directory('out')).toMatch(directory('./expected/tree/'));
 });

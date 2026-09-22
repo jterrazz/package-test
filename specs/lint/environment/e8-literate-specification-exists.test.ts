@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — e8-literate-specification-exists (CONVENTIONS E8)', () => {
@@ -7,7 +8,7 @@ describe('lint — e8-literate-specification-exists (CONVENTIONS E8)', () => {
     test('rejects a literate door pointing at no file', async () => {
         // Given - a project violating E8
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e8-literate-specification-exists/')
+            .fixture(directory('../../fixtures/lint-violations/e8-literate-specification-exists/'))
             .exec('.');
 
         // Then - the diagnostic names the rule
@@ -20,7 +21,9 @@ describe('lint — e8-literate-specification-exists (CONVENTIONS E8)', () => {
     test('accepts a literate door that resolves', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e8-literate-specification-exists-ok/')
+            .fixture(
+                directory('../../fixtures/lint-violations/e8-literate-specification-exists-ok/'),
+            )
             .exec('.');
 
         // Then - clean exit, no E8 diagnostic

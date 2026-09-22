@@ -1,4 +1,5 @@
 import { formatStdoutDiff } from '../chain/reporter.js';
+import { isDiskTarget } from '../chain/spec-path.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
 import type { TextAccessor } from './text.js';
@@ -8,8 +9,8 @@ import type { TextAccessor } from './text.js';
  *
  * A golden is read from disk under node and through a server command from
  * inside a page — two transports, one comparison. Keeping the judgement here,
- * pure, is what makes `expect(result.stdout).toMatchFile('./expected/help.txt')`
- * and `expect(result.tree).toMatchFile('./expected/table.aria.yaml')` the same
+ * pure, is what makes `expect(result.stdout).toMatch(file('./expected/help.txt'))`
+ * and `expect(result.tree).toMatch(file('./expected/table.aria.yaml'))` the same
  * assertion with the same diff, instead of two implementations that drift a
  * token at a time.
  */
@@ -24,7 +25,7 @@ export type TextComparison = {
 export function requireExtension(name: string, subject: string): void {
     if (!/\.[A-Za-z0-9]+$/u.test(name)) {
         throw new Error(
-            `toMatchFile("${name}"): the extension is part of the path and is required for ${subject} subjects (e.g. "./expected/help.txt").`,
+            `toMatch(file("${name}")): the extension is part of the path and is required for ${subject} subjects (e.g. file('./expected/help.txt')).`,
         );
     }
 }
@@ -90,32 +91,54 @@ export function textContains(accessor: TextAccessor, expected: string): TextComp
     };
 }
 
+/** The name the golden comparison is registered under — no member access can spell it. */
+export const GOLDEN_MATCHER = '@jterrazz/test:golden';
+
+/** The slice of vitest's `chai` the golden route needs. */
+type Chai = {
+    Assertion: { prototype: object };
+    util: {
+        overwriteMethod: (
+            target: object,
+            name: string,
+            method: (original: (...args: unknown[]) => unknown) => (...args: unknown[]) => unknown,
+        ) => void;
+    };
+};
+
 /**
- * `toMatch` and `toContain` on a subject that is NOT an accessor.
+ * `toMatch` routes a `file()` or a `directory()` to the golden comparison and
+ * EVERYTHING else to vitest's own matcher, untouched: a string or a RegExp is a
+ * value, and on a value `toMatch` means exactly what vitest says it means — a
+ * stream accessor included, which is compared as `result.stdout.text`.
  *
- * Both matchers are overridden globally, for every subject in the project, so
+ * Both builds call this, each with the `chai` its `vitest` hands out, after
+ * registering the golden under {@link GOLDEN_MATCHER}.
+ */
+export function matchThroughGolden(chai: Chai): void {
+    chai.util.overwriteMethod(
+        chai.Assertion.prototype,
+        'toMatch',
+        (vitestToMatch) =>
+            function toMatch(this: Record<string, unknown>, ...args: unknown[]): unknown {
+                const golden = this[GOLDEN_MATCHER];
+                if (isDiskTarget(args[0]) && typeof golden === 'function') {
+                    return golden.apply(this, args) as unknown;
+                }
+                return vitestToMatch.apply(this, args);
+            },
+    );
+}
+
+/**
+ * `toContain` on a subject that is NOT an accessor.
+ *
+ * The matcher is overridden globally, for every subject in the project, so
  * whatever the framework does not own has to keep meaning what vitest's own
  * matcher meant. Stated once here because the two builds register two different
  * `expect.extend` calls: a copy in the page is how `expect(['ab']).toContain('b')`
  * ends up passing on one side of the seam and failing on the other.
  */
-
-/** vitest's `toMatch` for a plain string: a substring, or a regular expression. */
-export function nativeMatch(received: unknown, expected: unknown): TextComparison {
-    if (typeof received !== 'string') {
-        throw new TypeError(
-            'toMatch: unsupported subject — it takes a string or a stream accessor, and its argument is a value. ' +
-                "A golden file is toMatchFile('./expected/<name>.<ext>'), a golden tree toMatchDirectory('./expected/<name>/').",
-        );
-    }
-    const pass =
-        expected instanceof RegExp ? expected.test(received) : received.includes(String(expected));
-    return {
-        message: () =>
-            `expected ${JSON.stringify(received)} ${pass ? 'not ' : ''}to match ${String(expected)}`,
-        pass,
-    };
-}
 
 /** vitest's `toContain` for a plain string (substring) or an iterable (membership). */
 export function nativeContain(received: unknown, expected: unknown): TextComparison {

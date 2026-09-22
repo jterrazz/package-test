@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — j6w-given-in-the-test (CONVENTIONS J6)', () => {
@@ -7,7 +8,7 @@ describe('lint — j6w-given-in-the-test (CONVENTIONS J6)', () => {
     test('warns on a Given built in a hook', async () => {
         // Given - a project whose setup lives above its tests
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/j6w-given-in-the-test/')
+            .fixture(directory('../../fixtures/lint-violations/j6w-given-in-the-test/'))
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +19,7 @@ describe('lint — j6w-given-in-the-test (CONVENTIONS J6)', () => {
     test('accepts a Given each test calls for itself', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/j6w-given-in-the-test-ok/')
+            .fixture(directory('../../fixtures/lint-violations/j6w-given-in-the-test-ok/'))
             .exec('.');
 
         // Then - clean run, no J6 diagnostic

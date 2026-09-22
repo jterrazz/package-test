@@ -17,7 +17,7 @@ ruleTester.run('d2-await-io-matcher', d2AwaitIoMatcher as unknown as OxlintRule,
         { code: 'expect(dir).toBeEmpty();', errors: 1 },
         { code: 'expect(container).toBeRunning();', errors: 1 },
         // A tree golden walks the disk, whatever its subject.
-        { code: "expect(result.filesystem).toMatchDirectory('./expected/tree/');", errors: 1 },
+        { code: "expect(result.filesystem).toMatch(directory('./expected/tree/'));", errors: 1 },
         // Negated form is still IO.
         { code: 'expect(dir).not.toBeEmpty();', errors: 1 },
         // A text accessor is an IO subject too: `.call()`'s "and it did not

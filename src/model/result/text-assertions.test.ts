@@ -1,12 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import { nativeContain, nativeMatch } from './text-assertions.js';
+import { file } from '../chain/spec-path.js';
+import { GOLDEN_MATCHER, matchThroughGolden, nativeContain } from './text-assertions.js';
 
 /**
- * The framework overrides `toMatch` and `toContain` GLOBALLY, in two builds. A
- * subject it does not own has to keep meaning what vitest's own matcher meant,
- * identically on both sides of the browser seam — so the fallback is specified
- * here, once, rather than twice by hand.
+ * The framework overrides `toContain` GLOBALLY, in two builds, and routes
+ * `toMatch`'s disk arguments to the golden. A subject it does not own has to
+ * keep meaning what vitest's own matcher meant, identically on both sides of
+ * the browser seam — so the fallback is specified here, once, rather than
+ * twice by hand.
  */
 
 describe('nativeContain', () => {
@@ -37,18 +39,46 @@ describe('nativeContain', () => {
     });
 });
 
-describe('nativeMatch', () => {
-    test('takes a substring or a regular expression on a string', () => {
-        // Given - the two shapes vitest's own toMatch accepts
-        // Then - both answer the same way they do without the override
-        expect(nativeMatch('hexagonal', 'agon').pass).toBeTruthy();
-        expect(nativeMatch('hexagonal', /^hex/u).pass).toBeTruthy();
-        expect(nativeMatch('hexagonal', /^agon/u).pass).toBeFalsy();
-    });
+/** A chai whose `toMatch` records who answered. */
+/** What `overwriteMethod` is handed: the original, and the method that replaces it. */
+type Overwrite = (original: (...args: unknown[]) => unknown) => (...args: unknown[]) => unknown;
+function chaiWith(answered: string[]): {
+    Assertion: { prototype: Record<string, unknown> };
+    util: { overwriteMethod: (target: object, name: string, method: Overwrite) => void };
+} {
+    const prototype: Record<string, unknown> = {
+        [GOLDEN_MATCHER]: () => answered.push('golden'),
+        toMatch: () => answered.push('vitest'),
+    };
+    return {
+        Assertion: { prototype },
+        util: {
+            overwriteMethod: (target, name, method) => {
+                const record = target as Record<string, (...args: unknown[]) => unknown>;
+                const original = record[name];
+                if (original !== undefined) {
+                    record[name] = method(original);
+                }
+            },
+        },
+    };
+}
 
-    test('refuses a subject that is not a string, rather than stringifying it', () => {
-        // Given - an object, which has no text of its own worth matching
-        // Then - the refusal names the accessors and the string it expected
-        expect(() => nativeMatch({ a: 1 }, 'a')).toThrow(/unsupported subject/u);
+describe('matchThroughGolden', () => {
+    /** A chai whose `toMatch` records who answered. */
+    test('hands the disk to the golden and every value to vitest, untouched', () => {
+        // Given - a chai whose two answers are recorded
+        const answered: string[] = [];
+        const chai = chaiWith(answered);
+        matchThroughGolden(chai);
+        const toMatch = chai.Assertion.prototype.toMatch as (this: unknown, value: unknown) => void;
+
+        // When - a file, a string and a RegExp reach toMatch
+        toMatch.call(chai.Assertion.prototype, file('./expected/out.txt'));
+        toMatch.call(chai.Assertion.prototype, 'out');
+        toMatch.call(chai.Assertion.prototype, /out/u);
+
+        // Then - one golden, and two answers that are vitest's own
+        expect(answered).toStrictEqual(['golden', 'vitest', 'vitest']);
     });
 });

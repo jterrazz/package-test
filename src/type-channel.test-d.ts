@@ -1,12 +1,14 @@
-/* oxlint-disable jterrazz/a1-specification-file, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. */
-import { mockOf, postgres, specification } from './index.js';
+/* oxlint-disable jterrazz/a1-specification-file, jterrazz/d2-await-io-matcher, jterrazz/f2-no-test-imports-in-prod, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all, and a refused golden is typed as the overload it failed, never awaited. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. It imports vitest's `expect` because the D14 rows are about the matcher augmentation, and it runs nothing: no test is declared, so F2's production reach does not apply. */
+import { expect } from 'vitest';
+
+import { directory, file, mockOf, postgres, specification } from './index.js';
 import type { Visitor } from './model/ports/browser.port.js';
 import type { MobileVisitor } from './model/ports/device.port.js';
 
 /**
  * The TYPE channel — the conventions the compiler refuses, stated as code.
  *
- * Six rows here are held by nothing else: no rule sees them, no pass walks
+ * The rows here are held by nothing else: no rule sees them, no pass walks
  * them, and the framework never gets the chance to refuse them at run time,
  * because the call they describe does not compile. Each `@ts-expect-error`
  * below IS the assertion — `typescript check` fails if the line it marks ever
@@ -63,16 +65,46 @@ export async function typeRows(): Promise<void> {
     // @ts-expect-error B3 — a chain carries no label
     api.label('the happy path');
 
-    // B2 — a file is named by its path from the spec file: a bare name,
-    // Resolved against a folder the line does not show, does not compile. The
-    // Golden matchers' rows sit in `model/goldens/matchers.test.ts`, the one
-    // File that may import the `expect` they are declared on.
-    // @ts-expect-error B2 — a seed is named by its relative path
-    api.seedFile('x.sql');
+    // B2 — a string is a value and the disk is `file()` or `directory()`: a
+    // Bare string where a file is meant, a file with the wrong tail, a path that
+    // Is not relative, a directory without its `/` — none of them compiles. The
+    // Golden rows sit in `model/goldens/matchers.test.ts`, the one file that may
+    // Import the `expect` they are declared on.
+    // @ts-expect-error B2 — a bare string is a value, not a file
+    api.seed('./seeds/x.sql');
     // @ts-expect-error B2 — a seed's path ends in `.sql`
-    api.seedFile('./seeds/x.json');
-    // @ts-expect-error B2 — a directory is spread by a path that ends in `/`
-    cli.fixtureDirectory('./fixtures/shop');
+    api.seed(file('./seeds/x.json'));
+    // @ts-expect-error B2 — a path is relative to the spec file
+    api.seed(file('x.sql'));
+    // @ts-expect-error B2 — a directory's path ends in `/`
+    cli.fixture(directory('./fixtures/shop'));
+    // @ts-expect-error B2 — a path ending in `/` is a directory
+    cli.fixture(file('./fixtures/shop/'));
+    // @ts-expect-error B2 — a request is one `.http` file, not a directory
+    await api.request(directory('./requests/'));
+    // @ts-expect-error B2 — a document is a `.spec.yaml` file
+    await cli.run(file('./case.yaml'));
+    // @ts-expect-error B2 — a path is a value where a verb takes one
+    await api.get(file('./requests/orders.http'));
+    // @ts-expect-error B2 — a command is a value where a verb takes one
+    await cli.exec(file('./fixtures/args.txt'));
+
+    // D14 — the golden half of `toMatch` takes the disk its subject has: a
+    // Value subject has none, a stream's is a file, a tree's is a directory.
+    const out = await cli.exec();
+    // @ts-expect-error D14 — a string subject has no golden: its argument is a value
+    expect('abc').toMatch(file('./expected/abc.txt'));
+    // @ts-expect-error D14 — a stream's golden is a file
+    expect(out.stdout).toMatch(directory('./expected/out/'));
+    // @ts-expect-error D14 — a tree's golden is a directory
+    await expect(out.filesystem).toMatch(file('./expected/tree.txt'));
+    expect(out.stdout).toMatch(file('./expected/out.txt'));
+    expect(out.stdout.text).toMatch(/built/u);
+    await expect(out.filesystem).toMatch(directory('./expected/tree/'));
+
+    // What the rows are written FOR — the disk where the disk is meant.
+    await api.seed(file('./seeds/orders.sql')).post('/orders', file('./requests/order.json'));
+    await cli.fixture(directory('../../fixtures/shop/')).fixture(file('./fixtures/a.json')).exec();
 
     const result = await api.get('/orders/1');
 

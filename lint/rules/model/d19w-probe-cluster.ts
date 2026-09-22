@@ -3,6 +3,7 @@ import {
     child,
     childList,
     findTestCallback,
+    goldenOf,
     isTestCallee,
     memberPath,
     walk,
@@ -56,7 +57,7 @@ function goldenableSubject(subject: AstNode | undefined): string | undefined {
  * three of them state three, leave everything between them unstated, and still
  * have to be rewritten one by one the day the output changes. The threshold is
  * an option because "how many greps are a cluster" is the one part of this that
- * is taste — the default is three, and a `toMatchFile('./expected/<file>')` on the same
+ * is taste — the default is three, and a `toMatch(file('./expected/<file>'))` on the same
  * subject silences it however many probes stand beside it.
  */
 export const d19wProbeCluster: LintRule = {
@@ -90,7 +91,7 @@ export const d19wProbeCluster: LintRule = {
                     if (subject === undefined) {
                         return;
                     }
-                    if (assertion.matcher === 'toMatchFile') {
+                    if (goldenOf(inner) !== undefined) {
                         goldened.add(subject);
                         return;
                     }
@@ -114,7 +115,7 @@ export const d19wProbeCluster: LintRule = {
         docs: RULE_DOCS['d19w-probe-cluster'],
         messages: {
             cluster:
-                "{{count}} probes on `{{subject}}` — golden the subject: `expect({{subject}}).toMatchFile('./expected/<case>.txt')`, tokens for what moves.",
+                "{{count}} probes on `{{subject}}` — golden the subject: `expect({{subject}}).toMatch(file('./expected/<case>.txt'))`, tokens for what moves.",
         },
         schema: [
             {

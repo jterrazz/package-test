@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
-import { isAbsolute, resolve } from 'node:path';
+import { basename, isAbsolute, resolve } from 'node:path';
 
 import { specDescription } from '../facets/cli/literate.js';
+import { DISK_KEY } from '../model/chain/spec-path.js';
 
 /**
  * The `literate()` vite plugin — door one of the spec-document format.
@@ -65,6 +66,11 @@ export type LiteratePlugin = {
  * document's `description:` and whose body runs the whole file — its ground,
  * its servers, every run asserted.
  *
+ * The document is handed to `cli.run()` as the value `file('./<case>.spec.yaml')`
+ * returns, spelled by its brand: the generated module imports the runner and
+ * nothing else, so it resolves the same way from a consumer's install and from
+ * this repository's source.
+ *
  * @internal Exported for unit tests.
  */
 export function literateModule(
@@ -78,7 +84,7 @@ export function literateModule(
         `import { cli } from ${JSON.stringify(specificationPath)};`,
         '',
         `test(${JSON.stringify(title)}, async () => {`,
-        `    await cli.run(${JSON.stringify(filePath)});`,
+        `    await cli.run({ [Symbol.for(${JSON.stringify(DISK_KEY)})]: 'file', path: ${JSON.stringify(`./${basename(filePath)}`)} });`,
         '});',
         '',
     ].join('\n');

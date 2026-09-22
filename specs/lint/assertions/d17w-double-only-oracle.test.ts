@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — d17w-double-only-oracle (CONVENTIONS D17)', () => {
@@ -7,7 +8,7 @@ describe('lint — d17w-double-only-oracle (CONVENTIONS D17)', () => {
     test('rejects a module test whose whole proof is a call log', async () => {
         // Given - a project violating D17
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/d17w-double-only-oracle/')
+            .fixture(directory('../../fixtures/lint-violations/d17w-double-only-oracle/'))
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +19,7 @@ describe('lint — d17w-double-only-oracle (CONVENTIONS D17)', () => {
     test('accepts a call log beside what the subject produced', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/d17w-double-only-oracle-ok/')
+            .fixture(directory('../../fixtures/lint-violations/d17w-double-only-oracle-ok/'))
             .exec('.');
 
         // Then - clean exit, no D17 diagnostic

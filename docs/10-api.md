@@ -63,14 +63,14 @@ Without `root`, the framework walks **up from the specification file** to the **
 
 ### Setups (chainable)
 
-| Setup                                         | Description                                                                                                                     |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `.seedFile('./seeds/file.sql')`               | Load that `.sql` file, named by its path from the spec file, into the database                                                  |
-| `.seedFile('./seeds/file.sql', { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
-| `.headers({ 'Name': 'value' })`               | Set request headers; repeated calls merge                                                                                       |
-| `.intercept(contract)`                        | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |
-| `.intercept(trigger, response)`               | Inline intercept for one-off cases                                                                                              |
-| `.clock('2026-03-04T09:30:00Z')`              | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths)) |
+| Setup                                           | Description                                                                                                                     |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `.seed(file('./seeds/file.sql'))`               | Load that `.sql` file, named by its path from the spec file, into the database                                                  |
+| `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
+| `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                       |
+| `.intercept(contract)`                          | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |
+| `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                              |
+| `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths)) |
 
 Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
@@ -102,15 +102,15 @@ test('starts clean between specs', async () => {
 
 Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the result.
 
-| Action                                 | Description                                                   |
-| -------------------------------------- | ------------------------------------------------------------- |
-| `.requestFile('./requests/file.http')` | Execute the complete request that `.http` file describes      |
-| `.get(path)`                           | Inline GET — for simple cases where a file would be excessive |
-| `.post(path, body?)`                   | Inline POST                                                   |
-| `.put(path, body?)`                    | Inline PUT                                                    |
-| `.delete(path)`                        | Inline DELETE                                                 |
+| Action                                   | Description                                                   |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| `.request(file('./requests/file.http'))` | Execute the complete request that `.http` file describes      |
+| `.get(path)`                             | Inline GET — for simple cases where a file would be excessive |
+| `.post(path, body?)`                     | Inline POST                                                   |
+| `.put(path, body?)`                      | Inline PUT                                                    |
+| `.delete(path)`                          | Inline DELETE                                                 |
 
-The inline `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header. There is no filename form inline — file-based requests always go through `.requestFile('./requests/file.http')`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
+The inline `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header. There is no filename form inline — file-based requests always go through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
 
 There is no `.run()` and no label argument: the vitest test name is the spec's only description (rule B3).
 
@@ -143,7 +143,7 @@ Format rules:
 - First line: `METHOD /path` — the file must start with it (rule C2). The path is relative to the app under test.
 - Header lines: `Name: value`, one per line, immediately after the request line.
 - Blank line, then the body (optional — a GET usually has none).
-- Executed with `api.requestFile('./requests/create-user.http')` — the argument is the file's path from the spec file, spelled in full; the type refuses a bare name (rule B2).
+- Executed with `api.request(file('./requests/create-user.http'))` — the argument is the file's path from the spec file, spelled in full; the type refuses a bare name (rule B2).
 
 Expected responses live in `expected/`, like every other golden, same extension, and start with a status line (rule C3):
 
@@ -167,11 +167,11 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 | Member                      | Type             | Description                                                                      |
 | --------------------------- | ---------------- | -------------------------------------------------------------------------------- |
 | `result.status`             | `number`         | HTTP status code — assert with native `expect(...).toBe(...)`                    |
-| `result.response`           | response subject | Full response (status + headers + body) — subject for `toMatchFile`              |
+| `result.response`           | response subject | Full response (status + headers + body) — subject for `toMatch(file(…))`         |
 | `result.response.body`      | parsed body      | Raw body for native assertions (`toEqual`, `toMatchObject`)                      |
 | `result.table(name, opts?)` | table subject    | Database table — subject for `toMatchRows` / `toBeEmpty` (async, `await expect`) |
 
-`expect(result.response).toMatchFile('./expected/user-created.http')` reads the path it is given, like every other golden matcher (rule D3) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).
+`expect(result.response).toMatch(file('./expected/user-created.http'))` reads the path it is given, like every other golden matcher (rule D3) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).
 
 Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.jobs()` has no `docker` member — jobs never spawn containers.)
 
@@ -211,8 +211,8 @@ import { api } from '../api.specification.js';
 test('ingests an order event into analytics', async () => {
     // Given - catalog in the main database, analytics empty
     const result = await api
-        .seedFile('./seeds/catalog.sql', { database: 'db' })
-        .requestFile('./requests/new-order.http');
+        .seed(file('./seeds/catalog.sql'), { database: 'db' })
+        .request(file('./requests/new-order.http'));
 
     // Then - one row per database, targeted by record key
     await expect(result.table('orders', { database: 'db' })).toMatchRows({
@@ -228,18 +228,18 @@ test('ingests an order event into analytics', async () => {
 test('returns the created order with consistent ids', async () => {
     // Given
     const result = await api
-        .seedFile('./seeds/catalog.sql', { database: 'db' })
-        .requestFile('./requests/new-order.http');
+        .seed(file('./seeds/catalog.sql'), { database: 'db' })
+        .request(file('./requests/new-order.http'));
 
     // Then - {{uuid#order}} appears 3 times (Location header included) → all equal
-    expect(result.response).toMatchFile('./expected/order-created.http');
+    expect(result.response).toMatch(file('./expected/order-created.http'));
 });
 
 test('links the analytics event to the created order', async () => {
     // Given
     const result = await api
-        .seedFile('./seeds/catalog.sql', { database: 'db' })
-        .requestFile('./requests/new-order.http');
+        .seed(file('./seeds/catalog.sql'), { database: 'db' })
+        .request(file('./requests/new-order.http'));
 
     // Then - same id on both sides, without ever knowing its value
     await expect(result.table('orders', { database: 'db' })).toMatchRows({
@@ -253,7 +253,7 @@ test('links the analytics event to the created order', async () => {
 });
 ```
 
-> This project declares two databases, so `database:` is mandatory on every `.seedFile()` and `.table()` (rule A7). With a single database you would write `api.seedFile('./seeds/catalog.sql')` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
+> This project declares two databases, so `database:` is mandatory on every `.seed()` and `.table()` (rule A7). With a single database you would write `api.seed(file('./seeds/catalog.sql'))` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
 
 The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).
 

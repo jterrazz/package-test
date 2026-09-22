@@ -73,7 +73,7 @@ question asked of two constructors. Everything else is one facet's own, and a
 name that is one facet's own is never another's: two names for one capability
 is the drift the vocabulary exists to stop.
 
-It says nothing about where a METHOD may appear. `.seedFile()` is used inside jobs'
+It says nothing about where a METHOD may appear. `.seed()` is used inside jobs'
 `triggering/` scenarios and integration's `call/` ones, because seeding is the
 Given there and not the subject; a capability earns a folder when it is what
 the specs in it are ABOUT.
@@ -253,35 +253,34 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 ### Setup
 
-| Capability            | api | jobs | cli | integration | website | mobile | component | module |
-| --------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.clock()`            | 1   | 0    | —   | 1           | 1       | —      | 1         | —      |
-| `.intercept()`        | 3   | 1    | —   | 1           | 0       | 0      | 4         | —      |
-| `.seedFile()`         | 4   | 1    | 1   | 2           | —       | —      | —         | —      |
-| `.headers()`          | 1   | —    | —   | —           | 1       | —      | —         | —      |
-| `.fixtureFile()`      | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.fixtureDirectory()` | —   | —    | 6   | —           | —       | —      | —         | —      |
-| `.env()`              | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `.wrap()`             | —   | —    | —   | —           | —       | —      | 2         | —      |
-| `.viewport()`         | —   | —    | —   | —           | —       | —      | 1         | —      |
+| Capability     | api | jobs | cli | integration | website | mobile | component | module |
+| -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.clock()`     | 1   | 0    | —   | 1           | 1       | —      | 1         | —      |
+| `.intercept()` | 3   | 1    | —   | 1           | 0       | 0      | 4         | —      |
+| `.seed()`      | 4   | 1    | 1   | 2           | —       | —      | —         | —      |
+| `.headers()`   | 1   | —    | —   | —           | 1       | —      | —         | —      |
+| `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
+| `.env()`       | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
+| `.viewport()`  | —   | —    | —   | —           | —       | —      | 1         | —      |
 
 ### Terminal action
 
-| Capability       | api | jobs | cli | integration | website | mobile | component | module |
-| ---------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.get()`         | 9   | —    | —   | —           | —       | —      | —         | —      |
-| `.post()`        | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.put()`         | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.delete()`      | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.requestFile()` | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.trigger()`     | —   | 1    | —   | —           | —       | —      | —         | —      |
-| `.call()`        | —   | —    | —   | 6           | —       | —      | —         | —      |
-| `.exec()`        | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.run()`         | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.visit()`       | —   | —    | —   | —           | 10      | —      | —         | —      |
-| `.fetch()`       | —   | —    | —   | —           | 2       | —      | —         | —      |
-| `.open()`        | —   | —    | —   | —           | —       | 0      | —         | —      |
-| `.render()`      | —   | —    | —   | —           | —       | —      | 15        | —      |
+| Capability   | api | jobs | cli | integration | website | mobile | component | module |
+| ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.get()`     | 9   | —    | —   | —           | —       | —      | —         | —      |
+| `.post()`    | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.put()`     | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.request()` | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.trigger()` | —   | 1    | —   | —           | —       | —      | —         | —      |
+| `.call()`    | —   | —    | —   | 6           | —       | —      | —         | —      |
+| `.exec()`    | —   | —    | 7   | —           | —       | —      | —         | —      |
+| `.run()`     | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `.visit()`   | —   | —    | —   | —           | 10      | —      | —         | —      |
+| `.fetch()`   | —   | —    | —   | —           | 2       | —      | —         | —      |
+| `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `.render()`  | —   | —    | —   | —           | —       | —      | 15        | —      |
 
 ### Verb
 
@@ -369,16 +368,16 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 ### Golden
 
-| Capability           | api | jobs | cli | integration | website | mobile | component | module |
-| -------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 2      |
-| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 1      |
-| `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 1      |
-| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 3      |
-| `.aria.yaml tree`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 4      |
-| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 8      |
-| `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 2      |
+| Capability             | api | jobs | cli | integration | website | mobile | component | module |
+| ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `toMatch(file())`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 2      |
+| `toMatch(directory())` | 0   | —    | 3   | 0           | —       | —      | —         | 1      |
+| `toMatchRows()`        | 4   | 1    | 1   | 1           | —       | —      | 0         | 1      |
+| `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 3      |
+| `.aria.yaml tree`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `.json body`           | 0   | —    | 2   | 5           | 2       | —      | —         | 6      |
+| `.txt stream`          | 1   | —    | 8   | 2           | 2       | —      | —         | 9      |
+| `{ frozen }`           | 2   | —    | 5   | —           | —       | —      | 1         | 2      |
 
 ### Time & doubles
 
@@ -418,9 +417,9 @@ What the framework can do, and how many of this package’s own test FILES carry
 ### Exemptions
 
 - no mobile tree: an iOS simulator is not something CI provisions (M1) — `services`·mobile, `root`·mobile, `backend`·mobile, `device`·mobile, `app`·mobile, `timeouts`·mobile, `.intercept()`·mobile, `.open()`·mobile, `see`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `content`·mobile, `testId`·mobile, `.content`·mobile, `.screen`·mobile
-- the surface ships and this package does not specify it here yet — `root`·cli, `root`·website, `root`·component, `backend`·website, `external`·website, `clock`·component, `locale`·component, `timezone`·component, `viewport`·component, `.clock()`·jobs, `.intercept()`·website, `press`·website, `hover`·website, `check`·website, `goto`·website, `testId`·website, `heading`·website, `dialog`·website, `status`·website, `table`·website, `row`·website, `listitem`·website, `banner`·website, `banner`·component, `complementary`·website, `complementary`·component, `contentinfo`·component, `form`·website, `form`·component, `search`·website, `search`·component, `.file()`·api, `.file()`·integration, `.directory()`·api, `.directory()`·integration, `.html`·website, `.title`·website, `.links`·website, `toMatchDirectory()`·api, `toMatchDirectory()`·integration, `toMatchRows()`·component, `.json body`·api
+- the surface ships and this package does not specify it here yet — `root`·cli, `root`·website, `root`·component, `backend`·website, `external`·website, `clock`·component, `locale`·component, `timezone`·component, `viewport`·component, `.clock()`·jobs, `.intercept()`·website, `press`·website, `hover`·website, `check`·website, `goto`·website, `testId`·website, `heading`·website, `dialog`·website, `status`·website, `table`·website, `row`·website, `listitem`·website, `banner`·website, `banner`·component, `complementary`·website, `complementary`·component, `contentinfo`·component, `form`·website, `form`·component, `search`·website, `search`·component, `.file()`·api, `.file()`·integration, `.directory()`·api, `.directory()`·integration, `.html`·website, `.title`·website, `.links`·website, `toMatch(directory())`·api, `toMatch(directory())`·integration, `toMatchRows()`·component, `.json body`·api
 - the package serves its own fixture site, so `server` is what it proves; `url` targets an already-running deployment, which is a consumer shape (A11 states the XOR) — `url`·website
-- a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory — `toMatchFile()`·jobs
+- a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory — `toMatch(file())`·jobs
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·api, `{{iso8601}}`·cli, `{{iso8601}}`·integration, `{{iso8601}}`·website, `{{number}}`·api, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·api, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·api, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·api, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->
@@ -440,7 +439,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/ast.test.ts`                          | specsAnchor                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 7     |
 | `lint/checker-crossfile.test.ts`            | checker suppression — suppressedLines (checker-disable comments)                                                                                                                                                                                                                                                                                                                                                                                                                                     | 9     |
 | `lint/checker-member.test.ts`               | the member pass — what a workspace member owes                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 18    |
-| `lint/checker-migration.test.ts`            | the 16 → 17 mover (C13 --fix)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 4     |
+| `lint/checker-migration.test.ts`            | the 16 → 17 mover (C13 --fix)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5     |
 | `lint/checker-spec.test.ts`                 | fixSpecDocument — key order and block scalars                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5     |
 | `lint/checker.test.ts`                      | conventions checker — findUnknownTokens (D4) · conventions checker — findKnownTokens (D10) · conventions checker — checkConventionFiles (D4)                                                                                                                                                                                                                                                                                                                                                         | 8     |
 | `lint/coverage.test.ts`                     | the coverage ratchet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 8     |

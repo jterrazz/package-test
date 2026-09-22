@@ -88,7 +88,7 @@ export function memberPropertyName(node: AstNode): string | undefined {
 
 /**
  * The root identifier name of a member/call chain:
- * `dockerCli.fixtureDirectory(x).exec(y)` → `dockerCli`.
+ * `dockerCli.fixture(x).exec(y)` → `dockerCli`.
  */
 export function chainRootName(node: AstNode | undefined): string | undefined {
     let current = node;
@@ -531,4 +531,42 @@ export function scenarioCallbackOf(node: AstNode): AstNode | undefined {
     return scenario?.type === 'ArrowFunctionExpression' || scenario?.type === 'FunctionExpression'
         ? scenario
         : undefined;
+}
+
+/** A `file(…)` or `directory(…)` call, read: which of the two, and its literal path. */
+export type DiskCall = {
+    kind: 'directory' | 'file';
+    /** The argument node — where a finding about the path points. */
+    node: AstNode;
+    /** The literal path, or `undefined` when the argument is computed. */
+    path: string | undefined;
+};
+
+/**
+ * Read a node as a `file(…)` / `directory(…)` call — the bare identifier, never
+ * a result accessor (`result.file(…)`). `undefined` for anything else.
+ */
+export function diskCallOf(node: AstNode | undefined): DiskCall | undefined {
+    if (node?.type !== 'CallExpression') {
+        return undefined;
+    }
+    const kind = identifierName(child(node, 'callee'));
+    if (kind !== 'file' && kind !== 'directory') {
+        return undefined;
+    }
+    const argument = childList(node, 'arguments')[0];
+    return { kind, node: argument ?? node, path: stringValue(argument) };
+}
+
+/**
+ * The golden a call names: `expect(x).toMatch(file(…))` or
+ * `toMatch(directory(…))` — `undefined` for a `toMatch` whose argument is a
+ * value, and for any other call.
+ */
+export function goldenOf(node: AstNode): DiskCall | undefined {
+    const callee = child(node, 'callee');
+    if (callee === undefined || memberPropertyName(callee) !== 'toMatch') {
+        return undefined;
+    }
+    return diskCallOf(childList(node, 'arguments')[0]);
 }

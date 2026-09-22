@@ -74,7 +74,7 @@ export const { cleanup, website } = await specification.website({
 afterAll(cleanup);
 ```
 
-A declared database is not seeded by the chain — a website chain has no `.seedFile()`. It is seeded by whatever owns it: the service's own `docker/<service>/init.sql`, or a `before:` command on the `process()` that migrates it.
+A declared database is not seeded by the chain — a website chain has no `.seed()`. It is seeded by whatever owns it: the service's own `docker/<service>/init.sql`, or a `before:` command on the `process()` that migrates it.
 
 ## The chain
 
@@ -100,19 +100,19 @@ test('serves robots.txt as plain text', async () => {
 
     // Then - the whole file matches one golden
     expect(result.headers['content-type']).toBe('text/plain');
-    expect(result.body).toMatchFile('./expected/robots.txt');
+    expect(result.body).toMatch(file('./expected/robots.txt'));
 });
 ```
 
 `FetchResult` accessors:
 
-| Member            | Type                  | Description                                                           |
-| ----------------- | --------------------- | --------------------------------------------------------------------- |
-| `result.status`   | `number`              | HTTP status — 3xx surfaces exactly as sent, never followed            |
-| `result.location` | `string \| undefined` | The `location` header, or undefined                                   |
-| `result.headers`  | flat map              | Response headers, lower-cased keys                                    |
-| `result.body`     | `TextAccessor`        | Raw response body — `toMatchFile('./expected/robots.txt')`, `.grep()` |
-| `result.json`     | `JsonAccessor`        | Response body parsed as JSON                                          |
+| Member            | Type                  | Description                                                             |
+| ----------------- | --------------------- | ----------------------------------------------------------------------- |
+| `result.status`   | `number`              | HTTP status — 3xx surfaces exactly as sent, never followed              |
+| `result.location` | `string \| undefined` | The `location` header, or undefined                                     |
+| `result.headers`  | flat map              | Response headers, lower-cased keys                                      |
+| `result.body`     | `TextAccessor`        | Raw response body — `toMatch(file('./expected/robots.txt'))`, `.grep()` |
+| `result.json`     | `JsonAccessor`        | Response body parsed as JSON                                            |
 
 #### `.visit(path, scenario?)` — a rendered page
 
@@ -125,7 +125,7 @@ test('captures the full head surface of a rendered page', async () => {
 
     // Then - one golden covers title, canonical, alternates, and metas
     expect(result.status).toBe(200);
-    expect(result.head).toMatchFile('./expected/home.head.json');
+    expect(result.head).toMatch(file('./expected/home.head.json'));
 });
 ```
 
@@ -229,7 +229,7 @@ test('lays the article out as a reader walks it', async () => {
     const result = await website.visit('/articles/hexagonal');
 
     // Then - the outline is what a screen reader would walk
-    expect(result.tree).toMatchFile('./expected/article.aria.yaml');
+    expect(result.tree).toMatch(file('./expected/article.aria.yaml'));
 });
 ```
 
@@ -250,7 +250,7 @@ test('exposes canonical, alternates, and named metas directly', async () => {
     expect(result.meta('og:title')).toBe('Fixture — Home');
 
     // …or snapshot the whole surface at once
-    expect(result.head).toMatchFile('./expected/home.head.json');
+    expect(result.head).toMatch(file('./expected/home.head.json'));
 });
 ```
 
@@ -272,7 +272,7 @@ Structured data gets the same treatment — every `ld+json` block on the page, i
 test('parses every json-ld block into one array', async () => {
     const result = await website.visit('/');
 
-    expect(result.jsonLd).toMatchFile('./expected/home.jsonld.json');
+    expect(result.jsonLd).toMatch(file('./expected/home.jsonld.json'));
 });
 ```
 
@@ -295,7 +295,7 @@ test('separates console errors from the full stream', async () => {
     const result = await website.visit('/noisy');
 
     // Then - the full stream carries both, the error stream only the error
-    expect(result.console).toMatchFile('./expected/noisy.console.txt');
+    expect(result.console).toMatch(file('./expected/noisy.console.txt'));
     expect(result.errors).toContain('boom');
 });
 ```
@@ -382,7 +382,7 @@ specs/website/
         └── http/…
 ```
 
-No `seeds/` or `requests/` — a website chain has no `.seedFile()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `expected/<name>`.
+No `seeds/` or `requests/` — a website chain has no `.seed()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `expected/<name>`.
 
 ## Pitfalls
 
@@ -395,7 +395,7 @@ No `seeds/` or `requests/` — a website chain has no `.seedFile()` setup and no
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.
-- **Reading `result.head` field-by-field instead of snapshotting it.** It is designed as the one golden per page (`toMatchFile('./expected/home.head.json')`) — use the direct accessors (`canonical`, `alternates`, `meta()`) only for a single targeted probe.
+- **Reading `result.head` field-by-field instead of snapshotting it.** It is designed as the one golden per page (`toMatch(file('./expected/home.head.json'))`) — use the direct accessors (`canonical`, `alternates`, `meta()`) only for a single targeted probe.
 - **Calling `.intercept()` without the `backend` option.** It throws immediately, naming the fix: add `backend: { env: '…' }` to the `specification.website()` options — a chain's `.http` exchanges need a stub to serve them.
 - **Combining `backend` with `url` mode.** The type forbids it and the runtime refuses: a deployed site reads its API URL at its own deploy time — there is nothing a local stub could inject into.
 

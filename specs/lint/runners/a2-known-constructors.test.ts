@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — a2-known-constructors (CONVENTIONS A2)', () => {
@@ -7,7 +8,7 @@ describe('lint — a2-known-constructors (CONVENTIONS A2)', () => {
     test('rejects specification.app - only api, jobs and cli exist', async () => {
         // Given - a project violating A2
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/a2-known-constructors/')
+            .fixture(directory('../../fixtures/lint-violations/a2-known-constructors/'))
             .exec('.');
 
         // Then - oxlint reports the a2-known-constructors diagnostic
@@ -18,7 +19,7 @@ describe('lint — a2-known-constructors (CONVENTIONS A2)', () => {
     test('accepts the three known constructors', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/a2-known-constructors-ok/')
+            .fixture(directory('../../fixtures/lint-violations/a2-known-constructors-ok/'))
             .exec('.');
 
         // Then - clean run, no a2-known-constructors diagnostic

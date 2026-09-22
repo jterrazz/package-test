@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — checker CLI contract', () => {
@@ -9,12 +10,12 @@ describe('lint — checker CLI contract', () => {
     test('a root that is not a specs tree is read as the project holding one', async () => {
         // Given - the project root of a tree whose facet findings sit one level down
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c12-spec-placement/')
+            .fixture(directory('../../fixtures/lint-violations/c12-spec-placement/'))
             .exec('.');
 
         // Then - the facet passes report what `specs` reports, anchored on the root that was named
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./expected/checker-project-root.txt');
+        expect(result.stderr).toMatch(file('./expected/checker-project-root.txt'));
     });
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
@@ -22,7 +23,7 @@ describe('lint — checker CLI contract', () => {
     test('a root holding no specs tree at all is refused, not reported clean', async () => {
         // Given - a package with module tests and no `specs/` anywhere below it
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/checker-no-specs/')
+            .fixture(directory('../../fixtures/lint-violations/checker-no-specs/'))
             .exec('.');
 
         // Then - the run the operator asked for had nothing to walk, and says so

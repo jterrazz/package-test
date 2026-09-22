@@ -25,7 +25,9 @@ describe('literate() — the vite plugin door', () => {
         // Then - one test, titled by `description:`, running the document through cli.run
         expect(module).toContain('test("refuses to guess outside the checkout"');
         expect(module).toContain('import { cli } from "/specs/cli/x.spec.ts";');
-        expect(module).toContain('await cli.run("/specs/cli/no-estate.spec.yaml");');
+        expect(module).toContain(
+            'await cli.run({ [Symbol.for("@jterrazz/test:disk")]: \'file\', path: "./no-estate.spec.yaml" });',
+        );
     });
 
     test('the plugin adds the .spec.yaml glob to the project test include', () => {

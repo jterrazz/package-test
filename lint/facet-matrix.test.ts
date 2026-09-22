@@ -99,19 +99,19 @@ const apiChain = {
     clock: 'setup',
     headers: 'setup',
     intercept: 'setup',
-    seedFile: 'setup',
+    seed: 'setup',
 
     delete: 'action',
     get: 'action',
     post: 'action',
     put: 'action',
-    requestFile: 'action',
+    request: 'action',
 } satisfies Record<keyof ApiSpecification, FacetRole>;
 
 const jobsChain = {
     clock: 'setup',
     intercept: 'setup',
-    seedFile: 'setup',
+    seed: 'setup',
 
     trigger: 'action',
 } satisfies Record<keyof JobsSpecification, FacetRole>;
@@ -119,16 +119,15 @@ const jobsChain = {
 const integrationChain = {
     clock: 'setup',
     intercept: 'setup',
-    seedFile: 'setup',
+    seed: 'setup',
 
     call: 'action',
 } satisfies Record<keyof IntegrationSpecification, FacetRole>;
 
 const cliChain = {
     env: 'setup',
-    fixtureDirectory: 'setup',
-    fixtureFile: 'setup',
-    seedFile: 'setup',
+    fixture: 'setup',
+    seed: 'setup',
 
     exec: 'action',
     run: 'action',

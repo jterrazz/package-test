@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — e4w-project-binding (CONVENTIONS E4)', () => {
@@ -7,7 +8,7 @@ describe('lint — e4w-project-binding (CONVENTIONS E4)', () => {
     test('warns on a facet root collected under another name', async () => {
         // Given - a project violating E4
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e4w-project-binding/')
+            .fixture(directory('../../fixtures/lint-violations/e4w-project-binding/'))
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +19,7 @@ describe('lint — e4w-project-binding (CONVENTIONS E4)', () => {
     test('accepts a project named for the facet it collects', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e4w-project-binding-ok/')
+            .fixture(directory('../../fixtures/lint-violations/e4w-project-binding-ok/'))
             .exec('.');
 
         // Then - clean exit, no E4 diagnostic

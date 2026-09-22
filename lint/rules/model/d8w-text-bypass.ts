@@ -2,8 +2,11 @@ import { child, childList, identifierName, memberPropertyName } from '../../ast.
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
-/** Text-oriented matchers that tempt a raw `.text` bypass (D8). */
-const TEXT_MATCHERS = new Set(['toContain', 'toMatch']);
+/**
+ * The text matcher that tempts a raw `.text` bypass (D8). `toMatch` is not one:
+ * it is vitest's own, and a stream is compared through its text.
+ */
+const TEXT_MATCHERS = new Set(['toContain']);
 
 /** A regex literal, or `new RegExp(…)`. */
 function isRegExp(node: AstNode | undefined): boolean {
@@ -17,7 +20,7 @@ function isRegExp(node: AstNode | undefined): boolean {
 }
 
 /**
- * CONVENTIONS D8 (warning) — `.text` is the raw stream escape hatch. Asserting
+ * CONVENTIONS D8 (warning) — `.text` is the raw stream escape hatch for a probe. Asserting
  * `expect(result.text).toContain(…)` throws away the typed subject (its ANSI
  * stripping, its transform) for a substring check. Prefer asserting on the
  * accessor subject itself.

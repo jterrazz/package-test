@@ -74,11 +74,14 @@ Containers are the one resource that outlives a process badly, which is why `aft
 ## What a 17.0 adoption meets
 
 `npx jterrazz-test-check specs --fix` is the migration: it renames the four
-ground folders to their bare names, deepest first, and rewrites every literal
-call and document to the file verbs with full relative paths — `.seed('x.sql')`
-to `.seedFile('./seeds/x.sql')`, `.fixture('$FIXTURES/app/')` to
-`.fixtureDirectory('../../fixtures/app/')`, `toMatch('help.txt')` to
-`toMatchFile('./expected/help.txt')`. Four things it leaves to the reader:
+ground folders to their bare names, deepest first, rewrites every literal call
+and document to name the disk with `file()` or `directory()` and a full relative
+path — `.seed('x.sql')` to `.seed(file('./seeds/x.sql'))`,
+`.fixture('$FIXTURES/app/')` to `.fixture(directory('../../fixtures/app/'))`,
+`toMatch('help.txt')` to `toMatch(file('./expected/help.txt'))`,
+`.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
+wrappers from the entry the specification file already uses. Three things it
+leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
   moves a string only when a file of that name sits in the spec's `expected/`;

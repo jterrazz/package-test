@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — i1-layer-boundaries (CONVENTIONS I1)', () => {
@@ -7,7 +8,7 @@ describe('lint — i1-layer-boundaries (CONVENTIONS I1)', () => {
     test('rejects an external dependency imported from core/', async () => {
         // Given - a project violating I1
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/i1-layer-boundaries/')
+            .fixture(directory('../../fixtures/lint-violations/i1-layer-boundaries/'))
             .exec('.');
 
         // Then - oxlint reports the i1-layer-boundaries diagnostic
@@ -18,7 +19,7 @@ describe('lint — i1-layer-boundaries (CONVENTIONS I1)', () => {
     test('accepts node builtins and in-layer imports', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/i1-layer-boundaries-ok/')
+            .fixture(directory('../../fixtures/lint-violations/i1-layer-boundaries-ok/'))
             .exec('.');
 
         // Then - clean run, no i1-layer-boundaries diagnostic

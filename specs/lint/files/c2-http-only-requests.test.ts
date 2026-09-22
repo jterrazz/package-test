@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — c2-http-only-requests (CONVENTIONS C2)', () => {
@@ -7,7 +8,7 @@ describe('lint — c2-http-only-requests (CONVENTIONS C2)', () => {
     test('rejects a non-.http file under requests/', async () => {
         // Given - a project violating C2
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c2-http-only-requests/')
+            .fixture(directory('../../fixtures/lint-violations/c2-http-only-requests/'))
             .exec('.');
 
         // Then - oxlint reports the c2-http-only-requests diagnostic
@@ -18,7 +19,7 @@ describe('lint — c2-http-only-requests (CONVENTIONS C2)', () => {
     test('accepts a requests/ directory of .http files only', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c2-http-only-requests-ok/')
+            .fixture(directory('../../fixtures/lint-violations/c2-http-only-requests-ok/'))
             .exec('.');
 
         // Then - clean run, no c2-http-only-requests diagnostic

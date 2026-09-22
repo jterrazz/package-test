@@ -24,11 +24,11 @@ import { integration } from '../integration.specification.js';
 test('reads the orders the day left behind', async () => {
     // Given - two orders in the real database
     const result = await integration
-        .seedFile('./seeds/two-orders.sql')
+        .seed(file('./seeds/two-orders.sql'))
         .call(async ({ db }) => await listOrders(db.connectionString));
 
     // Then - the module answered with both
-    expect(result.value).toMatchFile('./expected/two-orders.json');
+    expect(result.value).toMatch(file('./expected/two-orders.json'));
 });
 ```
 
@@ -53,13 +53,13 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule A3
 
 ## The chain
 
-Setups: `.seedFile()`, `.intercept()`, `.clock()`. Terminal action: `.call(subject)` (rule B2).
+Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.call(subject)` (rule B2).
 
-| Setup                            | Means                                                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `.seedFile('./seeds/rows.sql')`  | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several |
-| `.intercept(contracts)`          | declare what the outside world replies ([16](16-contracts.md))                                         |
-| `.clock('2026-03-04T09:30:00Z')` | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths))        |
+| Setup                             | Means                                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `.seed(file('./seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several |
+| `.intercept(contracts)`           | declare what the outside world replies ([16](16-contracts.md))                                         |
+| `.clock('2026-03-04T09:30:00Z')`  | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths))        |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
 
@@ -89,7 +89,7 @@ test('refuses an order that is not one', async () => {
     );
 
     // Then - what it threw is the reading, and nothing was written
-    expect(result.error).toMatchFile('./expected/refused.txt');
+    expect(result.error).toMatch(file('./expected/refused.txt'));
     await expect(result.table('orders')).toBeEmpty();
 });
 ```
@@ -107,7 +107,7 @@ That is what keeps a spec of a refusal the same size as a spec of a success, and
 const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
 ```
 
-Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatchFile('./expected/<name>.json')`, or `.txt`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([15](15-tokens.md), [14](14-assertions.md)).
+Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch(file('./expected/<name>.json'))`, or `.txt`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([15](15-tokens.md), [14](14-assertions.md)).
 
 A call that a declared contract never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule D7).
 
@@ -129,7 +129,7 @@ test.each(CASES)('renders $name', async ({ name, input }) => {
     const result = await integration.call(() => render(input));
 
     // Then - the golden for that case
-    expect(result.value).toMatchFile(`./expected/${name}.json`);
+    expect(result.value).toMatch(file(`./expected/${name}.json`));
     await expect(result.error).toBeEmpty();
 });
 ```

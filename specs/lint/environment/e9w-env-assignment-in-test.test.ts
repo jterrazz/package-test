@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — e9w-env-assignment-in-test (CONVENTIONS E9)', () => {
@@ -7,7 +8,7 @@ describe('lint — e9w-env-assignment-in-test (CONVENTIONS E9)', () => {
     test('warns on a raw process.env assignment in a test', async () => {
         // Given - a project violating E9
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e9w-env-assignment-in-test/')
+            .fixture(directory('../../fixtures/lint-violations/e9w-env-assignment-in-test/'))
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +19,7 @@ describe('lint — e9w-env-assignment-in-test (CONVENTIONS E9)', () => {
     test('accepts the self-restoring stub', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/e9w-env-assignment-in-test-ok/')
+            .fixture(directory('../../fixtures/lint-violations/e9w-env-assignment-in-test-ok/'))
             .exec('.');
 
         // Then - clean exit, no E9 diagnostic

@@ -17,7 +17,7 @@ import { missingHint, shouldUpdateSnapshots } from '../../runner/update.js';
 import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { formatDirectoryDiff, formatResponseDiff, formatTableDiff } from '../chain/reporter.js';
 import { resolveSpecPath } from '../chain/resolve.js';
-import { requireRelativePath } from '../chain/spec-path.js';
+import { isDiskDirectory, isDiskFile } from '../chain/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http-files/http-file.js';
 import type { ParsedResponseFile } from '../http-files/http-file.js';
 import { CaptureScope } from '../matching/match.js';
@@ -35,8 +35,9 @@ import { ResponseAccessor } from '../result/response.js';
 import { TableAccessor } from '../result/table.js';
 import {
     compareStreamText,
+    GOLDEN_MATCHER,
+    matchThroughGolden,
     nativeContain,
-    nativeMatch,
     requireExtension,
     textContains,
     textIsEmpty,
@@ -55,11 +56,11 @@ function formatJson(value: unknown): string {
     return `${JSON.stringify(value, null, 4)}\n`;
 }
 
-// ── toMatchFile — sync subjects ──
+// ── toMatch(file()) — sync subjects ──
 
 function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'stream');
-    const filePath = resolveSpecPath('toMatchFile', name, accessor.testDir);
+    const filePath = resolveSpecPath('toMatch', name, accessor.testDir);
     const actual = accessor.comparableText;
 
     if (shouldUpdateSnapshots() && !frozen) {
@@ -84,7 +85,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
 
 function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'json');
-    const filePath = resolveSpecPath('toMatchFile', name, accessor.testDir);
+    const filePath = resolveSpecPath('toMatch', name, accessor.testDir);
     const actual = accessor.value;
 
     if (shouldUpdateSnapshots() && !frozen) {
@@ -219,7 +220,7 @@ function matchResponseFile(
     frozen: boolean,
 ): MatcherResult {
     requireExtension(name, 'response');
-    const filePath = resolveSpecPath('toMatchFile', name, accessor.testDir);
+    const filePath = resolveSpecPath('toMatch', name, accessor.testDir);
 
     if (shouldUpdateSnapshots() && !frozen) {
         const previous = existsSync(filePath)
@@ -243,7 +244,7 @@ function matchResponseFile(
     return failure === null ? PASS(`expected response not to match ${name}`) : FAIL(failure);
 }
 
-// ── toMatchDirectory — async subjects (disk walk) ──
+// ── toMatch(directory()) — async subjects (disk walk) ──
 
 async function matchTreeFile(
     actualRoot: string,
@@ -252,7 +253,7 @@ async function matchTreeFile(
     scope: CaptureScope,
     frozen: boolean,
 ): Promise<MatcherResult> {
-    const fixtureDir = resolveSpecPath('toMatchDirectory', name, testDir);
+    const fixtureDir = resolveSpecPath('toMatch', name, testDir);
 
     if (shouldUpdateSnapshots() && !frozen) {
         // Preserve placeholder-covered file contents from the previous
@@ -294,69 +295,59 @@ async function matchTreeFile(
 
 // ── Matcher entry points ──
 
-function toMatchFile(
+/**
+ * `toMatch(file())` / `toMatch(directory())` — the golden comparison. A file
+ * golden is sync on a stream, json or response subject; a directory golden is
+ * async, the tree compared on disk.
+ */
+function toMatchGolden(
     received: unknown,
     expected: unknown,
     options?: MatchFixtureOptions,
-): MatcherResult {
-    requireRelativePath('toMatchFile', expected);
+): MatcherResult | Promise<MatcherResult> {
     const frozen = options?.frozen === true;
-    if (received instanceof TextAccessor) {
-        return matchStreamFile(received, expected, frozen);
+    if (isDiskFile(expected)) {
+        if (received instanceof TextAccessor) {
+            return matchStreamFile(received, expected.path, frozen);
+        }
+        if (received instanceof JsonAccessor) {
+            return matchJsonFile(received, expected.path, frozen);
+        }
+        if (received instanceof ResponseAccessor) {
+            return matchResponseFile(received, expected.path, frozen);
+        }
+        throw new TypeError(
+            `toMatch(file(${JSON.stringify(expected.path)})): a file golden is compared against a stream, json or response accessor ` +
+                '(a directory or the working directory is toMatch(directory(…))).',
+        );
     }
-    if (received instanceof JsonAccessor) {
-        return matchJsonFile(received, expected, frozen);
+    if (isDiskDirectory(expected)) {
+        return matchDirectoryGolden(received, expected.path, frozen);
     }
-    if (received instanceof ResponseAccessor) {
-        return matchResponseFile(received, expected, frozen);
-    }
-    throw new TypeError(
-        'toMatchFile: unsupported subject — expected a stream, json or response accessor ' +
-            '(a directory or the working directory is toMatchDirectory).',
-    );
+    throw new TypeError('toMatch: the golden comparison takes file(…) or directory(…).');
 }
 
-async function toMatchDirectory(
+/** `toMatch(directory())` — async, its refusal included: a tree golden is awaited. */
+async function matchDirectoryGolden(
     received: unknown,
-    expected: unknown,
-    options?: MatchFixtureOptions,
+    path: string,
+    frozen: boolean,
 ): Promise<MatcherResult> {
-    requireRelativePath('toMatchDirectory', expected);
-    if (!expected.endsWith('/')) {
-        throw new TypeError(
-            `toMatchDirectory(${JSON.stringify(expected)}): a directory's path ends in / (e.g. './expected/scaffold/').`,
-        );
-    }
-    const frozen = options?.frozen === true;
     if (received instanceof FilesystemAccessor) {
-        return await matchTreeFile(
-            received.cwd,
-            received.testDir,
-            expected,
-            received.captures,
-            frozen,
-        );
+        return await matchTreeFile(received.cwd, received.testDir, path, received.captures, frozen);
     }
     if (received instanceof DirectoryAccessor) {
         return await matchTreeFile(
             received.root,
             received.testDir,
-            expected,
+            path,
             received.captures,
             frozen,
         );
     }
     throw new TypeError(
-        'toMatchDirectory: unsupported subject — expected result.filesystem or result.directory(…).',
+        `toMatch(directory(${JSON.stringify(path)})): a directory golden is compared against result.filesystem or result.directory(…).`,
     );
-}
-
-/** Vitest's `toMatch`, reading a stream accessor as the text it compares. */
-function toMatch(received: unknown, expected: unknown): MatcherResult {
-    if (received instanceof TextAccessor) {
-        return nativeMatch(received.comparableText, expected);
-    }
-    return nativeMatch(received, expected);
 }
 
 function toContain(received: unknown, expected: unknown): MatcherResult {
@@ -478,16 +469,15 @@ export async function registerMatchers(): Promise<void> {
     globals[REGISTERED] = true;
 
     try {
-        const { expect } = await import('vitest');
+        const { chai, expect } = await import('vitest');
         expect.extend({
+            [GOLDEN_MATCHER]: toMatchGolden,
             toBeEmpty,
             toBeRunning,
             toContain,
-            toMatch,
-            toMatchDirectory,
-            toMatchFile,
             toMatchRows,
         });
+        matchThroughGolden(chai);
     } catch {
         // No vitest peer available (library imported outside a test run).
         globals[REGISTERED] = false;

@@ -228,22 +228,22 @@ const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/
  *
  * A snapshot is written by the run that was supposed to be judged by it: the
  * file lands beside the test, nobody reads the diff, and a wrong answer becomes
- * the expectation the moment someone re-records. `toMatchFile('./expected/<name>.<ext>')`
+ * the expectation the moment someone re-records. `toMatch(file('./expected/<name>.<ext>'))`
  * is the same convenience with the file where a reviewer
  * looks, tokens for what legitimately moves, and `TEST_UPDATE=1` as the one
  * door that rewrites it.
  */
 const SNAPSHOT_MATCHERS: Record<string, string> = {
     toMatchAriaSnapshot:
-        "The ARIA tree is a golden: `expect(result.tree).toMatchFile('./expected/<case>.aria.yaml')`.",
+        "The ARIA tree is a golden: `expect(result.tree).toMatch(file('./expected/<case>.aria.yaml'))`.",
     toMatchFileSnapshot:
-        "Name the file yourself: `expect(subject).toMatchFile('./expected/<case>.<ext>')`.",
+        "Name the file yourself: `expect(subject).toMatch(file('./expected/<case>.<ext>'))`.",
     toMatchInlineSnapshot:
-        "An inline snapshot is the run judging itself: `expect(subject).toMatchFile('./expected/<case>.<ext>')`, or compare to a literal with `toStrictEqual`.",
+        "An inline snapshot is the run judging itself: `expect(subject).toMatch(file('./expected/<case>.<ext>'))`, or compare to a literal with `toStrictEqual`.",
     toMatchScreenshot:
         'A screenshot is not a golden this dialect can read: assert the ARIA tree, the content, or the markup.',
     toMatchSnapshot:
-        "The golden is `expect(subject).toMatchFile('./expected/<name>.<ext>')`, a path from the spec file; under `src/` compare to a literal with `toStrictEqual`.",
+        "The golden is `expect(subject).toMatch(file('./expected/<name>.<ext>'))`, a path from the spec file; under `src/` compare to a literal with `toStrictEqual`.",
     toThrowErrorMatchingInlineSnapshot:
         "State the message: `expect(fn).toThrow('<what the subject says>')`.",
     toThrowErrorMatchingSnapshot:

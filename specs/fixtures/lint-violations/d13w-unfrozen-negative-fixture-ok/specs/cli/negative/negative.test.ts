@@ -1,9 +1,10 @@
 import { expect, test } from 'vitest';
+import { file } from '@jterrazz/test';
 
 test('asserts the mismatch diff on a frozen fixture', () => {
     // Given - output that differs from a deliberately-wrong fixture
     const result = call();
 
     // Then - the frozen opt-out keeps the fixture safe under TEST_UPDATE (no D13 warn)
-    expect(() => expect(result.stdout).toMatchFile('./expected/wrong.txt', { frozen: true })).toThrow(/mismatch/);
+    expect(() => expect(result.stdout).toMatch(file('./expected/wrong.txt'), { frozen: true })).toThrow(/mismatch/);
 });

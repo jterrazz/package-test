@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — b4-given-then (CONVENTIONS B4)', () => {
@@ -7,7 +8,7 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
     test('rejects tests missing Given or Then markers', async () => {
         // Given - a project whose tests miss Given, Then, or both
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b4-given-then/')
+            .fixture(directory('../../fixtures/lint-violations/b4-given-then/'))
             .exec('.');
 
         // Then - oxlint reports one diagnostic per missing marker (1 + 1 + 2). counted by DIAGNOSTIC, not by name: every message ends with its generated anchor, so the rule name appears twice on each line
@@ -20,7 +21,7 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
     test('rejects Given declared after Then', async () => {
         // Given - a project whose tests order the markers wrongly
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b4-given-then-position/')
+            .fixture(directory('../../fixtures/lint-violations/b4-given-then-position/'))
             .exec('.');
 
         // Then - the position upgrade reports one diagnostic per test (2)
@@ -32,7 +33,7 @@ describe('lint — b4-given-then (CONVENTIONS B4)', () => {
     test('accepts both markers, optional When, and skipIf wrappers', async () => {
         // Given - the compliant twin: Given+Then, a When variant, a skipIf test
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b4-given-then-ok/')
+            .fixture(directory('../../fixtures/lint-violations/b4-given-then-ok/'))
             .exec('.');
 
         // Then - clean exit, no B4 diagnostic

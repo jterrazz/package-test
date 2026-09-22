@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — b5 await-using inference (CONVENTIONS B5)', () => {
@@ -8,22 +9,22 @@ describe('lint — b5 await-using inference (CONVENTIONS B5)', () => {
     test('rejects a docker runner result bound without await using', async () => {
         // Given - a docker-aware spec and a test binding its result with const
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b5-await-using-inference/')
+            .fixture(directory('../../fixtures/lint-violations/b5-await-using-inference/'))
             .exec('.');
 
         // Then - the checker fails with the full diagnostic naming the runner
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./expected/b5-await-using-inference.txt');
+        expect(result.stderr).toMatch(file('./expected/b5-await-using-inference.txt'));
     });
 
     test('accepts a docker runner result bound with await using', async () => {
         // Given - the compliant twin (await using)
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b5-await-using-inference-ok/')
+            .fixture(directory('../../fixtures/lint-violations/b5-await-using-inference-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/clean.txt');
+        expect(result.stdout).toMatch(file('./expected/clean.txt'));
     });
 });

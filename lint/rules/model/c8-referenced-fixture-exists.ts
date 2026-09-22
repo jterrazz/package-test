@@ -1,23 +1,13 @@
 import { dirname, resolve } from 'node:path';
 
 import { isRelativePath } from '../../../src/model/chain/spec-path.js';
-import { memberPropertyName, specsAnchor, stringValue } from '../../ast.js';
+import { diskCallOf, specsAnchor } from '../../ast.js';
 import { isDirectory, isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
-
-/** Every verb that reads the disk, and the kind of entry its path names. */
-const FILE_VERBS: Record<string, 'directory' | 'file'> = {
-    fixtureDirectory: 'directory',
-    fixtureFile: 'file',
-    requestFile: 'file',
-    seedFile: 'file',
-    toMatchDirectory: 'directory',
-    toMatchFile: 'file',
-};
 
 /**
  * CONVENTIONS C8 — a path literal passed to a verb that reads the disk must
@@ -35,24 +25,19 @@ export const c8ReferencedFixtureExists: LintRule = {
         const specDir = dirname(file);
         return {
             CallExpression(node: AstNode) {
-                const callee = node.callee as AstNode | undefined;
-                const verb = callee === undefined ? undefined : memberPropertyName(callee);
-                const kind = verb === undefined ? undefined : FILE_VERBS[verb];
-                if (verb === undefined || kind === undefined) {
+                const disk = diskCallOf(node);
+                const value = disk?.path;
+                if (disk === undefined || value === undefined || !isRelativePath(value)) {
                     return;
                 }
-                const argument = (node.arguments as AstNode[] | undefined)?.[0];
-                const value = stringValue(argument);
-                if (value === undefined || !isRelativePath(value)) {
-                    return;
-                }
+                const { kind } = disk;
                 const target = resolve(specDir, value);
                 const exists = kind === 'directory' ? isDirectory(target) : isFile(target);
                 if (!exists) {
                     context.report({
-                        data: { kind, path: value, verb },
+                        data: { kind, path: value },
                         messageId: 'missing',
-                        node: argument,
+                        node: disk.node,
                     });
                 }
             },
@@ -62,7 +47,7 @@ export const c8ReferencedFixtureExists: LintRule = {
         docs: RULE_DOCS['c8-referenced-fixture-exists'],
         messages: {
             missing:
-                '{{verb}}("{{path}}") names no {{kind}} on disk, read from the spec file\'s directory. Create it or fix the path.',
+                '{{kind}}("{{path}}") names no {{kind}} on disk, read from the spec file\'s directory. Create it or fix the path.',
         },
         type: 'problem',
     },

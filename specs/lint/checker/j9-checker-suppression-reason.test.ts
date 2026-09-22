@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — j9-checker-suppression-reason (CONVENTIONS J9)', () => {
@@ -9,22 +10,22 @@ describe('lint — j9-checker-suppression-reason (CONVENTIONS J9)', () => {
     test('rejects a checker suppression with no reason', async () => {
         // Given - a tree violating J9
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/j9-checker-suppression-reason/')
+            .fixture(directory('../../fixtures/lint-violations/j9-checker-suppression-reason/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./expected/j9-checker-suppression-reason.txt');
+        expect(result.stderr).toMatch(file('./expected/j9-checker-suppression-reason.txt'));
     });
 
     test('accepts a suppression that says why', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/j9-checker-suppression-reason-ok/')
+            .fixture(directory('../../fixtures/lint-violations/j9-checker-suppression-reason-ok/'))
             .exec('specs');
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/j9-checker-suppression-reason-ok.txt');
+        expect(result.stdout).toMatch(file('./expected/j9-checker-suppression-reason-ok.txt'));
     });
 });

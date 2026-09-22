@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — c16-document-outside-ground (CONVENTIONS C16)', () => {
@@ -9,22 +10,22 @@ describe('lint — c16-document-outside-ground (CONVENTIONS C16)', () => {
     test('rejects a document filed under ground', async () => {
         // Given - a tree violating C16
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/c16-document-outside-ground/')
+            .fixture(directory('../../fixtures/lint-violations/c16-document-outside-ground/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./expected/c16-document-outside-ground.txt');
+        expect(result.stderr).toMatch(file('./expected/c16-document-outside-ground.txt'));
     });
 
     test('accepts a document beside the test that runs it', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/spec-document-ok/')
+            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
             .exec('specs');
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/c16-document-outside-ground-ok.txt');
+        expect(result.stdout).toMatch(file('./expected/c16-document-outside-ground-ok.txt'));
     });
 });

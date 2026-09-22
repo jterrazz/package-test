@@ -54,7 +54,7 @@ test('shows help', async () => {
 
     // Then - full stdout snapshot; ANSI already stripped, dynamics covered by tokens
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toMatchFile('./expected/help.txt');
+    expect(result.stdout).toMatch(file('./expected/help.txt'));
 });
 ```
 
@@ -64,7 +64,7 @@ test('shows help', async () => {
 test('dev server boots', async () => {
     // Given - long-running: resolved on pattern match, killed at timeout otherwise
     const result = await cli
-        .fixtureDirectory('../../fixtures/base-shop/')
+        .fixture(directory('../../fixtures/base-shop/'))
         .exec('dev --port 0', { waitFor: 'Listening on', timeout: 10_000 });
 
     // Then
@@ -86,7 +86,7 @@ Quoting is identical between the one-shot and `waitFor` forms: both run the full
 test('build then start chain stops at first failure', async () => {
     // Given - a sequence in the SAME working directory
     const result = await cli
-        .fixtureDirectory('../../fixtures/base-shop/')
+        .fixture(directory('../../fixtures/base-shop/'))
         .exec(['build', 'start --check']);
 
     // Then
@@ -102,24 +102,24 @@ Every spec gets a brand-new temp directory (`mkdtemp`) as its cwd. The runner ne
 
 That directory lives in the **OS temp dir**, and it stays there on purpose. It is per-RUN scratch — created for one spec, gone when the run ends — not something the project produced, so it does not belong under `.artifacts/` with the caches a next run reuses (see [02 — Developing](02-developing.md#artefacts-live-under-artifacts)). Writing it inside the project would also change what a spec sees: a binary that walks up looking for a `package.json` would find yours instead of nothing.
 
-Two disjoint verbs shape a spec's state (rule C7): **`.fixtureDirectory()` carries file state** (an isolated tree copied into the cwd), **`.seedFile()` carries database state** (SQL only). Any "transformation" you need is expressed declaratively, in the _shape_ of the fixture tree.
+Two disjoint verbs shape a spec's state (rule C7): **`.fixture()` carries file state** (an isolated tree copied into the cwd), **`.seed()` carries database state** (SQL only). Any "transformation" you need is expressed declaratively, in the _shape_ of the fixture tree.
 
-A fixture is named by its path from the spec file, spelled in full, and the verb states what it names:
+A fixture is named by `file()` or `directory()`, with its path from the spec file spelled in full — the wrapper states what it names:
 
-| Verb                                         | Names                          | Copy effect                                   |
-| -------------------------------------------- | ------------------------------ | --------------------------------------------- |
-| `.fixtureFile('./fixtures/config.toml')`     | one file beside the spec       | `<cwd>/config.toml` (the file under its name) |
-| `.fixtureDirectory('./fixtures/base-shop/')` | a directory beside the spec    | its **contents spread** into `<cwd>`          |
-| `.fixtureDirectory('../../fixtures/shop/')`  | a directory of the shared pool | its **contents spread** into `<cwd>`          |
+| Call                                           | Names                          | Copy effect                                   |
+| ---------------------------------------------- | ------------------------------ | --------------------------------------------- |
+| `.fixture(file('./fixtures/config.toml'))`     | one file beside the spec       | `<cwd>/config.toml` (the file under its name) |
+| `.fixture(directory('./fixtures/base-shop/'))` | a directory beside the spec    | its **contents spread** into `<cwd>`          |
+| `.fixture(directory('../../fixtures/shop/'))`  | a directory of the shared pool | its **contents spread** into `<cwd>`          |
 
-A directory's path ends in `/`, and the type refuses one that does not; `fixtureFile` refuses a directory and `fixtureDirectory` a file, naming the verb to use (rule B2). A command that expects the project one level down gets a fixture tree shaped that way: `./fixtures/nested/shop/…`, spread. The shared pool is `specs/fixtures/`, and a spec reaches it by the path that climbs to it — nothing hides behind a marker. Chained fixtures **layer** in order — a later one overwrites files from an earlier one.
+A directory's path ends in `/`, and the type refuses one that does not; a `file()` that names a directory on disk, or a `directory()` that names a file, is refused with the form to write (rule B2). A command that expects the project one level down gets a fixture tree shaped that way: `./fixtures/nested/shop/…`, spread. The shared pool is `specs/fixtures/`, and a spec reaches it by the path that climbs to it — nothing hides behind a marker. Chained fixtures **layer** in order — a later one overwrites files from an earlier one.
 
-| Setup                                            | Effect on the cwd                                                    |
-| ------------------------------------------------ | -------------------------------------------------------------------- |
-| _(nothing)_                                      | Empty directory                                                      |
-| `.fixtureDirectory('../../fixtures/base-shop/')` | Spread a whole shared project into the cwd                           |
-| `.fixtureFile('./fixtures/config.toml')`         | Copy the leaf's own `fixtures/config.toml` into the cwd              |
-| `.seedFile('./seeds/users.sql')`                 | SQL into a service database (rule A7 governs the `database:` option) |
+| Setup                                              | Effect on the cwd                                                    |
+| -------------------------------------------------- | -------------------------------------------------------------------- |
+| _(nothing)_                                        | Empty directory                                                      |
+| `.fixture(directory('../../fixtures/base-shop/'))` | Spread a whole shared project into the cwd                           |
+| `.fixture(file('./fixtures/config.toml'))`         | Copy the leaf's own `fixtures/config.toml` into the cwd              |
+| `.seed(file('./seeds/users.sql'))`                 | SQL into a service database (rule A7 governs the `database:` option) |
 
 ```typescript
 test('scaffolds a new shop', async () => {
@@ -133,28 +133,28 @@ test('scaffolds a new shop', async () => {
     expect(result.file('my-shop/.env').exists).toBe(false);
 
     // …or a tree snapshot (structured added/removed/changed diff)
-    await expect(result.directory('my-shop')).toMatchDirectory('./expected/shop-scaffold/');
+    await expect(result.directory('my-shop')).toMatch(directory('./expected/shop-scaffold/'));
 });
 
 test('upgrade rewrites the workspace predictably', async () => {
     // Given
-    const result = await cli.fixtureDirectory('../../fixtures/base-shop/').exec('upgrade');
+    const result = await cli.fixture(directory('../../fixtures/base-shop/')).exec('upgrade');
 
     // Then - snapshot of the ENTIRE cwd + flat read of the file list
-    await expect(result.filesystem).toMatchDirectory('./expected/upgraded-shop/');
+    await expect(result.filesystem).toMatch(directory('./expected/upgraded-shop/'));
     expect(await result.filesystem.files()).toContain('shoply.lock');
 });
 
 test('seeds a single fixture file', async () => {
     // Given
-    const result = await cli.fixtureFile('./fixtures/legacy-config.toml').exec('migrate-config');
+    const result = await cli.fixture(file('./fixtures/legacy-config.toml')).exec('migrate-config');
 
     // Then
     expect(result.file('shoply.yaml').exists).toBe(true);
 });
 ```
 
-A tree golden is a directory (`./expected/shop-scaffold/`), compared by `toMatchDirectory` — its path ends in `/` where a file golden's carries its extension (rule C6).
+A tree golden is a directory, compared by `toMatch(directory('./expected/shop-scaffold/'))` — its path ends in `/` where a file golden's carries its extension (rule C6).
 
 ### `.env()` — child process environment
 
@@ -194,7 +194,7 @@ export const { cli: migrateCli, cleanup } = await specification.cli('shoply-migr
 
 test('migrates a legacy schema', async () => {
     // Given - DATABASE_URL / DB_URL injected automatically into the child env
-    const result = await migrateCli.seedFile('./seeds/legacy-schema.sql').exec('up');
+    const result = await migrateCli.seed(file('./seeds/legacy-schema.sql')).exec('up');
 
     // Then
     expect(result.exitCode).toBe(0);
@@ -207,7 +207,7 @@ test('migrates a legacy schema', async () => {
 
 ### File state is the shape of a fixture tree
 
-CLI-mode `.seedFile()` is **SQL only** — it carries database state, nothing else (rule C7). To put files or config trees into the cwd, use `.fixtureDirectory()` with a fixture laid out exactly as the cwd should look. There is no "seed handler" or path-prefix dispatch.
+CLI-mode `.seed()` is **SQL only** — it carries database state, nothing else (rule C7). To put files or config trees into the cwd, use `.fixture(directory(…))` with a fixture laid out exactly as the cwd should look. There is no "seed handler" or path-prefix dispatch.
 
 ```typescript
 // specs/cli/deploy/fixtures/two-shops/  ← committed, shaped like the target cwd
@@ -218,7 +218,7 @@ CLI-mode `.seedFile()` is **SQL only** — it carries database state, nothing el
 test('deploys from a shaped workspace', async () => {
     // Given - the tree is spread into the cwd; layering a second fixture would
     // overwrite matching files (last write wins)
-    const result = await cli.fixtureDirectory('./fixtures/two-shops/').exec('deploy alpha');
+    const result = await cli.fixture(directory('./fixtures/two-shops/')).exec('deploy alpha');
 
     // Then
     expect(result.exitCode).toBe(0);
@@ -231,7 +231,7 @@ The two doors are not interchangeable, and the question that picks between them 
 
 The POOL — `specs/fixtures/`, reached by the path that climbs to it (`../../fixtures/<name>/`) — is for what SEVERAL leaves share. That is the whole of its meaning: an entry there announces "other specs depend on me, change me with care". A tree only one spec directory reaches for is not shared ground, whatever folder it sits in; parked in the pool it collects the pool's caution without earning it, and the one spec that actually owns it is a directory away, invisible to the next reader. It is an error (C15's twin, **C14**), and `jterrazz-test-check --fix` moves it beside its leaf and rewrites the reference.
 
-A LEAF'S OWN ground sits beside it, as `<domain>/fixtures/<name>/`, and is reached by the path from the leaf — `.fixtureFile('./fixtures/config.toml')`, `.fixtureDirectory('./fixtures/base-shop/')`. It is read from that leaf and nowhere else: a path may leave its leaf only into the pool, and one that climbs into a sibling's tree is the pool by another door, with none of the pool's visibility — the neighbour's author has no way to know you depend on them, edits their ground, and breaks a spec two folders away. That is **C15**; the repair is to promote the tree to the pool, where its sharing is declared.
+A LEAF'S OWN ground sits beside it, as `<domain>/fixtures/<name>/`, and is reached by the path from the leaf — `.fixture(file('./fixtures/config.toml'))`, `.fixture(directory('./fixtures/base-shop/'))`. It is read from that leaf and nowhere else: a path may leave its leaf only into the pool, and one that climbs into a sibling's tree is the pool by another door, with none of the pool's visibility — the neighbour's author has no way to know you depend on them, edits their ground, and breaks a spec two folders away. That is **C15**; the repair is to promote the tree to the pool, where its sharing is declared.
 
 So: one reader, beside the leaf. Two or more, in the pool. Write it local first — promotion is a `--fix` away, and demotion is the rule the checker enforces.
 
@@ -241,25 +241,25 @@ A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a
 
 The framework supplies the ground; the chain states the sandbox, in three verbs:
 
-| Verb                                           | What it closes                                                                             |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `.fixtureDirectory('../../fixtures/<name>/')`  | spreads a `bin/` of stub binaries into the spec's temp cwd                                 |
-| `.env({ PATH: '$WORKDIR/bin:/usr/bin:/bin' })` | puts those stubs FIRST — the binary finds the stub, never the tool installed on the host   |
-| `.env({ HOME: '$WORKDIR' })`                   | moves config dirs, caches and credential stores onto the temp cwd, off the operator's home |
+| Verb                                            | What it closes                                                                             |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `.fixture(directory('../../fixtures/<name>/'))` | spreads a `bin/` of stub binaries into the spec's temp cwd                                 |
+| `.env({ PATH: '$WORKDIR/bin:/usr/bin:/bin' })`  | puts those stubs FIRST — the binary finds the stub, never the tool installed on the host   |
+| `.env({ HOME: '$WORKDIR' })`                    | moves config dirs, caches and credential stores onto the temp cwd, off the operator's home |
 
-`PATH` is not rewritten for you: `.fixtureDirectory()` lays the tree down, `.env()` decides what the child is allowed to find. Pin the tail of `PATH` too — inheriting the developer's own `PATH` re-opens the door the stub was there to close.
+`PATH` is not rewritten for you: `.fixture(directory(…))` lays the tree down, `.env()` decides what the child is allowed to find. Pin the tail of `PATH` too — inheriting the developer's own `PATH` re-opens the door the stub was there to close.
 
 ```typescript
 test('reports what the cluster holds', async () => {
     // Given - stubs first on PATH, HOME on the temp cwd: nothing can reach out
     const result = await cli
-        .fixtureDirectory('../../fixtures/cluster-stub/')
+        .fixture(directory('../../fixtures/cluster-stub/'))
         .env({ HOME: '$WORKDIR', PATH: '$WORKDIR/bin:/usr/bin:/bin', TZ: 'UTC' })
         .exec('cluster pods');
 
     // Then
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toMatchFile('./expected/pods.txt');
+    expect(result.stdout).toMatch(file('./expected/pods.txt'));
 });
 ```
 
@@ -342,22 +342,22 @@ test('emits machine-readable config', async () => {
 
     // Then
     expect(result.json.value).toMatchObject({ name: 'shoply' }); // read + native matcher
-    expect(result.json).toMatchFile('./expected/config.json'); // expected/config.json
+    expect(result.json).toMatch(file('./expected/config.json')); // expected/config.json
 });
 
 test('lints a shop and reports per-file blocks', async () => {
     // Given
-    const result = await cli.fixtureDirectory('../../fixtures/base-shop/').exec('lint');
+    const result = await cli.fixture(directory('../../fixtures/base-shop/')).exec('lint');
 
     // Then - snapshot the whole surface; grep is the scalpel for targeted probes
-    expect(result.stdout).toMatchFile('./expected/lint-output.txt'); // full snapshot, tokens for volatile parts
+    expect(result.stdout).toMatch(file('./expected/lint-output.txt')); // full snapshot, tokens for volatile parts
     expect(result.stdout.grep('products/ok.yaml')).not.toContain('error'); // absence probe
 });
 ```
 
-`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison (rule D6), with `.text` exposing the raw capture. Text operations are **closed** over the type: `.grep(pattern)` returns a `TextAccessor` (not a string), so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatchFile('./expected/block.txt')`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
+`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison (rule D6), with `.text` exposing the raw capture. Text operations are **closed** over the type: `.grep(pattern)` returns a `TextAccessor` (not a string), so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch(file('./expected/block.txt'))`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
 
-**Tool output → snapshot per scoped use case (rule D11).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatchFile('./expected/<use-case>.txt')` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](14-assertions.md).
+**Tool output → snapshot per scoped use case (rule D11).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch(file('./expected/<use-case>.txt'))` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](14-assertions.md).
 
 ## Unique here
 
@@ -392,13 +392,13 @@ runs:
 
 Everything above `runs:`. Any key outside the table below is a refusal naming the key and its line.
 
-| Key            | Shape                                       | Meaning                                                                                                                                                                                                                                                                                                  |
-| -------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind:`        | optional, default `cli`                     | The facet the document describes. Reserved for a second facet; `cli` is the only one implemented                                                                                                                                                                                                         |
-| `description:` | **mandatory**, one line                     | The vitest test title. Lowercase prose, no trailing period                                                                                                                                                                                                                                               |
-| `fixture:`     | string or list                              | A path relative to this document (`./fixtures/shop/`, `../../fixtures/shop/`): a trailing `/` spreads a directory's contents, without it the file (or directory) is copied under its own name; executable bits preserved. A list **layers** in order. A path that is not relative is refused on its line |
-| `env:`         | string or list                              | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)                                                                                                                                                                    |
-| `serve:`       | string, list of strings, or `- name: { … }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server                                                                                                                                                           |
+| Key            | Shape                                       | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| -------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind:`        | optional, default `cli`                     | The facet the document describes. Reserved for a second facet; `cli` is the only one implemented                                                                                                                                                                                                                                                                                                                                               |
+| `description:` | **mandatory**, one line                     | The vitest test title. Lowercase prose, no trailing period                                                                                                                                                                                                                                                                                                                                                                                     |
+| `fixture:`     | string or list                              | A path relative to this document, in the two forms the chain's `file()` and `directory()` take — the trailing `/` says which: `./fixtures/shop/` spreads a directory's contents, `./fixtures/config.toml` copies one file under its own name; a path whose `/` disagrees with the disk is refused, and so is one that names nothing. Executable bits preserved. A list **layers** in order. A path that is not relative is refused on its line |
+| `env:`         | string or list                              | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)                                                                                                                                                                                                                                                                                                          |
+| `serve:`       | string, list of strings, or `- name: { … }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server                                                                                                                                                                                                                                                                                                 |
 
 #### The runs
 
@@ -514,21 +514,21 @@ export default defineConfig({
 
 `specification` points at the `*.specification.ts` whose exported `cli` runs the documents. It is **stated, never guessed**: a repository may declare several cli runners — different binaries, different service records — and no convention could pick the right one without silently binding a scenario to the wrong command. `include` (default `['**/*.spec.yaml']`) narrows the glob when a tree also holds documents that are _inputs_ to other specs rather than scenarios to run.
 
-**The bridge.** `cli.run('<case>.spec.yaml')` runs the document — its ground, its servers, every run asserted — and resolves with the **last** run's `CliResult`, so code adds what the document cannot express:
+**The bridge.** `cli.run(file('./<case>.spec.yaml'))` runs the document — its ground, its servers, every run asserted — and resolves with the **last** run's `CliResult`, so code adds what the document cannot express:
 
 ```typescript
 test('scaffolds a shop and leaves the tree we expect', async () => {
     // Given - the whole session, stated in the document
-    const result = await cli.run('scaffold.spec.yaml');
+    const result = await cli.run(file('./scaffold.spec.yaml'));
 
     // Then - one assertion the format has no vocabulary for
-    await expect(result.directory('my-shop')).toMatchDirectory('./expected/shop-scaffold/');
+    await expect(result.directory('my-shop')).toMatch(directory('./expected/shop-scaffold/'));
 });
 ```
 
 `.run()` is a DOOR, not a fallback, and the criterion is written: it stays for a document whose result needs one assertion the grammar has no vocabulary for — an absence, a count, an exhaustive file list, a directory golden, a host shell-out probe — or for a document `literate()`'s static glob cannot collect, because it is generated at test time or deliberately excluded to prove a refusal. It is never for a Given built by chaining onto `cli`: no site on the workbench does that, and the default door is `literate()`, which `cli()` wires for you.
 
-The path is relative to the test file's directory, where the document lives. Setup chained before the call layers **underneath** the document's own ground: a chained `.fixtureDirectory()` is copied first, the document's `fixture:` entries over it, and its `env:` wins over a chained `.env()`. `{ frozen: true }` opts one document out of the update rewrite — the same guard as `toMatchFile(path, { frozen: true })`, for a deliberately-wrong document whose failure rendering is the subject of a negative test.
+The document is named with `file()`, from the test file beside it: `cli.run(file('./case.spec.yaml'))`. Setup chained before the call layers **underneath** the document's own ground: a chained `.fixture()` is copied first, the document's `fixture:` entries over it, and its `env:` wins over a chained `.env()`. `{ frozen: true }` opts one document out of the update rewrite — the same guard as `toMatch(file(…), { frozen: true })`, for a deliberately-wrong document whose failure rendering is the subject of a negative test.
 
 #### Failure and update
 
@@ -567,7 +567,7 @@ The format states one binary, one working directory, one linear session. Reach f
 - **parallel fan-out** — several commands that must run at once, or an interleaving;
 - **host shell-outs** the binary under test is not — a `git` call, a build step staged by hand;
 - **structural JSON** — `result.json` against an `expected/*.json` golden, where the comparison is by shape rather than by text;
-- **database state** — `.seedFile()` and `result.table(…)`.
+- **database state** — `.seed()` and `result.table(…)`.
 
 A document that starts wanting a conditional is a chain wearing a header. Write it in code.
 
@@ -619,7 +619,7 @@ A Docker-aware runner **requires `await using`** on every result (rule B5 — th
 test('deploy spawns a labelled container', async () => {
     // Given - await using ⇒ containers force-removed at scope exit (rule B5)
     await using result = await deploy
-        .fixtureDirectory('../../fixtures/two-shops/')
+        .fixture(directory('../../fixtures/two-shops/'))
         .exec('deploy alpha');
 
     // Then - lazy access (zero Docker calls if you never touch .container)
@@ -664,9 +664,9 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 - **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection — override only to _change_ it, `null` to remove it.
 - **Letting the chain find the real binary.** Mounting a stub fixture without pinning `PATH` (or pinning it with the developer's own `PATH` on the tail) leaves the installed `kubectl`/`gh` reachable — the spec then tests the operator's machine. Pin `PATH` and `HOME` on `$WORKDIR`.
 - **Writing into fixture folders from a test.** The cwd is a copy; feature-local `fixtures/` and the shared `specs/fixtures/` pool are templates and stay pristine.
-- **Reaching for `.project()` or `seedHandlers`.** Both are gone — two verbs copy files (`.fixtureFile()`, `.fixtureDirectory()`), each named by its path, and `.seedFile()` is SQL-only (rule C7).
-- **A bare fixture name.** `.fixtureDirectory('shop/')` does not compile: the path is spelled from the spec — `./fixtures/shop/` beside it, `../../fixtures/shop/` in the pool (rule B2).
-- **Forgetting the extension in `toMatchFile('./expected/help')`.** The extension is part of the path (rule C6); a tree is `toMatchDirectory('./expected/help/')`.
+- **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files, `.fixture()`, handed a `file()` or a `directory()`, and `.seed()` is SQL-only (rule C7).
+- **A bare fixture name.** `.fixture('shop/')` and `directory('shop/')` do not compile: the path is spelled from the spec — `./fixtures/shop/` beside it, `../../fixtures/shop/` in the pool (rule B2).
+- **Forgetting the extension in `file('./expected/help')`.** The extension is part of the path (rule C6); a tree is `directory('./expected/help/')`.
 
 ## Related
 

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — d4b spec shape (CONVENTIONS D4b)', () => {
@@ -9,22 +10,22 @@ describe('lint — d4b spec shape (CONVENTIONS D4b)', () => {
     test('rejects a key outside the closed set', async () => {
         // Given - a document carrying a `when:` line
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/d4b-spec-shape/')
+            .fixture(directory('../../fixtures/lint-violations/d4b-spec-shape/'))
             .exec('.');
 
         // Then - the grammar the runner parses is the grammar the lint enforces
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatchFile('./expected/d4b-spec-shape.txt');
+        expect(result.stderr).toMatch(file('./expected/d4b-spec-shape.txt'));
     });
 
     test('the same grammar is what the compliant twin satisfies', async () => {
         // Given - a well-formed document
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/spec-document-ok/')
+            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/clean.txt');
+        expect(result.stdout).toMatch(file('./expected/clean.txt'));
     });
 });

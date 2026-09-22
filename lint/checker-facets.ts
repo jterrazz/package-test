@@ -216,13 +216,13 @@ function* walkDirectories(dir: string): Generator<string> {
 const GROUND = new Set<string>(GROUND_DIRS);
 
 /**
- * A golden named by a TEMPLATE rather than by a literal — `toMatchFile(`./expected/${x}.json`)`.
+ * A golden named by a TEMPLATE rather than by a literal — `toMatch(file(`./expected/${x}.json`))`.
  *
  * Such a test reads whatever the table hands it, so the names under the ground
  * appear nowhere in its source. It is a reader of every golden in its leaf,
  * and counting it as none made a shared `expected/` read as one spec's own.
  */
-const COMPUTED_GOLDEN = /\.toMatch(?:File|Directory)\(\s*(?:`|[A-Za-z_$])/u;
+const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u;
 
 /**
  * C21w (warning) — ground a single spec reads belongs to that spec.

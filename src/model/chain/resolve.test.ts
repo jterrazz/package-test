@@ -161,10 +161,10 @@ describe('spec path resolution', () => {
         const specDir = '/repo/specs/cli/build';
 
         // Then - both resolve from the spec, never from the working directory
-        expect(resolveSpecPath('seedFile', './seeds/users.sql', specDir)).toBe(
+        expect(resolveSpecPath('seed', './seeds/users.sql', specDir)).toBe(
             '/repo/specs/cli/build/seeds/users.sql',
         );
-        expect(resolveSpecPath('fixtureDirectory', '../../fixtures/shop/', specDir)).toBe(
+        expect(resolveSpecPath('fixture', '../../fixtures/shop/', specDir)).toBe(
             '/repo/specs/fixtures/shop',
         );
     });
@@ -172,8 +172,8 @@ describe('spec path resolution', () => {
     test('a bare name is refused before anything is read', () => {
         // Given - the 16 form, a name resolved against a hidden folder
         // Then - refused with the verb
-        expect(() => resolveSpecPath('requestFile', 'create.http', '/repo/specs')).toThrow(
-            /^requestFile\("create\.http"\): a file is named by a path relative to the spec file/u,
+        expect(() => resolveSpecPath('request', 'create.http', '/repo/specs')).toThrow(
+            /^request\("create\.http"\): a path is relative to the spec file/u,
         );
     });
 });

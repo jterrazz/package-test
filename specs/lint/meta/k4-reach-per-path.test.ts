@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 /**
@@ -21,7 +22,7 @@ import { cli } from '../lint.specification.js';
 async function reachRun(): Promise<string> {
     const result = await cli
         .env({ LINT_CONFIG: 'oxlint.reach.json' })
-        .fixtureDirectory('./fixtures/lint-reach/')
+        .fixture(directory('./fixtures/lint-reach/'))
         .exec('.');
     return result.stdout.text;
 }

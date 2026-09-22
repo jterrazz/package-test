@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — j3w spec empty assertion (CONVENTIONS J3)', () => {
@@ -9,22 +10,22 @@ describe('lint — j3w spec empty assertion (CONVENTIONS J3)', () => {
     test('warns about a stream that is only {{any}}', async () => {
         // Given - a run that executes and proves nothing
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/j3w-spec-empty-assertion/')
+            .fixture(directory('../../fixtures/lint-violations/j3w-spec-empty-assertion/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatchFile('./expected/j3w-spec-empty-assertion.txt');
+        expect(result.stderr).toMatch(file('./expected/j3w-spec-empty-assertion.txt'));
     });
 
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/spec-document-ok/')
+            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatchFile('./expected/clean.txt');
+        expect(result.stdout).toMatch(file('./expected/clean.txt'));
     });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — d19w-probe-cluster (CONVENTIONS D19)', () => {
@@ -7,7 +8,7 @@ describe('lint — d19w-probe-cluster (CONVENTIONS D19)', () => {
     test('rejects three probes on one stream with no golden', async () => {
         // Given - a project violating D19
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/d19w-probe-cluster/')
+            .fixture(directory('../../fixtures/lint-violations/d19w-probe-cluster/'))
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +19,7 @@ describe('lint — d19w-probe-cluster (CONVENTIONS D19)', () => {
     test('accepts two targeted probes', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/d19w-probe-cluster-ok/')
+            .fixture(directory('../../fixtures/lint-violations/d19w-probe-cluster-ok/'))
             .exec('.');
 
         // Then - clean exit, no D19 diagnostic

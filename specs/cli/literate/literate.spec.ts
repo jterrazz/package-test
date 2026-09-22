@@ -1,9 +1,10 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 import { afterEach, describe, expect, test } from 'vitest';
 
-import { text } from '../../../src/index.js';
+import { file, text } from '../../../src/index.js';
+import type { DiskFile, RelativePath } from '../../../src/index.js';
 import { cli } from '../literate-cli.specification.js';
 
 /**
@@ -25,6 +26,11 @@ function scratchFile(content: string): string {
     const path = resolve(dir, 'case.spec.yaml');
     writeFileSync(path, content);
     return path;
+}
+
+/** A scratch document, named the one way `cli.run()` accepts: `file()`, from this spec. */
+function documentAt(path: string): DiskFile<'.spec.yaml'> {
+    return file(relative(import.meta.dirname, path) as RelativePath<'.spec.yaml'>);
 }
 
 async function failureOf(run: Promise<unknown>): Promise<string> {
@@ -58,7 +64,7 @@ afterEach(() => {
 describe('spec documents — the bridge door (cli.run)', () => {
     test('runs a bare document and hands back the last run result', async () => {
         // Given - a scenario with no ground to state and one command
-        const result = await cli.run('help.spec.yaml');
+        const result = await cli.run(file('./help.spec.yaml'));
 
         // Then - the document asserted itself; the result is still a CliResult
         expect(result.exitCode).toBe(0);
@@ -67,7 +73,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('a two-run sequence shares one working directory', async () => {
         // Given - build writes dist/, start reads it — one cwd, two runs
-        const result = await cli.run('built-then-started.spec.yaml');
+        const result = await cli.run(file('./built-then-started.spec.yaml'));
 
         // Then - the document proved the sequence; the cwd is readable afterwards
         expect(result.file('dist/index.js').exists).toBeTruthy();
@@ -75,7 +81,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('an env set and an inline pair both reach the child', async () => {
         // Given - `env: [frozen, EXTRA=inline]`
-        const result = await cli.run('frozen-env.spec.yaml');
+        const result = await cli.run(file('./frozen-env.spec.yaml'));
 
         // Then - the set's value reached the child, and so did the pair
         expect(result.stdout).toContain('MY_VAR=from-the-frozen-set');
@@ -83,7 +89,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('a served URL matches through {{url}} whatever port was free', async () => {
         // Given - the echo server started by the document, on an OS-picked port
-        const result = await cli.run('served-url.spec.yaml');
+        const result = await cli.run(file('./served-url.spec.yaml'));
 
         // Then - the document matched the URL by token; the raw value is a real one
         expect(result.stdout.comparableText).toMatch(/backend http:\/\/127\.0\.0\.1:\d+\//u);
@@ -91,7 +97,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('a served stub answers out of the workdir the document laid down', async () => {
         // Given - the stub reads TEST_WORKDIR: run 1 echoes it, run 2 serves the file the document's `fixture:` put there
-        const result = await cli.run('served-workdir.spec.yaml');
+        const result = await cli.run(file('./served-workdir.spec.yaml'));
 
         // Then - the answer came off disk, from the very cwd the runs share
         expect(result.file('answers/dashboard/posts.json').content).toContain(
@@ -116,13 +122,13 @@ describe('spec documents — the bridge door (cli.run)', () => {
         );
 
         // Then - the document's value reached the server, not the temp cwd
-        const result = await cli.run(path);
+        const result = await cli.run(documentAt(path));
         expect(result.stdout.text).toBe('/elsewhere\n');
     });
 
     test('`|` and `|-` are compared byte for byte, final newline included', async () => {
         // Given - two runs, one output ending on a newline and one not
-        const result = await cli.run('chomping.spec.yaml');
+        const result = await cli.run(file('./chomping.spec.yaml'));
 
         // Then - the last run's raw stdout carries no trailing newline at all
         expect(result.stdout.text).toBe('ends here');
@@ -130,7 +136,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('stdin: is written to the child, then closed', async () => {
         // Given - a command that reads its input to EOF and shouts it back
-        const result = await cli.run('piped-input.spec.yaml');
+        const result = await cli.run(file('./piped-input.spec.yaml'));
 
         // Then - the document's own golden already proved it; the result agrees
         expect(result.stdout).toContain('SHOUT THIS');
@@ -138,7 +144,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('files: asserts what the run left on disk', async () => {
         // Given - contains, equals, exists and absent over one scaffold
-        const result = await cli.run('written-files.spec.yaml');
+        const result = await cli.run(file('./written-files.spec.yaml'));
 
         // Then - the document passed, and the tree it judged is the result's cwd
         expect(result.file('out/go.mod').content).toBe('module example\n');
@@ -146,7 +152,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('an absent: holds against the cwd of ITS run, not of the last one', async () => {
         // Given - run 1 states dist/index.js is not there yet, run 2 builds it
-        const result = await cli.run('absent-then-written.spec.yaml');
+        const result = await cli.run(file('./absent-then-written.spec.yaml'));
 
         // Then - the absent passed although the session ends with the file there
         expect(result.file('dist/index.js').exists).toBeTruthy();
@@ -154,7 +160,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 
     test('an exists: holds against the cwd of ITS run, not of the last one', async () => {
         // Given - run 1 builds dist/index.js, run 2 removes it again
-        const result = await cli.run('written-then-removed.spec.yaml');
+        const result = await cli.run(file('./written-then-removed.spec.yaml'));
 
         // Then - the exists passed although the session ends with the file gone
         expect(result.file('dist/index.js').exists).toBeFalsy();
@@ -164,7 +170,7 @@ describe('spec documents — the bridge door (cli.run)', () => {
 describe('spec documents — refusals', () => {
     test('a key outside the closed set names the key, the line and the vocabulary', async () => {
         // Given - a `when:` line
-        const message = await failureOf(cli.run('fixtures/unknown-key.spec.yaml'));
+        const message = await failureOf(cli.run(file('./fixtures/unknown-key.spec.yaml')));
 
         // Then - the closed vocabulary is spelled out in the refusal
         expect(message).toContain('unknown key "when:"');
@@ -175,34 +181,38 @@ describe('spec documents — refusals', () => {
     test('a wrong stdout renders the description, the command and a line diff', async () => {
         // Given - a golden nobody updated (frozen: its mismatch IS the subject)
         const message = await failureOf(
-            cli.run('fixtures/wrong-stdout.spec.yaml', { frozen: true }),
+            cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
         );
 
         // Then - the whole rendering, tokens covering the path and the run cwd
-        expect(text(message)).toMatchFile('./expected/wrong-stdout-error.txt');
+        expect(text(message)).toMatch(file('./expected/wrong-stdout-error.txt'));
     });
 
     test('a wrong exit code names both codes and what stderr carried', async () => {
         // Given - a golden claiming a failing command succeeds
-        const message = await failureOf(cli.run('fixtures/wrong-exit.spec.yaml', { frozen: true }));
+        const message = await failureOf(
+            cli.run(file('./fixtures/wrong-exit.spec.yaml'), { frozen: true }),
+        );
 
         // Then - the whole rendering, stderr included
-        expect(text(message)).toMatchFile('./expected/wrong-exit-error.txt');
+        expect(text(message)).toMatch(file('./expected/wrong-exit-error.txt'));
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
         // Given - a contains that does not, an absent that is there, and a missing file that should exist
         const message = await failureOf(
-            cli.run('fixtures/wrong-files.spec.yaml', { frozen: true }),
+            cli.run(file('./fixtures/wrong-files.spec.yaml'), { frozen: true }),
         );
 
         // Then - the whole rendering, one line per rejected assertion
-        expect(text(message)).toMatchFile('./expected/wrong-files-error.txt');
+        expect(text(message)).toMatch(file('./expected/wrong-files-error.txt'));
     });
 
     test('the stack carries ONE frame, on the run that failed', async () => {
         // Given - a golden whose run is deliberately wrong
-        const error = await errorOf(cli.run('fixtures/wrong-stdout.spec.yaml', { frozen: true }));
+        const error = await errorOf(
+            cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
+        );
 
         // Then - no engine frames, no generated-module frame: the `command:` line, which is what the message names too
         expect(frames(error)).toStrictEqual([
@@ -213,7 +223,7 @@ describe('spec documents — refusals', () => {
 
     test('a grammar refusal points at the offending line, not at the engine', async () => {
         // Given - a document carrying a key outside the closed set (line 2)
-        const error = await errorOf(cli.run('fixtures/unknown-key.spec.yaml'));
+        const error = await errorOf(cli.run(file('./fixtures/unknown-key.spec.yaml')));
 
         // Then - the frame is that line, not a parser frame
         expect(frames(error)).toStrictEqual([
@@ -238,7 +248,7 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the token line is shown as equal, with its token
-        const message = await failureOf(cli.run(path));
+        const message = await failureOf(cli.run(documentAt(path)));
         expect(message).toContain('  backend {{url}}');
         expect(message).not.toContain('- backend {{url}}');
         expect(message).toContain('- not printed at all');
@@ -250,8 +260,10 @@ describe('spec documents — refusals', () => {
             `description: names a server that does not exist\nserve: ghost\nruns:\n  - command: help\n    exit: 0\n`,
         );
 
+        const document = documentAt(path);
+
         // Then - the refusal lists what specification.cli() actually declares
-        await expect(failureOf(cli.run(path))).resolves.toContain('registered servers: echo');
+        await expect(failureOf(cli.run(document))).resolves.toContain('registered servers: echo');
     });
 });
 
@@ -274,7 +286,7 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         // Given - one update run
         process.env.TEST_UPDATE = '1';
         try {
-            await cli.run(path);
+            await cli.run(documentAt(path));
         } finally {
             delete process.env.TEST_UPDATE;
         }
@@ -291,7 +303,7 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         expect(written).not.toContain('stdout');
 
         // Then - the rewritten document passes on a normal run
-        await cli.run(path);
+        await cli.run(documentAt(path));
     });
 
     test('{{url}} survives a port change: the second server gets another port', async () => {
@@ -311,9 +323,9 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         // Given - two update runs, each with its own server and port
         process.env.TEST_UPDATE = '1';
         try {
-            await cli.run(path);
+            await cli.run(documentAt(path));
             const first = readFileSync(path, 'utf8');
-            await cli.run(path);
+            await cli.run(documentAt(path));
 
             // Then - the token was never replaced by a run-specific URL
             expect(first).toContain('backend {{url}}');
@@ -341,7 +353,7 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         // Given - one update run against output carrying two EXTRA lines
         process.env.TEST_UPDATE = '1';
         try {
-            await cli.run(path);
+            await cli.run(documentAt(path));
         } finally {
             delete process.env.TEST_UPDATE;
         }
@@ -370,7 +382,7 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         // Given - one update run
         process.env.TEST_UPDATE = '1';
         try {
-            await cli.run(path);
+            await cli.run(documentAt(path));
         } finally {
             delete process.env.TEST_UPDATE;
         }
@@ -403,7 +415,7 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         // Given - one update run
         process.env.TEST_UPDATE = '1';
         try {
-            await cli.run(path);
+            await cli.run(documentAt(path));
         } finally {
             delete process.env.TEST_UPDATE;
         }
@@ -419,7 +431,9 @@ describe('spec documents — update mode (CONVENTIONS D5)', () => {
         process.env.TEST_UPDATE = '1';
         let message: string;
         try {
-            message = await failureOf(cli.run('fixtures/wrong-stdout.spec.yaml', { frozen: true }));
+            message = await failureOf(
+                cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
+            );
         } finally {
             delete process.env.TEST_UPDATE;
         }

@@ -14,15 +14,13 @@ ruleTester.run('d8w-text-bypass', d8wTextBypass as unknown as OxlintRule, {
     invalid: [
         // Raw .text bypass with toContain.
         { code: 'expect(result.text).toContain("hi");', errors: 1 },
-        // ...and with toMatch.
-        { code: 'expect(result.stdout.text).toMatch("bye");', errors: 1 },
     ],
     valid: [
         // Asserting on the typed subject.
-        { code: 'expect(result).toMatch("out.txt");' },
-        // A RegExp is the one argument the typed subject cannot take —
-        // `toMatch` on an accessor resolves a fixture NAME and throws on a
-        // Regex, so chapter 14 prescribes this exact spelling.
+        { code: 'expect(result.stdout).toContain("out");' },
+        // `toMatch` is vitest's: a stream is compared through its text, a
+        // String and a RegExp alike.
+        { code: 'expect(result.stdout.text).toMatch("bye");' },
         { code: 'expect(result.stdout.text).toMatch(/error: \\d+/u);' },
         { code: 'expect(result.text).toMatch(new RegExp(pattern, "u"));' },
         // Some other property, not .text.

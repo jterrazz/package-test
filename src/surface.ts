@@ -14,7 +14,10 @@
  * too: one `declare module` for one published `types` entry.
  */
 
-import type { RelativePath as RelativePathType } from './model/chain/spec-path.js';
+import type {
+    DiskDirectory as DiskDirectoryType,
+    DiskFile as DiskFileType,
+} from './model/chain/spec-path.js';
 import type { DirectoryAccessor as DirectoryAccessorType } from './model/result/directory.js';
 import type { FilesystemAccessor as FilesystemAccessorType } from './model/result/filesystem.js';
 import type { JsonAccessor as JsonAccessorType } from './model/result/json.js';
@@ -147,10 +150,36 @@ export { clock, type PinnedClock } from './model/clock/clock.js';
 export { required } from './model/assertions/required.js';
 export { waitUntil, type WaitUntilOptions } from './model/assertions/wait-until.js';
 
-// Matcher options (per-call `toMatchFile(path, { frozen })`), and the path
-// Every verb that reads the disk takes
+// The disk: a string is a value, and what a test stands on is named by one of
+// These two — the only argument a verb that reads the disk accepts
+export {
+    directory,
+    type DiskDirectory,
+    type DiskFile,
+    type DiskTarget,
+    file,
+    type FileAt,
+    type RelativePath,
+} from './model/chain/spec-path.js';
+
+// Matcher options (per-call `toMatch(file(…), { frozen })`)
 export type { MatchFixtureOptions } from './model/result/match-options.js';
-export type { RelativePath } from './model/chain/spec-path.js';
+
+/**
+ * The golden half of `toMatch`, by subject: a `file()` against a stream, json
+ * or response accessor (async when the subject was captured INSIDE a page — the
+ * file crosses the browser seam through a server command), a `directory()`
+ * against a working directory or one of its directories (async: the tree is
+ * compared on disk). Any other subject has no golden half, and `toMatch` is
+ * vitest's alone.
+ */
+type GoldenMatch<T, R> = T extends { readonly capturedInPage: true }
+    ? (golden: DiskFileType, options?: MatchFixtureOptionsType) => Promise<void>
+    : T extends JsonAccessorType | ResponseAccessorType | TextAccessorType
+      ? (golden: DiskFileType, options?: MatchFixtureOptionsType) => R
+      : T extends DirectoryAccessorType | FilesystemAccessorType
+        ? (golden: DiskDirectoryType, options?: MatchFixtureOptionsType) => Promise<void>
+        : unknown;
 
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.
@@ -163,7 +192,8 @@ declare module 'vitest' {
     // Regression in the package rather than as a resolution problem. Declared
     // Together, they are present together or absent together.
     //
-    // `toMatch` is NOT here: it is vitest's own, and its argument is a value.
+    // `toMatch` keeps vitest's own signature — a string or a RegExp is a
+    // Value — and gains the golden half where the subject has one.
     //
     // The two type parameters are vitest's own, repeated CHARACTER for
     // Character: an augmentation whose parameter list differs from the
@@ -190,22 +220,11 @@ declare module 'vitest' {
         /** Assert the container is running. Async — docker-backed subject. */
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**
-         * Assert the subject matches a directory golden, named by a path
-         * relative to the spec file that ends in `/` — the whole working
-         * directory (`result.filesystem`) or one of its directories. Async: the
-         * tree is compared on disk.
-         *
-         * Pass `{ frozen: true }` to opt the golden OUT of update-mode rewriting.
-         */
-        toMatchDirectory: T extends DirectoryAccessorType | FilesystemAccessorType
-            ? (path: RelativePathType<'/'>, options?: MatchFixtureOptionsType) => Promise<void>
-            : never;
-        /**
-         * Assert the subject matches a golden file, named by a path relative to
-         * the spec file, extension included (`.http` format for
-         * `result.response`). Async for a subject captured INSIDE a page
-         * (`result.tree`, `result.html`, … — the file crosses the browser seam
-         * through a server command).
+         * Vitest's `toMatch` for a value (a string or a RegExp, against a
+         * string — a stream is compared as `result.stdout.text`), and the
+         * golden comparison for the disk: `toMatch(file('./expected/help.txt'))`,
+         * the extension part of the path (`.http` for `result.response`), or
+         * `await expect(result.directory('out')).toMatch(directory('./expected/out/'))`.
          *
          * Pass `{ frozen: true }` to opt a single golden OUT of update-mode
          * rewriting: a frozen golden is never overwritten under `TEST_UPDATE=1`
@@ -213,14 +232,7 @@ declare module 'vitest' {
          * Use it for a deliberately-wrong golden whose diff/error rendering is
          * the behaviour under test.
          */
-        // A stream captured INSIDE a page reads its golden through a server
-        // Command, so it is async where the identical node accessor is sync —
-        // Told apart by the same kind of structural marker as `toBeEmpty`.
-        toMatchFile: T extends { readonly capturedInPage: true }
-            ? (path: RelativePathType, options?: MatchFixtureOptionsType) => Promise<void>
-            : T extends JsonAccessorType | ResponseAccessorType | TextAccessorType
-              ? (path: RelativePathType, options?: MatchFixtureOptionsType) => R
-              : never;
+        toMatch: ((expected: RegExp | string) => R) & GoldenMatch<T, R>;
         /**
          * Assert the table contains exactly the given rows for the given
          * columns. Cells accept `match.*` dynamic-value matchers. Async —

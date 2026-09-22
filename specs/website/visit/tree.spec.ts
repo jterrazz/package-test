@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -7,5 +8,5 @@ test('keeps the page outline the accessibility tree draws', async () => {
     const result = await website.visit('/');
 
     // Then - the outline is a golden in the dialect a component spec uses too
-    expect(result.tree).toMatchFile('./expected/home.aria.yaml');
+    expect(result.tree).toMatch(file('./expected/home.aria.yaml'));
 });

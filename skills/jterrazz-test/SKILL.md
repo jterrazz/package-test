@@ -44,11 +44,11 @@ afterAll(cleanup);
 test('creates a user', async () => {
     // Given - one existing user
     const result = await api
-        .seedFile('./seeds/one-user.sql')
-        .requestFile('./requests/create-user.http');
+        .seed(file('./seeds/one-user.sql'))
+        .request(file('./requests/create-user.http'));
 
     // Then - the response and the row it wrote
-    expect(result.response).toMatchFile('./expected/user-created.http');
+    expect(result.response).toMatch(file('./expected/user-created.http'));
     await expect(result.table('users')).toMatchRows({ columns: ['name'], rows: [['Alice']] });
 });
 ```
@@ -57,29 +57,31 @@ test('creates a user', async () => {
 - A runner lives in a `*.specification.ts` at the facet root, destructured under its canonical name, with `afterAll(cleanup)`.
 - Every test carries a `// Given -` line, then a `// Then -` line.
 
-## A file is named by its path
+## A string is a value; the disk is `file()` or `directory()`
 
-Every verb that reads the disk ends in `File` or `Directory` and takes a path relative to the spec file, spelled in full — the type refuses a bare name:
+What a test stands on is named by one of two calls, with the path relative to the spec file spelled in full; the verbs keep simple names and the type refuses a bare string where a file is meant:
 
-| Verb                                                                   | Reads                                       |
-| ---------------------------------------------------------------------- | ------------------------------------------- |
-| `.seedFile('./seeds/users.sql')`                                       | database state, before the action           |
-| `.requestFile('./requests/create.http')`                               | a complete request — the terminal action    |
-| `.fixtureFile('./fixtures/config.toml')`                               | one file, copied into the working directory |
-| `.fixtureDirectory('../../fixtures/shop/')`                            | a directory's contents, spread into it      |
-| `expect(x).toMatchFile('./expected/out.txt')`                          | a golden file, `{{token}}`s resolved        |
-| `await expect(result.filesystem).toMatchDirectory('./expected/tree/')` | a golden tree                               |
+| Call                                                                     | Reads                                       |
+| ------------------------------------------------------------------------ | ------------------------------------------- |
+| `.seed(file('./seeds/users.sql'))`                                       | database state, before the action           |
+| `.request(file('./requests/create.http'))`                               | a complete request — the terminal action    |
+| `.post('/orders', file('./requests/order.json'))`                        | a request body, sent as the file holds it   |
+| `.fixture(file('./fixtures/config.toml'))`                               | one file, copied into the working directory |
+| `.fixture(directory('../../fixtures/shop/'))`                            | a directory's contents, spread into it      |
+| `cli.run(file('./build.spec.yaml'))`                                     | a document, run from a test                 |
+| `expect(x).toMatch(file('./expected/out.txt'))`                          | a golden file, `{{token}}`s resolved        |
+| `await expect(result.filesystem).toMatch(directory('./expected/tree/'))` | a golden tree                               |
 
-`toMatch`, `toBe`, `toContain` keep vitest's meaning: a string is a value. Ground sits in four reserved folders beside the spec — `fixtures/`, `expected/`, `requests/`, `seeds/` — and the shared pool is `specs/fixtures/`, reached by the path that climbs to it. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
+`toMatch` with a string or a RegExp is vitest's own: a stream is compared through its text, `expect(result.stdout.text).toMatch(/built/)`. Ground sits in four reserved folders — `fixtures/`, `expected/`, `requests/`, `seeds/` — each verb reads its own, and the shared pool is `specs/fixtures/`, reached by the path that climbs to it. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
 
 ## Pitfalls
 
-- **A bare name** — `.seedFile('users.sql')` does not compile, and a document's `fixture: shop/` is refused on its line. Spell the path from the spec: `./seeds/users.sql`.
+- **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./seeds/users.sql')`.
 - **A domain named `fixtures`, `expected`, `requests` or `seeds`** — the names are reserved for ground; C1 refuses a spec under one.
 - **Reaching into a sibling leaf** — a path may leave its leaf only into `specs/fixtures/` (C15). Shared ground goes to the pool.
-- **`expect(result.stdout).toMatch('help.txt')`** — that is a substring check now. A golden is `.toMatchFile('./expected/help.txt')`.
+- **`expect(result.stdout).toMatch('help.txt')`** — a stream is not a string, and a string is a value. A golden is `.toMatch(file('./expected/help.txt'))`; a value is `expect(result.stdout.text).toMatch('help')`.
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
-- **Awaiting a sync matcher, or not awaiting an IO one** — `toMatchRows`, `toMatchDirectory`, `toBeEmpty` are awaited; `toMatchFile` is not, except on a subject captured inside a page (D2).
+- **Awaiting a sync matcher, or not awaiting an IO one** — `toMatchRows`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (D2).
 - **A double before the real thing** — the ladder is: the real thing → a declared service → a contract (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits.
 - **Time** — `clock` only (`.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope); never `vi.useFakeTimers`.
 - **A 16.x tree** — `npx jterrazz-test-check specs --fix` renames the ground folders and rewrites every literal call and document.

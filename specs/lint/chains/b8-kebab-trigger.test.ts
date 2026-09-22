@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — b8-kebab-trigger (CONVENTIONS B8)', () => {
@@ -7,7 +8,7 @@ describe('lint — b8-kebab-trigger (CONVENTIONS B8)', () => {
     test('rejects a non-kebab-case job name in .trigger()', async () => {
         // Given - a project violating B8
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b8-kebab-trigger/')
+            .fixture(directory('../../fixtures/lint-violations/b8-kebab-trigger/'))
             .exec('.');
 
         // Then - oxlint reports the b8-kebab-trigger diagnostic
@@ -18,7 +19,7 @@ describe('lint — b8-kebab-trigger (CONVENTIONS B8)', () => {
     test('accepts a kebab-case job name', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b8-kebab-trigger-ok/')
+            .fixture(directory('../../fixtures/lint-violations/b8-kebab-trigger-ok/'))
             .exec('.');
 
         // Then - clean run, no b8-kebab-trigger diagnostic

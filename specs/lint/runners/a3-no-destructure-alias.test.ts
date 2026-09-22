@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — a3-no-destructure-alias (CONVENTIONS A3)', () => {
@@ -7,7 +8,7 @@ describe('lint — a3-no-destructure-alias (CONVENTIONS A3)', () => {
     test('rejects destructuring the runner with an alias', async () => {
         // Given - a project violating A3
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/a3-no-destructure-alias/')
+            .fixture(directory('../../fixtures/lint-violations/a3-no-destructure-alias/'))
             .exec('.');
 
         // Then - oxlint reports the a3-no-destructure-alias diagnostic
@@ -18,7 +19,7 @@ describe('lint — a3-no-destructure-alias (CONVENTIONS A3)', () => {
     test('accepts the canonical destructured names', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/a3-no-destructure-alias-ok/')
+            .fixture(directory('../../fixtures/lint-violations/a3-no-destructure-alias-ok/'))
             .exec('.');
 
         // Then - clean run, no a3-no-destructure-alias diagnostic

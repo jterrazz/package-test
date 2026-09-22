@@ -100,7 +100,7 @@ test('shows the events feed behind its deep link', async () => {
     const result = await mobile.open('news://events');
 
     // Then - one golden covers the whole screen
-    expect(result.screen).toMatchFile('./expected/events.screen.json');
+    expect(result.screen).toMatch(file('./expected/events.screen.json'));
 });
 ```
 
@@ -174,7 +174,7 @@ test('renders the events feed', async () => {
     const result = await mobile.open('news://events');
 
     // Then - the whole projected tree matches one golden
-    expect(result.screen).toMatchFile('./expected/events.screen.json');
+    expect(result.screen).toMatch(file('./expected/events.screen.json'));
 });
 ```
 
@@ -206,7 +206,7 @@ test('renders the events feed from the declared backend', async () => {
     const result = await mobile.intercept(newsroom).open('news://events');
 
     // Then - the screen rendered what the stub declared
-    expect(result.screen).toMatchFile('./expected/events.screen.json');
+    expect(result.screen).toMatch(file('./expected/events.screen.json'));
 });
 ```
 

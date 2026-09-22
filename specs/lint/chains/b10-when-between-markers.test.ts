@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
 describe('lint — b10-when-between-markers (CONVENTIONS B10)', () => {
@@ -7,7 +8,7 @@ describe('lint — b10-when-between-markers (CONVENTIONS B10)', () => {
     test('rejects a When written outside the two mandatory markers', async () => {
         // Given - a project narrating the action before the Given and after the Then
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b10-when-between-markers/')
+            .fixture(directory('../../fixtures/lint-violations/b10-when-between-markers/'))
             .exec('.');
 
         // Then - one diagnostic per misplaced marker
@@ -19,7 +20,7 @@ describe('lint — b10-when-between-markers (CONVENTIONS B10)', () => {
     test('accepts a When between Given and Then, and a test without one', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixtureDirectory('../../fixtures/lint-violations/b10-when-between-markers-ok/')
+            .fixture(directory('../../fixtures/lint-violations/b10-when-between-markers-ok/'))
             .exec('.');
 
         // Then - clean exit, no B10 diagnostic

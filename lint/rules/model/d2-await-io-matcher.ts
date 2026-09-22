@@ -1,9 +1,9 @@
-import { memberPropertyName } from '../../ast.js';
+import { goldenOf, memberPropertyName } from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /** Matchers backed by IO (SQL query, disk walk, docker) — must be awaited (D2). */
-const IO_MATCHERS = new Set(['toBeEmpty', 'toBeRunning', 'toMatchDirectory', 'toMatchRows']);
+const IO_MATCHERS = new Set(['toBeEmpty', 'toBeRunning', 'toMatchRows']);
 
 /** Does the member-call spine root at an `expect(…)` call? */
 function rootsAtExpect(node: AstNode | undefined): boolean {
@@ -37,7 +37,7 @@ function isDropped(node: AstNode): boolean {
 
 /**
  * CONVENTIONS D2 — the IO-backed matchers (`toMatchRows` runs SQL,
- * `toMatchDirectory` walks a tree, `toBeEmpty`/`toBeRunning` walk disk / query
+ * `toMatch(directory(…))` walks a tree, `toBeEmpty`/`toBeRunning` walk disk / query
  * docker) return a promise and must
  * be `await`ed (or returned). A bare `expect(rows).toMatchRows(...)` silently
  * resolves nothing and the assertion never runs.
@@ -50,8 +50,14 @@ export const d2AwaitIoMatcher: LintRule = {
                 if (callee === undefined) {
                     return;
                 }
-                const matcher = memberPropertyName(callee);
-                if (matcher === undefined || !IO_MATCHERS.has(matcher)) {
+                const name = memberPropertyName(callee);
+                const matcher =
+                    goldenOf(node)?.kind === 'directory'
+                        ? 'toMatch(directory(…))'
+                        : name !== undefined && IO_MATCHERS.has(name)
+                          ? `${name}(…)`
+                          : undefined;
+                if (matcher === undefined) {
                     return;
                 }
                 if (!rootsAtExpect(callee.object as AstNode | undefined)) {
@@ -67,7 +73,7 @@ export const d2AwaitIoMatcher: LintRule = {
         docs: RULE_DOCS['d2-await-io-matcher'],
         messages: {
             mustAwait:
-                'expect(…).{{matcher}}(…) is IO-backed and returns a promise — it must be awaited or returned, else the assertion never runs.',
+                'expect(…).{{matcher}} is IO-backed and returns a promise — it must be awaited or returned, else the assertion never runs.',
         },
         type: 'problem',
     },

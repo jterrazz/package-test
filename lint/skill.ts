@@ -11,7 +11,7 @@ import { dirname, resolve } from 'node:path';
 /** The cap: past it, the skill is restating a chapter. */
 export const SKILL_MAX_LINES = 120;
 
-/** What vitest itself provides a test. */
+/** What vitest itself provides a test — `toMatch` included, the matcher the golden rides on. */
 const VITEST = [
     'afterAll',
     'afterEach',
@@ -21,6 +21,7 @@ const VITEST = [
     'expect',
     'it',
     'test',
+    'toMatch',
     'vi',
 ];
 

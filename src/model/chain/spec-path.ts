@@ -1,29 +1,171 @@
 /**
- * A path a spec names a file by, spelled relative to the spec file itself.
+ * The disk, as a spec names it: `file()` and `directory()`.
  *
- * Every verb that reads the disk takes one, and nothing else: the path leaves
- * no folder implied and no pool hidden behind a marker, so what a test stands
- * on is visible on the line that names it. `Extension` narrows the tail — a
- * seed ends in `.sql`, a directory in `/`.
+ * A string is a value. What a test stands on — a seed, a request, a fixture, a
+ * document, a golden — is named by one of these two calls, with a path spelled
+ * relative to the spec file, so what the line reads is visible on the line and
+ * no folder is implied behind a bare name.
+ *
+ * The value they return is BRANDED: a verb that reads the disk accepts it and
+ * nothing else, and a verb that takes a value refuses it. The brand is a
+ * registry symbol (`Symbol.for`), so every build of the package — the node
+ * entry, the page's, a source checkout beside a bundle — reads the same one.
  */
+
+/** A path relative to the spec file; `Extension` narrows its tail. */
 export type RelativePath<Extension extends string = string> =
     | `../${string}${Extension}`
     | `./${string}${Extension}`;
+
+/** The registry key the brand is stored under. */
+export const DISK_KEY = '@jterrazz/test:disk';
+
+/** The brand every `file()` and `directory()` value carries. */
+const DISK: unique symbol = Symbol.for(DISK_KEY);
+
+/** A file the spec names, at `Path`. */
+export type FileAt<Path extends string> = {
+    readonly [DISK]: 'file';
+    readonly path: Path;
+};
+
+/** A file whose path ends in `Extension` — what a verb that reads one file accepts. */
+export type DiskFile<Extension extends string = string> = FileAt<RelativePath<Extension>>;
+
+/** A directory the spec names; its path ends in `/`. */
+export type DiskDirectory = {
+    readonly [DISK]: 'directory';
+    readonly path: RelativePath<'/'>;
+};
+
+/** Either of the two — what a verb that takes a file or a directory accepts. */
+export type DiskTarget = DiskDirectory | DiskFile;
 
 /** Does the value start the way a relative path must? */
 export function isRelativePath(value: string): boolean {
     return value.startsWith('./') || value.startsWith('../');
 }
 
-/**
- * Refuse anything that is not a relative path. The type already does, for a
- * typed caller; this is the same law for a caller the compiler does not see.
- */
-export function requireRelativePath(verb: string, path: unknown): asserts path is string {
+/** Refuse anything that is not a relative path, naming the call that received it. */
+export function requireRelativePath(call: string, path: unknown): asserts path is string {
     if (typeof path !== 'string' || !isRelativePath(path)) {
         throw new TypeError(
-            `${verb}(${JSON.stringify(path)}): a file is named by a path relative to the spec file — ` +
-                `start it with ./ or ../ (e.g. ${verb}('./expected/output.txt')).`,
+            `${call}(${JSON.stringify(path)}): a path is relative to the spec file — ` +
+                `start it with ./ or ../ (e.g. ${call}('./expected/output.txt')).`,
         );
     }
+}
+
+/**
+ * Name one file, by its path from the spec file.
+ *
+ * @example
+ *   await api.seed(file('./seeds/users.sql')).get('/users');
+ *   expect(result.stdout).toMatch(file('./expected/help.txt'));
+ */
+export function file<const Path extends RelativePath>(
+    path: Path extends `${string}/` ? never : Path,
+): FileAt<Path> {
+    requireRelativePath('file', path);
+    if (path.endsWith('/')) {
+        throw new TypeError(
+            `file(${JSON.stringify(path)}): a path ending in / is a directory — name it with directory().`,
+        );
+    }
+    return Object.freeze({ [DISK]: 'file', path }) as FileAt<Path>;
+}
+
+/**
+ * Name one directory, by its path from the spec file — ending in `/`.
+ *
+ * @example
+ *   await cli.fixture(directory('../../fixtures/shop/')).exec('build');
+ *   await expect(result.directory('out')).toMatch(directory('./expected/scaffold/'));
+ */
+export function directory<const Path extends RelativePath<'/'>>(
+    path: Path,
+): DiskDirectory & { readonly path: Path } {
+    requireRelativePath('directory', path);
+    if (!path.endsWith('/')) {
+        throw new TypeError(
+            `directory(${JSON.stringify(path)}): a directory's path ends in / (e.g. directory('./expected/scaffold/')).`,
+        );
+    }
+    return Object.freeze({ [DISK]: 'directory', path }) as DiskDirectory & {
+        readonly path: Path;
+    };
+}
+
+/** Is this a `file()` value? */
+export function isDiskFile(value: unknown): value is DiskFile {
+    return brandOf(value) === 'file';
+}
+
+/** Is this a `directory()` value? */
+export function isDiskDirectory(value: unknown): value is DiskDirectory {
+    return brandOf(value) === 'directory';
+}
+
+/** Is this a `file()` or a `directory()` value? */
+export function isDiskTarget(value: unknown): value is DiskTarget {
+    return brandOf(value) !== undefined;
+}
+
+function brandOf(value: unknown): 'directory' | 'file' | undefined {
+    if (value === null || typeof value !== 'object') {
+        return undefined;
+    }
+    const brand = (value as { [DISK]?: unknown })[DISK];
+    return brand === 'file' || brand === 'directory' ? brand : undefined;
+}
+
+/** How a value reads in a refusal: `file('./x')`, or the value itself. */
+function spelled(value: unknown): string {
+    if (isDiskTarget(value)) {
+        return `${brandOf(value)}(${JSON.stringify(value.path)})`;
+    }
+    return typeof value === 'string' ? JSON.stringify(value) : String(value);
+}
+
+/**
+ * Refuse anything but a `file()` whose path ends in `extension` — a verb that
+ * reads one file. The type already does, for a typed caller; this is the same
+ * law for a caller the compiler does not see.
+ */
+export function requireDiskFile(verb: string, value: unknown, extension = ''): DiskFile {
+    if (!isDiskFile(value)) {
+        const hint = isDiskDirectory(value)
+            ? 'it takes one file, not a directory'
+            : 'a string is a value — name the file with file()';
+        throw new TypeError(
+            `${verb}(${spelled(value)}): ${hint} (e.g. ${verb}(file('./${exampleOf(verb, extension)}'))).`,
+        );
+    }
+    if (!value.path.endsWith(extension)) {
+        throw new TypeError(
+            `${verb}(${spelled(value)}): the file ${verb}() reads ends in ${extension}.`,
+        );
+    }
+    return value;
+}
+
+/** Refuse anything but a `file()` or a `directory()` — a verb that takes either. */
+export function requireDiskTarget(verb: string, value: unknown): DiskTarget {
+    if (!isDiskTarget(value)) {
+        throw new TypeError(
+            `${verb}(${spelled(value)}): a string is a value — name the disk with file('./…') or directory('./…/').`,
+        );
+    }
+    return value;
+}
+
+/** The example path a refusal shows, in the ground folder the verb reads. */
+function exampleOf(verb: string, extension: string): string {
+    const folder: Record<string, string> = {
+        fixture: 'fixtures/config.json',
+        request: 'requests/create.http',
+        run: 'case.spec.yaml',
+        seed: 'seeds/rows.sql',
+    };
+    return folder[verb] ?? `expected/output${extension || '.txt'}`;
 }

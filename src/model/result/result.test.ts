@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
 
-import { specification, sqlite } from '../../index.js';
+import { file, specification, sqlite } from '../../index.js';
 
 const CLI_BIN = resolve(import.meta.dirname, '../../../../../specs/fixtures/cli-app/cli.sh');
 
@@ -16,8 +16,8 @@ describe('database option rule (CONVENTIONS A7)', () => {
     test('with a single database, passing database is redundant and throws', () => {
         // Given - one declared database ("db")
         // Then - the explicit option is rejected as redundant, synchronously
-        expect(() => cli.seedFile('./anything.sql', { database: 'db' })).toThrow(
-            'seedFile(): redundant database option — "db" is the only declared database.',
+        expect(() => cli.seed(file('./anything.sql'), { database: 'db' })).toThrow(
+            'seed(): redundant database option — "db" is the only declared database.',
         );
     });
 
