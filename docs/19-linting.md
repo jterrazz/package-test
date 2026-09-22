@@ -419,7 +419,7 @@ specs/api/orders/create.spec.ts:7:5: error jterrazz-check(c15): "../users/fixtur
 specs/api/requests/x.http:3:1: warning jterrazz-check(d10): token {{uuid}} in a requests/ file — …
 ```
 
-The code is the convention code — the id's first segment — so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A golden that proves a finding keeps only `file:line:column  jterrazz-check(<code>)`: `lintReport`, exported from the package root, normalises oxlint's `unix` lines and these alike, and drops every other line — a rule's spec document binds its runner with `specification.cli(bin, { transform: lintReport })`, so a reworded message moves no golden.
+The code is the convention code — the id's first segment — so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A golden that proves a finding keeps only `file:line:column  jterrazz-check(<code>)`: `lintReport`, exported from the package root, normalises oxlint's `unix` lines and these alike, and drops every other line — a rule's spec document binds its runner with `specification.cli(bin, { transform: lintReport })`, so a reworded message moves no golden. The runner states oxlint's format, `--format=unix` or `--format=agent`: without one, oxlint renders graphical frames outside an agent's shell — CI included — and `lintReport` refuses them rather than read them as a clean run.
 
 **A path is read for what it IS.** A directory with a `specs` segment in its
 path is a tree, walked as one. Anything else is a project root, and takes the

@@ -38,4 +38,24 @@ describe('lintReport — a report as a golden keeps it', () => {
         // Then - the empty text a document omits
         expect(lintReport('Found 0 warnings and 0 errors.\n')).toBe('');
     });
+
+    test("keeps oxlint's agent line, which is the checker's", () => {
+        // Given - the rendering oxlint picks in a shell that advertises an agent
+        const report =
+            'src/util.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module\n';
+
+        // Then - the same golden line as the unix rendering
+        expect(lintReport(report)).toBe('src/util.test.ts:1:1  jterrazz(i2-sibling-test-naming)\n');
+    });
+
+    test("refuses oxlint's graphical rendering instead of reading it as a clean run", () => {
+        // Given - the frames oxlint prints when no format is stated and no agent is advertised
+        const report = [
+            '  ! jterrazz(d12w-response-body-probe): 3 body probes in one test',
+            '    ,-[specs/api/events/events.test.ts:3:1]',
+        ].join('\n');
+
+        // Then - the runner is told to state the format
+        expect(() => lintReport(report)).toThrow(/--format=unix or --format=agent/u);
+    });
 });
