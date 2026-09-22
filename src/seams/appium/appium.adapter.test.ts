@@ -2,7 +2,6 @@
 import { describe, expect, test, vi } from 'vitest';
 
 import { button } from '../../model/elements/elements.js';
-import { resetSubstringWarnings } from '../../model/elements/substring-warning.js';
 import { AppiumAdapter } from './appium.adapter.js';
 
 /**
@@ -148,10 +147,10 @@ describe('appium adapter — the declared timeouts', () => {
 
 /**
  * A driver whose one button is labelled "Continue to payment" — it answers a
- * `CONTAINS` predicate and refuses an `==` one, which is exactly the shape the
- * exact-name default made unreachable.
+ * `CONTAINS` predicate and refuses an `==` one: a name that only begins the
+ * label designates nothing.
  */
-function substringDriver(): { remote: never; state: { taps: number } } {
+function partialLabelDriver(): { remote: never; state: { taps: number } } {
     const state = { taps: 0 };
     const element = {
         click: async () => {
@@ -185,12 +184,10 @@ function substringDriver(): { remote: never; state: { taps: number } } {
     return { remote: asRemote(remote), state };
 }
 
-describe('appium adapter — the transitional window for a name matched in part', () => {
-    test('taps the element the label CONTAINS, and names the label to write', async () => {
+describe('appium adapter — names are exact', () => {
+    test('a name that only begins the label designates nothing, and nothing is tapped', async () => {
         // Given - a screen whose only button is labelled "Continue to payment", and a scenario naming part of it
-        resetSubstringWarnings();
-        const printed = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
-        const { remote, state } = substringDriver();
+        const { remote, state } = partialLabelDriver();
         const adapter = new AppiumAdapter({
             remote,
             serverUrl: SERVER_URL,
@@ -198,18 +195,16 @@ describe('appium adapter — the transitional window for a name matched in part'
             udid: 'SIM-UDID',
         });
 
-        // When - the whole-label match answers nothing and the deadline passes
-        await adapter.open({
+        // When - the scenario taps the partial name
+        const opened = adapter.open({
             bundleId: BUNDLE_ID,
             scenario: async (visitor) => {
                 await visitor.tap(button('Continue'));
             },
         });
 
-        // Then - the tap reached the button through the window, and the line went where a plain run shows it
-        expect(state.taps).toBe(1);
-        expect(String(printed.mock.calls[0]?.[0])).toContain(
-            "The name to write is 'Continue to payment'",
-        );
+        // Then - the verb runs to its deadline on an exact name, and no substring is widened to
+        await expect(opened).rejects.toThrow(/timed out/u);
+        expect(state.taps).toBe(0);
     });
 });

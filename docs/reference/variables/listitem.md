@@ -5,6 +5,6 @@
 const listitem: LandmarkFactory;
 ```
 
-Defined in: [src/model/elements/elements.ts:139](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L139)
+Defined in: [src/model/elements/elements.ts:137](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L137)
 
 An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`.

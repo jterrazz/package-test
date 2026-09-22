@@ -5,7 +5,7 @@
 type BrowserOpenOptions = object;
 ```
 
-Defined in: [src/model/ports/browser.port.ts:173](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L173)
+Defined in: [src/model/ports/browser.port.ts:171](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L171)
 
 Per-visit options forwarded to the browser context.
 
@@ -17,7 +17,7 @@ Per-visit options forwarded to the browser context.
 optional allowedOrigins?: string[];
 ```
 
-Defined in: [src/model/ports/browser.port.ts:178](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L178)
+Defined in: [src/model/ports/browser.port.ts:176](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L176)
 
 Extra origins the `external: 'block'` policy lets through — the
 declared stub backend the page legitimately fetches from.
@@ -30,7 +30,7 @@ declared stub backend the page legitimately fetches from.
 baseUrl: string;
 ```
 
-Defined in: [src/model/ports/browser.port.ts:183](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L183)
+Defined in: [src/model/ports/browser.port.ts:181](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L181)
 
 Base URL of the site under test — the origin `goto()` resolves against
 and the boundary of the `external` policy.
@@ -43,7 +43,7 @@ and the boundary of the `external` policy.
 optional clock?: string;
 ```
 
-Defined in: [src/model/ports/browser.port.ts:188](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L188)
+Defined in: [src/model/ports/browser.port.ts:186](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L186)
 
 Pin the page's own `Date` at this instant before the first byte is
 parsed — the calendar the site's scripts read. `.clock()` on the chain.
@@ -56,7 +56,7 @@ parsed — the calendar the site's scripts read. `.clock()` on the chain.
 external: "allow" | "block";
 ```
 
-Defined in: [src/model/ports/browser.port.ts:194](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L194)
+Defined in: [src/model/ports/browser.port.ts:192](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L192)
 
 Cross-origin request policy. `'block'` aborts every request leaving
 the site under test (analytics, CDNs) — the browser-side analog of
@@ -70,7 +70,7 @@ strict intercepts. `'allow'` lets them through (deployed-site mode).
 optional headers?: Record<string, string>;
 ```
 
-Defined in: [src/model/ports/browser.port.ts:196](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L196)
+Defined in: [src/model/ports/browser.port.ts:194](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L194)
 
 Extra HTTP headers sent with every request of the visit (incl. User-Agent overrides).
 
@@ -82,6 +82,6 @@ Extra HTTP headers sent with every request of the visit (incl. User-Agent overri
 optional scenario?: VisitScenario;
 ```
 
-Defined in: [src/model/ports/browser.port.ts:198](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L198)
+Defined in: [src/model/ports/browser.port.ts:196](https://github.com/jterrazz/package-test/blob/main/src/model/ports/browser.port.ts#L196)
 
 The interaction scenario to run after load; the capture reflects the final state.

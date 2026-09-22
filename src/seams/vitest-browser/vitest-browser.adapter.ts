@@ -7,9 +7,6 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../model/elements/ambiguity.js';
-import { accessibleNameIn } from '../../model/elements/aria-name.js';
-import { widenedForWindow, WINDOW_SETTLE_MS } from '../../model/elements/substring-warning.js';
-import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type { ElementMatch, ElementRef } from '../../model/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
 
@@ -53,7 +50,7 @@ export type MountedSurface = {
  * a label whose text carries every option of the select, while the control's
  * accessible name is `Channel` — which is what the ARIA tree shows and what a
  * screen reader reads. Resolving by label text alone made the ordinary
- * wrapping-label form unreachable under the 16.0 whole-name default.
+ * wrapping-label form unreachable under the whole-name default.
  *
  * The label-text locator stays in the union for the controls ARIA gives no
  * role at all (a date or colour input), which nothing else would find.
@@ -144,65 +141,6 @@ function ambiguousLevel(element: ElementRef): ElementRef {
 }
 
 /**
- * The name to WRITE for this descriptor — the whole one, never truncated.
- *
- * A role descriptor matches the accessible name the browser computed, and a
- * page cannot compute one: the snapshot comes back from the node side, of the
- * one node the locator's own selector names. Text content would be the wrong
- * answer — it glues inline children with no separator and carries nothing of a
- * field's label — except for a `text` descriptor, which matches text.
- */
-async function wholeNameOf(element: ElementRef): Promise<string | undefined> {
-    const locator = locate(page, element);
-    if (element.kind !== 'text') {
-        try {
-            const named = accessibleNameIn(await commands.ariaNode(locator.selector));
-            if (named !== undefined) {
-                return named;
-            }
-        } catch {
-            // The node left the page, or it has no snapshot of its own: the
-            // Text below is the only answer left, and a window that threw here
-            // Would replace the caller's failure with its own.
-        }
-    }
-    const collapsed = (locator.query()?.textContent ?? '').replaceAll(/\s+/gu, ' ').trim();
-    return collapsed === '' ? undefined : collapsed;
-}
-
-/**
- * Does the descriptor arrive if the subject is given the settle budget?
- *
- * A mounted component never navigates, but it does re-render: a subject whose
- * name arrives with the state after a click is the same question a page asks
- * across a navigation, and one window answers both. The poll is vitest's own,
- * with the window's budget rather than the test's — what is being waited for
- * here is a surface settling, not an assertion coming true.
- */
-async function settles(element: ElementRef): Promise<boolean> {
-    try {
-        await expect
-            .poll(() => locate(page, element).elements().length, { timeout: WINDOW_SETTLE_MS })
-            .toBeGreaterThan(0);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-/** What the transitional window may ask of the mounted page. */
-const PROBE: WindowProbe = {
-    count: async (element) => await Promise.resolve(locate(page, element).elements().length),
-    nameOf: async (element) => await wholeNameOf(element),
-    // The page has no stderr, and the console it does have is captured and
-    // Dropped by the reporter: the line goes out to the node side to be printed.
-    print: async (line) => {
-        await commands.notify(line);
-    },
-    settles: async (element) => await settles(element),
-};
-
-/**
  * Run one visitor action, turning "more than one match" into the W3 refusal.
  * The ambiguous LEVEL is identified first: a scope matching several landmarks
  * is the real fault, and naming the target would send the author to fix the
@@ -212,17 +150,14 @@ export async function act<T>(
     element: ElementRef,
     action: (locator: Locator) => Promise<T>,
 ): Promise<T> {
-    // The transitional window is asked BEFORE the action, because the action
-    // Waits the whole budget and the budget is the test's ({@link widenedForWindow}).
-    const target = (await widenedForWindow(element, globalThis.location.href, PROBE)) ?? element;
-    const locator = locate(page, target);
+    const locator = locate(page, element);
     try {
         return await action(locator);
     } catch (error) {
         if (locator.elements().length <= 1) {
             throw error;
         }
-        const culprit = ambiguousLevel(target);
+        const culprit = ambiguousLevel(element);
         const matches = candidates(locate(page, culprit));
         const url = globalThis.location.href;
         throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));

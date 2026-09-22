@@ -17,10 +17,9 @@ Options accepted by every named descriptor.
 optional exact?: boolean;
 ```
 
-Defined in: [src/model/elements/elements.ts:27](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L27)
+Defined in: [src/model/elements/elements.ts:26](https://github.com/jterrazz/package-test/blob/main/src/model/elements/elements.ts#L26)
 
-Match the accessible name as a whole string. `true` by default since
-16.0.
+Match the accessible name as a whole string. `true` by default.
 
 A substring match is what a person does NOT mean: `link('Articles')`
 designated "Read Articles" as readily as "Articles", so a test could pass

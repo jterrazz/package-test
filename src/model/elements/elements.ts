@@ -15,8 +15,7 @@ import type { ElementRef } from '../ports/browser.port.js';
 /** Options accepted by every named descriptor. */
 export type ElementOptions = {
     /**
-     * Match the accessible name as a whole string. `true` by default since
-     * 16.0.
+     * Match the accessible name as a whole string. `true` by default.
      *
      * A substring match is what a person does NOT mean: `link('Articles')`
      * designated "Read Articles" as readily as "Articles", so a test could pass
@@ -36,8 +35,7 @@ const named =
         kind,
         name,
         // The descriptor records what the AUTHOR stated, not the default: an
-        // Absent `exact` is what lets the adapter tell "nothing found under the
-        // New default" from "the author asked for a substring".
+        // Absent `exact` is exact, and only a stated `false` is a substring.
         ...(options?.exact === undefined ? {} : { exact: options.exact }),
     });
 

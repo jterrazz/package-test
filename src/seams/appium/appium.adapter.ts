@@ -6,7 +6,6 @@ import type { remote } from 'webdriverio';
 import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
 import { projectScreen } from '../../facets/mobile/projection.js';
 import { AmbiguousElementError, formatElement } from '../../model/elements/ambiguity.js';
-import { warnSubstringOnly } from '../../model/elements/substring-warning.js';
 import type {
     DeviceOpenOptions,
     DevicePort,
@@ -294,23 +293,13 @@ export class AppiumAdapter implements DevicePort {
          * so it runs once, on the first miss, not on every poll.
          */
         let scrollAttempted = false;
-        let windowAsked = false;
-        let looking = chain;
         for (;;) {
-            const resolved = await this.resolveChain(driver, looking, cardinality, {
+            const resolved = await this.resolveChain(driver, chain, cardinality, {
                 tryScroll: !scrollAttempted,
             });
             scrollAttempted = true;
             if (resolved) {
                 return resolved;
-            }
-            if (!windowAsked) {
-                // The transitional window, asked on the FIRST miss rather than
-                // At the deadline: the deadline is the test's own budget, and
-                // A widening that arrives there arrives after the test is over.
-                windowAsked = true;
-                // oxlint-disable-next-line eslint/no-await-in-loop -- asked ONCE per resolution, and what it answers decides what every later pass looks for
-                looking = (await this.widenedChain(driver, chain)) ?? chain;
             }
             if (Date.now() > deadline) {
                 throw await this.timeoutError(driver, element, verb);
@@ -370,65 +359,6 @@ export class AppiumAdapter implements DevicePort {
             scope = next;
         }
         return scope as DriverElement;
-    }
-
-    /**
-     * The chain to keep polling with, level by level: a descriptor that
-     * designated nothing as a whole label but designates exactly one thing as a
-     * SUBSTRING is widened, with the warning that names the label to write. The
-     * window is the vocabulary's, not one surface's — chapter 13 — so the
-     * screen answers it exactly as a page does.
-     *
-     * `null` when nothing would change, which is the ordinary wait.
-     */
-    private async widenedChain(
-        driver: Driver,
-        chain: MobileElementRef[],
-    ): Promise<MobileElementRef[] | null> {
-        let scope: MatchScope = driver;
-        const widened: MobileElementRef[] = [];
-        let changed = false;
-        /* oxlint-disable eslint/no-await-in-loop -- the chain resolves outside-in: a level can only be looked for inside the scope the level before it resolved to */
-        for (const level of chain) {
-            const found = await this.widenedLevel(scope, level);
-            changed ||= found !== null;
-            const candidate = found ?? level;
-            const matches = await matching(scope, candidate);
-            const next = matches[0];
-            if (next === undefined) {
-                return null;
-            }
-            scope = next;
-            widened.push(candidate);
-        }
-        /* oxlint-enable eslint/no-await-in-loop */
-        return changed ? widened : null;
-    }
-
-    /** One level of the chain, widened and warned about, or `null`. */
-    private async widenedLevel(
-        scope: MatchScope,
-        level: MobileElementRef,
-    ): Promise<MobileElementRef | null> {
-        if (level.exact !== undefined || level.name === undefined) {
-            return null;
-        }
-        const strict = await matching(scope, level);
-        if ((await strict.length) > 0) {
-            return null;
-        }
-        const loose: MobileElementRef = { ...level, exact: false };
-        const matches = await matching(scope, loose);
-        const first = matches[0];
-        // Exactly one, never "at least one": a label several elements carry in
-        // Part is the ambiguity the old default hid, and the window may not
-        // Resolve it by guessing which one the author meant (W3).
-        if (first === undefined || (await matches.length) !== 1) {
-            return null;
-        }
-        const evidence = await captureMatch(first);
-        await warnSubstringOnly(level, this.options.udid, evidence.label);
-        return loose;
     }
 
     /** Enumerate the candidates' evidence, truncated. */

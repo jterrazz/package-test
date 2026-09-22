@@ -61,8 +61,18 @@ test('scopes to the footer as readily as to the nav', async () => {
     expect(result.url).toContain('/articles');
 });
 
+test('a name only part of an accessible name designates nothing', async () => {
+    // Given - "Read Articles" is on the page, and no element is named "Read" whole
+    const result = await website.visit('/ambiguous', async (visitor) => {
+        await visitor.gone(link('Read'));
+    });
+
+    // Then - exact names: the partial name found nothing, and the page still carries the longer one
+    expect(result.content).toContain('Read Articles');
+});
+
 test('the opt-out brings the substring match back, and widens the ambiguity', async () => {
-    // Given - the same page, with the pre-16.0 matching asked for explicitly
+    // Given - the same page, with substring matching asked for explicitly
     const message = await refusalOf('/ambiguous', async (visitor) => {
         // When - `{ exact: false }` lets "Read Articles" answer to "Articles" again
         await visitor.click(link('Articles', { exact: false }));

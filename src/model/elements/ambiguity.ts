@@ -127,9 +127,9 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
         );
     }
 
-    // Only worth offering to a descriptor that opted OUT: exact is the default
-    // Since 16.0, so telling an ordinary descriptor to "match the name whole"
-    // Would be telling it to do what it is already doing.
+    // Only worth offering to a descriptor that opted OUT: exact is the default,
+    // So telling an ordinary descriptor to "match the name whole" would be
+    // Telling it to do what it is already doing.
     if (element.exact === false && element.name !== undefined) {
         const remaining = matches.filter((match) => match.text === element.name).length;
         if (remaining > 0 && remaining < matches.length) {

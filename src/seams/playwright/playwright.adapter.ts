@@ -9,9 +9,6 @@ import {
     describeAmbiguity,
     formatElement,
 } from '../../model/elements/ambiguity.js';
-import { accessibleNameIn } from '../../model/elements/aria-name.js';
-import { widenedForWindow, WINDOW_SETTLE_MS } from '../../model/elements/substring-warning.js';
-import type { WindowProbe } from '../../model/elements/substring-warning.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -61,7 +58,7 @@ const VALUE_POLL_MS = 100;
  * a label whose text carries every option of the select, while the control's
  * accessible name is `Channel` — which is what the ARIA tree shows and what a
  * screen reader reads. Resolving by label text alone made the ordinary
- * wrapping-label form unreachable under the 16.0 whole-name default.
+ * wrapping-label form unreachable under the whole-name default.
  *
  * The label-text locator stays in the union for the controls ARIA gives no
  * role at all (a date or colour input), which nothing else would find.
@@ -154,100 +151,17 @@ async function act<T>(
     element: ElementRef,
     action: (locator: Locator) => Promise<T>,
 ): Promise<T> {
-    // The transitional window is asked BEFORE the action, because the action
-    // Waits the whole budget and the budget is the test's ({@link widenedForWindow}).
-    const target = (await widenedForWindow(element, page.url(), probeOf(page))) ?? element;
     try {
-        return await action(locate(page, target));
+        return await action(locate(page, element));
     } catch (error) {
         if (!isStrictViolation(error)) {
             throw error;
         }
-        const culprit = await findAmbiguousLevel(page, target);
+        const culprit = await findAmbiguousLevel(page, element);
         const matches = await captureMatches(locate(page, culprit));
         throw new AmbiguousElementError(
             describeAmbiguity({ element: culprit, matches, url: page.url() }),
         );
-    }
-}
-
-/** What the transitional window may ask of the page. */
-function probeOf(page: Page): WindowProbe {
-    return {
-        count: async (element) => await locate(page, element).count(),
-        nameOf: async (element) => await wholeNameOf(page, element),
-        settles: async (element) => await settles(page, element),
-    };
-}
-
-/**
- * Does the descriptor arrive if the page is given the settle budget?
- *
- * A poll rather than `waitFor`, for the reason the rest of this adapter has no
- * `.first()`: waiting on the locator itself would have to narrow a strict
- * locator to one element, and a count answers the same question without
- * touching the mechanism W3 rests on. The locator is rebuilt every round, so a
- * navigation that replaced the document is read on the new one.
- */
-async function settles(page: Page, element: ElementRef): Promise<boolean> {
-    const deadline = Date.now() + WINDOW_SETTLE_MS;
-    for (;;) {
-        // oxlint-disable-next-line eslint/no-await-in-loop -- a poll asks, waits, asks again: the rounds are sequential by definition
-        if ((await countOrZero(page, element)) > 0) {
-            return true;
-        }
-        if (Date.now() >= deadline) {
-            return false;
-        }
-        // oxlint-disable-next-line eslint/no-await-in-loop -- same round: the wait between two looks is what a poll IS
-        await sleep(VALUE_POLL_MS);
-    }
-}
-
-/** A count taken mid-navigation throws; the page is simply not answering yet. */
-async function countOrZero(page: Page, element: ElementRef): Promise<number> {
-    try {
-        return await locate(page, element).count();
-    } catch {
-        return 0;
-    }
-}
-
-/**
- * The name to WRITE for this descriptor — the whole one, never truncated.
- *
- * A role descriptor matches the accessible name the browser computed, so the
- * name is read off the ARIA snapshot, which is that same computation: the text
- * content glues inline children with no separator (`Experiments9` for a button
- * named "Experiments 9") and a field's name is its label, which its text never
- * carries at all. A `text` descriptor matches text, so text is what it is told
- * to write.
- */
-async function wholeNameOf(page: Page, element: ElementRef): Promise<string | undefined> {
-    const locator = locate(page, element);
-    if (element.kind !== 'text') {
-        try {
-            const named = accessibleNameIn(await locator.ariaSnapshot());
-            if (named !== undefined) {
-                return named;
-            }
-        } catch {
-            // The element left the page, or the node has no snapshot of its
-            // Own: the text below is the only answer left, and a window that
-            // Threw here would replace the caller's failure with its own.
-        }
-    }
-    return await wholeTextOf(locator);
-}
-
-/** The element's text, whitespace-collapsed and WHOLE — a name cut mid-word resolves to nothing. */
-async function wholeTextOf(locator: Locator): Promise<string | undefined> {
-    try {
-        const text = await locator.evaluate((node) => node.textContent ?? '');
-        const collapsed = text.replaceAll(/\s+/gu, ' ').trim();
-        return collapsed === '' ? undefined : collapsed;
-    } catch {
-        return undefined;
     }
 }
 

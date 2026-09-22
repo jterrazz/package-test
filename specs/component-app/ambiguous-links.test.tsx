@@ -34,7 +34,7 @@ test('a name designates the accessible name WHOLE — the default', async () => 
 });
 
 test('`{ exact: false }` brings the substring match back, and the ambiguity with it', async () => {
-    // Given - the pre-16.0 matching, asked for explicitly
+    // Given - substring matching, asked for explicitly
     const refusal = await refusalOf(async (visitor) => {
         await visitor.click(link('Articles', { exact: false }));
     });
@@ -43,15 +43,12 @@ test('`{ exact: false }` brings the substring match back, and the ambiguity with
     expect(refusal).toContain('matched 3 elements');
 });
 
-test('a name that only matches as a substring still resolves', async () => {
+test('a name that only matches as a substring designates nothing', async () => {
     // Given - a name no element carries whole, and exactly one element carries in part
-
-    // `see()` rather than `click()`: the window resolves it, and a resolved
-    // Click would navigate the mounted page out from under the runner.
     const refusal = await refusalOf(async (visitor) => {
-        await visitor.see(link('archive'));
+        await visitor.gone(link('archive'));
     });
 
-    // Then - the transitional window resolved it rather than waiting out the budget
+    // Then - names are exact: the partial name is absent, with no widening to the element that contains it
     expect(refusal).toBe('');
 });
