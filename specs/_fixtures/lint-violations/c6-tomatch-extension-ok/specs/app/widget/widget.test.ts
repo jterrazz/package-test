@@ -7,6 +7,6 @@ test('prints help and scaffolds a tree', async () => {
     const result = await cli.exec('help');
 
     // Then - stream fixture carries its extension; tree snapshots are directories
-    expect(result.stdout).toMatch('help.txt');
-    await expect(result.directory('out')).toMatch('tree');
+    expect(result.stdout).toMatchFile('./_expected/help.txt');
+    await expect(result.directory('out')).toMatchDirectory('./_expected/tree/');
 });

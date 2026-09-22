@@ -168,13 +168,22 @@ describe('response body update mode — workdir substitution (CONVENTIONS D5, te
     });
 });
 
-describe('toMatch — accessor subjects reject a regex argument (runtime guard, D14)', () => {
+describe("toMatch is vitest's: its argument is a value (runtime guard, D14)", () => {
     beforeAll(async () => {
         await registerMatchers();
     });
 
+    test('a stream accessor is matched as the text it compares', () => {
+        // Given - a stream subject, ANSI included
+        const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m', 'stdout', '/tmp');
+
+        // Then - a substring and a regex both read the comparable text
+        expect(subject).toMatch('built in');
+        expect(subject).toMatch(/built in \ds/u);
+        expect(subject).not.toMatch('failed');
+    });
+
     const subjects: [string, () => unknown][] = [
-        ['stream', () => new TextAccessor('out', 'stdout', '/tmp')],
         ['json', () => new JsonAccessor('{}', '/tmp')],
         ['response', () => new ResponseAccessor({ body: {}, headers: {}, status: 200 }, '/tmp')],
         ['filesystem', () => new FilesystemAccessor('/tmp', '/tmp')],
@@ -182,33 +191,79 @@ describe('toMatch — accessor subjects reject a regex argument (runtime guard, 
     ];
 
     for (const [kind, make] of subjects) {
-        test(`a ${kind} subject throws immediately with the fixture-name guidance`, () => {
-            // Given - an accessor subject and the instinctive (wrong) regex argument
+        test(`a ${kind} subject under toMatch is refused, naming the file matchers`, () => {
+            // Given - a subject whose golden is a file, and the 16 spelling
             const subject = make();
 
-            // Then - the throw names the subject kind, the rule, and the escape hatch
+            // Then - the refusal points at the verb that reads the disk
             expect(() => {
-                expect(subject).toMatch(/re/u);
-            }).toThrow(kind);
-            expect(() => {
-                expect(subject).toMatch(/re/u);
-            }).toThrow('toMatch on accessors takes a fixture name (extension included)');
-            expect(() => {
-                expect(subject).toMatch(/re/u);
-            }).toThrow('use expect(x.text).toMatch(/re/) for regex matching');
+                expect(subject).toMatch('golden.json');
+            }).toThrow(/toMatchFile\('\.\/expected\/<name>\.<ext>'\)/u);
         });
     }
 
-    // RUNTIME D14 — `toMatch` on an accessor subject expects a fixture NAME:
-    // Anything else is refused at once, naming the subject and the escape hatch.
-    test('a non-string, non-regex argument is rejected too (defensive)', () => {
-        // Given - a stream subject and a numeric argument
-        const subject = new TextAccessor('out', 'stdout', '/tmp');
+    // RUNTIME D14 — a file matcher takes a path relative to the spec, and
+    // Anything else is refused at once, naming the verb and the form to write.
+    test('toMatchFile refuses an argument that is not a relative path', () => {
+        // Given - a stream and a json subject, handed a bare name and a regex
+        const stream = new TextAccessor('out', 'stdout', '/tmp');
+        const json = new JsonAccessor('{}', '/tmp');
 
-        // Then - the guard still fires with the fixture-name guidance
+        // Then - the refusal names the verb and the relative form, before any read
         expect(() => {
-            expect(subject).toMatch(42 as unknown as string);
-        }).toThrow('toMatch on accessors takes a fixture name (extension included)');
+            expect(stream).toMatchFile('help.txt' as never, { frozen: true });
+        }).toThrow(
+            /^toMatchFile\("help\.txt"\): a file is named by a path relative to the spec file/u,
+        );
+        expect(() => {
+            expect(json).toMatchFile(/re/u as never, { frozen: true });
+        }).toThrow(/a file is named by a path relative to the spec file/u);
+    });
+
+    test('toMatchDirectory refuses an argument that is not a relative path', async () => {
+        // Given - a tree subject handed a bare name
+        const tree = new DirectoryAccessor('/tmp', '/tmp');
+
+        // Then - the same refusal, from the async matcher
+        await expect(
+            expect(tree).toMatchDirectory('scaffold/' as never, { frozen: true }),
+        ).rejects.toThrow(/^toMatchDirectory\("scaffold\/"\): a file is named by a path relative/u);
+    });
+
+    test('the type refuses the bare name the runtime refuses (B2)', async () => {
+        // Given - a stream and a tree subject
+        const stream = new TextAccessor('out', 'stdout', '/tmp');
+        const tree = new DirectoryAccessor('/tmp', '/tmp');
+
+        // Then - neither 16 spelling compiles, and each is refused if it is forced through
+        expect(() => {
+            // @ts-expect-error B2 — a golden is named by its relative path
+            expect(stream).toMatchFile('expected/x.txt', { frozen: true });
+        }).toThrow(/relative to the spec file/u);
+        await expect(
+            // @ts-expect-error B2 — a directory golden's path ends in `/`
+            expect(tree).toMatchDirectory('./expected/tree', { frozen: true }),
+        ).rejects.toThrow(/a directory's path ends in \//u);
+    });
+
+    test('toMatchDirectory refuses a relative path that does not end in /', async () => {
+        // Given - a directory subject and a path without the trailing slash
+        const subject = new DirectoryAccessor('/tmp', '/tmp');
+
+        // Then - the path states the kind, so the slash is required
+        await expect(
+            expect(subject).toMatchDirectory('./expected/scaffold' as never, { frozen: true }),
+        ).rejects.toThrow(/a directory's path ends in \//u);
+    });
+
+    test('toMatchFile refuses a directory subject, naming toMatchDirectory', () => {
+        // Given - a directory subject under the file matcher
+        const subject = new DirectoryAccessor('/tmp', '/tmp') as unknown as TextAccessor;
+
+        // Then - the refusal names the matcher that reads a tree
+        expect(() => {
+            expect(subject).toMatchFile('./expected/tree.txt', { frozen: true });
+        }).toThrow(/toMatchDirectory/u);
     });
 });
 
@@ -249,7 +304,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - update mode is bypassed: it throws the does-not-exist error, no write
         expect(() => {
-            expect(accessor).toMatch('frozen.json', { frozen: true });
+            expect(accessor).toMatchFile('./_expected/frozen.json', { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
@@ -263,7 +318,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - frozen mismatch still throws and never overwrites
         expect(() => {
-            expect(accessor).toMatch('wrong.json', { frozen: true });
+            expect(accessor).toMatchFile('./_expected/wrong.json', { frozen: true });
         }).toThrow();
         expect(readFileSync(fixturePath, 'utf8')).toBe('{\n    "id": 999\n}\n');
     });
@@ -274,7 +329,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixturePath = resolve(scratch, '_expected', 'written.json');
 
         // Then - update mode writes it and passes
-        expect(accessor).toMatch('written.json');
+        expect(accessor).toMatchFile('./_expected/written.json');
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
@@ -288,7 +343,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
         // Then - frozen bypasses the write, throwing the does-not-exist error
         expect(() => {
-            expect(accessor).toMatch('frozen.http', { frozen: true });
+            expect(accessor).toMatchFile('./_expected/frozen.http', { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
@@ -302,7 +357,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixturePath = resolve(scratch, '_expected', 'written.http');
 
         // Then - update mode writes and passes
-        expect(accessor).toMatch('written.http');
+        expect(accessor).toMatchFile('./_expected/written.http');
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
@@ -315,9 +370,9 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixtureDir = resolve(scratch, '_expected', 'frozen-tree');
 
         // Then - frozen bypasses the write (async matcher rejects), nothing created
-        await expect(expect(accessor).toMatch('frozen-tree', { frozen: true })).rejects.toThrow(
-            /does not exist[\s\S]*TEST_UPDATE=1/u,
-        );
+        await expect(
+            expect(accessor).toMatchDirectory('./_expected/frozen-tree/', { frozen: true }),
+        ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixtureDir)).toBeFalsy();
     });
 
@@ -330,7 +385,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixtureFile = resolve(scratch, '_expected', 'written-tree', 'file.txt');
 
         // Then - update mode copies the tree and passes
-        await expect(accessor).toMatch('written-tree');
+        await expect(accessor).toMatchDirectory('./_expected/written-tree/');
         expect(existsSync(fixtureFile)).toBeTruthy();
     });
 });
@@ -396,7 +451,7 @@ describe('the hint a missing golden gives names a run that does something', () =
 
         // Then - update mode is where it comes from
         expect(() => {
-            expect(subject).toMatch('nowhere.txt');
+            expect(subject).toMatchFile('./_expected/nowhere.txt');
         }).toThrow('Run with TEST_UPDATE=1');
     });
 
@@ -407,7 +462,7 @@ describe('the hint a missing golden gives names a run that does something', () =
 
         // Then - the hint names the two things that do work, and not the one that silently writes nothing: `{ frozen }` IS the no-write switch
         expect(() => {
-            expect(subject).toMatch('nowhere.txt', { frozen: true });
+            expect(subject).toMatchFile('./_expected/nowhere.txt', { frozen: true });
         }).toThrow('Write the file by hand');
     });
 });

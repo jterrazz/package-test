@@ -7,5 +7,5 @@ test('prints the widget listing', async () => {
     const result = await cli.exec('widget list');
 
     // Then - the golden matches
-    expect(result.stdout).toMatch('out.txt');
+    expect(result.stdout).toMatchFile('./_expected/out.txt');
 });

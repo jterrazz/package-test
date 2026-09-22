@@ -50,7 +50,10 @@ async function underSymlinkedTmp<T>(action: () => Promise<T>): Promise<T> {
 describe('command — env', () => {
     test('passes user-supplied env vars to the process', async () => {
         // Given - a custom env var
-        const result = await cli.fixture('$FIXTURES/cli-app/').env({ MY_VAR: 'hello' }).exec('env');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .env({ MY_VAR: 'hello' })
+            .exec('env');
 
         // Then - the command sees it
         expect(result.exitCode).toBe(0);
@@ -60,7 +63,7 @@ describe('command — env', () => {
     test('merges multiple .env() calls', async () => {
         // Given - two .env() calls setting different keys
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .env({ MY_VAR: 'first' })
             .env({ EXTRA: 'second' })
             .exec('env');
@@ -73,7 +76,7 @@ describe('command — env', () => {
     test('the later .env() call wins for the same key', async () => {
         // Given - the same key set by two successive .env() calls
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .env({ MY_VAR: 'first' })
             .env({ MY_VAR: 'second' })
             .exec('env');
@@ -83,12 +86,10 @@ describe('command — env', () => {
         expect(result.stdout.text).not.toContain('MY_VAR=first');
     });
 
-    // RUNTIME B2 — an unknown `$…` marker is refused where it is written, and
-    // `$FIXTURES` outside a specs tree with it.
     test('expands $WORKDIR token to the actual cwd', async () => {
         // Given - $WORKDIR placeholder for HOME (the typical isolation pattern)
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .env({ HOME: '$WORKDIR' })
             .exec('env');
 
@@ -105,14 +106,14 @@ describe('command — env', () => {
         const result = await underSymlinkedTmp(
             async () =>
                 await cli
-                    .fixture('$FIXTURES/cli-app/')
+                    .fixtureDirectory('../../_fixtures/cli-app/')
                     .env({ CACHE_DIR: '$WORKDIR/sub' })
                     .exec('workdir-var'),
         );
 
         // Then - what the child echoes back matches the {{workdir}} golden
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('workdir-var.txt');
+        expect(result.stdout).toMatchFile('./_expected/workdir-var.txt');
     });
 
     test('$WORKDIR in a document env: expands to that same path', async () => {
@@ -127,7 +128,10 @@ describe('command — env', () => {
 
     test('null value unsets a variable', async () => {
         // Given - set then unset (HOME is set on the host)
-        const result = await cli.fixture('$FIXTURES/cli-app/').env({ HOME: null }).exec('env');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .env({ HOME: null })
+            .exec('env');
 
         // Then - the child sees the variable as unset
         expect(result.stdout.text).toContain('HOME=unset');
@@ -135,7 +139,7 @@ describe('command — env', () => {
 
     test('env without .env() keeps process.env intact', async () => {
         // Given - no .env() — host PATH should still be available so the script runs
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('env');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('env');
 
         // Then - HOME should be the host's HOME, not "unset"
         expect(result.exitCode).toBe(0);
@@ -185,7 +189,7 @@ describe('command — automatic service env injection (CONVENTIONS B6)', () => {
 
     test('runner without services injects nothing', async () => {
         // Given - the plain runner (no services record)
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('env');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('env');
 
         // Then - no URL vars appear in the child env
         expect(result.stdout.text).toContain('DB_URL=unset');

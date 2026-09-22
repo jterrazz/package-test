@@ -4,7 +4,7 @@ import { isTestRole, roleOf } from '../../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 
 /**
- * Does `arguments[1]` of a `toMatch(name, options)` call carry `{ frozen: true }`?
+ * Does `arguments[1]` of a `toMatchFile(path, options)` call carry `{ frozen: true }`?
  * A frozen fixture opts out of update-mode rewriting, so it is exempt.
  */
 function hasFrozenOption(args: AstNode[]): boolean {
@@ -52,7 +52,7 @@ function isWrappedInExpect(node: AstNode): boolean {
 }
 
 /**
- * CONVENTIONS D13 (warning) — a `toMatch` whose failure is the behaviour under
+ * CONVENTIONS D13 (warning) — a golden matcher whose failure is the behaviour under
  * test (wrapped in `expect(() => …).toThrow()` or `expect(…).rejects.toThrow()`)
  * asserts a DELIBERATELY-WRONG or MISSING fixture. Under `TEST_UPDATE=1` an
  * unfrozen fixture is silently rewritten with the actual output — the matcher
@@ -147,7 +147,8 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;
-                if (callee === undefined || memberPropertyName(callee) !== 'toMatch') {
+                const matcher = callee === undefined ? undefined : memberPropertyName(callee);
+                if (matcher !== 'toMatchFile' && matcher !== 'toMatchDirectory') {
                     return;
                 }
                 if (!isWrappedInExpect(node) && !inAThrowingHelper(node)) {
@@ -164,7 +165,7 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
         docs: RULE_DOCS['d13w-unfrozen-negative-fixture'],
         messages: {
             unfrozenNegativeFixture:
-                'This toMatch asserts a mismatch (wrapped in expect(…).toThrow/.rejects) — pass { frozen: true } so TEST_UPDATE=1 never overwrites the deliberately-wrong fixture.',
+                'This golden matcher asserts a mismatch (wrapped in expect(…).toThrow/.rejects) — pass { frozen: true } so TEST_UPDATE=1 never overwrites the deliberately-wrong golden.',
         },
         type: 'suggestion',
     },

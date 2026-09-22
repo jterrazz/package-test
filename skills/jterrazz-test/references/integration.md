@@ -35,7 +35,7 @@ export const { cleanup, integration } = await specification.integration({
 | -------------- | -------------------------------- | --------------------------------------------------------------------------------------- |
 | `.clock()`     | `.clock('2026-03-04T09:30:00Z')` | Pins `Date` for this chain — the one primitive for time                                 |
 | `.intercept()` | `.intercept(contracts)`          | Declares what the network answers, from contracts — strict from the first one (rule D7) |
-| `.seed()`      | `.seed('users.sql')`             | Loads a `_seeds/*.sql` file into the named service before the action                    |
+| `.seedFile()`  | `.seedFile('./seeds/users.sql')` | Loads a `.sql` file, named from the spec file, into the named service before the action |
 
 ## Terminal actions (exactly one)
 
@@ -55,12 +55,13 @@ export const { cleanup, integration } = await specification.integration({
 
 ## Goldens
 
-| Name                | Written                                                        | Does                                                                                                         |
-| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
-| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
-| `.json body`        | `await expect(subject).toMatch('created.json')`                | A JSON payload as a file, tokens resolved and keys compared                                                  |
-| `.txt stream`       | `await expect(subject).toMatch('help.txt')`                    | A text stream as a file — stdout, stderr, a rendered body                                                    |
+| Name                 | Written                                                                  | Does                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `toMatchFile()`      | `expect(subject).toMatchFile('./expected/<name>.<ext>')`                 | Compares the subject to the golden file its path names from the spec file, tokens resolved; `TEST_UPDATE=1` writes it      |
+| `toMatchDirectory()` | `await expect(result.filesystem).toMatchDirectory('./expected/<name>/')` | Compares a directory, or the whole working directory, to a golden tree named from the spec file; `TEST_UPDATE=1` writes it |
+| `toMatchRows()`      | `expect(result.table('users')).toMatchRows({ columns, rows })`           | Compares a table to a column list and one array of cells per row                                                           |
+| `.json body`         | `expect(subject).toMatchFile('./expected/created.json')`                 | A JSON payload as a file, tokens resolved and keys compared                                                                |
+| `.txt stream`        | `expect(subject).toMatchFile('./expected/help.txt')`                     | A text stream as a file — stdout, stderr, a rendered body                                                                  |
 
 ## Read next
 

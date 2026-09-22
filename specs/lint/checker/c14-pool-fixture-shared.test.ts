@@ -8,33 +8,33 @@ describe('lint — c14 pool fixture shared (CONVENTIONS C14)', () => {
     test('rejects a pool fixture only one spec directory reaches for', async () => {
         // Given - a pool entry named by a single leaf
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c14-pool-fixture-shared/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c14-pool-fixture-shared/')
             .exec('.');
 
         // Then - the checker names the leaf the fixture belongs beside
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch('c14-pool-fixture-shared.txt');
+        expect(result.stderr).toMatchFile('./_expected/c14-pool-fixture-shared.txt');
     });
 
     test('accepts a pool fixture two leaves share', async () => {
         // Given - the compliant twin, the same entry read from two leaves
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c14-pool-fixture-shared-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c14-pool-fixture-shared-ok/')
             .exec('.');
 
         // Then - the clean summary on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('clean.txt');
+        expect(result.stdout).toMatchFile('./_expected/clean.txt');
     });
 
     test('--fix moves the fixture beside its leaf and rewrites the reference', async () => {
         // Given - the same misplaced pool entry, run through the fixer
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c14-pool-fixture-shared/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c14-pool-fixture-shared/')
             .exec('. --fix');
 
         // Then - the move is announced and the re-check passes in the same run
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('c14-fixed.txt');
+        expect(result.stdout).toMatchFile('./_expected/c14-fixed.txt');
     });
 });

@@ -22,6 +22,6 @@ type SpecFileAssertion =
 };
 ```
 
-Defined in: [src/model/literate/spec-document.ts:105](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L105)
+Defined in: [src/model/literate/spec-document.ts:106](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L106)
 
 One `files:` assertion, keyed by a workdir-relative path.

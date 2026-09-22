@@ -7,7 +7,7 @@ describe('lint — i4-no-module-doubles (CONVENTIONS I4)', () => {
     test('rejects vi.mock and data-asset imports under src/', async () => {
         // Given - a project violating I4
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/i4-no-module-doubles/')
+            .fixtureDirectory('../../_fixtures/lint-violations/i4-no-module-doubles/')
             .exec('.');
 
         // Then - oxlint reports the i4-no-module-doubles diagnostic
@@ -18,7 +18,7 @@ describe('lint — i4-no-module-doubles (CONVENTIONS I4)', () => {
     test('accepts code-only module tests', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/i4-no-module-doubles-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/i4-no-module-doubles-ok/')
             .exec('.');
 
         // Then - clean run, no i4-no-module-doubles diagnostic

@@ -1,4 +1,4 @@
-Response mismatch (wrong-body.http)
+Response mismatch (./_expected/wrong-body.http)
 
 - Expected
 + Received

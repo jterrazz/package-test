@@ -8,19 +8,23 @@ describe('lint — d4b spec key order (CONVENTIONS D4b)', () => {
     // Apply — the whole stderr is asserted, tokens covering the run cwd.
     test('rejects a document whose runs sit above its env', async () => {
         // Given - a document declaring runs: before env:
-        const result = await cli.fixture('$FIXTURES/lint-violations/d4b-spec-key-order/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/d4b-spec-key-order/')
+            .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch('d4b-spec-key-order.txt');
+        expect(result.stderr).toMatchFile('./_expected/d4b-spec-key-order.txt');
     });
 
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
-        const result = await cli.fixture('$FIXTURES/lint-violations/spec-document-ok/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/spec-document-ok/')
+            .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('clean.txt');
+        expect(result.stdout).toMatchFile('./_expected/clean.txt');
     });
 });

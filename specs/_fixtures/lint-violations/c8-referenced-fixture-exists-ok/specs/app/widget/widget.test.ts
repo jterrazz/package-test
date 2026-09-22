@@ -7,5 +7,5 @@ test('matches an existing snapshot', async () => {
     const result = await cli.exec('help');
 
     // Then - the referenced fixture exists under _expected/
-    expect(result.stdout).toMatch('help.txt');
+    expect(result.stdout).toMatchFile('./_expected/help.txt');
 });

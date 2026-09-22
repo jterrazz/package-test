@@ -13,78 +13,53 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-// C8 resolves references against the on-disk ground roots relative to the
-// Test file's directory, so the cases are anchored to REAL spec dirs whose
-// Fixtures ship in the repo — exercising every verb root, the $FIXTURES
-// Walk-up, trailing-slash normalisation and the looksLikePath skip.
+// C8 resolves a path from the test file's own directory, so the cases are
+// Anchored to REAL spec dirs whose ground ships in the repo.
 const SPECS = resolve(import.meta.dirname, '../../../../specs');
-const EXEC = `${SPECS}/cli/exec/exec.test.ts`; // _expected/help.txt, _expected/start.txt
-const SEEDING = `${SPECS}/cli/seeding/seeding.test.ts`; // _seeds/users.sql, _fixtures/note.txt
-const REQUESTS = `${SPECS}/api/requests/requests.test.ts`; // _requests/create-user.http
-const DIRECTORY = `${SPECS}/cli/directory/directory.test.ts`; // _expected/cli-scaffold/out/ (tree)
+const EXEC = `${SPECS}/cli/exec/exec.spec.ts`;
+const SEEDING = `${SPECS}/cli/seeding/seeding.spec.ts`;
+const REQUESTS = `${SPECS}/api/requests/requests.spec.ts`;
+const DIRECTORY = `${SPECS}/cli/directory/directory.spec.ts`;
 
 ruleTester.run('c8-referenced-fixture-exists', c8ReferencedFixtureExists as unknown as OxlintRule, {
     invalid: [
-        // ToMatch → _expected/ file that does not exist.
         {
-            code: 'expect(result.stdout).toMatch("missing.txt");',
+            code: 'expect(result.stdout).toMatchFile("./_expected/missing.txt");',
             errors: 1,
             filename: EXEC,
         },
-        // Seed → _seeds/ file that does not exist.
+        { code: 'cli.seedFile("./_seeds/ghost.sql");', errors: 1, filename: SEEDING },
+        { code: 'api.requestFile("./_requests/ghost.http");', errors: 1, filename: REQUESTS },
+        { code: 'cli.fixtureFile("./_fixtures/ghost.txt");', errors: 1, filename: SEEDING },
+        // The pool, reached by the path that climbs to it — and the entry is not there.
+        { code: 'cli.fixtureDirectory("../../_fixtures/ghost/");', errors: 1, filename: EXEC },
+        // The verb states the kind: a directory is not a file, a file is not a tree.
+        { code: 'cli.fixtureFile("../../_fixtures/cli-app");', errors: 1, filename: EXEC },
         {
-            code: 'cli.seed("ghost.sql");',
-            errors: 1,
-            filename: SEEDING,
-        },
-        // Request → _requests/ file that does not exist.
-        {
-            code: 'api.request("ghost.http");',
-            errors: 1,
-            filename: REQUESTS,
-        },
-        // Fixture → feature-local _fixtures/ file that does not exist.
-        {
-            code: 'cli.fixture("ghost.txt");',
-            errors: 1,
-            filename: SEEDING,
-        },
-        // Fixture → $FIXTURES pool entry that does not exist (walk-up to specs/_fixtures/).
-        {
-            code: 'cli.fixture("$FIXTURES/ghost/");',
+            code: 'await expect(result.filesystem).toMatchDirectory("./_expected/help.txt/");',
             errors: 1,
             filename: EXEC,
         },
     ],
     valid: [
-        // ToMatch → an existing _expected/ file.
-        { code: 'expect(result.stdout).toMatch("help.txt");', filename: EXEC },
-        // ToMatch → a trailing slash is normalised away before resolution.
-        { code: 'expect(result.stdout).toMatch("help.txt/");', filename: EXEC },
-        // ToMatch → an existing _expected/ directory-tree snapshot.
+        { code: 'expect(result.stdout).toMatchFile("./_expected/help.txt");', filename: EXEC },
         {
-            code: 'await expect(result.directory("out")).toMatch("cli-scaffold/out");',
+            code: 'await expect(result.directory("out")).toMatchDirectory("./_expected/cli-scaffold/out/");',
             filename: DIRECTORY,
         },
-        // Seed → an existing _seeds/ file.
-        { code: 'cli.seed("users.sql");', filename: SEEDING },
-        // Request → an existing _requests/ file.
-        { code: 'api.request("create-user.http");', filename: REQUESTS },
-        // Fixture → an existing feature-local _fixtures/ file.
-        { code: 'cli.fixture("note.txt");', filename: SEEDING },
-        // Fixture → an existing $FIXTURES pool entry (walk-up to specs/_fixtures/cli-app/).
-        { code: 'cli.fixture("$FIXTURES/cli-app/");', filename: EXEC },
-        // Seed → raw SQL (whitespace) is inline content, not a path — skipped.
-        { code: 'cli.seed("INSERT INTO users VALUES (1)");', filename: SEEDING },
-        // Fixture → an unknown $marker is B2's concern, not existence — skipped.
-        { code: 'cli.fixture("$UNKNOWN/x");', filename: EXEC },
+        { code: 'cli.seedFile("./_seeds/users.sql");', filename: SEEDING },
+        { code: 'api.requestFile("./_requests/create-user.http");', filename: REQUESTS },
+        { code: 'cli.fixtureFile("./_fixtures/note.txt");', filename: SEEDING },
+        { code: 'cli.fixtureDirectory("../../_fixtures/cli-app/");', filename: EXEC },
+        // Not a relative path — the type's refusal (B2), not existence.
+        { code: 'cli.seedFile("users.sql");', filename: SEEDING },
         // Non-literal argument is out of static reach — skipped.
-        { code: 'cli.seed(fileName);', filename: SEEDING },
-        // A method that is not a fixture-referencing verb is ignored.
-        { code: 'result.grep("help.txt");', filename: EXEC },
+        { code: 'cli.seedFile(fileName);', filename: SEEDING },
+        // A method that is not a file verb is ignored.
+        { code: 'result.grep("./help.txt");', filename: EXEC },
         // Outside specs/ the rule is inert.
         {
-            code: 'expect(x).toMatch("nope.txt");',
+            code: 'expect(x).toMatchFile("./nope.txt");',
             filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],

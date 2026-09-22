@@ -74,12 +74,12 @@ export const { cleanup, website } = await specification.website({
 
 ## Goldens
 
-| Name                | Written                                           | Does                                                                                                                                                                                                      |
-| ------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`         | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it                                                                                              |
-| `.aria.yaml tree`   | `expect(result.tree).toMatch('<name>.aria.yaml')` | The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not. Awaited on a component, where the capture crosses the browser seam; sync on a page |
-| `.json body`        | `await expect(subject).toMatch('created.json')`   | A JSON payload as a file, tokens resolved and keys compared                                                                                                                                               |
-| `.txt stream`       | `await expect(subject).toMatch('help.txt')`       | A text stream as a file — stdout, stderr, a rendered body                                                                                                                                                 |
+| Name              | Written                                                          | Does                                                                                                                                                                                                      |
+| ----------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toMatchFile()`   | `expect(subject).toMatchFile('./expected/<name>.<ext>')`         | Compares the subject to the golden file its path names from the spec file, tokens resolved; `TEST_UPDATE=1` writes it                                                                                     |
+| `.aria.yaml tree` | `expect(result.tree).toMatchFile('./expected/<name>.aria.yaml')` | The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not. Awaited on a component, where the capture crosses the browser seam; sync on a page |
+| `.json body`      | `expect(subject).toMatchFile('./expected/created.json')`         | A JSON payload as a file, tokens resolved and keys compared                                                                                                                                               |
+| `.txt stream`     | `expect(subject).toMatchFile('./expected/help.txt')`             | A text stream as a file — stdout, stderr, a rendered body                                                                                                                                                 |
 
 ## The vocabulary
 

@@ -4,7 +4,7 @@ import { cli } from '../setup.specification.js';
 
 test('renders the widget', async () => {
     // Given - the widget's own ground, beside it
-    const result = await cli.fixture('widget-stub/').exec('widget');
+    const result = await cli.fixtureDirectory('./_fixtures/widget-stub/').exec('widget');
 
     // Then - it ran
     expect(result.exitCode).toBe(0);

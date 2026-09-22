@@ -36,11 +36,12 @@ export const { cli, cleanup } = await specification.cli('./bin/shoply.sh', {
 
 ## Setups (chainable)
 
-| Name         | Written                 | Does                                                                                                                     |
-| ------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `.seed()`    | `.seed('users.sql')`    | Loads a `_seeds/*.sql` file into the named service before the action                                                     |
-| `.fixture()` | `.fixture('a-project')` | Copies a fixture tree into the run's working directory                                                                   |
-| `.env()`     | `.env({ TZ: 'UTC' })`   | The child process environment for this chain — `$WORKDIR` expands, `null` unsets; wins over the constructor's `defaults` |
+| Name                  | Written                                      | Does                                                                                                                     |
+| --------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `.seedFile()`         | `.seedFile('./seeds/users.sql')`             | Loads a `.sql` file, named from the spec file, into the named service before the action                                  |
+| `.fixtureFile()`      | `.fixtureFile('./fixtures/config.toml')`     | Copies one file, named from the spec file, into the run's working directory                                              |
+| `.fixtureDirectory()` | `.fixtureDirectory('./fixtures/a-project/')` | Spreads a directory's contents, named from the spec file, into the run's working directory                               |
+| `.env()`              | `.env({ TZ: 'UTC' })`                        | The child process environment for this chain — `$WORKDIR` expands, `null` unsets; wins over the constructor's `defaults` |
 
 ## Terminal actions (exactly one)
 
@@ -66,13 +67,14 @@ export const { cli, cleanup } = await specification.cli('./bin/shoply.sh', {
 
 ## Goldens
 
-| Name                | Written                                                        | Does                                                                                                         |
-| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
-| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
-| `.json body`        | `await expect(subject).toMatch('created.json')`                | A JSON payload as a file, tokens resolved and keys compared                                                  |
-| `.txt stream`       | `await expect(subject).toMatch('help.txt')`                    | A text stream as a file — stdout, stderr, a rendered body                                                    |
-| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                  |
+| Name                 | Written                                                                  | Does                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `toMatchFile()`      | `expect(subject).toMatchFile('./expected/<name>.<ext>')`                 | Compares the subject to the golden file its path names from the spec file, tokens resolved; `TEST_UPDATE=1` writes it      |
+| `toMatchDirectory()` | `await expect(result.filesystem).toMatchDirectory('./expected/<name>/')` | Compares a directory, or the whole working directory, to a golden tree named from the spec file; `TEST_UPDATE=1` writes it |
+| `toMatchRows()`      | `expect(result.table('users')).toMatchRows({ columns, rows })`           | Compares a table to a column list and one array of cells per row                                                           |
+| `.json body`         | `expect(subject).toMatchFile('./expected/created.json')`                 | A JSON payload as a file, tokens resolved and keys compared                                                                |
+| `.txt stream`        | `expect(subject).toMatchFile('./expected/help.txt')`                     | A text stream as a file — stdout, stderr, a rendered body                                                                  |
+| `{ frozen }`         | `toMatchFile('./expected/refused.txt', { frozen: true })`                | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                                |
 
 ## Read next
 

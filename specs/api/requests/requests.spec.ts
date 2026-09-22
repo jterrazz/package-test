@@ -7,23 +7,25 @@ import { api } from '../api.specification.js';
 describe('requests', () => {
     test('sends GET request', async () => {
         // Given - seeded data
-        const result = await api.seed('two-users.sql', { database: 'db' }).get('/users');
+        const result = await api
+            .seedFile('./_seeds/two-users.sql', { database: 'db' })
+            .get('/users');
 
         // Then - the full response for the two seeded users
-        expect(result.response).toMatch('users-list.http');
+        expect(result.response).toMatchFile('./_expected/users-list.http');
     });
 
     test('sends the complete request from a .http file', async () => {
         // Given - method, path, headers, and body loaded from _requests/create-user.http
-        const result = await api.request('create-user.http');
+        const result = await api.requestFile('./_requests/create-user.http');
 
         // Then - the full created-user response
-        expect(result.response).toMatch('user-created.http');
+        expect(result.response).toMatchFile('./_expected/user-created.http');
     });
 
     test('request that writes to multiple databases', async () => {
         // Given - create a user (app writes to both databases)
-        const result = await api.request('create-user.http');
+        const result = await api.requestFile('./_requests/create-user.http');
 
         // Then - user in default db and event in analytics db
         expect(result.status).toBe(201);
@@ -40,7 +42,9 @@ describe('requests', () => {
     // oxlint-disable-next-line jterrazz/d12w-response-body-probe -- request-building self-test: the subject is the header MERGE delta (x-file preserved, x-chain overridden, body forwarded), a single-field-delta scalpel — a full-response golden would assert the whole echo envelope and obscure which fields the merge test targets.
     test('merges .headers() on top of the .http file headers', async () => {
         // Given - the file sets x-file and x-chain; the chain overrides x-chain
-        const result = await api.headers({ 'x-chain': 'from-chain' }).request('echo.http');
+        const result = await api
+            .headers({ 'x-chain': 'from-chain' })
+            .requestFile('./_requests/echo.http');
 
         // Then - file header preserved, chain header wins, body forwarded
         expect(result.status).toBe(200);
@@ -58,7 +62,7 @@ describe('requests', () => {
         const result = await api
             .headers({ 'x-chain': 'first' })
             .headers({ 'x-chain': 'second', 'x-file': 'chain-wins' })
-            .request('echo.http');
+            .requestFile('./_requests/echo.http');
 
         // Then - the last call wins over both the earlier call and the file
         expect(result.status).toBe(200);
@@ -69,7 +73,7 @@ describe('requests', () => {
 
     test('passes a non-JSON request body through verbatim', async () => {
         // Given - a .http file whose body is whitespace-significant plain text
-        const result = await api.request('echo-raw.http');
+        const result = await api.requestFile('./_requests/echo-raw.http');
 
         // Then - the app received the exact raw text (double space + indentation intact)
         expect(result.status).toBe(200);
@@ -93,7 +97,7 @@ describe('requests', () => {
     test('sends PUT with an inline body', async () => {
         // Given - a user seeded at a known id (reset truncates without restarting the identity sequence, so the id is pinned in the seed, not assumed)
         const result = await api
-            .seed('one-user-at-id.sql', { database: 'db' })
+            .seedFile('./_seeds/one-user-at-id.sql', { database: 'db' })
             .put('/users/1000', { email: 'updated@test.com', name: 'Alice Updated' });
 
         // Then - 200 OK and the row now carries the updated fields
@@ -109,7 +113,7 @@ describe('requests', () => {
         const result = await api.delete('/users/999');
 
         // Then - the full not-found response
-        expect(result.response).toMatch('user-not-found.http');
+        expect(result.response).toMatchFile('./_expected/user-not-found.http');
     });
 });
 
@@ -120,6 +124,6 @@ describe('request errors', () => {
         // Given - reference to a nonexistent .http file
         // Then - the chain rejects with ENOENT
         // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing file IS the behaviour under test
-        await expect(api.request('nonexistent.http')).rejects.toThrow('ENOENT');
+        await expect(api.requestFile('./_requests/nonexistent.http')).rejects.toThrow('ENOENT');
     });
 });

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { discoverRoot, findRoot, resolveCommand, resolveRoot } from './resolve.js';
+import { discoverRoot, findRoot, resolveCommand, resolveRoot, resolveSpecPath } from './resolve.js';
 
 /** A virtual filesystem: the probe the caller injects (fs, or a lint cache). */
 const probe =
@@ -151,6 +151,29 @@ describe('command resolution', () => {
         // Then - the bare name is returned for the shell to resolve
         expect(resolveCommand('definitely-not-installed-xyz', base)).toBe(
             'definitely-not-installed-xyz',
+        );
+    });
+});
+
+describe('spec path resolution', () => {
+    test('a relative path resolves from the spec directory, climbing included', () => {
+        // Given - a spec two levels under specs/, naming its own ground and the pool
+        const specDir = '/repo/specs/cli/build';
+
+        // Then - both resolve from the spec, never from the working directory
+        expect(resolveSpecPath('seedFile', './seeds/users.sql', specDir)).toBe(
+            '/repo/specs/cli/build/seeds/users.sql',
+        );
+        expect(resolveSpecPath('fixtureDirectory', '../../fixtures/shop/', specDir)).toBe(
+            '/repo/specs/fixtures/shop',
+        );
+    });
+
+    test('a bare name is refused before anything is read', () => {
+        // Given - the 16 form, a name resolved against a hidden folder
+        // Then - refused with the verb
+        expect(() => resolveSpecPath('requestFile', 'create.http', '/repo/specs')).toThrow(
+            /^requestFile\("create\.http"\): a file is named by a path relative to the spec file/u,
         );
     });
 });

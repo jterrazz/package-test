@@ -7,7 +7,7 @@ describe('lint — c13-underscored-ground (CONVENTIONS C13)', () => {
     test('rejects a pre-14 ground directory beside a spec', async () => {
         // Given - a project whose goldens still sit in expected/, not _expected/
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c13-underscored-ground/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c13-underscored-ground/')
             .exec('.');
 
         // Then - oxlint reports the c13-underscored-ground diagnostic
@@ -18,7 +18,7 @@ describe('lint — c13-underscored-ground (CONVENTIONS C13)', () => {
     test('accepts ground named with the leading underscore', async () => {
         // Given - the compliant twin, its goldens under _expected/
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c13-underscored-ground-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c13-underscored-ground-ok/')
             .exec('.');
 
         // Then - clean run, no c13-underscored-ground diagnostic

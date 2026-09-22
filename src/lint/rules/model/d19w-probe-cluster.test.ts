@@ -45,7 +45,7 @@ ruleTester().run('d19w-probe-cluster', asOxlintRule(d19wProbeCluster), {
         {
             code: `test('builds', async () => {
                 const result = await cli.exec('build');
-                expect(result.stdout).toMatch('build.txt');
+                expect(result.stdout).toMatchFile('./_expected/build.txt');
                 expect(result.stdout).toContain('compiled');
                 expect(result.stdout).toContain('2 files');
                 expect(result.stdout).toContain('done');

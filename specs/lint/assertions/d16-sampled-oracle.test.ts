@@ -6,7 +6,9 @@ describe('lint — d16-sampled-oracle (CONVENTIONS D16)', () => {
     // Scalpel (D11): targeted rule-id presence/absence probe — a full-output snapshot would couple this rule test to the tool's diagnostic formatting.
     test('rejects an oracle that samples the clock', async () => {
         // Given - a project violating D16
-        const result = await cli.fixture('$FIXTURES/lint-violations/d16-sampled-oracle/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/d16-sampled-oracle/')
+            .exec('.');
 
         // Then - the diagnostic names the rule
         expect(result.exitCode).toBe(1);
@@ -16,7 +18,7 @@ describe('lint — d16-sampled-oracle (CONVENTIONS D16)', () => {
     test('accepts an oracle the test states', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/d16-sampled-oracle-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/d16-sampled-oracle-ok/')
             .exec('.');
 
         // Then - clean exit, no D16 diagnostic

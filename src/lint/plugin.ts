@@ -23,7 +23,6 @@ import { a2KnownConstructors } from './rules/model/a2-known-constructors.js';
 import { a3NoDestructureAlias } from './rules/model/a3-no-destructure-alias.js';
 import { a4CleanupAfterall } from './rules/model/a4-cleanup-afterall.js';
 import { a9wRedundantRoot } from './rules/model/a9w-redundant-root.js';
-import { b2KnownFixtureMarker } from './rules/model/b2-known-fixture-marker.js';
 import { b4GivenThen } from './rules/model/b4-given-then.js';
 import { b10WhenBetweenMarkers } from './rules/model/b10-when-between-markers.js';
 import { b11MarkerOneLine } from './rules/model/b11-marker-one-line.js';
@@ -118,7 +117,6 @@ const plugin: LintPlugin = {
         'a9w-redundant-root': a9wRedundantRoot,
         'b10-when-between-markers': b10WhenBetweenMarkers,
         'b11-marker-one-line': b11MarkerOneLine,
-        'b2-known-fixture-marker': b2KnownFixtureMarker,
         'b4-given-then': b4GivenThen,
         'b6w-redundant-env-url': b6wRedundantEnvUrl,
         'b8-kebab-trigger': b8KebabTrigger,
@@ -230,21 +228,22 @@ const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/
  *
  * A snapshot is written by the run that was supposed to be judged by it: the
  * file lands beside the test, nobody reads the diff, and a wrong answer becomes
- * the expectation the moment someone re-records. `toMatch('<name>.<ext>')`
- * under `_expected/` is the same convenience with the file where a reviewer
+ * the expectation the moment someone re-records. `toMatchFile('./expected/<name>.<ext>')`
+ * is the same convenience with the file where a reviewer
  * looks, tokens for what legitimately moves, and `TEST_UPDATE=1` as the one
  * door that rewrites it.
  */
 const SNAPSHOT_MATCHERS: Record<string, string> = {
     toMatchAriaSnapshot:
-        "The ARIA tree is a golden: `expect(result.tree).toMatch('<case>.aria.yaml')`.",
-    toMatchFileSnapshot: "Name the file yourself: `expect(subject).toMatch('<case>.<ext>')`.",
+        "The ARIA tree is a golden: `expect(result.tree).toMatchFile('./expected/<case>.aria.yaml')`.",
+    toMatchFileSnapshot:
+        "Name the file yourself: `expect(subject).toMatchFile('./expected/<case>.<ext>')`.",
     toMatchInlineSnapshot:
-        "An inline snapshot is the run judging itself: `expect(subject).toMatch('<case>.<ext>')`, or compare to a literal with `toStrictEqual`.",
+        "An inline snapshot is the run judging itself: `expect(subject).toMatchFile('./expected/<case>.<ext>')`, or compare to a literal with `toStrictEqual`.",
     toMatchScreenshot:
         'A screenshot is not a golden this dialect can read: assert the ARIA tree, the content, or the markup.',
     toMatchSnapshot:
-        "The golden is `expect(subject).toMatch('<name>.<ext>')` under `_expected/`; under `src/` compare to a literal with `toStrictEqual`.",
+        "The golden is `expect(subject).toMatchFile('./expected/<name>.<ext>')`, a path from the spec file; under `src/` compare to a literal with `toStrictEqual`.",
     toThrowErrorMatchingInlineSnapshot:
         "State the message: `expect(fn).toThrow('<what the subject says>')`.",
     toThrowErrorMatchingSnapshot:

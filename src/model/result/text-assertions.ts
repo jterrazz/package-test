@@ -8,9 +8,10 @@ import type { TextAccessor } from './text.js';
  *
  * A golden is read from disk under node and through a server command from
  * inside a page — two transports, one comparison. Keeping the judgement here,
- * pure, is what makes `expect(result.stdout).toMatch('help.txt')` and
- * `expect(result.tree).toMatch('table.aria.yaml')` the same assertion with the
- * same diff, instead of two implementations that drift a token at a time.
+ * pure, is what makes `expect(result.stdout).toMatchFile('./expected/help.txt')`
+ * and `expect(result.tree).toMatchFile('./expected/table.aria.yaml')` the same
+ * assertion with the same diff, instead of two implementations that drift a
+ * token at a time.
  */
 
 /** A matcher's verdict: the boolean vitest reads, and the message it prints. */
@@ -19,11 +20,11 @@ export type TextComparison = {
     pass: boolean;
 };
 
-/** The fixture name carries its extension — the name IS the file. */
+/** The golden's path carries its extension — the name IS the file. */
 export function requireExtension(name: string, subject: string): void {
     if (!/\.[A-Za-z0-9]+$/u.test(name)) {
         throw new Error(
-            `toMatch("${name}"): the extension is part of the name and is required for ${subject} subjects (e.g. "help.txt").`,
+            `toMatchFile("${name}"): the extension is part of the path and is required for ${subject} subjects (e.g. "./expected/help.txt").`,
         );
     }
 }
@@ -43,7 +44,7 @@ export function compareStreamText(
     const actual = accessor.comparableText;
     if (textEquals(expected, actual, accessor.captures)) {
         return {
-            message: () => `expected ${accessor.streamName} not to match _expected/${name}`,
+            message: () => `expected ${accessor.streamName} not to match ${name}`,
             pass: true,
         };
     }
@@ -103,7 +104,8 @@ export function textContains(accessor: TextAccessor, expected: string): TextComp
 export function nativeMatch(received: unknown, expected: unknown): TextComparison {
     if (typeof received !== 'string') {
         throw new TypeError(
-            'toMatch: unsupported subject — expected a stream, json, response, filesystem, or directory accessor, or a string.',
+            'toMatch: unsupported subject — it takes a string or a stream accessor, and its argument is a value. ' +
+                "A golden file is toMatchFile('./expected/<name>.<ext>'), a golden tree toMatchDirectory('./expected/<name>/').",
         );
     }
     const pass =

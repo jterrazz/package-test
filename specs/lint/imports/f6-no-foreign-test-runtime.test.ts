@@ -7,7 +7,7 @@ describe('lint — f6-no-foreign-test-runtime (CONVENTIONS F6)', () => {
     test('rejects a second renderer imported by a test', async () => {
         // Given - a test file reaching for Testing Library
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/f6-no-foreign-test-runtime/')
+            .fixtureDirectory('../../_fixtures/lint-violations/f6-no-foreign-test-runtime/')
             .exec('.');
 
         // Then - oxlint reports the f6-no-foreign-test-runtime diagnostic
@@ -18,7 +18,7 @@ describe('lint — f6-no-foreign-test-runtime (CONVENTIONS F6)', () => {
     test("accepts the framework's own chain", async () => {
         // Given - the compliant twin: `component.render()` and the vocabulary
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/f6-no-foreign-test-runtime-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/f6-no-foreign-test-runtime-ok/')
             .exec('.');
 
         // Then - clean run, no f6-no-foreign-test-runtime diagnostic

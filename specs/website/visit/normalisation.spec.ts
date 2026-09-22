@@ -7,7 +7,7 @@ test('drops what the framework wrote into the head before the comparison', async
     const result = await website.visit('/framework');
 
     // Then - the golden is the head the SITE declares: the runner's transform ran before the comparison
-    expect(result.head).toMatch('framework.head.json');
+    expect(result.head).toMatchFile('./_expected/framework.head.json');
 });
 
 test('leaves the raw reading alone', async () => {

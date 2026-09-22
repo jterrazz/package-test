@@ -65,7 +65,7 @@ export type CapabilityGroup =
  *
  * `member` is the key of the facet interface, the result class or the options
  * type this row answers for, where the row's `name` spells it differently
- * (`.seed()` → `seed`). It is what the sibling test pins against `keyof`.
+ * (`.seedFile()` → `seedFile`). It is what the sibling test pins against `keyof`.
  *
  * `exempt` is what a declared-but-empty cell is allowed to say, per column. It
  * exists for the shape M1 already sanctions — a surface the package publishes
@@ -80,7 +80,7 @@ export type Capability = {
     group: CapabilityGroup;
     /** The interface key this row answers for, when `name` is not it verbatim. */
     member?: string;
-    /** How the capability is written in a spec, e.g. `.seed()`. */
+    /** How the capability is written in a spec, e.g. `.seedFile()`. */
     name: string;
     /** The literal a test exercising it carries. */
     probe: string;
@@ -240,11 +240,17 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'jobs', 'cli', 'integration'],
         group: 'Setup',
-        name: '.seed()',
-        probe: '.seed(',
+        name: '.seedFile()',
+        probe: '.seedFile(',
     },
     { columns: ['api', 'website'], group: 'Setup', name: '.headers()', probe: '.headers(' },
-    { columns: ['cli'], group: 'Setup', name: '.fixture()', probe: '.fixture(' },
+    { columns: ['cli'], group: 'Setup', name: '.fixtureFile()', probe: '.fixtureFile(' },
+    {
+        columns: ['cli'],
+        group: 'Setup',
+        name: '.fixtureDirectory()',
+        probe: '.fixtureDirectory(',
+    },
     { columns: ['cli'], group: 'Setup', name: '.env()', probe: '.env(' },
     { columns: ['component'], group: 'Setup', name: '.wrap()', probe: '.wrap(' },
     { columns: ['component'], group: 'Setup', name: '.viewport()', probe: '.viewport(' },
@@ -254,7 +260,12 @@ export const CAPABILITIES: Capability[] = [
     { columns: ['api'], group: 'Terminal action', name: '.post()', probe: ".post('" },
     { columns: ['api'], group: 'Terminal action', name: '.put()', probe: ".put('" },
     { columns: ['api'], group: 'Terminal action', name: '.delete()', probe: ".delete('" },
-    { columns: ['api'], group: 'Terminal action', name: '.request()', probe: ".request('" },
+    {
+        columns: ['api'],
+        group: 'Terminal action',
+        name: '.requestFile()',
+        probe: ".requestFile('",
+    },
     { columns: ['jobs'], group: 'Terminal action', name: '.trigger()', probe: ".trigger('" },
     { columns: ['integration'], group: 'Terminal action', name: '.call()', probe: '.call(' },
     { columns: ['cli'], group: 'Terminal action', name: '.exec()', probe: '.exec(' },
@@ -569,8 +580,15 @@ export const CAPABILITIES: Capability[] = [
             jobs: "a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory",
         },
         group: 'Golden',
-        name: "toMatch('<name>')",
-        probe: ".toMatch('",
+        name: 'toMatchFile()',
+        probe: '.toMatchFile(',
+    },
+    {
+        columns: ['api', 'cli', 'integration', 'module'],
+        exempt: { api: OWED, integration: OWED },
+        group: 'Golden',
+        name: 'toMatchDirectory()',
+        probe: '.toMatchDirectory(',
     },
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'component', 'module'],

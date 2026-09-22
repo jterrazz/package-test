@@ -10,7 +10,7 @@ describe('responses', () => {
         const result = await api.get('/session');
 
         // Then - the fixture matches via {{uuid#session}} / {{iso8601}} placeholders, with the #session ref asserting both uuid occurrences are equal. the matcher also asserts the status line and the content-type header (via a {{string}} placeholder) as a subset — headers absent from the fixture are unconstrained.
-        expect(result.response).toMatch('session.http');
+        expect(result.response).toMatchFile('./_expected/session.http');
     });
 
     test('fails when a ref captures two different values', async () => {
@@ -19,7 +19,9 @@ describe('responses', () => {
 
         // Then - the second occurrence of {{...#val}} must equal the capture, and does not frozen - a deliberately-wrong fixture asserting the mismatch; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatch('session-wrong-ref.http', { frozen: true });
+            expect(result.response).toMatchFile('./_expected/session-wrong-ref.http', {
+                frozen: true,
+            });
         }).toThrow(/Response mismatch/u);
     });
 });
@@ -31,9 +33,11 @@ describe('response mismatch messages', () => {
 
         // Then - the failure names the fixture and both status codes frozen - a deliberately-wrong fixture asserting the status mismatch; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatch('session-wrong-status.http', { frozen: true });
+            expect(result.response).toMatchFile('./_expected/session-wrong-status.http', {
+                frozen: true,
+            });
         }).toThrow(
-            /Response status mismatch \(session-wrong-status\.http\)[\s\S]*expected: 201[\s\S]*received: 200/u,
+            /Response status mismatch \(\.\/_expected\/session-wrong-status\.http\)[\s\S]*expected: 201[\s\S]*received: 200/u,
         );
     });
 
@@ -43,9 +47,11 @@ describe('response mismatch messages', () => {
 
         // Then - the failure names the header and shows expected vs received frozen - a deliberately-wrong fixture asserting the header mismatch; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatch('session-wrong-header.http', { frozen: true });
+            expect(result.response).toMatchFile('./_expected/session-wrong-header.http', {
+                frozen: true,
+            });
         }).toThrow(
-            /Response header mismatch \(session-wrong-header\.http\)[\s\S]*header: content-type[\s\S]*expected: text\/html[\s\S]*received: application\/json/u,
+            /Response header mismatch \(\.\/_expected\/session-wrong-header\.http\)[\s\S]*header: content-type[\s\S]*expected: text\/html[\s\S]*received: application\/json/u,
         );
     });
 
@@ -58,9 +64,11 @@ describe('response mismatch messages', () => {
 
         // Then - the failure shows the header as absent frozen - a deliberately-wrong fixture asserting the absent-header case; never rewritten under TEST_UPDATE
         expect(() => {
-            expect(result.response).toMatch('session-missing-header.http', { frozen: true });
+            expect(result.response).toMatchFile('./_expected/session-missing-header.http', {
+                frozen: true,
+            });
         }).toThrow(
-            /Response header mismatch \(session-missing-header\.http\)[\s\S]*header: x-request-id[\s\S]*received: \(absent\)/u,
+            /Response header mismatch \(\.\/_expected\/session-missing-header\.http\)[\s\S]*header: x-request-id[\s\S]*received: \(absent\)/u,
         );
     });
 });

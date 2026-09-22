@@ -13,7 +13,7 @@ import { cli } from '../cli.specification.js';
 describe('command — exec', () => {
     test('runs a command successfully', async () => {
         // Given - the cli-app fixture project
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('build');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('build');
 
         // Then - clean exit
         expect(result.exitCode).toBe(0);
@@ -21,16 +21,16 @@ describe('command — exec', () => {
 
     test('surfaces the whole usage banner on stdout', async () => {
         // Given - the help command
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('help');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('help');
 
         // Then - the whole usage banner is surfaced on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('help.txt');
+        expect(result.stdout).toMatchFile('./_expected/help.txt');
     });
 
     test('captures non-zero exit code', async () => {
         // Given - a command that exits 2
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('fail');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('fail');
 
         // Then - the exit code is preserved
         expect(result.exitCode).toBe(2);
@@ -38,7 +38,7 @@ describe('command — exec', () => {
 
     test('captures unknown command failure', async () => {
         // Given - a command the fixture does not know
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('nonexistent');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('nonexistent');
 
         // Then - non-zero exit with a useful stderr
         expect(result.exitCode).toBe(1);
@@ -47,7 +47,9 @@ describe('command — exec', () => {
 
     test('captures stderr on exit zero (Unix-style status banners)', async () => {
         // Given - a command that prints to stderr and exits 0, mirroring the unix convention where status banners go to stderr while data goes to stdout. spwn, gh, git, npm and many others follow this pattern.
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('status-on-stderr');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .exec('status-on-stderr');
 
         // Then - exit code is zero AND stderr is preserved (regression guard: an earlier execSync-based adapter discarded stderr on exit zero, leaving CLI consumers unable to snapshot status output).
         expect(result.exitCode).toBe(0);
@@ -76,16 +78,20 @@ describe('command — exec', () => {
 
     test('multi-exec — runs commands sequentially in same directory', async () => {
         // Given - build then start (start needs dist/ from build)
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start']);
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .exec(['build', 'start']);
 
         // Then - the last command's whole output is surfaced
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('start.txt');
+        expect(result.stdout).toMatchFile('./_expected/start.txt');
     });
 
     test('multi-exec — stops on first failure', async () => {
         // Given - fail then build (fail exits non-zero, build should not run)
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec(['fail', 'build']);
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .exec(['fail', 'build']);
 
         // Then - stopped at fail
         expect(result.exitCode).toBe(2);
@@ -94,7 +100,9 @@ describe('command — exec', () => {
 
     test('multi-exec — preserves files between commands', async () => {
         // Given - build creates dist/, then we check it still exists
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec(['build', 'check']);
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .exec(['build', 'check']);
 
         // Then - the sequence shares one working directory
         expect(result.exitCode).toBe(0);
@@ -104,7 +112,7 @@ describe('command — exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — resolves when the waitFor pattern is matched in stdout', async () => {
         // Given - a watch-mode process that prints then keeps running
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .exec('dev', { timeout: 10_000, waitFor: 'Hello from CLI app' });
 
         // Then - resolved at the pattern with the output captured so far
@@ -116,7 +124,7 @@ describe('command — exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — resolves when the waitFor pattern is matched in stderr', async () => {
         // Given - a process whose readiness banner goes to stderr
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .exec('dev-stderr', { timeout: 10_000, waitFor: 'Listening on stderr' });
 
         // Then - resolved at the stderr pattern with the output captured so far
@@ -127,7 +135,7 @@ describe('command — exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — waitFor without timeout defaults to 10s', async () => {
         // Given - only waitFor is set
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .exec('dev', { waitFor: 'Hello from CLI app' });
 
         // Then - the pattern resolved well before the default timeout
@@ -137,7 +145,7 @@ describe('command — exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — returns non-zero when the process exits without matching', async () => {
         // Given - help exits immediately without matching pattern
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .exec('help', { timeout: 5000, waitFor: 'NONEXISTENT_PATTERN' });
 
         // Then - exit code 1 (pattern not matched before process exited)
@@ -147,7 +155,7 @@ describe('command — exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — kills a long-running process at the timeout', async () => {
         // Given - dev runs forever but the pattern never appears
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .exec('dev', { timeout: 2000, waitFor: 'NONEXISTENT_PATTERN' });
 
         // Then - exit code 124 (timeout)
@@ -157,7 +165,7 @@ describe('command — exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — terminates the whole process group, not just the direct child', async () => {
         // Given - a command that spawns a looping background grandchild (like a tsdown --watch under a dev command) and records its pid
         const result = await cli
-            .fixture('$FIXTURES/cli-app/')
+            .fixtureDirectory('../../_fixtures/cli-app/')
             .exec('spawn-daemon', { timeout: 10_000, waitFor: 'daemon ready' });
         expect(result.exitCode).toBe(0);
         const daemonPid = Number(result.file('daemon.pid').content.trim());
@@ -183,7 +191,9 @@ describe('command — exec', () => {
         // Given - an array of commands plus long-running options
         // Then - the combination is refused: `.exec()` answers a promise, so the refusal arrives as a rejection
         await expect(
-            cli.fixture('$FIXTURES/cli-app/').exec(['build', 'start'], { waitFor: 'x' }),
+            cli
+                .fixtureDirectory('../../_fixtures/cli-app/')
+                .exec(['build', 'start'], { waitFor: 'x' }),
         ).rejects.toThrow('not supported with a command sequence');
     });
 });

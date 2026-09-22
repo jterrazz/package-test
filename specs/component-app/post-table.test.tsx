@@ -32,7 +32,7 @@ test('says how much of the collection the table is showing', async () => {
     });
 
     // Then - the table is qualified by what it is not showing, and says nothing else
-    await expect(result.tree).toMatch('posts-table.aria.yaml');
+    await expect(result.tree).toMatchFile('./_expected/posts-table.aria.yaml');
     await expect(result.console).toBeEmpty();
 });
 
@@ -103,10 +103,14 @@ test('never rewrites a frozen golden, and throws its diff instead', async () => 
 
     // Then - it threw its diff, and throws the SAME diff on a second read: a rewrite would have made the second comparison pass, which is exactly what `{ frozen: true }` forbids under TEST_UPDATE=1 (docs/08 § update mode)
     const first = await refusalOf(
-        expect(result.tree).toMatch('wrong-posts-table.aria.yaml', { frozen: true }),
+        expect(result.tree).toMatchFile('./_expected/wrong-posts-table.aria.yaml', {
+            frozen: true,
+        }),
     );
     const second = await refusalOf(
-        expect(result.tree).toMatch('wrong-posts-table.aria.yaml', { frozen: true }),
+        expect(result.tree).toMatchFile('./_expected/wrong-posts-table.aria.yaml', {
+            frozen: true,
+        }),
     );
     expect(first).toContain('A third post');
     expect(second).toBe(first);

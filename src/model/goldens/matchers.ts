@@ -15,8 +15,9 @@ import { dirname, resolve } from 'node:path';
 
 import { missingHint, shouldUpdateSnapshots } from '../../runner/update.js';
 import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
-import { GROUND_EXPECTED } from '../chain/ground.js';
 import { formatDirectoryDiff, formatResponseDiff, formatTableDiff } from '../chain/reporter.js';
+import { resolveSpecPath } from '../chain/resolve.js';
+import { requireRelativePath } from '../chain/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http-files/http-file.js';
 import type { ParsedResponseFile } from '../http-files/http-file.js';
 import { CaptureScope } from '../matching/match.js';
@@ -54,11 +55,11 @@ function formatJson(value: unknown): string {
     return `${JSON.stringify(value, null, 4)}\n`;
 }
 
-// ── toMatch — sync subjects ──
+// ── toMatchFile — sync subjects ──
 
 function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'stream');
-    const filePath = resolve(accessor.testDir, GROUND_EXPECTED, name);
+    const filePath = resolveSpecPath('toMatchFile', name, accessor.testDir);
     const actual = accessor.comparableText;
 
     if (shouldUpdateSnapshots() && !frozen) {
@@ -69,7 +70,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
         const merged = mergeTextPreservingPlaceholders(previous, actual, accessor.captures);
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, merged);
-        return PASS(`updated ${GROUND_EXPECTED}/${name}`);
+        return PASS(`updated ${name}`);
     }
 
     if (!existsSync(filePath)) {
@@ -83,7 +84,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
 
 function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'json');
-    const filePath = resolve(accessor.testDir, GROUND_EXPECTED, name);
+    const filePath = resolveSpecPath('toMatchFile', name, accessor.testDir);
     const actual = accessor.value;
 
     if (shouldUpdateSnapshots() && !frozen) {
@@ -99,7 +100,7 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
             : mergePreservingPlaceholders(null, actual, accessor.captures.workdir);
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, formatJson(merged));
-        return PASS(`updated ${GROUND_EXPECTED}/${name}`);
+        return PASS(`updated ${name}`);
     }
 
     if (!existsSync(filePath)) {
@@ -110,7 +111,7 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
 
     const expected = JSON.parse(readFileSync(filePath, 'utf8'));
     if (structuralEquals(expected, actual, accessor.captures)) {
-        return PASS(`expected JSON not to match ${GROUND_EXPECTED}/${name}`);
+        return PASS(`expected JSON not to match ${name}`);
     }
     return FAIL(formatResponseDiff(name, renderExpected(expected), actual));
 }
@@ -124,7 +125,7 @@ type ActualResponse = {
 };
 
 /**
- * Build the updated `_expected/*.http` fixture content from the previous
+ * Build the updated `.http` golden content from the previous
  * fixture and the actual response (CONVENTIONS D5). Headers are the
  * INTERSECTION with the actual response: placeholders still matching are
  * preserved, stale values are replaced, headers absent from the actual
@@ -168,7 +169,7 @@ export function buildUpdatedResponse(
 }
 
 /**
- * Compare a parsed `_expected/*.http` fixture against an actual response.
+ * Compare a parsed `.http` golden against an actual response.
  * Returns the failure message, or null when everything matches.
  *
  * @internal Exported for unit tests.
@@ -218,17 +219,17 @@ function matchResponseFile(
     frozen: boolean,
 ): MatcherResult {
     requireExtension(name, 'response');
-    const filePath = resolve(accessor.testDir, GROUND_EXPECTED, name);
+    const filePath = resolveSpecPath('toMatchFile', name, accessor.testDir);
 
     if (shouldUpdateSnapshots() && !frozen) {
         const previous = existsSync(filePath)
-            ? parseResponseFile(readFileSync(filePath, 'utf8'), `${GROUND_EXPECTED}/${name}`)
+            ? parseResponseFile(readFileSync(filePath, 'utf8'), name)
             : null;
 
         const updated = buildUpdatedResponse(previous, accessor, accessor.captures.workdir);
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, serializeResponseFile(updated));
-        return PASS(`updated ${GROUND_EXPECTED}/${name}`);
+        return PASS(`updated ${name}`);
     }
 
     if (!existsSync(filePath)) {
@@ -237,17 +238,12 @@ function matchResponseFile(
         );
     }
 
-    const expected = parseResponseFile(
-        readFileSync(filePath, 'utf8'),
-        `${GROUND_EXPECTED}/${name}`,
-    );
+    const expected = parseResponseFile(readFileSync(filePath, 'utf8'), name);
     const failure = compareResponse(name, expected, accessor, accessor.captures);
-    return failure === null
-        ? PASS(`expected response not to match ${GROUND_EXPECTED}/${name}`)
-        : FAIL(failure);
+    return failure === null ? PASS(`expected response not to match ${name}`) : FAIL(failure);
 }
 
-// ── toMatch — async subjects (disk walk) ──
+// ── toMatchDirectory — async subjects (disk walk) ──
 
 async function matchTreeFile(
     actualRoot: string,
@@ -256,7 +252,7 @@ async function matchTreeFile(
     scope: CaptureScope,
     frozen: boolean,
 ): Promise<MatcherResult> {
-    const fixtureDir = resolve(testDir, GROUND_EXPECTED, name);
+    const fixtureDir = resolveSpecPath('toMatchDirectory', name, testDir);
 
     if (shouldUpdateSnapshots() && !frozen) {
         // Preserve placeholder-covered file contents from the previous
@@ -279,7 +275,7 @@ async function matchTreeFile(
                 writeFileSync(resolve(fixtureDir, file), merged);
             }
         }
-        return PASS(`updated ${GROUND_EXPECTED}/${name}/`);
+        return PASS(`updated ${name}`);
     }
 
     if (!existsSync(fixtureDir)) {
@@ -290,7 +286,7 @@ async function matchTreeFile(
 
     const diff = await diffDirectories(fixtureDir, actualRoot, { scope });
     if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
-        return PASS(`expected directory not to match ${GROUND_EXPECTED}/${name}/`);
+        return PASS(`expected directory not to match ${name}`);
     }
 
     return FAIL(formatDirectoryDiff(name, diff, 'Run with TEST_UPDATE=1 to update the fixture.'));
@@ -298,49 +294,68 @@ async function matchTreeFile(
 
 // ── Matcher entry points ──
 
-/**
- * Guard the accessor `toMatch` subjects: their argument is a fixture NAME, never
- * a regex or other value. A `RegExp` (the natural instinct, since vitest-native
- * `toMatch` takes one) must fail loudly with the escape hatch, not silently trip
- * the extension check or be coerced to `"/re/"`.
- */
-function requireFixtureName(name: unknown, subjectKind: string): asserts name is string {
-    if (typeof name !== 'string') {
-        const got = name instanceof RegExp ? 'a regular expression' : `a ${typeof name}`;
-        throw new TypeError(
-            `toMatch on accessors takes a fixture name (extension included) — the ${subjectKind} subject received ${got}. ` +
-                'For a regex, assert on the raw text instead: use expect(x.text).toMatch(/re/) for regex matching.',
-        );
-    }
-}
-
-function toMatch(
+function toMatchFile(
     received: unknown,
     expected: unknown,
     options?: MatchFixtureOptions,
-): MatcherResult | Promise<MatcherResult> {
+): MatcherResult {
+    requireRelativePath('toMatchFile', expected);
     const frozen = options?.frozen === true;
     if (received instanceof TextAccessor) {
-        requireFixtureName(expected, 'stream');
         return matchStreamFile(received, expected, frozen);
     }
     if (received instanceof JsonAccessor) {
-        requireFixtureName(expected, 'json');
         return matchJsonFile(received, expected, frozen);
     }
     if (received instanceof ResponseAccessor) {
-        requireFixtureName(expected, 'response');
         return matchResponseFile(received, expected, frozen);
     }
+    throw new TypeError(
+        'toMatchFile: unsupported subject — expected a stream, json or response accessor ' +
+            '(a directory or the working directory is toMatchDirectory).',
+    );
+}
+
+async function toMatchDirectory(
+    received: unknown,
+    expected: unknown,
+    options?: MatchFixtureOptions,
+): Promise<MatcherResult> {
+    requireRelativePath('toMatchDirectory', expected);
+    if (!expected.endsWith('/')) {
+        throw new TypeError(
+            `toMatchDirectory(${JSON.stringify(expected)}): a directory's path ends in / (e.g. './expected/scaffold/').`,
+        );
+    }
+    const frozen = options?.frozen === true;
     if (received instanceof FilesystemAccessor) {
-        requireFixtureName(expected, 'filesystem');
-        return matchTreeFile(received.cwd, received.testDir, expected, received.captures, frozen);
+        return await matchTreeFile(
+            received.cwd,
+            received.testDir,
+            expected,
+            received.captures,
+            frozen,
+        );
     }
     if (received instanceof DirectoryAccessor) {
-        requireFixtureName(expected, 'directory');
-        return matchTreeFile(received.root, received.testDir, expected, received.captures, frozen);
+        return await matchTreeFile(
+            received.root,
+            received.testDir,
+            expected,
+            received.captures,
+            frozen,
+        );
     }
+    throw new TypeError(
+        'toMatchDirectory: unsupported subject — expected result.filesystem or result.directory(…).',
+    );
+}
 
+/** Vitest's `toMatch`, reading a stream accessor as the text it compares. */
+function toMatch(received: unknown, expected: unknown): MatcherResult {
+    if (received instanceof TextAccessor) {
+        return nativeMatch(received.comparableText, expected);
+    }
     return nativeMatch(received, expected);
 }
 
@@ -469,6 +484,8 @@ export async function registerMatchers(): Promise<void> {
             toBeRunning,
             toContain,
             toMatch,
+            toMatchDirectory,
+            toMatchFile,
             toMatchRows,
         });
     } catch {

@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { resolveFixtureSource } from '../model/chain/fixtures.js';
 import { GROUND_FIXTURES } from '../model/chain/ground.js';
+import { resolveSpecPath } from '../model/chain/resolve.js';
 import {
     assertedStreams,
     DOCUMENT_KEYS,
@@ -437,7 +437,7 @@ function fixedData(document: SpecDocument, dir: string): string {
     for (const fixture of document.fixtures) {
         let source;
         try {
-            source = resolveFixtureSource(fixture.path, dir);
+            source = resolveSpecPath('fixture', fixture.path, dir);
         } catch {
             continue;
         }

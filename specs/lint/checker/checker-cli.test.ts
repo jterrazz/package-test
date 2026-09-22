@@ -8,18 +8,22 @@ describe('lint — checker CLI contract', () => {
     // Apply — the whole stream is asserted, tokens covering the run cwd.
     test('a root that is not a specs tree is read as the project holding one', async () => {
         // Given - the project root of a tree whose facet findings sit one level down
-        const result = await cli.fixture('$FIXTURES/lint-violations/c12-spec-placement/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/c12-spec-placement/')
+            .exec('.');
 
         // Then - the facet passes report what `specs` reports, anchored on the root that was named
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch('checker-project-root.txt');
+        expect(result.stderr).toMatchFile('./_expected/checker-project-root.txt');
     });
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
     // Full-output golden would couple this to the diagnostic formatting.
     test('a root holding no specs tree at all is refused, not reported clean', async () => {
         // Given - a package with module tests and no `specs/` anywhere below it
-        const result = await cli.fixture('$FIXTURES/lint-violations/checker-no-specs/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/checker-no-specs/')
+            .exec('.');
 
         // Then - the run the operator asked for had nothing to walk, and says so
         expect(result.exitCode).toBe(1);

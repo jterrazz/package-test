@@ -5,9 +5,9 @@ import { api } from '../setup/multi.specification.js';
 describe('grammar', () => {
     test('exercises the fixture-grammar passes', async () => {
         // Given - a request fixture and a seed
-        const result = await api.seed('used.sql', { database: 'db' }).request('req.http');
+        const result = await api.seedFile('./_seeds/used.sql', { database: 'db' }).requestFile('./_requests/req.http');
 
         // Then - the expected snapshot is asserted
-        expect(result.stdout).toMatch('out.txt');
+        expect(result.stdout).toMatchFile('./_expected/out.txt');
     });
 });

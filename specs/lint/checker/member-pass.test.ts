@@ -58,7 +58,7 @@ describe('checker CLI — the member pass', () => {
 
         // Then - stdout is the diagnostic array, and nothing else
         expect(result.exitCode).toBe(1);
-        expect(result.json).toMatch('seam-dependency.json');
+        expect(result.json).toMatchFile('./_expected/seam-dependency.json');
     });
 
     test('reads the jest allowance the same from the member as from the root', async () => {

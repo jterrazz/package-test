@@ -7,7 +7,7 @@ describe('lint — b9w-product-command (CONVENTIONS B9)', () => {
     test('warns when the cli binary is a third-party node_modules/.bin', async () => {
         // Given - a runner pointed straight at node_modules/.bin/oxlint
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/b9w-product-command/')
+            .fixtureDirectory('../../_fixtures/lint-violations/b9w-product-command/')
             .exec('.');
 
         // Then - oxlint warns (advisory - warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — b9w-product-command (CONVENTIONS B9)', () => {
     test('stays silent on the product command wrapper', async () => {
         // Given - the compliant twin, pointed at the product's own bin script
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/b9w-product-command-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/b9w-product-command-ok/')
             .exec('.');
 
         // Then - clean run, no b9w-product-command diagnostic

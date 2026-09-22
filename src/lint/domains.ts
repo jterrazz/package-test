@@ -23,7 +23,7 @@ import { cell, table } from './catalog.js';
  * directions.
  *
  * What it does NOT say is that a capability is only ever exercised under its
- * own name: `.seed()` is used inside jobs' `triggering/` scenarios, because
+ * own name: `.seedFile()` is used inside jobs' `triggering/` scenarios, because
  * seeding is the Given there and not the subject. The rule is about what a
  * FOLDER is called, not about where a method may appear.
  */

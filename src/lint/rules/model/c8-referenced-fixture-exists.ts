@@ -1,11 +1,6 @@
-import { dirname, join } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
-import {
-    GROUND_EXPECTED,
-    GROUND_FIXTURES,
-    GROUND_REQUESTS,
-    GROUND_SEEDS,
-} from '../../../model/chain/ground.js';
+import { isRelativePath } from '../../../model/chain/spec-path.js';
 import { memberPropertyName, specsAnchor, stringValue } from '../../ast.js';
 import { isDirectory, isFile } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
@@ -14,97 +9,50 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 
-/** The ground directory each fixture-referencing verb reads from. */
-const VERB_ROOTS: Record<string, string> = {
-    request: GROUND_REQUESTS,
-    seed: GROUND_SEEDS,
-    toMatch: GROUND_EXPECTED,
+/** Every verb that reads the disk, and the kind of entry its path names. */
+const FILE_VERBS: Record<string, 'directory' | 'file'> = {
+    fixtureDirectory: 'directory',
+    fixtureFile: 'file',
+    requestFile: 'file',
+    seedFile: 'file',
+    toMatchDirectory: 'directory',
+    toMatchFile: 'file',
 };
 
 /**
- * A fixture reference is a filename/path, never inline content. `.seed()` also
- * accepts a raw SQL string (integration tests), and any literal with whitespace
- * or a newline is inline content, not a path — out of C8's reach.
- */
-function looksLikePath(value: string): boolean {
-    return value.length > 0 && !/\s/u.test(value);
-}
-
-/** Resolve the on-disk target a `.fixture()` literal points at, if determinable. */
-function resolveFixture(
-    argument: string,
-    featureDir: string,
-    specsDir: string,
-): string | undefined {
-    if (argument.startsWith('$FIXTURES/')) {
-        return join(specsDir, GROUND_FIXTURES, argument.slice(10));
-    }
-    if (argument.startsWith('$')) {
-        return undefined; // Unknown marker — B2's concern, not existence.
-    }
-    return join(featureDir, GROUND_FIXTURES, argument);
-}
-
-/**
- * CONVENTIONS C8 — a fixture referenced by a literal must exist on disk under
- * its ground root: `.request(x)`→`_requests/x`, `.seed(x)`→`_seeds/x`,
- * `.fixture(x)`→the leaf's `_fixtures/` (or the `$FIXTURES/` pool at the nearest
- * `specs/_fixtures/`), `toMatch(x)`→`_expected/x` (file or tree snapshot). A typo
- * that would fail only at runtime is caught statically. Non-literal arguments
- * are out of static reach and skipped.
+ * CONVENTIONS C8 — a path literal passed to a verb that reads the disk must
+ * name an entry that exists, of the kind the verb reads, resolved from the
+ * spec file's own directory. A typo that would fail only at run time is caught
+ * statically. A non-literal argument, or one that is not a relative path (the
+ * type's refusal, B2), is out of this rule's reach.
  */
 export const c8ReferencedFixtureExists: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        const anchor = specsAnchor(file);
-        if (!TEST_FILE.test(file) || anchor === undefined) {
+        if (!TEST_FILE.test(file) || specsAnchor(file) === undefined) {
             return {};
         }
-        const featureDir = dirname(file);
+        const specDir = dirname(file);
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;
                 const verb = callee === undefined ? undefined : memberPropertyName(callee);
-                if (verb === undefined) {
+                const kind = verb === undefined ? undefined : FILE_VERBS[verb];
+                if (verb === undefined || kind === undefined) {
                     return;
                 }
-                const args = (node.arguments as AstNode[] | undefined) ?? [];
-                if (verb === 'fixture') {
-                    const value = stringValue(args[0]);
-                    if (value === undefined || !looksLikePath(value)) {
-                        return;
-                    }
-                    const target = resolveFixture(
-                        value.replace(/\/+$/u, ''),
-                        featureDir,
-                        anchor.directory,
-                    );
-                    if (target !== undefined && !isFile(target) && !isDirectory(target)) {
-                        context.report({
-                            data: { path: value, root: GROUND_FIXTURES },
-                            messageId: 'missing',
-                            node: args[0],
-                        });
-                    }
+                const argument = (node.arguments as AstNode[] | undefined)?.[0];
+                const value = stringValue(argument);
+                if (value === undefined || !isRelativePath(value)) {
                     return;
                 }
-                const root = VERB_ROOTS[verb];
-                if (root === undefined) {
-                    return;
-                }
-                const value = stringValue(args[0]);
-                if (value === undefined || !looksLikePath(value)) {
-                    return;
-                }
-                const target = join(featureDir, root, value.replace(/\/+$/u, ''));
-                // ToMatch may name a directory-tree snapshot; the others are files.
-                const ok =
-                    verb === 'toMatch' ? isFile(target) || isDirectory(target) : isFile(target);
-                if (!ok) {
+                const target = resolve(specDir, value);
+                const exists = kind === 'directory' ? isDirectory(target) : isFile(target);
+                if (!exists) {
                     context.report({
-                        data: { path: `${root}/${value}`, root },
+                        data: { kind, path: value, verb },
                         messageId: 'missing',
-                        node: args[0],
+                        node: argument,
                     });
                 }
             },
@@ -114,7 +62,7 @@ export const c8ReferencedFixtureExists: LintRule = {
         docs: RULE_DOCS['c8-referenced-fixture-exists'],
         messages: {
             missing:
-                'Referenced fixture "{{path}}" does not exist on disk under its ground {{root}}/ root. Create it or fix the reference.',
+                '{{verb}}("{{path}}") names no {{kind}} on disk, read from the spec file\'s directory. Create it or fix the path.',
         },
         type: 'problem',
     },

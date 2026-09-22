@@ -14,6 +14,7 @@
  * too: one `declare module` for one published `types` entry.
  */
 
+import type { RelativePath as RelativePathType } from './model/chain/spec-path.js';
 import type { DirectoryAccessor as DirectoryAccessorType } from './model/result/directory.js';
 import type { FilesystemAccessor as FilesystemAccessorType } from './model/result/filesystem.js';
 import type { JsonAccessor as JsonAccessorType } from './model/result/json.js';
@@ -146,38 +147,32 @@ export { clock, type PinnedClock } from './model/clock/clock.js';
 export { required } from './model/assertions/required.js';
 export { waitUntil, type WaitUntilOptions } from './model/assertions/wait-until.js';
 
-// Matcher options (per-call `toMatch(name, { frozen })`)
+// Matcher options (per-call `toMatchFile(path, { frozen })`), and the path
+// Every verb that reads the disk takes
 export type { MatchFixtureOptions } from './model/result/match-options.js';
+export type { RelativePath } from './model/chain/spec-path.js';
 
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.
 
 declare module 'vitest' {
-    // ONE interface carries all four matchers, and it is `Assertion`.
+    // ONE interface carries every matcher, and it is `Assertion`: a setup
+    // That resolves `vitest`'s types twice (a nested or duplicated install, a
+    // `file:` link) picks up one augmentation and not the other when the
+    // Matchers are split across two interfaces — a failure that reads as a
+    // Regression in the package rather than as a resolution problem. Declared
+    // Together, they are present together or absent together.
     //
-    // `toMatch` has no choice: it is a BUILT-IN declared on `JestAssertion`,
-    // Which `Assertion` also extends, so a `Matchers`-only override is shadowed
-    // By the native 1-arg signature — only a DIRECT member of `Assertion`
-    // Overrides the inherited one, which is what makes `{ frozen }` type. The
-    // Other three would work on either interface, and splitting them across the
-    // Two was the defect: a setup that resolves `vitest`'s types twice (a nested
-    // Or duplicated install, a `file:` link) picks up one augmentation and not
-    // The other, so `toMatch` types while `toBeEmpty` does not — a failure that
-    // Reads as a regression in the package rather than as a resolution problem.
-    // Declared together, they are present together or absent together.
-    //
-    // The `toMatch` override must stay ASSIGNABLE to the native
-    // `(expected: string | RegExp) => void`, so every branch keeps the
-    // `RegExp | string` parameter and a void-compatible return.
+    // `toMatch` is NOT here: it is vitest's own, and its argument is a value.
     //
     // The two type parameters are vitest's own, repeated CHARACTER for
     // Character: an augmentation whose parameter list differs from the
     // Declaration it merges into is refused outright (TS2428), so this line
     // Tracks the runner's — `R` is the return shape a promisified assertion
     // Threads through, `T` the received value every branch below keys on.
-    // `R` is unused here because each matcher states its own return: a golden
-    // Read across the browser seam is async where the identical node accessor
-    // Is sync, and that is not something the chai chain can infer.
+    // A sync golden returns `R`; every async matcher states `Promise<void>`,
+    // Because a golden read across the browser seam is async where the
+    // Identical node accessor is sync, and the chai chain cannot infer that.
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface: a type alias redeclares the name and every matcher is lost
     interface Assertion<R extends Promise<void> | void = void, T = unknown> {
         /**
@@ -195,36 +190,37 @@ declare module 'vitest' {
         /** Assert the container is running. Async — docker-backed subject. */
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**
-         * On `@jterrazz/test` accessors: assert the subject matches a fixture
-         * file under `_expected/<name>` (flat — a slash creates a subfolder;
-         * `.http` format for `result.response`). Async for filesystem/directory
-         * subjects (tree compare on disk), and for a subject captured INSIDE a
-         * page (`result.tree`, `result.html`, … — the file crosses the browser
-         * seam through a server command).
+         * Assert the subject matches a directory golden, named by a path
+         * relative to the spec file that ends in `/` — the whole working
+         * directory (`result.filesystem`) or one of its directories. Async: the
+         * tree is compared on disk.
          *
-         * Pass `{ frozen: true }` to opt a single fixture OUT of update-mode
-         * rewriting: a frozen fixture is never overwritten under `TEST_UPDATE=1`
-         * (or vitest `-u`), and a frozen mismatch/missing fixture still throws.
-         * Use it for a deliberately-wrong fixture whose diff/error rendering is
+         * Pass `{ frozen: true }` to opt the golden OUT of update-mode rewriting.
+         */
+        toMatchDirectory: T extends DirectoryAccessorType | FilesystemAccessorType
+            ? (path: RelativePathType<'/'>, options?: MatchFixtureOptionsType) => Promise<void>
+            : never;
+        /**
+         * Assert the subject matches a golden file, named by a path relative to
+         * the spec file, extension included (`.http` format for
+         * `result.response`). Async for a subject captured INSIDE a page
+         * (`result.tree`, `result.html`, … — the file crosses the browser seam
+         * through a server command).
+         *
+         * Pass `{ frozen: true }` to opt a single golden OUT of update-mode
+         * rewriting: a frozen golden is never overwritten under `TEST_UPDATE=1`
+         * (or vitest `-u`), and a frozen mismatch/missing golden still throws.
+         * Use it for a deliberately-wrong golden whose diff/error rendering is
          * the behaviour under test.
          */
         // A stream captured INSIDE a page reads its golden through a server
         // Command, so it is async where the identical node accessor is sync —
         // Told apart by the same kind of structural marker as `toBeEmpty`.
-        //
-        // The async branches return `Promise<void> & R`, not `Promise<void>`:
-        // `toMatch` is INHERITED from `JestAssertion<R, T>` as `=> R`, and an
-        // Override has to stay assignable to what it overrides. The
-        // Intersection is what says both things at once — the caller awaits a
-        // Promise, and the chain keeps the return shape vitest threads through
-        // `.resolves` / `.rejects`.
-        toMatch: T extends DirectoryAccessorType | FilesystemAccessorType
-            ? (name: RegExp | string, options?: MatchFixtureOptionsType) => Promise<void> & R
-            : T extends { readonly capturedInPage: true }
-              ? (name: RegExp | string, options?: MatchFixtureOptionsType) => Promise<void> & R
-              : T extends JsonAccessorType | ResponseAccessorType | TextAccessorType
-                ? (name: RegExp | string, options?: MatchFixtureOptionsType) => R
-                : (expected: RegExp | string, options?: MatchFixtureOptionsType) => R;
+        toMatchFile: T extends { readonly capturedInPage: true }
+            ? (path: RelativePathType, options?: MatchFixtureOptionsType) => Promise<void>
+            : T extends JsonAccessorType | ResponseAccessorType | TextAccessorType
+              ? (path: RelativePathType, options?: MatchFixtureOptionsType) => R
+              : never;
         /**
          * Assert the table contains exactly the given rows for the given
          * columns. Cells accept `match.*` dynamic-value matchers. Async —

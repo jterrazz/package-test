@@ -6,5 +6,5 @@ test('creates an event', () => {
 
     // Then - the status probe sits alongside a full-response golden: scalpel, silent
     expect(result.status).toBe(201);
-    expect(result.response).toMatch('created.http');
+    expect(result.response).toMatchFile('./_expected/created.http');
 });

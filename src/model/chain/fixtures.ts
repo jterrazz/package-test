@@ -1,75 +1,16 @@
-import { basename, dirname, resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 
-import { GROUND_FIXTURES } from './ground.js';
+import { resolveSpecPath } from './resolve.js';
 
 /**
- * Fixture path resolution + copy semantics for the `cli` facet's `.fixture()`.
+ * Copy semantics for the file-state a command spec stands on — the chain's
+ * `.fixtureFile()` / `.fixtureDirectory()` and a document's `fixture:`.
  *
- * A fixture path is one of two shapes:
- *
- *  - `$FIXTURES/<rest>` — the shared pool at `<specs-root>/_fixtures/<rest>`,
- *    where `<specs-root>` is the nearest ancestor directory named `specs`.
- *  - `<path>` (no marker) — feature-local, at `<test-dir>/_fixtures/<path>`.
- *
- * The leading underscore is the ground rule of a spec tree ({@link GROUND_FIXTURES}).
- * Any other `$`-prefixed marker is a usage error (listed against the known
- * markers). Copy semantics mirror rsync's trailing-slash rule (see
- * {@link copyPlan}).
+ * The source is a path relative to the spec (or document) naming it, and the
+ * shared pool is reached the same way, by the path that climbs to it
+ * (`../../fixtures/shop/`). Copy semantics follow rsync's trailing-slash rule
+ * (see {@link copyPlan}).
  */
-
-/**
- * Markers understood in a `.fixture()` path. Extend here + in
- * {@link resolveFixtureSource}. Exported so the lint layer (rule
- * `jterrazz/b2-known-fixture-marker`) validates literals against the same list.
- */
-export const KNOWN_FIXTURE_MARKERS = ['$FIXTURES'] as const;
-
-/**
- * Walk up from `startDir` to the nearest ancestor directory named `specs`.
- * Throws with guidance if none is found up to the filesystem root — the
- * `$FIXTURES` marker is meaningless without a specs root.
- */
-export function discoverSpecsRoot(startDir: string): string {
-    let dir = startDir;
-    for (;;) {
-        if (basename(dir) === 'specs') {
-            return dir;
-        }
-        const parent = dirname(dir);
-        if (parent === dir) {
-            break;
-        }
-        dir = parent;
-    }
-    throw new Error(
-        `.fixture(): the $FIXTURES marker resolves to <specs-root>/${GROUND_FIXTURES}, but no ` +
-            `directory named "specs" was found walking up from ${startDir}. Move the ` +
-            `specification under a specs/ directory, or use a feature-local ` +
-            `${GROUND_FIXTURES}/ path (no $FIXTURES marker).`,
-    );
-}
-
-/**
- * Resolve the absolute source path of a fixture, applying marker resolution.
- * The trailing slash (spread semantics) is preserved by callers via
- * {@link copyPlan} — it is irrelevant to source resolution.
- */
-export function resolveFixtureSource(path: string, testDir: string): string {
-    const clean = path.replace(/\/+$/u, '');
-    if (clean === '$FIXTURES' || path.startsWith('$FIXTURES/')) {
-        const rest = clean.slice('$FIXTURES'.length).replace(/^\/+/u, '');
-        return resolve(discoverSpecsRoot(testDir), GROUND_FIXTURES, rest);
-    }
-    if (path.startsWith('$')) {
-        const marker = clean.split('/')[0];
-        throw new Error(
-            `.fixture("${path}"): unknown marker "${marker}". Known markers: ` +
-                `${KNOWN_FIXTURE_MARKERS.join(', ')}. A path without a marker is feature-local ` +
-                `(resolved under <test-dir>/${GROUND_FIXTURES}/).`,
-        );
-    }
-    return resolve(testDir, GROUND_FIXTURES, clean);
-}
 
 /** A resolved copy operation: where to read from, where to write to. */
 type FixtureCopyPlan = {
@@ -79,18 +20,26 @@ type FixtureCopyPlan = {
 
 /**
  * Compute the source + destination for copying a fixture into the working
- * directory. Copy semantics follow rsync's trailing-slash rule:
+ * directory:
  *
- *  - `dir/` (trailing slash) — the CONTENTS are spread into the cwd.
- *  - `dir`  (no slash, a directory) — the directory is copied as `<cwd>/<basename>`.
- *  - `file` — copied as `<cwd>/<basename>`.
+ *  - `./dir/` (trailing slash) — the CONTENTS are spread into the cwd.
+ *  - `./file` — copied as `<cwd>/<basename>`.
  *
- * Chained `.fixture()` calls layer in order: a later fixture overwrites files
- * written by an earlier one.
+ * A path without the slash that names a directory is copied as
+ * `<cwd>/<basename>` too — the `fixture:` key of a document takes both forms;
+ * the chain splits them into two verbs.
+ *
+ * Chained fixtures layer in order: a later one overwrites files written by an
+ * earlier one.
  */
-export function copyPlan(path: string, testDir: string, workDir: string): FixtureCopyPlan {
-    const src = resolveFixtureSource(path, testDir);
-    const spread = /\/+$/u.test(path);
+export function copyPlan(
+    path: string,
+    specDir: string,
+    workDir: string,
+    verb = 'fixture',
+): FixtureCopyPlan {
+    const src = resolveSpecPath(verb, path, specDir);
+    const spread = path.endsWith('/');
     const dest = spread ? workDir : resolve(workDir, basename(src));
     return { dest, src };
 }

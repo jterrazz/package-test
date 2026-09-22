@@ -5,7 +5,7 @@
 type SpecRun = object;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:117](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L117)
+Defined in: [src/model/literate/spec-document.ts:118](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L118)
 
 One run: a command, what it must exit with, and what it must have produced.
 
@@ -17,7 +17,7 @@ One run: a command, what it must exit with, and what it must have produced.
 command: string;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:118](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L118)
+Defined in: [src/model/literate/spec-document.ts:119](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L119)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [src/model/literate/spec-document.ts:118](https://github.com/jterraz
 commandLine: number;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:120](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L120)
+Defined in: [src/model/literate/spec-document.ts:121](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L121)
 
 1-based line of the `command:` key — the frame a failure points at.
 
@@ -39,7 +39,7 @@ Defined in: [src/model/literate/spec-document.ts:120](https://github.com/jterraz
 exitCode: number;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:121](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L121)
+Defined in: [src/model/literate/spec-document.ts:122](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L122)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [src/model/literate/spec-document.ts:121](https://github.com/jterraz
 files: SpecFileAssertion[];
 ```
 
-Defined in: [src/model/literate/spec-document.ts:122](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L122)
+Defined in: [src/model/literate/spec-document.ts:123](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L123)
 
 ***
 
@@ -59,7 +59,7 @@ Defined in: [src/model/literate/spec-document.ts:122](https://github.com/jterraz
 stderr: null | SpecStream;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:124](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L124)
+Defined in: [src/model/literate/spec-document.ts:125](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L125)
 
 `null` when the key is absent, which asserts an empty stream.
 
@@ -71,7 +71,7 @@ Defined in: [src/model/literate/spec-document.ts:124](https://github.com/jterraz
 stdin: null | string;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:126](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L126)
+Defined in: [src/model/literate/spec-document.ts:127](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L127)
 
 Written to the child then closed; `null` keeps the empty-pipe EOF.
 
@@ -83,7 +83,7 @@ Written to the child then closed; `null` keeps the empty-pipe EOF.
 stdout: null | SpecStream;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:127](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L127)
+Defined in: [src/model/literate/spec-document.ts:128](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L128)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [src/model/literate/spec-document.ts:127](https://github.com/jterraz
 timeout: null | number;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:128](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L128)
+Defined in: [src/model/literate/spec-document.ts:129](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L129)
 
 ***
 
@@ -103,6 +103,6 @@ Defined in: [src/model/literate/spec-document.ts:128](https://github.com/jterraz
 waitFor: null | string;
 ```
 
-Defined in: [src/model/literate/spec-document.ts:130](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L130)
+Defined in: [src/model/literate/spec-document.ts:131](https://github.com/jterrazz/package-test/blob/main/src/model/literate/spec-document.ts#L131)
 
 Only ever on the LAST run — a long-running command ends the session.

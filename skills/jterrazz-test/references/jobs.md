@@ -36,7 +36,7 @@ export const { cleanup, jobs } = await specification.jobs({
 | -------------- | -------------------------------- | --------------------------------------------------------------------------------------- |
 | `.clock()`     | `.clock('2026-03-04T09:30:00Z')` | Pins `Date` for this chain — the one primitive for time                                 |
 | `.intercept()` | `.intercept(contracts)`          | Declares what the network answers, from contracts — strict from the first one (rule D7) |
-| `.seed()`      | `.seed('users.sql')`             | Loads a `_seeds/*.sql` file into the named service before the action                    |
+| `.seedFile()`  | `.seedFile('./seeds/users.sql')` | Loads a `.sql` file, named from the spec file, into the named service before the action |
 
 ## Terminal actions (exactly one)
 
@@ -52,10 +52,10 @@ export const { cleanup, jobs } = await specification.jobs({
 
 ## Goldens
 
-| Name                | Written                                                        | Does                                                                                                         |
-| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
-| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
+| Name            | Written                                                        | Does                                                                                                                  |
+| --------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `toMatchFile()` | `expect(subject).toMatchFile('./expected/<name>.<ext>')`       | Compares the subject to the golden file its path names from the spec file, tokens resolved; `TEST_UPDATE=1` writes it |
+| `toMatchRows()` | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                                      |
 
 ## Read next
 

@@ -21,7 +21,7 @@ import type { CapabilityGroup, Column } from './facet-matrix.js';
  *   add a name it does not declare, and {@link SIGNATURES} must cover every one
  *   it does ({@link uncoveredCapabilities}, {@link deadSignatures}).
  * - this module owns how each one READS — its signature and its one line — once
- *   for the whole vocabulary, because `.seed()` means the same thing on four
+ *   for the whole vocabulary, because `.seedFile()` means the same thing on four
  *   facets and a per-card description would be four chances to disagree.
  */
 
@@ -139,7 +139,7 @@ type Signature = { line: string; signature: string };
 export const SIGNATURES: Record<string, Signature> = {
     '.aria.yaml tree': {
         line: 'The accessibility outline of the surface — the golden a rendered thing wants, deterministic where a screenshot is not. Awaited on a component, where the capture crosses the browser seam; sync on a page',
-        signature: "expect(result.tree).toMatch('<name>.aria.yaml')",
+        signature: "expect(result.tree).toMatchFile('./expected/<name>.aria.yaml')",
     },
     '.call()': {
         line: 'Calls the module, with the services it was handed; resolves to a `CallResult`',
@@ -211,9 +211,13 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'One file in the working directory, as a stream subject',
         signature: ".file('out/report.json')",
     },
-    '.fixture()': {
-        line: "Copies a fixture tree into the run's working directory",
-        signature: ".fixture('a-project')",
+    '.fixtureDirectory()': {
+        line: "Spreads a directory's contents, named from the spec file, into the run's working directory",
+        signature: ".fixtureDirectory('./fixtures/a-project/')",
+    },
+    '.fixtureFile()': {
+        line: "Copies one file, named from the spec file, into the run's working directory",
+        signature: ".fixtureFile('./fixtures/config.toml')",
     },
     '.get()': { line: 'Sends `GET <path>`', signature: ".get('/users')" },
     '.head': {
@@ -234,7 +238,7 @@ export const SIGNATURES: Record<string, Signature> = {
     },
     '.http exchange': {
         line: 'A complete request/response pair as a file: status line, header subset, body, tokens',
-        signature: "expect(result.response).toMatch('user-created.http')",
+        signature: "expect(result.response).toMatchFile('./expected/user-created.http')",
     },
     '.intercept()': {
         line: 'Declares what the network answers, from contracts — strict from the first one (rule D7)',
@@ -246,7 +250,7 @@ export const SIGNATURES: Record<string, Signature> = {
     },
     '.json body': {
         line: 'A JSON payload as a file, tokens resolved and keys compared',
-        signature: "await expect(subject).toMatch('created.json')",
+        signature: "expect(subject).toMatchFile('./expected/created.json')",
     },
     '.jsonLd': {
         line: 'The JSON-LD blocks the document carries, parsed',
@@ -271,9 +275,9 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'Mounts a React tree, or hands a DOM function a fresh container, and runs the scenario',
         signature: '.render(<X />, async (visitor) => { … })',
     },
-    '.request()': {
-        line: 'Sends the complete request written in a `_requests/*.http` file',
-        signature: ".request('create-user.http')",
+    '.requestFile()': {
+        line: 'Sends the complete request written in a `.http` file, named from the spec file',
+        signature: ".requestFile('./requests/create-user.http')",
     },
     '.response': {
         line: 'The HTTP response — status, headers, body, matched against an `.http` golden',
@@ -283,9 +287,9 @@ export const SIGNATURES: Record<string, Signature> = {
         line: 'The BRIDGE door: runs a `<case>.spec.yaml` document and resolves with its last run, for the one assertion the grammar cannot say',
         signature: ".run('scaffold.spec.yaml')",
     },
-    '.seed()': {
-        line: 'Loads a `_seeds/*.sql` file into the named service before the action',
-        signature: ".seed('users.sql')",
+    '.seedFile()': {
+        line: 'Loads a `.sql` file, named from the spec file, into the named service before the action',
+        signature: ".seedFile('./seeds/users.sql')",
     },
     '.screen': {
         line: 'The device screen as a tree — the outline a golden pins',
@@ -312,7 +316,7 @@ export const SIGNATURES: Record<string, Signature> = {
     },
     '.txt stream': {
         line: 'A text stream as a file — stdout, stderr, a rendered body',
-        signature: "await expect(subject).toMatch('help.txt')",
+        signature: "expect(subject).toMatchFile('./expected/help.txt')",
     },
     '.url': { line: 'The URL the page ended on, after every redirect', signature: 'result.url' },
     '.value': {
@@ -333,11 +337,15 @@ export const SIGNATURES: Record<string, Signature> = {
     },
     '{ frozen }': {
         line: 'Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose',
-        signature: "toMatch('refused.txt', { frozen: true })",
+        signature: "toMatchFile('./expected/refused.txt', { frozen: true })",
     },
-    "toMatch('<name>')": {
-        line: 'Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it',
-        signature: "expect(subject).toMatch('<name>.<ext>')",
+    'toMatchDirectory()': {
+        line: 'Compares a directory, or the whole working directory, to a golden tree named from the spec file; `TEST_UPDATE=1` writes it',
+        signature: "await expect(result.filesystem).toMatchDirectory('./expected/<name>/')",
+    },
+    'toMatchFile()': {
+        line: 'Compares the subject to the golden file its path names from the spec file, tokens resolved; `TEST_UPDATE=1` writes it',
+        signature: "expect(subject).toMatchFile('./expected/<name>.<ext>')",
     },
     app: { line: 'The built app bundle the simulator installs', signature: 'app: string' },
     backend: {

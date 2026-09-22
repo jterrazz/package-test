@@ -7,7 +7,7 @@ describe('lint — d2-await-io-matcher (CONVENTIONS D2)', () => {
     test('rejects an un-awaited IO matcher', async () => {
         // Given - a project violating D2
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/d2-await-io-matcher/')
+            .fixtureDirectory('../../_fixtures/lint-violations/d2-await-io-matcher/')
             .exec('.');
 
         // Then - oxlint reports the d2-await-io-matcher diagnostic
@@ -18,7 +18,7 @@ describe('lint — d2-await-io-matcher (CONVENTIONS D2)', () => {
     test('accepts an awaited IO matcher', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/d2-await-io-matcher-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/d2-await-io-matcher-ok/')
             .exec('.');
 
         // Then - clean run, no d2-await-io-matcher diagnostic

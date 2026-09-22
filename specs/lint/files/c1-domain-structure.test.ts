@@ -7,7 +7,7 @@ describe('lint — c1-domain-structure (CONVENTIONS C1)', () => {
     test('rejects a test placed directly at the facet root', async () => {
         // Given - a project with specs/widget/widget.test.ts (no domain folder)
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c1-domain-structure/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c1-domain-structure/')
             .exec('.');
 
         // Then - oxlint reports the C1 placement violation
@@ -18,7 +18,7 @@ describe('lint — c1-domain-structure (CONVENTIONS C1)', () => {
     test('rejects a test in a ground folder with no module beside it', async () => {
         // Given - specs/widget/_binary/scenarios.test.ts, and no scenarios.ts
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c1-domain-structure/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c1-domain-structure/')
             .exec('.');
 
         // Then - the ground clause reports it: a spec wandered into the ground
@@ -29,7 +29,7 @@ describe('lint — c1-domain-structure (CONVENTIONS C1)', () => {
     test('accepts a test nested at facet/domain depth', async () => {
         // Given - the compliant twin, specs/widget/status/status.test.ts
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c1-domain-structure-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c1-domain-structure-ok/')
             .exec('.');
 
         // Then - clean exit, no C1 diagnostic
@@ -40,7 +40,7 @@ describe('lint — c1-domain-structure (CONVENTIONS C1)', () => {
     test('accepts a ground module carrying its own unit test beside it', async () => {
         // Given - the same compliant project, whose ground is CODE: specs/widget/_binary/binary.ts with binary.test.ts next to it (I2)
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c1-domain-structure-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c1-domain-structure-ok/')
             .exec('.');
 
         // Then - the pairing is legal in ground, so nothing is reported and no project has to switch a clause off that no project may switch off

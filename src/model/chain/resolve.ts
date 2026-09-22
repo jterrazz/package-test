@@ -2,6 +2,7 @@ import { existsSync, realpathSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
 
 import type { CliEnv } from '../ports/cli.port.js';
+import { requireRelativePath } from './spec-path.js';
 
 /** What makes a directory a project root: the thing that declares itself one. */
 const ROOT_MARKER = 'package.json';
@@ -112,4 +113,13 @@ export function expandWorkdir(env: CliEnv, workDir: string): CliEnv {
         expanded[key] = typeof value === 'string' ? value.replaceAll('$WORKDIR', workdir) : value;
     }
     return expanded;
+}
+
+/**
+ * The absolute path a spec names a file by, read from the spec file's own
+ * directory. The path is refused unless it is relative (`./…`, `../…`).
+ */
+export function resolveSpecPath(verb: string, path: string, specDir: string): string {
+    requireRelativePath(verb, path);
+    return resolve(specDir, path);
 }

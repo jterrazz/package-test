@@ -172,18 +172,6 @@ export const RULE_DOCS = {
             'The narration is a sentence about the subject; a paragraph hides its second half from every reader that only looks at the marker line.',
         reach: 'tests',
     },
-    'b2-known-fixture-marker': {
-        channel: 'statique',
-        convention:
-            'An unknown `$…` marker in a literal passed to `.fixture()` is an error (`$FIXTURES` is the only one).',
-        facet: 'model',
-        family: 'B',
-        fix: 'Write `$FIXTURES/<name>` for the shared pool, or a path relative to the spec for local ground.',
-        id: 'B2',
-        rationale:
-            'Catching a wrong marker statically avoids a fixture path resolved at random at run time.',
-        reach: 'tests',
-    },
     'b4-given-then': {
         channel: 'statique',
         convention:
@@ -305,13 +293,13 @@ export const RULE_DOCS = {
     'c6-tomatch-extension': {
         channel: 'statique',
         convention:
-            "`toMatch`'s argument carries its extension (`'help.txt'`, `'<case>.aria.yaml'` for a tree golden), except for a directory snapshot; a file subject with no extension is an error.",
+            "`toMatchFile`'s path carries its extension (`'./expected/help.txt'`, `'./expected/<case>.aria.yaml'` for an ARIA tree); a golden file with no extension is an error. A directory golden is `toMatchDirectory`, whose path ends in `/`.",
         facet: 'model',
         family: 'C',
         fix: "Write the fixture's full name, extension included.",
         id: 'C6',
         rationale:
-            "The extension is part of the expected file's name — dropping it breaks `_expected/` resolution.",
+            "The extension is part of the golden's path — the path IS the file, and a file without its extension is another file.",
         reach: 'tests',
     },
     'c7-seeds-sql-only': {
@@ -321,13 +309,14 @@ export const RULE_DOCS = {
         family: 'C',
         fix: 'Write the seed as SQL, or move the file to `_fixtures/` as the material it is.',
         id: 'C7',
-        rationale: '`.seed()` carries database state only — no seed handlers, no prefix dispatch.',
+        rationale:
+            '`.seedFile()` carries database state only — no seed handlers, no prefix dispatch.',
         reach: 'ground',
     },
     'c8-referenced-fixture-exists': {
         channel: 'statique',
         convention:
-            'A literal passed to `.request`/`.seed`/`.fixture`/`toMatch` must exist on disk under its conventional root; a missing path is an error.',
+            "A path literal passed to a verb that reads the disk — `.seedFile`, `.requestFile`, `.fixtureFile`, `.fixtureDirectory`, `toMatchFile`, `toMatchDirectory` — must name an entry that exists, of the kind the verb reads, resolved from the spec file's directory; a missing path is an error.",
         facet: 'model',
         family: 'C',
         fix: 'Create the file, or fix the name — the message prints the path it looked for.',
@@ -387,10 +376,10 @@ export const RULE_DOCS = {
     'd19w-probe-cluster': {
         channel: 'statique',
         convention:
-            "Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatch('<file>')` on it is a warning. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.",
+            'Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatchFile(…)` on it is a warning. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.',
         facet: 'model',
         family: 'D',
-        fix: "Golden the subject: `expect(result.stdout).toMatch('<case>.txt')`, tokens for what moves.",
+        fix: "Golden the subject: `expect(result.stdout).toMatchFile('./expected/<case>.txt')`, tokens for what moves.",
         id: 'D19',
         rationale:
             'Three greps state three lines, leave everything between them unstated, and still have to be rewritten one by one the day the output changes.',
@@ -399,7 +388,7 @@ export const RULE_DOCS = {
     'd2-await-io-matcher': {
         channel: 'statique',
         convention:
-            'An IO matcher (`toMatchRows`/`toBeEmpty`/`toBeRunning`) must be awaited or returned; otherwise the assertion never runs → error.',
+            'An IO matcher (`toMatchRows`/`toMatchDirectory`/`toBeEmpty`/`toBeRunning`) must be awaited or returned; otherwise the assertion never runs → error.',
         facet: 'model',
         family: 'D',
         fix: 'Put `await` in front of the `expect(...)`.',
@@ -434,19 +423,19 @@ export const RULE_DOCS = {
     'd8w-text-bypass': {
         channel: 'statique',
         convention:
-            '`expect(x.text).toContain/toMatch` short-circuits the typed accessor subject → warning. A RegExp argument is exempt: `toMatch` on an accessor takes a fixture NAME and throws on a regex, so reaching through to `.text` is the sanctioned form for a raw pattern (chapter 14).',
+            '`expect(x.text).toContain/toMatch` short-circuits the typed accessor subject → warning. A RegExp argument is exempt: a pattern carries no token grammar to lose, so the raw text and the accessor say the same thing.',
         facet: 'model',
         family: 'D',
         fix: 'Assert on the accessor itself (`expect(x)`), which carries the tokens and the fixture resolution.',
         id: 'D8',
         rationale:
-            "Asserting on `.text` throws away the token grammar and the subject's `toMatch('file')` resolution.",
+            "Asserting on `.text` throws away what the typed subject applies before a comparison — ANSI stripping and the runner's transform.",
         reach: 'tests',
     },
     'd9w-single-use-ref': {
         channel: 'statique',
         convention:
-            'A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code plus the referenced `_expected/` fixtures) is named for nothing → warning.',
+            'A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code plus the golden files it references) is named for nothing → warning.',
         facet: 'model',
         family: 'D',
         fix: 'Drop the ref name and keep the bare token.',
@@ -458,10 +447,10 @@ export const RULE_DOCS = {
     'd12w-response-body-probe': {
         channel: 'statique',
         convention:
-            "A test accumulating a CLUSTER of raw probes on `.response.body` (≥ `threshold`, default 3; a variable cast from `.response.body` counts its reads) → warning: this case wants a full golden (`expect(result.response).toMatch('case.http')`). One or two probes stay silent (a legitimate scalpel).",
+            "A test accumulating a CLUSTER of raw probes on `.response.body` (≥ `threshold`, default 3; a variable cast from `.response.body` counts its reads) → warning: this case wants a full golden (`expect(result.response).toMatchFile('./expected/case.http')`). One or two probes stay silent (a legitimate scalpel).",
         facet: 'api',
         family: 'D',
-        fix: "Golden the response: `expect(result.response).toMatch('<case>.http')`, with tokens for the parts that move.",
+        fix: "Golden the response: `expect(result.response).toMatchFile('./expected/<case>.http')`, with tokens for the parts that move.",
         id: 'D12',
         rationale:
             'A full golden captures the whole shape and its token grammar; a cluster of raw probes replaces it with ad-hoc checks that drift (it mechanises the D11 boundary for API responses).',
@@ -470,7 +459,7 @@ export const RULE_DOCS = {
     'd13w-unfrozen-negative-fixture': {
         channel: 'statique',
         convention:
-            'A `toMatch` whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong fixture instead of throwing → warning. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
+            'A `toMatchFile`/`toMatchDirectory` whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong fixture instead of throwing → warning. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
         facet: 'model',
         family: 'D',
         fix: 'Pass `{ frozen: true }` so update mode never overwrites the fixture the test is about.',
@@ -482,7 +471,7 @@ export const RULE_DOCS = {
     'd15w-status-only-probe': {
         channel: 'statique',
         convention:
-            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatch('case.http')`). A status probe BESIDE a real assertion (a golden, `toMatchRows`, `toContain`…) stays silent (a legitimate scalpel).",
+            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatchFile('./expected/case.http')`). A status probe BESIDE a real assertion (a golden, `toMatchRows`, `toContain`…) stays silent (a legitimate scalpel).",
         facet: 'api',
         family: 'D',
         fix: 'Assert what the response carries, not only the code it came back with.',
@@ -1124,7 +1113,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'With ≥ 2 databases, `database:` is required on every `.seed()`/`.table()`; with exactly one it is forbidden — checked by crossing the `services:` record with the calls in the tests.',
+            'With ≥ 2 databases, `database:` is required on every `.seedFile()`/`.table()`; with exactly one it is forbidden — checked by crossing the `services:` record with the calls in the tests.',
         facet: 'model',
         family: 'A',
         fix: 'State `database:` everywhere or nowhere, whichever the record calls for.',
@@ -1268,6 +1257,19 @@ export const TYPE_ROWS: CatalogEntry[] = [
     {
         channel: 'type',
         convention:
+            "Every verb that reads the disk takes a `RelativePath`: `seedFile('x.sql')`, `requestFile('x.http')` or `toMatchFile('expected/x.txt')` does not compile — the path starts with `./` or `../`, a seed ends in `.sql`, a request in `.http`, a directory in `/`.",
+        facet: 'model',
+        family: 'B',
+        fix: 'Spell the path from the spec file: `./seeds/users.sql`, `./expected/help.txt`, `../../fixtures/shop/`.',
+        id: 'B2',
+        name: 'b2-a-file-is-named-by-its-path',
+        rationale:
+            'A bare name resolved against a hidden folder is a convention the reader has to know; a relative path is read where it is written, and the compiler refuses the other form at the call.',
+        reach: 'tests',
+    },
+    {
+        channel: 'type',
+        convention:
             'The `services` record types the factory argument: `server: (services) => …` sees exactly the keys the record declares.',
         facet: 'model',
         family: 'A',
@@ -1373,7 +1375,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
             'No vitest snapshot matcher: `toMatchSnapshot`, `toMatchInlineSnapshot`, `toMatchFileSnapshot`, `toMatchAriaSnapshot`, `toMatchScreenshot`, `toThrowErrorMatchingSnapshot` and `toThrowErrorMatchingInlineSnapshot` are refused by `vitest/no-restricted-matchers`, whose option the `testing` fragment sets (ADR-005).',
         facet: 'model',
         family: 'D',
-        fix: "Write the golden: `expect(subject).toMatch('<name>.<ext>')` under `_expected/`; under `src/` compare to a literal with `toStrictEqual`.",
+        fix: "Write the golden: `expect(subject).toMatchFile('./expected/<name>.<ext>')`; under `src/` compare to a literal with `toStrictEqual`.",
         id: 'D20',
         name: 'd20-golden-not-snapshot',
         rationale:
@@ -1446,27 +1448,27 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            "A slash in a fixture name is a SUBFOLDER of `_expected/`: `toMatch('build/verbose.txt')` resolves to `_expected/build/verbose.txt`.",
+            "A golden's path may name a subfolder (`./expected/build/verbose.txt`): the path is the file, and update mode creates the folders it names.",
         facet: 'model',
         family: 'C',
-        fix: 'Name the subfolder in the fixture name; the resolver creates it under `_expected/`.',
+        fix: 'Name the subfolder in the path.',
         id: 'C5',
-        name: 'c5-slash-is-a-subfolder',
+        name: 'c5-a-path-names-its-subfolder',
         rationale:
-            'A flat `_expected/` stops being readable at a dozen files, and the alternative — a second option naming a directory — would be a second way to say where a golden lives.',
+            'A flat folder stops being readable at a dozen files, and a path that names its subfolder is read where it is written — no second option says where a golden lives.',
         reach: 'ground',
     },
     {
         channel: 'runtime',
         convention:
-            'Every `toMatch` subject resolves against `_expected/` — response, stream, json, directory, tree. Only `.request()` reads `_requests/`.',
+            "Every golden matcher reads the path it is given, from the spec file's directory — response, stream, json, tree alike — and `requestFile` reads a request the same way. Nothing resolves against a folder the line does not name.",
         facet: 'model',
         family: 'D',
-        fix: 'Put the golden under `_expected/` and name it with its extension.',
+        fix: "Spell the golden's path from the spec: `./expected/<case>.<ext>`.",
         id: 'D3',
-        name: 'd3-tomatch-resolves-under-expected',
+        name: 'd3-a-golden-is-read-where-its-path-says',
         rationale:
-            'One resolution rule for every subject means a reader knows where a golden lives without knowing which accessor produced it.',
+            'One resolution rule, written on the line, means a reader knows where a golden lives without knowing any convention or which accessor produced it.',
         reach: 'tests',
     },
     {
@@ -1510,14 +1512,14 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            'The framework refuses at run time an unknown `$…` marker, or a `$FIXTURES` with no ancestor `specs` directory (with a guiding message).',
+            "The framework refuses at run time a file verb (`seedFile`, `requestFile`, `fixtureFile`, `fixtureDirectory`, `toMatchFile`, `toMatchDirectory`, a document's `fixture:`) whose path does not start with `./` or `../`, naming the verb and the form to write; `fixtureFile` refuses a directory and `fixtureDirectory` a file.",
         facet: 'model',
         family: 'B',
-        fix: 'Write `$FIXTURES/<name>`, from a spec that sits under a `specs/` tree.',
+        fix: 'Name the file by its path from the spec file: `./seeds/users.sql`, `../../fixtures/shop/`.',
         id: 'B2',
-        name: 'b2-unknown-marker-runtime',
+        name: 'b2-relative-path-runtime',
         rationale:
-            'A runtime message guides the author where the fault escapes the static channel (a non-literal argument).',
+            'The type refuses a bare name at the call; the runtime keeps the law for a caller the compiler does not see — a JavaScript spec, a cast, a document.',
         reach: 'tests',
     },
     {
@@ -1547,14 +1549,14 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            '`toMatch` on an accessor subject (`stream`/`json`/`response`/tree) expects a fixture NAME (extension included): passing a `RegExp` (or any non-string) throws immediately, naming the subject and the `expect(x.text).toMatch(/re/)` escape hatch.',
+            "`toMatch` is vitest's and takes a value — on a stream accessor it reads the comparable text; on a json, response or tree subject it is refused, naming the file matchers. `toMatchFile` and `toMatchDirectory` take a path relative to the spec file: a bare name or a `RegExp` throws at once, naming the verb and the form to write.",
         facet: 'model',
         family: 'D',
-        fix: "Write the fixture's name, or assert on `.text` when a pattern is genuinely what you mean.",
+        fix: "Write `toMatchFile('./expected/<case>.<ext>')` for a golden, `toMatch(value)` for a value.",
         id: 'D14',
-        name: 'd14-tomatch-fixture-name',
+        name: 'd14-one-verb-per-meaning',
         rationale:
-            'The instinct inherited from vitest (`toMatch(/re/)`) would otherwise hit the extension error or coerce the regex into `"/re/"`. The accessor argument is never a value-side literal, and a static heuristic would confuse the legitimate `expect(string).toMatch(/re/)` (D3/D8) — only the runtime channel refuses it cleanly, with no false positives.',
+            'A string that is sometimes a value and sometimes a file name is a convention the reader must know; one verb per meaning makes the line say which, and the runtime refuses the crossed form a type cannot see (a cast, a JavaScript spec).',
         reach: 'tests',
     },
     {

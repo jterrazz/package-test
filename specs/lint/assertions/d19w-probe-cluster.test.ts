@@ -6,7 +6,9 @@ describe('lint — d19w-probe-cluster (CONVENTIONS D19)', () => {
     // Scalpel (D11): targeted rule-id presence/absence probe — a full-output snapshot would couple this rule test to the tool's diagnostic formatting.
     test('rejects three probes on one stream with no golden', async () => {
         // Given - a project violating D19
-        const result = await cli.fixture('$FIXTURES/lint-violations/d19w-probe-cluster/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/d19w-probe-cluster/')
+            .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
         expect(result.exitCode).toBe(0);
@@ -16,7 +18,7 @@ describe('lint — d19w-probe-cluster (CONVENTIONS D19)', () => {
     test('accepts two targeted probes', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/d19w-probe-cluster-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/d19w-probe-cluster-ok/')
             .exec('.');
 
         // Then - clean exit, no D19 diagnostic

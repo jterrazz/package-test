@@ -5,7 +5,7 @@
 type JobsSpecification<DatabaseKey> = object;
 ```
 
-Defined in: [src/model/chain/builder.ts:216](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L216)
+Defined in: [src/model/chain/builder.ts:221](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L221)
 
 ## Type Parameters
 
@@ -21,7 +21,7 @@ Defined in: [src/model/chain/builder.ts:216](https://github.com/jterrazz/package
 clock: (iso) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/model/chain/builder.ts:218](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L218)
+Defined in: [src/model/chain/builder.ts:223](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L223)
 
 Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 
@@ -43,27 +43,27 @@ Pin the job's `Date` at `iso` for this chain — the calendar the job reads.
 intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
 ```
 
-Defined in: [src/model/chain/builder.ts:220](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L220)
+Defined in: [src/model/chain/builder.ts:225](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L225)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
 ***
 
-### seed
+### seedFile
 
 ```ts
-seed: (file, options?) => JobsSpecification<DatabaseKey>;
+seedFile: (path, options?) => JobsSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/model/chain/builder.ts:222](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L222)
+Defined in: [src/model/chain/builder.ts:227](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L227)
 
-Queue a SQL seed file from `_seeds/` to run before the action.
+Queue a SQL seed file, relative to the spec file, to run before the action.
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `file` | `string` |
+| `path` | [`RelativePath`](RelativePath.md)\<`".sql"`\> |
 | `options?` | \{ `database?`: `DatabaseKey`; \} |
 | `options.database?` | `DatabaseKey` |
 
@@ -79,7 +79,7 @@ Queue a SQL seed file from `_seeds/` to run before the action.
 trigger: (name) => Promise<JobsResult>;
 ```
 
-Defined in: [src/model/chain/builder.ts:225](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L225)
+Defined in: [src/model/chain/builder.ts:233](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L233)
 
 Execute the named job registered via the `jobs` option and resolve with the result.
 

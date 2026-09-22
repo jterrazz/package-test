@@ -1,7 +1,7 @@
 description: prints back the instant, the directory and the origin it was handed
 fixture:
-    - $FIXTURES/console/
-    - served/
+    - ../_fixtures/console/
+    - ./_fixtures/served/
 env:
     - frozen
 serve:

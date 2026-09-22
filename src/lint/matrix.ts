@@ -25,7 +25,7 @@ import type { Capability, Column } from './facet-matrix.js';
  * between markers and into the skill's `references/matrix.md`; `matrix.test.ts`
  * refuses an empty declared cell.
  *
- * A cell counts FILES, not assertions: "three files exercise `.seed()` on api"
+ * A cell counts FILES, not assertions: "three files exercise `.seedFile()` on api"
  * is a fact a reader can act on, where a raw occurrence count moves with every
  * refactor of a loop and says nothing more.
  */

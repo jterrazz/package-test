@@ -7,7 +7,7 @@ describe('lint — a1-specification-file (CONVENTIONS A1)', () => {
     test('rejects a specification.cli() call outside a *.specification.ts file', async () => {
         // Given - a project violating A1
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/a1-specification-file/')
+            .fixtureDirectory('../../_fixtures/lint-violations/a1-specification-file/')
             .exec('.');
 
         // Then - oxlint reports the a1-specification-file diagnostic
@@ -18,7 +18,7 @@ describe('lint — a1-specification-file (CONVENTIONS A1)', () => {
     test('accepts the same runner created in a *.specification.ts file', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/a1-specification-file-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/a1-specification-file-ok/')
             .exec('.');
 
         // Then - clean run, no a1-specification-file diagnostic

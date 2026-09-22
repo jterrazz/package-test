@@ -8,7 +8,7 @@ test('captures the full head surface of a rendered page', async () => {
 
     // Then - one golden covers title, canonical, alternates, and metas
     expect(result.status).toBe(200);
-    expect(result.head).toMatch('home.head.json');
+    expect(result.head).toMatchFile('./_expected/home.head.json');
 });
 
 test('exposes canonical, alternates, and named metas directly', async () => {
@@ -27,5 +27,5 @@ test('parses every json-ld block into one array', async () => {
     const result = await website.visit('/');
 
     // Then - the whole structured-data surface matches one golden
-    expect(result.jsonLd).toMatch('home.jsonld.json');
+    expect(result.jsonLd).toMatchFile('./_expected/home.jsonld.json');
 });

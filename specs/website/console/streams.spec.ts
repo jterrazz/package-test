@@ -16,6 +16,6 @@ test('separates console errors from the full stream', async () => {
     const result = await website.visit('/noisy');
 
     // Then - the full stream carries both, the error stream only the error
-    expect(result.console).toMatch('noisy.console.txt');
+    expect(result.console).toMatchFile('./_expected/noisy.console.txt');
     expect(result.errors).toContain('boom');
 });

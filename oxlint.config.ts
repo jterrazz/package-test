@@ -69,7 +69,8 @@ const FRAMEWORK_LAYERS = {
             'seams/yaml/document',
             'model/matching/match',
             'model/chain/binding',
-            'model/chain/fixtures',
+            // The path law the runner refuses by is the one the rules read by.
+            'model/chain/spec-path',
             // The four ground names have ONE home; a rule that probed for its
             // Own copy of them could drift from what the runner resolves.
             'model/chain/ground',

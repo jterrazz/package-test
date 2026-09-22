@@ -7,7 +7,7 @@ describe('lint — b6w-redundant-env-url (CONVENTIONS B6)', () => {
     test('warns on a hand-wired DATABASE_URL from connectionString', async () => {
         // Given - a project violating B6
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/b6w-redundant-env-url/')
+            .fixtureDirectory('../../_fixtures/lint-violations/b6w-redundant-env-url/')
             .exec('.');
 
         // Then - oxlint reports the b6w-redundant-env-url diagnostic warnings do not fail the run - the diagnostic is advisory
@@ -18,7 +18,7 @@ describe('lint — b6w-redundant-env-url (CONVENTIONS B6)', () => {
     test('stays silent for non-URL env variables', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/b6w-redundant-env-url-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/b6w-redundant-env-url-ok/')
             .exec('.');
 
         // Then - clean run, no b6w-redundant-env-url diagnostic

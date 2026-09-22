@@ -88,7 +88,7 @@ export function memberPropertyName(node: AstNode): string | undefined {
 
 /**
  * The root identifier name of a member/call chain:
- * `dockerCli.fixture(x).exec(y)` → `dockerCli`.
+ * `dockerCli.fixtureDirectory(x).exec(y)` → `dockerCli`.
  */
 export function chainRootName(node: AstNode | undefined): string | undefined {
     let current = node;

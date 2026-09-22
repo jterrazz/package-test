@@ -9,20 +9,22 @@ describe('lint — d5w spec pinned value (CONVENTIONS D5)', () => {
     test('warns about a timestamp no fixture fixed', async () => {
         // Given - a golden spelling an ISO-8601 instant out
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/d5w-spec-pinned-value/')
+            .fixtureDirectory('../../_fixtures/lint-violations/d5w-spec-pinned-value/')
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch('d5w-spec-pinned-value.txt');
+        expect(result.stderr).toMatchFile('./_expected/d5w-spec-pinned-value.txt');
     });
 
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
-        const result = await cli.fixture('$FIXTURES/lint-violations/spec-document-ok/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/spec-document-ok/')
+            .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('clean.txt');
+        expect(result.stdout).toMatchFile('./_expected/clean.txt');
     });
 });

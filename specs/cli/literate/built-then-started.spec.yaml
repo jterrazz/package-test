@@ -1,5 +1,5 @@
 description: start runs what build wrote in the same working directory
-fixture: $FIXTURES/cli-app/
+fixture: ../../_fixtures/cli-app/
 runs:
     - command: build
       exit: 0

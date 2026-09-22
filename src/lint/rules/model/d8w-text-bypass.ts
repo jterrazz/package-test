@@ -5,7 +5,7 @@ import type { AstNode, LintRule, RuleContext } from '../../types.js';
 /** Text-oriented matchers that tempt a raw `.text` bypass (D8). */
 const TEXT_MATCHERS = new Set(['toContain', 'toMatch']);
 
-/** A regex literal, or `new RegExp(…)` — what an accessor subject refuses. */
+/** A regex literal, or `new RegExp(…)`. */
 function isRegExp(node: AstNode | undefined): boolean {
     if (node === undefined) {
         return false;
@@ -18,14 +18,12 @@ function isRegExp(node: AstNode | undefined): boolean {
 
 /**
  * CONVENTIONS D8 (warning) — `.text` is the raw stream escape hatch. Asserting
- * `expect(result.text).toContain(…)` throws away the typed subject (its token
- * grammar, its `toMatch('file.txt')` fixture resolution) for a substring check.
- * Prefer asserting on the accessor subject itself.
+ * `expect(result.text).toContain(…)` throws away the typed subject (its ANSI
+ * stripping, its transform) for a substring check. Prefer asserting on the
+ * accessor subject itself.
  *
- * A RegExp argument is exempt, because it is the one thing the typed subject
- * cannot take: `toMatch` on an accessor resolves a FIXTURE NAME and throws on a
- * regex, and chapter 14 names `expect(x.text).toMatch(/re/)` as the way through.
- * The rule warned on exactly the spelling its own manual prescribes.
+ * A RegExp argument is exempt: a pattern carries no token grammar to lose, so
+ * the raw text and the accessor say the same thing.
  */
 export const d8wTextBypass: LintRule = {
     create(context: RuleContext) {

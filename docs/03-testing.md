@@ -108,10 +108,10 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                   | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 54    |
-| Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
+| Module tests            | `src/**/*.test.ts` beside the module                    | one module, through its own exports, with nothing started                | 55    |
+| Rule tests              | `src/lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
 | The package’s own specs | `specs/<facet>/`                                        | the framework's own facets, each met through its constructor             | 67    |
-| The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 88    |
+| The lint suite          | `specs/lint/**`                                         | the built binary end to end, over fixture projects                       | 87    |
 | Meta-tests              | `src/lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the cards, the floor       | 18    |
 
 <!-- /GENERATED:layers -->
@@ -251,34 +251,35 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 ### Setup
 
-| Capability     | api | jobs | cli | integration | website | mobile | component | module |
-| -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.clock()`     | 1   | 0    | —   | 1           | 1       | —      | 1         | —      |
-| `.intercept()` | 3   | 1    | —   | 1           | 0       | 0      | 4         | —      |
-| `.seed()`      | 4   | 1    | 1   | 2           | —       | —      | —         | —      |
-| `.headers()`   | 1   | —    | —   | —           | 1       | —      | —         | —      |
-| `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
-| `.env()`       | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
-| `.viewport()`  | —   | —    | —   | —           | —       | —      | 1         | —      |
+| Capability            | api | jobs | cli | integration | website | mobile | component | module |
+| --------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.clock()`            | 1   | 0    | —   | 1           | 1       | —      | 1         | —      |
+| `.intercept()`        | 3   | 1    | —   | 1           | 0       | 0      | 4         | —      |
+| `.seedFile()`         | 4   | 1    | 1   | 2           | —       | —      | —         | —      |
+| `.headers()`          | 1   | —    | —   | —           | 1       | —      | —         | —      |
+| `.fixtureFile()`      | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `.fixtureDirectory()` | —   | —    | 6   | —           | —       | —      | —         | —      |
+| `.env()`              | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `.wrap()`             | —   | —    | —   | —           | —       | —      | 2         | —      |
+| `.viewport()`         | —   | —    | —   | —           | —       | —      | 1         | —      |
 
 ### Terminal action
 
-| Capability   | api | jobs | cli | integration | website | mobile | component | module |
-| ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.get()`     | 9   | —    | —   | —           | —       | —      | —         | —      |
-| `.post()`    | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.put()`     | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.request()` | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.trigger()` | —   | 1    | —   | —           | —       | —      | —         | —      |
-| `.call()`    | —   | —    | —   | 6           | —       | —      | —         | —      |
-| `.exec()`    | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.run()`     | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.visit()`   | —   | —    | —   | —           | 11      | —      | —         | —      |
-| `.fetch()`   | —   | —    | —   | —           | 2       | —      | —         | —      |
-| `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
-| `.render()`  | —   | —    | —   | —           | —       | —      | 15        | —      |
+| Capability       | api | jobs | cli | integration | website | mobile | component | module |
+| ---------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.get()`         | 9   | —    | —   | —           | —       | —      | —         | —      |
+| `.post()`        | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.put()`         | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.delete()`      | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.requestFile()` | 1   | —    | —   | —           | —       | —      | —         | —      |
+| `.trigger()`     | —   | 1    | —   | —           | —       | —      | —         | —      |
+| `.call()`        | —   | —    | —   | 6           | —       | —      | —         | —      |
+| `.exec()`        | —   | —    | 7   | —           | —       | —      | —         | —      |
+| `.run()`         | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `.visit()`       | —   | —    | —   | —           | 11      | —      | —         | —      |
+| `.fetch()`       | —   | —    | —   | —           | 2       | —      | —         | —      |
+| `.open()`        | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `.render()`      | —   | —    | —   | —           | —       | —      | 15        | —      |
 
 ### Verb
 
@@ -366,15 +367,16 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 ### Golden
 
-| Capability          | api | jobs | cli | integration | website | mobile | component | module |
-| ------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch('<name>')` | 3   | 0    | 6   | 5           | 5       | —      | 1         | 6      |
-| `toMatchRows()`     | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
-| `.http exchange`    | 3   | —    | —   | —           | —       | —      | —         | 7      |
-| `.aria.yaml tree`   | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `.json body`        | 0   | —    | 2   | 5           | 2       | —      | —         | 10     |
-| `.txt stream`       | 1   | —    | 8   | 2           | 2       | —      | —         | 12     |
-| `{ frozen }`        | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
+| Capability           | api | jobs | cli | integration | website | mobile | component | module |
+| -------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `toMatchFile()`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 10     |
+| `toMatchDirectory()` | 0   | —    | 3   | 0           | —       | —      | —         | 5      |
+| `toMatchRows()`      | 4   | 1    | 1   | 1           | —       | —      | 0         | 4      |
+| `.http exchange`     | 3   | —    | —   | —           | —       | —      | —         | 8      |
+| `.aria.yaml tree`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `.json body`         | 0   | —    | 2   | 5           | 2       | —      | —         | 10     |
+| `.txt stream`        | 1   | —    | 8   | 2           | 2       | —      | —         | 13     |
+| `{ frozen }`         | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
 
@@ -414,9 +416,9 @@ What the framework can do, and how many of this package’s own test FILES carry
 ### Exemptions
 
 - no mobile tree: an iOS simulator is not something CI provisions (M1) — `services`·mobile, `root`·mobile, `backend`·mobile, `device`·mobile, `app`·mobile, `timeouts`·mobile, `.intercept()`·mobile, `.open()`·mobile, `see`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `content`·mobile, `testId`·mobile, `.content`·mobile, `.screen`·mobile
-- the surface ships and this package does not specify it here yet — `root`·cli, `root`·website, `root`·component, `backend`·website, `external`·website, `clock`·component, `locale`·component, `timezone`·component, `viewport`·component, `.clock()`·jobs, `.intercept()`·website, `press`·website, `hover`·website, `check`·website, `goto`·website, `testId`·website, `dialog`·website, `status`·website, `table`·website, `row`·website, `listitem`·website, `banner`·website, `banner`·component, `complementary`·website, `complementary`·component, `contentinfo`·component, `form`·website, `form`·component, `search`·website, `search`·component, `.file()`·api, `.file()`·integration, `.directory()`·api, `.directory()`·integration, `.html`·website, `.title`·website, `.links`·website, `toMatchRows()`·component, `.json body`·api
+- the surface ships and this package does not specify it here yet — `root`·cli, `root`·website, `root`·component, `backend`·website, `external`·website, `clock`·component, `locale`·component, `timezone`·component, `viewport`·component, `.clock()`·jobs, `.intercept()`·website, `press`·website, `hover`·website, `check`·website, `goto`·website, `testId`·website, `dialog`·website, `status`·website, `table`·website, `row`·website, `listitem`·website, `banner`·website, `banner`·component, `complementary`·website, `complementary`·component, `contentinfo`·component, `form`·website, `form`·component, `search`·website, `search`·component, `.file()`·api, `.file()`·integration, `.directory()`·api, `.directory()`·integration, `.html`·website, `.title`·website, `.links`·website, `toMatchDirectory()`·api, `toMatchDirectory()`·integration, `toMatchRows()`·component, `.json body`·api
 - the package serves its own fixture site, so `server` is what it proves; `url` targets an already-running deployment, which is a consumer shape (A11 states the XOR) — `url`·website
-- a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory — `toMatch('<name>')`·jobs
+- a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory — `toMatchFile()`·jobs
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·api, `{{iso8601}}`·cli, `{{iso8601}}`·integration, `{{iso8601}}`·website, `{{number}}`·api, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·api, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·api, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·api, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->
@@ -455,7 +457,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- /GENERATED:meta-tests -->
 
-One proof of the channel declares no test and appears in no row: `src/type-channel.test-d.ts` states what the COMPILER refuses — A8, A11, B1, B3, D1, M2, W6 — as an `@ts-expect-error` per row, and `typescript check` fails the day the line it marks starts compiling. It runs under the typechecker the whole repository already runs, never under a vitest project.
+One proof of the channel declares no test and appears in no row: `src/type-channel.test-d.ts` states what the COMPILER refuses — A8, A11, B1, B2, B3, D1, M2, W6 — as an `@ts-expect-error` per row, and `typescript check` fails the day the line it marks starts compiling. It runs under the typechecker the whole repository already runs, never under a vitest project.
 
 `src/lint/plugin.test.ts` also holds the seven-channel contract: every row of
 every channel carries the proof that channel can give — a rule file and a

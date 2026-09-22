@@ -62,7 +62,7 @@ ruleTester.run('d12w-response-body-probe', d12wResponseBodyProbe as unknown as O
         // The golden form — no body probe at all.
         {
             code: `it('golden', async () => {
-                expect(result.response).toMatch('minimal.http');
+                expect(result.response).toMatchFile('./_expected/minimal.http');
             });`,
             filename: SPEC,
         },

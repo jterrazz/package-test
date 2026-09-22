@@ -9,20 +9,22 @@ describe('lint — c8 spec registered name (CONVENTIONS C8)', () => {
     test('rejects env and serve names no runner registers', async () => {
         // Given - a typo in both registries, beside a specification file that has neither
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c8-spec-registered-name/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c8-spec-registered-name/')
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch('c8-spec-registered-name.txt');
+        expect(result.stderr).toMatchFile('./_expected/c8-spec-registered-name.txt');
     });
 
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
-        const result = await cli.fixture('$FIXTURES/lint-violations/spec-document-ok/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/spec-document-ok/')
+            .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch('clean.txt');
+        expect(result.stdout).toMatchFile('./_expected/clean.txt');
     });
 });

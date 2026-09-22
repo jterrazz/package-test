@@ -10,6 +10,6 @@ describe('widget', () => {
         const result = await api.get('/');
 
         // Then - the golden is named by the row, not by a hand-written literal
-        expect(result.body).toMatch(`${name}.json`, { frozen: true });
+        expect(result.body).toMatchFile(`./_expected/${name}.json`, { frozen: true });
     });
 });

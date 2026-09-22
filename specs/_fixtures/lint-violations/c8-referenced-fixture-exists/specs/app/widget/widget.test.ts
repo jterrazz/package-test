@@ -7,5 +7,5 @@ test('matches a snapshot that was never created', async () => {
     const result = await cli.exec('help');
 
     // Then - the referenced fixture does not exist on disk (C8)
-    expect(result.stdout).toMatch('missing.txt');
+    expect(result.stdout).toMatchFile('./_expected/missing.txt');
 });

@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import type { BrowserCommand } from 'vitest/node';
 
-import { GROUND_EXPECTED } from '../../model/chain/ground.js';
+import { resolveSpecPath } from '../../model/chain/resolve.js';
 
 /**
  * The four things a page cannot do for itself, run on the server side of
@@ -16,7 +16,7 @@ import { GROUND_EXPECTED } from '../../model/chain/ground.js';
  *
  * **The golden file.** Vitest's built-in file commands resolve against the
  * project root and obey `server.fs`; a golden resolves against the TEST's own
- * directory (`_expected/` beside it), which `context.testPath` gives exactly —
+ * directory (the path is relative to it), which `context.testPath` gives exactly —
  * no `/@fs/` URL to parse, and no dependence on where the project is rooted.
  */
 
@@ -27,14 +27,14 @@ type PlaywrightCommandContext = {
     }>;
 };
 
-/** Where a golden sits: `_expected/<name>` beside the test that asked for it. */
+/** Where a golden sits: its path, relative to the test that asked for it. */
 function goldenPath(testPath: string | undefined, name: string): string {
     if (testPath === undefined) {
         throw new Error(
             'golden: the command carries no test path — a golden is read from a test file.',
         );
     }
-    return resolve(dirname(testPath), GROUND_EXPECTED, name);
+    return resolveSpecPath('toMatchFile', name, dirname(testPath));
 }
 
 /** The ARIA snapshot of the rendered `<body>`, as YAML. */

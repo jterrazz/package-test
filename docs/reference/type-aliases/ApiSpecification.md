@@ -5,7 +5,7 @@
 type ApiSpecification<DatabaseKey> = object;
 ```
 
-Defined in: [src/model/chain/builder.ts:179](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L179)
+Defined in: [src/model/chain/builder.ts:181](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L181)
 
 The `api` facet — HTTP chain entry handed out by `specification.api()`.
 Setup methods chain; action methods are terminal: they execute the spec
@@ -28,7 +28,7 @@ of the declared services record that are databases.
 clock: (iso) => ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/model/chain/builder.ts:181](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L181)
+Defined in: [src/model/chain/builder.ts:183](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L183)
 
 Pin the app's `Date` at `iso` for this chain — the calendar the app reads.
 
@@ -50,7 +50,7 @@ Pin the app's `Date` at `iso` for this chain — the calendar the app reads.
 delete: (path) => Promise<HttpResult>;
 ```
 
-Defined in: [src/model/chain/builder.ts:190](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L190)
+Defined in: [src/model/chain/builder.ts:195](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L195)
 
 Send a DELETE request and resolve with the result.
 
@@ -72,7 +72,7 @@ Send a DELETE request and resolve with the result.
 get: (path) => Promise<HttpResult>;
 ```
 
-Defined in: [src/model/chain/builder.ts:192](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L192)
+Defined in: [src/model/chain/builder.ts:197](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L197)
 
 Send a GET request and resolve with the result.
 
@@ -94,7 +94,7 @@ Send a GET request and resolve with the result.
 headers: (headers) => ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/model/chain/builder.ts:183](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L183)
+Defined in: [src/model/chain/builder.ts:185](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L185)
 
 Set HTTP headers for the request. Multiple calls merge.
 
@@ -116,7 +116,7 @@ Set HTTP headers for the request. Multiple calls merge.
 intercept: InterceptMethod<ApiSpecification<DatabaseKey>>;
 ```
 
-Defined in: [src/model/chain/builder.ts:185](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L185)
+Defined in: [src/model/chain/builder.ts:187](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L187)
 
 Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair.
 
@@ -128,7 +128,7 @@ Declare outgoing calls — a contract, a list, a composite, or an inline request
 post: (path, body?) => Promise<HttpResult>;
 ```
 
-Defined in: [src/model/chain/builder.ts:194](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L194)
+Defined in: [src/model/chain/builder.ts:199](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L199)
 
 Send a POST request (optional inline JSON body) and resolve with the result.
 
@@ -151,7 +151,7 @@ Send a POST request (optional inline JSON body) and resolve with the result.
 put: (path, body?) => Promise<HttpResult>;
 ```
 
-Defined in: [src/model/chain/builder.ts:196](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L196)
+Defined in: [src/model/chain/builder.ts:201](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L201)
 
 Send a PUT request (optional inline JSON body) and resolve with the result.
 
@@ -168,21 +168,21 @@ Send a PUT request (optional inline JSON body) and resolve with the result.
 
 ***
 
-### request
+### requestFile
 
 ```ts
-request: (file) => Promise<HttpResult>;
+requestFile: (path) => Promise<HttpResult>;
 ```
 
-Defined in: [src/model/chain/builder.ts:198](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L198)
+Defined in: [src/model/chain/builder.ts:203](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L203)
 
-Send the complete request described by `_requests/<file>` (.http format).
+Send the complete request described by a `.http` file, relative to the spec file.
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `file` | `string` |
+| `path` | [`RelativePath`](RelativePath.md)\<`".http"`\> |
 
 #### Returns
 
@@ -190,21 +190,21 @@ Send the complete request described by `_requests/<file>` (.http format).
 
 ***
 
-### seed
+### seedFile
 
 ```ts
-seed: (file, options?) => ApiSpecification<DatabaseKey>;
+seedFile: (path, options?) => ApiSpecification<DatabaseKey>;
 ```
 
-Defined in: [src/model/chain/builder.ts:187](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L187)
+Defined in: [src/model/chain/builder.ts:189](https://github.com/jterrazz/package-test/blob/main/src/model/chain/builder.ts#L189)
 
-Queue a SQL seed file from `_seeds/` to run before the action.
+Queue a SQL seed file, relative to the spec file, to run before the action.
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `file` | `string` |
+| `path` | [`RelativePath`](RelativePath.md)\<`".sql"`\> |
 | `options?` | \{ `database?`: `DatabaseKey`; \} |
 | `options.database?` | `DatabaseKey` |
 

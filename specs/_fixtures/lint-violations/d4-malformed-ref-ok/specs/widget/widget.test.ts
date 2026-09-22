@@ -8,6 +8,6 @@ describe('widget', () => {
         const result = await cli.exec('build');
 
         // Then - it matches the recorded fixture
-        expect(result.stdout).toMatch('out.txt');
+        expect(result.stdout).toMatchFile('./_expected/out.txt');
     });
 });

@@ -113,6 +113,7 @@
 | [PostgresOptions](type-aliases/PostgresOptions.md) | - |
 | [ProcessOptions](type-aliases/ProcessOptions.md) | The ONE shape an external process takes — the site under test, a backend a page talks to, a bundler a simulator loads from. Built by `process()` (chapter 17) and accepted wherever a facet starts something outside this process: `website({ server })`, `services: { api: process(…) }`, and the literate `serve:` registry. |
 | [RedisOptions](type-aliases/RedisOptions.md) | - |
+| [RelativePath](type-aliases/RelativePath.md) | A path a spec names a file by, spelled relative to the spec file itself. |
 | [RenderSubject](type-aliases/RenderSubject.md) | What `.render()` mounts. A React tree is an element (`<PostTable />`); a vanilla DOM subject is the FUNCTION that fills a container, which is how a DOM-only module is called in production too. |
 | [ScreenNode](type-aliases/ScreenNode.md) | One node of the projected accessibility tree — the XCUITest page source with its noise collapsed: unlabeled, identifier-less, valueless wrapper nodes are dropped and their children hoisted, so the projection stays stable and golden-friendly. Type names lose the `XCUIElementType` prefix. |
 | [ServerPort](type-aliases/ServerPort.md) | Abstract server interface for specification runners. Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch. |

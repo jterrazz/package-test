@@ -7,5 +7,5 @@ test('writes the report', async () => {
     const result = await cli.exec('report');
 
     // Then - the summary is the golden
-    expect(result.stdout).toMatch('summary.txt');
+    expect(result.stdout).toMatchFile('./_expected/summary.txt');
 });

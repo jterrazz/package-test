@@ -112,12 +112,33 @@ describe('spec document — reading', () => {
         expect(document.runs[0]?.commandLine).toBe(3);
     });
 
+    test.each(['$FIXTURES/stub/', 'stub/', '/abs/stub/'])(
+        'a fixture that is not a relative path is refused on its line: %s',
+        (path) => {
+            // Given - the 16 spellings: a marker, a bare name, an absolute path
+            const source = [
+                'description: states its ground',
+                'fixture:',
+                `  - ${path}`,
+                'runs:',
+                '  - command: help',
+                '    exit: 0',
+                '',
+            ].join('\n');
+
+            // Then - refused by the grammar, where the path is written
+            expect(() => parseSpecDocument(source, 'case.spec.yaml')).toThrow(
+                /^case\.spec\.yaml:3: fixture: ".*" is not a relative path — name it from this document/u,
+            );
+        },
+    );
+
     test('env and fixture take a bare string or a list, and serve carries extra env', () => {
         // Given - the three ground keys in both their forms
         const document = parseSpecDocument(
             [
                 'description: states its ground',
-                'fixture: $FIXTURES/stub/',
+                'fixture: ../../fixtures/stub/',
                 'env:',
                 '  - frozen',
                 '  - ORIGIN=http://127.0.0.1:9',
@@ -133,7 +154,9 @@ describe('spec document — reading', () => {
         );
 
         // Then - a bare word is a registered set, KEY=value is inline, and a mapping entry names one server plus the env it is started with
-        expect(document.fixtures.map((fixture) => fixture.path)).toStrictEqual(['$FIXTURES/stub/']);
+        expect(document.fixtures.map((fixture) => fixture.path)).toStrictEqual([
+            '../../fixtures/stub/',
+        ]);
         expect(document.env).toStrictEqual([
             { kind: 'set', line: 4, name: 'frozen' },
             { key: 'ORIGIN', kind: 'pair', line: 5, value: 'http://127.0.0.1:9' },

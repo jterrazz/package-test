@@ -94,7 +94,7 @@ function withoutComments(text: string): string {
 
 /**
  * Directories the walk never enters. `_fixtures/` trees (the shared pool and
- * the leaf-local ones) are verbatim `.fixture()` cwd material — file STATE, not
+ * the leaf-local ones) are verbatim fixture cwd material — file STATE, not
  * assertion fixtures — so the token grammar has no meaning inside them.
  */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);

@@ -7,7 +7,7 @@ describe('lint — c2-http-only-requests (CONVENTIONS C2)', () => {
     test('rejects a non-.http file under _requests/', async () => {
         // Given - a project violating C2
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c2-http-only-requests/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c2-http-only-requests/')
             .exec('.');
 
         // Then - oxlint reports the c2-http-only-requests diagnostic
@@ -18,7 +18,7 @@ describe('lint — c2-http-only-requests (CONVENTIONS C2)', () => {
     test('accepts a _requests/ directory of .http files only', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/c2-http-only-requests-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/c2-http-only-requests-ok/')
             .exec('.');
 
         // Then - clean run, no c2-http-only-requests diagnostic

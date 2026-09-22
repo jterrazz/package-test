@@ -8,6 +8,7 @@ import {
     yamlSyntaxErrors,
 } from '../../seams/yaml/document.js';
 import type { Node, Pair, YAMLMap, YamlSource } from '../../seams/yaml/document.js';
+import { isRelativePath } from '../chain/spec-path.js';
 
 /**
  * The `<case>.spec.yaml` document — one scenario, written as data.
@@ -17,7 +18,7 @@ import type { Node, Pair, YAMLMap, YamlSource } from '../../seams/yaml/document.
  * command, its exit code, its streams and what it left on disk:
  *
  *     description: removes a post and names what is gone
- *     fixture: $FIXTURES/posts-stub/
+ *     fixture: ../../fixtures/posts-stub/
  *     env:
  *       - frozen
  *     runs:
@@ -277,6 +278,19 @@ function readStream(context: Context, node: Node | null, what: string): SpecStre
 
 // ── Fields ──
 
+function readFixtures(context: Context, node: Node | null): SpecFixture[] {
+    return stringList(context, node, 'fixture:').map(({ line, value }) => {
+        if (!isRelativePath(value)) {
+            throw new SpecSyntaxError(
+                context.fileName,
+                line,
+                `fixture: "${value}" is not a relative path — name it from this document (./… or ../…)`,
+            );
+        }
+        return { line, path: value };
+    });
+}
+
 function readEnv(context: Context, node: Node | null): SpecEnvToken[] {
     return stringList(context, node, 'env:').map(({ line, value }) => {
         const separator = value.indexOf('=');
@@ -478,13 +492,7 @@ export function readSpecFile(content: string, fileName: string): SpecFile {
         description: requireString(context, found.get('description')!.value, 'description:'),
         descriptionLine: lineOf(context, found.get('description')),
         env: envPair === undefined ? [] : readEnv(context, envPair.value),
-        fixtures:
-            fixturePair === undefined
-                ? []
-                : stringList(context, fixturePair.value, 'fixture:').map(({ line, value }) => ({
-                      line,
-                      path: value,
-                  })),
+        fixtures: fixturePair === undefined ? [] : readFixtures(context, fixturePair.value),
         kind: kind as SpecKind,
         runs: runItems.map((item, index) => readRun(context, item, index === runItems.length - 1)),
         serve: servePair === undefined ? [] : readServe(context, servePair.value),
@@ -583,6 +591,9 @@ export function updateSpecFile(file: SpecFile, updates: SpecRunUpdate[]): string
 }
 
 // ── Schema ──
+
+/** What a path in a document starts with — the same law as every file verb. */
+const RELATIVE_PATH_PATTERN = String.raw`^\.\.?/`;
 
 const STRING_OR_LIST = {
     oneOf: [{ type: 'string' }, { items: { type: 'string' }, minItems: 1, type: 'array' }],
@@ -694,9 +705,16 @@ export const SPEC_SCHEMA: SpecSchema = {
                 'A bare word names an env set registered in code; KEY=value is inline. $WORKDIR expands.',
         },
         fixture: {
-            ...STRING_OR_LIST,
             description:
-                'Fixture paths copied into the working directory, layering in order. `$FIXTURES/<name>` is the shared pool at `<specs-root>/_fixtures/`; a bare path is the ground beside this document, at `_fixtures/<name>`.',
+                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`). A trailing `/` spreads a directory's contents; without it the file or directory is copied under its own name. The shared pool is reached by the path that climbs to it.",
+            oneOf: [
+                { pattern: RELATIVE_PATH_PATTERN, type: 'string' },
+                {
+                    items: { pattern: RELATIVE_PATH_PATTERN, type: 'string' },
+                    minItems: 1,
+                    type: 'array',
+                },
+            ],
         },
         kind: {
             default: 'cli',

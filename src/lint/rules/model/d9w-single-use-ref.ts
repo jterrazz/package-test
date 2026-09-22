@@ -1,11 +1,21 @@
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
-import { GROUND_EXPECTED } from '../../../model/chain/ground.js';
+import { isRelativePath } from '../../../model/chain/spec-path.js';
 import { memberPropertyName, stringValue, walk } from '../../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole, roleOf } from '../../role.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../types.js';
+
+/** The relative path a golden matcher names, when the call is one and names it literally. */
+function goldenPathOf(node: AstNode): string | undefined {
+    const matcher = memberPropertyName(node.callee as AstNode);
+    if (matcher !== 'toMatchFile' && matcher !== 'toMatchDirectory') {
+        return undefined;
+    }
+    const name = stringValue((node.arguments as AstNode[] | undefined)?.[0]);
+    return name !== undefined && isRelativePath(name) ? name : undefined;
+}
 
 /** A captured-ref token: `{{kind#ref}}`. Captures the ref name. */
 const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/gu;
@@ -48,7 +58,7 @@ function refsInFixture(target: string): string[] {
  * `{{uuid#order}}`) earns its keep only when it is asserted more than once (the
  * point of a capture is the equality check on later occurrences). Aggregating
  * per file — code `match.ref` literals plus the `{{kind#ref}}` tokens of the
- * `_expected/` fixtures the file references — a ref that appears exactly once
+ * golden files the file references — a ref that appears exactly once
  * everywhere is a plain matcher wearing a name.
  */
 export const d9wSingleUseRef: LintRule = {
@@ -64,8 +74,8 @@ export const d9wSingleUseRef: LintRule = {
                 const counts = new Map<string, number>();
                 const codeNodes = new Map<string, AstNode>();
                 // Fallback report site for a ref that lives ONLY in a fixture:
-                // The `toMatch(...)` node that pulled it in. Per D9's normative
-                // Text the count aggregates code + referenced `_expected/`
+                // The golden matcher's node that pulled it in. Per D9's normative
+                // Text the count aggregates code + the goldens it references,
                 // Fixtures, so a fixture-only ref used once must still warn —
                 // Attached to its referencing node since it has no code site.
                 const fixtureNodes = new Map<string, AstNode>();
@@ -87,19 +97,13 @@ export const d9wSingleUseRef: LintRule = {
                         }
                         return;
                     }
-                    if (memberPropertyName(node.callee as AstNode) === 'toMatch') {
-                        const name = stringValue((node.arguments as AstNode[] | undefined)?.[0]);
-                        if (name !== undefined) {
-                            const target = join(
-                                featureDir,
-                                GROUND_EXPECTED,
-                                name.replace(/\/+$/u, ''),
-                            );
-                            for (const ref of refsInFixture(target)) {
-                                bump(ref);
-                                if (!fixtureNodes.has(ref)) {
-                                    fixtureNodes.set(ref, node);
-                                }
+                    const name = goldenPathOf(node);
+                    if (name !== undefined) {
+                        const target = resolve(featureDir, name.replace(/\/+$/u, ''));
+                        for (const ref of refsInFixture(target)) {
+                            bump(ref);
+                            if (!fixtureNodes.has(ref)) {
+                                fixtureNodes.set(ref, node);
                             }
                         }
                     }

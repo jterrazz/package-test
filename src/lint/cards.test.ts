@@ -152,8 +152,8 @@ describe('signature cards — what a card says', () => {
         const card = renderCard('api');
 
         // Then - it names the setups and the terminals by their written form
-        expect(card).toContain('`.seed()`');
-        expect(card).toContain("`.request('create-user.http')`");
+        expect(card).toContain('`.seedFile()`');
+        expect(card).toContain("`.requestFile('./requests/create-user.http')`");
         expect(card).toContain('## Terminal actions (exactly one)');
     });
 

@@ -6,5 +6,5 @@ test('answers the total of the order', async () => {
     // Given - an order with two lines
     const result = await api.get('/orders/1');
     // Then - the whole answer is pinned
-    expect(result.response.body).toMatch('total.json');
+    expect(result.response.body).toMatchFile('./_expected/total.json');
 });

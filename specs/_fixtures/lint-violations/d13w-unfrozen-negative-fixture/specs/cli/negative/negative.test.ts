@@ -5,5 +5,5 @@ test('asserts the mismatch diff on an unfrozen fixture', () => {
     const result = call();
 
     // Then - the mismatch is asserted, but the fixture is unfrozen (D13 warn)
-    expect(() => expect(result.stdout).toMatch('wrong.txt')).toThrow(/mismatch/);
+    expect(() => expect(result.stdout).toMatchFile('./_expected/wrong.txt')).toThrow(/mismatch/);
 });

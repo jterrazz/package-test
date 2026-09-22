@@ -277,7 +277,7 @@ describe('builder — adapter requirements', () => {
 // ── SQL seed targeting ──
 
 describe('builder — sql seed targeting', () => {
-    test('seed() with an unknown database key lists the available keys', async () => {
+    test('seedFile() with an unknown database key lists the available keys', async () => {
         // Given - two named databases in the config
         const cli = createCliFacet({
             command: new FakeCommandAdapter(),
@@ -289,8 +289,8 @@ describe('builder — sql seed targeting', () => {
         });
 
         // Then - the error names the missing key and enumerates the record
-        await expect(cli.seed('x.sql', { database: 'ghost' }).exec('run')).rejects.toThrow(
-            'seed() targets database "ghost" but it was not found. Available: analytics, db',
+        await expect(cli.seedFile('./x.sql', { database: 'ghost' }).exec('run')).rejects.toThrow(
+            'seedFile() targets database "ghost" but it was not found. Available: analytics, db',
         );
     });
 
@@ -302,7 +302,7 @@ describe('builder — sql seed targeting', () => {
         });
 
         // Then - a bare SQL seed is rejected until it names its target database
-        expect(() => cli.seed('users.sql')).toThrow('2 databases are declared');
+        expect(() => cli.seedFile('./users.sql')).toThrow('2 databases are declared');
     });
 });
 

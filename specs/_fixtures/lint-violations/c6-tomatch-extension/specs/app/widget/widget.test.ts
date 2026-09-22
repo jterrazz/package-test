@@ -7,5 +7,5 @@ test('prints help', async () => {
     const result = await cli.exec('help');
 
     // Then - output matches the fixture
-    expect(result.stdout).toMatch('help');
+    expect(result.stdout).toMatchFile('./_expected/help');
 });

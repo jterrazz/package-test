@@ -124,19 +124,21 @@
             "description": "A bare word names an env set registered in code; KEY=value is inline. $WORKDIR expands."
         },
         "fixture": {
+            "description": "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`). A trailing `/` spreads a directory's contents; without it the file or directory is copied under its own name. The shared pool is reached by the path that climbs to it.",
             "oneOf": [
                 {
+                    "pattern": "^\\.\\.?/",
                     "type": "string"
                 },
                 {
                     "items": {
+                        "pattern": "^\\.\\.?/",
                         "type": "string"
                     },
                     "minItems": 1,
                     "type": "array"
                 }
-            ],
-            "description": "Fixture paths copied into the working directory, layering in order. `$FIXTURES/<name>` is the shared pool at `<specs-root>/_fixtures/`; a bare path is the ground beside this document, at `_fixtures/<name>`."
+            ]
         },
         "kind": {
             "default": "cli",

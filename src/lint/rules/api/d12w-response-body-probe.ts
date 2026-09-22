@@ -39,7 +39,7 @@ function unwrap(node: AstNode | undefined): AstNode | undefined {
  * assertions (the D11 boundary, mechanized). A test that accumulates a CLUSTER
  * of raw body probes — reading `.response.body` (or a variable cast from it)
  * `threshold`+ times in one test callback — should collapse into one golden:
- * `expect(result.response).toMatch('case.http')`. One or two probes stay silent
+ * `expect(result.response).toMatchFile('./expected/case.http')`. One or two probes stay silent
  * (a legitimate scalpel: absence, a single-field delta, third-party output).
  *
  * A probe is a body-rooted read: a direct `.response.body` use, or a field
@@ -112,7 +112,7 @@ export const d12wResponseBodyProbe: LintRule = {
         defaultOptions: [{ threshold: DEFAULT_THRESHOLD }],
         messages: {
             bodyProbeCluster:
-                "{{count}} body probes in one test — this wants a full golden: expect(result.response).toMatch('x.http').",
+                "{{count}} body probes in one test — this wants a full golden: expect(result.response).toMatchFile('./expected/x.http').",
         },
         schema: [
             {

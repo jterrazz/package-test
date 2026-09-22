@@ -22,7 +22,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the parts a consumer reads come from the compose file
-        expect(result.value).toMatch('connection-string.json');
+        expect(result.value).toMatchFile('./_expected/connection-string.json');
     });
 
     test('passes its healthcheck on a reachable container', async () => {
@@ -43,43 +43,43 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the row is readable
-        expect(result.value).toMatch('alice.json');
+        expect(result.value).toMatchFile('./_expected/alice.json');
     });
 
     test('executes every statement of a seed file', async () => {
         // Given - a seed file holding two inserts
         const result = await integration
-            .seed('two-users.sql')
+            .seedFile('./_seeds/two-users.sql')
             .call(async ({ db }) => await db.query('users', ['name']));
 
         // Then - both rows landed
-        expect(result.value).toMatch('two-users.json');
+        expect(result.value).toMatchFile('./_expected/two-users.json');
     });
 
     test('returns rows as value arrays, in the column order asked for', async () => {
         // Given - two seeded users, the columns requested in reverse
         const result = await integration
-            .seed('two-users.sql')
+            .seedFile('./_seeds/two-users.sql')
             .call(async ({ db }) => await db.query('users', ['email', 'name']));
 
         // Then - each row is a value array following the requested order
-        expect(result.value).toMatch('two-users-reversed.json');
+        expect(result.value).toMatchFile('./_expected/two-users-reversed.json');
     });
 
     test('starts every chain on an empty table', async () => {
         // Given - a chain that seeded, then a chain that only reads
         await integration
-            .seed('two-users.sql')
+            .seedFile('./_seeds/two-users.sql')
             .call(async ({ db }) => await db.query('users', ['name']));
         const result = await integration.call(async ({ db }) => await db.query('users', ['name']));
 
         // Then - the second chain never saw the first one's rows
-        expect(result.value).toMatch('empty.json');
+        expect(result.value).toMatchFile('./_expected/empty.json');
     });
 
     test('truncates every table on reset, and takes rows again afterwards', async () => {
         // Given - seeded rows, a reset, then one insert
-        const result = await integration.seed('two-users.sql').call(async ({ db }) => {
+        const result = await integration.seedFile('./_seeds/two-users.sql').call(async ({ db }) => {
             await db.reset();
             await db.seed(
                 "INSERT INTO \"users\" (name, email) VALUES ('Second', 'second@test.com')",
@@ -88,7 +88,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - only the row written after the reset remains
-        expect(result.value).toMatch('second.json');
+        expect(result.value).toMatchFile('./_expected/second.json');
     });
 
     test('runs the init script the compose directory carries', async () => {
@@ -113,7 +113,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the script ran against the real database
-        expect(result.value).toMatch('init-ok.json');
+        expect(result.value).toMatchFile('./_expected/init-ok.json');
     });
 
     /*

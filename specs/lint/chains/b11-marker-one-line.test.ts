@@ -7,7 +7,7 @@ describe('lint — b11-marker-one-line (CONVENTIONS B11)', () => {
     test('rejects a marker wrapped onto a second comment line', async () => {
         // Given - a project whose Given sentence runs over two comment lines
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/b11-marker-one-line/')
+            .fixtureDirectory('../../_fixtures/lint-violations/b11-marker-one-line/')
             .exec('.');
 
         // Then - the wrapped marker is reported
@@ -18,7 +18,7 @@ describe('lint — b11-marker-one-line (CONVENTIONS B11)', () => {
     test('accepts one-line markers and a note set apart by a blank line', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/b11-marker-one-line-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/b11-marker-one-line-ok/')
             .exec('.');
 
         // Then - clean exit, no B11 diagnostic

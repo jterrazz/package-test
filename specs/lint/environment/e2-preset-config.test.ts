@@ -6,7 +6,9 @@ describe('lint — e2-preset-config (CONVENTIONS E2)', () => {
     // Scalpel (D11): targeted rule-id presence/absence probe — a full-output snapshot would couple this rule test to the tool's diagnostic formatting.
     test('rejects a config that does not start from the preset', async () => {
         // Given - a project violating E2
-        const result = await cli.fixture('$FIXTURES/lint-violations/e2-preset-config/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/e2-preset-config/')
+            .exec('.');
 
         // Then - the diagnostic names the rule
         expect(result.exitCode).toBe(1);
@@ -16,7 +18,7 @@ describe('lint — e2-preset-config (CONVENTIONS E2)', () => {
     test('accepts a config that starts from the preset', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/e2-preset-config-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/e2-preset-config-ok/')
             .exec('.');
 
         // Then - clean exit, no E2 diagnostic

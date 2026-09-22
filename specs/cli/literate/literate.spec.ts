@@ -179,7 +179,7 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the whole rendering, tokens covering the path and the run cwd
-        expect(text(message)).toMatch('wrong-stdout-error.txt');
+        expect(text(message)).toMatchFile('./_expected/wrong-stdout-error.txt');
     });
 
     test('a wrong exit code names both codes and what stderr carried', async () => {
@@ -189,7 +189,7 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the whole rendering, stderr included
-        expect(text(message)).toMatch('wrong-exit-error.txt');
+        expect(text(message)).toMatchFile('./_expected/wrong-exit-error.txt');
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
@@ -199,7 +199,7 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the whole rendering, one line per rejected assertion
-        expect(text(message)).toMatch('wrong-files-error.txt');
+        expect(text(message)).toMatchFile('./_expected/wrong-files-error.txt');
     });
 
     test('the stack carries ONE frame, on the run that failed', async () => {

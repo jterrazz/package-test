@@ -3,7 +3,7 @@ import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../types.js';
 
 /** Matchers backed by IO (SQL query, disk walk, docker) — must be awaited (D2). */
-const IO_MATCHERS = new Set(['toBeEmpty', 'toBeRunning', 'toMatchRows']);
+const IO_MATCHERS = new Set(['toBeEmpty', 'toBeRunning', 'toMatchDirectory', 'toMatchRows']);
 
 /** Does the member-call spine root at an `expect(…)` call? */
 function rootsAtExpect(node: AstNode | undefined): boolean {
@@ -37,7 +37,8 @@ function isDropped(node: AstNode): boolean {
 
 /**
  * CONVENTIONS D2 — the IO-backed matchers (`toMatchRows` runs SQL,
- * `toBeEmpty`/`toBeRunning` walk disk / query docker) return a promise and must
+ * `toMatchDirectory` walks a tree, `toBeEmpty`/`toBeRunning` walk disk / query
+ * docker) return a promise and must
  * be `await`ed (or returned). A bare `expect(rows).toMatchRows(...)` silently
  * resolves nothing and the assertion never runs.
  */

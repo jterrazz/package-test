@@ -14,7 +14,7 @@ describe('integration — the world the module reaches', () => {
             .call(async () => await quoteOrder(PRICING, 'ORD-1'));
 
         // Then - the module answered with what the provider replied
-        expect(result.value).toMatch('quoted.json');
+        expect(result.value).toMatchFile('./_expected/quoted.json');
     });
 
     test('reads the refusal of the module when the provider says no', async () => {
@@ -24,7 +24,7 @@ describe('integration — the world the module reaches', () => {
             .call(async () => await quoteOrder(PRICING, 'ORD-2'));
 
         // Then - the module's message is the reading, not the status
-        expect(result.error).toMatch('unavailable.txt');
+        expect(result.error).toMatchFile('./_expected/unavailable.txt');
     });
 
     test('fails the chain on a call no contract accepted', async () => {

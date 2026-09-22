@@ -6,7 +6,9 @@ describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
     // Scalpel (D11): targeted rule-id presence/absence probe — a full-output snapshot would couple this rule test to the tool's diagnostic formatting.
     test('rejects an arbitrary setTimeout sleep in a spec', async () => {
         // Given - a project violating J2
-        const result = await cli.fixture('$FIXTURES/lint-violations/j2-no-sleep/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/j2-no-sleep/')
+            .exec('.');
 
         // Then - oxlint reports the j2-no-sleep diagnostic
         expect(result.exitCode).toBe(1);
@@ -15,7 +17,9 @@ describe('lint — j2-no-sleep (CONVENTIONS J2)', () => {
 
     test('accepts framework-level synchronisation, and a double that settles late', async () => {
         // Given - the compliant twin: a `waitFor`, and a double written as a plain object literal whose method holds a timer
-        const result = await cli.fixture('$FIXTURES/lint-violations/j2-no-sleep-ok/').exec('.');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/lint-violations/j2-no-sleep-ok/')
+            .exec('.');
 
         // Then - clean run, no j2-no-sleep diagnostic
         expect(result.exitCode).toBe(0);

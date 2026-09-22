@@ -1,6 +1,6 @@
 import { expect, inject } from 'vitest';
 
-import { GROUND_EXPECTED } from '../../model/chain/ground.js';
+import { requireRelativePath } from '../../model/chain/spec-path.js';
 import type { MatchFixtureOptions } from '../../model/result/match-options.js';
 import {
     compareStreamText,
@@ -47,7 +47,7 @@ async function matchGolden(
         }
         return {
             message: () =>
-                `${accessor.streamName} fixture "${name}" does not exist under ${GROUND_EXPECTED}/ beside this test.\n` +
+                `${accessor.streamName} fixture "${name}" does not exist beside this test.\n` +
                 'Run with TEST_UPDATE=1 (or vitest -u) to create it.',
             pass: false,
         };
@@ -56,23 +56,29 @@ async function matchGolden(
     const comparison = compareStreamText(accessor, name, stored);
     if (!comparison.pass && updating() && !frozen) {
         await writeGolden(name, actual);
-        return { message: () => `updated ${GROUND_EXPECTED}/${name}`, pass: true };
+        return { message: () => `updated ${name}`, pass: true };
     }
     return comparison;
 }
 
-async function toMatch(
+async function toMatchFile(
     received: unknown,
     expected: unknown,
     options?: MatchFixtureOptions,
 ): Promise<MatcherResult> {
+    requireRelativePath('toMatchFile', expected);
+    if (!(received instanceof TextAccessor)) {
+        throw new TypeError(
+            'toMatchFile: unsupported subject — in a page, a golden file is compared against a captured text (result.tree, result.html, text(…)).',
+        );
+    }
+    return await matchGolden(received, expected, options?.frozen === true);
+}
+
+/** Vitest's `toMatch`, reading a stream accessor as the text it compares. */
+function toMatch(received: unknown, expected: unknown): MatcherResult {
     if (received instanceof TextAccessor) {
-        if (typeof expected !== 'string') {
-            throw new TypeError(
-                'toMatch on accessors takes a fixture name (extension included) — for a regex, assert on the raw text instead: expect(x.text).toMatch(/re/).',
-            );
-        }
-        return await matchGolden(received, expected, options?.frozen === true);
+        return nativeMatch(received.comparableText, expected);
     }
     return nativeMatch(received, expected);
 }
@@ -103,5 +109,5 @@ export function registerBrowserMatchers(): void {
         return;
     }
     registered = true;
-    expect.extend({ toBeEmpty, toContain, toMatch });
+    expect.extend({ toBeEmpty, toContain, toMatch, toMatchFile });
 }

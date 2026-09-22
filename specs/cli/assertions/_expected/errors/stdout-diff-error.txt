@@ -1,4 +1,4 @@
-Output mismatch (stdout-wrong.txt)
+Output mismatch (./_expected/stdout-wrong.txt)
 
 - Expected
 + Received

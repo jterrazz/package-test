@@ -7,7 +7,7 @@ describe('lint — w5w-scenario-settles (CONVENTIONS W5)', () => {
     test('warns on a scenario that ends on the action', async () => {
         // Given - a scenario whose last statement is a click
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/w5w-scenario-settles/')
+            .fixtureDirectory('../../_fixtures/lint-violations/w5w-scenario-settles/')
             .exec('.');
 
         // Then - oxlint warns (advisory — warnings do not fail the run)
@@ -18,7 +18,7 @@ describe('lint — w5w-scenario-settles (CONVENTIONS W5)', () => {
     test('accepts a scenario that names what the action produced', async () => {
         // Given - the compliant twin, ending on see()
         const result = await cli
-            .fixture('$FIXTURES/lint-violations/w5w-scenario-settles-ok/')
+            .fixtureDirectory('../../_fixtures/lint-violations/w5w-scenario-settles-ok/')
             .exec('.');
 
         // Then - clean run, no W5 diagnostic

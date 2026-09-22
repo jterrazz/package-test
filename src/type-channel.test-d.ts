@@ -56,11 +56,23 @@ export async function typeRows(): Promise<void> {
     );
 
     const { api } = await specification.api({ server: () => ({}) as never });
+    const { cli } = await specification.cli('./bin.sh');
 
     // B3 — a chain carries no label: the test's name is the sentence, and a
     // Second one inside the chain would be a second place to read it.
     // @ts-expect-error B3 — a chain carries no label
     api.label('the happy path');
+
+    // B2 — a file is named by its path from the spec file: a bare name,
+    // Resolved against a folder the line does not show, does not compile. The
+    // Golden matchers' rows sit in `model/goldens/matchers.test.ts`, the one
+    // File that may import the `expect` they are declared on.
+    // @ts-expect-error B2 — a seed is named by its relative path
+    api.seedFile('x.sql');
+    // @ts-expect-error B2 — a seed's path ends in `.sql`
+    api.seedFile('./seeds/x.json');
+    // @ts-expect-error B2 — a directory is spread by a path that ends in `/`
+    cli.fixtureDirectory('./fixtures/shop');
 
     const result = await api.get('/orders/1');
 

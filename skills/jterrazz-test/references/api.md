@@ -37,18 +37,18 @@ export const { api, cleanup } = await specification.api({
 | -------------- | --------------------------------------- | --------------------------------------------------------------------------------------- |
 | `.clock()`     | `.clock('2026-03-04T09:30:00Z')`        | Pins `Date` for this chain — the one primitive for time                                 |
 | `.intercept()` | `.intercept(contracts)`                 | Declares what the network answers, from contracts — strict from the first one (rule D7) |
-| `.seed()`      | `.seed('users.sql')`                    | Loads a `_seeds/*.sql` file into the named service before the action                    |
+| `.seedFile()`  | `.seedFile('./seeds/users.sql')`        | Loads a `.sql` file, named from the spec file, into the named service before the action |
 | `.headers()`   | `.headers({ 'Accept-Language': 'fr' })` | Request headers for this chain                                                          |
 
 ## Terminal actions (exactly one)
 
-| Name         | Written                        | Does                                                            |
-| ------------ | ------------------------------ | --------------------------------------------------------------- |
-| `.get()`     | `.get('/users')`               | Sends `GET <path>`                                              |
-| `.post()`    | `.post('/users', body)`        | Sends `POST <path>`                                             |
-| `.put()`     | `.put('/users/1', body)`       | Sends `PUT <path>`                                              |
-| `.delete()`  | `.delete('/users/1')`          | Sends `DELETE <path>`                                           |
-| `.request()` | `.request('create-user.http')` | Sends the complete request written in a `_requests/*.http` file |
+| Name             | Written                                       | Does                                                                           |
+| ---------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
+| `.get()`         | `.get('/users')`                              | Sends `GET <path>`                                                             |
+| `.post()`        | `.post('/users', body)`                       | Sends `POST <path>`                                                            |
+| `.put()`         | `.put('/users/1', body)`                      | Sends `PUT <path>`                                                             |
+| `.delete()`      | `.delete('/users/1')`                         | Sends `DELETE <path>`                                                          |
+| `.requestFile()` | `.requestFile('./requests/create-user.http')` | Sends the complete request written in a `.http` file, named from the spec file |
 
 ## The result
 
@@ -62,14 +62,15 @@ export const { api, cleanup } = await specification.api({
 
 ## Goldens
 
-| Name                | Written                                                        | Does                                                                                                         |
-| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `toMatch('<name>')` | `expect(subject).toMatch('<name>.<ext>')`                      | Compares the subject to the file of that name under `_expected/`, tokens resolved; `TEST_UPDATE=1` writes it |
-| `toMatchRows()`     | `expect(result.table('users')).toMatchRows({ columns, rows })` | Compares a table to a column list and one array of cells per row                                             |
-| `.http exchange`    | `expect(result.response).toMatch('user-created.http')`         | A complete request/response pair as a file: status line, header subset, body, tokens                         |
-| `.json body`        | `await expect(subject).toMatch('created.json')`                | A JSON payload as a file, tokens resolved and keys compared                                                  |
-| `.txt stream`       | `await expect(subject).toMatch('help.txt')`                    | A text stream as a file — stdout, stderr, a rendered body                                                    |
-| `{ frozen }`        | `toMatch('refused.txt', { frozen: true })`                     | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                  |
+| Name                 | Written                                                                  | Does                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `toMatchFile()`      | `expect(subject).toMatchFile('./expected/<name>.<ext>')`                 | Compares the subject to the golden file its path names from the spec file, tokens resolved; `TEST_UPDATE=1` writes it      |
+| `toMatchDirectory()` | `await expect(result.filesystem).toMatchDirectory('./expected/<name>/')` | Compares a directory, or the whole working directory, to a golden tree named from the spec file; `TEST_UPDATE=1` writes it |
+| `toMatchRows()`      | `expect(result.table('users')).toMatchRows({ columns, rows })`           | Compares a table to a column list and one array of cells per row                                                           |
+| `.http exchange`     | `expect(result.response).toMatchFile('./expected/user-created.http')`    | A complete request/response pair as a file: status line, header subset, body, tokens                                       |
+| `.json body`         | `expect(subject).toMatchFile('./expected/created.json')`                 | A JSON payload as a file, tokens resolved and keys compared                                                                |
+| `.txt stream`        | `expect(subject).toMatchFile('./expected/help.txt')`                     | A text stream as a file — stdout, stderr, a rendered body                                                                  |
+| `{ frozen }`         | `toMatchFile('./expected/refused.txt', { frozen: true })`                | Opts one fixture out of the update-mode rewrite — a negative fixture stays wrong on purpose                                |
 
 ## Read next
 

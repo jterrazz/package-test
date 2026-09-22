@@ -1,5 +1,5 @@
 description: lists the stamps the console answered with
-fixture: $FIXTURES/console/
+fixture: ../_fixtures/console/
 env:
     - frozen
 serve:

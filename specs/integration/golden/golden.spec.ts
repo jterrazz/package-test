@@ -23,7 +23,7 @@ describe('integration — a table of cases, one golden each', () => {
         }));
 
         // Then - the golden the row names is the oracle
-        expect(result.value).toMatch(`${name}.json`);
+        expect(result.value).toMatchFile(`./_expected/${name}.json`);
         await expect(result.error).toBeEmpty();
     });
 

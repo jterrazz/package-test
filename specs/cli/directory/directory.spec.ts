@@ -18,55 +18,72 @@ async function catchMessage(assertion: () => Promise<unknown>): Promise<string> 
 describe('command — directory snapshot', () => {
     test('matches an identical fixture tree', async () => {
         // Given - scaffold writes the exact tree committed under _expected/cli-scaffold/
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('scaffold');
 
         // Then - the snapshot matches (a slash in the name creates a subfolder)
         expect(result.exitCode).toBe(0);
-        await expect(result.directory('out')).toMatch('cli-scaffold/out');
+        await expect(result.directory('out')).toMatchDirectory('./_expected/cli-scaffold/out/');
     });
 
     test('detects a changed file', async () => {
         // Given - scaffold-changed writes go.mod with different content
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold-changed');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .exec('scaffold-changed');
 
         // Then - diff surfaces the changed file. Frozen: the shared golden is asserted negatively here against a changed tree — TEST_UPDATE must not overwrite it with the changed output
         await expect(
-            expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
+            expect(result.directory('out')).toMatchDirectory('./_expected/cli-scaffold/out/', {
+                frozen: true,
+            }),
         ).rejects.toThrow(/Directory mismatch/u);
         await expect(
-            expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
+            expect(result.directory('out')).toMatchDirectory('./_expected/cli-scaffold/out/', {
+                frozen: true,
+            }),
         ).rejects.toThrow(/go\.mod/u);
     });
 
     test('detects an extra file', async () => {
         // Given - scaffold-extra writes an unexpected file
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold-extra');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .exec('scaffold-extra');
 
         // Then - diff surfaces the added file (frozen: shared golden asserted negatively)
         await expect(
-            expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true }),
+            expect(result.directory('out')).toMatchDirectory('./_expected/cli-scaffold/out/', {
+                frozen: true,
+            }),
         ).rejects.toThrow(/UNEXPECTED\.txt/u);
     });
 
     test('the directory mismatch diff is goldened in full (failure-message quality is the product)', async () => {
         // Given - scaffold-changed writes go.mod with different content than the fixture tree
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold-changed');
+        const result = await cli
+            .fixtureDirectory('../../_fixtures/cli-app/')
+            .exec('scaffold-changed');
 
         // Then - the whole directory diff (counts + per-file line diff) is captured and goldened. frozen - the shared cli-scaffold/out golden is asserted negatively here; TEST_UPDATE must not overwrite it, and only the error golden updates
         const message = await catchMessage(async () => {
-            await expect(result.directory('out')).toMatch('cli-scaffold/out', { frozen: true });
+            await expect(result.directory('out')).toMatchDirectory(
+                './_expected/cli-scaffold/out/',
+                { frozen: true },
+            );
         });
-        expect(text(message)).toMatch('errors/directory-diff-error.txt');
+        expect(text(message)).toMatchFile('./_expected/errors/directory-diff-error.txt');
     });
 
     test('detects a missing fixture', async () => {
         // Given - a fixture name that was never created
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('scaffold');
 
         // Then - clear error with the TEST_UPDATE hint. Frozen: under TEST_UPDATE the missing snapshot must still throw rather than be created
         await expect(
             // oxlint-disable-next-line jterrazz/c8-referenced-fixture-exists -- negative spec: the missing snapshot IS the behaviour under test
-            expect(result.directory('out')).toMatch('does-not-exist', { frozen: true }),
+            expect(result.directory('out')).toMatchDirectory('./_expected/does-not-exist/', {
+                frozen: true,
+            }),
         ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 
@@ -74,19 +91,19 @@ describe('command — directory snapshot', () => {
         // Given - fresh scaffold and a non-existent fixture name
         const fixtureName = `transient-fixture-${Date.now()}`;
 
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('scaffold');
 
         // When - update mode writes the fixture
         process.env.TEST_UPDATE = '1';
         try {
-            await expect(result.directory('out')).toMatch(fixtureName);
+            await expect(result.directory('out')).toMatchDirectory(`./_expected/${fixtureName}/`);
         } finally {
             delete process.env.TEST_UPDATE;
         }
 
         // Then - running again without update mode now matches
-        const result2 = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
-        await expect(result2.directory('out')).toMatch(fixtureName);
+        const result2 = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('scaffold');
+        await expect(result2.directory('out')).toMatchDirectory(`./_expected/${fixtureName}/`);
 
         // Cleanup committed transient fixture
         rmSync(resolve(import.meta.dirname, '_expected', fixtureName), {
@@ -97,7 +114,7 @@ describe('command — directory snapshot', () => {
 
     test('files() helper — lists files recursively, sorted', async () => {
         // Given - a scaffold run
-        const result = await cli.fixture('$FIXTURES/cli-app/').exec('scaffold');
+        const result = await cli.fixtureDirectory('../../_fixtures/cli-app/').exec('scaffold');
 
         // Then - the tree listing is complete and sorted
         const files = await result.directory('out').files();
