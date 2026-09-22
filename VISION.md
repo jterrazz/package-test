@@ -407,3 +407,15 @@ The ratchets stay out of it: `typescript.baseline.json` and
 `test.baseline.json` at the root are measurements a tool rewrites on every
 `chore(lint)`, `package.json` ships in the tarball and churns with every
 dependency bump, and a decision (rare, reasoned) is not a measurement.
+
+## Iteration 2 — the orchestrator's calls on questions 19–25 (2026-09-23)
+
+| # | Decision |
+| --- | --- |
+| 19 | `typescript check` hands its oxlint JSON report to the checker with a known flag, `--oxlint-report <path>`; a checker run without it (standalone, a member run) runs oxlint itself. One oxlint run per `check`. |
+| 20 | The toolchain reads `jterrazz.typescript.roots`, and only that (no legacy `jterrazz.roots`). |
+| 21 | `result.stdout.text` is the COMPARABLE text — colour codes stripped, `transform` applied — the same text a golden compares; the raw stream is `result.stdout.raw`. No matcher override remains on streams (`toContain` is Vitest's too). |
+| 22 | The run that judges the ratchet prints the findings it judges: a verdict and its evidence are always in one log. |
+| 23 | C8 (existence) walks every tree a test stands on — `src/` and `lint/` module tests included. |
+| 24 | C24 follows a `file()`/`directory()` bound to a `const` in the same file to the verb it reaches. |
+| 25 | `file()`/`directory()` may be called only in a test or spec file: a shared helper module takes a `file()` as a parameter, it never builds one (its resolution would depend on the caller). |
