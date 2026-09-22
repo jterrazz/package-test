@@ -132,7 +132,8 @@ export async function typeRows(): Promise<void> {
 /**
  * D14, the value half — a stream is not a string: a value matcher reads its
  * `.text`, and vitest's `toContain` handed the accessor would search an empty
- * list, so `.not` would pass on anything.
+ * list, so `.not` would pass on anything. An empty stream is an empty text:
+ * `toBeEmpty` is a table's matcher.
  */
 export async function streamValueRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
@@ -143,4 +144,7 @@ export async function streamValueRows(): Promise<void> {
     expect(out.stderr).not.toContain('warning');
     expect(out.stdout.text).toContain('built');
     expect(['built']).toContain('built');
+    // @ts-expect-error D14 — an empty stream is an empty text
+    await expect(out.stderr).toBeEmpty();
+    expect(out.stderr.text).toBe('');
 }

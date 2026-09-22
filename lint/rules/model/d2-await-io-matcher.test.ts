@@ -20,14 +20,13 @@ ruleTester.run('d2-await-io-matcher', d2AwaitIoMatcher as unknown as OxlintRule,
         { code: "expect(result.filesystem).toMatch(directory('./expected/tree/'));", errors: 1 },
         // Negated form is still IO.
         { code: 'expect(dir).not.toBeEmpty();', errors: 1 },
-        // A text accessor is an IO subject too: `.call()`'s "and it did not
-        // Refuse" reads as a pass when the promise is dropped.
-        { code: 'expect(result.error).toBeEmpty();', errors: 1 },
+        // A table's emptiness is a query: dropped, it reads as a pass.
+        { code: "expect(result.table('orders')).toBeEmpty();", errors: 1 },
     ],
     valid: [
         // Awaited.
         { code: 'async function f() { await expect(rows).toMatchRows([]); }' },
-        { code: 'async function f() { await expect(result.error).toBeEmpty(); }' },
+        { code: "async function f() { await expect(result.table('orders')).toBeEmpty(); }" },
         // Returned.
         { code: 'const f = () => expect(dir).toBeEmpty();' },
         { code: 'function f() { return expect(container).toBeRunning(); }' },

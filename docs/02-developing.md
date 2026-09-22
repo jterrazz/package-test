@@ -69,7 +69,7 @@ Peer dependencies:
 
 **Docker** must be running for container-backed services (`postgres()`, `redis()`). `sqlite()` and plain CLI specs need no Docker.
 
-Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch(file(…))` types while `toBeEmpty` does not.
+Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch(file(…))` types while `toMatchRows` does not.
 
 Everything a spec needs imports from the single package root; the tool subpaths beside it are the ones the `exports` map publishes, and they are listed once — [01 § What the tree publishes](01-architecture.md#what-the-tree-publishes). F1 and F3 read that map, so a specifier it does not publish is refused:
 

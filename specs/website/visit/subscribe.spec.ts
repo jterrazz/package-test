@@ -14,7 +14,7 @@ test('subscribes through the form and captures the final state', async () => {
 
     // Then - the capture reflects the page after the interaction
     expect(result.content.text).toContain('Thanks for subscribing');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });
 
 test('navigates to another page and captures where it landed', async () => {

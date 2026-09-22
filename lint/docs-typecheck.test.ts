@@ -122,10 +122,7 @@ describe('docs-typecheck — the published samples typecheck', () => {
  */
 const SYNC_SUBJECTS = ['error', 'json', 'response', 'stderr', 'stdout', 'value'];
 
-/**
- * `toBeEmpty()` is not in the sweep: it answers a promise on EVERY subject, so
- * the awaited form is the right one there and chapter 06 leans on it.
- */
+/** `toBeEmpty()` is not in the sweep: it is a table's matcher, and a table's is async. */
 
 describe('docs-typecheck — the corpus does not await a sync matcher', () => {
     test('no page writes `await expect(result.<sync>).toMatch(file(`', () => {

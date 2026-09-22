@@ -331,4 +331,30 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         // Then - untouched: the toolchain's Suppressions pass names a directive naming no rule
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
     });
+
+    test('a stream asserted empty is an empty text, and a table keeps its matcher', () => {
+        // Given - 16's toBeEmpty on streams, awaited and negated, beside a table's
+        const root = tree16({
+            'integration/call/_expected/x.txt': '',
+            'integration/call/call.spec.ts': [
+                'await expect(result.error).toBeEmpty();',
+                'await expect(result.stdout.grep(/warn/u)).not.toBeEmpty();',
+                "await expect(result.table('orders')).toBeEmpty();",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - vitest's own toBe('') on the text, the await gone with the promise; the table's line stays
+        expect(readFileSync(join(root, 'integration/call/call.spec.ts'), 'utf8')).toBe(
+            [
+                "expect(result.error.text).toBe('');",
+                "expect(result.stdout.grep(/warn/u).text).not.toBe('');",
+                "await expect(result.table('orders')).toBeEmpty();",
+                '',
+            ].join('\n'),
+        );
+    });
 });

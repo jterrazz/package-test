@@ -35,10 +35,10 @@ import { ResponseAccessor } from '../result/response.js';
 import { TableAccessor } from '../result/table.js';
 import {
     compareStreamText,
+    emptyStreamRefusal,
     GOLDEN_MATCHER,
     matchThroughGolden,
     requireExtension,
-    textIsEmpty,
 } from '../result/text-assertions.js';
 import { TextAccessor } from '../result/text.js';
 
@@ -402,12 +402,10 @@ async function toMatchRows(received: unknown, expected: unknown): Promise<Matche
 
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {
     if (received instanceof TextAccessor) {
-        return textIsEmpty(received);
+        throw emptyStreamRefusal(received);
     }
     if (!(received instanceof TableAccessor)) {
-        throw new TypeError(
-            'toBeEmpty: unsupported subject — expected result.table(...) or a text accessor.',
-        );
+        throw new TypeError('toBeEmpty: unsupported subject — expected result.table(...).');
     }
 
     const rows = await received.query(['*']);

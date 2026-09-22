@@ -4,10 +4,10 @@ import { isDiskFile } from '../../model/chain/spec-path.js';
 import type { MatchFixtureOptions } from '../../model/result/match-options.js';
 import {
     compareStreamText,
+    emptyStreamRefusal,
     GOLDEN_MATCHER,
     matchThroughGolden,
     requireExtension,
-    textIsEmpty,
 } from '../../model/result/text-assertions.js';
 import { TextAccessor } from '../../model/result/text.js';
 import { readGolden, writeGolden } from './vitest-browser.adapter.js';
@@ -79,11 +79,15 @@ async function toMatchGolden(
     return await matchGolden(received, expected.path, options?.frozen === true);
 }
 
-function toBeEmpty(received: unknown): MatcherResult {
-    if (!(received instanceof TextAccessor)) {
-        throw new TypeError('toBeEmpty: unsupported subject — expected a text accessor.');
-    }
-    return textIsEmpty(received);
+/** A page holds no table: `toBeEmpty` is registered to refuse a stream with the form to write. */
+async function toBeEmpty(received: unknown): Promise<MatcherResult> {
+    return await Promise.reject(
+        received instanceof TextAccessor
+            ? emptyStreamRefusal(received)
+            : new TypeError(
+                  'toBeEmpty: unsupported subject — in a page, compare a stream as its text.',
+              ),
+    );
 }
 
 let registered = false;

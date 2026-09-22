@@ -216,17 +216,10 @@ declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface: a type alias redeclares the name and every matcher is lost
     interface Assertion<R extends Promise<void> | void = void, T = unknown> {
         /**
-         * Assert the subject is empty — zero rows for a table (async), an
-         * empty stream for a text accessor (console, errors, stdout).
+         * Assert the table holds zero rows. Async — queries the database. A
+         * stream is not a table: an empty one is `expect(result.stderr.text).toBe('')`.
          */
-        // Structural marker rather than the class: the augmentation is loaded
-        // Twice (src + bundled dist) and CaptureScope's private state makes the
-        // Class copies nominally distinct.
-        toBeEmpty: T extends TableAccessorType
-            ? () => Promise<void>
-            : T extends StreamMarker
-              ? () => Promise<void>
-              : never;
+        toBeEmpty: T extends TableAccessorType ? () => Promise<void> : never;
         /**
          * Vitest's `toContain`. A stream is not a string: it is compared as
          * `result.stdout.text`, and handed whole it is refused here — vitest

@@ -96,7 +96,7 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the tree finding is the per-root run's: this run neither prints nor fails on it
         expect(result.exitCode).toBe(0);
-        await expect(result.stderr).toBeEmpty();
+        expect(result.stderr.text).toBe('');
     });
 
     test('the plugin diagnostics are read from the report typescript check hands over', async () => {

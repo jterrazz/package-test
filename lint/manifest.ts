@@ -1586,7 +1586,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            "`toMatch` has two meanings, and the argument says which: a string or a `RegExp` is a value and the matcher is vitest's own, untouched — a stream accessor is not a string, so it is compared as `result.stdout.text`; a `file()` or a `directory()` is the golden comparison, and a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes.",
+            "`toMatch` has two meanings, and the argument says which: a string or a `RegExp` is a value and the matcher is vitest's own, untouched — a stream accessor is not a string, so it is compared as `result.stdout.text`; a `file()` or a `directory()` is the golden comparison, and a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: `toBeEmpty` is a table's matcher, and handed a stream it is refused in both builds, naming `expect(<stream>.text).toBe('')`.",
         facet: 'model',
         family: 'D',
         fix: "Write `toMatch(file('./expected/<case>.<ext>'))` for a golden, `toMatch(value)` on a string for a value.",

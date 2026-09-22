@@ -20,7 +20,7 @@ test('renders a vanilla DOM list in the same browser, under the same visitor', a
     // Then - the class tones are what the markup carries, and nothing complained
     expect(result.html.text).toContain('row row--live');
     expect(result.html.text).toContain('row row--idle');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });
 
 test('names a list item by its role where the list holds exactly one', async () => {

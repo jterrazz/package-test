@@ -63,17 +63,14 @@ export function compareStreamText(
     };
 }
 
-/** `expect(stream).toBeEmpty()` — the stream you usually want silent. */
-export function textIsEmpty(accessor: TextAccessor): TextComparison {
-    const content = accessor.text;
-    const pass = content === '';
-    return {
-        message: () =>
-            pass
-                ? `expected ${accessor.streamName} not to be empty`
-                : `Expected ${accessor.streamName} to be empty, but it contains:\n${content}`,
-        pass,
-    };
+/**
+ * `toBeEmpty` on a stream is refused, in both builds: an empty stream is an
+ * empty text, and vitest's own `toBe('')` says so on the text a golden reads.
+ */
+export function emptyStreamRefusal(accessor: TextAccessor): TypeError {
+    return new TypeError(
+        `toBeEmpty: "${accessor.streamName}" is a stream, and an empty stream is an empty text — write expect(<stream>.text).toBe('')`,
+    );
 }
 
 /** The name the golden comparison is registered under — no member access can spell it. */

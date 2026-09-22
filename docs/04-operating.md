@@ -83,6 +83,12 @@ disk with `file()` or `directory()` and a full relative path —
 `.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
 wrappers from the entry the specification file already uses.
 
+A stream is a stream in 17, not a string: the mover makes one compared as a
+value read its text — `expect(result.stdout).toContain('x')` to
+`expect(result.stdout.text).toContain('x')` — and one asserted empty an empty
+text, `await expect(result.stderr).toBeEmpty()` to
+`expect(result.stderr.text).toBe('')`. A table keeps its `toBeEmpty`.
+
 It runs only on a tree C13 still finds 16.x-shaped — one holding a 16 ground
 folder — so a second run, or a run over a tree already on 17, changes nothing.
 It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave

@@ -94,7 +94,7 @@ test('refuses an order that is not one', async () => {
 });
 ```
 
-That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `await expect(result.error).toBeEmpty()` is how a chain says "and it did not refuse". The `await` is not optional: `toBeEmpty` answers a promise on every subject it takes, a dropped one passes the test while the real failure surfaces as an unhandled rejection, and rule D2 refuses the bare form.
+That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `expect(result.error.text).toBe('')` is how a chain says "and it did not refuse": `result.error` is empty rather than absent when the call returned, so the empty text is the whole answer.
 
 `.call<T>()` carries `T` through to the result, so one field is read where one field is what the spec means — `expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string — and a golden file is kept for what a golden file is for: a shape worth freezing whole.
 
@@ -130,7 +130,7 @@ test.each(CASES)('renders $name', async ({ name, input }) => {
 
     // Then - the golden for that case
     expect(result.value).toMatch(file(`./expected/${name}.json`));
-    await expect(result.error).toBeEmpty();
+    expect(result.error.text).toBe('');
 });
 ```
 

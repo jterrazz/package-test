@@ -83,11 +83,10 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 Always `await expect(…)` (IO). `database:` is **mandatory when the services record declares ≥ 2 databases, forbidden with exactly 1** (rule A7).
 
-| Matcher                          | Sync/async | Example                                                                                                                         |
-| -------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `toMatchRows({ columns, rows })` | async      | see below                                                                                                                       |
-| `toBeEmpty()`                    | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()`                                                          |
-| `toBeEmpty()` on a text subject  | async      | `await expect(result.error).toBeEmpty()` — the integration facet's "and it did not refuse" ([06](06-integration.md#the-result)) |
+| Matcher                          | Sync/async | Example                                                                |
+| -------------------------------- | ---------- | ---------------------------------------------------------------------- |
+| `toMatchRows({ columns, rows })` | async      | see below                                                              |
+| `toBeEmpty()`                    | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()` |
 
 ```typescript
 await expect(result.table('orders', { database: 'db' })).toMatchRows({
@@ -109,7 +108,7 @@ await expect(result.table('payment_intents', { database: 'db' })).toMatchRows({
 });
 ```
 
-`toBeEmpty` is async on EVERY subject, the text ones included: it is one matcher with one signature, so a sync/async split by subject could not be expressed by a lint rule that keys on the matcher's name. Rule D2 therefore refuses the bare `expect(x).toBeEmpty();` outright — dropped, it passes the test and surfaces the real failure as an unhandled rejection.
+`toBeEmpty` is a table's matcher, and async: rule D2 refuses the bare `expect(x).toBeEmpty();` — dropped, it passes the test and surfaces the real failure as an unhandled rejection. A stream is not a table: an empty one is an empty text, `expect(result.stderr.text).toBe('')` — vitest's own, sync, on the text a golden compares. `toBeEmpty` handed a stream does not compile, and at run time it is refused with that form.
 
 A failing `toMatchRows` prints the expected grid against the actual rows for the selected columns, cell by cell — matcher cells render as their placeholder text (`Matcher.toString()`): `match.uuid()` shows as `{{uuid}}`, `match.ref('order')` as `{{ref#order}}`, `match.ref('intent', { not: 'order' })` as `{{ref#intent!order}}`, `match.regex(/…/)` as `{{regex:…}}`. A failing `toBeEmpty` reports how many rows it found (the count, not the rows themselves). `.not` inverts both (`.not.toBeEmpty()` = at least one row).
 
@@ -258,7 +257,7 @@ expect(result.value.text).toContain('Alice');
 
 ```typescript
 expect(result.error).toMatch(file('./expected/refused.txt'));
-await expect(result.error).toBeEmpty(); // nothing was thrown
+expect(result.error.text).toBe(''); // nothing was thrown
 ```
 
 A call that threw leaves `result.value` empty and vice versa; asserting on both in one test is asserting on a branch that cannot happen.
@@ -296,7 +295,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 | `toMatch(file(…))`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                                           | sync, except inside a page (async) | the path it is given |
 | `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                          | async                              | the path it is given |
 | `toMatchRows`           | `table(…)`                                                                                                                                                                                            | async                              | — (inline)           |
-| `toBeEmpty`             | `table(…)`, `error`, `console` and every text accessor                                                                                                                                                | async (every subject)              | —                    |
+| `toBeEmpty`             | `table(…)` — an empty stream is `expect(<stream>.text).toBe('')`                                                                                                                                      | async                              | —                    |
 | `toBeRunning`           | `container(…)`                                                                                                                                                                                        | async                              | —                    |
 | native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.raw`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) — and `toMatch` with a value, on a string | per vitest                         | —                    |
 

@@ -34,7 +34,7 @@ test('says how much of the collection the table is showing', async () => {
 
     // Then - the table is qualified by what it is not showing, and says nothing else
     await expect(result.tree).toMatch(file('./expected/posts-table.aria.yaml'));
-    await expect(result.console).toBeEmpty();
+    expect(result.console.text).toBe('');
 });
 
 test('renders inside the frame the project wraps every render in', async () => {

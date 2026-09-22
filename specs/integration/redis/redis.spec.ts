@@ -30,7 +30,7 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - it resolved, and refused nothing
-        await expect(result.error).toBeEmpty();
+        expect(result.error.text).toBe('');
     });
 
     // RUNTIME G2 — isolation is per WORKER: the runner's handle holds this

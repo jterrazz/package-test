@@ -25,7 +25,7 @@ describe('integration — a table of cases, one golden each', () => {
 
         // Then - the golden the row names is the oracle
         expect(result.value).toMatch(file(`./expected/${name}.json`));
-        await expect(result.error).toBeEmpty();
+        expect(result.error.text).toBe('');
     });
 
     test('a one-field reading needs no golden at all', async () => {

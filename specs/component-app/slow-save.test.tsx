@@ -19,5 +19,5 @@ test('waits the test budget for a thing to go, not a poll default of one second'
 
     // Then - the absence was waited out, the way every other verb waits
     expect(result.content.text).toContain('Saved');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });

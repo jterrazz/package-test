@@ -101,7 +101,8 @@ export class PageResult extends BaseResult {
     /**
      * The browser console as a stream — one message per line, prefixed by
      * its type — same shape as `stdout` on a cli result. Assert emptiness
-     * with `toBeEmpty()`, or snapshot with `toMatch('home.console.txt')`.
+     * with `expect(result.console.text).toBe('')`, or snapshot it with
+     * `toMatch(file('./expected/home.console.txt'))`.
      */
     get console(): TextAccessor {
         const lines = this.page.consoleMessages.map((m) => `[${m.type}] ${m.text}`).join('\n');
@@ -113,7 +114,7 @@ export class PageResult extends BaseResult {
 
     /**
      * Console messages of type `error` only — the stream you usually want
-     * empty: `expect(result.errors).toBeEmpty()`. Same shape as `stderr` on
+     * empty: `expect(result.errors.text).toBe('')`. Same shape as `stderr` on
      * a cli result.
      */
     get errors(): TextAccessor {

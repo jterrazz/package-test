@@ -66,7 +66,7 @@ test('names the options a field offers, and the one it is on', async () => {
 
     // Then - the tree carries the selection the verbs answered about; not one of those options ever had a box on the screen to be seen through
     expect(result.tree.text).toContain('option "Oldest" [selected]');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });
 
 test('says what a text field holds, in both directions', async () => {

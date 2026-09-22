@@ -24,7 +24,7 @@ test('says where the keyboard is after a field was filled', async () => {
     });
 
     // Then - both verbs answered on the settled page, and it stayed silent
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });
 
 test('says whether a control is taking input, in both directions', async () => {
@@ -37,5 +37,5 @@ test('says whether a control is taking input, in both directions', async () => {
     });
 
     // Then - the page stayed silent through all four answers
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });

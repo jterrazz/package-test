@@ -49,5 +49,5 @@ test('says what a field holds, which no accessibility tree carries', async () =>
 
     // Then - a tree carries a field's value too, so the modifier is not the only way to read one: it is how the ONE field a test is about is waited for
     expect(result.tree.text).toContain('visitor@site.test');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });

@@ -8,8 +8,8 @@ test('keeps a clean page silent on both streams', async () => {
     const result = await website.visit('/');
 
     // Then - no console output at all
-    await expect(result.console).toBeEmpty();
-    await expect(result.errors).toBeEmpty();
+    expect(result.console.text).toBe('');
+    expect(result.errors.text).toBe('');
 });
 
 test('separates console errors from the full stream', async () => {

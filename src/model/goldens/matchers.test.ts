@@ -199,6 +199,18 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         }).toThrow(/to include 'built in 3s'/u);
     });
 
+    test('an empty stream is an empty text: toBeEmpty refuses a stream, naming the form to write', async () => {
+        // Given - an empty stream, and a table's matcher handed to it past the compiler
+        const stream = new TextAccessor('', 'stderr', '/tmp');
+        const subject = stream as unknown as TableAccessor;
+
+        // Then - refused with vitest's own form, which holds on the comparable text
+        await expect(expect(subject).toBeEmpty()).rejects.toThrow(
+            /"stderr" is a stream, and an empty stream is an empty text — write expect\(<stream>\.text\)\.toBe\(''\)/u,
+        );
+        expect(stream.text).toBe('');
+    });
+
     test('a file golden refuses a tree subject, naming directory()', () => {
         // Given - a directory subject handed a file golden, past the compiler
         const subject = new DirectoryAccessor('/tmp', '/tmp') as unknown as TextAccessor;

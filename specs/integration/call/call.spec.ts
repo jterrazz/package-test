@@ -13,7 +13,7 @@ describe('integration — a module against the real database', () => {
 
         // Then - the module answered with both, and refused nothing
         expect(result.value).toMatch(file('./expected/two-orders.json'));
-        await expect(result.error).toBeEmpty();
+        expect(result.error.text).toBe('');
     });
 
     test('writes what the module was told to write', async () => {

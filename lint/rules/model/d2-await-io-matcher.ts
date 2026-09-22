@@ -37,8 +37,8 @@ function isDropped(node: AstNode): boolean {
 
 /**
  * CONVENTIONS D2 — the IO-backed matchers (`toMatchRows` runs SQL,
- * `toMatch(directory(…))` walks a tree, `toBeEmpty`/`toBeRunning` walk disk / query
- * docker) return a promise and must
+ * `toMatch(directory(…))` walks a tree, `toBeEmpty` queries a table, `toBeRunning`
+ * queries docker) return a promise and must
  * be `await`ed (or returned). A bare `expect(rows).toMatchRows(...)` silently
  * resolves nothing and the assertion never runs.
  */

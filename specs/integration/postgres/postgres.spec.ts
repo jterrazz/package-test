@@ -32,7 +32,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - it resolved, and refused nothing
-        await expect(result.error).toBeEmpty();
+        expect(result.error.text).toBe('');
     });
 
     test('executes the statements it is handed', async () => {

@@ -90,7 +90,7 @@ test('subscribes through the form and captures the final state', async () => {
 
     // Then - the page says so, and the console is clean
     expect(result.content.text).toContain('Thanks for subscribing');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });
 ```
 

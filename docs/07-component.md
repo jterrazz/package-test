@@ -113,7 +113,7 @@ test('says how much of the collection the table is showing', async () => {
 
     // Then - the table is qualified by what it is not showing
     await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
-    await expect(result.console).toBeEmpty();
+    expect(result.console.text).toBe('');
 });
 ```
 
@@ -155,7 +155,7 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 ```typescript
 await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
 expect(result.html.text).toContain('row row--live');
-await expect(result.errors).toBeEmpty();
+expect(result.errors.text).toBe('');
 ```
 
 The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [08 — Website specs](08-website.md) produces for a whole page. Goldens live in `expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([15 — Tokens](15-tokens.md)).

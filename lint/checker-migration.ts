@@ -33,7 +33,10 @@ import { isTestFileName } from './role.js';
  *    `toMatch` on a stream accessor, 17 leaves both to vitest, so
  *    `expect(result.stdout).toContain('x')` → `expect(result.stdout.text).toContain('x')`
  *    (`.not` included, a `.grep(…)` subject too; a `toMatch(file(…))` golden
- *    stays on the accessor);
+ *    stays on the accessor), and a stream asserted empty is an empty text:
+ *    `await expect(result.stderr).toBeEmpty()` →
+ *    `expect(result.stderr.text).toBe('')`, the `await` dropped with the
+ *    promise (a table keeps its `toBeEmpty`);
  * 4. a source the second gesture touched imports the two names it now calls;
  * 5. a suppression directive naming a rule 17 renamed names its new id
  *    (`d8w-text-bypass` → `d8w-raw-bypass`), and the one line a `-next-line`
@@ -166,15 +169,25 @@ const PROTOTYPE_VERBS: Record<string, [verb: string, wrap: string]> = {
  * text in every facet, with any `.grep(…)` after them. `body` and `value` are
  * out: on an api or integration result they are json as often as text.
  */
-const STREAM_VALUE =
-    /expect\((?<space>\s*)(?<subject>[\w$.]*?\.(?:content|console|error|errors|html|stderr|stdout|title|tree)(?:\.grep\([^()]*\))*)(?<close>\s*,?\s*\))(?<not>(?:\.not)?)\.(?<matcher>toContain|toMatch)\((?!\s*(?:directory|file)\()/gu;
+const STREAM_SUBJECT = String.raw`[\w$.]*?\.(?:content|console|error|errors|html|stderr|stdout|title|tree)(?:\.grep\([^()]*\))*`;
+
+/** A stream compared as a value: `expect(<stream>)[.not].toContain|toMatch(<value>)`. */
+const STREAM_VALUE = new RegExp(
+    String.raw`expect\((?<space>\s*)(?<subject>${STREAM_SUBJECT})(?<close>\s*,?\s*\))(?<not>(?:\.not)?)\.(?<matcher>toContain|toMatch)\((?!\s*(?:directory|file)\()`,
+    'gu',
+);
+
+/** A stream asserted empty: `[await ]expect(<stream>)[.not].toBeEmpty()` — a table's matcher alone in 17. */
+const STREAM_EMPTY = new RegExp(
+    String.raw`(?:await\s+)?expect\((?<space>\s*)(?<subject>${STREAM_SUBJECT})(?<close>\s*,?\s*\))(?<not>(?:\.not)?)\.toBeEmpty\(\)`,
+    'gu',
+);
 
 /** Rewrite the 16 (and prototype) calls of one source file; `root` is the specs tree. */
 function migrateSource(text: string, file: string, root: string): string {
-    return migrateVerbs(renameDirectives(text), file, root).replaceAll(
-        STREAM_VALUE,
-        'expect($<space>$<subject>.text$<close>$<not>.$<matcher>(',
-    );
+    return migrateVerbs(renameDirectives(text), file, root)
+        .replaceAll(STREAM_VALUE, 'expect($<space>$<subject>.text$<close>$<not>.$<matcher>(')
+        .replaceAll(STREAM_EMPTY, "expect($<space>$<subject>.text$<close>$<not>.toBe('')");
 }
 
 /** The rules 17 renamed: the 16 id → the id a directive names now. */

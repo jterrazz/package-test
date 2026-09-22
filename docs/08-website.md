@@ -145,7 +145,7 @@ test('subscribes through the form and captures the final state', async () => {
 
     // Then - the capture reflects the page after the interaction
     expect(result.content.text).toContain('Thanks for subscribing');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });
 ```
 
@@ -286,8 +286,8 @@ test('keeps a clean page silent on both streams', async () => {
     const result = await website.visit('/');
 
     // Then - no console output at all
-    await expect(result.console).toBeEmpty();
-    await expect(result.errors).toBeEmpty();
+    expect(result.console.text).toBe('');
+    expect(result.errors.text).toBe('');
 });
 
 test('separates console errors from the full stream', async () => {
@@ -334,7 +334,7 @@ test('renders the events feed from the declared backend', async () => {
 
     // Then - the page rendered what the stub declared
     expect(result.content.text).toContain('Enquête Fauci COVID-19');
-    await expect(result.errors).toBeEmpty();
+    expect(result.errors.text).toBe('');
 });
 ```
 
