@@ -85,4 +85,40 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             "api.seedFile('./seeds/users.sql');\n",
         );
     });
+
+    test('leaves what it cannot read as a 16 file name, and moves a document listing its fixtures', () => {
+        // Given - a raw SQL string, a non-http request argument, an unknown marker, and a document with a fixture list
+        const root = tree16({
+            'cli/build/case.spec.yaml': [
+                'description: x',
+                'fixture:',
+                '    - $FIXTURES/shop/',
+                '    - config.toml',
+                'runs: []',
+                '',
+            ].join('\n'),
+            'cli/build/build.spec.ts': [
+                "db.seed('DELETE FROM users');",
+                "server.request('GET');",
+                "cli.fixture('$OTHER/x/');",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - none of the three is a file name, so all three stay; the list moves entry by entry
+        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
+            [
+                "db.seed('DELETE FROM users');",
+                "server.request('GET');",
+                "cli.fixture('$OTHER/x/');",
+                '',
+            ].join('\n'),
+        );
+        expect(readFileSync(join(root, 'cli/build/case.spec.yaml'), 'utf8')).toContain(
+            ['fixture:', '    - ../../fixtures/shop/', '    - ./fixtures/config.toml'].join('\n'),
+        );
+    });
 });

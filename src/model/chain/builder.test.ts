@@ -394,3 +394,30 @@ describe('builder — the calendar a chain pins', () => {
         expect(() => builder.clock('2026-03-04T09:30:00Z')).not.toThrow();
     });
 });
+
+describe('builder — a fixture verb states the kind of what it names', () => {
+    test('refuses a directory path without its trailing slash, and a file path with one', () => {
+        // Given - a cli facet over a fake binary
+        const cli = createCliFacet({ command: new FakeCommandAdapter() });
+
+        // Then - the path states the kind, and each verb refuses the other's
+        expect(() => cli.fixtureDirectory('./fixtures/shop' as never)).toThrow(
+            /a directory's path ends in \/ — its contents are spread/u,
+        );
+        expect(() => cli.fixtureFile('./fixtures/shop/')).toThrow(
+            /a path ending in \/ is a directory — spread it with fixtureDirectory\(\)/u,
+        );
+    });
+
+    test('refuses a file named by fixtureDirectory, naming fixtureFile', async () => {
+        // Given - a real file beside this test, named as if it were a directory
+        const cli = createCliFacet({ command: new FakeCommandAdapter() });
+        const run = cli.fixtureDirectory('../chain/').fixtureFile('./builder.ts').exec('go');
+
+        // Then - the directory copies, and the pass reaches the file verb that holds
+        await expect(run).resolves.toBeDefined();
+        await expect(cli.fixtureDirectory('./builder.ts/').exec('go')).rejects.toThrow(
+            /names a file — use fixtureFile\(\)/u,
+        );
+    });
+});
