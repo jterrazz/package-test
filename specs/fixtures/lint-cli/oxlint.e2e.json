@@ -26,6 +26,7 @@
         "jterrazz/c6-tomatch-extension": "error",
         "jterrazz/c7-seeds-sql-only": "error",
         "jterrazz/c24-ground-role": "error",
+        "jterrazz/c26-disk-named-in-the-test": "error",
         "jterrazz/d12w-response-body-probe": "warn",
         "jterrazz/d13w-unfrozen-negative-fixture": "warn",
         "jterrazz/d15w-status-only-probe": "warn",

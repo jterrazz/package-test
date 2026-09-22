@@ -324,6 +324,18 @@ export const RULE_DOCS = {
             'Four reserved names are a vocabulary only if each means one thing: a seed parked in `fixtures/` or a golden in `requests/` makes the folder lie about what it holds, and the next reader trusts the folder.',
         reach: 'tests',
     },
+    'c26-disk-named-in-the-test': {
+        channel: 'statique',
+        convention:
+            "`file()` and `directory()` are called in a test or spec file — a `.test.ts(x)`, a `.spec.ts`, a type test — and nowhere else: a shared helper module, a specification file or a contract takes a `file()` as a parameter and never builds one. The call is recognised by its import from the framework's entry, an alias included.",
+        facet: 'model',
+        family: 'C',
+        fix: 'Take the `file()`/`directory()` as a parameter of the helper, and build it in the test that calls it.',
+        id: 'C26',
+        rationale:
+            'A path resolves against the spec that starts the chain, so one built in a helper resolves per caller: the same line names a different file for every spec that reaches it, and the file it names is visible on no line of the test that stands on it.',
+        reach: 'all',
+    },
     'd16-sampled-oracle': {
         channel: 'statique',
         convention:

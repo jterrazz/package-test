@@ -92,6 +92,10 @@ things it leaves to the reader:
   `jterrazz/…` or `jterrazz-check/…` key in it, and `jterrazz-test-check
 baseline` records those in `test.baseline.json` — rename the file, then run
   the two gestures once ([19 § The ratchet](19-linting.md#the-ratchet-testbaselinejson)).
+- **A helper that named ground moves where it stands.** The mover writes the
+  `file()` where the string was, inside the helper, and C26 refuses it there:
+  a path resolves against the spec that starts the chain, so the helper takes
+  the `file()` as a parameter and each test builds its own.
 - **A computed name is out of its reach.** A template or a variable naming a
   seed, a fixture or a golden is left as written, and the first run names each
   one the verb refuses.

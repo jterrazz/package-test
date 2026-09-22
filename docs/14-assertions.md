@@ -21,7 +21,7 @@ Everything else is synchronous, and that includes the subjects it is easiest to 
 
 ### A golden is named by `file()` or `directory()` (rule D3)
 
-A string is a value; the disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full. `toMatch` reads its argument: a string or a RegExp is vitest's own comparison, and a `file()` or a `directory()` is the golden (rule D14) — the type refuses a bare string where a file is meant (rule B2):
+A string is a value; the disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule C26). `toMatch` reads its argument: a string or a RegExp is vitest's own comparison, and a `file()` or a `directory()` is the golden (rule D14) — the type refuses a bare string where a file is meant (rule B2):
 
 - `toMatch(file('./expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule C6); a path may name a subfolder, `./expected/build/verbose.txt`, and update mode creates it (rule C5).
 - `toMatch(directory('./expected/shop-scaffold/'))` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.

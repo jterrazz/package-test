@@ -1,0 +1,5 @@
+description: a helper that takes the file as a parameter passes, and the spec names it on its own line
+fixture: ./fixtures/takes/
+runs:
+    - command: .
+      exit: 0

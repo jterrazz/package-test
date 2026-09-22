@@ -1,0 +1,7 @@
+description: a shared helper that builds the file it hands on is refused where it builds it
+fixture: ./fixtures/builds/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/api/orders/seeded.ts:5:21  jterrazz(c26-disk-named-in-the-test)

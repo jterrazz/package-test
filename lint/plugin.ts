@@ -35,6 +35,7 @@ import { c10ContractsBoundary } from './rules/model/c10-contracts-boundary.js';
 import { c11ContractDataPairing } from './rules/model/c11-contract-data-pairing.js';
 import { c13BareGround } from './rules/model/c13-bare-ground.js';
 import { c24GroundRole } from './rules/model/c24-ground-role.js';
+import { c26DiskNamedInTheTest } from './rules/model/c26-disk-named-in-the-test.js';
 import { d2AwaitIoMatcher } from './rules/model/d2-await-io-matcher.js';
 import { d2wAwaitSyncMatcher } from './rules/model/d2w-await-sync-matcher.js';
 import { d6wTransformTokenEquivalent } from './rules/model/d6w-transform-token-equivalent.js';
@@ -126,6 +127,7 @@ const plugin: LintPlugin = {
         'c11-contract-data-pairing': c11ContractDataPairing,
         'c13-bare-ground': c13BareGround,
         'c24-ground-role': c24GroundRole,
+        'c26-disk-named-in-the-test': c26DiskNamedInTheTest,
         'c2-http-only-requests': c2HttpOnlyRequests,
         'c4-contract-shape': c4ContractShape,
         'c6-tomatch-extension': c6ToMatchExtension,
