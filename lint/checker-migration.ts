@@ -5,13 +5,17 @@ import { GROUND_FIXTURES, isGroundName, RENAMED_GROUND_DIRS } from '../src/model
 import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 
 /**
- * The 16 → 17 mover — what `jterrazz-test-check <specs> --fix` does to a tree
- * written for 16.x.
+ * The 16 → 17 mover — what `jterrazz-test-check --fix` does to a tree written
+ * for 16.x.
  *
- * Three gestures, in this order:
+ * It runs only on what C13 still finds 16.x-shaped: a tree holding at least
+ * one `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder. A tree
+ * with none is on 17 and is left exactly as it is — its bare strings are
+ * values, or the deliberate refusals a negative spec exists to keep.
  *
- * 1. every `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` folder takes its
- *    bare name (C13), deepest first;
+ * Its gestures, in this order:
+ *
+ * 1. every 16 ground folder takes its bare name (C13), deepest first;
  * 2. every call names the disk with `file()` or `directory()`, by the path from
  *    the spec: `.seed('x.sql')` → `.seed(file('./seeds/x.sql'))`,
  *    `.request('x.http')` → `.request(file('./requests/x.http'))`,
@@ -23,7 +27,7 @@ import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
  *    the same way;
  * 3. a stream compared as a VALUE reads its text: 16 overrode `toContain` and
  *    `toMatch` on a stream accessor, 17 leaves both to vitest, so
- *    `expect(result.stdout.text).toContain('x')` → `expect(result.stdout.text).toContain('x')`
+ *    `expect(result.stdout).toContain('x')` → `expect(result.stdout.text).toContain('x')`
  *    (`.not` included, a `.grep(…)` subject too; a `toMatch(file(…))` golden
  *    stays on the accessor);
  * 4. a source the second gesture touched imports the two names it now calls.
@@ -44,7 +48,7 @@ export type Migration = { renamed: string[]; rewritten: string[] };
 /** A rename, injected so the CLI can keep git's history of what it moves. */
 export type Rename = (from: string, to: string) => void;
 
-const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
+const SKIPPED = new Set(['.artifacts', '.git', 'coverage', 'dist', 'node_modules']);
 
 /** The groups every rewrite below captures. */
 type Call = { quote: string; space: string; value: string };
@@ -380,12 +384,18 @@ function migrateDocument(text: string, file: string, root: string): string {
 const OLD_SEGMENT = /(?<=['"/ ])_(?<name>fixtures|expected|requests|seeds)(?=\/)/gu;
 
 /**
- * Apply the 16 → 17 migration to a specs tree. Idempotent: a tree already on
- * 17 is left as it is.
+ * A tree the mover walks: its 16 folders, the files it rewrites — listed once
+ * the folders carry their bare names — and the specs root its pool sits under.
  */
-export function migrateTo17(root: string, rename: Rename): Migration {
+type Walked = { files: () => string[]; folders: string[]; specsRoot: string };
+
+/** Rename the folders, then rewrite the files — on a tree that still holds a 16 folder, and only there. */
+function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Rename): Migration {
+    if (folders.length === 0) {
+        return { renamed: [], rewritten: [] };
+    }
     const renamed: string[] = [];
-    for (const dir of oldGroundFolders(root)) {
+    for (const dir of folders) {
         const bare = RENAMED_GROUND_DIRS[dir.split(sep).at(-1) ?? ''];
         const target = bare === undefined ? undefined : join(dirname(dir), bare);
         if (target !== undefined && !existsSync(target)) {
@@ -394,12 +404,12 @@ export function migrateTo17(root: string, rename: Rename): Migration {
         }
     }
     const rewritten: string[] = [];
-    for (const file of specFiles(root)) {
+    for (const file of files()) {
         const text = readFileSync(file, 'utf8');
         const isDocument = file.endsWith(SPEC_EXTENSION);
         const moved = isDocument
-            ? migrateDocument(text, file, root)
-            : migrateSource(text, file, root);
+            ? migrateDocument(text, file, specsRoot)
+            : migrateSource(text, file, specsRoot);
         const bare = moved.replaceAll(OLD_SEGMENT, '$<name>');
         const next = isDocument || bare === text ? bare : importWrappers(bare, file);
         if (next !== text) {
@@ -408,4 +418,13 @@ export function migrateTo17(root: string, rename: Rename): Migration {
         }
     }
     return { renamed, rewritten };
+}
+
+/** Apply the 16 → 17 migration to a specs tree that still holds a 16 folder. */
+export function migrateTo17(root: string, rename: Rename): Migration {
+    return migrate(
+        root,
+        { files: () => specFiles(root), folders: oldGroundFolders(root), specsRoot: root },
+        rename,
+    );
 }

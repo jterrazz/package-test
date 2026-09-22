@@ -1,0 +1,10 @@
+description: --fix renames a 16 ground folder and names the golden it holds by its path
+fixture: ./fixtures/on-16/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/cli/build/_expected/build.txt: absent
+          specs/cli/build/expected/build.txt: exists
+          specs/cli/build/build.spec.ts:
+              contains: toMatch(file('./expected/build.txt'))

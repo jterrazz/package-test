@@ -83,6 +83,31 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(migrateTo17(root, renameSync)).toStrictEqual({ renamed: [], rewritten: [] });
     });
 
+    test('never runs on a tree C13 finds on 17: its bare strings are values, or refusals kept on purpose', () => {
+        // Given - a 17 tree (no 16 folder) whose negative spec hands the verbs what they must refuse
+        const source = [
+            "import { directory, file } from '@jterrazz/test';",
+            "await expect(cli.fixture('cli-app/' as never).exec('build')).rejects.toThrow();",
+            "await expect(api.seed('users.sql' as never).request('create.http' as never)).rejects.toThrow();",
+            '// @ts-expect-error — a stream is compared as its text',
+            "expect(result.stdout).toContain('built');",
+            "expect(result.stdout).toMatch(file('./expected/build.txt'));",
+            '',
+        ].join('\n');
+        const root = tree16({
+            'cli/build/build.spec.ts': source,
+            'cli/build/expected/build.txt': '',
+            'fixtures/cli-app/index.ts': '',
+        });
+
+        // When - the mover runs
+        const migration = migrateTo17(root, renameSync);
+
+        // Then - nothing renamed, nothing rewritten, the spec byte for byte as it was
+        expect(migration).toStrictEqual({ renamed: [], rewritten: [] });
+        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
+    });
+
     test('moves the prototype verbs, and a path spelled in full against a 16 folder', () => {
         // Given - the intermediate form: …File verbs, old folder names, a relative entry import
         const root = tree16({
@@ -112,6 +137,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
     test('leaves what it cannot read as a 16 file name, and moves a document listing its fixtures', () => {
         // Given - a raw SQL string, a non-http request argument, an unknown marker, and a document with a fixture list
         const root = tree16({
+            '_fixtures/shop/index.ts': '',
             'cli/build/case.spec.yaml': [
                 'description: x',
                 'fixture:',
@@ -163,11 +189,12 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
     test('a stream compared as a value reads its text, and a golden stays on the accessor', () => {
         // Given - the 16 value matchers on stream accessors, beside a golden and a text already read
         const root = tree16({
+            'cli/build/_expected/build.txt': '',
             'cli/build/build.spec.ts': [
                 "import { file } from '@jterrazz/test';",
-                "expect(result.stdout.text).toContain('built');",
-                "expect(result.stderr.text).not.toContain('warning');",
-                "expect(result.stdout.grep('users.ts').text).toMatch(/users/u);",
+                "expect(result.stdout).toContain('built');",
+                "expect(result.stderr).not.toContain('warning');",
+                "expect(result.stdout.grep('users.ts')).toMatch(/users/u);",
                 'expect(',
                 '    result.tree,',
                 ").toContain('button');",

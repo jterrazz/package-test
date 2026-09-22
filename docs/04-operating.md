@@ -80,9 +80,11 @@ path — `.seed('x.sql')` to `.seed(file('./seeds/x.sql'))`,
 `.fixture('$FIXTURES/app/')` to `.fixture(directory('../../fixtures/app/'))`,
 `toMatch('help.txt')` to `toMatch(file('./expected/help.txt'))`,
 `.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
-wrappers from the entry the specification file already uses. It is 17.0's
-alone: C13 and its mover retire in 17.1, once the estate's wave has run. Four
-things it leaves to the reader:
+wrappers from the entry the specification file already uses. It runs only on
+a tree C13 still finds 16.x-shaped — one holding a 16 ground folder — so a
+second run, or a run over a tree already on 17, changes nothing. It is 17.0's
+alone: C13 and its mover retire in 17.1, once the estate's wave has run. What
+it leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
   moves a string only when a file of that name sits in the spec's `expected/`;
@@ -96,6 +98,9 @@ baseline` records those in `test.baseline.json` — rename the file, then run
   `file()` where the string was, inside the helper, and C26 refuses it there:
   a path resolves against the spec that starts the chain, so the helper takes
   the `file()` as a parameter and each test builds its own.
+- **A 16.x tree with no ground folder at all is not moved.** Nothing in it
+  tells a 16 string from a 17 value, so the compiler names each call the
+  types refuse, and each is written by hand.
 - **A computed name is out of its reach.** A template or a variable naming a
   seed, a fixture or a golden is left as written, and the first run names each
   one the verb refuses.
