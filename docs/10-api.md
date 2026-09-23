@@ -57,7 +57,7 @@ afterAll(cleanup);
 
 ### Root resolution (rule A9)
 
-Without `root`, the framework walks **up from the specification file** to the **nearest** directory carrying `package.json` — the package being tested, not the repository around it. Passing a `root` that points at the directory the walk would have found anyway is redundant (future lint warning).
+Without `root`, the framework finds the package being tested by walking up from the specification file. The walk, the tree it reads and when a `root` is redundant are [17 — Services § Root auto-discovery](17-services.md#root-auto-discovery-rule-a9)'s.
 
 ## The chain
 
