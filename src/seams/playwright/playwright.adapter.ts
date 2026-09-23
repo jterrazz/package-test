@@ -374,6 +374,15 @@ export class PlaywrightAdapter implements BrowserPort {
             page.on('console', (message) => {
                 consoleMessages.push({ text: message.text(), type: message.type() });
             });
+            // An exception nothing in the page caught is an error of the
+            // Visit, spelled as the browser's own `ErrorEvent` spells it — the
+            // Line a mounted component's error stream carries.
+            page.on('pageerror', (error) => {
+                consoleMessages.push({
+                    text: `Uncaught ${error.name}: ${error.message}`,
+                    type: 'error',
+                });
+            });
 
             const response = await page.goto(url, { waitUntil: 'load' });
 

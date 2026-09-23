@@ -113,7 +113,8 @@ export class PageResult extends BaseResult {
     }
 
     /**
-     * Console messages of type `error` only — the stream you usually want
+     * Console messages of type `error` only, an uncaught exception of the
+     * page among them (`Uncaught Error: …`) — the stream you usually want
      * empty: `expect(result.errors.text).toBe('')`. Same shape as `stderr` on
      * a cli result.
      */

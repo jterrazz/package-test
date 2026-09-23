@@ -202,7 +202,7 @@ export type BrowserOpenOptions = {
  * parser); interpretation of the raw elements belongs to the model.
  */
 export type BrowserPage = {
-    /** Console messages emitted while loading and interacting, in order. */
+    /** Console messages emitted while loading and interacting, and the uncaught exceptions as errors, in order. */
     consoleMessages: BrowserConsoleMessage[];
     /** Serialized DOM after rendering (`document.documentElement.outerHTML`). */
     html: string;

@@ -204,22 +204,22 @@ A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pai
 
 ## The result
 
-| Member              | Type                  | Description                                                                     |
-| ------------------- | --------------------- | ------------------------------------------------------------------------------- |
-| `result.status`     | `number`              | HTTP status of the main document response                                       |
-| `result.url`        | `string`              | Final URL — after redirects and any scenario navigation                         |
-| `result.title`      | `TextAccessor`        | `document.title`                                                                |
-| `result.head`       | `JsonAccessor`        | `{ title, canonical, alternates, metas }` — the one-golden-per-page SEO surface |
-| `result.jsonLd`     | `JsonAccessor`        | Every `application/ld+json` block, parsed, as one array                         |
-| `result.meta(name)` | `string \| undefined` | Content of a named meta — `.meta('description')`, `.meta('og:image')`           |
-| `result.canonical`  | `string \| null`      | The canonical `<link>` href, or null                                            |
-| `result.alternates` | flat map              | Hreflang alternates, keyed by language code                                     |
-| `result.links`      | array                 | `<link>` elements of the head, in DOM order                                     |
-| `result.content`    | `TextAccessor`        | Rendered body text (`document.body.innerText`)                                  |
-| `result.html`       | `TextAccessor`        | Full serialized DOM (`document.documentElement.outerHTML`)                      |
-| `result.console`    | `TextAccessor`        | Every console message, one `[type] text` line per message                       |
-| `result.errors`     | `TextAccessor`        | Console messages of type `error` only                                           |
-| `result.tree`       | `TextAccessor`        | The ARIA snapshot of the rendered `<body>` — the page's outline, as a golden    |
+| Member              | Type                  | Description                                                                                                             |
+| ------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `result.status`     | `number`              | HTTP status of the main document response                                                                               |
+| `result.url`        | `string`              | Final URL — after redirects and any scenario navigation                                                                 |
+| `result.title`      | `TextAccessor`        | `document.title`                                                                                                        |
+| `result.head`       | `JsonAccessor`        | `{ title, canonical, alternates, metas }` — the one-golden-per-page SEO surface                                         |
+| `result.jsonLd`     | `JsonAccessor`        | Every `application/ld+json` block, parsed, as one array                                                                 |
+| `result.meta(name)` | `string \| undefined` | Content of a named meta — `.meta('description')`, `.meta('og:image')`                                                   |
+| `result.canonical`  | `string \| null`      | The canonical `<link>` href, or null                                                                                    |
+| `result.alternates` | flat map              | Hreflang alternates, keyed by language code                                                                             |
+| `result.links`      | array                 | `<link>` elements of the head, in DOM order                                                                             |
+| `result.content`    | `TextAccessor`        | Rendered body text (`document.body.innerText`)                                                                          |
+| `result.html`       | `TextAccessor`        | Full serialized DOM (`document.documentElement.outerHTML`)                                                              |
+| `result.console`    | `TextAccessor`        | Every console message, one `[type] text` line per message, and every uncaught exception as an `[error] Uncaught …` line |
+| `result.errors`     | `TextAccessor`        | Console errors only, plus any uncaught page error (`Uncaught Error: …`)                                                 |
+| `result.tree`       | `TextAccessor`        | The ARIA snapshot of the rendered `<body>` — the page's outline, as a golden                                            |
 
 ### `result.tree` — the outline, as the accessibility tree draws it
 

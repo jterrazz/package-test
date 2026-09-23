@@ -141,6 +141,9 @@ const pages = {
     <h1>Search</h1>
     <search aria-label="Site"><label for="site-query">Query</label><input id="site-query" type="search"></search>
     </body></html>`,
+    // A page whose script throws, with nothing to catch it and nothing logged.
+    '/thrown': `<!doctype html><html lang="en"><head><title>Fixture — Thrown</title></head>
+    <body><h1>Thrown</h1><script>throw new Error('the page broke');</script></body></html>`,
     // A page that stamps its build in every surface a result reads — the text,
     // The markup, the title, the console and its errors — for a runner's
     // `transform` to normalise before any comparison.

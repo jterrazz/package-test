@@ -20,3 +20,12 @@ test('separates console errors from the full stream', async () => {
     expect(result.console).toMatch(file('./expected/noisy.console.txt'));
     expect(result.errors.text).toContain('boom');
 });
+
+test('carries an uncaught exception of the page on both streams', async () => {
+    // Given - a page whose script throws and logs nothing
+    const result = await website.visit('/thrown');
+
+    // Then - the exception is an error, as the component facet reports one
+    expect(result.errors.text).toBe('Uncaught Error: the page broke');
+    expect(result.console.text).toBe('[error] Uncaught Error: the page broke');
+});
