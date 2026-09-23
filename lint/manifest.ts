@@ -1085,7 +1085,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the files every path key of it names.",
+            "No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A reference is a path RESOLVED to the entry, never a name: a document's keys and a `file()`/`directory()` argument from the file that writes them, the words of any other literal from that file and from the project root, a template literal's table from the folders written before its hole — so `./seeds/x.sql` in a leaf vouches for that leaf's `seeds/x.sql`, and not for `<specs>/seeds/x.sql`. A `<case>.spec.yaml` references the files every path key of it names.",
         facet: 'model',
         family: 'C',
         fix: 'Reference it from the spec it stands under, or delete it.',

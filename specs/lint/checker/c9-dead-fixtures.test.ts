@@ -72,6 +72,17 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         expect(result.stderr).toMatch(file('./expected/c9-dead-root-seed.txt'));
     });
 
+    test('a reference vouches for the entry its path resolves to, never for one of the same name', async () => {
+        // Given - a leaf seed and a root seed of one name, each named by one path; and a leaf copy of a root seed, the root one named
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/c9-matched-by-path/'))
+            .exec('.');
+
+        // Then - the entry no path resolves to is dead, whichever of the two it is
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(file('./expected/c9-matched-by-path.txt'));
+    });
+
     test('a golden named by a template literal in a table is a reference, not silence', async () => {
         // Given - the form chapter 06 prescribes for the golden half: one row per case, `toMatch(file(`./expected/${name}.json`))`, three goldens beside the test
         const result = await cli

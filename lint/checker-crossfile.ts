@@ -9,6 +9,7 @@ import {
     SPEC_EXTENSION,
 } from '../src/model/literate/spec-document.js';
 import { moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
+import { specsAnchor } from './ast.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 
@@ -24,8 +25,8 @@ import { isNodeTestFileName, isTestFileName } from './role.js';
  * shape. All three are string/scan based (no TS parser in the light lint
  * bundle), matching the token checker's aesthetic.
  *
- * - **C9 dead fixtures** — per feature dir, a fixture file no test literal
- *   references is dead weight; a feature dir with ground subdirs but no
+ * - **C9 dead fixtures** — per feature dir, a fixture file no reference
+ *   RESOLVES to is dead weight; a feature dir with ground subdirs but no
  *   `<feature>.test.ts` is an orphan. A `<case>.spec.yaml` counts as a test
  *   AND as a referrer: the paths of its `fixture:` entries keep those trees
  *   alive exactly as a `.fixture(directory('…'))` literal does.
@@ -307,13 +308,14 @@ function collectLiterals(text: string): Set<string> {
  * A golden NAMED by a template literal with a hole — the table form chapter 17
  * prescribes for the golden half (`toMatch(file(`./expected/${name}.json`))` under a
  * `test.each`). The hole's value is not readable here, but its static ends are:
- * a fixture whose name starts with `prefix` and ends with `suffix` is one the
+ * an entry of `directory` — the folders written before the hole, resolved from
+ * the file — whose name starts with `prefix` and ends with `suffix` is one the
  * table could have asked for, which is all C9 needs to stop calling it dead.
  */
-export type LiteralPattern = { prefix: string; suffix: string };
+export type LiteralPattern = { directory: string; prefix: string; suffix: string };
 
 const TEMPLATE_WITH_HOLE = /`(?<body>(?:[^`\\]|\\.)*\$\{(?:[^`\\]|\\.)*)`/gu;
-function collectLiteralPatterns(text: string): LiteralPattern[] {
+function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
     const found: LiteralPattern[] = [];
     for (const match of text.matchAll(TEMPLATE_WITH_HOLE)) {
         const body = match.groups?.body ?? '';
@@ -323,14 +325,22 @@ function collectLiteralPatterns(text: string): LiteralPattern[] {
             continue;
         }
         // The path's folders are the ground this entry sits in; the entry is
-        // Matched on what the template states after the last of them.
-        const prefix = body.slice(0, opens).split('/').at(-1) ?? '';
+        // Matched on what the template states after the last of them, up to
+        // The folder the hole may name.
+        const before = body.slice(0, opens);
+        const cut = before.lastIndexOf('/');
+        const prefix = before.slice(cut + 1);
         const suffix = body.slice(closes + 1);
         // A template that is ALL hole names everything; it vouches for
         // Nothing in particular, and C9 already downgrades that file's
         // Findings to warn through `hasNonLiteralFixtureArg`.
         if (prefix.length > 0 || suffix.length > 0) {
-            found.push({ prefix, suffix });
+            const folders = before.slice(0, Math.max(cut, 0));
+            found.push({
+                directory: resolve(from, folders),
+                prefix,
+                suffix: suffix.split('/')[0] ?? '',
+            });
         }
     }
     return found;
@@ -754,30 +764,63 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
 
 // ── C9 (dead fixtures + orphan dirs) ─────────────────────────────────────────
 
-/** Is a top-level ground-subdir entry referenced by any test literal? */
-function entryReferenced(
-    entry: string,
-    entryIsDir: boolean,
-    literals: Set<string>,
-    patterns: LiteralPattern[] = [],
-): boolean {
-    for (const pattern of patterns) {
-        if (entry.startsWith(pattern.prefix) && entry.endsWith(pattern.suffix)) {
+/** The disk, named anywhere: a `file(…)` or `directory(…)` call with a plain string argument. */
+const DISK_CALL =
+    /(?<![.\w])(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
+
+/**
+ * What the referrers of one scan name, RESOLVED: the paths their literals
+ * point at from the file that writes them, and the template-literal tables
+ * they could ask for. An entry is referenced by the path that reaches it,
+ * never by a literal that merely spells its name.
+ */
+type References = { paths: Set<string>; patterns: LiteralPattern[] };
+
+/**
+ * Every path `file` names, resolved. A document's keys are read from the
+ * document. A source's `file()`/`directory()` arguments are read from the
+ * file; so is each word of its other literals, and from the project root as
+ * well — a path bound first to a name, or written into a command a process
+ * service runs from the root (`node specs/fixtures/app/server.mjs`).
+ */
+function referencesOf(file: string, into: References): void {
+    const from = dirname(file);
+    if (file.endsWith(SPEC_EXTENSION)) {
+        for (const literal of collectSpecLiterals(file)) {
+            into.paths.add(resolve(from, literal));
+        }
+        return;
+    }
+    for (const { path } of collectFixtureReferences(file, DISK_CALL)) {
+        into.paths.add(resolve(from, path));
+    }
+    const anchor = specsAnchor(file);
+    const bases = anchor === undefined ? [from] : [from, dirname(anchor.directory)];
+    const text = readSource(file);
+    for (const literal of collectLiterals(text)) {
+        for (const word of literal.split(/\s+/u).filter((part) => part.length > 0)) {
+            for (const base of bases) {
+                into.paths.add(resolve(base, word));
+            }
+        }
+    }
+    into.patterns.push(...collectLiteralPatterns(text, from));
+}
+
+/** Is the entry at `path` — a ground file, or a tree — reached by a reference? */
+function entryReferenced(path: string, references: References): boolean {
+    const name = basename(path);
+    for (const pattern of references.patterns) {
+        if (
+            pattern.directory === dirname(path) &&
+            name.startsWith(pattern.prefix) &&
+            name.endsWith(pattern.suffix)
+        ) {
             return true;
         }
     }
-    for (const literal of literals) {
-        if (entryIsDir) {
-            // A referenced `<name>/…` tree counts entirely as used.
-            if (
-                literal === entry ||
-                literal.startsWith(`${entry}/`) ||
-                literal.includes(`/${entry}`)
-            ) {
-                return true;
-            }
-        }
-        if (literal === entry || literal.includes(entry)) {
+    for (const reached of references.paths) {
+        if (reached === path || isWithin(path, reached)) {
             return true;
         }
     }
@@ -847,30 +890,20 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             continue;
         }
 
-        const literals = new Set<string>();
-        const patterns: LiteralPattern[] = [];
+        const references: References = { paths: new Set(), patterns: [] };
         let downgrade = false;
         for (const testFile of testFiles) {
-            if (testFile.endsWith(SPEC_EXTENSION)) {
-                for (const literal of collectSpecLiterals(testFile)) {
-                    literals.add(literal);
-                }
-                continue;
+            referencesOf(testFile, references);
+            if (!testFile.endsWith(SPEC_EXTENSION)) {
+                downgrade ||= hasNonLiteralFixtureArg(readSource(testFile));
             }
-            const text = readSource(testFile);
-            for (const literal of collectLiterals(text)) {
-                literals.add(literal);
-            }
-            patterns.push(...collectLiteralPatterns(text));
-            downgrade ||= hasNonLiteralFixtureArg(text);
         }
         const severity: Severity = downgrade ? 'warn' : 'error';
 
         for (const sub of groundSubdirs) {
             const subPath = join(dir, sub);
             for (const entry of treeEntries(subPath)) {
-                const entryIsDir = entry.isDirectory();
-                if (entryReferenced(entry.name, entryIsDir, literals, patterns)) {
+                if (entryReferenced(join(subPath, entry.name), references)) {
                     continue;
                 }
                 const relEntry = relative(rootDir, join(subPath, entry.name));
@@ -893,26 +926,14 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const pool of findPools(rootDir)) {
         const specsRoot = dirname(pool);
-        // Every literal in the specs tree, excluding references made from
+        // Every reference in the specs tree, excluding those made from
         // Inside the pool itself (a dead entry cannot vouch for another).
-        const literals = new Set<string>();
-        for (const file of listFiles(
-            specsRoot,
-            (path) => path.endsWith('.ts') || path.endsWith(SPEC_EXTENSION),
-        )) {
-            if (file.startsWith(`${pool}/`) || file.startsWith(`${pool}\\`)) {
-                continue;
-            }
-            const found = file.endsWith(SPEC_EXTENSION)
-                ? collectSpecLiterals(file)
-                : collectLiterals(readSource(file));
-            for (const literal of found) {
-                literals.add(literal);
-            }
+        const references: References = { paths: new Set(), patterns: [] };
+        for (const file of listReferrers(specsRoot, pool)) {
+            referencesOf(file, references);
         }
         for (const entry of treeEntries(pool)) {
-            const referenced = [...literals].some((literal) => literal.includes(entry.name));
-            if (!referenced) {
+            if (!entryReferenced(join(pool, entry.name), references)) {
                 const relEntry = relative(rootDir, join(pool, entry.name));
                 violations.push({
                     file: relEntry,
@@ -945,10 +966,6 @@ type FixtureReference = {
 /** A fixture, named by a wrapper with a plain string argument. */
 const FIXTURE_CALL =
     /\.fixture\(\s*(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
-
-/** The disk, named anywhere: a `file(…)` or `directory(…)` call with a plain string argument. */
-const DISK_CALL =
-    /(?<![.\w])(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
 /**
  * Every fixture path a spec file names, with the line it names it on. A

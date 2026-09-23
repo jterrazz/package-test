@@ -1,0 +1,6 @@
+kind: api
+description: the orders are listed over the shared user
+seed: ../../seeds/one-user.sql
+request: GET /orders
+response:
+    status: 200
