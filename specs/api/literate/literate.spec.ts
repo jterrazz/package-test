@@ -1,6 +1,10 @@
-import { describe, expect, test } from 'vitest';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { relative, resolve } from 'node:path';
+import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import { file, text } from '../../../src/index.js';
+import type { DiskFile, RelativePath } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 /** The message a run that must fail failed with. */
@@ -100,6 +104,67 @@ describe('api documents — what the runner refuses', () => {
         // Then - the path and the body it searched, before the next step is sent
         await expect(failure).rejects.toThrow(
             'capture: orderId — $.order.id found nothing in the response body',
+        );
+    });
+});
+
+/** A scratch leaf holding one document that names `./expected/echo.http`, named the one way `api.run()` accepts. */
+function leafWithGolden(golden: null | string): {
+    document: DiskFile<'.spec.yaml'>;
+    golden: string;
+} {
+    const dir = mkdtempSync(resolve(tmpdir(), 'api-document-'));
+    onTestFinished(() => {
+        rmSync(dir, { force: true, recursive: true });
+    });
+    const path = resolve(dir, 'case.spec.yaml');
+    writeFileSync(
+        path,
+        [
+            'kind: api',
+            'description: records the echo it got back',
+            'request: GET /echo/recorded',
+            'response: ./expected/echo.http',
+            '',
+        ].join('\n'),
+    );
+    const goldenPath = resolve(dir, 'expected', 'echo.http');
+    if (golden !== null) {
+        mkdirSync(resolve(dir, 'expected'));
+        writeFileSync(goldenPath, golden);
+    }
+    return {
+        document: file(relative(import.meta.dirname, path) as RelativePath<'.spec.yaml'>),
+        golden: goldenPath,
+    };
+}
+
+describe('api documents — update mode records the golden a response: names', () => {
+    test.each([
+        ['a missing golden is created', null],
+        ['an empty golden is filled', ''],
+    ])('%s, and the next run passes on it', async (_name, golden) => {
+        // Given - a document whose response: golden does not exist yet, or holds nothing
+        const leaf = leafWithGolden(golden);
+
+        // Given - one update run
+        vi.stubEnv('TEST_UPDATE', '1');
+        await api.run(leaf.document);
+        vi.unstubAllEnvs();
+
+        // Then - the golden holds what came back, and a normal run passes on it
+        expect(existsSync(leaf.golden)).toBe(true);
+        expect(readFileSync(leaf.golden, 'utf8')).toContain('HTTP/1.1 200');
+        await api.run(leaf.document);
+    });
+
+    test('outside update mode, a missing golden is still refused on its line', async () => {
+        // Given - the same document, its golden never recorded
+        const leaf = leafWithGolden(null);
+
+        // Then - refused before any request, naming the path
+        await expect(api.run(leaf.document)).rejects.toThrow(
+            'case.spec.yaml:4: response: "./expected/echo.http" names nothing',
         );
     });
 });

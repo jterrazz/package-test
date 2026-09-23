@@ -57,6 +57,19 @@ function formatJson(value: unknown): string {
 
 // ── toMatch(file()) — sync subjects ──
 
+/**
+ * What an update run merges into: the golden's content, or `null` when there is
+ * none to keep — no file, or a file holding only whitespace, the one an author
+ * creates to be recorded.
+ */
+function recordedGolden(filePath: string): null | string {
+    if (!existsSync(filePath)) {
+        return null;
+    }
+    const content = readFileSync(filePath, 'utf8');
+    return content.trim() === '' ? null : content;
+}
+
 function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean): MatcherResult {
     requireExtension(name, 'stream');
     const filePath = resolveSpecPath('toMatch', name, accessor.testDir);
@@ -66,8 +79,11 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
         // Update mode writes TOKENS, not values: placeholder-covered lines of
         // The previous fixture are preserved, and values the framework knows
         // To be dynamic ({{workdir}}) are substituted (CONVENTIONS D5).
-        const previous = existsSync(filePath) ? readFileSync(filePath, 'utf8') : null;
-        const merged = mergeTextPreservingPlaceholders(previous, actual, accessor.captures);
+        const merged = mergeTextPreservingPlaceholders(
+            recordedGolden(filePath),
+            actual,
+            accessor.captures,
+        );
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, merged);
         return PASS(`updated ${name}`);
@@ -91,13 +107,12 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
         // Writes TOKENS, not values — parity with the text path: preserve
         // Still-matching placeholders and substitute the known cwd back to
         // {{workdir}} (CONVENTIONS D5).
-        const merged = existsSync(filePath)
-            ? mergePreservingPlaceholders(
-                  JSON.parse(readFileSync(filePath, 'utf8')),
-                  actual,
-                  accessor.captures.workdir,
-              )
-            : mergePreservingPlaceholders(null, actual, accessor.captures.workdir);
+        const previous = recordedGolden(filePath);
+        const merged = mergePreservingPlaceholders(
+            previous === null ? null : JSON.parse(previous),
+            actual,
+            accessor.captures.workdir,
+        );
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, formatJson(merged));
         return PASS(`updated ${name}`);
@@ -226,9 +241,8 @@ export function matchResponseFile(
     const filePath = resolveSpecPath('toMatch', name, accessor.testDir);
 
     if (shouldUpdateSnapshots() && !frozen) {
-        const previous = existsSync(filePath)
-            ? parseResponseFile(readFileSync(filePath, 'utf8'), name)
-            : null;
+        const recorded = recordedGolden(filePath);
+        const previous = recorded === null ? null : parseResponseFile(recorded, name);
 
         const updated = buildUpdatedResponse(previous, accessor, accessor.captures.workdir);
         mkdirSync(dirname(filePath), { recursive: true });

@@ -1,7 +1,16 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import {
+    afterEach,
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    onTestFinished,
+    test,
+    vi,
+} from 'vitest';
 
 import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { directory, file } from '../chain/spec-path.js';
@@ -452,6 +461,51 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         await expect(accessor).toMatch(directory('./expected/written-tree/'));
         expect(existsSync(fixtureFile)).toBeTruthy();
     });
+});
+
+describe('update mode records a golden whatever the file holds: nothing, or no file at all (D5)', () => {
+    test.each([
+        [
+            'stream',
+            'empty.txt',
+            (dir: string) => new TextAccessor('built\n', 'stdout', dir),
+            'built\n',
+        ],
+        ['json', 'empty.json', (dir: string) => new JsonAccessor('{ "id": 1 }', dir), '"id": 1'],
+        [
+            'response',
+            'empty.http',
+            (dir: string) =>
+                new ResponseAccessor(
+                    {
+                        body: { ok: true },
+                        headers: { 'content-type': 'application/json' },
+                        status: 200,
+                    },
+                    dir,
+                ),
+            'HTTP/1.1 200',
+        ],
+    ])(
+        '%s: an empty golden is filled from what came back',
+        async (_kind, name, subject, written) => {
+            // Given - update mode, and a golden that exists and holds nothing — a file created to be recorded
+            await registerMatchers();
+            vi.stubEnv('TEST_UPDATE', '1');
+            const scratch = mkdtempSync(join(tmpdir(), 'empty-golden-'));
+            onTestFinished(() => {
+                rmSync(scratch, { force: true, recursive: true });
+            });
+            mkdirSync(resolve(scratch, 'expected'));
+            const fixturePath = resolve(scratch, 'expected', name);
+            writeFileSync(fixturePath, '');
+
+            // Then - update mode writes it as if it were missing, and passes
+            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            expect(subject(scratch)).toMatch(file(`./expected/${name}` as const));
+            expect(readFileSync(fixturePath, 'utf8')).toContain(written);
+        },
+    );
 });
 
 describe('response comparison — compareResponse', () => {

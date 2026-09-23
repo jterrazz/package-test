@@ -273,7 +273,7 @@ Run with TEST_UPDATE=1 to rewrite the responses — a response's status, headers
 
 A line the comparison ACCEPTED is rendered as equal, with its token, so the marked lines are the mismatch and nothing else. The stack carries one frame: the document's own line.
 
-`TEST_UPDATE=1` rewrites what the run produced and nothing else: a cli run's `exit`, `stdout` and `stderr`; an api response — an inline one in the document, a file-form one in its golden. The ground, the commands, the requests, `files:`, `tables:` and a job's `error:` are stated by hand and never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. Placeholders survive by **pattern match**, so a token stays a token wherever the line moved to: see [update mode](15-tokens.md#update-mode-tokens-are-preserved).
+`TEST_UPDATE=1` rewrites what the run produced and nothing else: a cli run's `exit`, `stdout` and `stderr`; an api response — an inline one in the document, a file-form one in its golden, recorded when it is missing or empty. The ground, the commands, the requests, `files:`, `tables:` and a job's `error:` are stated by hand and never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. Placeholders survive by **pattern match**, so a token stays a token wherever the line moved to: see [update mode](15-tokens.md#update-mode-tokens-are-preserved).
 
 ## When to reach for code
 

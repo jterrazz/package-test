@@ -70,16 +70,21 @@ export function readDocumentFor(kind: SpecKind, place: DocumentPlace): SpecFile 
 /**
  * Every path the document names exists, as what its key reads — the runtime
  * half of C8, refused on the line that names the path, with what it resolved
- * to.
+ * to. A run that records its goldens (`recording`) stands without the
+ * `response:` files it is about to write.
  */
 export function requireDocumentPaths(
     document: SpecDocument,
     dir: string,
     place: DocumentPlace,
+    recording: boolean,
 ): void {
     for (const { key, kind, line, path } of documentPaths(document)) {
         const target = resolve(dir, path);
         if (!existsSync(target)) {
+            if (recording && key === 'response') {
+                continue;
+            }
             throw refusal(
                 place,
                 line,

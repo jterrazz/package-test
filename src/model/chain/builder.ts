@@ -12,6 +12,7 @@ import { CallResult } from '../../facets/integration/integration.result.js';
 import { runJobsDocument } from '../../facets/jobs/literate.js';
 import { ScreenResult } from '../../facets/mobile/mobile.result.js';
 import { FetchResult, PageResult } from '../../facets/website/website.result.js';
+import { shouldUpdateSnapshots } from '../../runner/update.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
 import { clock as timeClock } from '../clock/clock.js';
@@ -673,7 +674,11 @@ export class SpecificationBuilder
         document: DiskFile<'.spec.yaml'>,
         options?: LiterateRunFlags,
     ): Promise<HttpResult> {
-        const { file, place } = await this.standOnDocument('api', document);
+        const { file, place } = await this.standOnDocument(
+            'api',
+            document,
+            options?.frozen === true,
+        );
         const chainHeaders = this.requestHeaders;
         const tableOf = this.tableOf();
         const response = await this.executeSetup(
@@ -697,7 +702,7 @@ export class SpecificationBuilder
      * `run`.
      */
     async runJobs(document: DiskFile<'.spec.yaml'>): Promise<BaseResult> {
-        const { file, place } = await this.standOnDocument('jobs', document);
+        const { file, place } = await this.standOnDocument('jobs', document, false);
         const { trigger } = file.document;
         const job = this.config.jobs?.find((candidate) => candidate.name === trigger?.name);
         if (trigger === null || job === undefined) {
@@ -946,13 +951,14 @@ export class SpecificationBuilder
     private async standOnDocument(
         kind: 'api' | 'jobs',
         document: DiskFile<'.spec.yaml'>,
+        frozen: boolean,
     ): Promise<{ file: SpecFile; place: DocumentPlace }> {
         const source = requireDiskFile('run', document, '.spec.yaml');
         const filePath = resolveSpecPath('run', source.path, this.testDir);
         const place = { displayPath: relative(process.cwd(), filePath) || source.path, filePath };
         const file = readDocumentFor(kind, place);
         const dir = dirname(filePath);
-        requireDocumentPaths(file.document, dir, place);
+        requireDocumentPaths(file.document, dir, place, shouldUpdateSnapshots() && !frozen);
         for (const seed of file.document.seeds) {
             try {
                 validateDatabaseOption('seed', this.config, seed.database ?? undefined);
