@@ -6,7 +6,7 @@ import { api } from '../api.specification.js';
 test('the users are listed over their own two users and the shared one', async () => {
     // Given - the seeds it stands on
     const result = await api
-        .seed(file('./seeds/two-users.sql'))
+        .seed(file('./seeds/two-users.sql')) // checker-disable-line c28 -- an input tree of the checker spec: its file form is what the rule reads
         .seed(file('../../seeds/one-user.sql'))
         .get('/users');
 

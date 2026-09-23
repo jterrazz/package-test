@@ -131,7 +131,9 @@ describe('command — ANSI stripped by default (CONVENTIONS D6)', () => {
 
         // Then - matchers compare the stripped form
         expect(result.stdout.text).toContain('red plain bold');
-        expect(result.stdout).toMatch(file('./expected/ansi.txt'));
+        expect(result.stdout).toMatch(`
+            red plain bold
+        `);
 
         // Then - the raw accessor keeps the escapes
         // oxlint-disable-next-line jterrazz/d8w-raw-bypass -- the raw accessor IS the subject: this test proves it retains ANSI escapes while matchers see the stripped form.

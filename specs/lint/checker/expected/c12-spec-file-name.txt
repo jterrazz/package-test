@@ -1,3 +1,0 @@
-specs/rm/rm.spec.yaml:1:1: error jterrazz-check(c12): "rm.spec.yaml" repeats its directory "rm/" — name what this case proves, not where it sits
-
-conventions checker: 1 error(s) found under {{workdir}}

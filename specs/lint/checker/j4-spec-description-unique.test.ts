@@ -15,7 +15,11 @@ describe('lint — j4 spec description unique (CONVENTIONS J4)', () => {
 
         // Then - the second one is named, with the first it collides with
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/j4-spec-description-unique.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/rebuilds.spec.yaml:1:1: error jterrazz-check(j4): "builds the widget" is already the description of widget/builds.spec.yaml — two documents of one directory cannot share a title
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {

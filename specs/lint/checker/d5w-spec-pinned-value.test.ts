@@ -15,7 +15,9 @@ describe('lint — d5w spec pinned value (CONVENTIONS D5)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('./expected/d5w-spec-pinned-value.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/stamps.spec.yaml:6:1: warning jterrazz-check(d5w): "2026-07-17T10:00:00.000Z" is not fixed by any fixture: or stdin: of this document — write {{string}}
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {

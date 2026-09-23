@@ -9,5 +9,5 @@ test('a fixture named by a bare string is refused where it is written', async ()
 
     // Then - refused at the call, and the report says so
     expect(() => cli.fixture('shop/' as never)).toThrow(/a string is a value/u);
-    expect(result.stdout).toMatch(file('./expected/refused.txt'));
+    expect(result.stdout).toMatch(file('./expected/refused.txt')); // checker-disable-line c28 -- an input tree of the c13-bare-ground spec: its file form is what the rule reads
 });

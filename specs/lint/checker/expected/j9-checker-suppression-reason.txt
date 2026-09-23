@@ -1,3 +1,0 @@
-api/orders/orders.spec.ts:8:1: error jterrazz-check(j9): say why: `checker-disable-next-line <id> -- <reason>`
-
-conventions checker: 1 error(s) found under {{workdir}}/specs

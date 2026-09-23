@@ -22,7 +22,7 @@ A document is ONE test: its `description:` is the vitest title, and nothing in i
 - **Role** — a path whose first ground folder is not `fixtures/` is refused by the grammar, on its line, so the checker (`d4b-spec-shape`) and the runner refuse the same document (C24's law, for data).
 - **Locality** — a path leaves its leaf only into the specs root's own `<specs>/fixtures/` (C15).
 - **Existence** — every path names an entry git does not ignore, of the kind it names — a directory with its trailing `/`, a file without (C8); at run time a missing one is refused with what it resolved to.
-- **Liveness** — a fixture a document names is referenced, exactly as a `file()` literal references it (C9, C14).
+- **Liveness** — a fixture a document names is referenced, exactly as a `file()` literal references it (C9, C28).
 
 ## A cli document
 

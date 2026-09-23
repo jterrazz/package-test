@@ -1,3 +1,0 @@
-specs/widget/builds.spec.yaml:5:1: error jterrazz-check(d4b): stdout is a quoted scalar — a stream is written as a block scalar (`|` keeps the final newline, `|-` drops it) (fixable: `node dist/checker.js <root> --fix`)
-
-conventions checker: 1 error(s) found under {{workdir}}

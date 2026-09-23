@@ -1,7 +1,6 @@
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 /** The fixture workspace the member pass is exercised against. */
@@ -68,7 +67,24 @@ describe('checker CLI — the member pass', () => {
 
         // Then - stdout is the diagnostic array, and nothing else
         expect(result.exitCode).toBe(1);
-        expect(result.json).toMatch(file('./expected/seam-dependency.json'));
+        expect(result.json).toMatch([
+            {
+                code: 'jterrazz-check(f8)',
+                file: 'packages/seam-dependency/package.json',
+                line: 4,
+                message:
+                    'packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced — the facet is `component()`, `website()`, `clock` or `intercept()`; remove the declaration',
+                severity: 'error',
+            },
+            {
+                code: 'jterrazz-check(f8)',
+                file: 'packages/seam-dependency/package.json',
+                line: 5,
+                message:
+                    'packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` — remove the declaration',
+                severity: 'error',
+            },
+        ]);
     });
 
     test('reads the jest allowance the same from the member as from the root', async () => {

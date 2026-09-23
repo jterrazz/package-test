@@ -15,7 +15,11 @@ describe('lint — d5 spec volatile literal (CONVENTIONS D5)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d5-spec-volatile-literal.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/serves.spec.yaml:6:1: error jterrazz-check(d5): "{{ip}}:{{port}}" is a value the next run will not reproduce — write {{string}}
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     // Full-output golden: the checker's diagnostics are OUR product, so the
@@ -29,7 +33,12 @@ describe('lint — d5 spec volatile literal (CONVENTIONS D5)', () => {
 
         // Then - ground is judged by the list documents are judged by: one rule, one reach
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d5-ground-volatile-literal.txt'));
+        expect(result.stderr).toMatch(`
+            specs/cli/report/expected/summary.txt:1:1: error jterrazz-check(d5): "{{string}}" is a value the next run will not reproduce — write {{string}}
+            specs/cli/report/expected/summary.txt:2:1: error jterrazz-check(d5): "{{string}}" is a value the next run will not reproduce — write {{string}}
+
+            conventions checker: 2 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts every literal the document itself pinned', async () => {

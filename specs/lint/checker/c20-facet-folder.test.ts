@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
+import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
@@ -15,7 +15,11 @@ describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c20-facet-folder.txt'));
+        expect(result.stderr).toMatch(`
+            jobs:1:1: error jterrazz-check(c20): \`specs/jobs/\` is a facet folder with no \`jobs.specification.ts\` constructing \`specification.jobs()\` — create it, or rename the folder
+
+            conventions checker: 1 error(s) found under {{workdir}}/specs
+        `);
     });
 
     test('accepts a facet folder holding the runner it promises', async () => {
@@ -26,6 +30,8 @@ describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/c20-facet-folder-ok.txt'));
+        expect(result.stdout).toMatch(`
+            jterrazz.baseline.json › test: nothing held
+        `);
     });
 });

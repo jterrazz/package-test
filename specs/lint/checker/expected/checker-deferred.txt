@@ -1,2 +1,0 @@
-widget/seeds/dead.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in widget references seeds/dead.sql
-conventions checker: 1 finding(s) under {{workdir}}/specs, judged by jterrazz.baseline.json › test

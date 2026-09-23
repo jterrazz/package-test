@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { file, redis } from '../../../src/index.js';
+import { redis } from '../../../src/index.js';
 import { integration } from '../redis.specification.js';
 
 /*
@@ -20,7 +20,9 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - the scheme is the one a redis client expects
-        expect(result.value).toMatch(file('./expected/connection-string.json'));
+        expect(result.value).toMatch({
+            protocol: 'redis:',
+        });
     });
 
     test('passes its healthcheck on a reachable container', async () => {
@@ -59,7 +61,9 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - the key is gone
-        expect(result.value).toMatch(file('./expected/flushed.json'));
+        expect(result.value).toMatch({
+            after: null,
+        });
     });
 
     test('takes keys again after a reset', async () => {
@@ -87,7 +91,10 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - the new key is there and the flushed one is not
-        expect(result.value).toMatch(file('./expected/reset-then-write.json'));
+        expect(result.value).toMatch({
+            flushed: null,
+            written: 'value2',
+        });
     });
 
     // RUNTIME G2 — two workers on one container never share a key.
@@ -121,6 +128,9 @@ describe('redis — the handle against a real container', () => {
         });
 
         // Then - the second worker saw nothing, and release gave the first its container's string back
-        expect(result.value).toMatch(file('./expected/two-workers.json'));
+        expect(result.value).toMatch({
+            first: '',
+            seen: null,
+        });
     });
 });

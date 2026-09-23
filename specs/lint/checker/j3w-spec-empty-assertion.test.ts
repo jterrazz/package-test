@@ -15,7 +15,9 @@ describe('lint — j3w spec empty assertion (CONVENTIONS J3)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('./expected/j3w-spec-empty-assertion.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/builds.spec.yaml:6:1: warning jterrazz-check(j3w): a stream that is only {{string}} asserts nothing — golden what the command actually printed
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {

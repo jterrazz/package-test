@@ -1,1 +1,0 @@
-specs/widget/refuses.spec.yaml:3:1: warning jterrazz-check(d11w): exit: 1 with no stdout: and no stderr: — golden the words the refusal printed

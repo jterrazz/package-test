@@ -6,7 +6,7 @@ import { api } from '../setup/multi.specification.js';
 describe('widget', () => {
     test('seeds naming the database', async () => {
         // Given - two SQL databases are declared and the seed names one
-        const result = await api.seed(file('./seeds/x.sql'), { database: 'db' }).get('/');
+        const result = await api.seed(file('./seeds/x.sql'), { database: 'db' }).get('/'); // checker-disable-line c28 -- an input tree of the checker spec: its file form is what the rule reads
 
         // Then - the response is defined
         expect(result).toBeDefined();

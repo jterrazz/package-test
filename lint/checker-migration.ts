@@ -435,6 +435,39 @@ function withImport(text: string, line: string, entry: string): string {
     return `${text.slice(0, end)}\n${line}${text.slice(end)}`;
 }
 
+/** Make the file import `name` from the framework's entry — the one it has, or the one its specification uses. */
+export function withEntryImport(text: string, file: string, name: string): string {
+    const merged = mergedIntoEntry(text, new Set([name]));
+    if (merged !== undefined) {
+        return merged;
+    }
+    const entry = entryFor(text, file);
+    return withImport(text, `import { ${name} } from '${entry}';`, entry);
+}
+
+/** Drop `name` from the file's import of the framework's entry, the whole import when it was the last name. */
+export function withoutEntryImport(text: string, name: string): string {
+    for (const match of text.matchAll(NAMED_IMPORT)) {
+        const from = match.groups?.from ?? '';
+        if (!isEntry(from)) {
+            continue;
+        }
+        const names = (match.groups?.names ?? '')
+            .split(',')
+            .map((each) => each.trim())
+            .filter((each) => each.length > 0);
+        if (!names.includes(name)) {
+            continue;
+        }
+        const kept = names.filter((each) => each !== name);
+        const quote = match.groups?.quote ?? "'";
+        return kept.length === 0
+            ? text.replace(`${match[0]}\n`, '')
+            : text.replace(match[0], `import { ${kept.join(', ')} } from ${quote}${from}${quote};`);
+    }
+    return text;
+}
+
 /** Make the file import every wrapper it calls. */
 function importWrappers(text: string, file: string): string {
     const called = new Set(

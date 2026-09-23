@@ -15,7 +15,11 @@ describe('lint — d4b spec shape (CONVENTIONS D4b)', () => {
 
         // Then - the grammar the runner parses is the grammar the lint enforces
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d4b-spec-shape.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/builds.spec.yaml:2:1: error jterrazz-check(d4b): unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('the same grammar is what the compliant twin satisfies', async () => {

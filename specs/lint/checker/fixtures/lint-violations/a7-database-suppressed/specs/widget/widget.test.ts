@@ -7,7 +7,7 @@ describe('widget', () => {
     test('suppresses the A7 database requirement with a reason', async () => {
         // Given - two databases but the check is deliberately suppressed
         // checker-disable-next-line a7 -- legacy seed touches both schemas
-        const result = await api.seed(file('./seeds/x.sql')).get('/');
+        const result = await api.seed(file('./seeds/x.sql')).get('/'); // checker-disable-line c28 -- an input tree of the checker spec: its file form is what the rule reads
 
         // Then - the response is defined
         expect(result).toBeDefined();

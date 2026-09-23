@@ -15,7 +15,9 @@ describe('lint — d11w spec silent refusal (CONVENTIONS D11)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('./expected/d11w-spec-silent-refusal.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/refuses.spec.yaml:3:1: warning jterrazz-check(d11w): exit: 1 with no stdout: and no stderr: — golden the words the refusal printed
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {

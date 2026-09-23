@@ -14,7 +14,11 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
 
         // Then - the checker fails with the full diagnostic naming the dead fixture
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c9-dead-fixtures.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/seeds/dead.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in widget references seeds/dead.sql
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a feature whose fixtures are all referenced', async () => {
@@ -36,7 +40,11 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
 
         // Then - the orphan directory is flagged (the no-test branch)
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c9-orphan-dir.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget:1:1: error jterrazz-check(c9): domain directory has ground subdirs (expected) but no *.test.ts(x) or *.spec.yaml
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('downgrades a dead fixture to a warning when a test uses a non-literal fixture arg', async () => {
@@ -47,7 +55,9 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
 
         // Then - the unreferenced seed is advisory only (warn, exit 0)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('./expected/c9-nonliteral-warn.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/seeds/orphaned.sql:1:1: warning jterrazz-check(c9): dead fixture — no test literal in widget references seeds/orphaned.sql
+        `);
     });
 
     test('reports a dead pool entry no spec references', async () => {
@@ -58,7 +68,12 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
 
         // Then - the pool-scan branch flags the orphaned entry
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c9-dead-pool.txt'));
+        expect(result.stderr).toMatch(`
+            specs/fixtures/orphan.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references orphan.sql
+            specs/fixtures/used-app:1:1: error jterrazz-check(c28): only widget reaches for this pool entry — the specs root's ground is what SEVERAL leaves share; move it to widget/fixtures/used-app and name it directory('./fixtures/used-app/') — \`--fix\` does both
+
+            conventions checker: 2 error(s) found under {{workdir}}
+        `);
     });
 
     test("reports a dead entry of the specs root's seeds/, the shared one kept", async () => {
@@ -69,7 +84,11 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
 
         // Then - the unnamed seed is dead, the shared one is not
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c9-dead-root-seed.txt'));
+        expect(result.stderr).toMatch(`
+            specs/seeds/orphan.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references orphan.sql
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('a reference vouches for the entry its path resolves to, never for one of the same name', async () => {
@@ -80,7 +99,12 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
 
         // Then - the entry no path resolves to is dead, whichever of the two it is
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c9-matched-by-path.txt'));
+        expect(result.stderr).toMatch(`
+            specs/api/orders/seeds/one-user.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in orders references seeds/one-user.sql
+            specs/seeds/two-users.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references two-users.sql
+
+            conventions checker: 2 error(s) found under {{workdir}}
+        `);
     });
 
     test('a golden named by a template literal in a table is a reference, not silence', async () => {

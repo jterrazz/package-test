@@ -14,7 +14,11 @@ describe('lint — d4 malformed ref (CONVENTIONS D4)', () => {
 
         // Then - the checker fails with the full diagnostic naming the offending token
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d4-malformed-ref.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/expected/out.txt:1:1: error jterrazz-check(d4): unknown token {{string}} — the D4 vocabulary is frozen (known: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir)
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a well-formed capture ref', async () => {

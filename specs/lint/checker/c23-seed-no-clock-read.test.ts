@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
+import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — c23-seed-no-clock-read (CONVENTIONS C23)', () => {
@@ -15,7 +15,13 @@ describe('lint — c23-seed-no-clock-read (CONVENTIONS C23)', () => {
 
         // Then - three findings, one per row, and none for the comment
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c23-seed-no-clock-read.txt'));
+        expect(result.stderr).toMatch(`
+            widget/seeds/posts.sql:2:1: error jterrazz-check(c23): \`'now'\` reads the clock — a seed states the instant the case is about, and the chain pins the run's with \`.clock()\`
+            widget/seeds/posts.sql:3:1: error jterrazz-check(c23): \`CURRENT_TIMESTAMP\` reads the clock — a seed states the instant the case is about, and the chain pins the run's with \`.clock()\`
+            widget/seeds/posts.sql:4:1: error jterrazz-check(c23): \`NOW()\` reads the clock — a seed states the instant the case is about, and the chain pins the run's with \`.clock()\`
+
+            conventions checker: 3 error(s) found under {{workdir}}/specs
+        `);
     });
 
     test('accepts a seed that states the instants the case is about', async () => {
@@ -26,6 +32,8 @@ describe('lint — c23-seed-no-clock-read (CONVENTIONS C23)', () => {
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/c23-seed-no-clock-read-ok.txt'));
+        expect(result.stdout).toMatch(`
+            jterrazz.baseline.json › test: nothing held
+        `);
     });
 });

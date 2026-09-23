@@ -8,5 +8,5 @@ test('writes the report', async () => {
     const result = await cli.exec('report');
 
     // Then - the summary is the golden
-    expect(result.stdout).toMatch(file('./expected/summary.txt'));
+    expect(result.stdout).toMatch(file('./expected/summary.txt')); // checker-disable-line c28 -- an input tree of the checker spec: its file form is what the rule reads
 });

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
+import { directory } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 /*
@@ -26,7 +26,13 @@ describe('command — exec', () => {
 
         // Then - the whole usage banner is surfaced on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/help.txt'));
+        expect(result.stdout).toMatch(`
+            Usage: cli <command>
+
+            Commands:
+              build   Build the project
+              check   Check code quality
+        `);
     });
 
     test('captures non-zero exit code', async () => {
@@ -85,7 +91,9 @@ describe('command — exec', () => {
 
         // Then - the last command's whole output is surfaced
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/start.txt'));
+        expect(result.stdout).toMatch(`
+            Hello from CLI app
+        `);
     });
 
     test('multi-exec — stops on first failure', async () => {

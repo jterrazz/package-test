@@ -1,3 +1,0 @@
-jobs:1:1: error jterrazz-check(c20): `specs/jobs/` is a facet folder with no `jobs.specification.ts` constructing `specification.jobs()` — create it, or rename the folder
-
-conventions checker: 1 error(s) found under {{workdir}}/specs

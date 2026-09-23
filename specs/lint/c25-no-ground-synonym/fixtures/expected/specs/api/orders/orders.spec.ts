@@ -8,5 +8,5 @@ test('lists the orders', async () => {
     const result = await api.get('/orders');
 
     // Then - the golden the leaf keeps in expected/
-    expect(result.response).toMatch(file('./expected/orders.http'));
+    expect(result.response).toMatch(file('./expected/orders.http')); // checker-disable-line c28 -- an input tree of the c25-no-ground-synonym spec: its file form is what the rule reads
 });

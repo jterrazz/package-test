@@ -15,7 +15,12 @@ describe('lint — c8 spec registered name (CONVENTIONS C8)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c8-spec-registered-name.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/builds.spec.yaml:3:1: error jterrazz-check(c8): env: "frozn" is not a registered env set — registered: frozen
+            specs/widget/builds.spec.yaml:5:1: error jterrazz-check(c8): serve: "dashbord" is not a registered server — registered: api
+
+            conventions checker: 2 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {

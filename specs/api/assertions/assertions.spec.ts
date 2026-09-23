@@ -26,6 +26,7 @@ describe('api assertions', () => {
             .get('/users');
 
         // Then - status + body match expected/all-users.http
+        // checker-disable-next-line c28 -- the file form is the subject: a response compared to its .http golden on disk
         expect(result.response).toMatch(file('./expected/all-users.http'));
     });
 });
@@ -48,9 +49,48 @@ describe('api assertion details', () => {
 
         // Then - error names the fixture and shows the full -/+ diff of both values frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The error golden below legitimately updates, but the wrong fixture must never be rewritten
         const message = await catchMessage(() => {
-            expect(result.response).toMatch(file('./expected/wrong-body.http'), { frozen: true });
+            expect(result.response).toMatch(
+                `
+                HTTP/1.1 200 OK
+
+                {
+                    "users": [
+                        {
+                            "name": "Wrong1",
+                            "email": "wrong1@test.com"
+                        },
+                        {
+                            "name": "Wrong2",
+                            "email": "wrong2@test.com"
+                        }
+                    ]
+                }
+            `,
+                { frozen: true },
+            );
         });
-        expect(text(message)).toMatch(file('./expected/errors/wrong-body-error.txt'));
+        expect(text(message)).toMatch(`
+            Response mismatch (the value in place)
+
+            - Expected
+            + Received
+
+              {
+                "users": [
+                  {
+            -       "name": "Wrong1",
+            +       "name": "Alice",
+            -       "email": "wrong1@test.com"
+            +       "email": "alice@test.com"
+                  },
+                  {
+            -       "name": "Wrong2",
+            +       "name": "Bob",
+            -       "email": "wrong2@test.com"
+            +       "email": "bob@test.com"
+                  }
+                ]
+              }`);
     });
 
     test('toMatch fails on nonexistent fixture with an update hint', async () => {
@@ -103,12 +143,28 @@ describe('shared assertions', () => {
 
         // Then - error shows both columns in the full -/+ diff
         const message = await catchMessage(async () => {
-            await expect(result.table('users', { database: 'db' })).toMatch([
-                [1, 'Wrong1', 'wrong1@test.com'],
-                [2, 'Wrong2', 'wrong2@test.com'],
-            ]);
+            await expect(result.table('users', { database: 'db' })).toMatch(
+                [
+                    [1, 'Wrong1', 'wrong1@test.com'],
+                    [2, 'Wrong2', 'wrong2@test.com'],
+                ],
+                { frozen: true },
+            );
         });
-        expect(text(message)).toMatch(file('./expected/errors/table-multi-column-error.txt'));
+        expect(text(message)).toMatch(`
+            Table "users" mismatch
+              query: id, name, email
+              expected: 2 rows
+              received: 2 rows
+
+            - Expected
+            + Received
+
+              id  |  name  |  email
+            - 1  |  Wrong1  |  wrong1@test.com
+            + 1  |  Alice  |  alice@test.com
+            - 2  |  Wrong2  |  wrong2@test.com
+            + 2  |  Bob  |  bob@test.com`);
     });
 
     test('table details — shows diff on extra rows', async () => {
@@ -119,11 +175,23 @@ describe('shared assertions', () => {
 
         // Then - row count mismatch + extra rows with + marker (full diff)
         const message = await catchMessage(async () => {
-            await expect(result.table('users', { database: 'db' })).toMatch([
-                [1, 'Alice', 'alice@test.com'],
-            ]);
+            await expect(result.table('users', { database: 'db' })).toMatch(
+                [[1, 'Alice', 'alice@test.com']],
+                { frozen: true },
+            );
         });
-        expect(text(message)).toMatch(file('./expected/errors/table-extra-rows-error.txt'));
+        expect(text(message)).toMatch(`
+            Table "users" mismatch
+              query: id, name, email
+              expected: 1 row
+              received: 2 rows
+
+            - Expected
+            + Received
+
+              id  |  name  |  email
+              1  |  Alice  |  alice@test.com
+            + 2  |  Bob  |  bob@test.com`);
     });
 
     test('table details — shows diff on missing rows', async () => {
@@ -132,11 +200,22 @@ describe('shared assertions', () => {
 
         // Then - row count mismatch + missing rows with - marker (full diff)
         const message = await catchMessage(async () => {
-            await expect(result.table('users', { database: 'db' })).toMatch([
-                [1, 'Alice', 'alice@test.com'],
-            ]);
+            await expect(result.table('users', { database: 'db' })).toMatch(
+                [[1, 'Alice', 'alice@test.com']],
+                { frozen: true },
+            );
         });
-        expect(text(message)).toMatch(file('./expected/errors/table-missing-rows-error.txt'));
+        expect(text(message)).toMatch(`
+            Table "users" mismatch
+              query: id, name, email
+              expected: 1 row
+              received: 0 rows
+
+            - Expected
+            + Received
+
+              id  |  name  |  email
+            - 1  |  Alice  |  alice@test.com`);
     });
 
     test('table details — supports toBeEmpty', async () => {

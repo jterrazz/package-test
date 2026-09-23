@@ -1,3 +1,0 @@
-specs/widget/widget.test.ts:8:1: error jterrazz-check(b5): result of docker-aware runner "dockerCli" must be bound with `await using` so its containers are disposed
-
-conventions checker: 1 error(s) found under {{workdir}}

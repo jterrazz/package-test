@@ -14,7 +14,9 @@ describe('lint — d10w tokens in requests (CONVENTIONS D10)', () => {
 
         // Then - advisory only: the run passes (exit 0) but the full warning is on stderr. the echoed leaked token is covered by {{string}} — a literal {{uuid}} in the golden would itself be read as a placeholder by the token grammar (see D4).
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('./expected/d10w-tokens-in-requests.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/requests/create.http:4:1: warning jterrazz-check(d10w): token {{string}} in a requests/ file — requests are inputs, never matched; tokens are not validated here
+        `);
     });
 
     test('stays silent when requests carry no tokens', async () => {

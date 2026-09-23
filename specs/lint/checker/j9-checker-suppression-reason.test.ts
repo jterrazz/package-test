@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
+import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — j9-checker-suppression-reason (CONVENTIONS J9)', () => {
@@ -15,7 +15,11 @@ describe('lint — j9-checker-suppression-reason (CONVENTIONS J9)', () => {
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/j9-checker-suppression-reason.txt'));
+        expect(result.stderr).toMatch(`
+            api/orders/orders.spec.ts:8:1: error jterrazz-check(j9): say why: \`checker-disable-next-line <id> -- <reason>\`
+
+            conventions checker: 1 error(s) found under {{workdir}}/specs
+        `);
     });
 
     test('accepts a suppression that says why', async () => {
@@ -26,6 +30,8 @@ describe('lint — j9-checker-suppression-reason (CONVENTIONS J9)', () => {
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/j9-checker-suppression-reason-ok.txt'));
+        expect(result.stdout).toMatch(`
+            jterrazz.baseline.json › test: nothing held
+        `);
     });
 });

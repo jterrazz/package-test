@@ -225,7 +225,7 @@ test('deploys from a shaped workspace', async () => {
 
 #### Where a fixture lives
 
-A fixture tree sits beside the one leaf that reads it, `./fixtures/<name>/`, or — when several leaves share it — in the specs root's own `specs/fixtures/`, reached by the path that climbs to it. That law holds for all four ground roles, not for fixtures alone, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (C14, C15, C27).
+A fixture tree sits beside the one leaf that reads it, `./fixtures/<name>/`, or — when several leaves share it — in the specs root's own `specs/fixtures/`, reached by the path that climbs to it. That law holds for all four ground roles, not for fixtures alone, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (C15, C27, C28).
 
 ### The chain never reaches a real system
 

@@ -1098,14 +1098,14 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A pool entry is SHARED, or it is local: an entry — a file or a directory — of the specs root's own ground, `<specs>/fixtures/`, `seeds/`, `requests/` or `expected/`, reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, in its folder of the same role (`<leaf>/seeds/<name>`), named by the path from the leaf (`./seeds/<name>`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the entry is moved — a `git mv` in a work tree, so it keeps its history — the literals rewritten, and a pool folder the move empties removed.",
+            "A ground file exists only if it is shared: the checker counts the TESTS that read each file of the specs trees — a `test()`/`it()` whose body names it with a literal `file()`/`directory()`, a document — and judges its level. Read by ONE test, a file of `seeds/`, `expected/` or `requests/` is an error where the test names it: it belongs in the test, written in place — a seed as ``sql`…` ``, a golden as the value `toMatch` compares, a request as its text or its body value — unless it is a directory tree, a binary file, or longer than 150 lines; `fixtures/` is file state a program reads, never a value, and stays a file. Read by several tests of ONE leaf, it lives beside them: an entry of the specs root's own ground (`<specs>/seeds/`, …) one leaf alone reaches is an error where it sits, and belongs in the leaf's folder of the same role. Read from several leaves, it lives in the specs root's ground — C15 refuses the path that leaves a leaf for a sibling's, and C27 finds copies. A reference outside every test — a `const` of the file, a specification, a helper — counts as shared, and zero references is C9's. Fixed by `--fix`: a single-use file whose one reference is a literal `file()` handed to `.seed(`, `.request(`, `.post(`/`.put(` or `toMatch(` is written in place and deleted (the `sql` import added, a `file` import no longer used dropped, an emptied ground folder removed); an entry of the specs root one leaf alone reaches is moved beside it (a `git mv` in a work tree) and the literals rewritten.",
         facet: 'model',
         family: 'C',
-        fix: 'Run `jterrazz-test-check <root> --fix`; it moves the entry with `git mv` (a plain rename outside git) and rewrites what named it.',
-        id: 'C14',
-        name: 'c14-pool-fixture-shared',
+        fix: 'Run `jterrazz-test-check <root> --fix`: it writes a single-use file into its one test and deletes it, and moves a specs-root entry one leaf reaches beside that leaf. A test whose subject IS the file form keeps it, with a reasoned `checker-disable-next-line c28`.',
+        id: 'C28',
+        name: 'c28-ground-shared-or-inline',
         rationale:
-            "A single scenario's fixture parked in the pool reads as shared ground: everyone assumes someone else depends on it and nobody dares touch it.",
+            "A file a test reads is read at a distance: the reader opens a second file to know what the test stands on or expects, and a file one test reads pays that price for nothing. A single scenario's file parked in the pool is worse still — it reads as shared, so nobody dares change it.",
         reach: 'ground',
     },
     {

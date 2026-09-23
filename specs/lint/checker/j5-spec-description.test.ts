@@ -15,7 +15,12 @@ describe('lint — j5 spec description (CONVENTIONS J5)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/j5-spec-description.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): description: ends with a period — a title is a fragment, not a sentence
+            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): description: starts with a capital — a title is lowercase prose
+
+            conventions checker: 2 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {

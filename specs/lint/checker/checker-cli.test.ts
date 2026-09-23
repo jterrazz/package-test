@@ -15,7 +15,12 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the facet passes report what `specs` reports, anchored on the root that was named
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/checker-project-root.txt'));
+        expect(result.stderr).toMatch(`
+            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/api/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
+            specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+
+            conventions checker: 2 error(s) found under {{workdir}}
+        `);
     });
 
     test('a project checked out under a folder named `specs/` is a project root, not a tree', async () => {
@@ -26,7 +31,11 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the `specs` above the package is the machine's: the run walks the project's own tree
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/checker-under-specs.txt'));
+        expect(result.stderr).toMatch(`
+            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/api/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
+
+            conventions checker: 1 error(s) found under {{workdir}}/specs/checkout
+        `);
     });
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
@@ -124,7 +133,9 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the held line, then the project root and every pass
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/checker-held-verbose.txt'));
+        expect(result.stdout).toMatch(`
+            jterrazz.baseline.json › test: 1 held across 1 rule — conventions checker under {{workdir}} (a7-database-property, b5-await-using-inference, c12-spec-file-name, c15-local-fixture-reach, c16-document-outside-ground, c18-module-test-under-facet, c20-facet-folder, c21w-ground-owned-by-one, c23-seed-no-clock-read, c27w-duplicate-ground, c28-ground-shared-or-inline, c8-disk-target-exists, c8-spec-registered-name, c9-dead-fixtures, d10w-tokens-in-requests, d11w-spec-silent-refusal, d4-malformed-ref, d4-unknown-token, d4b-http-first-line, d4b-spec-block-scalar, d4b-spec-key-order, d4b-spec-shape, d5-spec-volatile-literal, d5w-spec-pinned-value, j3w-spec-empty-assertion, j4-spec-description-unique, j9-checker-suppression-reason, j5-spec-description, b12-route-reached, c25-no-ground-synonym, e3-config-present, e5b-no-simulated-dom-config-member, f8-no-seam-dependency)
+        `);
         expect(result.stderr.text).toBe('');
     });
 
@@ -169,7 +180,11 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the value of the flag is no project root, and the one diagnostic is counted
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/checker-oxlint-report.txt'));
+        expect(result.stderr).toMatch(`
+            src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module
+            jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
+            Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.
+        `);
     });
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
@@ -195,7 +210,10 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
 
         // Then - the finding and the file that judges it, and no verdict of its own
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('./expected/checker-deferred.txt'));
+        expect(result.stderr).toMatch(`
+            widget/seeds/dead.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in widget references seeds/dead.sql
+            conventions checker: 1 finding(s) under {{workdir}}/specs, judged by jterrazz.baseline.json › test
+        `);
     });
 
     test('`--format json` prints the findings on a green ratchet run too', async () => {
@@ -206,7 +224,9 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
 
         // Then - the record, then the held finding as JSON: the machine format carries the findings whatever the verdict
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/checker-held-json.txt'));
+        expect(result.stdout).toMatch(`
+            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"dead fixture — no test literal in widget references seeds/dead.sql","severity":"error"}]
+        `);
     });
 
     test("`--format json` carries the checker's own findings, never the plugin's it judges", async () => {
@@ -218,7 +238,9 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
 
         // Then - the verdict fails on both, and the JSON holds the tree's finding alone
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toMatch(file('./expected/checker-failing-json.txt'));
+        expect(result.stdout).toMatch(`
+            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"dead fixture — no test literal in widget references seeds/dead.sql","severity":"error"}]
+        `);
     });
 
     test('a green root member run prints exactly the held line', async () => {

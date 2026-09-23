@@ -8,5 +8,5 @@ test('prints the widget listing', async () => {
     const result = await cli.exec('widget list');
 
     // Then - the golden matches
-    expect(result.stdout).toMatch(file('./expected/out.txt'));
+    expect(result.stdout).toMatch(file('./expected/out.txt')); // checker-disable-line c28 -- an input tree of the c13-bare-ground spec: its file form is what the rule reads
 });

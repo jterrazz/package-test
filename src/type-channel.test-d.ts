@@ -81,7 +81,7 @@ export async function typeRows(): Promise<void> {
     cli.fixture(directory('./fixtures/shop'));
     // @ts-expect-error B2 — a path ending in `/` is a directory [`Argument of type '"./fixtures/shop/"' is not assignable to parameter of type 'never'`]
     cli.fixture(file('./fixtures/shop/'));
-    // @ts-expect-error B2 — a request is one `.http` file, not a directory [`is not assignable to parameter of type 'DiskFile<".http">'`]
+    // @ts-expect-error B2 — a request is one `.http` file, not a directory [`is not assignable to parameter of type 'string | DiskFile<".http">'`]
     await api.request(directory('./requests/'));
     // @ts-expect-error B2 — a document is a `.spec.yaml` file [`Argument of type 'FileAt<"./case.yaml">' is not assignable to parameter of type 'DiskFile<".spec.yaml">'`]
     await cli.run(file('./case.yaml'));

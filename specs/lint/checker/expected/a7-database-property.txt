@@ -1,3 +1,0 @@
-specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): .seed() must pass { database } — 2 SQL databases are declared
-
-conventions checker: 1 error(s) found under {{workdir}}

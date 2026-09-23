@@ -1,4 +1,0 @@
-specs/api/orders/seeds/one-user.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in orders references seeds/one-user.sql
-specs/seeds/two-users.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references two-users.sql
-
-conventions checker: 2 error(s) found under {{workdir}}

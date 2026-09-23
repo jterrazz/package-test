@@ -1,0 +1,5 @@
+description: shared, long, tree, fixture and files named outside every test all stay files
+fixture: ./fixtures/kept/
+runs:
+    - command: checker .
+      exit: 0

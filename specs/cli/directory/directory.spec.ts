@@ -2,7 +2,7 @@ import { rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { directory, file, text } from '../../../src/index.js';
+import { directory, text } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 /** Run an assertion expected to fail and return its thrown message. */
@@ -73,7 +73,19 @@ describe('command — directory snapshot', () => {
                 },
             );
         });
-        expect(text(message)).toMatch(file('./expected/errors/directory-diff-error.txt'));
+        expect(text(message)).toMatch(`
+            Directory mismatch: ./expected/cli-scaffold/out/
+              1 difference: 0 added, 0 removed, 1 changed
+
+            - Expected (fixture)
+            + Received (generated)
+
+            ~ changed  go.mod  (1 line differ)
+                line 1:
+                - module example
+                + module CHANGED
+
+            Run with TEST_UPDATE=1 to update the fixture.`);
     });
 
     test('detects a missing fixture', async () => {

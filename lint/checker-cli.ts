@@ -3,12 +3,13 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { moveKeepingHistory } from '../src/seams/git/tree.js';
-import { fixCopiedGround, fixPoolFixtures } from './checker-crossfile.js';
+import { fixCopiedGround } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
 import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
 import type { Migration } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { loadRouteSources } from './checker-routes.js';
+import { fixGroundSharing } from './checker-sharing.js';
 import { fixSpecFiles } from './checker-spec.js';
 import {
     CHECKER_PASS_IDS,
@@ -567,8 +568,10 @@ function applyFixes(root: string): void {
     for (const move of fixCopiedGround(root)) {
         console.log(`conventions checker: moved ${move} (C27)`);
     }
-    for (const move of fixPoolFixtures(root)) {
-        console.log(`conventions checker: moved ${move} (C14)`);
+    for (const change of fixGroundSharing(root)) {
+        console.log(
+            `conventions checker: ${change.includes(':') ? 'inlined' : 'moved'} ${change} (C28)`,
+        );
     }
 }
 

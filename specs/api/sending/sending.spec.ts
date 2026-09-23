@@ -4,9 +4,17 @@ import { directory, file, sql } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 describe('requests', () => {
-    test('a request file is sent whole, and the user it creates lands in both databases', async () => {
-        // Given - the complete request, a file
-        const result = await api.request(file('./requests/create-user.http'));
+    test('a complete request is sent whole, and the user it creates lands in both databases', async () => {
+        // Given - the complete request, written in the test
+        const result = await api.request(`
+            POST /users
+            content-type: application/json
+
+            {
+                "name": "Charlie",
+                "email": "charlie@test.com"
+            }
+        `);
 
         // Then - the created user, in the users table and as an event
         expect(result.response).toMatch(`
@@ -51,6 +59,7 @@ describe('requests', () => {
 
     test('a JSON body file is sent as its value, not as the layout of the file', async () => {
         // Given - a body named by its path
+        // checker-disable-next-line c28 -- the file form is the subject: a JSON body read from its file
         const result = await api.post('/echo-raw', file('./requests/erin.json'));
 
         // Then - the app received the compact JSON of the value
@@ -66,6 +75,7 @@ describe('requests', () => {
 
     test('a body file that is not JSON is sent as its bytes are written', async () => {
         // Given - a plain-text body named by its path
+        // checker-disable-next-line c28 -- the file form is the subject: a text body read from its file
         const result = await api.post('/echo-raw', file('./requests/note.txt'));
 
         // Then - the app received the text verbatim, whitespace kept
@@ -81,6 +91,7 @@ describe('requests', () => {
 
     test('a request file whose body is plain text sends it verbatim, whitespace kept', async () => {
         // Given - a request file carrying a text body
+        // checker-disable-next-line c28 -- the file form is the subject: a complete request read from its .http file
         const result = await api.request(file('./requests/echo-raw.http'));
 
         // Then - the body arrived as written
@@ -184,10 +195,17 @@ describe('requests', () => {
 
     test('the chain headers win over the request file headers, and repeated calls merge', async () => {
         // Given - the file sets x-file and x-chain; the chain overrides x-chain twice
-        const result = await api
-            .headers({ 'x-chain': 'first' })
-            .headers({ 'x-chain': 'second' })
-            .request(file('./requests/echo.http'));
+        const result = await api.headers({ 'x-chain': 'first' }).headers({ 'x-chain': 'second' })
+            .request(`
+                POST /echo
+                content-type: application/json
+                x-file: from-file
+                x-chain: from-file
+
+                {
+                    "greeting": "hello"
+                }
+            `);
 
         // Then - the file header kept, the last chain header won, the body forwarded
         expect(result.response).toMatch(`

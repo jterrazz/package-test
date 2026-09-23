@@ -6,10 +6,10 @@ import { api } from '../../setup/widget.specification.js';
 describe('widget', () => {
     test('replays the recorded request', async () => {
         // Given - a recorded request fixture
-        const result = await api.request(file('./requests/create.http'));
+        const result = await api.request(file('./requests/create.http')); // checker-disable-line c28 -- an input tree of the checker spec: its file form is what the rule reads
 
         // Then - the response is defined
-        expect(result.response).toMatch(file('./expected/created.http'));
+        expect(result.response).toMatch(file('./expected/created.http')); // checker-disable-line c28 -- an input tree of the checker spec: its file form is what the rule reads
         expect(result).toBeDefined();
         expect(result.response).toMatch(file('./expected/created.http'));
     });

@@ -98,9 +98,20 @@ describe('command — stdout accessor', () => {
 
         // Then - the whole -/+ stdout diff is captured and asserted against a golden. frozen - stdout-wrong.txt is deliberately wrong (its diff IS the subject); only the error golden updates, never the wrong fixture
         const message = catchMessage(() => {
-            expect(result.stdout).toMatch(file('./expected/stdout-wrong.txt'), { frozen: true });
+            expect(result.stdout).toMatch(
+                `
+                Usage: cli <command>
+
+                Commands:
+                  build   Compile the project
+                  check   Check code quality
+            `,
+                { frozen: true },
+            );
         });
-        expect(text(message)).toMatch(file('./expected/errors/stdout-diff-error.txt'));
+        expect(text(message)).toMatch(
+            'Output mismatch (the value in place)\n\n- Expected\n+ Received\n\n  Usage: cli <command>\n  \n  Commands:\n-   build   Compile the project\n+   build   Build the project\n    check   Check code quality\n  ',
+        );
     });
 
     test('a frozen fixture is never rewritten under TEST_UPDATE (negative-fixture guard)', async () => {
@@ -558,7 +569,13 @@ describe('command — fixture tree layering', () => {
 
         // Then - the CLI saw both layers as one merged tree: the config file and the nested tree
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/read-seed.txt'));
+        expect(result.stdout).toMatch(`
+            worlds:
+                - alpha
+                - beta
+            agents:
+              spwn/agents/neo/journal/session-1.md
+        `);
     });
 
     // RUNTIME B2 — a string is a value: a verb that reads the disk takes file()

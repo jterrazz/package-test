@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
+import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — c16-document-outside-ground (CONVENTIONS C16)', () => {
@@ -15,7 +15,12 @@ describe('lint — c16-document-outside-ground (CONVENTIONS C16)', () => {
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c16-document-outside-ground.txt'));
+        expect(result.stderr).toMatch(`
+            widget/expected/builds.spec.yaml:1:1: error jterrazz-check(c16): a \`.spec.yaml\` document is a SPEC, not ground — move it beside the test that runs it
+            widget:1:1: error jterrazz-check(c9): domain directory has ground subdirs (expected) but no *.test.ts(x) or *.spec.yaml
+
+            conventions checker: 2 error(s) found under {{workdir}}/specs
+        `);
     });
 
     test('accepts a document beside the test that runs it', async () => {
@@ -26,6 +31,8 @@ describe('lint — c16-document-outside-ground (CONVENTIONS C16)', () => {
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/c16-document-outside-ground-ok.txt'));
+        expect(result.stdout).toMatch(`
+            jterrazz.baseline.json › test: nothing held
+        `);
     });
 });

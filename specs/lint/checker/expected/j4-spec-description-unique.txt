@@ -1,3 +1,0 @@
-specs/widget/rebuilds.spec.yaml:1:1: error jterrazz-check(j4): "builds the widget" is already the description of widget/builds.spec.yaml — two documents of one directory cannot share a title
-
-conventions checker: 1 error(s) found under {{workdir}}

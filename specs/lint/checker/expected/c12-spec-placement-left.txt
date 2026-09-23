@@ -1,3 +1,0 @@
-api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the `api` facet: import `{ api }` from `api.specification.js`, or move a module test beside its module
-
-conventions checker: 1 error(s) found under {{workdir}}/specs

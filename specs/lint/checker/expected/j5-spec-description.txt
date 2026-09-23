@@ -1,4 +1,0 @@
-specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): description: ends with a period — a title is a fragment, not a sentence
-specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): description: starts with a capital — a title is lowercase prose
-
-conventions checker: 2 error(s) found under {{workdir}}

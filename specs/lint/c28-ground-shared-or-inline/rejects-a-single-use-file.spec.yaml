@@ -1,0 +1,12 @@
+description: a seed, a golden, a body and a request one test alone reads are refused where the test names them
+fixture: ./fixtures/single-use/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/users/created.spec.ts:8:35  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:8:75  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:11:37  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:16:38  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:27:38  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:28:37  jterrazz-check(c28)

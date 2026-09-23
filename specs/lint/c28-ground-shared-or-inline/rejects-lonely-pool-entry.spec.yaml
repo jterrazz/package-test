@@ -1,0 +1,7 @@
+description: a pool fixture only one spec directory reaches for is refused
+fixture: ./fixtures/lonely/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/fixtures/lonely-stub:1:1  jterrazz-check(c28)

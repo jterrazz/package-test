@@ -185,7 +185,28 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the whole rendering, tokens covering the path and the run cwd
-        expect(text(message)).toMatch(file('./expected/wrong-stdout-error.txt'));
+        expect(text(message)).toMatch(`
+            Spec mismatch
+
+            a run whose golden stdout is deliberately wrong
+
+            $ help
+
+            Output mismatch (stdout)
+
+            - Expected
+            + Received
+
+              Usage: cli <command>
+              
+              Commands:
+                build   Build the project
+            -   lint    A command this binary does not have
+            +   check   Check code quality
+              
+
+            specs/cli/literate/fixtures/wrong-stdout.spec.yaml:3
+            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
     });
 
     test('a wrong exit code names both codes and what stderr carried', async () => {
@@ -195,7 +216,23 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the whole rendering, stderr included
-        expect(text(message)).toMatch(file('./expected/wrong-exit-error.txt'));
+        expect(text(message)).toMatch(`
+            Spec mismatch
+
+            a run whose golden exit code is deliberately wrong
+
+            $ fail
+
+            exit code mismatch
+              expected: 0
+              received: 2
+
+            stderr was:
+            Starting...
+            Fatal: something went wrong
+
+            specs/cli/literate/fixtures/wrong-exit.spec.yaml:3
+            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
@@ -205,7 +242,21 @@ describe('spec documents — refusals', () => {
         );
 
         // Then - the whole rendering, one line per rejected assertion
-        expect(text(message)).toMatch(file('./expected/wrong-files-error.txt'));
+        expect(text(message)).toMatch(`
+            Spec mismatch
+
+            a run whose files assertions are deliberately wrong
+
+            $ scaffold
+
+            files mismatch
+
+              out/main.go: expected to contain "package rust", got "package main\\n"
+              out/go.mod: expected absent, got a file
+              out/nothing.txt: expected to exist, got nothing at that path
+
+            specs/cli/literate/fixtures/wrong-files.spec.yaml:3
+            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
     });
 
     test('the stack carries ONE frame, on the run that failed', async () => {

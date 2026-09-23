@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
+import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('lint — c21w-ground-owned-by-one (CONVENTIONS C21)', () => {
@@ -15,7 +15,9 @@ describe('lint — c21w-ground-owned-by-one (CONVENTIONS C21)', () => {
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/c21w-ground-owned-by-one.txt'));
+        expect(result.stdout).toMatch(`
+            jterrazz.baseline.json › test: nothing held
+        `);
     });
 
     test('accepts ground that sits beside the spec that reads it', async () => {
@@ -26,6 +28,8 @@ describe('lint — c21w-ground-owned-by-one (CONVENTIONS C21)', () => {
 
         // Then - the clean summary
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/c21w-ground-owned-by-one-ok.txt'));
+        expect(result.stdout).toMatch(`
+            jterrazz.baseline.json › test: nothing held
+        `);
     });
 });

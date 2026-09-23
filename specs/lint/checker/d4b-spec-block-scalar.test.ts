@@ -15,7 +15,11 @@ describe('lint — d4b spec block scalar (CONVENTIONS D4b)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d4b-spec-block-scalar.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/builds.spec.yaml:5:1: error jterrazz-check(d4b): stdout is a quoted scalar — a stream is written as a block scalar (\`|\` keeps the final newline, \`|-\` drops it) (fixable: \`node dist/checker.js <root> --fix\`)
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {

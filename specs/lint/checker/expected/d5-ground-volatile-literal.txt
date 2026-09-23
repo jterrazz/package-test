@@ -1,4 +1,0 @@
-specs/cli/report/expected/summary.txt:1:1: error jterrazz-check(d5): "{{string}}" is a value the next run will not reproduce — write {{string}}
-specs/cli/report/expected/summary.txt:2:1: error jterrazz-check(d5): "{{string}}" is a value the next run will not reproduce — write {{string}}
-
-conventions checker: 2 error(s) found under {{workdir}}

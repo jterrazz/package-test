@@ -1,1 +1,0 @@
-specs/widget/seeds/orphaned.sql:1:1: warning jterrazz-check(c9): dead fixture — no test literal in widget references seeds/orphaned.sql

@@ -1,1 +1,0 @@
-specs/widget/builds.spec.yaml:6:1: warning jterrazz-check(j3w): a stream that is only {{string}} asserts nothing — golden what the command actually printed

@@ -1,3 +1,0 @@
-specs/widget:1:1: error jterrazz-check(c9): domain directory has ground subdirs (expected) but no *.test.ts(x) or *.spec.yaml
-
-conventions checker: 1 error(s) found under {{workdir}}

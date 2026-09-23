@@ -15,7 +15,11 @@ describe('lint — a7 database property (CONVENTIONS A7)', () => {
 
         // Then - the checker fails with the full cross-file diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/a7-database-property.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): .seed() must pass { database } — 2 SQL databases are declared
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts seeds that name their database under a multi-database spec', async () => {
@@ -37,7 +41,11 @@ describe('lint — a7 database property (CONVENTIONS A7)', () => {
 
         // Then - the inverse branch fails: a lone database must not be named
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/a7-database-single-forbidden.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): .seed() must not pass { database } — a single SQL database is declared
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('a checker-disable-next-line comment suppresses the A7 finding', async () => {

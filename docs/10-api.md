@@ -103,13 +103,14 @@ test('starts clean between specs', async () => {
 
 Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the result.
 
-| Action                                   | Description                                                   |
-| ---------------------------------------- | ------------------------------------------------------------- |
-| `.request(file('./requests/file.http'))` | Execute the complete request that `.http` file describes      |
-| `.get(path)`                             | Inline GET — for simple cases where a file would be excessive |
-| `.post(path, body?)`                     | Inline POST                                                   |
-| `.put(path, body?)`                      | Inline PUT                                                    |
-| `.delete(path)`                          | Inline DELETE                                                 |
+| Action                                   | Description                                                                           |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| ``.request(`POST /users …`)``            | Execute the complete request written in the test, `.http` text, dedented              |
+| `.request(file('./requests/file.http'))` | Execute the complete request that `.http` file describes — when several tests send it |
+| `.get(path)`                             | Inline GET — for simple cases where a file would be excessive                         |
+| `.post(path, body?)`                     | Inline POST                                                                           |
+| `.put(path, body?)`                      | Inline PUT                                                                            |
+| `.delete(path)`                          | Inline DELETE                                                                         |
 
 The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
 

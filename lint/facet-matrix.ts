@@ -104,6 +104,10 @@ const NO_SIMULATOR = 'no mobile tree: an iOS simulator is not something CI provi
 /** Every mobile cell carries the same reason; written once, spread per row. */
 const MOBILE_EXEMPT = { mobile: NO_SIMULATOR } as const;
 
+/** Why a column holds no golden FILE: every golden of its tree is read by one test, and written in place. */
+const IN_PLACE =
+    "every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared";
+
 /** The three surfaces that draw, and their shared vocabulary. */
 const DRAWS = ['website', 'mobile', 'component'] as const;
 
@@ -571,6 +575,7 @@ export const CAPABILITIES: Capability[] = [
     // ── Goldens ──
     {
         columns: ['api', 'cli', 'integration', 'website', 'component', 'module'],
+        exempt: { component: IN_PLACE, website: IN_PLACE },
         group: 'Golden',
         name: 'toMatch(file())',
         probe: '.toMatch(file(',
@@ -595,12 +600,14 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['website', 'component'],
+        exempt: { component: IN_PLACE, website: IN_PLACE },
         group: 'Golden',
         name: '.aria.yaml tree',
         probe: ".aria.yaml'",
     },
     {
         columns: ['api', 'cli', 'integration', 'website', 'module'],
+        exempt: { website: IN_PLACE },
         group: 'Golden',
         name: '.json body',
         probe: ".json'",

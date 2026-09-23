@@ -111,7 +111,9 @@ describe('command — env', () => {
 
         // Then - what the child echoes back matches the {{workdir}} golden
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/workdir-var.txt'));
+        expect(result.stdout).toMatch(`
+            CACHE_DIR={{workdir}}/sub
+        `);
     });
 
     test('$WORKDIR in a document env: expands to that same path', async () => {

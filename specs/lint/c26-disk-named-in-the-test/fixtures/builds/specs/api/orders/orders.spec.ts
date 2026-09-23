@@ -8,5 +8,5 @@ test('lists the seeded orders', async () => {
     const result = await seeded().get('/orders');
 
     // Then - the orders are listed
-    expect(result.response).toMatch(file('./expected/orders.http'));
+    expect(result.response).toMatch(file('./expected/orders.http')); // checker-disable-line c28 -- an input tree of the c26-disk-named-in-the-test spec: its file form is what the rule reads
 });

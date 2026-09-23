@@ -1,8 +1,0 @@
-POST /echo
-content-type: application/json
-x-file: from-file
-x-chain: from-file
-
-{
-    "greeting": "hello"
-}

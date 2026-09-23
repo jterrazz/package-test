@@ -14,7 +14,11 @@ describe('lint — d4b http first line (CONVENTIONS D4b)', () => {
 
         // Then - the checker fails with the full D4b grammar diagnostic
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d4b-http-first-line.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/requests/create.http:1:1: error jterrazz-check(d4b): a requests/*.http file must start with a request line "METHOD /path"
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts well-formed request and status lines', async () => {

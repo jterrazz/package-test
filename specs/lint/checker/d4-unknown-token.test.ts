@@ -15,7 +15,11 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
 
         // Then - the checker fails with the full diagnostic (file, token, frozen vocabulary)
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d4-unknown-token.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/expected/out.txt:1:1: error jterrazz-check(d4): unknown token {{string}} — the D4 vocabulary is frozen (known: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir)
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('rejects an unknown token in a document stream, never in its description', async () => {
@@ -26,7 +30,11 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
 
         // Then - one finding, on the stream line: a description is text, not tokens
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/d4-unknown-token-spec.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/builds.spec.yaml:6:1: error jterrazz-check(d4): unknown token {{string}} — the D4 vocabulary is frozen (known: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir)
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts fixtures using only the frozen vocabulary', async () => {

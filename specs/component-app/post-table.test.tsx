@@ -2,7 +2,6 @@ import {
     component,
     content,
     defineContract,
-    file,
     heading,
     http,
     main,
@@ -33,7 +32,20 @@ test('says how much of the collection the table is showing', async () => {
     });
 
     // Then - the table is qualified by what it is not showing, and says nothing else
-    await expect(result.tree).toMatch(file('./expected/posts-table.aria.yaml'));
+    await expect(result.tree).toMatch(`
+        - main:
+          - region "Posts":
+            - heading "Posts" [level=1]
+            - table "Showing 2 of 200 posts":
+              - caption: Showing 2 of 200 posts
+              - rowgroup:
+                - row "Title":
+                  - columnheader "Title"
+              - rowgroup:
+                - row "A first post":
+                  - cell "A first post"
+                - row "A second post":
+                  - cell "A second post"`);
     expect(result.console.text).toBe('');
 });
 
@@ -103,16 +115,24 @@ test('never rewrites a frozen golden, and throws its diff instead', async () => 
     });
 
     // Then - it threw its diff, and throws the SAME diff on a second read: a rewrite would have made the second comparison pass, which is exactly what `{ frozen: true }` forbids under TEST_UPDATE=1 (docs/08 § update mode)
-    const first = await refusalOf(
-        expect(result.tree).toMatch(file('./expected/wrong-posts-table.aria.yaml'), {
-            frozen: true,
-        }),
-    );
-    const second = await refusalOf(
-        expect(result.tree).toMatch(file('./expected/wrong-posts-table.aria.yaml'), {
-            frozen: true,
-        }),
-    );
+    const wrong = `
+            - main:
+              - region "Posts":
+                - heading "Posts" [level=1]
+                - table "Showing 3 of 200 posts":
+                  - caption: Showing 3 of 200 posts
+                  - rowgroup:
+                    - row "Title":
+                      - columnheader "Title"
+                  - rowgroup:
+                    - row "A first post":
+                      - cell "A first post"
+                    - row "A second post":
+                      - cell "A second post"
+                    - row "A third post":
+                      - cell "A third post"`;
+    const first = await refusalOf(expect(result.tree).toMatch(wrong, { frozen: true }));
+    const second = await refusalOf(expect(result.tree).toMatch(wrong, { frozen: true }));
     expect(first).toContain('A third post');
     expect(second).toBe(first);
 });

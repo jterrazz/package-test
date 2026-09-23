@@ -38,7 +38,7 @@ import { isNodeTestFileName, isTestFileName } from './role.js';
  * - **A7 database property** — a spec's `services:` record fixes how many SQL
  *   databases exist; importing tests must (≥2) or must not (==1) pass
  *   `{ database }` to every `.seed()` / `.table()`.
- * - **C14 / C15 where ground lives** — an entry of the specs root's own ground
+ * - **C28 / C15 where ground lives** — an entry of the specs root's own ground
  *   only ONE spec directory reaches for belongs beside that leaf (autofixed),
  *   and a path leaves its leaf only into that ground.
  */
@@ -82,7 +82,7 @@ function isPruned(dir: string): boolean {
 }
 
 /** Recursively list every file under `dir`, skipping pruned dirs and the pool. */
-function listFiles(dir: string, predicate: (path: string) => boolean): string[] {
+export function listFiles(dir: string, predicate: (path: string) => boolean): string[] {
     const out: string[] = [];
     const visit = (current: string): void => {
         let entries;
@@ -133,7 +133,7 @@ function listDirs(dir: string): string[] {
  * measured from. A nested one (a fixture project's own tree) sits inside a pool,
  * which the walk does not enter; the pool's contents are inputs, not live specs.
  */
-function findSpecsRoots(dir: string): string[] {
+export function findSpecsRoots(dir: string): string[] {
     const roots: string[] = [];
     const visit = (current: string): void => {
         if (basename(current) === 'specs') {
@@ -949,7 +949,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-// ── C14 / C15 (where ground lives) ────────────────────────────────────────────
+// ── C28's level half / C15 (where ground lives) ────────────────────────────────────────────
 
 /** One fixture reference: the path a spec named, and where it named it. */
 type FixtureReference = {
@@ -1112,7 +1112,7 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
 }
 
 /**
- * CONVENTIONS C14 — a pool entry is SHARED, or it is local. An entry of one of
+ * CONVENTIONS C28, its level half — a pool entry is SHARED, or it is local. An entry of one of
  * the specs root's ground folders — `fixtures/`, `seeds/`, `requests/`,
  * `expected/` — that exactly one spec directory reaches for is misplaced: it
  * belongs beside that leaf, in the leaf's folder of the same role
@@ -1136,14 +1136,14 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
             file: relEntry,
             line: 1,
             message: `only ${relLeaf} reaches for this pool entry — the specs root's ground is what SEVERAL leaves share; move it to ${relLeaf}/${role}/${entry} and name it ${named} — \`--fix\` does both`,
-            rule: 'c14',
+            rule: 'c28',
             severity: 'error',
         };
     });
 }
 
 /**
- * Apply C14: move each single-reader pool entry beside its leaf and rewrite the
+ * Apply C28's level half: move each single-reader pool entry beside its leaf and rewrite the
  * paths that climbed to it into the path from the leaf. The move is a `git mv`
  * in a work tree, so the moved fixture keeps its history; a plain rename elsewhere.
  * A pool the move empties goes with it, as C27's leaf folder does. Returns what

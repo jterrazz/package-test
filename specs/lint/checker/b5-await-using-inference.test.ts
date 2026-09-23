@@ -14,7 +14,11 @@ describe('lint — b5 await-using inference (CONVENTIONS B5)', () => {
 
         // Then - the checker fails with the full diagnostic naming the runner
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/b5-await-using-inference.txt'));
+        expect(result.stderr).toMatch(`
+            specs/widget/widget.test.ts:8:1: error jterrazz-check(b5): result of docker-aware runner "dockerCli" must be bound with \`await using\` so its containers are disposed
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a docker runner result bound with await using', async () => {

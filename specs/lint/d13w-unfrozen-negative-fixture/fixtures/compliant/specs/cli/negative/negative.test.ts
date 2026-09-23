@@ -6,5 +6,5 @@ test('asserts the mismatch diff on a frozen fixture', () => {
     const result = call();
 
     // Then - the frozen opt-out keeps the fixture safe under TEST_UPDATE (no D13 warn)
-    expect(() => expect(result.stdout).toMatch(file('./expected/wrong.txt'), { frozen: true })).toThrow(/mismatch/);
+    expect(() => expect(result.stdout).toMatch(file('./expected/wrong.txt'), { frozen: true })).toThrow(/mismatch/); // checker-disable-line c28 -- an input tree of the d13w-unfrozen-negative-fixture spec: its file form is what the rule reads
 });

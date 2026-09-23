@@ -26,7 +26,7 @@ describe('integration — a module against the real database', () => {
             );
 
         // Then - it said so, and the row is in the database it wrote to
-        expect(result.value).toMatch(file('./expected/recorded.txt'));
+        expect(result.value).toMatch('recorded ORD-3');
         await expect(result.table('orders')).toMatch([
             [1, 'ORD-1', '42'],
             [2, 'ORD-2', '108'],
@@ -63,7 +63,7 @@ describe('integration — a module against the real database', () => {
             );
 
         // Then - what it threw is the reading, and nothing was written
-        expect(result.error).toMatch(file('./expected/refused.txt'));
+        expect(result.error).toMatch(`an order of 0 is not an order — reference ORD-4`);
         await expect(result.table('orders')).toMatch([
             [1, 'ORD-1', '42'],
             [2, 'ORD-2', '108'],

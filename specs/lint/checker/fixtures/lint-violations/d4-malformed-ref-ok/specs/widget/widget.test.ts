@@ -9,6 +9,6 @@ describe('widget', () => {
         const result = await cli.exec('build');
 
         // Then - it matches the recorded fixture
-        expect(result.stdout).toMatch(file('./expected/out.txt'));
+        expect(result.stdout).toMatch(file('./expected/out.txt')); // checker-disable-line c28 -- an input tree of the checker spec: its file form is what the rule reads
     });
 });

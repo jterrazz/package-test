@@ -22,7 +22,11 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the parts a consumer reads come from the compose file
-        expect(result.value).toMatch(file('./expected/connection-string.json'));
+        expect(result.value).toMatch({
+            database: '/test',
+            protocol: 'postgresql:',
+            username: 'test',
+        });
     });
 
     test('passes its healthcheck on a reachable container', async () => {
@@ -43,7 +47,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the row is readable
-        expect(result.value).toMatch(file('./expected/alice.json'));
+        expect(result.value).toMatch([['Alice']]);
     });
 
     test('executes every statement of a seed file', async () => {
@@ -53,7 +57,7 @@ describe('postgres — the handle against a real container', () => {
             .call(async ({ db }) => await db.query('users', ['name']));
 
         // Then - both rows landed
-        expect(result.value).toMatch(file('./expected/two-users.json'));
+        expect(result.value).toMatch([['Alice'], ['Bob']]);
     });
 
     test('returns rows as value arrays, in the column order asked for', async () => {
@@ -63,7 +67,10 @@ describe('postgres — the handle against a real container', () => {
             .call(async ({ db }) => await db.query('users', ['email', 'name']));
 
         // Then - each row is a value array following the requested order
-        expect(result.value).toMatch(file('./expected/two-users-reversed.json'));
+        expect(result.value).toMatch([
+            ['alice@test.com', 'Alice'],
+            ['bob@test.com', 'Bob'],
+        ]);
     });
 
     test('starts every chain on an empty table', async () => {
@@ -74,7 +81,7 @@ describe('postgres — the handle against a real container', () => {
         const result = await integration.call(async ({ db }) => await db.query('users', ['name']));
 
         // Then - the second chain never saw the first one's rows
-        expect(result.value).toMatch(file('./expected/empty.json'));
+        expect(result.value).toMatch([]);
     });
 
     test('truncates every table on reset, its generated ids restarted, and takes rows again afterwards', async () => {
@@ -123,7 +130,7 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - the script ran against the real database
-        expect(result.value).toMatch(file('./expected/init-ok.json'));
+        expect(result.value).toMatch([['ok']]);
     });
 
     /*
@@ -206,6 +213,12 @@ describe('postgres — the handle against a real container', () => {
         });
 
         // Then - each worker has its own schema, and the row stayed in the one that wrote it
-        expect(result.value).toMatch(file('./expected/two-workers.json'));
+        expect(result.value).toMatch({
+            rows: {
+                first: [['Alice']],
+                second: [],
+            },
+            schemas: ['-c search_path=worker_7,public', '-c search_path=worker_8,public'],
+        });
     });
 });

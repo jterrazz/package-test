@@ -125,8 +125,8 @@ The counts are generated: a layer that stops growing while the surface does is v
 
 A rule is specified in one of two forms, and the first is the one a new rule takes:
 
-- **Documents.** `specs/lint/<rule-id>/<case>.spec.yaml`, the trees it lints in a local `fixtures/`: a tree in, the command, the report out. The runner is `specs/lint/report.specification.ts` — one wrapper for both channels (`command: .` lints with oxlint, `command: checker .` runs the checker), bound with the published `lintReport` as its `transform`: every diagnostic of either channel reads `file:line:column  plugin(rule)`, so the golden proves where the rule fired and which rule it was, and every other line — a tally, a summary — is dropped, so a clean run is an empty stream. The `unit` project collects these documents through `literate()`. Every rule of the oxlint plugin takes this form — all fifty-six, each with at least one document whose golden names the line and column it fires on, which a meta-test holds — and so do ten checker passes, C14's and C27's moves among them, and C13's 16 → 17 mover; a second meta-test holds every checker pass to a spec of either form.
-- **A test file per checker pass**, `specs/lint/checker/<pass>.test.ts` (and the reach meta-test under `specs/lint/meta/`), over a violation/compliant twin in `specs/lint/checker/fixtures/lint-violations/` — the pool entry moved beside the one leaf that reads it (C14). The checker's goldens there are full snapshots: `specs/lint/checker/expected/*.txt` holds the exact report lines the checker prints. A message that changes its wording moves its golden with it, in the same commit — the reason the documents golden the normalised report instead.
+- **Documents.** `specs/lint/<rule-id>/<case>.spec.yaml`, the trees it lints in a local `fixtures/`: a tree in, the command, the report out. The runner is `specs/lint/report.specification.ts` — one wrapper for both channels (`command: .` lints with oxlint, `command: checker .` runs the checker), bound with the published `lintReport` as its `transform`: every diagnostic of either channel reads `file:line:column  plugin(rule)`, so the golden proves where the rule fired and which rule it was, and every other line — a tally, a summary — is dropped, so a clean run is an empty stream. The `unit` project collects these documents through `literate()`. Every rule of the oxlint plugin takes this form — all fifty-six, each with at least one document whose golden names the line and column it fires on, which a meta-test holds — and so do eleven checker passes, C27's moves and C28's inlining and moves among them, and C13's 16 → 17 mover; a second meta-test holds every checker pass to a spec of either form.
+- **A test file per checker pass**, `specs/lint/checker/<pass>.test.ts` (and the reach meta-test under `specs/lint/meta/`), over a violation/compliant twin in `specs/lint/checker/fixtures/lint-violations/` — the pool entry moved beside the one leaf that reads it (C28). The checker's goldens there are full snapshots: `specs/lint/checker/expected/*.txt` holds the exact report lines the checker prints. A message that changes its wording moves its golden with it, in the same commit — the reason the documents golden the normalised report instead.
 
 ## Coverage is a ratchet, not a threshold
 
@@ -189,7 +189,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **81 modules** have no sibling test, and every one of them is claimed:
+Today **82 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -203,7 +203,7 @@ Today **81 modules** have no sibling test, and every one of them is claimed:
 | a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
 | a seam adapter (11)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
 | a bundled CLI entry (3)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                |
-| a lint-layer module (5)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
+| a lint-layer module (6)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
 | a chain or runner internal (7)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |
 
 <!-- /GENERATED:siblings -->
@@ -234,7 +234,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `root`      | 2   | 1    | 1   | 2           | 1       | 0      | 1         | —      |
 | `server`    | 4   | —    | —   | —           | 4       | —      | —         | —      |
 | `jobs`      | —   | 2    | —   | —           | —       | —      | —         | —      |
-| `url`       | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `url`       | —   | —    | —   | —           | 2       | —      | —         | —      |
 | `backend`   | —   | —    | —   | —           | 1       | 0      | —         | —      |
 | `external`  | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `device`    | —   | —    | —   | —           | —       | 0      | —         | —      |
@@ -371,13 +371,13 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability             | api | jobs | cli | integration | website | mobile | component | module |
 | ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —    | 6   | 6           | 6       | —      | 1         | 2      |
+| `toMatch(file())`      | 1   | —    | 2   | 3           | 0       | —      | 0         | 2      |
 | `toMatch(directory())` | 1   | —    | 3   | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 4   | 2    | 1   | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 2   | —    | —   | —           | —       | —      | —         | 3      |
-| `.aria.yaml tree`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `.json body`           | 2   | —    | 2   | 5           | 2       | —      | —         | 7      |
-| `.txt stream`          | 2   | —    | 8   | 3           | 2       | —      | —         | 9      |
+| `.aria.yaml tree`      | —   | —    | —   | —           | 0       | —      | 0         | —      |
+| `.json body`           | 2   | —    | 2   | 2           | 0       | —      | —         | 7      |
+| `.txt stream`          | 1   | —    | 6   | 1           | 1       | —      | —         | 9      |
 | `{ frozen }`           | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
@@ -418,6 +418,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 ### Exemptions
 
 - no mobile tree: an iOS simulator is not something CI provisions (M1) — `services`·mobile, `root`·mobile, `backend`·mobile, `device`·mobile, `app`·mobile, `timeouts`·mobile, `.intercept()`·mobile, `.open()`·mobile, `see`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `content`·mobile, `testId`·mobile, `.content`·mobile, `.screen`·mobile
+- every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared — `toMatch(file())`·website, `toMatch(file())`·component, `.aria.yaml tree`·website, `.aria.yaml tree`·component, `.json body`·website
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·cli, `{{iso8601}}`·website, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·api, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->

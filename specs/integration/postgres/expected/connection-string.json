@@ -1,5 +1,0 @@
-{
-    "database": "/test",
-    "protocol": "postgresql:",
-    "username": "test"
-}

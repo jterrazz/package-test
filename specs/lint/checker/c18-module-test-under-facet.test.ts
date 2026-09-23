@@ -15,7 +15,11 @@ describe('lint — c18-module-test-under-facet (CONVENTIONS C18)', () => {
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c18-module-test-under-facet.txt'));
+        expect(result.stderr).toMatch(`
+            api/orders/total.spec.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+
+            conventions checker: 1 error(s) found under {{workdir}}/specs
+        `);
     });
 
     test('leaves a golden under `expected/` alone, as it leaves `fixtures/`', async () => {

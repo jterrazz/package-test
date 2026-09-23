@@ -20,6 +20,7 @@ import type {
     ContractResponse,
 } from '../contracts/exchange.js';
 import { parseRequestFile } from '../http-files/http-file.js';
+import { dedent } from '../matching/dedent.js';
 import type { BrowserPort, VisitScenario } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
@@ -164,8 +165,8 @@ export type RequestEntry = {
     body?: unknown;
     method: string;
     path: string;
-    /** A `.http` document to load method/path/headers/body from. */
-    request?: DiskFile | undefined;
+    /** A complete request to send: a `.http` file, or its text written in the test. */
+    request?: DiskFile | string | undefined;
 };
 
 /**
@@ -206,8 +207,8 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
     post: (path: string, body?: unknown) => Promise<HttpResult>;
     /** Send a PUT request — the body a value or a `file()` — and resolve with the result. */
     put: (path: string, body?: unknown) => Promise<HttpResult>;
-    /** Send the complete request a `.http` document describes, `file('./requests/<name>.http')`. */
-    request: (source: DiskFile<'.http'>) => Promise<HttpResult>;
+    /** Send a complete request: its `.http` text written in the test, or `file('./requests/<name>.http')`. */
+    request: (source: DiskFile<'.http'> | string) => Promise<HttpResult>;
 };
 
 /**
@@ -545,15 +546,23 @@ export class SpecificationBuilder
     // ── HTTP actions (terminal) ──
 
     /**
-     * Send the complete request a `.http` document describes — first line
-     * `METHOD /path`, then headers until a blank line, then the body. Headers
-     * set via `.headers()` merge on top of the document's headers.
+     * Send a complete request — first line `METHOD /path`, then headers until a
+     * blank line, then the body — written in the test (dedented, as a value in
+     * place is), or in a `.http` file several tests share. Headers set via
+     * `.headers()` merge on top of the request's own.
      *
      * @example
-     *   const result = await api.request(file('./requests/create-user.http'));
+     *   const result = await api.request(`
+     *       POST /users
+     *       content-type: application/json
+     *
+     *       {"name": "Charlie"}
+     *   `);
+     *   const result = await api.request(file('../../requests/create-user.http'));
      */
-    async request(source: DiskFile<'.http'>): Promise<HttpResult> {
-        const request = requireDiskFile('request', source, '.http');
+    async request(source: DiskFile<'.http'> | string): Promise<HttpResult> {
+        const request =
+            typeof source === 'string' ? source : requireDiskFile('request', source, '.http');
         return await this.executeHttp({ method: '', path: '', request });
     }
 
@@ -909,12 +918,17 @@ export class SpecificationBuilder
             body = body.path.endsWith('.json') ? JSON.parse(content) : content;
         }
 
-        if (request.request) {
-            const raw = readFileSync(
-                resolveSpecPath('request', request.request.path, this.testDir),
-                'utf8',
-            );
-            const parsed = parseRequestFile(raw, request.request.path);
+        if (request.request !== undefined) {
+            const parsed =
+                typeof request.request === 'string'
+                    ? parseRequestFile(dedent(request.request), 'the request in place')
+                    : parseRequestFile(
+                          readFileSync(
+                              resolveSpecPath('request', request.request.path, this.testDir),
+                              'utf8',
+                          ),
+                          request.request.path,
+                      );
             body = parsed.body;
             fileHeaders = parsed.headers;
             method = parsed.method;

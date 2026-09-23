@@ -23,7 +23,6 @@ import {
     checkDiskTargetsExist,
     checkDockerRunnerAwaitUsing,
     checkLocalFixtureReach,
-    checkPoolFixtureSharing,
     checkSuppressionReason,
 } from './checker-crossfile.js';
 import {
@@ -32,6 +31,7 @@ import {
     checkModuleTestUnderFacet,
 } from './checker-facets.js';
 import { checkTestUnderFacet } from './checker-placement.js';
+import { checkGroundSharing } from './checker-sharing.js';
 import {
     checkSpecConventions,
     checkSpecDescriptionsUnique,
@@ -117,7 +117,6 @@ export const TREE_PASS_IDS = [
     'a7-database-property',
     'b5-await-using-inference',
     'c12-spec-file-name',
-    'c14-pool-fixture-shared',
     'c15-local-fixture-reach',
     'c16-document-outside-ground',
     'c18-module-test-under-facet',
@@ -125,6 +124,7 @@ export const TREE_PASS_IDS = [
     'c21w-ground-owned-by-one',
     'c23-seed-no-clock-read',
     'c27w-duplicate-ground',
+    'c28-ground-shared-or-inline',
     'c8-disk-target-exists',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
@@ -502,7 +502,7 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
         ...checkConventionFiles(rootDir),
         ...checkSpecDescriptionsUnique(rootDir),
         ...checkDeadFixtures(rootDir),
-        ...checkPoolFixtureSharing(rootDir),
+        ...checkGroundSharing(rootDir),
         ...checkCopiedGround(rootDir),
         ...checkLocalFixtureReach(rootDir),
         ...checkDiskTargetsExist(rootDir),

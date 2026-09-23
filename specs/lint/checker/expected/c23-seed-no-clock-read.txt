@@ -1,5 +1,0 @@
-widget/seeds/posts.sql:2:1: error jterrazz-check(c23): `'now'` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()`
-widget/seeds/posts.sql:3:1: error jterrazz-check(c23): `CURRENT_TIMESTAMP` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()`
-widget/seeds/posts.sql:4:1: error jterrazz-check(c23): `NOW()` reads the clock — a seed states the instant the case is about, and the chain pins the run's with `.clock()`
-
-conventions checker: 3 error(s) found under {{workdir}}/specs

@@ -1,3 +1,0 @@
-specs/widget/serves.spec.yaml:6:1: error jterrazz-check(d5): "{{ip}}:{{port}}" is a value the next run will not reproduce — write {{string}}
-
-conventions checker: 1 error(s) found under {{workdir}}

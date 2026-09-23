@@ -19,7 +19,11 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c12-spec-file-name.txt'));
+        expect(result.stderr).toMatch(`
+            specs/rm/rm.spec.yaml:1:1: error jterrazz-check(c12): "rm.spec.yaml" repeats its directory "rm/" — name what this case proves, not where it sits
+
+            conventions checker: 1 error(s) found under {{workdir}}
+        `);
     });
 
     test('accepts a document that holds the convention', async () => {
@@ -44,7 +48,12 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
 
         // Then - the facet folder already says what it specifies; only the word is wrong
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c12-spec-placement.txt'));
+        expect(result.stderr).toMatch(`
+            api/users/creation.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/api/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
+            api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+
+            conventions checker: 2 error(s) found under {{workdir}}/specs
+        `);
     });
 
     test('renames the spec, and leaves the two files that are not its own', async () => {
@@ -55,8 +64,16 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
 
         // Then - one rename; the glob and the literal entry it broke, and nothing else: not the commented-out glob, not the `src/` one whose files it never touched, not the repository suite's
         expect(result.exitCode).toBe(1);
-        expect(result.stdout).toMatch(file('./expected/c12-spec-placement-fixed.txt'));
-        expect(result.stderr).toMatch(file('./expected/c12-spec-placement-left.txt'));
+        expect(result.stdout).toMatch(`
+            conventions checker: renamed api/users/creation.test.ts → api/users/creation.spec.ts (C12)
+            conventions checker: vitest.config.ts: specs/api/**/*.test.ts still names \`.test.ts\` — the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (C12)
+            conventions checker: vitest.config.ts: specs/api/users/creation.test.ts names a file this run renamed — it is \`specs/api/users/creation.spec.ts\` now, and the entry collects nothing until it follows (C12)
+        `);
+        expect(result.stderr).toMatch(`
+            api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+
+            conventions checker: 1 error(s) found under {{workdir}}/specs
+        `);
     });
 
     // Full-output golden: the checker's diagnostics are OUR product, so the
@@ -70,7 +87,11 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
 
         // Then - the spec is named, and the ground module's own test beside its module is not
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/c12-spec-rooted-facet.txt'));
+        expect(result.stderr).toMatch(`
+            operator/manifest/manifest.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
+
+            conventions checker: 1 error(s) found under {{workdir}}/specs
+        `);
     });
 
     test('names a `.spec.ts` that never reached a specs tree', async () => {

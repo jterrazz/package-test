@@ -1,1 +1,0 @@
-specs/widget/stamps.spec.yaml:6:1: warning jterrazz-check(d5w): "2026-07-17T10:00:00.000Z" is not fixed by any fixture: or stdin: of this document — write {{string}}
