@@ -1,0 +1,1 @@
+INSERT INTO rows VALUES (1);
