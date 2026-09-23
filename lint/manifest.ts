@@ -446,6 +446,30 @@ export const RULE_DOCS = {
             'Probes are a partial oracle: what they do not name is free to regress unseen. The whole result, written where the test reads it, is the default oracle — approval testing — and a precise assertion states what the test is about on top of it. It is the retired warning on body-probe clusters, grown into the rule it stood in for.',
         reach: 'tests',
     },
+    'd28-shared-expectation': {
+        channel: 'statique',
+        convention:
+            'A file-level `const` a spec hands to a matcher as the expected value serves two tests or more; read by one test, it is an error at its declaration. A constant read outside every test (by a helper) counts as shared, and an exported one is out of reach.',
+        facet: 'model',
+        family: 'D',
+        fix: 'Write the value in place, in the matcher the one test hands it to, and delete the constant — `make fix` inlines one read.',
+        id: 'D28',
+        rationale:
+            'A test is read where it is written: an expectation parked at the top of the file makes its one reader scroll to know what it asserts, and buys no sharing for the price.',
+        reach: 'spec',
+    },
+    'd29-no-foreign-expectation': {
+        channel: 'statique',
+        convention:
+            'A spec imports no expectation: a name imported from a relative module — neither its `*.specification` runner nor a module under `contracts/` — and handed to a matcher as the expected value, itself or a member of it, is an error at the argument. A helper is CALLED, and what it builds is the test’s own; F4 already refuses importing a test file at all.',
+        facet: 'model',
+        family: 'D',
+        fix: 'Write the expected value in the test — in place, or `file(…)` when several tests of the leaf share it — and drop the import.',
+        id: 'D29',
+        rationale:
+            'An expectation written in another module asserts what nobody reviewing the test reads, and a change to that module moves the assertions of every spec that imports it without one of them changing.',
+        reach: 'spec',
+    },
     'd2-await-io-matcher': {
         channel: 'statique',
         convention:

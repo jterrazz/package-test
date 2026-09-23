@@ -1,0 +1,47 @@
+import { asOxlintRule, ruleTester } from '../../rule-tester.fixtures.js';
+import { d29NoForeignExpectation } from './d29-no-foreign-expectation.js';
+
+const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
+
+ruleTester().run('d29-no-foreign-expectation', asOxlintRule(d29NoForeignExpectation), {
+    invalid: [
+        // An expectation written in another module.
+        {
+            code: "import { FIRST_PAGE } from '../shared/pages.js';\ntest('a', () => { expect(result.response).toMatch(FIRST_PAGE); });",
+            errors: [{ messageId: 'imported' }],
+            filename: SPEC,
+        },
+        // A member of one is the same expectation.
+        {
+            code: "import { pages } from '../../expectations.js';\ntest('a', () => { expect(result.json).toMatch(pages.first); });",
+            errors: [{ messageId: 'imported' }],
+            filename: SPEC,
+        },
+    ],
+    valid: [
+        // A helper is called: what it builds is the test's own.
+        {
+            code: "import { page } from '../shared/pages.js';\ntest('a', () => { expect(result.json).toMatch(page(1)); });",
+            filename: SPEC,
+        },
+        // The runner and the contracts are imported by design.
+        {
+            code: "import { api } from '../../api.specification.js';\ntest('a', () => { expect(a).toBe(api); });",
+            filename: SPEC,
+        },
+        {
+            code: "import { quote } from '../contracts/quotes.contracts.js';\ntest('a', () => { expect(a).toBe(quote); });",
+            filename: SPEC,
+        },
+        // A package is no expectation of this repository.
+        {
+            code: "import { value } from 'some-package';\ntest('a', () => { expect(a).toBe(value); });",
+            filename: SPEC,
+        },
+        // A module test is not a spec.
+        {
+            code: "import { X } from './x.js';\ntest('a', () => { expect(a).toBe(X); });",
+            filename: '/repo/src/x.test.ts',
+        },
+    ],
+});

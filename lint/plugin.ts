@@ -49,6 +49,8 @@ import { d17wDoubleOnlyOracle } from './rules/model/d17w-double-only-oracle.js';
 import { d18wExistenceOnlyOracle } from './rules/model/d18w-existence-only-oracle.js';
 import { d19wProbeCluster } from './rules/model/d19w-probe-cluster.js';
 import { d20WholeResult } from './rules/model/d20-whole-result.js';
+import { d28SharedExpectation } from './rules/model/d28-shared-expectation.js';
+import { d29NoForeignExpectation } from './rules/model/d29-no-foreign-expectation.js';
 import { e2PresetConfig } from './rules/model/e2-preset-config.js';
 import { e4wProjectBinding } from './rules/model/e4w-project-binding.js';
 import { e7wIncludePrefixExists } from './rules/model/e7w-include-prefix-exists.js';
@@ -115,6 +117,8 @@ const plugin: LintPlugin = {
         'd18w-existence-only-oracle': d18wExistenceOnlyOracle,
         'd19w-probe-cluster': d19wProbeCluster,
         'd20-whole-result': d20WholeResult,
+        'd28-shared-expectation': d28SharedExpectation,
+        'd29-no-foreign-expectation': d29NoForeignExpectation,
         'd2-await-io-matcher': d2AwaitIoMatcher,
         'd2w-await-sync-matcher': d2wAwaitSyncMatcher,
         'd6w-transform-token-equivalent': d6wTransformTokenEquivalent,

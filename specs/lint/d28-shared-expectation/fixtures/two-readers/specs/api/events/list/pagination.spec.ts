@@ -1,0 +1,23 @@
+import { describe, expect, test } from 'vitest';
+
+import { api } from '../../api.specification.js';
+
+const FIRST_PAGE = `HTTP/1.1 200 OK`;
+
+describe('pagination', () => {
+    test('lists the first page', async () => {
+        // Given - the events the app holds
+        const result = await api.get('/events');
+
+        // Then - the whole page
+        expect(result.response).toMatch(FIRST_PAGE);
+    });
+
+    test('lists it again', async () => {
+        // Given - the events the app holds
+        const result = await api.get('/events');
+
+        // Then - the whole page
+        expect(result.response).toMatch(FIRST_PAGE);
+    });
+});

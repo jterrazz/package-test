@@ -31,6 +31,8 @@
         "jterrazz/c32-aspect-name": "error",
         "jterrazz/c33-file-size": "error",
         "jterrazz/d20-whole-result": "error",
+        "jterrazz/d28-shared-expectation": "error",
+        "jterrazz/d29-no-foreign-expectation": "error",
         "jterrazz/d13w-unfrozen-negative-fixture": "warn",
         "jterrazz/d15w-status-only-probe": "warn",
         "jterrazz/d16-sampled-oracle": "error",
