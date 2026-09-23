@@ -179,18 +179,48 @@ function targetOf(specsRoot: string, spec: SpecRead, name: string, keepsName: bo
     return join(specsRoot, spec.facet, folder, `${aspect}.spec.ts`);
 }
 
-/** The test whose own chains reach several subjects — a file the fix cannot cut. */
-function uncuttable(spec: SpecRead): TestOf | undefined {
+/** A test whose own chains reach several subjects — a journey no cut can separate. */
+function journeyOf(spec: SpecRead): TestOf | undefined {
     return spec.tests.find((test) => test.subjects.length > 1);
 }
 
-/** The files a split writes, subject by subject — the first keeps the file's name where it has no folder. */
+/** The subjects the file's tests open on, in order: each is one file of a split. */
+function openedSubjects(spec: SpecRead): string[] {
+    return [
+        ...new Set(
+            spec.tests.flatMap((test) =>
+                test.subjects[0] === undefined ? [] : [test.subjects[0]],
+            ),
+        ),
+    ];
+}
+
+/**
+ * The files a split writes, one per subject a test opens on — a journey goes
+ * with the subject its chain starts on; the first keeps the file's name where
+ * the subject has no folder.
+ */
 function splitPlan(specsRoot: string, spec: SpecRead): Map<string, string> {
     const plan = new Map<string, string>();
-    for (const [position, name] of [...spec.subjects.keys()].entries()) {
+    for (const [position, name] of openedSubjects(spec).entries()) {
         plan.set(name, targetOf(specsRoot, spec, name, position === 0));
     }
     return plan;
+}
+
+/** What C29 tells the author of a file reaching several subjects to do. */
+function splitAdvice(specsRoot: string, spec: SpecRead): string {
+    const journey = journeyOf(spec);
+    const targets = [...splitPlan(specsRoot, spec).values()].map((path) => shown(specsRoot, path));
+    const seed =
+        journey === undefined
+            ? ''
+            : `the test "${journey.title}" reaches ${journey.subjects.join(' and ')} — state what it stands on with a seed, and keep one subject per test`;
+    if (targets.length < 2) {
+        return seed;
+    }
+    const split = `split it, one file per subject — ${targets.join(', ')} — \`make fix\` splits it`;
+    return journey === undefined ? split : `${split}; ${seed}`;
 }
 
 /** Where C29 reports a file: the first chain that reaches a second subject. */
@@ -221,18 +251,11 @@ export function checkOneSubject(specsRoot: string): TokenViolation[] {
             return [];
         }
         const names = [...spec.subjects.keys()];
-        const both = uncuttable(spec);
-        const targets = [...splitPlan(specsRoot, spec).values()].map((path) =>
-            shown(specsRoot, path),
-        );
         return [
             {
                 ...secondSubjectAt(spec),
                 file: shown(specsRoot, spec.file),
-                fix:
-                    both === undefined
-                        ? `split it, one file per subject — ${targets.join(', ')} — \`make fix\` splits it`
-                        : `split it by subject; the test "${both.title}" reaches ${both.subjects.join(' and ')} — state what it stands on with a seed, and keep one subject per test`,
+                fix: splitAdvice(specsRoot, spec),
                 found: `a spec reaching ${names.length} subjects — ${names.join(', ')}`,
                 rule: 'c29-one-subject' as const,
                 severity: 'error' as const,
@@ -600,13 +623,14 @@ function writeAt(from: string, to: string, text: string): void {
 /**
  * Apply C29 and C30: split each spec reaching several subjects into one file
  * per subject, and move each spec about one subject to its standard folder.
- * A file one of whose tests reaches two subjects, or whose target is taken, is
- * left for its author. Returns what it did, below the specs root.
+ * A test reaching two subjects goes with the one its chain opens on, and C29
+ * keeps naming it; a file whose target is taken is left for its author.
+ * Returns what it did, below the specs root.
  */
 export function fixSubjects(specsRoot: string): string[] {
     const done: string[] = [];
     for (const spec of subjectSpecs(specsRoot)) {
-        if (spec.subjects.size === 0 || uncuttable(spec) !== undefined || silenced(spec)) {
+        if (spec.subjects.size === 0 || silenced(spec)) {
             continue;
         }
         const plan = splitPlan(specsRoot, spec);
@@ -617,7 +641,7 @@ export function fixSubjects(specsRoot: string): string[] {
         if (targets.some((target) => target !== spec.file && existsSync(target))) {
             continue;
         }
-        const [first = ''] = spec.subjects.keys();
+        const [first = ''] = openedSubjects(spec);
         const neutral = new Set(spec.tests.filter((test) => test.subjects.length === 0));
         const keepsFile = targets.includes(spec.file);
         for (const [name, target] of plan) {

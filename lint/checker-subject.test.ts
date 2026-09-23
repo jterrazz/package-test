@@ -164,7 +164,7 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         }).toStrictEqual({ missing: true, quoted: true });
     });
 
-    test('a test reaching two subjects is reported with its title, and nothing is cut', () => {
+    test('a test reaching two subjects is reported with its title, and filed with the subject it opens on', () => {
         // Given - one test that creates, then lists
         const source = [
             "import { api } from '../api.specification.js';",
@@ -176,12 +176,40 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
             'api/orders/orders.spec.ts': source,
         });
 
-        // Then - the finding says why no split is offered, and the fix leaves the file
+        // Then - the finding says why no split is offered, and the fix only files the journey
         expect(checkOneSubject(root)[0]?.fix).toBe(
-            'split it by subject; the test "creates then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
+            'the test "creates then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
         );
         fixSubjects(root);
-        expect(readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')).toBe(source);
+        expect(readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8')).toContain(
+            "test('creates then lists'",
+        );
+    });
+
+    test('a journey goes with the subject it opens on, and the rest of the file is still cut', () => {
+        // Given - one test on GET, one journey opening on POST and reading GET back
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': [
+                "import { api } from '../api.specification.js';",
+                "test('lists', async () => { await api.get('/orders'); });",
+                "test('creates then lists', async () => { await api.post('/orders', {}); await api.get('/orders'); });",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix runs
+        fixSubjects(root);
+
+        // Then - two files, the journey with its opening subject, which C29 keeps naming
+        const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
+        expect({
+            journey: created.includes("test('creates then lists'"),
+            listed: existsSync(join(root, 'api/orders/list/orders.spec.ts')),
+        }).toStrictEqual({ journey: true, listed: true });
+        expect(checkOneSubject(root).map(({ file }) => file)).toStrictEqual([
+            'api/orders/create/orders.spec.ts',
+        ]);
     });
 
     test('a finding its author silenced is neither reported nor fixed', () => {
