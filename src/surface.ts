@@ -191,6 +191,15 @@ type GoldenMatch<T, R> = T extends { readonly capturedInPage: true }
  */
 type StreamMarker = { readonly raw: string; readonly streamName: string };
 
+/**
+ * What a value matcher's `this` must be on a stream subject — which no
+ * assertion is, so the call does not compile. The refusal sits on `this`
+ * rather than on the argument because the augmented `toMatch` must stay
+ * assignable to vitest's own, which takes a string or a RegExp from any
+ * subject.
+ */
+type StreamIsNoValue = { readonly 'a stream is compared as its .text': never };
+
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.
 
@@ -230,7 +239,8 @@ declare module 'vitest' {
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**
          * Vitest's `toMatch` for a value (a string or a RegExp, against a
-         * string — a stream is compared as `result.stdout.text`), and the
+         * string — a stream is compared as `result.stdout.text`, and handed
+         * whole with a value it does not compile), and the
          * golden comparison for the disk: `toMatch(file('./expected/help.txt'))`,
          * the extension part of the path (`.http` for `result.response`), or
          * `await expect(result.directory('out')).toMatch(directory('./expected/out/'))`.
@@ -241,7 +251,11 @@ declare module 'vitest' {
          * Use it for a deliberately-wrong golden whose diff/error rendering is
          * the behaviour under test.
          */
-        toMatch: ((expected: RegExp | string) => R) & GoldenMatch<T, R>;
+        toMatch: ((
+            this: T extends StreamMarker ? StreamIsNoValue : unknown,
+            expected: RegExp | string,
+        ) => R) &
+            GoldenMatch<T, R>;
         /**
          * Assert the table contains exactly the given rows for the given
          * columns. Cells accept `match.*` dynamic-value matchers. Async —

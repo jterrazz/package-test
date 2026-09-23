@@ -181,7 +181,8 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
 
         // Then - vitest's own refusal on the accessor, and vitest's own match on its comparable text
         expect(() => {
-            expect(subject).toMatch(/built in/u);
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value matcher on a stream
+            expect(subject as unknown as string).toMatch(/built in/u);
         }).toThrow('.toMatch() expects to receive a string, but got object');
         expect(subject.text).toMatch(/^built in \ds$/u);
         expect(subject.text).not.toMatch('failed');

@@ -88,6 +88,19 @@ export async function typeRows(): Promise<void> {
     // @ts-expect-error B2 — a command is a value where a verb takes one [`Argument of type 'FileAt<"./fixtures/args.txt">' is not assignable to parameter of type 'string | string[] | undefined'`]
     await cli.exec(file('./fixtures/args.txt'));
 
+    // B2 — the verbs 17 retired stay retired: the disk is an ARGUMENT of the
+    // Simple verb, never a second verb named for it.
+    // @ts-expect-error B2 — `seedFile` is retired: `seed(file(…))` [`Property 'seedFile' does not exist on type 'ApiSpecification<never>'`]
+    api.seedFile('./seeds/x.sql');
+    // @ts-expect-error B2 — `requestFile` is retired: `request(file(…))` [`Property 'requestFile' does not exist on type 'ApiSpecification<never>'`]
+    await api.requestFile('./requests/x.http');
+    // @ts-expect-error B2 — `fixtureFile` is retired: `fixture(file(…))` [`Property 'fixtureFile' does not exist on type`]
+    cli.fixtureFile('./fixtures/a.json');
+    // @ts-expect-error B2 — `fixtureDirectory` is retired: `fixture(directory(…))` [`Property 'fixtureDirectory' does not exist on type`]
+    cli.fixtureDirectory('./fixtures/shop/');
+    // @ts-expect-error B2 — `runFile` is retired: `run(file(…))` [`Property 'runFile' does not exist on type`]
+    await cli.runFile('./case.spec.yaml');
+
     // D14 — the golden half of `toMatch` takes the disk its subject has: a
     // Value subject has none, a stream's is a file, a tree's is a directory.
     const out = await cli.exec();
@@ -146,4 +159,22 @@ export async function streamValueRows(): Promise<void> {
     // @ts-expect-error D14 — an empty stream is an empty text [`Type 'never' has no call signatures`]
     await expect(out.stderr).toBeEmpty();
     expect(out.stderr.text).toBe('');
+}
+
+/**
+ * D14 and B2 on a stream's `toMatch`: a value is compared as the stream's
+ * `.text`, so the accessor takes a `file()` and nothing else — and the
+ * matchers 17 retired for the disk stay retired.
+ */
+export async function streamMatcherRows(): Promise<void> {
+    const { cli } = await specification.cli('./bin.sh');
+    const out = await cli.exec();
+    // @ts-expect-error D14 — a stream compared as a value is its text: `toMatch` takes no RegExp on one [`is not assignable to method's 'this' of type 'StreamIsNoValue'`]
+    expect(out.stdout).toMatch(/built/u);
+    // @ts-expect-error D14 — a stream compared as a value is its text: `toMatch` takes no string on one [`is not assignable to method's 'this' of type 'StreamIsNoValue'`]
+    expect(out.stderr).toMatch('warning');
+    // @ts-expect-error B2 — `toMatchFile` is retired: `toMatch(file(…))` [`Property 'toMatchFile' does not exist on type`]
+    expect(out.stdout).toMatchFile('./expected/out.txt');
+    // @ts-expect-error B2 — `toMatchDirectory` is retired: `toMatch(directory(…))` [`Property 'toMatchDirectory' does not exist on type`]
+    await expect(out.filesystem).toMatchDirectory('./expected/tree/');
 }
