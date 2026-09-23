@@ -12,6 +12,11 @@ const ruleTester = new RuleTester();
 
 ruleTester.run('d8w-raw-bypass', d8wRawBypass as unknown as OxlintRule, {
     invalid: [
+        // Negated, on the other stream: the capture is still what the check reads.
+        {
+            code: 'expect(result.stderr.raw).not.toContain("warning");',
+            errors: [{ column: 0, line: 1, messageId: 'rawBypass' }],
+        },
         // The stream as captured, handed to a substring check.
         { code: 'expect(result.stdout.raw).toContain("hi");', errors: 1 },
     ],

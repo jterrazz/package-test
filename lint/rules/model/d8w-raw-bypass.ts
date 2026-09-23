@@ -22,8 +22,14 @@ function isRegExp(node: AstNode | undefined): boolean {
  * `expect(result.stdout.raw).toContain(…)` throws away what `.text` applies
  * before every comparison — ANSI stripping and the runner's transform.
  *
- * A RegExp argument is exempt: a pattern carries no token grammar to lose.
+ * A RegExp argument is exempt: a pattern carries no token grammar to lose. A
+ * negated check (`.not.toContain`) is read like the plain one.
  */
+/** `expect(x).not` read as `expect(x)`: a negated check reads the capture as surely. */
+function unnegated(node: AstNode | undefined): AstNode | undefined {
+    return node !== undefined && memberPropertyName(node) === 'not' ? child(node, 'object') : node;
+}
+
 export const d8wRawBypass: LintRule = {
     create(context: RuleContext) {
         return {
@@ -33,7 +39,7 @@ export const d8wRawBypass: LintRule = {
                 if (matcher === undefined || !TEXT_MATCHERS.has(matcher)) {
                     return;
                 }
-                const expectCall = callee?.object as AstNode | undefined;
+                const expectCall = unnegated(callee?.object as AstNode | undefined);
                 if (expectCall?.type !== 'CallExpression') {
                     return;
                 }
