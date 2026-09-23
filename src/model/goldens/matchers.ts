@@ -32,7 +32,7 @@ import {
 import { diffDirectories, DirectoryAccessor, walkDirectory } from '../result/directory.js';
 import { FilesystemAccessor } from '../result/filesystem.js';
 import { JsonAccessor } from '../result/json.js';
-import type { MatchFixtureOptions } from '../result/match-options.js';
+import type { MatchFixtureOptions, TableMatchOptions } from '../result/match-options.js';
 import { ResponseAccessor } from '../result/response.js';
 import { TableAccessor } from '../result/table.js';
 import {
@@ -56,6 +56,8 @@ import {
     renderValue,
     writeInPlace,
 } from './in-place.js';
+import { pairRows } from './rows.js';
+import type { Rows } from './rows.js';
 
 type MatcherResult = {
     message: () => string;
@@ -381,41 +383,33 @@ async function matchDirectoryGolden(
     );
 }
 
-/** Rows as a value written in place states them: one array of cells per row. */
-type Rows = readonly (readonly unknown[])[];
-
 /** Is this rows, before the table is queried against it? */
 function isRows(expected: unknown): expected is Rows {
     return Array.isArray(expected) && expected.every((row) => Array.isArray(row));
 }
 
 /**
- * Compare the rows a table holds against the rows stated, cell by cell through
- * the token grammar — the diff when they differ, `null` when they match.
+ * Compare the rows a table holds against the rows stated — as a multiset, or
+ * in the table's order when `ordered` — the diff when they differ, `null`
+ * when they match.
  */
 export function rowsMismatch(
     name: string,
     expected: { columns: string[]; rows: Rows },
     actual: unknown[][],
-    scope: CaptureScope,
+    { ordered, scope }: { ordered: boolean; scope: CaptureScope },
 ): null | string {
-    const pass =
-        actual.length === expected.rows.length &&
-        expected.rows.every((row, i) => {
-            const actualRow = actual[i];
-            return (
-                actualRow !== undefined &&
-                row.length === actualRow.length &&
-                row.every((cell, j) => structuralEquals(cell, actualRow[j], scope))
-            );
-        });
+    const { pairs, pass } = pairRows(expected.rows, actual, scope, ordered);
     return pass
         ? null
         : formatTableDiff(
               name,
               expected.columns,
-              expected.rows.map((row) => row.map((cell) => renderExpected(cell))),
-              actual,
+              pairs.map(({ actual: row, expected: stated, matched }) => ({
+                  actual: row,
+                  expected: stated?.map((cell) => renderExpected(cell)),
+                  matched,
+              })),
           );
 }
 
@@ -425,7 +419,7 @@ export function rowsMismatch(
 type InPlace = {
     /** A negation asserts a mismatch, and update mode never records one. */
     negated: boolean;
-    options: MatchFixtureOptions | undefined;
+    options: TableMatchOptions | undefined;
     stack: string;
 };
 
@@ -522,19 +516,28 @@ function matchJsonValue(
 }
 
 /**
- * Rows to write in place: each cell whose previous expectation, as a token,
- * still matches keeps the token; every other cell is the table's value.
+ * Rows to write in place, in the order the previous rows stated them and the
+ * rows no previous row paired after: each cell whose previous expectation, as
+ * a token, still matches keeps the token; every other cell is the table's value.
  */
-function mergeRows(previous: null | Rows, actual: unknown[][]): unknown[][] {
-    return actual.map((row, i) =>
-        row.map((cell, j) => {
-            const before = renderExpected(previous?.[i]?.[j]);
-            return typeof before === 'string' &&
-                hasPlaceholders(before) &&
-                structuralEquals(before, cell, new CaptureScope())
-                ? before
-                : cell;
-        }),
+function mergeRows(previous: null | Rows, actual: unknown[][], ordered: boolean): unknown[][] {
+    const pairs =
+        previous === null
+            ? actual.map((row) => ({ actual: row, expected: undefined }))
+            : pairRows(previous, actual, new CaptureScope(), ordered).pairs;
+    return pairs.flatMap(({ actual: row, expected }) =>
+        row === undefined
+            ? []
+            : [
+                  row.map((cell, index) => {
+                      const before = renderExpected(expected?.[index]);
+                      return typeof before === 'string' &&
+                          hasPlaceholders(before) &&
+                          structuralEquals(before, cell, new CaptureScope())
+                          ? before
+                          : cell;
+                  }),
+              ],
     );
 }
 
@@ -546,17 +549,21 @@ async function matchTableValue(
 ): Promise<MatcherResult> {
     const { columns, rows } = await accessor.content();
     const previous = isRows(expected) ? expected : null;
+    const ordered = context.options?.ordered === true;
     const mismatch =
         previous === null
             ? `Table "${accessor.name}" (${IN_PLACE}): ${UNRECORDED}`
-            : rowsMismatch(accessor.name, { columns, rows: previous }, rows, accessor.captures);
+            : rowsMismatch(accessor.name, { columns, rows: previous }, rows, {
+                  ordered,
+                  scope: accessor.captures,
+              });
     if (mismatch === null) {
         return passed(`expected table "${accessor.name}" not to match the rows in place`);
     }
     if (!recording(context)) {
         return failed(mismatch);
     }
-    const merged = mergeRows(previous, rows);
+    const merged = mergeRows(previous, rows, ordered);
     return writeAt(context, (indent) => renderRows(merged, indent));
 }
 

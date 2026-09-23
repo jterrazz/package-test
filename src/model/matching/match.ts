@@ -241,4 +241,20 @@ export class CaptureScope {
     set(name: string, value: unknown): void {
         this.values.set(name, value);
     }
+
+    /** A copy to try a comparison on: what it captures stays in the copy until {@link adopt}ed. */
+    fork(): CaptureScope {
+        const copy = new CaptureScope(this.workdir);
+        for (const [name, value] of this.values) {
+            copy.set(name, value);
+        }
+        return copy;
+    }
+
+    /** Take every capture a fork of this scope recorded. */
+    adopt(fork: CaptureScope): void {
+        for (const [name, value] of fork.values) {
+            this.values.set(name, value);
+        }
+    }
 }

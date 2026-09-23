@@ -21,7 +21,10 @@ import type {
 import type { DirectoryAccessor as DirectoryAccessorType } from './model/result/directory.js';
 import type { FilesystemAccessor as FilesystemAccessorType } from './model/result/filesystem.js';
 import type { JsonAccessor as JsonAccessorType } from './model/result/json.js';
-import type { MatchFixtureOptions as MatchFixtureOptionsType } from './model/result/match-options.js';
+import type {
+    MatchFixtureOptions as MatchFixtureOptionsType,
+    TableMatchOptions as TableMatchOptionsType,
+} from './model/result/match-options.js';
 import type { ResponseAccessor as ResponseAccessorType } from './model/result/response.js';
 import type { TableAccessor as TableAccessorType } from './model/result/table.js';
 import type { TextAccessor as TextAccessorType } from './model/result/text.js';
@@ -206,7 +209,7 @@ type WholeMatch<T, R> = T extends { readonly capturedInPage: true }
         : T extends JsonAccessorType
           ? (expected: JsonExpectation, options?: MatchFixtureOptionsType) => R
           : T extends TableAccessorType
-            ? (expected: '' | TableRows, options?: MatchFixtureOptionsType) => Promise<void>
+            ? (expected: '' | TableRows, options?: TableMatchOptionsType) => Promise<void>
             : T extends DirectoryAccessorType | FilesystemAccessorType
               ? (golden: DiskDirectoryType, options?: MatchFixtureOptionsType) => Promise<void>
               : unknown;

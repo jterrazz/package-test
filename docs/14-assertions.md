@@ -113,7 +113,9 @@ Always `await expect(…)` (IO). `database:` is **mandatory when the services re
 | `toMatch(<rows>)` | async      | see below                                                              |
 | `toBeEmpty()`     | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()` |
 
-The table is compared WHOLE: every row, and every column in the order the table declares it — the rows are read `ORDER BY 1`. A reset restarts the generated ids, so the first row a chain inserts is `1` ([17 — Services](17-services.md#per-worker-isolation-rule-g2)); an instant is compared as its ISO text.
+The table is compared WHOLE: every row, and every column in the order the table declares it. A reset restarts the generated ids, so the first row a chain inserts is `1` ([17 — Services](17-services.md#per-worker-isolation-rule-g2)); an instant is compared as its ISO text.
+
+A table has no order of its own, so its rows compare as a multiset: each row written in place is paired with a row of the table it matches, whatever order the database hands them back in — a first column of random ids orders them differently run to run. When the order IS the claim, `toMatch(rows, { ordered: true })` compares row by row in the order of the table's first column (the rows are read `ORDER BY 1`). A token that captures, `{{uuid#event}}`, binds on the pairing that holds, and update mode writes the rows in the order the value in place stated them, a new row after them.
 
 ```typescript
 await expect(result.table('orders', { database: 'db' })).toMatch([
@@ -132,7 +134,7 @@ await expect(result.table('payment_intents', { database: 'db' })).toMatch([
 
 `toBeEmpty` is a table's matcher, and async: rule D2 refuses the bare `expect(x).toBeEmpty();` — dropped, it passes the test and surfaces the real failure as an unhandled rejection. A stream is not a table: an empty one is an empty text, `expect(result.stderr.text).toBe('')` — vitest's own, sync, on the text a golden compares. `toBeEmpty` handed a stream does not compile, and at run time it is refused with that form.
 
-A failing table `toMatch` prints the expected grid against the actual rows, every column named, cell by cell — matcher cells render as their placeholder text (`Matcher.toString()`): `match.uuid()` shows as `{{uuid}}`, `match.ref('order')` as `{{ref#order}}`, `match.ref('intent', { not: 'order' })` as `{{ref#intent!order}}`, `match.regex(/…/)` as `{{regex:…}}`. A failing `toBeEmpty` reports how many rows it found (the count, not the rows themselves). `.not` inverts both (`.not.toBeEmpty()` = at least one row).
+A failing table `toMatch` prints the expected grid against the actual rows, every column named, cell by cell: a row that matches prints once, unmarked, and each stated row that matches none is shown against the unpaired row of the table it resembles most (the most cells in common), a row too many or too few alone — matcher cells render as their placeholder text (`Matcher.toString()`): `match.uuid()` shows as `{{uuid}}`, `match.ref('order')` as `{{ref#order}}`, `match.ref('intent', { not: 'order' })` as `{{ref#intent!order}}`, `match.regex(/…/)` as `{{regex:…}}`. A failing `toBeEmpty` reports how many rows it found (the count, not the rows themselves). `.not` inverts both (`.not.toBeEmpty()` = at least one row).
 
 ## `result.stdout` / `result.stderr` — stream subjects (cli, container `exec`)
 

@@ -21,3 +21,12 @@
 export type MatchFixtureOptions = {
     frozen?: boolean;
 };
+
+/**
+ * The options a table's `toMatch(rows)` takes besides `frozen`. A table has
+ * no order of its own, so its rows compare as a multiset; `ordered` makes the
+ * order — the order of the table's first column — part of the claim.
+ */
+export type TableMatchOptions = MatchFixtureOptions & {
+    ordered?: boolean;
+};

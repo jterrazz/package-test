@@ -109,7 +109,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 61    |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 64    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 81    |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 155   |
@@ -189,7 +189,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **81 modules** have no sibling test, and every one of them is claimed:
+Today **80 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -201,7 +201,7 @@ Today **81 modules** have no sibling test, and every one of them is claimed:
 | a mobile module that needs a device (2) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
 | a facet module (8)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
 | a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
-| a seam adapter (11)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
+| a seam adapter (10)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
 | a bundled CLI entry (3)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                |
 | a lint-layer module (5)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
 | a chain or runner internal (7)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |
@@ -387,13 +387,13 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `clock()`     | —   | —    | —   | —           | —       | —      | —         | 2      |
 | `intercept()` | —   | —    | —   | —           | —       | —      | —         | 1      |
 | `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 1      |
-| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 7      |
+| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 8      |
 
 ### Token
 
 | Capability     | api | jobs | cli | integration | website | mobile | component | module |
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `{{any}}`      | 0   | —    | 2   | 0           | 0       | —      | —         | 1      |
+| `{{any}}`      | 0   | —    | 2   | 0           | 0       | —      | —         | 2      |
 | `{{base64}}`   | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
 | `{{date}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{duration}}` | 0   | —    | 1   | 0           | 0       | —      | —         | 2      |
@@ -438,7 +438,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/ast.test.ts`                          | specsAnchor                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 7     |
 | `lint/checker-crossfile.test.ts`            | checker suppression — suppressedLines (checker-disable comments)                                                                                                                                                                                                                                                                                                                                                                                                                                     | 10    |
 | `lint/checker-member.test.ts`               | the member pass — what a workspace member owes                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 19    |
-| `lint/checker-migration.test.ts`            | the 16 → 17 mover (C13 --fix)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 19    |
+| `lint/checker-migration.test.ts`            | the 16 → 17 mover (C13 --fix) · the 16 → 17 mover — the oxlint config                                                                                                                                                                                                                                                                                                                                                                                                                                | 21    |
 | `lint/checker-spec.test.ts`                 | fixSpecDocument — key order and block scalars                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5     |
 | `lint/checker.test.ts`                      | conventions checker — findUnknownTokens (D4) · conventions checker — findKnownTokens (D10) · conventions checker — checkConventionFiles (D4) · the tree the checker judges — what git does not ignore · the moves the fixers make · the single paths the checker probes — through the same tree                                                                                                                                                                                                      | 17    |
 | `lint/coverage.test.ts`                     | the coverage ratchet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 8     |

@@ -134,19 +134,27 @@ export function formatStatusError(
 
 // ── Table diff ──
 
+/** One line of a table diff: a stated row, a row of the table, or both — and whether they match. */
+export type TableDiffPair = {
+    actual?: undefined | unknown[];
+    expected?: readonly unknown[] | undefined;
+    matched: boolean;
+};
+
 export function formatTableDiff(
     table: string,
     columns: string[],
-    expected: unknown[][],
-    actual: unknown[][],
+    pairs: readonly TableDiffPair[],
 ): string {
+    const expectedCount = pairs.filter((pair) => pair.expected !== undefined).length;
+    const actualCount = pairs.filter((pair) => pair.actual !== undefined).length;
     const lines: string[] = [];
 
     lines.push(
         `Table "${table}" mismatch`,
         `${DIM}  query: ${columns.join(', ')}${RESET}`,
-        `${DIM}  expected: ${rowLabel(expected.length)}${RESET}`,
-        `${DIM}  received: ${rowLabel(actual.length)}${RESET}`,
+        `${DIM}  expected: ${rowLabel(expectedCount)}${RESET}`,
+        `${DIM}  received: ${rowLabel(actualCount)}${RESET}`,
         '',
         `${GREEN}- Expected${RESET}`,
         `${RED}+ Received${RESET}`,
@@ -156,30 +164,20 @@ export function formatTableDiff(
     const header = columns.join('  |  ');
     lines.push(`${DIM}  ${header}${RESET}`);
 
-    const maxRows = Math.max(expected.length, actual.length);
-
-    for (let i = 0; i < maxRows; i++) {
-        const exp = expected[i];
-        const act = actual[i];
-
-        if (exp && !act) {
-            lines.push(`${GREEN}- ${formatRow(exp)}${RESET}`);
-        } else if (!exp && act) {
-            lines.push(`${RED}+ ${formatRow(act)}${RESET}`);
-        } else if (exp && act) {
-            const same = JSON.stringify(exp) === JSON.stringify(act);
-            if (same) {
-                lines.push(`  ${formatRow(act)}`);
-            } else {
-                lines.push(
-                    `${GREEN}- ${formatRow(exp)}${RESET}`,
-                    `${RED}+ ${formatRow(act)}${RESET}`,
-                );
-            }
+    for (const { actual, expected, matched } of pairs) {
+        if (matched && actual !== undefined) {
+            lines.push(`  ${formatRow(actual)}`);
+            continue;
+        }
+        if (expected !== undefined) {
+            lines.push(`${GREEN}- ${formatRow(expected)}${RESET}`);
+        }
+        if (actual !== undefined) {
+            lines.push(`${RED}+ ${formatRow(actual)}${RESET}`);
         }
     }
 
-    if (expected.length === 0 && actual.length === 0) {
+    if (pairs.length === 0) {
         lines.push(`  (empty)`);
     }
 
@@ -474,7 +472,7 @@ function formatJson(value: unknown, color: string): string {
         .join('\n');
 }
 
-function formatRow(row: unknown[]): string {
+function formatRow(row: readonly unknown[]): string {
     return row.map((v) => String(v ?? 'null')).join('  |  ');
 }
 

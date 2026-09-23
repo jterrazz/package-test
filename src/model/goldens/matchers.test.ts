@@ -641,6 +641,19 @@ function scratchTest(call: string): { file: string; read: () => string; stack: s
     };
 }
 
+/**
+ * Uuids in an order no test can predict from their names, drawn from a fixed
+ * sequence so every run draws the same ones: what a table keyed by random
+ * ids hands back, without sampling randomness.
+ */
+function uuidDraw(): () => string {
+    let state = 7;
+    return () => {
+        state = (state * 1_103_515_245 + 12_345) % 2_147_483_648;
+        return `${state.toString(16).padStart(8, '0')}-0000-4000-8000-000000000000`;
+    };
+}
+
 /** A database double holding one table, `users`, with the rows given. */
 function usersTable(rows: unknown[][]): DatabasePort {
     return {
@@ -728,6 +741,80 @@ describe('toMatch compares the whole result to the value written in place, and u
         await expect(subject).toMatch([['{{int}}', 'Ada', '2026-01-02T03:04:05.000Z']]);
         await expect(expect(subject).toMatch([])).rejects.toThrow(
             /Table "users" mismatch[\s\S]*query: id, name, created_at[\s\S]*\+ 7 {2}\| {2}Ada/u,
+        );
+    });
+
+    test('a table of rows keyed by random ids matches whatever order they come back in, run after run', async () => {
+        // Given - fifty tables of three rows keyed by uuids drawn anew for each, each handed back in its first column's order
+        const draw = uuidDraw();
+        const runs = Array.from({ length: 50 }, () => {
+            const rows = ['Ada', 'Bob', 'Cy'].map((name) => [draw(), name, '2026-01-02']);
+            const sorted = rows.toSorted((a, b) => String(a[0]).localeCompare(String(b[0])));
+            return { bob: rows[1]?.[0], subject: new TableAccessor('users', usersTable(sorted)) };
+        });
+
+        // Then - each matches the rows as the test states them, each id captured on its own row
+        await Promise.all(
+            runs.map(async ({ subject }) => {
+                await expect(subject).toMatch([
+                    ['{{uuid#ada}}', 'Ada', '2026-01-02'],
+                    ['{{uuid#bob}}', 'Bob', '2026-01-02'],
+                    ['{{uuid#cy}}', 'Cy', '2026-01-02'],
+                ]);
+            }),
+        );
+        expect(runs.map(({ subject }) => subject.captures.get('bob'))).toStrictEqual(
+            runs.map(({ bob }) => bob),
+        );
+    });
+
+    test("a table compared { ordered: true } holds its first column's order as part of the claim", async () => {
+        // Given - two rows, handed back as the table orders them
+        const subject = new TableAccessor(
+            'users',
+            usersTable([
+                [1, 'Ada', '2026-01-02'],
+                [2, 'Bob', '2026-01-02'],
+            ]),
+        );
+
+        // Then - the rows in another order match as a multiset, and fail as an order
+        await expect(subject).toMatch([
+            [2, 'Bob', '2026-01-02'],
+            [1, 'Ada', '2026-01-02'],
+        ]);
+        await expect(
+            expect(subject).toMatch(
+                [
+                    [2, 'Bob', '2026-01-02'],
+                    [1, 'Ada', '2026-01-02'],
+                ],
+                { frozen: true, ordered: true },
+            ),
+        ).rejects.toThrow(/- 2 {2}\| {2}Bob[\s\S]*\+ 1 {2}\| {2}Ada/u);
+    });
+
+    test('a table diff pairs each stated row with the row it resembles most, and shows the rows that match as matching', async () => {
+        // Given - two rows, one stated with a wrong name, stated in the other order
+        const subject = new TableAccessor(
+            'users',
+            usersTable([
+                [1, 'Ada', '2026-01-02'],
+                [2, 'Bob', '2026-01-02'],
+            ]),
+        );
+
+        // Then - Bob's row matches, and Ada's is shown against the row it was meant to be
+        await expect(
+            expect(subject).toMatch(
+                [
+                    [2, 'Bob', '2026-01-02'],
+                    [1, 'Eve', '2026-01-02'],
+                ],
+                { frozen: true },
+            ),
+        ).rejects.toThrow(
+            /\n {2}2 {2}\| {2}Bob {2}\| {2}2026-01-02\n\S*- 1 {2}\| {2}Eve {2}\| {2}2026-01-02\S*\n\S*\+ 1 {2}\| {2}Ada/u,
         );
     });
 

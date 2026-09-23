@@ -3,7 +3,7 @@ import { isDiskTarget } from '../chain/spec-path.js';
 import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
-import type { MatchFixtureOptions } from './match-options.js';
+import type { TableMatchOptions } from './match-options.js';
 import { TextAccessor } from './text.js';
 
 /**
@@ -117,12 +117,15 @@ export const WHOLE_MATCHER = '@jterrazz/test:whole';
  * What the whole-result comparison is handed besides its value: the options
  * the test passed, and the stack of the call — where update mode writes.
  */
-export type WholeCall = { options: MatchFixtureOptions | undefined; stack: string };
+export type WholeCall = { options: TableMatchOptions | undefined; stack: string };
 
-/** The options a caller handed, read without trusting their shape: `frozen` is the one they carry. */
-function optionsOf(value: unknown): MatchFixtureOptions | undefined {
+/** The options a caller handed, read without trusting their shape: `frozen`, and a table's `ordered`. */
+function optionsOf(value: unknown): TableMatchOptions | undefined {
     return value !== null && typeof value === 'object'
-        ? { frozen: Reflect.get(value, 'frozen') === true }
+        ? {
+              frozen: Reflect.get(value, 'frozen') === true,
+              ordered: Reflect.get(value, 'ordered') === true,
+          }
         : undefined;
 }
 
