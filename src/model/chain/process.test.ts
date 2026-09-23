@@ -3,7 +3,9 @@ import { afterEach, describe, expect, test } from 'vitest';
 import { processService } from './process.js';
 import type { ProcessHandle } from './process.js';
 
-const SERVER = `node -e "require('node:http').createServer((q,s)=>s.end(process.env.GREETING ?? 'ok')).listen(process.env.PORT)"`;
+/** A server that binds the port the OS hands it and announces it — no spec picks a port. */
+const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end(process.env.GREETING ?? 'ok'));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
+const READY = /listening on port (?<port>\d+)/u;
 
 let started: null | ProcessHandle = null;
 
@@ -13,9 +15,9 @@ afterEach(async () => {
 });
 
 describe('process — the one shape an external process takes', () => {
-    test('comes up on a port the framework chose, and answers', async () => {
-        // Given - a process declared with nothing but its command
-        started = processService({ command: SERVER });
+    test('comes up on the port it bound, and answers', async () => {
+        // Given - a process declared with its command and the line that announces its port
+        started = processService({ command: SERVER, ready: READY });
         await started.spawnWith(process.cwd(), {}, 'run-1');
 
         // Then - it is reachable at the url the handle now carries
@@ -25,7 +27,7 @@ describe('process — the one shape an external process takes', () => {
 
     test('carries the environment it was declared with', async () => {
         // Given - a process handed one variable
-        started = processService({ command: SERVER, env: { GREETING: 'bonjour' } });
+        started = processService({ command: SERVER, env: { GREETING: 'bonjour' }, ready: READY });
         await started.spawnWith(process.cwd(), {}, 'run-2');
 
         // Then - the child read it
@@ -39,6 +41,7 @@ describe('process — the one shape an external process takes', () => {
         started = processService({
             command: SERVER,
             env: (services) => ({ GREETING: services.db?.connectionString ?? 'unset' }),
+            ready: READY,
         });
         await started.spawnWith(process.cwd(), siblings, 'run-3');
 
@@ -52,6 +55,7 @@ describe('process — the one shape an external process takes', () => {
         const handle = processService({
             before: `node -e "console.error('the build failed'); process.exit(2)"`,
             command: SERVER,
+            ready: READY,
         });
 
         // Then - the specification stops there, naming the exit and the output
@@ -62,7 +66,7 @@ describe('process — the one shape an external process takes', () => {
 
     test('refuses to name a url before it is up', () => {
         // Given - a declared but unstarted process
-        const handle = processService({ command: SERVER });
+        const handle = processService({ command: SERVER, ready: READY });
 
         // Then - the refusal says where the url comes from
         expect(() => handle.url).toThrow('known once the process is ready');

@@ -13,4 +13,8 @@ const server = createServer((request, response) => {
     response.end(JSON.stringify({ service: 'api', runId: process.env.TEST_RUN_ID ?? 'unset' }));
 });
 
-server.listen(Number(process.env.PORT ?? 0), '127.0.0.1');
+// It binds the port the OS hands it and announces it, which is how the runner
+// Reads it (`ready: /listening on port (\d+)/`).
+server.listen(0, '127.0.0.1', () => {
+    process.stdout.write(`listening on port ${server.address().port}\n`);
+});

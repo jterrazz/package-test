@@ -1281,6 +1281,19 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
+            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach.",
+        facet: 'model',
+        family: 'K',
+        fix: 'Bind port 0, print the port the OS gave, and declare `ready: /listening on port (\\d+)/`.',
+        id: 'K9',
+        name: 'k9-spec-server-port-zero',
+        rationale:
+            'A port picked, released, then bound is a window another server of the same run can take: `make check` failed twice on a spec reaching a stranger on the port it was handed, and passed on the rerun.',
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
             'Every constructor has a `specs/<facet>/` tree in this package. Two subjects answer differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component-app/`; `mobile` has no tree at all, because CI provisions no simulator.',
         facet: 'model',
         family: 'M',

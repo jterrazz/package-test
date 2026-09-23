@@ -1,7 +1,8 @@
 // The website fixture — a deliberately representative mini-site for the
 // Website specification specs: full head surface (canonical, hreflang, OG,
 // JSON-LD), a form with client behavior, a permanent redirect, robots.txt,
-// And a console-noisy page. Zero dependencies; PORT comes from the runner.
+// And a console-noisy page. Zero dependencies; it binds port 0 and prints the
+// Port it got.
 import { createServer } from 'node:http';
 
 const head = (title, path) => `
@@ -213,4 +214,8 @@ const server = createServer(async (request, response) => {
     response.end(page);
 });
 
-server.listen(Number(process.env.PORT ?? 3000));
+// It binds the port the OS hands it and announces it: the spec reads it off
+// That line (`ready: /listening on port (\d+)/`) and never picks one.
+server.listen(0, '127.0.0.1', () => {
+    process.stdout.write(`listening on port ${server.address().port}\n`);
+});

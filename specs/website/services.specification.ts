@@ -4,19 +4,19 @@ import { afterAll } from 'vitest';
 /**
  * The website runner started BESIDE another process: an API the site reads at
  * render time. `server` is a function of the started services, which is how
- * the site learns the URL of something the framework chose the port for.
+ * the site learns the URL of something the OS chose the port for.
  */
 export const { cleanup, website } = await specification.website({
     server: ({ api }) =>
         processService({
             command: 'node specs/fixtures/website-app/server.mjs',
             env: { API_URL: api.connectionString },
-            ready: '/',
+            ready: /listening on port (?<port>\d+)/u,
         }),
     services: {
         api: processService({
             command: 'node specs/fixtures/api-app/server.mjs',
-            ready: '/health',
+            ready: /listening on port (?<port>\d+)/u,
         }),
     },
 });

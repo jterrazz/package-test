@@ -11,7 +11,7 @@ export const { cleanup, website } = await specification.website({
     backend: { env: 'API_URL' },
     external: 'allow',
     root: '../fixtures/website-app',
-    server: { command: 'node server.mjs', ready: '/' },
+    server: { command: 'node server.mjs', ready: /listening on port (?<port>\d+)/u },
 });
 
 afterAll(cleanup);

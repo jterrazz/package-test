@@ -76,6 +76,7 @@ function metaProofs(): Set<string> {
         read('lint/plugin.test.ts'),
         read('lint/env-allowlist.test.ts'),
         read('lint/matrix.test.ts'),
+        read('lint/port-readers.test.ts'),
         read('lint/siblings.test.ts'),
     ];
     for (const entry of readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true })) {
