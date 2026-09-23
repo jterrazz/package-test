@@ -26,14 +26,23 @@ function realPath(path: string): string {
 const FRAMEWORK_DIR = realPath(import.meta.dirname);
 
 /**
- * The directory holding the framework's OWN modules: `<package>/dist` for a
- * built install (everything is bundled there), `<repo>/src` when the framework
- * runs from source — this module's known location inside that tree is what
- * tells the two apart.
+ * The directories holding the framework's OWN modules, from the directory this
+ * module runs in: `<repo>/src` when the framework runs from source — this
+ * module's known location inside that tree is what tells the two apart — and
+ * for a build, `<package>/dist` (everything is bundled there) with the
+ * `<package>/src` its source maps point back to: once a runner applies those
+ * maps, a frame of the bundle reads as a frame of its source, and it is still
+ * the framework's, never its caller's. An install ships no maps and no `src/`.
+ *
+ * @internal
  */
-const FRAMEWORK_TREE = FRAMEWORK_DIR.endsWith(`${sep}${SOURCE_LOCATION}`)
-    ? resolve(FRAMEWORK_DIR, '../..')
-    : FRAMEWORK_DIR;
+export function frameworkTreesOf(frameworkDir: string): string[] {
+    return frameworkDir.endsWith(`${sep}${SOURCE_LOCATION}`)
+        ? [resolve(frameworkDir, '../..')]
+        : [frameworkDir, resolve(frameworkDir, '..', 'src')];
+}
+
+const FRAMEWORK_TREES = frameworkTreesOf(FRAMEWORK_DIR);
 
 /** Is `path` inside `directory` (strictly — a directory is not inside itself)? */
 function isInside(directory: string, path: string): boolean {
@@ -52,13 +61,17 @@ function isInside(directory: string, path: string): boolean {
  *
  * @internal
  */
-export function isFrameworkFrame(filePath: string, frameworkTree = FRAMEWORK_TREE): boolean {
+export function isFrameworkFrame(
+    filePath: string,
+    frameworkTrees: readonly string[] = FRAMEWORK_TREES,
+): boolean {
     if (TEST_FILE.test(filePath)) {
         return false;
     }
     // Both sides go through realpath: an install reached by symlink (a `file:`
     // Link, a pnpm store, a worktree) must still compare equal to itself.
-    return isInside(realPath(frameworkTree), realPath(filePath));
+    const real = realPath(filePath);
+    return frameworkTrees.some((tree) => isInside(realPath(tree), real));
 }
 
 /**

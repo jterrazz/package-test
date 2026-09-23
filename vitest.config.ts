@@ -20,7 +20,7 @@ import {
  * order are the framework's, so `--project api` means the same thing here as
  * in every consumer.
  */
-export default defineSpecConfig({
+const config = defineSpecConfig({
     test: {
         projects: [
             // The module tests, plus the one specs tree that is not a facet's:
@@ -96,3 +96,20 @@ export default defineSpecConfig({
         ],
     },
 });
+
+/**
+ * Coverage counts the checker's child processes too. The documents and the
+ * checker tests run `dist/checker.js` as a child, so v8 hands every child the
+ * `NODE_V8_COVERAGE` directory it merges from (`autoAttachSubprocess`); the
+ * build's source maps take each bundle back to the `lint/` and `src/` modules
+ * it was built from. `dist/` is read, then judged AFTER that remap
+ * (`excludeAfterRemap`), so what counts is the source the bundle ran.
+ */
+const coverage = config.test?.coverage;
+if (coverage?.provider === 'v8') {
+    coverage.autoAttachSubprocess = true;
+    coverage.excludeAfterRemap = true;
+    coverage.exclude = (coverage.exclude ?? []).filter((glob) => glob !== 'dist/**');
+}
+
+export default config;

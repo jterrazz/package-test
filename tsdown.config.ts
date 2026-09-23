@@ -16,7 +16,10 @@ import { defineConfig } from 'tsdown';
  * - **Dual** — the `oxlint` plugin config is loaded by oxlint from the
  *   consumer's project, which may itself be ESM or CJS, so it ships both.
  *
- * Sourcemaps are omitted: the published tarball carries runtime + types only.
+ * Every group writes source maps, so the coverage of a child process running a
+ * bundle (the checker, under the documents) lands on the modules it was built
+ * from; `files` leaves them out of the tarball, which carries runtime + types
+ * only.
  */
 export default defineConfig([
     {
@@ -34,7 +37,7 @@ export default defineConfig([
         format: ['esm'],
         hash: false,
         outExtensions: () => ({ js: '.js' }),
-        sourcemap: false,
+        sourcemap: true,
     },
     {
         clean: false,
@@ -49,7 +52,7 @@ export default defineConfig([
         hash: false,
         outExtensions: () => ({ js: '.js' }),
         platform: 'browser',
-        sourcemap: false,
+        sourcemap: true,
     },
     {
         clean: false,
@@ -67,6 +70,6 @@ export default defineConfig([
         // Bundler calls that mix ambiguous unless the interop is stated, so it
         // Is stated: the CJS build exposes both as named, `default` included.
         outputOptions: { exports: 'named' },
-        sourcemap: false,
+        sourcemap: true,
     },
 ]);
