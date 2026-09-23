@@ -49,33 +49,36 @@ A second hole is the RENDERER's, and it is not this repository's to close: a Rea
 
 ## How a spec tree is laid out
 
-The layout is the one the conventions enforce on every consumer (rule C1), and this repository is its first consumer. A facet carries its runners at its ROOT and its tests one level down, in domain folders:
+The layout is the one the conventions enforce on every consumer (rules C1, C29, C30), and this repository is its first consumer. A facet carries its runners at its ROOT and its tests below, one file per aspect of one subject — in the api, cli and jobs facets under the subject's standard folder, derived from the route, the command or the job ([18 — Conventions § One file, one subject](18-conventions.md#one-file-one-subject)):
 
 ```
 specs/
 ├── api/
 │   ├── api.specification.ts          # runners at the facet root
 │   ├── intercepts.specification.ts
-│   └── sending/                      # a domain
-│       ├── sending.spec.ts
-│       ├── requests/                 # ground: complete requests, *.http
-│       └── expected/                 # ground: every golden it reads
+│   └── echo-raw/create/              # POST /echo-raw — the subject's standard folder
+│       ├── sending.spec.ts           # the aspect this file asks of it
+│       └── requests/                 # ground: what it sends, *.http and bodies
+├── website/
+│   └── visit/                        # a domain: a website's folders are its author's
 └── fixtures/                         # the SHARED file state, reached by ../../fixtures/…;
                                       # seeds/, requests/, expected/ beside it share the same way
 ```
 
-**A domain shared by two facets carries the same name in both.** Seven
+**Where the folder is the author's — integration, website — a domain shared by two facets carries the same name in both.** Seven
 capabilities belong to no facet in particular — a runner's `lifecycle`, the
 declared network (`intercepts`), the ground a chain loads (`seeding`), what a
 result answers (`assertions`), the `{{token}}` engine (`tokens`), the pinned
 calendar (`clock`) and the document door (`literate`) — and a facet that gives one of them a FOLDER calls it by
-that name, so `specs/api/clock/` and `specs/website/clock/` are the same
-question asked of two constructors. Everything else is one facet's own, and a
+that name, so `specs/integration/clock/` and `specs/website/clock/` are the same
+question asked of two constructors. An api, cli or jobs folder is no domain at
+all: it is the subject's name, and the capability becomes the ASPECT — the
+file — asked of it (`specs/api/session/get/clock.spec.ts`). Everything else is one facet's own, and a
 name that is one facet's own is never another's: two names for one capability
 is the drift the vocabulary exists to stop.
 
-It says nothing about where a METHOD may appear. `.seed()` is used inside jobs'
-`triggering/` scenarios and integration's `call/` ones, because seeding is the
+It says nothing about where a METHOD may appear. `.seed()` is used inside
+integration's `call/` scenarios, because seeding is the
 Given there and not the subject; a capability earns a folder when it is what
 the specs in it are ABOUT.
 
@@ -85,13 +88,10 @@ a declared name nothing carries fails too.
 
 <!-- GENERATED:domains — do not edit by hand; run `npm run docs`. Source: lint/domains.ts -->
 
-| Facet         | Shared domains it carries                                        | Its own                                                    |
-| ------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
-| `api`         | `assertions/`, `clock/`, `intercepts/`, `lifecycle/`, `seeding/` | `exports/`, `initiation-errors/`, `responses/`, `sending/` |
-| `cli`         | `assertions/`, `literate/`, `seeding/`, `tokens/`                | `directory/`, `docker/`, `env/`, `exec/`                   |
-| `integration` | `clock/`, `intercepts/`                                          | `call/`, `postgres/`, `redis/`, `table/`                   |
-| `jobs`        | `clock/`                                                         | `triggering/`                                              |
-| `website`     | `assertions/`, `clock/`                                          | `console/`, `fetch/`, `services/`, `visit/`                |
+| Facet         | Shared domains it carries | Its own                                     |
+| ------------- | ------------------------- | ------------------------------------------- |
+| `integration` | `clock/`, `intercepts/`   | `call/`, `postgres/`, `redis/`, `table/`    |
+| `website`     | `assertions/`, `clock/`   | `console/`, `fetch/`, `services/`, `visit/` |
 
 <!-- /GENERATED:domains -->
 
@@ -111,7 +111,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 66    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 62    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 81    |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 131   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 155   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 29    |
 
@@ -257,12 +257,12 @@ What the framework can do, and how many of this package’s own test FILES carry
 | Capability     | api | jobs | cli | integration | website | mobile | component | module |
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 1   | 1    | —   | 1           | 1       | —      | 1         | —      |
-| `.intercept()` | 3   | 1    | —   | 1           | 1       | 0      | 4         | —      |
-| `.seed()`      | 5   | 1    | 1   | 3           | —       | —      | —         | —      |
+| `.intercept()` | 10  | 1    | —   | 1           | 1       | 0      | 4         | —      |
+| `.seed()`      | 7   | 1    | 1   | 3           | —       | —      | —         | —      |
 | `.headers()`   | 2   | —    | —   | —           | 1       | —      | —         | —      |
 | `.with()`      | 2   | 1    | 1   | 1           | 1       | —      | —         | —      |
-| `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
-| `.env()`       | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —    | 27  | —           | —       | —      | —         | —      |
+| `.env()`       | —   | —    | 3   | —           | —       | —      | —         | —      |
 | `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
 | `.viewport()`  | —   | —    | —   | —           | —       | —      | 1         | —      |
 
@@ -270,17 +270,17 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability   | api | jobs | cli | integration | website | mobile | component | module |
 | ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.get()`     | 9   | —    | —   | —           | —       | —      | —         | —      |
-| `.post()`    | 3   | —    | —   | —           | —       | —      | —         | —      |
+| `.get()`     | 19  | —    | —   | —           | —       | —      | —         | —      |
+| `.post()`    | 4   | —    | —   | —           | —       | —      | —         | —      |
 | `.put()`     | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.request()` | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.trigger()` | —   | 2    | —   | —           | —       | —      | —         | —      |
+| `.request()` | 2   | —    | —   | —           | —       | —      | —         | —      |
+| `.trigger()` | —   | 6    | —   | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —    | —   | 7           | —       | —      | —         | —      |
-| `.exec()`    | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.run()`     | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.visit()`   | —   | —    | —   | —           | 17      | —      | —         | —      |
-| `.fetch()`   | —   | —    | —   | —           | 2       | —      | —         | —      |
+| `.exec()`    | —   | —    | 33  | —           | —       | —      | —         | —      |
+| `.run()`     | —   | —    | 4   | —           | —       | —      | —         | —      |
+| `.visit()`   | —   | —    | —   | —           | 20      | —      | —         | —      |
+| `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `.render()`  | —   | —    | —   | —           | —       | —      | 20        | —      |
 
@@ -288,7 +288,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 10      | 0      | 18        | —      |
+| `see`      | —   | —    | —   | —           | 11      | 0      | 18        | —      |
 | `fill`     | —   | —    | —   | —           | 4       | 0      | 2         | —      |
 | `click`    | —   | —    | —   | —           | 3       | —      | 8         | —      |
 | `gone`     | —   | —    | —   | —           | 3       | —      | 6         | —      |
@@ -306,7 +306,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `button`        | —   | —    | —   | —           | 4       | 0      | 8         | —      |
-| `field`         | —   | —    | —   | —           | 5       | 0      | 5         | —      |
+| `field`         | —   | —    | —   | —           | 6       | 0      | 5         | —      |
 | `content`       | —   | —    | —   | —           | 7       | 0      | 12        | —      |
 | `testId`        | —   | —    | —   | —           | 1       | 0      | 1         | —      |
 | `heading`       | —   | —    | —   | —           | 3       | —      | 2         | —      |
@@ -324,8 +324,8 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `main`          | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `navigation`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `region`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `search`        | —   | —    | —   | —           | 1       | —      | 2         | —      |
-| `within`        | —   | —    | —   | —           | 3       | —      | 6         | —      |
+| `search`        | —   | —    | —   | —           | 2       | —      | 2         | —      |
+| `within`        | —   | —    | —   | —           | 4       | —      | 6         | —      |
 | `focused`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `selected`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `valued`        | —   | —    | —   | —           | 1       | —      | 2         | —      |
@@ -336,23 +336,23 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`     | 9   | —    | —   | —           | —       | —      | —         | —      |
-| `.status`       | 1   | —    | —   | —           | 2       | —      | —         | —      |
-| `.table()`      | 4   | 2    | 1   | 1           | —       | —      | —         | —      |
-| `.file()`       | 1   | —    | 5   | 1           | —       | —      | —         | —      |
-| `.directory()`  | 1   | —    | 2   | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —    | 5   | —           | —       | —      | —         | —      |
-| `.stderr`       | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —    | 8   | —           | —       | —      | —         | —      |
+| `.response`     | 20  | —    | —   | —           | —       | —      | —         | —      |
+| `.status`       | 1   | —    | —   | —           | 3       | —      | —         | —      |
+| `.table()`      | 7   | 3    | 1   | 1           | —       | —      | —         | —      |
+| `.file()`       | 1   | —    | 9   | 1           | —       | —      | —         | —      |
+| `.directory()`  | 1   | —    | 4   | 1           | —       | —      | —         | —      |
+| `.stdout`       | —   | —    | 16  | —           | —       | —      | —         | —      |
+| `.stderr`       | —   | —    | 7   | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —    | 24  | —           | —       | —      | —         | —      |
 | `.filesystem`   | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `.container()`  | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `.container()`  | —   | —    | 2   | —           | —       | —      | —         | —      |
 | `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `.value`        | —   | —    | —   | 6           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
-| `.tree`         | —   | —    | —   | —           | 4       | —      | 4         | —      |
+| `.tree`         | —   | —    | —   | —           | 5       | —      | 4         | —      |
 | `.content`      | —   | —    | —   | —           | 9       | 0      | 13        | —      |
-| `.console`      | —   | —    | —   | —           | 2       | —      | 3         | —      |
-| `.errors`       | —   | —    | —   | —           | 6       | —      | 8         | —      |
+| `.console`      | —   | —    | —   | —           | 4       | —      | 3         | —      |
+| `.errors`       | —   | —    | —   | —           | 8       | —      | 8         | —      |
 | `.html`         | —   | —    | —   | —           | 2       | —      | 5         | —      |
 | `.title`        | —   | —    | —   | —           | 3       | —      | —         | —      |
 | `.url`          | —   | —    | —   | —           | 3       | —      | —         | —      |
@@ -363,7 +363,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.links`        | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.meta()`       | —   | —    | —   | —           | 2       | —      | —         | —      |
 | `.body`         | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.json`         | —   | —    | 2   | —           | 1       | —      | —         | —      |
+| `.json`         | —   | —    | 5   | —           | 1       | —      | —         | —      |
 | `.headers`      | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.location`     | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.screen`       | —   | —    | —   | —           | —       | 0      | —         | —      |
@@ -372,14 +372,14 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability             | api | jobs | cli | integration | website | mobile | component | module |
 | ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —    | 2   | 3           | 0       | —      | 0         | 2      |
-| `toMatch(directory())` | 1   | —    | 3   | 1           | —       | —      | —         | 1      |
-| `toMatch(<rows>)`      | 4   | 2    | 1   | 1           | —       | —      | —         | —      |
-| `.http exchange`       | 2   | —    | —   | —           | —       | —      | —         | 3      |
+| `toMatch(file())`      | 1   | —    | 6   | 3           | 0       | —      | 0         | 2      |
+| `toMatch(directory())` | 1   | —    | 5   | 1           | —       | —      | —         | 1      |
+| `toMatch(<rows>)`      | 7   | 3    | 1   | 1           | —       | —      | —         | —      |
+| `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 3      |
 | `.aria.yaml tree`      | —   | —    | —   | —           | 0       | —      | 0         | —      |
 | `.json body`           | 2   | —    | 2   | 2           | 0       | —      | —         | 9      |
-| `.txt stream`          | 1   | —    | 6   | 1           | 1       | —      | —         | 10     |
-| `{ frozen }`           | 2   | —    | 5   | —           | —       | —      | 1         | 3      |
+| `.txt stream`          | 1   | —    | 7   | 1           | 1       | —      | —         | 10     |
+| `{ frozen }`           | 2   | —    | 11  | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
 
@@ -412,9 +412,9 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `{{string}}`   | 2   | —    | 1   | 0           | 0       | —      | —         | 1      |
 | `{{time}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{ulid}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{url}}`      | 0   | —    | 2   | 0           | 0       | —      | —         | 1      |
+| `{{url}}`      | 0   | —    | 4   | 0           | 0       | —      | —         | 1      |
 | `{{uuid}}`     | 2   | —    | 0   | 0           | 0       | —      | —         | 3      |
-| `{{workdir}}`  | 0   | —    | 5   | 0           | 0       | —      | —         | 1      |
+| `{{workdir}}`  | 0   | —    | 6   | 0           | 0       | —      | —         | 1      |
 
 ### Exemptions
 

@@ -15,7 +15,7 @@ import { cell, table } from './catalog.js';
  * `{{token}}` engine (`tokens`), the pinned calendar (`clock`) and the
  * document door (`literate`) — and a facet
  * that gives one of them its own folder calls it by the shared name, so
- * `specs/api/clock/` and `specs/website/clock/` are the same question asked of
+ * `specs/integration/clock/` and `specs/website/clock/` are the same question asked of
  * two constructors.
  *
  * Everything else is one facet's own, and the defect this module exists to stop
@@ -23,6 +23,10 @@ import { cell, table } from './catalog.js';
  * facet inventing `fixtures/` beside another's `seeding/`. So the vocabulary is
  * declared here and `domains.test.ts` holds the tree equal to it, in both
  * directions.
+ *
+ * It judges the facets whose folders are their AUTHOR's to name — integration
+ * and website. An api, cli or jobs folder is its subject's standard name,
+ * derived from the route, the command or the job (C30): no vocabulary lists it.
  *
  * What it does NOT say is that a capability is only ever exercised under its
  * own name: `.seed()` is used inside jobs' `triggering/` scenarios, because
@@ -43,10 +47,7 @@ export const SHARED_DOMAINS = [
 
 /** Each facet's own domains — a name here may not appear under another facet. */
 export const FACET_DOMAINS: Record<string, string[]> = {
-    api: ['exports', 'initiation-errors', 'responses', 'sending'],
-    cli: ['directory', 'docker', 'env', 'exec'],
     integration: ['call', 'postgres', 'redis', 'table'],
-    jobs: ['triggering'],
     website: ['console', 'fetch', 'services', 'visit'],
 };
 

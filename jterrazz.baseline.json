@@ -55,16 +55,12 @@
         "vitest/require-to-throw-message": 2
     },
     "test": {
-        "jterrazz-check/c29": 15,
-        "jterrazz-check/c30": 7,
-        "jterrazz/c31-describe-names-file": 10,
-        "jterrazz/c33-file-size": 2,
         "jterrazz/d15w-status-only-probe": 2,
         "jterrazz/d16w-ambient-value": 10,
         "jterrazz/d18w-existence-only-oracle": 12,
-        "jterrazz/e9w-env-assignment-in-test": 39,
+        "jterrazz/e9w-env-assignment-in-test": 10,
         "jterrazz/i1-layer-boundaries": 1,
-        "jterrazz/j6w-given-in-the-test": 36,
+        "jterrazz/j6w-given-in-the-test": 35,
         "jterrazz/w5w-scenario-settles": 4,
         "routes/unreached": 1
     }

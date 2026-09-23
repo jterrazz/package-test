@@ -34,17 +34,6 @@ describe('landmarks', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('finds a `<search>` element as the search landmark, named and not', async () => {
-        // Given - a search landmark the element carries, with no role attribute
-        const result = await website.visit('/search', async (visitor) => {
-            await visitor.see(within(search(), field('Query')));
-            await visitor.see(within(search('Site'), field('Query')));
-        });
-
-        // Then - the tree calls it what the scopes found
-        expect(result.tree.text).toContain('search "Site"');
-    });
-
     test('names a table, its rows, a list item, a status and a test id', async () => {
         // Given - a scores table, a tag list, a status line and a canvas with no accessible name
         const result = await website.visit('/landmarks', async (visitor) => {

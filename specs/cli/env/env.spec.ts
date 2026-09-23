@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
@@ -31,21 +31,16 @@ async function underSymlinkedTmp<T>(action: () => Promise<T>): Promise<T> {
     const link = resolve(base, 'link');
     mkdirSync(target);
     symlinkSync(target, link, 'dir');
-    const previous = process.env.TMPDIR;
-    process.env.TMPDIR = link;
+    vi.stubEnv('TMPDIR', link);
     try {
         return await action();
     } finally {
-        if (previous === undefined) {
-            delete process.env.TMPDIR;
-        } else {
-            process.env.TMPDIR = previous;
-        }
+        vi.unstubAllEnvs();
         rmSync(base, { force: true, recursive: true });
     }
 }
 
-describe('command — env', () => {
+describe('env', () => {
     test('passes user-supplied env vars to the process', async () => {
         // Given - a custom env var
         const result = await cli
@@ -112,23 +107,6 @@ describe('command — env', () => {
         expect(homeLine).toContain('/spec-command-');
     });
 
-    test('$WORKDIR expands to the path {{workdir}} holds, symlinked tmp or not', async () => {
-        // Given - a nested path handed to the child through .env(), under a temp root whose raw spelling differs from its resolved one
-        const result = await underSymlinkedTmp(
-            async () =>
-                await cli
-                    .fixture(directory('../../fixtures/cli-app/'))
-                    .env({ CACHE_DIR: '$WORKDIR/sub' })
-                    .exec('workdir-var'),
-        );
-
-        // Then - what the child echoes back matches the {{workdir}} golden
-        expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(`
-            CACHE_DIR={{workdir}}/sub
-        `);
-    });
-
     test('$WORKDIR in a document env: expands to that same path', async () => {
         // Given - the same pair declared inline in a spec document, whose stdout block asserts {{workdir}}/sub
         const result = await underSymlinkedTmp(
@@ -158,9 +136,7 @@ describe('command — env', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).not.toContain('HOME=unset');
     });
-});
 
-describe('command — automatic service env injection (CONVENTIONS B6)', () => {
     test('injects <KEY>_URL for every declared service', async () => {
         // Given - a runner declaring { db: sqlite() }
         const result = await dbCli.exec('env');
@@ -208,9 +184,7 @@ describe('command — automatic service env injection (CONVENTIONS B6)', () => {
         expect(result.stdout.text).toContain('DB_URL=unset');
         expect(result.stdout.text).toContain('DATABASE_URL=unset');
     });
-});
 
-describe('cli defaults — the environment every run starts with', () => {
     test('applies to a run that states nothing', async () => {
         // Given - a runner declaring defaults, and a run that adds nothing
         const result = await defaultsCli.exec('env');

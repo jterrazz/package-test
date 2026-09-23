@@ -352,7 +352,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
 });
 
 describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13)', () => {
-    // The stream subject is covered end-to-end in specs/cli/assertions; these
+    // The stream subject is covered end-to-end by the cli assertions specs; these
     // Unit tests pin the SAME write gate for the json, response, and tree
     // Subjects by stubbing TEST_UPDATE=1 and asserting the fixture on disk is
     // Never created/overwritten when { frozen: true } is set — the invariant

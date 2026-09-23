@@ -257,7 +257,7 @@ Four measurements place it, on msw 2.15.0 with `@mswjs/interceptors` 0.41.9 unde
 | msw listening, the request passing THROUGH to it | never           |
 | msw listening, the reply MOCKED                  | never           |
 
-So it is neither undici, nor the mocked body, nor `@mswjs/interceptors`, nor this package's seam: a passthrough request hangs exactly as a mocked one does, and the one thing both have that the interceptor alone has not is msw's tee. The nearest upstream issue, [mswjs/interceptors#799](https://github.com/mswjs/interceptors/issues/799), is a passthrough body closed as fixed, and it is the wrong layer. The repro is `specs/api/intercepts/body-cancel.spec.ts`, skipped: it is the acceptance test of the fix.
+So it is neither undici, nor the mocked body, nor `@mswjs/interceptors`, nor this package's seam: a passthrough request hangs exactly as a mocked one does, and the one thing both have that the interceptor alone has not is msw's tee. The nearest upstream issue, [mswjs/interceptors#799](https://github.com/mswjs/interceptors/issues/799), is a passthrough body closed as fixed, and it is the wrong layer. The repro is `specs/api/cancel/get/body-cancel.spec.ts`, skipped: it is the acceptance test of the fix.
 
 That is the ONE escape rule M3 sanctions, and it is narrow because the upstream option carries no allow-list. A subject whose own code cancels a body keeps `vi.stubGlobal('fetch')`, behind a directive written on the call that states the defect:
 
