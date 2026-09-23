@@ -169,6 +169,8 @@ runs:
 | iteration 3      | shown: the mover gated on C13 (a tree with no 16 folder left byte for byte) and walking every member's module tests, C13 beside a module test; a directive naming `d8w-text-bypass` renamed, its line read as `.raw`; `toBeEmpty` a table's matcher alone (types, both runtimes, the mover); every rule reading a path below its package root; the green ratchet run one line | —                                                                              | —                   |
 | iteration 4      | shown: the mover gated per file (a 17 file beside a 16 one left byte for byte, a 16 pool reaching only the files naming `$FIXTURES/`); the directive rename on every `--fix`, read in a comment only; a file outside every package read below its repository root; the Makefile's six targets, `fix` the two fixers                                                           | —                                                                              | —                   |
 | ratchet, report  | shown: `test.baseline.json` recorded by `jterrazz-test-check baseline` and judged by the checker; the checker's report line; `lintReport` published, refusing oxlint's graphical frames; iteration 2: `--oxlint-report <file>` read, the judging run prints every finding it counts and every plugin diagnostic                                                               | `typescript.baseline.json`, jterrazz keys refused                              | —                   |
+| iteration 9      | shown: 62 — a green run keeping no `test` section prints `jterrazz.baseline.json › test: nothing held`, a deferring run names the judging file relative to the project; 63 — a stream handed a value `toMatch` past the compiler is refused naming `.text`, in both builds                                                                                                    | —                                                                              | —                   |
+| iteration 10     | shown: `kind: api` and `kind: jobs` documents — the grammar, the schema, the runner (`api.run`, `jobs.run`, the plugin by kind, the `api()`/`jobs()` door), steps and captures, every path key under C24/C15/C8/C9; B12 route coverage from a declared OpenAPI source; this package's pure-data api and jobs specs migrated; chapter 20 owns the format                       | —                                                                              | —                   |
 
 Each branch keeps one commit per unit, so the owner can read the vision
 commit by commit.
@@ -1054,3 +1056,123 @@ held across <k> rules`. The path and the pass list moved to
 - **Steps with named captures** inside one test for a journey: `steps: [{ request, capture: { orderId: $.id }, response }, { request: GET /orders/{{orderId}}, … }]`.
 - **Route coverage**: a check lists the routes the app declares and names every route no document or spec reaches — the functional coverage the owner asked for, beside line coverage.
 - TypeScript specs stay for logic (loops, computed values, cross-call reasoning).
+
+### What the package-test branch decided (iteration 10, and 62–63)
+
+- **62** — a green run of a project keeping no `test` section prints exactly
+  `jterrazz.baseline.json › test: nothing held` (`--verbose` adds where it
+  stood and what ran, as on the held line); a run deferring to the ratchet
+  names `jterrazz.baseline.json › test`, relative to the project.
+- **63** — `streamValueRefusal` lives beside the golden route both builds
+  lay: a value `toMatch` on a stream, past the compiler, is refused naming
+  `expect(<stream>.text).toMatch(…)` in node and in a page.
+- **The kinds.** `kind:` is stated — `api`, `jobs`, or `cli` by default — and
+  names the export a document runs through, in the plugin door and the
+  bridge (`api.run(file(…))`, `jobs.run(file(…))`). Each kind reads a closed
+  key set; a key of another kind is refused naming it. The folder does not
+  imply the kind: that would be a hidden convention.
+- **`fixture:` is refused on api and jobs.** The plan listed it among the
+  keys, but it lays files into a working directory, and neither chain has
+  one: a document key means what a chain gesture means, and no api or jobs
+  gesture means this. The refusal says so (question 66).
+- **The keys.** `seed:` a path or `{ file, database }`, or a list, applied in
+  order (A7 as the chain has it); `intercept:` paths to modules under
+  `contracts/` whose default export is a contract, a list or a composite;
+  `clock:` an ISO instant; `headers:` a mapping (top-level for every request,
+  per step over it); `request:` a `./requests/*.http` path or an inline
+  `METHOD /path` with `body:` a value or a path under `requests/`;
+  `response:` a `./expected/*.http` path or inline `{ status, headers,
+body }`, token-aware, an absent part not asserted; `tables:` table →
+  `{ database?, columns, rows }`, `rows: []` for empty; jobs `trigger:`,
+  `error:` (absent asserts success) and `tables:`. `cases:` and `extends:` do
+  not exist: they are unknown keys, refused as any other.
+- **Steps.** `steps:` is a journey in one test, one `executeSetup`, one
+  `CaptureScope` for the whole of it (a `#ref` bound by one response holds
+  in the next). `capture: { name: $.path }` reads the RESPONSE BODY with a
+  JSONPath subset (`.key`, `[n]`, `['key']`); a later step sends `{{name}}`
+  in its request line, headers or body — a whole-string reference sends the
+  value typed. A name sent before a capture, or a token in an input, is a
+  grammar refusal on the line that sends it.
+- **The guards.** Role is the grammar's (the `d4b-spec-shape` finding, and
+  the runner's refusal, name C24); C15, C8, C9 and C14 read every path key
+  through `documentPaths`, where they read `fixture:` alone; at run time a
+  missing path is refused with what it resolved to.
+- **The runner is the chain's.** A document's `seed:`, `intercept:` and
+  `clock:` are `.seed()`, `.intercept()` and `.clock()` on the chain that
+  runs it, so a setup chained before `.run()` lays underneath. The facet
+  factories now hand back a facet VIEW after each setup (memoised per
+  chain), so `api.seed(…).run(…)` is the api's run, not the cli's.
+- **Update.** `TEST_UPDATE=1` rewrites an inline response in the YAML
+  (`updateSpecResponses`) and a file-form one through its golden; tables and
+  a job's `error:` are stated by hand.
+- **The doors.** `literate()` binds by kind; `cli()`, `api()` and `jobs()`
+  share `documentProject`, collecting `specs/<facet>/**/*.spec.yaml` bound to
+  `specs/<facet>/<facet>.specification.ts` unless `literate` says otherwise.
+- **Route coverage is a checker pass, B12, over a DECLARED source**:
+  `test: { routes: './openapi.yaml' }` in `jterrazz.config.ts` (OpenAPI,
+  JSON or YAML). Not `app.routes`: the pass runs in the lint, before any
+  test, and Hono's table exists only once the factory is handed started
+  services; a table from a previous run would judge a stale tree. Reach is
+  static (a document's request lines and the `.http` files it sends, a
+  spec's literal `.get/.post/.put/.delete/.request(file())`), a parameter
+  taking one segment and a capture or a template hole filling one. The
+  config is loaded as the toolchain loads its own section — question 59
+  answered for the checker. Findings are `jterrazz-check(b12)`, ratcheted.
+  On this repository it found GET /users/{id}, which no case reached; a
+  document now does.
+- **Migration.** The pure-data api and jobs tests left TypeScript for
+  documents (sending, seeding, the api and jobs clocks, the job outcomes);
+  what stays is `.headers()` layering, refusals, the one-chain clock
+  release, the reset, the static jobs array, the strict network. The
+  capability matrix counts a document by the key it writes, or the jobs
+  `.clock()` cell would have fallen to 0 with the capability as exercised as
+  before. `literate` became a shared domain.
+- **Found and fixed on the way.** The YAML rewrite read a document's step
+  from its indented keys only: an api document whose one list holds flow
+  entries (`- { file: …, database: db }`) was rewritten at two spaces by
+  `--fix`, and the format check refused it. A flow entry states the step
+  too.
+- **One owner.** Chapter 20 — Spec documents owns the format for the three
+  kinds; 12 keeps the words `env:`/`serve:` are registered by, 10 and 11
+  show their document form and link.
+
+### Raised by the package-test branch, iteration 10
+
+65. A shared seed cannot live in the pool: C24 judges the FIRST ground
+    folder a path passes through, so `../../fixtures/seeds/base.sql` is a
+    `fixtures/` path for `seed(file())` and `seed:` alike. The vision's "the
+    pool's base and the leaf's delta" composes `fixture:` only. Judge the
+    folder below the pool, or keep the pool file-state only?
+66. `fixture:` on api and jobs is refused (no working directory). Confirm,
+    or give it a meaning — files an in-process app reads from its root?
+67. B12's source is declared. Making the declared file provably equal to the
+    served app's `app.routes` needs the runtime to read `jterrazz.config.ts`
+    (question 59 is answered for the checker only). Should the api
+    constructor compare the two at run time, and fail a stale source?
+68. The runner `import()`s an `intercept:` module from the framework's own
+    code. Here the framework is vite-transformed, so a contract importing
+    `./http/x.js` resolves to `.ts`; in a consumer `@jterrazz/test` is
+    externalised and Node loads the module itself. HYPOTHESIS (2026-09-23):
+    such a module fails to load in a consumer — settled by running a
+    document with `intercept:` in signews-api. If so: have the plugin's
+    generated module import the contracts (vite resolves them) and hand them
+    to `run`, or have the preset inline the package?
+69. The schema's per-kind `if`/`then` is proven equal to the parser's key
+    sets, but no document is validated against it: there is no JSON Schema
+    validator in the dev dependencies. Add one, and validate every document
+    of the tree?
+70. A capture reads the response body only: a `Location` header cannot be
+    captured. Root the JSONPath at `{ status, headers, body }`?
+71. Captures serve inputs; cross-step equality of outputs is the `#ref`
+    token. Two mechanisms for one idea, or the right split (a request sends
+    values, a golden matches shapes)?
+72. Update mode writes the WHOLE inline response: a document stating only
+    `status:` gets its body written on the next `TEST_UPDATE=1`. Keep
+    (approval testing), or rewrite only the parts stated?
+73. D12w, D15w and the other static probes read TypeScript only: an inline
+    response asserting one field of a large body is not warned. Give the
+    document channel the same warnings?
+74. d5w's carve-out compares the golden's literal with the document's
+    `clock:` verbatim, so `clock: 2026-03-04T09:30:00Z` does not fix
+    `2026-03-04T09:30:00.000Z`; the documents here write the clock in the
+    app's own spelling. Compare instants, not strings?
