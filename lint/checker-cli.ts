@@ -9,7 +9,13 @@ import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
 import type { Migration } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { fixSpecFiles } from './checker-spec.js';
-import { formatViolation, MEMBER_PASS_IDS, runAllChecks, TREE_PASS_IDS } from './checker.js';
+import {
+    CHECKER_PASS_IDS,
+    formatViolation,
+    MEMBER_PASS_IDS,
+    runAllChecks,
+    TREE_PASS_IDS,
+} from './checker.js';
 import type { TokenViolation } from './checker.js';
 import {
     CHECKER_NAMESPACE,
@@ -137,6 +143,8 @@ function valueOf(flag: string): string | undefined {
 const TREE_PASSES = TREE_PASS_IDS.join(', ');
 /** The passes a member run puts over a package. */
 const MEMBER_PASSES = MEMBER_PASS_IDS.join(', ');
+/** The passes the whole-project run puts over it: each named once, though two run in both. */
+const PROJECT_PASSES = CHECKER_PASS_IDS.join(', ');
 
 /**
  * The project whose ratchet judges a partial run: the directory the run was
@@ -654,7 +662,7 @@ const findings = projectFindings(root);
 ratchet({
     counted: () => findings,
     own: findings,
-    passes: `${TREE_PASSES}, ${MEMBER_PASSES}`,
+    passes: PROJECT_PASSES,
     plugin: pluginDiagnostics(root, reportFile),
     root,
     what: `under ${root}`,
