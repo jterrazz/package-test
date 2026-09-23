@@ -110,7 +110,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 55    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 67    |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 74    |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 156   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
 
@@ -230,12 +230,12 @@ What the framework can do, and how many of this package’s own test FILES carry
 | Capability  | api | jobs | cli | integration | website | mobile | component | module |
 | ----------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `services`  | 2   | 1    | 1   | 2           | 1       | 0      | —         | —      |
-| `root`      | 2   | 1    | 0   | 2           | 0       | 0      | 0         | —      |
-| `server`    | 4   | —    | —   | —           | 3       | —      | —         | —      |
+| `root`      | 2   | 1    | 0   | 2           | 1       | 0      | 0         | —      |
+| `server`    | 4   | —    | —   | —           | 4       | —      | —         | —      |
 | `jobs`      | —   | 2    | —   | —           | —       | —      | —         | —      |
-| `url`       | —   | —    | —   | —           | 0       | —      | —         | —      |
-| `backend`   | —   | —    | —   | —           | 0       | 0      | —         | —      |
-| `external`  | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `url`       | —   | —    | —   | —           | 1       | —      | —         | —      |
+| `backend`   | —   | —    | —   | —           | 1       | 0      | —         | —      |
+| `external`  | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `device`    | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `app`       | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `timeouts`  | —   | —    | —   | —           | —       | 0      | —         | —      |
@@ -256,7 +256,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | Capability     | api | jobs | cli | integration | website | mobile | component | module |
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 1   | 1    | —   | 1           | 1       | —      | 1         | —      |
-| `.intercept()` | 3   | 1    | —   | 1           | 0       | 0      | 4         | —      |
+| `.intercept()` | 3   | 1    | —   | 1           | 1       | 0      | 4         | —      |
 | `.seed()`      | 4   | 1    | 1   | 2           | —       | —      | —         | —      |
 | `.headers()`   | 1   | —    | —   | —           | 1       | —      | —         | —      |
 | `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
@@ -277,7 +277,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.call()`    | —   | —    | —   | 6           | —       | —      | —         | —      |
 | `.exec()`    | —   | —    | 7   | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.visit()`   | —   | —    | —   | —           | 10      | —      | —         | —      |
+| `.visit()`   | —   | —    | —   | —           | 17      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 2       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `.render()`  | —   | —    | —   | —           | —       | —      | 15        | —      |
@@ -286,15 +286,15 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 5       | 0      | 15        | —      |
-| `fill`     | —   | —    | —   | —           | 3       | 0      | 2         | —      |
+| `see`      | —   | —    | —   | —           | 10      | 0      | 15        | —      |
+| `fill`     | —   | —    | —   | —           | 4       | 0      | 2         | —      |
 | `click`    | —   | —    | —   | —           | 3       | —      | 5         | —      |
 | `gone`     | —   | —    | —   | —           | 3       | —      | 6         | —      |
-| `press`    | —   | —    | —   | —           | 0       | —      | 2         | —      |
-| `hover`    | —   | —    | —   | —           | 0       | —      | 1         | —      |
-| `check`    | —   | —    | —   | —           | 0       | —      | 2         | —      |
+| `press`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
+| `hover`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `check`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
 | `select`   | —   | —    | —   | —           | 1       | —      | 2         | —      |
-| `goto`     | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `goto`     | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `tap`      | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `rerender` | —   | —    | —   | —           | —       | —      | 1         | —      |
 | `unmount`  | —   | —    | —   | —           | —       | —      | 1         | —      |
@@ -303,27 +303,27 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `button`        | —   | —    | —   | —           | 3       | 0      | 5         | —      |
-| `field`         | —   | —    | —   | —           | 3       | 0      | 3         | —      |
-| `content`       | —   | —    | —   | —           | 3       | 0      | 10        | —      |
-| `testId`        | —   | —    | —   | —           | 0       | 0      | 1         | —      |
-| `heading`       | —   | —    | —   | —           | 0       | —      | 1         | —      |
-| `link`          | —   | —    | —   | —           | 2       | —      | 2         | —      |
-| `dialog`        | —   | —    | —   | —           | 0       | —      | 1         | —      |
-| `status`        | —   | —    | —   | —           | 0       | —      | 3         | —      |
-| `table`         | —   | —    | —   | —           | 0       | —      | 1         | —      |
-| `row`           | —   | —    | —   | —           | 0       | —      | 1         | —      |
-| `listitem`      | —   | —    | —   | —           | 0       | —      | 1         | —      |
+| `button`        | —   | —    | —   | —           | 4       | 0      | 5         | —      |
+| `field`         | —   | —    | —   | —           | 5       | 0      | 3         | —      |
+| `content`       | —   | —    | —   | —           | 7       | 0      | 10        | —      |
+| `testId`        | —   | —    | —   | —           | 1       | 0      | 1         | —      |
+| `heading`       | —   | —    | —   | —           | 3       | —      | 1         | —      |
+| `link`          | —   | —    | —   | —           | 3       | —      | 2         | —      |
+| `dialog`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `status`        | —   | —    | —   | —           | 1       | —      | 3         | —      |
+| `table`         | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `row`           | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| `listitem`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `option`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `banner`        | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `complementary` | —   | —    | —   | —           | 0       | —      | 0         | —      |
+| `banner`        | —   | —    | —   | —           | 1       | —      | 0         | —      |
+| `complementary` | —   | —    | —   | —           | 1       | —      | 0         | —      |
 | `contentinfo`   | —   | —    | —   | —           | 1       | —      | 0         | —      |
-| `form`          | —   | —    | —   | —           | 0       | —      | 0         | —      |
+| `form`          | —   | —    | —   | —           | 1       | —      | 0         | —      |
 | `main`          | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `navigation`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `region`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `search`        | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `within`        | —   | —    | —   | —           | 2       | —      | 4         | —      |
+| `search`        | —   | —    | —   | —           | 1       | —      | 0         | —      |
+| `within`        | —   | —    | —   | —           | 3       | —      | 4         | —      |
 | `focused`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `selected`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `valued`        | —   | —    | —   | —           | 1       | —      | 2         | —      |
@@ -347,18 +347,18 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `.value`        | —   | —    | —   | 6           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
-| `.tree`         | —   | —    | —   | —           | 2       | —      | 4         | —      |
-| `.content`      | —   | —    | —   | —           | 5       | 0      | 12        | —      |
-| `.console`      | —   | —    | —   | —           | 1       | —      | 3         | —      |
-| `.errors`       | —   | —    | —   | —           | 4       | —      | 5         | —      |
-| `.html`         | —   | —    | —   | —           | 0       | —      | 5         | —      |
-| `.title`        | —   | —    | —   | —           | 0       | —      | —         | —      |
-| `.url`          | —   | —    | —   | —           | 2       | —      | —         | —      |
+| `.tree`         | —   | —    | —   | —           | 3       | —      | 4         | —      |
+| `.content`      | —   | —    | —   | —           | 9       | 0      | 12        | —      |
+| `.console`      | —   | —    | —   | —           | 2       | —      | 3         | —      |
+| `.errors`       | —   | —    | —   | —           | 6       | —      | 5         | —      |
+| `.html`         | —   | —    | —   | —           | 2       | —      | 5         | —      |
+| `.title`        | —   | —    | —   | —           | 2       | —      | —         | —      |
+| `.url`          | —   | —    | —   | —           | 3       | —      | —         | —      |
 | `.head`         | —   | —    | —   | —           | 3       | —      | —         | —      |
 | `.jsonLd`       | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.canonical`    | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.alternates`   | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.links`        | —   | —    | —   | —           | 0       | —      | —         | —      |
+| `.links`        | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.meta()`       | —   | —    | —   | —           | 2       | —      | —         | —      |
 | `.body`         | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.json`         | —   | —    | 2   | —           | 1       | —      | —         | —      |
@@ -370,7 +370,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability             | api | jobs | cli | integration | website | mobile | component | module |
 | ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 3   | 0    | 6   | 6           | 5       | —      | 1         | 2      |
+| `toMatch(file())`      | 3   | 0    | 6   | 6           | 6       | —      | 1         | 2      |
 | `toMatch(directory())` | 0   | —    | 3   | 0           | —       | —      | —         | 1      |
 | `toMatchRows()`        | 4   | 2    | 1   | 1           | —       | —      | 0         | 1      |
 | `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 3      |
@@ -417,8 +417,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 ### Exemptions
 
 - no mobile tree: an iOS simulator is not something CI provisions (M1) — `services`·mobile, `root`·mobile, `backend`·mobile, `device`·mobile, `app`·mobile, `timeouts`·mobile, `.intercept()`·mobile, `.open()`·mobile, `see`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `content`·mobile, `testId`·mobile, `.content`·mobile, `.screen`·mobile
-- the surface ships and this package does not specify it here yet — `root`·cli, `root`·website, `root`·component, `backend`·website, `external`·website, `clock`·component, `locale`·component, `timezone`·component, `viewport`·component, `.intercept()`·website, `press`·website, `hover`·website, `check`·website, `goto`·website, `testId`·website, `heading`·website, `dialog`·website, `status`·website, `table`·website, `row`·website, `listitem`·website, `banner`·website, `banner`·component, `complementary`·website, `complementary`·component, `contentinfo`·component, `form`·website, `form`·component, `search`·website, `search`·component, `.file()`·api, `.file()`·integration, `.directory()`·api, `.directory()`·integration, `.html`·website, `.title`·website, `.links`·website, `toMatch(directory())`·api, `toMatch(directory())`·integration, `toMatchRows()`·component
-- the package serves its own fixture site, so `server` is what it proves; `url` targets an already-running deployment, which is a consumer shape (A11 states the XOR) — `url`·website
+- the surface ships and this package does not specify it here yet — `root`·cli, `root`·component, `clock`·component, `locale`·component, `timezone`·component, `viewport`·component, `banner`·component, `complementary`·component, `contentinfo`·component, `form`·component, `search`·component, `.file()`·api, `.file()`·integration, `.directory()`·api, `.directory()`·integration, `toMatch(directory())`·api, `toMatch(directory())`·integration, `toMatchRows()`·component
 - a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory — `toMatch(file())`·jobs
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·api, `{{iso8601}}`·cli, `{{iso8601}}`·integration, `{{iso8601}}`·website, `{{number}}`·api, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·api, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·api, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·api, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 

@@ -86,9 +86,89 @@ const pages = {
     <dialog open><button type="button">Delete post</button></dialog>
     <footer><a href="/articles">Articles</a></footer>
     </body></html>`,
+    // Every landmark and container the element vocabulary names, and the
+    // Controls the four remaining verbs drive: a checkbox, a field answered
+    // By a key, a button that explains itself on hover.
+    '/landmarks': `<!doctype html><html lang="en"><head>${head('Fixture — Landmarks', '/landmarks')}
+    </head><body>
+    <header><h1>Landmarks</h1></header>
+    <main>
+        <h2>Scores</h2>
+        <table aria-label="Scores">
+            <tr><th>Player</th><th>Score</th></tr>
+            <tr><td>Alice</td><td>3</td></tr>
+        </table>
+        <ul aria-label="Tags"><li>news</li><li>opinion</li></ul>
+        <p role="status">Saved</p>
+        <form aria-label="Subscribe">
+            <label><input type="checkbox" id="terms"> Accept terms</label>
+            <label for="name">Name</label>
+            <input id="name">
+        </form>
+        <p id="accepted" hidden>Terms accepted</p>
+        <p id="greeting" hidden></p>
+        <div role="search"><label for="query">Query</label><input id="query" type="search"></div>
+        <button type="button" id="help">Help</button>
+        <p id="tooltip" hidden>Help is on its way</p>
+        <div data-testid="chart"><canvas width="10" height="10"></canvas></div>
+    </main>
+    <aside aria-label="Related"><a href="/articles">Articles</a></aside>
+    <dialog open aria-label="Cookies"><p>We keep none</p></dialog>
+    <footer><p>Fixture footer</p></footer>
+    <script>
+        document.getElementById('terms').addEventListener('change', (event) => {
+            document.getElementById('accepted').hidden = !event.target.checked;
+        });
+        document.querySelector('form').addEventListener('submit', (event) => {
+            event.preventDefault();
+        });
+        document.getElementById('name').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                const greeting = document.getElementById('greeting');
+                greeting.textContent = 'Hello, ' + event.target.value;
+                greeting.hidden = false;
+            }
+        });
+        document.getElementById('help').addEventListener('mouseenter', () => {
+            document.getElementById('tooltip').hidden = false;
+        });
+    </script>
+    </body></html>`,
+    // A page that stamps its build in every surface a result reads — the text,
+    // The markup, the title, the console and its errors — for a runner's
+    // `transform` to normalise before any comparison.
+    '/stamped': `<!doctype html><html lang="en"><head><title>Stamped — build 7f3a</title></head>
+    <body><h1>Stamped</h1><p>build 7f3a</p>
+    <script>console.log('build 7f3a'); console.error('build 7f3a failed');</script>
+    </body></html>`,
+    // A page asking for a resource on ANOTHER origin — the same server, named
+    // By its other host — and saying whether the request left the site.
+    '/external': `<!doctype html><html lang="en"><head><title>Fixture — External</title></head>
+    <body><h1>External</h1><p id="external">pending</p>
+    <script>
+        const other = location.hostname === 'localhost' ? '127.0.0.1' : 'localhost';
+        fetch('http://' + other + ':' + location.port + '/robots.txt', { mode: 'no-cors' }).then(
+            () => { document.getElementById('external').textContent = 'Cross-origin reached'; },
+            () => { document.getElementById('external').textContent = 'Cross-origin blocked'; },
+        );
+    </script>
+    </body></html>`,
 };
 
-const server = createServer((request, response) => {
+/** A page rendered on the SERVER from what the declared backend answered. */
+async function greetingPage() {
+    const answer = await fetch(`${process.env.API_URL}/greeting`);
+    const { message } = await answer.json();
+    return `<!doctype html><html lang="en"><head><title>Fixture — Greeting</title></head>
+    <body><h1>Greeting</h1><p>${message}</p></body></html>`;
+}
+
+const server = createServer(async (request, response) => {
+    if (request.url === '/greeting') {
+        response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        response.end(await greetingPage());
+        return;
+    }
     if (request.url === '/old') {
         response.writeHead(308, { location: '/' });
         response.end();

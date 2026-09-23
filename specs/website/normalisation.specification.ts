@@ -9,7 +9,10 @@ import { afterAll } from 'vitest';
  */
 export const { cleanup, website } = await specification.website({
     server: { command: 'node specs/fixtures/website-app/server.mjs', ready: '/' },
-    transform: (text) => text.replaceAll(/,?"framework-transitions-[a-z]+":\s*"[^"]*"/gu, ''),
+    transform: (text) =>
+        text
+            .replaceAll(/,?"framework-transitions-[a-z]+":\s*"[^"]*"/gu, '')
+            .replaceAll(/build [0-9a-f]{4}/gu, 'build <stamp>'),
 });
 
 afterAll(cleanup);

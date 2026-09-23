@@ -107,10 +107,6 @@ const MOBILE_EXEMPT = { mobile: NO_SIMULATOR } as const;
 /** A hole this package owes itself — the capability ships, the proof does not. */
 const OWED = 'the surface ships and this package does not specify it here yet';
 
-/** Why website's `url` is empty, and will stay so. */
-const SERVES_ITS_OWN_SITE =
-    'the package serves its own fixture site, so `server` is what it proves; `url` targets an already-running deployment, which is a consumer shape (A11 states the XOR)';
-
 /** The three surfaces that draw, and their shared vocabulary. */
 const DRAWS = ['website', 'mobile', 'component'] as const;
 
@@ -132,7 +128,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'website', 'mobile', 'component'],
-        exempt: { cli: OWED, component: OWED, mobile: NO_SIMULATOR, website: OWED },
+        exempt: { cli: OWED, component: OWED, mobile: NO_SIMULATOR },
         group: 'Constructor option',
         name: 'root',
         probe: 'root:',
@@ -141,21 +137,19 @@ export const CAPABILITIES: Capability[] = [
     { columns: ['jobs'], group: 'Constructor option', name: 'jobs', probe: 'jobs:' },
     {
         columns: ['website'],
-        exempt: { website: SERVES_ITS_OWN_SITE },
         group: 'Constructor option',
         name: 'url',
         probe: 'url:',
     },
     {
         columns: ['website', 'mobile'],
-        exempt: { mobile: NO_SIMULATOR, website: OWED },
+        exempt: { mobile: NO_SIMULATOR },
         group: 'Constructor option',
         name: 'backend',
         probe: 'backend:',
     },
     {
         columns: ['website'],
-        exempt: { website: OWED },
         group: 'Constructor option',
         name: 'external',
         probe: 'external:',
@@ -231,7 +225,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'jobs', 'integration', 'website', 'mobile', 'component'],
-        exempt: { mobile: NO_SIMULATOR, website: OWED },
+        exempt: { mobile: NO_SIMULATOR },
         group: 'Setup',
         name: '.intercept()',
         probe: '.intercept(',
@@ -281,21 +275,18 @@ export const CAPABILITIES: Capability[] = [
     { columns: BROWSERS, group: 'Verb', name: 'gone', probe: '.gone(' },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Verb',
         name: 'press',
         probe: '.press(',
     },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Verb',
         name: 'hover',
         probe: '.hover(',
     },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Verb',
         name: 'check',
         probe: '.check(',
@@ -303,7 +294,6 @@ export const CAPABILITIES: Capability[] = [
     { columns: BROWSERS, group: 'Verb', name: 'select', probe: '.select(' },
     {
         columns: ['website'],
-        exempt: { website: OWED },
         group: 'Verb',
         name: 'goto',
         probe: '.goto(',
@@ -337,14 +327,13 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: DRAWS,
-        exempt: { mobile: NO_SIMULATOR, website: OWED },
+        exempt: { mobile: NO_SIMULATOR },
         group: 'Descriptor',
         name: 'testId',
         probe: 'testId(',
     },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Descriptor',
         name: 'heading',
         probe: 'heading(',
@@ -352,35 +341,30 @@ export const CAPABILITIES: Capability[] = [
     { columns: BROWSERS, group: 'Descriptor', name: 'link', probe: 'link(' },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Descriptor',
         name: 'dialog',
         probe: 'dialog(',
     },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Descriptor',
         name: 'status',
         probe: 'status(',
     },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Descriptor',
         name: 'table',
         probe: 'table(',
     },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Descriptor',
         name: 'row',
         probe: 'row(',
     },
     {
         columns: BROWSERS,
-        exempt: { website: OWED },
         group: 'Descriptor',
         name: 'listitem',
         probe: 'listitem(',
@@ -388,14 +372,14 @@ export const CAPABILITIES: Capability[] = [
     { columns: BROWSERS, group: 'Descriptor', name: 'option', probe: 'option(' },
     {
         columns: BROWSERS,
-        exempt: { component: OWED, website: OWED },
+        exempt: { component: OWED },
         group: 'Descriptor',
         name: 'banner',
         probe: 'banner(',
     },
     {
         columns: BROWSERS,
-        exempt: { component: OWED, website: OWED },
+        exempt: { component: OWED },
         group: 'Descriptor',
         name: 'complementary',
         probe: 'complementary(',
@@ -409,7 +393,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: BROWSERS,
-        exempt: { component: OWED, website: OWED },
+        exempt: { component: OWED },
         group: 'Descriptor',
         name: 'form',
         probe: 'form(',
@@ -419,7 +403,7 @@ export const CAPABILITIES: Capability[] = [
     { columns: BROWSERS, group: 'Descriptor', name: 'region', probe: 'region(' },
     {
         columns: BROWSERS,
-        exempt: { component: OWED, website: OWED },
+        exempt: { component: OWED },
         group: 'Descriptor',
         name: 'search',
         probe: 'search(',
@@ -508,14 +492,12 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['website', 'component'],
-        exempt: { website: OWED },
         group: 'Result accessor',
         name: '.html',
         probe: 'result.html',
     },
     {
         columns: ['website'],
-        exempt: { website: OWED },
         group: 'Result accessor',
         name: '.title',
         probe: 'result.title',
@@ -537,7 +519,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['website'],
-        exempt: { website: OWED },
         group: 'Result accessor',
         name: '.links',
         probe: 'result.links',
