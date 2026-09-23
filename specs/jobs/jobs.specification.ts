@@ -75,6 +75,13 @@ export const { cleanup, jobs } = await specification.jobs({
             },
             name: 'enrich-from-api',
         },
+        {
+            execute: async () => {
+                // The instant the job ran, as the job reads it: what `.clock()` pins.
+                await insertOneEvent(analyticsDb.connectionString, new Date().toISOString());
+            },
+            name: 'stamp-now',
+        },
     ],
     root: '../fixtures/app',
     services: {

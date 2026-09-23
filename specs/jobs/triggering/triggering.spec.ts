@@ -37,7 +37,7 @@ describe('jobs', () => {
         // Given - a job name that was never registered
         // Then - the error lists every available job, in registration order
         await expect(jobs.trigger('nope')).rejects.toThrow(
-            'trigger("nope"): job not found. Available: sync-events, crash-after-insert, enrich-from-api',
+            'trigger("nope"): job not found. Available: sync-events, crash-after-insert, enrich-from-api, stamp-now',
         );
     });
 

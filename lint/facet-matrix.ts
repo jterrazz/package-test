@@ -225,7 +225,6 @@ export const CAPABILITIES: Capability[] = [
     // ── Setups ──
     {
         columns: ['api', 'jobs', 'integration', 'website', 'component'],
-        exempt: { jobs: OWED },
         group: 'Setup',
         name: '.clock()',
         probe: '.clock(',
@@ -600,7 +599,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'cli', 'integration', 'website', 'module'],
-        exempt: { api: OWED },
         group: 'Golden',
         name: '.json body',
         probe: ".json'",
