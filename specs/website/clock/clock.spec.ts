@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-describe('website — the visit pins the calendar of the page', () => {
+describe('clock', () => {
     test('a script reading Date sees the instant the chain stated', async () => {
         // Given - a page whose script stamps the moment it opened
         const result = await website.clock('2026-03-04T09:30:00Z').visit('/clock');

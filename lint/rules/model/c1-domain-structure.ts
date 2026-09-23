@@ -21,6 +21,19 @@ function stemOf(base: string): string {
     return suffix === undefined ? base : base.slice(0, -suffix.length);
 }
 
+/**
+ * The facets whose subject's standard name may take several folders — a
+ * route's resource and action (`events/list/`), a command's words
+ * (`db/migrate/`). There a `.spec.ts` sits as deep as its subject's name,
+ * which C30 derives and judges.
+ */
+const SUBJECT_PATH_FACETS = new Set(['api', 'cli']);
+
+/** Is this a spec the subject's name may place below one domain folder? */
+function sitsInASubjectPath(relative: string[], base: string): boolean {
+    return base.endsWith('.spec.ts') && SUBJECT_PATH_FACETS.has(relative[0] ?? '');
+}
+
 /** The shapes a spec tree may declare. */
 export type SpecsDepth = 'facet' | 'facet-domain' | 'mirror' | 'off';
 
@@ -55,7 +68,9 @@ function testsItsNeighbour(filename: string): boolean {
  *
  * - a spec sits at facet/domain depth — exactly
  *   `specs/<facet>/<domain>/<aspect>.spec.ts`. A test directly at the facet root
- *   (or nested deeper than a domain) is rejected.
+ *   (or nested deeper than a domain) is rejected — but for a `.spec.ts` of the
+ *   api and cli facets, whose domain is its subject's standard name and may
+ *   take several folders (`events/list/`, `db/migrate/`): C30 judges which.
  * - a `*.specification.ts` sits at the facet root — exactly
  *   `specs/<facet>/<file>.specification.ts`, never inside a domain.
  *
@@ -130,7 +145,7 @@ export const c1DomainStructure: LintRule = {
                     if (isNodeTest(base)) {
                         if (nesting < 1) {
                             context.report({ messageId: 'testOutsideFacet', node });
-                        } else if (nesting > 2) {
+                        } else if (nesting > 2 && !sitsInASubjectPath(anchor.relative, base)) {
                             context.report({ messageId: 'testTooDeepForFacet', node });
                         }
                         return;
@@ -163,7 +178,7 @@ export const c1DomainStructure: LintRule = {
                 if (isNodeTest(base)) {
                     if (nesting < 2) {
                         context.report({ messageId: 'testAtFacetRoot', node });
-                    } else if (nesting > 2) {
+                    } else if (nesting > 2 && !sitsInASubjectPath(anchor.relative, base)) {
                         context.report({ messageId: 'testTooDeep', node });
                     }
                     return;

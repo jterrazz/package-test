@@ -115,12 +115,12 @@ Placement itself is **declared**, because a spec tree may legitimately have a sh
 "jterrazz/c1-domain-structure": ["error", { "depth": "facet-domain" }] // the default
 ```
 
-| `depth`          | The tree                                                                                                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `'facet-domain'` | the default — `specs/<facet>/<domain>/<aspect>.spec.ts`, `*.specification.ts` at the facet root                                                                     |
-| `'facet'`        | the assets decide the folder — a spec at the facet root (`specs/<facet>/<aspect>.spec.ts`) OR one domain down, never deeper; `*.specification.ts` at the facet root |
-| `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a spec at any depth ≥ 1, named `<dir>/<dir>.spec.ts`                                   |
-| `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                                                   |
+| `depth`          | The tree                                                                                                                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'facet-domain'` | the default — `specs/<facet>/<domain>/<aspect>.spec.ts`, `*.specification.ts` at the facet root; an api or cli spec's domain is its subject's standard name, one folder or several (`events/list/`) |
+| `'facet'`        | the assets decide the folder — a spec at the facet root (`specs/<facet>/<aspect>.spec.ts`) OR one domain down, never deeper; `*.specification.ts` at the facet root                                 |
+| `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a spec at any depth ≥ 1, named `<dir>/<dir>.spec.ts`                                                                   |
+| `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                                                                                   |
 
 A project states the shape it has — `facet` when asset-less tests sit beside their siblings at the facet root, `mirror` when the tree mirrors something outside itself — and keeps a checked shape, instead of switching the rule off and keeping none.
 

@@ -4,7 +4,7 @@ import { file, sql } from '../../../src/index.js';
 import { listOrders, placeOrder } from '../../fixtures/orders/orders.js';
 import { integration } from '../integration.specification.js';
 
-describe('integration — a module against the real database', () => {
+describe('call', () => {
     test('reads what the seed put there', async () => {
         // Given - two orders in the real database, and the module asked for them
         const result = await integration

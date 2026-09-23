@@ -55,7 +55,7 @@ async function startAndCapture(
 /** What one refused startup left behind: the error it threw, the report it printed. */
 type Capture = { failure: Error | undefined; output: string };
 
-describe('initiation errors', () => {
+describe('initiation-errors', () => {
     // Three refusals, each costing a container start, captured once and read by
     // Eight tests. The hook is the price of the containers, not of the Given:
     // Every test below reads a value this file named, and names which one.

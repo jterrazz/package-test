@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { file } from '../../../src/index.js';
 import { integration } from '../pure.specification.js';
 
-describe('integration — the calendar the module reads', () => {
+describe('clock', () => {
     test('stamps the instant the chain stated', async () => {
         // Given - a module that stamps the moment it ran
         const result = await integration

@@ -2,6 +2,7 @@ import { button, expect, heading, test } from '@jterrazz/test';
 
 import { website } from '../website.specification.js';
 
+describe('table', () => {
 test('pages through the table', async () => {
     // Given - a visitor who names what the click produced
     const result = await website.visit('/posts', async (visitor) => {
@@ -11,4 +12,5 @@ test('pages through the table', async () => {
 
     // Then - the settled page is the one captured
     expect(result.content).toContain('Page 2');
+});
 });

@@ -15,7 +15,7 @@ async function catchMessage(assertion: () => Promise<unknown>): Promise<string> 
     throw new Error('expected the assertion to throw, but it passed');
 }
 
-describe('command — directory snapshot', () => {
+describe('directory', () => {
     test('matches an identical fixture tree', async () => {
         // Given - scaffold writes the exact tree committed under expected/cli-scaffold/
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('scaffold');

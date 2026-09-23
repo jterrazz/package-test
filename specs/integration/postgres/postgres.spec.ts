@@ -13,7 +13,7 @@ import { integration } from '../integration.specification.js';
  * answers before it ever connects — is a module test beside `postgres.ts`.
  */
 
-describe('postgres — the handle against a real container', () => {
+describe('postgres', () => {
     test('builds a connection string carrying the credentials and the database', async () => {
         // Given - the service the runner started
         const result = await integration.call(({ db }) => {

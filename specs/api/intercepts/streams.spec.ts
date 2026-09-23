@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { http } from '../../../src/index.js';
 import { api, STREAM_URL } from '../intercepts.specification.js';
 
-describe('contracts — streamed replies', () => {
+describe('streams', () => {
     test('the app reads the declared pieces, in the declared order', async () => {
         // Given - a provider declared to answer in three pieces
         const result = await api

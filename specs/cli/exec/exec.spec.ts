@@ -11,7 +11,7 @@ import { cli } from '../cli.specification.js';
  * to snapshot by nature. Whole-output correctness IS a golden — see help.txt/start.txt.
  */
 
-describe('command — exec', () => {
+describe('exec', () => {
     test('runs a command successfully', async () => {
         // Given - the cli-app fixture project
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('build');

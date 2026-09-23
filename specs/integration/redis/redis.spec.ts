@@ -11,7 +11,7 @@ import { integration } from '../redis.specification.js';
  * client opened at the default index would be talking to another database.
  */
 
-describe('redis — the handle against a real container', () => {
+describe('redis', () => {
     test('builds a connection string on the redis scheme', async () => {
         // Given - the service the runner started
         const result = await integration.call(({ cache }) => {

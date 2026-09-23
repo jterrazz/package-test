@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          specs/website/posts/table.spec.ts:8:15  jterrazz(w5w-scenario-settles)
+          specs/website/posts/table.spec.ts:9:15  jterrazz(w5w-scenario-settles)

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../services.specification.js';
 
-describe('website — a process declared beside the site', () => {
+describe('services', () => {
     test('the site is handed the URL the framework chose for it', async () => {
         // Given - the page that renders what the server was started with
         const result = await website.visit('/services');

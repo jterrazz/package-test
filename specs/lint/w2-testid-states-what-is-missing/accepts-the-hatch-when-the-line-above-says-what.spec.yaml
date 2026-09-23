@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          specs/website/home/subscribe.spec.ts:10:15  jterrazz(w5w-scenario-settles)
+          specs/website/home/subscribe.spec.ts:11:15  jterrazz(w5w-scenario-settles)

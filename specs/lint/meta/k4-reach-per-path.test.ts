@@ -114,4 +114,16 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
             'a4-cleanup-afterall',
         );
     });
+
+    test('a spec is judged by the rules that reach specs alone, and no other test is', async () => {
+        // Given - the same run, read at the facet spec, a module test and a repository suite
+        const output = await reachRun();
+
+        // Then - C31's reach is the spec role: the spec's tests stand in no describe, and the other two test files are none of its business
+        expect(about(output, 'specs/api/orders/total.spec.ts')).toContain(
+            'c31-describe-names-file',
+        );
+        expect(about(output, 'src/widget.test.ts')).not.toContain('c31-describe-names-file');
+        expect(about(output, 'specs/build/graph.test.ts')).not.toContain('c31-describe-names-file');
+    });
 });

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { jobs } from '../jobs.specification.js';
 
-describe('jobs — the chain pins the calendar of the job', () => {
+describe('clock', () => {
     test('the job stamps the instant the chain pins', async () => {
         // Given - a chain pinned at an instant
         const result = await jobs.clock('2026-03-04T09:30:00.000Z').trigger('stamp-now');

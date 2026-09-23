@@ -35,9 +35,22 @@ export type SourceCode = {
     text: string;
 };
 
+/** One text edit a fixer returns: a source range and what replaces it. */
+export type Fix = { range: [number, number]; text: string };
+
+/** The slice of oxlint's ESLint-compatible fixer the rules use — ranges are source offsets. */
+export type RuleFixer = {
+    insertTextAfterRange: (range: [number, number], text: string) => Fix;
+    insertTextBeforeRange: (range: [number, number], text: string) => Fix;
+    removeRange: (range: [number, number]) => Fix;
+    replaceTextRange: (range: [number, number], text: string) => Fix;
+};
+
 /** A diagnostic accepted by `context.report`. */
 export type Diagnostic = {
     data?: Record<string, number | string> | undefined;
+    /** The edits `--fix` applies — a rule whose meta states `fixable`. */
+    fix?: ((fixer: RuleFixer) => Fix | Fix[] | null) | undefined;
     messageId?: string | undefined;
     message?: string | undefined;
     node?: AstNode | undefined;
@@ -151,6 +164,8 @@ export type RuleDoc = {
 /** Rule metadata (the subset we set). */
 export type RuleMeta = {
     defaultOptions?: unknown[];
+    /** Set when a diagnostic carries a `fix` — oxlint refuses a fix from a rule that does not say so. */
+    fixable?: 'code';
     docs?: RuleDoc & { description?: string };
     messages?: Record<string, string>;
     /** JSON schema for options — required by oxlint for rules that take options. */

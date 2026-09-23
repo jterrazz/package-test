@@ -1,0 +1,5 @@
+description: one describe titled with the aspect holds every test
+fixture: ./fixtures/aspect-title/
+runs:
+    - command: .
+      exit: 0

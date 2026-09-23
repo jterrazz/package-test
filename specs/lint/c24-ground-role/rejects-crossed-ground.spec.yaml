@@ -4,5 +4,5 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/api/orders/orders.spec.ts:6:40  jterrazz(c24-ground-role)
-          specs/api/orders/orders.spec.ts:9:42  jterrazz(c24-ground-role)
+          specs/api/orders/orders.spec.ts:7:40  jterrazz(c24-ground-role)
+          specs/api/orders/orders.spec.ts:10:42  jterrazz(c24-ground-role)

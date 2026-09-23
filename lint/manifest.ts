@@ -224,7 +224,7 @@ export const RULE_DOCS = {
     'c1-domain-structure': {
         channel: 'statique',
         convention:
-            'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth, a `*.specification.ts` at the facet root), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. A first-level folder that is no facet — a repository suite, `surface/` or `lint/` — is judged by the same depth as a facet is. In every mode, `off` included: a directory named `fixtures/`, `expected/`, `requests/` or `seeds/` is GROUND, never a facet, domain or suite folder — no spec lives inside one, so a domain named with a reserved word is refused. One exception, and only one: ground may be CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is I2). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — I2 holds its neighbourhood.',
+            'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth, a `*.specification.ts` at the facet root), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. Under `facet-domain` and `facet`, a `.spec.ts` of the api or cli facet sits as deep as its subject’s standard name — a route’s resource and action (`events/list/`), a command’s words (`db/migrate/`) — which C30 judges. A first-level folder that is no facet — a repository suite, `surface/` or `lint/` — is judged by the same depth as a facet is. In every mode, `off` included: a directory named `fixtures/`, `expected/`, `requests/` or `seeds/` is GROUND, never a facet, domain or suite folder — no spec lives inside one, so a domain named with a reserved word is refused. One exception, and only one: ground may be CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is I2). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — I2 holds its neighbourhood.',
         facet: 'model',
         family: 'C',
         fix: 'Move the file to the depth the tree declares, or declare the depth the tree actually has.',
@@ -337,6 +337,42 @@ export const RULE_DOCS = {
         rationale:
             'A path resolves against the spec that starts the chain, so one built in a helper resolves per caller: the same line names a different file for every spec that reaches it, and the file it names is visible on no line of the test that stands on it.',
         reach: 'all',
+    },
+    'c31-describe-names-file': {
+        channel: 'statique',
+        convention:
+            "A spec file holds one top-level `describe`, titled with the file's aspect — `pagination.spec.ts` → `describe('pagination', …)` — and every test inside it. A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything but the aspect at the title.",
+        facet: 'model',
+        family: 'C',
+        fix: "Title the file's one `describe` with its aspect, and put every test inside it — `make fix` renames a title and wraps a file that has none.",
+        id: 'C31',
+        rationale:
+            'The runner reports a failure under the describe it stands in, so a title that is the aspect names the file the failure came from; a second group, or a stray test, is a second question the file answers.',
+        reach: 'spec',
+    },
+    'c32-aspect-name': {
+        channel: 'statique',
+        convention:
+            'A spec file is named for its aspect: kebab-case (`not-found.spec.ts`), and never a name that says the file holds what fit nowhere else — `misc`, `other`, `basic`, `general`, `more`, `edge-cases`, `tests`, `main`.',
+        facet: 'model',
+        family: 'C',
+        fix: 'Rename the file for the question its tests ask of the subject — `pagination`, `filters`, `sorting`, `language`, `validation`, `not-found`, `auth`, `shape` are the api vocabulary chapter 18 advises.',
+        id: 'C32',
+        rationale:
+            'The folder names the subject; the file name is the only place the question asked of it is written, and a catch-all name answers none — the next test lands there because it fits nowhere, and the file grows until it holds everything.',
+        reach: 'spec',
+    },
+    'c33-file-size': {
+        channel: 'statique',
+        convention:
+            'A spec file holds at most 400 lines; a longer one is refused at its first line, the message grouping its tests by the prefix of their titles — where the cut usually goes. A file already past it is recorded on the ratchet and may only shrink.',
+        facet: 'model',
+        family: 'C',
+        fix: 'Cut the file along the groups the message names, one aspect per file, in the same folder.',
+        id: 'C33',
+        rationale:
+            'A file past a few hundred lines asks several questions of its subject, and a reader looking for one scrolls through the others; a cap written as a number is the one a reviewer does not have to argue.',
+        reach: 'spec',
     },
     'd16-sampled-oracle': {
         channel: 'statique',

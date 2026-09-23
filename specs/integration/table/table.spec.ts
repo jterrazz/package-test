@@ -15,7 +15,7 @@ const CASES = [
     { name: 'many', of: [7, 11, 13] },
 ];
 
-describe('integration — a table of cases, one golden each', () => {
+describe('table', () => {
     test.each(CASES)('totals $name', async ({ name, of }) => {
         // Given - the module summing what the row carries
         const result = await integration.call(() => ({

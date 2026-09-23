@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file, sql } from '../../../src/index.js';
 import { cli } from '../db-cli.specification.js';
 
-describe('command — seeding', () => {
+describe('seeding', () => {
     // RUNTIME B6 — the record key injects `<KEY>_URL` into the child process;
     // `.env()` is for overriding it, never for restating it.
     test('runs a SQL seed against the declared service database', async () => {

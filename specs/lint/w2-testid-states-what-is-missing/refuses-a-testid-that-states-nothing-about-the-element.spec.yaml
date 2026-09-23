@@ -4,5 +4,5 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/website/home/subscribe.spec.ts:9:15  jterrazz(w5w-scenario-settles)
-          specs/website/home/subscribe.spec.ts:9:29  jterrazz(w2-testid-states-what-is-missing)
+          specs/website/home/subscribe.spec.ts:10:15  jterrazz(w5w-scenario-settles)
+          specs/website/home/subscribe.spec.ts:10:29  jterrazz(w2-testid-states-what-is-missing)

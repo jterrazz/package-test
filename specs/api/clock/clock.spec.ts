@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
-describe('api — the chain pins the calendar of the app', () => {
+describe('clock', () => {
     test('the app reads the instant the chain pins', async () => {
         // Given - a chain pinned at an instant
         const result = await api.clock('2026-03-04T09:30:00.000Z').get('/session');

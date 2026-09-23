@@ -46,7 +46,7 @@ const HAS_DOCKER = dockerAvailable();
  * cut at an arbitrary instant, unstable to snapshot. Targeted toContain is the level.
  */
 
-describe('command — docker option (lazy container accessors)', () => {
+describe('docker', () => {
     test.skipIf(!HAS_DOCKER)(
         'tracks labelled containers and cleans up on dispose',
         async () => {

@@ -24,7 +24,7 @@ import { api, QUOTES_URL } from '../intercepts.specification.js';
  * a reasoned suppression of M3 ([16](../../../docs/16-contracts.md)). This spec
  * is the fix's acceptance test — unskip it, and the exception goes with it.
  */
-describe('contracts — a body the subject cancels', () => {
+describe('body-cancel', () => {
     // oxlint-disable-next-line vitest/no-disabled-tests -- reason: the seam does not answer this yet (msw 2.15.0 hangs); the spec is the acceptance test of the fix, and skipping it is how the defect stays written down rather than remembered
     test.skip('a subject that drops the reply it was served finishes its request', async () => {
         // Given - one served reply, and an app that cancels the body instead of reading it

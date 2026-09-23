@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/api/users/listed.spec.ts:10:12  jterrazz(d20-whole-result)
+          specs/api/users/listed.spec.ts:11:12  jterrazz(d20-whole-result)
