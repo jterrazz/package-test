@@ -191,10 +191,22 @@ const config: OxlintConfig = defineConfig(
                     // And states nothing a spec imports.
                     'src/facets/**/*.project.ts',
                     'src/seams/vitest-browser/**',
+                    // The two seams whose dependency IS a test package: the
+                    // Network double's engine and the browser the website
+                    // Facet drives.
+                    'src/seams/msw/**',
+                    'src/seams/playwright/**',
                     'src/model/clock/**',
                     'src/model/doubles/**',
                     'src/model/goldens/**',
                 ],
+                rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
+            },
+            {
+                // The two barrels that re-export the facet constructors, which
+                // This package's layout names `<facet>.specification.ts`: the
+                // Suffix F2 reads as test material names production here.
+                files: ['src/index.ts', 'src/facets/specification.ts'],
                 rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
             },
         ],

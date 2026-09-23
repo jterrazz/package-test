@@ -664,10 +664,10 @@ export const RULE_DOCS = {
     'f2-no-test-imports-in-prod': {
         channel: 'statique',
         convention:
-            'A production file never imports `vitest`, `@jterrazz/test`, a `*.test.*`, a `*.fixtures.*`, anything under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder, or `mockOf` (one exception: `@jterrazz/test/oxlint`). The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`.',
+            "A production module never reaches test material. A production module is a source module under a `src/` or a `lint/` folder that is no test material itself; test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder or under `specs/`, and a contract — a `*.contracts.ts` facade and the `contracts/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. One exception: `@jterrazz/test/oxlint`, the zero-runtime lint entry.",
         facet: 'model',
         family: 'F',
-        fix: 'Move the code that needs the import into a test, or inject what it needs as a port.',
+        fix: 'Move the code that needs the reference into a test, move what production needs out of the test material, or inject it as a port.',
         id: 'F2',
         rationale:
             "Keeping test artefacts out of production protects the consumer's application bundle.",

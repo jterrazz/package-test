@@ -1,10 +1,10 @@
 import { dirname, join, resolve } from 'node:path';
 
-import { importSourceVisitor } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import { isProductionModule, moduleReferenceVisitor } from '../../production.js';
 import { projectRootOf, projectSegments } from '../../role.js';
 
 /** What one layer under `src/` may import. */
@@ -30,8 +30,6 @@ export type LayerOptions = {
 };
 
 type Options = { layers?: Record<string, LayerOptions> };
-
-const TEST_OR_FIXTURES = /\.(?:test|fixtures)\.[cm]?[jt]sx?$/u;
 
 function matchesPackage(source: string, packages: string[]): boolean {
     return packages.some((name) => source === name || source.startsWith(`${name}/`));
@@ -92,10 +90,11 @@ function matchesPath(target: string, patterns: string[]): boolean {
  * folder may import its own packages and its own files), and `seams` opens a
  * named module to an extra edge — the lazy import a layer allows exactly once.
  *
- * A file under a layer the map does not name is out of scope, as are module
- * tests and `*.fixtures.ts` files (F2/I4 govern those), and any file outside
- * `src/` — except the root `lint/` of the repository spine, whose files a map
- * names `lint/…`.
+ * A file under a layer the map does not name is out of scope, as is anything
+ * that is not a production module (`production.ts`: tests, fixtures modules,
+ * ground — F2/I4 govern those), and any file outside `src/` — except the root
+ * `lint/` of the repository spine, whose files a map names `lint/…`. An edge is
+ * read in every form a module names another, `require()` included.
  */
 export const i1LayerBoundaries: LintRule = {
     create(context: RuleContext): Visitor {
@@ -104,7 +103,7 @@ export const i1LayerBoundaries: LintRule = {
             return {};
         }
         const file = context.physicalFilename;
-        if (TEST_OR_FIXTURES.test(file)) {
+        if (!isProductionModule(file)) {
             return {};
         }
         const inside = pathInLayers(file);
@@ -128,7 +127,7 @@ export const i1LayerBoundaries: LintRule = {
         };
 
         const visitor: Visitor = {
-            ...importSourceVisitor(({ node, source }) => {
+            ...moduleReferenceVisitor(({ node, source }) => {
                 if (source.startsWith('node:')) {
                     return;
                 }

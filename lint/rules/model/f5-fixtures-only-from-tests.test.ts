@@ -20,6 +20,12 @@ ruleTester.run('f5-fixtures-only-from-tests', f5FixturesOnlyFromTests as unknown
             errors: 1,
             filename: '/repo/src/domain/user.ts',
         },
+        // Every form a module names another in.
+        {
+            code: 'const { data } = require("./user.fixtures.js");',
+            errors: 1,
+            filename: '/repo/src/domain/user.ts',
+        },
         // A fixtures module importing another fixtures module.
         {
             code: 'import { base } from "./base.fixtures.js";',

@@ -57,6 +57,13 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
             filename: '/repo/src/model/matching/match.ts',
             options: framework,
         },
+        // An edge is an edge in every form a module names another.
+        {
+            code: 'const { Client } = require("pg");',
+            errors: [{ messageId: 'foreignDependency' }],
+            filename: '/repo/src/model/matching/match.ts',
+            options: framework,
+        },
         // A folder only imports its own declared dependency.
         {
             code: 'import { Client } from "pg";',
@@ -170,6 +177,18 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         {
             code: 'import { describe } from "vitest";',
             filename: '/repo/src/model/matching/match.test.ts',
+            options: framework,
+        },
+        // So is everything else that is not a production module: a spec under
+        // `src/`, and ground a module test stands on.
+        {
+            code: 'import { describe } from "vitest";',
+            filename: '/repo/src/model/matching/match.spec.ts',
+            options: framework,
+        },
+        {
+            code: 'import { Client } from "pg";',
+            filename: '/repo/src/model/matching/fixtures/app.ts',
             options: framework,
         },
         // A file under no declared layer is out of scope — here, the

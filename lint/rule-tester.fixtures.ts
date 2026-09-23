@@ -1,7 +1,7 @@
 /* oxlint-disable vitest/expect-expect, vitest/valid-describe-callback, vitest/valid-title -- this module DECLARES no suite of its own: it hands the runner's primitives to oxlint's RuleTester, which declares one per rule case, so a literal title and an assertion are the CALLER's to carry */
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { it as declareCase, describe as declareSuite } from 'vitest';
 
@@ -85,6 +85,20 @@ export function repositoryUnder(
         mkdirSync(join(root, '.git'));
     } else {
         writeFileSync(join(root, '.git'), 'gitdir: /elsewhere/.git/worktrees/repository\n');
+    }
+    return root;
+}
+
+/**
+ * A package on disk holding `files` — each written at its path below the
+ * root, a `package.json` among them replacing the empty one — for a rule that
+ * resolves what a file names through the tree beside it.
+ */
+export function packageWith(files: Record<string, string>): string {
+    const root = checkoutUnder('work');
+    for (const [path, text] of Object.entries(files)) {
+        mkdirSync(dirname(join(root, path)), { recursive: true });
+        writeFileSync(join(root, path), text);
     }
     return root;
 }
