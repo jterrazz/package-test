@@ -40,6 +40,7 @@ import { codeOf } from './rule-code.js';
  *     node dist/checker.js --member <dir>             # one workspace member
  *     node dist/checker.js baseline [root]            # record test.baseline.json
  *     node dist/checker.js … --oxlint-report <file>   # read the plugin's diagnostics from a report
+ *     node dist/checker.js … --summary                # a green ratchet run prints its held line alone
  *
  * Three runs, one reporter. A PATH is read for what it IS. Name a specs tree
  * — a directory with a `specs` segment below its package root — and it walks that tree
@@ -81,6 +82,9 @@ import { codeOf } from './rule-code.js';
  * A green verdict is one line — `test.baseline.json: <n> held across <k>
  * rules` — and a failing one prints every finding it counted and every plugin
  * diagnostic before its reasons, so a verdict and its evidence are one log.
+ * `--summary` cuts the green line to its first half, exactly
+ * `test.baseline.json: <n> held across <k> rules`, the line `typescript
+ * check` shows beside its own ratchet's; it changes nothing else.
  * `baseline [root]` writes the file from the current counts.
  *
  * The plugin's diagnostics come from `--oxlint-report <file>` when it is given
@@ -114,6 +118,7 @@ const recording = cliArguments[0] === 'baseline';
 const argv = recording ? cliArguments.slice(1) : cliArguments;
 const fix = argv.includes('--fix');
 const json = valueOf('--format') === 'json';
+const summary = argv.includes('--summary');
 const member = valueOf('--member');
 const oxlintReport = valueOf('--oxlint-report');
 /** The flags that take a value: the argument after one is that value, never a path. */
@@ -323,7 +328,8 @@ function heldSummary(
     passes: string,
 ): string {
     const rules = Object.keys(counts).length;
-    return `${TEST_BASELINE}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'} — conventions checker ${what} (${passes})`;
+    const held = `${TEST_BASELINE}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'}`;
+    return summary ? held : `${held} — conventions checker ${what} (${passes})`;
 }
 
 /** A directory that must exist — a typo'd path is operator error, not a clean tree. */

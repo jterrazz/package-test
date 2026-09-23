@@ -172,4 +172,22 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(file('./expected/checker-failing-json.txt'));
     });
+
+    test('`--summary` cuts a green ratchet run to exactly the held line', async () => {
+        // Given - a project whose checker finding and plugin diagnostic are both recorded
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-ratchet/'))
+            .fixture(
+                file('../../fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'),
+            )
+            .exec([
+                'baseline . --oxlint-report oxlint-report.json',
+                '--member . --summary --oxlint-report oxlint-report.json',
+            ]);
+
+        // Then - one line and nothing after it: what typescript check shows on a green run
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe('test.baseline.json: 2 held across 2 rules\n');
+        expect(result.stderr.text).toBe('');
+    });
 });
