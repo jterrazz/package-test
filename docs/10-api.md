@@ -293,7 +293,7 @@ Line coverage says which lines of the app ran; it cannot say which routes no cas
 api routes: all 12 declared routes reached
 ```
 
-A route no test reached fails the run, each one named; the count is a ratchet, held under `jterrazz.baseline.json › test › routes/unreached` — `TEST_UPDATE=1` records where the run stands, the checker's own recording keeps that key, and a run that reaches more is what lowers it. An app with no table the facet reads states its routes instead, as an OpenAPI document (JSON or YAML) named in `jterrazz.config.ts`:
+A route no test reached fails the run, each one named; the count is a ratchet, held under `jterrazz.baseline.json › test › routes/unreached` — `TEST_UPDATE=1` records where the run stands, the checker's own recording keeps that key, and a run that reaches more is what lowers it. An app with no table the facet reads — a `server` that returns anything but the Hono app itself — fails the run, since a measure against no table would read as every route reached; it states its routes instead, as an OpenAPI document (JSON or YAML) named in `jterrazz.config.ts`:
 
 ```typescript
 // jterrazz.config.ts

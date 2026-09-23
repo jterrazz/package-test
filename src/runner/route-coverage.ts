@@ -23,8 +23,16 @@ import { shouldUpdateSnapshots } from './update.js';
  * and what it was sent when it cleans up. After the last test it reads every
  * ledger and judges the declared routes no request reached against the
  * ratchet: more than `jterrazz.baseline.json › test` holds fails the run,
- * naming each; `TEST_UPDATE=1` records where the run stands.
+ * naming each; `TEST_UPDATE=1` records where the run stands. An app whose
+ * table is unknown — no `app.routes`, no OpenAPI document declared — fails
+ * the run too: a measure against nothing reads as every route reached.
  */
+
+/** The failure of a run whose app exposes no route table, and names none. */
+export const UNKNOWN_TABLE =
+    'api routes: an app specification.api() started exposes no route table, so no route can be judged reached — ' +
+    'hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: ' +
+    "`test: { routes: './openapi.yaml' }` in jterrazz.config.ts.";
 
 /** How a route reads in the report. */
 function spelled(route: Route): string {
@@ -46,6 +54,9 @@ export async function judgeRoutes(
     }
     const run = measure(ledgers);
     const table = (await declaredRoutes(root)) ?? run.declared;
+    if (table === undefined) {
+        return { failure: UNKNOWN_TABLE };
+    }
     // Every specification of the run declares the same table: a route counts once.
     const declared = [...new Map(table.map((route) => [spelled(route), route])).values()];
     const missing = unreachedRoutes(declared, run.reached);

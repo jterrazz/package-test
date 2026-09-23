@@ -29,8 +29,11 @@ import { VITEST_ARTIFACTS_DIR } from '../artifacts/artifacts.js';
 /** One route: an HTTP method and a path, parameters written `:id` or `{id}`. */
 export type Route = { method: string; path: string };
 
-/** What one specification of the run declared and sent. */
-export type Ledger = { declared: Route[]; reached: Route[] };
+/**
+ * What one specification of the run declared and sent — `declared` absent
+ * when its app exposes no route table.
+ */
+export type Ledger = { declared?: Route[] | undefined; reached: Route[] };
 
 /** The ratchet key the run owns in the `test` section — the unreached routes it holds. */
 export const ROUTES_KEY = 'routes/unreached';
@@ -144,10 +147,14 @@ export function readLedgers(directory: string): Ledger[] {
         .map((name) => JSON.parse(readFileSync(join(directory, name), 'utf8')) as Ledger);
 }
 
-/** The run's measure: the routes declared and the requests sent, over every ledger. */
+/**
+ * The run's measure: the routes declared and the requests sent, over every
+ * ledger — `declared` absent when a specification's app exposed no table.
+ */
 export function measure(ledgers: readonly Ledger[]): Ledger {
+    const tables = ledgers.map((ledger) => ledger.declared);
     return {
-        declared: ledgers.flatMap((ledger) => ledger.declared),
+        declared: tables.every((table) => table !== undefined) ? tables.flat() : undefined,
         reached: ledgers.flatMap((ledger) => ledger.reached),
     };
 }

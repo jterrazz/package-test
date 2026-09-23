@@ -100,8 +100,9 @@ const routes: Record<string, () => Promise<Response>> = {
     },
 };
 
-/** Minimal Hono-compatible app — every route fans out to the network. */
+/** Minimal Hono-compatible app — every route fans out to the network, and its table names each. */
 const outboundApp = {
+    routes: Object.keys(routes).map((path) => ({ method: 'GET', path })),
     request: async (path: string): Promise<Response> => {
         const route = routes[path];
         if (route === undefined) {

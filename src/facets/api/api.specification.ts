@@ -109,7 +109,7 @@ export async function startApi<Services extends ServiceRecord>(
             const ledgers = await routesLedger();
             if (ledgers !== undefined) {
                 writeLedger(ledgers, {
-                    declared: server.declared() ?? [],
+                    declared: server.declared(),
                     reached: server.reached,
                 });
             }

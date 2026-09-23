@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { heldUnreached, writeLedger } from '../model/routes/routes.js';
-import { judgeRoutes } from './route-coverage.js';
+import { judgeRoutes, UNKNOWN_TABLE } from './route-coverage.js';
 
 /** A project root holding one run's ledgers: two specifications of one table of three routes, one request. */
 function runWithOneRouteReached(): { directory: string; root: string } {
@@ -88,6 +88,37 @@ describe('route coverage — the api run judged', () => {
 
         // Then - nothing to judge
         await expect(judgeRoutes(root, join(root, 'ledgers'), false)).resolves.toStrictEqual({});
+    });
+
+    test('an app whose table is unknown fails the run, naming how to declare it', async () => {
+        // Given - a specification whose app exposed no route table, and no OpenAPI document
+        const { directory, root } = runWithOneRouteReached();
+        writeLedger(directory, { reached: [{ method: 'GET', path: '/health' }] });
+
+        // Then - the run fails rather than reading as every route reached
+        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+            failure: UNKNOWN_TABLE,
+        });
+    });
+
+    test('an app whose table is unknown is measured against the OpenAPI document it declares', async () => {
+        // Given - no table from the app, the one route declared in a document, and reached
+        const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
+        onTestFinished(() => {
+            rmSync(root, { force: true, recursive: true });
+        });
+        const directory = join(root, 'ledgers');
+        writeLedger(directory, { reached: [{ method: 'GET', path: '/health' }] });
+        writeFileSync(join(root, 'openapi.json'), '{"paths": {"/health": {"get": {}}}}');
+        writeFileSync(
+            join(root, 'jterrazz.config.ts'),
+            "export default { test: { routes: './openapi.json' } };\n",
+        );
+
+        // Then - measured against the document
+        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+            line: 'api routes: all 1 declared routes reached',
+        });
     });
 
     test('an ALL route is reached by a request of any method', async () => {
