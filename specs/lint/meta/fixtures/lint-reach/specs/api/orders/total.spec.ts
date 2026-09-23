@@ -4,7 +4,7 @@ import { myApi } from '../api.specification.js';
 
 test('answers the total, while tripping the rules a spec reaches', async () => {
     // Given - a spec that names its ground, then sleeps, writes the environment, and touches the DOM
-    await myApi.request('order.json');
+    await myApi.request('order');
     setTimeout(() => myApi, 10);
     process.env.ORDERS = 'on';
     const node = document.querySelector('#orders');

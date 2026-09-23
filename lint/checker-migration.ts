@@ -201,8 +201,12 @@ function migrateSource(text: string, file: string, root: string): string {
 
 /** The rules 17 renamed: the 16 id → the id a directive names now. */
 const RENAMED_RULES: Readonly<Record<string, string>> = {
+    'c2-http-only-requests': 'c2-request-extension',
     'd8w-text-bypass': 'd8w-raw-bypass',
 };
+
+/** The 16 id whose covered line reads `.raw` once its directive is renamed. */
+const TEXT_BYPASS = /\bjterrazz\/d8w-text-bypass\b/u;
 
 /** A suppression directive, and whether it covers its own line or the next. */
 const DIRECTIVE = /(?:oxlint|eslint)-(?:disable|enable)(?<scope>-next-line|-line)?\b/u;
@@ -260,7 +264,7 @@ function renameDirectives(text: string): string {
         }
         const covered = scope === '-next-line' ? index + 1 : index;
         lines[index] = `${line.slice(0, start)}${renamed}`;
-        if (scope !== undefined) {
+        if (scope !== undefined && TEXT_BYPASS.test(comment)) {
             lines[covered] = (lines[covered] ?? '').replaceAll(RAW_READ, '.raw');
         }
     }

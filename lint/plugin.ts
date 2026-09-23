@@ -9,7 +9,7 @@ import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 import type { LintPlugin, LintRule } from './oxlint-api.js';
 import { anchorOf } from './rule-code.js';
-import { c2HttpOnlyRequests } from './rules/api/c2-http-only-requests.js';
+import { c2RequestExtension } from './rules/api/c2-request-extension.js';
 import { d12wResponseBodyProbe } from './rules/api/d12w-response-body-probe.js';
 import { d15wStatusOnlyProbe } from './rules/api/d15w-status-only-probe.js';
 import { b6wRedundantEnvUrl } from './rules/cli/b6w-redundant-env-url.js';
@@ -128,7 +128,7 @@ const plugin: LintPlugin = {
         'c13-bare-ground': c13BareGround,
         'c24-ground-role': c24GroundRole,
         'c26-disk-named-in-the-test': c26DiskNamedInTheTest,
-        'c2-http-only-requests': c2HttpOnlyRequests,
+        'c2-request-extension': c2RequestExtension,
         'c4-contract-shape': c4ContractShape,
         'c6-tomatch-extension': c6ToMatchExtension,
         'c7-seeds-sql-only': c7SeedsSqlOnly,

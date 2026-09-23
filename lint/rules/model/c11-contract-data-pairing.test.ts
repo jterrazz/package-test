@@ -47,7 +47,7 @@ ruleTester.run('c11-contract-data-pairing', c11ContractDataPairing as unknown as
         // A feature with no contracts/ sibling.
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c2-http-only-requests/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/c2-request-extension/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // Outside specs/ the rule is inert.
         {

@@ -87,7 +87,7 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
         // Then - the config INSIDE `specs/` is still a config (spwn's shape), the contract answers for itself, and the ground answers through the spec that owns it — oxlint never opens a `.json`
         expect(about(output, 'specs/vitest.config.ts')).toContain('e4w-project-binding');
         expect(about(output, 'specs/api/orders/contracts/rates.ts')).toContain('c4-contract-shape');
-        expect(about(output, 'specs/api/orders/total.spec.ts')).toContain('c2-http-only-requests');
+        expect(about(output, 'specs/api/orders/total.spec.ts')).toContain('c2-request-extension');
         expect(about(output, 'specs/api/orders/contracts/rates.ts')).not.toContain('j2-no-sleep');
     });
 

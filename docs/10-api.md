@@ -110,7 +110,7 @@ Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the r
 | `.put(path, body?)`                      | Inline PUT                                                    |
 | `.delete(path)`                          | Inline DELETE                                                 |
 
-The inline `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header. There is no filename form inline — file-based requests always go through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
+The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
 
 There is no `.run()` and no label argument: the vitest test name is the spec's only description (rule B3).
 
@@ -127,7 +127,7 @@ test('returns 404 with a useful body', async () => {
 
 ### `.http` request files — full format
 
-Requests live in `requests/`, one file per request, extension `.http` (rule C2). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
+Requests live in `requests/`, one file per request, extension `.http`; the body files a verb sends live beside them, each named with its extension (rule C2). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
 
 ```http
 ### requests/create-user.http

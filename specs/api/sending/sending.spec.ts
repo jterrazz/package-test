@@ -1,4 +1,3 @@
-/* oxlint-disable jterrazz/c2-http-only-requests -- C24 sends a body file to requests/ (variant A: `.post(path, file('./requests/x.json'))`) while C2 refuses anything but `.http` there, so the body-file specs below cannot satisfy both; the conflict is question 41 of VISION.md. */
 import { describe, expect, test } from 'vitest';
 
 import { directory, file } from '../../../src/index.js';

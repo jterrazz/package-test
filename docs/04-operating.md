@@ -112,9 +112,11 @@ baseline` records those in `test.baseline.json` — rename the file, then run
 - **A 16.x file with no 16 folder beside it is not moved.** Nothing in it
   tells a 16 string from a 17 value, so the compiler names each call the
   types refuse, and each is written by hand.
-- **A suppression follows the rule it names.** `d8w-text-bypass` no longer exists
-  under that name: the mover rewrites a directive naming it to `d8w-raw-bypass`
-  on every file, a tree an earlier mover already moved included, and the line a `-next-line` or `-line` directive covers reads `.raw` — the
+- **A suppression follows the rule it names.** `d8w-text-bypass` and `c2-http-only-requests` no longer exist
+  under those names: the mover rewrites
+  a directive naming one to `d8w-raw-bypass` or `c2-request-extension` on every
+  file, a tree an earlier mover already moved included, and the line a
+  `-next-line` or `-line` directive naming D8w covers reads `.raw` — the
   capture 16's `.text` was. A directive naming a rule 17 retired names nothing,
   and the toolchain's Suppressions pass reports it: delete it.
 - **A computed name is out of its reach.** A template or a variable naming a

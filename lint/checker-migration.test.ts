@@ -322,6 +322,31 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
+    test('the 16 id of C2 names its 17 id, and the line it covers keeps its reads', () => {
+        // Given - a 17 tree suppressing C2 by the id it had while `requests/` held `.http` only
+        const root = tree16({
+            'api/orders/orders.spec.ts': [
+                '/* oxlint-disable jterrazz/c2-http-only-requests -- a body file beside the requests */',
+                '// oxlint-disable-next-line jterrazz/c2-http-only-requests -- the same, on one line',
+                "expect(result.stdout.text).toContain('sent');",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - both directives name c2-request-extension, and `.text` is not D8w's to move
+        expect(readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')).toBe(
+            [
+                '/* oxlint-disable jterrazz/c2-request-extension -- a body file beside the requests */',
+                '// oxlint-disable-next-line jterrazz/c2-request-extension -- the same, on one line',
+                "expect(result.stdout.text).toContain('sent');",
+                '',
+            ].join('\n'),
+        );
+    });
+
     test('a directive naming a renamed rule is renamed on a tree on 17 too, once', () => {
         // Given - a 17 tree (no 16 folder) an earlier, ungated mover left naming the 16 id
         const root = tree16({

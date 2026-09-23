@@ -266,15 +266,16 @@ export const RULE_DOCS = {
             'Every path names its folder in full, so the old name still runs — and a repository that keeps it speaks two dialects of one law. The rule names the rename instead of letting the two drift.',
         reach: 'tests',
     },
-    'c2-http-only-requests': {
+    'c2-request-extension': {
         channel: 'statique',
-        convention: '`requests/` holds `.http` files only; any other extension is an error.',
+        convention:
+            '`requests/` holds what a spec SENDS: a whole request as a `.http` (`request()`), or a body a verb sends (`post`/`put`/`patch` with a `file()`) — a `.json`, a `.txt`, any format the app reads. Every file there carries its extension; a file with none is an error.',
         facet: 'api',
         family: 'C',
-        fix: 'Write the request as a complete `.http` document, or move the file to `fixtures/`.',
+        fix: "Name the file with its extension: `.http` for a whole request, the body's own format otherwise.",
         id: 'C2',
         rationale:
-            'A request input is a complete `.http` — one format per folder forbids ad-hoc ones.',
+            'The extension is how the file is sent — a `.http` whole, a `.json` parsed, anything else verbatim — so a file without one says nothing about what the app will receive.',
         reach: 'ground',
     },
     'c4-contract-shape': {

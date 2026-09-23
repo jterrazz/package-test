@@ -329,7 +329,7 @@ specs/
 │   └── users/
 │       ├── users.spec.ts          # <aspect>.spec.ts inside its domain (rule C1)
 │       ├── seeds/                 # *.sql
-│       ├── requests/              # *.http — complete requests (inputs)
+│       ├── requests/              # what it sends: *.http complete requests, and body files (*.json, …)
 │       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
 │       └── expected/              # every golden it reads — incl. response *.http, each named by file(…)
 └── cli/

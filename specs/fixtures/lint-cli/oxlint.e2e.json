@@ -21,7 +21,7 @@
         "jterrazz/c10-contracts-boundary": "error",
         "jterrazz/c11-contract-data-pairing": "error",
         "jterrazz/c13-bare-ground": "error",
-        "jterrazz/c2-http-only-requests": "error",
+        "jterrazz/c2-request-extension": "error",
         "jterrazz/c4-contract-shape": "error",
         "jterrazz/c6-tomatch-extension": "error",
         "jterrazz/c7-seeds-sql-only": "error",

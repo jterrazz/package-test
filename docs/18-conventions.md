@@ -154,24 +154,24 @@ Two further rules decide WHERE a fixture lives, and they are the same question a
 
 Two more hold what each path says. **The verb and the folder agree**: `seed()` reads `seeds/`, `request()` and a request body read `requests/`, `fixture()` reads `fixtures/`, a golden reads `expected/` (C24). **What a path names exists**, of the kind its wrapper says (C8, the checker, reported where the path is written; the runtime refuses the same with the path it resolved to). And a path is **built in the test that stands on it**: it resolves against the spec that starts the chain, so a `file()` built in a shared helper would name a different file for every spec that reaches it — a helper takes the `file()` as a parameter (C26).
 
-| Thing           | Rule                                                                                                                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `integration/`, `website/`, `mobile/`, `fixtures/`) — one folder per constructor                                                                  |
-| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                                                                          |
-| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                                                                                       |
-| Spec file       | `specs/<facet>/<domain>/<aspect>.spec.ts` — the assembled product's word (C12)                                                                                                       |
-| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([12](12-cli.md#spec-documents--casespecyaml))                                                           |
-| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                                                                              |
-| Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([07](07-component.md))                                                               |
-| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                                                                                      |
-| Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic)                                                               |
-| Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                                                                                   |
-| Requests        | `requests/<name>.http` (inputs), read by `.request(file('./requests/<name>.http'))`                                                                                                  |
-| Seeds           | `seeds/<name>.sql` (database state), read by `.seed(file('./seeds/<name>.sql'))`                                                                                                     |
-| Fixtures        | `fixtures/<name>` (file state) — the leaf's own; the shared pool is `specs/fixtures/`, reached by the path that climbs to it                                                         |
-| Goldens         | `expected/<name>.<ext>` (everything asserted, response `.http` included), read by `.toMatch(file('./expected/<name>.<ext>'))`; a tree by `.toMatch(directory('./expected/<name>/'))` |
-| Service keys    | name the service: the report prints the key, and its kebab-case form is the folder its init script sits in                                                                           |
-| Framework env   | `TEST_UPDATE`                                                                                                                                                                        |
+| Thing           | Rule                                                                                                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `integration/`, `website/`, `mobile/`, `fixtures/`) — one folder per constructor                                                                      |
+| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                                                                              |
+| Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                                                                                           |
+| Spec file       | `specs/<facet>/<domain>/<aspect>.spec.ts` — the assembled product's word (C12)                                                                                                           |
+| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([12](12-cli.md#spec-documents--casespecyaml))                                                               |
+| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                                                                                  |
+| Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([07](07-component.md))                                                                   |
+| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                                                                                          |
+| Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic)                                                                   |
+| Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                                                                                       |
+| Requests        | what a spec sends: `requests/<name>.http`, read by `.request(file('./requests/<name>.http'))`, and a body `requests/<name>.<ext>`, sent by `.post(path, file('./requests/<name>.json'))` |
+| Seeds           | `seeds/<name>.sql` (database state), read by `.seed(file('./seeds/<name>.sql'))`                                                                                                         |
+| Fixtures        | `fixtures/<name>` (file state) — the leaf's own; the shared pool is `specs/fixtures/`, reached by the path that climbs to it                                                             |
+| Goldens         | `expected/<name>.<ext>` (everything asserted, response `.http` included), read by `.toMatch(file('./expected/<name>.<ext>'))`; a tree by `.toMatch(directory('./expected/<name>/'))`     |
+| Service keys    | name the service: the report prints the key, and its kebab-case form is the folder its init script sits in                                                                               |
+| Framework env   | `TEST_UPDATE`                                                                                                                                                                            |
 
 ## I — Source-code architecture
 
