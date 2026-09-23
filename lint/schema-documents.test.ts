@@ -87,6 +87,22 @@ describe('the published schema validates every document of the tree (meta-test)'
     });
 });
 
+describe('what no keyword states, the parser alone refuses', () => {
+    const validate = schemaValidator();
+
+    test('a waitFor on a run before the last: no keyword addresses the last item of a list', () => {
+        // Given - one run that waits, followed by another; the schema holds only that at most one run waits
+        const text =
+            'description: x\nruns:\n    - command: serve\n      waitFor: ready\n      exit: 0\n    - command: ping\n      exit: 0\n';
+
+        // Then - the parser refuses it, and the schema cannot
+        expect(parserRefusal(text, 'case.spec.yaml')).toContain(
+            'waitFor: is only allowed on the LAST run',
+        );
+        expect(validate(documentData(text))).toStrictEqual([]);
+    });
+});
+
 describe('the published schema refuses a wrong document of every kind', () => {
     const validate = schemaValidator();
 
@@ -136,6 +152,11 @@ describe('the published schema refuses a wrong document of every kind', () => {
             'api',
             'a body beside a request file',
             'kind: api\ndescription: x\nrequest: ./requests/one.http\nbody: { a: 1 }\nresponse: { status: 200 }\n',
+        ],
+        [
+            'cli',
+            'two runs that wait',
+            'description: x\nruns:\n    - command: serve\n      waitFor: ready\n      exit: 0\n    - command: serve\n      waitFor: ready\n      exit: 0\n',
         ],
         [
             'cli',

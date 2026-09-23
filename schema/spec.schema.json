@@ -664,10 +664,17 @@
             "type": "string"
         },
         "runs": {
+            "contains": {
+                "required": [
+                    "waitFor"
+                ]
+            },
             "description": "The session: one or more runs, sequential, sharing one working directory.",
             "items": {
                 "$ref": "#/$defs/run"
             },
+            "maxContains": 1,
+            "minContains": 0,
             "minItems": 1,
             "type": "array"
         },

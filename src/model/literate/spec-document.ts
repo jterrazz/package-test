@@ -2009,9 +2009,13 @@ export const SPEC_SCHEMA: SpecSchema = {
             type: 'string',
         },
         runs: {
+            // Only the last run may wait; no keyword addresses the last item, so the schema holds that one run at most does.
+            contains: { required: ['waitFor'] },
             description:
                 'The session: one or more runs, sequential, sharing one working directory.',
             items: { $ref: '#/$defs/run' },
+            maxContains: 1,
+            minContains: 0,
             minItems: 1,
             type: 'array',
         },
