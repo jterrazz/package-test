@@ -1311,3 +1311,87 @@ body }`, token-aware, an absent part not asserted; `tables:` table →
     tests), twice the testcontainers log-capture test (30 s timeout). Each
     passed alone. HYPOTHESIS: Vite's dependency optimiser, and Docker,
     starved under the full parallel load.
+
+## Iteration 13 — the calls on 81 to 85, and the signews-api defects (2026-09-23)
+
+| #   | Decision                                                                                                                                                                                                                                             |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 81  | The schema also refuses the VALUES the parser refuses where JSON Schema can express it — the clock format, the body path pattern, a row's width by its `columns` if expressible, the `waitFor` position — and the Q69 meta-test proves it both ways. |
+| 82  | C27 finds copies by BYTES whatever the name; its `--fix` moves only when the names agree, and reports differently-named copies without fixing.                                                                                                       |
+| 83  | Accepted, no change.                                                                                                                                                                                                                                 |
+| 84  | C14's fix removes the folder it empties, like C27's.                                                                                                                                                                                                 |
+| 85  | Pre-bundle the browser dependencies (`optimizeDeps.include`) so Vite never re-optimises mid-run; the testcontainers log-capture test gets the timeout its container start needs. Proven by three consecutive green `make check` runs.                |
+
+The owner decided mid-iteration that the `.spec.yaml` documents of the api
+and jobs facets are retired — variant B: TypeScript specs with the full
+result inline, a new `toMatchInline`, are the form; cli and lint-rule
+documents stay. The next round implements B and removes the api/jobs
+document grammar, so what served only api/jobs documents was dropped here.
+
+### What the package-test branch did (iteration 13)
+
+- **Defect 2, the document half only.** `runJobs` handed the engine the bare
+  `job.execute`, so a job whose `execute` reads `this` failed from a
+  document; it now calls through the handle. `.trigger()` never had the bug
+  — it calls `job.execute()` — so the fix goes with the jobs grammar next
+  round. It was committed before the owner's decision.
+- **Defect 4.** Update mode records a golden that is missing or holds only
+  whitespace, for the text, JSON and `.http` kinds alike, through one
+  reader; a document run that records stands without the `response:` files
+  it is about to write. The matcher half serves the inline matcher B brings.
+- **Defect 3.** C4 reads no types — it is an oxlint JS rule — so a facade's
+  default export is judged by where its builder comes from: a name imported
+  from a sibling `*.contracts` module, or a call to one, or a call to a
+  builder the file declares with the return type `Contracts`. A builder
+  from anywhere else, or declared otherwise, is still refused.
+- **82.** Copies are grouped by role and bytes, found in two leaves or more;
+  `--fix` moves only a group of one name. This tree holds no copy under two
+  names; the checker's kitchen-sink fixture did, and its golden gained the
+  two warnings.
+- **84.** C14 removes the pool folder its move emptied.
+- **81, for the documents that stay.** The one cli value the schema accepted
+  and the parser refused is `waitFor:` on a run that is not the last. No
+  JSON Schema keyword addresses the last item of a list, so the schema
+  states the part it can — at most one run waits (`contains` +
+  `maxContains: 1`) — and "one run waits before another" is listed beside
+  the capture order as what no keyword compares; a test pins that the
+  parser refuses it and the schema cannot.
+- **85.** The component project's dependency cache held two entries the
+  seam never declared: `vitest-mock-extended`, which the package's browser
+  entry imports through its doubles, and the app's `react-router`.
+  `component()` now pre-bundles the first, adopts the app pipeline's
+  `optimizeDeps` and joins its `include` to the seam's; this repository
+  declares `react-router`. The log-capture test and its stop hook get 120 s.
+  Three consecutive `make check` runs, the first on an emptied dependency
+  cache, exited 0.
+
+### Dropped by the owner's decision (api/jobs documents retired)
+
+- **Defect 1 (Q68 confirmed).** Reproduced before the drop: a consumer
+  fixture whose `@jterrazz/test` is the built `dist/`, externalised by
+  vitest, failed both doors — the collected document and a `.spec.ts`
+  calling `jobs.run(file(…))` — with `Cannot find module …/http/geocoder.js
+imported from …/geocoder.contracts.ts`. The fix (loading the module
+  through vitest's module graph, `vi.importActual`, instead of a native
+  `import()`) and its fixture were not committed.
+- **Defect 2's document half** stays committed, as above, and leaves with
+  the grammar.
+- **Defect 5.** No list of document-referenced files is exposed, so no
+  contract is written for `@jterrazz/typescript`'s knip preset: with the
+  api/jobs documents gone, no contract facade is named only by a document.
+- **81's api/jobs values.** A `body:` path outside `requests/`, the
+  `clock:` format and a table row's width by its `columns` are not stated.
+
+### Raised by the package-test branch, iteration 13
+
+86. The `response:` half of defect 4 (a document run that records stands
+    without its missing `response:` golden) lives in the api document
+    engine and goes with it. `toMatchInline` will need the same answer for
+    its own "nothing recorded yet" state: a missing inline value, recorded
+    by update mode, rather than refused.
+87. HYPOTHESIS (2026-09-23): the component flake of 85 was a mid-run
+    re-optimisation. Not reproduced: on an emptied cache the component
+    project alone logged "the scanner found every used dependency", and the
+    three runs above passed. The read that settles it: a `make check` loop
+    with `DEBUG=vite:deps` until a failure, reading whether "new
+    dependencies optimized" precedes it.
