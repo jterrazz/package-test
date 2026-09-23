@@ -1499,3 +1499,14 @@ Other rules' input trees stand in folders that ARE their rule's case: 34 fixture
 - SQL is NEVER inline: the `sql` tagged template is removed from the package (no legacy), `seed()` takes `file()` only. A seed file used by one test lives beside it in `./seeds/`; shared ones at the leaf or the specs-root pool as before (C28's "file only if shared" does not apply to seeds). The mover/fixer turns every inline `sql` into `./seeds/<name>.sql`, named from its first SQL comment when it has one.
 - C28's other size exceptions stay per role: an inline request body past 30 lines, an inline expectation past 150 lines goes to a file even when unshared. Messages in the four-part form.
 - Open question: typed seed builders (factory-style) — judged by the owner after seeing the seeds as files.
+
+## Iteration 19 — the calls on 97–102 (2026-09-24)
+
+| #   | Decision                                                                                                                                                                                                                                                   |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 97  | A cli runner may declare its command list (`specification.cli(bin, { commands: ['spawn', 'build'] })`); with a list, a command's words stop at the first word not in it; without one, only the first word is the subject.                                  |
+| 98  | The English-plural reading stays the default; a repository names its irregular collections in `jterrazz.config.ts` (`test: { collections: ['news', 'series'] }`).                                                                                          |
+| 99  | Website and mobile trees stay authored: a page is not a CRUD action. C29 still splits a file by page.                                                                                                                                                      |
+| 100 | No copies: when a split leaves a helper read by several of the new files, it moves it once into the leaf's `<leaf>.fixtures.ts` (the convention's typed-fixture module, domain-named) and imports it; a helper that builds `file()` stays forbidden (C26). |
+| 101 | Settled by running the fixer on signews-api (next round).                                                                                                                                                                                                  |
+| 102 | The sequence is the answer; no `--no-move`.                                                                                                                                                                                                                |
