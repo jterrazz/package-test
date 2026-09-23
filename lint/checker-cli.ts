@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, renameSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { fixPoolFixtures } from './checker-crossfile.js';
@@ -30,7 +29,7 @@ import {
 import type { PluginDiagnostic } from './ratchet.js';
 import { packageRootOf, projectRootOf } from './role.js';
 import { codeOf } from './rule-code.js';
-import { forgetTracked } from './tracked.js';
+import { moveKeepingHistory } from './tracked.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**
@@ -108,10 +107,10 @@ import { forgetTracked } from './tracked.js';
  * nothing, the run stays green with fewer files, and nothing else in the
  * toolchain would have said a word.
  *
- * C12's rename goes through `git mv` where the tree is a git working tree, so
- * the history follows the file across a migration that touches hundreds of
- * them; outside one it falls back to a plain rename. C14's move stays a plain
- * rename and the author stages what the working tree now shows.
+ * Every move — C12's, C13's, C14's — goes through `git mv` where the tree is a
+ * git working tree, so the history follows the file across a migration that
+ * touches hundreds of them and the moved file stays in the listing the next
+ * check walks; outside one it falls back to a plain rename.
  */
 
 const cliArguments = process.argv.slice(2);
@@ -363,33 +362,11 @@ function projectFindings(root: string): TokenViolation[] {
     }
     if (fix) {
         for (const memberDir of discoverMembers(root)) {
-            reportMigration(migrateModuleTestsTo17(memberDir, renameKeepingHistory));
+            reportMigration(migrateModuleTestsTo17(memberDir, moveKeepingHistory));
         }
     }
     found.push(...checkMembers(root));
     return found;
-}
-
-/**
- * Rename one file, keeping git's record of it where there is one.
- *
- * `git mv` is tried first and its failure is not an error: a path outside a
- * working tree, or one git does not track yet, renames exactly as well with
- * `renameSync` — what must not happen is a migration that loses the history of
- * every spec it touches because the tool reached for the blunter call.
- * A `git mv` changes the index every walk lists from, so the listing is read
- * again after one.
- */
-function renameKeepingHistory(from: string, to: string): void {
-    const moved = spawnSync('git', ['mv', from, to], {
-        cwd: dirname(from),
-        stdio: 'ignore',
-    });
-    if (moved.status === 0) {
-        forgetTracked();
-    } else {
-        renameSync(from, to);
-    }
 }
 
 /** A rename the mover performed, as absolute paths. */
@@ -402,7 +379,7 @@ function fixSpecSuffixes(root: string): Rename[] {
         if (to === undefined || existsSync(to)) {
             continue;
         }
-        renameKeepingHistory(from, to);
+        moveKeepingHistory(from, to);
         renamed.push({ from, to });
     }
     return renamed;
@@ -563,7 +540,7 @@ function reportMigration(migration: Migration): void {
 
 /** Apply every rewritable pass over one tree, printing what it did. */
 function applyFixes(root: string): void {
-    reportMigration(migrateTo17(root, renameKeepingHistory));
+    reportMigration(migrateTo17(root, moveKeepingHistory));
     const renamed = fixSpecSuffixes(root);
     for (const { from, to } of renamed) {
         console.log(
@@ -578,7 +555,7 @@ function applyFixes(root: string): void {
         console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
     }
     for (const move of fixPoolFixtures(root)) {
-        console.log(`conventions checker: moved ${move} (C14) — stage the rename`);
+        console.log(`conventions checker: moved ${move} (C14)`);
     }
 }
 

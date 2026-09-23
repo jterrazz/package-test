@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
@@ -6,7 +6,7 @@ import { isRelativePath } from '../src/model/chain/spec-path.js';
 import { parseSpecDocument, SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
-import { trackedEntries } from './tracked.js';
+import { moveKeepingHistory, trackedEntries } from './tracked.js';
 
 /**
  * The cross-file checker passes — the analyses oxlint cannot express because
@@ -1112,8 +1112,8 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
 
 /**
  * Apply C14: move each single-reader pool entry beside its leaf and rewrite the
- * paths that climbed to it into the path from the leaf. The move is a plain rename — the
- * checker never runs git, so the working tree sees it and the author stages it.
+ * paths that climbed to it into the path from the leaf. The move is a `git mv`
+ * in a work tree, so the moved fixture stays tracked; a plain rename elsewhere.
  * Returns what moved, relative to `rootDir`.
  */
 export function fixPoolFixtures(rootDir: string): string[] {
@@ -1124,7 +1124,7 @@ export function fixPoolFixtures(rootDir: string): string[] {
             continue; // Something already sits there — the author decides.
         }
         mkdirSync(dirname(destination), { recursive: true });
-        renameSync(join(pool, entry), destination);
+        moveKeepingHistory(join(pool, entry), destination);
         for (const file of referrers) {
             const text = readText(file);
             const climb = relative(dirname(file), pool).split(sep).join('/');

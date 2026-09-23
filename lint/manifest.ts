@@ -1084,10 +1084,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A pool fixture is SHARED, or it is local: a directory of the pool `<specs>/fixtures/` reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/fixtures/<name>/`, named by the path from the leaf (`./fixtures/<name>/`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved and the literals rewritten.',
+            'A pool fixture is SHARED, or it is local: a directory of the pool `<specs>/fixtures/` reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/fixtures/<name>/`, named by the path from the leaf (`./fixtures/<name>/`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved — a `git mv` in a work tree, so it stays tracked — and the literals rewritten.',
         facet: 'model',
         family: 'C',
-        fix: 'Run `jterrazz-test-check <root> --fix`; it moves the directory and rewrites what named it.',
+        fix: 'Run `jterrazz-test-check <root> --fix`; it moves the directory with `git mv` (a plain rename outside git) and rewrites what named it.',
         id: 'C14',
         name: 'c14-pool-fixture-shared',
         rationale:

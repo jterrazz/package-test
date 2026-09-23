@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
-import { lstatSync, readdirSync } from 'node:fs';
-import { join, resolve, sep } from 'node:path';
+import { lstatSync, readdirSync, renameSync } from 'node:fs';
+import { dirname, join, resolve, sep } from 'node:path';
 
 /**
  * The directory listing every walk of the conventions checker reads: what git
@@ -138,4 +138,25 @@ export function trackedNames(dir: string): string[] {
 export function forgetTracked(): void {
     trees.length = 0;
     outside.clear();
+}
+
+/**
+ * Move a file or a directory, keeping git's record of it where there is one.
+ *
+ * `git mv` is tried first and its failure is not an error: a path outside a
+ * working tree, or one git does not track yet, moves exactly as well with
+ * `renameSync`. A plain rename inside a work tree would leave the moved path
+ * untracked — invisible to this listing until the author stages it — and lose
+ * its history. A `git mv` changes the index, so the listing is read again.
+ */
+export function moveKeepingHistory(from: string, to: string): void {
+    const moved = spawnSync('git', ['mv', from, to], {
+        cwd: dirname(from),
+        stdio: 'ignore',
+    });
+    if (moved.status === 0) {
+        forgetTracked();
+    } else {
+        renameSync(from, to);
+    }
 }
