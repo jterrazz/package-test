@@ -89,4 +89,38 @@ describe('redis — the handle against a real container', () => {
         // Then - the new key is there and the flushed one is not
         expect(result.value).toMatch(file('./expected/reset-then-write.json'));
     });
+
+    // RUNTIME G2 — two workers on one container never share a key.
+    test('two workers take two database indexes, and a key one writes the other never reads', async () => {
+        // Given - two handles on the runner's container, acquired by two workers, one of them writing
+        const result = await integration.call(async ({ cache }) => {
+            const { createClient } = await import('redis');
+            const container = new URL(cache.connectionString);
+            container.pathname = '';
+            const [first, second] = [redis(), redis()];
+            await Promise.all(
+                [first, second].map(async (handle, index) => {
+                    handle.connectionString = container.toString().replace(/\/$/u, '');
+                    handle.started = true;
+                    await handle.isolation().acquire(String(7 + index));
+                }),
+            );
+
+            const writer = createClient({ url: first.connectionString });
+            await writer.connect();
+            await writer.set('worker-key', 'first');
+            await writer.quit();
+            const reader = createClient({ url: second.connectionString });
+            await reader.connect();
+            const seen = await reader.get('worker-key');
+            await reader.quit();
+
+            await first.isolation().release();
+            await second.isolation().release();
+            return { first: new URL(first.connectionString).pathname, seen };
+        });
+
+        // Then - the second worker saw nothing, and release gave the first its container's string back
+        expect(result.value).toMatch(file('./expected/two-workers.json'));
+    });
 });

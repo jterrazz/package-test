@@ -132,11 +132,13 @@ This is the same boundary rule B1 already states from the other side — one cha
 
 Vitest runs test files in parallel workers; the framework isolates them automatically — no configuration, no sharding:
 
-| Service      | Isolation strategy                  |
-| ------------ | ----------------------------------- |
-| `postgres()` | Cloned schema per worker            |
-| `redis()`    | Dedicated database index per worker |
-| `sqlite()`   | Template file copied per worker     |
+| Service      | Isolation strategy                                                       |
+| ------------ | ------------------------------------------------------------------------ |
+| `postgres()` | Cloned schema per worker, named in the connection string's `search_path` |
+| `redis()`    | Dedicated database index per worker (1–15), the connection string's path |
+| `sqlite()`   | Template file copied per worker                                          |
+
+The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address talks to another worker.
 
 On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers.
 

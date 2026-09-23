@@ -20,6 +20,9 @@ export class RedisHandle implements ServiceHandle {
 
     private dbIndex = 0;
 
+    /** The container's own string, which a worker's index is appended to and restored from. */
+    private sharedConnectionString = '';
+
     constructor(options: RedisOptions = {}) {
         this.defaultImage = options.image ?? 'redis:7';
     }
@@ -82,6 +85,10 @@ export class RedisHandle implements ServiceHandle {
                 // Use Redis database index 1-15 for workers (0 is default/shared)
                 const numericId = Number.parseInt(workerId, 10) || 0;
                 this.dbIndex = (numericId % 15) + 1;
+                // The index is in the string the app is handed, or the app
+                // Would write to the shared index 0 while reset flushes this one.
+                this.sharedConnectionString = this.connectionString;
+                this.connectionString = `${this.connectionString}/${this.dbIndex}`;
             },
 
             reset: async () => {
@@ -91,6 +98,7 @@ export class RedisHandle implements ServiceHandle {
             release: async () => {
                 await this.reset();
                 this.dbIndex = 0;
+                this.connectionString = this.sharedConnectionString;
             },
         };
     }

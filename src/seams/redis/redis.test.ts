@@ -67,4 +67,19 @@ describe('redis handle', () => {
         // Then - the reset fails rather than reporting a flush that never happened
         await expect(unreachable.reset()).rejects.toThrow();
     });
+
+    // RUNTIME G2 — each worker takes its own database index, and the string the app is handed says which.
+    test('two workers take two database indexes, and the connection string carries each', async () => {
+        // Given - two handles on one container, acquired by workers 1 and 2
+        const first = redis();
+        first.connectionString = 'redis://localhost:6380';
+        const second = redis();
+        second.connectionString = 'redis://localhost:6380';
+        await first.isolation().acquire('1');
+        await second.isolation().acquire('2');
+
+        // Then - index 0 stays the container's own, and neither worker is on the other's
+        expect(first.connectionString).toBe('redis://localhost:6380/2');
+        expect(second.connectionString).toBe('redis://localhost:6380/3');
+    });
 });
