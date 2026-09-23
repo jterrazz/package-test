@@ -92,7 +92,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stdout.text).not.toContain('test.baseline.json');
     });
 
-    test('a green ratchet run prints one line for what the file holds, and not the findings it holds', async () => {
+    test('a green ratchet run prints exactly the held line, and not the findings it holds', async () => {
         // Given - a project with one dead fixture, recorded, then judged
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -100,7 +100,31 @@ describe('lint — checker CLI contract', () => {
 
         // Then - the summary alone; the held finding prints only when a verdict fails
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/checker-held.txt'));
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 1 held across 1 rule\n');
+        expect(result.stderr.text).toBe('');
+    });
+
+    test('a green `--fix` run prints exactly the held line', async () => {
+        // Given - a project with one dead fixture, recorded, then fixed
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .exec(['baseline .', '. --fix']);
+
+        // Then - the same one line the check prints: nothing to rewrite, nothing more to say
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 1 held across 1 rule\n');
+        expect(result.stderr.text).toBe('');
+    });
+
+    test('`--verbose` adds to the held line where the run stood and what ran', async () => {
+        // Given - a project with one dead fixture, recorded, then judged verbosely
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .exec(['baseline .', '. --verbose']);
+
+        // Then - the held line, then the project root and every pass
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch(file('./expected/checker-held-verbose.txt'));
         expect(result.stderr.text).toBe('');
     });
 
@@ -197,14 +221,14 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         expect(result.stdout).toMatch(file('./expected/checker-failing-json.txt'));
     });
 
-    test('`--summary` cuts a green ratchet run to exactly the held line', async () => {
+    test('a green root member run prints exactly the held line', async () => {
         // Given - a project whose checker finding and plugin diagnostic are both recorded
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
             .fixture(file('./fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'))
             .exec([
                 'baseline . --oxlint-report oxlint-report.json',
-                '--member . --summary --oxlint-report oxlint-report.json',
+                '--member . --oxlint-report oxlint-report.json',
             ]);
 
         // Then - one line and nothing after it: what typescript check shows on a green run

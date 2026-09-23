@@ -41,7 +41,7 @@ import { codeOf } from './rule-code.js';
  *     node dist/checker.js --member <dir>             # one workspace member
  *     node dist/checker.js baseline [root]            # record jterrazz.baseline.json › test
  *     node dist/checker.js … --oxlint-report <file>   # read the plugin's diagnostics from a report
- *     node dist/checker.js … --summary                # a green ratchet run prints its held line alone
+ *     node dist/checker.js … --verbose                # a green ratchet run also names where it stood and what ran
  *
  * Three runs, one reporter. A PATH is read for what it IS. Name a specs tree
  * — a directory with a `specs` segment below its package root — and it walks that tree
@@ -82,12 +82,12 @@ import { codeOf } from './rule-code.js';
  * any ERROR finding and on any plugin diagnostic. Every other run under a
  * project that keeps a baseline reports what it found and leaves the verdict
  * to that one run; without a baseline it fails on an ERROR finding, as ever.
- * A green verdict is one line — `jterrazz.baseline.json › test: <n> held
- * across <k> rules` — and a failing one prints every finding it counted and every plugin
- * diagnostic before its reasons, so a verdict and its evidence are one log.
- * `--summary` cuts the green line to its first half, exactly
- * `jterrazz.baseline.json › test: <n> held across <k> rules`, the line
- * `typescript check` shows beside its own ratchet's; it changes nothing else.
+ * A green verdict is exactly one line — `jterrazz.baseline.json › test: <n>
+ * held across <k> rules`, whether the run checked, fixed or judged the root
+ * member — the line `typescript check` shows beside its own ratchet's. A
+ * failing one prints every finding it counted and every plugin diagnostic
+ * before its reasons, so a verdict and its evidence are one log. `--verbose`
+ * adds to the green line where the run stood and every pass that ran.
  * `baseline [root]` writes the `test` section from the current counts, and
  * leaves every other section of the file as it stands.
  *
@@ -122,7 +122,7 @@ const recording = cliArguments[0] === 'baseline';
 const argv = recording ? cliArguments.slice(1) : cliArguments;
 const fix = argv.includes('--fix');
 const json = valueOf('--format') === 'json';
-const summary = argv.includes('--summary');
+const verbose = argv.includes('--verbose');
 const member = valueOf('--member');
 const oxlintReport = valueOf('--oxlint-report');
 /** The flags that take a value: the argument after one is that value, never a path. */
@@ -323,8 +323,8 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
 
 /**
  * The one line a green ratchet run prints: what the file holds, by count and
- * by rule, and what ran. The findings themselves print only with a failing
- * verdict, where they are the evidence.
+ * by rule — and, asked for with `--verbose`, what ran and where. The findings
+ * themselves print only with a failing verdict, where they are the evidence.
  */
 function heldSummary(
     total: number,
@@ -334,7 +334,7 @@ function heldSummary(
 ): string {
     const rules = Object.keys(counts).length;
     const held = `${BASELINE_LABEL}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'}`;
-    return summary ? held : `${held} — conventions checker ${what} (${passes})`;
+    return verbose ? `${held} — conventions checker ${what} (${passes})` : held;
 }
 
 /** A directory that must exist — a typo'd path is operator error, not a clean tree. */
