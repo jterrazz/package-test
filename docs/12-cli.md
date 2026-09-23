@@ -6,7 +6,7 @@ Use it when the subject under test is a process invocation. If the process serve
 
 ## What it specifies
 
-A CLI spec answers one question: **given this file tree, this environment and this argv, what does the binary print, what does it exit with, and what does it leave on disk?** The subject is the built command met through a child process — never an imported function, which is a module test's ([05](05-module-tests.md)). Most of them are written as literate documents rather than as code; the three doors below say when each one is right.
+A CLI spec answers one question: **given this file tree, this environment and this argv, what does the binary print, what does it exit with, and what does it leave on disk?** The subject is the built command met through a child process — never an imported function, which is a module test's ([05](05-module-tests.md)). Most of them are written as documents rather than as code; [20 — Spec documents](20-documents.md#the-three-doors-one-engine) says when each door is right.
 
 ## The constructor
 
@@ -31,8 +31,8 @@ afterAll(cleanup);
 | `services`  | Named record of infrastructure services (`postgres()`, `redis()`, `sqlite()`) — connection URLs are auto-injected into the child env (rule B6)                                                                                                                            |
 | `docker`    | Opt-in Docker awareness: `{ envVar, nameLabel, testRunLabel }` — see [Docker-aware mode](#docker-aware-mode)                                                                                                                                                              |
 | `defaults`  | Environment applied to **every** run of this binary — the variables the product needs to be deterministic at all (`TZ`, `NO_COLOR`, `LANG`, a config home under the spec's own workdir). Stated once per app; a chained `.env()` and a document's `env:` both win over it |
-| `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`) — see [Spec documents](#spec-documents--casespecyaml)                                                                                                                                     |
-| `serve`     | Named **servers** a spec document starts (`serve: [mcp]`): `{ command, ready, url, env }` — see [Spec documents](#spec-documents--casespecyaml)                                                                                                                           |
+| `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`) — see [Registration](#registration--once-per-app)                                                                                                                                         |
+| `serve`     | Named **servers** a spec document starts (`serve: [mcp]`): `{ command, ready, url, env }` — see [Registration](#registration--once-per-app)                                                                                                                               |
 | `transform` | **Escape hatch only** (rule D6): a normalizer applied to streams before comparison, for application noise not covered by tokens. ANSI stripping is already the default; a transform that only re-implements standard tokens is a lint warning                             |
 
 ## The chain
@@ -363,96 +363,7 @@ test('lints a shop and reports per-file blocks', async () => {
 
 ### Spec documents — `<case>.spec.yaml`
 
-A terminal session is already a specification: a command, its exit code, what it printed, what it left on disk. A **spec document** writes it as that — one scenario per `<case>.spec.yaml`, living **beside the spec** (never under `expected/`, which holds goldens, not scenarios). Nothing here is new capability: it is the chain's semantics in the shape of a data file an editor can validate.
-
-```yaml
-description: refuses to guess when it is run outside the checkout
-fixture: ../../fixtures/repositories-stub/
-env:
-    - frozen
-    - SHOPLY_ORIGIN=http://127.0.0.1:9
-serve:
-    - mcp: { MCP_STUB_WITHHOLD: get-article }
-
-runs:
-    - command: repositories
-      exit: 1
-      stderr: |
-          Error: no directory with home/ and apps/ above the current directory
-          Hint: run inside the shoply checkout
-    - command: repositories --json
-      exit: 0
-      stdout: |
-          {
-              "data": []
-          }
-```
-
-#### The ground
-
-Everything above `runs:`. Any key outside the table below is a refusal naming the key and its line.
-
-| Key            | Shape                                       | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| -------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind:`        | optional, default `cli`                     | The facet the document describes. Reserved for a second facet; `cli` is the only one implemented                                                                                                                                                                                                                                                                                                                                               |
-| `description:` | **mandatory**, one line                     | The vitest test title. Lowercase prose, no trailing period                                                                                                                                                                                                                                                                                                                                                                                     |
-| `fixture:`     | string or list                              | A path relative to this document, in the two forms the chain's `file()` and `directory()` take — the trailing `/` says which: `./fixtures/shop/` spreads a directory's contents, `./fixtures/config.toml` copies one file under its own name; a path whose `/` disagrees with the disk is refused, and so is one that names nothing. Executable bits preserved. A list **layers** in order. A path that is not relative is refused on its line |
-| `env:`         | string or list                              | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)                                                                                                                                                                                                                                                                                                          |
-| `serve:`       | string, list of strings, or `- name: { … }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server                                                                                                                                                                                                                                                                                                 |
-
-#### The runs
-
-`runs:` is a list of at least one run, executed **in order**, all in ONE working directory, and **every** one asserted. This is where the format goes past `.exec([...])`, which stops at the first non-zero exit and keeps only the last output: here a non-zero exit does not end the session, because each exit code is part of what the document states.
-
-**A run is judged the moment it ends**, before the next command starts — its exit code, its streams and its `files:` all read at that one instant. So a document states the working directory as it was BETWEEN two commands, not only as the session left it. A run that disagrees throws there and then, and the runs below it do not execute: once the sequence has diverged, what the rest would print is a consequence, not a fact about the program.
-
-| Key        | Shape                         | Meaning                                                                                                                                                                                                                                              |
-| ---------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `command:` | **mandatory**                 | The argv AFTER the binary — exactly what `.exec('…')` takes. The binary is the runner's (`specification.cli(bin)`), so naming it here would pass it to itself as the first argument. The line goes through the shell, so quoting behaves identically |
-| `stdin:`   | optional block scalar         | Written to the child, which then reads EOF. Absent keeps today's immediately-closed pipe; a TTY is never given                                                                                                                                       |
-| `timeout:` | optional integer              | Milliseconds before the run is killed (exit code 124)                                                                                                                                                                                                |
-| `waitFor:` | optional, **last run only**   | Long-running form: resolve as soon as this text appears, as `.exec(args, { waitFor })` does                                                                                                                                                          |
-| `exit:`    | **mandatory** literal integer | The exit code the command must return                                                                                                                                                                                                                |
-| `stdout:`  | optional block scalar         | Expected stdout, **byte-exact**. Absent asserts an EMPTY stream                                                                                                                                                                                      |
-| `stderr:`  | optional block scalar         | Expected stderr, byte-exact. Absent asserts an EMPTY stream                                                                                                                                                                                          |
-| `files:`   | optional mapping              | On-disk assertions under the working directory, read the moment THIS run ends (below)                                                                                                                                                                |
-
-**`|` and `|-` are the whole newline story.** A block scalar written `|` keeps the final newline of its text; `|-` drops it. The comparison is byte-exact against that, so a command whose output ends with `\n` is written `|`, and one that ends mid-line is written `|-`. There is no normalisation to remember, and no empty last line to spell.
-
-The whole [token vocabulary](15-tokens.md) works in `stdout`, `stderr` and the `files:` texts — `{{url}}`, `{{int}}`, `{{workdir}}`, `{{any}}`, `#ref` captures — and **never** in `description`, `command` or `exit`, which are prose and data. For wording that varies WITHIN a line (a duration phrase, a hostname, a count in a sentence), reach for `{{string}}`, which stops at the end of the line; keep `{{any}}` for a span that genuinely crosses lines.
-
-#### `files:` — what the run left behind
-
-Each key is a path relative to the working directory (never absolute, never escaping it). Each value is one of four forms:
-
-```yaml
-files:
-    .spwn/agent.yaml: { contains: 'name: bot' } # one needle, or a list of them
-    out/report.txt:
-        equals: | # exact text, block scalar allowed
-            ok
-    .spwn/lock: absent # nothing at that path
-    out/src: exists # something at that path
-```
-
-`contains` and `equals` are token-aware: `{ contains: 'wrote {{path}}' }` finds the line whatever the path turned out to be.
-
-Each run's mapping is read against the working directory **as that run left it**, so a file may be `absent` for one run and there for the next — which is how a lock, a cache or a build output is described:
-
-```yaml
-description: the lock appears with the first apply and is released by the second
-runs:
-    - command: status
-      exit: 0
-      files:
-          .spwn/lock: absent # nothing has claimed the tree yet
-    - command: apply --hold
-      exit: 0
-      files:
-          .spwn/lock: { contains: 'pid: {{int}}' } # the same path, one command later
-```
-
-Written as one mapping at the end of the session, that pair could not be stated at all: a working directory only ever holds its latest state.
+Most cli cases are documents: a session written as data — the ground, the runs, what each printed and left on disk — collected as a test file of its own by the `cli()` project. The format, shared with the api and jobs facets, is [20 — Spec documents](20-documents.md): its keys, its paths, the three doors that run it, failure and update. What stays here is what only this constructor owns: the words a document names its ground by.
 
 #### Registration — once per app
 
@@ -481,117 +392,6 @@ A `serve` entry is spawned with the document's extra `KEY: value` merged into it
 `ready` is a regex over the child's output whose **first capture group** is the port the server chose (named or not — it is group 1 either way); the framework injects no `PORT`, the server announces one. `url(port)` builds the URL, and `env` names the variable it is bound to in every run's child.
 
 **`TEST_WORKDIR` is seeded into every served child** — the document's working directory in the resolved form `{{workdir}}` holds and `$WORKDIR` expands to. The servers start after `fixture:` has been copied, so a stub reads the world the document laid down (`$TEST_WORKDIR/answers/dashboard/posts.json`) exactly as a stub binary reads `${0%/*}/../answers/`: a scenario is a layer of files, not a flag threaded through the server. The mapping form overrides it like any other key — `- mcp: { TEST_WORKDIR: /elsewhere }` points that one server somewhere else.
-
-#### The schema
-
-The document's JSON Schema ships with the package at `schema/spec.schema.json`, published as the `@jterrazz/test/schema` export, and is generated from the grammar's own constants — it cannot describe a shape the parser does not read. Point an editor at it and every key, every type and every closed set is checked as you type:
-
-```yaml
-# yaml-language-server: $schema=./node_modules/@jterrazz/test/schema/spec.schema.json
-```
-
-A schema says which keys exist, not which ORDER they come in — JSON Schema has no vocabulary for the sequence of an object's members. The canonical order (`kind, description, fixture, env, serve, runs`, and `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run) is the `d4b-spec-key-order` lint pass's, which also rewrites it: `npx jterrazz-test-check specs --fix`. The full document family is in [19 — linting](19-linting.md).
-
-#### The three doors, one engine
-
-| Door       | Use it when                                                                                    |
-| ---------- | ---------------------------------------------------------------------------------------------- |
-| **plugin** | The document IS the test — the common case                                                     |
-| **bridge** | The document is the scenario, but one assertion needs code (a directory golden, a grep)        |
-| **chain**  | Everything the format cannot say — see [when to reach for code](#when-to-reach-for-code) below |
-
-**The plugin.** `literate()` from `@jterrazz/test/vitest` adds the `.spec.yaml` glob to the test include and transforms each document into a one-test module. The runner then shows the document's path as the test file and `description:` as the title, so a failing scenario opens where it is written:
-
-```typescript
-// vitest.config.ts
-import { defineConfig } from 'vitest/config';
-import { literate } from '@jterrazz/test/vitest';
-
-export default defineConfig({
-    plugins: [literate({ specification: './specs/cli/cli.specification.ts' })],
-});
-```
-
-`specification` points at the `*.specification.ts` whose exported `cli` runs the documents. It is **stated, never guessed**: a repository may declare several cli runners — different binaries, different service records — and no convention could pick the right one without silently binding a scenario to the wrong command. `include` (default `['**/*.spec.yaml']`) narrows the glob when a tree also holds documents that are _inputs_ to other specs rather than scenarios to run.
-
-**The bridge.** `cli.run(file('./<case>.spec.yaml'))` runs the document — its ground, its servers, every run asserted — and resolves with the **last** run's `CliResult`, so code adds what the document cannot express:
-
-```typescript
-test('scaffolds a shop and leaves the tree we expect', async () => {
-    // Given - the whole session, stated in the document
-    const result = await cli.run(file('./scaffold.spec.yaml'));
-
-    // Then - one assertion the format has no vocabulary for
-    await expect(result.directory('my-shop')).toMatch(directory('./expected/shop-scaffold/'));
-});
-```
-
-`.run()` is a DOOR, not a fallback, and the criterion is written: it stays for a document whose result needs one assertion the grammar has no vocabulary for — an absence, a count, an exhaustive file list, a directory golden, a host shell-out probe — or for a document `literate()`'s static glob cannot collect, because it is generated at test time or deliberately excluded to prove a refusal. It is never for a Given built by chaining onto `cli`: no site on the workbench does that, and the default door is `literate()`, which `cli()` wires for you.
-
-The document is named with `file()`, from the test file beside it: `cli.run(file('./case.spec.yaml'))`. Setup chained before the call layers **underneath** the document's own ground: a chained `.fixture()` is copied first, the document's `fixture:` entries over it, and its `env:` wins over a chained `.env()`. `{ frozen: true }` opts one document out of the update rewrite — the same guard as `toMatch(file(…), { frozen: true })`, for a deliberately-wrong document whose failure rendering is the subject of a negative test.
-
-#### Failure and update
-
-On a mismatch the failure renders the description, the command, everything the comparison rejected, and where to open the document:
-
-```
-Spec mismatch
-
-removes a post and names what is gone
-
-$ posts rm post-recap --yes
-
-Output mismatch (stdout)
-
-- Expected
-+ Received
-…
-
-files mismatch
-
-  .spwn/lock: expected absent, got a file
-
-specs/cli/removed.spec.yaml:9
-Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.
-```
-
-A line the comparison ACCEPTED is rendered as equal, with its token — a `{{url}}` that matched is never shown as a `-`/`+` pair against the concrete URL — so the marked lines are the mismatch and nothing else. The stack carries one frame: the run's own `command:` line.
-
-`TEST_UPDATE=1` rewrites **only `exit`, `stdout` and `stderr`, per run**. The ground, the commands and the `files:` assertions are never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. An empty stream loses its key, since absence already asserts emptiness. Placeholders survive by **pattern match**, not by line index, so a token stays a token wherever the line moved to: see [update mode](15-tokens.md#update-mode-tokens-are-preserved).
-
-#### When to reach for code
-
-The format states one binary, one working directory, one linear session. Reach for the chain when the spec needs:
-
-- **containers** — `docker`-aware runs, `await using`, `result.container(name)`;
-- **parallel fan-out** — several commands that must run at once, or an interleaving;
-- **host shell-outs** the binary under test is not — a `git` call, a build step staged by hand;
-- **structural JSON** — `result.json` against an `expected/*.json` golden, where the comparison is by shape rather than by text;
-- **database state** — `.seed()` and `result.table(…)`.
-
-A document that starts wanting a conditional is a chain wearing a header. Write it in code.
-
-### The `cli()` project — the default door, wired
-
-The project helper collects both halves of this facet: the `.spec.ts` files, and the documents — a `<case>.spec.yaml` is a test file of its own, so the literate plugin's glob has to join the include of the project that collects them, never the root config.
-
-```typescript
-// vitest.config.ts
-import { cli, defineSpecConfig, unit } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({ test: { projects: [unit(), cli()] } });
-```
-
-Called bare, it assumes the path convention: every `specs/cli/**/*.spec.yaml` becomes a test bound to `specs/cli/cli.specification.ts`. Three knobs change that, and nothing else needs stating:
-
-| `literate`                        | Collects                                                 |
-| --------------------------------- | -------------------------------------------------------- |
-| omitted                           | the convention above — the door every CLI suite opens on |
-| `{ specification: './other.ts' }` | the same documents, bound to another runner              |
-| `{ include: [...] }`              | a narrower glob                                          |
-| `false`                           | no documents at all — a suite written entirely in code   |
-
-A member without `"type": "module"` cannot `require()` the ESM-only helpers: name the file `vitest.config.mts` there.
 
 ### Docker-aware mode
 
@@ -656,9 +456,6 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 ## Pitfalls
 
 - **Reaching for `.spawn()`.** It does not exist — `.exec(args, { waitFor, timeout })` is the unified execution method (rule B2).
-- **Putting a `<case>.spec.yaml` under `expected/`.** A spec document is the SCENARIO, not a golden — it lives beside the spec it belongs to. `expected/` holds what an assertion resolves against.
-- **Writing a token in a `description:` or a `command:`.** Those are prose and data; placeholders only work in the streams and the `files:` texts.
-- **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — `d4b-spec-block-scalar` rejects it and `--fix` rewrites it.
 - **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `expected/*.txt` — `transform` is a last resort (rule D6).
 - **Assigning a Docker-aware result without `await using`.** Error (rule B5) — that is the leak-cleanup mechanism.
 - **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection — override only to _change_ it, `null` to remove it.
@@ -670,4 +467,4 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 
 ## Related
 
-[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [17 — Services](17-services.md)
+[20 — Spec documents](20-documents.md) · [02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [17 — Services](17-services.md)

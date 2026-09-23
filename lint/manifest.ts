@@ -315,7 +315,7 @@ export const RULE_DOCS = {
     'c24-ground-role': {
         channel: 'statique',
         convention:
-            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's `fixture:` is held by its grammar.",
+            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's path keys — `fixture:`, `seed:`, `request:`, `body:`, `response:`, `intercept:` (under `contracts/`) — are held to the same folders by its grammar (`d4b-spec-shape`).",
         facet: 'model',
         family: 'C',
         fix: 'Move the file into the folder its verb reads, and spell the path through it.',
@@ -931,7 +931,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A `<case>.spec.yaml` document follows its grammar: closed keys at document level (`kind`, `description`, `fixture`, `env`, `serve`, `runs`) and inside a run (`command`, `stdin`, `timeout`, `waitFor`, `exit`, `stdout`, `stderr`, `files`), `description:` and `runs:` required, `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir.',
+            'A `<case>.spec.yaml` document follows its grammar: closed keys per `kind:` — cli (`fixture`, `env`, `serve`, `runs`), api (`seed`, `intercept`, `clock`, `headers`, `request`, `body`, `response`, `tables`, `steps`), jobs (`seed`, `intercept`, `clock`, `trigger`, `error`, `tables`) — a key of another kind refused naming it, and closed keys inside a run and a step; `description:` required, and `runs:`, `request:` or `steps:`, `trigger:` per kind; `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir; every path key relative, reaching the folder its key reads; a `{{name}}` sent only after an earlier step captured it.',
         facet: 'cli',
         family: 'D',
         fix: 'Write the key the grammar names; the message prints the accepted set.',
@@ -1085,7 +1085,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the fixtures its `fixture:` entries name.',
+            'No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the files every path key of it names.',
         facet: 'model',
         family: 'C',
         fix: 'Reference it from the spec it stands under, or delete it.',
@@ -1111,7 +1111,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A path leaves its leaf only into the pool: a path a `file()`, a `directory()` or a document's `fixture:` names, whose target is neither under the spec's own directory nor under `<specs>/fixtures/`, is an error — ground shared by several leaves goes in the pool. A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too.",
+            "A path leaves its leaf only into the pool: a path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory nor under `<specs>/fixtures/`, is an error — ground shared by several leaves goes in the pool. A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too.",
         facet: 'model',
         family: 'C',
         fix: "Copy it under this leaf's own ground, or promote it to the pool at `specs/fixtures/`.",
@@ -1124,7 +1124,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every `fixture:` of a document names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed path is out of reach, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
+            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every path a document's keys name — `fixture:`, `seed:`, `request:`, `body:`, `response:`, `intercept:` — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed path is out of reach, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
         facet: 'model',
         family: 'C',
         fix: 'Create the entry (out of `.gitignore`), or fix the path — the message names what it resolved to.',

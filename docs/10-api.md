@@ -109,10 +109,11 @@ Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the r
 | `.post(path, body?)`                     | Inline POST                                                   |
 | `.put(path, body?)`                      | Inline PUT                                                    |
 | `.delete(path)`                          | Inline DELETE                                                 |
+| `.run(file('./<case>.spec.yaml'))`       | Run a `kind: api` document and resolve with its last response |
 
 The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
 
-There is no `.run()` and no label argument: the vitest test name is the spec's only description (rule B3).
+There is no label argument: the vitest test name is the spec's only description (rule B3). `.run()` hands the chain a whole case written as data — [Documents](#documents--an-api-case-as-data) below.
 
 ```typescript
 test('returns 404 with a useful body', async () => {
@@ -255,6 +256,34 @@ test('links the analytics event to the created order', async () => {
 
 > This project declares two databases, so `database:` is mandatory on every `.seed()` and `.table()` (rule A7). With a single database you would write `api.seed(file('./seeds/catalog.sql'))` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
 
+### Documents — an api case as data
+
+A case that is a request and what came back is a `<case>.spec.yaml` beside the spec, collected as a test of its own by the `api()` project and bound to `specs/api/api.specification.ts`. The given is the chain's setups as keys, the action is the request, and the default oracle is the golden of the whole response:
+
+```yaml
+kind: api
+description: the users seeded are the users listed, in the order they were inserted
+seed:
+    - { file: ./seeds/two-users.sql, database: db }
+request: GET /users
+response: ./expected/users-list.http
+```
+
+A journey — a request whose path or body carries what an earlier response returned — is one document too, its `steps:` capturing values by JSONPath and sending them as `{{name}}`. The keys, the paths each reads, the inline response and the three doors are [20 — Spec documents](20-documents.md#an-api-document)'s; what stays in TypeScript is logic, and what a chain refuses.
+
+### Route coverage (rule B12)
+
+Line coverage says which lines of the app ran; it cannot say which routes no case asked for. A member that declares its routes — `test: { routes: './openapi.yaml' }` in `jterrazz.config.ts`, an OpenAPI document, JSON or YAML — has the checker report every route no document and no spec of its `specs/` tree reaches, on the line the source declares it:
+
+```typescript
+// jterrazz.config.ts
+import { defineConfig } from '@jterrazz/typescript/config';
+
+export default defineConfig({ test: { routes: './openapi.yaml' } });
+```
+
+What reaches a route — a document's request line, a spec's literal call, a capture filling a parameter — is the rule's own sentence, B12 in [19 — Linting](19-linting.md); the findings are recorded and held by the ratchet like any other. The source is declared rather than read from the served app because the pass runs in the lint, before any test: Hono's `app.routes` exists only once the factory is handed started services.
+
 The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).
 
 ## Pitfalls
@@ -267,4 +296,4 @@ The app runs in THIS process, always: there is no second mode, no container bind
 
 ## Related
 
-[11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)
+[20 — Spec documents](20-documents.md) · [11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)

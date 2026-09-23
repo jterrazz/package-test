@@ -4,12 +4,12 @@ Real systems generate UUIDs, timestamps, ports, and paths. The framework handles
 
 ## Where tokens work
 
-| Fixture kind   | Files                                                                              | Coverage                                                                                                       |
-| -------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| HTTP responses | `expected/*.http`                                                                  | **body and headers**                                                                                           |
-| JSON snapshots | `expected/*.json`                                                                  | any string value                                                                                               |
-| Text snapshots | `expected/*.txt` (and other text files under `expected/`)                          | anywhere in the text                                                                                           |
-| Spec documents | `<case>.spec.yaml`, beside the spec ([12](12-cli.md#spec-documents--casespecyaml)) | both streams of every run, and `files:` assertions — **never the description or the command**, which are prose |
+| Fixture kind   | Files                                                       | Coverage                                                                                                                                                                                                                       |
+| -------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP responses | `expected/*.http`                                           | **body and headers**                                                                                                                                                                                                           |
+| JSON snapshots | `expected/*.json`                                           | any string value                                                                                                                                                                                                               |
+| Text snapshots | `expected/*.txt` (and other text files under `expected/`)   | anywhere in the text                                                                                                                                                                                                           |
+| Spec documents | `<case>.spec.yaml`, beside the spec ([20](20-documents.md)) | what a document asserts — a run's streams and `files:` texts, a response's status, headers and body, a table's cells, a job's `error:` — **never the description, a command, a request or a body**, which are prose and inputs |
 
 ```http
 ### expected/order-created.http — tokens in a header AND the body

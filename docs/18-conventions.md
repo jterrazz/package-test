@@ -160,7 +160,7 @@ Two more hold what each path says. **The verb and the folder agree**: `seed()` r
 | Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                                                                              |
 | Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                                                                                           |
 | Spec file       | `specs/<facet>/<domain>/<aspect>.spec.ts` — the assembled product's word (C12)                                                                                                           |
-| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([12](12-cli.md#spec-documents--casespecyaml))                                                               |
+| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([20](20-documents.md))                                                                                      |
 | Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                                                                                  |
 | Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([07](07-component.md))                                                                   |
 | Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                                                                                          |

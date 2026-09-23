@@ -36,21 +36,21 @@ All file-based comparisons understand the [`{{token}}` grammar](15-tokens.md); a
 
 Plain values take vitest's native matchers. No framework matcher exists (or is needed) for them.
 
-| Subject                                     | Type           | Example                                                                                                      |
-| ------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
-| `result.status`                             | `number`       | `expect(result.status).toBe(201)`                                                                            |
-| `result.exitCode`                           | `number`       | `expect(result.exitCode).toBe(0)`                                                                            |
-| `result.filesystem.cwd`                     | `string`       | `expect(result.filesystem.cwd).toContain('/tmp/')`                                                           |
-| `result.response.body`                      | parsed body    | `expect(result.response.body).toEqual({ error: 'User 999 not found' })`                                      |
-| `result.json.value`                         | parsed JSON    | `expect(result.json.value).toMatchObject({ name: 'shoply' })`                                                |
-| `result.stdout.grep(pattern)`               | `TextAccessor` | `expect(result.stdout.grep('broken.yaml').text).toContain('missing price')`                                  |
-| `result.file(path).exists`                  | `boolean`      | `expect(result.file('dist/index.js').exists).toBe(true)`                                                     |
-| `result.file(path).content`                 | `string`       | `expect(result.file('shoply.yaml').content).toContain('name: my-shop')`                                      |
-| `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                   |
-| `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                  |
-| `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                |
-| `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                           |
-| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [12](12-cli.md#spec-documents--casespecyaml) |
+| Subject                                     | Type           | Example                                                                                                          |
+| ------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `result.status`                             | `number`       | `expect(result.status).toBe(201)`                                                                                |
+| `result.exitCode`                           | `number`       | `expect(result.exitCode).toBe(0)`                                                                                |
+| `result.filesystem.cwd`                     | `string`       | `expect(result.filesystem.cwd).toContain('/tmp/')`                                                               |
+| `result.response.body`                      | parsed body    | `expect(result.response.body).toEqual({ error: 'User 999 not found' })`                                          |
+| `result.json.value`                         | parsed JSON    | `expect(result.json.value).toMatchObject({ name: 'shoply' })`                                                    |
+| `result.stdout.grep(pattern)`               | `TextAccessor` | `expect(result.stdout.grep('broken.yaml').text).toContain('missing price')`                                      |
+| `result.file(path).exists`                  | `boolean`      | `expect(result.file('dist/index.js').exists).toBe(true)`                                                         |
+| `result.file(path).content`                 | `string`       | `expect(result.file('shoply.yaml').content).toContain('name: my-shop')`                                          |
+| `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                       |
+| `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                      |
+| `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                    |
+| `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                               |
+| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [20](20-documents.md#the-three-doors-one-engine) |
 
 ## `result.response` — HTTP response (api)
 

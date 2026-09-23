@@ -4,13 +4,13 @@ What proves a change here: this package specifies itself with itself. The suites
 
 **The suffix says the kind.** `.test.ts` is the UNIT's word and sits beside the module it covers; `.test.tsx` is the same law for a rendered unit; `.spec.ts` is the ASSEMBLED product's word and lives under `specs/<facet>/`; a literate document stays `<case>.spec.yaml`. C12 holds both directions and its `--fix` renames with `git mv`, so a reader can tell what a file proves without opening it.
 
-| Ground          | Where                                     | Proves                                                                 |
-| --------------- | ----------------------------------------- | ---------------------------------------------------------------------- |
-| Module tests    | `src/**/<file>.test.ts`                   | One module's behaviour, beside it (rule I2)                            |
-| Component tests | `specs/component-app/<file>.test.tsx`     | A rendered unit, beside it, in a real Chromium ([07](07-component.md)) |
-| Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts` | The framework's own facets, through the public surface                 |
-| Spec documents  | `specs/cli/literate/*.spec.yaml`          | The document format, collected as test files by `literate()`           |
-| Meta-tests      | `lint/*.test.ts`                          | The framework applied to itself and to its own projections             |
+| Ground          | Where                                     | Proves                                                                                            |
+| --------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Module tests    | `src/**/<file>.test.ts`                   | One module's behaviour, beside it (rule I2)                                                       |
+| Component tests | `specs/component-app/<file>.test.tsx`     | A rendered unit, beside it, in a real Chromium ([07](07-component.md))                            |
+| Product specs   | `specs/<facet>/<domain>/<aspect>.spec.ts` | The framework's own facets, through the public surface                                            |
+| Spec documents  | `specs/<facet>/<domain>/<case>.spec.yaml` | A cli, api or jobs case as data, collected as a test file by `literate()` ([20](20-documents.md)) |
+| Meta-tests      | `lint/*.test.ts`                          | The framework applied to itself and to its own projections                                        |
 
 ## The seven projects
 
@@ -20,8 +20,8 @@ What proves a change here: this package specifies itself with itself. The suites
 | ------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | `unit`        | `src/**/*.test.ts` + `specs/lint/**/*.test.ts`, built by `unit()`                               | Nothing — the lint specs need `npm run build` first                  |
 | `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                 | Nothing — the Docker specs self-skip                                 |
-| `api`         | `specs/api/**/*.spec.ts`, built by `api()` (node mode, in-process Hono)                         | Docker                                                               |
-| `jobs`        | `specs/jobs/**`, built by `jobs()`                                                              | Docker                                                               |
+| `api`         | `specs/api/**`, built by `api()` — its documents included (node mode, in-process Hono)          | Docker                                                               |
+| `jobs`        | `specs/jobs/**`, built by `jobs()` — its documents included                                     | Docker                                                               |
 | `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included | Docker                                                               |
 | `website`     | `specs/website/**`, built by `website()`                                                        | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component-app/**/*.test.tsx`, built by `component()`                                     | the same chromium; no Docker. Runs in its own group, after `website` |
