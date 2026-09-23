@@ -22,12 +22,10 @@ import {
     BASELINE_LABEL,
     CHECKER_NAMESPACE,
     countsOf,
-    holdsRetiredBaseline,
     judge,
     keepsBaseline,
     pluginDiagnostics,
     readBaseline,
-    RETIRED_BASELINE,
     writeBaseline,
 } from './ratchet.js';
 import type { PluginDiagnostic } from './ratchet.js';
@@ -78,9 +76,9 @@ import { codeOf } from './rule-code.js';
  * every checker finding of the project and every diagnostic of this package's
  * oxlint plugin (the toolchain sets those aside, so they are judged here or
  * nowhere) against the `test` section of `jterrazz.baseline.json` at the root:
- * within it, exit 0; grown, new, or an entry at zero, exit 1. A project still
- * holding the retired `test.baseline.json` fails, told to record the section
- * and delete it — the file is never read. A project that keeps no section fails on
+ * within it, exit 0; grown, new, or an entry at zero, exit 1. The retired
+ * `test.baseline.json` is never read: `typescript check` owns the refusal of a
+ * leftover per-package file. A project that keeps no section fails on
  * any ERROR finding and on any plugin diagnostic. Every other run under a
  * project that keeps a baseline reports what it found and leaves the verdict
  * to that one run; without a baseline it fails on an ERROR finding, as ever.
@@ -287,12 +285,6 @@ type RatchetRun = {
  * exactly what it judges, so a verdict and its evidence are one log.
  */
 function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): never {
-    if (holdsRetiredBaseline(root)) {
-        say(
-            `baseline-ratchet  ${RETIRED_BASELINE}  is retired — the counts live in ${BASELINE_LABEL}: run 'jterrazz-test-check baseline', then delete ${RETIRED_BASELINE}`,
-        );
-        process.exit(1);
-    }
     if (keepsBaseline(root)) {
         const findings = counted();
         const counts = countsOf([

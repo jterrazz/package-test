@@ -28,9 +28,6 @@ export const BASELINE_SECTION = 'test';
 /** The section as a line a reader sees names it. */
 export const BASELINE_LABEL = `${BASELINE_FILE} › ${BASELINE_SECTION}`;
 
-/** The file this package kept alone before the family merged its ratchets; never read. */
-export const RETIRED_BASELINE = 'test.baseline.json';
-
 /** The namespace the checker's findings take — its published `jterrazz-check(<code>)`. */
 export const CHECKER_NAMESPACE = 'jterrazz-check';
 
@@ -112,11 +109,6 @@ function sectionsAt(root: string): null | Record<string, unknown> | undefined {
 export function keepsBaseline(root: string): boolean {
     const sections = sectionsAt(root);
     return sections === null || (sections !== undefined && BASELINE_SECTION in sections);
-}
-
-/** Does the project at `root` still hold the retired file? */
-export function holdsRetiredBaseline(root: string): boolean {
-    return existsSync(join(root, RETIRED_BASELINE));
 }
 
 /** The recorded counts of the `test` section at `root`; an unreadable file records nothing. */

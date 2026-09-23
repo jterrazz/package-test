@@ -79,18 +79,17 @@ describe('lint — checker CLI contract', () => {
         );
     });
 
-    test('a project still holding test.baseline.json is told to move it, and never read', async () => {
-        // Given - the retired file, recording the very finding the tree holds
+    test('a leftover test.baseline.json is never read: the section alone judges', async () => {
+        // Given - the retired file holding a count the project is far from, beside the recorded section
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
             .fixture(file('./fixtures/lint-violations/retired-baseline/test.baseline.json'))
-            .exec('.');
+            .exec(['baseline .', '.']);
 
-        // Then - the run fails on the file itself, naming where the counts live now
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr.text).toBe(
-            "baseline-ratchet  test.baseline.json  is retired — the counts live in jterrazz.baseline.json › test: run 'jterrazz-test-check baseline', then delete test.baseline.json\n",
-        );
+        // Then - the run is held by the section, and says nothing of the old file: the toolchain owns that refusal
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr.text).toBe('');
+        expect(result.stdout.text).not.toContain('test.baseline.json');
     });
 
     test('a green ratchet run prints one line for what the file holds, and not the findings it holds', async () => {

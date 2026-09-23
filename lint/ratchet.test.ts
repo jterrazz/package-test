@@ -6,13 +6,11 @@ import { describe, expect, test } from 'vitest';
 import {
     BASELINE_FILE,
     countsOf,
-    holdsRetiredBaseline,
     judge,
     keepsBaseline,
     keyOf,
     pluginDiagnostics,
     readBaseline,
-    RETIRED_BASELINE,
     writeBaseline,
 } from './ratchet.js';
 
@@ -108,13 +106,12 @@ describe('the test ratchet — counts that may fall and never rise', () => {
         expect(readBaseline(root)).toStrictEqual({});
     });
 
-    test('the retired file is seen, and never read', () => {
-        // Given - a project still holding the file this package kept alone
+    test('the retired file is never read', () => {
+        // Given - a project holding only the file this package kept alone before the merge
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
-        writeFileSync(join(root, RETIRED_BASELINE), '{ "jterrazz-check/c9": 1 }\n');
+        writeFileSync(join(root, 'test.baseline.json'), '{ "jterrazz-check/c9": 1 }\n');
 
-        // Then - it is seen as held, and it records nothing
-        expect(holdsRetiredBaseline(root)).toBe(true);
+        // Then - it keeps no test ratchet, and records nothing
         expect(keepsBaseline(root)).toBe(false);
         expect(readBaseline(root)).toStrictEqual({});
     });

@@ -100,15 +100,15 @@ has run. What it leaves to the reader:
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
   moves a string only when a file of that name sits in the spec's `expected/`;
   anything else was already a substring check, and still is.
-- **The ratchet splits by owner.** `oxlint.baseline.json` is gone:
-  `typescript baseline` records `typescript.baseline.json` and refuses a
-  `jterrazz/…` or `jterrazz-check/…` key in it, and `jterrazz-test-check
-baseline` records those in the `test` section of `jterrazz.baseline.json` —
-  rename the file, then run the two gestures once
+- **The ratchet is one file, a section per owner.** `oxlint.baseline.json`,
+  `typescript.baseline.json` and `test.baseline.json` are gone:
+  `typescript baseline` records the `typescript` section of
+  `jterrazz.baseline.json` and refuses a `jterrazz/…` or `jterrazz-check/…`
+  key in it, and `jterrazz-test-check baseline` records those in its `test`
+  section — run the two gestures once, then delete the old files
   ([19 § The ratchet](19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson)).
-  A `test.baseline.json` an earlier migration wrote is retired the same way:
-  the checker fails on it until `jterrazz-test-check baseline` has recorded
-  the section and the file is deleted.
+  A leftover per-package file is never read again: `typescript check` names
+  it (`baseline-legacy`) until it is deleted.
 - **Family settings leave package.json.** A repository states its settings
   for the family in `jterrazz.config.ts` at its root, a section per package,
   typed by `defineConfig` from `@jterrazz/typescript/config`; a `jterrazz` key
