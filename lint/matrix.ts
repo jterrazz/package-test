@@ -22,8 +22,7 @@ import type { Capability, Column } from './facet-matrix.js';
  * declaration (`facet-matrix.ts`), the `{{token}}` list the runner and the
  * checker already share, and — for the count — a static scan of the trees each
  * column owns. `npm run docs` writes the table into `docs/03-testing.md`
- * between markers and into the skill's `references/matrix.md`; `matrix.test.ts`
- * refuses an empty declared cell.
+ * between markers; `matrix.test.ts` refuses an empty declared cell.
  *
  * A cell counts FILES, not assertions: "three files exercise `.seed()` on api"
  * is a fact a reader can act on, where a raw occurrence count moves with every

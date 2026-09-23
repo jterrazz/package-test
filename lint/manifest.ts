@@ -25,9 +25,8 @@ import type { RuleDoc } from './oxlint-api.js';
  *   (`PROCESS_RULES`).
  *
  * The catalogue generator (`catalog.ts` / `dist/catalog.js`) reads this manifest
- * to (re)write the full seven-channel catalogue in `docs/19-linting.md` and the
- * agent-facing `skills/jterrazz-test/references/rules.md`. `plugin.test.ts`
- * guards freshness and completeness.
+ * to (re)write the full seven-channel catalogue in `docs/19-linting.md`.
+ * `plugin.test.ts` guards freshness and completeness.
  *
  * This module is pure data — it imports NOTHING but a type, so the lint layer
  * stays free of the framework runtime (CONVENTIONS I1) and the oxlint bundle

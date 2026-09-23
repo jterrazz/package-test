@@ -29,13 +29,13 @@ import { anchorOf, CATALOGUE_CHAPTER } from './rule-code.js';
  * GENERATED catalogue. This test guards two invariants:
  *
  * - **freshness** — running the generator reproduces the committed
- *   `docs/19-linting.md` catalogue and `skills/jterrazz-test/references/rules.md`
- *   byte-for-byte;
+ *   `docs/19-linting.md` catalogue byte-for-byte;
  * - **completeness** — every shipped rule carries `meta.docs`, and every manifest
  *   entry maps to an implementation (a plugin rule / a checker pass) or a
  *   documented review-borne rule.
  *
- * Plus the standing inventory: every plugin rule has an E2E spec + fixture pair.
+ * Plus the standing inventory: every plugin rule is specified by documents that
+ * golden its position, and every checker pass has an E2E spec.
  */
 const ROOT = resolve(import.meta.dirname, '..');
 const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8');
