@@ -1,7 +1,9 @@
-import { resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { c2HttpOnlyRequests } from './c2-http-only-requests.js';
 
 RuleTester.describe = describe;
@@ -16,8 +18,19 @@ const ruleTester = new RuleTester();
 // The fs-anchored cases run against the shared E2E fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
+/** A leaf whose requests/ holds two files that are not requests. */
+const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/requests']);
+writeFileSync(join(TWO_STRAYS, 'specs/app/widget/requests/order.json'), '{}\n');
+writeFileSync(join(TWO_STRAYS, 'specs/app/widget/requests/notes.txt'), 'notes\n');
+
 ruleTester.run('c2-http-only-requests', c2HttpOnlyRequests as unknown as OxlintRule, {
     invalid: [
+        // Every stray is named, whatever its extension: two strays, two reports.
+        {
+            code: 'test("x", () => {});',
+            errors: [{ messageId: 'notHttp' }, { messageId: 'notHttp' }],
+            filename: `${TWO_STRAYS}/specs/app/widget/widget.test.ts`,
+        },
         // The violation fixture keeps a .json next to the .http.
         {
             code: 'test("x", () => {});',

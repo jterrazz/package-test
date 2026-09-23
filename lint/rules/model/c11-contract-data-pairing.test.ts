@@ -1,7 +1,9 @@
-import { resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { c11ContractDataPairing } from './c11-contract-data-pairing.js';
 
 RuleTester.describe = describe;
@@ -14,8 +16,21 @@ const ruleTester = new RuleTester();
 // The rule is fs-anchored — the cases run against the shared fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
+/** A matched input with no contract beside it, in another provider's folder. */
+const ORPHAN_INPUT = checkoutUnder('work', ['specs/app/widget/contracts/anthropic']);
+writeFileSync(
+    join(ORPHAN_INPUT, 'specs/app/widget/contracts/anthropic/summary.request.ts'),
+    'export {};\n',
+);
+
 ruleTester.run('c11-contract-data-pairing', c11ContractDataPairing as unknown as OxlintRule, {
     invalid: [
+        // A matched input is data too: summary.request.ts has no summary.ts, in anthropic/.
+        {
+            code: 'test("x", () => {});',
+            errors: [{ messageId: 'orphan' }],
+            filename: `${ORPHAN_INPUT}/specs/app/widget/widget.test.ts`,
+        },
         // Articles.fr.response.json has no articles.ts to serve it.
         {
             code: 'test("x", () => {});',

@@ -20,6 +20,12 @@ const SPEC_FILE = `${SPECS_LINT}/a9w-redundant-root/fixtures/violation/specs/set
 
 ruleTester.run('a9w-redundant-root', a9wRedundantRoot as unknown as OxlintRule, {
     invalid: [
+        // Every facet takes the option: an api runner's root is as redundant.
+        {
+            code: 'await specification.api({ root: "../..", server: () => app });',
+            errors: 1,
+            filename: SPEC_FILE,
+        },
         // Root points exactly at the derived root (fixture root, via package.json).
         {
             code: 'await specification.cli("./bin", { root: "../.." });',

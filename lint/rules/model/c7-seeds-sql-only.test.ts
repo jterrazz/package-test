@@ -1,7 +1,9 @@
-import { resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { c7SeedsSqlOnly } from './c7-seeds-sql-only.js';
 
 RuleTester.describe = describe;
@@ -16,8 +18,19 @@ const ruleTester = new RuleTester();
 // The fs-anchored cases run against the shared E2E fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
+/** A leaf whose seeds/ holds two files that are not SQL. */
+const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/seeds']);
+writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.json'), '[]\n');
+writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.csv'), 'id\n');
+
 ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
     invalid: [
+        // Every stray is named, whatever its extension: two strays, two reports.
+        {
+            code: 'test("x", () => {});',
+            errors: [{ messageId: 'notSql' }, { messageId: 'notSql' }],
+            filename: `${TWO_STRAYS}/specs/app/widget/widget.test.ts`,
+        },
         // The violation fixture keeps a .json next to the .sql.
         {
             code: 'test("x", () => {});',

@@ -14,6 +14,12 @@ const ruleTester = new RuleTester();
 
 ruleTester.run('f1-no-subpath-import', f1NoSubpathImport as unknown as OxlintRule, {
     invalid: [
+        // A re-export reaches the subpath as surely as an import, and is reported where it is written.
+        {
+            code: 'const a = 1;\nexport { match } from "@jterrazz/test/matching";',
+            errors: [{ column: 22, line: 2, messageId: 'subpath' }],
+            filename: '/repo/specs/cli/exec/exec.test.ts',
+        },
         // Subpaths do not exist.
         {
             code: 'import { mockOf } from "@jterrazz/test/mock";',
