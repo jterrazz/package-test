@@ -1425,3 +1425,40 @@ The api/jobs documents turned into indexes of links (a 6-line document pointing 
 | 92       | A failure raised in a browser page shows the test's own line first: the router's frames are cut from the stack.                |
 | 93       | Watched: the `DEBUG=vite:deps` loop runs during the real refactor.                                                             |
 | id clash | The proposed "marker between statements" rule takes a free id; B12 stays retired.                                              |
+
+## Iteration 16 — six defects from the signews-api conversion (2026-09-23)
+
+### What the package-test branch did (iteration 16)
+
+1. **A table compares as a multiset of rows** (`8977180`). Rows pair by
+   best match, captures settling across rows; `{ ordered: true }` keeps
+   the positional claim, in the first column's order. Update mode keeps
+   the stated order. The five skipped signews-api pipeline tests are
+   what this unblocks.
+2. **An unknown route table fails the run** (`dfda8d4`), naming both ways
+   out: hand `server` the Hono app, or declare an OpenAPI document. The
+   package's own intercepts app exposes its table now; `GET /cancel` is
+   held at `routes/unreached: 1` (its only spec is the skipped msw
+   acceptance test).
+3. **`app.all()` routes are judged** (`a62b57f`): only an entry whose
+   handler takes `next` is a middleware — Hono's own `isMiddleware`.
+4. **C4 no longer requires a default export** (`dab6657`): a facade
+   exports its builders and sets by name; a default, when present, is
+   still judged a composition.
+5. **The mover rewrites oxlint configs** (`fc5bbb1`): an override of a
+   renamed rule takes the 17 id, one of a retired static rule leaves with
+   its comments.
+6. **The shifted code frame was real** (`2287b87`): update mode now
+   writes the test file after the report, through a global setup the
+   preset registers; a run outside the preset still writes at once.
+
+### Raised by the package-test branch, iteration 16
+
+94. Watch mode applies update mode's rewrites only when the watcher
+    exits: the setup's teardown is the only moment after the report.
+    Vitest's own inline snapshots shift a later frame the same way.
+95. A consumer config not built on `defineSpecConfig` keeps the
+    immediate write, and the shifted frame with it.
+96. `98fa39d` (the K10 commit) swept in chapter 19's sentence about the
+    mover's oxlint-config gesture before the code that makes it true
+    (`fc5bbb1`): two sessions shared one checkout.
