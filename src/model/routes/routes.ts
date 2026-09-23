@@ -55,9 +55,9 @@ function takesSegment(declared: string, sent: string | undefined): boolean {
     return parameter ? sent.length > 0 : sent === declared;
 }
 
-/** Does a request sent reach a declared route? A `*` tail takes the rest of the path. */
+/** Does a request sent reach a declared route? An `ALL` route takes any method, a `*` tail the rest of the path. */
 export function reachesRoute(route: Route, sent: Route): boolean {
-    if (route.method !== sent.method) {
+    if (route.method !== 'ALL' && route.method !== sent.method) {
         return false;
     }
     const declared = route.path.split('/');

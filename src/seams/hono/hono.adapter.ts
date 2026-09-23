@@ -1,11 +1,34 @@
 import type { ServerPort, ServerResponse } from '../../model/ports/server.port.js';
 import type { Route } from '../../model/routes/routes.js';
 
+/** One entry of an app's route table: a method, a path, and — a Hono app's — the handler it runs. */
+type TableEntry = { handler?: unknown; method: string; path: string };
+
 /** The app, as the adapter reaches it: a request, and — a Hono app's — its route table. */
 type InProcessApp = {
     request: (path: string, init?: RequestInit) => Promise<Response> | Response;
-    routes?: readonly { method: string; path: string }[];
+    routes?: readonly TableEntry[];
 };
+
+/** The key under which Hono keeps the handler a wrapper composes — `route()` under an error handler. */
+const COMPOSED_HANDLER = '__COMPOSED_HANDLER';
+
+/** The handler a wrapper runs, unwrapped as Hono's own route listing unwraps it. */
+function targetOf(handler: unknown): unknown {
+    const composed: unknown =
+        typeof handler === 'function' ? Reflect.get(handler, COMPOSED_HANDLER) : undefined;
+    return composed === undefined ? handler : targetOf(composed);
+}
+
+/**
+ * Does this entry register a middleware? Hono's own rule (`isMiddleware`, what
+ * `showRoutes` hides): a handler that takes `next` — `app.use()`'s — where a
+ * route's handler, `app.all()`'s included, takes the context alone.
+ */
+function isMiddleware(entry: TableEntry): boolean {
+    const handler = targetOf(entry.handler);
+    return typeof handler === 'function' && handler.length > 1;
+}
 
 /**
  * Server adapter that dispatches requests in-process through a Hono app
@@ -22,13 +45,13 @@ export class HonoAdapter implements ServerPort {
     }
 
     /**
-     * The routes the app declares — Hono's `app.routes`, less the `ALL`
-     * entries a middleware registers — or `undefined` for an app with no table.
+     * The routes the app declares — Hono's `app.routes`, less the entries a
+     * middleware registers — or `undefined` for an app with no table.
      */
     declared(): Route[] | undefined {
         return this.app.routes
-            ?.filter((route) => route.method !== 'ALL')
-            .map((route) => ({ method: route.method, path: route.path }));
+            ?.filter((entry) => !isMiddleware(entry))
+            .map((entry) => ({ method: entry.method, path: entry.path }));
     }
 
     async request(

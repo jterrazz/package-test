@@ -287,7 +287,7 @@ A journey — a request carrying what an earlier response returned — is code: 
 
 ### Route coverage
 
-Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The table is the app's own — Hono's `app.routes`, read from the app each `specification.api()` started — so it is the table that served the tests, never a copy that can drift from it. A path parameter (`:id`) takes any one segment, a `*` tail the rest of the path.
+Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The table is the app's own — Hono's `app.routes`, read from the app each `specification.api()` started — so it is the table that served the tests, never a copy that can drift from it. An entry whose handler takes `next` is a middleware, left out by Hono's own rule; a route `app.all()` declares is judged like any other, reached by a request of any method. A path parameter (`:id`) takes any one segment, a `*` tail the rest of the path.
 
 ```
 api routes: all 12 declared routes reached

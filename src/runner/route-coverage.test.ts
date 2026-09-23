@@ -89,4 +89,22 @@ describe('route coverage — the api run judged', () => {
         // Then - nothing to judge
         await expect(judgeRoutes(root, join(root, 'ledgers'), false)).resolves.toStrictEqual({});
     });
+
+    test('an ALL route is reached by a request of any method', async () => {
+        // Given - one app.all() route, reached by a POST
+        const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
+        onTestFinished(() => {
+            rmSync(root, { force: true, recursive: true });
+        });
+        const directory = join(root, 'ledgers');
+        writeLedger(directory, {
+            declared: [{ method: 'ALL', path: '/mcp' }],
+            reached: [{ method: 'POST', path: '/mcp' }],
+        });
+
+        // Then - reached
+        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+            line: 'api routes: all 1 declared routes reached',
+        });
+    });
 });
