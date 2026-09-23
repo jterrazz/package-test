@@ -21,7 +21,7 @@ test('is restored to the project size for the next test', async () => {
         await visitor.see(content('Wide layout'));
     });
 
-    // Then - the project's 1280x720 is what this render got
+    // Then - the project's 1024×640 is what this render got
     expect(result.content.text).toContain('Wide layout');
 });
 

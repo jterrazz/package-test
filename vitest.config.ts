@@ -64,10 +64,18 @@ export default defineSpecConfig({
             // Needs playwright + `npx playwright install chromium`; no Docker.
             website(),
             component({
+                // Every render's context, stated away from every default so the
+                // Component app proves each one reaches the page (locale-note).
+                clock: '2026-01-02T03:04:05.000Z',
                 // The package's own component app is the subject its component
                 // Specs stand on, and A2's law holds for it too: the test of a
                 // Component is the `.test.tsx` NEXT to it.
                 include: ['specs/component-app/**/*.test.tsx'],
+                locale: 'fr-FR',
+                // `wrap` is read against the app's folder, not the config's.
+                root: resolve(import.meta.dirname, 'specs/component-app'),
+                timezone: 'Europe/Paris',
+                viewport: { height: 640, width: 1024 },
                 vite: {
                     resolve: {
                         // The dogfood imports the PUBLIC specifier, and in this
@@ -80,7 +88,7 @@ export default defineSpecConfig({
                         },
                     },
                 },
-                wrap: './specs/component-app/providers.tsx',
+                wrap: './providers.tsx',
             }),
         ],
     },
