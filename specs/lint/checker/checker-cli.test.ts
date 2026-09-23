@@ -135,3 +135,41 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr.text).toContain('no such oxlint report');
     });
 });
+
+describe('lint — checker CLI, the logs a ratchet run prints', () => {
+    test('a run another run judges prints its findings, names the judge, and exits 0', async () => {
+        // Given - one specs tree of a project keeping test.baseline.json, the tree holding a finding the file does not
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-ratchet/'))
+            .exec('specs');
+
+        // Then - the finding and the file that judges it, and no verdict of its own
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toMatch(file('./expected/checker-deferred.txt'));
+    });
+
+    test('`--format json` prints the findings on a green ratchet run too', async () => {
+        // Given - a project whose one finding is recorded, judged with the JSON format
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/c9-dead-fixtures/'))
+            .exec(['baseline .', '. --format json']);
+
+        // Then - the record, then the held finding as JSON: the machine format carries the findings whatever the verdict
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch(file('./expected/checker-held-json.txt'));
+    });
+
+    test("`--format json` carries the checker's own findings, never the plugin's it judges", async () => {
+        // Given - a broken ratchet, and a report holding a diagnostic of the plugin and one of another
+        const result = await cli
+            .fixture(directory('../../fixtures/lint-violations/checker-ratchet/'))
+            .fixture(
+                file('../../fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'),
+            )
+            .exec('. --format json --oxlint-report oxlint-report.json');
+
+        // Then - the verdict fails on both, and the JSON holds the tree's finding alone
+        expect(result.exitCode).toBe(1);
+        expect(result.stdout).toMatch(file('./expected/checker-failing-json.txt'));
+    });
+});

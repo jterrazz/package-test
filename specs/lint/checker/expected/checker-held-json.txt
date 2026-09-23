@@ -1,0 +1,1 @@
+[{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"dead fixture — no test literal in widget references seeds/dead.sql","severity":"error"}]
