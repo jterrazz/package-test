@@ -1,6 +1,6 @@
 import { basename, dirname, join } from 'node:path';
 
-import { isFile } from './fs-cache.js';
+import { isDirectory, isFile } from './fs-cache.js';
 import type { AstNode, Comment } from './oxlint-api.js';
 
 /**
@@ -23,16 +23,26 @@ export type SpecsAnchor = {
 };
 
 /**
+ * Is this directory where a project starts: a package root (its
+ * `package.json`), or a repository root (its `.git`, a directory or a
+ * worktree's file) — a tree no package holds is still a project.
+ */
+export function isProjectRoot(directory: string): boolean {
+    const git = join(directory, '.git');
+    return isFile(join(directory, 'package.json')) || isDirectory(git) || isFile(git);
+}
+
+/**
  * The `specs/` directory a file belongs to: the NEAREST ancestor named `specs`,
- * searched no higher than the nearest `package.json`. `undefined` when the file
- * is not under one.
+ * searched no higher than the nearest project root ({@link isProjectRoot}).
+ * `undefined` when the file is not under one.
  *
  * One anchor for every specs-aware rule, because two searches are two
  * answers: an innermost match and an outermost one read a nested tree as two
  * different facets, and a bare "is `specs` a segment of this path" test
  * answers about the machine — a checkout living under `~/specs/` would be one
  * whole specs tree, with F2's protection of production code silently off. The
- * package boundary makes the search stop where the project does.
+ * project boundary makes the search stop where the project does.
  */
 export function specsAnchor(filename: string): SpecsAnchor | undefined {
     const relative = [basename(filename)];
@@ -41,8 +51,8 @@ export function specsAnchor(filename: string): SpecsAnchor | undefined {
         if (basename(directory) === 'specs') {
             return { directory, relative };
         }
-        if (isFile(join(directory, 'package.json'))) {
-            return undefined; // The package root, and no `specs/` under it.
+        if (isProjectRoot(directory)) {
+            return undefined; // The project root, and no `specs/` under it.
         }
         const parent = dirname(directory);
         if (parent === directory) {

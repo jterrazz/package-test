@@ -1,6 +1,6 @@
 import { basename, dirname, join, relative } from 'node:path';
 
-import { isUnderSpecs, segments } from './ast.js';
+import { isProjectRoot, isUnderSpecs, segments } from './ast.js';
 import { isFile } from './fs-cache.js';
 
 /**
@@ -17,7 +17,7 @@ import { isFile } from './fs-cache.js';
  * gate probing for a `src` or a `specs` segment answers about the machine the
  * checkout sits on, not about the project that runs the file.
  *
- * A folder the path names is read BELOW the package root that holds the file
+ * A folder the path names is read BELOW the project root that holds the file
  * ({@link projectSegments}): a checkout under a folder named `fixtures/`,
  * `contracts/` or `__tests__/` is the machine's business, never the project's.
  */
@@ -58,7 +58,7 @@ const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
  *
  * `__tests__/` is retired wherever it appears in the project. A `tests/` or
  * `test/` directory is only the retired ROOT when it sits directly under the
- * package — a `test` segment deeper in a tree is an ordinary domain name.
+ * project root — a `test` segment deeper in a tree is an ordinary domain name.
  *
  * Both spellings, because both exist: hoverfly-lsp keeps thirteen corpus tests
  * under `packages/*\/test/`, and a rule that named only the plural told it
@@ -70,7 +70,7 @@ function legacyDirOf(filename: string): LegacyDir {
         return '__tests__';
     }
     const first = parts.length > 1 ? parts[0] : undefined;
-    if (packageRootOf(dirname(filename)) !== undefined && (first === 'tests' || first === 'test')) {
+    if (projectRootOf(dirname(filename)) !== undefined && (first === 'tests' || first === 'test')) {
         return first;
     }
     return null;
@@ -169,13 +169,31 @@ export function packageRootOf(directory: string): string | undefined {
 }
 
 /**
- * The segments of a path below the package root that holds it — what a rule
+ * The nearest project root at or above a directory: a package root, or — for a
+ * tree no nearer package holds — the repository root ({@link isProjectRoot}).
+ */
+export function projectRootOf(directory: string): string | undefined {
+    let current = directory;
+    for (;;) {
+        if (isProjectRoot(current)) {
+            return current;
+        }
+        const parent = dirname(current);
+        if (parent === current) {
+            return undefined;
+        }
+        current = parent;
+    }
+}
+
+/**
+ * The segments of a path below the project root that holds it — what a rule
  * reads of a path, so a folder above the project never answers for it. A path
- * no package holds (a rule's test case, written against `/repo/…`) is read
- * whole.
+ * no package and no repository holds (a rule's test case, written against
+ * `/repo/…`) is read whole.
  */
 export function projectSegments(filename: string): string[] {
-    const root = packageRootOf(dirname(filename));
+    const root = projectRootOf(dirname(filename));
     return segments(root === undefined ? filename : relative(root, filename));
 }
 

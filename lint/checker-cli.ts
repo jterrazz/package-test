@@ -22,7 +22,7 @@ import {
     writeBaseline,
 } from './ratchet.js';
 import type { PluginDiagnostic } from './ratchet.js';
-import { packageRootOf } from './role.js';
+import { packageRootOf, projectRootOf } from './role.js';
 import { codeOf } from './rule-code.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
@@ -567,13 +567,13 @@ function applyFixes(root: string): void {
  * Is this directory a specs tree?
  *
  * The `specs` SEGMENT is the anchor every other pass reads (`specsAnchor`), so
- * the CLI reads it too, below the package root that holds the directory:
+ * the CLI reads it too, below the project root that holds the directory:
  * `specs`, `apps/web/specs` and `specs/api` are trees — a subtree of one is
  * still inside it — and everything else is a project root holding zero or more
  * of them, a checkout under a folder named `specs/` included.
  */
 function isSpecsTree(dir: string): boolean {
-    const owner = packageRootOf(dir);
+    const owner = projectRootOf(dir);
     return (owner === undefined ? dir : relative(owner, dir)).split(/[/\\]/u).includes('specs');
 }
 

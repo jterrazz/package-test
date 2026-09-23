@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { checkoutUnder } from '../../rule-tester.fixtures.js';
+import { checkoutUnder, repositoryUnder } from '../../rule-tester.fixtures.js';
 import { i1LayerBoundaries } from './i1-layer-boundaries.js';
 
 RuleTester.describe = describe;
@@ -44,6 +44,9 @@ const SPINE = resolve(import.meta.dirname, '../../..');
 
 /** The same spine, checked out under a folder named `src/`. */
 const UNDER_SRC = checkoutUnder('src', ['src']);
+
+/** A spine no package holds — a repository alone — checked out under a folder named `src/`. */
+const REPOSITORY_UNDER_SRC = repositoryUnder('src', ['src']);
 
 ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unknown as OxlintRule, {
     invalid: [
@@ -93,6 +96,13 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
             code: 'import { z } from "zod";',
             errors: [{ messageId: 'foreignDependency' }],
             filename: `${UNDER_SRC}/lint/rules/some-rule.ts`,
+            options: framework,
+        },
+        // Outside every package, the map reads below the repository root.
+        {
+            code: 'import { z } from "zod";',
+            errors: [{ messageId: 'foreignDependency' }],
+            filename: `${REPOSITORY_UNDER_SRC}/lint/rules/some-rule.ts`,
             options: framework,
         },
     ],

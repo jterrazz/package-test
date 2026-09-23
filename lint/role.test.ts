@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { FileRole, LegacyDir } from './role.js';
 import { isTestFile, isTestRole, projectSegments, roleOf } from './role.js';
-import { checkoutUnder } from './rule-tester.fixtures.js';
+import { checkoutUnder, repositoryUnder } from './rule-tester.fixtures.js';
 
 /** This package's own root — the one `tests/` guard reads a real package.json at. */
 const REPO_ROOT = resolve(import.meta.dirname, '..');
@@ -93,7 +93,7 @@ describe('roleOf — the kind a path states', () => {
     });
 });
 
-describe('roleOf — read below the package root', () => {
+describe('roleOf — read below the project root', () => {
     test('a checkout under a folder named like ground, a contract or a retired root is none of them', () => {
         // Given - three packages checked out under `fixtures/`, `contracts/` and `__tests__/`
         const under = ['fixtures', 'contracts', '__tests__'].map((folder) => checkoutUnder(folder));
@@ -124,8 +124,23 @@ describe('roleOf — read below the package root', () => {
         expect(legacyOf(join(root, 'tests/widget.test.ts'))).toBe('tests');
     });
 
-    test('a path no package holds is read whole', () => {
-        // Given - a rule case written against a root that is not on disk
+    test('a file outside every package is read below its repository root', () => {
+        // Given - two repositories holding no package.json, checked out under `fixtures/` and `specs/`, one a worktree
+        const underGround = repositoryUnder('fixtures');
+        const underSpecs = repositoryUnder('specs', [], 'file');
+
+        // Then - the segments start at the repository, and no folder above it answers
+        expect(projectSegments(join(underGround, 'src/widget.ts'))).toStrictEqual([
+            'src',
+            'widget.ts',
+        ]);
+        expect(roleOf(join(underGround, 'src/widget.ts')).role).toBe('other');
+        expect(roleOf(join(underSpecs, 'src/widget.test.ts')).inSpecs).toBe(false);
+        expect(legacyOf(join(underGround, 'tests/widget.test.ts'))).toBe('tests');
+    });
+
+    test('a path no package and no repository holds is read whole', () => {
+        // Given - a rule case written against a root that is not on disk, under no repository
         // Then - every segment answers, as the case spells it
         expect(projectSegments('/no-such-root-xyz/specs/api/x.spec.ts')).toStrictEqual([
             'no-such-root-xyz',

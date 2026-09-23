@@ -63,3 +63,28 @@ export function checkoutUnder(folder: string, folders: string[] = []): string {
     }
     return root;
 }
+
+/**
+ * A repository no package holds, checked out under a folder named
+ * `<folder>/`, on disk: its root, where its `.git` sits — a directory, or a
+ * worktree's file — with the `folders` it holds already made, and no
+ * `package.json` anywhere in it.
+ */
+export function repositoryUnder(
+    folder: string,
+    folders: string[] = [],
+    git: 'directory' | 'file' = 'directory',
+): string {
+    const scratch = mkdtempSync(join(tmpdir(), 'repository-'));
+    const root = join(scratch, folder, 'repository');
+    mkdirSync(root, { recursive: true });
+    for (const inside of folders) {
+        mkdirSync(join(root, inside), { recursive: true });
+    }
+    if (git === 'directory') {
+        mkdirSync(join(root, '.git'));
+    } else {
+        writeFileSync(join(root, '.git'), 'gitdir: /elsewhere/.git/worktrees/repository\n');
+    }
+    return root;
+}
