@@ -1,6 +1,14 @@
 import { dirname, join } from 'node:path';
 
-import { findProperty, memberPropertyName, stringValue, walk } from '../../ast.js';
+import {
+    child,
+    childList,
+    findProperty,
+    identifierName,
+    memberPropertyName,
+    stringValue,
+    walk,
+} from '../../ast.js';
 import { isDirectory, listDirectory } from '../../fs-cache.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
@@ -100,22 +108,84 @@ function checkLayout(context: RuleContext, node: AstNode, contractsDir: string):
             context.report({ data: { entry }, messageId: 'badProviderDir', node });
             continue;
         }
-        for (const child of listDirectory(path) ?? []) {
-            if (isDirectory(join(path, child))) {
+        for (const inner of listDirectory(path) ?? []) {
+            if (isDirectory(join(path, inner))) {
                 context.report({
-                    data: { child, provider: entry },
+                    data: { child: inner, provider: entry },
                     messageId: 'providerSubfolder',
                     node,
                 });
-            } else if (!/\.[cm]?ts$/u.test(child) && !child.endsWith('.response.json')) {
+            } else if (!/\.[cm]?ts$/u.test(inner) && !inner.endsWith('.response.json')) {
                 context.report({
-                    data: { child, provider: entry },
+                    data: { child: inner, provider: entry },
                     messageId: 'providerEntry',
                     node,
                 });
             }
         }
     }
+}
+
+/** A module that is a facade — `./<name>.contracts`, with or without its extension. */
+const FACADE_SOURCE = /\.contracts(?:\.[cm]?[jt]s)?$/u;
+
+/** The type `defineContracts(...)` returns — a builder declared to return it composes. */
+const COMPOSITION_TYPE = 'Contracts';
+
+/** Is this function declared to return the composition's own type? */
+function returnsComposition(fn: AstNode | undefined): boolean {
+    const annotation = child(child(fn, 'returnType'), 'typeAnnotation');
+    return (
+        annotation?.type === 'TSTypeReference' &&
+        identifierName(child(annotation, 'typeName')) === COMPOSITION_TYPE
+    );
+}
+
+/** The local names an import from a sibling facade binds — its scenarios. */
+function facadeImports(node: AstNode): string[] {
+    if (!FACADE_SOURCE.test(stringValue(child(node, 'source')) ?? '')) {
+        return [];
+    }
+    return childList(node, 'specifiers').flatMap(
+        (specifier) => identifierName(child(specifier, 'local')) ?? [],
+    );
+}
+
+/** The name a builder declared to return the composition is bound to. */
+function compositionBuilder(node: AstNode): string | undefined {
+    if (node.type === 'FunctionDeclaration') {
+        return returnsComposition(node) ? identifierName(child(node, 'id')) : undefined;
+    }
+    if (node.type === 'VariableDeclarator') {
+        return returnsComposition(child(node, 'init'))
+            ? identifierName(child(node, 'id'))
+            : undefined;
+    }
+    return undefined;
+}
+
+/**
+ * The names whose value is a composition without the file calling
+ * `defineContracts` itself: the bindings imported from a sibling facade (its
+ * named exports are scenarios, compositions by C4), and the builders this file
+ * declares with the composition's return type.
+ */
+function compositionNames(node: AstNode, names: Set<string>): void {
+    const found =
+        node.type === 'ImportDeclaration' ? facadeImports(node) : [compositionBuilder(node)];
+    for (const name of found) {
+        if (name !== undefined) {
+            names.add(name);
+        }
+    }
+}
+
+/** A default export whose value one of `names` produces — the name itself, or a call to it. */
+function namesComposition(declaration: AstNode | undefined, names: ReadonlySet<string>): boolean {
+    const value =
+        declaration?.type === 'CallExpression' ? child(declaration, 'callee') : declaration;
+    const name = identifierName(value);
+    return name !== undefined && names.has(name);
 }
 
 /** The facade: `<kebab>.contracts.ts`, default-exporting a composition. */
@@ -126,9 +196,13 @@ function checkComposite(context: RuleContext, program: AstNode, base: string): v
     }
     let hasDefault = false;
     let composed = false;
+    let declaration: AstNode | undefined;
+    const names = new Set<string>();
     walk(program, (node) => {
+        compositionNames(node, names);
         if (node.type === 'ExportDefaultDeclaration') {
             hasDefault = true;
+            declaration = child(node, 'declaration');
         } else if (node.type === 'ExportAllDeclaration' || node.type === 'ExportNamedDeclaration') {
             if (exportsDefault(node)) {
                 hasDefault = true;
@@ -149,7 +223,7 @@ function checkComposite(context: RuleContext, program: AstNode, base: string): v
     });
     if (!hasDefault) {
         context.report({ data: { base }, messageId: 'missingComposite', node: program });
-    } else if (!composed) {
+    } else if (!composed && !namesComposition(declaration, names)) {
         context.report({ data: { base }, messageId: 'notDefineContracts', node: program });
     }
 }
@@ -270,7 +344,7 @@ export const c4ContractShape: LintRule = {
             notDefineContract:
                 'The default export of a contract unit must be `defineContract(...)` or a factory returning a contract.',
             notDefineContracts:
-                'The default export of "{{base}}" must be built from `defineContracts(...)` (or a composition re-export).',
+                'The default export of "{{base}}" must be built from `defineContracts(...)`, a composition re-export, a scenario imported from a sibling facade, or a builder declared to return `Contracts`.',
             providerEntry:
                 'contracts/{{provider}}/{{child}} is neither a *.ts contract nor a *.response.json payload.',
             providerMismatch:

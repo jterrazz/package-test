@@ -135,7 +135,7 @@ specs/<facet>/<feature>/
 The rules, enforced by [C4, C10 and C11](19-linting.md):
 
 - The **root** holds only `*.contracts.ts` facades and the provider directories `http`, `openai`, `anthropic`. The folder carries the provider — filenames drop it and go back to being business names.
-- A facade default-exports a `defineContracts(...)` composition; its **named exports are scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world.
+- A facade default-exports a `defineContracts(...)` composition; its **named exports are scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world. A facade may also default-export a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.contracts.js` — or a call to a builder it declares to return `Contracts`; C4 judges the default by where its builder comes from, since the linter reads no types.
 - A unit contract is `<provider>/<kebab-name>.ts` and default-exports `defineContract(...)` or a factory returning one. Its `request` builder must name its own folder.
 - Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its contract: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
 - **Tests import only `*.contracts.ts`.** Provider folders are internal — reaching into one from a test is an error (C10). A scenario belongs in the facade, not in the test.

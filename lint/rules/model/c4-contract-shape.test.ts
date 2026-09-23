@@ -42,6 +42,18 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
             errors: [{ messageId: 'notDefineContracts' }],
             filename: FACADE,
         },
+        // A call to a builder imported from anything but a facade proves nothing.
+        {
+            code: `import { pipeline } from '../helpers/pipeline.js';\nexport default pipeline();`,
+            errors: [{ messageId: 'notDefineContracts' }],
+            filename: FACADE,
+        },
+        // A builder of this file declared to return something else.
+        {
+            code: `function quiet(): object {\n    return {};\n}\nexport default quiet();`,
+            errors: [{ messageId: 'notDefineContracts' }],
+            filename: FACADE,
+        },
         // A unit contract that is not kebab-case.
         {
             code: `import { defineContract, http } from '@jterrazz/test';\nexport default defineContract({ request: http.get('u'), response: http.json({}) });`,
@@ -94,6 +106,21 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
         {
             code: `export { default } from './newsroom.contracts.js';`,
             filename: `${FEATURE}/pipeline.contracts.ts`,
+        },
+        // A scenario of a sibling facade, called: its named exports ARE compositions.
+        {
+            code: `import { pipeline } from './pipeline.contracts.js';\nexport default pipeline({ ingestion: 'ai-facts' });`,
+            filename: FACADE,
+        },
+        // A scenario of a sibling facade, as a value.
+        {
+            code: `import { quietWorld } from './pipeline.contracts.js';\nexport default quietWorld;`,
+            filename: FACADE,
+        },
+        // A builder of this file whose declared return type is the composition's.
+        {
+            code: `import type { Contracts } from '@jterrazz/test';\nimport { base } from './pipeline.contracts.js';\nfunction quiet(): Contracts {\n    return base.world;\n}\nexport default quiet();`,
+            filename: FACADE,
         },
         // The canonical unit contract, matching its provider folder.
         {
