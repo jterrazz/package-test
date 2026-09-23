@@ -134,9 +134,19 @@ describe('component() — the browser project', () => {
         // Given - the canonical browser project on this install
         const project = await component();
 
-        // Then - react and the react adapter are declared up front
+        // Then - react, the react adapter and what the package's browser entry imports are declared up front
         expect(project.optimizeDeps?.include).toContain('vitest-browser-react');
         expect(project.optimizeDeps?.include).toContain('react-dom/client');
+        expect(project.optimizeDeps?.include).toContain('vitest-mock-extended');
+    });
+
+    test("pre-bundles what the app's own Vite config declares, beside the seam's", async () => {
+        // Given - an app whose components import a dependency the seam knows nothing of
+        const project = await component({ vite: { optimizeDeps: { include: ['react-router'] } } });
+
+        // Then - both are declared up front: a dependency found mid-run reloads the tester
+        expect(project.optimizeDeps?.include).toContain('react-router');
+        expect(project.optimizeDeps?.include).toContain('vitest-browser-react');
     });
 
     test('leaves msw to the runner, which already excludes it', async () => {

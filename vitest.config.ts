@@ -77,6 +77,9 @@ export default defineSpecConfig({
                 timezone: 'Europe/Paris',
                 viewport: { height: 640, width: 1024 },
                 vite: {
+                    // The app's routing is the one dependency its components
+                    // Import that the seam does not pre-bundle for them.
+                    optimizeDeps: { include: ['react-router'] },
                     resolve: {
                         // The dogfood imports the PUBLIC specifier, and in this
                         // Repository that specifier has to resolve to the

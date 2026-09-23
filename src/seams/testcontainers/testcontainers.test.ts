@@ -17,6 +17,12 @@ function dockerAvailable(): boolean {
 
 const HAS_DOCKER = dockerAvailable();
 
+/**
+ * What a container start may take: testcontainers' own wait strategy gives
+ * the readiness line 60 s, and creating the container comes before it.
+ */
+const CONTAINER_BUDGET_MS = 120_000;
+
 /*
  * The adapter IS the subject here, and it is not on the public entry — which
  * is what makes this a module test beside its module rather than a spec under
@@ -37,7 +43,7 @@ describe('testcontainers adapter', () => {
 
     afterAll(async () => {
         await started.stop();
-    });
+    }, CONTAINER_BUDGET_MS);
 
     test.skipIf(!HAS_DOCKER)(
         'captures the logs of a running container',
@@ -49,7 +55,7 @@ describe('testcontainers adapter', () => {
             const logs = await started.getLogs();
             expect(logs).toContain('database system is ready to accept connections');
         },
-        30_000,
+        CONTAINER_BUDGET_MS,
     );
 
     test('degrades to an empty string when the container was never started', async () => {

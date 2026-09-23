@@ -48,13 +48,16 @@ const PIPELINE_KEYS = [
     'envPrefix',
     'esbuild',
     'json',
+    'optimizeDeps',
     'oxc',
     'plugins',
     'resolve',
 ] as const;
 
 /**
- * The seam's own runtime, pre-bundled so a cold cache never reloads mid-run.
+ * The seam's own runtime, pre-bundled so a cold cache never reloads mid-run:
+ * react and its adapter, and what the package's browser entry imports
+ * (`vitest-mock-extended`, through the doubles it publishes).
  *
  * `msw` and `msw/browser` are NOT here: `@vitest/browser` already puts both in
  * `optimizeDeps.exclude`, and Vite's esbuild optimizer (6 and 7) treats an
@@ -67,6 +70,7 @@ const SEAM_DEPENDENCIES = [
     'react/jsx-dev-runtime',
     'react/jsx-runtime',
     'vitest-browser-react',
+    'vitest-mock-extended',
 ];
 
 const requireFrom = createRequire(import.meta.url);
@@ -225,6 +229,25 @@ async function reroot(
         }
     }
     return kept;
+}
+
+/**
+ * The app's own `optimizeDeps`, its `include` joined by the seam's: a
+ * dependency Vite finds only when a test first imports it is optimised then,
+ * and the reload that follows fails the tests already loading.
+ */
+function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include: string[] } {
+    const own = typeof declared === 'object' && declared !== null ? { ...declared } : {};
+    const listed = 'include' in own && Array.isArray(own.include) ? own.include : [];
+    return {
+        ...own,
+        include: [
+            ...new Set([
+                ...SEAM_DEPENDENCIES.filter(resolves),
+                ...listed.filter((entry): entry is string => typeof entry === 'string'),
+            ]),
+        ],
+    };
 }
 
 /** What a missing optional peer costs, said once rather than as a resolver stack. */
@@ -394,7 +417,7 @@ export async function component(
         // Reloads the tester mid-flight ("Vitest failed to find the runner").
         // A fresh CI checkout is exactly that state, so the seam's own runtime
         // Is declared up front. An optional peer that is absent is skipped.
-        optimizeDeps: { include: SEAM_DEPENDENCIES.filter(resolves) },
+        optimizeDeps: optimizeDepsOf(pipeline.optimizeDeps),
         plugins: [mswWorkerPlugin(), ...consumerPlugins],
         test: {
             browser: {
