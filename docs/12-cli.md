@@ -227,13 +227,7 @@ test('deploys from a shaped workspace', async () => {
 
 #### Where a fixture lives
 
-The two doors are not interchangeable, and the question that picks between them is **how many leaves read this tree**.
-
-The POOL — `specs/fixtures/`, reached by the path that climbs to it (`../../fixtures/<name>/`) — is for what SEVERAL leaves share. It is one of the specs root's four ground folders, and holds file state only: a shared seed is `<specs>/seeds/`, a shared golden `<specs>/expected/` ([18 — the naming recap](18-conventions.md#the-naming-recap)). That is the whole of its meaning: an entry there announces "other specs depend on me, change me with care". A tree only one spec directory reaches for is not shared ground, whatever folder it sits in; parked in the pool it collects the pool's caution without earning it, and the one spec that actually owns it is a directory away, invisible to the next reader. It is an error (C15's twin, **C14**), and `jterrazz-test-check --fix` moves it beside its leaf and rewrites the reference.
-
-A LEAF'S OWN ground sits beside it, as `<domain>/fixtures/<name>/`, and is reached by the path from the leaf — `.fixture(file('./fixtures/config.toml'))`, `.fixture(directory('./fixtures/base-shop/'))`. It is read from that leaf and nowhere else: a path may leave its leaf only into the specs root's ground, and one that climbs into a sibling's tree is the pool by another door, with none of the pool's visibility — the neighbour's author has no way to know you depend on them, edits their ground, and breaks a spec two folders away. That is **C15**; the repair is to promote the tree to the pool, where its sharing is declared.
-
-So: one reader, beside the leaf. Two or more, in the pool. Write it local first — promotion is a `--fix` away, and demotion is the rule the checker enforces.
+A fixture tree sits beside the one leaf that reads it, `./fixtures/<name>/`, or — when several leaves share it — in the specs root's own `specs/fixtures/`, reached by the path that climbs to it. That law holds for all four ground roles, not for fixtures alone, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (C14, C15, C27).
 
 ### The chain never reaches a real system
 
