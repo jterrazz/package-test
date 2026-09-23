@@ -139,6 +139,90 @@ type Chai = {
     };
 };
 
+/** Where a location's file sits — its query string or hash dropped, its `file://` scheme too. */
+function directoryOf(location: string): string {
+    const normalized = location.replace(/^file:\/\//u, '').replace(/[?#].*$/u, '');
+    return normalized.slice(0, normalized.lastIndexOf('/'));
+}
+
+/**
+ * This module's own directory: `dist/` under an installed node build, a
+ * page's deps-bundle folder under a browser — where a bundler co-locates
+ * every dependency's code, this one and vitest's matcher plumbing alike.
+ */
+const OWN_DIRECTORY = directoryOf(import.meta.url);
+
+/** A stack line that is a frame, never the error's own (possibly multi-line) message. */
+const FRAME_LINE = /^\s*at\s/u;
+
+/** A frame's file — a bare path, a `file://` one or a page's served URL. */
+const FRAME_FILE =
+    /at\s+(?:async\s+)?(?:.*?\s+)?\(?(?<file>(?:file:\/\/)?\/[^():]+|https?:\/\/.+?):\d+:\d+\)?\s*$/u;
+
+/** The directory a stack frame's file sits in, or `undefined` past what the pattern reads. */
+function frameDirectoryOf(line: string): string | undefined {
+    const file = FRAME_FILE.exec(line.trim())?.groups?.file;
+    return file === undefined ? undefined : directoryOf(file);
+}
+
+/**
+ * Cut every frame of `stack` that sits in `directory` — this router's own,
+ * and whatever a bundler co-located there — so a reader's first frame is
+ * whichever call reached it: the test's own line, not this routing.
+ *
+ * A page bundles this module beside vitest's own matcher plumbing, in one
+ * file with no source map either owns, so a failure raised there names an
+ * unreadable line before the test's; under node the same frame is legible
+ * and still not the test's. Either way the boundary is WHERE the code runs
+ * from, never a name a bundler is free to rewrite, and every one of this
+ * router's own frames is cut, not only a leading run of them: vitest's own
+ * matcher plumbing sits ABOVE this router on the stack, between it and the
+ * throw, so the frame this router left is never actually first.
+ */
+export function cutFramesUnder(stack: string, directory: string): string {
+    return stack
+        .split('\n')
+        .filter((line) => !FRAME_LINE.test(line) || frameDirectoryOf(line) !== directory)
+        .join('\n');
+}
+
+/** Does `value` look like a promise — thenable, never assumed to BE one? */
+function isThenable(value: unknown): value is Promise<unknown> {
+    return (
+        value !== null &&
+        typeof value === 'object' &&
+        typeof (value as { then?: unknown }).then === 'function'
+    );
+}
+
+/** Cut this router's frames from `error` and rethrow it — its stack alone changes, never its identity. */
+function rethrowCut(error: unknown): never {
+    if (error instanceof Error && error.stack !== undefined) {
+        error.stack = cutFramesUnder(error.stack, OWN_DIRECTORY);
+    }
+    throw error;
+}
+
+/** Await `result`, cutting this router's own frames from a rejection. */
+async function awaitedCut(result: Promise<unknown>): Promise<unknown> {
+    try {
+        return await result;
+    } catch (error) {
+        return rethrowCut(error);
+    }
+}
+
+/** Run `route`, cutting this router's own frames from what it throws — now, or once its promise rejects. */
+function routedThrough(route: () => unknown): unknown {
+    let result: unknown;
+    try {
+        result = route();
+    } catch (error) {
+        return rethrowCut(error);
+    }
+    return isThenable(result) ? awaitedCut(result) : result;
+}
+
 /**
  * `toMatch` routes a `file()` or a `directory()` to the golden comparison, a
  * value handed to one of the framework's subjects to the whole-result
@@ -166,7 +250,7 @@ export function matchThroughGolden(
             function toMatch(this: Record<string, unknown>, ...args: unknown[]): unknown {
                 const golden = this[GOLDEN_MATCHER];
                 if (isDiskTarget(args[0]) && typeof golden === 'function') {
-                    return golden.apply(this, args) as unknown;
+                    return routedThrough(() => golden.apply(this, args) as unknown);
                 }
                 const route = routeValue(chai.util.flag(this, 'object'), args[0]);
                 if (route instanceof TypeError) {
@@ -176,7 +260,7 @@ export function matchThroughGolden(
                 if (route === 'whole' && typeof whole === 'function') {
                     const stack = new Error('toMatch call site').stack ?? '';
                     const call: WholeCall = { options: optionsOf(args[1]), stack };
-                    return whole.call(this, args[0], call) as unknown;
+                    return routedThrough(() => whole.call(this, args[0], call) as unknown);
                 }
                 return vitestToMatch.apply(this, args);
             },
