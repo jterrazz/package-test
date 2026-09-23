@@ -841,6 +841,19 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            "Every route a member's api declares is reached by a document or a spec. The route table is DECLARED: `test.routes` in the member's `jterrazz.config.ts` names an OpenAPI document (JSON or YAML), whose every method of every path is a route; a member declaring none is not judged. What reaches a route is read from the member's `specs/` tree: an api document's request lines and the `.http` files it sends, and a spec's literal `.get('/…')`, `.post(…)`, `.put(…)`, `.delete(…)` and `.request(file(…))`. A path parameter takes any one segment, and so does a `{{capture}}` or a template hole; a computed path is out of reach. A route no case reaches is an error on the line the source declares it — the ratchet holds what a member accepts.",
+        facet: 'api',
+        family: 'B',
+        fix: 'Send the route from a document or a spec, or record it with `jterrazz-test-check baseline` while the case is owed.',
+        id: 'B12',
+        name: 'b12-route-reached',
+        rationale:
+            'Line coverage says which lines ran; it cannot say which routes no case ever asked for, and a route nobody asks for is a behaviour nobody specified.',
+        reach: 'member',
+    },
+    {
+        channel: 'checker',
+        convention:
             'Every workspace member with tests OF ITS OWN (a `test` script that does not delegate to members, or a `*.test.ts(x)` outside another package’s tree) declares a vitest config (`vitest.config.*`). The MEMBER pass judges the member itself, with or without a `specs/` root; a root that only delegates owes nothing.',
         facet: 'model',
         family: 'E',

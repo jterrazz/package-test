@@ -7,12 +7,17 @@ import type {} from '@jterrazz/typescript/config';
  * package. `@jterrazz/typescript` owns the file and its `JterrazzConfig`
  * interface; this package adds its section by merging into it, so
  * `defineConfig({ test: … })` is typed wherever `@jterrazz/test` is installed.
- *
- * The section holds nothing yet — every setting this package reads is still
- * an option of the call that uses it — so it accepts an empty object and
- * refuses a key nobody reads.
+ * A key nobody reads does not compile.
  */
-export type TestSettings = Record<string, never>;
+export type TestSettings = {
+    /**
+     * The routes the member's api declares: a path, from the config's
+     * directory, to an OpenAPI document (JSON or YAML). The checker reports
+     * every route no document or spec of the member's `specs/` tree reaches
+     * (rule B12).
+     */
+    routes?: string;
+};
 
 declare module '@jterrazz/typescript/config' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- declaration merging is the one thing only an interface can do, and it is the point

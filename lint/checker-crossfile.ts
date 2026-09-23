@@ -188,7 +188,7 @@ function readText(path: string): string {
  * literals untouched. The regex/scan passes read this so a commented-out
  * `.exec()` or a comma inside a `services:` comment never confuses them.
  */
-function blankComments(text: string): string {
+export function blankComments(text: string): string {
     const out = [...text];
     let state: "'" | '"' | '' | '`' | 'block' | 'line' = '';
     for (let i = 0; i < text.length; i += 1) {

@@ -188,7 +188,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **83 modules** have no sibling test, and every one of them is claimed:
+Today **84 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -202,7 +202,7 @@ Today **83 modules** have no sibling test, and every one of them is claimed:
 | a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
 | a seam adapter (11)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
 | a bundled CLI entry (3)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                |
-| a lint-layer module (4)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
+| a lint-layer module (5)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
 | a chain or runner internal (8)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |
 
 <!-- /GENERATED:siblings -->

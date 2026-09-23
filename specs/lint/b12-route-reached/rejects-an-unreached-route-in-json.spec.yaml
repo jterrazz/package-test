@@ -1,0 +1,8 @@
+description: a JSON source is read the same way, each unreached method on its path's line
+fixture: ./fixtures/json-source/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          openapi.json:5:1  jterrazz-check(b12)
+          openapi.json:6:1  jterrazz-check(b12)

@@ -1,0 +1,5 @@
+{
+    "name": "@fixture/orders",
+    "type": "module",
+    "scripts": { "test": "vitest --run" }
+}

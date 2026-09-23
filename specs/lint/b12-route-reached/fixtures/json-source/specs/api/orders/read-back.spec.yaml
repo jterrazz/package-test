@@ -1,0 +1,11 @@
+kind: api
+description: the first order listed is the order read back
+steps:
+    - request: GET /orders
+      capture:
+          orderId: $.orders[0].id
+      response:
+          status: 200
+    - request: GET /orders/{{orderId}}
+      response:
+          status: 200

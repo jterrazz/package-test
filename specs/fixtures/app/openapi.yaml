@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+    title: the fixture app the api and jobs specs drive
+    version: 1.0.0
+paths:
+    /users:
+        get:
+            summary: every user, in insertion order
+        post:
+            summary: create a user, logging an event when analytics is wired
+    /users/{id}:
+        get:
+            summary: one user, or 404
+        put:
+            summary: rename a user, or 404
+        delete:
+            summary: remove a user, or 404
+    /exports:
+        post:
+            summary: write the users to a directory, and answer where
+    /session:
+        get:
+            summary: a fresh session, stamped with the instant the app reads
+    /echo:
+        post:
+            summary: the JSON body and two headers, handed back
+    /echo/{value}:
+        get:
+            summary: a path segment, handed back
+    /echo-raw:
+        post:
+            summary: the raw body, handed back
+    /label:
+        get:
+            summary: the label an outgoing call fetched
+    /events:
+        get:
+            summary: every analytics event
