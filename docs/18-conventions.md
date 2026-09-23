@@ -236,17 +236,17 @@ The questions are asked IN ORDER, and the first yes is the kind. The answer fixe
 
 <!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/fork.ts -->
 
-| Question                                                               | Kind             | Lives at                                      | Constructor                   | Project       |
-| ---------------------------------------------------------------------- | ---------------- | --------------------------------------------- | ----------------------------- | ------------- |
-| Does it render in a browser as a whole served page?                    | website          | `specs/website/<domain>/<aspect>.spec.ts`     | `specification.website()`     | `website`     |
-| Does it render as a component (React, a DOM function, a hook)?         | component        | `<file>.test.tsx` beside `<file>.tsx`         | none — the `component` chain  | `component`   |
-| Does it render on a simulator?                                         | mobile           | `specs/mobile/<domain>/<aspect>.spec.ts`      | `specification.mobile()`      | `mobile`      |
-| Does it answer HTTP?                                                   | api              | `specs/api/<domain>/<aspect>.spec.ts`         | `specification.api()`         | `api`         |
-| Is it triggered by name, in-process?                                   | jobs             | `specs/jobs/<domain>/<aspect>.spec.ts`        | `specification.jobs()`        | `jobs`        |
-| Is it a binary?                                                        | cli              | `specs/cli/<domain>/` (+ `<case>.spec.yaml`)  | `specification.cli(bin)`      | `cli`         |
-| Is it a module that needs a real service, or whose oracle is a golden? | integration      | `specs/integration/<domain>/<aspect>.spec.ts` | `specification.integration()` | `integration` |
-| Is it a module alone?                                                  | module           | `<file>.test.ts` beside `<file>.ts`           | none                          | `unit`        |
-| Is it the repository itself — a suite over several apps?               | repository suite | `specs/<family>/<aspect>.test.ts`             | none                          | any name      |
+| Question                                                               | Kind             | Lives at                                         | Constructor                   | Project       |
+| ---------------------------------------------------------------------- | ---------------- | ------------------------------------------------ | ----------------------------- | ------------- |
+| Does it render in a browser as a whole served page?                    | website          | `specs/website/<domain>/<aspect>.spec.ts`        | `specification.website()`     | `website`     |
+| Does it render as a component (React, a DOM function, a hook)?         | component        | `<file>.test.tsx` beside `<file>.tsx`            | none — the `component` chain  | `component`   |
+| Does it render on a simulator?                                         | mobile           | `specs/mobile/<domain>/<aspect>.spec.ts`         | `specification.mobile()`      | `mobile`      |
+| Does it answer HTTP?                                                   | api              | `specs/api/<resource>/<action>/<aspect>.spec.ts` | `specification.api()`         | `api`         |
+| Is it triggered by name, in-process?                                   | jobs             | `specs/jobs/<job>/<aspect>.spec.ts`              | `specification.jobs()`        | `jobs`        |
+| Is it a binary?                                                        | cli              | `specs/cli/<command>/` (+ `<case>.spec.yaml`)    | `specification.cli(bin)`      | `cli`         |
+| Is it a module that needs a real service, or whose oracle is a golden? | integration      | `specs/integration/<domain>/<aspect>.spec.ts`    | `specification.integration()` | `integration` |
+| Is it a module alone?                                                  | module           | `<file>.test.ts` beside `<file>.ts`              | none                          | `unit`        |
+| Is it the repository itself — a suite over several apps?               | repository suite | `specs/<family>/<aspect>.test.ts`                | none                          | any name      |
 
 <!-- /GENERATED:fork -->
 

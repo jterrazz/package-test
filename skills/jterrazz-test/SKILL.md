@@ -16,14 +16,14 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 1. A whole served page in a browser? → **website**, `specs/website/<domain>/<aspect>.spec.ts`
 2. A component (React, a DOM function, a hook)? → **component**, `<file>.test.tsx` beside `<file>.tsx`
 3. A screen on a simulator? → **mobile**, `specs/mobile/<domain>/<aspect>.spec.ts`
-4. Answers HTTP? → **api**, `specs/api/<domain>/<aspect>.spec.ts`
-5. Triggered by name, in-process? → **jobs**, `specs/jobs/<domain>/<aspect>.spec.ts`
-6. A binary? → **cli**, `specs/cli/<domain>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
+4. Answers HTTP? → **api**, `specs/api/<resource>/<action>/<aspect>.spec.ts` — the folder derived from the route (`GET /events` → `events/list/`)
+5. Triggered by name, in-process? → **jobs**, `specs/jobs/<job>/<aspect>.spec.ts`
+6. A binary? → **cli**, `specs/cli/<command>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
 7. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
 8. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
 9. The repository itself, a suite over several apps? → **repository suite**, `specs/<family>/<aspect>.test.ts`
 
-The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner.
+The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner. A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect, under 400 lines; `make fix` splits, moves and retitles ([docs/18](../../docs/18-conventions.md#one-file-one-subject)).
 
 ## The shape every spec has
 
@@ -40,16 +40,18 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/api/users/creation.spec.ts
-test('creates a user', async () => {
-    // Given - one existing user
-    const result = await api
-        .seed(file('./seeds/one-user.sql'))
-        .request(file('./requests/create-user.http'));
+// specs/api/users/create/shape.spec.ts — POST /users
+describe('shape', () => {
+    test('creates a user', async () => {
+        // Given - one existing user
+        const result = await api
+            .seed(file('./seeds/one-user.sql'))
+            .request(file('./requests/create-user.http'));
 
-    // Then - the response and the row it wrote
-    expect(result.response).toMatch(file('./expected/user-created.http'));
-    await expect(result.table('users')).toMatch([[1, 'Alice']]);
+        // Then - the response and the row it wrote
+        expect(result.response).toMatch(file('./expected/user-created.http'));
+        await expect(result.table('users')).toMatch([[1, 'Alice']]);
+    });
 });
 ```
 

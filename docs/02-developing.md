@@ -122,7 +122,7 @@ afterAll(cleanup);
 ```
 
 ```http
-### specs/api/users/requests/create-user.http — the COMPLETE request
+### specs/api/users/create/requests/create-user.http — the COMPLETE request
 POST /users
 Content-Type: application/json
 
@@ -130,7 +130,7 @@ Content-Type: application/json
 ```
 
 ```http
-### specs/api/users/expected/user-created.http — status + header subset + body
+### specs/api/users/create/expected/user-created.http — status + header subset + body
 HTTP/1.1 201 Created
 Content-Type: application/json
 
@@ -138,17 +138,19 @@ Content-Type: application/json
 ```
 
 ```typescript
-// specs/api/users/users.spec.ts
-import { expect, test } from 'vitest';
-import { api } from '../api.specification.js';
+// specs/api/users/create/shape.spec.ts — POST /users, the whole response of the ordinary case
+import { describe, expect, test } from 'vitest';
+import { api } from '../../api.specification.js';
 
-test('creates a user', async () => {
-    // Given - empty database
-    const result = await api.request(file('./requests/create-user.http'));
+describe('shape', () => {
+    test('creates a user', async () => {
+        // Given - empty database
+        const result = await api.request(file('./requests/create-user.http'));
 
-    // Then - response matches the fixture; row landed in the database
-    expect(result.response).toMatch(file('./expected/user-created.http'));
-    await expect(result.table('users')).toMatch([[1, 'Alice']]);
+        // Then - response matches the fixture; row landed in the database
+        expect(result.response).toMatch(file('./expected/user-created.http'));
+        await expect(result.table('users')).toMatch([[1, 'Alice']]);
+    });
 });
 ```
 
@@ -170,17 +172,19 @@ afterAll(cleanup);
 ```
 
 ```typescript
-// specs/cli/help/help.spec.ts
-import { expect, test } from 'vitest';
+// specs/cli/help/usage.spec.ts — the `help` command, its usage banner
+import { describe, expect, test } from 'vitest';
 import { cli } from '../cli.specification.js';
 
-test('shows help', async () => {
-    // Given
-    const result = await cli.exec('--help');
+describe('usage', () => {
+    test('shows help', async () => {
+        // Given
+        const result = await cli.exec('help');
 
-    // Then - full snapshot of stdout against expected/help.txt
-    expect(result.exitCode).toBe(0);
-    expect(result.stdout).toMatch(file('./expected/help.txt'));
+        // Then - full snapshot of stdout against expected/help.txt
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch(file('./expected/help.txt'));
+    });
 });
 ```
 
@@ -326,16 +330,16 @@ You set exactly one variable, prefixed `TEST_` (rule E1): `TEST_UPDATE=1` turns 
 specs/
 ├── api/
 │   ├── api.specification.ts
-│   └── users/
-│       ├── users.spec.ts          # <aspect>.spec.ts inside its domain (rule C1)
+│   └── users/create/              # POST /users — the subject's standard folder (rules C29, C30)
+│       ├── shape.spec.ts          # <aspect>.spec.ts, one describe('shape') (rules C31, C32)
 │       ├── seeds/                 # *.sql
 │       ├── requests/              # what it sends: *.http complete requests, and body files (*.json, …)
 │       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
 │       └── expected/              # every golden it reads — incl. response *.http, each named by file(…)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)
-    └── help/
-        └── help.spec.ts           # under specs/, the suffix is .spec.ts (rule C12)
+    └── help/                      # the `help` command
+        └── usage.spec.ts          # under specs/, the suffix is .spec.ts (rule C12)
 ```
 
 ## Pitfalls

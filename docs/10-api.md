@@ -209,34 +209,36 @@ Location: /orders/{{uuid#order}}
 ```
 
 ```typescript
-// specs/api/orders/orders.spec.ts
-import { expect, test } from 'vitest';
+// specs/api/orders/create/analytics.spec.ts — POST /orders, what it writes where
+import { describe, expect, test } from 'vitest';
 import { match } from '@jterrazz/test';
-import { api } from '../api.specification.js';
+import { api } from '../../api.specification.js';
 
-test('ingests an order event into analytics', async () => {
-    // Given - catalog in the main database, analytics empty
-    const result = await api
-        .seed(file('./seeds/catalog.sql'), { database: 'db' })
-        .request(file('./requests/new-order.http'));
+describe('analytics', () => {
+    test('ingests an order event into analytics', async () => {
+        // Given - catalog in the main database, analytics empty
+        const result = await api
+            .seed(file('./seeds/catalog.sql'), { database: 'db' })
+            .request(file('./requests/new-order.http'));
 
-    // Then - one row per database, targeted by record key
-    await expect(result.table('orders', { database: 'db' })).toMatch([
-        ['{{uuid}}', 'pending', '{{number}}', '{{iso8601}}'],
-    ]);
-    await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
-        [1, '{{uuid}}', 'order_created'],
-    ]);
-});
+        // Then - one row per database, targeted by record key
+        await expect(result.table('orders', { database: 'db' })).toMatch([
+            ['{{uuid}}', 'pending', '{{number}}', '{{iso8601}}'],
+        ]);
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, '{{uuid}}', 'order_created'],
+        ]);
+    });
 
-test('returns the created order with consistent ids', async () => {
-    // Given
-    const result = await api
-        .seed(file('./seeds/catalog.sql'), { database: 'db' })
-        .request(file('./requests/new-order.http'));
+    test('returns the created order with consistent ids', async () => {
+        // Given
+        const result = await api
+            .seed(file('./seeds/catalog.sql'), { database: 'db' })
+            .request(file('./requests/new-order.http'));
 
-    // Then - {{uuid#order}} appears 3 times (Location header included) → all equal
-    expect(result.response).toMatch(file('./expected/order-created.http'));
+        // Then - {{uuid#order}} appears 3 times (Location header included) → all equal
+        expect(result.response).toMatch(file('./expected/order-created.http'));
+    });
 });
 
 test('links the analytics event to the created order', async () => {
