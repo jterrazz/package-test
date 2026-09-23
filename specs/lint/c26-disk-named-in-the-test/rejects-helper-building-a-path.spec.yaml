@@ -1,7 +1,10 @@
-description: a shared helper that builds the file it hands on is refused where it builds it
+description: a helper, a contract or a specification building a file is refused where it builds it
 fixture: ./fixtures/builds/
 runs:
     - command: .
       exit: 1
       stdout: |
+          specs/api/api.specification.ts:4:25  jterrazz(c26-disk-named-in-the-test)
+          specs/api/orders/contracts/http/stock.ts:1:1  jterrazz(c4-contract-shape)
+          specs/api/orders/contracts/http/stock.ts:4:12  jterrazz(c26-disk-named-in-the-test)
           specs/api/orders/seeded.ts:5:21  jterrazz(c26-disk-named-in-the-test)
