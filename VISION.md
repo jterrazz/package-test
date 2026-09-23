@@ -940,3 +940,58 @@ implementation (the commits say what was broken).
     first setting moves in, does the checker load the file the way the
     toolchain does (Node's type stripping, per unit), or through an
     export of `@jterrazz/typescript/config` so the two loaders are one?
+
+## Iteration 8 — the calls on questions 55 to 58 (2026-09-23)
+
+| #   | Decision                                                                                                                                                                                                                                                        |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 55  | The tree listing is never cached across runs of the editor's host: one lint run at most. Invalidate on the run boundary the plugin has; with none, key the listing on the mtime of git's index plus the listed directory's mtime.                               |
+| 56  | A spec covers the framework's PORT form.                                                                                                                                                                                                                        |
+| 57  | The tree clause of the root walk has one owner, chapter 17; chapter 10 links to it.                                                                                                                                                                             |
+| 58  | `@jterrazz/typescript` is a peer of `@jterrazz/test` — every consumer has the toolchain, and the published types name `@jterrazz/typescript/config`. The range is the toolchain's upcoming major, `^11.0.0`; the `file:` devDependency stays for the prototype. |
+
+### What the package-test branch decided (iteration 8)
+
+- **A dependency reads the disk (a regression, before 55).** F1 told
+  package-typescript that `/vitest` and `/oxlint` were internal
+  subpaths: the exemption reads this package's own manifest, which went
+  through the tree listing, and in an install that manifest sits under a
+  `node_modules/` every consumer's `.gitignore` names. The tracked
+  listing before it hid the same file; it surfaced once package-typescript
+  installed this package as a copy (`install-links=true`). The law: the
+  listing judges the project's OWN files. `package-exports.ts` reads its
+  manifest from the disk, and the seam answers from the disk for any
+  path inside a `node_modules/`. The audit of every reader moved to the
+  listing found no other dependency read through it.
+- **One run (55).** oxlint gives a plugin no run boundary (`before` and
+  `after` are per file), so the listing takes the fallback: a work tree
+  records its index file and when its listing began, and is listed again
+  when the index, or the directory a question reads, changed after that.
+  `lint/fs-cache.ts` keeps no listing of its own any more, and a file's
+  text only while its mtime holds.
+- **The PORT form (56),** proven without a child binding what it is
+  handed, so 53 holds: a child prints the port it got and the adapter's
+  timeout names the URL it polled, on that port at the ready path; and
+  a port the test holds, stated as `port`, is handed as `PORT` and
+  polled at the path. K9 names that one module test out of its reach.
+- **One owner (57).** Chapter 10 keeps what `root` overrides and links
+  to 17 § Root auto-discovery; 17 names `a9w-redundant-root` where both
+  said "future lint warning".
+- **The peer (58)** is required, not optional. A spec holds it: every
+  package a published declaration augments is a dependency or a
+  required peer. With the toolchain still at 10.3.2, `npm install`
+  exited 0 in both repositories and warned of nothing (why npm lets
+  package-typescript's root stand for a `^11` peer is a HYPOTHESIS: the
+  peer names the root project itself).
+
+### Raised by the package-test branch, iteration 8
+
+60. An in-place edit of a `.gitignore` moves neither the index nor the
+    directory a question reads, so the editor sees a new ignore line only
+    at the next index write or directory change (an editor's atomic save
+    does move the directory). Add every `.gitignore`'s mtime to the key,
+    or accept it?
+61. When `@jterrazz/typescript` 11 ships, `^11.0.0` is the peer this
+    package's release must be cut against; until then an install from the
+    registry cannot satisfy it. Does 17 wait for the toolchain's major,
+    or ship with `^10.3.0 || ^11.0.0`?
