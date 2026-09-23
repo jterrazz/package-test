@@ -5,7 +5,7 @@ Declarative testing framework for modules, APIs, jobs, CLIs, rendered components
 A spec reads as a sentence: given → action → assertions. The vitest test name is its only description, every assertion goes through `expect()` with subject-typed matchers, and the infrastructure a spec declares — Postgres, Redis, SQLite, a child process, a real Chromium, an iOS simulator — is started, isolated per worker and cleaned up for you.
 
 ```bash
-npm install -D @jterrazz/test vitest
+npm install -D @jterrazz/test @jterrazz/typescript vitest
 ```
 
 Everything a spec needs imports from `@jterrazz/test`; the entries beside it are tools no spec imports, and they are listed once — [docs/01 § What the tree publishes](docs/01-architecture.md#what-the-tree-publishes).
@@ -193,7 +193,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 
 The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships oxlint cannot. Every diagnostic ends in a rule id and an anchor into the generated catalogue.
 
-Node 24 and vitest 5 are the required peers; everything else — a browser, a database driver, a simulator — is an optional peer, loaded the first time a spec needs it and named in the refusal when it is not there. What to install, and when: [docs/04](docs/04-operating.md#what-a-consumer-must-bring).
+Node 24, vitest 5 and `@jterrazz/typescript` 11 are the required peers; everything else — a browser, a database driver, a simulator — is an optional peer, loaded the first time a spec needs it and named in the refusal when it is not there. What to install, and when: [docs/04](docs/04-operating.md#what-a-consumer-must-bring).
 
 ## Docs
 

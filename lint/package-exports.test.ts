@@ -190,6 +190,52 @@ describe('package-exports — the root has two runtimes and one type surface', (
     });
 });
 
+/** The package a module specifier belongs to: `@scope/name` or `name`, its subpath dropped. */
+function packageOf(specifier: string): string {
+    const parts = specifier.split('/');
+    return (specifier.startsWith('@') ? parts.slice(0, 2) : parts.slice(0, 1)).join('/');
+}
+
+/** Every package a published declaration file augments with `declare module`. */
+function augmentedPackages(): string[] {
+    const augmented = new Set<string>();
+    for (const name of readdirSync(resolve(ROOT, 'dist'))) {
+        if (/\.d\.c?ts$/u.test(name)) {
+            const text = readFileSync(resolve(ROOT, 'dist', name), 'utf8');
+            for (const found of text.matchAll(/^declare module ['"](?<specifier>[^'"]+)['"]/gmu)) {
+                augmented.add(packageOf(found.groups?.specifier ?? ''));
+            }
+        }
+    }
+    return [...augmented].toSorted();
+}
+
+/** What an install of this package makes a consumer have: its dependencies and its required peers. */
+function requiredOfAConsumer(): Set<string> {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: these are the three blocks this reads
+    const manifest = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
+        dependencies?: Record<string, string>;
+        peerDependencies?: Record<string, string>;
+        peerDependenciesMeta?: Record<string, { optional?: boolean }>;
+    };
+    const peers = Object.keys(manifest.peerDependencies ?? {}).filter(
+        (name) => manifest.peerDependenciesMeta?.[name]?.optional !== true,
+    );
+    return new Set([...Object.keys(manifest.dependencies ?? {}), ...peers]);
+}
+
+describe('package-exports — the published types name what a consumer has', () => {
+    test('every package a declaration augments is a dependency or a required peer', () => {
+        // Given - the packages the built declarations merge into (`npm run build` first)
+        const augmented = augmentedPackages();
+
+        // Then - a consumer typechecking them has each one, whatever it installed beside this package
+        expect(augmented).toContain('@jterrazz/typescript');
+        const required = requiredOfAConsumer();
+        expect(augmented.filter((name) => !required.has(name))).toStrictEqual([]);
+    });
+});
+
 describe('package-exports — the tarball carries what a message points at', () => {
     test('every chapter the README links is a file the install holds', () => {
         // Given - the vitrine, whose links are relative and therefore resolved inside the install

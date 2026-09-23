@@ -57,14 +57,15 @@ The rest of this chapter takes a consuming project from `npm install` to two pas
 ### Install
 
 ```bash
-npm install -D @jterrazz/test vitest
+npm install -D @jterrazz/test @jterrazz/typescript vitest
 ```
 
 Peer dependencies:
 
-| Package  | Required | Needed for                                                    |
-| -------- | -------- | ------------------------------------------------------------- |
-| `vitest` | yes      | Everything — the framework registers its matchers into vitest |
+| Package                | Required | Needed for                                                                    |
+| ---------------------- | -------- | ----------------------------------------------------------------------------- |
+| `vitest`               | yes      | Everything — the framework registers its matchers into vitest                 |
+| `@jterrazz/typescript` | yes      | The published types — they add the `test` section to its `jterrazz.config.ts` |
 
 `msw` (outgoing HTTP interception for `.intercept()`) ships as a direct dependency — no separate install. API specs pass your web app to `server`; the adapter only needs an object with a `request()` method, so bring your own web framework (e.g. `hono`) in your project.
 
