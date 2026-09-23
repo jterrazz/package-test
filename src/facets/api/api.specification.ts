@@ -9,6 +9,7 @@ import {
 } from '../../model/chain/services.js';
 import type { DatabaseKeys, ServiceRecord } from '../../model/chain/services.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
+import { writeLedger } from '../../model/routes/routes.js';
 import type { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { HonoAdapter } from '../../seams/hono/hono.adapter.js';
 import { createApiFacet } from './api.chain.js';
@@ -19,6 +20,8 @@ import type { ApiSpecification } from './api.chain.js';
 /** Any object with a request method compatible with Hono's app.request(). */
 export type HonoApp = {
     request: (path: string, init?: RequestInit) => Promise<Response> | Response;
+    /** The route table a Hono app carries — what route coverage measures the run against. */
+    routes?: readonly { method: string; path: string }[];
 };
 
 /** Options for {@link startApi | specification.api}. */
@@ -60,6 +63,19 @@ export type ApiHandle<DatabaseKey extends string = string> = {
     docker: (containerId: string) => ContainerAccessor;
 };
 
+/**
+ * Where the run collects route ledgers — what the api project's global setup
+ * provides; `undefined` for a run that measures no route coverage.
+ */
+async function routesLedger(): Promise<string | undefined> {
+    try {
+        const { inject } = await import('vitest');
+        return inject('routesLedger');
+    } catch {
+        return undefined;
+    }
+}
+
 // ── Constructor ──
 
 export async function startApi<Services extends ServiceRecord>(
@@ -78,17 +94,25 @@ export async function startApi<Services extends ServiceRecord>(
         root,
     );
     const app = options.server(services);
+    const server = new HonoAdapter(app);
 
     const config: SpecificationConfig = {
         database,
         databaseKeys,
         databases,
-        server: new HonoAdapter(app),
+        server,
     };
 
     return {
         api: createApiFacet(config),
         cleanup: async () => {
+            const ledgers = await routesLedger();
+            if (ledgers !== undefined) {
+                writeLedger(ledgers, {
+                    declared: server.declared() ?? [],
+                    reached: server.reached,
+                });
+            }
             await stopProcesses();
             await releaseIsolation(services);
             await orchestrator.stop();

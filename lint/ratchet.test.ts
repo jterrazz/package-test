@@ -96,6 +96,22 @@ describe('the test ratchet — counts that may fall and never rise', () => {
         );
     });
 
+    test("the routes the run holds are the run's: never judged here, never dropped by a recording", () => {
+        // Given - a test section holding a checker key and the run's route key
+        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        writeFileSync(
+            join(root, BASELINE_FILE),
+            '{\n    "test": { "jterrazz/old": 1, "routes/unreached": 2 }\n}\n',
+        );
+
+        // When - the checker records its own counts, none of which is a route
+        writeBaseline(root, { 'jterrazz/new': 1 });
+
+        // Then - the route key is kept, and judging never asks it to be deleted
+        expect(readBaseline(root)).toStrictEqual({ 'jterrazz/new': 1, 'routes/unreached': 2 });
+        expect(judge({ 'jterrazz/new': 1 }, readBaseline(root))).toStrictEqual([]);
+    });
+
     test("a file holding another package's section alone keeps no test ratchet", () => {
         // Given - a family file with a typescript section only
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));

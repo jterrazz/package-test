@@ -27,6 +27,7 @@ export default defineConfig([
             checker: 'lint/checker-cli.ts',
             coverage: 'lint/coverage-cli.ts',
             index: 'src/index.ts',
+            'route-coverage': 'src/runner/route-coverage.ts',
             vitest: 'src/runner/index.ts',
         },
         format: ['esm'],

@@ -11,10 +11,10 @@ import type {} from '@jterrazz/typescript/config';
  */
 export type TestSettings = {
     /**
-     * The routes the member's api declares: a path, from the config's
-     * directory, to an OpenAPI document (JSON or YAML). The checker reports
-     * every route no document or spec of the member's `specs/` tree reaches
-     * (rule B12).
+     * The routes the member's api declares, when its app carries no table the
+     * api facet reads (Hono's `app.routes`): a path, from the config's
+     * directory, to an OpenAPI document (JSON or YAML). The api project's run
+     * names every declared route no test reached.
      */
     routes?: string;
 };

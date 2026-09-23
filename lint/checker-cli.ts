@@ -8,7 +8,6 @@ import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from '.
 import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
 import type { Migration } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
-import { loadRouteSources } from './checker-routes.js';
 import { fixGroundSharing } from './checker-sharing.js';
 import { fixSpecFiles } from './checker-spec.js';
 import {
@@ -603,13 +602,6 @@ function requireReport(path: string | undefined): string | undefined {
 }
 
 const reportFile = requireReport(oxlintReport);
-
-// The route source a member declares lives in its `jterrazz.config.ts`, which
-// Node loads asynchronously; every member a run may judge is read once, here.
-await loadRouteSources([
-    ...discoverMembers(resolve(positional ?? '.')),
-    ...(member === undefined ? [] : [resolve(member)]),
-]);
 
 // ── Record the ratchet ──
 

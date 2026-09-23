@@ -2,6 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { ROUTES_KEY } from '../src/model/routes/routes.js';
+
 /**
  * The ratchet this package owns: a count per rule that may fall and never rise.
  *
@@ -75,6 +77,10 @@ export function judge(
         }
     }
     for (const key of Object.keys(baseline).toSorted()) {
+        // The run judges the routes it measured; the checker never counts them.
+        if (key === ROUTES_KEY) {
+            continue;
+        }
         if ((counts[key] ?? 0) === 0) {
             broken.push(`${key} is at zero — the ratchet moved, delete its entry`);
         }
@@ -192,8 +198,11 @@ function membersOf(text: string): MemberSpan[] {
  * the old one's value where it stood, or closes the object where there was none.
  */
 export function writeBaseline(root: string, counts: Readonly<Record<string, number>>): void {
+    // The run's own key stays what the run recorded: the checker never counts routes.
+    const held = readBaseline(root)[ROUTES_KEY];
+    const kept = held === undefined ? counts : { ...counts, [ROUTES_KEY]: held };
     const sorted = Object.fromEntries(
-        Object.entries(counts).toSorted(([a], [b]) => (a < b ? -1 : 1)),
+        Object.entries(kept).toSorted(([a], [b]) => (a < b ? -1 : 1)),
     );
     const section = JSON.stringify(sorted, null, 4).replaceAll('\n', '\n    ');
     const path = join(root, BASELINE_FILE);

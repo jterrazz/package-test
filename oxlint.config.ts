@@ -77,6 +77,8 @@ const FRAMEWORK_LAYERS = {
             'model/chain/resolve',
             // Every gate judges the tree the runtime reads: what git does not ignore.
             'seams/git/tree',
+            // The run owns one key of the ratchet the checker writes: route coverage.
+            'model/routes/routes',
         ],
     },
     model: {

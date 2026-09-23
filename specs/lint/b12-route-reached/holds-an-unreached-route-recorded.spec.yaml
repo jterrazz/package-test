@@ -1,9 +1,0 @@
-description: an unreached route the ratchet recorded is held, and the next run passes
-fixture: ./fixtures/unreached/
-runs:
-    - command: checker baseline .
-      exit: 0
-    - command: checker .
-      exit: 0
-      files:
-          jterrazz.baseline.json: { contains: '"jterrazz-check/b12": 1' }

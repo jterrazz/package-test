@@ -1,7 +1,0 @@
-description: a declared route no document or spec sends is refused on the line the source declares it
-fixture: ./fixtures/unreached/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          openapi.yaml:6:1  jterrazz-check(b12)

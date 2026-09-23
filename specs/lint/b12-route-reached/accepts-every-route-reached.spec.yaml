@@ -1,5 +1,0 @@
-description: every route a literal call or a request line reaches passes, a capture filling a parameter
-fixture: ./fixtures/reached/
-runs:
-    - command: checker .
-      exit: 0

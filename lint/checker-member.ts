@@ -6,7 +6,6 @@ import { isGroundName } from '../src/model/chain/ground.js';
 import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
 import { diskTargetFindings } from './checker-crossfile.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
-import { checkRoutesReached } from './checker-routes.js';
 import type { TokenViolation } from './checker.js';
 import { isTestFileName } from './role.js';
 
@@ -567,7 +566,6 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
         ...groundSynonyms(memberDir, label),
         ...moduleTestTargets(memberDir, rootDir),
-        ...checkRoutesReached(memberDir, rootDir),
     ];
 }
 

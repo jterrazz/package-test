@@ -191,7 +191,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/catalog.ts',
             'lint/checker-facets.ts',
             'lint/checker-placement.ts',
-            'lint/checker-routes.ts',
             'lint/checker-sharing.ts',
             'lint/fs-cache.ts',
         ),

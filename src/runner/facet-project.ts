@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
@@ -91,4 +93,14 @@ export function documentProject(
             }),
         ],
     }) as TestProjectInlineConfiguration;
+}
+
+/**
+ * The global setup that measures route coverage — the module beside this one:
+ * `route-coverage.ts` in a source checkout, `route-coverage.js` in the built
+ * package, where the bundle and its entries share one folder.
+ */
+export function routeCoverageSetup(): string {
+    const source = join(import.meta.dirname, 'route-coverage.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'route-coverage.js');
 }

@@ -151,7 +151,6 @@ export const TREE_PASS_IDS = [
  * ever reached a specs tree.
  */
 export const MEMBER_PASS_IDS = [
-    'b12-route-reached',
     'c12-spec-file-name',
     'c8-disk-target-exists',
     'c25-no-ground-synonym',

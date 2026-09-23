@@ -285,9 +285,15 @@ test('the users seeded are the users listed, in the order they were inserted', a
 
 A journey — a request carrying what an earlier response returned — is code: read the value from the first result, send it in the next chain. `TEST_UPDATE=1` writes an empty ` toMatch(`) `` with what came back ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)).
 
-### Route coverage (rule B12)
+### Route coverage
 
-Line coverage says which lines of the app ran; it cannot say which routes no case asked for. A member that declares its routes — `test: { routes: './openapi.yaml' }` in `jterrazz.config.ts`, an OpenAPI document, JSON or YAML — has the checker report every route no document and no spec of its `specs/` tree reaches, on the line the source declares it:
+Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The table is the app's own — Hono's `app.routes`, read from the app each `specification.api()` started — so it is the table that served the tests, never a copy that can drift from it. A path parameter (`:id`) takes any one segment, a `*` tail the rest of the path.
+
+```
+api routes: all 12 declared routes reached
+```
+
+A route no test reached fails the run, each one named; the count is a ratchet, held under `jterrazz.baseline.json › test › routes/unreached` — `TEST_UPDATE=1` records where the run stands, the checker's own recording keeps that key, and a run that reaches more is what lowers it. An app with no table the facet reads states its routes instead, as an OpenAPI document (JSON or YAML) named in `jterrazz.config.ts`:
 
 ```typescript
 // jterrazz.config.ts
@@ -296,7 +302,7 @@ import { defineConfig } from '@jterrazz/typescript/config';
 export default defineConfig({ test: { routes: './openapi.yaml' } });
 ```
 
-What reaches a route — a document's request line, a spec's literal call, a capture filling a parameter — is the rule's own sentence, B12 in [19 — Linting](19-linting.md); the findings are recorded and held by the ratchet like any other. The source is declared rather than read from the served app because the pass runs in the lint, before any test: Hono's `app.routes` exists only once the factory is handed started services.
+The measure is the `api()` project's global setup; a project written by hand measures nothing.
 
 The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).
 
