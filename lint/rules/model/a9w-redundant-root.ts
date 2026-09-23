@@ -8,7 +8,7 @@ import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
 /**
  * The root the convention would derive: the
- * framework's own walk-up, run against this layer's cached fs probe. The rule
+ * framework's own walk-up, run against this layer's fs probe. The rule
  * flags a `root` that the runner would have found by itself, so the two MUST
  * be the same function — a private copy of the walk drifted from it before.
  */

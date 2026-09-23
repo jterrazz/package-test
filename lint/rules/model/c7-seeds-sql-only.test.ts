@@ -2,8 +2,9 @@ import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 
+import type { AstNode, RuleContext } from '../../oxlint-api.js';
 import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { c7SeedsSqlOnly } from './c7-seeds-sql-only.js';
 
@@ -83,4 +84,40 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
             filename: '/repo/src/specification/matching/match.test.ts',
         },
     ],
+});
+
+/** One lint pass of C7 over `file`, in this process: the reports it makes. */
+function lintPass(file: string): string[] {
+    const reported: string[] = [];
+    const context: Pick<RuleContext, 'filename' | 'physicalFilename' | 'report'> = {
+        filename: file,
+        physicalFilename: file,
+        report: (diagnostic) => {
+            reported.push(String(diagnostic.data?.entry));
+        },
+    };
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reads only the file's name and `report`; the rest of oxlint's context is not what this pass is about
+    const visitor = c7SeedsSqlOnly.create(context as RuleContext);
+    const program: AstNode = { type: 'Program' };
+    const enterProgram = visitor.Program;
+    enterProgram?.(program);
+    return reported;
+}
+
+describe('c7-seeds-sql-only — the editor lints again in one process', () => {
+    test('a stray written after a first pass is seen by the second', () => {
+        // Given - a git checkout whose seeds/ holds one `.sql`, linted once
+        const root = checkoutUnder('work', ['specs/app/widget/seeds']);
+        writeFileSync(join(root, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
+        execFileSync('git', ['init', '--quiet'], { cwd: root });
+        execFileSync('git', ['add', '.'], { cwd: root });
+        const file = join(root, 'specs/app/widget/widget.test.ts');
+        expect(lintPass(file)).toStrictEqual([]);
+
+        // When - a stray is written beside it, and nothing restarts the host
+        writeFileSync(join(root, 'specs/app/widget/seeds/users.json'), '[]\n');
+
+        // Then - the next pass reports it
+        expect(lintPass(file)).toStrictEqual(['users.json']);
+    });
 });

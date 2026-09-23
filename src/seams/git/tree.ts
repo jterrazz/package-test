@@ -10,9 +10,9 @@ import { basename, dirname, join, resolve, sep } from 'node:path';
  * editor as in CI.
  *
  * A directory inside a git work tree is answered from ONE `git ls-files
- * --cached --others --exclude-standard` of that tree, run from its top level
- * and kept until {@link forgetTree}: its listed paths still on disk (a deleted
- * file the index still holds is gone), typed as the disk types them. A
+ * --cached --others --exclude-standard` of that tree, run from its top level:
+ * its listed paths still on disk (a deleted file the index still holds is
+ * gone), typed as the disk types them. A
  * directory git places in no work tree — `git rev-parse --show-cdup` fails
  * there, and a hand-made `.git` folder fails it too — is read from the disk,
  * which is where every E2E fixture the runner copies and every rule test's
@@ -21,6 +21,12 @@ import { basename, dirname, join, resolve, sep } from 'node:path';
  * The listing judges the project's OWN files. A path inside a `node_modules/`
  * is a dependency's, whatever `.gitignore` says of it, and is read from the
  * disk too.
+ *
+ * A listing answers only while it is newer than what it was read from. It is
+ * read again when git's index, or the directory a question reads the children
+ * of, changed after it was taken — so an editor host that keeps this module
+ * loaded across lint runs sees a file written between two of them — and it is
+ * dropped by {@link forgetTree}.
  */
 
 /** A listed child: the part of `Dirent` the walks read. */
@@ -31,8 +37,16 @@ export type TreeEntry = {
     name: string;
 };
 
-/** One work tree: its top level and, per listed directory, the names it holds. */
-type WorkTree = { children: Map<string, Set<string>>; top: string };
+/**
+ * One work tree: its top level, per listed directory the names it holds, the
+ * index file git keeps for it, and when the listing began (epoch ms).
+ */
+type WorkTree = {
+    children: Map<string, Set<string>>;
+    index: string;
+    listedAt: number;
+    top: string;
+};
 
 const trees: WorkTree[] = [];
 /** Directories known to lie in no work tree — their descendants neither. */
@@ -60,7 +74,7 @@ function listNotIgnored(top: string): null | string[] {
     return listed.stdout.split('\0').filter((path) => path !== '');
 }
 
-function indexOf(top: string, paths: string[]): WorkTree {
+function indexOf(top: string, paths: string[], index: string, listedAt: number): WorkTree {
     const children = new Map<string, Set<string>>();
     for (const path of paths) {
         // An untracked nested repository is listed as `sub/`: the trailing
@@ -77,7 +91,24 @@ function indexOf(top: string, paths: string[]): WorkTree {
             parent = join(parent, segment);
         }
     }
-    return { children, top };
+    return { children, index, listedAt, top };
+}
+
+/** When `path` last changed (epoch ms), 0 when it is not there. */
+function changedAt(path: string): number {
+    return statSync(path, { throwIfNoEntry: false })?.mtimeMs ?? 0;
+}
+
+/** Is the listing older than the index, or than the directory `dir` whose children are read? */
+function stale(tree: WorkTree, dir: string): boolean {
+    return changedAt(tree.index) > tree.listedAt || changedAt(dir) > tree.listedAt;
+}
+
+/** A fresh listing of the work tree at `top`, or null when git will not say. */
+function listTree(top: string, index: string): null | WorkTree {
+    const listedAt = Date.now();
+    const paths = listNotIgnored(top);
+    return paths === null ? null : indexOf(top, paths, index, listedAt);
 }
 
 /** Is `path` inside an installed dependency? */
@@ -85,30 +116,49 @@ function inDependency(path: string): boolean {
     return path.split(sep).includes('node_modules');
 }
 
-/** The work tree `dir` lies in, or null when git places it in none or it is a dependency's. */
-function workTreeOf(dir: string): null | WorkTree {
+/**
+ * The work tree `dir` lies in, or null when git places it in none or it is a
+ * dependency's — listed afresh when the listing is older than `read`, the
+ * directory whose children the caller is about to read.
+ */
+function workTreeOf(dir: string, read: string): null | WorkTree {
     if (inDependency(dir)) {
         return null;
     }
-    const known = trees.find(({ top }) => under(dir, top));
+    const at = trees.findIndex(({ top }) => under(dir, top));
+    const known = trees[at];
     if (known !== undefined) {
-        return known;
+        if (!stale(known, read)) {
+            return known;
+        }
+        const relisted = listTree(known.top, known.index);
+        if (relisted === null) {
+            trees.splice(at, 1);
+            return null;
+        }
+        trees[at] = relisted;
+        return relisted;
     }
     if ([...outside].some((root) => under(dir, root))) {
         return null;
     }
-    const cdup = spawnSync('git', ['rev-parse', '--show-cdup'], {
+    const located = spawnSync('git', ['rev-parse', '--show-cdup', '--git-path', 'index'], {
         cwd: dir,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'ignore'],
     });
-    const top = resolve(dir, cdup.stdout?.trim() ?? '');
-    const paths = cdup.error === undefined && cdup.status === 0 ? listNotIgnored(top) : null;
-    if (paths === null) {
+    // `--show-cdup` prints an empty line at the top level: the two answers are
+    // Read by position, never trimmed together.
+    const [cdup = '', index = ''] = (located.stdout ?? '').split('\n');
+    const top = resolve(dir, cdup);
+    const tree =
+        located.error === undefined && located.status === 0
+            ? listTree(top, resolve(dir, index))
+            : null;
+    if (tree === null) {
         outside.add(dir);
         return null;
     }
-    const tree = indexOf(top, paths);
     trees.push(tree);
     return tree;
 }
@@ -137,7 +187,7 @@ function entryOf(dir: string, name: string): null | TreeEntry {
 export function treeEntries(dir: string): TreeEntry[] {
     const absolute = resolve(dir);
     const onDisk = readdirSync(absolute, { withFileTypes: true });
-    const tree = workTreeOf(absolute);
+    const tree = workTreeOf(absolute, absolute);
     if (tree === null) {
         return onDisk;
     }
@@ -166,7 +216,7 @@ export function treeKind(path: string): 'directory' | 'file' | undefined {
         return undefined;
     }
     const kind = directory ? 'directory' : 'file';
-    const tree = workTreeOf(directory ? absolute : dirname(absolute));
+    const tree = workTreeOf(directory ? absolute : dirname(absolute), dirname(absolute));
     if (tree === null) {
         return kind;
     }

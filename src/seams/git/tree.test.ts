@@ -61,6 +61,40 @@ describe('the tree git does not ignore', () => {
         expect(treeKind(join(root, 'src', 'gone.ts'))).toBeUndefined();
     });
 
+    test('sees a file and a folder created after a first read, with no forget — an editor lints again', () => {
+        // Given - a repository whose tree was read once
+        const root = project(['src/old.ts'], { add: ['src'] });
+        expect(treeNames(join(root, 'src'))).toStrictEqual(['old.ts']);
+
+        // When - a module and a folder are written after it, and nothing drops the listing
+        writeFileSync(join(root, 'src', 'new.ts'), 'new\n');
+        mkdirSync(join(root, 'src', 'nested'));
+        writeFileSync(join(root, 'src', 'nested', 'deep.ts'), 'deep\n');
+
+        // Then - the next read sees them
+        expect(treeNames(join(root, 'src')).toSorted()).toStrictEqual([
+            'nested',
+            'new.ts',
+            'old.ts',
+        ]);
+        expect(treeKind(join(root, 'src', 'new.ts'))).toBe('file');
+        expect(treeKind(join(root, 'src', 'nested'))).toBe('directory');
+        expect(treeNames(join(root, 'src', 'nested'))).toStrictEqual(['deep.ts']);
+    });
+
+    test('reads the index again once it moved — a path `git rm --cached` and ignored leaves the tree', () => {
+        // Given - a tracked data file under a folder ignored after it was added, read once
+        const root = project(['data/dump.json', 'src/a.ts'], { add: ['data', 'src'] });
+        writeFileSync(join(root, '.gitignore'), 'data/\n');
+        expect(treeKind(join(root, 'data', 'dump.json'))).toBe('file');
+
+        // When - git stops tracking it: only the index changes
+        execFileSync('git', ['rm', '--cached', '--quiet', 'data/dump.json'], { cwd: root });
+
+        // Then - the ignore rule now hides it
+        expect(treeKind(join(root, 'data', 'dump.json'))).toBeUndefined();
+    });
+
     test('reads the disk where git places the directory in no work tree', () => {
         // Given - two files and no repository
         const root = project(['src/a.ts', 'src/b.log']);

@@ -7,9 +7,7 @@ import { isUnderSpecs, specsAnchor } from './ast.js';
 
 /**
  * The anchor probes the real filesystem for `package.json`, so the fixtures are
- * real directories. Everything is laid out ONCE, before the first probe: the
- * fs-cache is module-level, and a path probed before it exists stays remembered
- * as missing.
+ * real directories, laid out once for every case below.
  */
 const root = mkdtempSync(resolve(tmpdir(), 'specs-anchor-'));
 
