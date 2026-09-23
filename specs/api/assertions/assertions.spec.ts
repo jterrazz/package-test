@@ -169,6 +169,18 @@ describe('shared assertions', () => {
         await expect(result.table('users', { database: 'db' })).toBeEmpty();
     });
 
+    test('table details — toBeEmpty fails on a table holding a row, naming the count', async () => {
+        // Given - one user seeded
+        const result = await api
+            .seed(file('./seeds/one-user.sql'), { database: 'db' })
+            .get('/users');
+
+        // Then - the matcher refuses, and says how many rows it found
+        await expect(expect(result.table('users', { database: 'db' })).toBeEmpty()).rejects.toThrow(
+            /^Expected table "users" to be empty, but it has 1 row$/u,
+        );
+    });
+
     test('table details — throws on unknown database key', async () => {
         // Given - valid request
         const result = await api.get('/users');
