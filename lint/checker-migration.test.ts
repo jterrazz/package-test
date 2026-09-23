@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
+import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
 
 /** A tree written for 16.x, on disk: a specs tree, or (`at: ''`) a member. */
 function tree16(files: Record<string, string>, at = 'specs'): string {
@@ -551,5 +551,78 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
                 '',
             ].join('\n'),
         );
+    });
+});
+
+describe('the 16 → 17 mover — the oxlint config', () => {
+    test('an override of a retired rule leaves with its comment, and one of a renamed rule names its 17 id', () => {
+        // Given - a member whose config overrides D12w, retired into D20, and D8w under its 16 id
+        const member = tree16(
+            {
+                'oxlint.config.ts': [
+                    "import { testing } from '@jterrazz/test/oxlint';",
+                    '',
+                    'export default defineConfig(',
+                    '    compose(node, testing, {',
+                    '        rules: {',
+                    '            // Every cursor spec reads the envelope field by field —',
+                    '            // The threshold is raised once here.',
+                    "            'jterrazz/d12w-response-body-probe': ['warn', { threshold: 8 }],",
+                    "            'jterrazz/d8w-text-bypass': 'off',",
+                    '        },',
+                    '    }),',
+                    ');',
+                    '',
+                ].join('\n'),
+            },
+            '',
+        );
+
+        // When - the mover runs over the member
+        const moves = migrateLintConfig(member, member);
+
+        // Then - oxlint finds every rule the config names, and the move is reported
+        expect(readFileSync(join(member, 'oxlint.config.ts'), 'utf8')).toBe(
+            [
+                "import { testing } from '@jterrazz/test/oxlint';",
+                '',
+                'export default defineConfig(',
+                '    compose(node, testing, {',
+                '        rules: {',
+                "            'jterrazz/d8w-raw-bypass': 'off',",
+                '        },',
+                '    }),',
+                ');',
+                '',
+            ].join('\n'),
+        );
+        expect(moves).toStrictEqual([
+            {
+                file: 'oxlint.config.ts',
+                removed: ['d12w-response-body-probe'],
+                renamed: ['d8w-text-bypass'],
+            },
+        ]);
+    });
+
+    test('the last override of a JSON config leaves no trailing comma, and a second run changes nothing', () => {
+        // Given - a JSON config whose last rule is retired
+        const member = tree16(
+            {
+                '.oxlintrc.json':
+                    '{\n    "rules": {\n        "eqeqeq": "error",\n        "jterrazz/c8-referenced-fixture-exists": "off"\n    }\n}\n',
+            },
+            '',
+        );
+
+        // When - the mover runs twice
+        migrateLintConfig(member, member);
+        const again = migrateLintConfig(member, member);
+
+        // Then - valid JSON, the other rule kept, and nothing left to move
+        expect(readFileSync(join(member, '.oxlintrc.json'), 'utf8')).toBe(
+            '{\n    "rules": {\n        "eqeqeq": "error"\n    }\n}\n',
+        );
+        expect(again).toStrictEqual([]);
     });
 });

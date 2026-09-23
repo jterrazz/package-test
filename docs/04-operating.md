@@ -129,6 +129,15 @@ has run. What it leaves to the reader:
   `-next-line` or `-line` directive naming D8w covers reads `.raw` — the
   capture 16's `.text` was. A directive naming a rule 17 retired names nothing,
   and the toolchain's Suppressions pass reports it: delete it.
+- **An override follows the rule it names too.** oxlint refuses to start on a
+  config naming a rule the plugin does not define, so the mover rewrites each
+  member's oxlint config (`oxlint.config.ts`, its `.js`/`.mjs`/`.mts` forms,
+  `.oxlintrc.json`): an override of a renamed rule names its 17 id, and an
+  override of a static rule 17 retired is removed with the comment lines
+  directly above it —
+  `b2-known-fixture-marker`, `c13-underscored-ground`, `c8-referenced-fixture-exists` and `d12w-response-body-probe` no longer exist.
+  What a removed override tuned is not carried over: the rule that replaced
+  it, if any, is judged at its own defaults.
 - **A computed name is out of its reach.** A template or a variable naming a
   seed, a fixture or a golden is left as written, and the first run names each
   one the verb refuses.

@@ -47,7 +47,11 @@ import { isTestFileName } from './role.js';
  *    where 16 read `.text` — the raw capture it always compared. No 17 file
  *    can name the 16 id, and a renamed directive no longer matches, so the
  *    gesture is idempotent. A directive naming a rule 17 retired is left: the
- *    toolchain's Suppressions pass reports it as dead.
+ *    toolchain's Suppressions pass reports it as dead;
+ * 6. in a member's oxlint config, an override of a rule 17 renamed names its
+ *    new id, and an override of a static rule 17 retired is removed with the
+ *    comment lines that stood directly above it — oxlint refuses to start on
+ *    a rule the plugin does not define.
  *
  * The `…File`/`…Directory` verbs of the 17 prototype are read too
  * (`.seedFile('./seeds/x.sql')` → `.seed(file('./seeds/x.sql'))`), so a tree
@@ -205,6 +209,179 @@ const RENAMED_RULES: Readonly<Record<string, string>> = {
     'd8w-text-bypass': 'd8w-raw-bypass',
 };
 
+/** A string literal's opening quote. */
+const QUOTES = new Set(["'", '"', '`']);
+
+/**
+ * The static rules 16 defined and 17 no longer does — an override of one in
+ * an oxlint config stops oxlint from starting. A rule 17 renamed is in
+ * {@link RENAMED_RULES} instead.
+ */
+const RETIRED_RULES: readonly string[] = [
+    'b2-known-fixture-marker',
+    'c13-underscored-ground',
+    'c8-referenced-fixture-exists',
+    'd12w-response-body-probe',
+];
+
+/** The files oxlint reads its config from, at a member's root. */
+const LINT_CONFIGS = [
+    '.oxlintrc.json',
+    'oxlint.config.js',
+    'oxlint.config.mjs',
+    'oxlint.config.mts',
+    'oxlint.config.ts',
+];
+
+/** What the mover did to one oxlint config: the overrides it removed and renamed, by rule id. */
+export type LintConfigMove = { file: string; removed: string[]; renamed: string[] };
+
+/** Past the string or comment that opens at `index` — or `index` itself when none does. */
+function pastSkipped(text: string, index: number): number {
+    const char = text[index] ?? '';
+    if (QUOTES.has(char)) {
+        let at = index + 1;
+        while (at < text.length && text[at] !== char) {
+            at += text[at] === '\\' ? 2 : 1;
+        }
+        return at + 1;
+    }
+    if (text.startsWith('//', index)) {
+        const next = text.indexOf('\n', index);
+        return next === -1 ? text.length : next;
+    }
+    if (text.startsWith('/*', index)) {
+        const close = text.indexOf('*/', index);
+        return close === -1 ? text.length : close + 2;
+    }
+    return index;
+}
+
+/** Where the property value opening at `start` ends: the `,` or the closing bracket at its own depth. */
+function valueEnd(text: string, start: number): number {
+    let depth = 0;
+    let index = start;
+    while (index < text.length) {
+        const past = pastSkipped(text, index);
+        if (past !== index) {
+            index = past;
+            continue;
+        }
+        const char = text[index] ?? '';
+        const closes = ')]}'.includes(char);
+        if ((closes || char === ',') && depth === 0) {
+            return index;
+        }
+        depth += '([{'.includes(char) ? 1 : closes ? -1 : 0;
+        index += 1;
+    }
+    return text.length;
+}
+
+/** The start of the comment-only lines directly above the line that starts at `lineStart`. */
+function commentsAbove(text: string, lineStart: number): number {
+    let start = lineStart;
+    while (start > 0) {
+        const previous = text.lastIndexOf('\n', start - 2) + 1;
+        if (!/^\s*\/\//u.test(text.slice(previous, start - 1))) {
+            break;
+        }
+        start = previous;
+    }
+    return start;
+}
+
+/**
+ * The config without the first property keyed `jterrazz/<id>` — its whole
+ * lines and the comments directly above it when it stands on lines of its
+ * own — or `undefined` when no property is keyed so.
+ */
+function withoutOverride(text: string, id: string, json: boolean): string | undefined {
+    const key = new RegExp(`(['"])jterrazz/${id}\\1\\s*:`, 'u').exec(text);
+    if (key === null) {
+        return undefined;
+    }
+    const valueStop = valueEnd(text, key.index + key[0].length);
+    const comma = text[valueStop] === ',';
+    let end = comma
+        ? valueStop + 1
+        : key.index +
+          key[0].length +
+          text.slice(key.index + key[0].length, valueStop).trimEnd().length;
+    const lineStart = text.lastIndexOf('\n', key.index - 1) + 1;
+    const ownLine = /^\s*$/u.test(text.slice(lineStart, key.index));
+    const lineEnd = text.indexOf('\n', end);
+    const restBlank = /^\s*$/u.test(text.slice(end, lineEnd === -1 ? text.length : lineEnd));
+    const start = ownLine ? commentsAbove(text, lineStart) : key.index;
+    if (ownLine && restBlank) {
+        end = lineEnd === -1 ? text.length : lineEnd + 1;
+    }
+    const before = text.slice(0, start).trimEnd();
+    if (json && !comma && before.endsWith(',')) {
+        // JSON takes no trailing comma: the last property removed takes the one before it.
+        const at = before.length - 1;
+        return text.slice(0, at) + text.slice(at + 1, start) + text.slice(end);
+    }
+    return text.slice(0, start) + text.slice(end);
+}
+
+/** Move one oxlint config to 17: renamed rules take their new id, retired ones leave. */
+function migrateLintConfigText(
+    text: string,
+    json: boolean,
+): Omit<LintConfigMove, 'file'> & { text: string } {
+    const removed: string[] = [];
+    const renamed: string[] = [];
+    let next = text;
+    for (const [from, to] of Object.entries(RENAMED_RULES)) {
+        const replaced = next.replaceAll(
+            new RegExp(`(['"])jterrazz/${from}\\1`, 'gu'),
+            `$1jterrazz/${to}$1`,
+        );
+        if (replaced !== next) {
+            renamed.push(from);
+            next = replaced;
+        }
+    }
+    for (const id of RETIRED_RULES) {
+        let without = withoutOverride(next, id, json);
+        if (without !== undefined) {
+            removed.push(id);
+        }
+        while (without !== undefined) {
+            next = without;
+            without = withoutOverride(next, id, json);
+        }
+    }
+    return { removed, renamed, text: next };
+}
+
+/**
+ * Move the oxlint configs at a member's root to 17 — the overrides of a
+ * renamed rule renamed, of a retired one removed — and say what moved, each
+ * file relative to `root`.
+ */
+export function migrateLintConfig(member: string, root: string): LintConfigMove[] {
+    const moves: LintConfigMove[] = [];
+    for (const name of LINT_CONFIGS) {
+        const path = join(member, name);
+        if (treeKind(path) !== 'file') {
+            continue;
+        }
+        const text = readFileSync(path, 'utf8');
+        const moved = migrateLintConfigText(text, name.endsWith('.json'));
+        if (moved.text !== text) {
+            writeFileSync(path, moved.text);
+            moves.push({
+                file: relative(root, path),
+                removed: moved.removed,
+                renamed: moved.renamed,
+            });
+        }
+    }
+    return moves;
+}
+
 /** The 16 id whose covered line reads `.raw` once its directive is renamed. */
 const TEXT_BYPASS = /\bjterrazz\/d8w-text-bypass\b/u;
 
@@ -213,9 +390,6 @@ const DIRECTIVE = /(?:oxlint|eslint)-(?:disable|enable)(?<scope>-next-line|-line
 
 /** The raw read a 16 `.text` was, in a value comparison: `expect(<x>.text).toContain(`. */
 const RAW_READ = /\.text(?=\s*\)(?:\.not)?\.(?:toContain|toMatch)\()/gu;
-
-/** A string literal's opening quote. */
-const QUOTES = new Set(["'", '"', '`']);
 
 /**
  * Where the comment of a line starts — a `//` or `/*` outside every string

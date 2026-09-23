@@ -5,8 +5,8 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { moveKeepingHistory } from '../src/seams/git/tree.js';
 import { fixCopiedGround } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
-import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
-import type { Migration } from './checker-migration.js';
+import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
+import type { LintConfigMove, Migration } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { fixGroundSharing } from './checker-sharing.js';
 import { fixSpecFiles } from './checker-spec.js';
@@ -373,6 +373,9 @@ function projectFindings(root: string): TokenViolation[] {
     if (fix) {
         for (const memberDir of discoverMembers(root)) {
             reportMigration(migrateModuleTestsTo17(memberDir, moveKeepingHistory));
+            for (const move of migrateLintConfig(memberDir, root)) {
+                reportLintConfigMove(move);
+            }
         }
     }
     found.push(...checkMembers(root));
@@ -544,6 +547,20 @@ function reportMigration(migration: Migration): void {
     if (migration.directives.length > 0) {
         console.log(
             `conventions checker: renamed the directives naming a renamed rule in ${migration.directives.length} file(s)`,
+        );
+    }
+}
+
+/** Print what the 16 → 17 mover did to one oxlint config. */
+function reportLintConfigMove({ file, removed, renamed }: LintConfigMove): void {
+    for (const id of renamed) {
+        console.log(
+            `conventions checker: ${file} — the override of jterrazz/${id} names its 17 id`,
+        );
+    }
+    for (const id of removed) {
+        console.log(
+            `conventions checker: ${file} — removed the override of jterrazz/${id}, a rule 17 retired`,
         );
     }
 }
