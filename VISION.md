@@ -1493,3 +1493,9 @@ Other rules' input trees stand in folders that ARE their rule's case: 34 fixture
 100.    The split copies every helper a test reads into each file (`inUpdateMode`, `documentAt`): the typescript ratchet's `no-unsafe-type-assertion` sites multiply with them. A helper module per leaf would dedupe them, but C26 forbids a helper building `file()`. Accept the copies, or let a leaf hold a `*.fixtures.ts` the split writes the helpers into?
 101.    C29 counts a test's subjects by the chains it opens; a `beforeAll` chain, or one in a helper outside every test, reaches the file but no test, and the split leaves it in every file. None does here; HYPOTHESIS (2026-09-24): none does in signews-api either, settled by running `jterrazz-test-check --fix` there.
 102.    `make fix` cannot be run before a commit that leaves the specs unmigrated: it migrates them. Every rule commit here ran it, then set the specs tree back before `make check`; the migration landed alone. Worth a `--no-move` for such staging, or is the sequence the answer?
+
+## Iteration 18 (owner, 2026-09-23)
+
+- SQL is NEVER inline: the `sql` tagged template is removed from the package (no legacy), `seed()` takes `file()` only. A seed file used by one test lives beside it in `./seeds/`; shared ones at the leaf or the specs-root pool as before (C28's "file only if shared" does not apply to seeds). The mover/fixer turns every inline `sql` into `./seeds/<name>.sql`, named from its first SQL comment when it has one.
+- C28's other size exceptions stay per role: an inline request body past 30 lines, an inline expectation past 150 lines goes to a file even when unshared. Messages in the four-part form.
+- Open question: typed seed builders (factory-style) — judged by the owner after seeing the seeds as files.
