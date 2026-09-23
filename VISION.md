@@ -1176,3 +1176,65 @@ body }`, token-aware, an absent part not asserted; `tables:` table →
     `clock:` verbatim, so `clock: 2026-03-04T09:30:00Z` does not fix
     `2026-03-04T09:30:00.000Z`; the documents here write the clock in the
     app's own spelling. Compare instants, not strings?
+
+## Iteration 11 — the calls on 65 and 69 (orchestrator, 2026-09-23)
+
+| #   | Decision                                                                                                                                                                                                                                                                                                                                                                                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 65  | The shared pool is not one `fixtures/` folder but the SPECS ROOT's own ground — `<specs>/fixtures/`, `<specs>/seeds/`, `<specs>/requests/`, `<specs>/expected/`, the four roles one level up. A path leaves its leaf only into one of those (C15); C24 judges the role folder the path lands in, so a shared seed is `specs/seeds/`; C14's move applies to all four; the mover and the chapters follow. |
+| 69  | ajv joins the dev dependencies, and a meta-test validates every `.spec.yaml` of this repository against the published schema — the deliberately invalid fixtures excluded — with a negative case per document kind.                                                                                                                                                                                     |
+
+### What the package-test branch did (iteration 11)
+
+- **65.** C24 kept its reading, the first ground folder, which now lands
+  `../../seeds/x.sql` in `specs/seeds/`; its refusal — the oxlint rule and
+  the document grammar alike — names where the file goes, so
+  `../../fixtures/seeds/x.sql` is refused naming `specs/seeds/`. C15 admits
+  the four root folders. C14 reads the four pools, a file entry as a
+  directory, and moves a root seed one leaf reaches for to `<leaf>/seeds/`;
+  it now counts every literal `file()`/`directory()` reference, not only
+  `.fixture(…)`, or a root seed reached by a document in one leaf and a
+  `.seed(file())` in another would have been moved. C9's dead-entry scan
+  reads the four. This repository keeps one shared seed,
+  `specs/seeds/two-users.sql`: an api document lays it under its leaf's
+  delta, a jobs document seeds it.
+- **69.** `lint/schema-documents.test.ts` walks the 237 documents git keeps.
+  "Deliberately invalid" is the parser's verdict, not a hand list: every
+  document the parser reads, the schema validates; every one it refuses sits
+  under `fixtures/`, and the schema refuses it too — but for a name sent
+  before the step that captures it, an order across steps no keyword
+  compares, listed with that reason. The validator lives in the test: the
+  `lint/` layer ships and imports no package.
+- **Found and fixed on the way.** The schema's path patterns read "passes
+  through `seeds/`", so `../../fixtures/seeds/x.sql` validated as a seed the
+  parser refuses — the exact path 65 turns on. They now read the first
+  ground folder, as C24 does.
+
+### Raised by the package-test branch, iteration 11
+
+75. The schema is laxer than the parser on one more shape no fixture holds:
+    an api step with neither `response:` nor `tables:` validates, and the
+    parser refuses it ("a step asserts what came back"). The meta-test only
+    sees the documents that exist. State it in the schema (`anyOf` on the
+    step and the one-step document), or keep the schema a key-set contract?
+76. `fixture:` is judged by "names a `fixtures/` segment anywhere"
+    (`spec-document.ts`, `readFixtures`), not by the first ground folder the
+    other path keys and C24 read: `./seeds/fixtures/x/` passes. Align it?
+77. Nothing pushes ground UP: this tree still keeps six identical
+    `two-users.sql` and five identical `one-user.sql` across leaves. C14 only
+    demotes a lonely pool entry. A warning for byte-identical ground in two
+    leaves, the D25 of seeds, or leave promotion to review?
+78. C9's pool scan counts an entry referenced when any literal of the tree
+    CONTAINS its name, so a leaf's `./seeds/two-users.sql` vouches for
+    `specs/seeds/two-users.sql`. Seeds share names far more than fixture
+    trees did. Resolve each literal from its file, as C14 does?
+79. The pool law is stated twice: `docs/12-cli.md` § Where a fixture lives
+    and `docs/18-conventions.md` § The naming recap. With seeds, requests and
+    goldens in it, the law is no longer the cli's. One owner, 18, and 12
+    links?
+80. Environment: `npm install` / `npm ci` on npm 12 here runs with
+    `install-links=true` and blocked install scripts — `file:../package-typescript`
+    is copied, not linked, and better-sqlite3 has no binding until
+    `npx prebuild-install`. A `make install` on a fresh clone fails the sqlite
+    suites the same way. HYPOTHESIS (2026-09-23): CI is unaffected, settled
+    by its install log.
