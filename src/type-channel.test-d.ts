@@ -45,7 +45,7 @@ export async function typeRows(): Promise<void> {
     // In the record is not a service, and the failure belongs at the call.
     await specification.api({
         server: (services) =>
-            // @ts-expect-error A8 — `cache` is not a key of the services record
+            // @ts-expect-error A8 — `cache` is not a key of the services record [`Property 'cache' does not exist on type '{ db: PostgresHandle; }'`]
             services.cache,
         services: { db: postgres() },
     });
@@ -53,7 +53,7 @@ export async function typeRows(): Promise<void> {
     // A11 — `server` and `url` state two different subjects (a site this run
     // Starts, a site already running), so the pair is inexpressible.
     await specification.website(
-        // @ts-expect-error A11 — `server` and `url` are mutually exclusive
+        // @ts-expect-error A11 — `server` and `url` are mutually exclusive [`Types of property 'url' are incompatible`]
         { server: { command: 'npm start' }, url: 'https://site.test' },
     );
 
@@ -62,41 +62,40 @@ export async function typeRows(): Promise<void> {
 
     // B3 — a chain carries no label: the test's name is the sentence, and a
     // Second one inside the chain would be a second place to read it.
-    // @ts-expect-error B3 — a chain carries no label
+    // @ts-expect-error B3 — a chain carries no label [`Property 'label' does not exist on type 'ApiSpecification<never>'`]
     api.label('the happy path');
 
     // B2 — a string is a value and the disk is `file()` or `directory()`: a
     // Bare string where a file is meant, a file with the wrong tail, a path that
     // Is not relative, a directory without its `/` — none of them compiles. The
-    // Golden rows sit in `model/goldens/matchers.test.ts`, the one file that may
-    // Import the `expect` they are declared on.
-    // @ts-expect-error B2 — a bare string is a value, not a file
+    // Golden rows are D14's, below.
+    // @ts-expect-error B2 — a bare string is a value, not a file [`Argument of type 'string' is not assignable to parameter of type 'DiskFile<".sql">'`]
     api.seed('./seeds/x.sql');
-    // @ts-expect-error B2 — a seed's path ends in `.sql`
+    // @ts-expect-error B2 — a seed's path ends in `.sql` [`Argument of type 'FileAt<"./seeds/x.json">' is not assignable to parameter of type 'DiskFile<".sql">'`]
     api.seed(file('./seeds/x.json'));
-    // @ts-expect-error B2 — a path is relative to the spec file
+    // @ts-expect-error B2 — a path is relative to the spec file [`Argument of type '"x.sql"' is not assignable to parameter of type 'RelativePath<string>'`]
     api.seed(file('x.sql'));
-    // @ts-expect-error B2 — a directory's path ends in `/`
+    // @ts-expect-error B2 — a directory's path ends in `/` [`Argument of type '"./fixtures/shop"' is not assignable to parameter of type 'RelativePath<"/">'`]
     cli.fixture(directory('./fixtures/shop'));
-    // @ts-expect-error B2 — a path ending in `/` is a directory
+    // @ts-expect-error B2 — a path ending in `/` is a directory [`Argument of type '"./fixtures/shop/"' is not assignable to parameter of type 'never'`]
     cli.fixture(file('./fixtures/shop/'));
-    // @ts-expect-error B2 — a request is one `.http` file, not a directory
+    // @ts-expect-error B2 — a request is one `.http` file, not a directory [`is not assignable to parameter of type 'DiskFile<".http">'`]
     await api.request(directory('./requests/'));
-    // @ts-expect-error B2 — a document is a `.spec.yaml` file
+    // @ts-expect-error B2 — a document is a `.spec.yaml` file [`Argument of type 'FileAt<"./case.yaml">' is not assignable to parameter of type 'DiskFile<".spec.yaml">'`]
     await cli.run(file('./case.yaml'));
-    // @ts-expect-error B2 — a path is a value where a verb takes one
+    // @ts-expect-error B2 — a path is a value where a verb takes one [`Argument of type 'FileAt<"./requests/orders.http">' is not assignable to parameter of type 'string'`]
     await api.get(file('./requests/orders.http'));
-    // @ts-expect-error B2 — a command is a value where a verb takes one
+    // @ts-expect-error B2 — a command is a value where a verb takes one [`Argument of type 'FileAt<"./fixtures/args.txt">' is not assignable to parameter of type 'string | string[] | undefined'`]
     await cli.exec(file('./fixtures/args.txt'));
 
     // D14 — the golden half of `toMatch` takes the disk its subject has: a
     // Value subject has none, a stream's is a file, a tree's is a directory.
     const out = await cli.exec();
-    // @ts-expect-error D14 — a string subject has no golden: its argument is a value
+    // @ts-expect-error D14 — a string subject has no golden: its argument is a value [`Argument of type 'FileAt<"./expected/abc.txt">' is not assignable to parameter of type 'string | RegExp'`]
     expect('abc').toMatch(file('./expected/abc.txt'));
-    // @ts-expect-error D14 — a stream's golden is a file
+    // @ts-expect-error D14 — a stream's golden is a file [`is not assignable to parameter of type 'DiskFile'`]
     expect(out.stdout).toMatch(directory('./expected/out/'));
-    // @ts-expect-error D14 — a tree's golden is a directory
+    // @ts-expect-error D14 — a tree's golden is a directory [`Argument of type 'FileAt<"./expected/tree.txt">' is not assignable to parameter of type 'DiskDirectory'`]
     await expect(out.filesystem).toMatch(file('./expected/tree.txt'));
     expect(out.stdout).toMatch(file('./expected/out.txt'));
     expect(out.stdout.text).toMatch(/built/u);
@@ -110,18 +109,18 @@ export async function typeRows(): Promise<void> {
 
     // B1 — exactly one terminal action closes a chain: what a terminal action
     // Answers is a RESULT, and a result has no verbs to continue with.
-    // @ts-expect-error B1 — one terminal action closes the chain
+    // @ts-expect-error B1 — one terminal action closes the chain [`Property 'get' does not exist on type 'HttpResult'`]
     await result.get('/orders/2');
 
     // D1 — a result accessor is read-only: the answer a run produced is
     // Evidence, and a test that can rewrite its evidence proves nothing.
-    // @ts-expect-error D1 — a result accessor is read-only
+    // @ts-expect-error D1 — a result accessor is read-only [`Cannot assign to 'status' because it is a read-only property`]
     result.status = 200;
 
     // M2 — `mockOf<Port>()` needs the port: the type argument IS the contract
     // The double stands for, and without it the double has no surface at all.
     const anonymous = mockOf();
-    // @ts-expect-error M2 — a double with no port has nothing to call
+    // @ts-expect-error M2 — a double with no port has nothing to call [`Property 'send' does not exist on type 'object'`]
     anonymous.send('reader@site.test');
 
     // The shape the row is written FOR, so the file also shows what passes.
@@ -138,13 +137,13 @@ export async function typeRows(): Promise<void> {
 export async function streamValueRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
     const out = await cli.exec();
-    // @ts-expect-error D14 — a stream compared as a value is its text
+    // @ts-expect-error D14 — a stream compared as a value is its text [`Type 'never' has no call signatures`]
     expect(out.stdout).toContain('built');
-    // @ts-expect-error D14 — a stream compared as a value is its text
+    // @ts-expect-error D14 — a stream compared as a value is its text [`Type 'never' has no call signatures`]
     expect(out.stderr).not.toContain('warning');
     expect(out.stdout.text).toContain('built');
     expect(['built']).toContain('built');
-    // @ts-expect-error D14 — an empty stream is an empty text
+    // @ts-expect-error D14 — an empty stream is an empty text [`Type 'never' has no call signatures`]
     await expect(out.stderr).toBeEmpty();
     expect(out.stderr.text).toBe('');
 }

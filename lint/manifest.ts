@@ -1288,7 +1288,9 @@ export const META_ROWS: CatalogEntry[] = [
  * Each row is proven by an `@ts-expect-error` in `src/type-channel.test-d.ts`
  * (the W6 verb rows have a fuller set in the component facet's own type test),
  * which `typescript check` runs over the whole repository — the assertion fails
- * the day the line it marks starts compiling.
+ * the day the line it marks starts compiling — and each marker names the words
+ * of the error it is written for, which `lint/type-channel.test.ts` holds it
+ * to: a line refused for another reason fails too.
  */
 export const TYPE_ROWS: CatalogEntry[] = [
     {
