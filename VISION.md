@@ -172,6 +172,8 @@ runs:
 | iteration 9      | shown: 62 — a green run keeping no `test` section prints `jterrazz.baseline.json › test: nothing held`, a deferring run names the judging file relative to the project; 63 — a stream handed a value `toMatch` past the compiler is refused naming `.text`, in both builds                                                                                                                                                                                      | —                                                                              | —                   |
 | iteration 10     | shown: `kind: api` and `kind: jobs` documents — the grammar, the schema, the runner (`api.run`, `jobs.run`, the plugin by kind, the `api()`/`jobs()` door), steps and captures, every path key under C24/C15/C8/C9; B12 route coverage from a declared OpenAPI source; this package's pure-data api and jobs specs migrated; chapter 20 owns the format                                                                                                         | —                                                                              | —                   |
 | iteration 14     | shown: variant B — `toMatch` compares a whole result to a value in place or to `file()`/`directory()` (`toMatchRows` retired), `sql` seeds, `TEST_UPDATE=1` writing the value into the test source, C28 (a file exists only if shared; C14 folded in), D20 (every test compares its whole result; D12w folded in), route coverage measured at run time (B12 retired); iteration 10's api/jobs documents retired and this package's specs migrated to TypeScript | —                                                                              | —                   |
+| iteration 18     | shown: `sql` removed (export, types, runtime, docs), `seed()` a `.sql` `file()` alone; C28's seed branch (a seed one test reads lives beside it) and per-role caps both ways (requests 30, expected 150); the fixer writes inline `sql` to `./seeds/<name>.sql` and a value past its cap to a file; this package's specs migrated                                                                                                                               | —                                                                              | —                   |
+| iteration 19     | shown: 97 `specification.cli(bin, { commands })` read by the subject reader, first word by default; 98 `test: { collections }` read from `jterrazz.config.ts`; 100 the C29 split moves a helper several new files read into `<folder>/<folder>.fixtures.ts`                                                                                                                                                                                                     | —                                                                              | —                   |
 
 Each branch keeps one commit per unit, so the owner can read the vision
 commit by commit.
@@ -1510,3 +1512,101 @@ Other rules' input trees stand in folders that ARE their rule's case: 34 fixture
 | 100 | No copies: when a split leaves a helper read by several of the new files, it moves it once into the leaf's `<leaf>.fixtures.ts` (the convention's typed-fixture module, domain-named) and imports it; a helper that builds `file()` stays forbidden (C26). |
 | 101 | Settled by running the fixer on signews-api (next round).                                                                                                                                                                                                  |
 | 102 | The sequence is the answer; no `--no-move`.                                                                                                                                                                                                                |
+
+### What the package-test branch did (iteration 18)
+
+- **`sql` is gone** (`fe3388e`). The module, its test, the export, the
+  text branch of the seed queue and every chapter's form: `SeedSource` is
+  `DiskFile<'.sql'>`, so a string or a template is a type error (a
+  type-channel row), and past the compiler the B2 refusal names
+  `seed(file('./seeds/rows.sql'))` (a builder row).
+- **C28's seed branch.** `seeds/` is no inline role: a seed one test reads
+  lives beside it and is never an error for being unshared; the pool-down
+  move is unchanged. SQL still tagged `sql` in a spec — imported from the
+  framework's entry — is refused where the tag stands, and `--fix` writes
+  it to `./seeds/<name>.sql` beside the spec, named by its first `--`
+  comment, else its test's title, else `seed`, a taken name suffixed `-2`
+  and one holding the same bytes reused. That gesture lives alone in
+  `lint/checker-sql-seeds.ts`: no release shipped the tag, so it serves
+  the vision trees and leaves with the prototype.
+- **Per-role caps, both ways.** `requests/` 30 lines (a whole request or a
+  body), `expected/` 150 (`INLINE_CAPS`), a JSON file counted as the value
+  it becomes, so a file inlined and a value extracted measure the same
+  quantity and never oscillate. A single-use file past its cap stays a
+  file; a value written in a test past it is a finding, and `--fix` writes
+  it beside the test named from the test's title — `.json` for an object,
+  `.http` for a request or a response, `.txt` otherwise. A value the fixer
+  cannot read as a literal (a hole, an asymmetric matcher, a table) is
+  reported with a by-hand fix. Messages in the four-part form; `why` is the
+  row's first sentence, shortened so it stays one idea.
+- **This package's specs** were migrated by `make fix`, then by hand: the
+  six seeds renamed by domain (the two identical Alice seeds went to the
+  pool through C27), the titles that said "written in the test" retitled,
+  and the one cli test that existed only for the tag deleted.
+- **Red on a broken implementation:** seeds re-admitted as an inline role
+  (5 C28 documents failed), the requests cap at 150 (3), the expected cap
+  at 151 (2), the comment name ignored (1), `SeedSource` widened to
+  `string` (the type channel's B2 row).
+
+### What the package-test branch did (iteration 19)
+
+- **97** (`c946c7f`). `CliSpecificationOptions.commands`, read by the
+  checker alone. The subject reader takes the literal list from the
+  `specification.cli(…)` of the module the spec imports its `cli` from:
+  with it, every leading word the list holds; without it, the first word.
+  This package's `cli/spawn/shop/` spec moved to `cli/spawn/`; the db-cli
+  runner declares its two commands, which the capability matrix counts.
+- **98.** `TestSettings.collections`; the checker loads `jterrazz.config.ts`
+  with a synchronous `require()` of the ES module (types stripped by Node),
+  every pass being synchronous; a file that does not load is no settings,
+  since the toolchain reports it. `lint/` imports nothing of `src/`, so the
+  loader states the key it reads (`CheckerSettings`).
+- **100, reconciled.** A declaration two new files of a split read — with
+  every declaration it reads in turn — moves once into the fixtures module
+  of the folder its readers share, `<folder>/<folder>.fixtures.ts` (for
+  `api/orders/{list,create}/`, `api/orders/orders.fixtures.ts`): the
+  naming recap's typed-fixture module, domain-named by its folder, so §3
+  holds; F5 lets a spec import it; I2 does not judge it, being no test.
+  One that builds a `file()`/`directory()`, or reads one that does, stays
+  copied (C26); a module already at that path is the author's and the
+  copies stay. The document lints the result with oxlint and the checker:
+  both clean. Found on the way: a function whose return type is an object
+  literal was cut at that type's closing brace; the body is now the brace
+  that closes its line.
+- **99, 102** need no code; **101** waits for the signews-api run.
+- **Red on a broken implementation:** the declared list ignored (6 tests),
+  the old every-lowercase-word default (4), declared collections ignored
+  (4), helpers left copied (2), a `file()`-building helper moved (1).
+
+### Raised by the package-test branch, iterations 18 and 19
+
+103. A spec importing `cli` from two runners (`specs/cli/env/env.spec.ts`
+     imports `cli` and `cli as dbCli`) reads every chain with the FIRST
+     door's command list. Read the list per handle, or accept — one
+     binary per file is the norm?
+104. The list is read only when written as a literal in the door;
+     `commands: COMMANDS` reads as no list, so the first-word default
+     applies. Follow a `const` in the door, or require the literal?
+105. C30's move leaves the subject folder it emptied behind (the spawn
+     spec's old `shop/` folder stayed, empty, on disk). C14 and C27 remove
+     theirs: align C29/C30?
+106. The split moves `const`/`let`/`function` declarations only. A type
+     alias a moved helper reads stays in the spec files, and the fixtures
+     module would not compile. None here. Carry types along?
+107. A seed named from its test's title is long
+     (`seeds-apply-in-the-order-listed-each-to-the-database-it-names.sql`);
+     all six here were renamed by hand. Cap the name at a few words, or
+     warn on a seed file with no leading `--` comment?
+108. The cap scan skips a `toMatch` whose subject ends in `.text)` or
+     `.raw)`, vitest's own. A long template compared to a plain string
+     variable would be reported, and the fix would write a `.txt` golden
+     a string subject cannot take (D14). HYPOTHESIS (2026-09-24): no
+     such site in the estate; settled by running the checker on
+     signews-api.
+109. Coverage fell from 84.65 % to 84.11 % of statements across the two
+     iterations (8540/10088 → 8734/10383; the floor held). The coverage
+     report says where: `lint/checker-sql-seeds.ts` is 22.8 % covered and
+     `lint/checker-sharing.ts` 36.6 %, because the documents that prove
+     them run `dist/checker.js` in a child process coverage never sees.
+     Give those passes in-process unit tests, or count the documents'
+     child runs?
