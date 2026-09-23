@@ -377,13 +377,12 @@ const pageOf: TerminalReader = (first) => {
 /** The terminal actions that reach a subject, by name — the HTTP verbs apart. */
 const TERMINALS: Record<string, TerminalReader> = {
     exec: (first) => {
-        const lines =
+        // A sequence is one session of the binary, opened by its first command.
+        const line =
             first?.trim().startsWith('[') === true
-                ? argumentsOf(first.trim().slice(1, -1)).map((entry) => literalOf(entry))
-                : [literalOf(first)];
-        return lines.flatMap((line) =>
-            line === undefined ? [] : [{ command: commandWords(line), facet: 'cli' as const }],
-        );
+                ? literalOf(argumentsOf(first.trim().slice(1, -1))[0])
+                : literalOf(first);
+        return line === undefined ? [] : [{ command: commandWords(line), facet: 'cli' }];
     },
     fetch: pageOf,
     open: (first) => [{ facet: 'mobile', journey: literalOf(first) ?? '(launch)' }],
@@ -399,8 +398,8 @@ const TERMINALS: Record<string, TerminalReader> = {
 };
 
 /**
- * The subjects a chain's terminal action reaches — one, or several for a cli
- * sequence.
+ * The subject a chain's terminal action reaches — a cli sequence is one
+ * session, opened by its first command.
  */
 export function subjectsOfChain(chain: Chain, readRequest: RequestReader = () => ''): Subject[] {
     const terminal = chain.calls.at(-1);

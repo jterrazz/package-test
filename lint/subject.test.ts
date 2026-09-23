@@ -145,12 +145,11 @@ describe('the subject a spec reaches, read statically', () => {
             "await mobile.open('news://events');",
         ].join('\n');
 
-        // Then - each chain's subject, a cli sequence one per command
+        // Then - each chain's subject, a cli sequence the command it opens on
         expect(subjectsOf(source).map(({ subject }) => subjectName(subject))).toStrictEqual([
             'trigger digest',
             'exec db migrate',
             'exec build',
-            'exec serve',
             'visit /articles/:id',
             'open news://events',
         ]);
