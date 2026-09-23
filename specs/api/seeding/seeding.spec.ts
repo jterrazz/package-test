@@ -5,73 +5,11 @@ import { file, specification } from '../../../src/index.js';
 import type { ApiSpecification } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
-// ── Critical paths — both node and compose ──
-
-describe('seeding', () => {
-    test('loads a single seed file', async () => {
-        // Given - one user seeded
-        const result = await api
-            .seed(file('./seeds/one-user.sql'), { database: 'db' })
-            .get('/users');
-
-        // Then - user is in the database
-        await expect(result.table('users', { database: 'db' })).toMatchRows({
-            columns: ['name', 'email'],
-            rows: [['Alice', 'alice@test.com']],
-        });
-    });
-
-    test('loads multiple seed files in order', async () => {
-        // Given - two seed files applied sequentially
-        const result = await api
-            .seed(file('./seeds/one-user.sql'), { database: 'db' })
-            .seed(file('./seeds/third-user.sql'), { database: 'db' })
-            .get('/users');
-
-        // Then - both seeds applied
-        await expect(result.table('users', { database: 'db' })).toMatchRows({
-            columns: ['name'],
-            rows: [['Alice'], ['Charlie']],
-        });
-    });
-});
-
-// ── Multi-database + edge cases ──
+// What a seed loads, in order and per database, is data: the documents beside
+// This file state it. What stays here is what a chain REFUSES (A7, a missing
+// File, an unknown database) and a runner with no database at all.
 
 describe('seeding details', () => {
-    test('seeds a specific database with database option', async () => {
-        // Given - seed events in analytics-db
-        const result = await api
-            .seed(file('./seeds/one-event.sql'), { database: 'analyticsDb' })
-            .get('/events');
-
-        // Then - event appears in analytics database
-        await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({
-            columns: ['type', 'payload'],
-            rows: [['user_created', '{"name":"Alice"}']],
-        });
-    });
-
-    test('seeds both databases independently', async () => {
-        // Given - seed users in default db and events in analytics-db
-        const result = await api
-            .seed(file('./seeds/two-users.sql'), { database: 'db' })
-            .seed(file('./seeds/two-events.sql'), { database: 'analyticsDb' })
-            .get('/users');
-
-        // Then - users in default db
-        await expect(result.table('users', { database: 'db' })).toMatchRows({
-            columns: ['name'],
-            rows: [['Alice'], ['Bob']],
-        });
-
-        // Then - events in analytics db
-        await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({
-            columns: ['type'],
-            rows: [['user_created'], ['user_created']],
-        });
-    });
-
     // RUNTIME A7 — with two databases `database:` is required on every seed,
     // And with one it is refused: the record fixes the call.
     test('requires the database option when several databases are declared', () => {

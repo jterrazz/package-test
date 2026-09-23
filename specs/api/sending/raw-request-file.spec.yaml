@@ -1,0 +1,7 @@
+kind: api
+description: a request file whose body is plain text sends it verbatim, whitespace kept
+request: ./requests/echo-raw.http
+response:
+    status: 200
+    body:
+        raw: "first  line\n    indented line"

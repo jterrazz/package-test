@@ -78,6 +78,13 @@ export type Capability = {
     /** Per column: why an empty cell is accepted there. */
     exempt?: Partial<Record<Column, string>>;
     group: CapabilityGroup;
+    /**
+     * How a `<case>.spec.yaml` writes it: the key it opens a line with — at
+     * the top of the document, or as a step's first key (`- request: GET /`).
+     * A document counts for a row only through this; a row without one is a
+     * gesture the document grammar has no key for.
+     */
+    document?: string;
     /** The interface key this row answers for, when `name` is not it verbatim. */
     member?: string;
     /** How the capability is written in a spec, e.g. `.seed()`. */
@@ -213,6 +220,7 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'jobs', 'integration', 'website', 'component'],
         group: 'Setup',
+        document: 'clock:',
         name: '.clock()',
         probe: '.clock(',
     },
@@ -220,33 +228,72 @@ export const CAPABILITIES: Capability[] = [
         columns: ['api', 'jobs', 'integration', 'website', 'mobile', 'component'],
         exempt: { mobile: NO_SIMULATOR },
         group: 'Setup',
+        document: 'intercept:',
         name: '.intercept()',
         probe: '.intercept(',
     },
     {
         columns: ['api', 'jobs', 'cli', 'integration'],
         group: 'Setup',
+        document: 'seed:',
         name: '.seed()',
         probe: '.seed(file(',
     },
-    { columns: ['api', 'website'], group: 'Setup', name: '.headers()', probe: '.headers(' },
+    {
+        columns: ['api', 'website'],
+        document: 'headers:',
+        group: 'Setup',
+        name: '.headers()',
+        probe: '.headers(',
+    },
     { columns: ['cli'], group: 'Setup', name: '.fixture()', probe: '.fixture(' },
     { columns: ['cli'], group: 'Setup', name: '.env()', probe: '.env(' },
     { columns: ['component'], group: 'Setup', name: '.wrap()', probe: '.wrap(' },
     { columns: ['component'], group: 'Setup', name: '.viewport()', probe: '.viewport(' },
 
     // ── Terminal actions ──
-    { columns: ['api'], group: 'Terminal action', name: '.get()', probe: ".get('/" },
-    { columns: ['api'], group: 'Terminal action', name: '.post()', probe: ".post('" },
-    { columns: ['api'], group: 'Terminal action', name: '.put()', probe: ".put('" },
-    { columns: ['api'], group: 'Terminal action', name: '.delete()', probe: ".delete('" },
+    {
+        columns: ['api'],
+        document: 'request: GET /',
+        group: 'Terminal action',
+        name: '.get()',
+        probe: ".get('/",
+    },
+    {
+        columns: ['api'],
+        document: 'request: POST /',
+        group: 'Terminal action',
+        name: '.post()',
+        probe: ".post('",
+    },
+    {
+        columns: ['api'],
+        document: 'request: PUT /',
+        group: 'Terminal action',
+        name: '.put()',
+        probe: ".put('",
+    },
+    {
+        columns: ['api'],
+        document: 'request: DELETE /',
+        group: 'Terminal action',
+        name: '.delete()',
+        probe: ".delete('",
+    },
     {
         columns: ['api'],
         group: 'Terminal action',
+        document: 'request: ./',
         name: '.request()',
         probe: '.request(file(',
     },
-    { columns: ['jobs'], group: 'Terminal action', name: '.trigger()', probe: ".trigger('" },
+    {
+        columns: ['jobs'],
+        document: 'trigger:',
+        group: 'Terminal action',
+        name: '.trigger()',
+        probe: ".trigger('",
+    },
     { columns: ['integration'], group: 'Terminal action', name: '.call()', probe: '.call(' },
     { columns: ['cli'], group: 'Terminal action', name: '.exec()', probe: '.exec(' },
     {
@@ -409,7 +456,13 @@ export const CAPABILITIES: Capability[] = [
     { columns: BROWSERS, group: 'Descriptor', name: 'enabled', probe: 'enabled(' },
 
     // ── Result accessors ──
-    { columns: ['api'], group: 'Result accessor', name: '.response', probe: 'result.response' },
+    {
+        columns: ['api'],
+        document: 'response:',
+        group: 'Result accessor',
+        name: '.response',
+        probe: 'result.response',
+    },
     {
         columns: ['api', 'website'],
         group: 'Result accessor',
@@ -419,6 +472,7 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'jobs', 'cli', 'integration'],
         group: 'Result accessor',
+        document: 'tables:',
         member: 'table',
         name: '.table()',
         probe: 'result.table(',
@@ -541,6 +595,7 @@ export const CAPABILITIES: Capability[] = [
     // ── Goldens ──
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'website', 'component', 'module'],
+        document: 'response: ./',
         group: 'Golden',
         name: 'toMatch(file())',
         probe: '.toMatch(file(',
@@ -554,10 +609,17 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'module'],
         group: 'Golden',
+        document: 'tables:',
         name: 'toMatchRows()',
         probe: '.toMatchRows(',
     },
-    { columns: ['api', 'module'], group: 'Golden', name: '.http exchange', probe: ".http'" },
+    {
+        columns: ['api', 'module'],
+        document: 'response: ./',
+        group: 'Golden',
+        name: '.http exchange',
+        probe: ".http'",
+    },
     {
         columns: ['website', 'component'],
         group: 'Golden',

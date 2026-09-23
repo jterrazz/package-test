@@ -1,0 +1,16 @@
+kind: api
+description: an inline put renames the user seeded at a known id
+seed:
+    - { file: ./seeds/one-user-at-id.sql, database: db }
+request: PUT /users/1000
+body:
+    name: Alice Updated
+    email: updated@test.com
+response:
+    status: 200
+tables:
+    users:
+        database: db
+        columns: [name, email]
+        rows:
+            - [Alice Updated, updated@test.com]

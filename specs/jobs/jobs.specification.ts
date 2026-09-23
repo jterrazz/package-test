@@ -90,7 +90,4 @@ export const { cleanup, jobs } = await specification.jobs({
     },
 });
 
-/** Connection string of the analytics database — read lazily (set after start). */
-export const analyticsUrl = (): string => analyticsHandle.connectionString;
-
 afterAll(cleanup);

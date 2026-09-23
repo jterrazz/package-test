@@ -1,0 +1,14 @@
+kind: api
+description: a put sends the fields its body file holds
+seed:
+    - { file: ./seeds/one-user-at-id.sql, database: db }
+request: PUT /users/1000
+body: ./requests/alice-renamed.json
+response:
+    status: 200
+tables:
+    users:
+        database: db
+        columns: [name, email]
+        rows:
+            - [Alice Renamed, alice.renamed@test.com]

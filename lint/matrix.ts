@@ -38,7 +38,7 @@ import type { Capability, Column } from './facet-matrix.js';
  * repository's own `vitest.config.ts`.
  */
 const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roots: string[] }> = {
-    api: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/api'] },
+    api: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/api'] },
     cli: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/cli'] },
     component: {
         extensions: ['.test.tsx', '.specification.ts'],
@@ -46,7 +46,7 @@ const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roo
         roots: ['specs/component-app'],
     },
     integration: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/integration'] },
-    jobs: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/jobs'] },
+    jobs: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/jobs'] },
     mobile: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/mobile'] },
     module: { extensions: ['.test.ts', '.test.tsx'], roots: ['src'] },
     website: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/website'] },
@@ -171,6 +171,8 @@ const WRITTEN_IN_CODE = new Set<Capability['group']>([
 
 /** A test file, as its capabilities are read from it. */
 type Source = {
+    /** Is it a `<case>.spec.yaml` — read by its keys, where a row names one? */
+    document: boolean;
     /** Which indexes of `text` sit inside a string literal (none, for a document). */
     strings: boolean[];
     /** The text, comments stripped. */
@@ -199,10 +201,14 @@ function sourcesOf(root: string): Record<Column, Source[]> {
             const source = readFileSync(path, 'utf8');
             // A document is YAML: its only comments are `#` lines, and an apostrophe in its prose is no quote.
             if (path.endsWith('.spec.yaml')) {
-                return { strings: [], text: source.replaceAll(/^\s*#[^\n]*/gmu, '') };
+                return {
+                    document: true,
+                    strings: [],
+                    text: source.replaceAll(/^\s*#[^\n]*/gmu, ''),
+                };
             }
             const text = withoutComments(source);
-            return { strings: stringsOf(text), text };
+            return { document: false, strings: stringsOf(text), text };
         });
     };
     // Written out rather than folded: the compiler then holds the invariant
@@ -269,6 +275,11 @@ function matcherOf(probe: string): RegExp {
     return new RegExp(lead + probe.replaceAll(ESCAPE, String.raw`\$&`), 'u');
 }
 
+/** A document key, matched where a document writes it: a line's start, or a step's first key. */
+function documentMatcherOf(key: string): RegExp {
+    return new RegExp(String.raw`^(?:\s*- )?${key.replaceAll(ESCAPE, String.raw`\$&`)}`, 'mu');
+}
+
 /** The matrix, derived. `root` is the repository root. */
 export function matrixRows(root: string): MatrixRow[] {
     const sources = sourcesOf(root);
@@ -278,7 +289,13 @@ export function matrixRows(root: string): MatrixRow[] {
         }
         const matcher = matcherOf(capability.probeByColumn?.[column] ?? capability.probe);
         const inCode = WRITTEN_IN_CODE.has(capability.group);
-        return sources[column].filter((source) => carries(source, matcher, inCode)).length;
+        const key =
+            capability.document === undefined ? undefined : documentMatcherOf(capability.document);
+        return sources[column].filter((source) =>
+            source.document && key !== undefined
+                ? key.test(source.text) || carries(source, matcher, inCode)
+                : carries(source, matcher, inCode),
+        ).length;
     };
     return capabilities().map((capability) => ({
         capability,
@@ -342,7 +359,7 @@ export function renderMatrixBody(root: string): string {
     }
     const notes = [...byReason].map(([why, cells]) => `- ${why} — ${cells.join(', ')}`);
     const intro =
-        'What the framework can do, and how many of this package\u2019s own test FILES carry the literal that exercises it, per facet (comments stripped, and for a call or a key strings too, so a sentence or a string naming a capability never counts as a test of it). A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
+        'What the framework can do, and how many of this package\u2019s own test FILES carry the literal that exercises it, per facet (comments stripped, and for a call or a key strings too, so a sentence or a string naming a capability never counts as a test of it; a `<case>.spec.yaml` counts by the key it writes — `seed:`, `request: GET /`, `tables:`). A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
     return [intro, ...sections, '### Exemptions', notes.join('\n')].join('\n\n');
 }
 

@@ -1,0 +1,13 @@
+kind: api
+description: a single seed file is the whole table
+seed:
+    - { file: ./seeds/one-user.sql, database: db }
+request: GET /users
+response:
+    status: 200
+tables:
+    users:
+        database: db
+        columns: [name, email]
+        rows:
+            - [Alice, alice@test.com]

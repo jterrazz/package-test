@@ -12,3 +12,9 @@ response:
         user:
             name: Dora
             email: dora@test.com
+tables:
+    users:
+        database: db
+        columns: [name]
+        rows:
+            - [Dora]

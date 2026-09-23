@@ -1,0 +1,8 @@
+kind: api
+description: a body file that is not JSON is sent as its bytes are written
+request: POST /echo-raw
+body: ./requests/note.txt
+response:
+    status: 200
+    body:
+        raw: "kept  as\n    written\n"
