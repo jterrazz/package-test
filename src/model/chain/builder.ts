@@ -715,7 +715,15 @@ export class SpecificationBuilder
         }
         const tableOf = this.tableOf();
         await this.executeSetup(null, async () => {
-            await runJobsDocument({ execute: job.execute, file, place, tableOf, trigger });
+            await runJobsDocument({
+                execute: async () => {
+                    await job.execute();
+                },
+                file,
+                place,
+                tableOf,
+                trigger,
+            });
         });
         return new BaseResult({ config: this.config, testDir: this.testDir });
     }

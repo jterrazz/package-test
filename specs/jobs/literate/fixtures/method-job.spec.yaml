@@ -1,0 +1,4 @@
+kind: jobs
+description: runs a job whose execute is a method reading this
+trigger: refuse-by-name
+error: 'refuse-by-name: refused'

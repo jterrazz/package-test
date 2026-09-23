@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { file, text } from '../../../src/index.js';
 import { jobs } from '../jobs.specification.js';
+import { jobs as staticJobs } from '../static-jobs.specification.js';
 
 // The bridge door of a `kind: jobs` document, and what its runner refuses —
 // Run on the inputs under fixtures/, which no glob collects.
@@ -61,5 +62,16 @@ describe('jobs documents — what the runner refuses', () => {
             columns: ['payload'],
             rows: [['{"name":"Alice"}']],
         });
+    });
+
+    test('a job whose execute is a method runs as its trigger() runs it — bound to the job', async () => {
+        // Given - a document triggering a job that reads its name through `this`
+        const run = staticJobs.run(file('./fixtures/method-job.spec.yaml'));
+
+        // Then - the job rejects with its own message, as `.trigger()` would
+        await expect(run).resolves.toBeDefined();
+        await expect(staticJobs.trigger('refuse-by-name')).rejects.toThrow(
+            'refuse-by-name: refused',
+        );
     });
 });
