@@ -1307,6 +1307,19 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
+            'A lint-rule document — under `specs/lint/`, less the fixtures another document feeds a violation through — that asserts a failing `exit:` also goldens `stdout:` or `stderr:`: the report that says WHICH rule fired, not only that one did.',
+        facet: 'model',
+        family: 'K',
+        fix: 'Golden the run’s report beside its `exit:`.',
+        id: 'K10',
+        name: 'k10-lint-document-goldens-report',
+        rationale:
+            'An exit code alone proves a rule ended the run, never which one: a document pinned to it keeps passing once the wrong rule starts firing for the wrong reason.',
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
             'Every constructor has a `specs/<facet>/` tree in this package. Two subjects answer differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component-app/`; `mobile` has no tree at all, because CI provisions no simulator.',
         facet: 'model',
         family: 'M',

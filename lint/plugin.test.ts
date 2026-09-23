@@ -74,6 +74,7 @@ function metaProofs(): Set<string> {
     const found = new Set<string>();
     const sources = [
         read('lint/plugin.test.ts'),
+        read('lint/document-report.test.ts'),
         read('lint/env-allowlist.test.ts'),
         read('lint/matrix.test.ts'),
         read('lint/port-readers.test.ts'),

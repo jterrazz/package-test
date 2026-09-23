@@ -5,7 +5,13 @@ import { describe, expect, test } from 'vitest';
 
 import { PRESENCE } from '../src/model/literate/spec-document.js';
 import type { PresenceShape } from '../src/model/literate/spec-document.js';
-import { documentData, parserRefusal, schemaVerdicts, specDocuments } from './schema-documents.js';
+import {
+    documentData,
+    isFixture,
+    parserRefusal,
+    schemaVerdicts,
+    specDocuments,
+} from './schema-documents.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
@@ -31,11 +37,6 @@ function schemaValidator(): (data: unknown) => string[] {
  * them, and an editor validating against the schema does not see them.
  */
 const BEYOND_A_SCHEMA = new Map<string, string>();
-
-/** Is this document an input a negative spec runs — under a `fixtures/` folder? */
-function isFixture(file: string): boolean {
-    return file.split('/').includes('fixtures');
-}
 
 describe('the published schema validates every document of the tree (meta-test)', () => {
     test('every document the parser reads, the schema validates', () => {

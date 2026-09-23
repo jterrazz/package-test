@@ -18,6 +18,11 @@ import { parseYamlSource } from '../src/seams/yaml/document.js';
 /** Directories no document of the repository lives in. */
 const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 
+/** Is this document an input a negative spec runs — under a `fixtures/` folder? */
+export function isFixture(file: string): boolean {
+    return file.split('/').includes('fixtures');
+}
+
 /** One document: where it sits, and what the parser and the schema said. */
 export type SchemaVerdict = {
     /** Repository-relative path. */
