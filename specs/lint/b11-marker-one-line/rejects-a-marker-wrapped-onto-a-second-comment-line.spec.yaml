@@ -1,0 +1,7 @@
+description: rejects a marker wrapped onto a second comment line
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          scenario.test.ts:6:5  jterrazz(b11-marker-one-line)

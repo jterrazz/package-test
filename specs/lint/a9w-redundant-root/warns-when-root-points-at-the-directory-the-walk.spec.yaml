@@ -1,0 +1,7 @@
+description: warns when root points at the directory the walk-up already finds
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/setup/rooted.specification.ts:6:5  jterrazz(a9w-redundant-root)

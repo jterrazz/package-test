@@ -1,0 +1,8 @@
+description: rejects a hand-rolled browser project
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          vitest.config.ts:1:1  jterrazz(e2-preset-config)
+          vitest.config.ts:6:21  jterrazz(e6-component-project-helper)

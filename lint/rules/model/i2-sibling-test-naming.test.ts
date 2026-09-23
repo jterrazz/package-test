@@ -18,7 +18,10 @@ const ruleTester = new RuleTester();
 // A specs tree, which is the half of I2's orphan clause that reads `inSpecs`.
 // The guard on the `tests/` clause — a `tests` segment with no package above it
 // Is an ordinary folder name — is `roleOf`'s, and `role.test.ts` holds it.
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const FIXTURES = resolve(
+    import.meta.dirname,
+    '../../../specs/lint/i2-sibling-test-naming/fixtures',
+);
 const OWN = resolve(import.meta.dirname, '../../../specs/lint/i2-sibling-test-naming/fixtures');
 // The repo root DOES carry a package.json — the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../..');
@@ -86,7 +89,7 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
         // Tree, not one module — the orphan clause requires `!inSpecs`.
         {
             code: 'test("x", () => {});',
-            filename: `${FIXTURES}/i2-repository-suite/specs/build/a.test.ts`,
+            filename: `${FIXTURES}/repository-suite/specs/build/a.test.ts`,
         },
     ],
 });

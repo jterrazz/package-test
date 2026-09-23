@@ -1,0 +1,5 @@
+description: accepts an assertion that says what came back
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

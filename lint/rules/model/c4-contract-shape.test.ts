@@ -13,7 +13,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 /** The layout half is fs-anchored — it runs against the shared fixture trees. */
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
 const FEATURE = '/repo/specs/api/feature/contracts';
 
@@ -76,7 +76,7 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
         {
             code: 'test("x", () => {});',
             errors: 2,
-            filename: `${FIXTURES}/c4-contract-shape/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/c4-contract-shape/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
@@ -113,7 +113,7 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
         // The compliant fixture tree — the layout half stays silent.
         {
             code: 'test("x", () => {});',
-            filename: `${FIXTURES}/c4-contract-shape-ok/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/c4-contract-shape/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // The framework's own contracts module is not a feature tree.
         {

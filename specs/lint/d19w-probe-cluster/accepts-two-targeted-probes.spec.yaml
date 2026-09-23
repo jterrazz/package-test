@@ -1,0 +1,5 @@
+description: accepts two targeted probes
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

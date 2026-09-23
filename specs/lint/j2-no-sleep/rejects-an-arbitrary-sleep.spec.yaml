@@ -1,0 +1,7 @@
+description: rejects an arbitrary setTimeout sleep in a spec
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/widget.test.ts:7:36  jterrazz(j2-no-sleep)

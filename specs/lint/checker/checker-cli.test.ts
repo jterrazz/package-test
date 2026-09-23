@@ -163,9 +163,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         // Given - a broken ratchet, and a report holding a diagnostic of the plugin and one of another
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
-            .fixture(
-                file('./fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'),
-            )
+            .fixture(file('./fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'))
             .exec('. --format json --oxlint-report oxlint-report.json');
 
         // Then - the verdict fails on both, and the JSON holds the tree's finding alone
@@ -177,9 +175,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         // Given - a project whose checker finding and plugin diagnostic are both recorded
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
-            .fixture(
-                file('./fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'),
-            )
+            .fixture(file('./fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'))
             .exec([
                 'baseline . --oxlint-report oxlint-report.json',
                 '--member . --summary --oxlint-report oxlint-report.json',

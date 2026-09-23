@@ -1,0 +1,5 @@
+description: accepts extensions and directory-tree snapshots
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

@@ -1,0 +1,8 @@
+description: rejects an expect() inside a visit scenario
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/website/home/subscribe.test.ts:11:9  jterrazz(w1-scenario-pure)
+          specs/website/home/subscribe.test.ts:11:9  jterrazz(w5w-scenario-settles)

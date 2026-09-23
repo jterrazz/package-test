@@ -14,7 +14,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the shared E2E fixture trees.
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
 ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
     invalid: [
@@ -22,19 +22,19 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
         {
             code: 'test("x", () => {});',
             errors: 1,
-            filename: `${FIXTURES}/c7-seeds-sql-only/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
         // Only .sql fragments in the compliant twin.
         {
             code: 'test("x", () => {});',
-            filename: `${FIXTURES}/c7-seeds-sql-only-ok/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // No seeds/ directory at this level (the feature has no seeds/ sibling).
         {
             code: 'test("x", () => {});',
-            filename: `${FIXTURES}/c7-seeds-sql-only-ok/specs/app/app.test.ts`,
+            filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/compliant/specs/app/app.test.ts`,
         },
         // Outside specs/ the rule is inert.
         {

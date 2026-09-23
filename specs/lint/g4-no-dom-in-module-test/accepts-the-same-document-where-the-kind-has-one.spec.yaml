@@ -1,0 +1,5 @@
+description: accepts the same document where the kind has one
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

@@ -1,0 +1,8 @@
+description: warns on a facet root collected under another name
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          vitest.config.ts:5:32  jterrazz(e7w-include-prefix-exists)
+          vitest.config.ts:5:59  jterrazz(e4w-project-binding)

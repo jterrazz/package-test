@@ -1,0 +1,5 @@
+description: accepts a literate door that resolves
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

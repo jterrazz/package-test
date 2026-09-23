@@ -1,0 +1,5 @@
+description: accepts the framework's own chain
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

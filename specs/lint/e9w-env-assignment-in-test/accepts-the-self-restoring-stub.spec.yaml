@@ -1,0 +1,5 @@
+description: accepts the self-restoring stub
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

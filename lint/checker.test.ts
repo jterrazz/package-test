@@ -9,7 +9,7 @@ import {
 } from './checker.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees.
-const FIXTURES = resolve(import.meta.dirname, '../specs/fixtures/lint-violations');
+const FIXTURES = resolve(import.meta.dirname, '../specs/lint/checker/fixtures/lint-violations');
 
 describe('conventions checker — findUnknownTokens (D4)', () => {
     test('flags an identifier-shaped token outside the vocabulary', () => {

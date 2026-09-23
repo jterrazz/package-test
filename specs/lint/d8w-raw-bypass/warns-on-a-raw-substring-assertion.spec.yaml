@@ -1,0 +1,7 @@
+description: warns on a .raw substring assertion
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          scenario.test.ts:8:5  jterrazz(d8w-raw-bypass)

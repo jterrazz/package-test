@@ -1,0 +1,5 @@
+description: accepts the same runner created in a *.specification.ts file
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

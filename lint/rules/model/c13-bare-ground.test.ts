@@ -16,7 +16,7 @@ const ruleTester = new RuleTester();
 
 // The rule probes the filesystem around the visited test file, so the cases run
 // Against the shared E2E fixture trees rather than on synthetic paths.
-const FIXTURES = resolve(import.meta.dirname, '../../../specs/fixtures/lint-violations');
+const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
 /** A package whose module test still stands on the 16 `_expected/`. */
 const MODULE_16 = checkoutUnder('work', ['src/report/_expected']);
@@ -27,7 +27,7 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
         {
             code: 'test("x", () => {});',
             errors: 1,
-            filename: `${FIXTURES}/c13-bare-ground/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
         // A module test stands on ground as surely as a spec: its 16 folder is named too.
         {
@@ -40,13 +40,13 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
         // The compliant twin carries `expected/`.
         {
             code: 'test("x", () => {});',
-            filename: `${FIXTURES}/c13-bare-ground-ok/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // Anchored on TEST files only: a module beside the same legacy directory
         // Is not a spec, so it is not a probe site.
         {
             code: 'export const helper = () => {};',
-            filename: `${FIXTURES}/c13-bare-ground/specs/app/widget/helper.ts`,
+            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/violation/specs/app/widget/helper.ts`,
         },
         // A module test with no 16 folder beside it is on 17.
         {

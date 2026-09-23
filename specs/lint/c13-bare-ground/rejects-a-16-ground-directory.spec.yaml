@@ -1,0 +1,8 @@
+description: rejects a 16.x ground directory beside a spec
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/widget.test.ts:1:1  jterrazz(c13-bare-ground)
+          specs/app/widget/widget.test.ts:11:40  jterrazz(c24-ground-role)

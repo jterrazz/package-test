@@ -1,0 +1,7 @@
+description: rejects an un-awaited IO matcher
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          scenario.test.ts:8:5  jterrazz(d2-await-io-matcher)

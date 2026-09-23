@@ -1,0 +1,7 @@
+description: rejects a module test whose whole proof is a call log
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          scenario.test.ts:5:1  jterrazz(d17w-double-only-oracle)

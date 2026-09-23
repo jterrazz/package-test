@@ -1,0 +1,7 @@
+description: accepts the single public entry point and every published subpath
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/app/widget/widget.test.ts:5:1  jterrazz(d18w-existence-only-oracle)

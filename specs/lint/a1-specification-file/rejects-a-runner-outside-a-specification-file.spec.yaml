@@ -1,0 +1,7 @@
+description: rejects a specification.cli() call outside a *.specification.ts file
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/setup/runner.ts:3:39  jterrazz(a1-specification-file)

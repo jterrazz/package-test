@@ -1,0 +1,8 @@
+description: a test at the facet root, and one in a ground folder with no module beside it, are refused
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/widget/fixtures/binary/scenarios.test.ts:1:1  jterrazz(c1-domain-structure)
+          specs/widget/widget.test.ts:1:1  jterrazz(c1-domain-structure)

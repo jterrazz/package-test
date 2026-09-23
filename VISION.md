@@ -187,21 +187,15 @@ commit, prototype plumbing that never reaches the release.
 
 - **`lint/` one folder per rule.** The rules moved to the root as they were,
   `lint/rules/<facet>/<rule>.ts` beside its test.
-- **The lint rule specs still to convert in the refactor** — 81 files under
-  `specs/lint/<family>/`, each to become `specs/lint/<rule-id>/<case>.spec.yaml`
-  with its twin moved into a local `fixtures/`. Converted: i2-sibling-test-naming
-  (static), d12w-response-body-probe (warn), c15-local-fixture-reach (checker),
-  c14-pool-fixture-shared (autofix); iteration 1 added c24-ground-role and
-  f2-no-test-imports-in-prod (static), c8-disk-target-exists (checker) and
-  c25-no-ground-synonym (member pass). To convert: a1, a2, a3, a4, a9w, b4, b6w,
-  b8, b9w, b10, b11, c1, c2, c4, c6, c7, c10, c11, c13, d2, d2w, d6w, d8w,
-  d9w, d13w, d15w, d16, d16w, d17w, d18w, d19w, e2, e4w, e5, e6, e7w, e8, e9w,
-  f1, f3–f6, g4, i1, i4, j2, j6w, w1, w2, w5w; the checker's a7, b5, c8-spec,
-  c9, c12, c16, c18, c20, c21w, c23, d4 ×2, d4b ×4, d5, d5w, d10w, d11w, j3w,
-  j4, j5, j9, member-pass, checker-cli, kitchen-sink; and the k4 reach meta-test.
-- **c13-bare-ground, half converted (iteration 3).** Its mover (a 17 tree
-  left, a 16 tree and a 16 module test moved) and its module-test clause are
-  documents; its tree clause keeps its family test, so c13 stays listed above.
+- **The lint rule specs still to convert in the refactor** — the checker's,
+  `specs/lint/checker/<pass>.test.ts` over the twins in
+  `specs/lint/checker/fixtures/lint-violations/`, each to become
+  `specs/lint/<pass-id>/<case>.spec.yaml`: a7, b5, c8-spec, c9, c12, c16,
+  c18, c20, c21w, c23, d4 ×2, d4b ×4, d5, d5w, d10w, d11w, j3w, j4, j5, j9,
+  member-pass, checker-cli, kitchen-sink; and the k4 reach meta-test. Every
+  static rule is converted (the spec-coverage pass converted the last 51,
+  c13's tree clause included), and a meta-test holds each to a golden naming
+  the line and column it fires on.
 
 ## Open questions for the iteration
 

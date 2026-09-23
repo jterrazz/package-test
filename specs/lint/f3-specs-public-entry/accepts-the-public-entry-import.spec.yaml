@@ -1,0 +1,7 @@
+description: accepts the public entry import
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/app/widget/widget.test.ts:8:1  jterrazz(d18w-existence-only-oracle)

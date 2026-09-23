@@ -1,0 +1,9 @@
+description: rejects vi.mock and data-asset imports under src/
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/util.test.ts:3:21  jterrazz(i4-no-module-doubles)
+          src/util.test.ts:5:1  jterrazz(i4-no-module-doubles)
+          src/util.test.ts:7:1  jterrazz(d18w-existence-only-oracle)

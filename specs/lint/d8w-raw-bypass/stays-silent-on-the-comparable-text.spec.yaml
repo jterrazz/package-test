@@ -1,0 +1,5 @@
+description: stays silent on the comparable text
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0

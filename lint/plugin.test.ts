@@ -529,7 +529,7 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         // Each of them with its rule, so the directory listing IS the vocabulary.
         const names = new Set([
             ...known,
-            ...readdirSync(resolve(ROOT, 'specs/fixtures/lint-violations')),
+            ...readdirSync(resolve(ROOT, 'specs/lint/checker/fixtures/lint-violations')),
             // A golden is named after the case it holds, which is the rule's
             // Name plus what the run did to the tree.
             ...readdirSync(resolve(ROOT, 'specs/lint/checker/expected')).map((file) =>
@@ -652,18 +652,28 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
             .map((entry) => entry.slice(entry.lastIndexOf('/') + 1, -'.test.ts'.length)),
     ]);
 
-    test('every plugin rule has a specs/lint E2E spec and a fixture pair', () => {
+    test('every plugin rule is specified by documents over trees of its own', () => {
         // Given - each shipped rule
         for (const id of pluginRules) {
-            // Then - its E2E specification exists, and so do the trees it lints: its own fixtures, or the violation/compliant twin in the pool
-            expect(e2eSpecIds.has(id), `${id} has no E2E spec`).toBeTruthy();
-            const trees = withDocuments.has(id)
-                ? [resolve(ROOT, 'specs/lint', id, 'fixtures')]
-                : [
-                      resolve(ROOT, 'specs/fixtures/lint-violations', id),
-                      resolve(ROOT, 'specs/fixtures/lint-violations', `${id}-ok`),
-                  ];
-            expect(trees.filter((tree) => !existsSync(tree))).toStrictEqual([]);
+            // Then - its documents in specs/lint/<id>/, and the trees they lint beside them
+            expect(withDocuments.has(id), `${id} has no documents in specs/lint/${id}/`).toBe(true);
+            expect(
+                existsSync(resolve(ROOT, 'specs/lint', id, 'fixtures')),
+                `${id} has no fixtures/`,
+            ).toBe(true);
+        }
+    });
+
+    test('every plugin rule has a document proving the line and column it fires on', () => {
+        // Given - each shipped rule, and the report lines its documents golden
+        for (const id of pluginRules) {
+            const position = new RegExp(String.raw`^\s+\S+:\d+:\d+  jterrazz\(${id}\)$`, 'mu');
+            const proven = readdirSync(resolve(ROOT, 'specs/lint', id))
+                .filter((entry) => entry.endsWith('.spec.yaml'))
+                .some((entry) => position.test(read(`specs/lint/${id}/${entry}`)));
+
+            // Then - one golden at least says WHERE the rule fired, not only that it did
+            expect(proven, `${id} has no document whose golden names file:line:column`).toBe(true);
         }
     });
 

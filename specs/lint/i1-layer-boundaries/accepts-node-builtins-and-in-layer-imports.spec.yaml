@@ -1,0 +1,5 @@
+description: accepts node builtins and in-layer imports
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0
