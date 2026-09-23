@@ -819,3 +819,14 @@ implementation (the commits say what was broken).
     `src/seams/process/serve.adapter.test.ts` (a dying command's port
     answered), both passing alone and on the rerun — another server
     holding the port they picked. A port-picking flake to chase, or known?
+
+## Iteration 6 — the owner's answers and the calls on 41, 49–53 (2026-09-23)
+
+| # | Decision |
+| --- | --- |
+| 41 | Owner: `requests/` holds everything a spec SENDS — a whole request `.http` and a body file (`.json`, `.txt`, …). C2 accepts both; C24 keeps a body in `requests/`. |
+| 49 (tree law, revised) | Owner: every tree gate and every rule judges what git does NOT ignore — tracked files plus untracked, non-ignored files (`git ls-files --cached --others --exclude-standard`). Only `.gitignore`d paths are out. A local data folder belongs in `.gitignore`. One law for the CLI, CI, the baseline and the editor; outside a git checkout, the disk. |
+| 50 | The lint's root lookup and the runtime's agree by reading the same thing — the non-ignored tree under the law above. |
+| 51 | Every single-path check (C9/C14 `isDir`, C13 `existsSync`, the member pass's anchors, checker-placement, checker-spec) reads through the same listing. |
+| 52 | `region()`/`section` joins the context landmarks, so an ambiguity error can suggest it. |
+| 53 | A spec server or process binds port 0 and reads the port it got; no spec picks a port. |
