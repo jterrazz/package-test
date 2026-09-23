@@ -1,6 +1,6 @@
 # 06 — Integration specs: a module against the real thing
 
-`specification.integration()` specifies a MODULE — not an entry. No HTTP, no binary, no page: the subject is a function, and it is called. What makes it a spec rather than a module test beside its code is what it stands on — a real database, a declared contract, a golden file — and that is exactly the fork this facet closes.
+`specification.integration()` specifies a MODULE — not an entry. No HTTP, no binary, no page: the subject is a function, and it is called. What makes it a spec rather than a module test beside its code is what it stands on — a real database, a declared contract, a golden — and that is exactly the fork this facet closes.
 
 ```typescript
 // specs/integration/integration.specification.ts
@@ -16,19 +16,27 @@ afterAll(cleanup);
 
 ```typescript
 // specs/integration/orders/orders.spec.ts
+import { sql } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { listOrders } from '../../../src/orders/orders.js';
 import { integration } from '../integration.specification.js';
 
 test('reads the orders the day left behind', async () => {
-    // Given - two orders in the real database
+    // Given - two orders in the real database, written in the test
     const result = await integration
-        .seed(file('./seeds/two-orders.sql'))
+        .seed(
+            sql`
+            INSERT INTO orders (reference, total) VALUES ('ORD-1', 42), ('ORD-2', 108);
+        `,
+        )
         .call(async ({ db }) => await listOrders(db.connectionString));
 
-    // Then - the module answered with both
-    expect(result.value).toMatch(file('./expected/two-orders.json'));
+    // Then - the module answered with both, compared whole
+    expect(result.value).toMatch([
+        { id: 1, reference: 'ORD-1', total: 42 },
+        { id: 2, reference: 'ORD-2', total: 108 },
+    ]);
 });
 ```
 
@@ -90,14 +98,14 @@ test('refuses an order that is not one', async () => {
     );
 
     // Then - what it threw is the reading, and nothing was written
-    expect(result.error).toMatch(file('./expected/refused.txt'));
+    expect(result.error).toMatch('an order of 0 is not an order — reference ORD-4');
     await expect(result.table('orders')).toBeEmpty();
 });
 ```
 
 That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `expect(result.error.text).toBe('')` is how a chain says "and it did not refuse": `result.error` is empty rather than absent when the call returned, so the empty text is the whole answer.
 
-`.call<T>()` carries `T` through to the result, so one field is read where one field is what the spec means — `expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string — and a golden file is kept for what a golden file is for: a shape worth freezing whole.
+`.call<T>()` carries `T` through to the result, so one field can be read where one field is what the spec means — `expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string — beside the comparison of the whole value, never instead of it (rule D20).
 
 **The accessor follows the value, and the type says so.** A subject typed exactly `string` reads as a `TextAccessor`; one that can never be a string reads as a `JsonAccessor<T>`; one that MAY be a string (`string | undefined`, `string | number`) is typed as the union of the two, and the spec narrows it — because only the value in hand decides, and a type that guessed handed back a `JsonAccessor` whose `.value` was silently `undefined` while the runtime had built a `TextAccessor`.
 
@@ -108,7 +116,7 @@ That is what keeps a spec of a refusal the same size as a spec of a success, and
 const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
 ```
 
-Both accessors are the package's ordinary subjects, so the golden mechanism reaches them whole: `toMatch(file('./expected/<name>.json'))`, or `.txt`, the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1` ([15](15-tokens.md), [14](14-assertions.md)).
+Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./expected/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([15](15-tokens.md), [14](14-assertions.md)).
 
 A call that a declared contract never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule D7).
 
@@ -163,8 +171,8 @@ specs/integration/
 ├── pure.specification.ts          # a second runner: no services, goldens only
 └── orders/                        # a domain
     ├── orders.spec.ts             # under specs/, the suffix is .spec.ts (rule C12)
-    ├── seeds/two-orders.sql       # ground: database state
-    └── expected/                  # ground: every golden this leaf reads
+    ├── seeds/two-orders.sql       # ground: database state several tests of the leaf share
+    └── expected/                  # ground: a golden several tests share — one test's is written in place (C28)
 ```
 
 **`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the contracts it declared are checked when that call ends, and a contract declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification — it does not inherit the first's obligations.

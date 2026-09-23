@@ -47,14 +47,17 @@ Setups: `.seed()` (``sql`…` `` written in the test, or a shared `file()`), `.i
 
 ```typescript
 // specs/jobs/reports/reports.spec.ts
+import { sql } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 import { jobs } from '../jobs.specification.js';
 import pipeline from './contracts/pipeline.contracts.js';
 
 test('nightly report classifies, prices and drafts', async () => {
-    // Given - pending articles + the world the pipeline reaches out to
+    // Given - one pending article + the world the pipeline reaches out to
     const result = await jobs
-        .seed(file('./seeds/pending-articles.sql'), { database: 'db' })
+        .seed(sql`INSERT INTO articles (title, state) VALUES ('Keyboards', 'pending');`, {
+            database: 'db',
+        })
         .intercept(pipeline)
         .trigger('nightly-report');
 

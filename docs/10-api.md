@@ -283,7 +283,7 @@ test('the users seeded are the users listed, in the order they were inserted', a
 });
 ```
 
-A journey — a request carrying what an earlier response returned — is code: read the value from the first result, send it in the next chain. `TEST_UPDATE=1` writes an empty ` toMatch(`) `` with what came back ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)).
+A journey — a request carrying what an earlier response returned — is code: read the value from the first result, send it in the next chain. `TEST_UPDATE=1` writes an empty `toMatch('')` with what came back ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)).
 
 ### Route coverage
 

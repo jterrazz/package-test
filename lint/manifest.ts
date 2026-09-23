@@ -402,7 +402,7 @@ export const RULE_DOCS = {
             "A test that reads a response, a json or a table — `<result>.response`, `<result>.json`, `<result>.table('<name>')` of a result it awaited — compares it WHOLE, once: `toMatch` handed the whole result written in place or its golden, or a table's `toBeEmpty()`. A precise assertion on one of its properties (`expect(result.json.value.total).toBe(1)`) is allowed only IN ADDITION → error on the first read of a result no whole comparison reaches. A negation, a RegExp and a read through a helper are no whole comparison; a result read through a helper, a computed table name, or a comparison made in a helper is out of reach, and the rule stays silent.",
         facet: 'model',
         family: 'D',
-        fix: 'Write `expect(<result>.<subject>).toMatch(``)` and run `TEST_UPDATE=1` — the whole result is written in place; keep the precise assertion beside it if one property IS the subject.',
+        fix: "Write `expect(<result>.<subject>).toMatch('')` and run `TEST_UPDATE=1` — the whole result is written in place; keep the precise assertion beside it if one property IS the subject.",
         id: 'D20',
         rationale:
             'Probes are a partial oracle: what they do not name is free to regress unseen. The whole result, written where the test reads it, is the default oracle — approval testing — and a precise assertion states what the test is about on top of it. It is the retired warning on body-probe clusters, grown into the rule it stood in for.',
@@ -931,7 +931,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'The keys of a `<case>.spec.yaml` follow the canonical order — `kind, description, fixture, env, serve, runs` at document level, `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run. Fixable (`--fix`).',
+            'The keys of a `<case>.spec.yaml` follow the canonical order — `description, fixture, env, serve, runs` at document level, `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run. Fixable (`--fix`).',
         facet: 'cli',
         family: 'D',
         fix: 'Run `jterrazz-test-check <root> --fix`; it rewrites the order.',
@@ -1630,7 +1630,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
             "`toMatch` on a result the framework produced compares the WHOLE result, and its argument says where the expectation lives: a value written in place — a stream's text, a response's `.http` text, a json's value, a table's rows (awaited) — or a `file()`/`directory()` golden. On a plain string it is vitest's own, untouched: a stream's text is `result.stdout.text`. A value of the wrong shape — a RegExp on a stream, a response or a json, anything but rows on a table — does not compile, and past the compiler it is refused in both builds, naming the form that takes it; a directory, the working directory and a container take no value, and are refused naming `directory()` or `toBeRunning()`; a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: `toBeEmpty` is a table's matcher, and handed a stream it is refused in both builds, naming `expect(<stream>.text).toBe('')`.",
         facet: 'model',
         family: 'D',
-        fix: "Write the whole result in place, `toMatch(`…`)`, or `toMatch(file('./expected/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
+        fix: "Write the whole result in place, ``toMatch(`…`)``, or `toMatch(file('./expected/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
         id: 'D14',
         name: 'd14-one-verb-per-meaning',
         rationale:

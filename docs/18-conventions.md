@@ -128,9 +128,9 @@ One clause of the rule is not the project's to declare, and holds in every mode,
 
 Ground is not always inert. It may be **code** the specs stand on — the build of the subject under test, a harness the runner spawns — and code carries its unit test as a sibling under [I2](#i--source-code-architecture). So the clause lets exactly one pairing through: `<module>.test.ts` NEXT to the `<module>.ts` it is named after, inside the ground it belongs to. A test with no module beside it, or a `*.specification.ts`, is a spec that wandered in and is still reported — which is why the clause needs no `off`, and why no project has to switch off a rule it cannot switch off.
 
-### D11 — golden-file, not a cluster of greps
+### D11 — the whole result, not a cluster of greps
 
-A tool's output (a linter, a compiler, a product CLI) is asserted as a **full snapshot per scoped use case**. Each case gets **its own fixture project** (its small valid/invalid files) — the fixture IS the Given, no shared `beforeAll` state — and the assertion is the whole snapshot (`expect(result.stdout).toMatch(file('./expected/<use-case>.txt'))` + `exitCode`), volatile parts covered by tokens, generated with `TEST_UPDATE=1`.
+**Every test compares its whole result.** A response, a json, a table, a tool's output (a linter, a compiler, a product CLI) is asserted as a **full snapshot per scoped use case** — written where the test reads it, ``expect(result.response).toMatch(`…`)``, or in a file when several tests share it — and a precise assertion on one property is allowed only beside it, stating what the case is about (D20 mechanizes it for a response, a json and a table). Each case gets **its own fixture project** (its small valid/invalid files) — the fixture IS the Given, no shared `beforeAll` state — and the assertion is the whole snapshot (``expect(result.stdout).toMatch(`…`)`` + `exitCode`), volatile parts covered by tokens, written by `TEST_UPDATE=1` from an empty `toMatch('')`.
 
 `.grep()` / `toContain` remain the **scalpel** — targeted probes, never the default mode. They are legitimate only for:
 
