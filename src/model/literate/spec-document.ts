@@ -167,6 +167,152 @@ export const FILE_STATES = ['absent', 'exists'] as const;
 /** The stream keys — the three block scalars an author writes as text. */
 export const STREAM_KEYS = ['stdin', 'stdout', 'stderr'] as const;
 
+// ── Presence ──
+
+/**
+ * A law on which keys a mapping of the grammar holds, read by BOTH readers:
+ * the parser refuses a mapping that breaks one with its sentence, and the
+ * schema states it — `each` as `required`, `some` as an `anyOf` of them,
+ * `apart` as a `not` of the pair — so an editor refuses what the runner does.
+ * `subject` is what the refusal names the mapping by: a table's name, a
+ * `files:` path; `key` is the key missing, or the one that may not stand
+ * beside `with`.
+ */
+export type PresenceLaw =
+    | {
+          keys: readonly string[];
+          law: 'apart';
+          refusal: (subject: string, key: string) => string;
+          with: string;
+      }
+    | {
+          keys: readonly string[];
+          law: 'each';
+          refusal: (subject: string, key: string) => string;
+      }
+    | {
+          keys: readonly string[];
+          law: 'some';
+          refusal: (subject: string) => string;
+      };
+
+/** The mappings a presence law governs: a document of any kind, one kind's, and the entries inside. */
+export type PresenceShape =
+    | 'api'
+    | 'cli'
+    | 'document'
+    | 'files'
+    | 'jobs'
+    | 'response'
+    | 'run'
+    | 'seed'
+    | 'step'
+    | 'table';
+
+/** Every presence law of the grammar, per shape, in the order the parser checks them. */
+export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> = {
+    api: [
+        {
+            keys: ['request', 'steps'],
+            law: 'some',
+            refusal: () => 'an api document sends a request: — or states its journey as steps:',
+        },
+        {
+            keys: ['request', 'body', 'response', 'tables'],
+            law: 'apart',
+            refusal: (_subject, key) =>
+                `"${key}:" belongs to a step when the document states steps: — one test is one shape`,
+            with: 'steps',
+        },
+    ],
+    cli: [
+        {
+            keys: ['runs'],
+            law: 'each',
+            refusal: () => 'missing "runs:" — description and runs are mandatory',
+        },
+    ],
+    document: [
+        {
+            keys: ['description'],
+            law: 'each',
+            refusal: () =>
+                'missing "description:" — every document is one test, and this is its title',
+        },
+    ],
+    files: [
+        {
+            keys: FILE_CONTENT_KEYS,
+            law: 'some',
+            refusal: (path) => `files: ${path} asserts nothing — give it contains: or equals:`,
+        },
+    ],
+    jobs: [
+        {
+            keys: ['trigger'],
+            law: 'each',
+            refusal: () => 'a jobs document names the job it runs — trigger: <name>',
+        },
+        {
+            keys: ['tables', 'error'],
+            law: 'some',
+            refusal: () =>
+                'a jobs document asserts what the job did — give it tables:, error:, or both',
+        },
+    ],
+    response: [
+        {
+            keys: RESPONSE_KEYS,
+            law: 'some',
+            refusal: () =>
+                `response: asserts nothing — give it ${RESPONSE_KEYS.join(', ')}, or name its ./expected/<name>.http`,
+        },
+    ],
+    run: [
+        {
+            keys: ['command', 'exit'],
+            law: 'each',
+            refusal: (_subject, key) =>
+                `a run is missing "${key}:" — command and exit are mandatory`,
+        },
+        {
+            keys: ['waitFor'],
+            law: 'apart',
+            refusal: () =>
+                'waitFor: and stdin: cannot share a run — the pattern is watched on a process nobody closed the input of',
+            with: 'stdin',
+        },
+    ],
+    seed: [
+        {
+            keys: ['file'],
+            law: 'each',
+            refusal: () =>
+                'a seed: entry names its file — `{ file: ./seeds/<name>.sql, database: <key> }`',
+        },
+    ],
+    step: [
+        {
+            keys: ['request'],
+            law: 'each',
+            refusal: () => 'a step states its request: — a path under requests/, or METHOD /path',
+        },
+        {
+            keys: ['response', 'tables'],
+            law: 'some',
+            refusal: () => 'a step asserts what came back — give it response:, tables:, or both',
+        },
+    ],
+    table: [
+        {
+            keys: ['columns', 'rows'],
+            law: 'each',
+            refusal: (name) =>
+                `tables: ${name} states its columns: and its rows: — [] asserts an empty table`,
+        },
+    ],
+};
+
 // ── Types ──
 
 export type SpecKind = (typeof SPEC_KINDS)[number];
@@ -432,6 +578,47 @@ function keyed(pairs: readonly Pair<Node, Node>[]): Map<string, Pair<Node, Node>
     return new Map(pairs.map((pair) => [scalarString(pair.key) ?? '', pair]));
 }
 
+/**
+ * Refuse a mapping that breaks a presence law of its shape — at `line`, the
+ * mapping's, for a key it lacks; at the pair, for a key that may not stand
+ * where it does.
+ */
+function holdPresence(
+    context: Context,
+    found: ReadonlyMap<string, Pair<Node, Node>>,
+    { line, shape, subject = '' }: { line: number; shape: PresenceShape; subject?: string },
+): void {
+    const at = (message: string, where = line): never => {
+        throw new SpecSyntaxError(context.fileName, where, message);
+    };
+    for (const law of PRESENCE[shape]) {
+        if (law.law === 'each') {
+            const missing = law.keys.find((key) => !found.has(key));
+            if (missing !== undefined) {
+                at(law.refusal(subject, missing));
+            }
+        } else if (law.law === 'some') {
+            if (!law.keys.some((key) => found.has(key))) {
+                at(law.refusal(subject));
+            }
+        } else if (found.has(law.with)) {
+            const beside = law.keys.find((key) => found.has(key));
+            if (beside !== undefined) {
+                at(law.refusal(subject, beside), lineOf(context, found.get(beside)));
+            }
+        }
+    }
+}
+
+/** A pair a presence law has already required of `found`. */
+function held(found: ReadonlyMap<string, Pair<Node, Node>>, key: string): Pair<Node, Node> {
+    const pair = found.get(key);
+    if (pair === undefined) {
+        throw new Error(`"${key}:" is required by a presence law and was not found`);
+    }
+    return pair;
+}
+
 function scalarString(node: unknown): null | string {
     return isScalar(node) && typeof node.value === 'string' ? node.value : null;
 }
@@ -546,9 +733,7 @@ function readFiles(context: Context, node: Node | null): SpecFileAssertion[] {
         }
         const assertion = requireMap(context, pair.value, `files: ${path}`);
         const pairs = closedPairs(context, assertion, FILE_CONTENT_KEYS, `files: ${path}`);
-        if (pairs.length === 0) {
-            fail(context, pair, `files: ${path} asserts nothing — give it contains: or equals:`);
-        }
+        holdPresence(context, keyed(pairs), { line, shape: 'files', subject: path });
         const contains: SpecStream[] = [];
         let equals: null | SpecStream = null;
         for (const entry of pairs) {
@@ -570,16 +755,8 @@ function readFiles(context: Context, node: Node | null): SpecFileAssertion[] {
 
 function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun {
     const map = requireMap(context, node, 'each entry of runs:');
-    const pairs = closedPairs(context, map, RUN_KEYS, 'a run');
-    const found = new Map<string, Pair<Node, Node>>();
-    for (const pair of pairs) {
-        found.set(scalarString(pair.key)!, pair);
-    }
-    for (const key of ['command', 'exit']) {
-        if (!found.has(key)) {
-            fail(context, node, `a run is missing "${key}:" — command and exit are mandatory`);
-        }
-    }
+    const found = keyed(closedPairs(context, map, RUN_KEYS, 'a run'));
+    holdPresence(context, found, { line: lineOf(context, node), shape: 'run' });
 
     const commandPair = found.get('command')!;
     const command = requireString(context, commandPair.value, 'command:');
@@ -589,13 +766,6 @@ function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun 
             context,
             waitForPair,
             'waitFor: is only allowed on the LAST run — a long-running command ends the session',
-        );
-    }
-    if (waitForPair !== undefined && found.has('stdin')) {
-        fail(
-            context,
-            waitForPair,
-            'waitFor: and stdin: cannot share a run — the pattern is watched on a process nobody closed the input of',
         );
     }
 
@@ -744,16 +914,9 @@ function readSeeds(context: Context, node: Node | null): SpecSeed[] {
             return seedAt(readPath(context, line, path, SEED_ROLE), null);
         }
         const map = requireMap(context, item, 'a seed: entry');
-        const pairs = closedPairs(context, map, SEED_KEYS, 'a seed: entry');
-        const found = keyed(pairs);
-        const file = found.get('file');
-        if (file === undefined) {
-            fail(
-                context,
-                item,
-                'a seed: entry names its file — `{ file: ./seeds/<name>.sql, database: <key> }`',
-            );
-        }
+        const found = keyed(closedPairs(context, map, SEED_KEYS, 'a seed: entry'));
+        holdPresence(context, found, { line, shape: 'seed' });
+        const file = held(found, 'file');
         const database = found.get('database');
         return seedAt(
             readPath(
@@ -860,15 +1023,8 @@ function readResponse(context: Context, node: Node | null): SpecResponse {
         return { kind: 'file', ...readPath(context, line, path, RESPONSE_ROLE) };
     }
     const map = requireMap(context, node, 'response:');
-    const pairs = closedPairs(context, map, RESPONSE_KEYS, 'an inline response');
-    if (pairs.length === 0) {
-        fail(
-            context,
-            node,
-            `response: asserts nothing — give it ${RESPONSE_KEYS.join(', ')}, or name its ./expected/<name>.http`,
-        );
-    }
-    const found = keyed(pairs);
+    const found = keyed(closedPairs(context, map, RESPONSE_KEYS, 'an inline response'));
+    holdPresence(context, found, { line, shape: 'response' });
     const status = found.get('status');
     const headers = found.get('headers');
     const body = found.get('body');
@@ -910,15 +1066,13 @@ function readTables(context: Context, node: Node | null): SpecTable[] {
         }
         const entry = requireMap(context, pair.value, `tables: ${name}`);
         const found = keyed(closedPairs(context, entry, TABLE_KEYS, `tables: ${name}`));
-        const columnsPair = found.get('columns');
-        const rowsPair = found.get('rows');
-        if (columnsPair === undefined || rowsPair === undefined) {
-            fail(
-                context,
-                pair,
-                `tables: ${name} states its columns: and its rows: — [] asserts an empty table`,
-            );
-        }
+        holdPresence(context, found, {
+            line: lineOf(context, pair),
+            shape: 'table',
+            subject: name,
+        });
+        const columnsPair = held(found, 'columns');
+        const rowsPair = held(found, 'rows');
         if (!isSeq(columnsPair.value) || columnsPair.value.items.length === 0) {
             fail(context, columnsPair, `tables: ${name}.columns is a list of at least one column`);
         }
@@ -1058,21 +1212,8 @@ function readStep(
     line: number,
     captured: ReadonlySet<string>,
 ): SpecStep {
-    const requestPair = pairs.get('request');
-    if (requestPair === undefined) {
-        throw new SpecSyntaxError(
-            context.fileName,
-            line,
-            'a step states its request: — a path under requests/, or METHOD /path',
-        );
-    }
-    if (!pairs.has('response') && !pairs.has('tables')) {
-        throw new SpecSyntaxError(
-            context.fileName,
-            line,
-            'a step asserts what came back — give it response:, tables:, or both',
-        );
-    }
+    holdPresence(context, pairs, { line, shape: 'step' });
+    const requestPair = held(pairs, 'request');
     const sent = readSent(context, pairs, readRequest(context, requestPair.value), captured);
     const capturePair = pairs.get('capture');
     const responsePair = pairs.get('response');
@@ -1194,30 +1335,14 @@ function readApiFields(
     map: YAMLMap,
     found: ReadonlyMap<string, Pair<Node, Node>>,
 ): Pick<SpecDocument, 'steps'> {
+    holdPresence(context, found, { line: lineOf(context, map), shape: 'api' });
     const stepsPair = found.get('steps');
     if (stepsPair === undefined) {
-        if (!found.has('request')) {
-            fail(
-                context,
-                map,
-                'an api document sends a request: — or states its journey as steps:',
-            );
-        }
         // The top-level `headers:` is the given every request carries, not this step's own.
         const step = new Map([...found].filter(([key]) => key !== 'headers'));
         return {
             steps: [readStep(context, step, lineOf(context, found.get('request')), new Set())],
         };
-    }
-    for (const key of ['request', 'body', 'response', 'tables']) {
-        const pair = found.get(key);
-        if (pair !== undefined) {
-            fail(
-                context,
-                pair,
-                `"${key}:" belongs to a step when the document states steps: — one test is one shape`,
-            );
-        }
     }
     return { steps: readSteps(context, stepsPair.value) };
 }
@@ -1228,19 +1353,10 @@ function readJobsFields(
     map: YAMLMap,
     found: ReadonlyMap<string, Pair<Node, Node>>,
 ): Pick<SpecDocument, 'error' | 'tables' | 'trigger'> {
-    const triggerPair = found.get('trigger');
-    if (triggerPair === undefined) {
-        fail(context, map, 'a jobs document names the job it runs — trigger: <name>');
-    }
+    holdPresence(context, found, { line: lineOf(context, map), shape: 'jobs' });
+    const triggerPair = held(found, 'trigger');
     const errorPair = found.get('error');
     const tablesPair = found.get('tables');
-    if (errorPair === undefined && tablesPair === undefined) {
-        fail(
-            context,
-            map,
-            'a jobs document asserts what the job did — give it tables:, error:, or both',
-        );
-    }
     return {
         error: errorPair === undefined ? null : readStream(context, errorPair.value, 'error:'),
         tables: tablesPair === undefined ? [] : readTables(context, tablesPair.value),
@@ -1280,13 +1396,7 @@ export function readSpecFile(content: string, fileName: string): SpecFile {
             kind === 'cli' ? 'a spec document' : `${article(kind)} ${kind} document`,
         ),
     );
-    if (!found.has('description')) {
-        fail(
-            context,
-            map,
-            `missing "description:" — every document is one test, and this is its title`,
-        );
-    }
+    holdPresence(context, found, { line: lineOf(context, map), shape: 'document' });
 
     const given = {
         description: requireString(context, found.get('description')!.value, 'description:'),
@@ -1357,10 +1467,8 @@ function readCliFields(
     map: YAMLMap,
     found: ReadonlyMap<string, Pair<Node, Node>>,
 ): Pick<SpecDocument, 'env' | 'fixtures' | 'runs' | 'serve'> {
-    const runsNode = found.get('runs');
-    if (runsNode === undefined) {
-        fail(context, map, 'missing "runs:" — description and runs are mandatory');
-    }
+    holdPresence(context, found, { line: lineOf(context, map), shape: 'cli' });
+    const runsNode = held(found, 'runs');
     if (!isSeq(runsNode.value) || runsNode.value.items.length === 0) {
         fail(context, runsNode, 'runs: is a list of at least one run');
     }
@@ -1608,6 +1716,45 @@ function oneOrMany(item: SchemaNode): SchemaNode {
 
 const HEADERS = { additionalProperties: { type: 'string' }, type: 'object' };
 
+/** The presence laws of a shape, as JSON Schema states them — {@link PRESENCE}'s, never restated. */
+function presenceOf(shape: PresenceShape): SchemaNode {
+    const required: string[] = [];
+    const allOf: SchemaNode[] = [];
+    for (const law of PRESENCE[shape]) {
+        if (law.law === 'each') {
+            required.push(...law.keys);
+        } else if (law.law === 'some') {
+            allOf.push({ anyOf: law.keys.map((key) => ({ required: [key] })) });
+        } else {
+            allOf.push(...law.keys.map((key) => ({ not: { required: [law.with, key] } })));
+        }
+    }
+    return {
+        ...(allOf.length > 0 ? { allOf } : {}),
+        ...(required.length > 0 ? { required } : {}),
+    };
+}
+
+/**
+ * What a step cannot be, as a schema: its presence laws, and a `body:` beside
+ * a request named by its path — the `.http` carries its own body.
+ */
+function stepLaws(): SchemaNode {
+    const { allOf = [], ...laws } = presenceOf('step') as { allOf?: SchemaNode[] };
+    return {
+        ...laws,
+        allOf: [
+            ...allOf,
+            {
+                not: {
+                    properties: { request: { pattern: String.raw`^\.\.?/`, type: 'string' } },
+                    required: ['request', 'body'],
+                },
+            },
+        ],
+    };
+}
+
 /** The `if` a kind's own `then` hangs on — a cli document may leave its kind unstated. */
 function whenKind(kind: SpecKind): SchemaNode {
     const stated = { properties: { kind: { const: kind } }, required: ['kind'] };
@@ -1643,7 +1790,6 @@ export type SpecSchema = {
     allOf: { if: SchemaNode; then: SchemaNode & { propertyNames: { enum: readonly string[] } } }[];
     description: string;
     properties: SchemaNode;
-    required: string[];
     title: string;
     type: string;
 };
@@ -1654,8 +1800,8 @@ export const SPEC_SCHEMA: SpecSchema = {
             oneOf: [
                 { enum: FILE_STATES as readonly string[], type: 'string' },
                 {
+                    ...presenceOf('files'),
                     additionalProperties: false,
-                    minProperties: 1,
                     properties: {
                         contains: STRING_OR_LIST,
                         equals: { type: 'string' },
@@ -1685,8 +1831,8 @@ export const SPEC_SCHEMA: SpecSchema = {
             oneOf: [
                 pathIn(GROUND_EXPECTED, '.http'),
                 {
+                    ...presenceOf('response'),
                     additionalProperties: false,
-                    minProperties: 1,
                     properties: {
                         body: { description: 'The body, compared structurally.' },
                         headers: HEADERS,
@@ -1697,6 +1843,7 @@ export const SPEC_SCHEMA: SpecSchema = {
             ],
         },
         run: {
+            ...presenceOf('run'),
             additionalProperties: false,
             properties: {
                 command: { description: 'The argv line, run through the shell.', type: 'string' },
@@ -1721,26 +1868,25 @@ export const SPEC_SCHEMA: SpecSchema = {
                     type: 'string',
                 },
             },
-            required: ['command', 'exit'],
             type: 'object',
         },
         seedEntry: {
             oneOf: [
                 pathIn(GROUND_SEEDS, '.sql'),
                 {
+                    ...presenceOf('seed'),
                     additionalProperties: false,
                     properties: {
                         database: { type: 'string' },
                         file: pathIn(GROUND_SEEDS, '.sql'),
                     },
-                    required: ['file'],
                     type: 'object',
                 },
             ],
         },
         step: {
+            ...stepLaws(),
             additionalProperties: false,
-            anyOf: [{ required: ['response'] }, { required: ['tables'] }],
             properties: {
                 body: {
                     description:
@@ -1752,18 +1898,17 @@ export const SPEC_SCHEMA: SpecSchema = {
                 response: { $ref: '#/$defs/response' },
                 tables: { $ref: '#/$defs/tables' },
             },
-            required: ['request'],
             type: 'object',
         },
         tables: {
             additionalProperties: {
+                ...presenceOf('table'),
                 additionalProperties: false,
                 properties: {
                     columns: { items: { type: 'string' }, minItems: 1, type: 'array' },
                     database: { type: 'string' },
                     rows: { items: { type: 'array' }, type: 'array' },
                 },
-                required: ['columns', 'rows'],
                 type: 'object',
             },
             description:
@@ -1792,17 +1937,10 @@ export const SPEC_SCHEMA: SpecSchema = {
         if: whenKind(kind),
         // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema's own keyword: an if/then pair is how the schema closes a document on its kind's keys
         then: {
+            ...presenceOf(kind),
+            // A one-step api document is that step, its laws held at the top level.
+            ...(kind === 'api' ? { dependentSchemas: { request: stepLaws() } } : {}),
             propertyNames: { enum: KIND_KEYS[kind] },
-            ...(kind === 'cli' ? { required: ['runs'] } : {}),
-            ...(kind === 'api'
-                ? { oneOf: [{ required: ['request'] }, { required: ['steps'] }] }
-                : {}),
-            ...(kind === 'jobs'
-                ? {
-                      anyOf: [{ required: ['tables'] }, { required: ['error'] }],
-                      required: ['trigger'],
-                  }
-                : {}),
         },
     })),
     description:
@@ -1885,7 +2023,7 @@ export const SPEC_SCHEMA: SpecSchema = {
             ],
         },
     },
-    required: ['description'],
+    ...presenceOf('document'),
     title: '@jterrazz/test spec document',
     type: 'object',
 } as const;

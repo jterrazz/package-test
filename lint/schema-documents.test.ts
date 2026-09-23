@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { PRESENCE } from '../src/model/literate/spec-document.js';
+import type { PresenceShape } from '../src/model/literate/spec-document.js';
 import { documentData, parserRefusal, schemaVerdicts, specDocuments } from './schema-documents.js';
 
 /** The repository root, from this module's place inside `lint/`. */
@@ -121,6 +123,26 @@ describe('the published schema refuses a wrong document of every kind', () => {
             'kind: api\ndescription: x\nseed: ./expected/one.sql\nrequest: GET /users\n',
         ],
         [
+            'api',
+            'a request with neither a response nor tables',
+            'kind: api\ndescription: x\nrequest: GET /users\n',
+        ],
+        [
+            'api',
+            'a response beside the steps',
+            'kind: api\ndescription: x\nresponse: { status: 200 }\nsteps:\n    - request: GET /users\n      response: { status: 200 }\n',
+        ],
+        [
+            'api',
+            'a body beside a request file',
+            'kind: api\ndescription: x\nrequest: ./requests/one.http\nbody: { a: 1 }\nresponse: { status: 200 }\n',
+        ],
+        [
+            'cli',
+            'a run that waits and writes stdin',
+            'description: x\nruns:\n    - command: serve\n      stdin: x\n      waitFor: ready\n      exit: 0\n',
+        ],
+        [
             'jobs',
             'a key another kind reads',
             'kind: jobs\ndescription: x\ntrigger: sync\nrequest: GET /users\n',
@@ -130,7 +152,8 @@ describe('the published schema refuses a wrong document of every kind', () => {
         // Given - the document's data
         const data = documentData(text);
 
-        // Then - the schema names at least one error
+        // Then - the parser refuses it, and the schema names at least one error
+        expect(parserRefusal(text, 'case.spec.yaml')).not.toBeNull();
         expect(validate(data).length).toBeGreaterThan(0);
     });
 
@@ -156,4 +179,198 @@ describe('the published schema refuses a wrong document of every kind', () => {
         expect(parserRefusal(text, 'twin.spec.yaml')).toBeNull();
         expect(validate(data)).toStrictEqual([]);
     });
+});
+
+/** A mapping of the grammar, as data. */
+type Mapping = Record<string, unknown>;
+
+/** What a value of each key a presence law names may be, when a case adds it. */
+const SAMPLES: Mapping = {
+    body: { a: 1 },
+    request: 'GET /users',
+    response: { status: 200 },
+    tables: { users: { columns: ['name'], rows: [] } },
+    waitFor: 'ready',
+};
+
+/**
+ * Each shape a presence law governs: well-formed instances of it, the
+ * document one is set in, and the name a refusal calls it by.
+ */
+const SHAPES: Record<
+    PresenceShape,
+    { embed: (mapping: Mapping) => Mapping; instances: Mapping[]; subject?: string }
+> = {
+    api: {
+        embed: (mapping) => mapping,
+        instances: [
+            { description: 'x', kind: 'api', request: 'GET /users', response: { status: 200 } },
+            {
+                description: 'x',
+                kind: 'api',
+                steps: [{ request: 'GET /users', response: { status: 200 } }],
+            },
+        ],
+    },
+    cli: {
+        embed: (mapping) => mapping,
+        instances: [{ description: 'x', runs: [{ command: 'build', exit: 0 }] }],
+    },
+    document: {
+        embed: (mapping) => mapping,
+        instances: [
+            { description: 'x', runs: [{ command: 'build', exit: 0 }] },
+            { description: 'x', kind: 'api', request: 'GET /users', tables: SAMPLES.tables },
+            { description: 'x', error: 'boom', kind: 'jobs', trigger: 'sync' },
+        ],
+    },
+    files: {
+        embed: (mapping) => ({
+            description: 'x',
+            runs: [{ command: 'build', exit: 0, files: { 'a.txt': mapping } }],
+        }),
+        instances: [{ contains: 'x' }, { equals: 'x' }],
+        subject: 'a.txt',
+    },
+    jobs: {
+        embed: (mapping) => mapping,
+        instances: [
+            { description: 'x', kind: 'jobs', tables: SAMPLES.tables, trigger: 'sync' },
+            { description: 'x', error: 'boom', kind: 'jobs', trigger: 'sync' },
+        ],
+    },
+    response: {
+        embed: (mapping) => ({
+            description: 'x',
+            kind: 'api',
+            request: 'GET /users',
+            response: mapping,
+        }),
+        instances: [{ status: 200 }, { body: { a: 1 }, headers: { 'x-a': 'b' } }],
+    },
+    run: {
+        embed: (mapping) => ({ description: 'x', runs: [mapping] }),
+        instances: [
+            { command: 'build', exit: 0 },
+            { command: 'build', exit: 0, stdin: 'x' },
+        ],
+    },
+    seed: {
+        embed: (mapping) => ({
+            description: 'x',
+            kind: 'api',
+            request: 'GET /users',
+            response: { status: 200 },
+            seed: mapping,
+        }),
+        instances: [{ database: 'db', file: './seeds/one.sql' }],
+    },
+    step: {
+        embed: (mapping) => ({ description: 'x', kind: 'api', steps: [mapping] }),
+        instances: [
+            { request: 'GET /users', response: { status: 200 } },
+            { body: { a: 1 }, request: 'POST /users', tables: SAMPLES.tables },
+        ],
+    },
+    table: {
+        embed: (mapping) => ({
+            description: 'x',
+            kind: 'jobs',
+            tables: { users: mapping },
+            trigger: 'sync',
+        }),
+        instances: [{ columns: ['name'], rows: [['a']] }],
+        subject: 'users',
+    },
+};
+
+/** One mapping that breaks a law: what it is, and the refusal the parser must give. */
+type Breach = { case: string; mapping: Mapping; refusal: string };
+
+/** The mapping, less `keys`. */
+function without(mapping: Mapping, keys: readonly string[]): Mapping {
+    return Object.fromEntries(Object.entries(mapping).filter(([key]) => !keys.includes(key)));
+}
+
+/** Every breach of a law the instances of its shape can be turned into. */
+function breachesOf(shape: PresenceShape, lawIndex: number): Breach[] {
+    const law = PRESENCE[shape][lawIndex];
+    const { instances, subject = '' } = SHAPES[shape];
+    if (law === undefined) {
+        return [];
+    }
+    return instances.flatMap((instance): Breach[] => {
+        if (law.law === 'each') {
+            return law.keys.map((key) => ({
+                case: `without ${key}`,
+                mapping: without(instance, [key]),
+                refusal: law.refusal(subject, key),
+            }));
+        }
+        if (law.law === 'some') {
+            return law.keys.some((key) => key in instance)
+                ? [
+                      {
+                          case: `without ${law.keys.join(', ')}`,
+                          mapping: without(instance, law.keys),
+                          refusal: law.refusal(subject),
+                      },
+                  ]
+                : [];
+        }
+        return law.with in instance
+            ? law.keys.map((key) => ({
+                  case: `${key} beside ${law.with}`,
+                  mapping: { ...instance, [key]: SAMPLES[key] },
+                  refusal: law.refusal(subject, key),
+              }))
+            : [];
+    });
+}
+
+/** The shapes, each with its laws by index — what `test.each` walks. */
+const LAWS = (Object.keys(PRESENCE) as PresenceShape[]).flatMap((shape) =>
+    PRESENCE[shape].map((law, index) => [shape, law.law, index] as const),
+);
+
+describe('the schema holds every presence law the parser holds (meta-test)', () => {
+    const validate = schemaValidator();
+
+    test.each(Object.keys(SHAPES) as PresenceShape[])(
+        '%s: every well-formed instance, the parser reads and the schema validates',
+        (shape) => {
+            // Given - each instance of the shape, set in its document
+            const { embed, instances } = SHAPES[shape];
+
+            // Then - both readers accept it: the breaches below are the law, not the shape
+            for (const instance of instances) {
+                const text = JSON.stringify(embed(instance));
+                expect(parserRefusal(text, 'case.spec.yaml')).toBeNull();
+                expect(validate(documentData(text))).toStrictEqual([]);
+            }
+        },
+    );
+
+    test.each(LAWS)(
+        '%s: the %s law #%i is broken the same for both readers',
+        (shape, _law, index) => {
+            // Given - every way the shape's instances break the law
+            const breaches = breachesOf(shape, index);
+
+            // Then - there is one at least, and each is refused by the parser with the law's sentence, and by the schema
+            expect(breaches.length).toBeGreaterThan(0);
+            const disagreements: string[] = [];
+            for (const breach of breaches) {
+                const text = JSON.stringify(SHAPES[shape].embed(breach.mapping));
+                const parser = parserRefusal(text, 'case.spec.yaml');
+                if (parser?.includes(breach.refusal) !== true) {
+                    disagreements.push(`${breach.case}: the parser said ${String(parser)}`);
+                }
+                if (validate(documentData(text)).length === 0) {
+                    disagreements.push(`${breach.case}: the schema validates it`);
+                }
+            }
+            expect(disagreements).toStrictEqual([]);
+        },
+    );
 });

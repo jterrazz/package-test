@@ -10,8 +10,23 @@
                     "type": "string"
                 },
                 {
+                    "allOf": [
+                        {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "contains"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "equals"
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
                     "additionalProperties": false,
-                    "minProperties": 1,
                     "properties": {
                         "contains": {
                             "oneOf": [
@@ -92,8 +107,28 @@
                     "type": "string"
                 },
                 {
+                    "allOf": [
+                        {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "headers"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "body"
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
                     "additionalProperties": false,
-                    "minProperties": 1,
                     "properties": {
                         "body": {
                             "description": "The body, compared structurally."
@@ -120,6 +155,20 @@
             ]
         },
         "run": {
+            "allOf": [
+                {
+                    "not": {
+                        "required": [
+                            "stdin",
+                            "waitFor"
+                        ]
+                    }
+                }
+            ],
+            "required": [
+                "command",
+                "exit"
+            ],
             "additionalProperties": false,
             "properties": {
                 "command": {
@@ -158,10 +207,6 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "command",
-                "exit"
-            ],
             "type": "object"
         },
         "seedEntry": {
@@ -171,6 +216,9 @@
                     "type": "string"
                 },
                 {
+                    "required": [
+                        "file"
+                    ],
                     "additionalProperties": false,
                     "properties": {
                         "database": {
@@ -181,27 +229,45 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "file"
-                    ],
                     "type": "object"
                 }
             ]
         },
         "step": {
-            "additionalProperties": false,
-            "anyOf": [
+            "required": [
+                "request"
+            ],
+            "allOf": [
                 {
-                    "required": [
-                        "response"
+                    "anyOf": [
+                        {
+                            "required": [
+                                "response"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "tables"
+                            ]
+                        }
                     ]
                 },
                 {
-                    "required": [
-                        "tables"
-                    ]
+                    "not": {
+                        "properties": {
+                            "request": {
+                                "pattern": "^\\.\\.?/",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "request",
+                            "body"
+                        ]
+                    }
                 }
             ],
+            "additionalProperties": false,
             "properties": {
                 "body": {
                     "description": "The body an inline request sends: a value, or a file under requests/ named by its path."
@@ -225,13 +291,14 @@
                     "$ref": "#/$defs/tables"
                 }
             },
-            "required": [
-                "request"
-            ],
             "type": "object"
         },
         "tables": {
             "additionalProperties": {
+                "required": [
+                    "columns",
+                    "rows"
+                ],
                 "additionalProperties": false,
                 "properties": {
                     "columns": {
@@ -251,10 +318,6 @@
                         "type": "array"
                     }
                 },
-                "required": [
-                    "columns",
-                    "rows"
-                ],
                 "type": "object"
             },
             "description": "Table name → the rows it holds after the action, in order, as toMatchRows() takes them; rows: [] asserts it is empty.",
@@ -306,6 +369,9 @@
                 ]
             },
             "then": {
+                "required": [
+                    "runs"
+                ],
                 "propertyNames": {
                     "enum": [
                         "kind",
@@ -315,10 +381,7 @@
                         "serve",
                         "runs"
                     ]
-                },
-                "required": [
-                    "runs"
-                ]
+                }
             }
         },
         {
@@ -333,6 +396,91 @@
                 ]
             },
             "then": {
+                "allOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "required": [
+                                    "request"
+                                ]
+                            },
+                            {
+                                "required": [
+                                    "steps"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "not": {
+                            "required": [
+                                "steps",
+                                "request"
+                            ]
+                        }
+                    },
+                    {
+                        "not": {
+                            "required": [
+                                "steps",
+                                "body"
+                            ]
+                        }
+                    },
+                    {
+                        "not": {
+                            "required": [
+                                "steps",
+                                "response"
+                            ]
+                        }
+                    },
+                    {
+                        "not": {
+                            "required": [
+                                "steps",
+                                "tables"
+                            ]
+                        }
+                    }
+                ],
+                "dependentSchemas": {
+                    "request": {
+                        "required": [
+                            "request"
+                        ],
+                        "allOf": [
+                            {
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "response"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "tables"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "not": {
+                                    "properties": {
+                                        "request": {
+                                            "pattern": "^\\.\\.?/",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "request",
+                                        "body"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
                 "propertyNames": {
                     "enum": [
                         "kind",
@@ -347,19 +495,7 @@
                         "tables",
                         "steps"
                     ]
-                },
-                "oneOf": [
-                    {
-                        "required": [
-                            "request"
-                        ]
-                    },
-                    {
-                        "required": [
-                            "steps"
-                        ]
-                    }
-                ]
+                }
             }
         },
         {
@@ -374,6 +510,25 @@
                 ]
             },
             "then": {
+                "allOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "required": [
+                                    "tables"
+                                ]
+                            },
+                            {
+                                "required": [
+                                    "error"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "required": [
+                    "trigger"
+                ],
                 "propertyNames": {
                     "enum": [
                         "kind",
@@ -385,22 +540,7 @@
                         "error",
                         "tables"
                     ]
-                },
-                "anyOf": [
-                    {
-                        "required": [
-                            "tables"
-                        ]
-                    },
-                    {
-                        "required": [
-                            "error"
-                        ]
-                    }
-                ],
-                "required": [
-                    "trigger"
-                ]
+                }
             }
         }
     ],

@@ -209,7 +209,7 @@ tables:
 
 ## The schema and the key order
 
-The document's JSON Schema ships with the package at `schema/spec.schema.json`, published as the `@jterrazz/test/schema` export, and is generated from the grammar's own constants — it cannot describe a shape the parser does not read. It closes each kind on its own keys, one `if`/`then` per kind. A meta-test holds the other direction: a JSON Schema validator runs it over every document of this repository, each one the parser reads, it validates, and each one the parser refuses, it refuses — but for an order across steps, a name sent before the step that captures it, which no keyword compares. Point an editor at it:
+The document's JSON Schema ships with the package at `schema/spec.schema.json`, published as the `@jterrazz/test/schema` export, and is generated from the grammar's own constants — it cannot describe a shape the parser does not read. It closes each kind on its own keys, one `if`/`then` per kind, and states every presence law of the grammar — the keys a mapping cannot do without, the keys that cannot stand together — from `PRESENCE`, the one table the parser refuses with. A meta-test holds the other direction: a JSON Schema validator runs it over every document of this repository, each one the parser reads, it validates, and each one the parser refuses, it refuses — but for an order across steps, a name sent before the step that captures it, which no keyword compares — and it breaks every presence law, for both readers alike. Point an editor at it:
 
 ```yaml
 # yaml-language-server: $schema=./node_modules/@jterrazz/test/schema/spec.schema.json
