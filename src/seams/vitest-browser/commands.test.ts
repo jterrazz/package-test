@@ -10,6 +10,7 @@ describe('the commands a page reaches the node side through', () => {
             'ariaTree',
             'goldenRead',
             'goldenWrite',
+            'inPlaceWrite',
         ]);
     });
 });

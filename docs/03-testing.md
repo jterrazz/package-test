@@ -109,7 +109,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 59    |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 60    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 121   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 156   |
@@ -261,7 +261,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.seed()`      | 16  | 3    | 1   | 3           | —       | —      | —         | —      |
 | `.headers()`   | 2   | —    | —   | —           | 1       | —      | —         | —      |
 | `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
-| `.env()`       | —   | —    | 1   | —           | —       | —      | —         | —      |
+| `.env()`       | —   | —    | 2   | —           | —       | —      | —         | —      |
 | `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
 | `.viewport()`  | —   | —    | —   | —           | —       | —      | 1         | —      |
 
@@ -378,7 +378,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.aria.yaml tree`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `.json body`           | 1   | —    | 2   | 5           | 2       | —      | —         | 7      |
 | `.txt stream`          | 2   | —    | 8   | 3           | 2       | —      | —         | 9      |
-| `{ frozen }`           | 3   | —    | 5   | —           | —       | —      | 1         | 2      |
+| `{ frozen }`           | 3   | —    | 5   | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
 

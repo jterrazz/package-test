@@ -3,6 +3,7 @@ import { dirname } from 'node:path';
 import type { BrowserCommand } from 'vitest/node';
 
 import { resolveSpecPath } from '../../model/chain/resolve.js';
+import { renderText, writeInPlace } from '../../model/goldens/in-place.js';
 
 /**
  * The things a page cannot do for itself, run on the server side of
@@ -59,7 +60,29 @@ export const goldenWrite: BrowserCommand<[string, string], string> = (context, n
 };
 
 /**
+ * Write a text in place — update mode's half for a value the test holds. The
+ * page's stack names the call in the module the page ran; the browser server
+ * maps it back to the test's own source, and the frame of the test file is
+ * the call to rewrite.
+ */
+export const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, text) => {
+    const file = context.testPath;
+    const frame = context.project.browser
+        ?.parseStacktrace(stack)
+        .find((candidate) => candidate.file === file);
+    if (file === undefined || frame === undefined) {
+        throw new Error(
+            'update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written.',
+        );
+    }
+    writeInPlace({ column: frame.column, file, line: frame.line }, (indent) =>
+        renderText(text, indent),
+    );
+    return `${file}:${frame.line}`;
+};
+
+/**
  * The commands, as `component()` registers them — one list, so the names the
  * page calls and the names the project registers cannot drift.
  */
-export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite };
+export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite, inPlaceWrite };

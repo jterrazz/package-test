@@ -23,6 +23,7 @@ import type { ParsedResponseFile } from '../http-files/http-file.js';
 import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import {
+    hasPlaceholders,
     mergePreservingPlaceholders,
     mergeTextPreservingPlaceholders,
     renderExpected,
@@ -45,8 +46,9 @@ import {
     streamValueRoute,
     WHOLE_MATCHER,
 } from '../result/text-assertions.js';
-import type { ValueRoute } from '../result/text-assertions.js';
+import type { ValueRoute, WholeCall } from '../result/text-assertions.js';
 import { TextAccessor } from '../result/text.js';
+import { callSiteOf, renderRows, renderText, renderValue, writeInPlace } from './in-place.js';
 
 type MatcherResult = {
     message: () => string;
@@ -412,57 +414,184 @@ export function rowsMismatch(
 
 // ── toMatch(<value>) — the whole result against the value written in place ──
 
+/** What a whole-result comparison is handed besides its value: its options, and its call site's stack. */
+type InPlace = {
+    /** A negation asserts a mismatch, and update mode never records one. */
+    negated: boolean;
+    options: MatchFixtureOptions | undefined;
+    stack: string;
+};
+
+/** The hint an expectation not yet written in place gives: the run that writes it. */
+const UNRECORDED =
+    'nothing is written in place yet — run with TEST_UPDATE=1 (or vitest -u) and the actual value is written into the test.';
+
+/** Nothing written in place yet: the empty text an author leaves to be recorded. */
+function unrecorded(expected: unknown): boolean {
+    return typeof expected === 'string' && expected.trim() === '';
+}
+
+/** Does this comparison write its value in place instead of failing? */
+function recording(context: InPlace): boolean {
+    return shouldUpdateSnapshots() && context.options?.frozen !== true && !context.negated;
+}
+
+/** Write what `render` states over the value in place at the call the stack names. */
+function writeAt(context: InPlace, render: (indent: string) => string): MatcherResult {
+    const site = callSiteOf(context.stack);
+    if (site === undefined) {
+        throw new Error(
+            'update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written.',
+        );
+    }
+    writeInPlace(site, render);
+    return passed(`updated the value in place at ${site.file}:${site.line}`);
+}
+
+/** A stream against its text written in place; recorded, the lines whose tokens still match keep them. */
+function matchStreamValue(
+    accessor: TextAccessor,
+    expected: string,
+    context: InPlace,
+): MatcherResult {
+    const comparison = compareStreamInPlace(accessor, expected);
+    if (comparison.pass || !recording(context)) {
+        return comparison;
+    }
+    const previous = dedent(expected);
+    const merged = mergeTextPreservingPlaceholders(
+        previous === '' ? null : previous,
+        accessor.text,
+        accessor.captures,
+    );
+    return writeAt(context, (indent) => renderText(merged, indent));
+}
+
 /** A response against its `.http` text written in place: status, the headers it lists, the body. */
-function matchResponseValue(accessor: ResponseAccessor, expected: string): MatcherResult {
-    const parsed = parseResponseFile(dedent(expected), IN_PLACE);
-    const failure = compareResponse(IN_PLACE, parsed, accessor, accessor.captures);
-    return failure === null
-        ? passed('expected response not to match the value in place')
-        : failed(failure);
+function matchResponseValue(
+    accessor: ResponseAccessor,
+    expected: string,
+    context: InPlace,
+): MatcherResult {
+    const previous = unrecorded(expected) ? null : parseResponseFile(dedent(expected), IN_PLACE);
+    const failure =
+        previous === null
+            ? `Response (${IN_PLACE}): ${UNRECORDED}`
+            : compareResponse(IN_PLACE, previous, accessor, accessor.captures);
+    if (failure === null) {
+        return passed('expected response not to match the value in place');
+    }
+    if (!recording(context)) {
+        return failed(failure);
+    }
+    const updated = buildUpdatedResponse(previous, accessor, accessor.captures.workdir);
+    return writeAt(context, (indent) => renderText(serializeResponseFile(updated), indent));
 }
 
 /** A json against the value written in place, tokens and `match.*` included. */
-function matchJsonValue(accessor: JsonAccessor, expected: unknown): MatcherResult {
+function matchJsonValue(
+    accessor: JsonAccessor,
+    expected: unknown,
+    context: InPlace,
+): MatcherResult {
     const actual = accessor.value;
-    return structuralEquals(expected, actual, accessor.captures)
-        ? passed('expected JSON not to match the value in place')
-        : failed(formatResponseDiff(IN_PLACE, renderExpected(expected), actual));
+    const empty = unrecorded(expected);
+    if (!empty && structuralEquals(expected, actual, accessor.captures)) {
+        return passed('expected JSON not to match the value in place');
+    }
+    if (!recording(context)) {
+        return failed(
+            empty
+                ? `JSON (${IN_PLACE}): ${UNRECORDED}`
+                : formatResponseDiff(IN_PLACE, renderExpected(expected), actual),
+        );
+    }
+    const merged = mergePreservingPlaceholders(
+        empty ? null : renderExpected(expected),
+        actual,
+        accessor.captures.workdir,
+    );
+    return writeAt(context, (indent) => renderValue(merged, indent));
+}
+
+/**
+ * Rows to write in place: each cell whose previous expectation, as a token,
+ * still matches keeps the token; every other cell is the table's value.
+ */
+function mergeRows(previous: null | Rows, actual: unknown[][]): unknown[][] {
+    return actual.map((row, i) =>
+        row.map((cell, j) => {
+            const before = renderExpected(previous?.[i]?.[j]);
+            return typeof before === 'string' &&
+                hasPlaceholders(before) &&
+                structuralEquals(before, cell, new CaptureScope())
+                ? before
+                : cell;
+        }),
+    );
 }
 
 /** A table against its rows written in place: every column, in the table's order. */
-async function matchTableValue(accessor: TableAccessor, expected: Rows): Promise<MatcherResult> {
+async function matchTableValue(
+    accessor: TableAccessor,
+    expected: '' | Rows,
+    context: InPlace,
+): Promise<MatcherResult> {
     const { columns, rows } = await accessor.content();
-    const mismatch = rowsMismatch(
-        accessor.name,
-        { columns, rows: expected },
-        rows,
-        accessor.captures,
-    );
-    return mismatch === null
-        ? passed(`expected table "${accessor.name}" not to match the rows in place`)
-        : failed(mismatch);
+    const previous = isRows(expected) ? expected : null;
+    const mismatch =
+        previous === null
+            ? `Table "${accessor.name}" (${IN_PLACE}): ${UNRECORDED}`
+            : rowsMismatch(accessor.name, { columns, rows: previous }, rows, accessor.captures);
+    if (mismatch === null) {
+        return passed(`expected table "${accessor.name}" not to match the rows in place`);
+    }
+    if (!recording(context)) {
+        return failed(mismatch);
+    }
+    const merged = mergeRows(previous, rows);
+    return writeAt(context, (indent) => renderRows(merged, indent));
+}
+
+/** The value a table is compared to: its rows, or nothing recorded yet. */
+function tableExpectation(expected: unknown): '' | Rows | undefined {
+    if (isRows(expected)) {
+        return expected;
+    }
+    return unrecorded(expected) ? '' : undefined;
 }
 
 /**
  * `toMatch(<value>)` on a result subject — the whole result against the value
- * the test writes in place. The route has already refused a value the subject
- * cannot be compared to.
+ * the test writes in place, rewritten there by update mode. The route has
+ * already refused a value the subject cannot be compared to.
  */
 function toMatchWhole(
+    this: { isNot?: boolean },
     received: unknown,
     expected: unknown,
+    call?: WholeCall,
 ): MatcherResult | Promise<MatcherResult> {
-    if (received instanceof TextAccessor && typeof expected === 'string') {
-        return compareStreamInPlace(received, expected);
-    }
-    if (received instanceof ResponseAccessor && typeof expected === 'string') {
-        return matchResponseValue(received, expected);
-    }
+    const context: InPlace = {
+        negated: this.isNot === true,
+        options: call?.options,
+        stack: call?.stack ?? '',
+    };
     if (received instanceof JsonAccessor) {
-        return matchJsonValue(received, expected);
+        return matchJsonValue(received, expected, context);
     }
-    if (received instanceof TableAccessor && isRows(expected)) {
-        return matchTableValue(received, expected);
+    const table = received instanceof TableAccessor ? tableExpectation(expected) : undefined;
+    if (received instanceof TableAccessor && table !== undefined) {
+        return matchTableValue(received, table, context);
+    }
+    if (typeof expected !== 'string') {
+        throw new TypeError('toMatch: this subject is not compared to a value written in place.');
+    }
+    if (received instanceof ResponseAccessor) {
+        return matchResponseValue(received, expected, context);
+    }
+    if (received instanceof TextAccessor) {
+        return matchStreamValue(received, expected, context);
     }
     throw new TypeError('toMatch: this subject is not compared to a value written in place.');
 }
@@ -543,7 +672,7 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
             : 'whole';
     }
     if (subject instanceof TableAccessor) {
-        return isRows(value)
+        return isRows(value) || unrecorded(value)
             ? 'whole'
             : new TypeError(
                   `toMatch: a table is compared whole to its rows written in place — one array of cells per row, every column in the table's order — received ${spelledValue(value)}.`,

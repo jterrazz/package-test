@@ -412,6 +412,11 @@ export async function writeGolden(name: string, content: string): Promise<string
     return await commands.goldenWrite(name, content);
 }
 
+/** Write a text over the value in place the stack's `toMatch` holds, and say where — update mode's half. */
+export async function writeInPlaceText(stack: string, text: string): Promise<string> {
+    return await commands.inPlaceWrite(stack, text);
+}
+
 /** Mount a React subject through the optional `vitest-browser-react` adapter. */
 export async function mountReact(ui: ComponentUi): Promise<MountedSurface> {
     let render;

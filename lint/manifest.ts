@@ -470,7 +470,7 @@ export const RULE_DOCS = {
     'd13w-unfrozen-negative-fixture': {
         channel: 'statique',
         convention:
-            'A golden `toMatch(file(…))`/`toMatch(directory(…))` whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong fixture instead of throwing → warning. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
+            'A golden `toMatch(file(…))`/`toMatch(directory(…))`, or a `toMatch(<value>)` on a result (the value written in place, rewritten in the test), whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong expectation instead of throwing → warning. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
         facet: 'model',
         family: 'D',
         fix: 'Pass `{ frozen: true }` so update mode never overwrites the fixture the test is about.',

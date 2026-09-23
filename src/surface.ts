@@ -171,7 +171,7 @@ export { lintReport } from './model/result/lint-report.js';
 // Matcher options (per-call `toMatch(file(…), { frozen })`)
 export type { MatchFixtureOptions } from './model/result/match-options.js';
 
-/** A table's rows as a test writes them in place: one array of cells per row, every column. */
+/** A table's rows as a test writes them in place: one array of cells per row, every column — or `''`, nothing recorded yet. */
 type TableRows = readonly (readonly unknown[])[];
 
 /**
@@ -206,7 +206,7 @@ type WholeMatch<T, R> = T extends { readonly capturedInPage: true }
         : T extends JsonAccessorType
           ? (expected: JsonExpectation, options?: MatchFixtureOptionsType) => R
           : T extends TableAccessorType
-            ? (expected: TableRows, options?: MatchFixtureOptionsType) => Promise<void>
+            ? (expected: '' | TableRows, options?: MatchFixtureOptionsType) => Promise<void>
             : T extends DirectoryAccessorType | FilesystemAccessorType
               ? (golden: DiskDirectoryType, options?: MatchFixtureOptionsType) => Promise<void>
               : unknown;

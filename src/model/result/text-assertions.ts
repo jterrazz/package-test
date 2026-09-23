@@ -3,6 +3,7 @@ import { isDiskTarget } from '../chain/spec-path.js';
 import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
+import type { MatchFixtureOptions } from './match-options.js';
 import { TextAccessor } from './text.js';
 
 /**
@@ -112,6 +113,19 @@ export const GOLDEN_MATCHER = '@jterrazz/test:golden';
 /** The name the whole-result comparison against a value is registered under. */
 export const WHOLE_MATCHER = '@jterrazz/test:whole';
 
+/**
+ * What the whole-result comparison is handed besides its value: the options
+ * the test passed, and the stack of the call — where update mode writes.
+ */
+export type WholeCall = { options: MatchFixtureOptions | undefined; stack: string };
+
+/** The options a caller handed, read without trusting their shape: `frozen` is the one they carry. */
+function optionsOf(value: unknown): MatchFixtureOptions | undefined {
+    return value !== null && typeof value === 'object'
+        ? { frozen: Reflect.get(value, 'frozen') === true }
+        : undefined;
+}
+
 /** The slice of vitest's `chai` the golden route needs. */
 type Chai = {
     Assertion: { prototype: object };
@@ -137,8 +151,9 @@ type Chai = {
  * comparison under {@link WHOLE_MATCHER}. `routeValue` tells, per subject and
  * value, whether the value is compared whole, refused (the subject takes no
  * such value — the types already refuse the call, and a caller past them
- * reads why), or vitest's. The whole-result comparison receives the call
- * site's stack as its third argument: update mode writes the value there.
+ * reads why), or vitest's. The whole-result comparison receives a
+ * {@link WholeCall}: the options, and the call site's stack, where update mode
+ * writes the value.
  */
 export function matchThroughGolden(
     chai: Chai,
@@ -159,8 +174,9 @@ export function matchThroughGolden(
                 }
                 const whole = this[WHOLE_MATCHER];
                 if (route === 'whole' && typeof whole === 'function') {
-                    const site = new Error('toMatch call site').stack ?? '';
-                    return whole.call(this, args[0], args[1], site) as unknown;
+                    const stack = new Error('toMatch call site').stack ?? '';
+                    const call: WholeCall = { options: optionsOf(args[1]), stack };
+                    return whole.call(this, args[0], call) as unknown;
                 }
                 return vitestToMatch.apply(this, args);
             },

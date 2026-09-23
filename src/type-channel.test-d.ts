@@ -236,7 +236,7 @@ export async function assertedSubjectMatcherRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
     const result = await api.get('/orders/1');
     const out = await cli.exec();
-    // @ts-expect-error D14 — a table is compared whole to its rows, never a text [`Argument of type 'string' is not assignable to parameter of type 'TableRows'`]
+    // @ts-expect-error D14 — a table is compared whole to its rows, never a text [`Argument of type '"1"' is not assignable to parameter of type '"" | TableRows'`]
     await expect(result.table('orders')).toMatch('1');
     // @ts-expect-error D14 — a container is asserted running, never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
     expect(out.container('db')).toMatch('up');

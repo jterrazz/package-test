@@ -1,4 +1,12 @@
-import { findProperty, goldenOf, memberPropertyName, walk } from '../../ast.js';
+import {
+    child,
+    childList,
+    findProperty,
+    goldenOf,
+    identifierName,
+    memberPropertyName,
+    walk,
+} from '../../ast.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -134,6 +142,62 @@ function inAThrowingHelper(node: AstNode): boolean {
     return false;
 }
 
+/** The accessors a value in place compares whole — `toMatch` on them is the framework's, rewritten by update mode. */
+const RESULT_SUBJECTS = new Set([
+    'body',
+    'console',
+    'content',
+    'error',
+    'errors',
+    'head',
+    'html',
+    'json',
+    'jsonLd',
+    'response',
+    'screen',
+    'stderr',
+    'stdout',
+    'title',
+    'tree',
+    'value',
+]);
+
+/** Is the subject handed to `expect(…)` a result the framework compares whole — an accessor, a table, a `text(…)`? */
+function isResultSubject(subject: AstNode | undefined): boolean {
+    if (subject?.type === 'CallExpression') {
+        const callee = child(subject, 'callee');
+        return (
+            identifierName(callee) === 'text' || memberPropertyName(callee ?? subject) === 'table'
+        );
+    }
+    const name = subject?.type === 'MemberExpression' ? memberPropertyName(subject) : undefined;
+    return name !== undefined && RESULT_SUBJECTS.has(name);
+}
+
+/**
+ * Is this a `toMatch(<value>)` on a result — the value written in place,
+ * which update mode rewrites in the test as it rewrites a golden file? A
+ * RegExp is a part, and vitest's.
+ */
+function inPlaceOf(node: AstNode): boolean {
+    const callee = child(node, 'callee');
+    if (memberPropertyName(callee ?? node) !== 'toMatch') {
+        return false;
+    }
+    const argument = childList(node, 'arguments')[0];
+    if (argument === undefined || (argument.type === 'Literal' && 'regex' in argument)) {
+        return false;
+    }
+    let expectCall = child(callee, 'object');
+    while (expectCall?.type === 'MemberExpression') {
+        expectCall = child(expectCall, 'object');
+    }
+    return (
+        identifierName(child(expectCall, 'callee')) === 'expect' &&
+        isResultSubject(childList(expectCall, 'arguments')[0])
+    );
+}
+
 export const d13wUnfrozenNegativeFixture: LintRule = {
     create(context: RuleContext): Visitor {
         if (!isTestRole(roleOf(context.filename).role)) {
@@ -141,7 +205,7 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
         }
         return {
             CallExpression(node: AstNode) {
-                if (goldenOf(node) === undefined) {
+                if (goldenOf(node) === undefined && !inPlaceOf(node)) {
                     return;
                 }
                 if (!isWrappedInExpect(node) && !inAThrowingHelper(node)) {
@@ -158,7 +222,7 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
         docs: RULE_DOCS['d13w-unfrozen-negative-fixture'],
         messages: {
             unfrozenNegativeFixture:
-                'This golden matcher asserts a mismatch (wrapped in expect(…).toThrow/.rejects) — pass { frozen: true } so TEST_UPDATE=1 never overwrites the deliberately-wrong golden.',
+                'This golden matcher asserts a mismatch (wrapped in expect(…).toThrow/.rejects) — pass { frozen: true } so TEST_UPDATE=1 never overwrites the deliberately-wrong golden, a file or a value in place.',
         },
         type: 'suggestion',
     },

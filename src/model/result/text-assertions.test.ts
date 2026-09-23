@@ -31,9 +31,9 @@ function chaiWith(
 } {
     const prototype: Record<string, unknown> = {
         [GOLDEN_MATCHER]: () => answered.push('golden'),
-        [WHOLE_MATCHER]: (_value: unknown, _options: unknown, site: unknown) =>
+        [WHOLE_MATCHER]: (_value: unknown, call: { stack?: unknown }) =>
             answered.push(
-                typeof site === 'string' && site.includes('toMatch call site')
+                typeof call.stack === 'string' && call.stack.includes('toMatch call site')
                     ? 'whole'
                     : 'no site',
             ),

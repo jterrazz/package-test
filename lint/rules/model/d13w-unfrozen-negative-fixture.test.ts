@@ -31,6 +31,17 @@ ruleTester.run(
                 errors: 1,
                 filename: SPEC,
             },
+            // A value in place is rewritten in the test as a file is on disk.
+            {
+                code: "test('t', () => { expect(() => expect(result.response).toMatch(`HTTP/1.1 500`)).toThrow(/x/); });",
+                errors: 1,
+                filename: SPEC,
+            },
+            {
+                code: "test('t', async () => { await expect(expect(result.table('users')).toMatch([[1, 'Wrong']])).rejects.toThrow(/x/); });",
+                errors: 1,
+                filename: SPEC,
+            },
             // Frozen:false is not an opt-out.
             {
                 code: `test('t', () => { expect(() => expect(a.stdout).toMatch(file('./expected/w.txt'), { frozen: false })).toThrow(); });`,
@@ -49,6 +60,19 @@ ruleTester.run(
             },
         ],
         valid: [
+            // A part of a text is vitest's, and a string's toMatch is vitest's: update mode writes neither.
+            {
+                code: "test('t', () => { expect(() => expect(result.stdout).toMatch(/x/)).toThrow(); });",
+                filename: SPEC,
+            },
+            {
+                code: "test('t', () => { expect(() => expect(result.stdout.text).toMatch('x')).toThrow(); });",
+                filename: SPEC,
+            },
+            {
+                code: "test('t', () => { expect(() => expect(result.response).toMatch(`HTTP/1.1 500`, { frozen: true })).toThrow(); });",
+                filename: SPEC,
+            },
             // The frozen opt-out is present — exempt.
             {
                 code: `test('t', () => { expect(() => expect(result.response).toMatch(file('./expected/wrong.http'), { frozen: true })).toThrow(/x/); });`,

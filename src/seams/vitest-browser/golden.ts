@@ -1,6 +1,8 @@
 import { chai, expect, inject } from 'vitest';
 
 import { isDiskFile } from '../../model/chain/spec-path.js';
+import { dedent } from '../../model/matching/dedent.js';
+import { mergeTextPreservingPlaceholders } from '../../model/matching/structural.js';
 import type { MatchFixtureOptions } from '../../model/result/match-options.js';
 import {
     compareStreamInPlace,
@@ -12,8 +14,9 @@ import {
     streamValueRoute,
     WHOLE_MATCHER,
 } from '../../model/result/text-assertions.js';
+import type { WholeCall } from '../../model/result/text-assertions.js';
 import { TextAccessor } from '../../model/result/text.js';
-import { readGolden, writeGolden } from './vitest-browser.adapter.js';
+import { readGolden, writeGolden, writeInPlaceText } from './vitest-browser.adapter.js';
 
 /**
  * The matchers, as a page can serve them.
@@ -84,15 +87,33 @@ async function toMatchGolden(
 
 /**
  * `toMatch(<text>)` in a page — a captured text against the text written in
- * place. Awaited, as every comparison a page makes is.
+ * place, rewritten in the test's source by update mode through a server
+ * command. Awaited, as every comparison a page makes is.
  */
-async function toMatchWhole(received: unknown, expected: unknown): Promise<MatcherResult> {
+async function toMatchWhole(
+    this: { isNot?: boolean },
+    received: unknown,
+    expected: unknown,
+    call?: WholeCall,
+): Promise<MatcherResult> {
     if (!(received instanceof TextAccessor) || typeof expected !== 'string') {
         throw new TypeError(
             'toMatch: in a page, a captured text is compared to a text written in place.',
         );
     }
-    return await Promise.resolve(compareStreamInPlace(received, expected));
+    const comparison = compareStreamInPlace(received, expected);
+    const frozen = call?.options?.frozen === true;
+    if (comparison.pass || !updating() || frozen || this.isNot === true) {
+        return comparison;
+    }
+    const previous = dedent(expected);
+    const merged = mergeTextPreservingPlaceholders(
+        previous === '' ? null : previous,
+        received.text,
+        received.captures,
+    );
+    const where = await writeInPlaceText(call?.stack ?? '', merged);
+    return { message: () => `updated the value in place at ${where}`, pass: true };
 }
 
 /** A page holds no table: `toBeEmpty` is registered to refuse a stream with the form to write. */

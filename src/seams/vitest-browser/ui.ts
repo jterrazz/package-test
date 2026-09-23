@@ -33,5 +33,6 @@ declare module 'vitest/browser' {
         ariaTree: () => Promise<string>;
         goldenRead: (name: string) => Promise<null | string>;
         goldenWrite: (name: string, content: string) => Promise<string>;
+        inPlaceWrite: (stack: string, text: string) => Promise<string>;
     }
 }

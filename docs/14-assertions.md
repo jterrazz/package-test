@@ -327,7 +327,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Update mode
 
-`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching golden from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The engine, the flag, the discipline it asks for and the frozen two-pass are all [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matchers the flag reaches, and it is `toMatch` handed a `file()` or a `directory()`, on every subject.
+`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching golden from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The engine, the flag, the discipline it asks for and the frozen two-pass are all [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matchers the flag reaches, and it is `toMatch` on every result subject — a value written in place is rewritten in the test itself, a `file()` or a `directory()` on disk.
 
 ## Common mistakes
 

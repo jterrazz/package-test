@@ -6,6 +6,7 @@ import { directory, file, text } from '../../../src/index.js';
 import { cli as asymmetricCli } from '../asymmetric-transform-cli.specification.js';
 import { cli } from '../cli.specification.js';
 import { cli as transformCli } from '../transform-cli.specification.js';
+import { cli as vitestCli } from '../vitest-cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
 
@@ -590,5 +591,36 @@ describe('command — fixture tree layering', () => {
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn.yaml').content).toContain('override-world');
         expect(result.file('spwn.yaml').content).not.toContain('base-world');
+    });
+});
+
+describe('update mode writes the value in place', () => {
+    test('a scratch test holding empty values is filled with what it compared, and the next run reads them back', async () => {
+        // Given - a scratch test comparing a stream and a json to empty values, run twice under update mode
+        const result = await vitestCli
+            .fixture(directory('./fixtures/in-place/'))
+            .env({ TEST_UPDATE: '1' })
+            .exec(['run', 'run']);
+
+        // Then - both runs passed, and the test now states the whole of each result, indented with its call
+        expect(result.exitCode).toBe(0);
+        expect(text(result.file('recorded.test.mjs').content)).toMatch(`
+            import { expect, test } from 'vitest';
+
+            const { specification, text } = await import(process.env.IN_PLACE_ENTRY);
+            const { integration } = await specification.integration({});
+
+            test('records the results in place', async () => {
+                const result = await integration.call(() => ({ id: 'order-1', lines: 2 }));
+                expect(text('built 3 files in 12ms\\ndone\\n')).toMatch(\`
+                    built 3 files in 12ms
+                    done
+                \`);
+                expect(result.value).toMatch({
+                    "id": "order-1",
+                    "lines": 2
+                });
+            });
+        `);
     });
 });

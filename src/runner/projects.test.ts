@@ -127,6 +127,7 @@ describe('component() — the browser project', () => {
             'ariaTree',
             'goldenRead',
             'goldenWrite',
+            'inPlaceWrite',
         ]);
     });
 
