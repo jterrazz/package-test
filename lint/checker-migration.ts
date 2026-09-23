@@ -1,9 +1,9 @@
-import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
 import { GROUND_FIXTURES, isGroundName, RENAMED_GROUND_DIRS } from '../src/model/chain/ground.js';
 import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
-import { treeEntries } from '../src/seams/git/tree.js';
+import { treeEntries, treeKind } from '../src/seams/git/tree.js';
 import { isTestFileName } from './role.js';
 
 /**
@@ -148,9 +148,9 @@ function fixturePath(value: string, specDir: string, root: string): string | und
     return `./${GROUND_FIXTURES}/${value}`;
 }
 
-/** Is `path` a directory on disk? */
+/** Is `path` a directory of the tree? */
 function isDirectoryAt(path: string): boolean {
-    return existsSync(path) && statSync(path).isDirectory();
+    return treeKind(path) === 'directory';
 }
 
 /** A literal the mover may rewrite: no interpolation to evaluate. */
@@ -321,7 +321,7 @@ function migrateVerbs(text: string, file: string, root: string): string {
                 const { value } = call;
                 const name = value.replace(/\/+$/u, '');
                 const golden = join(specDir, 'expected', name);
-                if (name.length === 0 || !isPlain(value) || !existsSync(golden)) {
+                if (name.length === 0 || !isPlain(value) || treeKind(golden) === undefined) {
                     return match[0];
                 }
                 return isDirectoryAt(golden)
@@ -364,7 +364,7 @@ function entryFor(text: string, file: string): string {
             continue;
         }
         const specification = join(dirname(file), from.replace(/\.js$/u, '.ts'));
-        if (!existsSync(specification)) {
+        if (treeKind(specification) !== 'file') {
             continue;
         }
         for (const inner of readFileSync(specification, 'utf8').matchAll(NAMED_IMPORT)) {
@@ -579,7 +579,7 @@ function moduleTests(member: string): Omit<Walked, 'specsRoot'> {
                 !SKIPPED.has(entry.name) &&
                 !isGroundName(entry.name) &&
                 entry.name !== 'specs' &&
-                !existsSync(join(path, 'package.json'))
+                treeKind(join(path, 'package.json')) !== 'file'
             ) {
                 walk(path);
             }

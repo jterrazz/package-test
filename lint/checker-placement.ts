@@ -1,8 +1,8 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
-import { treeEntries } from '../src/seams/git/tree.js';
+import { treeEntries, treeKind } from '../src/seams/git/tree.js';
 import { isUnderSpecs } from './ast.js';
 import { reachesRunner } from './checker-facets.js';
 import type { TokenViolation } from './checker.js';
@@ -69,7 +69,7 @@ function* walk(dir: string, stopAtPackages = false): Generator<string> {
             if (SKIPPED.has(entry.name)) {
                 continue;
             }
-            if (stopAtPackages && existsSync(join(path, 'package.json'))) {
+            if (stopAtPackages && treeKind(join(path, 'package.json')) === 'file') {
                 continue;
             }
             yield* walk(path, stopAtPackages);

@@ -1,10 +1,14 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { moveKeepingHistory } from '../src/seams/git/tree.js';
 import { fixPoolFixtures } from './checker-crossfile.js';
+import { readManifest } from './checker-member.js';
+import { migrateTo17 } from './checker-migration.js';
+import { checkSpecOutsideSpecs } from './checker-placement.js';
 import {
     checkConventionFiles,
     findKnownTokens,
@@ -223,5 +227,109 @@ describe('the moves the fixers make', () => {
         // Then - the disk holds it at its new place only
         expect(existsSync(join(root, 'specs', 'api', 'fixtures', 'app', 'index.txt'))).toBe(true);
         expect(existsSync(join(root, 'specs', 'fixtures', 'app'))).toBe(false);
+    });
+});
+
+describe('the single paths the checker probes — through the same tree', () => {
+    test('an ignored pool directory is no fixture to move (C14)', () => {
+        // Given - a pool directory `.gitignore` names, reached from one leaf
+        const root = repository(
+            ['specs/fixtures/app/index.txt', 'specs/fixtures/kept.txt'],
+            [],
+            'specs/fixtures/app/\n',
+        );
+        mkdirSync(join(root, 'specs', 'api'));
+        writeFileSync(
+            join(root, 'specs', 'api', 'boot.spec.ts'),
+            "await api.fixture(directory('../fixtures/app/')).get('/');\n",
+        );
+
+        // Then - C8 names the path, and C14 has nothing to move
+        expect(findings(root, 'c14')).toStrictEqual([]);
+        expect(findings(root, 'c8-disk-target-exists')).toHaveLength(1);
+    });
+
+    test('a manifest `.gitignore` names is no package (the member pass)', () => {
+        // Given - one new manifest and one ignored one
+        const root = repository(['fresh/package.json', 'local/package.json'], [], 'local/\n');
+        writeFileSync(join(root, 'fresh', 'package.json'), '{}\n');
+        writeFileSync(join(root, 'local', 'package.json'), '{}\n');
+
+        // Then - only the new one declares a package
+        expect(readManifest(join(root, 'fresh'))).not.toBeNull();
+        expect(readManifest(join(root, 'local'))).toBeNull();
+    });
+
+    test('a nested manifest `.gitignore` names bounds no walk (the member pass)', () => {
+        // Given - a spec outside `specs/` under a folder whose own manifest is ignored
+        const root = repository(
+            ['tools/package.json', 'tools/boot.spec.ts'],
+            [],
+            'tools/package.json\n',
+        );
+        writeFileSync(join(root, 'tools', 'package.json'), '{}\n');
+
+        // Then - the folder is the member's, and its spec is reported
+        expect(checkSpecOutsideSpecs(root).map(({ file }) => file)).toStrictEqual([
+            join('tools', 'boot.spec.ts'),
+        ]);
+    });
+
+    test('a golden `.gitignore` names is not one the mover points at (C13)', () => {
+        // Given - a 16 leaf whose `_expected/` holds a new golden and an ignored one
+        const root = repository(
+            [
+                'specs/cli/help/_expected/usage.txt',
+                'specs/cli/help/_expected/local.txt',
+                'specs/cli/help/help.test.ts',
+            ],
+            [],
+            'local.txt\n',
+        );
+        writeFileSync(
+            join(root, 'specs', 'cli', 'help', 'help.test.ts'),
+            "expect(a).toMatch('usage.txt');\nexpect(b).toMatch('local.txt');\n",
+        );
+
+        // When - the mover runs
+        migrateTo17(join(root, 'specs'), moveKeepingHistory);
+
+        // Then - the new golden is named by its path, the ignored name stays a value
+        expect(readFileSync(join(root, 'specs', 'cli', 'help', 'help.test.ts'), 'utf8')).toContain(
+            "expect(a).toMatch(file('./expected/usage.txt'));\nexpect(b).toMatch('local.txt');",
+        );
+    });
+
+    test('an ignored fixture fixes no value for the document beside it (D5)', () => {
+        // Given - two documents asserting a temp path their `fixture:` holds, one of the two fixtures ignored
+        const document = [
+            'description: prints where it wrote',
+            'fixture: ./fixtures/where.txt',
+            'runs:',
+            '    - command: widget where',
+            '      exit: 0',
+            '      stdout: |',
+            '          /tmp/widget/out',
+            '',
+        ].join('\n');
+        const root = repository(
+            [
+                'specs/kept/fixtures/where.txt',
+                'specs/local/fixtures/where.txt',
+                'specs/kept/prints-where.spec.yaml',
+                'specs/local/prints-where.spec.yaml',
+            ],
+            [],
+            'specs/local/fixtures/where.txt\n',
+        );
+        for (const leaf of ['kept', 'local']) {
+            writeFileSync(join(root, 'specs', leaf, 'fixtures', 'where.txt'), '/tmp/widget/out\n');
+            writeFileSync(join(root, 'specs', leaf, 'prints-where.spec.yaml'), document);
+        }
+
+        // Then - the value the ignored fixture held is volatile again
+        expect(findings(root, 'd5').map((line) => line.split(':')[0])).toStrictEqual([
+            'local/prints-where.spec.yaml',
+        ]);
     });
 });

@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
-import { treeEntries, treeNames } from '../src/seams/git/tree.js';
+import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
 import { diskTargetFindings } from './checker-crossfile.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
@@ -102,7 +102,7 @@ const PNPM_WORKSPACE = ['pnpm-workspace.yaml', 'pnpm-workspace.yml'];
 
 /** Does this directory DECLARE a workspace — npm/bun `workspaces`, or pnpm's own file? */
 function declaresWorkspace(dir: string): boolean {
-    if (PNPM_WORKSPACE.some((name) => existsSync(join(dir, name)))) {
+    if (PNPM_WORKSPACE.some((name) => treeKind(join(dir, name)) === 'file')) {
         return true;
     }
     const manifest = readManifest(dir);
@@ -231,7 +231,7 @@ type Manifest = {
 /** A member's manifest, or null when it has none (it is then not a member). */
 export function readManifest(dir: string): Manifest | null {
     const path = join(dir, 'package.json');
-    if (!existsSync(path)) {
+    if (treeKind(path) !== 'file') {
         return null;
     }
     try {
@@ -246,7 +246,7 @@ export function readManifest(dir: string): Manifest | null {
 function configOf(dir: string): null | string {
     for (const name of CONFIG_NAMES) {
         const path = join(dir, name);
-        if (existsSync(path)) {
+        if (treeKind(path) === 'file') {
             return path;
         }
     }
@@ -269,7 +269,7 @@ function holdsTests(dir: string): boolean {
         if (current === undefined) {
             break;
         }
-        if (!first && existsSync(join(current, 'package.json'))) {
+        if (!first && treeKind(join(current, 'package.json')) === 'file') {
             continue;
         }
         first = false;
@@ -503,7 +503,7 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
                     rule: 'c25-no-ground-synonym',
                     severity: 'error',
                 });
-            } else if (dir === memberDir || !existsSync(join(path, 'package.json'))) {
+            } else if (dir === memberDir || treeKind(join(path, 'package.json')) !== 'file') {
                 walk(path);
             }
         }
@@ -536,7 +536,7 @@ function moduleTestTargets(memberDir: string, rootDir: string): TokenViolation[]
                 !SKIPPED.has(entry.name) &&
                 !isGroundName(entry.name) &&
                 entry.name !== 'specs' &&
-                !existsSync(join(path, 'package.json'))
+                treeKind(join(path, 'package.json')) !== 'file'
             ) {
                 walk(path);
             }

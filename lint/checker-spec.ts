@@ -1,4 +1,4 @@
-import { readFileSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { GROUND_FIXTURES } from '../src/model/chain/ground.js';
@@ -11,7 +11,7 @@ import {
     SPEC_EXTENSION,
 } from '../src/model/literate/spec-document.js';
 import type { SpecDocument, SpecFile } from '../src/model/literate/spec-document.js';
-import { treeEntries, treeNames } from '../src/seams/git/tree.js';
+import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
 import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../src/seams/yaml/document.js';
 import type { Node, Pair, YAMLMap } from '../src/seams/yaml/document.js';
 import type { Severity, TokenViolation } from './checker.js';
@@ -421,13 +421,11 @@ function fixedData(document: SpecDocument, dir: string): string {
         parts.push(entry.name, ...Object.values(entry.env));
     }
     const visit = (path: string): void => {
-        let stat;
-        try {
-            stat = statSync(path);
-        } catch {
+        const kind = treeKind(path);
+        if (kind === undefined) {
             return;
         }
-        if (!stat.isDirectory()) {
+        if (kind === 'file') {
             parts.push(readText(path));
             return;
         }
