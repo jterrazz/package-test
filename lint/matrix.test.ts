@@ -61,6 +61,23 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
+    test('a glob in a string opens no comment, and the option after it still counts', () => {
+        // Given - a config whose first project collects `x/*` + `/*.yaml`, and whose component project states its clock after it
+        const root = mkdtempSync(join(tmpdir(), 'matrix-'));
+        try {
+            writeFileSync(
+                join(root, 'vitest.config.ts'),
+                "export default { projects: [{ include: ['x/*/*.yaml'] }, component({ clock: '2026-01-02T03:04:05Z', include: ['**/*.test.tsx'] })] };\n",
+            );
+            const clock = matrixRows(root).find((row) => row.capability.name === 'clock');
+
+            // Then - the clock the config states is read as written
+            expect(clock?.cells.component).toBe(1);
+        } finally {
+            rmSync(root, { force: true, recursive: true });
+        }
+    });
+
     test('an exemption excuses an empty cell, and goes the day the cell fills', () => {
         // Given - every reason a capability row states, and the cell it states it for. A token row's reason is the engine's and holds whatever a facet's goldens carry, so it is no debt to pay off
         const stale = matrixRows(ROOT)

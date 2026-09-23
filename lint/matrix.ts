@@ -72,6 +72,33 @@ function filesUnder(dir: string, extensions: string[]): string[] {
     return found;
 }
 
+/** The quotes a string literal opens on. */
+const QUOTES = new Set(['"', "'", '`']);
+
+/** The index just past the comment that opens at `index` — none opens there if `undefined`. */
+function pastComment(source: string, index: number): number | undefined {
+    const pair = source.slice(index, index + 2);
+    if (pair === '//' && source[index - 1] !== ':') {
+        const end = source.indexOf('\n', index);
+        return end === -1 ? source.length : end;
+    }
+    if (pair === '/*') {
+        const end = source.indexOf('*/', index + 2);
+        return end === -1 ? source.length : end + 2;
+    }
+    return undefined;
+}
+
+/** The index just past the string literal whose quote is at `index`. */
+function pastString(source: string, index: number): number {
+    const quote = source[index];
+    let at = index + 1;
+    while (at < source.length && source[at] !== quote) {
+        at += source[at] === '\\' ? 2 : 1;
+    }
+    return Math.min(at + 1, source.length);
+}
+
 /**
  * The source with its comments removed.
  *
@@ -79,12 +106,30 @@ function filesUnder(dir: string, extensions: string[]): string[] {
  * is not an exercise of it: before this, the comment naming `.intercept()` in
  * `specs/jobs/jobs.specification.ts` counted as a second jobs file, and the
  * word "wrapped" in a component test counted as a `wrap`.
+ *
+ * The scan walks the source character by character, because a regex cannot
+ * tell a comment from a string that spells one: the glob
+ * `'specs/lint/*' + '/*.spec.yaml'` opens a block comment to a pattern, and one
+ * swallowed every option of the next project of this repository's config.
  */
 function withoutComments(source: string): string {
-    return source
-        .replaceAll(/\/\*[\s\S]*?\*\//gu, '')
-        .replaceAll(/(?<before>^|[^:\\])\/\/[^\n]*/gu, '$<before>')
-        .replaceAll(/^\s*#[^\n]*/gmu, '');
+    let out = '';
+    let index = 0;
+    while (index < source.length) {
+        const char = source[index] ?? '';
+        const skipped = pastComment(source, index);
+        if (skipped !== undefined) {
+            index = skipped;
+        } else if (QUOTES.has(char)) {
+            const end = pastString(source, index);
+            out += source.slice(index, end);
+            index = end;
+        } else {
+            out += char;
+            index += 1;
+        }
+    }
+    return out;
 }
 
 /**
@@ -151,8 +196,13 @@ function sourcesOf(root: string): Record<Column, Source[]> {
             ),
             ...(tree.files ?? []).map((relative) => resolve(root, relative)),
         ].map((path) => {
-            const text = withoutComments(readFileSync(path, 'utf8'));
-            return { strings: path.endsWith('.spec.yaml') ? [] : stringsOf(text), text };
+            const source = readFileSync(path, 'utf8');
+            // A document is YAML: its only comments are `#` lines, and an apostrophe in its prose is no quote.
+            if (path.endsWith('.spec.yaml')) {
+                return { strings: [], text: source.replaceAll(/^\s*#[^\n]*/gmu, '') };
+            }
+            const text = withoutComments(source);
+            return { strings: stringsOf(text), text };
         });
     };
     // Written out rather than folded: the compiler then holds the invariant
