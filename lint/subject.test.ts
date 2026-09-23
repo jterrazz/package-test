@@ -107,7 +107,7 @@ describe('the subject a spec reaches, read statically', () => {
         const source = [
             "import { api } from '../api.specification.js';",
             "const events = api.with({ clock: '2026-01-01T00:00:00Z' });",
-            "test('a', async () => { await api.seed(sql`x`).get('/events/42'); });",
+            "test('a', async () => { await api.seed(file('./seeds/x.sql')).get('/events/42'); });",
             `test('b', async () => { await events.intercept(http.get('https://x.test/')).post(\`/events/\${id}/publish\`, {}); });`,
             "// await api.delete('/events/1');",
         ].join('\n');

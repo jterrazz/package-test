@@ -1,16 +1,16 @@
 import { Hono } from 'hono';
 import { describe, expect, test } from 'vitest';
 
-import { file, specification, sql } from '../../../../src/index.js';
+import { file, specification } from '../../../../src/index.js';
 import type { ApiSpecification } from '../../../../src/index.js';
 import { api } from '../../api.specification.js';
 
 describe('seeding', () => {
     test('seeds apply in the order listed, each to the database it names', async () => {
-        // Given - a shared user, a user written in the test after it, and an event in the other database
+        // Given - a user, a second seeded after it, and an event in the other database
         const result = await api
             .seed(file('./seeds/one-user.sql'), { database: 'db' })
-            .seed(sql`INSERT INTO "users" (name, email) VALUES ('Charlie', 'charlie@test.com');`, {
+            .seed(file('./seeds/charlie.sql'), {
                 database: 'db',
             })
             .seed(file('./seeds/one-event.sql'), { database: 'analyticsDb' })
@@ -39,16 +39,11 @@ describe('seeding', () => {
         ]);
     });
 
-    test('lays the statements written in the test over a shared seed', async () => {
-        // Given - the shared pool's two users, and a third written in the test
+    test('lays a leaf seed over a shared one', async () => {
+        // Given - the shared pool's two users, and a third from the leaf's own seed
         const result = await api
             .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
-            .seed(
-                sql`
-                    INSERT INTO "users" (name, email) VALUES ('Carol', 'carol@test.com');
-                `,
-                { database: 'db' },
-            )
+            .seed(file('./seeds/carol.sql'), { database: 'db' })
             .get('/users');
 
         // Then - the three rows, in the order the seeds ran

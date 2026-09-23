@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file, sql } from '../../../src/index.js';
+import { directory, file } from '../../../src/index.js';
 import { cli } from '../db-cli.specification.js';
 
 describe('seeding', () => {
@@ -19,21 +19,6 @@ describe('seeding', () => {
             [1, 'Ada'],
             [2, 'Grace'],
         ]);
-    });
-
-    test('runs a seed written in the test against the declared service database', async () => {
-        // Given - the users table and one user, written in the test
-        const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
-            .seed(sql`
-                CREATE TABLE IF NOT EXISTS "users" (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);
-                INSERT INTO "users" (name) VALUES ('Ada');
-            `)
-            .exec('help');
-
-        // Then - the row is queryable through the table accessor
-        expect(result.exitCode).toBe(0);
-        await expect(result.table('users')).toMatch([[1, 'Ada']]);
     });
 
     test('combines a SQL seed and a file fixture in one chain', async () => {

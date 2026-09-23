@@ -1,0 +1,8 @@
+description: a body past 30 lines and a response past 150 are refused where written, a 30-line body is not
+fixture: ./fixtures/past-cap/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/users/created.spec.ts:7:45  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:85:37  jterrazz-check(c28)

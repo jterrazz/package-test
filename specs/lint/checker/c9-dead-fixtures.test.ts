@@ -70,7 +70,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
             specs/fixtures/orphan.sql:1:1: error jterrazz-check(c9): found: the pool entry orphan.sql, which no spec under specs names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete orphan.sql, or name it from the specs that share it · read: docs/19-linting.md#c9-dead-fixtures
-            specs/fixtures/used-app:1:1: error jterrazz-check(c28): found: a pool entry only widget reaches for · why: A ground file exists only if it is shared: the checker counts the TESTS that read each file of the specs trees — a \`test()\`/\`it()\` whose body names it with a literal \`file()\`/\`directory()\`, a document — and judges its level. · fix: move it to widget/fixtures/used-app and name it directory('./fixtures/used-app/') — \`make fix\` does both · read: docs/19-linting.md#c28-ground-shared-or-inline
+            specs/fixtures/used-app:1:1: error jterrazz-check(c28): found: a pool entry only widget reaches for · why: A ground file exists only if it is shared, and a value lives in a test only while it stays short. · fix: move it to widget/fixtures/used-app and name it directory('./fixtures/used-app/') — \`make fix\` does both · read: docs/19-linting.md#c28-ground-shared-or-inline
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);

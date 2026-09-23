@@ -619,6 +619,15 @@ export function withEntryImport(text: string, file: string, name: string): strin
     return withImport(text, `import { ${name} } from '${entry}';`, entry);
 }
 
+/** Does the file import `name` from the framework's entry? */
+export function importsFromEntry(text: string, name: string): boolean {
+    return [...text.matchAll(NAMED_IMPORT)].some(
+        (match) =>
+            isEntry(match.groups?.from ?? '') &&
+            (match.groups?.names ?? '').split(',').some((each) => each.trim() === name),
+    );
+}
+
 /** Drop `name` from the file's import of the framework's entry, the whole import when it was the last name. */
 export function withoutEntryImport(text: string, name: string): string {
     for (const match of text.matchAll(NAMED_IMPORT)) {

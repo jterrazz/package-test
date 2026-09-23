@@ -1,28 +1,26 @@
-description: --fix writes each file one test reads into that test, and deletes it
+description: --fix writes each single-use golden, body and request in place, and leaves a seed a file
 fixture: ./fixtures/single-use/
 runs:
     - command: checker . --fix
       exit: 1
       stderr: |
-          specs/api/users/created.spec.ts:42:37  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:40:37  jterrazz-check(c28)
       files:
-          specs/api/users/seeds: absent
+          specs/api/users/seeds/ada.sql: exists
           specs/api/users/requests: absent
           specs/api/users/expected/created.http: absent
           specs/api/users/expected/line.txt: absent
           specs/api/users/expected/twice.http: exists
           specs/api/users/created.spec.ts:
               equals: |
-                  import { file, sql, text } from '@jterrazz/test';
+                  import { file, text } from '@jterrazz/test';
                   import { expect, test } from 'vitest';
 
                   import { api } from '../api.specification.js';
 
                   test('a user is created over its seed', async () => {
                       // Given - one user, and a second posted
-                      const result = await api.seed(sql`
-                          INSERT INTO users (name) VALUES ('Ada');
-                      `).post('/users', {
+                      const result = await api.seed(file('./seeds/ada.sql')).post('/users', {
                           "name": "Grace"
                       });
 

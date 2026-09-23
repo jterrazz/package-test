@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { file, sql } from '../../../src/index.js';
+import { file } from '../../../src/index.js';
 import { jobs } from '../jobs.specification.js';
 
 // Jobs run in-process by definition (CONVENTIONS A8) — specification.jobs()
@@ -18,15 +18,10 @@ describe('triggering', () => {
         await expect(result.table('events', { database: 'analyticsDb' })).toBeEmpty();
     });
 
-    test('a job reads the state a seed written in the test laid', async () => {
-        // Given - one user, written in the test
+    test('a job reads the state its seed laid', async () => {
+        // Given - one user, from the seed beside the test
         const result = await jobs
-            .seed(
-                sql`
-                    INSERT INTO "users" (name, email) VALUES ('Ada', 'ada@test.com');
-                `,
-                { database: 'db' },
-            )
+            .seed(file('./seeds/ada.sql'), { database: 'db' })
             .trigger('sync-events');
 
         // Then - the job synced that one user

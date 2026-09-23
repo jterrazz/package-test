@@ -138,10 +138,8 @@ test('creates a user and answers with it', async () => {
 
 ```typescript
 test('writes one digest row per active subscriber', async () => {
-    // Given - two subscribers, written in the test
-    const result = await jobs
-        .seed(sql`INSERT INTO subscribers (email) VALUES ('a@site.test'), ('b@site.test');`)
-        .trigger('daily-digest');
+    // Given - two subscribers, from the seed beside the test
+    const result = await jobs.seed(file('./seeds/two-subscribers.sql')).trigger('daily-digest');
 
     // Then - the whole table
     await expect(result.table('digests')).toMatch([

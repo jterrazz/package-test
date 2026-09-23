@@ -22,7 +22,7 @@ const RUNNER = 'export const { api, cleanup } = await specification.api({});\n';
 
 /** A spec of two routes, each test on one, a helper and a constant only one of them reads. */
 const TWO_ROUTES = [
-    "import { file, sql } from '@jterrazz/test';",
+    "import { file } from '@jterrazz/test';",
     "import { describe, expect, test } from 'vitest';",
     '',
     "import { api } from '../api.specification.js';",
@@ -36,7 +36,7 @@ const TWO_ROUTES = [
     "describe('reading', () => {",
     "    test('lists the orders', async () => {",
     '        // Given - one order',
-    "        const result = await api.seed(sql`INSERT INTO orders VALUES (1);`).get('/orders');",
+    "        const result = await api.seed(file('./seeds/one-order.sql')).get('/orders');",
     '',
     '        // Then - the list',
     '        listed(result);',

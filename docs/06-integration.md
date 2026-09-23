@@ -16,20 +16,16 @@ afterAll(cleanup);
 
 ```typescript
 // specs/integration/orders/orders.spec.ts
-import { sql } from '@jterrazz/test';
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { listOrders } from '../../../src/orders/orders.js';
 import { integration } from '../integration.specification.js';
 
 test('reads the orders the day left behind', async () => {
-    // Given - two orders in the real database, written in the test
+    // Given - two orders in the real database, from the seed beside the test
     const result = await integration
-        .seed(
-            sql`
-            INSERT INTO orders (reference, total) VALUES ('ORD-1', 42), ('ORD-2', 108);
-        `,
-        )
+        .seed(file('./seeds/two-orders.sql'))
         .call(async ({ db }) => await listOrders(db.connectionString));
 
     // Then - the module answered with both, compared whole
@@ -63,12 +59,11 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule A3
 
 Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule B2).
 
-| Setup                             | Means                                                                                           |
-| --------------------------------- | ----------------------------------------------------------------------------------------------- |
-| ``.seed(sql`INSERT …`)``          | run the statements written in the test before the call; `{ database }` targets one of several   |
-| `.seed(file('./seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call — the state several tests share |
-| `.intercept(contracts)`           | declare what the outside world replies ([16](16-contracts.md))                                  |
-| `.clock('2026-03-04T09:30:00Z')`  | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths)) |
+| Setup                             | Means                                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `.seed(file('./seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several |
+| `.intercept(contracts)`           | declare what the outside world replies ([16](16-contracts.md))                                         |
+| `.clock('2026-03-04T09:30:00Z')`  | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths))        |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
 
@@ -171,7 +166,7 @@ specs/integration/
 ├── pure.specification.ts          # a second runner: no services, goldens only
 └── orders/                        # a domain
     ├── orders.spec.ts             # under specs/, the suffix is .spec.ts (rule C12)
-    ├── seeds/two-orders.sql       # ground: database state several tests of the leaf share
+    ├── seeds/two-orders.sql       # ground: database state — beside its one test, or the tests of the leaf that share it
     └── expected/                  # ground: a golden several tests share — one test's is written in place (C28)
 ```
 

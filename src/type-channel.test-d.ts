@@ -1,7 +1,7 @@
 /* oxlint-disable jterrazz/a1-specification-file, jterrazz/d2-await-io-matcher, jterrazz/f2-no-test-imports-in-prod, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all, and a refused golden is typed as the overload it failed, never awaited. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. It imports vitest's `expect` because the D14 rows are about the matcher augmentation, and it runs nothing: no test is declared, so F2's production reach does not apply. */
 import { expect } from 'vitest';
 
-import { directory, file, mockOf, postgres, specification, sql } from './index.js';
+import { directory, file, mockOf, postgres, specification } from './index.js';
 import type { Visitor } from './model/ports/browser.port.js';
 import type { MobileVisitor } from './model/ports/device.port.js';
 
@@ -71,12 +71,12 @@ export async function typeRows(): Promise<void> {
     // Golden rows are D14's, below.
     // @ts-expect-error B2 — a bare string is a value, not a file [`Argument of type 'string' is not assignable to parameter of type 'SeedSource'`]
     api.seed('./seeds/x.sql');
-    // @ts-expect-error B2 — a seed's path ends in `.sql` [`Type 'FileAt<"./seeds/x.json">' is not assignable to type 'DiskFile<".sql">'`]
+    // @ts-expect-error B2 — a seed's path ends in `.sql` [`Type '"./seeds/x.json"' is not assignable to type 'RelativePath<".sql">'`]
     api.seed(file('./seeds/x.json'));
     // @ts-expect-error B2 — a path is relative to the spec file [`Argument of type '"x.sql"' is not assignable to parameter of type 'RelativePath<string>'`]
     api.seed(file('x.sql'));
-    // @ts-expect-error B2 — a seed written in the test takes no hole [`Argument of type '"Ada"' is not assignable to parameter of type 'never'`]
-    api.seed(sql`INSERT INTO users (name) VALUES ('${'Ada'}');`);
+    // @ts-expect-error B2 — SQL is never written in the test: a seed is a `.sql` file [`Argument of type 'string' is not assignable to parameter of type 'SeedSource'`]
+    api.seed(`INSERT INTO users (name) VALUES ('Ada');`);
     // @ts-expect-error B2 — a directory's path ends in `/` [`Argument of type '"./fixtures/shop"' is not assignable to parameter of type 'RelativePath<"/">'`]
     cli.fixture(directory('./fixtures/shop'));
     // @ts-expect-error B2 — a path ending in `/` is a directory [`Argument of type '"./fixtures/shop/"' is not assignable to parameter of type 'never'`]
@@ -116,10 +116,9 @@ export async function typeRows(): Promise<void> {
     expect(out.stdout.text).toMatch(/built/u);
     await expect(out.filesystem).toMatch(directory('./expected/tree/'));
 
-    // What the rows are written FOR — the disk where the disk is meant, and a
-    // Seed written in the test where the test is its only reader.
+    // What the rows are written FOR — the disk where the disk is meant, a seed
+    // Always among it.
     await api.seed(file('./seeds/orders.sql')).post('/orders', file('./requests/order.json'));
-    await api.seed(sql`INSERT INTO orders (reference) VALUES ('ORD-1');`).get('/orders');
     await cli.fixture(directory('../../fixtures/shop/')).fixture(file('./fixtures/a.json')).exec();
 
     const result = await api.get('/orders/1');

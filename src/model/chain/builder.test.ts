@@ -442,6 +442,9 @@ describe('builder — a string is a value, and the disk is file() or directory()
         expect(() => cli.seed('./seeds/rows.sql' as never)).toThrow(
             /^found: seed\("\.\/seeds\/rows\.sql"\), a value where a file is read\n.*\nfix: name one file: seed\(file\(/u,
         );
+        expect(() => cli.seed("INSERT INTO users (name) VALUES ('Ada');" as never)).toThrow(
+            /^found: seed\("INSERT INTO users \(name\) VALUES \('Ada'\);"\), a value where a file is read\n.*\nfix: name one file: seed\(file\('\.\/seeds\/rows\.sql'\)\)\n/u,
+        );
         expect(() => cli.fixture('./fixtures/shop/' as never)).toThrow(
             /^found: fixture\("\.\/fixtures\/shop\/"\), a value where the disk is read\n.*\nfix: name the disk: fixture\(file/u,
         );

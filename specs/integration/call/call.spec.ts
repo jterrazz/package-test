@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { file, sql } from '../../../src/index.js';
+import { file } from '../../../src/index.js';
 import { listOrders, placeOrder } from '../../fixtures/orders/orders.js';
 import { integration } from '../integration.specification.js';
 
@@ -34,17 +34,10 @@ describe('call', () => {
         ]);
     });
 
-    test('reads the state a seed written in the test laid', async () => {
-        // Given - the orders table and one order, written in the test
+    test('reads the state its seed laid', async () => {
+        // Given - the orders table and one order, from the seed beside the test
         const result = await integration
-            .seed(sql`
-                CREATE TABLE IF NOT EXISTS "orders" (
-                    id SERIAL PRIMARY KEY,
-                    reference TEXT NOT NULL,
-                    total NUMERIC NOT NULL
-                );
-                INSERT INTO "orders" (reference, total) VALUES ('ORD-9', 9);
-            `)
+            .seed(file('./seeds/one-order.sql'))
             .call(async ({ db }) => await listOrders(db.connectionString));
 
         // Then - the module read that one order

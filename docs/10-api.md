@@ -63,16 +63,15 @@ Without `root`, the framework finds the package being tested by walking up from 
 
 ### Setups (chainable)
 
-| Setup                                           | Description                                                                                                                     |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| ``.seed(sql`INSERT …`)``                        | Load the statements written in the test — a test's own state, dedented, no `${}` hole                                           |
-| `.seed(file('../../seeds/file.sql'))`           | Load that `.sql` file, named by its path from the spec file — the state several tests share                                     |
-| `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
-| `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                       |
-| `.intercept(contract)`                          | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |
-| `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                              |
-| `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths)) |
-| `api.with({ clock, headers })`                  | A view of the facet whose every chain starts with what the whole file shares ([18](18-conventions.md#what-a-file-shares))       |
+| Setup                                           | Description                                                                                                                                        |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.seed(file('./seeds/file.sql'))`               | Load that `.sql` file, named by its path from the spec file — beside the test that reads it, or at the level of the tests that share it (rule C28) |
+| `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                                                 |
+| `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                                          |
+| `.intercept(contract)`                          | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                                             |
+| `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                                                 |
+| `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths))                    |
+| `api.with({ clock, headers })`                  | A view of the facet whose every chain starts with what the whole file shares ([18](18-conventions.md#what-a-file-shares))                          |
 
 Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit refusal naming "an unmatched outgoing request" (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
@@ -261,16 +260,12 @@ test('links the analytics event to the created order', async () => {
 
 ### A case, written whole
 
-A case is a TypeScript spec whose oracle is the WHOLE result, written where the test reads it: the given is the chain's setups — a seed written in the test with ``sql`…` ``, a shared one named with `file()` — the action is the request, and the response is compared whole to its `.http` text in place, tokens allowed ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)):
+A case is a TypeScript spec whose oracle is the WHOLE result, written where the test reads it: the given is the chain's setups — a seed is always a `.sql` file named with `file()`, beside the test when it alone reads it — the action is the request, and the response is compared whole to its `.http` text in place, tokens allowed ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)):
 
 ```typescript
 test('the users seeded are the users listed, in the order they were inserted', async () => {
-    // Given - two users, written in the test
-    const result = await api
-        .seed(
-            sql`INSERT INTO users (name, email) VALUES ('Alice', 'alice@test.com'), ('Bob', 'bob@test.com');`,
-        )
-        .get('/users');
+    // Given - two users, from the seed beside the test
+    const result = await api.seed(file('./seeds/alice-and-bob.sql')).get('/users');
 
     // Then - the whole response, and the table it read
     expect(result.response).toMatch(`

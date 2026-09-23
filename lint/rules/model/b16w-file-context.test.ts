@@ -11,7 +11,7 @@ ruleTester().run('b16w-file-context', asOxlintRule(b16wFileContext), {
             code: [
                 IMPORT,
                 "test('a', async () => { await api.clock('2026-01-01T00:00:00Z').get('/events'); });",
-                "test('b', async () => { await api.seed(sql`x`).clock('2026-01-01T00:00:00Z').get('/events?page=2'); });",
+                "test('b', async () => { await api.seed(file('./seeds/x.sql')).clock('2026-01-01T00:00:00Z').get('/events?page=2'); });",
             ].join('\n'),
             errors: [{ messageId: 'repeated' }],
             filename: SPEC,
@@ -20,7 +20,7 @@ ruleTester().run('b16w-file-context', asOxlintRule(b16wFileContext), {
                 '',
                 "const pagination = api.with({ clock: '2026-01-01T00:00:00Z' });",
                 "test('a', async () => { await pagination.get('/events'); });",
-                "test('b', async () => { await pagination.seed(sql`x`).get('/events?page=2'); });",
+                "test('b', async () => { await pagination.seed(file('./seeds/x.sql')).get('/events?page=2'); });",
             ].join('\n'),
         },
         // The message spells the view it would write.

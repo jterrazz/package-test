@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { sql } from '../../../../src/index.js';
+import { file } from '../../../../src/index.js';
 import { api } from '../../api.specification.js';
 
 describe('sending', () => {
     test('a put renames the user, its fields written in the test', async () => {
         // Given - one user, and the fields it is renamed to
         const result = await api
-            .seed(sql`INSERT INTO "users" (name, email) VALUES ('Alice', 'alice@test.com');`, {
+            .seed(file('../../../seeds/alice.sql'), {
                 database: 'db',
             })
             .put('/users/1', { email: 'updated@test.com', name: 'Alice Updated' });

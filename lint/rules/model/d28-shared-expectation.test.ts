@@ -32,7 +32,7 @@ ruleTester().run('d28-shared-expectation', asOxlintRule(d28SharedExpectation), {
         },
         // A constant that is no expectation — a Given — is not this rule's.
         {
-            code: "const USERS = sql`x`;\ntest('a', () => { api.seed(USERS); expect(a).toBe(1); });",
+            code: "const USERS = file('./seeds/users.sql');\ntest('a', () => { api.seed(USERS); expect(a).toBe(1); });",
             filename: SPEC,
         },
         // An exported constant has readers elsewhere.

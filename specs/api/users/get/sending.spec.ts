@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { sql } from '../../../../src/index.js';
+import { file } from '../../../../src/index.js';
 import { api } from '../../api.specification.js';
 
 describe('sending', () => {
     test('a user is read back by its id', async () => {
         // Given - one user, numbered 1 by the reset
         const result = await api
-            .seed(sql`INSERT INTO "users" (name, email) VALUES ('Alice', 'alice@test.com');`, {
+            .seed(file('../../../seeds/alice.sql'), {
                 database: 'db',
             })
             .get('/users/1');

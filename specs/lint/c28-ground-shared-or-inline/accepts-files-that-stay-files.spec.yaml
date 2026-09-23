@@ -1,4 +1,4 @@
-description: shared, long, tree, fixture and files named outside every test all stay files
+description: seeds, a body past its cap, a tree, a fixture and a golden named outside a test stay files
 fixture: ./fixtures/kept/
 runs:
     - command: checker .

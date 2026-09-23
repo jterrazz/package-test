@@ -1,12 +1,14 @@
-description: --fix splits a file of two routes, one per route, each with what it reads
+description: --fix splits a file of two routes, each file with what it reads, the seed with its reader
 fixture: ./fixtures/split/
 runs:
     - command: checker . --fix
       exit: 0
       files:
           specs/api/orders/orders.spec.ts: absent
+          specs/api/orders/seeds: absent
+          specs/api/orders/list/seeds/one-order.sql: exists
           specs/api/orders/list/orders.spec.ts:
-              contains: import { sql } from '@jterrazz/test';
+              contains: api.seed(file('./seeds/one-order.sql'))
           specs/api/orders/create/orders.spec.ts:
               equals: |
                   import { describe, expect, test } from 'vitest';

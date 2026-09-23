@@ -590,9 +590,7 @@ function applyFixes(root: string): void {
         console.log(`conventions checker: moved ${move} (C27)`);
     }
     for (const change of fixGroundSharing(root)) {
-        console.log(
-            `conventions checker: ${change.includes(':') ? 'inlined' : 'moved'} ${change} (C28)`,
-        );
+        console.log(`conventions checker: ${change} (C28)`);
     }
 }
 
