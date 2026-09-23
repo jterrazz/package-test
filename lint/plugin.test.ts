@@ -487,16 +487,66 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         return found;
     };
 
+    /** Every rule id a text cites, in any of the four shapes, its warning tail dropped. */
+    const idsCitedIn = (text: string): string[] =>
+        citationPatterns().flatMap((pattern) =>
+            [...text.matchAll(pattern)].flatMap((match) =>
+                (match[1] ?? '')
+                    .split(/[\s,/]+|and/u)
+                    .filter(Boolean)
+                    .map((id) => id.replace(/w$/u, '')),
+            ),
+        );
+
+    /** Every implementation name a line spells: a family letter, a number, a kebab tail. */
+    const namesCitedIn = (line: string): string[] =>
+        [
+            ...line.matchAll(
+                new RegExp(
+                    String.raw`(?:^|[^\w\-#])([${letters.toLowerCase()}]\d+w?(?:-[a-z0-9]+)+)(?![\w-])`,
+                    'gu',
+                ),
+            ),
+        ].map((match) => match[1] ?? '');
+
+    /** What a name may resolve to: a rule, a pass, a row — and the cases named after one. */
+    const knownNames = (): Set<string> =>
+        new Set([
+            ...Object.keys(plugin.rules),
+            ...CHECKER_PASS_IDS,
+            ...catalog.map((entry) => entry.name),
+            // A fixture tree is named after the rule it stands for, with a tail
+            // Saying which case it holds — the inventory meta-test already pairs
+            // Each of them with its rule, so the directory listing IS the vocabulary.
+            ...readdirSync(resolve(ROOT, 'specs/lint/checker/fixtures/lint-violations')),
+            // A golden is named after the case it holds, which is the rule's
+            // Name plus what the run did to the tree.
+            ...readdirSync(resolve(ROOT, 'specs/lint/checker/expected')).map((file) =>
+                file.replace(/\.[a-z]+$/u, ''),
+            ),
+        ]);
+
+    test('k2 — a citation that resolves to nothing is caught, in every shape it takes', () => {
+        // Given - one false id in each of the four citation shapes, beside a true one, and a false name beside a true one
+        const ids = idsCitedIn("see rule C99, (C98 — gone), CONVENTIONS C97/C12, and C96's reach");
+        const names = namesCitedIn('`c99-nothing-here` and `c12-spec-file-name`');
+
+        // Then - exactly the false ones resolve to nothing
+        expect(ids.filter((id) => !rowIds.has(id)).toSorted()).toStrictEqual([
+            'C96',
+            'C97',
+            'C98',
+            'C99',
+        ]);
+        expect(names.filter((name) => !knownNames().has(name))).toStrictEqual(['c99-nothing-here']);
+    });
+
     test('k2 — every id the corpus cites resolves to a row', () => {
         // Given - every citation shape the corpus uses, in the chapters, the skill, the messages the plugin ships and the comments of the code that implements them. The families are the vocabulary: a citation is a family letter and a number, and nothing else is one
         const cited = new Map<string, string>();
         const collect = (text: string, where: string): void => {
-            for (const pattern of citationPatterns()) {
-                for (const match of text.matchAll(pattern)) {
-                    for (const id of (match[1] ?? '').split(/[\s,/]+|and/u).filter(Boolean)) {
-                        cited.set(id.replace(/w$/u, ''), where);
-                    }
-                }
+            for (const id of idsCitedIn(text)) {
+                cited.set(id, where);
             }
         };
         for (const file of [...citingFiles(), ...citingSources()]) {
@@ -519,27 +569,7 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
 
     test('k2 — every rule NAME the corpus cites resolves to a rule or a pass', () => {
         // Given - every implementation name the corpus spells, in the chapters, the skill and the code. A retired rule leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know — the whole file, not the line
-        const known = [
-            ...Object.keys(plugin.rules),
-            ...CHECKER_PASS_IDS,
-            ...catalog.map((entry) => entry.name),
-        ];
-        // A fixture tree is named after the rule it stands for, with a tail
-        // Saying which case it holds — the inventory meta-test already pairs
-        // Each of them with its rule, so the directory listing IS the vocabulary.
-        const names = new Set([
-            ...known,
-            ...readdirSync(resolve(ROOT, 'specs/lint/checker/fixtures/lint-violations')),
-            // A golden is named after the case it holds, which is the rule's
-            // Name plus what the run did to the tree.
-            ...readdirSync(resolve(ROOT, 'specs/lint/checker/expected')).map((file) =>
-                file.replace(/\.[a-z]+$/u, ''),
-            ),
-        ]);
-        const pattern = new RegExp(
-            String.raw`(?:^|[^\w\-#])([${letters.toLowerCase()}]\d+w?(?:-[a-z0-9]+)+)(?![\w-])`,
-            'gu',
-        );
+        const names = knownNames();
         const cited = new Map<string, string>();
         for (const file of [...citingFiles(), ...citingSources()]) {
             for (const line of read(file).split('\n')) {
@@ -549,8 +579,8 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
                 if (line.includes('no longer exist')) {
                     continue;
                 }
-                for (const match of line.matchAll(pattern)) {
-                    cited.set(match[1] ?? '', file);
+                for (const name of namesCitedIn(line)) {
+                    cited.set(name, file);
                 }
             }
         }
@@ -563,6 +593,24 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
                 `${where} names \`${name}\`, which is no rule of this plugin`,
             ).toBe(true);
         }
+    });
+
+    test('k4 — the reach fixture proves a rule of every reach the catalogue states', () => {
+        // Given - the reaches the plugin's rows state, and the rules the reach meta-test reads off its one run
+        const reachOf = new Map(
+            Object.entries(plugin.rules).map(([id, rule]) => [id, rule.meta?.docs?.reach]),
+        );
+        // A rule the run must NOT report on a path proves where it stops, not that it reaches.
+        const named = [
+            ...read('specs/lint/meta/k4-reach-per-path.test.ts')
+                .replaceAll(/\.not\.toContain\(\s*'[^']*',?\s*\)/gu, '')
+                .matchAll(/'(?<id>[a-z]\d+w?-[a-z0-9-]+)'/gu),
+        ].map((match) => match.groups?.id ?? '');
+
+        // Then - each reach is judged there by at least one of its own rules
+        expect(new Set(named.map((id) => reachOf.get(id)))).toStrictEqual(
+            new Set(reachOf.values()),
+        );
     });
 
     test('m1 — every constructor has a specs tree in this package', () => {
@@ -820,7 +868,7 @@ describe('the corpus’ own coordinates (meta-test K8)', () => {
             : resolve(ROOT, coordinate.from, '..', file);
     };
 
-    test('every relative link lands on a file, and every anchor on a heading', () => {
+    test('k8 — every relative link lands on a file, and every anchor on a heading', () => {
         // Given - the pages, and the anchors each of them offers
         const texts = new Map(
             pages().map((path) => [path, readFileSync(resolve(ROOT, path), 'utf8')]),
@@ -846,7 +894,7 @@ describe('the corpus’ own coordinates (meta-test K8)', () => {
         expect(coordinates.length).toBeGreaterThan(300);
     });
 
-    test('every `docs/NN` the source cites names a chapter that exists', () => {
+    test('k8 — every `docs/NN` the source cites names a chapter that exists', () => {
         // Given - the chapter numbers the corpus actually has, and every one the source names — a test TITLE and a comment cite chapters too, and a renumbering moves the files while leaving those behind
         const chapters = new Set(
             readdirSync(resolve(ROOT, 'docs'))

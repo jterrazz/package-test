@@ -1216,7 +1216,7 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
-            'The REACH of every row is proven on one fixture project laid out with every path role, judged by a single oxlint run.',
+            'Every REACH a row can state is proven on one fixture project laid out with every path role, by at least one rule of that reach, judged by a single oxlint run.',
         facet: 'model',
         family: 'K',
         fix: 'Add the path to the reach fixture and state what each rule says about it.',
@@ -1264,6 +1264,19 @@ export const META_ROWS: CatalogEntry[] = [
         rationale:
             'A suite proves what it runs, never what it does not: a facet can grow a method and be green forever without one test touching it.',
         reach: 'specs',
+    },
+    {
+        channel: 'meta',
+        convention:
+            'Every coordinate the corpus writes resolves: a relative link lands on a file and its anchor on a heading of that file, and every `docs/NN` a source comment cites names a chapter that exists.',
+        facet: 'model',
+        family: 'K',
+        fix: 'Point the link at the heading as it is now written, or restore the heading it named.',
+        id: 'K8',
+        name: 'k8-corpus-coordinates-resolve',
+        rationale:
+            'A renamed heading leaves a link that scrolls nowhere and a renumbered chapter one that 404s; the 16.0 renumbering left the map pointing at a heading the same commit had replaced.',
+        reach: 'all',
     },
     {
         channel: 'meta',

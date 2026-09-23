@@ -70,11 +70,12 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
         const output = await reachRun();
         const suite = about(output, 'specs/build/graph.test.ts');
 
-        // Then - the test rules reach it, and the ones that would call it misplaced do not: C1's declared depth is what judges its shape, and I2's orphan clause stops at the specs boundary
+        // Then - the test rules reach it, and the ones that would call it misplaced do not: C1's declared depth is what judges its shape — a spec with no facet folder is what it refuses — and I2's orphan clause stops at the specs boundary
         expect(suite).toStrictEqual(
             expect.arrayContaining(['j2-no-sleep', 'e9w-env-assignment-in-test']),
         );
         expect(suite).not.toContain('c1-domain-structure');
+        expect(about(output, 'specs/stray.spec.ts')).toContain('c1-domain-structure');
         expect(suite).not.toContain('i2-sibling-test-naming');
         expect(suite).not.toContain('g4-no-dom-in-module-test');
     });
@@ -101,5 +102,16 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
         expect(about(output, 'vitest.config.ts')).toContain('e2-preset-config');
         expect(about(output, 'vitest.config.ts')).not.toContain('j2-no-sleep');
         expect(about(output, 'vitest.config.ts')).not.toContain('e9w-env-assignment-in-test');
+    });
+
+    test('a specification that registers no cleanup is judged by A4, and a spec beside it is not', async () => {
+        // Given - the same run, read at a runner file with no afterAll and at a spec
+        const output = await reachRun();
+
+        // Then - A4's reach is the specification role, and nothing else
+        expect(about(output, 'specs/api/rates.specification.ts')).toContain('a4-cleanup-afterall');
+        expect(about(output, 'specs/api/orders/total.spec.ts')).not.toContain(
+            'a4-cleanup-afterall',
+        );
     });
 });
