@@ -61,6 +61,21 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
+    test('an exemption excuses an empty cell, and goes the day the cell fills', () => {
+        // Given - every reason a capability row states, and the cell it states it for. A token row's reason is the engine's and holds whatever a facet's goldens carry, so it is no debt to pay off
+        const stale = matrixRows(ROOT)
+            .filter((row) => row.capability.group !== 'Token')
+            .flatMap((row) =>
+                COLUMNS.filter(
+                    (column) =>
+                        row.capability.exempt?.[column] !== undefined && row.cells[column] !== 0,
+                ).map((column) => `${row.capability.name} · ${column}`),
+            );
+
+        // Then - no reason outlives the hole it excused
+        expect(stale, 'an exemption on a cell a spec now fills').toStrictEqual([]);
+    });
+
     test('an empty mobile cell names M1, and the day one fills the exemption goes', () => {
         // Given - the mobile column, which has no tree of its own today (M1)
         const rows = matrixRows(ROOT);
