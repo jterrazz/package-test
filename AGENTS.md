@@ -37,7 +37,7 @@ Decisions this package alone took are in `docs/decisions/`. The agent-facing ski
 make install                      # the dependencies
 make build                        # MUST precede lint and the unit project
 make lint                         # typescript check + the conventions checker
-make fix                          # the fixers: typescript fix, then the checker's --fix
+make fix                          # the fixers: typescript fix, then the checker's --fix, each whatever the other said
 make test                         # every project, with coverage — needs Docker and chromium
 make check                        # the whole verdict: build, lint, test
 npx vitest --run --project unit   # the loop, no infrastructure

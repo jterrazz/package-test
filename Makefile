@@ -12,11 +12,14 @@ build: node_modules/.install
 lint: node_modules/.install
 	npm run lint
 
-# The fixers, and nothing after them: the toolchain's, then the checker's
-# (which `build` puts in `dist/`). The verdict is `lint`'s, run apart.
+# Every fixer runs, whatever the one before it said, and the verdict is theirs
+# Combined, at the end: the toolchain's, then the checker's (which `build`
+# Puts in `dist/`). Nothing judges after them — that is `lint`'s, run apart.
 fix: build
-	npx typescript fix
-	node dist/checker.js --fix
+	@status=0; \
+	npx typescript fix || status=1; \
+	node dist/checker.js --fix || status=1; \
+	exit $$status
 
 # What CI calls, so the floor is judged on every push: the suite runs WITH
 # Coverage because `coverage:check` reads the report of the LAST `--coverage`
