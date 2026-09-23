@@ -1,0 +1,9 @@
+kind: jobs
+description: states no error for a job that crashes
+trigger: crash-after-insert
+tables:
+    events:
+        database: analyticsDb
+        columns: [type]
+        rows:
+            - [pre_crash]

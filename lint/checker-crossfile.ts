@@ -3,7 +3,11 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 
 import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
 import { isRelativePath } from '../src/model/chain/spec-path.js';
-import { parseSpecDocument, SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
+import {
+    documentPaths,
+    parseSpecDocument,
+    SPEC_EXTENSION,
+} from '../src/model/literate/spec-document.js';
 import { moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
@@ -230,16 +234,16 @@ function readSource(path: string): string {
 }
 
 /**
- * The fixture paths a `<case>.spec.yaml` names — its referrer literals. The
- * runner's own parser reads them, so the two channels cannot disagree about
- * what the document says; an unparseable file vouches for nothing (the
- * `d4b-spec-shape` pass is what reports it).
+ * The paths a `<case>.spec.yaml` names — its referrer literals, every key's: a
+ * `fixture:`, a `seed:`, a `request:`, a `body:`, a `response:`, an
+ * `intercept:`. The runner's own parser reads them, so the two channels cannot
+ * disagree about what the document says; an unparseable file vouches for
+ * nothing (the `d4b-spec-shape` pass is what reports it).
  */
 function collectSpecLiterals(path: string): Set<string> {
     try {
-        return new Set(
-            parseSpecDocument(readText(path), path).fixtures.map((fixture) => fixture.path),
-        );
+        const document = parseSpecDocument(readText(path), path);
+        return new Set(documentPaths(document).map((named) => named.path));
     } catch {
         return new Set();
     }
@@ -924,7 +928,9 @@ type FixtureReference = {
     /** Where the path's literal starts; a document entry points at its line. */
     column: number;
     file: string;
-    /** What the path names: its wrapper, or a document entry's trailing `/`. */
+    /** The document key that names the path — absent for a `file()`/`directory()` call. */
+    key?: string;
+    /** What the path names: its wrapper, or what a document key reads. */
     kind: 'directory' | 'file';
     line: number;
     path: string;
@@ -952,13 +958,9 @@ function collectFixtureReferences(
 ): FixtureReference[] {
     if (file.endsWith(SPEC_EXTENSION)) {
         try {
-            return parseSpecDocument(readText(file), file).fixtures.map((fixture) => ({
-                column: 1,
-                file,
-                kind: fixture.path.endsWith('/') ? 'directory' : 'file',
-                line: fixture.line,
-                path: fixture.path,
-            }));
+            return documentPaths(parseSpecDocument(readText(file), file)).map(
+                ({ key, kind, line, path }) => ({ column: 1, file, key, kind, line, path }),
+            );
         } catch {
             return [];
         }
@@ -1189,7 +1191,11 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
     const suppressed = file.endsWith(SPEC_EXTENSION)
         ? new Set<number>()
         : suppressedLines(readText(file), 'c8');
-    for (const { column, kind, line, path } of collectFixtureReferences(file, DISK_CALL, true)) {
+    for (const { column, key, kind, line, path } of collectFixtureReferences(
+        file,
+        DISK_CALL,
+        true,
+    )) {
         const target = resolve(dirname(file), path);
         const found = treeKind(target);
         if (found === kind || suppressed.has(line)) {
@@ -1197,14 +1203,19 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
         }
         const bare = path.replace(/\/+$/u, '');
         const spelled = found === 'directory' ? `${bare}/` : bare;
+        const named = key === undefined ? `${kind}('${path}')` : `${key}: "${path}"`;
+        const fix =
+            key === undefined || key === 'fixture'
+                ? `write ${key === undefined ? `${found}('${spelled}')` : `"${spelled}"`}`
+                : `${key}: reads one file`;
         violations.push({
             column,
             file: relative(rootDir, file),
             line,
             message:
                 found === undefined
-                    ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} ${existsSync(target) ? 'is ignored by git' : 'does not exist'}`
-                    : `${kind}('${path}') names a ${found} — write ${found}('${spelled}')`,
+                    ? `${named} names nothing — ${relative(rootDir, target)} ${existsSync(target) ? 'is ignored by git' : 'does not exist'}`
+                    : `${named} names a ${found} — ${fix}`,
             rule: 'c8-disk-target-exists',
             severity: 'error',
         });

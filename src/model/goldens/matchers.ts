@@ -213,7 +213,11 @@ export function compareResponse(
     return null;
 }
 
-function matchResponseFile(
+/**
+ * `toMatch(file('./expected/<name>.http'))` on a response — the golden, its
+ * update included. A document's `response: ./expected/…` is this same call.
+ */
+export function matchResponseFile(
     accessor: ResponseAccessor,
     name: string,
     frozen: boolean,
@@ -376,6 +380,24 @@ async function toMatchRows(received: unknown, expected: unknown): Promise<Matche
     }
 
     const actual = await received.query(expected.columns);
+    const mismatch = rowsMismatch(received.name, expected, actual, received.captures);
+    return {
+        message: () => mismatch ?? `expected table "${received.name}" not to match the given rows`,
+        pass: mismatch === null,
+    };
+}
+
+/**
+ * Compare the rows a table holds against the rows stated, cell by cell through
+ * the token grammar — the diff when they differ, `null` when they match. What
+ * `toMatchRows()` and a document's `tables:` both decide.
+ */
+export function rowsMismatch(
+    name: string,
+    expected: RowsExpectation,
+    actual: unknown[][],
+    scope: CaptureScope,
+): null | string {
     const pass =
         actual.length === expected.rows.length &&
         expected.rows.every((row, i) => {
@@ -383,22 +405,17 @@ async function toMatchRows(received: unknown, expected: unknown): Promise<Matche
             return (
                 actualRow !== undefined &&
                 row.length === actualRow.length &&
-                row.every((cell, j) => structuralEquals(cell, actualRow[j], received.captures))
+                row.every((cell, j) => structuralEquals(cell, actualRow[j], scope))
             );
         });
-
-    return {
-        message: () =>
-            pass
-                ? `expected table "${received.name}" not to match the given rows`
-                : formatTableDiff(
-                      received.name,
-                      expected.columns,
-                      expected.rows.map((row) => row.map((cell) => renderExpected(cell))),
-                      actual,
-                  ),
-        pass,
-    };
+    return pass
+        ? null
+        : formatTableDiff(
+              name,
+              expected.columns,
+              expected.rows.map((row) => row.map((cell) => renderExpected(cell))),
+              actual,
+          );
 }
 
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {

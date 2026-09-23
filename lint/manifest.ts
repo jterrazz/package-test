@@ -557,7 +557,7 @@ export const RULE_DOCS = {
             '`literate.specification`, resolved from the config directory, names a file that exists. The config directory is what the path is read against; a project that moves Vite’s `root` states its door relative to the config all the same.',
         facet: 'cli',
         family: 'E',
-        fix: 'Point it at the `*.specification.ts` that exports `cli`.',
+        fix: 'Point it at the `*.specification.ts` that exports the runner its documents name by `kind:` — `cli`, `api` or `jobs`.',
         id: 'E8',
         rationale:
             'A path that resolves to nothing fails at collection time with a message about an import, several layers from the line that caused it.',

@@ -1,0 +1,9 @@
+kind: jobs
+description: expects a table the job left empty
+trigger: sync-events
+tables:
+    events:
+        database: analyticsDb
+        columns: [type]
+        rows:
+            - [user_synced]

@@ -1,0 +1,10 @@
+kind: jobs
+description: the job's outgoing call is answered by the contract the document names
+intercept: ./contracts/enrich-label.contracts.ts
+trigger: enrich-from-api
+tables:
+    events:
+        database: analyticsDb
+        columns: [type]
+        rows:
+            - [enriched]

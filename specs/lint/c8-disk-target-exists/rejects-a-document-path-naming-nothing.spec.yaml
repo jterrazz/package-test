@@ -1,0 +1,8 @@
+description: every path an api document names is judged where it is written, key by key
+fixture: ./fixtures/document-missing/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/orders/created.spec.yaml:3:1  jterrazz-check(c8)
+          specs/api/orders/created.spec.yaml:4:1  jterrazz-check(c8)

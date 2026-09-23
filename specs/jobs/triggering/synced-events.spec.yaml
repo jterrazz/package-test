@@ -1,0 +1,12 @@
+kind: jobs
+description: the job copies one event per seeded user
+seed:
+    - { file: ./seeds/two-users.sql, database: db }
+trigger: sync-events
+tables:
+    events:
+        database: analyticsDb
+        columns: [payload, type]
+        rows:
+            - ['{"name":"Alice"}', user_synced]
+            - ['{"name":"Bob"}', user_synced]

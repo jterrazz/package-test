@@ -1,0 +1,7 @@
+description: a document key naming a file outside the folder it reads is refused on that key
+fixture: ./fixtures/crossed-ground/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/orders/seeded-from-goldens.spec.yaml:3:1  jterrazz-check(d4b)

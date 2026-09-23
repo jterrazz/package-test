@@ -1,0 +1,13 @@
+kind: api
+description: reads a session before creating it
+steps:
+    - request: POST /echo
+      body:
+          session: '{{sessionId}}'
+      response:
+          status: 200
+    - request: GET /session
+      capture:
+          sessionId: $.id
+      response:
+          status: 200

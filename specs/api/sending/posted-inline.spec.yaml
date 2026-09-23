@@ -1,0 +1,14 @@
+kind: api
+description: an inline request line sends the body written under it
+request: POST /users
+body:
+    name: Dora
+    email: dora@test.com
+response:
+    status: 201
+    headers:
+        content-type: application/json
+    body:
+        user:
+            name: Dora
+            email: dora@test.com

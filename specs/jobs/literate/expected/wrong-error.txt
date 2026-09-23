@@ -1,0 +1,12 @@
+Spec mismatch
+
+expects the crash to say something else
+
+trigger: crash-after-insert
+
+error mismatch
+  expected: crash-after-insert: timeout
+  received: crash-after-insert: boom
+
+specs/jobs/literate/fixtures/wrong-error.spec.yaml:4
+A jobs document is not rewritten — its error: and its tables: are stated by hand.

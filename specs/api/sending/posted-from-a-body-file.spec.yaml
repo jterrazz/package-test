@@ -1,0 +1,12 @@
+kind: api
+description: a body named by its path is sent as the value the file holds
+request: POST /users
+body: ./requests/erin.json
+response:
+    status: 201
+tables:
+    users:
+        database: db
+        columns: [name, email]
+        rows:
+            - [Erin, erin@test.com]

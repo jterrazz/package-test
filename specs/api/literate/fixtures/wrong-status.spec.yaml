@@ -1,0 +1,5 @@
+kind: api
+description: expects a user that was never seeded
+request: GET /users/999
+response:
+    status: 200

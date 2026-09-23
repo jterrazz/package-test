@@ -6,9 +6,12 @@ import { resolveSpecPath } from '../src/model/chain/resolve.js';
 import {
     assertedStreams,
     DOCUMENT_KEYS,
+    documentPaths,
+    KIND_KEYS,
     readSpecFile,
     RUN_KEYS,
     SPEC_EXTENSION,
+    STEP_KEYS,
 } from '../src/model/literate/spec-document.js';
 import type { SpecDocument, SpecFile } from '../src/model/literate/spec-document.js';
 import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
@@ -104,9 +107,14 @@ function keyName(pair: Pair<Node, Node>): null | string {
 }
 
 function runMaps(file: SpecFile): YAMLMap[] {
+    return itemMaps(file, 'runs');
+}
+
+/** The mappings of a top-level list — `runs:` of a cli document, `steps:` of an api one. */
+function itemMaps(file: SpecFile, key: 'runs' | 'steps'): YAMLMap[] {
     const map = documentMap(file);
-    const runs = map?.get('runs', true);
-    return isSeq(runs) ? (runs.items as Node[]).filter((item) => isMap(item)) : [];
+    const items = map?.get(key, true);
+    return isSeq(items) ? (items.items as Node[]).filter((item) => isMap(item)) : [];
 }
 
 /** The stream scalars of one run — the values the block-scalar rule judges. */
@@ -181,10 +189,18 @@ function checkKeyOrder(file: SpecFile, lineAt: (node: Pair<Node, Node>) => numbe
     };
     const map = documentMap(file);
     if (map !== null) {
-        inspect(map, DOCUMENT_KEYS, 'a spec document');
+        const { kind } = file.document;
+        inspect(
+            map,
+            DOCUMENT_KEYS.filter((key) => (KIND_KEYS[kind] as readonly string[]).includes(key)),
+            kind === 'cli' ? 'a spec document' : `${kind === 'api' ? 'an' : 'a'} ${kind} document`,
+        );
     }
     for (const run of runMaps(file)) {
         inspect(run, RUN_KEYS, 'a run');
+    }
+    for (const step of itemMaps(file, 'steps')) {
+        inspect(step, STEP_KEYS, 'a step');
     }
     return findings;
 }
@@ -413,7 +429,10 @@ const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
  * committed.
  */
 function fixedData(document: SpecDocument, dir: string): string {
-    const parts = document.runs.flatMap((run) => [run.stdin ?? '', run.command]);
+    const parts = [
+        ...document.runs.flatMap((run) => [run.stdin ?? '', run.command]),
+        ...sentData(document, dir),
+    ];
     for (const token of document.env) {
         parts.push(token.kind === 'pair' ? `${token.key}=${token.value}` : token.name);
     }
@@ -444,6 +463,30 @@ function fixedData(document: SpecDocument, dir: string): string {
     }
     visit(join(dir, GROUND_FIXTURES));
     return parts.join('\n');
+}
+
+/** The keys whose file an api or jobs case SENDS or SEEDS — what it fixes, read from disk. */
+const SENT_KEYS = new Set(['body', 'request', 'seed']);
+
+/**
+ * What an api or jobs case fixes by sending or seeding it: its clock, its
+ * headers, its inline requests and bodies, and the files its `seed:`,
+ * `request:` and `body:` name. A value that comes back from there is one the
+ * document stated.
+ */
+function sentData(document: SpecDocument, dir: string): string[] {
+    return [
+        document.clock?.iso ?? '',
+        ...Object.values(document.headers),
+        ...document.steps.flatMap((step) => [
+            step.request.kind === 'inline' ? step.request.target : '',
+            ...Object.values(step.headers),
+            step.body?.kind === 'value' ? JSON.stringify(step.body.value) : '',
+        ]),
+        ...documentPaths(document)
+            .filter((named) => SENT_KEYS.has(named.key))
+            .map((named) => readText(join(dir, named.path))),
+    ];
 }
 
 /**
@@ -777,6 +820,9 @@ export function fixSpecDocument(text: string, rel: string): null | string {
         return null;
     }
     reorder(map, DOCUMENT_KEYS);
+    for (const step of itemMaps(file, 'steps')) {
+        reorder(step, STEP_KEYS);
+    }
     for (const run of runMaps(file)) {
         reorder(run, RUN_KEYS);
         for (const { scalar } of streamScalars(run)) {

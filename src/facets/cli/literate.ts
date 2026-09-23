@@ -430,6 +430,15 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         throw error instanceof SpecSyntaxError ? atLine(error, filePath, error.line) : error;
     }
     const { document } = file;
+    if (document.kind !== 'cli') {
+        throw atLine(
+            new Error(
+                `${displayPath}:1: a kind: ${document.kind} document is run by ${document.kind}.run(), and this runner is specification.cli()'s`,
+            ),
+            filePath,
+            1,
+        );
+    }
     const fileDir = filePath.replace(/[/\\][^/\\]*$/u, '');
 
     // `fixture:` layers on top of whatever the chain already copied, in
@@ -505,9 +514,4 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         transform: config.transform,
         workDir,
     });
-}
-
-/** The title a transformed `.spec.yaml` module runs under — the `description:` line. */
-export function specDescription(content: string, displayPath: string): string {
-    return readSpecFile(content, displayPath).document.description;
 }

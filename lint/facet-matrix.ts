@@ -249,7 +249,12 @@ export const CAPABILITIES: Capability[] = [
     { columns: ['jobs'], group: 'Terminal action', name: '.trigger()', probe: ".trigger('" },
     { columns: ['integration'], group: 'Terminal action', name: '.call()', probe: '.call(' },
     { columns: ['cli'], group: 'Terminal action', name: '.exec()', probe: '.exec(' },
-    { columns: ['cli'], group: 'Terminal action', name: '.run()', probe: '.run(file(' },
+    {
+        columns: ['api', 'jobs', 'cli'],
+        group: 'Terminal action',
+        name: '.run()',
+        probe: '.run(file(',
+    },
     { columns: ['website'], group: 'Terminal action', name: '.visit()', probe: ".visit('" },
     { columns: ['website'], group: 'Terminal action', name: '.fetch()', probe: ".fetch('" },
     {
@@ -536,9 +541,6 @@ export const CAPABILITIES: Capability[] = [
     // ── Goldens ──
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'website', 'component', 'module'],
-        exempt: {
-            jobs: "a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory",
-        },
         group: 'Golden',
         name: 'toMatch(file())',
         probe: '.toMatch(file(',

@@ -1,0 +1,10 @@
+kind: jobs
+description: a job that crashes is read by its error, and what it wrote first stays
+trigger: crash-after-insert
+error: 'crash-after-insert: {{string}}'
+tables:
+    events:
+        database: analyticsDb
+        columns: [type]
+        rows:
+            - [pre_crash]

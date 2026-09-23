@@ -10,6 +10,7 @@ export { literate, type LiterateOptions, type LiteratePlugin } from './literate-
 export { defineSpecConfig, type SpecConfig } from './preset.js';
 export {
     api,
+    type ApiProjectOptions,
     cli,
     type CliProjectOptions,
     component,
@@ -17,6 +18,8 @@ export {
     type FacetProjectOptions,
     integration,
     jobs,
+    type JobsProjectOptions,
+    type LiterateDoor,
     mobile,
     unit,
     type UnitProjectOptions,

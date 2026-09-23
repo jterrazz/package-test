@@ -1,0 +1,25 @@
+kind: api
+description: a later step sends what an earlier one captured, and gets the same session back
+steps:
+    - request: GET /session
+      capture:
+          sessionId: $.id
+      response: ./expected/session.http
+    - request: GET /echo/{{sessionId}}
+      response:
+          status: 200
+          body:
+              value: '{{uuid#session}}'
+    - request: POST /echo
+      headers:
+          x-chain: '{{sessionId}}'
+      body:
+          session: '{{sessionId}}'
+      response:
+          status: 200
+          body:
+              body:
+                  session: '{{uuid#session}}'
+              headers:
+                  x-chain: '{{uuid#session}}'
+                  x-file: null

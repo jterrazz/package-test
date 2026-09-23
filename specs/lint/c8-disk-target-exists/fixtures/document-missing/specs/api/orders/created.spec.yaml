@@ -1,0 +1,5 @@
+kind: api
+description: an order is created from a request nobody wrote
+seed: ./seeds/one-customer.sql
+request: ./requests/create-order.http
+response: ./expected/order-created.http

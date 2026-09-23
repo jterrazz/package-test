@@ -1,0 +1,7 @@
+kind: api
+description: seeds a file nobody wrote
+seed:
+    - { file: ./seeds/nowhere.sql, database: db }
+request: GET /users
+response:
+    status: 200

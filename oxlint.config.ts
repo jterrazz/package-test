@@ -50,7 +50,6 @@ const FRAMEWORK_LAYERS = {
             'facets/component/component.chain.ts': ['seams/msw/', 'seams/vitest-browser/'],
             'facets/component/component.shape.ts': ['seams/vitest-browser/'],
             'facets/component/component.project.ts': ['seams/vitest-browser/commands'],
-            'facets/cli/cli.project.ts': ['runner/literate-plugin'],
             'facets/cli/literate.ts': ['seams/process/'],
             'facets/mobile/appium-server.ts': ['seams/process/'],
             'facets/mobile/mobile.specification.ts': ['seams/appium/'],
@@ -89,7 +88,11 @@ const FRAMEWORK_LAYERS = {
             // edge, by design: one builder, seven results it names.
             'facets/api/api.result',
             'facets/cli/cli.result',
+            // And a document run is the facet's own engine, called by the
+            // Builder's `run` the way its terminal actions are.
+            'facets/api/literate',
             'facets/cli/literate',
+            'facets/jobs/literate',
             'facets/integration/integration.result',
             'facets/mobile/mobile.result',
             'facets/website/website.result',
@@ -114,14 +117,7 @@ const FRAMEWORK_LAYERS = {
         },
     },
     runner: {
-        imports: [
-            'runner/',
-            'model/',
-            // The cli project wires the literate door, and the plugin needs the
-            // Facet's own runner to bind a document to.
-            'facets/cli/literate',
-            'facets/',
-        ],
+        imports: ['runner/', 'model/', 'facets/'],
         packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
     },
     seams: {

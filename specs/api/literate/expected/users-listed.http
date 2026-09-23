@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+content-type: application/json
+
+{
+    "users": [
+        {
+            "name": "Dora",
+            "email": "dora@test.com"
+        }
+    ]
+}

@@ -39,7 +39,7 @@ export const e8LiterateSpecificationExists: LintRule = {
         docs: RULE_DOCS['e8-literate-specification-exists'],
         messages: {
             missing:
-                '`literate.specification` must name the `*.specification.ts` exporting `cli` — `{{path}}` resolves to no file.',
+                '`literate.specification` must name the `*.specification.ts` exporting the runner its documents name by `kind:` (`cli`, `api`, `jobs`) — `{{path}}` resolves to no file.',
         },
         type: 'problem',
     },

@@ -63,11 +63,11 @@ specs/
 └── fixtures/                         # the SHARED pool, reached by ../../fixtures/…
 ```
 
-**A domain shared by two facets carries the same name in both.** Six
+**A domain shared by two facets carries the same name in both.** Seven
 capabilities belong to no facet in particular — a runner's `lifecycle`, the
 declared network (`intercepts`), the ground a chain loads (`seeding`), what a
-result answers (`assertions`), the `{{token}}` engine (`tokens`) and the pinned
-calendar (`clock`) — and a facet that gives one of them a FOLDER calls it by
+result answers (`assertions`), the `{{token}}` engine (`tokens`), the pinned
+calendar (`clock`) and the document door (`literate`) — and a facet that gives one of them a FOLDER calls it by
 that name, so `specs/api/clock/` and `specs/website/clock/` are the same
 question asked of two constructors. Everything else is one facet's own, and a
 name that is one facet's own is never another's: two names for one capability
@@ -84,13 +84,13 @@ a declared name nothing carries fails too.
 
 <!-- GENERATED:domains — do not edit by hand; run `npm run docs`. Source: lint/domains.ts -->
 
-| Facet         | Shared domains it carries                                        | Its own                                                    |
-| ------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
-| `api`         | `assertions/`, `clock/`, `intercepts/`, `lifecycle/`, `seeding/` | `exports/`, `initiation-errors/`, `responses/`, `sending/` |
-| `cli`         | `assertions/`, `seeding/`, `tokens/`                             | `directory/`, `docker/`, `env/`, `exec/`, `literate/`      |
-| `integration` | `clock/`, `intercepts/`                                          | `call/`, `postgres/`, `redis/`, `table/`                   |
-| `jobs`        | `clock/`                                                         | `triggering/`                                              |
-| `website`     | `assertions/`, `clock/`                                          | `console/`, `fetch/`, `services/`, `visit/`                |
+| Facet         | Shared domains it carries                                                     | Its own                                                    |
+| ------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `api`         | `assertions/`, `clock/`, `intercepts/`, `lifecycle/`, `literate/`, `seeding/` | `exports/`, `initiation-errors/`, `responses/`, `sending/` |
+| `cli`         | `assertions/`, `literate/`, `seeding/`, `tokens/`                             | `directory/`, `docker/`, `env/`, `exec/`                   |
+| `integration` | `clock/`, `intercepts/`                                                       | `call/`, `postgres/`, `redis/`, `table/`                   |
+| `jobs`        | `clock/`, `literate/`                                                         | `triggering/`                                              |
+| `website`     | `assertions/`, `clock/`                                                       | `console/`, `fetch/`, `services/`, `visit/`                |
 
 <!-- /GENERATED:domains -->
 
@@ -108,9 +108,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 56    |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 57    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 81    |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 83    |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 156   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 24    |
 
@@ -188,7 +188,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **80 modules** have no sibling test, and every one of them is claimed:
+Today **83 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -198,12 +198,12 @@ Today **80 modules** have no sibling test, and every one of them is claimed:
 | the facet file set, as a re-export (12) | the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name                                                                                       |
 | a facet's vitest project (7)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                |
 | a mobile module that needs a device (2) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
-| a facet module (8)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
+| a facet module (10)                     | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
 | a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
 | a seam adapter (11)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
 | a bundled CLI entry (3)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                |
 | a lint-layer module (4)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
-| a chain or runner internal (7)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |
+| a chain or runner internal (8)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |
 
 <!-- /GENERATED:siblings -->
 
@@ -257,7 +257,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 1   | 1    | —   | 1           | 1       | —      | 1         | —      |
 | `.intercept()` | 3   | 1    | —   | 1           | 1       | 0      | 4         | —      |
-| `.seed()`      | 5   | 1    | 1   | 3           | —       | —      | —         | —      |
+| `.seed()`      | 6   | 2    | 1   | 3           | —       | —      | —         | —      |
 | `.headers()`   | 1   | —    | —   | —           | 1       | —      | —         | —      |
 | `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
 | `.env()`       | —   | —    | 1   | —           | —       | —      | —         | —      |
@@ -276,7 +276,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `.trigger()` | —   | 2    | —   | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —    | —   | 7           | —       | —      | —         | —      |
 | `.exec()`    | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.run()`     | —   | —    | 2   | —           | —       | —      | —         | —      |
+| `.run()`     | 1   | 1    | 2   | —           | —       | —      | —         | —      |
 | `.visit()`   | —   | —    | —   | —           | 17      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 2       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
@@ -334,9 +334,9 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`     | 8   | —    | —   | —           | —       | —      | —         | —      |
+| `.response`     | 9   | —    | —   | —           | —       | —      | —         | —      |
 | `.status`       | 4   | —    | —   | —           | 2       | —      | —         | —      |
-| `.table()`      | 4   | 2    | 1   | 1           | —       | —      | —         | —      |
+| `.table()`      | 4   | 3    | 1   | 1           | —       | —      | —         | —      |
 | `.file()`       | 1   | —    | 5   | 1           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —    | 2   | 1           | —       | —      | —         | —      |
 | `.stdout`       | —   | —    | 5   | —           | —       | —      | —         | —      |
@@ -370,14 +370,14 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability             | api | jobs | cli | integration | website | mobile | component | module |
 | ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 3   | 0    | 6   | 6           | 6       | —      | 1         | 2      |
+| `toMatch(file())`      | 4   | 1    | 6   | 6           | 6       | —      | 1         | 2      |
 | `toMatch(directory())` | 1   | —    | 3   | 1           | —       | —      | —         | 1      |
-| `toMatchRows()`        | 4   | 2    | 1   | 1           | —       | —      | —         | 1      |
-| `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 3      |
+| `toMatchRows()`        | 4   | 3    | 1   | 1           | —       | —      | —         | 1      |
+| `.http exchange`       | 4   | —    | —   | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `.json body`           | 2   | —    | 2   | 5           | 2       | —      | —         | 7      |
-| `.txt stream`          | 2   | —    | 8   | 3           | 2       | —      | —         | 9      |
-| `{ frozen }`           | 2   | —    | 5   | —           | —       | —      | 1         | 2      |
+| `.txt stream`          | 3   | —    | 8   | 3           | 2       | —      | —         | 9      |
+| `{ frozen }`           | 3   | —    | 5   | —           | —       | —      | 1         | 2      |
 
 ### Time & doubles
 
@@ -417,7 +417,6 @@ What the framework can do, and how many of this package’s own test FILES carry
 ### Exemptions
 
 - no mobile tree: an iOS simulator is not something CI provisions (M1) — `services`·mobile, `root`·mobile, `backend`·mobile, `device`·mobile, `app`·mobile, `timeouts`·mobile, `.intercept()`·mobile, `.open()`·mobile, `see`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `content`·mobile, `testId`·mobile, `.content`·mobile, `.screen`·mobile
-- a job's oracle is the table it wrote (`toMatchRows`): its result carries no file and no directory — `toMatch(file())`·jobs
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·api, `{{iso8601}}`·cli, `{{iso8601}}`·integration, `{{iso8601}}`·website, `{{number}}`·api, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·api, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·api, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·api, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->

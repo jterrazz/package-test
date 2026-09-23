@@ -1,0 +1,14 @@
+kind: api
+description: expects a row the request never wrote
+request: POST /users
+body:
+    name: Dora
+    email: dora@test.com
+response:
+    status: 201
+tables:
+    users:
+        database: db
+        columns: [name]
+        rows:
+            - [Erin]

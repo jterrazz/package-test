@@ -35,6 +35,90 @@
                 }
             ]
         },
+        "capture": {
+            "additionalProperties": {
+                "pattern": "^\\$",
+                "type": "string"
+            },
+            "description": "Name → the JSONPath of the response body it reads ($.id, $.items[0].name); a later step sends it as {{name}}.",
+            "propertyNames": {
+                "not": {
+                    "enum": [
+                        "any",
+                        "base64",
+                        "date",
+                        "duration",
+                        "email",
+                        "float",
+                        "hex",
+                        "int",
+                        "ip",
+                        "iso8601",
+                        "number",
+                        "path",
+                        "port",
+                        "semver",
+                        "sha",
+                        "string",
+                        "time",
+                        "ulid",
+                        "url",
+                        "uuid",
+                        "workdir"
+                    ]
+                },
+                "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+            },
+            "type": "object"
+        },
+        "request": {
+            "description": "A ./requests/<name>.http sent whole, or an inline request line — METHOD /path, {{capture}} references allowed.",
+            "oneOf": [
+                {
+                    "pattern": "^\\.\\.?/(?:[^/]+/)*?requests/[^/].*\\.http$",
+                    "type": "string"
+                },
+                {
+                    "pattern": "^(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) /",
+                    "type": "string"
+                }
+            ]
+        },
+        "response": {
+            "description": "A ./expected/<name>.http golden, or its three parts inline — status, a subset of headers, the body — each token-aware.",
+            "oneOf": [
+                {
+                    "pattern": "^\\.\\.?/(?:[^/]+/)*?expected/[^/].*\\.http$",
+                    "type": "string"
+                },
+                {
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                        "body": {
+                            "description": "The body, compared structurally."
+                        },
+                        "headers": {
+                            "additionalProperties": {
+                                "type": "string"
+                            },
+                            "type": "object"
+                        },
+                        "status": {
+                            "oneOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
+        },
         "run": {
             "additionalProperties": false,
             "properties": {
@@ -80,6 +164,102 @@
             ],
             "type": "object"
         },
+        "seedEntry": {
+            "oneOf": [
+                {
+                    "pattern": "^\\.\\.?/(?:[^/]+/)*?seeds/[^/].*\\.sql$",
+                    "type": "string"
+                },
+                {
+                    "additionalProperties": false,
+                    "properties": {
+                        "database": {
+                            "type": "string"
+                        },
+                        "file": {
+                            "pattern": "^\\.\\.?/(?:[^/]+/)*?seeds/[^/].*\\.sql$",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "file"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        "step": {
+            "additionalProperties": false,
+            "anyOf": [
+                {
+                    "required": [
+                        "response"
+                    ]
+                },
+                {
+                    "required": [
+                        "tables"
+                    ]
+                }
+            ],
+            "properties": {
+                "body": {
+                    "description": "The body an inline request sends: a value, or a file under requests/ named by its path."
+                },
+                "capture": {
+                    "$ref": "#/$defs/capture"
+                },
+                "headers": {
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "type": "object"
+                },
+                "request": {
+                    "$ref": "#/$defs/request"
+                },
+                "response": {
+                    "$ref": "#/$defs/response"
+                },
+                "tables": {
+                    "$ref": "#/$defs/tables"
+                }
+            },
+            "required": [
+                "request"
+            ],
+            "type": "object"
+        },
+        "tables": {
+            "additionalProperties": {
+                "additionalProperties": false,
+                "properties": {
+                    "columns": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                    },
+                    "database": {
+                        "type": "string"
+                    },
+                    "rows": {
+                        "items": {
+                            "type": "array"
+                        },
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "columns",
+                    "rows"
+                ],
+                "type": "object"
+            },
+            "description": "Table name → the rows it holds after the action, in order, as toMatchRows() takes them; rows: [] asserts it is empty.",
+            "type": "object"
+        },
         "serveEntry": {
             "oneOf": [
                 {
@@ -102,10 +282,203 @@
     "$id": "https://jterrazz.com/schema/jterrazz-test/spec.schema.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "additionalProperties": false,
-    "description": "One scenario of the @jterrazz/test literate format: the ground a session stands on, then the session itself.",
+    "allOf": [
+        {
+            "if": {
+                "anyOf": [
+                    {
+                        "not": {
+                            "required": [
+                                "kind"
+                            ]
+                        }
+                    },
+                    {
+                        "properties": {
+                            "kind": {
+                                "const": "cli"
+                            }
+                        },
+                        "required": [
+                            "kind"
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "propertyNames": {
+                    "enum": [
+                        "kind",
+                        "description",
+                        "fixture",
+                        "env",
+                        "serve",
+                        "runs"
+                    ]
+                },
+                "required": [
+                    "runs"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "kind": {
+                        "const": "api"
+                    }
+                },
+                "required": [
+                    "kind"
+                ]
+            },
+            "then": {
+                "propertyNames": {
+                    "enum": [
+                        "kind",
+                        "description",
+                        "seed",
+                        "intercept",
+                        "clock",
+                        "headers",
+                        "request",
+                        "body",
+                        "response",
+                        "tables",
+                        "steps"
+                    ]
+                },
+                "oneOf": [
+                    {
+                        "required": [
+                            "request"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "steps"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "kind": {
+                        "const": "jobs"
+                    }
+                },
+                "required": [
+                    "kind"
+                ]
+            },
+            "then": {
+                "propertyNames": {
+                    "enum": [
+                        "kind",
+                        "description",
+                        "seed",
+                        "intercept",
+                        "clock",
+                        "trigger",
+                        "error",
+                        "tables"
+                    ]
+                },
+                "anyOf": [
+                    {
+                        "required": [
+                            "tables"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "error"
+                        ]
+                    }
+                ],
+                "required": [
+                    "trigger"
+                ]
+            }
+        }
+    ],
+    "description": "One case of the @jterrazz/test literate format, one file per test: the ground it stands on, what it does, and what came back.",
     "properties": {
+        "body": {
+            "description": "api: the body an inline request sends — a value, or a file under requests/ named by its path."
+        },
+        "clock": {
+            "description": "api, jobs: the instant the chain's .clock() pins, ISO — 2026-03-04T09:30:00Z.",
+            "type": "string"
+        },
         "description": {
             "description": "The vitest test title — one lowercase line, no trailing period.",
+            "type": "string"
+        },
+        "error": {
+            "description": "jobs: the message the triggered job must reject with, token-aware; absent asserts it succeeded.",
+            "type": "string"
+        },
+        "headers": {
+            "additionalProperties": {
+                "type": "string"
+            },
+            "type": "object",
+            "description": "api: the headers every request of the document carries."
+        },
+        "intercept": {
+            "oneOf": [
+                {
+                    "pattern": "^\\.\\.?/(?:[^/]+/)*?contracts/[^/].*$",
+                    "type": "string"
+                },
+                {
+                    "items": {
+                        "pattern": "^\\.\\.?/(?:[^/]+/)*?contracts/[^/].*$",
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                }
+            ],
+            "description": "api, jobs: contract modules under contracts/, each default-exporting a contract, a list or a composite — applied in order."
+        },
+        "request": {
+            "$ref": "#/$defs/request"
+        },
+        "response": {
+            "$ref": "#/$defs/response"
+        },
+        "seed": {
+            "description": "api, jobs: .sql files under seeds/, applied in order — { file, database } targets one database when several are declared.",
+            "oneOf": [
+                {
+                    "$ref": "#/$defs/seedEntry"
+                },
+                {
+                    "items": {
+                        "$ref": "#/$defs/seedEntry"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                }
+            ]
+        },
+        "steps": {
+            "description": "api: a journey — each step a request and what came back, sending what earlier steps captured.",
+            "items": {
+                "$ref": "#/$defs/step"
+            },
+            "minItems": 1,
+            "type": "array"
+        },
+        "tables": {
+            "$ref": "#/$defs/tables"
+        },
+        "trigger": {
+            "description": "jobs: the registered job the case runs.",
             "type": "string"
         },
         "env": {
@@ -144,7 +517,9 @@
             "default": "cli",
             "description": "The facet this document describes.",
             "enum": [
-                "cli"
+                "cli",
+                "api",
+                "jobs"
             ],
             "type": "string"
         },
@@ -173,8 +548,7 @@
         }
     },
     "required": [
-        "description",
-        "runs"
+        "description"
     ],
     "title": "@jterrazz/test spec document",
     "type": "object"

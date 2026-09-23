@@ -1,0 +1,7 @@
+kind: api
+description: lists its cases in one file
+request: GET /orders
+response:
+    status: 200
+cases:
+    - GET /orders/1

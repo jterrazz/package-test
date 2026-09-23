@@ -1,0 +1,13 @@
+kind: api
+description: the document's headers win over the request file's, which it sends whole
+headers:
+    x-chain: from-document
+request: ./requests/echo.http
+response:
+    status: 200
+    body:
+        body:
+            greeting: hello
+        headers:
+            x-chain: from-document
+            x-file: from-file

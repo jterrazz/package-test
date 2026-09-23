@@ -1,15 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { basename, isAbsolute, resolve } from 'node:path';
 
-import { specDescription } from '../facets/cli/literate.js';
 import { DISK_KEY } from '../model/chain/spec-path.js';
+import { readSpecFile } from '../model/literate/spec-document.js';
 
 /**
  * The `literate()` vite plugin — door one of the spec-document format.
  *
  * It makes a `<case>.spec.yaml` file a TEST FILE: the glob joins the project's
  * test include, and each document is transformed into a one-test module that
- * runs the file through the registered `cli` runner. The runner shows the
+ * runs the file through the runner its `kind:` names. The runner shows the
  * document's path as the file and its `description:` as the title, so a failing
  * scenario is opened where it is written — not in a `.test.ts` that merely
  * points at it.
@@ -36,8 +36,9 @@ export type LiterateOptions = {
      */
     include?: string[];
     /**
-     * Path to the `*.specification.ts` whose exported `cli` runs the files —
-     * relative to the vite root, or absolute.
+     * Path to the `*.specification.ts` whose export named for each document's
+     * `kind:` — `cli`, `api` or `jobs` — runs the files, relative to the vite
+     * root, or absolute.
      *
      * It is stated, never guessed: a repository may declare several cli
      * runners (different binaries, different service records), and there is no
@@ -63,13 +64,14 @@ export type LiteratePlugin = {
 
 /**
  * The module a `<case>.spec.yaml` becomes: one `test()` whose title is the
- * document's `description:` and whose body runs the whole file — its ground,
- * its servers, every run asserted.
+ * document's `description:` and whose body runs the whole file through the
+ * runner its `kind:` names — `cli`, `api` or `jobs`, the export the bound
+ * specification hands out under that name.
  *
- * The document is handed to `cli.run()` as the value `file('./<case>.spec.yaml')`
- * returns, spelled by its brand: the generated module imports the runner and
- * nothing else, so it resolves the same way from a consumer's install and from
- * this repository's source.
+ * The document is handed to `<kind>.run()` as the value
+ * `file('./<case>.spec.yaml')` returns, spelled by its brand: the generated
+ * module imports the runner and nothing else, so it resolves the same way from
+ * a consumer's install and from this repository's source.
  *
  * @internal Exported for unit tests.
  */
@@ -78,13 +80,13 @@ export function literateModule(
     filePath: string,
     specificationPath: string,
 ): string {
-    const title = specDescription(content, filePath);
+    const { description, kind } = readSpecFile(content, filePath).document;
     return [
         "import { test } from 'vitest';",
-        `import { cli } from ${JSON.stringify(specificationPath)};`,
+        `import { ${kind} } from ${JSON.stringify(specificationPath)};`,
         '',
-        `test(${JSON.stringify(title)}, async () => {`,
-        `    await cli.run({ [Symbol.for(${JSON.stringify(DISK_KEY)})]: 'file', path: ${JSON.stringify(`./${basename(filePath)}`)} });`,
+        `test(${JSON.stringify(description)}, async () => {`,
+        `    await ${kind}.run({ [Symbol.for(${JSON.stringify(DISK_KEY)})]: 'file', path: ${JSON.stringify(`./${basename(filePath)}`)} });`,
         '});',
         '',
     ].join('\n');

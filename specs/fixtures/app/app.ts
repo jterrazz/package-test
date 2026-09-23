@@ -118,11 +118,21 @@ export function createApp(options: AppOptions) {
         });
     });
 
+    // A path segment, handed back — what a journey's captured value reads as once sent.
+    app.get('/echo/:value', (c) => c.json({ value: c.req.param('value') }));
+
     app.post('/echo-raw', async (c) => {
         // Echo the request body verbatim — used to assert raw (non-JSON)
         // body passthrough from requests/*.http files.
         const raw = await c.req.text();
         return c.json({ raw });
+    });
+
+    // The one route that reaches OUT: what an `intercept:` stands in for.
+    app.get('/label', async (c) => {
+        const response = await fetch('https://enrich.example.test/label');
+        const { label } = (await response.json()) as { label: string };
+        return c.json({ label });
     });
 
     app.get('/events', async (c) => {

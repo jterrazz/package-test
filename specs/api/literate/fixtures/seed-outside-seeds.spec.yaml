@@ -1,0 +1,6 @@
+kind: api
+description: seeds from the goldens folder
+seed: ./expected/users.sql
+request: GET /users
+response:
+    status: 200

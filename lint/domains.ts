@@ -9,10 +9,11 @@ import { cell, table } from './catalog.js';
  *
  * C1 says a facet keeps its runners at its root and its tests one level down,
  * in domain folders; it says nothing about what those folders are CALLED, and
- * the name is the reading. Six capabilities belong to no facet in particular —
+ * the name is the reading. Seven capabilities belong to no facet in particular —
  * a runner's `lifecycle`, the declared network (`intercepts`), the ground a
  * chain loads (`seeding`), what a result answers (`assertions`), the
- * `{{token}}` engine (`tokens`) and the pinned calendar (`clock`) — and a facet
+ * `{{token}}` engine (`tokens`), the pinned calendar (`clock`) and the
+ * document door (`literate`) — and a facet
  * that gives one of them its own folder calls it by the shared name, so
  * `specs/api/clock/` and `specs/website/clock/` are the same question asked of
  * two constructors.
@@ -29,12 +30,13 @@ import { cell, table } from './catalog.js';
  * FOLDER is called, not about where a method may appear.
  */
 
-/** The six capabilities that belong to no facet in particular. */
+/** The seven capabilities that belong to no facet in particular. */
 export const SHARED_DOMAINS = [
     'assertions',
     'clock',
     'intercepts',
     'lifecycle',
+    'literate',
     'seeding',
     'tokens',
 ] as const;
@@ -42,7 +44,7 @@ export const SHARED_DOMAINS = [
 /** Each facet's own domains — a name here may not appear under another facet. */
 export const FACET_DOMAINS: Record<string, string[]> = {
     api: ['exports', 'initiation-errors', 'responses', 'sending'],
-    cli: ['directory', 'docker', 'env', 'exec', 'literate'],
+    cli: ['directory', 'docker', 'env', 'exec'],
     integration: ['call', 'postgres', 'redis', 'table'],
     jobs: ['triggering'],
     website: ['console', 'fetch', 'services', 'visit'],
