@@ -15,7 +15,7 @@ describe('seeding details', () => {
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
         // Then - .seed() without a database option violates A7, synchronously checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
-        expect(() => api.seed(file('./seeds/one-user.sql'))).toThrow(
+        expect(() => api.seed(file('../../seeds/one-user.sql'))).toThrow(
             'seed(): 2 databases are declared ("analyticsDb", "db") — pass { database: <key> } to target one of them.',
         );
     });
@@ -36,7 +36,7 @@ describe('seeding details', () => {
         // Then - the chain rejects naming the unknown key
         await expect(
             untypedApi
-                .seed(file('./seeds/one-user.sql'), { database: 'nonexistent-db' })
+                .seed(file('../../seeds/one-user.sql'), { database: 'nonexistent-db' })
                 .get('/users'),
         ).rejects.toThrow('seed() targets database "nonexistent-db" but it was not found');
     });
@@ -54,9 +54,9 @@ describe('seeding details', () => {
 
             try {
                 // Then - the chain fails because nothing can execute the SQL
-                await expect(bareApi.seed(file('./seeds/one-user.sql')).get('/')).rejects.toThrow(
-                    'seed() requires a database adapter',
-                );
+                await expect(
+                    bareApi.seed(file('../../seeds/one-user.sql')).get('/'),
+                ).rejects.toThrow('seed() requires a database adapter');
             } finally {
                 await stop();
             }

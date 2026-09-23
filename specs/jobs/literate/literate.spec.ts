@@ -53,7 +53,7 @@ describe('jobs documents — what the runner refuses', () => {
     test('a document run after a chained seed stands on it', async () => {
         // Given - a seed chained before a document triggering the sync
         const result = await jobs
-            .seed(file('./seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../../seeds/one-user.sql'), { database: 'db' })
             .run(file('./fixtures/extra-row.spec.yaml'));
 
         // Then - the chained user was synced, so the document's one row holds

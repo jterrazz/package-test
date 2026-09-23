@@ -1,8 +1,8 @@
 kind: api
 description: each database is seeded on its own, and each holds only its rows
 seed:
-    - { file: ./seeds/two-users.sql, database: db }
-    - { file: ./seeds/two-events.sql, database: analyticsDb }
+    - { file: ../../seeds/two-users.sql, database: db }
+    - { file: ../../seeds/two-events.sql, database: analyticsDb }
 request: GET /events
 response:
     status: 200

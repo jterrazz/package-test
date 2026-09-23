@@ -1,7 +1,7 @@
 kind: api
 description: a single seed file is the whole table
 seed:
-    - { file: ./seeds/one-user.sql, database: db }
+    - { file: ../../seeds/one-user.sql, database: db }
 request: GET /users
 response:
     status: 200

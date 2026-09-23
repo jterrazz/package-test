@@ -1,9 +1,9 @@
 kind: api
 description: seeds apply in the order listed, each to the database it names
 seed:
-    - { file: ./seeds/one-user.sql, database: db }
+    - { file: ../../seeds/one-user.sql, database: db }
     - { file: ./seeds/third-user.sql, database: db }
-    - { file: ./seeds/one-event.sql, database: analyticsDb }
+    - { file: ../../seeds/one-event.sql, database: analyticsDb }
 request: GET /users
 response:
     status: 200

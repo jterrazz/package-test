@@ -10,7 +10,9 @@ import { jobs as staticJobs, staticRuns } from '../static-jobs.specification.js'
 describe('jobs', () => {
     test('trigger resets databases at the start of each chain', async () => {
         // Given - a previous spec left synced events behind
-        await jobs.seed(file('./seeds/two-users.sql'), { database: 'db' }).trigger('sync-events');
+        await jobs
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
+            .trigger('sync-events');
         const result = await jobs.trigger('sync-events');
 
         // Then - no users were seeded this time, so no events were produced

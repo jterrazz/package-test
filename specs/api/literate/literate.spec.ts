@@ -30,7 +30,7 @@ describe('api documents — the bridge door', () => {
         // Given - a seed chained before a document that seeds nothing
         const message = await failureOf(
             api
-                .seed(file('./seeds/one-user.sql'), { database: 'db' })
+                .seed(file('../../seeds/one-user.sql'), { database: 'db' })
                 .run(file('./read-back.spec.yaml'), { frozen: true }),
         );
 

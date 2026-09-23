@@ -15,7 +15,7 @@ function exportedTo(body: unknown): string {
 test('reads the files the app wrote to disk, at the path it answered', async () => {
     // Given - two users, exported by the app
     const result = await api
-        .seed(file('./seeds/two-users.sql'), { database: 'db' })
+        .seed(file('../../seeds/two-users.sql'), { database: 'db' })
         .post('/exports');
     const exported = exportedTo(result.response.body);
 

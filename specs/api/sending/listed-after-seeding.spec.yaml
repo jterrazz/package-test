@@ -1,6 +1,6 @@
 kind: api
 description: the users seeded are the users listed, in the order they were inserted
 seed:
-    - { file: ./seeds/two-users.sql, database: db }
+    - { file: ../../seeds/two-users.sql, database: db }
 request: GET /users
 response: ./expected/users-list.http

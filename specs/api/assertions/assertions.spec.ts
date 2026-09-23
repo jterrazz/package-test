@@ -22,7 +22,7 @@ describe('api assertions', () => {
     test('response matches expected file', async () => {
         // Given - seeded data
         const result = await api
-            .seed(file('./seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - status + body match expected/all-users.http
@@ -43,7 +43,7 @@ describe('api assertion details', () => {
     test('toMatch shows diff on body mismatch', async () => {
         // Given - response differs from expected file
         const result = await api
-            .seed(file('./seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - error names the fixture and shows the full -/+ diff of both values frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The error golden below legitimately updates, but the wrong fixture must never be rewritten
@@ -71,7 +71,7 @@ describe('shared assertions', () => {
     test('toMatchRows — http — matches single column', async () => {
         // Given - one user seeded
         const result = await api
-            .seed(file('./seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../../seeds/one-user.sql'), { database: 'db' })
             .get('/users');
 
         // Then - table matches
@@ -84,7 +84,7 @@ describe('shared assertions', () => {
     test('toMatchRows — http — matches multi-column', async () => {
         // Given - one user seeded
         const result = await api
-            .seed(file('./seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../../seeds/one-user.sql'), { database: 'db' })
             .get('/users');
 
         // Then - table matches with both columns
@@ -99,7 +99,7 @@ describe('shared assertions', () => {
     test('table details — queries a specific database by key', async () => {
         // Given - seed analytics directly
         const result = await api
-            .seed(file('./seeds/two-events.sql'), { database: 'analyticsDb' })
+            .seed(file('../../seeds/two-events.sql'), { database: 'analyticsDb' })
             .get('/events');
 
         // Then - multi-column check on analytics-db
@@ -115,7 +115,7 @@ describe('shared assertions', () => {
     test('table details — shows diff on multi-column mismatch', async () => {
         // Given - two users in table, expecting wrong values
         const result = await api
-            .seed(file('./seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - error shows both columns in the full -/+ diff
@@ -134,7 +134,7 @@ describe('shared assertions', () => {
     test('table details — shows diff on extra rows', async () => {
         // Given - table has more rows than expected
         const result = await api
-            .seed(file('./seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - row count mismatch + extra rows with + marker (full diff)
@@ -172,7 +172,7 @@ describe('shared assertions', () => {
     test('table details — toBeEmpty fails on a table holding a row, naming the count', async () => {
         // Given - one user seeded
         const result = await api
-            .seed(file('./seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../../seeds/one-user.sql'), { database: 'db' })
             .get('/users');
 
         // Then - the matcher refuses, and says how many rows it found

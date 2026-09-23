@@ -49,7 +49,7 @@ describe('postgres — the handle against a real container', () => {
     test('executes every statement of a seed file', async () => {
         // Given - a seed file holding two inserts
         const result = await integration
-            .seed(file('./seeds/two-users.sql'))
+            .seed(file('../../seeds/two-users.sql'))
             .call(async ({ db }) => await db.query('users', ['name']));
 
         // Then - both rows landed
@@ -59,7 +59,7 @@ describe('postgres — the handle against a real container', () => {
     test('returns rows as value arrays, in the column order asked for', async () => {
         // Given - two seeded users, the columns requested in reverse
         const result = await integration
-            .seed(file('./seeds/two-users.sql'))
+            .seed(file('../../seeds/two-users.sql'))
             .call(async ({ db }) => await db.query('users', ['email', 'name']));
 
         // Then - each row is a value array following the requested order
@@ -69,7 +69,7 @@ describe('postgres — the handle against a real container', () => {
     test('starts every chain on an empty table', async () => {
         // Given - a chain that seeded, then a chain that only reads
         await integration
-            .seed(file('./seeds/two-users.sql'))
+            .seed(file('../../seeds/two-users.sql'))
             .call(async ({ db }) => await db.query('users', ['name']));
         const result = await integration.call(async ({ db }) => await db.query('users', ['name']));
 
@@ -80,7 +80,7 @@ describe('postgres — the handle against a real container', () => {
     test('truncates every table on reset, and takes rows again afterwards', async () => {
         // Given - seeded rows, a reset, then one insert
         const result = await integration
-            .seed(file('./seeds/two-users.sql'))
+            .seed(file('../../seeds/two-users.sql'))
             .call(async ({ db }) => {
                 await db.reset();
                 await db.seed(
