@@ -118,8 +118,9 @@ experiment branch, counted here as the folders the run walked.
 | `f6-no-foreign-test-runtime`  | 1     | signews-web 1                                                                                                                                                                                                                                                                                                                         |
 
 Four rows were at zero with no new surface to be the boundary of, and the gate
-moved them to the backlog with their criteria written: **B12** (a marker inside
-a declarator chain), **C19** (backend ground under a screen facet — the
+moved them to the backlog with their criteria written: **B14** (a marker
+inside a declarator chain — renamed from the B12 this record first gave it,
+since B12 had already named route coverage), **C19** (backend ground under a screen facet — the
 component facet that was its reason stopped being a folder when component tests
 became colocated), **D21w** (a volatile literal in a golden: 108 findings, every
 one a publication date the PRODUCT pins rather than a value a run minted; once
