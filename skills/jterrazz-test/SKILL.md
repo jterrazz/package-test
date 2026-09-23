@@ -72,14 +72,14 @@ What a test stands on is named by one of two calls, with the path relative to th
 | `expect(x).toMatch(file('./expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                      |
 | `await expect(result.filesystem).toMatch(directory('./expected/tree/'))` | a golden tree                                             |
 
-`toMatch` with a string or a RegExp, and `toContain`, are vitest's own: a stream is compared through its text — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `fixtures/`, `expected/`, `requests/`, `seeds/` — each verb reads its own, and the shared pool is `specs/fixtures/`, reached by the path that climbs to it. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
+`toMatch` with a string or a RegExp, and `toContain`, are vitest's own: a stream is compared through its text — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `fixtures/`, `expected/`, `requests/`, `seeds/` — each verb reads its own, and the same four at the specs root (`specs/fixtures/`, `specs/seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
 
 ## Pitfalls
 
 - **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./seeds/users.sql')`.
 - **A case that is data, written as code** — a request and what came back, a trigger and the rows it left: that is a `<case>.spec.yaml` (`kind: api`, `kind: jobs`), its oracle the golden of the whole response. Code is for logic.
 - **A domain named `fixtures`, `expected`, `requests` or `seeds`** — the names are reserved for ground; C1 refuses a spec under one.
-- **Reaching into a sibling leaf** — a path may leave its leaf only into `specs/fixtures/` (C15). Shared ground goes to the pool.
+- **Reaching into a sibling leaf** — a path may leave its leaf only into the specs root's own ground, `specs/<role>/` (C15). Shared ground goes there, in the folder of its role.
 - **`expect(result.stdout).toContain('built')`** — a stream is not a string, and it does not compile: a value matcher reads the stream's `.text`, the text a golden compares. A golden is `.toMatch(file('./expected/help.txt'))`. No other result accessor is a string either: `expect(result.response).toMatch(/200/)` does not compile — a response or json takes its `file()`, a tree its `directory()`.
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
 - **Awaiting a sync matcher, or not awaiting an IO one** — `toMatchRows`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (D2).

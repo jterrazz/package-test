@@ -1,0 +1,6 @@
+kind: api
+description: the users are listed over the shared users
+seed: ../../seeds/two-users.sql
+request: GET /users
+response:
+    status: 200

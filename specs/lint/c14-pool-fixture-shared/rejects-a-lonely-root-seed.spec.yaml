@@ -1,0 +1,7 @@
+description: a seed of the specs root only one spec directory reaches for is refused
+fixture: ./fixtures/lonely-seed/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/seeds/one-user.sql:1:1  jterrazz-check(c14)

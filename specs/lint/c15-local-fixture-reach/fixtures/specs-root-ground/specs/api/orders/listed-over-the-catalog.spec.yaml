@@ -1,0 +1,8 @@
+kind: api
+description: orders are listed over the shared catalog and this leaf's delta
+seed:
+    - ../../seeds/catalog.sql
+    - ./seeds/delta.sql
+request: GET /orders
+response:
+    status: 200

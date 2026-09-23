@@ -544,6 +544,28 @@ describe('spec document — an api case', () => {
         ]);
     });
 
+    test("reads a seed the specs root shares, then the leaf's own delta, in order", () => {
+        // Given - the pool's base and the leaf's delta, both listed
+        const document = parseSpecDocument(
+            documentOf(
+                'kind: api',
+                'description: x',
+                'seed:',
+                '  - ../../seeds/catalog.sql',
+                '  - ./seeds/delta.sql',
+                'request: GET /users',
+                'response: { status: 200 }',
+            ),
+            'case.spec.yaml',
+        );
+
+        // Then - both are seeds, applied in the order written
+        expect(document.seeds.map(({ path }) => path)).toStrictEqual([
+            '../../seeds/catalog.sql',
+            './seeds/delta.sql',
+        ]);
+    });
+
     test('reads a journey: inline requests, bodies, captures sent by later steps, inline responses', () => {
         // Given - two steps, the second sending what the first captured
         const document = parseSpecDocument(
@@ -587,6 +609,10 @@ describe('spec document — an api case', () => {
             'seed: reads seeds/, and "./expected/one-user.sql" names expected/',
         ],
         ['seed: ./one-user.sql', 'seed: reads seeds/, and "./one-user.sql" names no seeds/ folder'],
+        [
+            'seed: ../../fixtures/seeds/catalog.sql',
+            'seed: reads seeds/, and "../../fixtures/seeds/catalog.sql" names fixtures/ — put the file in ./seeds/ beside the document, or in specs/seeds/ if several leaves share it (C24)',
+        ],
         ['seed: seeds/one-user.sql', 'seed: "seeds/one-user.sql" is not a relative path'],
         ['seed: ./seeds/users/', 'seed: "./seeds/users/" names a directory'],
         ['seed: ./seeds/one-user.txt', 'seed: "./seeds/one-user.txt" is not a .sql file'],

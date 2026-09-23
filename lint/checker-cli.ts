@@ -101,7 +101,7 @@ import { codeOf } from './rule-code.js';
  *
  * `--fix` applies the rewritable passes — C13, which moves a 16.x tree to 17
  * (bare ground folders, every file named by its path: `checker-migration.ts`),
- * the two document ones (key order and block scalars), C14, which MOVES a single-reader pool fixture beside its leaf
+ * the two document ones (key order and block scalars), C14, which MOVES a single-reader pool entry beside its leaf
  * and rewrites the literals that named it, and C12, which RENAMES a `.test.ts`
  * under a facet folder to `.spec.ts` — then checks what is left, so a run that
  * fixes everything exits 0. With no path it applies them to every `specs/` root

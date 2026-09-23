@@ -50,6 +50,10 @@ describe('api documents — what the runner refuses', () => {
             'fixtures/seed-outside-seeds.spec.yaml:3: seed: reads seeds/, and "./expected/users.sql" names expected/',
         ],
         [
+            'seed-in-the-fixtures-pool',
+            'fixtures/seed-in-the-fixtures-pool.spec.yaml:3: seed: reads seeds/, and "../../../fixtures/seeds/catalog.sql" names fixtures/ — put the file in ./seeds/ beside the document, or in specs/seeds/ if several leaves share it (C24)',
+        ],
+        [
             'capture-before-it-exists',
             'fixtures/capture-before-it-exists.spec.yaml:6: "{{sessionId}}" is referenced before it exists',
         ],

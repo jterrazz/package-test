@@ -44,7 +44,7 @@ Every key that names the disk takes a path relative to the document, spelled in 
 | `intercept:` | `contracts/` | a module (`.ts`, `.js`)         |
 
 - **Role** — a path whose first ground folder is not the one its key reads is refused by the grammar, on its line, so the checker (`d4b-spec-shape`) and the runner refuse the same document (C24's law, for data).
-- **Locality** — a path leaves its leaf only into the shared pool, `specs/fixtures/` (C15).
+- **Locality** — a path leaves its leaf only into the specs root's own ground — `<specs>/fixtures/`, `<specs>/seeds/`, `<specs>/requests/`, `<specs>/expected/` — the folder of its key's role (C15, C24): `seed: [../../seeds/catalog.sql, ./seeds/delta.sql]` lays the shared base, then the leaf's delta.
 - **Existence** — every path names an entry git does not ignore, of the kind its key reads (C8); at run time a missing one is refused with what it resolved to.
 - **Liveness** — a ground file a document names is referenced, exactly as a `file()` literal references it (C9, C14).
 

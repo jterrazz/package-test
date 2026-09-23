@@ -61,6 +61,17 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         expect(result.stderr).toMatch(file('./expected/c9-dead-pool.txt'));
     });
 
+    test("reports a dead entry of the specs root's seeds/, the shared one kept", async () => {
+        // Given - a root seed two leaves share, and one no document names
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/c9-dead-root-seed/'))
+            .exec('.');
+
+        // Then - the unnamed seed is dead, the shared one is not
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(file('./expected/c9-dead-root-seed.txt'));
+    });
+
     test('a golden named by a template literal in a table is a reference, not silence', async () => {
         // Given - the form chapter 06 prescribes for the golden half: one row per case, `toMatch(file(`./expected/${name}.json`))`, three goldens beside the test
         const result = await cli

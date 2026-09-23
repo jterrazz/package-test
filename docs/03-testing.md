@@ -60,7 +60,8 @@ specs/
 │       ├── sending.spec.ts
 │       ├── requests/                 # ground: complete requests, *.http
 │       └── expected/                 # ground: every golden it reads
-└── fixtures/                         # the SHARED pool, reached by ../../fixtures/…
+└── fixtures/                         # the SHARED file state, reached by ../../fixtures/…;
+                                      # seeds/, requests/, expected/ beside it share the same way
 ```
 
 **A domain shared by two facets carries the same name in both.** Seven
@@ -110,7 +111,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 57    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 118   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 120   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 156   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 24    |
 
@@ -257,7 +258,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 2   | 1    | —   | 1           | 1       | —      | 1         | —      |
 | `.intercept()` | 4   | 2    | —   | 1           | 1       | 0      | 4         | —      |
-| `.seed()`      | 14  | 3    | 1   | 3           | —       | —      | —         | —      |
+| `.seed()`      | 16  | 3    | 1   | 3           | —       | —      | —         | —      |
 | `.headers()`   | 2   | —    | —   | —           | 1       | —      | —         | —      |
 | `.fixture()`   | —   | —    | 6   | —           | —       | —      | —         | —      |
 | `.env()`       | —   | —    | 1   | —           | —       | —      | —         | —      |
@@ -268,7 +269,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability   | api | jobs | cli | integration | website | mobile | component | module |
 | ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.get()`     | 23  | —    | —   | —           | —       | —      | —         | —      |
+| `.get()`     | 25  | —    | —   | —           | —       | —      | —         | —      |
 | `.post()`    | 10  | —    | —   | —           | —       | —      | —         | —      |
 | `.put()`     | 2   | —    | —   | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
@@ -334,7 +335,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`     | 31  | —    | —   | —           | —       | —      | —         | —      |
+| `.response`     | 33  | —    | —   | —           | —       | —      | —         | —      |
 | `.status`       | 4   | —    | —   | —           | 2       | —      | —         | —      |
 | `.table()`      | 12  | 8    | 1   | 1           | —       | —      | —         | —      |
 | `.file()`       | 1   | —    | 5   | 1           | —       | —      | —         | —      |

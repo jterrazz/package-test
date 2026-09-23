@@ -18,6 +18,17 @@ const MODULE_TEST = '/repo/src/report/report.test.ts';
 ruleTester.run('c24-ground-role', c24GroundRole as unknown as OxlintRule, {
     invalid: [
         { code: "api.seed(file('./fixtures/rows.sql'));", errors: 1, filename: SPEC },
+        // The fixtures pool holds file state: a shared seed goes to the specs root's `seeds/`.
+        {
+            code: "api.seed(file('../../fixtures/seeds/rows.sql'));",
+            errors: [
+                {
+                    message:
+                        "seed() reads seeds/, and file('../../fixtures/seeds/rows.sql') names fixtures/ — put the file in ./seeds/ beside the test, or in specs/seeds/ if several leaves share it.",
+                },
+            ],
+            filename: SPEC,
+        },
         { code: "api.request(file('./expected/create.http'));", errors: 1, filename: SPEC },
         { code: "api.post('/orders', file('./fixtures/order.json'));", errors: 1, filename: SPEC },
         { code: "cli.fixture(directory('./expected/shop/'));", errors: 1, filename: SPEC },
@@ -48,6 +59,9 @@ ruleTester.run('c24-ground-role', c24GroundRole as unknown as OxlintRule, {
     ],
     valid: [
         { code: "api.seed(file('./seeds/rows.sql'), { database: 'db' });", filename: SPEC },
+        { code: "api.seed(file('../../seeds/rows.sql'), { database: 'db' });", filename: SPEC },
+        { code: "api.request(file('../../requests/create.http'));", filename: SPEC },
+        { code: "expect(r.response).toMatch(file('../../expected/list.http'));", filename: SPEC },
         { code: "api.request(file('./requests/create.http'));", filename: SPEC },
         { code: "api.put('/orders/1', file('./requests/order.json'));", filename: SPEC },
         { code: "cli.fixture(directory('../../fixtures/shop/'));", filename: SPEC },

@@ -484,7 +484,7 @@ function readFixtures(context: Context, node: Node | null): SpecFixture[] {
             throw new SpecSyntaxError(
                 context.fileName,
                 line,
-                `fixture: "${value}" reaches no ${GROUND_FIXTURES}/ folder — file state lives in ./${GROUND_FIXTURES}/ beside the document, or in the pool (C24)`,
+                `fixture: "${value}" reaches no ${GROUND_FIXTURES}/ folder — file state lives in ./${GROUND_FIXTURES}/ beside the document, or in specs/${GROUND_FIXTURES}/ if several leaves share it (C24)`,
             );
         }
         return { line, path: value };
@@ -678,8 +678,12 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
             ? found === undefined && value.split('/').includes(CONTRACTS_FOLDER)
             : found === role.folder;
     if (!reaches) {
+        const where =
+            role.folder === CONTRACTS_FOLDER
+                ? 'the folder its key reads'
+                : `./${role.folder}/ beside the document, or in specs/${role.folder}/ if several leaves share it`;
         at(
-            `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in the folder its key reads (C24)`,
+            `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (C24)`,
         );
     }
     if (

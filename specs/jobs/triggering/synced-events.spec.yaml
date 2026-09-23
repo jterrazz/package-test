@@ -1,7 +1,7 @@
 kind: jobs
 description: the job copies one event per seeded user
 seed:
-    - { file: ./seeds/two-users.sql, database: db }
+    - { file: ../../seeds/two-users.sql, database: db }
 trigger: sync-events
 tables:
     events:

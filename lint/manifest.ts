@@ -315,10 +315,10 @@ export const RULE_DOCS = {
     'c24-ground-role': {
         channel: 'statique',
         convention:
-            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's path keys — `fixture:`, `seed:`, `request:`, `body:`, `response:`, `intercept:` (under `contracts/`) — are held to the same folders by its grammar (`d4b-spec-shape`).",
+            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The same four folders at the specs root hold what several leaves share, so a shared seed is `<specs>/seeds/x.sql` (`../../seeds/x.sql`), never `<specs>/fixtures/seeds/x.sql`. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's path keys — `fixture:`, `seed:`, `request:`, `body:`, `response:`, `intercept:` (under `contracts/`) — are held to the same folders by its grammar (`d4b-spec-shape`).",
         facet: 'model',
         family: 'C',
-        fix: 'Move the file into the folder its verb reads, and spell the path through it.',
+        fix: "Move the file into the folder its verb reads — the leaf's own, or the specs root's when several leaves share it — and spell the path through it.",
         id: 'C24',
         rationale:
             'Four reserved names are a vocabulary only if each means one thing: a seed parked in `fixtures/` or a golden in `requests/` makes the folder lie about what it holds, and the next reader trusts the folder.',
@@ -1085,7 +1085,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the files every path key of it names.',
+            "No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A `<case>.spec.yaml` references the files every path key of it names.",
         facet: 'model',
         family: 'C',
         fix: 'Reference it from the spec it stands under, or delete it.',
@@ -1098,10 +1098,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A pool fixture is SHARED, or it is local: a directory of the pool `<specs>/fixtures/` reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/fixtures/<name>/`, named by the path from the leaf (`./fixtures/<name>/`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved — a `git mv` in a work tree, so it keeps its history — and the literals rewritten.',
+            "A pool entry is SHARED, or it is local: an entry — a file or a directory — of the specs root's own ground, `<specs>/fixtures/`, `seeds/`, `requests/` or `expected/`, reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, in its folder of the same role (`<leaf>/seeds/<name>`), named by the path from the leaf (`./seeds/<name>`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the entry is moved — a `git mv` in a work tree, so it keeps its history — and the literals rewritten.",
         facet: 'model',
         family: 'C',
-        fix: 'Run `jterrazz-test-check <root> --fix`; it moves the directory with `git mv` (a plain rename outside git) and rewrites what named it.',
+        fix: 'Run `jterrazz-test-check <root> --fix`; it moves the entry with `git mv` (a plain rename outside git) and rewrites what named it.',
         id: 'C14',
         name: 'c14-pool-fixture-shared',
         rationale:
@@ -1111,10 +1111,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A path leaves its leaf only into the pool: a path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory nor under `<specs>/fixtures/`, is an error — ground shared by several leaves goes in the pool. A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too.",
+            "A path leaves its leaf only into the specs root's own ground: a path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory nor under one of `<specs>/fixtures/`, `<specs>/seeds/`, `<specs>/requests/`, `<specs>/expected/` — the four roles, one level up — is an error; ground shared by several leaves goes there, in the folder of its role (C24 judges which). A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too.",
         facet: 'model',
         family: 'C',
-        fix: "Copy it under this leaf's own ground, or promote it to the pool at `specs/fixtures/`.",
+        fix: "Copy it under this leaf's own ground, or promote it to the specs root's folder of its role — `<specs>/seeds/` for a seed, `<specs>/fixtures/` for file state.",
         id: 'C15',
         name: 'c15-local-fixture-reach',
         rationale:

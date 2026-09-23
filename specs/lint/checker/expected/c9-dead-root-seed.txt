@@ -1,0 +1,3 @@
+specs/seeds/orphan.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references orphan.sql
+
+conventions checker: 1 error(s) found under {{workdir}}
