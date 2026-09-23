@@ -10,7 +10,7 @@ describe('lint — d4b spec block scalar (CONVENTIONS D4b)', () => {
     test('rejects a stream written as a quoted string', async () => {
         // Given - a stdout: spelled with backslash-n escapes
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d4b-spec-block-scalar/'))
+            .fixture(directory('./fixtures/lint-violations/d4b-spec-block-scalar/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -21,7 +21,7 @@ describe('lint — d4b spec block scalar (CONVENTIONS D4b)', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

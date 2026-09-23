@@ -9,7 +9,7 @@ describe('lint — d4b http first line (CONVENTIONS D4b)', () => {
     test('rejects a requests/*.http without a request line', async () => {
         // Given - a request fixture whose first line is not "METHOD /path"
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d4b-http-first-line/'))
+            .fixture(directory('./fixtures/lint-violations/d4b-http-first-line/'))
             .exec('.');
 
         // Then - the checker fails with the full D4b grammar diagnostic
@@ -20,7 +20,7 @@ describe('lint — d4b http first line (CONVENTIONS D4b)', () => {
     test('accepts well-formed request and status lines', async () => {
         // Given - the compliant twin (request line + status line)
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d4b-http-first-line-ok/'))
+            .fixture(directory('./fixtures/lint-violations/d4b-http-first-line-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

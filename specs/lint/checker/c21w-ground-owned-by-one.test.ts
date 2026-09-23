@@ -10,7 +10,7 @@ describe('lint — c21w-ground-owned-by-one (CONVENTIONS C21)', () => {
     test('warns on ground a single spec of the leaf reads', async () => {
         // Given - a tree violating C21
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c21w-ground-owned-by-one/'))
+            .fixture(directory('./fixtures/lint-violations/c21w-ground-owned-by-one/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
@@ -21,7 +21,7 @@ describe('lint — c21w-ground-owned-by-one (CONVENTIONS C21)', () => {
     test('accepts ground that sits beside the spec that reads it', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c21w-ground-owned-by-one-ok/'))
+            .fixture(directory('./fixtures/lint-violations/c21w-ground-owned-by-one-ok/'))
             .exec('specs');
 
         // Then - the clean summary

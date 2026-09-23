@@ -10,7 +10,7 @@ describe('lint — c8 spec registered name (CONVENTIONS C8)', () => {
     test('rejects env and serve names no runner registers', async () => {
         // Given - a typo in both registries, beside a specification file that has neither
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c8-spec-registered-name/'))
+            .fixture(directory('./fixtures/lint-violations/c8-spec-registered-name/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -21,7 +21,7 @@ describe('lint — c8 spec registered name (CONVENTIONS C8)', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

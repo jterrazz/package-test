@@ -10,7 +10,7 @@ describe('lint — j4 spec description unique (CONVENTIONS J4)', () => {
     test('rejects two documents of one directory sharing a description', async () => {
         // Given - two .spec.yaml files whose description: is the same sentence
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/j4-spec-description-unique/'))
+            .fixture(directory('./fixtures/lint-violations/j4-spec-description-unique/'))
             .exec('.');
 
         // Then - the second one is named, with the first it collides with
@@ -21,7 +21,7 @@ describe('lint — j4 spec description unique (CONVENTIONS J4)', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

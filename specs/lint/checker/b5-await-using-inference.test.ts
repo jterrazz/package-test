@@ -9,7 +9,7 @@ describe('lint — b5 await-using inference (CONVENTIONS B5)', () => {
     test('rejects a docker runner result bound without await using', async () => {
         // Given - a docker-aware spec and a test binding its result with const
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/b5-await-using-inference/'))
+            .fixture(directory('./fixtures/lint-violations/b5-await-using-inference/'))
             .exec('.');
 
         // Then - the checker fails with the full diagnostic naming the runner
@@ -20,7 +20,7 @@ describe('lint — b5 await-using inference (CONVENTIONS B5)', () => {
     test('accepts a docker runner result bound with await using', async () => {
         // Given - the compliant twin (await using)
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/b5-await-using-inference-ok/'))
+            .fixture(directory('./fixtures/lint-violations/b5-await-using-inference-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

@@ -14,7 +14,28 @@ describe('lintReport — a report as a golden keeps it', () => {
 
         // Then - one line per diagnostic, nothing else
         expect(lintReport(report)).toBe(
-            'src/util.test.ts:1:1  jterrazz(i2-sibling-test-naming)\nsrc/a.ts:3:7  eslint(no-debugger)\n',
+            'src/a.ts:3:7  eslint(no-debugger)\nsrc/util.test.ts:1:1  jterrazz(i2-sibling-test-naming)\n',
+        );
+    });
+
+    test('orders the lines by file, line and column, whatever order the linter printed them in', () => {
+        // Given - the order oxlint's threads finished in: a later file first, line 10 before line 2
+        const report = [
+            'specs/b.ts:1:1: x [Error/jterrazz(c4-contract-shape)]',
+            'specs/a.ts:10:3: x [Error/jterrazz(c4-contract-shape)]',
+            'specs/a.ts:2:9: x [Error/jterrazz(c4-contract-shape)]',
+            'specs/a.ts:2:4: x [Error/jterrazz(c4-contract-shape)]',
+        ].join('\n');
+
+        // Then - the order a reader walks the tree in, numbers read as numbers
+        expect(lintReport(report)).toBe(
+            [
+                'specs/a.ts:2:4  jterrazz(c4-contract-shape)',
+                'specs/a.ts:2:9  jterrazz(c4-contract-shape)',
+                'specs/a.ts:10:3  jterrazz(c4-contract-shape)',
+                'specs/b.ts:1:1  jterrazz(c4-contract-shape)',
+                '',
+            ].join('\n'),
         );
     });
 

@@ -14,7 +14,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
     test('rejects a case name that only repeats its directory', async () => {
         // Given - specs/rm/rm.spec.yaml
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c12-spec-file-name/'))
+            .fixture(directory('./fixtures/lint-violations/c12-spec-file-name/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -25,7 +25,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
@@ -39,7 +39,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
     test('renames a `.test.ts` that sits under a facet folder', async () => {
         // Given - a tree holding `specs/api/users/creation.test.ts`
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c12-spec-placement/'))
+            .fixture(directory('./fixtures/lint-violations/c12-spec-placement/'))
             .exec('specs');
 
         // Then - the facet folder already says what it specifies; only the word is wrong
@@ -50,7 +50,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
     test('renames the spec, and leaves the two files that are not its own', async () => {
         // Given - the same tree, where `specs/build/` is a repository suite and `specs/api/helpers/normalize.test.ts` reaches no runner
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c12-spec-placement/'))
+            .fixture(directory('./fixtures/lint-violations/c12-spec-placement/'))
             .exec('specs --fix');
 
         // Then - one rename; the glob and the literal entry it broke, and nothing else: not the commented-out glob, not the `src/` one whose files it never touched, not the repository suite's
@@ -65,7 +65,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
     test("renames under a tree that is one facet's whole, with no facet level", async () => {
         // Given - a tree whose runner sits at its ROOT: the folders below it are domains, not facets
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c12-spec-rooted-facet/'))
+            .fixture(directory('./fixtures/lint-violations/c12-spec-rooted-facet/'))
             .exec('specs');
 
         // Then - the spec is named, and the ground module's own test beside its module is not

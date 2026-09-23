@@ -10,7 +10,7 @@ describe('lint — j3w spec empty assertion (CONVENTIONS J3)', () => {
     test('warns about a stream that is only {{any}}', async () => {
         // Given - a run that executes and proves nothing
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/j3w-spec-empty-assertion/'))
+            .fixture(directory('./fixtures/lint-violations/j3w-spec-empty-assertion/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -21,7 +21,7 @@ describe('lint — j3w spec empty assertion (CONVENTIONS J3)', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

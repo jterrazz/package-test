@@ -10,7 +10,7 @@ describe('lint — d4b spec shape (CONVENTIONS D4b)', () => {
     test('rejects a key outside the closed set', async () => {
         // Given - a document carrying a `when:` line
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d4b-spec-shape/'))
+            .fixture(directory('./fixtures/lint-violations/d4b-spec-shape/'))
             .exec('.');
 
         // Then - the grammar the runner parses is the grammar the lint enforces
@@ -21,7 +21,7 @@ describe('lint — d4b spec shape (CONVENTIONS D4b)', () => {
     test('the same grammar is what the compliant twin satisfies', async () => {
         // Given - a well-formed document
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

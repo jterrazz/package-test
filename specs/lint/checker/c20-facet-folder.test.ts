@@ -10,7 +10,7 @@ describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
     test('rejects a facet folder with no specification', async () => {
         // Given - a tree violating C20
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c20-facet-folder/'))
+            .fixture(directory('./fixtures/lint-violations/c20-facet-folder/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
@@ -21,7 +21,7 @@ describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
     test('accepts a facet folder holding the runner it promises', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c20-facet-folder-ok/'))
+            .fixture(directory('./fixtures/lint-violations/c20-facet-folder-ok/'))
             .exec('specs');
 
         // Then - the clean summary

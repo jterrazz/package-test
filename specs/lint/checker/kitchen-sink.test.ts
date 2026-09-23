@@ -12,7 +12,7 @@ describe('lint — checker kitchen-sink (CONVENTIONS D11)', () => {
     test('surfaces every diagnostic in one run', async () => {
         // Given - a specs tree that violates all of the checker passes
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/checker-kitchen-sink/'))
+            .fixture(directory('./fixtures/lint-violations/checker-kitchen-sink/'))
             .exec('.');
 
         // Then - the whole diagnostic block is asserted (the D10 line's echoed {{uuid}} token is covered by {{string}}; a literal token in the golden would itself be read as a placeholder by the grammar — see D4)

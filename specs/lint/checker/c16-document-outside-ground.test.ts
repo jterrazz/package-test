@@ -10,7 +10,7 @@ describe('lint — c16-document-outside-ground (CONVENTIONS C16)', () => {
     test('rejects a document filed under ground', async () => {
         // Given - a tree violating C16
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c16-document-outside-ground/'))
+            .fixture(directory('./fixtures/lint-violations/c16-document-outside-ground/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
@@ -21,7 +21,7 @@ describe('lint — c16-document-outside-ground (CONVENTIONS C16)', () => {
     test('accepts a document beside the test that runs it', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('specs');
 
         // Then - the clean summary

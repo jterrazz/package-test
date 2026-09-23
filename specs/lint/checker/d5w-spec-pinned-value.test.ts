@@ -10,7 +10,7 @@ describe('lint — d5w spec pinned value (CONVENTIONS D5)', () => {
     test('warns about a timestamp no fixture fixed', async () => {
         // Given - a golden spelling an ISO-8601 instant out
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d5w-spec-pinned-value/'))
+            .fixture(directory('./fixtures/lint-violations/d5w-spec-pinned-value/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -21,7 +21,7 @@ describe('lint — d5w spec pinned value (CONVENTIONS D5)', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout

@@ -9,7 +9,10 @@
  * problem matcher parses: `<file>:<line>:<column>: <severity>
  * <plugin>(<rule>): <message>`. Every other line — a tally, a summary, a blank
  * line, a notice — is dropped, so a reworded message or summary moves no
- * golden, and a run with no diagnostic normalises to the empty text.
+ * golden, and a run with no diagnostic normalises to the empty text. The lines
+ * are ordered by file, line and column: oxlint lints on several threads and
+ * prints files in the order they finish, so its own order is no fact a golden
+ * may hold.
  *
  * It is a `transform`: `specification.cli(bin, { transform: lintReport })`
  * applies it to both streams before every comparison.
@@ -47,6 +50,27 @@ export function lintReport(text: string): string {
     const lines = text
         .split('\n')
         .map(diagnosticOf)
-        .filter((line) => line !== undefined);
+        .filter((line) => line !== undefined)
+        .toSorted(byPosition);
     return lines.length === 0 ? '' : `${lines.join('\n')}\n`;
+}
+
+/** A normalised line's file, line and column, for ordering. */
+function positionOf(line: string): [string, number, number] {
+    const [at = ''] = line.split('  ');
+    const [column = '0', row = '0', ...file] = at.split(':').toReversed();
+    return [file.toReversed().join(':'), Number(row), Number(column)];
+}
+
+/** By file, then line, then column, then rule: the order a reader walks a tree in. */
+function byPosition(a: string, b: string): number {
+    const [fileA, rowA, columnA] = positionOf(a);
+    const [fileB, rowB, columnB] = positionOf(b);
+    if (fileA !== fileB) {
+        return fileA < fileB ? -1 : 1;
+    }
+    if (rowA !== rowB || columnA !== columnB) {
+        return rowA === rowB ? columnA - columnB : rowA - rowB;
+    }
+    return a < b ? -1 : Number(a > b);
 }

@@ -10,7 +10,7 @@ describe('lint — c23-seed-no-clock-read (CONVENTIONS C23)', () => {
     test('rejects every spelling of a clock read, and reads past a comment', async () => {
         // Given - a seed writing `datetime('now', …)`, `CURRENT_TIMESTAMP` and `NOW()`, under a comment that names one of them
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c23-seed-no-clock-read/'))
+            .fixture(directory('./fixtures/lint-violations/c23-seed-no-clock-read/'))
             .exec('specs');
 
         // Then - three findings, one per row, and none for the comment
@@ -21,7 +21,7 @@ describe('lint — c23-seed-no-clock-read (CONVENTIONS C23)', () => {
     test('accepts a seed that states the instants the case is about', async () => {
         // Given - the compliant twin, whose chain pins the run's clock instead
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/c23-seed-no-clock-read-ok/'))
+            .fixture(directory('./fixtures/lint-violations/c23-seed-no-clock-read-ok/'))
             .exec('specs');
 
         // Then - the clean summary

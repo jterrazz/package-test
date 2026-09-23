@@ -10,7 +10,7 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
     test('rejects an unknown token in an expected/ fixture', async () => {
         // Given - a specs tree whose text snapshot uses a token outside the frozen vocabulary
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d4-unknown-token/'))
+            .fixture(directory('./fixtures/lint-violations/d4-unknown-token/'))
             .exec('.');
 
         // Then - the checker fails with the full diagnostic (file, token, frozen vocabulary)
@@ -21,7 +21,7 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
     test('rejects an unknown token in a document stream, never in its description', async () => {
         // Given - a <case>.spec.yaml whose description prose AND whose stdout golden both spell {{widget}} — only a stream carries the grammar
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d4-unknown-token-spec/'))
+            .fixture(directory('./fixtures/lint-violations/d4-unknown-token-spec/'))
             .exec('.');
 
         // Then - one finding, on the stream line: a description is text, not tokens
@@ -32,7 +32,7 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
     test('accepts fixtures using only the frozen vocabulary', async () => {
         // Given - the compliant twin ({{uuid#id}}, {{iso8601}}, {{workdir}})
         const result = await cli
-            .fixture(directory('../../fixtures/lint-violations/d4-unknown-token-ok/'))
+            .fixture(directory('./fixtures/lint-violations/d4-unknown-token-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
