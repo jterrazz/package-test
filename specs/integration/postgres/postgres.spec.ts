@@ -165,4 +165,39 @@ describe('postgres — the handle against a real container', () => {
         expect(result.error.text).toContain('init script failed');
         expect(result.error.text).toContain('postgres/init.sql');
     });
+
+    // RUNTIME G2 — two workers on one container never share a row.
+    test('two workers take two schemas, and a row one writes the other never reads', async () => {
+        // Given - two handles on the runner's container, acquired by two workers, one of them seeding
+        const result = await integration.call(async ({ db }) => {
+            const container = new URL(db.connectionString);
+            container.searchParams.delete('options');
+            const [first, second] = [postgres(), postgres()];
+            await Promise.all(
+                [first, second].map(async (handle, index) => {
+                    handle.connectionString = container.toString();
+                    handle.started = true;
+                    await handle.isolation().acquire(String(7 + index));
+                }),
+            );
+
+            await first.seed(
+                "INSERT INTO \"users\" (name, email) VALUES ('Alice', 'alice@test.com')",
+            );
+            const rows = {
+                first: await first.query('users', ['name']),
+                second: await second.query('users', ['name']),
+            };
+            const schemas = [first, second].map((handle) =>
+                new URL(handle.connectionString).searchParams.get('options'),
+            );
+
+            await first.isolation().release();
+            await second.isolation().release();
+            return { rows, schemas };
+        });
+
+        // Then - each worker has its own schema, and the row stayed in the one that wrote it
+        expect(result.value).toMatch(file('./expected/two-workers.json'));
+    });
 });

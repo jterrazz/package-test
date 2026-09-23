@@ -1,0 +1,14 @@
+{
+    "rows": {
+        "first": [
+            [
+                "Alice"
+            ]
+        ],
+        "second": []
+    },
+    "schemas": [
+        "-c search_path=worker_7,public",
+        "-c search_path=worker_8,public"
+    ]
+}
