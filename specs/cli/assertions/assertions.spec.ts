@@ -128,15 +128,19 @@ describe('command — stdout accessor', () => {
     // RUNTIME D3 — every `toMatch` subject resolves against `expected/`; the
     // Refusal names the path it looked at, and only `.request()` reads
     // `requests/`.
-    test('toMatch on a missing stream fixture mentions TEST_UPDATE', async () => {
+    test('toMatch on a missing stream fixture names the path it resolved, and TEST_UPDATE', async () => {
         // Given - a fixture name that was never created
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
 
-        // Then - the failure explains how to create the fixture frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
-        expect(() => {
+        // Then - the failure names the path it resolved and explains how to create the fixture frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
+        const message = catchMessage(() => {
             // checker-disable-next-line c8 -- negative spec: the missing fixture IS the behaviour under test
             expect(result.stdout).toMatch(file('./expected/never-created.txt'), { frozen: true });
-        }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
+        });
+        expect(message).toContain(
+            `does not exist at ${resolve(EXPECTED_DIR, 'never-created.txt')}`,
+        );
+        expect(message).toMatch(/TEST_UPDATE=1/u);
     });
 
     // RUNTIME C5 — a slash in a fixture name is a SUBFOLDER of `expected/`,
@@ -461,6 +465,36 @@ describe('command — transform option', () => {
         // Then - pristine output preserved, and the value a reader compares is the transformed one
         expect(result.stdout.raw).toBe('\u001B[31mred\u001B[0m plain \u001B[1mbold\u001B[0m\n');
         expect(result.stdout.text).toBe('red plain bold\n');
+    });
+
+    test('.text applies a transform that is not the default one, after the ANSI strip', async () => {
+        // Given - a runner whose transform drops the word " plain", and a coloured line
+        const result = await asymmetricCli.exec('ansi');
+
+        // Then - the capture is untouched, and the text a reader compares is stripped then transformed
+        expect(result.stdout.raw).toBe('\u001B[31mred\u001B[0m plain \u001B[1mbold\u001B[0m\n');
+        expect(result.stdout.text).toBe('red bold\n');
+    });
+
+    test('toString and valueOf give the comparable text, not the capture', async () => {
+        // Given - the same run: ANSI in the capture, and a transform
+        const result = await asymmetricCli.exec('ansi');
+
+        // Then - every coercion reads what .text reads
+        expect(String(result.stdout)).toBe('red bold\n');
+        expect(result.stdout.toString()).toBe('red bold\n');
+        expect(result.stdout.valueOf()).toBe('red bold\n');
+    });
+
+    test('.grep() cuts the capture before the transform, and what it keeps reads through it', async () => {
+        // Given - a pattern the transform removes from the text, but the capture holds
+        const result = await asymmetricCli.exec('ansi');
+        const kept = result.stdout.grep('plain');
+
+        // Then - the block is cut from the colour-free capture, before the transform, and its text reads through the transform like the stream's
+        expect(kept.raw).toBe('red plain bold\n');
+        expect(kept.text).toBe('red bold\n');
+        expect(result.stdout.grep('absent').text).toBe('');
     });
 
     test('transform only runs on actual, never on fixture', async () => {
