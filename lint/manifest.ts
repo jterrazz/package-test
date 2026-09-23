@@ -281,13 +281,13 @@ export const RULE_DOCS = {
     'c4-contract-shape': {
         channel: 'statique',
         convention:
-            'Under `specs/**/contracts/`: the ROOT carries only `*.contracts.ts` facades (a default export built by `defineContracts(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.contracts` module, or a call to it — or a call to a builder of the file declared to return `Contracts`; named exports are scenarios; no type is read, so a builder is judged by where it comes from or what it declares) and the provider folders `http` | `openai` | `anthropic`. A unit contract is `<provider>/<kebab-name>.ts` with an `export default defineContract(...)` (or a factory returning one), and its `request` builder must name the provider of its own folder. A provider folder is flat and holds only `*.ts` and `*.response.json`.',
+            'Under `specs/**/contracts/`: the ROOT carries only `*.contracts.ts` facades and the provider folders `http` | `openai` | `anthropic`. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineContracts(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.contracts` module, or a call to it — or a call to a builder of the file declared to return `Contracts` (no type is read, so a builder is judged by where it comes from or what it declares). A unit contract is `<provider>/<kebab-name>.ts` with an `export default defineContract(...)` (or a factory returning one), and its `request` builder must name the provider of its own folder. A provider folder is flat and holds only `*.ts` and `*.response.json`.',
         facet: 'model',
         family: 'C',
         fix: 'Move the file to the half it belongs to: a facade at the root, a unit under its provider.',
         id: 'C4',
         rationale:
-            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the provider — filenames go back to being domain words, and bulky data sits beside the contract that serves it.',
+            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the provider — filenames go back to being domain words, and bulky data sits beside the contract that serves it. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
         reach: 'contract',
     },
     'c6-tomatch-extension': {

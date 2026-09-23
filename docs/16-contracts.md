@@ -118,8 +118,8 @@ The file layout follows the same split: a **public facade** per feature, **inter
 specs/<facet>/<feature>/
 ├── <feature>.test.ts
 └── contracts/
-    ├── newsroom.contracts.ts              PUBLIC — default export = the world,
-    │                                      named exports = its scenarios
+    ├── newsroom.contracts.ts              PUBLIC — named exports = the world
+    │                                      and its scenarios
     ├── http/
     │   ├── events.ts                      a unit contract
     │   ├── events.response.json           the payload it serves
@@ -135,7 +135,7 @@ specs/<facet>/<feature>/
 The rules, enforced by [C4, C10 and C11](19-linting.md):
 
 - The **root** holds only `*.contracts.ts` facades and the provider directories `http`, `openai`, `anthropic`. The folder carries the provider — filenames drop it and go back to being business names.
-- A facade default-exports a `defineContracts(...)` composition; its **named exports are scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world. A facade may also default-export a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.contracts.js` — or a call to a builder it declares to return `Contracts`; C4 judges the default by where its builder comes from, since the linter reads no types.
+- A facade **exports its builders and sets by name** — the world (`export const newsroom = defineContracts(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineContracts(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.contracts.js` — or a call to a builder it declares to return `Contracts`; C4 judges the default by where its builder comes from, since the linter reads no types.
 - A unit contract is `<provider>/<kebab-name>.ts` and default-exports `defineContract(...)` or a factory returning one. Its `request` builder must name its own folder.
 - Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its contract: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
 - **Tests import only `*.contracts.ts`.** Provider folders are internal — reaching into one from a test is an error (C10). A scenario belongs in the facade, not in the test.
@@ -150,9 +150,7 @@ import { defineContracts } from '@jterrazz/test';
 import articleGone from './http/article-gone.js';
 import events from './http/events.js';
 
-const newsroom = defineContracts(events);
-
-export default newsroom;
+export const newsroom = defineContracts(events);
 
 export const withArticleGone = (id: string) => newsroom.with(articleGone(id));
 ```
@@ -184,7 +182,7 @@ import { http } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
-import newsroom from './contracts/newsroom.contracts.js';
+import { newsroom } from './contracts/newsroom.contracts.js';
 
 test('serves the declared world', async () => {
     // Given - a one-off inline pair alongside the feature's world

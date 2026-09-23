@@ -188,12 +188,39 @@ function namesComposition(declaration: AstNode | undefined, names: ReadonlySet<s
     return name !== undefined && names.has(name);
 }
 
-/** The facade: `<kebab>.contracts.ts`, default-exporting a composition. */
+/** Does this export declaration export a value by a name of its own — never `default`, never a type alone? */
+function exportsByName(node: AstNode): boolean {
+    if (node.exportKind === 'type') {
+        return false;
+    }
+    if (node.type === 'ExportAllDeclaration') {
+        return true;
+    }
+    return child(node, 'declaration') !== undefined || !exportsDefault(node);
+}
+
+/** Is this a call that composes a world — `defineContracts(…)`, or a `.with(…)` on one? */
+function composes(node: AstNode): boolean {
+    if (node.type !== 'CallExpression') {
+        return false;
+    }
+    const callee = child(node, 'callee');
+    return (
+        (callee?.type === 'Identifier' && callee.name === 'defineContracts') ||
+        (callee !== undefined && memberPropertyName(callee) === 'with')
+    );
+}
+
+/**
+ * The facade: `<kebab>.contracts.ts`, exporting its builders and sets by
+ * name — and, when it has a default export, a composition there.
+ */
 function checkComposite(context: RuleContext, program: AstNode, base: string): void {
     if (!COMPOSITE_FILE.test(base)) {
         context.report({ data: { base }, messageId: 'rootFile', node: program });
         return;
     }
+    let named = false;
     let hasDefault = false;
     let composed = false;
     let declaration: AstNode | undefined;
@@ -204,6 +231,7 @@ function checkComposite(context: RuleContext, program: AstNode, base: string): v
             hasDefault = true;
             declaration = child(node, 'declaration');
         } else if (node.type === 'ExportAllDeclaration' || node.type === 'ExportNamedDeclaration') {
+            named = exportsByName(node) || named;
             if (exportsDefault(node)) {
                 hasDefault = true;
                 // `export { default } from './other.contracts.js'` — a
@@ -211,19 +239,13 @@ function checkComposite(context: RuleContext, program: AstNode, base: string): v
                 composed =
                     stringValue(node.source as AstNode | undefined) !== undefined || composed;
             }
-        } else if (node.type === 'CallExpression') {
-            const callee = node.callee as AstNode | undefined;
-            if (
-                (callee?.type === 'Identifier' && callee.name === 'defineContracts') ||
-                (callee !== undefined && memberPropertyName(callee) === 'with')
-            ) {
-                composed = true;
-            }
+        } else if (composes(node)) {
+            composed = true;
         }
     });
-    if (!hasDefault) {
-        context.report({ data: { base }, messageId: 'missingComposite', node: program });
-    } else if (!composed && !namesComposition(declaration, names)) {
+    if (!hasDefault && !named) {
+        context.report({ data: { base }, messageId: 'exportsNothing', node: program });
+    } else if (hasDefault && !composed && !namesComposition(declaration, names)) {
         context.report({ data: { base }, messageId: 'notDefineContracts', node: program });
     }
 }
@@ -272,8 +294,9 @@ function checkUnit(context: RuleContext, program: AstNode, base: string, provide
 
 /**
  * CONVENTIONS C4 — the structure of a feature's `contracts/` tree. The ROOT
- * holds only `*.contracts.ts` facades (default export = a `defineContracts`
- * composition, named exports = scenario factories) and the provider
+ * holds only `*.contracts.ts` facades (their builders and sets exported by
+ * name; a default export, when there is one, a `defineContracts`
+ * composition) and the provider
  * directories `http` / `openai` / `anthropic`. A provider directory holds
  * `<kebab>.ts` unit contracts (default export = `defineContract(...)` or a
  * factory returning one) plus their sibling data (`*.response.json`,
@@ -337,8 +360,8 @@ export const c4ContractShape: LintRule = {
                 'Contract unit "{{base}}" must be named <kebab-name>.ts — the folder already carries the provider.',
             badProviderDir:
                 'contracts/{{entry}}/ is not a provider directory — a contracts/ root holds only http/, openai/, anthropic/ and *.contracts.ts files.',
-            missingComposite:
-                'Contract facade "{{base}}" has no default export — it must default-export the composed world.',
+            exportsNothing:
+                'Contract facade "{{base}}" exports nothing — a facade exports its builders and sets by name.',
             missingDefault:
                 'Contract unit "{{base}}" has no default export — a unit default-exports `defineContract(...)` or a factory returning one.',
             notDefineContract:

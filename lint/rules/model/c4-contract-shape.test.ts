@@ -30,10 +30,10 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
             errors: [{ messageId: 'rootFile' }],
             filename: `${FEATURE}/latest.ts`,
         },
-        // A facade with no default export.
+        // A facade exporting nothing — a type alone is no builder.
         {
-            code: `import { defineContracts } from '@jterrazz/test';\nconst world = defineContracts();`,
-            errors: [{ messageId: 'missingComposite' }],
+            code: `import { defineContracts } from '@jterrazz/test';\nconst world = defineContracts();\nexport type World = typeof world;`,
+            errors: [{ messageId: 'exportsNothing' }],
             filename: FACADE,
         },
         // A default export that is not a composition.
@@ -100,6 +100,11 @@ ruleTester.run('c4-contract-shape', c4ContractShape as unknown as OxlintRule, {
         // The canonical facade: composed default + a named scenario factory.
         {
             code: `import { defineContracts } from '@jterrazz/test';\nimport events from './http/events.js';\nimport gone from './http/article-gone.js';\nconst world = defineContracts(events);\nexport default world;\nexport const withArticleGone = (id: string) => world.with(gone(id));`,
+            filename: FACADE,
+        },
+        // A facade with no default: its builder and its set exported by name.
+        {
+            code: `import { defineContracts } from '@jterrazz/test';\nimport events from './http/events.js';\nexport const newsroom = defineContracts(events);\nexport function pipeline(options: { ingestion: string }) {\n    return newsroom.with();\n}`,
             filename: FACADE,
         },
         // A composition re-export is a legitimate default.
