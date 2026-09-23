@@ -197,6 +197,7 @@ export class PageResult extends BaseResult {
     get tree(): TextAccessor {
         return new TextAccessor(this.page.tree, 'tree', this.testDir, {
             captures: this.captures,
+            transform: this.config.transform,
         });
     }
 
@@ -204,6 +205,7 @@ export class PageResult extends BaseResult {
     get title(): TextAccessor {
         return new TextAccessor(this.page.title, 'title', this.testDir, {
             captures: this.captures,
+            transform: this.config.transform,
         });
     }
 
