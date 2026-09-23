@@ -465,4 +465,66 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             ].join('\n'),
         );
     });
+
+    test('every text member of a facet compared as a value reads its text, and a value stays a value', () => {
+        // Given - a website, a component and an integration result, each text member compared as a value, beside a call's value
+        const root = tree16({
+            'website/home/_expected/x.txt': '',
+            'website/home/home.spec.ts': [
+                "expect(result.content).toContain('Welcome');",
+                'expect(result.html).toMatch(/<main>/u);',
+                "expect(result.console).not.toContain('error');",
+                "expect(result.errors).toContain('TypeError');",
+                "expect(result.error).toMatch('refused');",
+                "expect(result.title).toContain('Home');",
+                "expect(result.value).toContain('total');",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - the six text members read .text; a value, json as often as text, is left to the reader
+        expect(readFileSync(join(root, 'website/home/home.spec.ts'), 'utf8')).toBe(
+            [
+                "expect(result.content.text).toContain('Welcome');",
+                'expect(result.html.text).toMatch(/<main>/u);',
+                "expect(result.console.text).not.toContain('error');",
+                "expect(result.errors.text).toContain('TypeError');",
+                "expect(result.error.text).toMatch('refused');",
+                "expect(result.title.text).toContain('Home');",
+                "expect(result.value).toContain('total');",
+                '',
+            ].join('\n'),
+        );
+    });
+
+    test('a range directive naming a renamed rule is renamed, and the block it covers keeps its reads', () => {
+        // Given - a 16 tree suppressing D8w by its 16 id over a block, in both comment forms
+        const root = tree16({
+            'cli/build/_expected/build.txt': '',
+            'cli/build/build.spec.ts': [
+                '/* oxlint-disable jterrazz/d8w-text-bypass -- asserts the colour codes themselves */',
+                "expect(result.stdout.text).toContain('[31m');",
+                '// oxlint-enable jterrazz/d8w-text-bypass',
+                "expect(result.stderr.text).toContain('[0m');",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the mover runs
+        migrateTo17(root, renameSync);
+
+        // Then - both directives name d8w-raw-bypass, and no line under them moved to .raw: a range covers what it covers, not one line
+        expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
+            [
+                '/* oxlint-disable jterrazz/d8w-raw-bypass -- asserts the colour codes themselves */',
+                "expect(result.stdout.text).toContain('[31m');",
+                '// oxlint-enable jterrazz/d8w-raw-bypass',
+                "expect(result.stderr.text).toContain('[0m');",
+                '',
+            ].join('\n'),
+        );
+    });
 });
