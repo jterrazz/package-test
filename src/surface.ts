@@ -200,6 +200,22 @@ type StreamMarker = { readonly raw: string; readonly streamName: string };
  */
 type StreamIsNoValue = { readonly 'a stream is compared as its .text': never };
 
+/** Every other result accessor: none is a string, so none is compared as a value. */
+type ValuelessSubject =
+    | ContainerAccessorType
+    | DirectoryAccessorType
+    | FilesystemAccessorType
+    | JsonAccessorType
+    | ResponseAccessorType
+    | TableAccessorType;
+
+/**
+ * What a value matcher's `this` must be on any other result accessor: its
+ * golden is `file()` or `directory()`, a table is asserted by its rows and a
+ * container running — a string or a RegExp matches none of them.
+ */
+type SubjectIsNoValue = { readonly 'a result accessor is matched against its golden': never };
+
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.
 
@@ -239,8 +255,8 @@ declare module 'vitest' {
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**
          * Vitest's `toMatch` for a value (a string or a RegExp, against a
-         * string — a stream is compared as `result.stdout.text`, and handed
-         * whole with a value it does not compile), and the
+         * string — a stream is compared as `result.stdout.text`, and a stream
+         * or any other result accessor handed a value does not compile), and the
          * golden comparison for the disk: `toMatch(file('./expected/help.txt'))`,
          * the extension part of the path (`.http` for `result.response`), or
          * `await expect(result.directory('out')).toMatch(directory('./expected/out/'))`.
@@ -252,7 +268,11 @@ declare module 'vitest' {
          * the behaviour under test.
          */
         toMatch: ((
-            this: T extends StreamMarker ? StreamIsNoValue : unknown,
+            this: T extends StreamMarker
+                ? StreamIsNoValue
+                : T extends ValuelessSubject
+                  ? SubjectIsNoValue
+                  : unknown,
             expected: RegExp | string,
         ) => R) &
             GoldenMatch<T, R>;

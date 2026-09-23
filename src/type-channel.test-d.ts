@@ -178,3 +178,43 @@ export async function streamMatcherRows(): Promise<void> {
     // @ts-expect-error B2 — `toMatchDirectory` is retired: `toMatch(directory(…))` [`Property 'toMatchDirectory' does not exist on type`]
     await expect(out.filesystem).toMatchDirectory('./expected/tree/');
 }
+
+/**
+ * D14 on every other subject: a response, a json and a tree are no string, so
+ * `toMatch` takes their golden — `file()` for the first two, `directory()` for
+ * a tree — and never a value. Handed one, vitest would throw its own opaque
+ * TypeError at run time; the compiler says it here.
+ */
+export async function goldenSubjectMatcherRows(): Promise<void> {
+    const { api } = await specification.api({ server: () => ({}) as never });
+    const { cli } = await specification.cli('./bin.sh');
+    const result = await api.get('/orders/1');
+    const out = await cli.exec();
+    // @ts-expect-error D14 — a response is matched against its file(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    expect(result.response).toMatch(/200/u);
+    // @ts-expect-error D14 — a json is matched against its file(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    expect(out.json).toMatch('{"ok":true}');
+    // @ts-expect-error D14 — a tree is matched against its directory(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    await expect(out.filesystem).toMatch('scaffolded');
+    // @ts-expect-error D14 — a directory is matched against its directory(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    await expect(out.directory('out')).toMatch(/index/u);
+}
+
+/**
+ * D14 on the subjects with no golden: a table is asserted by its rows and a
+ * container running, so neither takes a value `toMatch` — and the subjects
+ * that have a golden take it.
+ */
+export async function assertedSubjectMatcherRows(): Promise<void> {
+    const { api } = await specification.api({ server: () => ({}) as never });
+    const { cli } = await specification.cli('./bin.sh');
+    const result = await api.get('/orders/1');
+    const out = await cli.exec();
+    // @ts-expect-error D14 — a table is asserted by its rows, never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    expect(result.table('orders')).toMatch('1');
+    // @ts-expect-error D14 — a container is asserted running, never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    expect(out.container('db')).toMatch('up');
+    expect(result.response).toMatch(file('./expected/order.http'));
+    expect(out.json).toMatch(file('./expected/out.json'));
+    await expect(out.directory('out')).toMatch(directory('./expected/out/'));
+}

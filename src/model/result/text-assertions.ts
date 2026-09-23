@@ -80,6 +80,7 @@ export const GOLDEN_MATCHER = '@jterrazz/test:golden';
 type Chai = {
     Assertion: { prototype: object };
     util: {
+        flag: (assertion: object, key: 'object') => unknown;
         overwriteMethod: (
             target: object,
             name: string,
@@ -96,9 +97,15 @@ type Chai = {
  * wrapped: `toContain` and every other value matcher are vitest's, on `.text`.
  *
  * Both builds call this, each with the `chai` its `vitest` hands out, after
- * registering the golden under {@link GOLDEN_MATCHER}.
+ * registering the golden under {@link GOLDEN_MATCHER}. `refuseValue` names,
+ * for a subject that is no string and takes no value, what it takes instead:
+ * the types already refuse the call, and a caller past them (JavaScript, a
+ * cast) reads that refusal rather than vitest's "expects to receive a string".
  */
-export function matchThroughGolden(chai: Chai): void {
+export function matchThroughGolden(
+    chai: Chai,
+    refuseValue?: (subject: unknown) => TypeError | undefined,
+): void {
     chai.util.overwriteMethod(
         chai.Assertion.prototype,
         'toMatch',
@@ -107,6 +114,10 @@ export function matchThroughGolden(chai: Chai): void {
                 const golden = this[GOLDEN_MATCHER];
                 if (isDiskTarget(args[0]) && typeof golden === 'function') {
                     return golden.apply(this, args) as unknown;
+                }
+                const refusal = refuseValue?.(chai.util.flag(this, 'object'));
+                if (refusal !== undefined) {
+                    throw refusal;
                 }
                 return vitestToMatch.apply(this, args);
             },

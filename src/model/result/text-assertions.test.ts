@@ -9,12 +9,19 @@ import { GOLDEN_MATCHER, matchThroughGolden } from './text-assertions.js';
  * builds call the same function.
  */
 
-/** A chai whose `toMatch` records who answered. */
 /** What `overwriteMethod` is handed: the original, and the method that replaces it. */
 type Overwrite = (original: (...args: unknown[]) => unknown) => (...args: unknown[]) => unknown;
-function chaiWith(answered: string[]): {
+
+/** A chai whose `toMatch` records who answered, over `subject`. */
+function chaiWith(
+    answered: string[],
+    subject?: unknown,
+): {
     Assertion: { prototype: Record<string, unknown> };
-    util: { overwriteMethod: (target: object, name: string, method: Overwrite) => void };
+    util: {
+        flag: (assertion: object, key: 'object') => unknown;
+        overwriteMethod: (target: object, name: string, method: Overwrite) => void;
+    };
 } {
     const prototype: Record<string, unknown> = {
         [GOLDEN_MATCHER]: () => answered.push('golden'),
@@ -23,6 +30,7 @@ function chaiWith(answered: string[]): {
     return {
         Assertion: { prototype },
         util: {
+            flag: () => subject,
             overwriteMethod: (target, name, method) => {
                 const record = target as Record<string, (...args: unknown[]) => unknown>;
                 const original = record[name];
@@ -34,14 +42,18 @@ function chaiWith(answered: string[]): {
     };
 }
 
+/** The `toMatch` a chai carries once the route is laid over it. */
+function toMatchOf(chai: ReturnType<typeof chaiWith>): (this: unknown, value: unknown) => void {
+    return chai.Assertion.prototype.toMatch as (this: unknown, value: unknown) => void;
+}
+
 describe('matchThroughGolden', () => {
-    /** A chai whose `toMatch` records who answered. */
     test('hands the disk to the golden and every value to vitest, untouched', () => {
         // Given - a chai whose two answers are recorded
         const answered: string[] = [];
         const chai = chaiWith(answered);
         matchThroughGolden(chai);
-        const toMatch = chai.Assertion.prototype.toMatch as (this: unknown, value: unknown) => void;
+        const toMatch = toMatchOf(chai);
 
         // When - a file, a string and a RegExp reach toMatch
         // checker-disable-next-line c8 -- the routing under test hands the path to a recorder: nothing reads the disk
@@ -51,5 +63,25 @@ describe('matchThroughGolden', () => {
 
         // Then - one golden, and two answers that are vitest's own
         expect(answered).toStrictEqual(['golden', 'vitest', 'vitest']);
+    });
+
+    test('refuses a value on a subject the caller names, and still hands that subject the disk', () => {
+        // Given - a chai whose subject the caller refuses any value on
+        const answered: string[] = [];
+        const chai = chaiWith(answered, 'valueless');
+        matchThroughGolden(chai, (subject) =>
+            subject === 'valueless' ? new TypeError('takes toMatch(file(…))') : undefined,
+        );
+        const toMatch = toMatchOf(chai);
+
+        // When - a file reaches toMatch
+        // checker-disable-next-line c8 -- the routing under test hands the path to a recorder: nothing reads the disk
+        toMatch.call(chai.Assertion.prototype, file('./expected/out.txt'));
+
+        // Then - the golden answered it, and a value is refused before vitest is asked
+        expect(answered).toStrictEqual(['golden']);
+        expect(() => {
+            toMatch.call(chai.Assertion.prototype, 'out');
+        }).toThrow('takes toMatch(file(…))');
     });
 });

@@ -3,10 +3,13 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 
+import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { directory, file } from '../chain/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http-files/http-file.js';
 import { CaptureScope } from '../matching/match.js';
+import type { DatabasePort } from '../ports/database.port.js';
 import { DirectoryAccessor } from '../result/directory.js';
+import { FilesystemAccessor } from '../result/filesystem.js';
 import { JsonAccessor } from '../result/json.js';
 import { ResponseAccessor } from '../result/response.js';
 import { TableAccessor } from '../result/table.js';
@@ -206,6 +209,56 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         expect(subject.text).toMatch(/^built in \ds$/u);
         expect(subject.text).not.toMatch('failed');
     });
+
+    test.each([
+        {
+            golden: 'toMatch(file(…))',
+            name: 'a json',
+            subject: () => new JsonAccessor('{ "id": 1 }', '/tmp'),
+        },
+        {
+            golden: 'toMatch(file(…))',
+            name: 'a response',
+            subject: () =>
+                new ResponseAccessor({ body: { id: 1 }, headers: {}, status: 200 }, '/tmp'),
+        },
+        {
+            golden: 'toMatch(directory(…))',
+            name: 'a directory',
+            subject: () => new DirectoryAccessor('/tmp', '/tmp'),
+        },
+        {
+            golden: 'toMatch(directory(…))',
+            name: 'the working directory',
+            subject: () => new FilesystemAccessor('/tmp', '/tmp'),
+        },
+        {
+            golden: 'toMatchRows(…)',
+            name: 'a table',
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the refusal fires before any query, so no database stands behind the table
+            subject: () => new TableAccessor('orders', {} as DatabasePort),
+        },
+        {
+            golden: 'toBeRunning()',
+            name: 'a container',
+            subject: () => new ContainerAccessor(null, null, '/tmp'),
+        },
+    ])(
+        '$name is no string: a value handed to it is refused, naming $golden',
+        ({ golden, subject }) => {
+            // Given - a result accessor handed a string and a RegExp, past the compiler
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value matcher on every result accessor
+            const accessor = subject() as unknown as string;
+
+            // Then - the refusal names what the subject takes, never vitest's "expects to receive a string"
+            expect(() => {
+                expect(accessor).toMatch('1');
+            }).toThrow(golden);
+            expect(() => {
+                expect(accessor).not.toMatch(/1/u);
+            }).toThrow(golden);
+        },
+    );
 
     test("toContain on a stream is vitest's: its .text answers, and no override reads the accessor", () => {
         // Given - a stream subject, ANSI included

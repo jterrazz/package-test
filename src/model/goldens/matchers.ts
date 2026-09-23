@@ -441,6 +441,49 @@ async function toBeRunning(received: unknown): Promise<MatcherResult> {
     };
 }
 
+/**
+ * What each result accessor other than a stream takes instead of a value — its
+ * golden, its rows, its state. A stream is left to vitest: its value is its
+ * `.text`, and any subject absent from this list is vitest's to read.
+ */
+const VALUELESS: readonly {
+    readonly is: (subject: unknown) => boolean;
+    readonly subject: string;
+    readonly takes: string;
+}[] = [
+    {
+        is: (subject) => subject instanceof JsonAccessor || subject instanceof ResponseAccessor,
+        subject: 'a json or response accessor',
+        takes: 'its golden, toMatch(file(…))',
+    },
+    {
+        is: (subject) =>
+            subject instanceof DirectoryAccessor || subject instanceof FilesystemAccessor,
+        subject: 'a directory or the working directory',
+        takes: 'its golden, await toMatch(directory(…))',
+    },
+    {
+        is: (subject) => subject instanceof TableAccessor,
+        subject: 'a table',
+        takes: 'its rows, await toMatchRows(…) or toBeEmpty()',
+    },
+    {
+        is: (subject) => subject instanceof ContainerAccessor,
+        subject: 'a container',
+        takes: 'its state, toBeRunning()',
+    },
+];
+
+/** The refusal of a value handed to a subject that takes none, or nothing for any other. */
+function valueRefusal(received: unknown): TypeError | undefined {
+    const valueless = VALUELESS.find(({ is }) => is(received));
+    return valueless === undefined
+        ? undefined
+        : new TypeError(
+              `toMatch: ${valueless.subject} is no string, so a string or a RegExp matches nothing on it — assert it with ${valueless.takes}.`,
+          );
+}
+
 // ── Registration ──
 
 const REGISTERED = Symbol.for('@jterrazz/test:matchers-registered');
@@ -465,7 +508,7 @@ export async function registerMatchers(): Promise<void> {
             toBeRunning,
             toMatchRows,
         });
-        matchThroughGolden(chai);
+        matchThroughGolden(chai, valueRefusal);
     } catch {
         // No vitest peer available (library imported outside a test run).
         globals[REGISTERED] = false;

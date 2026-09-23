@@ -28,7 +28,7 @@ A string is a value; the disk is named by one of two calls, `file()` and `direct
 
 Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule D3). By convention it sits in `expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
 
-`toMatch`, `toBe` and `toContain` are vitest's and take a VALUE. A stream accessor is not one: it is compared as `result.stdout.text`, the comparable text — ANSI stripped, the runner's `transform` applied, the text its golden compares — and `toContain` or a value `toMatch` handed the accessor itself does not compile — on a stream, `toMatch` takes a `file()` and nothing else. On a JSON, response or tree subject `toMatch` with a value is refused, naming the two file matchers (rule D14).
+`toMatch`, `toBe` and `toContain` are vitest's and take a VALUE. A stream accessor is not one: it is compared as `result.stdout.text`, the comparable text — ANSI stripped, the runner's `transform` applied, the text its golden compares — and `toContain` or a value `toMatch` handed the accessor itself does not compile — on a stream, `toMatch` takes a `file()` and nothing else. No other result accessor is a string either: on a JSON, response, tree, table or container subject a value `toMatch` does not compile, and past the compiler — a cast, a JavaScript spec — it is refused, naming what the subject takes: `file()`, `directory()`, `toMatchRows()` or `toBeRunning()` (rule D14).
 
 All file-based comparisons understand the [`{{token}}` grammar](15-tokens.md); all code-side dynamic values use `match.*`.
 
