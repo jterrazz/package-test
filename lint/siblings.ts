@@ -106,6 +106,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/model/ports/isolation.port.ts',
             'src/model/ports/server.port.ts',
             'src/model/ports/service.port.ts',
+            'src/settings.ts',
             'lint/config-shape.ts',
             'lint/oxlint-api.ts',
         ),

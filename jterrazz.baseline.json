@@ -22,7 +22,6 @@
         "eslint/prefer-destructuring": 6,
         "import/no-cycle": 2,
         "jsdoc/empty-tags": 25,
-        "names/names-root-foreign": 2,
         "promise/avoid-new": 12,
         "promise/param-names": 2,
         "promise/prefer-await-to-callbacks": 1,

@@ -109,6 +109,12 @@ baseline` records those in the `test` section of `jterrazz.baseline.json` —
   A `test.baseline.json` an earlier migration wrote is retired the same way:
   the checker fails on it until `jterrazz-test-check baseline` has recorded
   the section and the file is deleted.
+- **Family settings leave package.json.** A repository states its settings
+  for the family in `jterrazz.config.ts` at its root, a section per package,
+  typed by `defineConfig` from `@jterrazz/typescript/config`; a `jterrazz` key
+  in package.json is no longer read. This package's section is `test`, merged
+  into that interface as `TestSettings` — it holds nothing yet, so it accepts
+  `{}` and refuses any key.
 - **A helper that named ground moves where it stands.** The mover writes the
   `file()` where the string was, inside the helper, and C26 refuses it there:
   a path resolves against the spec that starts the chain, so the helper takes

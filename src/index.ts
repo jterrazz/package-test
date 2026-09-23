@@ -80,6 +80,7 @@ export type { DockerSpecConfig, JobHandle, SpecificationConfig } from './model/c
 // Publishing the classes exported a constructor nobody may call and a
 // prototype chain the package is then not free to change.
 export type { FileAccessor } from './model/result/result.js';
+export type { TestSettings } from './settings.js';
 export type { BaseResult } from './model/result/result.js';
 export type { CliResult } from './facets/cli/cli.result.js';
 export type { ContainerAccessor } from './seams/docker/container-accessor.js';
