@@ -141,3 +141,20 @@ describe('yaml document — a rewrite leaves alone what it did not change', () =
         expect(rendered).toContain("out/docs/README.md: { contains: ['# Docs', 'second needle'] }");
     });
 });
+
+describe('yaml document — the step a document is written with', () => {
+    test('a document whose list holds only flow entries comes back at its own step', () => {
+        // Given - a four-space document whose one list is written in flow, and a key added to it
+        const text = [
+            'seed:',
+            '    - { file: ./seeds/one.sql, database: db }',
+            '    - { file: ./seeds/two.sql, database: db }',
+            '',
+        ].join('\n');
+        const source = parseYamlSource(text);
+        source.document.set('request', 'GET /users');
+
+        // Then - the entries keep the four spaces they were written at
+        expect(renderYamlSource(source)).toBe(`${text}request: GET /users\n`);
+    });
+});

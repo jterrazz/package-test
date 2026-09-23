@@ -31,8 +31,12 @@ export type YamlSource = {
     text: string;
 };
 
-/** A line that opens a mapping key — `  key:` or `  - key:`, never block-scalar text. */
-const KEY_LINE = /^(?<indent> +)(?:- )?[A-Za-z_$'"][^\n]*:/u;
+/**
+ * A line that opens a mapping key — `  key:` or `  - key:` — or a list entry
+ * written in flow, `  - { … }` or `  - [ … ]`: never block-scalar text. A
+ * document whose lists hold only flow entries states its step on those.
+ */
+const KEY_LINE = /^(?<indent> +)(?:(?:- )?[A-Za-z_$'"][^\n]*:|- [[{])/u;
 
 /**
  * The indentation step the file was written with, read from the shallowest
