@@ -134,6 +134,13 @@ const pages = {
         });
     </script>
     </body></html>`,
+    // A search landmark the HTML `<search>` element carries, with no `role`
+    // Attribute to spell it.
+    '/search': `<!doctype html><html lang="en"><head>${head('Fixture — Search', '/search')}
+    </head><body>
+    <h1>Search</h1>
+    <search aria-label="Site"><label for="site-query">Query</label><input id="site-query" type="search"></search>
+    </body></html>`,
     // A page that stamps its build in every surface a result reads — the text,
     // The markup, the title, the console and its errors — for a runner's
     // `transform` to normalise before any comparison.

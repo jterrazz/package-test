@@ -1,5 +1,5 @@
 import { expect, TestRunner } from 'vitest';
-import { commands, page, userEvent } from 'vitest/browser';
+import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
 import {
@@ -67,6 +67,48 @@ const FIELD_ROLES = [
 ] as const;
 
 /**
+ * The `<search>` element, where no explicit role overrides the one it carries.
+ *
+ * Browser Mode's role engine predates the element and gives it no role, while
+ * the ARIA tree — and playwright on a served page — call it `search`; this
+ * selector is how `search()` finds it here as it does there.
+ */
+const SEARCH_ELEMENT = 'css=search:not([role])';
+
+/** A scope that answers the `<search>` elements it holds with no explicit role. */
+type SearchScope = LocatorSelectors & { getBySearchElement: () => Locator };
+
+const SEARCH_METHODS: Parameters<typeof locators.extend>[0] & {
+    getBySearchElement: () => string;
+} = { getBySearchElement: () => SEARCH_ELEMENT };
+locators.extend(SEARCH_METHODS);
+
+/** Every scope answers it once the methods above are registered, the page and each locator. */
+function answersSearch(scope: LocatorSelectors): scope is SearchScope {
+    return 'getBySearchElement' in scope;
+}
+
+/**
+ * The search landmark: the role, or the element. A `<search>` takes its
+ * accessible name from its author alone, so a name is its label.
+ */
+function locateSearch(scope: LocatorSelectors, element: ElementRef, exact: boolean): Locator {
+    const byRole =
+        element.name === undefined
+            ? scope.getByRole('search', { exact })
+            : scope.getByRole('search', { exact, name: element.name });
+    if (!answersSearch(scope)) {
+        return byRole;
+    }
+    const byElement = scope.getBySearchElement();
+    return byRole.or(
+        element.name === undefined
+            ? byElement
+            : byElement.and(scope.getByLabelText(element.name, { exact })),
+    );
+}
+
+/**
  * Translate a user-facing descriptor into a Browser Mode locator, resolving
  * `scope` outside-in so `within(navigation(), link('X'))` searches the nav
  * subtree. No `.first()` anywhere: designating exactly one element is
@@ -91,6 +133,9 @@ export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     }
     if (element.kind === 'text') {
         return scope.getByText(name, { exact });
+    }
+    if (element.kind === 'search') {
+        return locateSearch(scope, element, exact);
     }
     // Every other kind IS an ARIA role — landmark or not — and the vocabulary
     // Names them after the role they locate, so one branch answers for all of

@@ -49,16 +49,16 @@ And one role that is read where it SITS rather than where it shows:
 
 The **landmarks** are the ARIA landmark set and nothing more — a closed vocabulary keeps `within()` from becoming a second selector language. Each takes an optional accessible name, for surfaces carrying several of the same region:
 
-| Landmark               | Matches                               |
-| ---------------------- | ------------------------------------- |
-| `banner()`             | the page header                       |
-| `navigation(name?)`    | a `<nav>` — name it when several      |
-| `main()`               | the primary content                   |
-| `complementary(name?)` | an `<aside>`, a sidebar               |
-| `contentinfo()`        | the page footer                       |
-| `region(name)`         | a `<section>` with an accessible name |
-| `form(name)`           | a named form landmark                 |
-| `search()`             | the search landmark                   |
+| Landmark               | Matches                                  |
+| ---------------------- | ---------------------------------------- |
+| `banner()`             | the page header                          |
+| `navigation(name?)`    | a `<nav>` — name it when several         |
+| `main()`               | the primary content                      |
+| `complementary(name?)` | an `<aside>`, a sidebar                  |
+| `contentinfo()`        | the page footer                          |
+| `region(name)`         | a `<section>` with an accessible name    |
+| `form(name)`           | a named form landmark                    |
+| `search(name?)`        | a `<search>` element, or `role="search"` |
 
 ## Modifiers
 
