@@ -19,8 +19,9 @@ const read = (relative: string): string => readFileSync(resolve(ROOT, relative),
  * The matrix is the projection that makes that visible, and this test is what
  * makes it a gate rather than a poster — a capability a facet DECLARES with no
  * test file exercising it fails here, unless the row names the reason
- * (mobile's simulator, a golden kind a facet's result cannot produce, a hole
- * the package owes itself and has written down).
+ * (mobile's simulator, a golden kind a facet's result cannot produce, a token
+ * family the engine owns). No row excuses a hole as owed: the last of those
+ * became specs.
  */
 describe('capability matrix (meta-test K6)', () => {
     test('every declared capability is exercised, or says why it is not', () => {

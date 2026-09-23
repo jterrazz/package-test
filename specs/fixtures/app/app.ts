@@ -1,3 +1,7 @@
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { Hono } from 'hono';
 
 interface AppOptions {
@@ -39,6 +43,14 @@ export function createApp(options: AppOptions) {
     app.get('/users', async (c) => {
         const users = await query('SELECT name, email FROM "users" ORDER BY id');
         return c.json({ users });
+    });
+
+    // An export the app writes to disk, answering where it wrote it.
+    app.post('/exports', async (c) => {
+        const users = await query('SELECT name, email FROM "users" ORDER BY id');
+        const directory = await mkdtemp(join(tmpdir(), 'users-export-'));
+        await writeFile(join(directory, 'users.json'), `${JSON.stringify(users, null, 4)}\n`);
+        return c.json({ directory }, 201);
     });
 
     app.get('/users/:id', async (c) => {

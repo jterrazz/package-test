@@ -104,9 +104,6 @@ const NO_SIMULATOR = 'no mobile tree: an iOS simulator is not something CI provi
 /** Every mobile cell carries the same reason; written once, spread per row. */
 const MOBILE_EXEMPT = { mobile: NO_SIMULATOR } as const;
 
-/** A hole this package owes itself — the capability ships, the proof does not. */
-const OWED = 'the surface ships and this package does not specify it here yet';
-
 /** The three surfaces that draw, and their shared vocabulary. */
 const DRAWS = ['website', 'mobile', 'component'] as const;
 
@@ -128,7 +125,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'website', 'mobile', 'component'],
-        exempt: { cli: OWED, mobile: NO_SIMULATOR },
+        exempt: { mobile: NO_SIMULATOR },
         group: 'Constructor option',
         name: 'root',
         probe: 'root:',
@@ -423,7 +420,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'cli', 'integration'],
-        exempt: { api: OWED, integration: OWED },
         group: 'Result accessor',
         member: 'file',
         name: '.file()',
@@ -431,7 +427,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'cli', 'integration'],
-        exempt: { api: OWED, integration: OWED },
         group: 'Result accessor',
         member: 'directory',
         name: '.directory()',
@@ -550,7 +545,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'cli', 'integration', 'module'],
-        exempt: { api: OWED, integration: OWED },
         group: 'Golden',
         name: 'toMatch(directory())',
         probe: '.toMatch(directory(',

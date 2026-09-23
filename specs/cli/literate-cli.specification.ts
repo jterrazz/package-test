@@ -18,9 +18,12 @@ export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     env: {
         frozen: { MY_VAR: 'from-the-frozen-set', TZ: 'UTC' },
     },
+    // A served command runs from the project root: stated here as the server's
+    // Own folder, so the command names the file where it lives.
+    root: '../fixtures/literate-server',
     serve: {
         echo: {
-            command: 'node specs/fixtures/literate-server/server.mjs',
+            command: 'node server.mjs',
             env: 'LITERATE_BACKEND_URL',
             ready: /listening on port (?<port>\d+)/u,
             url: (port) => `http://127.0.0.1:${port}/`,

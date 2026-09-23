@@ -41,7 +41,7 @@ export const SHARED_DOMAINS = [
 
 /** Each facet's own domains — a name here may not appear under another facet. */
 export const FACET_DOMAINS: Record<string, string[]> = {
-    api: ['initiation-errors', 'responses', 'sending'],
+    api: ['exports', 'initiation-errors', 'responses', 'sending'],
     cli: ['directory', 'docker', 'env', 'exec', 'literate'],
     integration: ['call', 'postgres', 'redis', 'table'],
     jobs: ['triggering'],

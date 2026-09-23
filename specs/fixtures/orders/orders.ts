@@ -1,3 +1,6 @@
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { Client } from 'pg';
 
 /** One row of the orders table, as the module hands it out. */
@@ -63,4 +66,13 @@ export async function quoteOrder(pricingUrl: string, reference: string): Promise
     }
     const body = (await response.json()) as { total: number };
     return body.total;
+}
+
+/** Write the orders out as a report: every row as JSON, and a one-line summary. */
+export async function exportOrders(databaseUrl: string, directory: string): Promise<void> {
+    const orders = await listOrders(databaseUrl);
+    mkdirSync(directory, { recursive: true });
+    const rows = orders.map(({ reference, total }) => ({ reference, total }));
+    writeFileSync(join(directory, 'orders.json'), `${JSON.stringify(rows, null, 4)}\n`);
+    writeFileSync(join(directory, 'summary.txt'), `${orders.length} orders\n`);
 }
