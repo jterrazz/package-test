@@ -995,3 +995,10 @@ implementation (the commits say what was broken).
     package's release must be cut against; until then an install from the
     registry cannot satisfy it. Does 17 wait for the toolchain's major,
     or ship with `^10.3.0 || ^11.0.0`?
+
+## Iteration 8 — the calls on 60 and 61 (2026-09-23)
+
+| #   | Decision                                                                                                                                                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 60  | The listing's cache key also holds the mtime of the root `.gitignore` and of `.git/info/exclude`; a nested `.gitignore` edited in place is seen on the next index or directory change (accepted). |
+| 61  | Release order: `@jterrazz/typescript` 11.0 ships first, then `@jterrazz/test` 17.0 with the peer `^11.0.0` only — no `^10 \|\| ^11` range (no legacy).                                            |
