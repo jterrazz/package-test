@@ -6,6 +6,7 @@ import type { remote } from 'webdriverio';
 import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
 import { projectScreen } from '../../facets/mobile/projection.js';
 import { AmbiguousElementError, formatElement } from '../../model/elements/ambiguity.js';
+import { refusal } from '../../model/lesson/refusal.js';
 import type {
     DeviceOpenOptions,
     DevicePort,
@@ -93,7 +94,10 @@ function compilePredicate(
         }
         default: {
             throw new Error(
-                `${formatElement(element)}: landmarks are a website concept — an iOS screen has no '${element.kind}' region. Scope with within(testId('…'), …) instead.`,
+                refusal('w4-no-landmarks-on-mobile', {
+                    fix: `scope with within(testId('…'), …) — any descriptor works as the scope`,
+                    found: `${formatElement(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
+                }),
             );
         }
     }

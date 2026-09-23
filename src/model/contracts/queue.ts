@@ -15,6 +15,7 @@
  * declared zero contracts is not guarded at all (unchanged boundary).
  */
 
+import { refusal } from '../lesson/refusal.js';
 import { CaptureScope } from '../matching/match.js';
 import { hasPlaceholders, placeholderPatternSource, textEquals } from '../matching/structural.js';
 import { describeRoute } from './contract.js';
@@ -248,10 +249,10 @@ export class ContractQueue {
                       .map((entry) => `  - ${describeRoute(entry.contract)}${stateOf(entry)}`)
                       .join('\n');
         return new Error(
-            `Unmatched outgoing HTTP request during spec: ${method} ${url}\n` +
-                `Declared contracts:\n${declared}\n` +
-                `Every outgoing request of a chain that declares contracts must match one — ` +
-                `add a contract for it (or raise its \`times\` when it is exhausted).`,
+            refusal('d7-strict-intercepts', {
+                fix: `declare a contract for ${method} ${url} — or raise the \`times\` of the one it exhausted`,
+                found: `an unmatched outgoing request, ${method} ${url}; declared:\n${declared}`,
+            }),
         );
     }
 }

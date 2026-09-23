@@ -584,7 +584,7 @@ describe('command — fixture tree layering', () => {
         // Given - the 16 spelling, a name resolved against a folder the line does not show
         // Then - refused at the call, naming the wrapper to write
         expect(() => cli.fixture('cli-app/' as never)).toThrow(
-            /^fixture\("cli-app\/"\): a string is a value — name the disk with file/u,
+            /^found: fixture\("cli-app\/"\), a value where the disk is read\n.*\nfix: name the disk: fixture\(file/u,
         );
     });
 
@@ -594,7 +594,7 @@ describe('command — fixture tree layering', () => {
         const run = cli.fixture(file('../../fixtures/cli-app')).exec('help');
 
         // Then - the path states the kind, so the wrong one is refused rather than guessed
-        await expect(run).rejects.toThrow(/names a directory — end its path in \//u);
+        await expect(run).rejects.toThrow(/names a directory\n.*\nfix: end its path in \//u);
     });
 
     test('a later .fixture() overwrites an earlier file (last write wins)', async () => {

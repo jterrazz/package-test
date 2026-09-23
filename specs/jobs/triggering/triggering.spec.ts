@@ -100,6 +100,6 @@ describe('jobs — intercepts (D7)', () => {
             jobs
                 .intercept(http.get('https://not.the.url.test/other'), http.json({ label: 'x' }))
                 .trigger('enrich-from-api'),
-        ).rejects.toThrow(/Unmatched outgoing HTTP request[\s\S]*enrich\.example\.test/u);
+        ).rejects.toThrow(/an unmatched outgoing request, [\s\S]*enrich\.example\.test/u);
     });
 });

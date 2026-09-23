@@ -1,5 +1,6 @@
 import { formatStdoutDiff } from '../chain/reporter.js';
 import { isDiskTarget } from '../chain/spec-path.js';
+import { refusal } from '../lesson/refusal.js';
 import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
@@ -71,7 +72,10 @@ export function compareStreamText(
  */
 export function emptyStreamRefusal(accessor: TextAccessor): TypeError {
     return new TypeError(
-        `toBeEmpty: "${accessor.streamName}" is a stream, and an empty stream is an empty text — write expect(<stream>.text).toBe('')`,
+        refusal('d14-one-verb-per-meaning', {
+            fix: `compare its text: expect(<result>.${accessor.streamName}.text).toBe('')`,
+            found: `toBeEmpty() on the stream "${accessor.streamName}" — an empty stream is an empty text`,
+        }),
     );
 }
 
@@ -95,7 +99,10 @@ export function streamValueRoute(subject: unknown, value: unknown): ValueRoute {
     return typeof value === 'string'
         ? 'whole'
         : new TypeError(
-              `toMatch: "${subject.streamName}" is a stream, compared whole to the text written in place — a RegExp matches a part of it, which is vitest's: expect(<stream>.text).toMatch(…).`,
+              refusal('d14-one-verb-per-meaning', {
+                  fix: `write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.${subject.streamName}.text).toMatch(…)`,
+                  found: `toMatch(a ${value instanceof RegExp ? 'RegExp' : typeof value}) on the stream "${subject.streamName}"`,
+              }),
           );
 }
 

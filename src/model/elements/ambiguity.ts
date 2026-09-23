@@ -1,3 +1,4 @@
+import { refusal } from '../lesson/refusal.js';
 import type { ElementMatch, ElementRef, LandmarkKind } from '../ports/browser.port.js';
 
 /**
@@ -205,18 +206,11 @@ export function describeAmbiguity(options: {
     const { element, matches, url } = options;
     const fixes = formatFixes(element, matches).map((fix) => `  • ${fix}`);
 
-    return [
-        `Ambiguous element: ${formatElement(element)} matched ${matches.length} elements on ${url}.`,
-        '',
-        'A spec must designate exactly one element. Acting on the first match would let',
-        'this test keep passing while the visitor interacts with something else.',
-        '',
-        'Matched:',
-        ...matches.map((match, index) => formatMatch(match, index)),
-        '',
-        'Disambiguate with one of:',
-        ...fixes,
-        '',
-        'Docs: docs/13-elements.md#designating-exactly-one-element (CONVENTIONS W3)',
-    ].join('\n');
+    return refusal('w3-unambiguous-element', {
+        fix: ['designate one of them:', ...fixes].join('\n'),
+        found: [
+            `Ambiguous element: ${formatElement(element)} matched ${matches.length} elements on ${url} —`,
+            ...matches.map((match, index) => formatMatch(match, index)),
+        ].join('\n'),
+    });
 }

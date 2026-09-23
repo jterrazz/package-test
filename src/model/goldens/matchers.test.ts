@@ -219,7 +219,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a RegExp on a stream
             expect(subject).toMatch(/built in/u as unknown as string);
         }).toThrow(
-            '"stdout" is a stream, compared whole to the text written in place — a RegExp matches a part of it, which is vitest\'s: expect(<stream>.text).toMatch(…)',
+            "fix: write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.stdout.text).toMatch(…)",
         );
         expect(subject.text).toMatch(/^built in \ds$/mu);
     });
@@ -260,21 +260,21 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
     test.each([
         {
             name: 'a response',
-            refusal: 'a response is compared whole to its .http text written in place',
+            refusal: 'found: toMatch(a RegExp) on a response',
             subject: () =>
                 new ResponseAccessor({ body: { id: 1 }, headers: {}, status: 200 }, '/tmp'),
             value: /200/u,
         },
         {
             name: 'a json',
-            refusal: 'a json is compared whole to the value written in place',
+            refusal: 'found: toMatch(a RegExp) on a json',
             subject: () => new JsonAccessor('{ "id": 1 }', '/tmp'),
             value: /id/u,
         },
         {
             name: 'a table',
             refusal:
-                "a table is compared whole to its rows written in place — one array of cells per row, every column in the table's order — received a string",
+                "fix: write its rows in place, one array of cells per row in the table's column order",
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the refusal fires before any query, so no database stands behind the table
             subject: () => new TableAccessor('orders', {} as DatabasePort),
             value: '1',
@@ -312,7 +312,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
 
         // Then - refused with vitest's own form, which holds on the comparable text
         await expect(expect(subject).toBeEmpty()).rejects.toThrow(
-            /"stderr" is a stream, and an empty stream is an empty text — write expect\(<stream>\.text\)\.toBe\(''\)/u,
+            /fix: compare its text: expect\(<result>\.stderr\.text\)\.toBe\(''\)/u,
         );
         expect(stream.text).toBe('');
     });
@@ -325,7 +325,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         expect(() => {
             // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
             expect(subject).toMatch(file('./expected/tree.txt'), { frozen: true });
-        }).toThrow(/a directory or the working directory is toMatch\(directory\(…\)\)/u);
+        }).toThrow(/a directory or the working directory is `await toMatch\(directory\(…\)\)`/u);
     });
 
     test('a file golden refuses a value subject', () => {
@@ -336,7 +336,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         expect(() => {
             // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
             expect(subject).toMatch(file('./expected/abc.txt'));
-        }).toThrow(/a file golden is compared against a stream, json or response accessor/u);
+        }).toThrow(/fix: compare a stream, a json or a response to its file/u);
     });
 
     test('a directory golden refuses a stream subject, as a rejection', async () => {
@@ -347,7 +347,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         await expect(
             // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
             expect(subject).toMatch(directory('./expected/out/'), { frozen: true }),
-        ).rejects.toThrow(/a directory golden is compared against/u);
+        ).rejects.toThrow(/on a subject that is no tree/u);
     });
 });
 

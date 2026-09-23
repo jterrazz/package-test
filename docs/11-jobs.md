@@ -70,7 +70,7 @@ test('nightly report classifies, prices and drafts', async () => {
 
 Everything a pipeline reads from the outside world is declared: seeds set the database state, contracts pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [contracts](16-contracts.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
 
-Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit "Unmatched outgoing HTTP request" error naming the method, URL, and every declared route with its consumption state (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit refusal — "an unmatched outgoing request" — naming the method, URL, and every declared route with its consumption state (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
 
 ### Seeding and sequences for pipelines
 

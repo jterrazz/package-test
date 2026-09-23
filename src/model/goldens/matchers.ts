@@ -20,6 +20,7 @@ import { resolveSpecPath } from '../chain/resolve.js';
 import { isDiskDirectory, isDiskFile } from '../chain/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http-files/http-file.js';
 import type { ParsedResponseFile } from '../http-files/http-file.js';
+import { refusal } from '../lesson/refusal.js';
 import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import {
@@ -350,14 +351,21 @@ function toMatchGolden(
             return matchResponseFile(received, expected.path, frozen);
         }
         throw new TypeError(
-            `toMatch(file(${JSON.stringify(expected.path)})): a file golden is compared against a stream, json or response accessor ` +
-                '(a directory or the working directory is toMatch(directory(…))).',
+            refusal('d14-one-verb-per-meaning', {
+                fix: 'compare a stream, a json or a response to its file; a directory or the working directory is `await toMatch(directory(…))`',
+                found: `toMatch(file(${JSON.stringify(expected.path)})) on a subject that holds no file of its kind`,
+            }),
         );
     }
     if (isDiskDirectory(expected)) {
         return matchDirectoryGolden(received, expected.path, frozen);
     }
-    throw new TypeError('toMatch: the golden comparison takes file(…) or directory(…).');
+    throw new TypeError(
+        refusal('d14-one-verb-per-meaning', {
+            fix: 'name the golden with file(…) or directory(…)',
+            found: `toMatch(${spelledValue(expected)}) routed to the golden comparison`,
+        }),
+    );
 }
 
 /** `toMatch(directory())` — async, its refusal included: a tree golden is awaited. */
@@ -379,7 +387,10 @@ async function matchDirectoryGolden(
         );
     }
     throw new TypeError(
-        `toMatch(directory(${JSON.stringify(path)})): a directory golden is compared against result.filesystem or result.directory(…).`,
+        refusal('d14-one-verb-per-meaning', {
+            fix: `compare result.filesystem or result.directory(…) to directory(${JSON.stringify(path)}); a text is compared to file(…)`,
+            found: `toMatch(directory(${JSON.stringify(path)})) on a subject that is no tree`,
+        }),
     );
 }
 
@@ -599,7 +610,7 @@ function toMatchWhole(
         return matchTableValue(received, table, context);
     }
     if (typeof expected !== 'string') {
-        throw new TypeError('toMatch: this subject is not compared to a value written in place.');
+        throw noValueRefusal(expected);
     }
     if (received instanceof ResponseAccessor) {
         return matchResponseValue(received, expected, context);
@@ -607,7 +618,17 @@ function toMatchWhole(
     if (received instanceof TextAccessor) {
         return matchStreamValue(received, expected, context);
     }
-    throw new TypeError('toMatch: this subject is not compared to a value written in place.');
+    throw noValueRefusal(expected);
+}
+
+/** A subject the value route has no comparison for. */
+function noValueRefusal(expected: unknown): TypeError {
+    return new TypeError(
+        refusal('d14-one-verb-per-meaning', {
+            fix: 'compare it to its golden, `toMatch(file(…))`, or assert a part of its text with vitest on `.text`',
+            found: `toMatch(${spelledValue(expected)}) on a subject that is not compared to a value written in place`,
+        }),
+    );
 }
 
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {
@@ -615,7 +636,12 @@ async function toBeEmpty(received: unknown): Promise<MatcherResult> {
         throw emptyStreamRefusal(received);
     }
     if (!(received instanceof TableAccessor)) {
-        throw new TypeError('toBeEmpty: unsupported subject — expected result.table(...).');
+        throw new TypeError(
+            refusal('d14-one-verb-per-meaning', {
+                fix: "assert a table empty, `await expect(result.table('<name>')).toBeEmpty()`; any other subject is compared whole with toMatch",
+                found: 'toBeEmpty() on a subject that is no table',
+            }),
+        );
     }
 
     const rows = await received.query(['*']);
@@ -675,13 +701,19 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
         return typeof value === 'string'
             ? 'whole'
             : new TypeError(
-                  `toMatch: a response is compared whole to its .http text written in place (\`HTTP/1.1 200 OK …\`), or to toMatch(file(…)) — received ${spelledValue(value)}.`,
+                  refusal('d14-one-verb-per-meaning', {
+                      fix: 'write the whole response in place, ``toMatch(`HTTP/1.1 200 OK …`)``, or compare it to toMatch(file(…))',
+                      found: `toMatch(${spelledValue(value)}) on a response`,
+                  }),
               );
     }
     if (subject instanceof JsonAccessor) {
         return value instanceof RegExp
             ? new TypeError(
-                  'toMatch: a json is compared whole to the value written in place, or to toMatch(file(…)) — a RegExp matches a part of a text.',
+                  refusal('d14-one-verb-per-meaning', {
+                      fix: 'write the whole value in place, `toMatch({ … })`, or compare it to toMatch(file(…))',
+                      found: 'toMatch(a RegExp) on a json',
+                  }),
               )
             : 'whole';
     }
@@ -689,17 +721,26 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
         return isRows(value) || unrecorded(value)
             ? 'whole'
             : new TypeError(
-                  `toMatch: a table is compared whole to its rows written in place — one array of cells per row, every column in the table's order — received ${spelledValue(value)}.`,
+                  refusal('d14-one-verb-per-meaning', {
+                      fix: "write its rows in place, one array of cells per row in the table's column order: `await expect(result.table('<name>')).toMatch([[…]])`",
+                      found: `toMatch(${spelledValue(value)}) on a table`,
+                  }),
               );
     }
     if (subject instanceof DirectoryAccessor || subject instanceof FilesystemAccessor) {
         return new TypeError(
-            'toMatch: a directory or the working directory is compared to its golden tree, await toMatch(directory(…)) — a value states no tree.',
+            refusal('d14-one-verb-per-meaning', {
+                fix: 'compare it to its golden tree: `await expect(…).toMatch(directory(…))`',
+                found: `toMatch(${spelledValue(value)}) on a directory`,
+            }),
         );
     }
     if (subject instanceof ContainerAccessor) {
         return new TypeError(
-            'toMatch: a container is asserted by its state, toBeRunning() — its logs are streams, compared whole as result.container(…).stdout.',
+            refusal('d14-one-verb-per-meaning', {
+                fix: 'assert its state, `await expect(…).toBeRunning()`, or compare its logs, `result.container(…).stdout`, whole',
+                found: `toMatch(${spelledValue(value)}) on a container`,
+            }),
         );
     }
     return undefined;

@@ -84,6 +84,8 @@ const FRAMEWORK_LAYERS = {
             'seams/git/tree',
             // A finding and a refusal teach in one form: the four parts, and how they read.
             'model/lesson/lesson',
+            // The runtime's refusals open on the sentence their catalogue row does.
+            'model/lesson/refusal',
             // The run owns one key of the ratchet the checker writes: route coverage.
             'model/routes/routes',
         ],

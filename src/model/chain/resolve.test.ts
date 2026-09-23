@@ -190,7 +190,7 @@ describe('spec path resolution', () => {
         // Given - the 16 form, a name resolved against a hidden folder
         // Then - refused with the verb
         expect(() => resolveSpecPath('request', 'create.http', '/repo/specs')).toThrow(
-            /^request\("create\.http"\): a path is relative to the spec file/u,
+            /^found: request\("create\.http"\), a path that is not relative to the spec file/u,
         );
     });
 });

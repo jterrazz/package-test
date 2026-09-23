@@ -1,3 +1,4 @@
+import { REFUSAL_WHY } from '../src/model/lesson/refusal.js';
 import type { RuleDoc } from './oxlint-api.js';
 
 /**
@@ -28,9 +29,10 @@ import type { RuleDoc } from './oxlint-api.js';
  * to (re)write the full seven-channel catalogue in `docs/19-linting.md`.
  * `plugin.test.ts` guards freshness and completeness.
  *
- * This module is pure data — it imports NOTHING but a type, so the lint layer
- * stays free of the framework runtime (CONVENTIONS I1) and the oxlint bundle
- * stays light.
+ * This module is pure data — it imports a type and the sentences the runtime's
+ * refusals open on (`REFUSAL_WHY`, whose rows begin with them), so the lint
+ * layer stays free of the framework runtime (CONVENTIONS I1) and the oxlint
+ * bundle stays light.
  */
 
 /** A catalogue row: a {@link RuleDoc} plus the implementation name it maps to. */
@@ -1603,8 +1605,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     },
     {
         channel: 'runtime',
-        convention:
-            'The framework throws at run time if `database:` is absent with ≥ 2 databases, or present with exactly one (it doubles the checker channel).',
+        convention: `${REFUSAL_WHY['a7-database-runtime']} The framework throws at run time if \`database:\` is absent with ≥ 2 databases, or present with exactly one (it doubles the checker channel).`,
         facet: 'model',
         family: 'A',
         fix: 'State `database:` everywhere or nowhere, whichever the record calls for.',
@@ -1615,8 +1616,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     },
     {
         channel: 'runtime',
-        convention:
-            'The framework refuses at run time a verb that reads the disk (`seed`, `request`, `fixture`, `run`) handed anything but a `file()`/`directory()` — a bare string names the wrapper to write — and a `file()`, `directory()` or document `fixture:` whose path does not start with `./` or `../`. The trailing `/` says which of the two a path is, and the disk must agree: a directory named without it, or a file named with it, is refused, and so is a path that names nothing, with the path it resolved to.',
+        convention: `${REFUSAL_WHY['b2-relative-path-runtime']} The framework refuses at run time a verb that reads the disk (\`seed\`, \`request\`, \`fixture\`, \`run\`) handed anything but a \`file()\`/\`directory()\` — a bare string names the wrapper to write — and a \`file()\`, \`directory()\` or document \`fixture:\` whose path does not start with \`./\` or \`../\`. The trailing \`/\` says which of the two a path is, and the disk must agree: a directory named without it, or a file named with it, is refused, and so is a path that names nothing, with the path it resolved to.`,
         facet: 'model',
         family: 'B',
         fix: "Name the disk from the spec file: `file('./seeds/users.sql')`, `directory('../../fixtures/shop/')`.",
@@ -1640,8 +1640,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     },
     {
         channel: 'runtime',
-        convention:
-            'As soon as an `api`/`jobs` chain declares an intercept, any unmatched outgoing request (an exhausted queue included) fails the spec with an explicit error.',
+        convention: `${REFUSAL_WHY['d7-strict-intercepts']} As soon as an \`api\`/\`jobs\` chain declares an intercept, any unmatched outgoing request (an exhausted queue included) fails the spec with an explicit error.`,
         facet: 'model',
         family: 'D',
         fix: 'Declare the contract the request needs, or stop making the request.',
@@ -1652,8 +1651,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     },
     {
         channel: 'runtime',
-        convention:
-            "`toMatch` on a result the framework produced compares the WHOLE result, and its argument says where the expectation lives: a value written in place — a stream's text, a response's `.http` text, a json's value, a table's rows (awaited) — or a `file()`/`directory()` golden. On a plain string it is vitest's own, untouched: a stream's text is `result.stdout.text`. A value of the wrong shape — a RegExp on a stream, a response or a json, anything but rows on a table — does not compile, and past the compiler it is refused in both builds, naming the form that takes it; a directory, the working directory and a container take no value, and are refused naming `directory()` or `toBeRunning()`; a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: `toBeEmpty` is a table's matcher, and handed a stream it is refused in both builds, naming `expect(<stream>.text).toBe('')`.",
+        convention: `${REFUSAL_WHY['d14-one-verb-per-meaning']} Its argument says where the expectation lives: a value written in place — a stream's text, a response's \`.http\` text, a json's value, a table's rows (awaited) — or a \`file()\`/\`directory()\` golden. On a plain string it is vitest's own, untouched: a stream's text is \`result.stdout.text\`. A value of the wrong shape — a RegExp on a stream, a response or a json, anything but rows on a table — does not compile, and past the compiler it is refused in both builds, naming the form that takes it; a directory, the working directory and a container take no value, and are refused naming \`directory()\` or \`toBeRunning()\`; a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: \`toBeEmpty\` is a table's matcher, and handed a stream it is refused in both builds, naming \`expect(<stream>.text).toBe('')\`.`,
         facet: 'model',
         family: 'D',
         fix: "Write the whole result in place, ``toMatch(`…`)``, or `toMatch(file('./expected/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
@@ -1665,8 +1663,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     },
     {
         channel: 'runtime',
-        convention:
-            'An element descriptor must designate exactly ONE element when a verb ACTS on it (`click`/`tap`/`fill`): if several match, the action is refused with an error enumerating the candidates and offering the rewrites (`within(...)`, another descriptor). The framework never acts on "the first". A name designates the WHOLE accessible name — `{ exact: false }` is the opt-out — and a descriptor that finds nothing whole is not found, whatever a substring would have matched. It holds on both scenario facets, website and mobile; on mobile, `see()` — which acts on nothing — is satisfied by any visible match (the XCUITest tree legitimately duplicates a label between a container and its child).',
+        convention: `${REFUSAL_WHY['w3-unambiguous-element']} An element descriptor must designate exactly ONE element when a verb ACTS on it (\`click\`/\`tap\`/\`fill\`): if several match, the action is refused with an error enumerating the candidates and offering the rewrites (\`within(...)\`, another descriptor). The framework never acts on "the first". A name designates the WHOLE accessible name — \`{ exact: false }\` is the opt-out — and a descriptor that finds nothing whole is not found, whatever a substring would have matched. It holds on both scenario facets, website and mobile; on mobile, \`see()\` — which acts on nothing — is satisfied by any visible match (the XCUITest tree legitimately duplicates a label between a container and its child).`,
         facet: 'model',
         family: 'W',
         fix: 'Scope it with `within(<landmark>, …)`, or name the element with a descriptor that designates one thing.',
@@ -1678,8 +1675,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     },
     {
         channel: 'runtime',
-        convention:
-            'The element vocabulary is ONE between the website and mobile facets; an ARIA landmark (`main()`, `navigation()`…) passed to a mobile verb is refused at run time — an iOS screen has no ARIA regions; scope with `within(testId(…), …)`.',
+        convention: `${REFUSAL_WHY['w4-no-landmarks-on-mobile']} The element vocabulary is ONE between the website and mobile facets; an ARIA landmark (\`main()\`, \`navigation()\`…) passed to a mobile verb is refused at run time.`,
         facet: 'mobile',
         family: 'W',
         fix: 'Scope with `within(testId(…), …)`: a screen has no landmarks, and any descriptor works as the scope.',

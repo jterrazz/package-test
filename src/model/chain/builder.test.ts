@@ -408,18 +408,18 @@ describe('builder — a string is a value, and the disk is file() or directory()
 
         // Then - each verb that reads the disk refuses the string and names file()
         expect(() => cli.seed('./seeds/rows.sql' as never)).toThrow(
-            /^seed\("\.\/seeds\/rows\.sql"\): a string is a value — name the file with file\(\)/u,
+            /^found: seed\("\.\/seeds\/rows\.sql"\), a value where a file is read\n.*\nfix: name one file: seed\(file\(/u,
         );
         expect(() => cli.fixture('./fixtures/shop/' as never)).toThrow(
-            /^fixture\("\.\/fixtures\/shop\/"\): a string is a value — name the disk with file/u,
+            /^found: fixture\("\.\/fixtures\/shop\/"\), a value where the disk is read\n.*\nfix: name the disk: fixture\(file/u,
         );
         // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => cli.seed(directory('./seeds/') as never)).toThrow(
-            /it takes one file, not a directory/u,
+            /a directory where one file is read/u,
         );
         // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => cli.seed(file('./seeds/rows.json') as never)).toThrow(
-            /the file seed\(\) reads ends in \.sql/u,
+            /a file not ending in \.sql/u,
         );
     });
 
@@ -435,11 +435,11 @@ describe('builder — a string is a value, and the disk is file() or directory()
         await expect(run).resolves.toBeDefined();
         // checker-disable-next-line c8 -- the kind on disk is the refusal under test: each path names the other kind on purpose
         await expect(cli.fixture(directory('./fixtures/config.json/')).exec('go')).rejects.toThrow(
-            /names a file — a path ending in \/ is a directory/u,
+            /names a file\n.*\nfix: drop the \//u,
         );
         // checker-disable-next-line c8 -- the kind on disk is the refusal under test: each path names the other kind on purpose
         await expect(cli.fixture(file('./fixtures/shop')).exec('go')).rejects.toThrow(
-            /names a directory — end its path in \//u,
+            /names a directory\n.*\nfix: end its path in \//u,
         );
     });
 });

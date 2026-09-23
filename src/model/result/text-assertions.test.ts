@@ -113,7 +113,7 @@ describe('matchThroughGolden', () => {
         expect(() => {
             toMatch.call(chai.Assertion.prototype, /built/u);
         }).toThrow(
-            '"stderr" is a stream, compared whole to the text written in place — a RegExp matches a part of it, which is vitest\'s: expect(<stream>.text).toMatch(…)',
+            "fix: write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(…)",
         );
         expect(streamValueRoute('built', 'built')).toBeUndefined();
     });

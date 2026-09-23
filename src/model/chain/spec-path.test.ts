@@ -41,7 +41,7 @@ describe('the disk — file() and directory()', () => {
             // Given - a bare name, a marker or an absolute path
             // Then - the refusal names the call and the form to write
             expect(() => file(path as never)).toThrow(
-                /^file\(.*\): a path is relative to the spec file — start it with \.\/ or \.\.\//u,
+                /^found: file\(.*\), a path that is not relative to the spec file\n.*\nfix: start it with \.\/ or \.\.\/, from the spec file: file\('\.\//u,
             );
         },
     );
@@ -50,9 +50,11 @@ describe('the disk — file() and directory()', () => {
         // Given - each wrapper handed the other's path
         // Then - each names the one to use
         // checker-disable-next-line c8 -- the wrapper's own brand and refusal are under test: nothing reads the disk
-        expect(() => file('./fixtures/shop/' as never)).toThrow(/name it with directory\(\)/u);
+        expect(() => file('./fixtures/shop/' as never)).toThrow(
+            /fix: name the directory with directory\("\.\/fixtures\/shop\/"\)/u,
+        );
         expect(() => directory('./fixtures/shop' as never)).toThrow(
-            /a directory's path ends in \//u,
+            /fix: end it in \/: directory\("\.\/fixtures\/shop\/"\)/u,
         );
     });
 
@@ -62,9 +64,11 @@ describe('the disk — file() and directory()', () => {
 
         // Then - neither kind, and a verb refuses it as a value
         expect(isDiskFile(forged)).toBeFalsy();
-        expect(() => requireDiskFile('seed', forged, '.sql')).toThrow(/a string is a value/u);
+        expect(() => requireDiskFile('seed', forged, '.sql')).toThrow(
+            /a value where a file is read/u,
+        );
         expect(() => requireDiskTarget('fixture', './fixtures/')).toThrow(
-            /^fixture\("\.\/fixtures\/"\): a string is a value/u,
+            /^found: fixture\("\.\/fixtures\/"\), a value where the disk is read/u,
         );
     });
 });

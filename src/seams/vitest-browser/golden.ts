@@ -1,6 +1,7 @@
 import { chai, expect, inject } from 'vitest';
 
 import { isDiskFile } from '../../model/chain/spec-path.js';
+import { refusal } from '../../model/lesson/refusal.js';
 import { dedent } from '../../model/matching/dedent.js';
 import { mergeTextPreservingPlaceholders } from '../../model/matching/structural.js';
 import type { MatchFixtureOptions } from '../../model/result/match-options.js';
@@ -74,12 +75,18 @@ async function toMatchGolden(
 ): Promise<MatcherResult> {
     if (!isDiskFile(expected)) {
         throw new TypeError(
-            'toMatch(directory(…)): in a page there is no working directory — a golden tree is compared under node.',
+            refusal('d14-one-verb-per-meaning', {
+                fix: 'compare the tree under node, or a captured text of the page to its file(…)',
+                found: 'toMatch(directory(…)) in a page, which has no working directory',
+            }),
         );
     }
     if (!(received instanceof TextAccessor)) {
         throw new TypeError(
-            `toMatch(file(${JSON.stringify(expected.path)})): in a page, a golden file is compared against a captured text (result.tree, result.html, text(…)).`,
+            refusal('d14-one-verb-per-meaning', {
+                fix: `compare a captured text — result.tree, result.html, text(…) — to file(${JSON.stringify(expected.path)})`,
+                found: `toMatch(file(${JSON.stringify(expected.path)})) in a page, on a subject that is no captured text`,
+            }),
         );
     }
     return await matchGolden(received, expected.path, options?.frozen === true);
@@ -98,7 +105,10 @@ async function toMatchWhole(
 ): Promise<MatcherResult> {
     if (!(received instanceof TextAccessor) || typeof expected !== 'string') {
         throw new TypeError(
-            'toMatch: in a page, a captured text is compared to a text written in place.',
+            refusal('d14-one-verb-per-meaning', {
+                fix: 'compare a captured text — result.tree, result.html, text(…) — to a text written in place',
+                found: 'toMatch(<value>) in a page, on a subject or a value that is no text',
+            }),
         );
     }
     const comparison = compareStreamInPlace(received, expected);
@@ -122,7 +132,10 @@ async function toBeEmpty(received: unknown): Promise<MatcherResult> {
         received instanceof TextAccessor
             ? emptyStreamRefusal(received)
             : new TypeError(
-                  'toBeEmpty: unsupported subject — in a page, compare a stream as its text.',
+                  refusal('d14-one-verb-per-meaning', {
+                      fix: "compare the stream's text: expect(<result>.<stream>.text).toBe('')",
+                      found: 'toBeEmpty() in a page, which holds no table',
+                  }),
               ),
     );
 }

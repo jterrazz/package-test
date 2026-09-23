@@ -20,7 +20,7 @@ test('refuses a descriptor matching several elements, and says how to fix it', a
     // Then - the refusal is the website facet's, word for word: same rule, same fix
     expect(refusal).toContain('Ambiguous element: link("Articles") matched 2 elements');
     expect(refusal).toContain('within(navigation(), link("Articles"))');
-    expect(refusal).toContain('CONVENTIONS W3');
+    expect(refusal).toContain('read: docs/19-linting.md#w3-unambiguous-element');
 });
 
 test('a name designates the accessible name WHOLE — the default', async () => {

@@ -142,38 +142,33 @@ Both take a modifier, so `see(focused(button('Open')))` waits for the keyboard t
 **A descriptor must match exactly one element (rule W3).** When several match, the framework refuses the action instead of taking the first one:
 
 ```
-Ambiguous element: link("Articles") matched 3 elements on http://site.test/ambiguous.
-
-A spec must designate exactly one element. Acting on the first match would let
-this test keep passing while the visitor interacts with something else.
-
-Matched:
+found: Ambiguous element: link("Articles") matched 2 elements on http://site.test/ambiguous —
   1. <a href="/articles">Articles</a>  in <nav>
   2. <a href="/articles">Articles</a>  in <footer>
-
-Disambiguate with one of:
+why: A verb acts on exactly ONE element: a descriptor that matches several is refused, never settled by the first.
+fix: designate one of them:
   • scope it       within(navigation(), link("Articles"))   [leaves 1 of 2]   [also here: contentinfo()]
   • other element  a heading(), button() or field() may name one thing where this does not
-
-Docs: docs/13-elements.md#designating-exactly-one-element (CONVENTIONS W3)
+read: docs/19-linting.md#w3-unambiguous-element
 ```
+
+The refusal is a lesson in the four parts every message carries ([19](19-linting.md#what-a-finding-says)), one part per line.
 
 Every suggestion carries what it LEAVES, so a rewrite that would keep the spec ambiguous never reads as a fix: a landmark holding every candidate is not offered at all. A candidate inside a named `<section>` is offered its region by name — `within(region("Orders"), …)`, the name read from the section's `aria-label` or from what its `aria-labelledby` points at — since a page holds several regions; an unnamed `<section>` is no region, so it stays evidence (`in <section>`) and is never offered. The evidence also names the ACCESSIBLE name a candidate matched on when that is not its text — a role descriptor matches the name, so `button('Delete post')` finds an `aria-label="Delete Post a"` too, and printing only the text would send you after something that never matched.
 
 On a device the same refusal reads in the device's terms — there are no landmarks to offer, so the evidence offers the accessibility identifiers it found:
 
 ```
-Ambiguous element: button("Bookmark") matched 3 elements on the screen.
-
-Matched:
+found: Ambiguous element: button("Bookmark") matched 3 elements on the screen —
   1. Button "Bookmark"  [testId: event-1-bookmark]
   2. Button "Bookmark"  [testId: event-2-bookmark]
   3. Button "Bookmark all"
-
-Disambiguate with one of:
+why: A verb acts on exactly ONE element: a descriptor that matches several is refused, never settled by the first.
+fix: designate one of them:
   • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any descriptor works as the scope
   • test id        testId("event-1-bookmark")   [also here: event-2-bookmark]
   • other element  a button() or field() may name one thing where this does not
+read: docs/19-linting.md#w3-unambiguous-element
 ```
 
 Taking "the first match" is the failure this rule exists to prevent: the spec stays green while the visitor acts on a different element, and nothing ever reports it. Ambiguity is an authoring mistake, not something DOM order should arbitrate.

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { REFUSAL_WHY } from '../lesson/refusal.js';
 import type { ElementMatch } from '../ports/browser.port.js';
 import { describeAmbiguity, formatElement } from './ambiguity.js';
 import { link, main, navigation, region, within } from './elements.js';
@@ -203,8 +204,8 @@ describe('describeAmbiguity', () => {
             url: 'http://site.test/',
         });
 
-        // Then - an agent reading the failure can find the full rule
-        expect(message).toContain('CONVENTIONS W3');
-        expect(message).toContain('docs/13-elements.md#designating-exactly-one-element');
+        // Then - an agent reading the failure reads the rule, and where it is whole
+        expect(message).toContain(`why: ${REFUSAL_WHY['w3-unambiguous-element']}`);
+        expect(message).toContain('read: docs/19-linting.md#w3-unambiguous-element');
     });
 });

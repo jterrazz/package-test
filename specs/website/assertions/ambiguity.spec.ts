@@ -37,7 +37,7 @@ test('enumerates the candidates and the rewrites that would resolve them', async
     expect(message).toContain('in <nav>');
     expect(message).toContain('in <footer>');
     expect(message).toContain('within(navigation(), link("Articles"))');
-    expect(message).toContain('CONVENTIONS W3');
+    expect(message).toContain('read: docs/19-linting.md#w3-unambiguous-element');
 });
 
 test('names a candidate inside a `<search>` element by its landmark', async () => {

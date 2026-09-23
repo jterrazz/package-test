@@ -409,10 +409,11 @@ The `request` handed to it is the same `MatchableRequest` the match ran on: `{ b
 The moment a chain declares one contract, the network is guarded: every outgoing request during the action must match a declared, non-exhausted contract. Anything else fails the spec with an explicit error that rejects the action promise (never an unhandled rejection):
 
 ```
-Unmatched outgoing HTTP request during spec: POST https://api.openai.com/v1/chat/completions
-Declared contracts:
-  - POST https://api.openai.com/v1/chat/completions (exhausted)
-Every outgoing request of a chain that declares contracts must match one — declare it, or raise `times`.
+found: an unmatched outgoing request, POST https://api.openai.com/v1/chat/completions; declared:
+  - POST https://api.openai.com/v1/chat/completions (exhausted after 1)
+why: From its first contract, a chain’s network is strict: every outgoing request matches a declared contract.
+fix: declare a contract for POST https://api.openai.com/v1/chat/completions — or raise the `times` of the one it exhausted
+read: docs/19-linting.md#d7-strict-intercepts
 ```
 
 At chain end the same channel verifies `required` contracts: one that was declared and never requested fails the spec, naming its route.

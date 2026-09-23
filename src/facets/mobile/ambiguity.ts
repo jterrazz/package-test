@@ -1,4 +1,5 @@
 import { formatElement } from '../../model/elements/ambiguity.js';
+import { refusal } from '../../model/lesson/refusal.js';
 import type { MobileElementMatch, MobileElementRef } from '../../model/ports/device.port.js';
 
 /**
@@ -85,18 +86,11 @@ export function describeMobileAmbiguity(options: {
     const { element, matches } = options;
     const fixes = formatFixes(element, matches).map((fix) => `  • ${fix}`);
 
-    return [
-        `Ambiguous element: ${formatElement(element)} matched ${matches.length} elements on the screen.`,
-        '',
-        'A spec must designate exactly one element. Acting on the first match would let',
-        'this test keep passing while the visitor taps something else.',
-        '',
-        'Matched:',
-        ...matches.map((match, index) => formatMatch(match, index)),
-        '',
-        'Disambiguate with one of:',
-        ...fixes,
-        '',
-        'Docs: docs/13-elements.md#designating-exactly-one-element (CONVENTIONS W3)',
-    ].join('\n');
+    return refusal('w3-unambiguous-element', {
+        fix: ['designate one of them:', ...fixes].join('\n'),
+        found: [
+            `Ambiguous element: ${formatElement(element)} matched ${matches.length} elements on the screen —`,
+            ...matches.map((match, index) => formatMatch(match, index)),
+        ].join('\n'),
+    });
 }

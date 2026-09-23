@@ -165,7 +165,7 @@ describe('contract queue — strict failure message (CONVENTIONS D7)', () => {
 
         // Then - method + url + every declared contract with its state
         expect(error.message).toContain(
-            'Unmatched outgoing HTTP request during spec: GET https://unregistered.test/x',
+            'found: an unmatched outgoing request, GET https://unregistered.test/x; declared:',
         );
         expect(error.message).toContain(`- GET ${URL_A} (exhausted after 1)`);
         expect(error.message).toContain(`- POST ${URL_B}`);

@@ -254,7 +254,7 @@ describe('shared assertions', () => {
 
         // Then - table() without a database option violates A7 checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
         expect(() => result.table('users')).toThrow(
-            'table(): 2 databases are declared ("analyticsDb", "db") — pass { database: <key> } to target one of them.',
+            'found: table() names no database, and 2 databases are declared ("analyticsDb", "db")',
         );
     });
 });

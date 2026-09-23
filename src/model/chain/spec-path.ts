@@ -12,6 +12,8 @@
  * entry, the page's, a source checkout beside a bundle — reads the same one.
  */
 
+import { refusal } from '../lesson/refusal.js';
+
 /** A path relative to the spec file; `Extension` narrows its tail. */
 export type RelativePath<Extension extends string = string> =
     | `../${string}${Extension}`
@@ -46,12 +48,20 @@ export function isRelativePath(value: string): boolean {
     return value.startsWith('./') || value.startsWith('../');
 }
 
+/** A path as the relative one it may have meant — `out.txt` → `./out.txt`. */
+function asRelative(path: unknown): string {
+    const bare = typeof path === 'string' ? path.replace(/^\/+/u, '') : '';
+    return `./${bare === '' ? 'expected/output.txt' : bare}`;
+}
+
 /** Refuse anything that is not a relative path, naming the call that received it. */
 export function requireRelativePath(call: string, path: unknown): asserts path is string {
     if (typeof path !== 'string' || !isRelativePath(path)) {
         throw new TypeError(
-            `${call}(${JSON.stringify(path)}): a path is relative to the spec file — ` +
-                `start it with ./ or ../ (e.g. ${call}('./expected/output.txt')).`,
+            refusal('b2-relative-path-runtime', {
+                fix: `start it with ./ or ../, from the spec file: ${call}('${asRelative(path)}')`,
+                found: `${call}(${JSON.stringify(path)}), a path that is not relative to the spec file`,
+            }),
         );
     }
 }
@@ -68,8 +78,12 @@ export function file<const Path extends RelativePath>(
 ): FileAt<Path> {
     requireRelativePath('file', path);
     if (path.endsWith('/')) {
+        const bare = path.replace(/\/+$/u, '');
         throw new TypeError(
-            `file(${JSON.stringify(path)}): a path ending in / is a directory — name it with directory().`,
+            refusal('b2-relative-path-runtime', {
+                fix: `name the directory with directory(${JSON.stringify(path)}), or the file without its /: file(${JSON.stringify(bare)})`,
+                found: `file(${JSON.stringify(path)}), a path ending in / — a directory's`,
+            }),
         );
     }
     return Object.freeze({ [DISK]: 'file', path }) as FileAt<Path>;
@@ -88,7 +102,10 @@ export function directory<const Path extends RelativePath<'/'>>(
     requireRelativePath('directory', path);
     if (!path.endsWith('/')) {
         throw new TypeError(
-            `directory(${JSON.stringify(path)}): a directory's path ends in / (e.g. directory('./expected/scaffold/')).`,
+            refusal('b2-relative-path-runtime', {
+                fix: `end it in /: directory(${JSON.stringify(`${path}/`)}), or name a file with file(${JSON.stringify(path)})`,
+                found: `directory(${JSON.stringify(path)}), a path that does not end in /`,
+            }),
         );
     }
     return Object.freeze({ [DISK]: 'directory', path }) as DiskDirectory & {
@@ -134,16 +151,21 @@ function spelled(value: unknown): string {
  */
 export function requireDiskFile(verb: string, value: unknown, extension = ''): DiskFile {
     if (!isDiskFile(value)) {
-        const hint = isDiskDirectory(value)
-            ? 'it takes one file, not a directory'
-            : 'a string is a value — name the file with file()';
         throw new TypeError(
-            `${verb}(${spelled(value)}): ${hint} (e.g. ${verb}(file('./${exampleOf(verb, extension)}'))).`,
+            refusal('b2-relative-path-runtime', {
+                fix: `name one file: ${verb}(file('./${exampleOf(verb, extension)}'))`,
+                found: isDiskDirectory(value)
+                    ? `${verb}(${spelled(value)}), a directory where one file is read`
+                    : `${verb}(${spelled(value)}), a value where a file is read`,
+            }),
         );
     }
     if (!value.path.endsWith(extension)) {
         throw new TypeError(
-            `${verb}(${spelled(value)}): the file ${verb}() reads ends in ${extension}.`,
+            refusal('b2-relative-path-runtime', {
+                fix: `name the ${extension} file ${verb}() reads: ${verb}(file('./${exampleOf(verb, extension)}'))`,
+                found: `${verb}(${spelled(value)}), a file not ending in ${extension}`,
+            }),
         );
     }
     return value;
@@ -153,7 +175,10 @@ export function requireDiskFile(verb: string, value: unknown, extension = ''): D
 export function requireDiskTarget(verb: string, value: unknown): DiskTarget {
     if (!isDiskTarget(value)) {
         throw new TypeError(
-            `${verb}(${spelled(value)}): a string is a value — name the disk with file('./…') or directory('./…/').`,
+            refusal('b2-relative-path-runtime', {
+                fix: `name the disk: ${verb}(file('./…')) for a file, ${verb}(directory('./…/')) for a directory`,
+                found: `${verb}(${spelled(value)}), a value where the disk is read`,
+            }),
         );
     }
     return value;

@@ -73,7 +73,7 @@ Without `root`, the framework finds the package being tested by walking up from 
 | `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                              |
 | `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths)) |
 
-Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit "Unmatched outgoing HTTP request" error (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
+Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit refusal naming "an unmatched outgoing request" (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
 ```typescript
 test('serves french content', async () => {

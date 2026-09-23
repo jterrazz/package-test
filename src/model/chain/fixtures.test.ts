@@ -46,7 +46,7 @@ describe('fixtures — source resolution', () => {
             // Given - a name that leaves its folder implicit
             // Then - the refusal says how a file is named
             expect(() => copyPlan(path, testDir, '/work')).toThrow(
-                /a path is relative to the spec file/u,
+                /a path that is not relative to the spec file/u,
             );
         },
     );
@@ -55,7 +55,7 @@ describe('fixtures — source resolution', () => {
         // Given - a file the leaf does not carry
         // Then - the refusal carries the absolute path it looked at
         expect(() => copyPlan('./fixtures/absent.txt', testDir, '/work')).toThrow(
-            `fixture: "./fixtures/absent.txt" names nothing — ${resolve(testDir, 'fixtures/absent.txt')} does not exist.`,
+            `found: fixture: "./fixtures/absent.txt" names nothing — ${resolve(testDir, 'fixtures/absent.txt')} does not exist`,
         );
     });
 });
@@ -97,7 +97,7 @@ describe('fixtures — copy semantics (the trailing slash says which)', () => {
         // Given - a directory fixture, no trailing slash
         // Then - the path says one kind and the disk the other
         expect(() => copyPlan('./fixtures/proj', testDir, freshWorkDir())).toThrow(
-            /names a directory — end its path in \/ \(directory\('\.\/fixtures\/proj\/'\)\)/u,
+            /names a directory\n.*\nfix: end its path in \/: directory\('\.\/fixtures\/proj\/'\)/u,
         );
     });
 
@@ -105,7 +105,7 @@ describe('fixtures — copy semantics (the trailing slash says which)', () => {
         // Given - a file fixture in spread form
         // Then - the refusal names file()
         expect(() => copyPlan('./fixtures/single.txt/', testDir, freshWorkDir())).toThrow(
-            /names a file — a path ending in \/ is a directory \(file\('\.\/fixtures\/single\.txt'\)\)/u,
+            /names a file\n.*\nfix: drop the \/: file\('\.\/fixtures\/single\.txt'\)/u,
         );
     });
 

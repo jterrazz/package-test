@@ -3,9 +3,11 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { lessonParts, missingParts } from '../src/model/lesson/lesson.js';
+import { refusal, REFUSAL_WHY } from '../src/model/lesson/refusal.js';
+import type { RefusalRow } from '../src/model/lesson/refusal.js';
 import { CHECKER_PASS_IDS } from './checker.js';
 import { lessonOf, lessons, readOf, whyOf } from './lesson.js';
-import { CHECKER_PASSES } from './manifest.js';
+import { CHECKER_PASSES, RUNTIME_RULES } from './manifest.js';
 import plugin from './plugin.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -30,6 +32,15 @@ function goldenCheckerLines(): string[] {
         }
     }
     return lines;
+}
+
+/** Every module under `dir`, concatenated — where a refusal is thrown. */
+function sourcesUnder(dir: string): string {
+    return readdirSync(dir, { recursive: true })
+        .map(String)
+        .filter((path) => path.endsWith('.ts') && !/\.test(?:-d)?\.tsx?$/u.test(path))
+        .map((path) => readFileSync(resolve(dir, path), 'utf8'))
+        .join('\n');
 }
 
 describe('whyOf — the convention in one sentence', () => {
@@ -89,6 +100,22 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
         expect(lines.length).toBeGreaterThan(20);
         for (const message of lines) {
             expect(missingParts(message)).toStrictEqual([]);
+        }
+    });
+
+    test('k11 — every refusal of the runtime opens on its row’s sentence, and is thrown somewhere', () => {
+        // Given - the runtime rows that refuse, and the source that throws them
+        const source = sourcesUnder(resolve(ROOT, 'src'));
+        for (const [row, why] of Object.entries(REFUSAL_WHY)) {
+            const entry = RUNTIME_RULES.find((rule) => rule.name === row);
+
+            // Then - the row exists, opens on the refusal's why, and a module throws it
+            expect(entry?.channel).toBe('runtime');
+            expect(whyOf(entry?.convention ?? '')).toBe(why);
+            expect(source).toContain(`refusal('${row}'`);
+            expect(
+                missingParts(refusal(row as RefusalRow, { fix: 'the gesture', found: 'the case' })),
+            ).toStrictEqual([]);
         }
     });
 

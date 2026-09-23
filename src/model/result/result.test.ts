@@ -18,7 +18,7 @@ describe('database option rule (CONVENTIONS A7)', () => {
         // Then - the explicit option is rejected as redundant, synchronously
         // checker-disable-next-line c8 -- the A7 refusal fires before the seed is read: the path names nothing on purpose
         expect(() => cli.seed(file('./seeds/anything.sql'), { database: 'db' })).toThrow(
-            'seed(): redundant database option — "db" is the only declared database.',
+            'found: seed() names a database, and "db" is the only one declared',
         );
     });
 
@@ -28,7 +28,7 @@ describe('database option rule (CONVENTIONS A7)', () => {
 
         // Then - table() with a database option violates A7
         expect(() => result.table('t', { database: 'db' })).toThrow(
-            'table(): redundant database option — "db" is the only declared database.',
+            'found: table() names a database, and "db" is the only one declared',
         );
     });
 

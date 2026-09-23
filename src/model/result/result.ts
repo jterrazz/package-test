@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 
 import type { SpecificationConfig } from '../chain/builder.js';
 import { safeRealpath } from '../chain/resolve.js';
+import { refusal } from '../lesson/refusal.js';
 import { CaptureScope } from '../matching/match.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import { DirectoryAccessor } from './directory.js';
@@ -122,13 +123,18 @@ export function validateDatabaseOption(
     }
     if (keys.length >= 2 && !database) {
         throw new Error(
-            `${method}(): ${keys.length} databases are declared (${keys.map((k) => `"${k}"`).join(', ')}) — ` +
-                `pass { database: <key> } to target one of them.`,
+            refusal('a7-database-runtime', {
+                fix: `pass the database it reads: { database: '${keys[0]}' }, or another declared key`,
+                found: `${method}() names no database, and ${keys.length} databases are declared (${keys.map((k) => `"${k}"`).join(', ')})`,
+            }),
         );
     }
     if (keys.length === 1 && database) {
         throw new Error(
-            `${method}(): redundant database option — "${keys[0]}" is the only declared database.`,
+            refusal('a7-database-runtime', {
+                fix: `delete { database: '${database}' }`,
+                found: `${method}() names a database, and "${keys[0]}" is the only one declared`,
+            }),
         );
     }
 }

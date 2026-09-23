@@ -1,6 +1,7 @@
 import { existsSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
+import { refusal } from '../lesson/refusal.js';
 import { resolveSpecPath } from './resolve.js';
 
 /**
@@ -35,15 +36,29 @@ type FixtureCopyPlan = {
 export function copyPlan(path: string, specDir: string, workDir: string): FixtureCopyPlan {
     const src = resolveSpecPath('fixture', path, specDir);
     if (!existsSync(src)) {
-        throw new Error(`fixture: ${JSON.stringify(path)} names nothing — ${src} does not exist.`);
+        throw new Error(
+            refusal('b2-relative-path-runtime', {
+                fix: `create ${src}, or correct the path`,
+                found: `fixture: ${JSON.stringify(path)} names nothing — ${src} does not exist`,
+            }),
+        );
     }
     const spread = path.endsWith('/');
     const isDirectory = statSync(src).isDirectory();
     if (isDirectory !== spread) {
         throw new TypeError(
-            isDirectory
-                ? `fixture: ${JSON.stringify(path)} names a directory — end its path in / (directory('${path}/')), and its contents are spread into the working directory.`
-                : `fixture: ${JSON.stringify(path)} names a file — a path ending in / is a directory (file('${path.replace(/\/+$/u, '')}')).`,
+            refusal(
+                'b2-relative-path-runtime',
+                isDirectory
+                    ? {
+                          fix: `end its path in /: directory('${path}/') — its contents are spread into the working directory`,
+                          found: `fixture: ${JSON.stringify(path)} names a directory`,
+                      }
+                    : {
+                          fix: `drop the /: file('${path.replace(/\/+$/u, '')}')`,
+                          found: `fixture: ${JSON.stringify(path)} names a file`,
+                      },
+            ),
         );
     }
     const dest = spread ? workDir : resolve(workDir, basename(src));

@@ -32,6 +32,6 @@ test('an empty stream is an empty text: toBeEmpty refuses a stream in the page t
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a stream handed to toBeEmpty
     const table = result.console as unknown as TableAccessor;
     await expect(expect(table).toBeEmpty()).rejects.toThrow(
-        /an empty stream is an empty text — write expect\(<stream>\.text\)\.toBe\(''\)/u,
+        /an empty stream is an empty text\n.*\nfix: compare its text: expect\(<result>\.console\.text\)\.toBe\(''\)/u,
     );
 });

@@ -150,7 +150,7 @@ describe('contracts — strict failures (CONVENTIONS D7)', () => {
 
         // Then - the spec fails with the offending request and the queue state
         await expect(chain).rejects.toThrow(
-            `Unmatched outgoing HTTP request during spec: GET ${QUOTES_URL}`,
+            `found: an unmatched outgoing request, GET ${QUOTES_URL}`,
         );
         await expect(chain).rejects.toThrow(`- GET ${QUOTES_URL} (exhausted after 1)`);
     });
@@ -161,7 +161,7 @@ describe('contracts — strict failures (CONVENTIONS D7)', () => {
 
         // Then - the error names the offending request and the declared routes
         await expect(chain).rejects.toThrow(
-            'Unmatched outgoing HTTP request during spec: GET https://unregistered.spec.test/thing',
+            'found: an unmatched outgoing request, GET https://unregistered.spec.test/thing',
         );
         await expect(chain).rejects.toThrow(`- GET ${QUOTES_URL}`);
     });
@@ -219,7 +219,7 @@ describe('contracts — http request filters', () => {
 
         // Then - the URL/method matched but the filter did not: strict failure
         await expect(chain).rejects.toThrow(
-            `Unmatched outgoing HTTP request during spec: POST ${QUOTES_URL}`,
+            `found: an unmatched outgoing request, POST ${QUOTES_URL}`,
         );
     });
 });
