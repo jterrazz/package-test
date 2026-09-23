@@ -173,6 +173,25 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         await registerMatchers();
     });
 
+    // C13 — the 16 ground names are gone: no bridge reads them.
+    test('a golden named in expected/ is not read from the 16 _expected/ beside it', () => {
+        // Given - a spec directory holding only the 16 folder, and a golden it would match
+        const specDir = mkdtempSync(join(tmpdir(), 'bridge-'));
+        try {
+            mkdirSync(join(specDir, '_expected'));
+            writeFileSync(join(specDir, '_expected/out.txt'), 'built\n');
+            const subject = new TextAccessor('built\n', 'stdout', specDir);
+
+            // Then - the path is read where it says, and the refusal names it
+            expect(() => {
+                // checker-disable-next-line c8 -- negative spec: the golden missing from expected/ IS the behaviour under test
+                expect(subject).toMatch(file('./expected/out.txt'), { frozen: true });
+            }).toThrow(`does not exist at ${join(specDir, 'expected/out.txt')}`);
+        } finally {
+            rmSync(specDir, { force: true, recursive: true });
+        }
+    });
+
     // RUNTIME D14 — `toMatch` routes the disk to the golden and a value to
     // Vitest, and a golden handed a subject of the other kind is refused.
     test('a stream accessor is not a string: vitest refuses it, and its .text matches', () => {
