@@ -161,7 +161,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/seams/msw/handlers.ts',
             'src/seams/msw/server.ts',
             'src/seams/msw/worker.ts',
-            'src/seams/openai/openai.ts',
             'src/seams/playwright/playwright.adapter.ts',
             'src/seams/vitest-browser/commands.ts',
             'src/seams/vitest-browser/golden.ts',
