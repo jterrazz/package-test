@@ -84,7 +84,9 @@ import { codeOf } from './rule-code.js';
  * to that one run; without a baseline it fails on an ERROR finding, as ever.
  * A green verdict is exactly one line — `jterrazz.baseline.json › test: <n>
  * held across <k> rules`, whether the run checked, fixed or judged the root
- * member — the line `typescript check` shows beside its own ratchet's. A
+ * member — the line `typescript check` shows beside its own ratchet's; a
+ * project that keeps no section prints `jterrazz.baseline.json › test: nothing
+ * held`, and a run that defers names the judging file relative to the project. A
  * failing one prints every finding it counted and every plugin diagnostic
  * before its reasons, so a verdict and its evidence are one log. `--verbose`
  * adds to the green line where the run stood and every pass that ran.
@@ -213,6 +215,9 @@ function printFindings(violations: TokenViolation[], plugin: PluginDiagnostic[] 
     }
 }
 
+/** The one line a green run of a project keeping no `test` section prints. */
+const NOTHING_HELD = `${BASELINE_LABEL}: nothing held`;
+
 /** A line of the verdict, on the stream a human reads it from; never in the JSON. */
 function say(line: string): void {
     if (!json) {
@@ -248,7 +253,7 @@ function verdict(
     const errors = violations.filter((violation) => violation.severity === 'error');
     if (deferredTo !== undefined && violations.length > 0) {
         say(
-            `conventions checker: ${violations.length} finding(s) ${what}, judged by ${join(deferredTo, BASELINE_FILE)} › test`,
+            `conventions checker: ${violations.length} finding(s) ${what}, judged by ${relative(process.cwd(), join(deferredTo, BASELINE_FILE)) || BASELINE_FILE} › test`,
         );
         process.exit(0);
     }
@@ -257,10 +262,8 @@ function verdict(
         process.exit(1);
     }
     if (!json) {
-        // The success line names what actually ran — every pass, not just the
-        // Token scan.
         console.log(
-            `conventions checker: all passes clean ${what} (${passes})${violations.length > 0 ? ` — ${violations.length} warning(s)` : ''}`,
+            verbose ? `${NOTHING_HELD} — conventions checker ${what} (${passes})` : NOTHING_HELD,
         );
     }
     process.exit(0);

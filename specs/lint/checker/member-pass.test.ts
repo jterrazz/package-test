@@ -22,7 +22,16 @@ describe('checker CLI — the member pass', () => {
         // Given - a member with a config and only optional peers declared
         const result = await cli.exec(`--member ${member('clean')} ${WORKSPACE}`);
 
-        // Then - the run is clean, says which member it judged, and names the passes that actually ran — from the registry itself, and never the tree ones, which walked nothing
+        // Then - one line: the project keeps no section, so nothing is held
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+    });
+
+    test('`--verbose` names the member it judged and the passes that ran', async () => {
+        // Given - the same clean member, judged verbosely
+        const result = await cli.exec(`--member ${member('clean')} ${WORKSPACE} --verbose`);
+
+        // Then - the member, and the passes that actually ran — from the registry itself, and never the tree ones, which walked nothing
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('packages/clean');
         expect(result.stdout.text).toContain(
@@ -33,7 +42,7 @@ describe('checker CLI — the member pass', () => {
 
     test("a root whose only tests are its members' owes no config", async () => {
         // Given - a workspace root that delegates `test` to its members
-        const result = await cli.exec(`--member ${WORKSPACE} ${WORKSPACE}`);
+        const result = await cli.exec(`--member ${WORKSPACE} ${WORKSPACE} --verbose`);
 
         // Then - the root is silent, and it is named by its manifest
         expect(result.exitCode).toBe(0);
