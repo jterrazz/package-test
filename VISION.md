@@ -1408,65 +1408,20 @@ The api/jobs documents turned into indexes of links (a 6-line document pointing 
 - **Update mode writes the expectation into the test.** `TEST_UPDATE=1` rewrites a `toMatch(<value>)` argument in place (and a `toMatch(file())` file) (like Vitest's `toMatchInlineSnapshot`), keeping tokens where the old expectation had them.
 - **Route coverage** is computed at run time from the app's own route table (no OpenAPI required): at the end of the api project, every declared route no test reached is reported (ratchet-recordable in the `test` section); a declared OpenAPI file stays an optional source.
 
-### What the package-test branch did (iteration 14)
+## The exit plan — no legacy, a perfect end state (owner, 2026-09-23)
 
-- **One verb, a whole result.** `toMatch` on a response, a json, a stream
-  or a table compares it WHOLE: to a value written in place, dedented (a
-  text opening on a newline loses it, its closing line's whitespace and the
-  indentation its lines share), or to `file()`/`directory()`. A response
-  takes its `.http` text, headers a subset as in a golden; a json takes a
-  value; a table takes its rows, every column, a `Date` cell compared as
-  its ISO text; a tree and a container take no value. A RegExp on a subject
-  is refused. `toMatchRows` retired. The diff is the golden's.
-- **`sql` seeds.** ``.seed(sql`…`)`` is dedented and branded; it refuses
-  holes, so a seed stays data. It works on the api, jobs and integration
-  chains.
-- **Update mode writes into the test.** `TEST_UPDATE=1` finds the call from
-  the stack, locates the argument with a scanner that knows strings,
-  templates, comments and brackets, and rewrites it, keeping the tokens the
-  old value held. An empty value (`toMatch('')`) is filled. Several
-  rewrites to one file apply to the source as loaded (a per-file ledger).
-  In a page it goes through a server command. A `{ frozen: true }` value
-  and a `.not` are never rewritten.
-- **C28 `c28-ground-shared-or-inline`.** It counts the tests that reference
-  each ground file. A file one test references is an error unless it is a
-  directory, binary, over 150 lines or under `fixtures/`. `--fix` inlines
-  it (``sql`…` ``, a template, or `JSON.stringify` when dedent would change
-  it) and deletes it; a shared file moves to its level. It absorbs C14.
-  C9, C15 and C27 stay. A reference outside a test counts as shared.
-- **D20 `d20-whole-result`.** A test that reads `<result>.response`,
-  `<result>.json` or `<result>.table('<name>')` holds one whole comparison
-  of it. A read inside a function handed to `expect` (a refusal) is exempt.
-  It absorbs D12w; D15w stays.
-- **The api/jobs documents are retired.** The grammar keeps the cli keys
-  only; `kind:` is gone; the runner, schema, doors and chapter sections are
-  deleted. `request()` takes the `.http` text itself. This package's api
-  and jobs specs are TypeScript in the B form.
-- **Route coverage at run time.** The Hono adapter records what each test
-  sends and reads `app.routes`. Each specification writes a ledger; the api
-  project's global setup judges them after the last test and ratchets the
-  count under `jterrazz.baseline.json › test › routes/unreached`, a key the
-  checker keeps. A declared OpenAPI file (`test: { routes }`) stays an
-  optional source. B12 retired.
-- **Ids restart on a reset.** Each worker's cloned postgres schema owns its
-  sequences and a reset restarts them; sqlite clears `sqlite_sequence`.
-  Without it, ids written in place differed by worker.
+1. The real refactor starts from `main` in clean commits (never replaying vision/17's history): every tried-then-dropped form is absent — `…File` verbs, api/jobs documents, `--summary`, `toMatchRows`, transitional forms; the prototype plumbing (file: links, install-links .npmrc) never lands; VISION.md becomes chapters + ADRs then is deleted; VISION-signews-api.md deleted. Releases: @jterrazz/typescript 11.0, then @jterrazz/test 17.0.
+2. The wave keeps, temporarily, only what moves a repository from 16 to 17: the mover (C13 --fix), the rule-rename maps, the leftover-baseline finding.
+3. Right after the wave: @jterrazz/test 17.1 and @jterrazz/typescript 11.1 delete the mover, C13, the rename maps, the leftover-file detection, CHECKER_FLOOR, and every rule whose only job was to recognise the old world. Then a closing audit: no code, chapter, spec, estate wiki page or session memory names a retired form.
 
-### Raised by the package-test branch, iteration 14
+## Iteration 15 — the calls on 88–93 (2026-09-23)
 
-88. A lint document asserting only `exit: 1` passes when oxlint fails to
-    start on a config error (it happened here: a stale rule name in
-    `oxlint.e2e.json`). Should every lint document assert a report line?
-89. D13w misses an unfrozen negative value handed to a helper that catches
-    the failure. Update mode then rewrites the deliberately wrong value.
-    This tree marks them `{ frozen: true }`; the rule could follow the
-    helper.
-90. C28's fixer guesses whether dedent would keep a text as it is, since
-    `lint/` cannot import the runtime's `dedent`. Share the function
-    through a module both reach?
-91. Line coverage fell from 83.94 to 83.52, above the floor.
-92. In a page, the stack frame of a failure in this repository names an
-    internal router line before the test's own.
-93. HYPOTHESIS (2026-09-23): the component flake of 85/87 ("vitest-browser-react
-    … SyntaxError") came back once in this iteration and passed on a rerun.
-    The read that settles it is the one 87 names.
+| #        | Decision                                                                                                                       |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 88       | A lint-rule document goldens its report (`stdout`), never `exit:` alone; a rule refuses a document with an exit and no output. |
+| 89       | Accepted: a deliberately wrong expectation passed to a helper is marked `{ frozen: true }`.                                    |
+| 90       | `dedent` moves to a pure module both `src/` and `lint/` may import, so C28's fixer uses the runtime's own.                     |
+| 91       | Accepted.                                                                                                                      |
+| 92       | A failure raised in a browser page shows the test's own line first: the router's frames are cut from the stack.                |
+| 93       | Watched: the `DEBUG=vite:deps` loop runs during the real refactor.                                                             |
+| id clash | The proposed "marker between statements" rule takes a free id; B12 stays retired.                                              |
