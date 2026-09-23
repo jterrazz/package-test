@@ -167,6 +167,7 @@ runs:
 | guards (iter. 1) | shown: role C24 (static), locality C15/C14 over the wrappers, existence C8 (checker pass; the oxlint C8 retired), F2 refusing ground imports, C25 refusing golden synonyms                                                                                                                                                                                                    | ignores the four names at any depth                                            | —                   |
 | iteration 2      | shown: `.text` the comparable text and `.raw` the capture, `toContain` vitest's and refused on a stream by the types, D8w restated on `.raw` (`d8w-raw-bypass`), the mover's stream gesture; C8 over module tests (member pass); C24 through a `const`; C26 `file()` built in the test only; `schema/` under `jterrazz.typescript.roots`                                      | `--oxlint-report` handed over; `jterrazz.typescript.roots` read                | —                   |
 | iteration 3      | shown: the mover gated on C13 (a tree with no 16 folder left byte for byte) and walking every member's module tests, C13 beside a module test; a directive naming `d8w-text-bypass` renamed, its line read as `.raw`; `toBeEmpty` a table's matcher alone (types, both runtimes, the mover); every rule reading a path below its package root; the green ratchet run one line | —                                                                              | —                   |
+| iteration 4      | shown: the mover gated per file (a 17 file beside a 16 one left byte for byte, a 16 pool reaching only the files naming `$FIXTURES/`); the directive rename on every `--fix`, read in a comment only; a file outside every package read below its repository root; the Makefile's six targets, `fix` the two fixers                                                           | —                                                                              | —                   |
 | ratchet, report  | shown: `test.baseline.json` recorded by `jterrazz-test-check baseline` and judged by the checker; the checker's report line; `lintReport` published, refusing oxlint's graphical frames; iteration 2: `--oxlint-report <file>` read, the judging run prints every finding it counts and every plugin diagnostic                                                               | `typescript.baseline.json`, jterrazz keys refused                              | —                   |
 
 Each branch keeps one commit per unit, so the owner can read the vision
@@ -592,3 +593,48 @@ dependency bump, and a decision (rare, reasoned) is not a measurement.
 | 36                   | Accepted as is.                                                                                                                                                                                                                                                                                         |
 | 37                   | The spine grows a Makefile contract: every repository answers `make install`, `build`, `lint`, `fix`, `test` and `check`, the toolchain checks the targets exist, and the flows speak only these six.                                                                                                   |
 | coverage             | Every decision of this file and every rule has a spec that FAILS when the behaviour is broken; an audit per package maps decision → spec, an adversarial pass tries to break a "covered" row, makers fill the gaps. Locked by the catalogue meta-tests, the capability matrix and the coverage ratchet. |
+
+### What the package-test branch decided (iteration 4)
+
+- **32** — a file is 16.x-shaped when a 16 folder it stands on is still
+  there: one beside it (C13's sibling probe), or the 16 pool when the file
+  names it by `$FIXTURES/`. C13's pool clause flags every spec under a 16
+  pool; the gate narrows it to the files that name the pool, or a 16 pool
+  would re-open the per-tree gate. Which directories held a 16 folder is
+  read before the renames erase it. Left for the reader: a 16 file with no
+  16 folder beside it and no `$FIXTURES/`, and a path spelled in full
+  against a 16 folder elsewhere in the tree.
+- **33** — the rename keeps its covered-line move (`.text` → `.raw`): an
+  ungated mover left that line on `.text` too. A renamed directive no longer
+  matches, so a second run is a no-op. `Migration` gains `directives` (the
+  files whose directives alone moved), printed on their own line. Found by
+  running `make fix` here: the ungated rename rewrote the mover's own unit
+  test, whose Given spells directives in string literals — a directive is
+  now read in a comment only (`//` or `/*` outside every string the line
+  opens).
+- **34** — the NEAREST of a `package.json` and a `.git` (a directory or a
+  worktree's file) is the project root, so a manifest-less clone inside a
+  directory that has one reads below its own `.git`. `projectSegments`,
+  `specsAnchor`'s ceiling, the retired `tests/` clause, I1's spine base and
+  the CLI's "is this a specs tree" read it. A path neither holds — a rule
+  case's `/repo/…`, a string with nothing on disk — is still read whole.
+- **37** — `fix` depends on `build` (the checker it runs is this package's
+  own `dist/checker.js`), runs `npx typescript fix` then the checker's
+  `--fix`, and stops. `docs` and `coverage` left the Makefile (`npm run
+docs`/`coverage` stay), and `lint:fix` left package.json. A meta-test,
+  `lint/makefile.test.ts`, holds the six and `fix`'s recipe.
+
+### Raised by the package-test branch, iteration 4
+
+38. The toolchain's Suppressions pass reads a directive spelled inside a
+    string literal: `make fix` failed on the mover's unit test (a
+    `-line` directive in a string, no `-- reason`). Align it with the
+    mover's comment-only reading?
+39. A path no package and no repository holds is still read whole — the
+    rule tests' virtual `/repo/…` paths live there. Move the rule tests onto
+    a real checkout (as `checkoutUnder` does) and refuse to judge such a
+    path, or accept the escape?
+40. This repository's `fix` builds first because its checker is its own
+    `dist/`. A consumer's `fix` runs the installed checker and needs no
+    build: does the contract say anything about a target's prerequisites,
+    or only that the six exist?
