@@ -1,6 +1,7 @@
+/* oxlint-disable jterrazz/c2-http-only-requests -- C24 sends a body file to requests/ (variant A: `.post(path, file('./requests/x.json'))`) while C2 refuses anything but `.http` there, so the body-file specs below cannot satisfy both; the conflict is question 41 of VISION.md. */
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../../../src/index.js';
+import { directory, file } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 // ── Critical paths — both node and compose ──
@@ -109,6 +110,52 @@ describe('requests', () => {
         });
     });
 
+    test('sends POST with a body read from a file', async () => {
+        // Given - the body in requests/erin.json, not written inline
+        const result = await api.post('/users', file('./requests/erin.json'));
+
+        // Then - the app parsed the JSON the file holds, and stored it
+        expect(result.status).toBe(201);
+        await expect(result.table('users', { database: 'db' })).toMatchRows({
+            columns: ['name', 'email'],
+            rows: [['Erin', 'erin@test.com']],
+        });
+    });
+
+    test('sends PUT with a body read from a file', async () => {
+        // Given - a user seeded at a known id, and the new fields in requests/alice-renamed.json
+        const result = await api
+            .seed(file('./seeds/one-user-at-id.sql'), { database: 'db' })
+            .put('/users/1000', file('./requests/alice-renamed.json'));
+
+        // Then - the row carries the fields the file holds
+        expect(result.status).toBe(200);
+        await expect(result.table('users', { database: 'db' })).toMatchRows({
+            columns: ['name', 'email'],
+            rows: [['Alice Renamed', 'alice.renamed@test.com']],
+        });
+    });
+
+    test('a JSON body file is sent as its value, the way an inline body is', async () => {
+        // Given - requests/erin.json, written over four indented lines
+        const result = await api.post('/echo-raw', file('./requests/erin.json'));
+
+        // Then - the app received the value serialised, not the file's layout
+        expect(result.status).toBe(200);
+        expect(result.response.body).toStrictEqual({
+            raw: '{"email":"erin@test.com","name":"Erin"}',
+        });
+    });
+
+    test('a body file that is not JSON is sent verbatim', async () => {
+        // Given - a plain-text body whose whitespace is significant
+        const result = await api.post('/echo-raw', file('./requests/note.txt'));
+
+        // Then - the app received the file's bytes as they are written
+        expect(result.status).toBe(200);
+        expect(result.response.body).toStrictEqual({ raw: 'kept  as\n    written\n' });
+    });
+
     test('sends DELETE request', async () => {
         // Given - non-existent resource
         const result = await api.delete('/users/999');
@@ -121,6 +168,14 @@ describe('requests', () => {
 // ── Edge cases ──
 
 describe('request errors', () => {
+    test('refuses a directory as a body, naming the one-file form', async () => {
+        // Given - a body named by directory()
+        // Then - the chain rejects before a request is sent: a body is one file
+        await expect(api.post('/users', directory('./requests/'))).rejects.toThrow(
+            '.post("/users", directory("./requests/")): a body is one file — name it with file().',
+        );
+    });
+
     test('throws on nonexistent request file', async () => {
         // Given - reference to a nonexistent .http file
         // Then - the chain rejects with ENOENT

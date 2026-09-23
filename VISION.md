@@ -638,3 +638,14 @@ docs`/`coverage` stay), and `lint:fix` left package.json. A meta-test,
     `dist/`. A consumer's `fix` runs the installed checker and needs no
     build: does the contract say anything about a target's prerequisites,
     or only that the six exist?
+
+### Raised by the package-test branch, the spec-coverage pass
+
+41. Variant A sends a body from the disk —
+    `.post('/orders', file('./requests/order.json'))` — and C24 holds a
+    body to `requests/`; C2 still refuses any file in `requests/` that is
+    not a `.http`, and its fix sends it to `fixtures/`, which C24 then
+    refuses. No body file can satisfy both. The body specs
+    (`specs/api/sending/`) carry a C2 suppression until it is decided: does
+    `requests/` hold the body files a verb names (C2 relaxed to what a
+    chain sends), or does a body file live elsewhere (C24's row moved)?
