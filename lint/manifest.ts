@@ -1111,6 +1111,19 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte, under the same role and the same name, is a warning on every copy; it belongs in the specs root's folder of its role (`<specs>/seeds/<name>`), named by the path that climbs to it. Fixed by `--fix`: one copy is moved there — a `git mv` in a work tree — the others deleted, and every path of the specs tree that named a copy rewritten; a specs root already holding the name with other content is left to the author.",
+        facet: 'model',
+        family: 'C',
+        fix: 'Run `jterrazz-test-check <root> --fix`, or keep the copies apart on purpose and record them in the ratchet.',
+        id: 'C27',
+        name: 'c27w-duplicate-ground',
+        rationale:
+            "Copies drift: one leaf's seed gains a column, the other's does not, and the reader of either cannot tell a difference meant from one forgotten.",
+        reach: 'ground',
+    },
+    {
+        channel: 'checker',
+        convention:
             "A path leaves its leaf only into the specs root's own ground: a path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory nor under one of `<specs>/fixtures/`, `<specs>/seeds/`, `<specs>/requests/`, `<specs>/expected/` — the four roles, one level up — is an error; ground shared by several leaves goes there, in the folder of its role (C24 judges which). A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too.",
         facet: 'model',
         family: 'C',

@@ -17,6 +17,7 @@ import {
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import { treeEntries } from '../src/seams/git/tree.js';
 import {
+    checkCopiedGround,
     checkDatabaseProperty,
     checkDeadFixtures,
     checkDiskTargetsExist,
@@ -123,6 +124,7 @@ export const TREE_PASS_IDS = [
     'c20-facet-folder',
     'c21w-ground-owned-by-one',
     'c23-seed-no-clock-read',
+    'c27w-duplicate-ground',
     'c8-disk-target-exists',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
@@ -501,6 +503,7 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
         ...checkSpecDescriptionsUnique(rootDir),
         ...checkDeadFixtures(rootDir),
         ...checkPoolFixtureSharing(rootDir),
+        ...checkCopiedGround(rootDir),
         ...checkLocalFixtureReach(rootDir),
         ...checkDiskTargetsExist(rootDir),
         ...checkDockerRunnerAwaitUsing(rootDir),

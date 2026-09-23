@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
@@ -1166,6 +1167,234 @@ export function fixPoolFixtures(rootDir: string): string[] {
             }
         }
         moved.push(`${relative(rootDir, join(pool, entry))} → ${relative(rootDir, destination)}`);
+    }
+    return moved;
+}
+
+// ── C27 (ground copied across leaves) ────────────────────────────────────────
+
+/**
+ * What an entry of ground holds, as one string two copies share: a file's
+ * bytes, a tree's every file by its path below the entry — the listing git
+ * keeps, so an ignored file is no difference.
+ */
+function fingerprintOf(path: string): string {
+    const hash = createHash('sha256');
+    const visit = (current: string, below: string): void => {
+        if (!isDir(current)) {
+            hash.update(`${below}\0`);
+            hash.update(readFileSync(current));
+            hash.update('\0');
+            return;
+        }
+        const children = treeEntries(current)
+            .map((child) => child.name)
+            .toSorted();
+        for (const name of children) {
+            visit(join(current, name), `${below}/${name}`);
+        }
+    };
+    visit(path, '');
+    return `${isDir(path) ? 'tree' : 'file'}:${hash.digest('hex')}`;
+}
+
+/** One entry of ground copied into several leaves, and where the copies belong. */
+type CopiedGround = {
+    /** The copies, one per leaf, sorted — the first is the one a fix moves. */
+    copies: string[];
+    /** What every copy holds. */
+    fingerprint: string;
+    /** The specs root's folder of the copies' role, holding the entry by its name. */
+    target: string;
+};
+
+/** Every leaf ground entry of `specsRoot`, keyed by its role, its name and what it holds. */
+function leafGroundOf(specsRoot: string): Map<string, CopiedGround> {
+    const groups = new Map<string, CopiedGround>();
+    for (const dir of listDirs(specsRoot)) {
+        if (dir === specsRoot) {
+            continue;
+        }
+        for (const role of GROUND_DIRS) {
+            const ground = join(dir, role);
+            if (!isConventionalSubdir(ground)) {
+                continue;
+            }
+            for (const entry of treeEntries(ground)) {
+                const path = join(ground, entry.name);
+                const fingerprint = fingerprintOf(path);
+                const key = `${role}/${entry.name}\0${fingerprint}`;
+                const group = groups.get(key) ?? {
+                    copies: [],
+                    fingerprint,
+                    target: join(specsRoot, role, entry.name),
+                };
+                group.copies.push(path);
+                groups.set(key, group);
+            }
+        }
+    }
+    return groups;
+}
+
+/**
+ * Ground entries — a file or a tree — that two leaves or more hold byte for
+ * byte under the same role and the same name.
+ */
+function copiedGround(rootDir: string): CopiedGround[] {
+    const copied: CopiedGround[] = [];
+    for (const specsRoot of findSpecsRoots(rootDir)) {
+        for (const group of leafGroundOf(specsRoot).values()) {
+            if (group.copies.length > 1) {
+                copied.push({ ...group, copies: group.copies.toSorted() });
+            }
+        }
+    }
+    return copied;
+}
+
+/**
+ * CONVENTIONS C27 — ground several leaves share lives once. An entry of a
+ * leaf's ground that another leaf holds byte for byte, under the same role
+ * and name, is a copy: it belongs in the specs root's folder of its role,
+ * named by the path that climbs to it.
+ *
+ * The catch: a seed copied into every leaf that needs it. The copies drift —
+ * one leaf's gains a column, the next does not — and the reader of either
+ * cannot tell a deliberate difference from a forgotten one. A warning, since
+ * two leaves may mean to diverge tomorrow; `--fix` moves one copy and rewrites
+ * every path that named any of them.
+ */
+export function checkCopiedGround(rootDir: string): TokenViolation[] {
+    return copiedGround(rootDir).flatMap(({ copies, fingerprint, target }) => {
+        const taken = treeKind(target) !== undefined && fingerprintOf(target) !== fingerprint;
+        const where = relative(rootDir, target);
+        return copies.map((copy) => ({
+            file: relative(rootDir, copy),
+            line: 1,
+            message: `the same ${isDir(copy) ? 'tree' : 'file'} is in ${copies
+                .filter((other) => other !== copy)
+                .map((other) => relative(rootDir, other))
+                .join(', ')} — ground several leaves share lives once, in ${where}${
+                taken
+                    ? `, which holds another ${basename(target)}: rename one of the two`
+                    : ' — `--fix` moves it there and rewrites every path that named a copy'
+            }`,
+            rule: 'c27w-duplicate-ground',
+            severity: 'warn' as const,
+        }));
+    });
+}
+
+/** `to`, as the relative path a file in `from` names it by. */
+function pathFrom(from: string, to: string): string {
+    const rest = relative(from, to).split(sep).join('/');
+    return rest.startsWith('.') ? rest : `./${rest}`;
+}
+
+/** `path`, written from `from`, moved from the entry `copy` to the entry `target` — or `undefined` when it names no part of the copy. */
+function repointed(
+    from: string,
+    path: string,
+    { copy, target }: { copy: string; target: string },
+): string | undefined {
+    const reached = resolve(from, path);
+    if (reached !== copy && !isWithin(copy, reached)) {
+        return undefined;
+    }
+    const moved = pathFrom(from, join(target, relative(copy, reached)));
+    return path.endsWith('/') && !moved.endsWith('/') ? `${moved}/` : moved;
+}
+
+/** The literal paths a source writes, rewritten where one names a copy. */
+function repointSource(file: string, move: (path: string) => string | undefined): string {
+    const text = readText(file);
+    const scanned = blankComments(text);
+    let next = '';
+    let last = 0;
+    for (const match of scanned.matchAll(STRING_LITERAL)) {
+        const value = match.groups?.single ?? match.groups?.double ?? match.groups?.template;
+        const moved = value === undefined || !isRelativePath(value) ? undefined : move(value);
+        if (moved !== undefined) {
+            next += `${text.slice(last, match.index + 1)}${moved}`;
+            last = match.index + 1 + (value?.length ?? 0);
+        }
+    }
+    return `${next}${text.slice(last)}`;
+}
+
+/** The paths a document's keys name, rewritten on their lines where one names a copy. */
+function repointDocument(file: string, move: (path: string) => string | undefined): string {
+    const text = readText(file);
+    let named;
+    try {
+        named = documentPaths(parseSpecDocument(text, file));
+    } catch {
+        return text;
+    }
+    const lines = text.split('\n');
+    for (const { line, path } of named) {
+        const moved = move(path);
+        const at = line - 1;
+        if (moved === undefined || lines[at] === undefined) {
+            continue;
+        }
+        const escaped = path.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
+        lines[at] = lines[at].replace(
+            new RegExp(String.raw`(^|[\s'"[,])${escaped}(?=$|[\s'"\],])`, 'u'),
+            (_whole, lead: string) => `${lead}${moved}`,
+        );
+    }
+    return lines.join('\n');
+}
+
+/**
+ * Apply C27: one copy of each copied entry moves to the specs root's folder
+ * of its role — a `git mv` in a work tree — the others are deleted, and every
+ * path of the specs tree that named a copy names the moved entry. An entry the
+ * target already holds byte for byte keeps it and deletes every copy; one
+ * holding something else is the author's call, and nothing moves. A leaf's
+ * ground folder the move empties goes with it. Returns
+ * what moved, relative to `rootDir`.
+ */
+export function fixCopiedGround(rootDir: string): string[] {
+    const moved: string[] = [];
+    for (const { copies, fingerprint, target } of copiedGround(rootDir)) {
+        const held = treeKind(target) !== undefined;
+        if (held && fingerprintOf(target) !== fingerprint) {
+            continue;
+        }
+        const specsRoot = dirname(dirname(target));
+        for (const file of listFiles(specsRoot, isReferrer)) {
+            const from = dirname(file);
+            const move = (path: string): string | undefined =>
+                copies
+                    .map((copy) => repointed(from, path, { copy, target }))
+                    .find((next) => next !== undefined);
+            const text = readText(file);
+            const next = file.endsWith(SPEC_EXTENSION)
+                ? repointDocument(file, move)
+                : repointSource(file, move);
+            if (next !== text) {
+                writeFileSync(file, next);
+            }
+        }
+        const [first, ...others] = copies;
+        if (first !== undefined && !held) {
+            mkdirSync(dirname(target), { recursive: true });
+            moveKeepingHistory(first, target);
+        }
+        for (const copy of held ? copies : others) {
+            rmSync(copy, { force: true, recursive: true });
+        }
+        for (const ground of new Set(copies.map((copy) => dirname(copy)))) {
+            if (existsSync(ground) && readdirSync(ground).length === 0) {
+                rmSync(ground, { recursive: true });
+            }
+        }
+        moved.push(
+            `${copies.map((copy) => relative(rootDir, copy)).join(', ')} → ${relative(rootDir, target)}`,
+        );
     }
     return moved;
 }
