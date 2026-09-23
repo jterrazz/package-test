@@ -19,8 +19,13 @@ test('reads the files the app wrote to disk, at the path it answered', async () 
         .post('/exports');
     const exported = exportedTo(result.response.body);
 
-    // Then - the tree the app wrote is the golden one, and its file reads whole
-    expect(result.status).toBe(201);
+    // Then - the answer names where it wrote, the tree there is the golden one, and its file reads whole
+    expect(result.response).toMatch(`
+        HTTP/1.1 201 Created
+        content-type: application/json
+
+        {"directory": "{{path}}"}
+    `);
     await expect(result.directory(exported)).toMatch(directory('./expected/export/'));
     expect(result.file(join(exported, 'users.json')).exists).toBe(true);
 });

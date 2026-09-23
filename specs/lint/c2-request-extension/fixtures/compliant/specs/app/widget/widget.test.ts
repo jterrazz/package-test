@@ -8,5 +8,5 @@ test('creates a user', async () => {
     const result = await api.request(file('./requests/create-user.http')); // checker-disable-line c28 -- an input tree of the c2-request-extension spec: its file form is what the rule reads
 
     // Then - created
-    expect(result.response.status).toBe(201);
+    expect(result.response.status).toBe(201); // oxlint-disable-line jterrazz/d20-whole-result -- an input tree of the c2-request-extension spec: the probe is incidental to the rule it feeds
 });

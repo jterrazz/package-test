@@ -10,7 +10,6 @@ import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import type { LintPlugin, LintRule } from './oxlint-api.js';
 import { anchorOf } from './rule-code.js';
 import { c2RequestExtension } from './rules/api/c2-request-extension.js';
-import { d12wResponseBodyProbe } from './rules/api/d12w-response-body-probe.js';
 import { d15wStatusOnlyProbe } from './rules/api/d15w-status-only-probe.js';
 import { b6wRedundantEnvUrl } from './rules/cli/b6w-redundant-env-url.js';
 import { b9wProductCommand } from './rules/cli/b9w-product-command.js';
@@ -47,6 +46,7 @@ import { d16wAmbientValue } from './rules/model/d16w-ambient-value.js';
 import { d17wDoubleOnlyOracle } from './rules/model/d17w-double-only-oracle.js';
 import { d18wExistenceOnlyOracle } from './rules/model/d18w-existence-only-oracle.js';
 import { d19wProbeCluster } from './rules/model/d19w-probe-cluster.js';
+import { d20WholeResult } from './rules/model/d20-whole-result.js';
 import { e2PresetConfig } from './rules/model/e2-preset-config.js';
 import { e4wProjectBinding } from './rules/model/e4w-project-binding.js';
 import { e7wIncludePrefixExists } from './rules/model/e7w-include-prefix-exists.js';
@@ -137,12 +137,12 @@ const plugin: LintPlugin = {
         'd17w-double-only-oracle': d17wDoubleOnlyOracle,
         'd18w-existence-only-oracle': d18wExistenceOnlyOracle,
         'd19w-probe-cluster': d19wProbeCluster,
+        'd20-whole-result': d20WholeResult,
         'd2-await-io-matcher': d2AwaitIoMatcher,
         'd2w-await-sync-matcher': d2wAwaitSyncMatcher,
         'd6w-transform-token-equivalent': d6wTransformTokenEquivalent,
         'd8w-raw-bypass': d8wRawBypass,
         'd9w-single-use-ref': d9wSingleUseRef,
-        'd12w-response-body-probe': d12wResponseBodyProbe,
         'd13w-unfrozen-negative-fixture': d13wUnfrozenNegativeFixture,
         'd15w-status-only-probe': d15wStatusOnlyProbe,
         'e2-preset-config': e2PresetConfig,

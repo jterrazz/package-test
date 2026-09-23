@@ -140,7 +140,7 @@ A tool's output (a linter, a compiler, a product CLI) is asserted as a **full sn
 - **(d)** asserting **rule ids** in the E2E lint specs (avoiding coupling to a third-party binary's exact format);
 - **(e)** probes into **third-party-formatted** output.
 
-Every other use is converted to a full snapshot. A single "kitchen-sink" project + full snapshot serves as the whole-surface regression net (it churns — that is its job). The static channel cannot tell a legitimate grep from a lazy one, hence the process channel. The mechanized boundary for API responses (an amas of raw `.response.body` probes, or a lone HTTP-status probe) is caught by `d12w`/`d15w`; the negative-fixture guard is `d13w` (wrapped forms) plus a process rule for helper-routed residue.
+Every other use is converted to a full snapshot. A single "kitchen-sink" project + full snapshot serves as the whole-surface regression net (it churns — that is its job). The static channel cannot tell a legitimate grep from a lazy one, hence the process channel. The mechanized boundary for a result (a response, a json or a table read and never compared whole) is D20, and a lone HTTP-status probe `d15w`; the negative-fixture guard is `d13w` (wrapped forms) plus a process rule for helper-routed residue.
 
 ### K1 — retro-propagation
 
@@ -308,7 +308,7 @@ takes of them anyway, so neither side is silently dropped.
 | Convention                                        | Why no channel decides it                                             | What the machine takes                                                                                                    |
 | ------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | C1 grouping — own domain vs sibling aspects       | what the assets will become is a reading of the domain                | C21w flags the one-owner half                                                                                             |
-| D11 the legitimacy of a probe                     | absence, cut output and a third-party format are meanings, not shapes | d12w / d15w / D19w draw the cluster boundary                                                                              |
+| D11 the legitimacy of a probe                     | absence, cut output and a third-party format are meanings, not shapes | D20 / d15w / D19w draw the cluster boundary                                                                               |
 | D13 residue routed through a helper               | inter-procedural analysis is out of an oxlint JS plugin's reach       | d13w's bounded heuristic                                                                                                  |
 | K1 — whether a defect is a CLASS                  | a judgement about what will happen again                              | K2–K5 hold the catalogue complete and true                                                                                |
 | the truth of a Given/Then sentence, or of a title | a sentence can be well-formed and false                               | B4/B10/B11 and `vitest/valid-title` hold the shape                                                                        |

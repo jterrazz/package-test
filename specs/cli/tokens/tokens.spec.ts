@@ -145,6 +145,6 @@ describe('command — ANSI stripped by default (CONVENTIONS D6)', () => {
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('ansi-json');
 
         // Then - parsing works because ANSI is stripped by default
-        expect(result.json.value).toStrictEqual({ status: 'ok', value: 42 });
+        expect(result.json).toMatch({ status: 'ok', value: 42 });
     });
 });

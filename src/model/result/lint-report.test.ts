@@ -72,7 +72,7 @@ describe('lintReport — a report as a golden keeps it', () => {
     test("refuses oxlint's graphical rendering instead of reading it as a clean run", () => {
         // Given - the frames oxlint prints when no format is stated and no agent is advertised
         const report = [
-            '  ! jterrazz(d12w-response-body-probe): 3 body probes in one test',
+            '  ! jterrazz(d19w-probe-cluster): 3 probes in one test',
             '    ,-[specs/api/events/events.test.ts:3:1]',
         ].join('\n');
 

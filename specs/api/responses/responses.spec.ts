@@ -30,7 +30,12 @@ describe('responses', () => {
         const echoed = await api.get(`/echo/${id}`);
         const posted = await api.headers({ 'x-chain': id }).post('/echo', { session: id });
 
-        // Then - each response carries the id it was sent
+        // Then - the session, then each response carrying the id it was sent
+        expect(session.response).toMatch(`
+            HTTP/1.1 200 OK
+
+            {"echo": {"sessionId": "${id}"}, "id": "${id}", "startedAt": "{{iso8601}}", "ttl": 3600}
+        `);
         expect(echoed.response).toMatch(`
             HTTP/1.1 200 OK
 

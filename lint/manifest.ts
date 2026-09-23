@@ -396,6 +396,18 @@ export const RULE_DOCS = {
             'Three greps state three lines, leave everything between them unstated, and still have to be rewritten one by one the day the output changes.',
         reach: 'tests',
     },
+    'd20-whole-result': {
+        channel: 'statique',
+        convention:
+            "A test that reads a response, a json or a table — `<result>.response`, `<result>.json`, `<result>.table('<name>')` of a result it awaited — compares it WHOLE, once: `toMatch` handed the whole result written in place or its golden, or a table's `toBeEmpty()`. A precise assertion on one of its properties (`expect(result.json.value.total).toBe(1)`) is allowed only IN ADDITION → error on the first read of a result no whole comparison reaches. A negation, a RegExp and a read through a helper are no whole comparison; a result read through a helper, a computed table name, or a comparison made in a helper is out of reach, and the rule stays silent.",
+        facet: 'model',
+        family: 'D',
+        fix: 'Write `expect(<result>.<subject>).toMatch(``)` and run `TEST_UPDATE=1` — the whole result is written in place; keep the precise assertion beside it if one property IS the subject.',
+        id: 'D20',
+        rationale:
+            'Probes are a partial oracle: what they do not name is free to regress unseen. The whole result, written where the test reads it, is the default oracle — approval testing — and a precise assertion states what the test is about on top of it. It is the retired warning on body-probe clusters, grown into the rule it stood in for.',
+        reach: 'tests',
+    },
     'd2-await-io-matcher': {
         channel: 'statique',
         convention:
@@ -455,18 +467,6 @@ export const RULE_DOCS = {
             'A ref only earns its name when it asserts equality across at least two occurrences.',
         reach: 'tests',
     },
-    'd12w-response-body-probe': {
-        channel: 'statique',
-        convention:
-            "A test accumulating a CLUSTER of raw probes on `.response.body` (≥ `threshold`, default 3; a variable cast from `.response.body` counts its reads) → warning: this case wants a full golden (`expect(result.response).toMatch(file('./expected/case.http'))`). One or two probes stay silent (a legitimate scalpel).",
-        facet: 'api',
-        family: 'D',
-        fix: "Golden the response: `expect(result.response).toMatch(file('./expected/<case>.http'))`, with tokens for the parts that move.",
-        id: 'D12',
-        rationale:
-            'A full golden captures the whole shape and its token grammar; a cluster of raw probes replaces it with ad-hoc checks that drift (it mechanises the D11 boundary for API responses).',
-        reach: 'tests',
-    },
     'd13w-unfrozen-negative-fixture': {
         channel: 'statique',
         convention:
@@ -488,7 +488,7 @@ export const RULE_DOCS = {
         fix: 'Assert what the response carries, not only the code it came back with.',
         id: 'D15',
         rationale:
-            'A lone status pins the response code and throws away the whole payload; a full golden captures the shape and its token grammar (it completes d12w, which needs a cluster of body probes and misses the solitary status probe).',
+            'A lone status pins the response code and throws away the whole payload; a full golden captures the shape and its token grammar (it completes D20, which reads the response the probe stands beside).',
         reach: 'tests',
     },
     'e2-preset-config': {

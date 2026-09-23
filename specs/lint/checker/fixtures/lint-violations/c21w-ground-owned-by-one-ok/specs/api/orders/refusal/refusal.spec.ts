@@ -7,5 +7,5 @@ test('refuses an order that does not exist', async () => {
     const result = await api.get('/orders/404');
     // Then - the request is refused
     expect(result.status).toBe(404);
-    expect(result.response.body).toContain('no such order');
+    expect(result.response.body).toContain('no such order'); // oxlint-disable-line jterrazz/d20-whole-result -- an input tree of the checker spec: the probe is incidental to the rule it feeds
 });

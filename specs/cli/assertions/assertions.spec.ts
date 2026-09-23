@@ -234,7 +234,7 @@ describe('command — json accessor', () => {
         const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json');
 
         // Then - the parsed value is readable
-        expect(result.json.value).toStrictEqual({
+        expect(result.json).toMatch({
             features: ['build', 'check'],
             name: 'cli-app',
             version: '1.0.0',
@@ -555,7 +555,7 @@ describe('command — transform option', () => {
         expect(result.stdout.raw).toContain('\u001B[32m');
 
         // Then - .json.value works because the transform stripped ANSI before parse
-        expect(result.json.value).toStrictEqual({ status: 'ok', value: 42 });
+        expect(result.json).toMatch({ status: 'ok', value: 42 });
     });
 });
 

@@ -2,7 +2,6 @@
     "typescript": {
         "eslint/class-methods-use-this": 12,
         "eslint/complexity": 28,
-        "eslint/eqeqeq": 1,
         "eslint/max-classes-per-file": 2,
         "eslint/max-depth": 5,
         "eslint/max-params": 2,
@@ -10,7 +9,6 @@
         "eslint/no-console": 3,
         "eslint/no-control-regex": 2,
         "eslint/no-empty-function": 1,
-        "eslint/no-eq-null": 1,
         "eslint/no-inline-comments": 11,
         "eslint/no-irregular-whitespace": 1,
         "eslint/no-loop-func": 1,

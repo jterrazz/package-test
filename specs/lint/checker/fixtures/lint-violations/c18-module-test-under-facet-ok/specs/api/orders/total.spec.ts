@@ -7,5 +7,5 @@ test('answers the total of the order', async () => {
     const result = await api.get('/orders/1');
     // Then - the response states the total
     expect(result.status).toBe(200);
-    expect(result.response.body).toContain('3');
+    expect(result.response.body).toContain('3'); // oxlint-disable-line jterrazz/d20-whole-result -- an input tree of the checker spec: the probe is incidental to the rule it feeds
 });
