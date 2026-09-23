@@ -9,6 +9,6 @@ test('carries an uncaught exception of the page on the error stream', async () =
         await visitor.click(button('Break'));
     });
 
-    // Then - the exception is an error of the render, not a silence
-    expect(result.errors.text).toContain('Uncaught Error: the handler broke');
+    // Then - the exception is one error of the render, not a silence nor a pair
+    expect(result.errors.text).toBe('Uncaught Error: the handler broke');
 });

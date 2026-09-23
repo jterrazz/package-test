@@ -147,8 +147,8 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 | `result.tree`    | `TextAccessor` | The ARIA snapshot of the rendered body — the outline a golden pins                                                                                     |
 | `result.content` | `TextAccessor` | The RENDERED text of the document body (`innerText`) — what a reader sees, so a stylesheet's source and a node the page does not display are not in it |
 | `result.html`    | `TextAccessor` | The mounted markup — the escape hatch for a class or an attribute                                                                                      |
-| `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message                                                                                              |
-| `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error                                                                                                      |
+| `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message, and every uncaught exception as ONE `[error] Uncaught …` line                               |
+| `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error, once (`Uncaught Error: …`)                                                                          |
 
 `toMatch(file(…))` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
