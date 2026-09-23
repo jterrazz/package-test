@@ -1238,3 +1238,76 @@ body }`, token-aware, an absent part not asserted; `tables:` table →
     `npx prebuild-install`. A `make install` on a fresh clone fails the sqlite
     suites the same way. HYPOTHESIS (2026-09-23): CI is unaffected, settled
     by its install log.
+
+## Iteration 12 — the calls on 75 to 79 (orchestrator, 2026-09-23)
+
+| #   | Decision                                                                                                                                                                                                                                                               |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 75  | The schema refuses what the parser refuses: an api step with neither `response:` nor `tables:`, and the same principle for every kind — the schema's required-ness is derived from the parser's rules, and the Q69 meta-test proves the two agree both ways.           |
+| 76  | `fixture:` is judged by the FIRST ground folder, like every other path key.                                                                                                                                                                                            |
+| 77  | Identical copies of a ground file in two leaves or more are a finding — a warning, ratchet-recordable — whose `--fix` moves one copy to the matching specs-root folder and rewrites every reference; the six `two-users.sql` and five `one-user.sql` copies here move. |
+| 78  | C9 matches references by RESOLVED path, never by entry name.                                                                                                                                                                                                           |
+| 79  | The pool rule has one owner, `docs/18-conventions.md`; `docs/12-cli.md` links to it.                                                                                                                                                                                   |
+
+### What the package-test branch did (iteration 12)
+
+- **75.** The presence laws are one table, `PRESENCE` in
+  `spec-document.ts` — per shape (a document of any kind, each kind, a
+  step, a run, a table, a seed entry, an inline response, a `files:`
+  assertion), `each` / `some` / `apart`. The parser refuses through it with
+  the sentences it already gave; the schema states each law as `required`,
+  an `anyOf` or a `not`, and the hand-written ones are gone. Stating the
+  table surfaced three more gaps than the one asked: a step's key beside
+  `steps:`, `waitFor:` beside `stdin:`, and a `body:` beside a request file
+  (not a presence law — a value condition, held by `stepLaws()`). A one-step
+  api document carries its step's laws through `dependentSchemas` on
+  `request`. The meta-test breaks every law of the table from well-formed
+  instances of its shape, for both readers.
+- **76.** `fixture:` goes through the same `readPath` as the other keys;
+  its schema pattern is `pathIn(fixtures)`, the one role a path may end on
+  (`./fixtures/` spreads the folder whole).
+- **77.** `c27w-duplicate-ground` (C27): a copy is a leaf ground entry — a
+  file by its bytes, a tree file by file — another leaf holds under the
+  same role AND name; one warning per copy. `--fix` runs before C14's,
+  rewrites every path that resolved to a copy, `git mv`s the first to
+  `<specs>/<role>/<name>`, deletes the others and removes an emptied leaf
+  ground folder; a specs root holding the name with other bytes moves
+  nothing. Run here, it moved four entries, not two: `two-events.sql` and
+  `one-event.sql` were copied across two api leaves as well.
+- **78.** A reference is an absolute path: a document's keys and a
+  `file()`/`directory()` argument from the file; each word of the other
+  literals from the file AND the project root — the website services run
+  `node specs/fixtures/api-app/server.mjs` from the root, the one live
+  reference no file-relative reading reaches; a template table from the
+  folders before its hole. The `file()` arguments get their own pattern:
+  the literal scan desyncs after a template with a hole, and four live
+  goldens read as dead until it did.
+- **79.** 12 keeps one paragraph and the link; the "why" 12 alone said —
+  an entry of the specs root must earn its caution, write ground local
+  first — moved into 18's recap, now true both ways (C27 up, C14 down).
+
+### Raised by the package-test branch, iteration 12
+
+81. The schema still accepts values the parser refuses, none of which a
+    document of this tree holds: a `body:` path outside `requests/` (the
+    schema leaves `body` unconstrained), a `clock:` that is no ISO instant,
+    a table row whose cell count is not its columns', `waitFor:` on a run
+    that is not the last. The first two are patterns; the last two compare
+    across values, like the capture order already listed as beyond a
+    schema. State the patterns, and list the rest beside the capture?
+82. C27 finds copies by name AND bytes. The same bytes under two names —
+    `one-user.sql` here, `alice.sql` there — are not found, and a fix could
+    not pick the name. Leave them to review, or warn without a fix?
+83. C9 resolves a literal's words from the file and from the project root.
+    A path a process service runs with its own `cwd:` resolves from neither
+    and would read dead. None does here; HYPOTHESIS: none does in the
+    workbench, settled by an R8 dry run.
+84. C14's `--fix` leaves the pool folder it emptied behind; C27's removes
+    the leaf folder it empties. Align C14?
+85. `make check` failed four times in eleven runs this iteration, each
+    time green on the rerun of the same tree: twice the
+    `component (chromium)` project ("needs vitest-browser-react …
+    SyntaxError: Illegal return statement" / "Unexpected token '}'", 6–7
+    tests), twice the testcontainers log-capture test (30 s timeout). Each
+    passed alone. HYPOTHESIS: Vite's dependency optimiser, and Docker,
+    starved under the full parallel load.
