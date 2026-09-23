@@ -1160,6 +1160,32 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
+            'Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (`GET /events/:id`, the request line of a `.http` a `.request(file())` sends), a jobs chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens. A file reaching several is an error at the first chain that reaches a second. Fixed by `--fix`: each test goes to the file of its subject — the subject’s standard folder under the facet, as C30 names it, the file keeping its aspect’s name; beside the file, named for the subject, where the subject has none — keeping the imports and the file-level declarations it reads; the paths the code names keep pointing where they pointed, and the old leaf’s ground another leaf reads goes up to the specs root’s own ground, where C28 moves it down to the one leaf that reads it. A test whose own chains reach two subjects is reported and left.',
+        facet: 'model',
+        family: 'C',
+        fix: 'Run `make fix`: it splits the file, one per subject. A test reaching two subjects states what it stands on with a seed instead of a second action.',
+        id: 'C29',
+        name: 'c29-one-subject',
+        rationale:
+            'A file about one subject is found by its subject: the reader of `GET /events/:id` opens one folder and reads every question asked of it, and a change to that route touches one file.',
+        reach: 'spec',
+    },
+    {
+        channel: 'checker',
+        convention:
+            'A spec file about one subject sits in the subject’s standard folder, derived and never listed: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST /events` → `events/create/`, `PUT|PATCH /events/:id` → `events/update/`, `DELETE /events/:id` → `events/delete/`, a route under an item (`GET /events/:id/timeline`) its literal segments (`events/timeline/`), a singleton (`GET /health`) `health/get/`, a method-less route its segments; a job its name (`specs/jobs/<job>/`), a cli command its words (`specs/cli/<words>/`, as `db/migrate/`). A GET on one segment lists a plural noun and gets anything else; a segment is a parameter when it is a template hole or anything but lowercase words. A page, a journey and the root route have no standard name, and are not judged. An error at the file’s first line; fixed by `--fix`, which moves the file as C29 does.',
+        facet: 'model',
+        family: 'C',
+        fix: 'Run `make fix`: it moves the file to its subject’s folder, and the ground it stands on with it.',
+        id: 'C30',
+        name: 'c30-subject-folder',
+        rationale:
+            'A name derived from the subject is the same in every repository: nobody lists the folders, nobody argues them, and a reader who knows the route knows the path.',
+        reach: 'spec',
+    },
+    {
+        channel: 'checker',
+        convention:
             "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is a warning on every copy; it belongs in the specs root's folder of its role (`<specs>/seeds/<name>`), named by the path that climbs to it. Fixed by `--fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every path of the specs tree that named a copy rewritten. Copies of several names, and a specs root already holding the name with other content, are left to the author.",
         facet: 'model',
         family: 'C',

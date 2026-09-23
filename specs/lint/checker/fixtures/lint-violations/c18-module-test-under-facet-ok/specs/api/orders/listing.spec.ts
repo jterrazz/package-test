@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest';
+import { expect, test } from 'vitest'; // checker-disable-line c30 -- an input of C18: this folder is the case the rule reads, not a subject's standard name
 
 // The import states no extension: the runner is reached by the MODULE it
 // Names, and a scan for `.specification.js` read this spec as a module test.

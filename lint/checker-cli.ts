@@ -10,6 +10,7 @@ import type { LintConfigMove, Migration } from './checker-migration.js';
 import { movesUnderFacet } from './checker-placement.js';
 import { fixGroundSharing } from './checker-sharing.js';
 import { fixSpecFiles } from './checker-spec.js';
+import { fixSubjects } from './checker-subject.js';
 import {
     CHECKER_PASS_IDS,
     formatViolation,
@@ -581,6 +582,9 @@ function applyFixes(root: string): void {
     const written = fixSpecFiles(root);
     if (written.length > 0) {
         console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
+    }
+    for (const change of fixSubjects(root)) {
+        console.log(`conventions checker: moved ${change} (C29/C30)`);
     }
     for (const move of fixCopiedGround(root)) {
         console.log(`conventions checker: moved ${move} (C27)`);

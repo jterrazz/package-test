@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest';
+import { expect, test } from 'vitest'; // checker-disable-line c30 -- an input of C20: this folder is the case the rule reads, not a subject's standard name
 
 import { jobs } from '../jobs.specification.js';
 

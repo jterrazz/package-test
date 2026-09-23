@@ -37,6 +37,7 @@ import {
     checkSpecDescriptionsUnique,
     volatileLiteralIn,
 } from './checker-spec.js';
+import { checkOneSubject, checkSubjectFolder } from './checker-subject.js';
 import { lessonOf } from './lesson.js';
 import type { Teaching } from './lesson.js';
 import { codeOf } from './rule-code.js';
@@ -127,6 +128,8 @@ export const TREE_PASS_IDS = [
     'c23-seed-no-clock-read',
     'c27w-duplicate-ground',
     'c28-ground-shared-or-inline',
+    'c29-one-subject',
+    'c30-subject-folder',
     'c8-disk-target-exists',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
@@ -532,6 +535,8 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
         ...checkSpecDescriptionsUnique(rootDir),
         ...checkDeadFixtures(rootDir),
         ...checkGroundSharing(rootDir),
+        ...checkOneSubject(rootDir),
+        ...checkSubjectFolder(rootDir),
         ...checkCopiedGround(rootDir),
         ...checkLocalFixtureReach(rootDir),
         ...checkDiskTargetsExist(rootDir),

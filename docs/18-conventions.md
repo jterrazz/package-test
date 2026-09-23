@@ -146,6 +146,53 @@ Every other use is converted to a full snapshot. A single "kitchen-sink" project
 
 Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its rule joins `lint/manifest.ts` and the catalogue regenerates.
 
+## One file, one subject
+
+A spec file answers one question about one subject, and both are written in its path: the folder is the SUBJECT, the file name the ASPECT asked of it — `<specs>/api/events/list/pagination.spec.ts` is the pagination of `GET /events`. A reader who knows the route knows where its specs are, and a change to that route opens one folder.
+
+### The subject, and its standard name
+
+The subject is what the file's chains reach, read statically: an api chain's method and route, a jobs chain's job, a cli chain's command, a website chain's page, a mobile chain's journey. A file reaches ONE (C29); a file reaching several is several files, and `make fix` splits it, each test going with the imports and file-level constants it reads.
+
+The folder is the subject's STANDARD name, derived and never listed (C30), so two repositories never argue it:
+
+| Subject                         | Folder                              |
+| ------------------------------- | ----------------------------------- |
+| `GET /events`                   | `events/list/`                      |
+| `GET /events/:id`               | `events/get/`                       |
+| `POST /events`                  | `events/create/`                    |
+| `PUT` or `PATCH /events/:id`    | `events/update/`                    |
+| `DELETE /events/:id`            | `events/delete/`                    |
+| `GET /events/:id/timeline`      | `events/timeline/`                  |
+| `GET /health`, a singleton      | `health/get/`                       |
+| `GET /market/:symbol/chart`     | `market/chart/`                     |
+| a method-less route, `ALL /mcp` | `mcp/`                              |
+| a job                           | `specs/jobs/<job>/`                 |
+| a cli command, `db migrate`     | `specs/cli/<words>/`, `db/migrate/` |
+
+A GET on one segment lists a plural noun and gets anything else, and a segment is a parameter when it is anything but lowercase words (`42`, `AAPL`, a template hole). A page and a journey have no standard name: the file reaches one, and its folder stays the author's. A test whose own chains reach two subjects cannot be cut — it states what it stands on with a seed rather than a second action.
+
+### The aspect
+
+The file name is the aspect, and the file's one top-level `describe` is titled with it (C31), so a failure's first word names its file. An aspect is kebab-case and says which question the file asks — never a name for what fit nowhere else (`misc`, `other`, `basic`, `general`, `more`, `edge-cases`, `tests`, `main`; C32). For an api, the vocabulary to reach for first, advised and not enforced:
+
+| Aspect       | Asks                                            |
+| ------------ | ----------------------------------------------- |
+| `pagination` | the pages, their size, their cursor             |
+| `filters`    | what a query parameter narrows                  |
+| `sorting`    | the order a list comes back in                  |
+| `language`   | what the `Accept-Language` of a request changes |
+| `validation` | what a malformed request is refused with        |
+| `not-found`  | what an unknown id answers                      |
+| `auth`       | who may, and what the others get                |
+| `shape`      | the whole response of the ordinary case         |
+
+A file holds at most 400 lines (C33); past it, the tests usually group by a prefix of their titles, and that is where the file is cut.
+
+### What a file shares
+
+A file shares only what its tests share. A file-level expectation serves two tests or more, and one a single test reads is written in that test (D28). An expectation is never imported from another module (D29): a helper the test calls, a contract, the runner are imports; the value a matcher compares is the test's own.
+
 ## The naming recap
 
 One rule decides every folder of a spec tree: **what a spec stands on sits in one of four RESERVED folders; a spec's own folder never takes one of their names.** The four are `fixtures/`, `expected/`, `requests/` and `seeds/` — material a spec names by its path, spelled in full on the line that reads it (`file('./seeds/users.sql')`, `directory('../../fixtures/shop/')`). The names are reserved wherever a test stands on a file, beside a module under `src/` as much as under `specs/`: the toolchain and the vitest preset ignore all four at any depth, and production code may import nothing from them (F2). A facet, a domain, and `contracts/` are members of the row, not ground: a contract is TypeScript a spec imports, so it stays bare. `docker/` sits at the project root, outside any row of specs, and is untouched by the rule.
@@ -161,7 +208,7 @@ Two more hold what each path says. **The verb and the folder agree**: `seed()` r
 | Specs root      | `specs/` (`api/`, `jobs/`, `cli/`, `integration/`, `website/`, `mobile/`) — one folder per constructor, beside the shared ground `fixtures/`, `seeds/`, `requests/`, `expected/`         |
 | Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                                                                              |
 | Instances       | `api`, `jobs`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                                                                                           |
-| Spec file       | `specs/<facet>/<domain>/<aspect>.spec.ts` — the assembled product's word (C12)                                                                                                           |
+| Spec file       | `specs/<facet>/<subject>/<aspect>.spec.ts` — the assembled product's word (C12); the subject's folder derived where the facet has one ([One file, one subject](#one-file-one-subject))   |
 | Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([20](20-documents.md))                                                                                      |
 | Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                                                                                  |
 | Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([07](07-component.md))                                                                   |

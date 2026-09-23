@@ -21,7 +21,7 @@ test('a complete request is sent', async () => {
 
 test('a one-line golden, and a golden its one test reads twice', async () => {
     // Given - a list
-    const result = await api.get('/users');
+    const result = await api.get('/users'); // checker-disable-line c29 -- an input of C28: its tests reach two subjects on purpose
 
     // Then - the line in place; the twice-read golden reported, and left to the author
     expect(text('one line')).toMatch(file('./expected/line.txt'));

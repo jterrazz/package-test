@@ -13,7 +13,7 @@ test('the users are listed over a seed only this leaf reaches for', async () => 
 
 test('the users are counted over the same seed', async () => {
     // Given - the same seed
-    const result = await api.seed(file('../../seeds/one-user.sql')).get('/users/count');
+    const result = await api.seed(file('../../seeds/one-user.sql')).get('/users/count'); // checker-disable-line c29 -- an input of C28: its tests reach two subjects on purpose
 
     // Then - the app answered
     expect(result.status).toBe(200);

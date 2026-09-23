@@ -124,7 +124,7 @@ export function subjectName(subject: Subject): string {
 // ── Reading the source ──
 
 /** The offset past the string literal that opens at `start`, template holes included. */
-function skipString(text: string, start: number): number {
+export function skipString(text: string, start: number): number {
     const quote = text[start];
     let index = start + 1;
     while (index < text.length) {
@@ -145,6 +145,58 @@ function skipString(text: string, start: number): number {
     return index;
 }
 
+/** The characters after which a `/` opens a regular expression rather than divides. */
+const BEFORE_REGEX = /(?:^|[(,=:[!&|?{};+\-*%<>~^]|\breturn|\btypeof|\bcase)\s*$/u;
+
+/** Does a `/` at `start` open a regular expression — no comment, and the code before it expects a value? */
+function opensRegex(text: string, start: number): boolean {
+    return (
+        text[start] === '/' &&
+        text[start + 1] !== '/' &&
+        text[start + 1] !== '*' &&
+        BEFORE_REGEX.test(text.slice(Math.max(0, start - 16), start))
+    );
+}
+
+/** The offset past a regular expression's closing `/` and its flags, from the one past its body. */
+function pastFlags(text: string, close: number): number {
+    let end = close + 1;
+    while (/[a-z]/u.test(text[end] ?? '')) {
+        end += 1;
+    }
+    return end;
+}
+
+/** The offset past the regular expression that opens at `start`, or `start` when none does. */
+function regexEnd(text: string, start: number): number {
+    if (!opensRegex(text, start)) {
+        return start;
+    }
+    let inClass = false;
+    for (let index = start + 1; index < text.length; index += 1) {
+        const character = text[index];
+        if (character === '\\') {
+            index += 1;
+        } else if (character === '\n') {
+            return start;
+        } else if (character === '[' || character === ']') {
+            inClass = character === '[';
+        } else if (character === '/' && !inClass) {
+            return pastFlags(text, index);
+        }
+    }
+    return start;
+}
+
+/** The offset past the string, template or regular expression that opens at `start` — `start` when none does. */
+export function literalEnd(text: string, start: number): number {
+    const character = text[start];
+    if (character === "'" || character === '"' || character === '`') {
+        return skipString(text, start);
+    }
+    return regexEnd(text, start);
+}
+
 /** The offset of the bracket closing the one that opens at `open`. */
 export function closingOf(text: string, open: number): number {
     const pairs: Record<string, string> = { '(': ')', '[': ']', '{': '}' };
@@ -152,8 +204,9 @@ export function closingOf(text: string, open: number): number {
     let index = open;
     while (index < text.length) {
         const character = text[index] ?? '';
-        if (character === "'" || character === '"' || character === '`') {
-            index = skipString(text, index);
+        const past = index === open ? index : literalEnd(text, index);
+        if (past !== index) {
+            index = past;
             continue;
         }
         if (character in pairs) {
@@ -176,8 +229,9 @@ export function argumentsOf(text: string): string[] {
     let index = 0;
     while (index < text.length) {
         const character = text[index] ?? '';
-        if (character === "'" || character === '"' || character === '`') {
-            index = skipString(text, index);
+        const past = literalEnd(text, index);
+        if (past !== index) {
+            index = past;
             continue;
         }
         if (character === '(' || character === '[' || character === '{') {
@@ -387,20 +441,15 @@ export function withoutComments(text: string): string {
     let index = 0;
     while (index < text.length) {
         const character = text[index] ?? '';
-        if (character === "'" || character === '"' || character === '`') {
-            const end = skipString(text, index);
-            out += text.slice(index, end);
-            index = end;
+        const comment = commentEnd(text, index);
+        if (comment !== index) {
+            out += text.slice(index, comment).replaceAll(/[^\n]/gu, ' ');
+            index = comment;
             continue;
         }
-        const end = commentEnd(text, index);
-        if (end === index) {
-            out += character;
-            index += 1;
-            continue;
-        }
-        out += text.slice(index, end).replaceAll(/[^\n]/gu, ' ');
-        index = end;
+        const end = literalEnd(text, index);
+        out += end === index ? character : text.slice(index, end);
+        index = end === index ? index + 1 : end;
     }
     return out;
 }

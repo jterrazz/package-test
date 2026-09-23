@@ -1,4 +1,4 @@
-import { file } from '@jterrazz/test';
+import { file } from '@jterrazz/test'; // checker-disable-line c30 -- an input of C25: this folder is the case the rule reads, not a subject's standard name
 import { expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
