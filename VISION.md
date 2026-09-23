@@ -1002,3 +1002,37 @@ implementation (the commits say what was broken).
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 60  | The listing's cache key also holds the mtime of the root `.gitignore` and of `.git/info/exclude`; a nested `.gitignore` edited in place is seen on the next index or directory change (accepted). |
 | 61  | Release order: `@jterrazz/typescript` 11.0 ships first, then `@jterrazz/test` 17.0 with the peer `^11.0.0` only — no `^10 \|\| ^11` range (no legacy).                                            |
+
+## Iteration 9 — three defects from the signews-api migration (2026-09-23)
+
+### What the package-test branch decided (iteration 9)
+
+- **`make fix` runs every fixer.** A recipe line that fails stops make,
+  so on a 16.x repository `typescript fix` (no baseline) kept the
+  mover from running. `fix` runs both fixers in one shell and exits on
+  their combined verdict; `lint/makefile.test.ts` runs it over stubbed
+  fixers. The contract and the recipe consumers copy are
+  package-typescript's chapter 06, "The six gestures", proven there by
+  its repository suite running that recipe; `typescript fix` rewrites
+  before it reports a missing baseline, pinned by a `fix` document.
+- **One held line (28, 35).** A green ratchet run — check, the root
+  member, `--fix` — prints exactly `jterrazz.baseline.json › test: <n>
+held across <k> rules`. The path and the pass list moved to
+  `--verbose`, which replaces `--summary`.
+- **D14 on every subject.** A value `toMatch` on a response, json, tree,
+  table or container does not compile (`SubjectIsNoValue`), and past the
+  compiler the node build refuses it naming what the subject takes.
+
+### Raised by the package-test branch, iteration 9
+
+62. A green run of a project with NO `test` section still prints
+    `conventions checker: all passes clean <path> (<passes>)`, and a
+    deferred run names the judging file by its absolute path. Does the
+    one-line law reach them (and with which line), or only the runs that
+    hold a count?
+63. A stream handed a value `toMatch` past the compiler still gets
+    vitest's own message at run time (the D14 test pins it). Give it the
+    refusal the other accessors now get?
+64. `typescript check` still passes `--summary`, which a 17 checker
+    ignores; it stays for the 16.x releases that print the long line
+    without it. Drop it when 16.x leaves the floor?
