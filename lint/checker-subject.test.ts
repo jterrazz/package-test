@@ -162,6 +162,35 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         );
     });
 
+    test('the split drops an import another clause only aliases, and a helper with its doc comment', () => {
+        // Given - one handle imported twice under two names, and a documented helper one test calls
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': [
+                "import { api } from '../api.specification.js';",
+                "import { api as other } from '../other.specification.js';",
+                '',
+                '/** Read the list twice. */',
+                'function twice(): void {}',
+                '',
+                "test('lists', async () => { twice(); await other.get('/orders'); });",
+                "test('creates', async () => { await api.post('/orders', {}); });",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix splits it
+        fixSubjects(root);
+
+        // Then - the list file names only `other`, the create file neither the helper nor its comment
+        const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
+        const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
+        expect({
+            createdHelper: created.includes('Read the list twice') || created.includes('twice'),
+            listedApi: listed.includes('import { api }'),
+        }).toStrictEqual({ createdHelper: false, listedApi: false });
+    });
+
     test('a move leaves a path naming nothing, and a call spelled in a string, as written', () => {
         // Given - a negative spec's missing file, and a refusal message quoting a call on a file that exists
         const root = specsTree({

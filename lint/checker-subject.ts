@@ -70,10 +70,19 @@ function withLeadingComments(text: string, start: number): number {
     let begin = lineStart(text, start);
     while (begin > 0) {
         const previous = lineStart(text, begin - 1);
-        if (!text.slice(previous, begin).trim().startsWith('//')) {
+        const line = text.slice(previous, begin).trim();
+        if (line.startsWith('//')) {
+            begin = previous;
+        } else if (line.endsWith('*/')) {
+            // The doc comment a declaration opens on goes with it.
+            const opening = text.lastIndexOf(
+                '/*',
+                previous + text.slice(previous, begin).lastIndexOf('*/'),
+            );
+            begin = lineStart(text, opening);
+        } else {
             break;
         }
-        begin = previous;
     }
     return begin;
 }
@@ -432,10 +441,14 @@ function withoutAnUnreadDeclaration(text: string): string {
 
 /** The code with each import clause keeping only the names the rest of it reads. */
 function withImportsPruned(text: string): string {
+    const clauses = importsOf(text);
+    // A name another import clause spells (`{ cli as vitestCli }`) is no read of it.
+    const code = clauses
+        .toReversed()
+        .reduce((rest, clause) => rest.slice(0, clause.start) + rest.slice(clause.end), text);
     let current = text;
-    for (const clause of importsOf(text).toReversed()) {
-        const rest = current;
-        const kept = importText(clause, (local) => isRead(rest, local, clause));
+    for (const clause of clauses.toReversed()) {
+        const kept = importText(clause, (local) => isRead(code, local, { end: 0, start: 0 }));
         current = current.slice(0, clause.start) + kept + current.slice(clause.end);
     }
     return current;
