@@ -667,6 +667,18 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         }
     });
 
+    test('every checker pass has a specs/lint E2E spec that runs the built checker', () => {
+        // Given - each pass dist/checker.js runs, tree and member alike
+        for (const id of CHECKER_PASS_IDS) {
+            // Then - its documents in specs/lint/<id>/, or its own test under specs/lint/checker/: a pass the registry names and no spec runs is a sentence with nothing behind it
+            expect(
+                withDocuments.has(id) ||
+                    existsSync(resolve(ROOT, 'specs/lint/checker', `${id}.test.ts`)),
+                `${id} has no E2E spec`,
+            ).toBe(true);
+        }
+    });
+
     test('every specs/lint E2E spec maps to a plugin rule or a checker pass', () => {
         // Given - each E2E spec id, and the meta rows that have a spec of their own
         const metaRows = new Set(META_ROWS.map((row) => row.name));

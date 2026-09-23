@@ -1,0 +1,7 @@
+description: a member with a test script of its own and no vitest config is refused
+fixture: ../../fixtures/member-workspace/
+runs:
+    - command: checker --member packages/tested-no-config .
+      exit: 1
+      stderr: |
+          packages/tested-no-config/package.json:1:1  jterrazz-check(e3)
