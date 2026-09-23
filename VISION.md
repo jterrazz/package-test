@@ -1462,3 +1462,13 @@ The api/jobs documents turned into indexes of links (a 6-line document pointing 
 96. `98fa39d` (the K10 commit) swept in chapter 19's sentence about the
     mover's oxlint-config gesture before the code that makes it true
     (`fc5bbb1`): two sessions shared one checkout.
+
+## Iteration 17 — one subject per file, standard names, messages that teach (owner, 2026-09-23)
+
+**Every rule's message teaches** (lint and checker alike), in four parts — `found:` the finding located, `why:` the convention in one sentence, `fix:` the concrete gesture for THIS case (target paths/names included, `make fix` when it can), `read:` the chapter anchor. A meta-test (K11) refuses a catalogue rule whose message lacks a part; every existing message is rewritten to the form.
+
+**One file, one subject.** S1 `one-subject`: every action of a spec file reaches one subject, read statically — api: method + path template; jobs: the triggered job; cli: the command; website: the page; mobile: the journey. `make fix` splits by subject. S2 `subject-folder`: the file's folder is its subject's standard name; `make fix` moves. S3 `describe-names-file`: one top-level `describe`, titled with the file's aspect (`pagination.spec.ts` → `describe('pagination')`); `make fix` renames.
+
+**Standard names, derived, never listed.** A subject's folder is computed from the route: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST /events` → `events/create/`, `PUT|PATCH /events/:id` → `events/update/`, `DELETE /events/:id` → `events/delete/`, `GET /events/:id/timeline` → `events/timeline/`, singletons `GET /health` → `health/get/`, `GET /market/:symbol/chart` → `market/chart/`, a method-less route (`ALL /mcp`) → its path segments (`mcp/`); a job → `specs/jobs/<job>/`; a cli command → its command path. Aspect names stay free: S4 `aspect-name` wants kebab-case and refuses generic names (`misc`, `other`, `basic`, `general`, `more`, `edge-cases`, `tests`, `main`); the chapter recommends an api vocabulary (`pagination`, `filters`, `sorting`, `language`, `validation`, `not-found`, `auth`, `shape`), advised, not enforced.
+
+**Size and sharing within a file.** S5 `file-size`: at most 400 lines (ratchet-recordable; the message groups the tests by title prefix to suggest the cut). S6 `shared-expectation`: a file-level expectation constant serves 2+ tests, else it is inlined (autofix). S7 `no-foreign-expectation`: a spec imports no expectation from another spec file (contract builders and typed helpers allowed). S8 `file-context`: a setting repeated on every chain of a file (the same `.clock(…)`) is declared once for the file — `const events = api.with({ clock: '…' })` (new API) — warn, autofix.
