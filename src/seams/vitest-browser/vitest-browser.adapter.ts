@@ -144,6 +144,22 @@ export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     );
 }
 
+/**
+ * A landmark's accessible name, as the role engine reads it: its label, else
+ * the text of what its `aria-labelledby` names; none when it has neither.
+ */
+function nameOf(landmark: Element | null | undefined): string | undefined {
+    const labelledBy = (landmark?.getAttribute('aria-labelledby') ?? '')
+        .split(/\s+/u)
+        .filter((id) => id !== '')
+        .map((id) => document.querySelector(`#${CSS.escape(id)}`)?.textContent ?? '')
+        .join(' ');
+    const name = (landmark?.getAttribute('aria-label') ?? labelledBy)
+        .replaceAll(/\s+/gu, ' ')
+        .trim();
+    return name === '' ? undefined : name;
+}
+
 /** Describe the live candidates — the evidence the W3 refusal enumerates. */
 function candidates(locator: Locator): ElementMatch[] {
     return locator
@@ -162,6 +178,7 @@ function candidates(locator: Locator): ElementMatch[] {
                 // Never matched.
                 accessibleName: label !== undefined && label !== text ? label : undefined,
                 context: context ?? undefined,
+                contextName: nameOf(landmark),
                 detail: detail ?? undefined,
                 tag: node.tagName.toLowerCase(),
                 text,

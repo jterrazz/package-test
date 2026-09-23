@@ -104,6 +104,13 @@ export type ElementMatch = {
     accessibleName?: string | undefined;
     /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
     context?: string | undefined;
+    /**
+     * That landmark's accessible name — its `aria-label`, or the text its
+     * `aria-labelledby` points at. A `<section>` is a `region` only when it is
+     * named, and several regions are the norm, so the name is what makes
+     * `region("…")` a rewrite.
+     */
+    contextName?: string | undefined;
     /** The attribute that disambiguates most — `href` for links, `name` for fields. */
     detail?: string | undefined;
     /** Tag name, lower-cased. */

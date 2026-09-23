@@ -51,6 +51,19 @@ test('names a candidate inside a `<search>` element by its landmark', async () =
     expect(message).toContain('within(search(), button("Go"))');
 });
 
+test('offers a named `<section>` as the region it is, by its name', async () => {
+    // Given - a "Remove" button in a section named by its label, one named by its heading, one in an unnamed section
+    const message = await refusalOf('/regions', async (visitor) => {
+        await visitor.click(button('Remove'));
+    });
+
+    // Then - each named section is a region() rewrite, and the unnamed one is evidence only
+    expect(message).toContain('in <section>');
+    expect(message).toContain(
+        'within(region("Orders"), button("Remove"))   [leaves 1 of 3]   [also here: region("Returns")]',
+    );
+});
+
 test('resolves the ambiguity when the descriptor is scoped to a landmark', async () => {
     // Given - the same page, the link designated inside the nav
     const result = await website.visit('/ambiguous', async (visitor) => {

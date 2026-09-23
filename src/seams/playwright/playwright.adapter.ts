@@ -120,8 +120,22 @@ function isStrictViolation(error: unknown): boolean {
 /** Capture the candidates in-page — the evidence the refusal enumerates. */
 async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
     return await locator.evaluateAll(
-        (nodes, { landmarks, limit }) =>
-            nodes.slice(0, limit).map((node) => {
+        (nodes, { landmarks, limit }) => {
+            // The landmark's accessible name, as the role engine reads it: its
+            // Label, else the text of what its `aria-labelledby` names.
+            // oxlint-disable-next-line unicorn/consistent-function-scoping -- this function is serialized into the page: a helper at module scope never reaches it
+            const nameOf = (landmark: Element | null | undefined): string | undefined => {
+                const labelledBy = (landmark?.getAttribute('aria-labelledby') ?? '')
+                    .split(/\s+/u)
+                    .filter((id) => id !== '')
+                    .map((id) => document.querySelector(`#${CSS.escape(id)}`)?.textContent ?? '')
+                    .join(' ');
+                const name = (landmark?.getAttribute('aria-label') ?? labelledBy)
+                    .replaceAll(/\s+/gu, ' ')
+                    .trim();
+                return name === '' ? undefined : name;
+            };
+            return nodes.slice(0, limit).map((node) => {
                 const element = node as HTMLElement;
                 const landmark = element.parentElement?.closest(landmarks);
                 const context = landmark
@@ -136,11 +150,13 @@ async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
                 return {
                     accessibleName: label && label !== text ? label : undefined,
                     context: context ?? undefined,
+                    contextName: nameOf(landmark),
                     detail: detail ?? undefined,
                     tag: element.tagName.toLowerCase(),
                     text,
                 };
-            }),
+            });
+        },
         { landmarks: LANDMARK_SELECTOR, limit: MAX_REPORTED_MATCHES },
     );
 }

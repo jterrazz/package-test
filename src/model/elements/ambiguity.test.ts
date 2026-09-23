@@ -98,6 +98,25 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('also here: contentinfo()');
     });
 
+    test('offers a named section as the region it is, and an unnamed one as nothing', () => {
+        // Given - candidates in two named sections, one reached by its role, and one in an unnamed section
+        const message = describeAmbiguity({
+            element: link('Articles'),
+            matches: [
+                match({ context: 'section', contextName: 'Orders' }),
+                match({ context: 'region', contextName: 'Returns' }),
+                match({ context: 'section' }),
+            ],
+            url: 'http://site.test/',
+        });
+
+        // Then - each region is offered by its name, and the unnamed section never
+        expect(message).toContain(
+            'within(region("Orders"), link("Articles"))   [leaves 1 of 3]   [also here: region("Returns")]',
+        );
+        expect(message).not.toContain('region()');
+    });
+
     test('does not offer a landmark that holds every candidate', () => {
         // Given - two candidates in the same main
         const message = describeAmbiguity({

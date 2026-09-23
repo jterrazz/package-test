@@ -158,7 +158,7 @@ Disambiguate with one of:
 Docs: docs/13-elements.md#designating-exactly-one-element (CONVENTIONS W3)
 ```
 
-Every suggestion carries what it LEAVES, so a rewrite that would keep the spec ambiguous never reads as a fix: a landmark holding every candidate is not offered at all. The evidence also names the ACCESSIBLE name a candidate matched on when that is not its text — a role descriptor matches the name, so `button('Delete post')` finds an `aria-label="Delete Post a"` too, and printing only the text would send you after something that never matched.
+Every suggestion carries what it LEAVES, so a rewrite that would keep the spec ambiguous never reads as a fix: a landmark holding every candidate is not offered at all. A candidate inside a named `<section>` is offered its region by name — `within(region("Orders"), …)`, the name read from the section's `aria-label` or from what its `aria-labelledby` points at — since a page holds several regions; an unnamed `<section>` is no region, so it stays evidence (`in <section>`) and is never offered. The evidence also names the ACCESSIBLE name a candidate matched on when that is not its text — a role descriptor matches the name, so `button('Delete post')` finds an `aria-label="Delete Post a"` too, and printing only the text would send you after something that never matched.
 
 On a device the same refusal reads in the device's terms — there are no landmarks to offer, so the evidence offers the accessibility identifiers it found:
 

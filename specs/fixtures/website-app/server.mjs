@@ -142,6 +142,17 @@ const pages = {
     <search aria-label="Site"><label for="site-query">Query</label><input id="site-query" type="search"><button type="button">Go</button></search>
     <main><button type="button">Go</button></main>
     </body></html>`,
+    // Three "Remove" buttons, each in a `<section>`: one named by its label,
+    // One by the heading it points at, one unnamed — no region at all.
+    '/regions': `<!doctype html><html lang="en"><head>${head('Fixture — Regions', '/regions')}
+    </head><body>
+    <main>
+        <h1>Regions</h1>
+        <section aria-label="Orders"><button type="button">Remove</button></section>
+        <section aria-labelledby="returns-title"><h2 id="returns-title">Returns</h2><button type="button">Remove</button></section>
+        <section><button type="button">Remove</button></section>
+    </main>
+    </body></html>`,
     // A page whose script throws, with nothing to catch it and nothing logged.
     '/thrown': `<!doctype html><html lang="en"><head><title>Fixture — Thrown</title></head>
     <body><h1>Thrown</h1><script>throw new Error('the page broke');</script></body></html>`,

@@ -57,20 +57,37 @@ const LANDMARK_ELEMENTS: Record<LandmarkKind, string> = {
  */
 export const LANDMARK_SELECTOR = [...Object.values(LANDMARK_ELEMENTS), '[role]'].join(', ');
 
-/** The landmark a context string maps back to, for a copy-pasteable suggestion. */
-const CONTEXT_LANDMARKS: Record<string, string> = {
-    aside: 'complementary()',
-    banner: 'banner()',
-    complementary: 'complementary()',
-    contentinfo: 'contentinfo()',
-    footer: 'contentinfo()',
-    form: 'form()',
-    header: 'banner()',
-    main: 'main()',
-    nav: 'navigation()',
-    navigation: 'navigation()',
-    search: 'search()',
+/** The landmark a context string — an element or a role — maps back to. */
+const CONTEXT_LANDMARKS: Record<string, LandmarkKind> = {
+    aside: 'complementary',
+    banner: 'banner',
+    complementary: 'complementary',
+    contentinfo: 'contentinfo',
+    footer: 'contentinfo',
+    form: 'form',
+    header: 'banner',
+    main: 'main',
+    nav: 'navigation',
+    navigation: 'navigation',
+    region: 'region',
+    search: 'search',
+    section: 'region',
 };
+
+/**
+ * The copy-pasteable scope a candidate's landmark offers, or none. A region
+ * is a landmark only when it is named — an unnamed `<section>` has no role to
+ * locate — and a page holds several, so it is offered by its name alone.
+ */
+function landmarkOf(match: ElementMatch): string | undefined {
+    const kind = match.context === undefined ? undefined : CONTEXT_LANDMARKS[match.context];
+    if (kind !== 'region') {
+        return kind === undefined ? undefined : `${CONSTRUCTORS[kind]}()`;
+    }
+    return match.contextName === undefined
+        ? undefined
+        : `${CONSTRUCTORS.region}(${JSON.stringify(match.contextName)})`;
+}
 
 /**
  * Render a descriptor as the source that would build it — `link('Articles')`,
@@ -113,7 +130,7 @@ function quoteDetail(match: ElementMatch): string {
 function landmarkCounts(matches: ElementMatch[]): [string, number][] {
     const counts = new Map<string, number>();
     for (const match of matches) {
-        const landmark = match.context === undefined ? undefined : CONTEXT_LANDMARKS[match.context];
+        const landmark = landmarkOf(match);
         if (landmark !== undefined) {
             counts.set(landmark, (counts.get(landmark) ?? 0) + 1);
         }
