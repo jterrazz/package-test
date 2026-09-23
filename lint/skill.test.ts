@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -46,5 +46,28 @@ describe('the skill names only what exists (meta-test)', () => {
             unknownCalls: ['fakeOf'],
             unknownImports: ['fakeOf from @jterrazz/test'],
         });
+    });
+});
+
+describe('knowledge has one owner each — the skill is one page, the API is the types (meta-test)', () => {
+    test('the skills tree holds one SKILL.md per skill, and nothing beside it', () => {
+        // Given - every file under skills/
+        const files = readdirSync(resolve(ROOT, 'skills'), { recursive: true, withFileTypes: true })
+            .filter((entry) => entry.isFile())
+            .map((entry) => join(entry.parentPath, entry.name).slice(ROOT.length + 1));
+
+        // Then - no references/, no card, no generated projection of any kind
+        expect(files.filter((file) => !/^skills\/[^/]+\/SKILL\.md$/u.test(file))).toStrictEqual([]);
+    });
+
+    test('no generated API reference: no docs/reference/, no typedoc config, dependency or script', () => {
+        // Given - the tree and the manifest
+        const manifest = readFileSync(resolve(ROOT, 'package.json'), 'utf8');
+        const configs = readdirSync(ROOT).filter((entry) => /^typedoc(?:\.|$)/u.test(entry));
+
+        // Then - the API is the types, and nothing writes a second copy of them
+        expect(existsSync(resolve(ROOT, 'docs/reference'))).toBe(false);
+        expect(configs).toStrictEqual([]);
+        expect(manifest).not.toMatch(/typedoc/u);
     });
 });
