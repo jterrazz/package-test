@@ -39,8 +39,9 @@ import { isTestFileName } from './role.js';
  *    `expect(result.stderr.text).toBe('')`, the `await` dropped with the
  *    promise (a table keeps its `toBeEmpty`);
  * 4. a source the second gesture touched imports the two names it now calls;
- * 5. in EVERY file walked, 16.x-shaped or not, a suppression directive naming
- *    a rule 17 renamed names its new id (`d8w-text-bypass` → `d8w-raw-bypass`),
+ * 5. in EVERY file walked, 16.x-shaped or not, a suppression directive — a
+ *    comment, never a string literal that spells one — naming a rule 17
+ *    renamed names its new id (`d8w-text-bypass` → `d8w-raw-bypass`),
  *    and the one line a `-next-line` or `-line` directive covers reads `.raw`
  *    where 16 read `.text` — the raw capture it always compared. No 17 file
  *    can name the 16 id, and a renamed directive no longer matches, so the
@@ -208,6 +209,29 @@ const DIRECTIVE = /(?:oxlint|eslint)-(?:disable|enable)(?<scope>-next-line|-line
 /** The raw read a 16 `.text` was, in a value comparison: `expect(<x>.text).toContain(`. */
 const RAW_READ = /\.text(?=\s*\)(?:\.not)?\.(?:toContain|toMatch)\()/gu;
 
+/** A string literal's opening quote. */
+const QUOTES = new Set(["'", '"', '`']);
+
+/**
+ * Where the comment of a line starts — a `//` or `/*` outside every string
+ * literal the line opens — or -1. A directive spelled inside a string is text.
+ */
+function commentStart(line: string): number {
+    let quote: string | undefined;
+    for (let index = 0; index < line.length; index += 1) {
+        const char = line[index] ?? '';
+        if (quote === undefined && QUOTES.has(char)) {
+            quote = char;
+        } else if (quote !== undefined) {
+            index += char === '\\' ? 1 : 0;
+            quote = char === quote ? undefined : quote;
+        } else if (char === '/' && ['/', '*'].includes(line[index + 1] ?? '')) {
+            return index;
+        }
+    }
+    return -1;
+}
+
 /**
  * A directive naming a renamed rule names its new id. A 16 `.text` WAS the raw
  * capture, so the line a `d8w-text-bypass` directive covers reads `.raw` —
@@ -216,23 +240,25 @@ const RAW_READ = /\.text(?=\s*\)(?:\.not)?\.(?:toContain|toMatch)\()/gu;
 function renameDirectives(text: string): string {
     const lines = text.split('\n');
     for (const [index, line] of lines.entries()) {
-        const directive = DIRECTIVE.exec(line);
+        const start = commentStart(line);
+        const comment = start === -1 ? '' : line.slice(start);
+        const directive = DIRECTIVE.exec(comment);
         if (directive === null) {
             continue;
         }
         const scope = directive.groups?.scope;
-        let renamed = line;
+        let renamed = comment;
         for (const [from, to] of Object.entries(RENAMED_RULES)) {
             renamed = renamed.replaceAll(
                 new RegExp(`\\bjterrazz/${from}\\b`, 'gu'),
                 `jterrazz/${to}`,
             );
         }
-        if (renamed === line) {
+        if (renamed === comment) {
             continue;
         }
         const covered = scope === '-next-line' ? index + 1 : index;
-        lines[index] = renamed;
+        lines[index] = `${line.slice(0, start)}${renamed}`;
         if (scope !== undefined) {
             lines[covered] = (lines[covered] ?? '').replaceAll(RAW_READ, '.raw');
         }

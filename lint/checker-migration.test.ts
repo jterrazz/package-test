@@ -378,6 +378,25 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
+    test('a directive is read in a comment, never in a string that spells one', () => {
+        // Given - a 17 test whose Given is a 16 source, the directive and its read held in string literals
+        const source = [
+            'const given = [',
+            "    '// oxlint-disable-next-line jterrazz/d8w-text-bypass -- a 16 id that no longer exists',",
+            '    "expect(result.stdout.text).toContain(\'[0m\'); // oxlint-disable-line jterrazz/d8w-text-bypass -- colour",',
+            '];',
+            '',
+        ].join('\n');
+        const root = tree16({ 'lint/mover/mover.test.ts': source });
+
+        // When - the mover runs
+        const migration = migrateTo17(root, renameSync);
+
+        // Then - a string is text: nothing renamed
+        expect(migration.directives).toStrictEqual([]);
+        expect(readFileSync(join(root, 'lint/mover/mover.test.ts'), 'utf8')).toBe(source);
+    });
+
     test('the gate is per file: a 17 file is left byte for byte beside a 16 one in the same tree', () => {
         // Given - one leaf still on 16 (its golden folder), and another leaf on 17 whose negative spec keeps the 16 spellings on purpose
         const refusal = [
