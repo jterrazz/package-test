@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
-import { lstatSync, readdirSync, renameSync } from 'node:fs';
-import { dirname, join, resolve, sep } from 'node:path';
+import { lstatSync, readdirSync, renameSync, statSync } from 'node:fs';
+import { basename, dirname, join, resolve, sep } from 'node:path';
 
 /**
  * The directory listing every walk of the conventions checker reads: what git
@@ -132,6 +132,30 @@ export function trackedEntries(dir: string): TrackedEntry[] {
 /** The names `trackedEntries` lists. */
 export function trackedNames(dir: string): string[] {
     return trackedEntries(dir).map(({ name }) => name);
+}
+
+/**
+ * What one path names, read through the same listing: `directory` or `file` as
+ * the disk types it (a link followed), or undefined when it is not on disk or,
+ * inside a work tree, when git tracks neither it nor anything below it.
+ */
+export function trackedKind(path: string): 'directory' | 'file' | undefined {
+    const absolute = resolve(path);
+    let directory: boolean;
+    try {
+        directory = statSync(absolute).isDirectory();
+    } catch {
+        return undefined;
+    }
+    const kind = directory ? 'directory' : 'file';
+    const tree = workTreeOf(directory ? absolute : dirname(absolute));
+    if (tree === null) {
+        return kind;
+    }
+    const listed =
+        absolute === tree.top ||
+        (tree.children.get(dirname(absolute))?.has(basename(absolute)) ?? false);
+    return listed ? kind : undefined;
 }
 
 /** Forget every listing: a `git mv` changed what the index holds. */

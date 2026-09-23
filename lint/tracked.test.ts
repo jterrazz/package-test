@@ -134,3 +134,33 @@ describe('the moves the fixers make', () => {
         expect(existsSync(join(root, 'specs', 'fixtures', 'app'))).toBe(false);
     });
 });
+
+describe('the single paths the checker probes', () => {
+    test('reports a `file()` whose target is on disk and untracked (C8)', () => {
+        // Given - a tracked spec naming two goldens on disk, only one of them added to git
+        const root = mkdtempSync(join(tmpdir(), 'tracked-c8-'));
+        mkdirSync(join(root, 'specs', 'api', 'expected'), { recursive: true });
+        writeFileSync(join(root, 'specs', 'api', 'expected', 'added.txt'), 'added\n');
+        writeFileSync(join(root, 'specs', 'api', 'expected', 'local.txt'), 'local\n');
+        writeFileSync(
+            join(root, 'specs', 'api', 'boot.spec.ts'),
+            [
+                "expect(a).toMatch(file('./expected/added.txt'));",
+                "expect(b).toMatch(file('./expected/local.txt'));",
+                '',
+            ].join('\n'),
+        );
+        execFileSync('git', ['init', '--quiet'], { cwd: root });
+        execFileSync('git', ['add', 'specs/api/boot.spec.ts', 'specs/api/expected/added.txt'], {
+            cwd: root,
+        });
+
+        // Then - the untracked golden names nothing a clean checkout holds
+        const c8 = runAllChecks(join(root, 'specs'))
+            .filter(({ rule }) => rule === 'c8-disk-target-exists')
+            .map(({ line, message }) => `${line}: ${message}`);
+        expect(c8).toStrictEqual([
+            "2: file('./expected/local.txt') names nothing — api/expected/local.txt is not tracked by git",
+        ]);
+    });
+});

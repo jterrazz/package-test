@@ -1,6 +1,6 @@
 import { basename, dirname, join } from 'node:path';
 
-import { isDirectory, isFile } from './fs-cache.js';
+import { isFile, isOnDisk } from './fs-cache.js';
 import type { AstNode, Comment } from './oxlint-api.js';
 
 /**
@@ -29,7 +29,7 @@ export type SpecsAnchor = {
  */
 export function isProjectRoot(directory: string): boolean {
     const git = join(directory, '.git');
-    return isFile(join(directory, 'package.json')) || isDirectory(git) || isFile(git);
+    return isFile(join(directory, 'package.json')) || isOnDisk(git);
 }
 
 /**

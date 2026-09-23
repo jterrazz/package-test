@@ -6,7 +6,7 @@ import { isRelativePath } from '../src/model/chain/spec-path.js';
 import { parseSpecDocument, SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
-import { moveKeepingHistory, trackedEntries } from './tracked.js';
+import { moveKeepingHistory, trackedEntries, trackedKind } from './tracked.js';
 
 /**
  * The cross-file checker passes — the analyses oxlint cannot express because
@@ -1176,22 +1176,14 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-/** What a path names on disk, if anything. */
-function entryKind(path: string): 'directory' | 'file' | undefined {
-    try {
-        return statSync(path).isDirectory() ? 'directory' : 'file';
-    } catch {
-        return undefined;
-    }
-}
-
 /**
  * CONVENTIONS C8 — every path a test names exists, as what it says it is.
  *
  * A `file()` or `directory()` with a literal path, and a document's `fixture:`,
  * resolved from the test's own directory: a path that names nothing, a
  * `file()` naming a directory, or a `directory()` naming a file is reported at
- * the path. The catch is the typo that would only fail a run — a test later,
+ * the path. Inside a git work tree a path names only what git tracks: an
+ * untracked target is on this workstation and on no clean checkout. The catch is the typo that would only fail a run — a test later,
  * far from the line that made it. A call written inside a string (a rule's
  * test case, a sample) is text, not a call, and is not read.
  */
@@ -1202,7 +1194,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
         : suppressedLines(readText(file), 'c8');
     for (const { column, kind, line, path } of collectFixtureReferences(file, DISK_CALL, true)) {
         const target = resolve(dirname(file), path);
-        const found = entryKind(target);
+        const found = trackedKind(target);
         if (found === kind || suppressed.has(line)) {
             continue;
         }
@@ -1214,7 +1206,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
             line,
             message:
                 found === undefined
-                    ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} does not exist`
+                    ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} ${existsSync(target) ? 'is not tracked by git' : 'does not exist'}`
                     : `${kind}('${path}') names a ${found} — write ${found}('${spelled}')`,
             rule: 'c8-disk-target-exists',
             severity: 'error',

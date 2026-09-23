@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
@@ -22,6 +23,15 @@ const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/seeds']);
 writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.json'), '[]\n');
 writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.csv'), 'id\n');
+
+/** A git checkout whose seeds/ tracks one `.sql` and holds an untracked `.json` beside it. */
+const UNTRACKED_STRAY = checkoutUnder('work', ['specs/app/widget/seeds']);
+writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
+writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
+execFileSync('git', ['init', '--quiet'], { cwd: UNTRACKED_STRAY });
+execFileSync('git', ['add', 'package.json', 'specs/app/widget/seeds/users.sql'], {
+    cwd: UNTRACKED_STRAY,
+});
 
 ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
     invalid: [
@@ -48,6 +58,11 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
         {
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/compliant/specs/app/app.test.ts`,
+        },
+        // A file git does not track is on no clean checkout: it violates nothing.
+        {
+            code: 'test("x", () => {});',
+            filename: `${UNTRACKED_STRAY}/specs/app/widget/widget.test.ts`,
         },
         // Outside specs/ the rule is inert.
         {
