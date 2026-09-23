@@ -140,7 +140,7 @@ Vitest runs test files in parallel workers; the framework isolates them automati
 
 The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address talks to another worker.
 
-On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers.
+On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers. The reset restarts every generated id too, and a postgres worker's cloned schema counts its serial columns on sequences of its own: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
 
 ## Root auto-discovery (rule A9)
 

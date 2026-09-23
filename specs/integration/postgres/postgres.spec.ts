@@ -77,7 +77,7 @@ describe('postgres — the handle against a real container', () => {
         expect(result.value).toMatch(file('./expected/empty.json'));
     });
 
-    test('truncates every table on reset, and takes rows again afterwards', async () => {
+    test('truncates every table on reset, its generated ids restarted, and takes rows again afterwards', async () => {
         // Given - seeded rows, a reset, then one insert
         const result = await integration
             .seed(file('../../seeds/two-users.sql'))
@@ -86,10 +86,10 @@ describe('postgres — the handle against a real container', () => {
                 await db.seed(
                     "INSERT INTO \"users\" (name, email) VALUES ('Second', 'second@test.com')",
                 );
-                return await db.query('users', ['name']);
+                return await db.query('users', ['id', 'name']);
             });
 
-        // Then - only the row written after the reset remains
+        // Then - only the row written after the reset remains, numbered from 1 again
         expect(result.value).toMatch(file('./expected/second.json'));
     });
 

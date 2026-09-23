@@ -328,3 +328,24 @@ describe('the template build lock (regression guard)', () => {
         rmSync(root, { force: true, recursive: true });
     });
 });
+
+describe('sqlite() — a reset starts the next chain from the same state', () => {
+    test('a reset empties every table and restarts its generated ids', async () => {
+        // Given - an AUTOINCREMENT table holding two rows, then a reset and one insert
+        const root = mkdtempSync(resolve(tmpdir(), 'sqlite-reset-'));
+        const initSqlPath = resolve(root, 'init.sql');
+        writeFileSync(
+            initSqlPath,
+            'CREATE TABLE "users" (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);',
+        );
+        const db = sqlite({ init: initSqlPath });
+        await db.initialize(root, root);
+        await db.seed(`INSERT INTO "users" (name) VALUES ('Ada'), ('Grace')`);
+        await db.reset();
+        await db.seed(`INSERT INTO "users" (name) VALUES ('Linus')`);
+
+        // Then - the one row, numbered from 1 again
+        await expect(db.query('users', ['id', 'name'])).resolves.toStrictEqual([[1, 'Linus']]);
+        rmSync(root, { force: true, recursive: true });
+    });
+});

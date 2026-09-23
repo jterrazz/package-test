@@ -452,6 +452,14 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         for (const { name } of tables) {
             db.exec(`DELETE FROM "${name}"`);
         }
+        const counted = db
+            .prepare(
+                `SELECT name FROM sqlite_master WHERE type='table' AND name = 'sqlite_sequence'`,
+            )
+            .get();
+        if (counted !== undefined) {
+            db.exec('DELETE FROM sqlite_sequence');
+        }
     }
 
     isolation(): IsolationStrategy {

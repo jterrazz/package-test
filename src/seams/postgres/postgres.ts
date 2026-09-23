@@ -140,7 +140,9 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
             AND tablename NOT LIKE '_prisma%'
         `);
         for (const row of result.rows) {
-            await client.query(`TRUNCATE "${this.schema}"."${row.tablename}" CASCADE`);
+            await client.query(
+                `TRUNCATE "${this.schema}"."${row.tablename}" RESTART IDENTITY CASCADE`,
+            );
         }
     }
 
@@ -175,6 +177,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
                         `CREATE TABLE "${workerSchema}"."${row.tablename}" (LIKE "public"."${row.tablename}" INCLUDING ALL)`,
                     );
                 }
+                await ownSequences(client, workerSchema);
 
                 // Switch this handle to use the worker schema
                 this.schema = workerSchema;
@@ -199,6 +202,37 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
                 await client.query(`DROP SCHEMA IF EXISTS "${workerSchema}" CASCADE`);
             },
         };
+    }
+}
+
+/**
+ * Give the cloned tables' serial columns sequences of their own schema.
+ *
+ * `LIKE … INCLUDING ALL` copies a serial column's default as written, so a
+ * clone would still draw from the public table's sequence — shared by every
+ * worker, never restarted by the clone's reset. Each such column gets a
+ * sequence owned by its clone instead: its ids count from 1 in each worker,
+ * and `TRUNCATE … RESTART IDENTITY` restarts them.
+ */
+async function ownSequences(client: Client, schema: string): Promise<void> {
+    const serials = await client.query<{ column: string; table: string }>(
+        `SELECT c.relname AS table, a.attname AS column
+        FROM pg_attrdef d
+        JOIN pg_attribute a ON a.attrelid = d.adrelid AND a.attnum = d.adnum
+        JOIN pg_class c ON c.oid = d.adrelid
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = $1 AND pg_get_expr(d.adbin, d.adrelid) LIKE 'nextval(%'`,
+        [schema],
+    );
+    const statements = serials.rows.map(({ column, table }) => {
+        const sequence = `"${schema}"."${table}_${column}_seq"`;
+        return (
+            `CREATE SEQUENCE ${sequence} OWNED BY "${schema}"."${table}"."${column}"; ` +
+            `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${column}" SET DEFAULT nextval('${sequence}');`
+        );
+    });
+    if (statements.length > 0) {
+        await client.query(statements.join('\n'));
     }
 }
 
