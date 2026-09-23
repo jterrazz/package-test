@@ -24,6 +24,17 @@ function schemaValidator(): (data: unknown) => string[] {
               );
 }
 
+/**
+ * The refusals a schema cannot state, each with the reason: the parser holds
+ * them, and an editor validating against the schema does not see them.
+ */
+const BEYOND_A_SCHEMA = new Map([
+    [
+        'specs/api/literate/fixtures/capture-before-it-exists.spec.yaml',
+        'a name sent before the step that captures it: an order across steps, which no keyword compares',
+    ],
+]);
+
 /** Is this document an input a negative spec runs — under a `fixtures/` folder? */
 function isFixture(file: string): boolean {
     return file.split('/').includes('fixtures');
@@ -50,6 +61,16 @@ describe('the published schema validates every document of the tree (meta-test)'
         // Then - each is deliberately invalid: no live document is one
         expect(refused.length).toBeGreaterThan(0);
         expect(refused.filter(({ file }) => !isFixture(file))).toStrictEqual([]);
+    });
+
+    test('a document the parser refuses, the schema refuses — but for what no schema can state', () => {
+        // Given - every document the parser refuses, less the refusals no JSON Schema keyword can express
+        const refused = schemaVerdicts(ROOT, schemaValidator()).filter(
+            ({ file, parser }) => parser !== null && !BEYOND_A_SCHEMA.has(file),
+        );
+
+        // Then - the schema refuses each of them too: an editor flags what the runner refuses
+        expect(refused.filter(({ schema }) => schema.length === 0)).toStrictEqual([]);
     });
 
     test('the walk reads the documents git keeps, and nothing it ignores', () => {
@@ -83,6 +104,11 @@ describe('the published schema refuses a wrong document of every kind', () => {
             'api',
             'neither a request nor steps',
             'kind: api\ndescription: x\nseed: ./seeds/one.sql\n',
+        ],
+        [
+            'api',
+            'a seed under seeds/ inside the fixtures pool',
+            'kind: api\ndescription: x\nseed: ../../fixtures/seeds/one.sql\nrequest: GET /users\n',
         ],
         [
             'api',

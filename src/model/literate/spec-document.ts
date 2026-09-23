@@ -9,6 +9,7 @@ import {
 } from '../../seams/yaml/document.js';
 import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from '../../seams/yaml/document.js';
 import {
+    GROUND_DIRS,
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
@@ -1565,10 +1566,19 @@ const STRING_OR_LIST = {
     oneOf: [{ type: 'string' }, { items: { type: 'string' }, minItems: 1, type: 'array' }],
 };
 
-/** A relative path that passes through `folder`, as a pattern — C24's reading, for an editor. */
+/** A folder segment that is not ground — what a path may pass through before the folder it reads. */
+const NOT_GROUND_SEGMENT = String.raw`(?!(?:${GROUND_DIRS.join('|')})/)[^/]+/`;
+
+/**
+ * A relative path whose FIRST ground folder is `folder`, as a pattern — C24's
+ * reading, for an editor. `contracts/` is no ground, so a contract path passes
+ * through no ground folder at all.
+ */
 function pathIn(folder: string, extension = ''): SchemaNode {
+    const rest =
+        folder === CONTRACTS_FOLDER ? `(?:${NOT_GROUND_SEGMENT})*[^/]+` : String.raw`[^/].*`;
     return {
-        pattern: String.raw`^\.\.?/(?:[^/]+/)*?${folder}/[^/].*${extension.replaceAll('.', String.raw`\.`)}$`,
+        pattern: String.raw`^\.\.?/(?:${NOT_GROUND_SEGMENT})*?${folder}/${rest}${extension.replaceAll('.', String.raw`\.`)}$`,
         type: 'string',
     };
 }

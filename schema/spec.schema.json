@@ -75,7 +75,7 @@
             "description": "A ./requests/<name>.http sent whole, or an inline request line — METHOD /path, {{capture}} references allowed.",
             "oneOf": [
                 {
-                    "pattern": "^\\.\\.?/(?:[^/]+/)*?requests/[^/].*\\.http$",
+                    "pattern": "^\\.\\.?/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*?requests/[^/].*\\.http$",
                     "type": "string"
                 },
                 {
@@ -88,7 +88,7 @@
             "description": "A ./expected/<name>.http golden, or its three parts inline — status, a subset of headers, the body — each token-aware.",
             "oneOf": [
                 {
-                    "pattern": "^\\.\\.?/(?:[^/]+/)*?expected/[^/].*\\.http$",
+                    "pattern": "^\\.\\.?/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*?expected/[^/].*\\.http$",
                     "type": "string"
                 },
                 {
@@ -167,7 +167,7 @@
         "seedEntry": {
             "oneOf": [
                 {
-                    "pattern": "^\\.\\.?/(?:[^/]+/)*?seeds/[^/].*\\.sql$",
+                    "pattern": "^\\.\\.?/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*?seeds/[^/].*\\.sql$",
                     "type": "string"
                 },
                 {
@@ -177,7 +177,7 @@
                             "type": "string"
                         },
                         "file": {
-                            "pattern": "^\\.\\.?/(?:[^/]+/)*?seeds/[^/].*\\.sql$",
+                            "pattern": "^\\.\\.?/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*?seeds/[^/].*\\.sql$",
                             "type": "string"
                         }
                     },
@@ -431,12 +431,12 @@
         "intercept": {
             "oneOf": [
                 {
-                    "pattern": "^\\.\\.?/(?:[^/]+/)*?contracts/[^/].*$",
+                    "pattern": "^\\.\\.?/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*?contracts/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*[^/]+$",
                     "type": "string"
                 },
                 {
                     "items": {
-                        "pattern": "^\\.\\.?/(?:[^/]+/)*?contracts/[^/].*$",
+                        "pattern": "^\\.\\.?/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*?contracts/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*[^/]+$",
                         "type": "string"
                     },
                     "minItems": 1,
