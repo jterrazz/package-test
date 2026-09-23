@@ -116,36 +116,39 @@ test('bookmarks an event from its detail screen', async () => {
 });
 ```
 
-**An API** — the assembled app, met through a complete HTTP exchange, usually as a document ([docs/10](docs/10-api.md), [docs/20](docs/20-documents.md)):
+**An API** — the assembled app, met through a complete HTTP exchange, the whole response written where the test reads it ([docs/10](docs/10-api.md)):
 
-```yaml
-# specs/api/users/created.spec.yaml
-kind: api
-description: creates a user and answers with it
-seed: ./seeds/empty.sql
-request: ./requests/create-user.http
-response: ./expected/user-created.http
-tables:
-    users:
-        columns: [name]
-        rows:
-            - [Alice]
+```typescript
+test('creates a user and answers with it', async () => {
+    // Given - the complete request
+    const result = await api.post('/users', { name: 'Alice' });
+
+    // Then - the whole response, and the row it wrote
+    expect(result.response).toMatch(`
+        HTTP/1.1 201 Created
+        content-type: application/json
+
+        {"id": "{{uuid}}", "name": "Alice"}
+    `);
+    await expect(result.table('users')).toMatch([['{{uuid}}', 'Alice']]);
+});
 ```
 
 **A job** — what a name triggers, in-process ([docs/11](docs/11-jobs.md)):
 
-```yaml
-# specs/jobs/digest/active-subscribers.spec.yaml
-kind: jobs
-description: writes one digest row per active subscriber
-seed: ./seeds/subscribers.sql
-trigger: daily-digest
-tables:
-    digests:
-        columns: [to]
-        rows:
-            - [a@site.test]
-            - [b@site.test]
+```typescript
+test('writes one digest row per active subscriber', async () => {
+    // Given - two subscribers, written in the test
+    const result = await jobs
+        .seed(sql`INSERT INTO subscribers (email) VALUES ('a@site.test'), ('b@site.test');`)
+        .trigger('daily-digest');
+
+    // Then - the whole table
+    await expect(result.table('digests')).toMatch([
+        [1, 'a@site.test'],
+        [2, 'b@site.test'],
+    ]);
+});
 ```
 
 **A CLI** — the built binary, usually as a document ([docs/12](docs/12-cli.md)):
@@ -173,7 +176,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)        |
 | What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)       |
 | Each kind of test, one chapter, the same seven sections          | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md)     |
-| A case written as data: the `<case>.spec.yaml` of cli, api, jobs | [docs/20](docs/20-documents.md)                                  |
+| A cli session written as data: the `<case>.spec.yaml`            | [docs/20](docs/20-documents.md)                                  |
 | Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                   |
 | Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                 |
 | The `{{token}}` grammar, `#ref` captures, update mode            | [docs/15](docs/15-tokens.md)                                     |

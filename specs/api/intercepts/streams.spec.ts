@@ -14,10 +14,19 @@ describe('contracts — streamed replies', () => {
             .get('/tokens');
 
         // Then - the app read them one by one, under the declared type
-        expect(result.response.body).toStrictEqual({
-            chunks: ['Hel', 'lo, ', 'world'],
-            contentType: 'text/plain',
-        });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "chunks": [
+                    "Hel",
+                    "lo, ",
+                    "world"
+                ],
+                "contentType": "text/plain"
+            }
+        `);
     });
 
     test('an event stream arrives framed, one chunk per event', async () => {
@@ -30,9 +39,17 @@ describe('contracts — streamed replies', () => {
             .get('/tokens');
 
         // Then - each event is its own frame, under text/event-stream
-        expect(result.response.body).toStrictEqual({
-            chunks: ['data: {"token":"a"}\n\n', 'event: done\ndata: \n\n'],
-            contentType: 'text/event-stream',
-        });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "chunks": [
+                    "data: {\\"token\\":\\"a\\"}\\n\\n",
+                    "event: done\\ndata: \\n\\n"
+                ],
+                "contentType": "text/event-stream"
+            }
+        `);
     });
 });

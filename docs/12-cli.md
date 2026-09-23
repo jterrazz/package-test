@@ -355,7 +355,7 @@ test('lints a shop and reports per-file blocks', async () => {
 
 ### Spec documents — `<case>.spec.yaml`
 
-Most cli cases are documents: a session written as data — the ground, the runs, what each printed and left on disk — collected as a test file of its own by the `cli()` project. The format, shared with the api and jobs facets, is [20 — Spec documents](20-documents.md): its keys, its paths, the three doors that run it, failure and update. What stays here is what only this constructor owns: the words a document names its ground by.
+Most cli cases are documents: a session written as data — the ground, the runs, what each printed and left on disk — collected as a test file of its own by the `cli()` project. The format is [20 — Spec documents](20-documents.md): its keys, its paths, the three doors that run it, failure and update. What stays here is what only this constructor owns: the words a document names its ground by.
 
 #### Registration — once per app
 

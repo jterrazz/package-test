@@ -1,8 +1,0 @@
-kind: api
-description: a JSON body file is sent as its value, not as the file's layout
-request: POST /echo-raw
-body: ./requests/erin.json
-response:
-    status: 200
-    body:
-        raw: '{"email":"erin@test.com","name":"Erin"}'

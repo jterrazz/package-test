@@ -65,10 +65,9 @@ export type LiteratePlugin = {
 /**
  * The module a `<case>.spec.yaml` becomes: one `test()` whose title is the
  * document's `description:` and whose body runs the whole file through the
- * runner its `kind:` names — `cli`, `api` or `jobs`, the export the bound
- * specification hands out under that name.
+ * `cli` the bound specification hands out.
  *
- * The document is handed to `<kind>.run()` as the value
+ * The document is handed to `cli.run()` as the value
  * `file('./<case>.spec.yaml')` returns, spelled by its brand: the generated
  * module imports the runner and nothing else, so it resolves the same way from
  * a consumer's install and from this repository's source.
@@ -80,13 +79,13 @@ export function literateModule(
     filePath: string,
     specificationPath: string,
 ): string {
-    const { description, kind } = readSpecFile(content, filePath).document;
+    const { description } = readSpecFile(content, filePath).document;
     return [
         "import { test } from 'vitest';",
-        `import { ${kind} } from ${JSON.stringify(specificationPath)};`,
+        `import { cli } from ${JSON.stringify(specificationPath)};`,
         '',
         `test(${JSON.stringify(description)}, async () => {`,
-        `    await ${kind}.run({ [Symbol.for(${JSON.stringify(DISK_KEY)})]: 'file', path: ${JSON.stringify(`./${basename(filePath)}`)} });`,
+        `    await cli.run({ [Symbol.for(${JSON.stringify(DISK_KEY)})]: 'file', path: ${JSON.stringify(`./${basename(filePath)}`)} });`,
         '});',
         '',
     ].join('\n');

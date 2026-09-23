@@ -50,7 +50,7 @@ async function enrichFromApi(analyticsUrl: string): Promise<void> {
 
 // The `analyticsDb` key auto-binds to the `analytics-db` compose service via
 // The record KEY is the service name, in kebab-case (CONVENTIONS A8).
-const analyticsHandle = postgres();
+export const analyticsHandle = postgres();
 
 export const { cleanup, jobs } = await specification.jobs({
     jobs: ({ analyticsDb, db }): JobHandle[] => [

@@ -1,75 +1,120 @@
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
-// ── Placeholders in expected/*.http — both modes ──
-
 describe('responses', () => {
-    test('matches dynamic values via placeholders', async () => {
-        // Given - an endpoint returning a random uuid and a timestamp
+    test('matches dynamic values through tokens, a ref holding its first value', async () => {
+        // Given - an endpoint returning a random uuid twice and a timestamp
         const result = await api.get('/session');
 
-        // Then - the fixture matches via {{uuid#session}} / {{iso8601}} placeholders, with the #session ref asserting both uuid occurrences are equal. the matcher also asserts the status line and the content-type header (via a {{string}} placeholder) as a subset — headers absent from the fixture are unconstrained.
-        expect(result.response).toMatch(file('./expected/session.http'));
+        // Then - {{uuid#session}} captures the id and requires the echo to hold the same one; content-type is asserted as a subset header
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: {{string}}
+
+            {
+                "echo": {
+                    "sessionId": "{{uuid#session}}"
+                },
+                "id": "{{uuid#session}}",
+                "startedAt": "{{iso8601}}",
+                "ttl": 3600
+            }
+        `);
+    });
+
+    test('a journey sends what an earlier response carried, and gets the same session back', async () => {
+        // Given - a session, then two calls that send its id
+        const session = await api.get('/session');
+        const { id } = session.response.body as { id: string };
+        const echoed = await api.get(`/echo/${id}`);
+        const posted = await api.headers({ 'x-chain': id }).post('/echo', { session: id });
+
+        // Then - each response carries the id it was sent
+        expect(echoed.response).toMatch(`
+            HTTP/1.1 200 OK
+
+            {"value": "${id}"}
+        `);
+        expect(posted.response).toMatch(`
+            HTTP/1.1 200 OK
+
+            {"body": {"session": "${id}"}, "headers": {"x-chain": "${id}", "x-file": null}}
+        `);
     });
 
     test('fails when a ref captures two different values', async () => {
-        // Given - a fixture that reuses one ref for fields with different values
+        // Given - an expectation that reuses one ref for fields with different values
         const result = await api.get('/session');
 
-        // Then - the second occurrence of {{...#val}} must equal the capture, and does not frozen - a deliberately-wrong fixture asserting the mismatch; never rewritten under TEST_UPDATE
+        // Then - the second occurrence of {{…#val}} must equal the capture, and does not
         expect(() => {
-            expect(result.response).toMatch(file('./expected/session-wrong-ref.http'), {
-                frozen: true,
-            });
+            expect(result.response).toMatch(
+                `
+                    HTTP/1.1 200 OK
+
+                    {
+                        "echo": { "sessionId": "{{uuid#val}}" },
+                        "id": "{{uuid#val}}",
+                        "startedAt": "{{string#val}}",
+                        "ttl": "{{number}}"
+                    }
+                `,
+                { frozen: true },
+            );
         }).toThrow(/Response mismatch/u);
     });
 });
 
 describe('response mismatch messages', () => {
     test('reports a status-line mismatch with expected and received codes', async () => {
-        // Given - a fixture expecting 201 for an endpoint that returns 200
+        // Given - an expectation of 201 for an endpoint that returns 200
         const result = await api.get('/session');
 
-        // Then - the failure names the fixture and both status codes frozen - a deliberately-wrong fixture asserting the status mismatch; never rewritten under TEST_UPDATE
+        // Then - the failure names the value in place and both status codes
         expect(() => {
-            expect(result.response).toMatch(file('./expected/session-wrong-status.http'), {
-                frozen: true,
-            });
+            expect(result.response).toMatch('HTTP/1.1 201 Created', { frozen: true });
         }).toThrow(
-            /Response status mismatch \(\.\/expected\/session-wrong-status\.http\)[\s\S]*expected: 201[\s\S]*received: 200/u,
+            /Response status mismatch \(the value in place\)[\s\S]*expected: 201[\s\S]*received: 200/u,
         );
     });
 
     test('reports a subset-header mismatch with the wrong value', async () => {
-        // Given - a fixture pinning content-type to a value the app never sends
+        // Given - an expectation pinning content-type to a value the app never sends
         const result = await api.get('/session');
 
-        // Then - the failure names the header and shows expected vs received frozen - a deliberately-wrong fixture asserting the header mismatch; never rewritten under TEST_UPDATE
+        // Then - the failure names the header and shows expected vs received
         expect(() => {
-            expect(result.response).toMatch(file('./expected/session-wrong-header.http'), {
-                frozen: true,
-            });
+            expect(result.response).toMatch(
+                `
+                    HTTP/1.1 200 OK
+                    content-type: text/html
+                `,
+                { frozen: true },
+            );
         }).toThrow(
-            /Response header mismatch \(\.\/expected\/session-wrong-header\.http\)[\s\S]*header: content-type[\s\S]*expected: text\/html[\s\S]*received: application\/json/u,
+            /Response header mismatch \(the value in place\)[\s\S]*header: content-type[\s\S]*expected: text\/html[\s\S]*received: application\/json/u,
         );
     });
 
-    // RUNTIME C3 — an `expected/*.http` starts with a status line and its
+    // RUNTIME C3 — a response expectation starts with a status line and its
     // Headers are matched as a SUBSET: the ones listed must match, the rest are
     // Unconstrained.
     test('reports a subset-header mismatch when the header is absent', async () => {
-        // Given - a fixture listing a header the response does not carry
+        // Given - an expectation listing a header the response does not carry
         const result = await api.get('/session');
 
-        // Then - the failure shows the header as absent frozen - a deliberately-wrong fixture asserting the absent-header case; never rewritten under TEST_UPDATE
+        // Then - the failure shows the header as absent
         expect(() => {
-            expect(result.response).toMatch(file('./expected/session-missing-header.http'), {
-                frozen: true,
-            });
+            expect(result.response).toMatch(
+                `
+                    HTTP/1.1 200 OK
+                    x-request-id: {{string}}
+                `,
+                { frozen: true },
+            );
         }).toThrow(
-            /Response header mismatch \(\.\/expected\/session-missing-header\.http\)[\s\S]*header: x-request-id[\s\S]*received: \(absent\)/u,
+            /Response header mismatch \(the value in place\)[\s\S]*header: x-request-id[\s\S]*received: \(absent\)/u,
         );
     });
 });

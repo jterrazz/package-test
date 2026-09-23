@@ -106,7 +106,6 @@ const apiChain = {
     post: 'action',
     put: 'action',
     request: 'action',
-    run: 'action',
 } satisfies Record<keyof ApiSpecification, FacetRole>;
 
 const jobsChain = {
@@ -114,7 +113,6 @@ const jobsChain = {
     intercept: 'setup',
     seed: 'setup',
 
-    run: 'action',
     trigger: 'action',
 } satisfies Record<keyof JobsSpecification, FacetRole>;
 

@@ -1,7 +1,0 @@
-description: an api document seeding from a sibling leaf's ground is refused on that key
-fixture: ./fixtures/api-document-reach/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/api/orders/listed-with-a-user.spec.yaml:3:1  jterrazz-check(c15)

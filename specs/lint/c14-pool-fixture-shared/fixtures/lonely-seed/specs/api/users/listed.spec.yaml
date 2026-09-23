@@ -1,6 +1,0 @@
-kind: api
-description: the users are listed over a seed nobody else reaches for
-seed: ../../seeds/one-user.sql
-request: GET /users
-response:
-    status: 200

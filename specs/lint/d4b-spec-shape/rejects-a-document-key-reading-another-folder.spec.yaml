@@ -4,4 +4,4 @@ runs:
     - command: checker .
       exit: 1
       stderr: |
-          specs/api/orders/seeded-from-goldens.spec.yaml:3:1  jterrazz-check(d4b)
+          specs/widget/case.spec.yaml:2:1  jterrazz-check(d4b)

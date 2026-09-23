@@ -315,7 +315,7 @@ export const RULE_DOCS = {
     'c24-ground-role': {
         channel: 'statique',
         convention:
-            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The same four folders at the specs root hold what several leaves share, so a shared seed is `<specs>/seeds/x.sql` (`../../seeds/x.sql`), never `<specs>/fixtures/seeds/x.sql`. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's path keys — `fixture:`, `seed:`, `request:`, `body:`, `response:`, `intercept:` (under `contracts/`) — are held to the same folders by its grammar (`d4b-spec-shape`).",
+            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The same four folders at the specs root hold what several leaves share, so a shared seed is `<specs>/seeds/x.sql` (`../../seeds/x.sql`), never `<specs>/fixtures/seeds/x.sql`. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's `fixture:` is held to `fixtures/` by its grammar (`d4b-spec-shape`).",
         facet: 'model',
         family: 'C',
         fix: "Move the file into the folder its verb reads — the leaf's own, or the specs root's when several leaves share it — and spell the path through it.",
@@ -557,7 +557,7 @@ export const RULE_DOCS = {
             '`literate.specification`, resolved from the config directory, names a file that exists. The config directory is what the path is read against; a project that moves Vite’s `root` states its door relative to the config all the same.',
         facet: 'cli',
         family: 'E',
-        fix: 'Point it at the `*.specification.ts` that exports the runner its documents name by `kind:` — `cli`, `api` or `jobs`.',
+        fix: 'Point it at the `*.specification.ts` that exports the `cli` its documents run through.',
         id: 'E8',
         rationale:
             'A path that resolves to nothing fails at collection time with a message about an import, several layers from the line that caused it.',
@@ -841,10 +841,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "Every route a member's api declares is reached by a document or a spec. The route table is DECLARED: `test.routes` in the member's `jterrazz.config.ts` names an OpenAPI document (JSON or YAML), whose every method of every path is a route; a member declaring none is not judged. What reaches a route is read from the member's `specs/` tree: an api document's request lines and the `.http` files it sends, and a spec's literal `.get('/…')`, `.post(…)`, `.put(…)`, `.delete(…)` and `.request(file(…))`. A path parameter takes any one segment, and so does a `{{capture}}` or a template hole; a computed path is out of reach. A route no case reaches is an error on the line the source declares it — the ratchet holds what a member accepts.",
+            "Every route a member's api declares is reached by a spec. The route table is DECLARED: `test.routes` in the member's `jterrazz.config.ts` names an OpenAPI document (JSON or YAML), whose every method of every path is a route; a member declaring none is not judged. What reaches a route is read from the member's `specs/` tree: a spec's literal `.get('/…')`, `.post(…)`, `.put(…)`, `.delete(…)` and `.request(file(…))`. A path parameter takes any one segment, and so does a template hole; a computed path is out of reach. A route no case reaches is an error on the line the source declares it — the ratchet holds what a member accepts.",
         facet: 'api',
         family: 'B',
-        fix: 'Send the route from a document or a spec, or record it with `jterrazz-test-check baseline` while the case is owed.',
+        fix: 'Send the route from a spec, or record it with `jterrazz-test-check baseline` while the case is owed.',
         id: 'B12',
         name: 'b12-route-reached',
         rationale:
@@ -931,7 +931,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A `<case>.spec.yaml` document follows its grammar: closed keys per `kind:` — cli (`fixture`, `env`, `serve`, `runs`), api (`seed`, `intercept`, `clock`, `headers`, `request`, `body`, `response`, `tables`, `steps`), jobs (`seed`, `intercept`, `clock`, `trigger`, `error`, `tables`) — a key of another kind refused naming it, and closed keys inside a run and a step; `description:` required, and `runs:`, `request:` or `steps:`, `trigger:` per kind; `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir; every path key relative, reaching the folder its key reads; a `{{name}}` sent only after an earlier step captured it.',
+            'A `<case>.spec.yaml` document follows its grammar: closed keys — `description`, `fixture`, `env`, `serve`, `runs` — and closed keys inside a run; `description:` and `runs:` required; `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir; every `fixture:` path relative, reaching `fixtures/`.',
         facet: 'cli',
         family: 'D',
         fix: 'Write the key the grammar names; the message prints the accepted set.',
@@ -1137,7 +1137,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every path a document's keys name — `fixture:`, `seed:`, `request:`, `body:`, `response:`, `intercept:` — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed path is out of reach, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
+            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every path a document's `fixture:` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed path is out of reach, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
         facet: 'model',
         family: 'C',
         fix: 'Create the entry (out of `.gitignore`), or fix the path — the message names what it resolved to.',

@@ -1,6 +1,0 @@
-kind: api
-description: seeds from a seeds folder parked inside the fixtures pool
-seed: ../../../fixtures/seeds/catalog.sql
-request: GET /users
-response:
-    status: 200

@@ -2,17 +2,11 @@ import { describe, expect, test } from 'vitest';
 
 import {
     DOCUMENT_KEYS,
-    documentPaths,
-    jsonPathSegments,
-    KIND_KEYS,
     parseSpecDocument,
     readSpecFile,
     RUN_KEYS,
-    SPEC_KINDS,
     SPEC_SCHEMA,
-    STEP_KEYS,
     updateSpecFile,
-    updateSpecResponses,
 } from './spec-document.js';
 import type { SpecSyntaxError } from './spec-document.js';
 
@@ -61,12 +55,11 @@ function refusalOf(content: string): SpecSyntaxError {
 }
 
 describe('spec document — reading', () => {
-    test('a minimal document defaults its kind and asserts empty streams', () => {
+    test('a minimal document asserts empty streams', () => {
         // Given - the smallest document the grammar accepts
         const document = parseSpecDocument(MINIMAL, 'case.spec.yaml');
 
-        // Then - kind defaults to cli, and an absent stream is `null` (= empty)
-        expect(document.kind).toBe('cli');
+        // Then - an absent stream is `null` (= empty)
         expect(document.description).toBe('does the thing');
         expect(document.runs).toHaveLength(1);
         expect(document.runs[0]?.stdout).toBeNull();
@@ -255,7 +248,7 @@ describe('spec document — refusals', () => {
         // Then - the closed vocabulary is spelled out, on the offending line
         expect(refusal.line).toBe(2);
         expect(refusal.message).toContain('unknown key "given:"');
-        expect(refusal.message).toContain(KIND_KEYS.cli.join(', '));
+        expect(refusal.message).toContain(DOCUMENT_KEYS.join(', '));
     });
 
     test('an unknown run key names the run vocabulary', () => {
@@ -299,14 +292,14 @@ describe('spec document — refusals', () => {
         expect(refusal.message).toContain('waitFor: is only allowed on the LAST run');
     });
 
-    test('an unknown kind names the facets that exist', () => {
-        // Given - a document claiming a facet nobody implemented
+    test('a kind is no key: an api or jobs case is a TypeScript spec', () => {
+        // Given - a document stating the kind the grammar once read
         const refusal = refusalOf(
-            `kind: http\ndescription: x\nruns:\n  - command: a\n    exit: 0\n`,
+            `kind: api\ndescription: x\nruns:\n  - command: a\n    exit: 0\n`,
         );
 
-        // Then - the refusal lists the known kinds
-        expect(refusal.message).toContain('kind: "http" is not a facet');
+        // Then - refused as the unknown key it is
+        expect(refusal.message).toContain('unknown key "kind:" in a spec document');
     });
 
     test('malformed YAML is refused with the parser’s own line', () => {
@@ -492,379 +485,5 @@ describe('spec document — the published schema', () => {
         );
         expect(SPEC_SCHEMA.additionalProperties).toBeFalsy();
         expect(SPEC_SCHEMA.$defs.run.additionalProperties).toBeFalsy();
-    });
-
-    test('describes exactly the keys an api step reads, and no other', () => {
-        // Given - the step the schema shares between the one-step form and a journey
-        // Then - its closed set is the parser's own
-        expect(Object.keys(SPEC_SCHEMA.$defs.step.properties).toSorted()).toStrictEqual(
-            [...STEP_KEYS].toSorted(),
-        );
-        expect(SPEC_SCHEMA.$defs.step.additionalProperties).toBe(false);
-    });
-
-    test('refuses, per kind, every key that kind does not read', () => {
-        // Given - the schema's one if/then per kind
-        // Then - each closes its document on exactly the keys the parser reads for that kind
-        expect(SPEC_SCHEMA.allOf.map((rule) => rule.then.propertyNames.enum)).toStrictEqual(
-            SPEC_KINDS.map((kind) => KIND_KEYS[kind]),
-        );
-    });
-});
-
-/** A document of `kind`, from its lines. */
-function documentOf(...lines: string[]): string {
-    return [...lines, ''].join('\n');
-}
-
-describe('spec document — an api case', () => {
-    test('reads the given, one request and what came back, and names every path it stands on', () => {
-        // Given - a one-step document stating every given key and a file response
-        const document = parseSpecDocument(
-            documentOf(
-                'kind: api',
-                'description: creates a user',
-                'seed:',
-                '  - ./seeds/one-user.sql',
-                '  - { file: ./seeds/one-event.sql, database: analyticsDb }',
-                'intercept: ./contracts/news.contracts.ts',
-                'clock: 2026-03-04T09:30:00Z',
-                'headers:',
-                '  x-tenant: acme',
-                'request: ./requests/create-user.http',
-                'response: ./expected/user-created.http',
-                'tables:',
-                '  users:',
-                '    database: db',
-                '    columns: [name]',
-                '    rows:',
-                '      - [Charlie]',
-            ),
-            'case.spec.yaml',
-        );
-
-        // Then - the given reads in order, the top-level request is the one step, and every path is listed with its key
-        expect(document).toMatchObject({
-            clock: { iso: '2026-03-04T09:30:00Z' },
-            headers: { 'x-tenant': 'acme' },
-            seeds: [
-                { database: null, path: './seeds/one-user.sql' },
-                { database: 'analyticsDb', path: './seeds/one-event.sql' },
-            ],
-            steps: [
-                {
-                    headers: {},
-                    tables: [
-                        { columns: ['name'], database: 'db', name: 'users', rows: [['Charlie']] },
-                    ],
-                },
-            ],
-        });
-        expect(documentPaths(document).map(({ key, path }) => `${key} ${path}`)).toStrictEqual([
-            'seed ./seeds/one-user.sql',
-            'seed ./seeds/one-event.sql',
-            'intercept ./contracts/news.contracts.ts',
-            'request ./requests/create-user.http',
-            'response ./expected/user-created.http',
-        ]);
-    });
-
-    test("reads a seed the specs root shares, then the leaf's own delta, in order", () => {
-        // Given - the pool's base and the leaf's delta, both listed
-        const document = parseSpecDocument(
-            documentOf(
-                'kind: api',
-                'description: x',
-                'seed:',
-                '  - ../../seeds/catalog.sql',
-                '  - ./seeds/delta.sql',
-                'request: GET /users',
-                'response: { status: 200 }',
-            ),
-            'case.spec.yaml',
-        );
-
-        // Then - both are seeds, applied in the order written
-        expect(document.seeds.map(({ path }) => path)).toStrictEqual([
-            '../../seeds/catalog.sql',
-            './seeds/delta.sql',
-        ]);
-    });
-
-    test('reads a journey: inline requests, bodies, captures sent by later steps, inline responses', () => {
-        // Given - two steps, the second sending what the first captured
-        const document = parseSpecDocument(
-            documentOf(
-                'kind: api',
-                'description: an order created is the order read back',
-                'steps:',
-                '  - request: POST /orders',
-                '    body: { item: book, count: 2 }',
-                '    capture:',
-                "      orderId: $.items[0]['the id']",
-                '    response:',
-                '      status: 201',
-                '      headers: { content-type: application/json }',
-                '      body: { id: "{{uuid}}" }',
-                '  - request: GET /orders/{{orderId}}',
-                '    headers: { x-order: "{{orderId}}" }',
-                '    response: { status: "{{number}}" }',
-            ),
-            'case.spec.yaml',
-        );
-
-        // Then - each step keeps its shape, and the capture reads as segments
-        expect(document.steps).toMatchObject([
-            {
-                body: { kind: 'value', value: { count: 2, item: 'book' } },
-                capture: [{ name: 'orderId', segments: ['items', 0, 'the id'] }],
-                request: { kind: 'inline', method: 'POST', target: '/orders' },
-                response: { kind: 'inline', status: 201 },
-            },
-            {
-                request: { target: '/orders/{{orderId}}' },
-                response: { status: '{{number}}' },
-            },
-        ]);
-    });
-
-    test.each([
-        [
-            'seed: ./expected/one-user.sql',
-            'seed: reads seeds/, and "./expected/one-user.sql" names expected/',
-        ],
-        ['seed: ./one-user.sql', 'seed: reads seeds/, and "./one-user.sql" names no seeds/ folder'],
-        [
-            'seed: ../../fixtures/seeds/catalog.sql',
-            'seed: reads seeds/, and "../../fixtures/seeds/catalog.sql" names fixtures/ — put the file in ./seeds/ beside the document, or in specs/seeds/ if several leaves share it (C24)',
-        ],
-        ['seed: seeds/one-user.sql', 'seed: "seeds/one-user.sql" is not a relative path'],
-        ['seed: ./seeds/users/', 'seed: "./seeds/users/" names a directory'],
-        ['seed: ./seeds/one-user.txt', 'seed: "./seeds/one-user.txt" is not a .sql file'],
-        [
-            'intercept: ./fixtures/news.ts',
-            'intercept: reads contracts/, and "./fixtures/news.ts" names fixtures/',
-        ],
-        ['clock: tomorrow', 'clock: "tomorrow" is not an ISO instant'],
-    ])('refuses a given key naming the wrong thing: %s', (line, message) => {
-        // Given - a one-step document whose given names what its key does not read
-        const refusal = refusalOf(
-            documentOf(
-                'kind: api',
-                'description: x',
-                line,
-                'request: GET /users',
-                'response: { status: 200 }',
-            ),
-        );
-
-        // Then - refused on the key's line, naming the folder the key reads (C24 for documents)
-        expect(refusal.line).toBe(3);
-        expect(refusal.message).toContain(message);
-    });
-
-    test.each([
-        [
-            'request: ./expected/create.http',
-            'request: reads requests/, and "./expected/create.http" names expected/',
-        ],
-        ['request: FETCH /users', 'request: "FETCH /users" is neither a path'],
-        [
-            'response: ./requests/created.http',
-            'response: reads expected/, and "./requests/created.http" names requests/',
-        ],
-    ])('refuses a step key naming the wrong thing: %s', (line, message) => {
-        // Given - the action or the outcome in the wrong form
-        const [request, response] = line.startsWith('response')
-            ? ['request: GET /users', line]
-            : [line, 'response: { status: 200 }'];
-        const refusal = refusalOf(documentOf('kind: api', 'description: x', request, response));
-
-        // Then - the refusal names the form the key takes
-        expect(refusal.message).toContain(message);
-    });
-
-    test('a capture sent before a step named it is refused on the line that sends it', () => {
-        // Given - the first step sends {{orderId}}, which only the second captures
-        const refusal = refusalOf(
-            documentOf(
-                'kind: api',
-                'description: x',
-                'steps:',
-                '  - request: GET /orders/{{orderId}}',
-                '    response: { status: 200 }',
-                '  - request: POST /orders',
-                '    capture: { orderId: $.id }',
-                '    response: { status: 201 }',
-            ),
-        );
-
-        // Then - refused where it is sent, naming the rule
-        expect(refusal.line).toBe(4);
-        expect(refusal.message).toContain('"{{orderId}}" is referenced before it exists');
-    });
-
-    test('a token sent in a request is refused, naming why an input takes values', () => {
-        // Given - a body carrying a {{uuid}} token
-        const refusal = refusalOf(
-            documentOf(
-                'kind: api',
-                'description: x',
-                'request: POST /users',
-                'body: { id: "{{uuid}}" }',
-                'response: { status: 201 }',
-            ),
-        );
-
-        // Then - a token matches what comes back; a request sends values
-        expect(refusal.message).toContain('{{uuid}} is a token: it matches what comes back');
-    });
-
-    test.each([
-        [['capture: { uuid: $.id }'], 'capture: "uuid" is a {{token}} of the grammar'],
-        [['capture: { orderId: id }'], 'is not a JSONPath into the response body'],
-    ])('refuses a capture the journey could not read: %s', (lines, message) => {
-        // Given - a step capturing under a token's name, or by a path that is not one
-        const refusal = refusalOf(
-            documentOf(
-                'kind: api',
-                'description: x',
-                'steps:',
-                '  - request: POST /orders',
-                ...lines.map((l) => `    ${l}`),
-                '    response: { status: 201 }',
-            ),
-        );
-
-        // Then - refused before any request is sent
-        expect(refusal.message).toContain(message);
-    });
-
-    test.each([
-        [
-            ['fixture: ./fixtures/shop/', 'request: GET /users', 'response: { status: 200 }'],
-            '"fixture:" is a key of a cli document, not of an api one — it lays files into a working directory',
-        ],
-        [
-            ['cases: []', 'request: GET /users', 'response: { status: 200 }'],
-            'unknown key "cases:" in an api document',
-        ],
-        [
-            ['extends: ./base.spec.yaml', 'request: GET /users', 'response: { status: 200 }'],
-            'unknown key "extends:"',
-        ],
-        [['request: GET /users'], 'a step asserts what came back'],
-        [
-            ['request: ./requests/one.http', 'body: { a: 1 }', 'response: { status: 200 }'],
-            'body: goes with an inline request',
-        ],
-        [['response: { status: 200 }'], 'an api document sends a request:'],
-        [
-            [
-                'request: GET /users',
-                'steps:',
-                '  - request: GET /users',
-                '    response: { status: 200 }',
-            ],
-            '"request:" belongs to a step when the document states steps:',
-        ],
-    ])('refuses a document that is not one test of one shape: %j', (lines, message) => {
-        // Given - a key of another facet, a list of cases, an inherited given, or a missing half
-        const refusal = refusalOf(documentOf('kind: api', 'description: x', ...lines));
-
-        // Then - each refusal names what the grammar holds instead
-        expect(refusal.message).toContain(message);
-    });
-
-    test('reads a JSONPath into segments, and refuses what is not one', () => {
-        // Given - the three segment forms, and two strings that are not paths
-        // Then - segments below the root, or undefined
-        expect(jsonPathSegments("$.a[2]['b c']")).toStrictEqual(['a', 2, 'b c']);
-        expect(jsonPathSegments('$')).toStrictEqual([]);
-        expect(jsonPathSegments('a.b')).toBeUndefined();
-        expect(jsonPathSegments('$.a..b')).toBeUndefined();
-    });
-
-    test('update rewrites an inline response and keeps everything else', () => {
-        // Given - a two-step journey whose second response is stale
-        const file = readSpecFile(
-            documentOf(
-                '# kept',
-                'kind: api',
-                'description: x',
-                'steps:',
-                '  - request: GET /a',
-                '    response: ./expected/a.http',
-                '  - request: GET /b',
-                '    response:',
-                '      status: 500',
-                '      body: { stale: true }',
-            ),
-            'case.spec.yaml',
-        );
-
-        // When - the second step's response is rewritten from what came back
-        const written = updateSpecResponses(file, [
-            { body: { ok: true }, hasBody: true, headers: {}, status: '200', step: 1 },
-        ]);
-
-        // Then - the new response reads back, the file-form one and the comment untouched
-        const document = parseSpecDocument(written, 'case.spec.yaml');
-        expect(document.steps[1]?.response).toMatchObject({
-            body: { value: { ok: true } },
-            status: 200,
-        });
-        expect(document.steps[0]?.response).toMatchObject({
-            kind: 'file',
-            path: './expected/a.http',
-        });
-        expect(written.startsWith('# kept\n')).toBe(true);
-    });
-});
-
-describe('spec document — a jobs case', () => {
-    test('reads the job, the error it ends on and the tables it leaves', () => {
-        // Given - a jobs document stating both outcomes
-        const document = parseSpecDocument(
-            documentOf(
-                'kind: jobs',
-                'description: a crash keeps what it wrote',
-                'seed: ./seeds/two-users.sql',
-                'trigger: crash-after-insert',
-                'error: "crash-after-insert: {{string}}"',
-                'tables:',
-                '  events:',
-                '    columns: [type]',
-                '    rows: []',
-            ),
-            'case.spec.yaml',
-        );
-
-        // Then - the trigger, the token-aware error and an empty table
-        expect(document.trigger?.name).toBe('crash-after-insert');
-        expect(document.error?.text).toBe('crash-after-insert: {{string}}');
-        expect(document.tables[0]?.rows).toStrictEqual([]);
-    });
-
-    test.each([
-        [
-            ['tables: { events: { columns: [type], rows: [] } }'],
-            'names the job it runs — trigger: <name>',
-        ],
-        [['trigger: sync'], 'asserts what the job did'],
-        [
-            ['trigger: sync', 'request: GET /x', 'error: boom'],
-            '"request:" is a key of an api document, not of a jobs one',
-        ],
-        [
-            ['trigger: sync', 'tables: { events: { columns: [type, payload], rows: [[a]] } }'],
-            'each row holds one cell per column (2)',
-        ],
-    ])('refuses a jobs document that cannot be run as one: %j', (lines, message) => {
-        // Given - a missing trigger, a missing outcome, a key of the api, a ragged row
-        const refusal = refusalOf(documentOf('kind: jobs', 'description: x', ...lines));
-
-        // Then - the refusal names what is missing or misplaced
-        expect(refusal.message).toContain(message);
     });
 });

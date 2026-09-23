@@ -16,8 +16,8 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 1. A whole served page in a browser? → **website**, `specs/website/<domain>/<aspect>.spec.ts`
 2. A component (React, a DOM function, a hook)? → **component**, `<file>.test.tsx` beside `<file>.tsx`
 3. A screen on a simulator? → **mobile**, `specs/mobile/<domain>/<aspect>.spec.ts`
-4. Answers HTTP? → **api**, `specs/api/<domain>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
-5. Triggered by name, in-process? → **jobs**, `specs/jobs/<domain>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
+4. Answers HTTP? → **api**, `specs/api/<domain>/<aspect>.spec.ts`
+5. Triggered by name, in-process? → **jobs**, `specs/jobs/<domain>/<aspect>.spec.ts`
 6. A binary? → **cli**, `specs/cli/<domain>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
 7. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
 8. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
@@ -61,24 +61,24 @@ test('creates a user', async () => {
 
 What a test stands on is named by one of two calls, with the path relative to the spec file spelled in full; the verbs keep simple names and the type refuses a bare string where a file is meant:
 
-| Call                                                                     | Reads                                                     |
-| ------------------------------------------------------------------------ | --------------------------------------------------------- |
-| ``.seed(sql`INSERT …`)``                                                 | a test's own database state, written in the test          |
-| `.seed(file('./seeds/users.sql'))`                                       | database state several tests share, before the action     |
-| `.request(file('./requests/create.http'))`                               | a complete request — the terminal action                  |
-| `.post('/orders', file('./requests/order.json'))`                        | a request body, sent as the file holds it                 |
-| `.fixture(file('./fixtures/config.toml'))`                               | one file, copied into the working directory               |
-| `.fixture(directory('../../fixtures/shop/'))`                            | a directory's contents, spread into it                    |
-| `cli.run(file('./build.spec.yaml'))`                                     | a document, run from a test (`api.run`, `jobs.run` alike) |
-| `expect(x).toMatch(file('./expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                      |
-| `await expect(result.filesystem).toMatch(directory('./expected/tree/'))` | a golden tree                                             |
+| Call                                                                     | Reads                                                 |
+| ------------------------------------------------------------------------ | ----------------------------------------------------- |
+| ``.seed(sql`INSERT …`)``                                                 | a test's own database state, written in the test      |
+| `.seed(file('./seeds/users.sql'))`                                       | database state several tests share, before the action |
+| `.request(file('./requests/create.http'))`                               | a complete request — the terminal action              |
+| `.post('/orders', file('./requests/order.json'))`                        | a request body, sent as the file holds it             |
+| `.fixture(file('./fixtures/config.toml'))`                               | one file, copied into the working directory           |
+| `.fixture(directory('../../fixtures/shop/'))`                            | a directory's contents, spread into it                |
+| `cli.run(file('./build.spec.yaml'))`                                     | a cli document, run from a test                       |
+| `expect(x).toMatch(file('./expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                  |
+| `await expect(result.filesystem).toMatch(directory('./expected/tree/'))` | a golden tree                                         |
 
 `toMatch` on a result — a response, a stream, a json, a table — compares the WHOLE result: to the value written in place (``toMatch(`HTTP/1.1 200 OK …`)``, `toMatch([[1, 'Alice']])`, tokens allowed), or to `file()`/`directory()`. On a plain string it is vitest's own: a stream's text is its `.text` — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `fixtures/`, `expected/`, `requests/`, `seeds/` — each verb reads its own, and the same four at the specs root (`specs/fixtures/`, `specs/seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
 
 ## Pitfalls
 
 - **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./seeds/users.sql')`.
-- **A case that is data, written as code** — a request and what came back, a trigger and the rows it left: that is a `<case>.spec.yaml` (`kind: api`, `kind: jobs`), its oracle the golden of the whole response. Code is for logic.
+- **A probe where the whole result belongs** — a test reading a response, a json or a table compares it WHOLE, its value written in place (``toMatch(`HTTP/1.1 200 OK …`)``), then adds a precise assertion only if one property is the subject.
 - **A domain named `fixtures`, `expected`, `requests` or `seeds`** — the names are reserved for ground; C1 refuses a spec under one.
 - **Reaching into a sibling leaf** — a path may leave its leaf only into the specs root's own ground, `specs/<role>/` (C15). Shared ground goes there, in the folder of its role.
 - **`expect(result.stdout).toContain('built')`** — a stream is not a string, and it does not compile: a value matcher reads the stream's `.text`, the text a golden compares. A golden is `.toMatch(file('./expected/help.txt'))`. A part of a result is no comparison of it either: `expect(result.response).toMatch(/200/)` does not compile — a response takes its whole `.http` text or its `file()`, a json its value, a table its rows, a tree its `directory()`.
@@ -100,7 +100,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 | api                                         | [docs/10-api.md](../../docs/10-api.md)                   |
 | jobs                                        | [docs/11-jobs.md](../../docs/11-jobs.md)                 |
 | cli                                         | [docs/12-cli.md](../../docs/12-cli.md)                   |
-| a `<case>.spec.yaml`, of any kind           | [docs/20-documents.md](../../docs/20-documents.md)       |
+| a cli `<case>.spec.yaml`                    | [docs/20-documents.md](../../docs/20-documents.md)       |
 | naming an element on any surface that draws | [docs/13-elements.md](../../docs/13-elements.md)         |
 | a matcher, sync or awaited                  | [docs/14-assertions.md](../../docs/14-assertions.md)     |
 | a `{{token}}`, or update mode               | [docs/15-tokens.md](../../docs/15-tokens.md)             |

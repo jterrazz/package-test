@@ -1,4 +1,0 @@
-kind: jobs
-description: triggers a job nobody registered
-trigger: nope
-error: nope

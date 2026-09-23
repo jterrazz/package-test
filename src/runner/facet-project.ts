@@ -56,7 +56,7 @@ export function facetProject(
     });
 }
 
-/** The literate door of a facet that reads documents — cli, api, jobs. */
+/** The literate door of the facet that reads documents — the cli. */
 export type LiterateDoor = {
     /**
      * The door, wired by default: every `specs/<facet>/**\/*.spec.yaml` becomes

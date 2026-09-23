@@ -110,20 +110,22 @@ Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the r
 | `.post(path, body?)`                     | Inline POST                                                   |
 | `.put(path, body?)`                      | Inline PUT                                                    |
 | `.delete(path)`                          | Inline DELETE                                                 |
-| `.run(file('./<case>.spec.yaml'))`       | Run a `kind: api` document and resolve with its last response |
 
 The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
 
-There is no label argument: the vitest test name is the spec's only description (rule B3). `.run()` hands the chain a whole case written as data — [Documents](#documents--an-api-case-as-data) below.
+There is no label argument: the vitest test name is the spec's only description (rule B3).
 
 ```typescript
 test('returns 404 with a useful body', async () => {
     // Given - empty database
     const result = await api.get('/users/999');
 
-    // Then - inline assertions when a fixture file would be excessive
-    expect(result.status).toBe(404);
-    expect(result.response.body).toEqual({ error: 'User 999 not found' });
+    // Then - the whole response, written in place
+    expect(result.response).toMatch(`
+        HTTP/1.1 404 Not Found
+
+        {"error": "User 999 not found"}
+    `);
 });
 ```
 
@@ -253,20 +255,34 @@ test('links the analytics event to the created order', async () => {
 
 > This project declares two databases, so `database:` is mandatory on every `.seed()` and `.table()` (rule A7). With a single database you would write `api.seed(file('./seeds/catalog.sql'))` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
 
-### Documents — an api case as data
+### A case, written whole
 
-A case that is a request and what came back is a `<case>.spec.yaml` beside the spec, collected as a test of its own by the `api()` project and bound to `specs/api/api.specification.ts`. The given is the chain's setups as keys, the action is the request, and the default oracle is the golden of the whole response:
+A case is a TypeScript spec whose oracle is the WHOLE result, written where the test reads it: the given is the chain's setups — a seed written in the test with ``sql`…` ``, a shared one named with `file()` — the action is the request, and the response is compared whole to its `.http` text in place, tokens allowed ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)):
 
-```yaml
-kind: api
-description: the users seeded are the users listed, in the order they were inserted
-seed:
-    - { file: ./seeds/two-users.sql, database: db }
-request: GET /users
-response: ./expected/users-list.http
+```typescript
+test('the users seeded are the users listed, in the order they were inserted', async () => {
+    // Given - two users, written in the test
+    const result = await api
+        .seed(
+            sql`INSERT INTO users (name, email) VALUES ('Alice', 'alice@test.com'), ('Bob', 'bob@test.com');`,
+        )
+        .get('/users');
+
+    // Then - the whole response, and the table it read
+    expect(result.response).toMatch(`
+        HTTP/1.1 200 OK
+        content-type: application/json
+
+        {"users": [{"name": "Alice", "email": "alice@test.com"}, {"name": "Bob", "email": "bob@test.com"}]}
+    `);
+    await expect(result.table('users')).toMatch([
+        [1, 'Alice', 'alice@test.com'],
+        [2, 'Bob', 'bob@test.com'],
+    ]);
+});
 ```
 
-A journey — a request whose path or body carries what an earlier response returned — is one document too, its `steps:` capturing values by JSONPath and sending them as `{{name}}`. The keys, the paths each reads, the inline response and the three doors are [20 — Spec documents](20-documents.md#an-api-document)'s; what stays in TypeScript is logic, and what a chain refuses.
+A journey — a request carrying what an earlier response returned — is code: read the value from the first result, send it in the next chain. `TEST_UPDATE=1` writes an empty ` toMatch(`) `` with what came back ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)).
 
 ### Route coverage (rule B12)
 
@@ -293,4 +309,4 @@ The app runs in THIS process, always: there is no second mode, no container bind
 
 ## Related
 
-[20 — Spec documents](20-documents.md) · [11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)
+[11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)

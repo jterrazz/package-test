@@ -1,0 +1,6 @@
+description: lists its cases in one file
+runs:
+    - command: build
+      exit: 0
+cases:
+    - build --watch

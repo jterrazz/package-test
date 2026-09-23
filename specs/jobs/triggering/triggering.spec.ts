@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { file, http, sql } from '../../../src/index.js';
-import { jobs } from '../jobs.specification.js';
+import { analyticsHandle, jobs } from '../jobs.specification.js';
 import { jobs as staticJobs, staticRuns } from '../static-jobs.specification.js';
 
 // Jobs run in-process by definition (CONVENTIONS A8) — specification.jobs()
@@ -36,6 +36,30 @@ describe('jobs', () => {
         ]);
     });
 
+    test('the job copies one event per seeded user', async () => {
+        // Given - the two users the specs root shares
+        const result = await jobs
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
+            .trigger('sync-events');
+
+        // Then - one synced event each, in order
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'user_synced', '{"name":"Alice"}', '{{iso8601}}'],
+            [2, 'user_synced', '{"name":"Bob"}', '{{iso8601}}'],
+        ]);
+    });
+
+    test('a job that crashes rejects the trigger with its own error, and what it wrote first stays', async () => {
+        // Given - a job that writes one row, then throws
+        const run = jobs.trigger('crash-after-insert');
+
+        // Then - the trigger rejects with the job's error, and the row written before stays
+        await expect(run).rejects.toThrow('crash-after-insert: boom');
+        await expect(
+            analyticsHandle.query('events', ['id', 'type', 'payload']),
+        ).resolves.toStrictEqual([[1, 'pre_crash', '{}']]);
+    });
+
     test('trigger rejects unknown job names', async () => {
         // Given - a job name that was never registered
         // Then - the error lists every available job, in registration order
@@ -54,6 +78,21 @@ describe('jobs', () => {
 });
 
 describe('jobs — intercepts (D7)', () => {
+    test("the job's outgoing call is answered by the contract the chain declares", async () => {
+        // Given - the one call the job makes out, answered in place
+        const result = await jobs
+            .intercept(
+                http.get('https://enrich.example.test/label'),
+                http.json({ label: 'enriched' }),
+            )
+            .trigger('enrich-from-api');
+
+        // Then - the job stored what the contract answered
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'enriched', '{}', '{{iso8601}}'],
+        ]);
+    });
+
     test('strict by default: an outgoing request matching no intercept fails the trigger', async () => {
         // Given - an intercept is declared, but for a DIFFERENT url than the job calls, so the chain's network is guarded (D7) yet the job's real request matches nothing
         // Then - the trigger rejects, naming the offending request rather than letting it reach the network

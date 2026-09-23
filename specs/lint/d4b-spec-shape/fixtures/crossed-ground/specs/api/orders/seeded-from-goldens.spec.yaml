@@ -1,6 +1,0 @@
-kind: api
-description: seeds from the folder the goldens live in
-seed: ./expected/one-order.sql
-request: GET /orders
-response:
-    status: 200

@@ -139,14 +139,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/facets/api/api.specification.ts',
-            'src/facets/api/literate.ts',
             'src/facets/cli/cli.specification.ts',
             'src/facets/cli/literate.ts',
             'src/facets/component/component.specification.ts',
             'src/facets/component/rendered-text.ts',
             'src/facets/integration/integration.specification.ts',
             'src/facets/jobs/jobs.specification.ts',
-            'src/facets/jobs/literate.ts',
             'src/facets/website/website.specification.ts',
         ),
         name: 'a facet module',
@@ -206,7 +204,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/model/chain/registry.ts',
             'src/model/chain/services.ts',
             'src/model/contracts/stream.ts',
-            'src/model/literate/document-run.ts',
             'src/model/timing/pause.ts',
             'src/runner/facet-project.ts',
         ),

@@ -7,5 +7,5 @@ runs:
           specs/seeds/one-user.sql: absent
           specs/seeds: absent
           specs/api/users/seeds/one-user.sql: exists
-          specs/api/users/listed.spec.yaml:
-              contains: 'seed: ./seeds/one-user.sql'
+          specs/api/users/listed.spec.ts:
+              contains: file('./seeds/one-user.sql')

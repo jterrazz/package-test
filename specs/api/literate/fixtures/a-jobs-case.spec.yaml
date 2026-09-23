@@ -1,8 +1,0 @@
-kind: jobs
-description: is a jobs case
-trigger: sync-events
-tables:
-    events:
-        database: analyticsDb
-        columns: [type]
-        rows: []

@@ -1,8 +1,29 @@
 import { describe, expect, test } from 'vitest';
 
 import { defineContract, defineContracts, http } from '../../../src/index.js';
+import { api as app } from '../api.specification.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
 import latestNews from './contracts/latest-news.contracts.js';
+
+describe('contracts — the app a chain intercepts for', () => {
+    test('the outgoing call is answered by the contract the chain declares', async () => {
+        // Given - the one call the app makes out, answered in place
+        const result = await app
+            .intercept(
+                http.get('https://enrich.example.test/label'),
+                http.json({ label: 'enriched' }),
+            )
+            .get('/label');
+
+        // Then - the app served what the contract answered
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {"label": "enriched"}
+        `);
+    });
+});
 
 describe('contracts — selection', () => {
     test('a finite contract plays before the unlimited tail (retry path)', async () => {
@@ -15,8 +36,14 @@ describe('contracts — selection', () => {
             .get('/quote');
 
         // Then - the retry was served by the tail contract
-        expect(result.status).toBe(200);
-        expect(result.response.body).toStrictEqual({ quote: 'after retry' });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "quote": "after retry"
+            }
+        `);
     });
 
     test('a contract with no times keeps serving every call', async () => {
@@ -26,8 +53,15 @@ describe('contracts — selection', () => {
             .get('/quote-twice');
 
         // Then - both calls were served (no times = unlimited, no exhaustion)
-        expect(result.status).toBe(200);
-        expect(result.response.body).toStrictEqual({ first: 200, second: 200 });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "first": 200,
+                "second": 200
+            }
+        `);
     });
 
     test('a contract and an inline pair mix in one chain', async () => {
@@ -38,11 +72,19 @@ describe('contracts — selection', () => {
             .get('/combo');
 
         // Then - each outgoing call got its declared response
-        expect(result.status).toBe(200);
-        expect(result.response.body).toStrictEqual({
-            news: { headline: 'Contract headline' },
-            quote: { quote: 'inline' },
-        });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "news": {
+                    "headline": "Contract headline"
+                },
+                "quote": {
+                    "quote": "inline"
+                }
+            }
+        `);
     });
 
     test('a composite scenario overrides one route of the declared world', async () => {
@@ -58,10 +100,19 @@ describe('contracts — selection', () => {
             .get('/combo');
 
         // Then - the override answered, the untouched route still did
-        expect(result.response.body).toStrictEqual({
-            news: { headline: 'Contract headline' },
-            quote: { quote: 'x' },
-        });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "news": {
+                    "headline": "Contract headline"
+                },
+                "quote": {
+                    "quote": "x"
+                }
+            }
+        `);
     });
 
     test('a path-form url matches the call whatever its origin', async () => {
@@ -71,7 +122,14 @@ describe('contracts — selection', () => {
             .get('/quote');
 
         // Then - the origin was ignored and the contract served the call
-        expect(result.response.body).toStrictEqual({ quote: 'by path' });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "quote": "by path"
+            }
+        `);
     });
 });
 
@@ -140,8 +198,14 @@ describe('contracts — http request filters', () => {
             .get('/submit');
 
         // Then - the filter accepted the request and returned its response
-        expect(result.status).toBe(200);
-        expect(result.response.body).toStrictEqual({ quote: 'filtered' });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "quote": "filtered"
+            }
+        `);
     });
 
     test('a request that fails the body filter counts as unmatched (D7)', async () => {
@@ -176,8 +240,15 @@ describe('contracts — dynamic responses', () => {
             .get('/submit');
 
         // Then - the reply was derived from the outgoing request body
-        expect(result.status).toBe(200);
-        expect(result.response.body).toStrictEqual({ echoedAction: 'quote', forRole: 'admin' });
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "echoedAction": "quote",
+                "forRole": "admin"
+            }
+        `);
     });
 
     test('an inline .intercept(request, fn) responder derives status and body per request', async () => {
@@ -190,8 +261,14 @@ describe('contracts — dynamic responses', () => {
             .get('/submit');
 
         // Then - the function ran at serve time, shaping status and body
-        expect(result.status).toBe(201);
-        expect(result.response.body).toStrictEqual({ quote: 'hello acme' });
+        expect(result.response).toMatch(`
+            HTTP/1.1 201 Created
+            content-type: application/json
+
+            {
+                "quote": "hello acme"
+            }
+        `);
     });
 });
 
@@ -209,8 +286,14 @@ describe('contracts — chain isolation', () => {
             .get('/quote');
 
         // Then - the second chain served ITS contract, not the leftover
-        expect(second.status).toBe(200);
-        expect(second.response.body).toStrictEqual({ quote: 'SECOND' });
+        expect(second.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "quote": "SECOND"
+            }
+        `);
     });
 });
 
@@ -222,9 +305,13 @@ describe('contracts — transport failure', () => {
             .get('/offline');
 
         // Then - the caller took its "nothing answered" branch, which only a transport failure reaches — `http.error(503)` would reach the other
-        expect(result.status).toBe(503);
-        expect(result.response.body).toStrictEqual({
-            error: 'the quotes service did not answer',
-        });
+        expect(result.response).toMatch(`
+            HTTP/1.1 503 Service Unavailable
+            content-type: application/json
+
+            {
+                "error": "the quotes service did not answer"
+            }
+        `);
     });
 });

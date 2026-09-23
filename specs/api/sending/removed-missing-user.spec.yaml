@@ -1,4 +1,0 @@
-kind: api
-description: deleting a user that does not exist answers not found
-request: DELETE /users/999
-response: ./expected/user-not-found.http

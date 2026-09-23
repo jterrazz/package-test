@@ -1,43 +1,209 @@
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
+import { directory, file, sql } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
-// What a request sends, and what comes back, is data: the documents beside this
-// File state it. What stays here is the chain's own `.headers()` layering, and
-// What the chain refuses.
-
 describe('requests', () => {
-    // oxlint-disable-next-line jterrazz/d12w-response-body-probe -- request-building self-test: the subject is the header MERGE delta (x-file preserved, x-chain overridden, body forwarded), a single-field-delta scalpel — a full-response golden would assert the whole echo envelope and obscure which fields the merge test targets.
-    test('merges .headers() on top of the .http file headers', async () => {
-        // Given - the file sets x-file and x-chain; the chain overrides x-chain
-        const result = await api
-            .headers({ 'x-chain': 'from-chain' })
-            .request(file('./requests/echo.http'));
+    test('a request file is sent whole, and the user it creates lands in both databases', async () => {
+        // Given - the complete request, a file
+        const result = await api.request(file('./requests/create-user.http'));
 
-        // Then - file header preserved, chain header wins, body forwarded
-        expect(result.status).toBe(200);
-        const body = result.response.body as {
-            body: { greeting: string };
-            headers: { 'x-chain': string; 'x-file': string };
-        };
-        expect(body.headers['x-file']).toBe('from-file');
-        expect(body.headers['x-chain']).toBe('from-chain');
-        expect(body.body.greeting).toBe('hello');
+        // Then - the created user, in the users table and as an event
+        expect(result.response).toMatch(`
+            HTTP/1.1 201 Created
+            content-type: application/json
+
+            {
+                "user": {
+                    "name": "Charlie",
+                    "email": "charlie@test.com"
+                }
+            }
+        `);
+        await expect(result.table('users', { database: 'db' })).toMatch([
+            [1, 'Charlie', 'charlie@test.com'],
+        ]);
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'user_created', '{"name":"Charlie","email":"charlie@test.com"}', '{{iso8601}}'],
+        ]);
     });
 
-    test('repeated .headers() calls merge with the later call winning', async () => {
-        // Given - the same header set by two successive .headers() calls
+    test('an inline body is sent as the value written in the test', async () => {
+        // Given - a user posted with its fields written in place
+        const result = await api.post('/users', { email: 'dora@test.com', name: 'Dora' });
+
+        // Then - the user created, and the row it wrote
+        expect(result.response).toMatch(`
+            HTTP/1.1 201 Created
+            content-type: application/json
+
+            {
+                "user": {
+                    "name": "Dora",
+                    "email": "dora@test.com"
+                }
+            }
+        `);
+        await expect(result.table('users', { database: 'db' })).toMatch([
+            [1, 'Dora', 'dora@test.com'],
+        ]);
+    });
+
+    test('a JSON body file is sent as its value, not as the layout of the file', async () => {
+        // Given - a body named by its path
+        const result = await api.post('/echo-raw', file('./requests/erin.json'));
+
+        // Then - the app received the compact JSON of the value
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "raw": "{\\"email\\":\\"erin@test.com\\",\\"name\\":\\"Erin\\"}"
+            }
+        `);
+    });
+
+    test('a body file that is not JSON is sent as its bytes are written', async () => {
+        // Given - a plain-text body named by its path
+        const result = await api.post('/echo-raw', file('./requests/note.txt'));
+
+        // Then - the app received the text verbatim, whitespace kept
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "raw": "kept  as\\n    written\\n"
+            }
+        `);
+    });
+
+    test('a request file whose body is plain text sends it verbatim, whitespace kept', async () => {
+        // Given - a request file carrying a text body
+        const result = await api.request(file('./requests/echo-raw.http'));
+
+        // Then - the body arrived as written
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "raw": "first  line\\n    indented line"
+            }
+        `);
+    });
+
+    test('the users seeded are the users listed, in the order they were inserted', async () => {
+        // Given - the two users the specs root shares
+        const result = await api
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
+            .get('/users');
+
+        // Then - both, in order
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "users": [
+                    {
+                        "name": "Alice",
+                        "email": "alice@test.com"
+                    },
+                    {
+                        "name": "Bob",
+                        "email": "bob@test.com"
+                    }
+                ]
+            }
+        `);
+    });
+
+    test('a user is read back by its id', async () => {
+        // Given - one user, numbered 1 by the reset
+        const result = await api
+            .seed(sql`INSERT INTO "users" (name, email) VALUES ('Alice', 'alice@test.com');`, {
+                database: 'db',
+            })
+            .get('/users/1');
+
+        // Then - that user
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "user": {
+                    "name": "Alice",
+                    "email": "alice@test.com"
+                }
+            }
+        `);
+    });
+
+    test('a put renames the user, its fields written in the test', async () => {
+        // Given - one user, and the fields it is renamed to
+        const result = await api
+            .seed(sql`INSERT INTO "users" (name, email) VALUES ('Alice', 'alice@test.com');`, {
+                database: 'db',
+            })
+            .put('/users/1', { email: 'updated@test.com', name: 'Alice Updated' });
+
+        // Then - the renamed user, answered and stored
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "user": {
+                    "name": "Alice Updated",
+                    "email": "updated@test.com"
+                }
+            }
+        `);
+        await expect(result.table('users', { database: 'db' })).toMatch([
+            [1, 'Alice Updated', 'updated@test.com'],
+        ]);
+    });
+
+    test('deleting a user that does not exist answers not found', async () => {
+        // Given - an empty users table
+        const result = await api.delete('/users/999');
+
+        // Then - the refusal, whole
+        expect(result.response).toMatch(`
+            HTTP/1.1 404 Not Found
+            content-type: application/json
+
+            {
+                "error": "User not found"
+            }
+        `);
+    });
+
+    test('the chain headers win over the request file headers, and repeated calls merge', async () => {
+        // Given - the file sets x-file and x-chain; the chain overrides x-chain twice
         const result = await api
             .headers({ 'x-chain': 'first' })
-            .headers({ 'x-chain': 'second', 'x-file': 'chain-wins' })
+            .headers({ 'x-chain': 'second' })
             .request(file('./requests/echo.http'));
 
-        // Then - the last call wins over both the earlier call and the file
-        expect(result.status).toBe(200);
-        const body = result.response.body as { headers: Record<string, null | string> };
-        expect(body.headers['x-chain']).toBe('second');
-        expect(body.headers['x-file']).toBe('chain-wins');
+        // Then - the file header kept, the last chain header won, the body forwarded
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "body": {
+                    "greeting": "hello"
+                },
+                "headers": {
+                    "x-chain": "second",
+                    "x-file": "from-file"
+                }
+            }
+        `);
     });
 });
 

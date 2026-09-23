@@ -9,7 +9,7 @@ runs:
                   INSERT INTO users (name) VALUES ('Alice'), ('Bob');
           specs/api/users/seeds/two-users.sql: absent
           specs/api/orders/seeds/two-users.sql: absent
-          specs/api/users/listed.spec.yaml:
-              contains: 'seed: ../../seeds/two-users.sql'
+          specs/api/users/listed.spec.ts:
+              contains: file('../../seeds/two-users.sql')
           specs/api/orders/orders.spec.ts:
               contains: file('../../seeds/two-users.sql')

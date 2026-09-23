@@ -78,13 +78,6 @@ export type Capability = {
     /** Per column: why an empty cell is accepted there. */
     exempt?: Partial<Record<Column, string>>;
     group: CapabilityGroup;
-    /**
-     * How a `<case>.spec.yaml` writes it: the key it opens a line with — at
-     * the top of the document, or as a step's first key (`- request: GET /`).
-     * A document counts for a row only through this; a row without one is a
-     * gesture the document grammar has no key for.
-     */
-    document?: string;
     /** The interface key this row answers for, when `name` is not it verbatim. */
     member?: string;
     /** How the capability is written in a spec, e.g. `.seed()`. */
@@ -220,7 +213,6 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'jobs', 'integration', 'website', 'component'],
         group: 'Setup',
-        document: 'clock:',
         name: '.clock()',
         probe: '.clock(',
     },
@@ -228,20 +220,17 @@ export const CAPABILITIES: Capability[] = [
         columns: ['api', 'jobs', 'integration', 'website', 'mobile', 'component'],
         exempt: { mobile: NO_SIMULATOR },
         group: 'Setup',
-        document: 'intercept:',
         name: '.intercept()',
         probe: '.intercept(',
     },
     {
         columns: ['api', 'jobs', 'cli', 'integration'],
         group: 'Setup',
-        document: 'seed:',
         name: '.seed()',
         probe: '.seed(file(',
     },
     {
         columns: ['api', 'website'],
-        document: 'headers:',
         group: 'Setup',
         name: '.headers()',
         probe: '.headers(',
@@ -254,28 +243,24 @@ export const CAPABILITIES: Capability[] = [
     // ── Terminal actions ──
     {
         columns: ['api'],
-        document: 'request: GET /',
         group: 'Terminal action',
         name: '.get()',
         probe: ".get('/",
     },
     {
         columns: ['api'],
-        document: 'request: POST /',
         group: 'Terminal action',
         name: '.post()',
         probe: ".post('",
     },
     {
         columns: ['api'],
-        document: 'request: PUT /',
         group: 'Terminal action',
         name: '.put()',
         probe: ".put('",
     },
     {
         columns: ['api'],
-        document: 'request: DELETE /',
         group: 'Terminal action',
         name: '.delete()',
         probe: ".delete('",
@@ -283,25 +268,18 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api'],
         group: 'Terminal action',
-        document: 'request: ./',
         name: '.request()',
         probe: '.request(file(',
     },
     {
         columns: ['jobs'],
-        document: 'trigger:',
         group: 'Terminal action',
         name: '.trigger()',
         probe: ".trigger('",
     },
     { columns: ['integration'], group: 'Terminal action', name: '.call()', probe: '.call(' },
     { columns: ['cli'], group: 'Terminal action', name: '.exec()', probe: '.exec(' },
-    {
-        columns: ['api', 'jobs', 'cli'],
-        group: 'Terminal action',
-        name: '.run()',
-        probe: '.run(file(',
-    },
+    { columns: ['cli'], group: 'Terminal action', name: '.run()', probe: '.run(file(' },
     { columns: ['website'], group: 'Terminal action', name: '.visit()', probe: ".visit('" },
     { columns: ['website'], group: 'Terminal action', name: '.fetch()', probe: ".fetch('" },
     {
@@ -458,7 +436,6 @@ export const CAPABILITIES: Capability[] = [
     // ── Result accessors ──
     {
         columns: ['api'],
-        document: 'response:',
         group: 'Result accessor',
         name: '.response',
         probe: 'result.response',
@@ -472,7 +449,6 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'jobs', 'cli', 'integration'],
         group: 'Result accessor',
-        document: 'tables:',
         member: 'table',
         name: '.table()',
         probe: 'result.table(',
@@ -594,8 +570,7 @@ export const CAPABILITIES: Capability[] = [
 
     // ── Goldens ──
     {
-        columns: ['api', 'jobs', 'cli', 'integration', 'website', 'component', 'module'],
-        document: 'response: ./',
+        columns: ['api', 'cli', 'integration', 'website', 'component', 'module'],
         group: 'Golden',
         name: 'toMatch(file())',
         probe: '.toMatch(file(',
@@ -609,13 +584,11 @@ export const CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'jobs', 'cli', 'integration'],
         group: 'Golden',
-        document: 'tables:',
         name: 'toMatch(<rows>)',
         probe: ')).toMatch([',
     },
     {
         columns: ['api', 'module'],
-        document: 'response: ./',
         group: 'Golden',
         name: '.http exchange',
         probe: ".http'",

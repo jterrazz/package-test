@@ -8,16 +8,8 @@ import {
     yamlSyntaxErrors,
 } from '../../seams/yaml/document.js';
 import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from '../../seams/yaml/document.js';
-import {
-    GROUND_DIRS,
-    GROUND_EXPECTED,
-    GROUND_FIXTURES,
-    GROUND_REQUESTS,
-    GROUND_SEEDS,
-    isGroundName,
-} from '../chain/ground.js';
+import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../chain/ground.js';
 import { isRelativePath } from '../chain/spec-path.js';
-import { TOKEN_KINDS } from '../matching/match.js';
 
 /**
  * The `<case>.spec.yaml` document — one scenario, written as data.
@@ -36,23 +28,8 @@ import { TOKEN_KINDS } from '../matching/match.js';
  *         stdout: |
  *           Removed post-recap.
  *
- * An api or jobs document states the same thing in its facet's words: the
- * ground (`seed:`, `intercept:`, `clock:`, `headers:`), the action (`request:`,
- * or `trigger:`) and what came back (`response:`, `error:`, `tables:`) — one
- * file, one test, and a journey is `steps:` whose named captures later steps
- * send:
- *
- *     kind: api
- *     description: an order created is the order read back
- *     seed: ./seeds/one-customer.sql
- *     steps:
- *       - request: POST /orders
- *         body: { item: book }
- *         capture:
- *           orderId: $.id
- *         response: ./expected/order-created.http
- *       - request: GET /orders/{{orderId}}
- *         response: { status: 200 }
+ * A document is a cli case alone: an api or a jobs case is a TypeScript spec,
+ * its whole result written in place.
  *
  * This module owns the grammar and NOTHING else: it resolves no path, runs no
  * command, and knows no filesystem. It is read by the runner and by the lint
@@ -66,85 +43,14 @@ import { TOKEN_KINDS } from '../matching/match.js';
 /** The extension that makes a file a spec document. */
 export const SPEC_EXTENSION = '.spec.yaml';
 
-/** The facets a document may describe — each one's runner reads the kind it is exported as. */
-export const SPEC_KINDS = ['cli', 'api', 'jobs'] as const;
-
 /**
- * Top-level keys of every kind, IN THE ORDER a document is written in: what the
- * case stands on first, then what it does, then what came back. The order is
- * the canonical one the `d4b-spec-key-order` lint pass enforces and rewrites;
- * which of them a kind takes is {@link KIND_KEYS}'s.
+ * The keys of a document, IN THE ORDER it is written in: what the case stands
+ * on first, then what it does. The order is the canonical one the
+ * `d4b-spec-key-order` lint pass enforces and rewrites.
  */
-export const DOCUMENT_KEYS = [
-    'kind',
-    'description',
-    'fixture',
-    'env',
-    'serve',
-    'seed',
-    'intercept',
-    'clock',
-    'headers',
-    'runs',
-    'trigger',
-    'request',
-    'body',
-    'response',
-    'error',
-    'tables',
-    'steps',
-] as const;
+export const DOCUMENT_KEYS = ['description', 'fixture', 'env', 'serve', 'runs'] as const;
 
 export type DocumentKey = (typeof DOCUMENT_KEYS)[number];
-
-/**
- * The keys each kind reads, a closed set per facet. A key of another kind is
- * refused naming the kind it belongs to: `fixture:` lays files into a working
- * directory, and neither an api nor a jobs chain has one.
- */
-export const KIND_KEYS: Readonly<Record<SpecKind, readonly DocumentKey[]>> = {
-    api: [
-        'kind',
-        'description',
-        'seed',
-        'intercept',
-        'clock',
-        'headers',
-        'request',
-        'body',
-        'response',
-        'tables',
-        'steps',
-    ],
-    cli: ['kind', 'description', 'fixture', 'env', 'serve', 'runs'],
-    jobs: ['kind', 'description', 'seed', 'intercept', 'clock', 'trigger', 'error', 'tables'],
-};
-
-/** The keys of one api step, in the canonical order: what is sent, then what came back. */
-export const STEP_KEYS = ['request', 'headers', 'body', 'capture', 'response', 'tables'] as const;
-
-/** The keys of an inline `response:` — the three parts of a `.http` golden. */
-export const RESPONSE_KEYS = ['status', 'headers', 'body'] as const;
-
-/** The keys of one `tables:` entry — what `toMatchRows()` takes, and the database it reads. */
-export const TABLE_KEYS = ['database', 'columns', 'rows'] as const;
-
-/** The keys of a `seed:` entry that names its database. */
-export const SEED_KEYS = ['file', 'database'] as const;
-
-/** The methods an inline `request:` line may name. */
-export const REQUEST_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'HEAD',
-    'OPTIONS',
-] as const;
-
-/** Where a module a document intercepts with sits — TypeScript a spec imports, never ground. */
-export const CONTRACTS_FOLDER = 'contracts';
 
 /** The keys of one run, in the canonical order: what is given, then what came back. */
 export const RUN_KEYS = [
@@ -196,42 +102,11 @@ export type PresenceLaw =
           refusal: (subject: string) => string;
       };
 
-/** The mappings a presence law governs: a document of any kind, one kind's, and the entries inside. */
-export type PresenceShape =
-    | 'api'
-    | 'cli'
-    | 'document'
-    | 'files'
-    | 'jobs'
-    | 'response'
-    | 'run'
-    | 'seed'
-    | 'step'
-    | 'table';
+/** The mappings a presence law governs: a document, a run, and a `files:` assertion. */
+export type PresenceShape = 'document' | 'files' | 'run';
 
 /** Every presence law of the grammar, per shape, in the order the parser checks them. */
 export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> = {
-    api: [
-        {
-            keys: ['request', 'steps'],
-            law: 'some',
-            refusal: () => 'an api document sends a request: — or states its journey as steps:',
-        },
-        {
-            keys: ['request', 'body', 'response', 'tables'],
-            law: 'apart',
-            refusal: (_subject, key) =>
-                `"${key}:" belongs to a step when the document states steps: — one test is one shape`,
-            with: 'steps',
-        },
-    ],
-    cli: [
-        {
-            keys: ['runs'],
-            law: 'each',
-            refusal: () => 'missing "runs:" — description and runs are mandatory',
-        },
-    ],
     document: [
         {
             keys: ['description'],
@@ -239,33 +114,17 @@ export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> =
             refusal: () =>
                 'missing "description:" — every document is one test, and this is its title',
         },
+        {
+            keys: ['runs'],
+            law: 'each',
+            refusal: () => 'missing "runs:" — description and runs are mandatory',
+        },
     ],
     files: [
         {
             keys: FILE_CONTENT_KEYS,
             law: 'some',
             refusal: (path) => `files: ${path} asserts nothing — give it contains: or equals:`,
-        },
-    ],
-    jobs: [
-        {
-            keys: ['trigger'],
-            law: 'each',
-            refusal: () => 'a jobs document names the job it runs — trigger: <name>',
-        },
-        {
-            keys: ['tables', 'error'],
-            law: 'some',
-            refusal: () =>
-                'a jobs document asserts what the job did — give it tables:, error:, or both',
-        },
-    ],
-    response: [
-        {
-            keys: RESPONSE_KEYS,
-            law: 'some',
-            refusal: () =>
-                `response: asserts nothing — give it ${RESPONSE_KEYS.join(', ')}, or name its ./expected/<name>.http`,
         },
     ],
     run: [
@@ -283,39 +142,9 @@ export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> =
             with: 'stdin',
         },
     ],
-    seed: [
-        {
-            keys: ['file'],
-            law: 'each',
-            refusal: () =>
-                'a seed: entry names its file — `{ file: ./seeds/<name>.sql, database: <key> }`',
-        },
-    ],
-    step: [
-        {
-            keys: ['request'],
-            law: 'each',
-            refusal: () => 'a step states its request: — a path under requests/, or METHOD /path',
-        },
-        {
-            keys: ['response', 'tables'],
-            law: 'some',
-            refusal: () => 'a step asserts what came back — give it response:, tables:, or both',
-        },
-    ],
-    table: [
-        {
-            keys: ['columns', 'rows'],
-            law: 'each',
-            refusal: (name) =>
-                `tables: ${name} states its columns: and its rows: — [] asserts an empty table`,
-        },
-    ],
 };
 
 // ── Types ──
-
-export type SpecKind = (typeof SPEC_KINDS)[number];
 
 /** One `env:` entry — a bare word naming a registered set, or a `KEY=value` pair. */
 export type SpecEnvToken =
@@ -371,99 +200,22 @@ export type SpecRun = {
     waitFor: null | string;
 };
 
-/** A path a document names, with the line it names it on — every path key reads as one. */
+/** A path a document names, with the line it names it on. */
 export type SpecPath = {
     line: number;
     path: string;
 };
 
-/** One `seed:` entry: a `.sql` file, and the database it targets when several are declared. */
-export type SpecSeed = SpecPath & {
-    database: null | string;
-};
-
-/** What a step sends: a `./requests/*.http` whole, or an inline `METHOD /path` line. */
-export type SpecRequest =
-    | { kind: 'file'; line: number; path: string }
-    | { kind: 'inline'; line: number; method: string; target: string };
-
-/** A body sent with an inline request: a file under `requests/`, or a value written inline. */
-export type SpecBody =
-    | { kind: 'file'; line: number; path: string }
-    | { kind: 'value'; line: number; value: unknown };
-
-/**
- * What a step expects back: a `./expected/*.http` golden, or the same three
- * parts written inline — status, a subset of headers, the body — each
- * token-aware. `texts` are the inline strings the `{{token}}` grammar governs.
- */
-export type SpecResponse =
-    | {
-          body: null | { value: unknown };
-          headers: Record<string, string>;
-          kind: 'inline';
-          line: number;
-          status: null | number | string;
-          texts: SpecStream[];
-      }
-    | { kind: 'file'; line: number; path: string };
-
-/** One `tables:` entry — the rows a table must hold after the action, in order. */
-export type SpecTable = {
-    columns: string[];
-    database: null | string;
-    line: number;
-    name: string;
-    rows: unknown[][];
-    /** The string cells, token-aware like any expected text. */
-    texts: SpecStream[];
-};
-
-/** One named capture: a value read from a response body, sent by a later step as `{{name}}`. */
-export type SpecCapture = {
-    line: number;
-    name: string;
-    /** The JSONPath as written — `$.id`, `$.items[0].name`, `$['a key']`. */
-    path: string;
-    /** The path, read: a key or an index per segment below the root. */
-    segments: (number | string)[];
-};
-
-/** One api step: a request, and what came back from it. */
-export type SpecStep = {
-    body: null | SpecBody;
-    capture: SpecCapture[];
-    headers: Record<string, string>;
-    /** 1-based line the step starts on — the frame a failure points at. */
-    line: number;
-    request: SpecRequest;
-    response: null | SpecResponse;
-    tables: SpecTable[];
-};
-
-/** A parsed `<case>.spec.yaml`. Each kind fills its own keys; the others stay empty. */
+/** A parsed `<case>.spec.yaml`. */
 export type SpecDocument = {
-    clock: null | { iso: string; line: number };
     /** The vitest test title. */
     description: string;
     /** 1-based line of the `description:` key. */
     descriptionLine: number;
     env: SpecEnvToken[];
-    /** The rejection a triggered job must end on — `null` asserts it succeeded. */
-    error: null | SpecStream;
     fixtures: SpecFixture[];
-    /** The headers every request of an api document carries. */
-    headers: Record<string, string>;
-    intercepts: SpecPath[];
-    kind: SpecKind;
     runs: SpecRun[];
-    seeds: SpecSeed[];
     serve: SpecServeEntry[];
-    /** An api document's requests — the top-level request is its one step. */
-    steps: SpecStep[];
-    /** A jobs document's tables; an api step carries its own. */
-    tables: SpecTable[];
-    trigger: null | { line: number; name: string };
 };
 
 /** A document plus the YAML source it was read from — what update mode rewrites. */
@@ -790,7 +542,7 @@ function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun 
     };
 }
 
-// ── Fields: api and jobs ──
+// ── Paths ──
 
 /** The first ground folder a path passes through, if any — C24's reading. */
 function groundOf(path: string): string | undefined {
@@ -803,7 +555,7 @@ type PathRole = {
     directories: boolean;
     /** The extensions the file may carry; empty takes any. */
     extensions: readonly string[];
-    /** The folder the key reads — a ground name, or `contracts`. */
+    /** The ground folder the key reads. */
     folder: string;
     key: string;
 };
@@ -828,15 +580,8 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
         at(`${role.key}: "${value}" names a directory — ${role.key}: reads one file`);
     }
     const found = groundOf(value);
-    const reaches =
-        role.folder === CONTRACTS_FOLDER
-            ? found === undefined && value.split('/').includes(CONTRACTS_FOLDER)
-            : found === role.folder;
-    if (!reaches) {
-        const where =
-            role.folder === CONTRACTS_FOLDER
-                ? 'the folder its key reads'
-                : `./${role.folder}/ beside the document, or in specs/${role.folder}/ if several leaves share it`;
+    if (found !== role.folder) {
+        const where = `./${role.folder}/ beside the document, or in specs/${role.folder}/ if several leaves share it`;
         at(
             `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (C24)`,
         );
@@ -863,508 +608,9 @@ const FIXTURE_ROLE: PathRole = {
     folder: GROUND_FIXTURES,
     key: 'fixture',
 };
-const SEED_ROLE: PathRole = {
-    directories: false,
-    extensions: ['.sql'],
-    folder: GROUND_SEEDS,
-    key: 'seed',
-};
-const INTERCEPT_ROLE: PathRole = {
-    directories: false,
-    extensions: ['.ts', '.mts', '.js', '.mjs'],
-    folder: CONTRACTS_FOLDER,
-    key: 'intercept',
-};
-const REQUEST_ROLE: PathRole = {
-    directories: false,
-    extensions: ['.http'],
-    folder: GROUND_REQUESTS,
-    key: 'request',
-};
-const BODY_ROLE: PathRole = {
-    directories: false,
-    extensions: [],
-    folder: GROUND_REQUESTS,
-    key: 'body',
-};
-const RESPONSE_ROLE: PathRole = {
-    directories: false,
-    extensions: ['.http'],
-    folder: GROUND_EXPECTED,
-    key: 'response',
-};
-
 /** `fixture:` — paths of file state, each judged by its first ground folder like every path key. */
 function readFixtures(context: Context, node: Node | null): SpecFixture[] {
     return readPaths(context, node, FIXTURE_ROLE);
-}
-
-/** One seed: its path, and the database it targets. */
-function seedAt({ line, path }: SpecPath, database: null | string): SpecSeed {
-    return { database, line, path };
-}
-
-/** `seed:` — a path, or `{ file, database }`, or a list of either, applied in order. */
-function readSeeds(context: Context, node: Node | null): SpecSeed[] {
-    const items: (Node | null)[] = isSeq(node) ? itemsIn(node) : [node];
-    return items.map((item) => {
-        const line = lineOf(context, item);
-        const path = scalarString(item);
-        if (path !== null) {
-            return seedAt(readPath(context, line, path, SEED_ROLE), null);
-        }
-        const map = requireMap(context, item, 'a seed: entry');
-        const found = keyed(closedPairs(context, map, SEED_KEYS, 'a seed: entry'));
-        holdPresence(context, found, { line, shape: 'seed' });
-        const file = held(found, 'file');
-        const database = found.get('database');
-        return seedAt(
-            readPath(
-                context,
-                lineOf(context, file),
-                requireString(context, file.value, 'seed: file'),
-                SEED_ROLE,
-            ),
-            database === undefined
-                ? null
-                : requireString(context, database.value, 'seed: database'),
-        );
-    });
-}
-
-/** `clock:` — the ISO instant the chain's `.clock()` pins. */
-function readClock(context: Context, node: Node | null): { iso: string; line: number } {
-    const iso = requireString(context, node, 'clock:');
-    if (!/^\d{4}-\d{2}-\d{2}T/u.test(iso) || Number.isNaN(Date.parse(iso))) {
-        fail(context, node, `clock: "${iso}" is not an ISO instant — write 2026-03-04T09:30:00Z`);
-    }
-    return { iso, line: lineOf(context, node) };
-}
-
-/** A `headers:` mapping, name to text. */
-function readHeaders(context: Context, node: Node | null, what: string): Record<string, string> {
-    const map = requireMap(context, node, what);
-    const headers: Record<string, string> = {};
-    for (const pair of pairsIn(map)) {
-        const name = scalarString(pair.key);
-        if (name === null) {
-            fail(context, pair, `${what} — a header name must be a plain word`);
-        }
-        const { value } = pair;
-        headers[name] =
-            isScalar(value) && (typeof value.value === 'number' || typeof value.value === 'boolean')
-                ? String(value.value)
-                : requireString(context, value, `${what} ${name}`);
-    }
-    return headers;
-}
-
-/** The value a YAML node holds, as JSON reads it. */
-function valueOf(node: Node | null): unknown {
-    if (node === null) {
-        return null;
-    }
-    return isScalar(node) ? node.value : node.toJSON();
-}
-
-/** Every string scalar under a node, each with the line it is written on. */
-function textsOf(context: Context, node: Node | null): SpecStream[] {
-    if (isScalar(node)) {
-        return typeof node.value === 'string' ? [readStream(context, node, 'a value')] : [];
-    }
-    if (isSeq(node)) {
-        return itemsIn(node).flatMap((item) => textsOf(context, item));
-    }
-    if (isMap(node)) {
-        return pairsIn(node).flatMap((pair) => textsOf(context, pair.value));
-    }
-    return [];
-}
-
-/** `request:` — a `./requests/*.http` path, or an inline `METHOD /path` line. */
-function readRequest(context: Context, node: Node | null): SpecRequest {
-    const value = requireString(context, node, 'request:');
-    const line = lineOf(context, node);
-    if (isRelativePath(value)) {
-        return { kind: 'file', ...readPath(context, line, value, REQUEST_ROLE) };
-    }
-    const match = /^(?<method>[A-Z]+) (?<target>\/\S*)$/u.exec(value);
-    const method = match?.groups?.method;
-    const target = match?.groups?.target;
-    if (
-        method === undefined ||
-        target === undefined ||
-        !(REQUEST_METHODS as readonly string[]).includes(method)
-    ) {
-        fail(
-            context,
-            node,
-            `request: "${value}" is neither a path (./requests/<name>.http) nor a request line (${REQUEST_METHODS.join('|')} /path)`,
-        );
-    }
-    return { kind: 'inline', line, method, target };
-}
-
-/** `body:` — a file under `requests/`, named by its path, or the value itself. */
-function readBody(context: Context, node: Node | null): SpecBody {
-    const line = lineOf(context, node);
-    const text = scalarString(node);
-    if (text !== null && isRelativePath(text)) {
-        return { kind: 'file', ...readPath(context, line, text, BODY_ROLE) };
-    }
-    return { kind: 'value', line, value: valueOf(node) };
-}
-
-/** `response:` — a `./expected/*.http` golden, or its three parts written inline. */
-function readResponse(context: Context, node: Node | null): SpecResponse {
-    const line = lineOf(context, node);
-    const path = scalarString(node);
-    if (path !== null) {
-        return { kind: 'file', ...readPath(context, line, path, RESPONSE_ROLE) };
-    }
-    const map = requireMap(context, node, 'response:');
-    const found = keyed(closedPairs(context, map, RESPONSE_KEYS, 'an inline response'));
-    holdPresence(context, found, { line, shape: 'response' });
-    const status = found.get('status');
-    const headers = found.get('headers');
-    const body = found.get('body');
-    const texts: SpecStream[] = [];
-    let statusValue: null | number | string = null;
-    if (status !== undefined) {
-        const { value } = status;
-        if (isScalar(value) && typeof value.value === 'number' && Number.isInteger(value.value)) {
-            statusValue = value.value;
-        } else {
-            statusValue = requireString(context, value, 'response: status');
-            texts.push(readStream(context, value, 'response: status'));
-        }
-    }
-    if (headers !== undefined) {
-        texts.push(...textsOf(context, headers.value));
-    }
-    if (body !== undefined) {
-        texts.push(...textsOf(context, body.value));
-    }
-    return {
-        body: body === undefined ? null : { value: valueOf(body.value) },
-        headers:
-            headers === undefined ? {} : readHeaders(context, headers.value, 'response: headers'),
-        kind: 'inline',
-        line,
-        status: statusValue,
-        texts,
-    };
-}
-
-/** `tables:` — table name to the rows it must hold, what `toMatchRows()` takes. */
-function readTables(context: Context, node: Node | null): SpecTable[] {
-    const map = requireMap(context, node, 'tables:');
-    return pairsIn(map).map((pair) => {
-        const name = scalarString(pair.key);
-        if (name === null) {
-            fail(context, pair, 'tables: each key is the name of a table');
-        }
-        const entry = requireMap(context, pair.value, `tables: ${name}`);
-        const found = keyed(closedPairs(context, entry, TABLE_KEYS, `tables: ${name}`));
-        holdPresence(context, found, {
-            line: lineOf(context, pair),
-            shape: 'table',
-            subject: name,
-        });
-        const columnsPair = held(found, 'columns');
-        const rowsPair = held(found, 'rows');
-        if (!isSeq(columnsPair.value) || columnsPair.value.items.length === 0) {
-            fail(context, columnsPair, `tables: ${name}.columns is a list of at least one column`);
-        }
-        const columns = itemsIn(columnsPair.value).map((item) =>
-            requireString(context, item, `tables: ${name}.columns`),
-        );
-        if (!isSeq(rowsPair.value)) {
-            fail(context, rowsPair, `tables: ${name}.rows is a list of rows, each a list of cells`);
-        }
-        const rows = itemsIn(rowsPair.value).map((row) => {
-            if (!isSeq(row) || row.items.length !== columns.length) {
-                fail(
-                    context,
-                    row,
-                    `tables: ${name} — each row holds one cell per column (${columns.length})`,
-                );
-            }
-            return itemsIn(row).map((cell) => valueOf(cell));
-        });
-        const database = found.get('database');
-        return {
-            columns,
-            database:
-                database === undefined
-                    ? null
-                    : requireString(context, database.value, `tables: ${name}.database`),
-            line: lineOf(context, pair),
-            name,
-            rows,
-            texts: textsOf(context, rowsPair.value),
-        };
-    });
-}
-
-/** A capture name: a word no `{{token}}` of the grammar already means. */
-const CAPTURE_NAME = /^[A-Za-z][A-Za-z0-9_]*$/u;
-
-/** One JSONPath segment below `$`: `.key`, `[0]` or `['a key']`. */
-const JSONPATH_SEGMENT = /^(?:\.(?<key>[A-Za-z_][\w-]*)|\[(?<index>\d+)\]|\['(?<quoted>[^']*)'\])/u;
-
-/** Read `$.a[0]['b c']` into its segments, or `undefined` when it is not one. */
-export function jsonPathSegments(path: string): (number | string)[] | undefined {
-    if (!path.startsWith('$')) {
-        return undefined;
-    }
-    const segments: (number | string)[] = [];
-    let rest = path.slice(1);
-    while (rest.length > 0) {
-        const match = JSONPATH_SEGMENT.exec(rest);
-        const groups = match?.groups;
-        if (match === null || groups === undefined) {
-            return undefined;
-        }
-        segments.push(
-            groups.index === undefined ? (groups.key ?? groups.quoted ?? '') : Number(groups.index),
-        );
-        rest = rest.slice(match[0].length);
-    }
-    return segments;
-}
-
-/** `capture:` — name to the JSONPath of the response body it reads. */
-function readCapture(context: Context, node: Node | null): SpecCapture[] {
-    const map = requireMap(context, node, 'capture:');
-    return pairsIn(map).map((pair) => {
-        const name = scalarString(pair.key);
-        if (name === null || !CAPTURE_NAME.test(name)) {
-            fail(
-                context,
-                pair,
-                `capture: a name is a word — letters, digits and _, starting with a letter`,
-            );
-        }
-        if ((TOKEN_KINDS as readonly string[]).includes(name)) {
-            fail(
-                context,
-                pair,
-                `capture: "${name}" is a {{token}} of the grammar — name the value for what it is (orderId, token)`,
-            );
-        }
-        const path = requireString(context, pair.value, `capture: ${name}`);
-        const segments = jsonPathSegments(path);
-        if (segments === undefined) {
-            fail(
-                context,
-                pair.value,
-                `capture: ${name} — "${path}" is not a JSONPath into the response body ($.id, $.items[0].name)`,
-            );
-        }
-        return { line: lineOf(context, pair), name, path, segments };
-    });
-}
-
-/** A `{{name}}` an input sends — a capture's name, spelled where its value goes. */
-const REFERENCE = /\{\{(?<name>[^{}]*)\}\}/gu;
-
-/** Every `{{name}}` written in a value an input sends, strings at any depth. */
-function referencesIn(value: unknown): string[] {
-    if (typeof value === 'string') {
-        return [...value.matchAll(REFERENCE)].map((match) => match.groups?.name ?? '');
-    }
-    if (Array.isArray(value)) {
-        return value.flatMap((item) => referencesIn(item));
-    }
-    if (value !== null && typeof value === 'object') {
-        return Object.values(value).flatMap((item) => referencesIn(item));
-    }
-    return [];
-}
-
-/** Refuse a `{{name}}` sent before a step's `capture:` has named it. */
-function requireCaptured(
-    context: Context,
-    line: number,
-    value: unknown,
-    captured: ReadonlySet<string>,
-): void {
-    for (const name of referencesIn(value)) {
-        if (captured.has(name)) {
-            continue;
-        }
-        const token = (TOKEN_KINDS as readonly string[]).includes(name.split('#')[0] ?? '')
-            ? ` — {{${name}}} is a token: it matches what comes back, and a request sends values`
-            : '';
-        throw new SpecSyntaxError(
-            context.fileName,
-            line,
-            `"{{${name}}}" is referenced before it exists — a step sends only what an EARLIER step's capture: named${token}`,
-        );
-    }
-}
-
-/** One api step, read with the captures the steps before it named. */
-function readStep(
-    context: Context,
-    pairs: ReadonlyMap<string, Pair<Node, Node>>,
-    line: number,
-    captured: ReadonlySet<string>,
-): SpecStep {
-    holdPresence(context, pairs, { line, shape: 'step' });
-    const requestPair = held(pairs, 'request');
-    const sent = readSent(context, pairs, readRequest(context, requestPair.value), captured);
-    const capturePair = pairs.get('capture');
-    const responsePair = pairs.get('response');
-    const tablesPair = pairs.get('tables');
-    return {
-        ...sent,
-        capture: capturePair === undefined ? [] : readCapture(context, capturePair.value),
-        line,
-        response: responsePair === undefined ? null : readResponse(context, responsePair.value),
-        tables: tablesPair === undefined ? [] : readTables(context, tablesPair.value),
-    };
-}
-
-/** What a step sends — its request, its headers, its body — every reference checked. */
-function readSent(
-    context: Context,
-    pairs: ReadonlyMap<string, Pair<Node, Node>>,
-    request: SpecRequest,
-    captured: ReadonlySet<string>,
-): Pick<SpecStep, 'body' | 'headers' | 'request'> {
-    const bodyPair = pairs.get('body');
-    const headersPair = pairs.get('headers');
-    if (bodyPair !== undefined && request.kind === 'file') {
-        fail(
-            context,
-            bodyPair,
-            'body: goes with an inline request — a requests/*.http carries its own body',
-        );
-    }
-    const body = bodyPair === undefined ? null : readBody(context, bodyPair.value);
-    const headers =
-        headersPair === undefined ? {} : readHeaders(context, headersPair.value, 'headers:');
-    requireCaptured(
-        context,
-        request.line,
-        request.kind === 'inline' ? request.target : '',
-        captured,
-    );
-    requireCaptured(context, lineOf(context, headersPair), headers, captured);
-    requireCaptured(
-        context,
-        body?.line ?? request.line,
-        body?.kind === 'value' ? body.value : null,
-        captured,
-    );
-    return { body, headers, request };
-}
-
-/** `steps:` — a journey, each step sending what the steps before it captured. */
-function readSteps(context: Context, node: Node | null): SpecStep[] {
-    if (!isSeq(node) || node.items.length === 0) {
-        fail(context, node, 'steps: is a list of at least one step');
-    }
-    const captured = new Set<string>();
-    return itemsIn(node).map((item) => {
-        const map = requireMap(context, item, 'each entry of steps:');
-        const pairs = closedPairs(context, map, STEP_KEYS, 'a step');
-        const step = readStep(context, keyed(pairs), lineOf(context, item), captured);
-        for (const capture of step.capture) {
-            captured.add(capture.name);
-        }
-        return step;
-    });
-}
-
-/** The article a kind's name reads with: an api, a cli, a jobs. */
-function article(kind: SpecKind): string {
-    return kind === 'api' ? 'an' : 'a';
-}
-
-/**
- * Refuse a key another kind reads, before the closed set would call it unknown:
- * the refusal names the kind it belongs to, and why it cannot mean anything
- * here.
- */
-function refuseForeignKeys(context: Context, map: YAMLMap, kind: SpecKind): void {
-    for (const pair of pairsIn(map)) {
-        const key = scalarString(pair.key) ?? '';
-        const owners = SPEC_KINDS.filter(
-            (other) =>
-                other !== kind &&
-                !(KIND_KEYS[kind] as readonly string[]).includes(key) &&
-                (KIND_KEYS[other] as readonly string[]).includes(key),
-        );
-        if (owners.length > 0) {
-            const why =
-                key === 'fixture'
-                    ? ` — it lays files into a working directory, and ${article(kind)} ${kind} chain has none`
-                    : '';
-            fail(
-                context,
-                pair,
-                `"${key}:" is a key of ${owners.map((owner) => `${article(owner)} ${owner}`).join(' or ')} document, not of ${article(kind)} ${kind} one${why} — ${kind} keys: ${KIND_KEYS[kind].join(', ')}`,
-            );
-        }
-    }
-}
-
-/** The kind a document states, read before its keys are — the key set depends on it. */
-function readKind(context: Context, map: YAMLMap): SpecKind {
-    const pair = pairsIn(map).find((item) => scalarString(item.key) === 'kind');
-    if (pair === undefined) {
-        return 'cli';
-    }
-    const kind = requireString(context, pair.value, 'kind:');
-    if (!SPEC_KINDS.includes(kind as SpecKind)) {
-        fail(
-            context,
-            pair,
-            `kind: "${kind}" is not a facet — known kinds: ${SPEC_KINDS.join(', ')}`,
-        );
-    }
-    return kind as SpecKind;
-}
-
-/** What an api document says: its given, then its steps — one, or a journey. */
-function readApiFields(
-    context: Context,
-    map: YAMLMap,
-    found: ReadonlyMap<string, Pair<Node, Node>>,
-): Pick<SpecDocument, 'steps'> {
-    holdPresence(context, found, { line: lineOf(context, map), shape: 'api' });
-    const stepsPair = found.get('steps');
-    if (stepsPair === undefined) {
-        // The top-level `headers:` is the given every request carries, not this step's own.
-        const step = new Map([...found].filter(([key]) => key !== 'headers'));
-        return {
-            steps: [readStep(context, step, lineOf(context, found.get('request')), new Set())],
-        };
-    }
-    return { steps: readSteps(context, stepsPair.value) };
-}
-
-/** What a jobs document says: the job it triggers, and what it must have left or thrown. */
-function readJobsFields(
-    context: Context,
-    map: YAMLMap,
-    found: ReadonlyMap<string, Pair<Node, Node>>,
-): Pick<SpecDocument, 'error' | 'tables' | 'trigger'> {
-    holdPresence(context, found, { line: lineOf(context, map), shape: 'jobs' });
-    const triggerPair = held(found, 'trigger');
-    const errorPair = found.get('error');
-    const tablesPair = found.get('tables');
-    return {
-        error: errorPair === undefined ? null : readStream(context, errorPair.value, 'error:'),
-        tables: tablesPair === undefined ? [] : readTables(context, tablesPair.value),
-        trigger: {
-            line: lineOf(context, triggerPair),
-            name: requireString(context, triggerPair.value, 'trigger:'),
-        },
-    };
 }
 
 // ── Entry ──
@@ -1386,88 +632,21 @@ export function readSpecFile(content: string, fileName: string): SpecFile {
         throw new SpecSyntaxError(fileName, 1, 'the document is empty');
     }
     const map = requireMap(context, root, 'a spec document');
-    const kind = readKind(context, map);
-    refuseForeignKeys(context, map, kind);
-    const found = keyed(
-        closedPairs(
-            context,
-            map,
-            KIND_KEYS[kind],
-            kind === 'cli' ? 'a spec document' : `${article(kind)} ${kind} document`,
-        ),
-    );
+    const found = keyed(closedPairs(context, map, DOCUMENT_KEYS, 'a spec document'));
     holdPresence(context, found, { line: lineOf(context, map), shape: 'document' });
-
-    const given = {
-        description: requireString(context, found.get('description')!.value, 'description:'),
+    const document: SpecDocument = {
+        description: requireString(context, held(found, 'description').value, 'description:'),
         descriptionLine: lineOf(context, found.get('description')),
-        kind,
+        ...readCliFields(context, found),
     };
-    const document: SpecDocument =
-        kind === 'cli'
-            ? { ...emptyDocument(), ...given, ...readCliFields(context, map, found) }
-            : {
-                  ...emptyDocument(),
-                  ...given,
-                  ...readGiven(context, found),
-                  ...(kind === 'api'
-                      ? readApiFields(context, map, found)
-                      : readJobsFields(context, map, found)),
-              };
     return { document, source };
-}
-
-/** A document with every key of every kind empty — each kind fills its own. */
-function emptyDocument(): SpecDocument {
-    return {
-        clock: null,
-        description: '',
-        descriptionLine: 1,
-        env: [],
-        error: null,
-        fixtures: [],
-        headers: {},
-        intercepts: [],
-        kind: 'cli',
-        runs: [],
-        seeds: [],
-        serve: [],
-        steps: [],
-        tables: [],
-        trigger: null,
-    };
-}
-
-/** What an api or jobs case stands on: the chain's own setups, as data. */
-function readGiven(
-    context: Context,
-    found: ReadonlyMap<string, Pair<Node, Node>>,
-): Pick<SpecDocument, 'clock' | 'headers' | 'intercepts' | 'seeds'> {
-    const seed = found.get('seed');
-    const intercept = found.get('intercept');
-    const clock = found.get('clock');
-    const headers = found.get('headers');
-    const captured = new Set<string>();
-    const document = {
-        clock: clock === undefined ? null : readClock(context, clock.value),
-        headers: headers === undefined ? {} : readHeaders(context, headers.value, 'headers:'),
-        intercepts:
-            intercept === undefined ? [] : readPaths(context, intercept.value, INTERCEPT_ROLE),
-        seeds: seed === undefined ? [] : readSeeds(context, seed.value),
-    };
-    if (headers !== undefined) {
-        requireCaptured(context, lineOf(context, headers), document.headers, captured);
-    }
-    return document;
 }
 
 /** What a cli document says: its session, run after run. */
 function readCliFields(
     context: Context,
-    map: YAMLMap,
     found: ReadonlyMap<string, Pair<Node, Node>>,
 ): Pick<SpecDocument, 'env' | 'fixtures' | 'runs' | 'serve'> {
-    holdPresence(context, found, { line: lineOf(context, map), shape: 'cli' });
     const runsNode = held(found, 'runs');
     if (!isSeq(runsNode.value) || runsNode.value.items.length === 0) {
         fail(context, runsNode, 'runs: is a list of at least one run');
@@ -1486,24 +665,12 @@ function readCliFields(
 
 /**
  * Every text of a document the `{{token}}` grammar governs: the streams a
- * comparison judges, and the `files:` texts it judges them with — and, in an
- * api or jobs document, an inline response's texts, a table's string cells
- * and a job's `error:`. `stdin:`, a request and its body are INPUTS — like a
- * `requests/` fixture, never matched — and a description or a command is
- * prose, so none of them appears here.
+ * comparison judges, and the `files:` texts it judges them with. `stdin:` is
+ * an INPUT — like a fixture, never matched — and a description or a command
+ * is prose, so none of them appears here.
  */
 export function assertedStreams(document: SpecDocument): SpecStream[] {
     const streams: SpecStream[] = [];
-    for (const step of document.steps) {
-        if (step.response?.kind === 'inline') {
-            streams.push(...step.response.texts);
-        }
-        streams.push(...step.tables.flatMap((table) => table.texts));
-    }
-    streams.push(...document.tables.flatMap((table) => table.texts));
-    if (document.error !== null) {
-        streams.push(document.error);
-    }
     for (const run of document.runs) {
         if (run.stdout !== null) {
             streams.push(run.stdout);
@@ -1527,17 +694,12 @@ export function assertedStreams(document: SpecDocument): SpecStream[] {
 /** One path a document names — the entry the path passes read it through. */
 export type DocumentPath = {
     /** The key that names it — the role C24 read it for. */
-    key: 'body' | 'fixture' | 'intercept' | 'request' | 'response' | 'seed';
+    key: 'fixture';
     /** What the path names: a `fixture:` with a trailing `/` spreads a directory, every other key one file. */
     kind: 'directory' | 'file';
     line: number;
     path: string;
 };
-
-/** One file a key names. */
-function namedFile(key: DocumentPath['key'], { line, path }: SpecPath): DocumentPath {
-    return { key, kind: 'file', line, path };
-}
 
 /**
  * Every path a document names, in the order it names them — what the checker's
@@ -1545,28 +707,12 @@ function namedFile(key: DocumentPath['key'], { line, path }: SpecPath): Document
  * they read a `file()` or a `directory()`.
  */
 export function documentPaths(document: SpecDocument): DocumentPath[] {
-    const paths: DocumentPath[] = document.fixtures.map(({ line, path }) => ({
+    return document.fixtures.map(({ line, path }) => ({
         key: 'fixture',
         kind: path.endsWith('/') ? 'directory' : 'file',
         line,
         path,
     }));
-    paths.push(
-        ...document.seeds.map((seed) => namedFile('seed', seed)),
-        ...document.intercepts.map((intercept) => namedFile('intercept', intercept)),
-    );
-    for (const step of document.steps) {
-        if (step.request.kind === 'file') {
-            paths.push(namedFile('request', step.request));
-        }
-        if (step.body?.kind === 'file') {
-            paths.push(namedFile('body', step.body));
-        }
-        if (step.response?.kind === 'file') {
-            paths.push(namedFile('response', step.response));
-        }
-    }
-    return paths;
 }
 
 /** Read a `<case>.spec.yaml` for its content alone — the shape passes and C9's scan. */
@@ -1631,56 +777,6 @@ export function updateSpecFile(file: SpecFile, updates: SpecRunUpdate[]): string
     return renderYamlSource(file.source);
 }
 
-/** What update mode writes back into one inline `response:` — a `.http` golden's three parts. */
-export type ResponseRewrite = {
-    body: unknown;
-    hasBody: boolean;
-    headers: Record<string, string>;
-    status: string;
-    /** The step whose response is rewritten; the top-level one of a one-step document is 0. */
-    step: number;
-};
-
-/**
- * Rewrite the inline responses of an api document from what the app answered —
- * status, headers and body, placeholders of the previous golden preserved by
- * the caller. A file-form response is its golden's to rewrite, so it is left
- * alone here, and so is every other key: the YAML document is edited, never
- * re-emitted.
- */
-export function updateSpecResponses(file: SpecFile, rewrites: readonly ResponseRewrite[]): string {
-    const root = file.source.document.contents;
-    if (!isMap(root)) {
-        return renderYamlSource(file.source);
-    }
-    const steps = root.get('steps', true);
-    for (const rewrite of rewrites) {
-        const holder = isSeq(steps) ? steps.items[rewrite.step] : root;
-        const response = isMap(holder) ? holder.get('response', true) : undefined;
-        if (!isMap(response)) {
-            continue;
-        }
-        const node = (value: unknown): unknown => file.source.document.createNode(value);
-        setOrdered(
-            response,
-            'status',
-            /^\d+$/u.test(rewrite.status) ? Number(rewrite.status) : rewrite.status,
-            RESPONSE_KEYS,
-        );
-        if (Object.keys(rewrite.headers).length > 0) {
-            setOrdered(response, 'headers', node(rewrite.headers), RESPONSE_KEYS);
-        } else {
-            response.delete('headers');
-        }
-        if (rewrite.hasBody) {
-            setOrdered(response, 'body', node(rewrite.body), RESPONSE_KEYS);
-        } else {
-            response.delete('body');
-        }
-    }
-    return renderYamlSource(file.source);
-}
-
 // ── Schema ──
 
 const STRING_OR_LIST = {
@@ -1691,20 +787,13 @@ const STRING_OR_LIST = {
 const NOT_GROUND_SEGMENT = String.raw`(?!(?:${GROUND_DIRS.join('|')})/)[^/]+/`;
 
 /**
- * A relative path whose FIRST ground folder is `folder`, as a pattern — C24's
- * reading, for an editor. `contracts/` is no ground, so a contract path passes
- * through no ground folder at all; `fixtures/` is the one a path may end on,
- * a directory `fixture:` spreads whole.
+ * A relative path whose FIRST ground folder is `fixtures/`, as a pattern — C24's
+ * reading, for an editor. It may end on the folder: `fixture:` spreads a
+ * directory whole.
  */
-function pathIn(folder: string, extension = ''): SchemaNode {
-    const rest =
-        folder === CONTRACTS_FOLDER
-            ? `(?:${NOT_GROUND_SEGMENT})*[^/]+`
-            : folder === GROUND_FIXTURES
-              ? '.*'
-              : String.raw`[^/].*`;
+function fixturePath(): SchemaNode {
     return {
-        pattern: String.raw`^\.\.?/(?:${NOT_GROUND_SEGMENT})*?${folder}/${rest}${extension.replaceAll('.', String.raw`\.`)}$`,
+        pattern: String.raw`^\.\.?/(?:${NOT_GROUND_SEGMENT})*?${GROUND_FIXTURES}/.*$`,
         type: 'string',
     };
 }
@@ -1713,8 +802,6 @@ function pathIn(folder: string, extension = ''): SchemaNode {
 function oneOrMany(item: SchemaNode): SchemaNode {
     return { oneOf: [item, { items: item, minItems: 1, type: 'array' }] };
 }
-
-const HEADERS = { additionalProperties: { type: 'string' }, type: 'object' };
 
 /** The presence laws of a shape, as JSON Schema states them — {@link PRESENCE}'s, never restated. */
 function presenceOf(shape: PresenceShape): SchemaNode {
@@ -1733,32 +820,6 @@ function presenceOf(shape: PresenceShape): SchemaNode {
         ...(allOf.length > 0 ? { allOf } : {}),
         ...(required.length > 0 ? { required } : {}),
     };
-}
-
-/**
- * What a step cannot be, as a schema: its presence laws, and a `body:` beside
- * a request named by its path — the `.http` carries its own body.
- */
-function stepLaws(): SchemaNode {
-    const { allOf = [], ...laws } = presenceOf('step') as { allOf?: SchemaNode[] };
-    return {
-        ...laws,
-        allOf: [
-            ...allOf,
-            {
-                not: {
-                    properties: { request: { pattern: String.raw`^\.\.?/`, type: 'string' } },
-                    required: ['request', 'body'],
-                },
-            },
-        ],
-    };
-}
-
-/** The `if` a kind's own `then` hangs on — a cli document may leave its kind unstated. */
-function whenKind(kind: SpecKind): SchemaNode {
-    const stated = { properties: { kind: { const: kind } }, required: ['kind'] };
-    return kind === 'cli' ? { anyOf: [{ not: { required: ['kind'] } }, stated] } : stated;
 }
 
 /**
@@ -1781,13 +842,10 @@ type SchemaNode = Record<string, unknown>;
 export type SpecSchema = {
     $defs: SchemaNode & {
         run: SchemaNode & { additionalProperties: boolean; properties: SchemaNode };
-        step: SchemaNode & { additionalProperties: boolean; properties: SchemaNode };
     };
     $id: string;
     $schema: string;
     additionalProperties: boolean;
-    /** One `if`/`then` per kind: the keys it reads, and the ones it cannot do without. */
-    allOf: { if: SchemaNode; then: SchemaNode & { propertyNames: { enum: readonly string[] } } }[];
     description: string;
     properties: SchemaNode;
     title: string;
@@ -1805,38 +863,6 @@ export const SPEC_SCHEMA: SpecSchema = {
                     properties: {
                         contains: STRING_OR_LIST,
                         equals: { type: 'string' },
-                    },
-                    type: 'object',
-                },
-            ],
-        },
-        capture: {
-            additionalProperties: { pattern: String.raw`^\$`, type: 'string' },
-            description:
-                'Name → the JSONPath of the response body it reads ($.id, $.items[0].name); a later step sends it as {{name}}.',
-            propertyNames: { not: { enum: [...TOKEN_KINDS] }, pattern: CAPTURE_NAME.source },
-            type: 'object',
-        },
-        request: {
-            description:
-                'A ./requests/<name>.http sent whole, or an inline request line — METHOD /path, {{capture}} references allowed.',
-            oneOf: [
-                pathIn(GROUND_REQUESTS, '.http'),
-                { pattern: `^(?:${REQUEST_METHODS.join('|')}) /`, type: 'string' },
-            ],
-        },
-        response: {
-            description:
-                'A ./expected/<name>.http golden, or its three parts inline — status, a subset of headers, the body — each token-aware.',
-            oneOf: [
-                pathIn(GROUND_EXPECTED, '.http'),
-                {
-                    ...presenceOf('response'),
-                    additionalProperties: false,
-                    properties: {
-                        body: { description: 'The body, compared structurally.' },
-                        headers: HEADERS,
-                        status: { oneOf: [{ type: 'integer' }, { type: 'string' }] },
                     },
                     type: 'object',
                 },
@@ -1870,51 +896,6 @@ export const SPEC_SCHEMA: SpecSchema = {
             },
             type: 'object',
         },
-        seedEntry: {
-            oneOf: [
-                pathIn(GROUND_SEEDS, '.sql'),
-                {
-                    ...presenceOf('seed'),
-                    additionalProperties: false,
-                    properties: {
-                        database: { type: 'string' },
-                        file: pathIn(GROUND_SEEDS, '.sql'),
-                    },
-                    type: 'object',
-                },
-            ],
-        },
-        step: {
-            ...stepLaws(),
-            additionalProperties: false,
-            properties: {
-                body: {
-                    description:
-                        'The body an inline request sends: a value, or a file under requests/ named by its path.',
-                },
-                capture: { $ref: '#/$defs/capture' },
-                headers: HEADERS,
-                request: { $ref: '#/$defs/request' },
-                response: { $ref: '#/$defs/response' },
-                tables: { $ref: '#/$defs/tables' },
-            },
-            type: 'object',
-        },
-        tables: {
-            additionalProperties: {
-                ...presenceOf('table'),
-                additionalProperties: false,
-                properties: {
-                    columns: { items: { type: 'string' }, minItems: 1, type: 'array' },
-                    database: { type: 'string' },
-                    rows: { items: { type: 'array' }, type: 'array' },
-                },
-                type: 'object',
-            },
-            description:
-                'Table name → the rows it holds after the action, in order, as toMatchRows() takes them; rows: [] asserts it is empty.',
-            type: 'object',
-        },
         serveEntry: {
             oneOf: [
                 { type: 'string' },
@@ -1933,65 +914,13 @@ export const SPEC_SCHEMA: SpecSchema = {
     $id: 'https://jterrazz.com/schema/jterrazz-test/spec.schema.json',
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     additionalProperties: false,
-    allOf: SPEC_KINDS.map((kind) => ({
-        if: whenKind(kind),
-        // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema's own keyword: an if/then pair is how the schema closes a document on its kind's keys
-        then: {
-            ...presenceOf(kind),
-            // A one-step api document is that step, its laws held at the top level.
-            ...(kind === 'api' ? { dependentSchemas: { request: stepLaws() } } : {}),
-            propertyNames: { enum: KIND_KEYS[kind] },
-        },
-    })),
     description:
         'One case of the @jterrazz/test literate format, one file per test: the ground it stands on, what it does, and what came back.',
     properties: {
-        body: {
-            description:
-                'api: the body an inline request sends — a value, or a file under requests/ named by its path.',
-        },
-        clock: {
-            description:
-                "api, jobs: the instant the chain's .clock() pins, ISO — 2026-03-04T09:30:00Z.",
-            type: 'string',
-        },
         description: {
             description: 'The vitest test title — one lowercase line, no trailing period.',
             type: 'string',
         },
-        error: {
-            description:
-                'jobs: the message the triggered job must reject with, token-aware; absent asserts it succeeded.',
-            type: 'string',
-        },
-        headers: {
-            ...HEADERS,
-            description: 'api: the headers every request of the document carries.',
-        },
-        intercept: {
-            ...oneOrMany(pathIn(CONTRACTS_FOLDER)),
-            description:
-                'api, jobs: contract modules under contracts/, each default-exporting a contract, a list or a composite — applied in order.',
-        },
-        request: { $ref: '#/$defs/request' },
-        response: { $ref: '#/$defs/response' },
-        seed: {
-            description:
-                'api, jobs: .sql files under seeds/, applied in order — { file, database } targets one database when several are declared.',
-            oneOf: [
-                { $ref: '#/$defs/seedEntry' },
-                { items: { $ref: '#/$defs/seedEntry' }, minItems: 1, type: 'array' },
-            ],
-        },
-        steps: {
-            description:
-                'api: a journey — each step a request and what came back, sending what earlier steps captured.',
-            items: { $ref: '#/$defs/step' },
-            minItems: 1,
-            type: 'array',
-        },
-        tables: { $ref: '#/$defs/tables' },
-        trigger: { description: 'jobs: the registered job the case runs.', type: 'string' },
         env: {
             ...STRING_OR_LIST,
             description:
@@ -2000,13 +929,7 @@ export const SPEC_SCHEMA: SpecSchema = {
         fixture: {
             description:
                 "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is fixtures/ — ./fixtures/ beside the document, or specs/fixtures/ reached by the path that climbs to it.",
-            ...oneOrMany(pathIn(GROUND_FIXTURES)),
-        },
-        kind: {
-            default: 'cli',
-            description: 'The facet this document describes.',
-            enum: [...SPEC_KINDS],
-            type: 'string',
+            ...oneOrMany(fixturePath()),
         },
         runs: {
             // Only the last run may wait; no keyword addresses the last item, so the schema holds that one run at most does.

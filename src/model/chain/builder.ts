@@ -1,18 +1,14 @@
 import { cpSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, relative, resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 
 import { HttpResult } from '../../facets/api/api.result.js';
-import { runApiSteps } from '../../facets/api/literate.js';
-import type { DocumentRequest } from '../../facets/api/literate.js';
 import { CliResult } from '../../facets/cli/cli.result.js';
 import { runSpecDocument } from '../../facets/cli/literate.js';
 import type { LiterateRunFlags, LiterateServeRegistration } from '../../facets/cli/literate.js';
 import { CallResult } from '../../facets/integration/integration.result.js';
-import { runJobsDocument } from '../../facets/jobs/literate.js';
 import { ScreenResult } from '../../facets/mobile/mobile.result.js';
 import { FetchResult, PageResult } from '../../facets/website/website.result.js';
-import { shouldUpdateSnapshots } from '../../runner/update.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
 import { clock as timeClock } from '../clock/clock.js';
@@ -24,22 +20,13 @@ import type {
     ContractResponse,
 } from '../contracts/exchange.js';
 import { parseRequestFile } from '../http-files/http-file.js';
-import {
-    atLine,
-    loadIntercepts,
-    readDocumentFor,
-    requireDocumentPaths,
-} from '../literate/document-run.js';
-import type { DocumentPlace } from '../literate/document-run.js';
-import type { SpecFile } from '../literate/spec-document.js';
 import type { BrowserPort, VisitScenario } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import type { DevicePort, MobileScenario } from '../ports/device.port.js';
-import type { ServerPort, ServerResponse } from '../ports/server.port.js';
+import type { ServerPort } from '../ports/server.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
 import { BaseResult, validateDatabaseOption } from '../result/result.js';
-import type { TableAccessor } from '../result/table.js';
 import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
@@ -221,12 +208,6 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
     put: (path: string, body?: unknown) => Promise<HttpResult>;
     /** Send the complete request a `.http` document describes, `file('./requests/<name>.http')`. */
     request: (source: DiskFile<'.http'>) => Promise<HttpResult>;
-    /**
-     * Run a `kind: api` document — its ground, then every step, each judged —
-     * and resolve with the LAST response, so a `.spec.ts` can add an assertion
-     * the document cannot express. The document is named with `file()`.
-     */
-    run: (document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags) => Promise<HttpResult>;
 };
 
 /**
@@ -257,12 +238,6 @@ export type JobsSpecification<DatabaseKey extends string = string> = {
 
     /** Execute the named job registered via the `jobs` option and resolve with the result. */
     trigger: (name: string) => Promise<JobsResult>;
-    /**
-     * Run a `kind: jobs` document — its ground, the job it triggers, what it
-     * must have thrown and left — and resolve with the result. The document is
-     * named with `file()`.
-     */
-    run: (document: DiskFile<'.spec.yaml'>) => Promise<JobsResult>;
 };
 
 /**
@@ -674,74 +649,6 @@ export class SpecificationBuilder
         );
     }
 
-    /**
-     * Run a `kind: api` document: its `seed:`, `intercept:` and `clock:` join
-     * this chain's setups, then every step is sent and judged — the facet's
-     * `run`. Setup chained before the call layers underneath the document's.
-     */
-    async runApi(
-        document: DiskFile<'.spec.yaml'>,
-        options?: LiterateRunFlags,
-    ): Promise<HttpResult> {
-        const { file, place } = await this.standOnDocument(
-            'api',
-            document,
-            options?.frozen === true,
-        );
-        const chainHeaders = this.requestHeaders;
-        const tableOf = this.tableOf();
-        const response = await this.executeSetup(
-            null,
-            async () =>
-                await runApiSteps({
-                    chainHeaders,
-                    file,
-                    frozen: options?.frozen === true,
-                    place,
-                    send: async (request) => await this.send(request),
-                    tableOf,
-                }),
-        );
-        return new HttpResult({ config: this.config, response, testDir: this.testDir });
-    }
-
-    /**
-     * Run a `kind: jobs` document: its ground joins this chain's setups, then
-     * the job it names is triggered and what it did is judged — the facet's
-     * `run`.
-     */
-    async runJobs(document: DiskFile<'.spec.yaml'>): Promise<BaseResult> {
-        const { file, place } = await this.standOnDocument('jobs', document, false);
-        const { trigger } = file.document;
-        const job = this.config.jobs?.find((candidate) => candidate.name === trigger?.name);
-        if (trigger === null || job === undefined) {
-            const line = trigger?.line ?? 1;
-            const available = (this.config.jobs ?? [])
-                .map((candidate) => candidate.name)
-                .join(', ');
-            throw atLine(
-                new Error(
-                    `${place.displayPath}:${line}: trigger: "${trigger?.name ?? ''}" is not a registered job — registered: ${available}`,
-                ),
-                place.filePath,
-                line,
-            );
-        }
-        const tableOf = this.tableOf();
-        await this.executeSetup(null, async () => {
-            await runJobsDocument({
-                execute: async () => {
-                    await job.execute();
-                },
-                file,
-                place,
-                tableOf,
-                trigger,
-            });
-        });
-        return new BaseResult({ config: this.config, testDir: this.testDir });
-    }
-
     // ── Website actions (terminal) ──
 
     /**
@@ -953,71 +860,6 @@ export class SpecificationBuilder
     }
 
     // ── Private ──
-
-    /**
-     * Read a document for this facet and lay its ground on this chain: every
-     * path it names checked, its seeds queued (read from the document's own
-     * directory), its contracts registered, its clock pinned — the chain's own
-     * setups, in the order the document states them.
-     */
-    private async standOnDocument(
-        kind: 'api' | 'jobs',
-        document: DiskFile<'.spec.yaml'>,
-        frozen: boolean,
-    ): Promise<{ file: SpecFile; place: DocumentPlace }> {
-        const source = requireDiskFile('run', document, '.spec.yaml');
-        const filePath = resolveSpecPath('run', source.path, this.testDir);
-        const place = { displayPath: relative(process.cwd(), filePath) || source.path, filePath };
-        const file = readDocumentFor(kind, place);
-        const dir = dirname(filePath);
-        requireDocumentPaths(file.document, dir, place, shouldUpdateSnapshots() && !frozen);
-        for (const seed of file.document.seeds) {
-            try {
-                validateDatabaseOption('seed', this.config, seed.database ?? undefined);
-            } catch (error) {
-                throw atLine(
-                    new Error(
-                        `${place.displayPath}:${seed.line}: ${error instanceof Error ? error.message : String(error)}`,
-                    ),
-                    filePath,
-                    seed.line,
-                );
-            }
-            this.seeds.push({
-                database: seed.database ?? undefined,
-                dir,
-                source: { path: seed.path },
-            });
-        }
-        const contracts = await loadIntercepts(file.document, dir, place);
-        if (contracts.length > 0) {
-            this.intercept(contracts);
-        }
-        if (file.document.clock !== null) {
-            this.clock(file.document.clock.iso);
-        }
-        return { file, place };
-    }
-
-    /** A table of this chain's databases, read after the action — what `result.table()` hands back. */
-    private tableOf(): (name: string, database: string | undefined) => TableAccessor {
-        const result = new BaseResult({ config: this.config, testDir: this.testDir });
-        return (name, database) =>
-            result.table(name, database === undefined ? undefined : { database });
-    }
-
-    /** Send one request through the app under test, exactly as written. */
-    private async send(request: DocumentRequest): Promise<ServerResponse> {
-        if (!this.config.server) {
-            throw new Error('HTTP actions require a server adapter (use specification.api())');
-        }
-        return await this.config.server.request(
-            request.method,
-            request.path,
-            request.body,
-            Object.keys(request.headers).length > 0 ? request.headers : undefined,
-        );
-    }
 
     private resolveEnv(workDir: string): CliEnv | undefined {
         if (Object.keys(this.commandEnv).length === 0) {
@@ -1383,7 +1225,6 @@ function apiView(builder: SpecificationBuilder): ApiSpecification {
         post: async (path, body) => await builder.post(path, body),
         put: async (path, body) => await builder.put(path, body),
         request: async (source) => await builder.request(source),
-        run: async (document, options) => await builder.runApi(document, options),
         seed: (source, options) => apiView(builder.seed(source, options)),
     };
     apiViews.set(builder, view);
@@ -1406,7 +1247,6 @@ export function createApiFacet(config: SpecificationConfig): ApiSpecification {
         post: async (path, body) => await start().post(path, body),
         put: async (path, body) => await start().put(path, body),
         request: async (source) => await start().request(source),
-        run: async (document, options) => await start().runApi(document, options),
         seed: (source, options) => apiView(start().seed(source, options)),
     };
 }
@@ -1420,7 +1260,6 @@ function jobsView(builder: SpecificationBuilder): JobsSpecification {
     const view: JobsSpecification = {
         clock: (iso) => jobsView(builder.clock(iso)),
         intercept: interceptInto(() => builder, jobsView),
-        run: async (document) => await builder.runJobs(document),
         seed: (source, options) => jobsView(builder.seed(source, options)),
         trigger: async (name) => await builder.trigger(name),
     };
@@ -1437,7 +1276,6 @@ export function createJobsFacet(config: SpecificationConfig): JobsSpecification 
     return {
         clock: (iso) => jobsView(start().clock(iso)),
         intercept: interceptInto(start, jobsView),
-        run: async (document) => await start().runJobs(document),
         seed: (source, options) => jobsView(start().seed(source, options)),
         trigger: async (name) => await start().trigger(name),
     };

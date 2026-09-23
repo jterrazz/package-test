@@ -1,7 +1,0 @@
-kind: api
-description: lists its cases in one file
-cases:
-    - GET /users
-request: GET /users
-response:
-    status: 200

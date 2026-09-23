@@ -1,4 +1,0 @@
-kind: jobs
-description: expects the crash to say something else
-trigger: crash-after-insert
-error: 'crash-after-insert: timeout'

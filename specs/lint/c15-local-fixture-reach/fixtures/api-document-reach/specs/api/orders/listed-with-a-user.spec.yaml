@@ -1,6 +1,0 @@
-kind: api
-description: orders are listed against a user seeded from the users leaf
-seed: ../users/seeds/one-user.sql
-request: GET /orders
-response:
-    status: 200

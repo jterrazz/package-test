@@ -3,14 +3,13 @@ import { dirname, extname, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { isGroundName } from '../src/model/chain/ground.js';
-import { parseSpecDocument, SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import { treeEntries } from '../src/seams/git/tree.js';
 import { isMap, isScalar, parseYamlSource } from '../src/seams/yaml/document.js';
 import { blankComments } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
 
 /**
- * B12 — every route the api declares is reached by a document or a spec.
+ * B12 — every route the api declares is reached by a spec.
  *
  * Line coverage says which lines of the app ran; it cannot say which of the
  * app's routes no case ever asked for, and a route nobody asks for is a
@@ -21,8 +20,7 @@ import type { TokenViolation } from './checker.js';
  * exists once its factory is handed started services.
  *
  * What reaches a route is read from the member's `specs/` tree the way a
- * reader reads it: a document's request lines and the `.http` files it sends,
- * a spec's literal `.get('/…')`, `.post(…)`, `.put(…)`, `.delete(…)` and the
+ * reader reads it: a spec's literal `.get('/…')`, `.post(…)`, `.put(…)`, `.delete(…)` and the
  * `.http` file a `.request(file(…))` sends. A `{{capture}}` or a template
  * hole reaches any one segment; a computed path is out of reach, and the route
  * it would have reached is reported — the ratchet holds what a member accepts.
@@ -171,29 +169,7 @@ function reachOfSpec(file: string): Reach[] {
     return reached;
 }
 
-/** What an api document sends, read through the runner's own parser. */
-function reachOfDocument(file: string): Reach[] {
-    let steps;
-    try {
-        ({ steps } = parseSpecDocument(readFileSync(file, 'utf8'), file));
-    } catch {
-        return [];
-    }
-    return steps.flatMap((step) => {
-        if (step.request.kind === 'inline') {
-            return [
-                {
-                    method: step.request.method,
-                    path: step.request.target.replaceAll(/\{\{[^}]*\}\}/gu, HOLE),
-                },
-            ];
-        }
-        const sent = requestLineOf(resolve(dirname(file), step.request.path));
-        return sent === undefined ? [] : [sent];
-    });
-}
-
-/** Every spec and document under `dir`, ground left out. */
+/** Every spec under `dir`, ground left out. */
 function readersUnder(dir: string): string[] {
     const found: string[] = [];
     const visit = (current: string): void => {
@@ -209,7 +185,7 @@ function readersUnder(dir: string): string[] {
                 if (!isGroundName(entry.name) && entry.name !== 'node_modules') {
                     visit(path);
                 }
-            } else if (entry.name.endsWith('.spec.ts') || entry.name.endsWith(SPEC_EXTENSION)) {
+            } else if (entry.name.endsWith('.spec.ts')) {
                 found.push(path);
             }
         }
@@ -246,8 +222,7 @@ function matchesSegment(declaredSegment: string, sent: string | undefined): bool
 }
 
 /**
- * B12 over one member: each route its declared source names that no document
- * and no spec of its `specs/` tree reaches, reported on the line the source
+ * B12 over one member: each route its declared source names that no spec of its `specs/` tree reaches, reported on the line the source
  * declares it.
  */
 export function checkRoutesReached(memberDir: string, rootDir: string): TokenViolation[] {
@@ -285,16 +260,14 @@ export function checkRoutesReached(memberDir: string, rootDir: string): TokenVio
             ),
         ];
     }
-    const reached = readersUnder(join(memberDir, 'specs')).flatMap((file) =>
-        file.endsWith(SPEC_EXTENSION) ? reachOfDocument(file) : reachOfSpec(file),
-    );
+    const reached = readersUnder(join(memberDir, 'specs')).flatMap((file) => reachOfSpec(file));
     return routes
         .filter((route) => !reached.some((reach) => reaches(route, reach)))
         .map((route) =>
             at(
                 path,
                 route.line,
-                `${route.method} ${route.path} is declared and no document or spec reaches it — send it from a case, or record what the member accepts`,
+                `${route.method} ${route.path} is declared and no spec reaches it — send it from a case, or record what the member accepts`,
             ),
         );
 }

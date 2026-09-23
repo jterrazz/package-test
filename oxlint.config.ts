@@ -88,11 +88,9 @@ const FRAMEWORK_LAYERS = {
             // edge, by design: one builder, seven results it names.
             'facets/api/api.result',
             'facets/cli/cli.result',
-            // And a document run is the facet's own engine, called by the
+            // And a document run is the cli's own engine, called by the
             // Builder's `run` the way its terminal actions are.
-            'facets/api/literate',
             'facets/cli/literate',
-            'facets/jobs/literate',
             'facets/integration/integration.result',
             'facets/mobile/mobile.result',
             'facets/website/website.result',

@@ -30,12 +30,7 @@ function schemaValidator(): (data: unknown) => string[] {
  * The refusals a schema cannot state, each with the reason: the parser holds
  * them, and an editor validating against the schema does not see them.
  */
-const BEYOND_A_SCHEMA = new Map([
-    [
-        'specs/api/literate/fixtures/capture-before-it-exists.spec.yaml',
-        'a name sent before the step that captures it: an order across steps, which no keyword compares',
-    ],
-]);
+const BEYOND_A_SCHEMA = new Map<string, string>();
 
 /** Is this document an input a negative spec runs — under a `fixtures/` folder? */
 function isFixture(file: string): boolean {
@@ -50,7 +45,7 @@ describe('the published schema validates every document of the tree (meta-test)'
         );
 
         // Then - none carries a schema error: an editor never flags what the runner runs
-        expect(read.length).toBeGreaterThan(200);
+        expect(read.length).toBeGreaterThan(150);
         expect(read.filter(({ schema }) => schema.length > 0)).toStrictEqual([]);
     });
 
@@ -79,10 +74,9 @@ describe('the published schema validates every document of the tree (meta-test)'
         // Given - the documents the walk found
         const documents = specDocuments(ROOT);
 
-        // Then - the facets' documents are there, and no dependency's is
-        expect(documents).toContain('specs/api/seeding/seeded-in-order.spec.yaml');
-        expect(documents).toContain('specs/jobs/triggering/synced-events.spec.yaml');
+        // Then - the cli's and the lint rules' documents are there, and no dependency's is
         expect(documents.some((file) => file.startsWith('specs/cli/'))).toBe(true);
+        expect(documents.some((file) => file.startsWith('specs/lint/'))).toBe(true);
         expect(documents.some((file) => file.includes('node_modules/'))).toBe(false);
     });
 });
@@ -103,7 +97,7 @@ describe('what no keyword states, the parser alone refuses', () => {
     });
 });
 
-describe('the published schema refuses a wrong document of every kind', () => {
+describe('the published schema refuses a wrong document', () => {
     const validate = schemaValidator();
 
     test.each([
@@ -115,43 +109,13 @@ describe('the published schema refuses a wrong document of every kind', () => {
         ],
         [
             'cli',
-            'a key another kind reads',
+            'a key no document reads',
             'description: x\nseed: ./seeds/one.sql\nruns:\n    - command: build\n      exit: 0\n',
         ],
         [
-            'api',
-            'a key another kind reads',
-            'kind: api\ndescription: x\ntrigger: sync\nrequest: GET /users\n',
-        ],
-        [
-            'api',
-            'neither a request nor steps',
-            'kind: api\ndescription: x\nseed: ./seeds/one.sql\n',
-        ],
-        [
-            'api',
-            'a seed under seeds/ inside the fixtures pool',
-            'kind: api\ndescription: x\nseed: ../../fixtures/seeds/one.sql\nrequest: GET /users\n',
-        ],
-        [
-            'api',
-            'a seed outside seeds/',
-            'kind: api\ndescription: x\nseed: ./expected/one.sql\nrequest: GET /users\n',
-        ],
-        [
-            'api',
-            'a request with neither a response nor tables',
-            'kind: api\ndescription: x\nrequest: GET /users\n',
-        ],
-        [
-            'api',
-            'a response beside the steps',
-            'kind: api\ndescription: x\nresponse: { status: 200 }\nsteps:\n    - request: GET /users\n      response: { status: 200 }\n',
-        ],
-        [
-            'api',
-            'a body beside a request file',
-            'kind: api\ndescription: x\nrequest: ./requests/one.http\nbody: { a: 1 }\nresponse: { status: 200 }\n',
+            'cli',
+            'a kind, which no document states',
+            'kind: api\ndescription: x\nruns:\n    - command: build\n      exit: 0\n',
         ],
         [
             'cli',
@@ -163,12 +127,6 @@ describe('the published schema refuses a wrong document of every kind', () => {
             'a run that waits and writes stdin',
             'description: x\nruns:\n    - command: serve\n      stdin: x\n      waitFor: ready\n      exit: 0\n',
         ],
-        [
-            'jobs',
-            'a key another kind reads',
-            'kind: jobs\ndescription: x\ntrigger: sync\nrequest: GET /users\n',
-        ],
-        ['jobs', 'no trigger', 'kind: jobs\ndescription: x\nseed: ./seeds/one.sql\n'],
     ])('%s: %s', (_kind, _case, text) => {
         // Given - the document's data
         const data = documentData(text);
@@ -180,14 +138,6 @@ describe('the published schema refuses a wrong document of every kind', () => {
 
     test.each([
         ['cli', 'description: x\nruns:\n    - command: build\n      exit: 0\n'],
-        [
-            'api',
-            'kind: api\ndescription: x\nseed: ./seeds/one.sql\nrequest: GET /users\nresponse:\n    status: 200\n',
-        ],
-        [
-            'jobs',
-            'kind: jobs\ndescription: x\ntrigger: sync\ntables:\n    users:\n        columns: [name]\n        rows: []\n',
-        ],
         [
             'cli',
             'description: x\nfixture: [./fixtures/, ../../fixtures/shop/]\nruns:\n    - command: build\n      exit: 0\n',
@@ -207,10 +157,6 @@ type Mapping = Record<string, unknown>;
 
 /** What a value of each key a presence law names may be, when a case adds it. */
 const SAMPLES: Mapping = {
-    body: { a: 1 },
-    request: 'GET /users',
-    response: { status: 200 },
-    tables: { users: { columns: ['name'], rows: [] } },
     waitFor: 'ready',
 };
 
@@ -222,28 +168,9 @@ const SHAPES: Record<
     PresenceShape,
     { embed: (mapping: Mapping) => Mapping; instances: Mapping[]; subject?: string }
 > = {
-    api: {
-        embed: (mapping) => mapping,
-        instances: [
-            { description: 'x', kind: 'api', request: 'GET /users', response: { status: 200 } },
-            {
-                description: 'x',
-                kind: 'api',
-                steps: [{ request: 'GET /users', response: { status: 200 } }],
-            },
-        ],
-    },
-    cli: {
-        embed: (mapping) => mapping,
-        instances: [{ description: 'x', runs: [{ command: 'build', exit: 0 }] }],
-    },
     document: {
         embed: (mapping) => mapping,
-        instances: [
-            { description: 'x', runs: [{ command: 'build', exit: 0 }] },
-            { description: 'x', kind: 'api', request: 'GET /users', tables: SAMPLES.tables },
-            { description: 'x', error: 'boom', kind: 'jobs', trigger: 'sync' },
-        ],
+        instances: [{ description: 'x', runs: [{ command: 'build', exit: 0 }] }],
     },
     files: {
         embed: (mapping) => ({
@@ -253,55 +180,12 @@ const SHAPES: Record<
         instances: [{ contains: 'x' }, { equals: 'x' }],
         subject: 'a.txt',
     },
-    jobs: {
-        embed: (mapping) => mapping,
-        instances: [
-            { description: 'x', kind: 'jobs', tables: SAMPLES.tables, trigger: 'sync' },
-            { description: 'x', error: 'boom', kind: 'jobs', trigger: 'sync' },
-        ],
-    },
-    response: {
-        embed: (mapping) => ({
-            description: 'x',
-            kind: 'api',
-            request: 'GET /users',
-            response: mapping,
-        }),
-        instances: [{ status: 200 }, { body: { a: 1 }, headers: { 'x-a': 'b' } }],
-    },
     run: {
         embed: (mapping) => ({ description: 'x', runs: [mapping] }),
         instances: [
             { command: 'build', exit: 0 },
             { command: 'build', exit: 0, stdin: 'x' },
         ],
-    },
-    seed: {
-        embed: (mapping) => ({
-            description: 'x',
-            kind: 'api',
-            request: 'GET /users',
-            response: { status: 200 },
-            seed: mapping,
-        }),
-        instances: [{ database: 'db', file: './seeds/one.sql' }],
-    },
-    step: {
-        embed: (mapping) => ({ description: 'x', kind: 'api', steps: [mapping] }),
-        instances: [
-            { request: 'GET /users', response: { status: 200 } },
-            { body: { a: 1 }, request: 'POST /users', tables: SAMPLES.tables },
-        ],
-    },
-    table: {
-        embed: (mapping) => ({
-            description: 'x',
-            kind: 'jobs',
-            tables: { users: mapping },
-            trigger: 'sync',
-        }),
-        instances: [{ columns: ['name'], rows: [['a']] }],
-        subject: 'users',
     },
 };
 

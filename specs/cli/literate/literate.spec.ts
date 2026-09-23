@@ -174,7 +174,7 @@ describe('spec documents — refusals', () => {
 
         // Then - the closed vocabulary is spelled out in the refusal
         expect(message).toContain('unknown key "when:"');
-        expect(message).toContain('kind, description, fixture, env, serve, runs');
+        expect(message).toContain('description, fixture, env, serve, runs');
         expect(message).toContain('unknown-key.spec.yaml:2');
     });
 

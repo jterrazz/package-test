@@ -1,16 +1,12 @@
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { documentProject } from '../../runner/facet-project.js';
-import type { FacetProjectOptions, LiterateDoor } from '../../runner/facet-project.js';
+import { facetProject } from '../../runner/facet-project.js';
+import type { FacetProjectOptions } from '../../runner/facet-project.js';
 
-/** `api()` — the app met through HTTP, and the documents that specify it. */
-export type ApiProjectOptions = FacetProjectOptions & LiterateDoor;
+/** `api()` — the app met through HTTP. */
+export type ApiProjectOptions = FacetProjectOptions;
 
-/**
- * A api project collects the facet's `.spec.ts` files AND its documents:
- * `specs/api/**\/*.spec.yaml`, bound to `specs/api/api.specification.ts`
- * unless `literate` says otherwise.
- */
+/** An api project collects the facet's `.spec.ts` files: `specs/api/**\/*.spec.ts`. */
 export function api(options: ApiProjectOptions = {}): TestProjectInlineConfiguration {
-    return documentProject('api', options);
+    return facetProject('api', options);
 }

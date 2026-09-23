@@ -33,7 +33,6 @@ export {
     type SpecEnvToken,
     type SpecFileAssertion,
     type SpecFixture,
-    type SpecKind,
     type SpecRun,
     type SpecServeEntry,
     type SpecStream,

@@ -41,7 +41,7 @@ There is **no `server`** option: jobs run in-process by definition, and the reco
 
 ## The chain
 
-Setups: `.seed()` (``sql`…` `` written in the test, or a shared `file()`), `.intercept()`, `.clock()`. Terminal action: `.trigger(name)` (rule B2), or `.run(file('./<case>.spec.yaml'))` for a case written as a document ([below](#documents--a-jobs-case-as-data)). No `.headers()` — there is no request.
+Setups: `.seed()` (``sql`…` `` written in the test, or a shared `file()`), `.intercept()`, `.clock()`. Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
 
 `.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 
@@ -141,26 +141,20 @@ The three failure families:
 
 The full builder catalogue lives in [contracts](16-contracts.md).
 
-### Documents — a jobs case as data
+### A crash is read by its rejection
 
-A case that is a trigger and what it left is a `<case>.spec.yaml` beside the spec, collected as a test of its own by the `jobs()` project and bound to `specs/jobs/jobs.specification.ts`. It names the job, the rejection it must end on — or none — and the rows it must leave:
+A job that throws rejects `.trigger()` with its own error, and what it wrote before the throw stays in the database — read it from the service handle, since a rejected chain hands back no result:
 
-```yaml
-kind: jobs
-description: the job copies one event per seeded user
-seed:
-    - { file: ./seeds/two-users.sql, database: db }
-trigger: sync-events
-tables:
-    events:
-        database: analyticsDb
-        columns: [payload, type]
-        rows:
-            - ['{"name":"Alice"}', user_synced]
-            - ['{"name":"Bob"}', user_synced]
+```typescript
+test('a crashed job leaves what it wrote first', async () => {
+    // Given - a job that writes one row, then throws
+    const run = jobs.trigger('crash-after-insert');
+
+    // Then - its error, and the row it wrote before it
+    await expect(run).rejects.toThrow('crash-after-insert: boom');
+    await expect(analyticsDb.query('events', ['type'])).resolves.toStrictEqual([['pre_crash']]);
+});
 ```
-
-A job that throws is read by `error:`, and its tables are judged either way, so a document states what a crashing job wrote before it crashed. The keys and the doors are [20 — Spec documents](20-documents.md#a-jobs-document)'s.
 
 ## Pitfalls
 
@@ -173,4 +167,4 @@ A job that throws is read by `error:`, and its tables are judged either way, so 
 
 ## Related
 
-[20 — Spec documents](20-documents.md) · [10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)
+[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)

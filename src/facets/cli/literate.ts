@@ -430,15 +430,6 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         throw error instanceof SpecSyntaxError ? atLine(error, filePath, error.line) : error;
     }
     const { document } = file;
-    if (document.kind !== 'cli') {
-        throw atLine(
-            new Error(
-                `${displayPath}:1: a kind: ${document.kind} document is run by ${document.kind}.run(), and this runner is specification.cli()'s`,
-            ),
-            filePath,
-            1,
-        );
-    }
     const fileDir = filePath.replace(/[/\\][^/\\]*$/u, '');
 
     // `fixture:` layers on top of whatever the chain already copied, in

@@ -5,13 +5,73 @@ import { file, specification, sql } from '../../../src/index.js';
 import type { ApiSpecification } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
-// What a seed loads, in order and per database, is data: the documents beside
-// This file state it. What stays here is what a chain REFUSES (A7, a missing
-// File, an unknown database) and a runner with no database at all.
-
 describe('seeding', () => {
-    test('lays the statements written in the test, in the database it names', async () => {
-        // Given - a user written in the test, and the shared pool's two under it
+    test('seeds apply in the order listed, each to the database it names', async () => {
+        // Given - a shared user, a user written in the test after it, and an event in the other database
+        const result = await api
+            .seed(file('../../seeds/one-user.sql'), { database: 'db' })
+            .seed(sql`INSERT INTO "users" (name, email) VALUES ('Charlie', 'charlie@test.com');`, {
+                database: 'db',
+            })
+            .seed(file('../../seeds/one-event.sql'), { database: 'analyticsDb' })
+            .get('/users');
+
+        // Then - the users in the order the seeds ran, and the event where it was laid
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "users": [
+                    {
+                        "name": "Alice",
+                        "email": "alice@test.com"
+                    },
+                    {
+                        "name": "Charlie",
+                        "email": "charlie@test.com"
+                    }
+                ]
+            }
+        `);
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'user_created', '{"name":"Alice"}', '{{iso8601}}'],
+        ]);
+    });
+
+    test('each database is seeded on its own, and each holds only its rows', async () => {
+        // Given - two users in one database, two events in the other
+        const result = await api
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../seeds/two-events.sql'), { database: 'analyticsDb' })
+            .get('/events');
+
+        // Then - the events the app reads, and the users table untouched by them
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "events": [
+                    {
+                        "type": "user_created",
+                        "payload": "{\\"name\\":\\"Alice\\"}"
+                    },
+                    {
+                        "type": "user_created",
+                        "payload": "{\\"name\\":\\"Bob\\"}"
+                    }
+                ]
+            }
+        `);
+        await expect(result.table('users', { database: 'db' })).toMatch([
+            [1, 'Alice', 'alice@test.com'],
+            [2, 'Bob', 'bob@test.com'],
+        ]);
+    });
+
+    test('lays the statements written in the test over a shared seed', async () => {
+        // Given - the shared pool's two users, and a third written in the test
         const result = await api
             .seed(file('../../seeds/two-users.sql'), { database: 'db' })
             .seed(
@@ -23,6 +83,27 @@ describe('seeding', () => {
             .get('/users');
 
         // Then - the three rows, in the order the seeds ran
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "users": [
+                    {
+                        "name": "Alice",
+                        "email": "alice@test.com"
+                    },
+                    {
+                        "name": "Bob",
+                        "email": "bob@test.com"
+                    },
+                    {
+                        "name": "Carol",
+                        "email": "carol@test.com"
+                    }
+                ]
+            }
+        `);
         await expect(result.table('users', { database: 'db' })).toMatch([
             [1, 'Alice', 'alice@test.com'],
             [2, 'Bob', 'bob@test.com'],

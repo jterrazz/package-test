@@ -1,4 +1,0 @@
-kind: jobs
-description: expects a crash from a job that succeeds
-trigger: stamp-now
-error: 'boom'
