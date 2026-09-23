@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { GROUND_FIXTURES } from '../src/model/chain/ground.js';
@@ -15,6 +15,7 @@ import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../src/seams/y
 import type { Node, Pair, YAMLMap } from '../src/seams/yaml/document.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { codeOf } from './rule-code.js';
+import { trackedEntries, trackedNames } from './tracked.js';
 
 /**
  * The `<case>.spec.yaml` conventions — the checker passes that judge a document
@@ -60,7 +61,7 @@ function listSpecFiles(dir: string): string[] {
     const visit = (current: string): void => {
         let entries;
         try {
-            entries = readdirSync(current, { withFileTypes: true });
+            entries = trackedEntries(current);
         } catch {
             return;
         }
@@ -430,7 +431,7 @@ function fixedData(document: SpecDocument, dir: string): string {
             parts.push(readText(path));
             return;
         }
-        for (const entry of readdirSync(path)) {
+        for (const entry of trackedNames(path)) {
             visit(join(path, entry));
         }
     };
@@ -591,7 +592,7 @@ function registeredNames(dir: string): null | { env: Set<string>; serve: Set<str
     for (;;) {
         let entries: string[];
         try {
-            entries = readdirSync(current).filter((name) => name.endsWith('.specification.ts'));
+            entries = trackedNames(current).filter((name) => name.endsWith('.specification.ts'));
         } catch {
             entries = [];
         }

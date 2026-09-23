@@ -1,9 +1,10 @@
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
 import { GROUND_FIXTURES, isGroundName, RENAMED_GROUND_DIRS } from '../src/model/chain/ground.js';
 import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import { isTestFileName } from './role.js';
+import { trackedEntries } from './tracked.js';
 
 /**
  * The 16 → 17 mover — what `jterrazz-test-check --fix` does to a tree written
@@ -91,7 +92,7 @@ const LITERAL = '(?<quote>[\'"`])(?<value>[^\'"`\\n]*)\\k<quote>';
 function oldGroundFolders(root: string): string[] {
     const found: string[] = [];
     const walk = (dir: string): void => {
-        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        for (const entry of trackedEntries(dir)) {
             if (!entry.isDirectory() || SKIPPED.has(entry.name)) {
                 continue;
             }
@@ -111,7 +112,7 @@ function oldGroundFolders(root: string): string[] {
 function specFiles(root: string): string[] {
     const found: string[] = [];
     const walk = (dir: string, depth: number): void => {
-        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        for (const entry of trackedEntries(dir)) {
             const path = join(dir, entry.name);
             if (entry.isDirectory()) {
                 const isPool = depth === 0 && entry.name === GROUND_FIXTURES;
@@ -567,7 +568,7 @@ function moduleTests(member: string): Omit<Walked, 'specsRoot'> {
     const files: string[] = [];
     const folders: string[] = [];
     const walk = (dir: string): void => {
-        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        for (const entry of trackedEntries(dir)) {
             const path = join(dir, entry.name);
             if (entry.isFile() && isTestFileName(entry.name)) {
                 files.push(path);

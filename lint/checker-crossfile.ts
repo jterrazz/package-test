@@ -1,12 +1,4 @@
-import {
-    existsSync,
-    mkdirSync,
-    readdirSync,
-    readFileSync,
-    renameSync,
-    statSync,
-    writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
@@ -14,6 +6,7 @@ import { isRelativePath } from '../src/model/chain/spec-path.js';
 import { parseSpecDocument, SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
+import { trackedEntries } from './tracked.js';
 
 /**
  * The cross-file checker passes — the analyses oxlint cannot express because
@@ -82,7 +75,7 @@ function listFiles(dir: string, predicate: (path: string) => boolean): string[] 
     const visit = (current: string): void => {
         let entries;
         try {
-            entries = readdirSync(current, { withFileTypes: true });
+            entries = trackedEntries(current);
         } catch {
             return;
         }
@@ -108,7 +101,7 @@ function listDirs(dir: string): string[] {
         out.push(current);
         let entries;
         try {
-            entries = readdirSync(current, { withFileTypes: true });
+            entries = trackedEntries(current);
         } catch {
             return;
         }
@@ -137,7 +130,7 @@ function findSpecsRoots(dir: string): string[] {
         }
         let entries;
         try {
-            entries = readdirSync(current, { withFileTypes: true });
+            entries = trackedEntries(current);
         } catch {
             return;
         }
@@ -157,7 +150,7 @@ function findPools(dir: string): string[] {
     const visit = (current: string): void => {
         let entries;
         try {
-            entries = readdirSync(current, { withFileTypes: true });
+            entries = trackedEntries(current);
         } catch {
             return;
         }
@@ -798,7 +791,7 @@ function isConventionalSubdir(path: string): boolean {
     }
     let children;
     try {
-        children = readdirSync(path, { withFileTypes: true });
+        children = trackedEntries(path);
     } catch {
         return false;
     }
@@ -814,7 +807,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
         }
         let entries;
         try {
-            entries = readdirSync(dir, { withFileTypes: true });
+            entries = trackedEntries(dir);
         } catch {
             continue;
         }
@@ -869,7 +862,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
 
         for (const sub of groundSubdirs) {
             const subPath = join(dir, sub);
-            for (const entry of readdirSync(subPath, { withFileTypes: true })) {
+            for (const entry of trackedEntries(subPath)) {
                 const entryIsDir = entry.isDirectory();
                 if (entryReferenced(entry.name, entryIsDir, literals, patterns)) {
                     continue;
@@ -911,7 +904,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                 literals.add(literal);
             }
         }
-        for (const entry of readdirSync(pool, { withFileTypes: true })) {
+        for (const entry of trackedEntries(pool)) {
             const referenced = [...literals].some((literal) => literal.includes(entry.name));
             if (!referenced) {
                 const relEntry = relative(rootDir, join(pool, entry.name));

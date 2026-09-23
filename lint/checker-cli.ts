@@ -30,6 +30,7 @@ import {
 import type { PluginDiagnostic } from './ratchet.js';
 import { packageRootOf, projectRootOf } from './role.js';
 import { codeOf } from './rule-code.js';
+import { forgetTracked } from './tracked.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**
@@ -376,13 +377,17 @@ function projectFindings(root: string): TokenViolation[] {
  * working tree, or one git does not track yet, renames exactly as well with
  * `renameSync` — what must not happen is a migration that loses the history of
  * every spec it touches because the tool reached for the blunter call.
+ * A `git mv` changes the index every walk lists from, so the listing is read
+ * again after one.
  */
 function renameKeepingHistory(from: string, to: string): void {
     const moved = spawnSync('git', ['mv', from, to], {
         cwd: dirname(from),
         stdio: 'ignore',
     });
-    if (moved.status !== 0) {
+    if (moved.status === 0) {
+        forgetTracked();
+    } else {
         renameSync(from, to);
     }
 }

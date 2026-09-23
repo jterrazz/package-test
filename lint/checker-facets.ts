@@ -1,10 +1,11 @@
-import type { Dirent } from 'node:fs';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
 import type { TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
+import { trackedEntries } from './tracked.js';
+import type { TrackedEntry } from './tracked.js';
 
 /**
  * The FACET passes — what a tree says about itself, read from the tree.
@@ -39,10 +40,10 @@ function isUnderGround(relativePath: string): boolean {
     return relativePath.split(/[/\\]/u).some((segment) => isGroundName(segment));
 }
 
-/** `readdirSync` that answers `[]` for anything it cannot read. */
-function entriesOf(dir: string): Dirent[] {
+/** The tracked listing, answering `[]` for anything it cannot read. */
+function entriesOf(dir: string): TrackedEntry[] {
     try {
-        return readdirSync(dir, { withFileTypes: true });
+        return trackedEntries(dir);
     } catch {
         return [];
     }

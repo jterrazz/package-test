@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import {
@@ -36,6 +36,7 @@ import {
     volatileLiteralIn,
 } from './checker-spec.js';
 import { codeOf } from './rule-code.js';
+import { trackedEntries } from './tracked.js';
 
 /**
  * The conventions checker — the non-oxlint static channel.
@@ -352,7 +353,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
     ): void => {
         let entries;
         try {
-            entries = readdirSync(dir, { withFileTypes: true });
+            entries = trackedEntries(dir);
         } catch {
             return;
         }

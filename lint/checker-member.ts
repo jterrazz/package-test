@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
@@ -7,6 +7,7 @@ import { diskTargetFindings } from './checker-crossfile.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
 import { isTestFileName } from './role.js';
+import { trackedEntries, trackedNames } from './tracked.js';
 
 /**
  * The MEMBER pass — what a workspace member owes, read from the member itself
@@ -155,7 +156,7 @@ function findJestConfigs(rootDir: string): string[] {
         }
         let entries;
         try {
-            entries = readdirSync(dir, { withFileTypes: true });
+            entries = trackedEntries(dir);
         } catch {
             return;
         }
@@ -274,7 +275,7 @@ function holdsTests(dir: string): boolean {
         first = false;
         let entries;
         try {
-            entries = readdirSync(current, { withFileTypes: true });
+            entries = trackedEntries(current);
         } catch {
             continue;
         }
@@ -467,7 +468,7 @@ function holdsGround(path: string, memberDir: string): boolean {
         return true;
     }
     try {
-        return !readdirSync(path).some((name) => CODE_MODULE.test(name));
+        return !trackedNames(path).some((name) => CODE_MODULE.test(name));
     } catch {
         return false;
     }
@@ -485,7 +486,7 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
     const walk = (dir: string): void => {
         let entries;
         try {
-            entries = readdirSync(dir, { withFileTypes: true });
+            entries = trackedEntries(dir);
         } catch {
             return;
         }
@@ -522,7 +523,7 @@ function moduleTestTargets(memberDir: string, rootDir: string): TokenViolation[]
     const walk = (dir: string): void => {
         let entries;
         try {
-            entries = readdirSync(dir, { withFileTypes: true });
+            entries = trackedEntries(dir);
         } catch {
             return;
         }
@@ -616,7 +617,7 @@ export function discoverMembers(rootDir: string): string[] {
         }
         let entries;
         try {
-            entries = readdirSync(dir, { withFileTypes: true });
+            entries = trackedEntries(dir);
         } catch {
             return;
         }
@@ -693,7 +694,7 @@ export function discoverSpecRoots(rootDir: string): string[] {
             }
             let entries;
             try {
-                entries = readdirSync(dir, { withFileTypes: true });
+                entries = trackedEntries(dir);
             } catch {
                 return;
             }
