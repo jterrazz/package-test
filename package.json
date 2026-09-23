@@ -65,7 +65,6 @@
         "build": "tsdown --config tsdown.config.ts",
         "docs": "npm run build && node dist/catalog.js",
         "lint": "typescript check && node dist/checker.js",
-        "lint:fix": "typescript fix && node dist/checker.js --fix",
         "test": "vitest --run",
         "coverage": "npm run build && vitest --run --coverage && node dist/coverage.js --write",
         "coverage:check": "node dist/coverage.js"

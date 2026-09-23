@@ -78,7 +78,7 @@ describe('fixSpecDocument — key order and block scalars', () => {
             '',
         ].join('\n');
 
-        // Then - `null`: the fixer has nothing to say, so the formatter has nothing to undo and `lint:fix` converges on the first pass
+        // Then - `null`: the fixer has nothing to say, so the formatter has nothing to undo and `make fix` converges on the first pass
         expect(fixSpecDocument(source, 'case.spec.yaml')).toBeNull();
     });
 

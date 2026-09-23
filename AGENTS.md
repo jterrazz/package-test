@@ -8,7 +8,7 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 - **Five trees with declared edges.** Under `src/`: `model/` (what every facet is made of, no external imports), `facets/<facet>/` (the same four files in each), `seams/<dep>/` (one folder per dependency), `runner/` (the config side of the runner coupling); at the root, `lint/` (the rules the package ships, no runtime imports). The map is stated as `FRAMEWORK_LAYERS` in `oxlint.config.ts` and enforced from there.
 - **The code owns the rules.** A mechanized rule's normative sentence lives in `lint/manifest.ts` beside its implementation, and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
 - **The package specifies itself with itself.** `specs/` is written with `@jterrazz/test` against fixture apps, and a family of meta-tests runs the framework on its own output.
-- **The build precedes the lint.** `oxlint.config.ts` and the lint specs load `./dist/oxlint.js`, so `npm run build` comes first — always.
+- **The build precedes the lint.** `oxlint.config.ts` and the lint specs load `./dist/oxlint.js`, so `make build` comes first — always.
 
 ## Where knowledge lives (route here first)
 
@@ -34,12 +34,14 @@ Decisions this package alone took are in `docs/decisions/`. The agent-facing ski
 ## Setup & commands
 
 ```bash
-npm install                       # or make install
-npm run build                     # MUST precede lint and the unit project
-npm run lint                      # typescript check + the conventions checker
-npm test                          # every project — needs Docker and chromium
-npm run docs                      # regenerate the generated tables and the schema
+make install                      # the dependencies
+make build                        # MUST precede lint and the unit project
+make lint                         # typescript check + the conventions checker
+make fix                          # the fixers: typescript fix, then the checker's --fix
+make test                         # every project, with coverage — needs Docker and chromium
+make check                        # the whole verdict: build, lint, test
 npx vitest --run --project unit   # the loop, no infrastructure
+npm run docs                      # regenerate the generated tables and the schema
 ```
 
 ## Standing rules
