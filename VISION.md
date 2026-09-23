@@ -1610,3 +1610,24 @@ Other rules' input trees stand in folders that ARE their rule's case: 34 fixture
      them run `dist/checker.js` in a child process coverage never sees.
      Give those passes in-process unit tests, or count the documents'
      child runs?
+
+## Iteration 20 (owner, 2026-09-24) — production never imports test code
+
+Audit F2 (and whatever else guards it) against every way production code can reach test material, each form with a spec red when the guard is removed:
+
+- targets: `*.test.ts(x)`, `*.spec.ts`, `*.specification.ts`, `*.fixtures.ts`, anything under a ground folder (fixtures/, seeds/, requests/, expected/) or under `specs/`, contract modules (`contracts/`), and the test packages themselves — `@jterrazz/test`, `vitest`, `@vitest/*`, `msw`, testing-library, playwright — from a production module;
+- forms: static import, `import type` (still refused: prod must not depend on test shapes), `export … from` / `export * from` re-exports, dynamic `import()`, `require()`, `new URL('./x', import.meta.url)` / `fs.read*` of a ground path, a tsconfig `paths` alias or package `imports` (`#…`) that resolves to test material, and a production barrel (`index.ts`) that re-exports test material (transitive reach);
+- a build-level guard beside the lint one: the package's publish/build check fails when `dist/` (or the bundle) contains a module compiled from test material.
+  "Production module" = a non-test module under src/ or lint/ (and an app's src/): define it once, in one reader, shared by every guard.
+
+## Iteration 21 — the calls on 103–109 (2026-09-24)
+
+| #   | Decision                                                                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------ |
+| 103 | Each chain is read with the command list of the runner its handle came from.                                             |
+| 104 | A `commands` list bound to a `const` in the runner file is followed.                                                     |
+| 105 | C30's move removes the folder it empties, like C14 and C27.                                                              |
+| 106 | The split moves type aliases and interfaces a moved helper reads, with it.                                               |
+| 107 | A seed named from a test title keeps its first four meaningful words, kebab-cased.                                       |
+| 108 | Settled on signews-api (next round).                                                                                     |
+| 109 | Coverage collects the checker's child processes too (`NODE_V8_COVERAGE`), so documents that run `dist/checker.js` count. |
