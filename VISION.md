@@ -1044,3 +1044,13 @@ held across <k> rules`. The path and the pass list moved to
 | 62  | A green run with no `test` section prints one line too: `jterrazz.baseline.json › test: nothing held`; a deferring run names the root's file relative to the project, never absolutely. |
 | 63  | A stream given a value `toMatch` at run time gets the framework's message naming `.text` (the D14 test that pins vitest's message changes with it).                                     |
 | 64  | No legacy: `check.sh` stops passing `--summary`, and `CHECKER_FLOOR` becomes 17.0.0 in the release.                                                                                     |
+
+## Iteration 10 — documents for the api and jobs facets (owner, 2026-09-23)
+
+- **A golden of the whole result is the default** (approval testing): `toMatch(file('./expected/x.http'))` or a document's `response:`. A precise assertion stays for the case where one property IS the subject; D12w keeps warning on multi-field probes.
+- **An api or jobs case is a `.spec.yaml` document**, the same grammar as the cli's: `seed`, `request`, `response` (file paths or inline, tokens allowed), `intercept`, `clock`; run by `run(file('./case.spec.yaml'))` / `literate()`, validated by the published JSON schema.
+- **One file = one test.** No `cases:` list: a document is one test.
+- **Composable by lists, visibly**: every given key (`seed`, `fixture`, `intercept`, headers) takes one path or a list applied in order — the pool's base and the leaf's delta both readable. No `extends:` (a hidden given).
+- **Steps with named captures** inside one test for a journey: `steps: [{ request, capture: { orderId: $.id }, response }, { request: GET /orders/{{orderId}}, … }]`.
+- **Route coverage**: a check lists the routes the app declares and names every route no document or spec reaches — the functional coverage the owner asked for, beside line coverage.
+- TypeScript specs stay for logic (loops, computed values, cross-call reasoning).
