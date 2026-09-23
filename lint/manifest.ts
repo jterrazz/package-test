@@ -173,6 +173,18 @@ export const RULE_DOCS = {
             'The narration is a sentence about the subject; a paragraph hides its second half from every reader that only looks at the marker line.',
         reach: 'tests',
     },
+    'b16w-file-context': {
+        channel: 'statique',
+        convention:
+            "A setting every chain of a spec file states alike — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`, per runner handle — is the file’s, stated once on a view of the facet: `const events = api.with({ clock: '…' })` → warning at the first chain. A file of one chain is not judged; a seed and a contract are a test’s Given, never a setting.",
+        facet: 'model',
+        family: 'B',
+        fix: 'Declare the view once after the imports, `const <view> = <handle>.with({ … })`, and start every chain from it — `make fix` writes it and drops the setting from each chain.',
+        id: 'B16',
+        rationale:
+            'A setting repeated on every chain reads as a choice each test made; stated once, it reads as what it is — the condition of the whole file — and the next test cannot forget it.',
+        reach: 'spec',
+    },
     'b4-given-then': {
         channel: 'statique',
         convention:

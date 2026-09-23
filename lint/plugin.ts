@@ -25,6 +25,7 @@ import { a9wRedundantRoot } from './rules/model/a9w-redundant-root.js';
 import { b4GivenThen } from './rules/model/b4-given-then.js';
 import { b10WhenBetweenMarkers } from './rules/model/b10-when-between-markers.js';
 import { b11MarkerOneLine } from './rules/model/b11-marker-one-line.js';
+import { b16wFileContext } from './rules/model/b16w-file-context.js';
 import { c1DomainStructure } from './rules/model/c1-domain-structure.js';
 import { c4ContractShape } from './rules/model/c4-contract-shape.js';
 import { c6ToMatchExtension } from './rules/model/c6-tomatch-extension.js';
@@ -94,6 +95,7 @@ const plugin: LintPlugin = {
         'a9w-redundant-root': a9wRedundantRoot,
         'b10-when-between-markers': b10WhenBetweenMarkers,
         'b11-marker-one-line': b11MarkerOneLine,
+        'b16w-file-context': b16wFileContext,
         'b4-given-then': b4GivenThen,
         'b6w-redundant-env-url': b6wRedundantEnvUrl,
         'b8-kebab-trigger': b8KebabTrigger,

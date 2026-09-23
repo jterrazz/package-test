@@ -191,7 +191,7 @@ A file holds at most 400 lines (C33); past it, the tests usually group by a pref
 
 ### What a file shares
 
-A file shares only what its tests share. A SETTING every chain of a file repeats — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)` — is stated once, on a view of the facet: `const events = api.with({ clock: '2026-03-04T09:30:00Z' })`, every chain of `events` starting with it and its own setups merging over it. A seed and a contract are the Given of one test and stay on its chain. A file-level expectation serves two tests or more, and one a single test reads is written in that test (D28). An expectation is never imported from another module (D29): a helper the test calls, a contract, the runner are imports; the value a matcher compares is the test's own.
+A file shares only what its tests share. A SETTING every chain of a file repeats — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)` — is stated once, on a view of the facet: `const events = api.with({ clock: '2026-03-04T09:30:00Z' })`, every chain of `events` starting with it and its own setups merging over it. A seed and a contract are the Given of one test and stay on its chain; B16w warns on the setting every chain repeats, and `make fix` declares the view. A file-level expectation serves two tests or more, and one a single test reads is written in that test (D28). An expectation is never imported from another module (D29): a helper the test calls, a contract, the runner are imports; the value a matcher compares is the test's own.
 
 ## The naming recap
 

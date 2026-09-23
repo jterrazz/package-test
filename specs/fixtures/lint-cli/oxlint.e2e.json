@@ -13,6 +13,7 @@
         "jterrazz/a9w-redundant-root": "warn",
         "jterrazz/b10-when-between-markers": "error",
         "jterrazz/b11-marker-one-line": "error",
+        "jterrazz/b16w-file-context": "warn",
         "jterrazz/b4-given-then": "error",
         "jterrazz/b6w-redundant-env-url": "warn",
         "jterrazz/b8-kebab-trigger": "error",
