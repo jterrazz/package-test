@@ -633,6 +633,49 @@ docs`/`coverage` stay), and `lint:fix` left package.json. A meta-test,
     build: does the contract say anything about a target's prerequisites,
     or only that the six exist?
 
+## Iteration 4 — the calls on questions 39 and 40 (2026-09-23)
+
+| #   | Decision                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 39  | The whole-path fallback stays: a path no package and no repository holds is read whole, which is where the rule tests' made-up `/repo/…` paths live.          |
+| 40  | The Makefile contract names the six targets and only them; what a target needs before it runs — `fix` building first here — is the repository's own to state. |
+
+### What the package-test branch decided (the spec-coverage pass)
+
+The owner's criterion — every decision and every rule has a spec that
+FAILS when the behaviour is broken — was applied to the audit of this
+branch, each new or strengthened spec shown red on a deliberately broken
+implementation (the commits say what was broken).
+
+- **Position.** Every static rule is specified by documents
+  (`specs/lint/<rule-id>/<case>.spec.yaml`) whose golden names the line and
+  column it fires on; two meta-tests hold every plugin rule to documents
+  and to one position line, and every checker pass to an E2E spec (the
+  member pass's E3, E5b and F8 gained documents). `lintReport` now orders
+  the diagnostics by file, line and column: oxlint prints files in the
+  order its threads finish, and two converted goldens flaked on it.
+- **Types.** A stream refuses a value `toMatch` (the refusal sits on
+  `this`, since the augmented member must stay assignable to vitest's),
+  and every retired verb name is a type row. Every row ends on the words of
+  the error it is written for, and `lint/type-channel.test.ts` compiles the
+  file with its markers removed and fails a row refused for another reason.
+- **`--summary`.** A green ratchet run prints exactly
+  `test.baseline.json: <n> held across <k> rules` with it — the line
+  `typescript check` can show beside its own ratchet's (question 35). The
+  whole-project line names each pass once.
+- **The matrix.** No cell is excused as owed any more: the last owed
+  surface of website, component, jobs, api, integration and cli has specs,
+  a meta-test fails an exemption on a filled cell, and `toMatchRows()`
+  left the component column (a page holds no table). A cell counts a call
+  only where code writes it, never inside a string, and comments are
+  stripped by a scan that a glob in a string no longer fools.
+- **Found and fixed on the way.** Redis never isolated the app: a worker's
+  index is now in the connection string it is handed (G2). The website
+  tree and title now read through the runner's `transform`, like every
+  other accessor (Q21). D8w reads `.not.toContain` on `.raw`. K4 states and
+  proves what it does — every reach, by one rule at least; K8 is a
+  catalogue row; K2 proves it catches a false citation.
+
 ### Raised by the package-test branch, the spec-coverage pass
 
 41. Variant A sends a body from the disk —
@@ -643,3 +686,16 @@ docs`/`coverage` stay), and `lint:fix` left package.json. A meta-test,
     (`specs/api/sending/`) carry a C2 suppression until it is decided: does
     `requests/` hold the body files a verb names (C2 relaxed to what a
     chain sends), or does a body file live elsewhere (C24's row moved)?
+42. Tracked files (iteration 3, owner): the conventions checker still
+    walks the disk — about twenty-five `readdirSync` walks across
+    `lint/checker-*.ts` — so an untracked file counts on a workstation and
+    not on a clean checkout. Implement the `git ls-files` reading in the
+    checker (a walk outside a work tree — every E2E fixture — keeping the
+    disk), or is the decision the toolchain's sweep alone?
+43. The component facet's role locator does not find an HTML `<search>`
+    element that the page's own tree calls `search` (the website facet was
+    shown only on `role="search"`). Map the element in the adapter, or
+    document `role="search"` as the form to write?
+44. `result.errors` on a website visit holds the console's `error`
+    messages and not an uncaught exception of the page. Is an uncaught
+    exception an error the result should carry?
