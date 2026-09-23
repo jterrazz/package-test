@@ -16,8 +16,24 @@
  * /events/:id` `events/delete/`, a route under an item
  * (`GET /events/:id/timeline`) its literal segments (`events/timeline/`), a
  * singleton (`GET /health`) `health/get/`, a method-less route (`ALL /mcp`)
- * its segments; a job is its name, a cli command its words.
+ * its segments; a job is its name, a cli command its first word.
+ *
+ * Two readings a repository may correct, each where it is declared: the
+ * plural test that tells a collection (`events`) from a singleton (`status`)
+ * takes the irregular collections `jterrazz.config.ts` names
+ * (`test: { collections: ['data', 'people'] }`); and a command's words stop at
+ * the first word not in the list its runner declares
+ * (`specification.cli(bin, { commands: ['db', 'migrate'] })`), or after the
+ * first word when it declares none.
  */
+
+/** What a repository declared that the reading takes: its runner's commands, its irregular collections. */
+export type SubjectReading = {
+    /** The collections no plural test recognises, by their segment. */
+    collections?: readonly string[] | undefined;
+    /** The words a cli runner declares its commands with. */
+    commands?: readonly string[] | undefined;
+};
 
 /** A method an api chain sends, or `ALL` for a route that takes any. */
 export type Method = 'ALL' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
@@ -57,15 +73,20 @@ export function pathTemplate(path: string): string {
     return `/${segments.join('/')}`;
 }
 
-/** Is this word a collection's name — a plural noun (`events`, never `status`)? */
-function isCollection(word: string): boolean {
-    return word.endsWith('s') && !/(?:ss|us|is)$/u.test(word);
+/** Is this word a collection's name — a plural noun (`events`, never `status`), or one the repository declares? */
+function isCollection(word: string, collections: readonly string[]): boolean {
+    return collections.includes(word) || (word.endsWith('s') && !/(?:ss|us|is)$/u.test(word));
 }
 
 /** The action a route's single resource segment is filed under. */
-function actionOf(method: Method, resource: string, item: boolean): string {
+function actionOf(
+    method: Method,
+    resource: string,
+    item: boolean,
+    collections: readonly string[],
+): string {
     if (method === 'GET') {
-        return !item && isCollection(resource) ? 'list' : 'get';
+        return !item && isCollection(resource, collections) ? 'list' : 'get';
     }
     if (method === 'POST') {
         return 'create';
@@ -77,7 +98,11 @@ function actionOf(method: Method, resource: string, item: boolean): string {
 }
 
 /** The folder an api route is filed under — see {@link subjectFolder}. */
-function routeFolder(method: Method, path: string): string | undefined {
+function routeFolder(
+    method: Method,
+    path: string,
+    collections: readonly string[],
+): string | undefined {
     const segments = pathTemplate(path).split('/').slice(1);
     const literals = segments.filter((segment) => segment !== '' && segment !== ':id');
     if (literals.length === 0) {
@@ -87,7 +112,7 @@ function routeFolder(method: Method, path: string): string | undefined {
         return literals.join('/');
     }
     const [resource = ''] = literals;
-    return `${resource}/${actionOf(method, resource, segments.at(-1) === ':id')}`;
+    return `${resource}/${actionOf(method, resource, segments.at(-1) === ':id', collections)}`;
 }
 
 /**
@@ -95,9 +120,9 @@ function routeFolder(method: Method, path: string): string | undefined {
  * nothing, where the subject has no standard name: the root route, a cli run
  * with no command word, a page, a journey.
  */
-export function subjectFolder(subject: Subject): string | undefined {
+export function subjectFolder(subject: Subject, reading: SubjectReading = {}): string | undefined {
     if (subject.facet === 'api') {
-        return routeFolder(subject.method, subject.path);
+        return routeFolder(subject.method, subject.path, reading.collections ?? []);
     }
     if (subject.facet === 'cli') {
         return subject.command.length === 0 ? undefined : subject.command.join('/');
@@ -285,14 +310,22 @@ function chainAt(text: string, handle: string, start: number): Chain {
 const SPECIFICATION_IMPORT =
     /import\s*\{(?<names>[^}]*)\}\s*from\s*['"][^'"]*\.specification(?:\.[jt]s)?['"]/gu;
 
+/** The same import, its specifier kept. */
+const SPECIFICATION_DOOR =
+    /import\s*\{(?<names>[^}]*)\}\s*from\s*['"](?<from>[^'"]*\.specification(?:\.[jt]s)?)['"]/gu;
+
 /** A view bound to a handle: `const events = api.with({ … })`. */
 const VIEW = /const\s+(?<view>[A-Za-z_$][\w$]*)\s*=\s*(?<from>[A-Za-z_$][\w$]*)\s*\.\s*with\s*\(/gu;
 
-/** The facet handles an import clause names, under their local names. */
-function importedHandles(names: string): string[] {
+/** The facet handles an import clause names, under their local names — of one facet, or of all. */
+function importedHandles(names: string, facet?: string): string[] {
     return names.split(',').flatMap((name) => {
         const [imported = '', local = imported] = name.trim().split(/\s+as\s+/u);
-        return (SUBJECT_FACETS as readonly string[]).includes(imported) ? [local] : [];
+        const wanted =
+            facet === undefined
+                ? (SUBJECT_FACETS as readonly string[]).includes(imported)
+                : imported === facet;
+        return wanted ? [local] : [];
     });
 }
 
@@ -341,16 +374,65 @@ const REQUEST_LINE = /^\s*(?<method>DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT)\s+(?
 /** A request named by `file()`, the one argument `request()` takes. */
 const REQUEST_FILE = /^file\(\s*(?<quote>['"])(?<path>[^'"]*)\k<quote>\s*\)$/u;
 
-/** The words of a command line that name the command, before its first argument. */
-export function commandWords(line: string): string[] {
-    const words: string[] = [];
-    for (const word of line.trim().split(/\s+/u)) {
-        if (!/^[a-z][a-z0-9-]*$/u.test(word)) {
+/** A word that may name a command: lowercase, never a flag or a value. */
+const COMMAND_WORD = /^[a-z][a-z0-9-]*$/u;
+
+/**
+ * The words of a command line that name the command: with the runner's
+ * declared list, every leading word in it; without one, the first word alone —
+ * a positional argument is never read as a subcommand.
+ */
+export function commandWords(line: string, commands?: readonly string[]): string[] {
+    const words = line.trim().split(/\s+/u);
+    if (commands === undefined) {
+        const [first = ''] = words;
+        return COMMAND_WORD.test(first) ? [first] : [];
+    }
+    const named: string[] = [];
+    for (const word of words) {
+        if (!commands.includes(word)) {
             break;
         }
-        words.push(word);
+        named.push(word);
     }
-    return words;
+    return named;
+}
+
+/** A runner's constructor call and the options it opens: `specification.cli(bin, {`. */
+const CLI_CONSTRUCTOR = /\bspecification\s*\.\s*cli\s*\(/u;
+
+/**
+ * The command list a specification module declares for its cli runner — the
+ * literal `commands: [...]` of its `specification.cli(bin, { … })` — or
+ * nothing when it declares none.
+ */
+export function declaredCommands(door: string): string[] | undefined {
+    const text = withoutComments(door);
+    const call = CLI_CONSTRUCTOR.exec(text);
+    if (call === null) {
+        return undefined;
+    }
+    const open = call.index + call[0].length - 1;
+    const [, options = ''] = argumentsOf(text.slice(open + 1, closingOf(text, open)));
+    const list = /(?:^|[{,\s])commands\s*:\s*\[/u.exec(options);
+    if (list === null) {
+        return undefined;
+    }
+    const start = list.index + list[0].length - 1;
+    return argumentsOf(options.slice(start + 1, closingOf(options, start))).flatMap((entry) => {
+        const word = literalOf(entry);
+        return word === undefined ? [] : [word];
+    });
+}
+
+/** The specification module a spec imports a facet's runner from — its specifier, as written. */
+export function doorOf(text: string, facet: (typeof SUBJECT_FACETS)[number]): string | undefined {
+    for (const found of text.matchAll(SPECIFICATION_DOOR)) {
+        if (importedHandles(found.groups?.names ?? '', facet).length > 0) {
+            return found.groups?.from;
+        }
+    }
+    return undefined;
 }
 
 /** The route a `.http`'s request line sends. */
@@ -364,7 +446,11 @@ function requestLineOf(text: string): Subject[] {
 type RequestReader = (path: string) => string | undefined;
 
 /** What one terminal action reaches, from its first argument. */
-type TerminalReader = (first: string | undefined, readRequest: RequestReader) => Subject[];
+type TerminalReader = (
+    first: string | undefined,
+    readRequest: RequestReader,
+    reading: SubjectReading,
+) => Subject[];
 
 /** A page a website chain visits or fetches. */
 const pageOf: TerminalReader = (first) => {
@@ -376,13 +462,15 @@ const pageOf: TerminalReader = (first) => {
 
 /** The terminal actions that reach a subject, by name — the HTTP verbs apart. */
 const TERMINALS: Record<string, TerminalReader> = {
-    exec: (first) => {
+    exec: (first, _readRequest, reading) => {
         // A sequence is one session of the binary, opened by its first command.
         const line =
             first?.trim().startsWith('[') === true
                 ? literalOf(argumentsOf(first.trim().slice(1, -1))[0])
                 : literalOf(first);
-        return line === undefined ? [] : [{ command: commandWords(line), facet: 'cli' }];
+        return line === undefined
+            ? []
+            : [{ command: commandWords(line, reading.commands), facet: 'cli' }];
     },
     fetch: pageOf,
     open: (first) => [{ facet: 'mobile', journey: literalOf(first) ?? '(launch)' }],
@@ -401,7 +489,11 @@ const TERMINALS: Record<string, TerminalReader> = {
  * The subject a chain's terminal action reaches — a cli sequence is one
  * session, opened by its first command.
  */
-export function subjectsOfChain(chain: Chain, readRequest: RequestReader = () => ''): Subject[] {
+export function subjectsOfChain(
+    chain: Chain,
+    readRequest: RequestReader = () => '',
+    reading: SubjectReading = {},
+): Subject[] {
     const terminal = chain.calls.at(-1);
     if (terminal === undefined) {
         return [];
@@ -412,7 +504,7 @@ export function subjectsOfChain(chain: Chain, readRequest: RequestReader = () =>
         const path = literalOf(first);
         return path?.startsWith('/') === true ? [{ facet: 'api', method, path }] : [];
     }
-    return TERMINALS[terminal.name]?.(first, readRequest) ?? [];
+    return TERMINALS[terminal.name]?.(first, readRequest, reading) ?? [];
 }
 
 /** Where the comment that opens at `index` ends, or `index` when none opens there. */
@@ -454,9 +546,16 @@ export function withoutComments(text: string): string {
 }
 
 /** Every subject a spec's source reaches, where it reaches it. */
-export function subjectsOf(source: string, readRequest?: RequestReader): SubjectAt[] {
+export function subjectsOf(
+    source: string,
+    readRequest?: RequestReader,
+    reading: SubjectReading = {},
+): SubjectAt[] {
     const text = withoutComments(source);
     return chainsOf(text, handlesOf(text)).flatMap((chain) =>
-        subjectsOfChain(chain, readRequest).map((subject) => ({ index: chain.index, subject })),
+        subjectsOfChain(chain, readRequest, reading).map((subject) => ({
+            index: chain.index,
+            subject,
+        })),
     );
 }

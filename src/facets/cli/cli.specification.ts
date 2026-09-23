@@ -22,6 +22,15 @@ import type { LiterateServeRegistration } from './literate.js';
 /** Options for {@link startCli | specification.cli}. */
 export type CliSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /**
+     * The words the binary's commands are spelled with (`['db', 'migrate']`),
+     * read by the conventions checker alone, never by the run: a spec's
+     * subject is the leading words of its command line this list holds —
+     * `exec('db migrate --dry')` is `db migrate`, filed under `cli/db/migrate/`
+     * (C29, C30). Without it the first word alone is the subject, so a
+     * positional argument is never read as a subcommand.
+     */
+    commands?: readonly string[];
+    /**
      * Opt-in Docker awareness. When set, every spec generates a unique
      * test-run id, injects it into the child process env under `envVar`,
      * and exposes `.container(name)` accessors on the result that lazily

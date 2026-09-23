@@ -152,25 +152,25 @@ A spec file answers one question about one subject, and both are written in its 
 
 ### The subject, and its standard name
 
-The subject is what the file's chains reach, read statically: an api chain's method and route, a jobs chain's job, a cli chain's command, a website chain's page, a mobile chain's journey. A file reaches ONE (C29); a file reaching several is several files, and `make fix` splits it, each test going with the imports and file-level constants it reads.
+The subject is what the file's chains reach, read statically: an api chain's method and route, a jobs chain's job, a cli chain's command, a website chain's page, a mobile chain's journey. A file reaches ONE (C29); a file reaching several is several files, and `make fix` splits it, each test going with the imports and file-level constants it reads. What two of the new files still read is written once: the split moves it into the fixtures module of the folder they share, `<folder>/<folder>.fixtures.ts`, exported, and each file imports it — the typed module the recap below names, never a copy per file. A declaration that builds a `file()` or a `directory()` stays in the files that read it, since a module no test is may not build a path (C26).
 
 The folder is the subject's STANDARD name, derived and never listed (C30), so two repositories never argue it:
 
-| Subject                         | Folder                              |
-| ------------------------------- | ----------------------------------- |
-| `GET /events`                   | `events/list/`                      |
-| `GET /events/:id`               | `events/get/`                       |
-| `POST /events`                  | `events/create/`                    |
-| `PUT` or `PATCH /events/:id`    | `events/update/`                    |
-| `DELETE /events/:id`            | `events/delete/`                    |
-| `GET /events/:id/timeline`      | `events/timeline/`                  |
-| `GET /health`, a singleton      | `health/get/`                       |
-| `GET /market/:symbol/chart`     | `market/chart/`                     |
-| a method-less route, `ALL /mcp` | `mcp/`                              |
-| a job                           | `specs/jobs/<job>/`                 |
-| a cli command, `db migrate`     | `specs/cli/<words>/`, `db/migrate/` |
+| Subject                         | Folder                        |
+| ------------------------------- | ----------------------------- |
+| `GET /events`                   | `events/list/`                |
+| `GET /events/:id`               | `events/get/`                 |
+| `POST /events`                  | `events/create/`              |
+| `PUT` or `PATCH /events/:id`    | `events/update/`              |
+| `DELETE /events/:id`            | `events/delete/`              |
+| `GET /events/:id/timeline`      | `events/timeline/`            |
+| `GET /health`, a singleton      | `health/get/`                 |
+| `GET /market/:symbol/chart`     | `market/chart/`               |
+| a method-less route, `ALL /mcp` | `mcp/`                        |
+| a job                           | `specs/jobs/<job>/`           |
+| a cli command, `spawn shop`     | `specs/cli/<word>/`, `spawn/` |
 
-A GET on one segment lists a plural noun and gets anything else, and a segment is a parameter when it is anything but lowercase words (`42`, `AAPL`, a template hole). A page and a journey have no standard name: the file reaches one, and its folder stays the author's. A test whose own chains reach two subjects cannot be cut — it states what it stands on with a seed rather than a second action.
+A GET on one segment lists a plural noun and gets anything else, and a segment is a parameter when it is anything but lowercase words (`42`, `AAPL`, a template hole). The plural test cannot know a collection English does not mark: a repository names those in `jterrazz.config.ts`, `test: { collections: ['data', 'people'] }`, and `GET /data` is filed under `data/list/`. A command is its first word, so a positional argument is never read as a subcommand (`exec('spawn shop')` is `spawn/`); a runner whose commands take several words declares them, `specification.cli(bin, { commands: ['db', 'migrate'] })`, and a command is then every leading word the list holds — `exec('db migrate --dry-run')` is `db/migrate/`. A page and a journey have no standard name: the file reaches one, and its folder stays the author's. A test whose own chains reach two subjects cannot be cut — it states what it stands on with a seed rather than a second action.
 
 ### The aspect
 

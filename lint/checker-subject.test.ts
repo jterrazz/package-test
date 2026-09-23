@@ -55,6 +55,15 @@ const TWO_ROUTES = [
     '',
 ].join('\n');
 
+/** A spec running `db migrate`, its `cli` imported from the named specification module. */
+function migrating(door: string): string {
+    return [
+        `import { cli } from '../${door}.specification.js';`,
+        "test('a', async () => { await cli.exec('db migrate --dry-run'); });",
+        '',
+    ].join('\n');
+}
+
 describe('c29 and c30 — one subject per file, filed under its standard name', () => {
     test('a spec of two routes is reported at the chain reaching the second, naming the split', () => {
         // Given - one file reaching GET /orders and POST /orders
@@ -278,5 +287,109 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         // Then - nothing
         expect(checkSubjectFolder(root)).toStrictEqual([]);
         expect(fixSubjects(root)).toStrictEqual([]);
+    });
+
+    test('a cli command is its first word, unless its runner declares the words of its commands', () => {
+        // Given - one spec running `db migrate`, from a runner that declares no list, and one from a runner that does
+        const root = specsTree({
+            'cli/cli.specification.ts':
+                'export const { cleanup, cli } = await specification.cli(BIN);\n',
+            'cli/db-cli.specification.ts':
+                "export const { cleanup, cli } = await specification.cli(BIN, { commands: ['db', 'migrate'] });\n",
+            'cli/first/runs.spec.ts': migrating('cli'),
+            'cli/listed/runs.spec.ts': migrating('db-cli'),
+        });
+
+        // Then - the first word files the one, the declared words the other
+        expect(checkSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
+            'move it to cli/db/runs.spec.ts — `make fix` moves it, and the ground it stands on',
+            'move it to cli/db/migrate/runs.spec.ts — `make fix` moves it, and the ground it stands on',
+        ]);
+    });
+
+    test('a collection no plural names is listed once the repository declares it', () => {
+        // Given - GET /data filed as a singleton would be, in a unit whose config names `data` a collection
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/data/get/listing.spec.ts': [
+                "import { api } from '../../api.specification.js';",
+                "test('a', async () => { await api.get('/data'); });",
+                '',
+            ].join('\n'),
+        });
+        const plain = checkSubjectFolder(root);
+        writeFileSync(
+            join(dirname(root), 'jterrazz.config.ts'),
+            "export default { test: { collections: ['data'] } };\n",
+        );
+        writeFileSync(join(dirname(root), 'package.json'), '{}\n');
+
+        // Then - no finding before the declaration, and the list folder after it
+        expect(plain).toStrictEqual([]);
+        expect(checkSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
+            'move it to api/data/list/listing.spec.ts — `make fix` moves it, and the ground it stands on',
+        ]);
+    });
+
+    test('a helper the split leaves to several files moves once into the leaf fixtures module', () => {
+        // Given - two routes sharing a helper and the constant it reads, and a helper that builds a file()
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/expected/listed.http': 'HTTP/1.1 200 OK\n',
+            'api/orders/orders.spec.ts': [
+                "import { file } from '@jterrazz/test';",
+                "import { expect, test } from 'vitest';",
+                '',
+                "import { api } from '../api.specification.js';",
+                '',
+                'const OK = 200;',
+                '',
+                '/** The status every answer carries. */',
+                'function answered(result) {',
+                '    expect(result.status).toBe(OK);',
+                '}',
+                '',
+                'function listed(result) {',
+                "    expect(result.response).toMatch(file('./expected/listed.http'));",
+                '}',
+                '',
+                "test('lists', async () => {",
+                "    const result = await api.get('/orders');",
+                '    answered(result);',
+                '    listed(result);',
+                '});',
+                '',
+                "test('creates', async () => {",
+                "    const result = await api.post('/orders', {});",
+                '    answered(result);',
+                '    listed(result);',
+                '});',
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix splits it
+        fixSubjects(root);
+
+        // Then - the helper and its constant live once, exported, and the file()-building helper stays copied
+        expect(readFileSync(join(root, 'api/orders/orders.fixtures.ts'), 'utf8')).toBe(
+            [
+                "import { expect } from 'vitest';",
+                '',
+                'export const OK = 200;',
+                '',
+                '/** The status every answer carries. */',
+                'export function answered(result) {',
+                '    expect(result.status).toBe(OK);',
+                '}',
+                '',
+            ].join('\n'),
+        );
+        const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
+        expect({
+            copy: created.includes('function listed(result)'),
+            imported: created.includes("import { answered } from '../orders.fixtures.js';"),
+            moved: created.includes('function answered'),
+        }).toStrictEqual({ copy: true, imported: true, moved: false });
     });
 });

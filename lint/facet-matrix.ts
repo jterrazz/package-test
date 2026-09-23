@@ -176,6 +176,7 @@ export const CAPABILITIES: Capability[] = [
         name: 'timeouts',
         probe: 'timeouts:',
     },
+    { columns: ['cli'], group: 'Constructor option', name: 'commands', probe: 'commands:' },
     { columns: ['cli'], group: 'Constructor option', name: 'defaults', probe: 'defaults:' },
     { columns: ['cli'], group: 'Constructor option', name: 'env', probe: 'env:' },
     { columns: ['cli'], group: 'Constructor option', name: 'docker', probe: 'docker:' },

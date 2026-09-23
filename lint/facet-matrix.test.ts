@@ -187,6 +187,7 @@ const jobsOptions = {
 } satisfies Record<KeysOf<JobsSpecificationOptions>, Published>;
 
 const cliOptions = {
+    commands: true,
     defaults: true,
     docker: true,
     env: true,

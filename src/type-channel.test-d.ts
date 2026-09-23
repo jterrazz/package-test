@@ -59,6 +59,7 @@ export async function typeRows(): Promise<void> {
 
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
+    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
 
     // B3 — a chain carries no label: the test's name is the sentence, and a
     // Second one inside the chain would be a second place to read it.
@@ -152,6 +153,7 @@ export async function typeRows(): Promise<void> {
  */
 export async function streamValueRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
+    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
     const out = await cli.exec();
     // @ts-expect-error D14 — a stream compared as a value is its text [`Type 'never' has no call signatures`]
     expect(out.stdout).toContain('built');
@@ -171,6 +173,7 @@ export async function streamValueRows(): Promise<void> {
  */
 export async function streamMatcherRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
+    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
     const out = await cli.exec();
     // @ts-expect-error D14 — a stream is compared whole: a RegExp matches a part, on its .text [`Argument of type 'RegExp' is not assignable to parameter of type 'string | DiskFile'`]
     expect(out.stdout).toMatch(/built/u);
@@ -182,6 +185,7 @@ export async function streamMatcherRows(): Promise<void> {
 export async function retiredMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
+    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
     const out = await cli.exec();
     const result = await api.get('/orders/1');
     // @ts-expect-error B2 — `toMatchFile` is retired: `toMatch(file(…))` [`Property 'toMatchFile' does not exist on type`]
@@ -200,6 +204,7 @@ export async function retiredMatcherRows(): Promise<void> {
 export async function valueSubjectMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
+    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
     const result = await api.get('/orders/1');
     const out = await cli.exec();
     // @ts-expect-error D14 — a response is compared whole to its .http text, never a RegExp [`Argument of type 'RegExp' is not assignable to parameter of type 'string | DiskFile'`]
@@ -217,6 +222,7 @@ export async function valueSubjectMatcherRows(): Promise<void> {
 /** D14 on a tree: its golden is a `directory()`, and a value states no tree. */
 export async function treeMatcherRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
+    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
     const out = await cli.exec();
     // @ts-expect-error D14 — a tree is matched against its directory(), never a value [`Argument of type 'string' is not assignable to parameter of type 'DiskDirectory'`]
     await expect(out.filesystem).toMatch('scaffolded');
@@ -233,6 +239,7 @@ export async function treeMatcherRows(): Promise<void> {
 export async function assertedSubjectMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
+    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
     const result = await api.get('/orders/1');
     const out = await cli.exec();
     // @ts-expect-error D14 — a table is compared whole to its rows, never a text [`Argument of type '"1"' is not assignable to parameter of type '"" | TableRows'`]

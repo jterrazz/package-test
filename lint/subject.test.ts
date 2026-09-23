@@ -1,6 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import { commandWords, pathTemplate, subjectFolder, subjectName, subjectsOf } from './subject.js';
+import {
+    commandWords,
+    declaredCommands,
+    doorOf,
+    pathTemplate,
+    subjectFolder,
+    subjectName,
+    subjectsOf,
+} from './subject.js';
 import type { Subject } from './subject.js';
 
 describe('subjectFolder — the standard name, derived from the subject', () => {
@@ -145,10 +153,10 @@ describe('the subject a spec reaches, read statically', () => {
             "await mobile.open('news://events');",
         ].join('\n');
 
-        // Then - each chain's subject, a cli sequence the command it opens on
+        // Then - each chain's subject, a command its first word, a cli sequence the command it opens on
         expect(subjectsOf(source).map(({ subject }) => subjectName(subject))).toStrictEqual([
             'trigger digest',
-            'exec db migrate',
+            'exec db',
             'exec build',
             'visit /articles/:id',
             'open news://events',
@@ -156,13 +164,87 @@ describe('the subject a spec reaches, read statically', () => {
     });
 
     test.each([
-        ['db migrate --dry-run', ['db', 'migrate']],
+        ['db migrate --dry-run', ['db']],
+        ['spawn shop', ['spawn']],
         ['--help', []],
         ['.', []],
         ['check ./src', ['check']],
-    ])('the command line %j names the command %j', (line, words) => {
-        // Given - a command line a chain runs
-        // Then - the leading words name the command, the first argument ends it
+    ])('with no declared list, the command line %j names the command %j', (line, words) => {
+        // Given - a command line a chain runs, its runner declaring no command list
+        // Then - the first word alone names the command: a positional argument is no subcommand
         expect(commandWords(line)).toStrictEqual(words);
+    });
+
+    test.each([
+        ['db migrate --dry-run', ['db', 'migrate']],
+        ['spawn shop', ['spawn']],
+        ['migrate db', ['migrate', 'db']],
+        ['shop', []],
+        ['--help', []],
+    ])('with the list db, migrate, spawn, the command line %j names %j', (line, words) => {
+        // Given - a runner declaring the words its commands are spelled with
+        const commands = ['db', 'migrate', 'spawn'];
+
+        // Then - the leading words the list holds name the command, the first other word ends it
+        expect(commandWords(line, commands)).toStrictEqual(words);
+    });
+
+    test("a spec's cli chain reads its runner's list, handed in", () => {
+        // Given - a chain running a two-word command, and the list its runner declares
+        const source = [
+            "import { cli } from '../cli.specification.js';",
+            "await cli.exec('db migrate --dry-run');",
+        ].join('\n');
+
+        // Then - both words name the command, and the folder
+        const [at] = subjectsOf(source, undefined, { commands: ['db', 'migrate'] });
+        expect(at === undefined ? undefined : subjectFolder(at.subject)).toBe('db/migrate');
+    });
+});
+
+describe('what a repository declares — its runner commands, its irregular collections', () => {
+    test('the list a specification module declares is read from its cli constructor', () => {
+        // Given - a door declaring its commands among other options, and one declaring none
+        const declaring = [
+            "import { specification } from '@jterrazz/test';",
+            "// commands: ['ignored'] in a comment",
+            "export const { cleanup, cli } = await specification.cli(BIN, { defaults: { TZ: 'UTC' }, commands: ['db', \"migrate\"] });",
+        ].join('\n');
+        const silent =
+            'export const { cleanup, cli } = await specification.cli(BIN, { commands });';
+
+        // Then - the literal words, and nothing where the list is no literal or absent
+        expect(declaredCommands(declaring)).toStrictEqual(['db', 'migrate']);
+        expect(declaredCommands(silent)).toBeUndefined();
+        expect(
+            declaredCommands('export const { cli } = await specification.cli(BIN);'),
+        ).toBeUndefined();
+    });
+
+    test('the door of a facet is the specification module its runner is imported from', () => {
+        // Given - a spec importing its cli and its api from two doors
+        const source = [
+            "import { api } from '../api.specification.js';",
+            "import { cli as run } from '../db-cli.specification.js';",
+        ].join('\n');
+
+        // Then - each facet's door, and none for a facet not imported
+        expect(doorOf(source, 'cli')).toBe('../db-cli.specification.js');
+        expect(doorOf(source, 'api')).toBe('../api.specification.js');
+        expect(doorOf(source, 'jobs')).toBeUndefined();
+    });
+
+    test.each<[string, readonly string[], string | undefined]>([
+        ['/data', [], 'data/get'],
+        ['/data', ['data'], 'data/list'],
+        ['/people', ['people'], 'people/list'],
+        ['/data/:id', ['data'], 'data/get'],
+        ['/events', ['data'], 'events/list'],
+    ])('a GET on %s with the collections %j is filed under %s', (path, collections, folder) => {
+        // Given - a GET on one resource, and the collections the repository declares
+        const subject: Subject = { facet: 'api', method: 'GET', path };
+
+        // Then - a declared collection is listed, the plural test holding for the rest
+        expect(subjectFolder(subject, { collections })).toBe(folder);
     });
 });

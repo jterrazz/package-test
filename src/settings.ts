@@ -11,6 +11,12 @@ import type {} from '@jterrazz/typescript/config';
  */
 export type TestSettings = {
     /**
+     * The api collections no English plural names — `data`, `people`, `media`
+     * — by their route segment. The conventions checker files `GET /news`
+     * under `news/list/` for them, where a singleton goes under `get/`.
+     */
+    collections?: readonly string[];
+    /**
      * The routes the member's api declares, when its app carries no table the
      * api facet reads (Hono's `app.routes`): a path, from the config's
      * directory, to an OpenAPI document (JSON or YAML). The api project's run

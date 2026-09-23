@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import { describe, expect, test } from 'vitest';
 
-import { cli as dockerCli } from '../../docker-cli.specification.js';
+import { cli as dockerCli } from '../docker-cli.specification.js';
 
 function dockerAvailable(): boolean {
     try {

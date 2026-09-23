@@ -5,8 +5,11 @@ import { GROUND_DIRS } from '../src/model/chain/ground.js';
 import { forgetTree, moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
 import { listFiles, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
+import { projectRootOf } from './role.js';
 import {
     closingOf,
+    declaredCommands,
+    doorOf,
     literalEnd,
     SUBJECT_FACETS,
     subjectFolder,
@@ -14,7 +17,8 @@ import {
     subjectsOf,
     withoutComments,
 } from './subject.js';
-import type { Subject } from './subject.js';
+import type { Subject, SubjectReading } from './subject.js';
+import { testSettingsAt } from './test-settings.js';
 
 /**
  * C29 and C30 — a spec file is about ONE subject, filed under that subject's
@@ -23,7 +27,8 @@ import type { Subject } from './subject.js';
  * The subject is what the file's chains reach (`lint/subject.ts`): a route, a
  * job, a command, a page, a journey. A file that reaches several is several
  * files, and `--fix` splits it — each test to the file of the subject it
- * reaches, keeping the imports and the file-level constants it uses. A file
+ * reaches, keeping the imports and the file-level constants it uses, what
+ * two of the new files read moved once into their folder's fixtures module. A file
  * about one subject whose name the tree derives (api, jobs, cli) lives in that
  * folder, and `--fix` moves it there. Either move keeps every path the code
  * names pointing where it pointed, and sends the ground the old leaf holds for
@@ -42,6 +47,8 @@ type SpecRead = {
     /** The facet folder the file sits in. */
     facet: string;
     file: string;
+    /** What the repository declared that its subjects are read with. */
+    reading: SubjectReading;
     /** Every subject the file's chains reach, in order of first appearance, by name. */
     subjects: Map<string, { index: number; subject: Subject }>;
     tests: TestOf[];
@@ -111,14 +118,32 @@ function facetOf(specsRoot: string, file: string): string {
     return relative(specsRoot, file).split(/[/\\]/u)[0] ?? '';
 }
 
+/** A file the spec names by a relative path, read — `undefined` when the tree holds none there. */
+function readBeside(file: string, path: string): string | undefined {
+    const target = resolve(dirname(file), path);
+    return treeKind(target) === 'file' ? readFileSync(target, 'utf8') : undefined;
+}
+
+/**
+ * What the spec's subjects are read with: the irregular collections of the
+ * unit's `jterrazz.config.ts`, and the command list of the runner the spec
+ * imports its `cli` from.
+ */
+function readingOf(specsRoot: string, file: string, text: string): SubjectReading {
+    const { collections } = testSettingsAt(projectRootOf(specsRoot) ?? dirname(specsRoot));
+    const door = doorOf(withoutComments(text), 'cli');
+    const source = door === undefined ? undefined : readBeside(file, door.replace(/\.js$/u, '.ts'));
+    return { collections, commands: source === undefined ? undefined : declaredCommands(source) };
+}
+
 /** Read one spec for its subjects and its tests. */
 function readSpec(specsRoot: string, file: string): SpecRead {
     const text = readFileSync(file, 'utf8');
     const facet = facetOf(specsRoot, file);
-    const reached = subjectsOf(text, (path) => {
-        const target = resolve(dirname(file), path);
-        return treeKind(target) === 'file' ? readFileSync(target, 'utf8') : undefined;
-    }).filter(({ subject }) => subject.facet === facet);
+    const reading = readingOf(specsRoot, file, text);
+    const reached = subjectsOf(text, (path) => readBeside(file, path), reading).filter(
+        ({ subject }) => subject.facet === facet,
+    );
     const subjects = new Map<string, { index: number; subject: Subject }>();
     for (const at of reached) {
         const name = subjectName(at.subject);
@@ -138,7 +163,7 @@ function readSpec(specsRoot: string, file: string): SpecRead {
             ),
         ],
     }));
-    return { facet, file, subjects, tests, text };
+    return { facet, file, reading, subjects, tests, text };
 }
 
 /** Every `.spec.ts` of a facet whose chains reach a subject. */
@@ -175,7 +200,7 @@ function slugOf(name: string): string {
  */
 function targetOf(specsRoot: string, spec: SpecRead, name: string, keepsName: boolean): string {
     const subject = spec.subjects.get(name)?.subject;
-    const folder = subject === undefined ? undefined : subjectFolder(subject);
+    const folder = subject === undefined ? undefined : subjectFolder(subject, spec.reading);
     const aspect = aspectOf(spec.file);
     if (folder === undefined) {
         return keepsName
@@ -398,7 +423,13 @@ function statementEnd(blank: string, start: number, isFunction: boolean): number
         }
         if (character === '(' || character === '[' || character === '{') {
             const close = closingOf(blank, index);
-            if (isFunction && character === '{') {
+            // A function's body is the brace that closes its line: an object
+            // type in its return annotation is followed by more of the head.
+            if (
+                isFunction &&
+                character === '{' &&
+                /^[ \t]*(?:\n|$)/u.test(blank.slice(close + 1))
+            ) {
                 return close + 1;
             }
             index = close + 1;
@@ -648,11 +679,189 @@ function liftGround(specsRoot: string, leaf: string): string[] {
     return lifted;
 }
 
-/** Write a spec's code at `to`, its paths rebased from where it stood. */
-function writeAt(from: string, to: string, text: string): void {
-    mkdirSync(dirname(to), { recursive: true });
-    const moved = rebased(text, dirname(from), dirname(to));
-    writeFileSync(to, pruned(moved));
+// ── The helpers a split shares ──
+
+/** One file a split writes: where, and its code, paths already rebased and pruned. */
+type Draft = { target: string; text: string };
+
+/** A call that builds a path — what a module no test is may never hold (C26). */
+const BUILDS_DISK = /(?<![\w$.])(?:file|directory)\s*\(/u;
+
+/** Does `code` read `name` — a whole identifier, never a member or a longer name? */
+function reads(code: string, name: string): boolean {
+    return new RegExp(
+        String.raw`(?<![\w$.])${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
+        'u',
+    ).test(codeOnly(code));
+}
+
+/**
+ * The file-level declarations a split moves into the leaf's fixtures module:
+ * those two files or more still read, with every declaration they read in
+ * turn — never one that builds a `file()` or a `directory()` (C26), nor one
+ * that reads such a declaration, which stay copied where they are read.
+ */
+function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaration[] {
+    const declarations = declarationsOf(spec.text);
+    const code = new Map(declarations.map((d) => [d.name, spec.text.slice(d.start, d.end)]));
+    const readers = (name: string): number =>
+        drafts.filter((draft) => declarationsOf(draft.text).some((d) => d.name === name)).length;
+    const excluded = new Set(
+        declarations
+            .filter((d) => BUILDS_DISK.test(codeOnly(code.get(d.name) ?? '')))
+            .map((d) => d.name),
+    );
+    const moved = new Set(
+        declarations.filter((d) => readers(d.name) > 1 && !excluded.has(d.name)).map((d) => d.name),
+    );
+    for (let changed = true; changed;) {
+        changed = false;
+        for (const name of moved) {
+            const body = (code.get(name) ?? '').replace(
+                new RegExp(String.raw`^[\s\S]*?\b${name.replaceAll('$', String.raw`\$`)}\b`, 'u'),
+                '',
+            );
+            for (const other of declarations) {
+                if (other.name === name || !reads(body, other.name)) {
+                    continue;
+                }
+                if (excluded.has(other.name)) {
+                    moved.delete(name);
+                    excluded.add(name);
+                    changed = true;
+                    break;
+                }
+                if (!moved.has(other.name)) {
+                    moved.add(other.name);
+                    changed = true;
+                }
+            }
+        }
+    }
+    return declarations.filter((d) => moved.has(d.name));
+}
+
+/** The folder every path of the list sits in or below — the nearest they share. */
+function commonFolder(paths: readonly string[]): string {
+    const [first = [], ...rest] = paths.map((path) => path.split(sep));
+    let depth = first.length;
+    for (const parts of rest) {
+        depth = Math.min(depth, parts.length);
+        while (depth > 0 && parts.slice(0, depth).join(sep) !== first.slice(0, depth).join(sep)) {
+            depth -= 1;
+        }
+    }
+    return first.slice(0, depth).join(sep);
+}
+
+/** A declaration's code, exported: `export` written before its head, its doc comment kept above. */
+function exported(code: string): string {
+    const head = /^(?:const|let|async\s|function)/mu.exec(withoutComments(code));
+    return head === null ? code : `${code.slice(0, head.index)}export ${code.slice(head.index)}`;
+}
+
+/** The code with an import line added after its last import. */
+function withImportLine(text: string, line: string): string {
+    const last = importsOf(text).at(-1);
+    return last === undefined
+        ? `${line}\n${text}`
+        : `${text.slice(0, last.end)}${line}\n${text.slice(last.end)}`;
+}
+
+/**
+ * The drafts of a split once the helpers two of them read live once: moved
+ * into the fixtures module of the folder their readers share,
+ * `<folder>/<folder>.fixtures.ts`, exported, and imported by each reader —
+ * the typed-fixture module the naming recap names, beside the tests it serves.
+ * A module already at that path is the author's: the copies stay.
+ */
+function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; fixtures?: Draft } {
+    const moved = movedDeclarations(spec, drafts);
+    if (moved.length === 0) {
+        return { drafts };
+    }
+    const names = new Set(moved.map((d) => d.name));
+    const holds = (draft: Draft): boolean =>
+        declarationsOf(draft.text).some((d) => names.has(d.name));
+    const folder = commonFolder(drafts.filter(holds).map((draft) => dirname(draft.target)));
+    const module = join(folder, `${basename(folder)}.fixtures.ts`);
+    if (existsSync(module)) {
+        return { drafts };
+    }
+    const imports = importsOf(spec.text)
+        .map((clause) => spec.text.slice(clause.start, clause.end))
+        .join('');
+    const body = moved.map((d) => exported(spec.text.slice(d.start, d.end))).join('\n');
+    const fixtures = {
+        target: module,
+        text: pruned(rebased(`${imports}\n${body}`, dirname(spec.file), folder)).replace(
+            /^\n+/u,
+            '',
+        ),
+    };
+    return {
+        drafts: drafts.map((draft) => {
+            if (!holds(draft)) {
+                return draft;
+            }
+            const kept = without(
+                draft.text,
+                declarationsOf(draft.text).filter((d) => names.has(d.name)),
+            );
+            const read = [...names].filter((name) => reads(kept, name)).toSorted();
+            const specifier = relativePath(dirname(draft.target), module).replace(/\.ts$/u, '.js');
+            return {
+                target: draft.target,
+                text: pruned(
+                    withImportLine(kept, `import { ${read.join(', ')} } from '${specifier}';`),
+                ),
+            };
+        }),
+        fixtures,
+    };
+}
+
+/** The files a split writes, one per subject: each with its tests, paths rebased, unread code pruned. */
+function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
+    const [first = ''] = openedSubjects(spec);
+    const neutral = new Set(spec.tests.filter((test) => test.subjects.length === 0));
+    return [...plan].map(([name, target]) => {
+        const kept = new Set(
+            spec.tests.filter(
+                (test) => test.subjects[0] === name || (name === first && neutral.has(test)),
+            ),
+        );
+        const cut = without(
+            spec.text,
+            spec.tests.filter((test) => !kept.has(test)),
+        );
+        const text = oneDescribe(cut, aspectOf(target));
+        return { target, text: pruned(rebased(text, dirname(spec.file), dirname(target))) };
+    });
+}
+
+/** Write a split's files, the helpers they share once, and the file's history with its first subject. */
+function writeSplit(
+    specsRoot: string,
+    spec: SpecRead,
+    keepsFile: boolean,
+    drafts: Draft[],
+): string[] {
+    const shared = withSharedHelpers(spec, drafts);
+    const [opening] = shared.drafts;
+    if (opening !== undefined && !keepsFile && opening.target !== spec.file) {
+        // The file's history follows its first subject.
+        mkdirSync(dirname(opening.target), { recursive: true });
+        moveKeepingHistory(spec.file, opening.target);
+    }
+    const written = [...shared.drafts, ...(shared.fixtures === undefined ? [] : [shared.fixtures])];
+    for (const { target, text } of written) {
+        mkdirSync(dirname(target), { recursive: true });
+        writeFileSync(target, text);
+    }
+    return written
+        .filter(({ target }) => target !== spec.file)
+        .map(({ target }) => `${shown(specsRoot, spec.file)} → ${shown(specsRoot, target)}`);
 }
 
 /**
@@ -676,32 +885,9 @@ export function fixSubjects(specsRoot: string): string[] {
         if (targets.some((target) => target !== spec.file && existsSync(target))) {
             continue;
         }
-        const [first = ''] = openedSubjects(spec);
-        const neutral = new Set(spec.tests.filter((test) => test.subjects.length === 0));
-        const keepsFile = targets.includes(spec.file);
-        for (const [name, target] of plan) {
-            const kept = new Set(
-                spec.tests.filter(
-                    (test) => test.subjects[0] === name || (name === first && neutral.has(test)),
-                ),
-            );
-            const cut = without(
-                spec.text,
-                spec.tests.filter((test) => !kept.has(test)),
-            );
-            const text = oneDescribe(cut, aspectOf(target));
-            if (target === spec.file) {
-                writeFileSync(spec.file, pruned(text));
-                continue;
-            }
-            if (name === first && !keepsFile) {
-                // The file's history follows its first subject.
-                mkdirSync(dirname(target), { recursive: true });
-                moveKeepingHistory(spec.file, target);
-            }
-            writeAt(spec.file, target, text);
-            done.push(`${shown(specsRoot, spec.file)} → ${shown(specsRoot, target)}`);
-        }
+        done.push(
+            ...writeSplit(specsRoot, spec, targets.includes(spec.file), splitDrafts(spec, plan)),
+        );
         forgetTree();
         done.push(...liftGround(specsRoot, dirname(spec.file)));
     }
