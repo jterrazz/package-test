@@ -1,5 +1,6 @@
 import { formatStdoutDiff } from '../chain/reporter.js';
 import { isDiskTarget } from '../chain/spec-path.js';
+import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
 import { TextAccessor } from './text.js';
@@ -73,21 +74,43 @@ export function emptyStreamRefusal(accessor: TextAccessor): TypeError {
     );
 }
 
+/** How a value handed to `toMatch` is read: whole, refused, or vitest's own. */
+export type ValueRoute = 'whole' | TypeError | undefined;
+
+/** How the comparison names an expectation written in the test rather than a file. */
+export const IN_PLACE = 'the value in place';
+
 /**
- * A value `toMatch` on a stream is refused, in both builds: a stream is no
- * string, and the value it is compared as is its `.text` — the comparable text
- * a golden reads. Any other subject is not this refusal's to answer.
+ * A stream is compared WHOLE to a text written in place, in both builds: a
+ * stream is no string, so vitest's substring meaning never applied to it, and
+ * the text it is compared as is its `.text` — the comparable text a golden
+ * reads. A RegExp matches a part, which is vitest's, on `.text`. Any other
+ * subject is not this route's to answer.
  */
-export function streamValueRefusal(subject: unknown): TypeError | undefined {
-    return subject instanceof TextAccessor
-        ? new TypeError(
-              `toMatch: "${subject.streamName}" is a stream, and a stream compared as a value is its text — write expect(<stream>.text).toMatch(…), or toMatch(file(…)) for its golden.`,
-          )
-        : undefined;
+export function streamValueRoute(subject: unknown, value: unknown): ValueRoute {
+    if (!(subject instanceof TextAccessor)) {
+        return undefined;
+    }
+    return typeof value === 'string'
+        ? 'whole'
+        : new TypeError(
+              `toMatch: "${subject.streamName}" is a stream, compared whole to the text written in place — a RegExp matches a part of it, which is vitest's: expect(<stream>.text).toMatch(…).`,
+          );
+}
+
+/**
+ * Compare a stream against a text written in place: the same comparison, and
+ * the same diff, a golden file gets.
+ */
+export function compareStreamInPlace(accessor: TextAccessor, expected: string): TextComparison {
+    return compareStreamText(accessor, IN_PLACE, dedent(expected));
 }
 
 /** The name the golden comparison is registered under — no member access can spell it. */
 export const GOLDEN_MATCHER = '@jterrazz/test:golden';
+
+/** The name the whole-result comparison against a value is registered under. */
+export const WHOLE_MATCHER = '@jterrazz/test:whole';
 
 /** The slice of vitest's `chai` the golden route needs. */
 type Chai = {
@@ -103,21 +126,23 @@ type Chai = {
 };
 
 /**
- * `toMatch` routes a `file()` or a `directory()` to the golden comparison and
- * EVERYTHING else to vitest's own matcher, untouched: a string or a RegExp is a
- * value, and on a value `toMatch` means exactly what vitest says it means — a
- * stream is compared as `result.stdout.text`. It is the one vitest matcher
- * wrapped: `toContain` and every other value matcher are vitest's, on `.text`.
+ * `toMatch` routes a `file()` or a `directory()` to the golden comparison, a
+ * value handed to one of the framework's subjects to the whole-result
+ * comparison, and EVERYTHING else to vitest's own matcher, untouched: on a
+ * plain string a string or a RegExp is a value, and `toMatch` means exactly
+ * what vitest says it means. It is the one vitest matcher wrapped.
  *
  * Both builds call this, each with the `chai` its `vitest` hands out, after
- * registering the golden under {@link GOLDEN_MATCHER}. `refuseValue` names,
- * for a subject that is no string and takes no value, what it takes instead:
- * the types already refuse the call, and a caller past them (JavaScript, a
- * cast) reads that refusal rather than vitest's "expects to receive a string".
+ * registering the golden under {@link GOLDEN_MATCHER} and the whole-result
+ * comparison under {@link WHOLE_MATCHER}. `routeValue` tells, per subject and
+ * value, whether the value is compared whole, refused (the subject takes no
+ * such value — the types already refuse the call, and a caller past them
+ * reads why), or vitest's. The whole-result comparison receives the call
+ * site's stack as its third argument: update mode writes the value there.
  */
 export function matchThroughGolden(
     chai: Chai,
-    refuseValue?: (subject: unknown) => TypeError | undefined,
+    routeValue: (subject: unknown, value: unknown) => ValueRoute,
 ): void {
     chai.util.overwriteMethod(
         chai.Assertion.prototype,
@@ -128,9 +153,14 @@ export function matchThroughGolden(
                 if (isDiskTarget(args[0]) && typeof golden === 'function') {
                     return golden.apply(this, args) as unknown;
                 }
-                const refusal = refuseValue?.(chai.util.flag(this, 'object'));
-                if (refusal !== undefined) {
-                    throw refusal;
+                const route = routeValue(chai.util.flag(this, 'object'), args[0]);
+                if (route instanceof TypeError) {
+                    throw route;
+                }
+                const whole = this[WHOLE_MATCHER];
+                if (route === 'whole' && typeof whole === 'function') {
+                    const site = new Error('toMatch call site').stack ?? '';
+                    return whole.call(this, args[0], args[1], site) as unknown;
                 }
                 return vitestToMatch.apply(this, args);
             },

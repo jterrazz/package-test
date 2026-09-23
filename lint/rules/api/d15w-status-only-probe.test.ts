@@ -47,7 +47,7 @@ ruleTester.run('d15w-status-only-probe', d15wStatusOnlyProbe as unknown as Oxlin
         {
             code: `test('persists', async () => {
                 expect(result.status).toBe(201);
-                await expect(result.table('users')).toMatchRows([{ id: 1 }]);
+                await expect(result.table('users')).toMatch([[1, 'Ada']]);
             });`,
             filename: SPEC,
         },

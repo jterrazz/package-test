@@ -155,6 +155,15 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         return result.rows.map((row: Record<string, unknown>) => columns.map((col) => row[col]));
     }
 
+    async columns(table: string): Promise<string[]> {
+        const client = await this.getClient();
+        const result = await client.query<{ column_name: string }>(
+            'SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = $2 ORDER BY ordinal_position',
+            [this.schema, table],
+        );
+        return result.rows.map((row) => row.column_name);
+    }
+
     isolation(): IsolationStrategy {
         return {
             acquire: async (workerId: string) => {

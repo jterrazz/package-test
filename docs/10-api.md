@@ -165,12 +165,12 @@ Location: /users/{{uuid#user}}
 
 The result of an API action exposes read-only accessors (rule D1); all assertions go through `expect()`:
 
-| Member                      | Type             | Description                                                                      |
-| --------------------------- | ---------------- | -------------------------------------------------------------------------------- |
-| `result.status`             | `number`         | HTTP status code — assert with native `expect(...).toBe(...)`                    |
-| `result.response`           | response subject | Full response (status + headers + body) — subject for `toMatch(file(…))`         |
-| `result.response.body`      | parsed body      | Raw body for native assertions (`toEqual`, `toMatchObject`)                      |
-| `result.table(name, opts?)` | table subject    | Database table — subject for `toMatchRows` / `toBeEmpty` (async, `await expect`) |
+| Member                      | Type             | Description                                                                                             |
+| --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `result.status`             | `number`         | HTTP status code — assert with native `expect(...).toBe(...)`                                           |
+| `result.response`           | response subject | Full response (status + headers + body) — compared whole, `toMatch(<.http text>)` or `toMatch(file(…))` |
+| `result.response.body`      | parsed body      | Raw body for native assertions (`toEqual`, `toMatchObject`)                                             |
+| `result.table(name, opts?)` | table subject    | Database table — compared whole, `toMatch(<rows>)` / `toBeEmpty()` (async, `await expect`)              |
 
 `expect(result.response).toMatch(file('./expected/user-created.http'))` reads the path it is given, like every other golden matcher (rule D3) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).
 
@@ -216,14 +216,12 @@ test('ingests an order event into analytics', async () => {
         .request(file('./requests/new-order.http'));
 
     // Then - one row per database, targeted by record key
-    await expect(result.table('orders', { database: 'db' })).toMatchRows({
-        columns: ['status'],
-        rows: [['pending']],
-    });
-    await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({
-        columns: ['type'],
-        rows: [['order_created']],
-    });
+    await expect(result.table('orders', { database: 'db' })).toMatch([
+        ['{{uuid}}', 'pending', '{{number}}', '{{iso8601}}'],
+    ]);
+    await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+        [1, '{{uuid}}', 'order_created'],
+    ]);
 });
 
 test('returns the created order with consistent ids', async () => {
@@ -243,14 +241,12 @@ test('links the analytics event to the created order', async () => {
         .request(file('./requests/new-order.http'));
 
     // Then - same id on both sides, without ever knowing its value
-    await expect(result.table('orders', { database: 'db' })).toMatchRows({
-        columns: ['id', 'status'],
-        rows: [[match.ref('order'), 'pending']],
-    });
-    await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({
-        columns: ['order_id', 'type'],
-        rows: [[match.ref('order'), 'order_created']],
-    });
+    await expect(result.table('orders', { database: 'db' })).toMatch([
+        [match.ref('order'), 'pending', '{{number}}', '{{iso8601}}'],
+    ]);
+    await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+        [1, match.ref('order'), 'order_created'],
+    ]);
 });
 ```
 

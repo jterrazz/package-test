@@ -349,3 +349,22 @@ describe('sqlite() — a reset starts the next chain from the same state', () =>
         rmSync(root, { force: true, recursive: true });
     });
 });
+
+describe('sqlite() — the columns a whole-table comparison reads', () => {
+    test('names every column of a table in the order the table declares them', async () => {
+        // Given - a table declared with three columns
+        const root = mkdtempSync(resolve(tmpdir(), 'sqlite-columns-'));
+        const initSqlPath = resolve(root, 'init.sql');
+        writeFileSync(
+            initSqlPath,
+            'CREATE TABLE "orders" (id INTEGER PRIMARY KEY, reference TEXT, total REAL);',
+        );
+        const db = sqlite({ init: initSqlPath });
+        await db.initialize(root, root);
+
+        // Then - the three, in their order; a table it does not hold has none
+        await expect(db.columns('orders')).resolves.toStrictEqual(['id', 'reference', 'total']);
+        await expect(db.columns('ghost')).resolves.toStrictEqual([]);
+        rmSync(root, { force: true, recursive: true });
+    });
+});

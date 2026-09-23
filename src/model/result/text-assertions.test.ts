@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../chain/spec-path.js';
-import { GOLDEN_MATCHER, matchThroughGolden, streamValueRefusal } from './text-assertions.js';
+import {
+    GOLDEN_MATCHER,
+    matchThroughGolden,
+    streamValueRoute,
+    WHOLE_MATCHER,
+} from './text-assertions.js';
 import { TextAccessor } from './text.js';
 
 /**
@@ -26,6 +31,12 @@ function chaiWith(
 } {
     const prototype: Record<string, unknown> = {
         [GOLDEN_MATCHER]: () => answered.push('golden'),
+        [WHOLE_MATCHER]: (_value: unknown, _options: unknown, site: unknown) =>
+            answered.push(
+                typeof site === 'string' && site.includes('toMatch call site')
+                    ? 'whole'
+                    : 'no site',
+            ),
         toMatch: () => answered.push('vitest'),
     };
     return {
@@ -53,7 +64,7 @@ describe('matchThroughGolden', () => {
         // Given - a chai whose two answers are recorded
         const answered: string[] = [];
         const chai = chaiWith(answered);
-        matchThroughGolden(chai);
+        matchThroughGolden(chai, streamValueRoute);
         const toMatch = toMatchOf(chai);
 
         // When - a file, a string and a RegExp reach toMatch
@@ -86,20 +97,23 @@ describe('matchThroughGolden', () => {
         }).toThrow('takes toMatch(file(…))');
     });
 
-    test('a stream handed a value is refused naming its .text, in the route both builds lay', () => {
-        // Given - the route laid with the stream refusal, over a stream subject
+    test('hands a value the route reads whole to the whole-result comparison, with its call site', () => {
+        // Given - the route laid with the stream route, over a stream subject
         const answered: string[] = [];
         const chai = chaiWith(answered, new TextAccessor('built\n', 'stderr', '/tmp'));
-        matchThroughGolden(chai, streamValueRefusal);
+        matchThroughGolden(chai, streamValueRoute);
         const toMatch = toMatchOf(chai);
 
-        // Then - a value is refused naming the text, vitest is never asked, and a non-stream is left alone
+        // When - a text reaches toMatch
+        toMatch.call(chai.Assertion.prototype, 'built\n');
+
+        // Then - compared whole, handed the stack of the call; a RegExp is refused naming the text
+        expect(answered).toStrictEqual(['whole']);
         expect(() => {
             toMatch.call(chai.Assertion.prototype, /built/u);
         }).toThrow(
-            '"stderr" is a stream, and a stream compared as a value is its text — write expect(<stream>.text).toMatch(…)',
+            '"stderr" is a stream, compared whole to the text written in place — a RegExp matches a part of it, which is vitest\'s: expect(<stream>.text).toMatch(…)',
         );
-        expect(answered).toStrictEqual([]);
-        expect(streamValueRefusal('built')).toBeUndefined();
+        expect(streamValueRoute('built', 'built')).toBeUndefined();
     });
 });

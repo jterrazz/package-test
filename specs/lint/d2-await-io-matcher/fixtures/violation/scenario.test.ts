@@ -5,5 +5,5 @@ test('checks the table without awaiting', async () => {
     const rows = getRows();
 
     // Then - the IO matcher is never awaited (D2)
-    expect(rows).toMatchRows([{ id: 1 }]);
+    expect(rows).toMatch([[1, 'Ada']]);
 });

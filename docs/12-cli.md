@@ -198,10 +198,7 @@ test('migrates a legacy schema', async () => {
 
     // Then
     expect(result.exitCode).toBe(0);
-    await expect(result.table('schema_migrations')).toMatchRows({
-        columns: ['version'],
-        rows: [['20260716']],
-    });
+    await expect(result.table('schema_migrations')).toMatch([['20260716']]);
 });
 ```
 

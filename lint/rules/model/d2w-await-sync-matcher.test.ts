@@ -22,7 +22,7 @@ ruleTester.run('d2w-await-sync-matcher', d2wAwaitSyncMatcher as unknown as Oxlin
         // Not awaited — fine.
         { code: 'expect(a).toBe(b);' },
         // IO matcher awaited — the other rule's domain, not redundant.
-        { code: 'async function f() { await expect(rows).toMatchRows([]); }' },
+        { code: "async function f() { await expect(result.table('users')).toMatch([]); }" },
         // .resolves / .rejects make a sync matcher async — await is required.
         { code: 'async function f() { await expect(p).resolves.toEqual(x); }' },
         { code: 'async function f() { await expect(p).rejects.toThrow(); }' },

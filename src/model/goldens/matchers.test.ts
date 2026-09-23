@@ -204,39 +204,24 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         }
     });
 
-    // RUNTIME D14 — `toMatch` routes the disk to the golden and a value to
-    // Vitest, and a golden handed a subject of the other kind is refused.
-    test('a stream accessor is not a string: a value is refused naming .text, and its .text matches', () => {
+    // RUNTIME D14 — `toMatch` routes the disk to the golden, a value handed to a
+    // Result subject to the whole-result comparison, and a value it cannot be
+    // Compared to is refused naming what the subject takes.
+    test('a stream is compared whole to a text in place: a RegExp is refused naming its .text', () => {
         // Given - a stream subject, ANSI included
-        const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m', 'stdout', '/tmp');
+        const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m\n', 'stdout', '/tmp');
 
-        // Then - the framework's refusal naming the text, and vitest's own match on that comparable text
+        // Then - a RegExp matches a part, which is vitest's on the comparable text
         expect(() => {
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value matcher on a stream
-            expect(subject as unknown as string).toMatch(/built in/u);
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a RegExp on a stream
+            expect(subject).toMatch(/built in/u as unknown as string);
         }).toThrow(
-            '"stdout" is a stream, and a stream compared as a value is its text — write expect(<stream>.text).toMatch(…)',
+            '"stdout" is a stream, compared whole to the text written in place — a RegExp matches a part of it, which is vitest\'s: expect(<stream>.text).toMatch(…)',
         );
-        expect(() => {
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value matcher on a stream
-            expect(subject as unknown as string).not.toMatch('failed');
-        }).toThrow('expect(<stream>.text).toMatch(…)');
-        expect(subject.text).toMatch(/^built in \ds$/u);
-        expect(subject.text).not.toMatch('failed');
+        expect(subject.text).toMatch(/^built in \ds$/mu);
     });
 
     test.each([
-        {
-            golden: 'toMatch(file(…))',
-            name: 'a json',
-            subject: () => new JsonAccessor('{ "id": 1 }', '/tmp'),
-        },
-        {
-            golden: 'toMatch(file(…))',
-            name: 'a response',
-            subject: () =>
-                new ResponseAccessor({ body: { id: 1 }, headers: {}, status: 200 }, '/tmp'),
-        },
         {
             golden: 'toMatch(directory(…))',
             name: 'a directory',
@@ -248,21 +233,15 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
             subject: () => new FilesystemAccessor('/tmp', '/tmp'),
         },
         {
-            golden: 'toMatchRows(…)',
-            name: 'a table',
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the refusal fires before any query, so no database stands behind the table
-            subject: () => new TableAccessor('orders', {} as DatabasePort),
-        },
-        {
             golden: 'toBeRunning()',
             name: 'a container',
             subject: () => new ContainerAccessor(null, null, '/tmp'),
         },
     ])(
-        '$name is no string: a value handed to it is refused, naming $golden',
+        '$name takes no value: a value handed to it is refused, naming $golden',
         ({ golden, subject }) => {
             // Given - a result accessor handed a string and a RegExp, past the compiler
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value matcher on every result accessor
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value on these subjects
             const accessor = subject() as unknown as string;
 
             // Then - the refusal names what the subject takes, never vitest's "expects to receive a string"
@@ -272,6 +251,42 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
             expect(() => {
                 expect(accessor).not.toMatch(/1/u);
             }).toThrow(golden);
+        },
+    );
+
+    test.each([
+        {
+            name: 'a response',
+            refusal: 'a response is compared whole to its .http text written in place',
+            subject: () =>
+                new ResponseAccessor({ body: { id: 1 }, headers: {}, status: 200 }, '/tmp'),
+            value: /200/u,
+        },
+        {
+            name: 'a json',
+            refusal: 'a json is compared whole to the value written in place',
+            subject: () => new JsonAccessor('{ "id": 1 }', '/tmp'),
+            value: /id/u,
+        },
+        {
+            name: 'a table',
+            refusal:
+                "a table is compared whole to its rows written in place — one array of cells per row, every column in the table's order — received a string",
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the refusal fires before any query, so no database stands behind the table
+            subject: () => new TableAccessor('orders', {} as DatabasePort),
+            value: '1',
+        },
+    ])(
+        '$name is refused a value of the wrong shape, naming the one it takes',
+        ({ refusal, subject, value }) => {
+            // Given - a result accessor handed a value it cannot be compared to, past the compiler
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses the shape
+            const accessor = subject() as unknown as string;
+
+            // Then - refused before anything is read, naming the form to write
+            expect(() => {
+                expect(accessor).toMatch(value);
+            }).toThrow(refusal);
         },
     );
 
@@ -587,26 +602,106 @@ describe('the hint a missing golden gives names a run that does something', () =
     });
 });
 
-describe('toMatchRows states the shape it wants before it queries', () => {
+/** A database double holding one table, `users`, with the rows given. */
+function usersTable(rows: unknown[][]): DatabasePort {
+    return {
+        columns: async () => await Promise.resolve(['id', 'name', 'created_at']),
+        query: async () => await Promise.resolve(rows),
+        reset: async () => {
+            await Promise.resolve();
+        },
+        seed: async () => {
+            await Promise.resolve();
+        },
+    };
+}
+
+describe('toMatch compares the whole result to the value written in place', () => {
     beforeAll(async () => {
         await registerMatchers();
     });
 
-    test('a bare array of rows is refused by the matcher, not by the adapter', async () => {
-        // Given - a real table subject and the instinctive argument: the rows, without the columns the adapter needs to build its SELECT
-        const subject = new TableAccessor('MapPoi', {
-            query: async () => await Promise.resolve([]),
-            reset: async () => {
-                await Promise.resolve();
-            },
-            seed: async () => {
-                await Promise.resolve();
-            },
-        });
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the wrong shape IS the subject: the guard exists for the call the types already refuse
-        const pending = expect(subject).toMatchRows([{ id: 1 }] as never);
+    test('a stream against its text: indentation of the test dropped, tokens read, the golden diff on a mismatch', () => {
+        // Given - a stream, and its text written in place, indented with the test
+        const subject = new TextAccessor('built 3 files in 12ms\ndone\n', 'stdout', '/tmp');
 
-        // Then - the refusal names the matcher and the shape, rather than surfacing as a TypeError from inside SQL generation
-        await expect(pending).rejects.toThrow('toMatchRows takes { columns, rows }');
+        // Then - the whole text matches with a token, and a missing line is the golden's diff
+        expect(subject).toMatch(`
+            built 3 files in {{duration}}
+            done
+        `);
+        expect(() => {
+            expect(subject).toMatch(`
+                built 3 files in {{duration}}
+            `);
+        }).toThrow(/Output mismatch \(the value in place\)[\s\S]*\+ done/u);
+    });
+
+    test('a response against its .http text: status, the headers it lists, the whole body', () => {
+        // Given - a response
+        const subject = new ResponseAccessor(
+            {
+                body: { id: UUID, name: 'Alice' },
+                headers: { 'content-type': 'application/json', date: 'now' },
+                status: 201,
+            },
+            '/tmp',
+        );
+
+        // Then - the text in place matches; a body field off is the golden's body diff
+        expect(subject).toMatch(`
+            HTTP/1.1 201 Created
+            content-type: application/json
+
+            {"id": "{{uuid}}", "name": "Alice"}
+        `);
+        expect(() => {
+            expect(subject).toMatch(`
+                HTTP/1.1 201 Created
+
+                {"id": "{{uuid}}", "name": "Bob"}
+            `);
+        }).toThrow(/Response mismatch \(the value in place\)[\s\S]*"name": "Bob"/u);
+        expect(() => {
+            expect(subject).toMatch('HTTP/1.1 200 OK');
+        }).toThrow('Response status mismatch (the value in place)');
+    });
+
+    test('a json against its value: tokens in its strings, every key compared', () => {
+        // Given - a json
+        const subject = new JsonAccessor(`{ "id": "${UUID}", "tags": ["a"] }`, '/tmp');
+
+        // Then - the value matches whole; a missing key fails
+        expect(subject).toMatch({ id: '{{uuid}}', tags: ['a'] });
+        expect(() => {
+            expect(subject).toMatch({ id: '{{uuid}}' });
+        }).toThrow(/Response mismatch \(the value in place\)[\s\S]*\+ {3}"tags"/u);
+    });
+
+    test('a table against its rows: every column, an instant read as its ISO text', async () => {
+        // Given - a table holding one row, its instant a Date as a driver hands it
+        const subject = new TableAccessor(
+            'users',
+            usersTable([[7, 'Ada', new Date('2026-01-02T03:04:05.000Z')]]),
+        );
+
+        // Then - the rows match whole; a row too many is the table diff
+        await expect(subject).toMatch([['{{int}}', 'Ada', '2026-01-02T03:04:05.000Z']]);
+        await expect(expect(subject).toMatch([])).rejects.toThrow(
+            /Table "users" mismatch[\s\S]*query: id, name, created_at[\s\S]*\+ 7 {2}\| {2}Ada/u,
+        );
+    });
+
+    test('a table the database does not hold is refused naming it', async () => {
+        // Given - a table with no columns
+        const subject = new TableAccessor('ghost', {
+            ...usersTable([]),
+            columns: async () => await Promise.resolve([]),
+        });
+
+        // Then - refused, before a SELECT with no columns reaches the driver
+        await expect(expect(subject).toMatch([])).rejects.toThrow(
+            'table "ghost" has no columns: the database holds no such table.',
+        );
     });
 });

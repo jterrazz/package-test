@@ -607,11 +607,11 @@ export const CAPABILITIES: Capability[] = [
         probe: '.toMatch(directory(',
     },
     {
-        columns: ['api', 'jobs', 'cli', 'integration', 'module'],
+        columns: ['api', 'jobs', 'cli', 'integration'],
         group: 'Golden',
         document: 'tables:',
-        name: 'toMatchRows()',
-        probe: '.toMatchRows(',
+        name: 'toMatch(<rows>)',
+        probe: ')).toMatch([',
     },
     {
         columns: ['api', 'module'],

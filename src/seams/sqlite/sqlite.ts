@@ -442,6 +442,14 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         return rows.map((row) => columns.map((col) => row[col]));
     }
 
+    async columns(table: string): Promise<string[]> {
+        const statement = this.getDb().prepare<[], { name: string }>(
+            `PRAGMA table_info("${table}")`,
+        );
+        const rows = await Promise.resolve(statement.all());
+        return rows.map((row) => row.name);
+    }
+
     async reset(): Promise<void> {
         const db = this.getDb();
         const tables = db

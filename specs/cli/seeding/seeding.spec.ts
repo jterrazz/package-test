@@ -15,10 +15,10 @@ describe('command — seeding', () => {
 
         // Then - the rows are queryable through the table accessor
         expect(result.exitCode).toBe(0);
-        await expect(result.table('users')).toMatchRows({
-            columns: ['name'],
-            rows: [['Ada'], ['Grace']],
-        });
+        await expect(result.table('users')).toMatch([
+            [1, 'Ada'],
+            [2, 'Grace'],
+        ]);
     });
 
     test('combines a SQL seed and a file fixture in one chain', async () => {
@@ -32,9 +32,9 @@ describe('command — seeding', () => {
         // Then - the fixture landed in the cwd AND the SQL seed reached the db
         expect(result.file('note.txt').exists).toBeTruthy();
         expect(result.file('note.txt').content).toContain('hello from seed');
-        await expect(result.table('users')).toMatchRows({
-            columns: ['name'],
-            rows: [['Ada'], ['Grace']],
-        });
+        await expect(result.table('users')).toMatch([
+            [1, 'Ada'],
+            [2, 'Grace'],
+        ]);
     });
 });

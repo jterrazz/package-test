@@ -9,8 +9,10 @@ test('the name a descriptor matches is the computed one, not the text', async ()
         await visitor.gone(button('Experiments'));
     });
 
-    // Then - the partial name designates nothing, and the outline names the button as the browser computed it, spaces and all
-    expect(result.tree.text).toContain('button "Experiments 9"');
+    // Then - the partial name designates nothing, and the whole outline, compared in place, names the button as the browser computed it, spaces and all
+    await expect(result.tree).toMatch(`
+        - main:
+          - button "Experiments 9"`);
 });
 
 test('the computed name, written whole, designates the button', async () => {

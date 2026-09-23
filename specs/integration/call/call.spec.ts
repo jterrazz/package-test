@@ -27,10 +27,11 @@ describe('integration — a module against the real database', () => {
 
         // Then - it said so, and the row is in the database it wrote to
         expect(result.value).toMatch(file('./expected/recorded.txt'));
-        await expect(result.table('orders')).toMatchRows({
-            columns: ['reference'],
-            rows: [['ORD-1'], ['ORD-2'], ['ORD-3']],
-        });
+        await expect(result.table('orders')).toMatch([
+            [1, 'ORD-1', '42'],
+            [2, 'ORD-2', '108'],
+            [3, 'ORD-3', '7'],
+        ]);
     });
 
     test('reads a refusal as a refusal, with no try in the spec', async () => {
@@ -44,10 +45,10 @@ describe('integration — a module against the real database', () => {
 
         // Then - what it threw is the reading, and nothing was written
         expect(result.error).toMatch(file('./expected/refused.txt'));
-        await expect(result.table('orders')).toMatchRows({
-            columns: ['reference'],
-            rows: [['ORD-1'], ['ORD-2']],
-        });
+        await expect(result.table('orders')).toMatch([
+            [1, 'ORD-1', '42'],
+            [2, 'ORD-2', '108'],
+        ]);
     });
 
     test('starts every chain from the same database state', async () => {

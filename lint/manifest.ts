@@ -399,7 +399,7 @@ export const RULE_DOCS = {
     'd2-await-io-matcher': {
         channel: 'statique',
         convention:
-            'An IO matcher (`toMatchRows`/`toMatch(directory(…))`/`toBeEmpty`/`toBeRunning`) must be awaited or returned; otherwise the assertion never runs → error.',
+            'An IO matcher (a table compared whole, `toMatch(<rows>)`; `toMatch(directory(…))`; `toBeEmpty`; `toBeRunning`) must be awaited or returned; otherwise the assertion never runs → error.',
         facet: 'model',
         family: 'D',
         fix: 'Put `await` in front of the `expect(...)`.',
@@ -482,7 +482,7 @@ export const RULE_DOCS = {
     'd15w-status-only-probe': {
         channel: 'statique',
         convention:
-            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatch(file('./expected/case.http'))`). A status probe BESIDE a real assertion (a golden, `toMatchRows`, `toContain`…) stays silent (a legitimate scalpel).",
+            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatch(file('./expected/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
         facet: 'api',
         family: 'D',
         fix: 'Assert what the response carries, not only the code it came back with.',
@@ -1640,14 +1640,14 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     {
         channel: 'runtime',
         convention:
-            "`toMatch` has two meanings, and the argument says which: a string or a `RegExp` is a value and the matcher is vitest's own, untouched — a stream accessor is not a string, so it is compared as `result.stdout.text`, and handed whole to a value `toMatch` it does not compile — past the compiler it is refused in both builds, naming `.text`; no other result accessor is a string either, and a value `toMatch` on a json, response, tree, table or container does not compile — past the compiler it is refused, naming what the subject takes; a `file()` or a `directory()` is the golden comparison, and a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: `toBeEmpty` is a table's matcher, and handed a stream it is refused in both builds, naming `expect(<stream>.text).toBe('')`.",
+            "`toMatch` on a result the framework produced compares the WHOLE result, and its argument says where the expectation lives: a value written in place — a stream's text, a response's `.http` text, a json's value, a table's rows (awaited) — or a `file()`/`directory()` golden. On a plain string it is vitest's own, untouched: a stream's text is `result.stdout.text`. A value of the wrong shape — a RegExp on a stream, a response or a json, anything but rows on a table — does not compile, and past the compiler it is refused in both builds, naming the form that takes it; a directory, the working directory and a container take no value, and are refused naming `directory()` or `toBeRunning()`; a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: `toBeEmpty` is a table's matcher, and handed a stream it is refused in both builds, naming `expect(<stream>.text).toBe('')`.",
         facet: 'model',
         family: 'D',
-        fix: "Write `toMatch(file('./expected/<case>.<ext>'))` for a golden, `toMatch(value)` on a string for a value.",
+        fix: "Write the whole result in place, `toMatch(`…`)`, or `toMatch(file('./expected/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
         id: 'D14',
         name: 'd14-one-verb-per-meaning',
         rationale:
-            'A string that is sometimes a value and sometimes a file name is a convention the reader must know; a branded `file()` makes the line say which, and the runtime refuses the crossed form a type cannot see (a cast, a JavaScript spec).',
+            "A result is not a string, so vitest's substring meaning never applied to it: one verb compares it whole, the value in place when the test is its only reader, a branded `file()` when the expectation lives on disk — and the runtime refuses the crossed form a type cannot see (a cast, a JavaScript spec).",
         reach: 'tests',
     },
     {

@@ -12,23 +12,47 @@ This chapter is the exhaustive matrix: every matcher, for every valid subject, w
 
 | IO matcher subjects                                                    | Why                                  |
 | ---------------------------------------------------------------------- | ------------------------------------ |
-| `result.table(…)`, and `toBeEmpty()` on it                             | Runs a SQL query                     |
+| `result.table(…)` — `toMatch(<rows>)` and `toBeEmpty()` on it          | Runs a SQL query                     |
 | `toMatch(directory(…))` on `result.filesystem` / `result.directory(…)` | Walks the disk                       |
 | container subjects                                                     | Talks to the Docker daemon           |
 | every accessor of a COMPONENT result (`tree`, `html`, `content`, …)    | The capture crosses the browser seam |
 
 Everything else is synchronous, and that includes the subjects it is easiest to get wrong: `result.value`, `result.error`, `result.response`, `result.stdout`, `result.stderr`, `result.json` — and `result.tree` on a WEBSITE page, which is captured on the node side and is a plain text subject there. Only a component's accessors are read inside the page.
 
-### A golden is named by `file()` or `directory()` (rule D3)
+### One verb compares a whole result, and its argument says where the expectation lives (rule D3)
 
-A string is a value; the disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule C26). `toMatch` reads its argument: a string or a RegExp is vitest's own comparison, and a `file()` or a `directory()` is the golden (rule D14) — the type refuses a bare string where a file is meant (rule B2):
+`toMatch` on a result the framework produced — a response, a stream, a json, a table, a tree — compares the WHOLE result, and its argument is the expectation: a value written in place, the default, or `file()`/`directory()` when the expectation lives on disk (rule D14):
+
+```typescript
+expect(result.response).toMatch(`
+    HTTP/1.1 201 Created
+    content-type: application/json
+
+    {"id": "{{uuid}}", "name": "Alice"}
+`);
+await expect(result.table('users')).toMatch([[1, 'Alice', 'alice@test.com']]);
+expect(result.stdout).toMatch(file('./expected/help.txt'));
+```
+
+| Subject                                                   | The value written in place                                               | On disk             |
+| --------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------- |
+| `result.response`                                         | its `.http` text — status line, the headers it lists, the body           | `file('./….http')`  |
+| a stream (`stdout`, `stderr`, `error`, `tree`, `text(…)`) | its text                                                                 | `file('./….txt')`   |
+| a json (`json`, `value`, `head`, `screen`)                | its value — an object, a list, a scalar                                  | `file('./….json')`  |
+| `result.table(…)`                                         | its rows — one array of cells per row, every column in the table's order | —                   |
+| `result.directory(…)`, `result.filesystem`                | — a value states no tree                                                 | `directory('./…/')` |
+| a container                                               | — asserted running, `toBeRunning()`; its logs are streams                | —                   |
+
+A text written in place that opens on a line break is read without it, without the whitespace of its closing line, and without the indentation its lines share — a block indents with the test around it. The `{{token}}` grammar and `match.*` apply to a value in place exactly as to a file, and a mismatch prints the diff the same file would. A string handed a stream is a whole text, never vitest's substring: a RegExp matches a part, and on a result subject it does not compile — past the compiler it is refused, naming the form that takes it, `expect(result.stdout.text).toMatch(/built/)`. On a plain string — `result.stdout.text` is one — `toMatch`, `toBe` and `toContain` are vitest's, untouched.
+
+The disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule C26); the type refuses a bare string where a file is meant (rule B2):
 
 - `toMatch(file('./expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule C6); a path may name a subfolder, `./expected/build/verbose.txt`, and update mode creates it (rule C5).
 - `toMatch(directory('./expected/shop-scaffold/'))` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.
 
 Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule D3). By convention it sits in `expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
 
-`toMatch`, `toBe` and `toContain` are vitest's and take a VALUE. A stream accessor is not one: it is compared as `result.stdout.text`, the comparable text — ANSI stripped, the runner's `transform` applied, the text its golden compares — and `toContain` or a value `toMatch` handed the accessor itself does not compile — on a stream, `toMatch` takes a `file()` and nothing else, and a value slipped past the compiler is refused at run time, in both builds, naming `expect(<stream>.text).toMatch(…)`. No other result accessor is a string either: on a JSON, response, tree, table or container subject a value `toMatch` does not compile, and past the compiler — a cast, a JavaScript spec — it is refused, naming what the subject takes: `file()`, `directory()`, `toMatchRows()` or `toBeRunning()` (rule D14).
+`toContain` handed a stream accessor does not compile: a stream is no list, and vitest would search an empty one — its text is `result.stdout.text`, the comparable text (ANSI stripped, the runner's `transform` applied, the text its golden compares).
 
 All file-based comparisons understand the [`{{token}}` grammar](15-tokens.md); all code-side dynamic values use `match.*`.
 
@@ -56,6 +80,7 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 
 | Matcher                     | Sync/async | Example                                                                 |
 | --------------------------- | ---------- | ----------------------------------------------------------------------- |
+| `toMatch(<.http text>)`     | sync       | ``expect(result.response).toMatch(`HTTP/1.1 201 Created …`)``           |
 | `toMatch(file('./….http'))` | sync       | `expect(result.response).toMatch(file('./expected/user-created.http'))` |
 
 Checks, in order: the status line, the listed headers (**subset** — unlisted response headers are unconstrained, rule C3), then the body. Placeholders apply in headers _and_ body, with `#ref` captures shared across both:
@@ -83,34 +108,31 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 Always `await expect(…)` (IO). `database:` is **mandatory when the services record declares ≥ 2 databases, forbidden with exactly 1** (rule A7).
 
-| Matcher                          | Sync/async | Example                                                                |
-| -------------------------------- | ---------- | ---------------------------------------------------------------------- |
-| `toMatchRows({ columns, rows })` | async      | see below                                                              |
-| `toBeEmpty()`                    | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()` |
+| Matcher           | Sync/async | Example                                                                |
+| ----------------- | ---------- | ---------------------------------------------------------------------- |
+| `toMatch(<rows>)` | async      | see below                                                              |
+| `toBeEmpty()`     | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()` |
+
+The table is compared WHOLE: every row, and every column in the order the table declares it — the rows are read `ORDER BY 1`. A reset restarts the generated ids, so the first row a chain inserts is `1` ([17 — Services](17-services.md#per-worker-isolation-rule-g2)); an instant is compared as its ISO text.
 
 ```typescript
-await expect(result.table('orders', { database: 'db' })).toMatchRows({
-    columns: ['id', 'status', 'total_cents', 'created_at'],
-    rows: [[match.uuid(), 'pending', match.number(), match.iso8601()]],
-});
+await expect(result.table('orders', { database: 'db' })).toMatch([
+    [1, 'pending', 1250, '{{iso8601}}'],
+]);
 ```
 
-Cell values are literals or [`match.*`](15-tokens.md) matchers — including `match.ref(name)` to capture a generated value in one table and require equality in another, and `match.ref(name, { not: other })` to require inequality:
+Cell values are literals, [tokens](15-tokens.md) or `match.*` matchers — including `match.ref(name)` to capture a generated value in one table and require equality in another, and `match.ref(name, { not: other })` to require inequality:
 
 ```typescript
-await expect(result.table('orders', { database: 'db' })).toMatchRows({
-    columns: ['id'],
-    rows: [[match.ref('order')]],
-});
-await expect(result.table('payment_intents', { database: 'db' })).toMatchRows({
-    columns: ['id', 'order_id'],
-    rows: [[match.ref('intent', { not: 'order' }), match.ref('order')]],
-});
+await expect(result.table('orders', { database: 'db' })).toMatch([[match.ref('order'), 'pending']]);
+await expect(result.table('payment_intents', { database: 'db' })).toMatch([
+    [match.ref('intent', { not: 'order' }), match.ref('order')],
+]);
 ```
 
 `toBeEmpty` is a table's matcher, and async: rule D2 refuses the bare `expect(x).toBeEmpty();` — dropped, it passes the test and surfaces the real failure as an unhandled rejection. A stream is not a table: an empty one is an empty text, `expect(result.stderr.text).toBe('')` — vitest's own, sync, on the text a golden compares. `toBeEmpty` handed a stream does not compile, and at run time it is refused with that form.
 
-A failing `toMatchRows` prints the expected grid against the actual rows for the selected columns, cell by cell — matcher cells render as their placeholder text (`Matcher.toString()`): `match.uuid()` shows as `{{uuid}}`, `match.ref('order')` as `{{ref#order}}`, `match.ref('intent', { not: 'order' })` as `{{ref#intent!order}}`, `match.regex(/…/)` as `{{regex:…}}`. A failing `toBeEmpty` reports how many rows it found (the count, not the rows themselves). `.not` inverts both (`.not.toBeEmpty()` = at least one row).
+A failing table `toMatch` prints the expected grid against the actual rows, every column named, cell by cell — matcher cells render as their placeholder text (`Matcher.toString()`): `match.uuid()` shows as `{{uuid}}`, `match.ref('order')` as `{{ref#order}}`, `match.ref('intent', { not: 'order' })` as `{{ref#intent!order}}`, `match.regex(/…/)` as `{{regex:…}}`. A failing `toBeEmpty` reports how many rows it found (the count, not the rows themselves). `.not` inverts both (`.not.toBeEmpty()` = at least one row).
 
 ## `result.stdout` / `result.stderr` — stream subjects (cli, container `exec`)
 
@@ -118,13 +140,14 @@ Streams are compared **after ANSI stripping** (rule D6): `.text` is that compara
 
 | Matcher                    | Sync/async | Example                                                                |
 | -------------------------- | ---------- | ---------------------------------------------------------------------- |
+| `toMatch(<text>)`          | sync       | `expect(result.stdout).toMatch('built in {{duration}}\n')`             |
 | `toMatch(file('./….txt'))` | sync       | `expect(result.stdout).toMatch(file('./expected/help.txt'))`           |
 | `toContain('needle')`      | sync       | `expect(result.stderr.text).toContain("Unknown command 'frobnicate'")` |
-| `toMatch(value)`           | sync       | `expect(result.stdout.text).toMatch(/built in \d+ms/u)`                |
+| `toMatch(/pattern/)`       | sync       | `expect(result.stdout.text).toMatch(/built in \d+ms/u)`                |
 
-`toMatch(file(…))` on a stream is a full-text snapshot; the golden may contain any [token](15-tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
+`toMatch` on a stream is a full-text snapshot, its text written in place or in a file; the golden may contain any [token](15-tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
 
-> `toMatch` and `toContain` with a value are vitest's, untouched: a stream accessor is not a string, so it is compared through its text — `expect(result.stdout.text).toMatch(/built/)`. The golden is `toMatch` handed the disk: `toMatch(file('./expected/help.txt'))`.
+> A stream compared whole takes its text — in place, or `file(…)`. A part of it is vitest's, on its text: `expect(result.stdout.text).toMatch(/built/)`, `.toContain('built')`.
 
 `toContain` is vitest's, so its failure is vitest's, printing the needle and the comparable haystack. `.not.toContain(…)` asserts absence.
 
@@ -168,11 +191,12 @@ expect(text(message)).toMatch(file('./expected/errors/wrong-body-error.txt'));
 
 ## `result.json` — parsed stdout (cli)
 
-| Matcher                     | Sync/async | Example                                                       |
-| --------------------------- | ---------- | ------------------------------------------------------------- |
-| `toMatch(file('./….json'))` | sync       | `expect(result.json).toMatch(file('./expected/config.json'))` |
+| Matcher                     | Sync/async | Example                                                           |
+| --------------------------- | ---------- | ----------------------------------------------------------------- |
+| `toMatch(<value>)`          | sync       | `expect(result.json).toMatch({ name: 'shoply', id: '{{uuid}}' })` |
+| `toMatch(file('./….json'))` | sync       | `expect(result.json).toMatch(file('./expected/config.json'))`     |
 
-Deep-equal against the JSON golden; the fixture may embed tokens (`"id": "{{uuid}}"`). Failure prints a structural object diff (missing keys, extra keys, per-key value mismatches). For partial checks, read `.value` and use native `toMatchObject`.
+Deep-equal against the value in place or the JSON golden — every key, both ways; the fixture may embed tokens (`"id": "{{uuid}}"`). Failure prints a structural object diff (missing keys, extra keys, per-key value mismatches). For partial checks, read `.value` and use native `toMatchObject`.
 
 ## `result.file(path)` — single files in the cwd (cli)
 
@@ -290,14 +314,14 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Matcher summary
 
-| Matcher                 | Valid subjects                                                                                                                                                                                        | Sync/async                         | Reads                |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------- |
-| `toMatch(file(…))`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                                           | sync, except inside a page (async) | the path it is given |
-| `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                          | async                              | the path it is given |
-| `toMatchRows`           | `table(…)`                                                                                                                                                                                            | async                              | — (inline)           |
-| `toBeEmpty`             | `table(…)` — an empty stream is `expect(<stream>.text).toBe('')`                                                                                                                                      | async                              | —                    |
-| `toBeRunning`           | `container(…)`                                                                                                                                                                                        | async                              | —                    |
-| native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.raw`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) — and `toMatch` with a value, on a string | per vitest                         | —                    |
+| Matcher                 | Valid subjects                                                                                                                                                                                        | Sync/async                                     | Reads                |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------- |
+| `toMatch(<value>)`      | `response` (its `.http` text), `stdout`, `stderr`, `error`, `tree`, `text(…)` (a text), `json`, `value` (a value), `table(…)` (rows)                                                                  | sync, except a table and inside a page (async) | the test itself      |
+| `toMatch(file(…))`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                                           | sync, except inside a page (async)             | the path it is given |
+| `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                          | async                                          | the path it is given |
+| `toBeEmpty`             | `table(…)` — an empty stream is `expect(<stream>.text).toBe('')`                                                                                                                                      | async                                          | —                    |
+| `toBeRunning`           | `container(…)`                                                                                                                                                                                        | async                                          | —                    |
+| native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.raw`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) — and `toMatch` with a value, on a string | per vitest                                     | —                    |
 
 `.not` is supported on every framework matcher.
 
@@ -308,10 +332,10 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 ## Common mistakes
 
 - **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule D1). Write `expect(result.stdout.text).toContain('x')`.
-- **Missing `await` on IO matchers.** `expect(result.table('users')).toMatchRows(…)` without `await` never queries the database and the test passes vacuously (rule D2).
+- **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (rule D2).
 - **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract D2 states and the types carry.
 - **`file('./expected/help')` without extension.** The extension is part of the path (rule C6); a tree is `directory('./expected/help/')`.
-- **A golden written as a value.** `expect(result.stdout.text).toMatch('help.txt')` is a substring check that passes when the output contains the words "help.txt". A golden is `toMatch(file('./expected/help.txt'))` (rule D14).
+- **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./expected/help.txt')` (rule D14).
 - **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rule B2).
 - **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for (rule D6) — and a substring check on it warns (D8).
 - **`database:` on a single-database project** (or missing on a multi-database one) — rule A7 cuts both ways.

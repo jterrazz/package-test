@@ -1,10 +1,10 @@
 Table "users" mismatch
-  query: name
+  query: id, name, email
   expected: 1 row
   received: 0 rows
 
 - Expected
 + Received
 
-  name
-- Alice
+  id  |  name  |  email
+- 1  |  Alice  |  alice@test.com

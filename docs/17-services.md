@@ -101,11 +101,11 @@ With **2 or more databases** in the record, `database:` is mandatory on every `.
 ```typescript
 // one database → no database: anywhere
 await migrateCli.seed(file('./seeds/legacy-schema.sql')).exec('up');
-await expect(result.table('schema_migrations')).toMatchRows({ … });
+await expect(result.table('schema_migrations')).toMatch([…]);
 
 // two databases → database: everywhere
 await api.seed(file('./seeds/catalog.sql'), { database: 'db' }).request(file('./requests/new-order.http'));
-await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({ … });
+await expect(result.table('events', { database: 'analyticsDb' })).toMatch([…]);
 ```
 
 ## `docker/<service>/init.sql`

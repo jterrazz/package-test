@@ -5,5 +5,5 @@ test('awaits the io matcher', async () => {
     const rows = getRows();
 
     // Then - the IO matcher is awaited
-    await expect(rows).toMatchRows([{ id: 1 }]);
+    await expect(rows).toMatch([[1, 'Ada']]);
 });

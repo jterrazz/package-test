@@ -20,6 +20,7 @@ import { resolveSpecPath } from '../chain/resolve.js';
 import { isDiskDirectory, isDiskFile } from '../chain/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http-files/http-file.js';
 import type { ParsedResponseFile } from '../http-files/http-file.js';
+import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import {
     mergePreservingPlaceholders,
@@ -34,13 +35,17 @@ import type { MatchFixtureOptions } from '../result/match-options.js';
 import { ResponseAccessor } from '../result/response.js';
 import { TableAccessor } from '../result/table.js';
 import {
+    compareStreamInPlace,
     compareStreamText,
     emptyStreamRefusal,
     GOLDEN_MATCHER,
+    IN_PLACE,
     matchThroughGolden,
     requireExtension,
-    streamValueRefusal,
+    streamValueRoute,
+    WHOLE_MATCHER,
 } from '../result/text-assertions.js';
+import type { ValueRoute } from '../result/text-assertions.js';
 import { TextAccessor } from '../result/text.js';
 
 type MatcherResult = {
@@ -48,8 +53,8 @@ type MatcherResult = {
     pass: boolean;
 };
 
-const PASS = (label: string): MatcherResult => ({ message: () => label, pass: true });
-const FAIL = (message: string): MatcherResult => ({ message: () => message, pass: false });
+const passed = (label: string): MatcherResult => ({ message: () => label, pass: true });
+const failed = (message: string): MatcherResult => ({ message: () => message, pass: false });
 
 function formatJson(value: unknown): string {
     return `${JSON.stringify(value, null, 4)}\n`;
@@ -86,11 +91,11 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
         );
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, merged);
-        return PASS(`updated ${name}`);
+        return passed(`updated ${name}`);
     }
 
     if (!existsSync(filePath)) {
-        return FAIL(
+        return failed(
             `${accessor.streamName} fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`,
         );
     }
@@ -115,20 +120,20 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
         );
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, formatJson(merged));
-        return PASS(`updated ${name}`);
+        return passed(`updated ${name}`);
     }
 
     if (!existsSync(filePath)) {
-        return FAIL(
+        return failed(
             `JSON fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`,
         );
     }
 
     const expected = JSON.parse(readFileSync(filePath, 'utf8'));
     if (structuralEquals(expected, actual, accessor.captures)) {
-        return PASS(`expected JSON not to match ${name}`);
+        return passed(`expected JSON not to match ${name}`);
     }
-    return FAIL(formatResponseDiff(name, renderExpected(expected), actual));
+    return failed(formatResponseDiff(name, renderExpected(expected), actual));
 }
 
 /** The parts of a response a fixture is checked against. */
@@ -247,18 +252,18 @@ export function matchResponseFile(
         const updated = buildUpdatedResponse(previous, accessor, accessor.captures.workdir);
         mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, serializeResponseFile(updated));
-        return PASS(`updated ${name}`);
+        return passed(`updated ${name}`);
     }
 
     if (!existsSync(filePath)) {
-        return FAIL(
+        return failed(
             `Response fixture "${name}" does not exist at ${filePath}.\n${missingHint(frozen)}`,
         );
     }
 
     const expected = parseResponseFile(readFileSync(filePath, 'utf8'), name);
     const failure = compareResponse(name, expected, accessor, accessor.captures);
-    return failure === null ? PASS(`expected response not to match ${name}`) : FAIL(failure);
+    return failure === null ? passed(`expected response not to match ${name}`) : failed(failure);
 }
 
 // ── toMatch(directory()) — async subjects (disk walk) ──
@@ -293,21 +298,21 @@ async function matchTreeFile(
                 writeFileSync(resolve(fixtureDir, file), merged);
             }
         }
-        return PASS(`updated ${name}`);
+        return passed(`updated ${name}`);
     }
 
     if (!existsSync(fixtureDir)) {
-        return FAIL(
+        return failed(
             `Directory fixture "${name}" does not exist at ${fixtureDir}.\n${missingHint(frozen)}`,
         );
     }
 
     const diff = await diffDirectories(fixtureDir, actualRoot, { scope });
     if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
-        return PASS(`expected directory not to match ${name}`);
+        return passed(`expected directory not to match ${name}`);
     }
 
-    return FAIL(formatDirectoryDiff(name, diff, 'Run with TEST_UPDATE=1 to update the fixture.'));
+    return failed(formatDirectoryDiff(name, diff, 'Run with TEST_UPDATE=1 to update the fixture.'));
 }
 
 // ── Matcher entry points ──
@@ -367,48 +372,21 @@ async function matchDirectoryGolden(
     );
 }
 
-/** The one argument shape `toMatchRows` reads: a column list, and cells per row. */
-type RowsExpectation = { columns: string[]; rows: readonly (readonly unknown[])[] };
+/** Rows as a value written in place states them: one array of cells per row. */
+type Rows = readonly (readonly unknown[])[];
 
-/** Is this the shape, before the adapter is asked to build SQL from it? */
-function isRowsExpectation(expected: unknown): expected is RowsExpectation {
-    if (expected === null || typeof expected !== 'object') {
-        return false;
-    }
-    const { columns, rows } = expected as Partial<RowsExpectation>;
-    return Array.isArray(columns) && Array.isArray(rows);
-}
-
-async function toMatchRows(received: unknown, expected: unknown): Promise<MatcherResult> {
-    if (!(received instanceof TableAccessor)) {
-        throw new TypeError('toMatchRows: unsupported subject — expected result.table(...).');
-    }
-    // The shape is stated before the query runs: an absent `columns` reaching
-    // The adapter surfaces as a TypeError from inside SQL generation, which
-    // Names neither the matcher nor what it wanted.
-    if (!isRowsExpectation(expected)) {
-        throw new TypeError(
-            'toMatchRows takes { columns, rows } — a column list and one array of cells per row ' +
-                `(received ${Array.isArray(expected) ? 'an array' : `a ${typeof expected}`}).`,
-        );
-    }
-
-    const actual = await received.query(expected.columns);
-    const mismatch = rowsMismatch(received.name, expected, actual, received.captures);
-    return {
-        message: () => mismatch ?? `expected table "${received.name}" not to match the given rows`,
-        pass: mismatch === null,
-    };
+/** Is this rows, before the table is queried against it? */
+function isRows(expected: unknown): expected is Rows {
+    return Array.isArray(expected) && expected.every((row) => Array.isArray(row));
 }
 
 /**
  * Compare the rows a table holds against the rows stated, cell by cell through
- * the token grammar — the diff when they differ, `null` when they match. What
- * `toMatchRows()` and a document's `tables:` both decide.
+ * the token grammar — the diff when they differ, `null` when they match.
  */
 export function rowsMismatch(
     name: string,
-    expected: RowsExpectation,
+    expected: { columns: string[]; rows: Rows },
     actual: unknown[][],
     scope: CaptureScope,
 ): null | string {
@@ -430,6 +408,63 @@ export function rowsMismatch(
               expected.rows.map((row) => row.map((cell) => renderExpected(cell))),
               actual,
           );
+}
+
+// ── toMatch(<value>) — the whole result against the value written in place ──
+
+/** A response against its `.http` text written in place: status, the headers it lists, the body. */
+function matchResponseValue(accessor: ResponseAccessor, expected: string): MatcherResult {
+    const parsed = parseResponseFile(dedent(expected), IN_PLACE);
+    const failure = compareResponse(IN_PLACE, parsed, accessor, accessor.captures);
+    return failure === null
+        ? passed('expected response not to match the value in place')
+        : failed(failure);
+}
+
+/** A json against the value written in place, tokens and `match.*` included. */
+function matchJsonValue(accessor: JsonAccessor, expected: unknown): MatcherResult {
+    const actual = accessor.value;
+    return structuralEquals(expected, actual, accessor.captures)
+        ? passed('expected JSON not to match the value in place')
+        : failed(formatResponseDiff(IN_PLACE, renderExpected(expected), actual));
+}
+
+/** A table against its rows written in place: every column, in the table's order. */
+async function matchTableValue(accessor: TableAccessor, expected: Rows): Promise<MatcherResult> {
+    const { columns, rows } = await accessor.content();
+    const mismatch = rowsMismatch(
+        accessor.name,
+        { columns, rows: expected },
+        rows,
+        accessor.captures,
+    );
+    return mismatch === null
+        ? passed(`expected table "${accessor.name}" not to match the rows in place`)
+        : failed(mismatch);
+}
+
+/**
+ * `toMatch(<value>)` on a result subject — the whole result against the value
+ * the test writes in place. The route has already refused a value the subject
+ * cannot be compared to.
+ */
+function toMatchWhole(
+    received: unknown,
+    expected: unknown,
+): MatcherResult | Promise<MatcherResult> {
+    if (received instanceof TextAccessor && typeof expected === 'string') {
+        return compareStreamInPlace(received, expected);
+    }
+    if (received instanceof ResponseAccessor && typeof expected === 'string') {
+        return matchResponseValue(received, expected);
+    }
+    if (received instanceof JsonAccessor) {
+        return matchJsonValue(received, expected);
+    }
+    if (received instanceof TableAccessor && isRows(expected)) {
+        return matchTableValue(received, expected);
+    }
+    throw new TypeError('toMatch: this subject is not compared to a value written in place.');
 }
 
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {
@@ -473,52 +508,58 @@ async function toBeRunning(received: unknown): Promise<MatcherResult> {
     };
 }
 
-/**
- * What each result accessor other than a stream takes instead of a value — its
- * golden, its rows, its state. A stream's refusal names its `.text`
- * ({@link streamValueRefusal}), and any subject absent from both is vitest's
- * to read.
- */
-const VALUELESS: readonly {
-    readonly is: (subject: unknown) => boolean;
-    readonly subject: string;
-    readonly takes: string;
-}[] = [
-    {
-        is: (subject) => subject instanceof JsonAccessor || subject instanceof ResponseAccessor,
-        subject: 'a json or response accessor',
-        takes: 'its golden, toMatch(file(…))',
-    },
-    {
-        is: (subject) =>
-            subject instanceof DirectoryAccessor || subject instanceof FilesystemAccessor,
-        subject: 'a directory or the working directory',
-        takes: 'its golden, await toMatch(directory(…))',
-    },
-    {
-        is: (subject) => subject instanceof TableAccessor,
-        subject: 'a table',
-        takes: 'its rows, await toMatchRows(…) or toBeEmpty()',
-    },
-    {
-        is: (subject) => subject instanceof ContainerAccessor,
-        subject: 'a container',
-        takes: 'its state, toBeRunning()',
-    },
-];
+/** How the refusal spells a value it was handed. */
+function spelledValue(value: unknown): string {
+    if (value instanceof RegExp) {
+        return 'a RegExp';
+    }
+    return Array.isArray(value) ? 'an array' : `a ${typeof value}`;
+}
 
-/** The refusal of a value handed to a subject that takes none, or nothing for any other. */
-function valueRefusal(received: unknown): TypeError | undefined {
-    const stream = streamValueRefusal(received);
+/**
+ * How a value handed to `toMatch` is read, per subject: a result the framework
+ * produced is compared WHOLE to the value written in place — its `.http` text
+ * for a response, the value for a json, the rows for a table, the text for a
+ * stream — and one that takes no value is refused naming what it takes. A
+ * subject that is none of them is vitest's.
+ */
+function routeValue(subject: unknown, value: unknown): ValueRoute {
+    const stream = streamValueRoute(subject, value);
     if (stream !== undefined) {
         return stream;
     }
-    const valueless = VALUELESS.find(({ is }) => is(received));
-    return valueless === undefined
-        ? undefined
-        : new TypeError(
-              `toMatch: ${valueless.subject} is no string, so a string or a RegExp matches nothing on it — assert it with ${valueless.takes}.`,
-          );
+    if (subject instanceof ResponseAccessor) {
+        return typeof value === 'string'
+            ? 'whole'
+            : new TypeError(
+                  `toMatch: a response is compared whole to its .http text written in place (\`HTTP/1.1 200 OK …\`), or to toMatch(file(…)) — received ${spelledValue(value)}.`,
+              );
+    }
+    if (subject instanceof JsonAccessor) {
+        return value instanceof RegExp
+            ? new TypeError(
+                  'toMatch: a json is compared whole to the value written in place, or to toMatch(file(…)) — a RegExp matches a part of a text.',
+              )
+            : 'whole';
+    }
+    if (subject instanceof TableAccessor) {
+        return isRows(value)
+            ? 'whole'
+            : new TypeError(
+                  `toMatch: a table is compared whole to its rows written in place — one array of cells per row, every column in the table's order — received ${spelledValue(value)}.`,
+              );
+    }
+    if (subject instanceof DirectoryAccessor || subject instanceof FilesystemAccessor) {
+        return new TypeError(
+            'toMatch: a directory or the working directory is compared to its golden tree, await toMatch(directory(…)) — a value states no tree.',
+        );
+    }
+    if (subject instanceof ContainerAccessor) {
+        return new TypeError(
+            'toMatch: a container is asserted by its state, toBeRunning() — its logs are streams, compared whole as result.container(…).stdout.',
+        );
+    }
+    return undefined;
 }
 
 // ── Registration ──
@@ -541,11 +582,11 @@ export async function registerMatchers(): Promise<void> {
         const { chai, expect } = await import('vitest');
         expect.extend({
             [GOLDEN_MATCHER]: toMatchGolden,
+            [WHOLE_MATCHER]: toMatchWhole,
             toBeEmpty,
             toBeRunning,
-            toMatchRows,
         });
-        matchThroughGolden(chai, valueRefusal);
+        matchThroughGolden(chai, routeValue);
     } catch {
         // No vitest peer available (library imported outside a test run).
         globals[REGISTERED] = false;

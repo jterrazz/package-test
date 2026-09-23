@@ -114,10 +114,9 @@ Every token has a code mirror for inline assertions (table rows, primarily):
 ```typescript
 import { match } from '@jterrazz/test';
 
-await expect(result.table('orders', { database: 'db' })).toMatchRows({
-    columns: ['id', 'status', 'total_cents', 'created_at'],
-    rows: [[match.uuid(), 'pending', match.number(), match.iso8601()]],
-});
+await expect(result.table('orders', { database: 'db' })).toMatch([
+    [match.uuid(), 'pending', match.number(), match.iso8601()],
+]);
 ```
 
 `match.uuid()`, `match.ulid()`, `match.iso8601()`, `match.date()`, `match.time()`, `match.duration()`, `match.number()`, `match.int()`, `match.float()`, `match.semver()`, `match.sha()`, `match.hex()`, `match.base64()`, `match.port()`, `match.ip()`, `match.url()`, `match.email()`, `match.path()`, `match.workdir()`, `match.string()`, `match.any()` — plus three code-only forms:
@@ -130,14 +129,10 @@ await expect(result.table('orders', { database: 'db' })).toMatchRows({
 
 ```typescript
 // intent.order_id === orders.id, but intent.id ≠ orders.id
-await expect(result.table('orders', { database: 'db' })).toMatchRows({
-    columns: ['id'],
-    rows: [[match.ref('order')]],
-});
-await expect(result.table('payment_intents', { database: 'db' })).toMatchRows({
-    columns: ['id', 'order_id'],
-    rows: [[match.ref('intent', { not: 'order' }), match.ref('order')]],
-});
+await expect(result.table('orders', { database: 'db' })).toMatch([[match.ref('order'), 'pending']]);
+await expect(result.table('payment_intents', { database: 'db' })).toMatch([
+    [match.ref('intent', { not: 'order' }), match.ref('order')],
+]);
 ```
 
 ## Update mode: tokens are preserved

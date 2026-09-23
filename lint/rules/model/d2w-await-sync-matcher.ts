@@ -64,7 +64,7 @@ export const d2wAwaitSyncMatcher: LintRule = {
         docs: RULE_DOCS['d2w-await-sync-matcher'],
         messages: {
             redundantAwait:
-                'await on expect(…).{{matcher}}(…) is redundant — that matcher is synchronous; only IO-backed matchers (toMatchRows/toMatch(directory(…))/toBeEmpty/toBeRunning) are awaited.',
+                'await on expect(…).{{matcher}}(…) is redundant — that matcher is synchronous; only IO-backed matchers (a table compared whole with toMatch(<rows>), toMatch(directory(…)), toBeEmpty, toBeRunning) are awaited.',
         },
         type: 'suggestion',
     },

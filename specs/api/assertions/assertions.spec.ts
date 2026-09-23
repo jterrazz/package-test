@@ -68,30 +68,16 @@ describe('api assertion details', () => {
 // ── Table assertions ──
 
 describe('shared assertions', () => {
-    test('toMatchRows — http — matches single column', async () => {
+    test('a table is compared whole to its rows written in place — every column, in its order', async () => {
         // Given - one user seeded
         const result = await api
             .seed(file('../../seeds/one-user.sql'), { database: 'db' })
             .get('/users');
 
-        // Then - table matches
-        await expect(result.table('users', { database: 'db' })).toMatchRows({
-            columns: ['name'],
-            rows: [['Alice']],
-        });
-    });
-
-    test('toMatchRows — http — matches multi-column', async () => {
-        // Given - one user seeded
-        const result = await api
-            .seed(file('../../seeds/one-user.sql'), { database: 'db' })
-            .get('/users');
-
-        // Then - table matches with both columns
-        await expect(result.table('users', { database: 'db' })).toMatchRows({
-            columns: ['name', 'email'],
-            rows: [['Alice', 'alice@test.com']],
-        });
+        // Then - the whole table, its generated id through a token
+        await expect(result.table('users', { database: 'db' })).toMatch([
+            [1, 'Alice', 'alice@test.com'],
+        ]);
     });
 
     // ── Detailed table assertions ──
@@ -103,13 +89,10 @@ describe('shared assertions', () => {
             .get('/events');
 
         // Then - multi-column check on analytics-db
-        await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({
-            columns: ['type', 'payload'],
-            rows: [
-                ['user_created', '{"name":"Alice"}'],
-                ['user_created', '{"name":"Bob"}'],
-            ],
-        });
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'user_created', '{"name":"Alice"}', '{{iso8601}}'],
+            [2, 'user_created', '{"name":"Bob"}', '{{iso8601}}'],
+        ]);
     });
 
     test('table details — shows diff on multi-column mismatch', async () => {
@@ -120,13 +103,10 @@ describe('shared assertions', () => {
 
         // Then - error shows both columns in the full -/+ diff
         const message = await catchMessage(async () => {
-            await expect(result.table('users', { database: 'db' })).toMatchRows({
-                columns: ['name', 'email'],
-                rows: [
-                    ['Wrong1', 'wrong1@test.com'],
-                    ['Wrong2', 'wrong2@test.com'],
-                ],
-            });
+            await expect(result.table('users', { database: 'db' })).toMatch([
+                [1, 'Wrong1', 'wrong1@test.com'],
+                [2, 'Wrong2', 'wrong2@test.com'],
+            ]);
         });
         expect(text(message)).toMatch(file('./expected/errors/table-multi-column-error.txt'));
     });
@@ -139,10 +119,9 @@ describe('shared assertions', () => {
 
         // Then - row count mismatch + extra rows with + marker (full diff)
         const message = await catchMessage(async () => {
-            await expect(result.table('users', { database: 'db' })).toMatchRows({
-                columns: ['name'],
-                rows: [['Alice']],
-            });
+            await expect(result.table('users', { database: 'db' })).toMatch([
+                [1, 'Alice', 'alice@test.com'],
+            ]);
         });
         expect(text(message)).toMatch(file('./expected/errors/table-extra-rows-error.txt'));
     });
@@ -153,10 +132,9 @@ describe('shared assertions', () => {
 
         // Then - row count mismatch + missing rows with - marker (full diff)
         const message = await catchMessage(async () => {
-            await expect(result.table('users', { database: 'db' })).toMatchRows({
-                columns: ['name'],
-                rows: [['Alice']],
-            });
+            await expect(result.table('users', { database: 'db' })).toMatch([
+                [1, 'Alice', 'alice@test.com'],
+            ]);
         });
         expect(text(message)).toMatch(file('./expected/errors/table-missing-rows-error.txt'));
     });

@@ -69,7 +69,7 @@ function isStatusProbe(node: AstNode): boolean {
  * `expect(result.status).toBe(422)` as a test's sole assertion falls below that
  * threshold yet still hides everything the response carries. The rule fires only
  * when EVERY `expect(…)` in the callback is a status probe — a status probe
- * sitting NEXT TO a real assertion (a golden, `toMatchRows`, `toContain`, …) is
+ * sitting NEXT TO a real assertion (a whole-result `toMatch`, a table's rows, `toContain`, …) is
  * the legitimate scalpel and stays silent.
  */
 export const d15wStatusOnlyProbe: LintRule = {
@@ -88,7 +88,7 @@ export const d15wStatusOnlyProbe: LintRule = {
                 }
 
                 // Count every `expect(…)` call and how many are status probes.
-                // Any non-status assertion (golden, toMatchRows, toContain, or a
+                // Any non-status assertion (whole-result toMatch, a table's rows, toContain, or a
                 // Status compared to a string) makes probes < expects — the
                 // Scalpel allowance stays silent.
                 let expectCalls = 0;

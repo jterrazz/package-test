@@ -106,7 +106,7 @@ export async function typeRows(): Promise<void> {
     const out = await cli.exec();
     // @ts-expect-error D14 — a string subject has no golden: its argument is a value [`Argument of type 'FileAt<"./expected/abc.txt">' is not assignable to parameter of type 'string | RegExp'`]
     expect('abc').toMatch(file('./expected/abc.txt'));
-    // @ts-expect-error D14 — a stream's golden is a file [`is not assignable to parameter of type 'DiskFile'`]
+    // @ts-expect-error D14 — a stream's golden is a file [`is not assignable to parameter of type 'string | DiskFile'`]
     expect(out.stdout).toMatch(directory('./expected/out/'));
     // @ts-expect-error D14 — a tree's golden is a directory [`Argument of type 'FileAt<"./expected/tree.txt">' is not assignable to parameter of type 'DiskDirectory'`]
     await expect(out.filesystem).toMatch(file('./expected/tree.txt'));
@@ -162,59 +162,81 @@ export async function streamValueRows(): Promise<void> {
 }
 
 /**
- * D14 and B2 on a stream's `toMatch`: a value is compared as the stream's
- * `.text`, so the accessor takes a `file()` and nothing else — and the
- * matchers 17 retired for the disk stay retired.
+ * D14 on a stream's `toMatch`: a stream is compared WHOLE — to the text
+ * written in place, or to its `file()` — and a RegExp, which matches a part,
+ * is vitest's on `.text`.
  */
 export async function streamMatcherRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
     const out = await cli.exec();
-    // @ts-expect-error D14 — a stream compared as a value is its text: `toMatch` takes no RegExp on one [`is not assignable to method's 'this' of type 'StreamIsNoValue'`]
+    // @ts-expect-error D14 — a stream is compared whole: a RegExp matches a part, on its .text [`Argument of type 'RegExp' is not assignable to parameter of type 'string | DiskFile'`]
     expect(out.stdout).toMatch(/built/u);
-    // @ts-expect-error D14 — a stream compared as a value is its text: `toMatch` takes no string on one [`is not assignable to method's 'this' of type 'StreamIsNoValue'`]
-    expect(out.stderr).toMatch('warning');
+    expect(out.stderr).toMatch('warning: {{string}}\n');
+    expect(out.stderr.text).toMatch(/warning/u);
+}
+
+/** B2 — the matchers 17 retired for the disk stay retired. */
+export async function retiredMatcherRows(): Promise<void> {
+    const { api } = await specification.api({ server: () => ({}) as never });
+    const { cli } = await specification.cli('./bin.sh');
+    const out = await cli.exec();
+    const result = await api.get('/orders/1');
     // @ts-expect-error B2 — `toMatchFile` is retired: `toMatch(file(…))` [`Property 'toMatchFile' does not exist on type`]
     expect(out.stdout).toMatchFile('./expected/out.txt');
     // @ts-expect-error B2 — `toMatchDirectory` is retired: `toMatch(directory(…))` [`Property 'toMatchDirectory' does not exist on type`]
     await expect(out.filesystem).toMatchDirectory('./expected/tree/');
+    // @ts-expect-error B2 — `toMatchRows` is retired: a table is compared whole, `toMatch(rows)` [`Property 'toMatchRows' does not exist on type`]
+    await expect(result.table('orders')).toMatchRows({ columns: ['id'], rows: [[1]] });
 }
 
 /**
- * D14 on every other subject: a response, a json and a tree are no string, so
- * `toMatch` takes their golden — `file()` for the first two, `directory()` for
- * a tree — and never a value. Handed one, vitest would throw its own opaque
- * TypeError at run time; the compiler says it here.
+ * D14 on a response and a json: each is compared WHOLE, to the value its kind
+ * is written in — a response its `.http` text, a json its value — or to its
+ * golden. A RegExp matches a part, and matches neither.
  */
-export async function goldenSubjectMatcherRows(): Promise<void> {
+export async function valueSubjectMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
     const result = await api.get('/orders/1');
     const out = await cli.exec();
-    // @ts-expect-error D14 — a response is matched against its file(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    // @ts-expect-error D14 — a response is compared whole to its .http text, never a RegExp [`Argument of type 'RegExp' is not assignable to parameter of type 'string | DiskFile'`]
     expect(result.response).toMatch(/200/u);
-    // @ts-expect-error D14 — a json is matched against its file(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
-    expect(out.json).toMatch('{"ok":true}');
-    // @ts-expect-error D14 — a tree is matched against its directory(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    // @ts-expect-error D14 — a json is compared whole to its value, never a RegExp [`Argument of type 'RegExp' is not assignable to parameter of type 'JsonExpectation'`]
+    expect(out.json).toMatch(/ok/u);
+    expect(result.response).toMatch(`
+        HTTP/1.1 200 OK
+
+        {"id": 1}
+    `);
+    expect(out.json).toMatch({ ok: true });
+}
+
+/** D14 on a tree: its golden is a `directory()`, and a value states no tree. */
+export async function treeMatcherRows(): Promise<void> {
+    const { cli } = await specification.cli('./bin.sh');
+    const out = await cli.exec();
+    // @ts-expect-error D14 — a tree is matched against its directory(), never a value [`Argument of type 'string' is not assignable to parameter of type 'DiskDirectory'`]
     await expect(out.filesystem).toMatch('scaffolded');
-    // @ts-expect-error D14 — a directory is matched against its directory(), never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
+    // @ts-expect-error D14 — a directory is matched against its directory(), never a value [`Argument of type 'RegExp' is not assignable to parameter of type 'DiskDirectory'`]
     await expect(out.directory('out')).toMatch(/index/u);
+    await expect(out.directory('out')).toMatch(directory('./expected/out/'));
 }
 
 /**
- * D14 on the subjects with no golden: a table is asserted by its rows and a
- * container running, so neither takes a value `toMatch` — and the subjects
- * that have a golden take it.
+ * D14 on the table and the container: a table is compared whole to its rows
+ * (awaited), never to a text; a container is asserted running, never matched —
+ * and the subjects that have a golden take it.
  */
 export async function assertedSubjectMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
     const result = await api.get('/orders/1');
     const out = await cli.exec();
-    // @ts-expect-error D14 — a table is asserted by its rows, never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
-    expect(result.table('orders')).toMatch('1');
+    // @ts-expect-error D14 — a table is compared whole to its rows, never a text [`Argument of type 'string' is not assignable to parameter of type 'TableRows'`]
+    await expect(result.table('orders')).toMatch('1');
     // @ts-expect-error D14 — a container is asserted running, never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
     expect(out.container('db')).toMatch('up');
+    await expect(result.table('orders')).toMatch([['{{int}}', 'ORD-1']]);
     expect(result.response).toMatch(file('./expected/order.http'));
     expect(out.json).toMatch(file('./expected/out.json'));
-    await expect(out.directory('out')).toMatch(directory('./expected/out/'));
 }

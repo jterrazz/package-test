@@ -58,10 +58,9 @@ describe('jobs documents — what the runner refuses', () => {
             .run(file('./fixtures/extra-row.spec.yaml'));
 
         // Then - the chained user was synced, so the document's one row holds
-        await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({
-            columns: ['payload'],
-            rows: [['{"name":"Alice"}']],
-        });
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'user_synced', '{"name":"Alice"}', '{{iso8601}}'],
+        ]);
     });
 
     test('a job whose execute is a method runs as its trigger() runs it — bound to the job', async () => {

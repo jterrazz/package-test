@@ -32,7 +32,7 @@ Nothing here is new capability. A document is the chain's semantics in the shape
 
 ## Paths
 
-Every key that names the disk takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [14](14-assertions.md#a-golden-is-named-by-file-or-directory-rule-d3)):
+Every key that names the disk takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)):
 
 | Key          | Reads        | Takes                           |
 | ------------ | ------------ | ------------------------------- |

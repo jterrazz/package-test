@@ -90,7 +90,15 @@ describe('postgres — the handle against a real container', () => {
             });
 
         // Then - only the row written after the reset remains, numbered from 1 again
-        expect(result.value).toMatch(file('./expected/second.json'));
+        expect(result.value).toMatch([[1, 'Second']]);
+    });
+
+    test('names the columns of a table in the order the table declares them', async () => {
+        // Given - the users table the compose init declares
+        const result = await integration.call(async ({ db }) => await db.columns('users'));
+
+        // Then - every column, in its order
+        expect(result.value).toMatch(['id', 'name', 'email']);
     });
 
     test('runs the init script the compose directory carries', async () => {

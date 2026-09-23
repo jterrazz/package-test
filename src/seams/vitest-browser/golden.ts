@@ -3,12 +3,14 @@ import { chai, expect, inject } from 'vitest';
 import { isDiskFile } from '../../model/chain/spec-path.js';
 import type { MatchFixtureOptions } from '../../model/result/match-options.js';
 import {
+    compareStreamInPlace,
     compareStreamText,
     emptyStreamRefusal,
     GOLDEN_MATCHER,
     matchThroughGolden,
     requireExtension,
-    streamValueRefusal,
+    streamValueRoute,
+    WHOLE_MATCHER,
 } from '../../model/result/text-assertions.js';
 import { TextAccessor } from '../../model/result/text.js';
 import { readGolden, writeGolden } from './vitest-browser.adapter.js';
@@ -80,6 +82,19 @@ async function toMatchGolden(
     return await matchGolden(received, expected.path, options?.frozen === true);
 }
 
+/**
+ * `toMatch(<text>)` in a page — a captured text against the text written in
+ * place. Awaited, as every comparison a page makes is.
+ */
+async function toMatchWhole(received: unknown, expected: unknown): Promise<MatcherResult> {
+    if (!(received instanceof TextAccessor) || typeof expected !== 'string') {
+        throw new TypeError(
+            'toMatch: in a page, a captured text is compared to a text written in place.',
+        );
+    }
+    return await Promise.resolve(compareStreamInPlace(received, expected));
+}
+
 /** A page holds no table: `toBeEmpty` is registered to refuse a stream with the form to write. */
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {
     return await Promise.reject(
@@ -103,6 +118,6 @@ export function registerBrowserMatchers(): void {
         return;
     }
     registered = true;
-    expect.extend({ [GOLDEN_MATCHER]: toMatchGolden, toBeEmpty });
-    matchThroughGolden(chai, streamValueRefusal);
+    expect.extend({ [GOLDEN_MATCHER]: toMatchGolden, [WHOLE_MATCHER]: toMatchWhole, toBeEmpty });
+    matchThroughGolden(chai, streamValueRoute);
 }

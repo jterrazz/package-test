@@ -29,6 +29,7 @@ class FakeCommandAdapter implements CliPort {
 
 function fakeDatabase(): DatabasePort {
     return {
+        columns: async () => await Promise.resolve([]),
         query: async () => [],
         reset: async () => {},
         seed: async () => {},

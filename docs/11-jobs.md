@@ -59,10 +59,9 @@ test('nightly report classifies, prices and drafts', async () => {
         .trigger('nightly-report');
 
     // Then - the pipeline produced a classified, priced report
-    await expect(result.table('reports', { database: 'analyticsDb' })).toMatchRows({
-        columns: ['category', 'usd_price'],
-        rows: [['ELECTRONICS', 109]],
-    });
+    await expect(result.table('reports', { database: 'analyticsDb' })).toMatch([
+        [1, 'ELECTRONICS', 109],
+    ]);
 });
 ```
 
@@ -86,10 +85,9 @@ test('retries then recovers from provider rate-limit', async () => {
         .trigger('nightly-report');
 
     // Then - the retry succeeded
-    await expect(result.table('reports', { database: 'analyticsDb' })).toMatchRows({
-        columns: ['category'],
-        rows: [['BOOKS']],
-    });
+    await expect(result.table('reports', { database: 'analyticsDb' })).toMatch([
+        [1, 'BOOKS', '{{number}}'],
+    ]);
 });
 ```
 
@@ -99,9 +97,9 @@ The number in `times` IS the assertion: it says the job retries exactly once. A 
 
 `.trigger()` resolves to a result whose primary subjects are the databases:
 
-| Member                      | Description                                                             |
-| --------------------------- | ----------------------------------------------------------------------- |
-| `result.table(name, opts?)` | Table subject for `toMatchRows` / `toBeEmpty` — async, `await expect()` |
+| Member                      | Description                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `result.table(name, opts?)` | Table subject, compared whole — `toMatch(<rows>)` / `toBeEmpty()`, `await`ed |
 
 With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](14-assertions.md).
 

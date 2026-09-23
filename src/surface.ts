@@ -168,21 +168,45 @@ export { lintReport } from './model/result/lint-report.js';
 // Matcher options (per-call `toMatch(file(…), { frozen })`)
 export type { MatchFixtureOptions } from './model/result/match-options.js';
 
+/** A table's rows as a test writes them in place: one array of cells per row, every column. */
+type TableRows = readonly (readonly unknown[])[];
+
 /**
- * The golden half of `toMatch`, by subject: a `file()` against a stream, json
- * or response accessor (async when the subject was captured INSIDE a page — the
- * file crosses the browser seam through a server command), a `directory()`
- * against a working directory or one of its directories (async: the tree is
- * compared on disk). Any other subject has no golden half, and `toMatch` is
- * vitest's alone.
+ * What a json is compared to in place: a JSON value — tokens in its strings,
+ * `match.*` in its leaves — or its golden. A RegExp is none of them.
  */
-type GoldenMatch<T, R> = T extends { readonly capturedInPage: true }
-    ? (golden: DiskFileType, options?: MatchFixtureOptionsType) => Promise<void>
-    : T extends JsonAccessorType | ResponseAccessorType | TextAccessorType
-      ? (golden: DiskFileType, options?: MatchFixtureOptionsType) => R
-      : T extends DirectoryAccessorType | FilesystemAccessorType
-        ? (golden: DiskDirectoryType, options?: MatchFixtureOptionsType) => Promise<void>
-        : unknown;
+type JsonExpectation =
+    | boolean
+    | DiskFileType
+    | null
+    | number
+    | Readonly<Record<string, unknown>>
+    | readonly unknown[]
+    | string;
+
+/**
+ * The whole-result half of `toMatch`, by subject: the value written in place,
+ * or the golden a `file()`/`directory()` names. A stream and a response take
+ * their text (a response's is its `.http` text), a json its value, a table its
+ * rows (async: the table is queried), a working directory or one of its
+ * directories its `directory()` golden (async: the tree is compared on disk).
+ * A text captured INSIDE a page is awaited: its golden crosses the browser
+ * seam, and so does the rewrite update mode makes. Any other subject has no
+ * whole-result half, and `toMatch` is vitest's alone.
+ */
+type WholeMatch<T, R> = T extends { readonly capturedInPage: true }
+    ? (expected: DiskFileType | string, options?: MatchFixtureOptionsType) => Promise<void>
+    : T extends TextAccessorType
+      ? (expected: DiskFileType | string, options?: MatchFixtureOptionsType) => R
+      : T extends ResponseAccessorType
+        ? (expected: DiskFileType | string, options?: MatchFixtureOptionsType) => R
+        : T extends JsonAccessorType
+          ? (expected: JsonExpectation, options?: MatchFixtureOptionsType) => R
+          : T extends TableAccessorType
+            ? (expected: TableRows, options?: MatchFixtureOptionsType) => Promise<void>
+            : T extends DirectoryAccessorType | FilesystemAccessorType
+              ? (golden: DiskDirectoryType, options?: MatchFixtureOptionsType) => Promise<void>
+              : unknown;
 
 /**
  * A stream accessor, structurally: the augmentation is loaded twice (src and
@@ -192,16 +216,16 @@ type GoldenMatch<T, R> = T extends { readonly capturedInPage: true }
 type StreamMarker = { readonly raw: string; readonly streamName: string };
 
 /**
- * What a value matcher's `this` must be on a stream subject — which no
- * assertion is, so the call does not compile. The refusal sits on `this`
- * rather than on the argument because the augmented `toMatch` must stay
- * assignable to vitest's own, which takes a string or a RegExp from any
- * subject.
+ * What vitest's own `toMatch` needs `this` to be on a stream subject — which
+ * no assertion is, so vitest's half does not apply and the whole-result half
+ * alone answers. The refusal sits on `this` rather than on the argument
+ * because the augmented `toMatch` must stay assignable to vitest's own, which
+ * takes a string or a RegExp from any subject.
  */
-type StreamIsNoValue = { readonly 'a stream is compared as its .text': never };
+type StreamIsNoValue = { readonly 'a stream is compared whole, or as its .text': never };
 
-/** Every other result accessor: none is a string, so none is compared as a value. */
-type ValuelessSubject =
+/** Every other result accessor: none is a string, so vitest's substring meaning never applies. */
+type ResultSubject =
     | ContainerAccessorType
     | DirectoryAccessorType
     | FilesystemAccessorType
@@ -210,11 +234,11 @@ type ValuelessSubject =
     | TableAccessorType;
 
 /**
- * What a value matcher's `this` must be on any other result accessor: its
- * golden is `file()` or `directory()`, a table is asserted by its rows and a
- * container running — a string or a RegExp matches none of them.
+ * What vitest's own `toMatch` needs `this` to be on any other result accessor:
+ * a result is compared whole — to a value in place, to its golden — and a
+ * container is asserted running, so vitest's half never applies.
  */
-type SubjectIsNoValue = { readonly 'a result accessor is matched against its golden': never };
+type SubjectIsNoValue = { readonly 'a result accessor is compared whole': never };
 
 // ── Vitest matcher type augmentation (CONVENTIONS D1–D3) ──
 // Shipped from the shared surface so the ONE published `types` entry carries it.
@@ -254,38 +278,28 @@ declare module 'vitest' {
         /** Assert the container is running. Async — docker-backed subject. */
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /**
-         * Vitest's `toMatch` for a value (a string or a RegExp, against a
-         * string — a stream is compared as `result.stdout.text`, and a stream
-         * or any other result accessor handed a value does not compile), and the
-         * golden comparison for the disk: `toMatch(file('./expected/help.txt'))`,
-         * the extension part of the path (`.http` for `result.response`), or
-         * `await expect(result.directory('out')).toMatch(directory('./expected/out/'))`.
+         * On a plain string, vitest's `toMatch` (a string or a RegExp is a
+         * value — `result.stdout.text` is one). On a result the framework
+         * produced, the WHOLE result against its expectation: the value
+         * written in place — a stream's text, a response's `.http` text, a
+         * json's value, a table's rows (`await`ed), tokens allowed in each —
+         * or `file()`/`directory()` when the expectation lives on disk
+         * (`toMatch(file('./expected/help.txt'))`, the extension part of the
+         * path; `await expect(result.directory('out')).toMatch(directory('./expected/out/'))`).
          *
-         * Pass `{ frozen: true }` to opt a single golden OUT of update-mode
-         * rewriting: a frozen golden is never overwritten under `TEST_UPDATE=1`
-         * (or vitest `-u`), and a frozen mismatch/missing golden still throws.
-         * Use it for a deliberately-wrong golden whose diff/error rendering is
-         * the behaviour under test.
+         * Pass `{ frozen: true }` to opt a single expectation OUT of update-mode
+         * rewriting: a frozen one is never overwritten under `TEST_UPDATE=1`
+         * (or vitest `-u`), and a frozen mismatch still throws. Use it for a
+         * deliberately-wrong expectation whose diff is the behaviour under test.
          */
         toMatch: ((
             this: T extends StreamMarker
                 ? StreamIsNoValue
-                : T extends ValuelessSubject
+                : T extends ResultSubject
                   ? SubjectIsNoValue
                   : unknown,
             expected: RegExp | string,
         ) => R) &
-            GoldenMatch<T, R>;
-        /**
-         * Assert the table contains exactly the given rows for the given
-         * columns. Cells accept `match.*` dynamic-value matchers. Async —
-         * queries the database.
-         */
-        toMatchRows: T extends TableAccessorType
-            ? (expected: {
-                  columns: string[];
-                  rows: readonly (readonly unknown[])[];
-              }) => Promise<void>
-            : never;
+            WholeMatch<T, R>;
     }
 }

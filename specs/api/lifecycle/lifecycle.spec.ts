@@ -29,9 +29,8 @@ describe('lifecycle', () => {
 
         // Then - default db is empty, analytics has data
         await expect(result.table('users', { database: 'db' })).toBeEmpty();
-        await expect(result.table('events', { database: 'analyticsDb' })).toMatchRows({
-            columns: ['type'],
-            rows: [['user_created']],
-        });
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'user_created', '{{string}}', '{{iso8601}}'],
+        ]);
     });
 });
