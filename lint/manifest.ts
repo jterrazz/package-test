@@ -1111,7 +1111,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte, under the same role and the same name, is a warning on every copy; it belongs in the specs root's folder of its role (`<specs>/seeds/<name>`), named by the path that climbs to it. Fixed by `--fix`: one copy is moved there — a `git mv` in a work tree — the others deleted, and every path of the specs tree that named a copy rewritten; a specs root already holding the name with other content is left to the author.",
+            "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is a warning on every copy; it belongs in the specs root's folder of its role (`<specs>/seeds/<name>`), named by the path that climbs to it. Fixed by `--fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every path of the specs tree that named a copy rewritten. Copies of several names, and a specs root already holding the name with other content, are left to the author.",
         facet: 'model',
         family: 'C',
         fix: 'Run `jterrazz-test-check <root> --fix`, or keep the copies apart on purpose and record them in the ratchet.',

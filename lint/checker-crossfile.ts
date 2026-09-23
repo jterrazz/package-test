@@ -1204,17 +1204,23 @@ function fingerprintOf(path: string): string {
 
 /** One entry of ground copied into several leaves, and where the copies belong. */
 type CopiedGround = {
-    /** The copies, one per leaf, sorted — the first is the one a fix moves. */
+    /** The copies, sorted — the first is the one a fix moves. */
     copies: string[];
     /** What every copy holds. */
     fingerprint: string;
-    /** The specs root's folder of the copies' role, holding the entry by its name. */
-    target: string;
+    /**
+     * The specs root's folder of the copies' role, holding the entry by its
+     * name — or `null` when the copies go by several names, and none of them
+     * is the one to keep.
+     */
+    target: null | string;
 };
 
-/** Every leaf ground entry of `specsRoot`, keyed by its role, its name and what it holds. */
-function leafGroundOf(specsRoot: string): Map<string, CopiedGround> {
-    const groups = new Map<string, CopiedGround>();
+/** The leaf ground entries of `specsRoot`, grouped by their role and what they hold — whatever their names. */
+function leafGroundOf(
+    specsRoot: string,
+): Map<string, { copies: string[]; fingerprint: string; role: string }> {
+    const groups = new Map<string, { copies: string[]; fingerprint: string; role: string }>();
     for (const dir of listDirs(specsRoot)) {
         if (dir === specsRoot) {
             continue;
@@ -1227,12 +1233,8 @@ function leafGroundOf(specsRoot: string): Map<string, CopiedGround> {
             for (const entry of treeEntries(ground)) {
                 const path = join(ground, entry.name);
                 const fingerprint = fingerprintOf(path);
-                const key = `${role}/${entry.name}\0${fingerprint}`;
-                const group = groups.get(key) ?? {
-                    copies: [],
-                    fingerprint,
-                    target: join(specsRoot, role, entry.name),
-                };
+                const key = `${role}\0${fingerprint}`;
+                const group = groups.get(key) ?? { copies: [], fingerprint, role };
                 group.copies.push(path);
                 groups.set(key, group);
             }
@@ -1243,47 +1245,63 @@ function leafGroundOf(specsRoot: string): Map<string, CopiedGround> {
 
 /**
  * Ground entries — a file or a tree — that two leaves or more hold byte for
- * byte under the same role and the same name.
+ * byte under the same role, by one name or by several.
  */
 function copiedGround(rootDir: string): CopiedGround[] {
     const copied: CopiedGround[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
-        for (const group of leafGroundOf(specsRoot).values()) {
-            if (group.copies.length > 1) {
-                copied.push({ ...group, copies: group.copies.toSorted() });
+        for (const { copies, fingerprint, role } of leafGroundOf(specsRoot).values()) {
+            const leaves = new Set(copies.map((copy) => dirname(dirname(copy))));
+            if (leaves.size < 2) {
+                continue;
             }
+            const names = new Set(copies.map((copy) => basename(copy)));
+            const [name] = names;
+            copied.push({
+                copies: copies.toSorted(),
+                fingerprint,
+                target: names.size === 1 && name !== undefined ? join(specsRoot, role, name) : null,
+            });
         }
     }
     return copied;
 }
 
+/** What a copy's warning ends on: where the entry goes, or why `--fix` leaves it. */
+function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): string {
+    if (target === null) {
+        return ' — the copies go by several names, so `--fix` moves none: give them the one name the entry should keep';
+    }
+    const where = relative(rootDir, target);
+    if (treeKind(target) !== undefined && fingerprintOf(target) !== fingerprint) {
+        return `, in ${where}, which holds another ${basename(target)}: rename one of the two`;
+    }
+    return `, in ${where} — \`--fix\` moves it there and rewrites every path that named a copy`;
+}
+
 /**
  * CONVENTIONS C27 — ground several leaves share lives once. An entry of a
- * leaf's ground that another leaf holds byte for byte, under the same role
- * and name, is a copy: it belongs in the specs root's folder of its role,
- * named by the path that climbs to it.
+ * leaf's ground that another leaf holds byte for byte, under the same role,
+ * is a copy, whatever it is called: it belongs in the specs root's folder of
+ * its role, named by the path that climbs to it.
  *
  * The catch: a seed copied into every leaf that needs it. The copies drift —
  * one leaf's gains a column, the next does not — and the reader of either
  * cannot tell a deliberate difference from a forgotten one. A warning, since
  * two leaves may mean to diverge tomorrow; `--fix` moves one copy and rewrites
- * every path that named any of them.
+ * every path that named any of them — only when the copies share one name,
+ * since that name is the only one a fix could keep.
  */
 export function checkCopiedGround(rootDir: string): TokenViolation[] {
-    return copiedGround(rootDir).flatMap(({ copies, fingerprint, target }) => {
-        const taken = treeKind(target) !== undefined && fingerprintOf(target) !== fingerprint;
-        const where = relative(rootDir, target);
-        return copies.map((copy) => ({
+    return copiedGround(rootDir).flatMap((group) => {
+        const advice = copyAdvice(rootDir, group);
+        return group.copies.map((copy) => ({
             file: relative(rootDir, copy),
             line: 1,
-            message: `the same ${isDir(copy) ? 'tree' : 'file'} is in ${copies
+            message: `the same ${isDir(copy) ? 'tree' : 'file'} is in ${group.copies
                 .filter((other) => other !== copy)
                 .map((other) => relative(rootDir, other))
-                .join(', ')} — ground several leaves share lives once, in ${where}${
-                taken
-                    ? `, which holds another ${basename(target)}: rename one of the two`
-                    : ' — `--fix` moves it there and rewrites every path that named a copy'
-            }`,
+                .join(', ')} — ground several leaves share lives once${advice}`,
             rule: 'c27w-duplicate-ground',
             severity: 'warn' as const,
         }));
@@ -1357,13 +1375,16 @@ function repointDocument(file: string, move: (path: string) => string | undefine
  * of its role — a `git mv` in a work tree — the others are deleted, and every
  * path of the specs tree that named a copy names the moved entry. An entry the
  * target already holds byte for byte keeps it and deletes every copy; one
- * holding something else is the author's call, and nothing moves. A leaf's
- * ground folder the move empties goes with it. Returns
+ * holding something else is the author's call, and nothing moves; so are
+ * copies of several names. A leaf's ground folder the move empties goes with it. Returns
  * what moved, relative to `rootDir`.
  */
 export function fixCopiedGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const { copies, fingerprint, target } of copiedGround(rootDir)) {
+        if (target === null) {
+            continue;
+        }
         const held = treeKind(target) !== undefined;
         if (held && fingerprintOf(target) !== fingerprint) {
             continue;
