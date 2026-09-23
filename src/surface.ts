@@ -162,6 +162,9 @@ export {
     type RelativePath,
 } from './model/chain/spec-path.js';
 
+// A seed written in the test — the statements a chain lays, where they are read
+export { sql, type SqlText } from './model/chain/sql.js';
+
 // A linter's report as a golden keeps it — the transform a rule's specs share
 export { lintReport } from './model/result/lint-report.js';
 

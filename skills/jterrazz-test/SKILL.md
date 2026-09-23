@@ -63,7 +63,8 @@ What a test stands on is named by one of two calls, with the path relative to th
 
 | Call                                                                     | Reads                                                     |
 | ------------------------------------------------------------------------ | --------------------------------------------------------- |
-| `.seed(file('./seeds/users.sql'))`                                       | database state, before the action                         |
+| ``.seed(sql`INSERT …`)``                                                 | a test's own database state, written in the test          |
+| `.seed(file('./seeds/users.sql'))`                                       | database state several tests share, before the action     |
 | `.request(file('./requests/create.http'))`                               | a complete request — the terminal action                  |
 | `.post('/orders', file('./requests/order.json'))`                        | a request body, sent as the file holds it                 |
 | `.fixture(file('./fixtures/config.toml'))`                               | one file, copied into the working directory               |

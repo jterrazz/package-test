@@ -169,7 +169,7 @@ Two more hold what each path says. **The verb and the folder agree**: `seed()` r
 | Contracts       | `contracts/<name>.contracts.ts` (facade) · `contracts/<provider>/<name>.ts` (unit, provider ∈ http\|openai\|anthropic)                                                                   |
 | Contract data   | `contracts/<provider>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                                                                                       |
 | Requests        | what a spec sends: `requests/<name>.http`, read by `.request(file('./requests/<name>.http'))`, and a body `requests/<name>.<ext>`, sent by `.post(path, file('./requests/<name>.json'))` |
-| Seeds           | `seeds/<name>.sql` (database state), read by `.seed(file('./seeds/<name>.sql'))`                                                                                                         |
+| Seeds           | database state: ``.seed(sql`…`)`` written in the test, or `seeds/<name>.sql`, read by `.seed(file('./seeds/<name>.sql'))`, when several tests share it                                   |
 | Fixtures        | `fixtures/<name>` (file state) — the leaf's own; the shared pool is `specs/fixtures/`, reached by the path that climbs to it, as `specs/seeds/` is for seeds                             |
 | Goldens         | `expected/<name>.<ext>` (everything asserted, response `.http` included), read by `.toMatch(file('./expected/<name>.<ext>'))`; a tree by `.toMatch(directory('./expected/<name>/'))`     |
 | Service keys    | name the service: the report prints the key, and its kebab-case form is the folder its init script sits in                                                                               |

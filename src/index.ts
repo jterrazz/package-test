@@ -70,7 +70,12 @@ export type { JobsSpecification } from './facets/jobs/jobs.chain.js';
 export type { JobsResult } from './facets/jobs/jobs.result.js';
 export type { MobileSpecification } from './facets/mobile/mobile.chain.js';
 export type { WebsiteSpecification } from './facets/website/website.chain.js';
-export type { DockerSpecConfig, JobHandle, SpecificationConfig } from './model/chain/builder.js';
+export type {
+    DockerSpecConfig,
+    JobHandle,
+    SeedSource,
+    SpecificationConfig,
+} from './model/chain/builder.js';
 
 // Results that read a disk, a database or a container — node only.
 //

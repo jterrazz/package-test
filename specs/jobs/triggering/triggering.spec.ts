@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { file, http } from '../../../src/index.js';
+import { file, http, sql } from '../../../src/index.js';
 import { jobs } from '../jobs.specification.js';
 import { jobs as staticJobs, staticRuns } from '../static-jobs.specification.js';
 
@@ -17,6 +17,23 @@ describe('jobs', () => {
 
         // Then - no users were seeded this time, so no events were produced
         await expect(result.table('events', { database: 'analyticsDb' })).toBeEmpty();
+    });
+
+    test('a job reads the state a seed written in the test laid', async () => {
+        // Given - one user, written in the test
+        const result = await jobs
+            .seed(
+                sql`
+                    INSERT INTO "users" (name, email) VALUES ('Ada', 'ada@test.com');
+                `,
+                { database: 'db' },
+            )
+            .trigger('sync-events');
+
+        // Then - the job synced that one user
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, 'user_synced', '{"name":"Ada"}', '{{iso8601}}'],
+        ]);
     });
 
     test('trigger rejects unknown job names', async () => {

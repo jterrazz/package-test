@@ -55,11 +55,12 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule A3
 
 Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.call(subject)` (rule B2).
 
-| Setup                             | Means                                                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `.seed(file('./seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several |
-| `.intercept(contracts)`           | declare what the outside world replies ([16](16-contracts.md))                                         |
-| `.clock('2026-03-04T09:30:00Z')`  | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths))        |
+| Setup                             | Means                                                                                           |
+| --------------------------------- | ----------------------------------------------------------------------------------------------- |
+| ``.seed(sql`INSERT …`)``          | run the statements written in the test before the call; `{ database }` targets one of several   |
+| `.seed(file('./seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call — the state several tests share |
+| `.intercept(contracts)`           | declare what the outside world replies ([16](16-contracts.md))                                  |
+| `.clock('2026-03-04T09:30:00Z')`  | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths)) |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
 

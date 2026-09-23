@@ -119,6 +119,7 @@ A directory's path ends in `/`, and the type refuses one that does not; a `file(
 | _(nothing)_                                        | Empty directory                                                      |
 | `.fixture(directory('../../fixtures/base-shop/'))` | Spread a whole shared project into the cwd                           |
 | `.fixture(file('./fixtures/config.toml'))`         | Copy the leaf's own `fixtures/config.toml` into the cwd              |
+| ``.seed(sql`INSERT …`)``                           | SQL written in the test into a service database                      |
 | `.seed(file('./seeds/users.sql'))`                 | SQL into a service database (rule A7 governs the `database:` option) |
 
 ```typescript

@@ -46,6 +46,8 @@ import { copyPlan } from './fixtures.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile, requireDiskTarget } from './spec-path.js';
 import type { DiskFile, DiskTarget } from './spec-path.js';
+import { isSqlText } from './sql.js';
+import type { SqlText } from './sql.js';
 import type { StubBackend } from './stub-backend.js';
 
 // ── Types ──
@@ -154,14 +156,17 @@ export type SpecificationConfig = {
     transform?: ((text: string) => string) | undefined;
 };
 
-/** A SQL seed file to execute before the action, optionally targeting a named database. */
+/** A SQL seed to execute before the action, optionally targeting a named database. */
 type SeedEntry = {
     database?: string | undefined;
     /** The directory the path is read from — the spec's, or the document's that named it. */
     dir?: string | undefined;
-    /** Relative to the spec file, or to the document that named it. */
-    path: string;
+    /** Relative to the spec file, or to the document that named it — or the statements themselves. */
+    source: { path: string } | { text: string };
 };
+
+/** What `.seed()` takes: a seed file, or the statements written in the test. */
+export type SeedSource = DiskFile<'.sql'> | SqlText;
 
 /** An HTTP request to perform against the server adapter. */
 export type RequestEntry = {
@@ -200,9 +205,9 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
     headers: (headers: Record<string, string>) => ApiSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<ApiSpecification<DatabaseKey>>;
-    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run before the action. */
+    /** Queue a SQL seed — ``sql`…` `` written in the test, or `file('./seeds/<name>.sql')` shared — to run before the action. */
     seed: (
-        source: DiskFile<'.sql'>,
+        source: SeedSource,
         options?: { database?: DatabaseKey },
     ) => ApiSpecification<DatabaseKey>;
 
@@ -244,9 +249,9 @@ export type JobsSpecification<DatabaseKey extends string = string> = {
     clock: (iso: string) => JobsSpecification<DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
-    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run before the action. */
+    /** Queue a SQL seed — ``sql`…` `` written in the test, or `file('./seeds/<name>.sql')` shared — to run before the action. */
     seed: (
-        source: DiskFile<'.sql'>,
+        source: SeedSource,
         options?: { database?: DatabaseKey },
     ) => JobsSpecification<DatabaseKey>;
 
@@ -277,9 +282,9 @@ export type IntegrationSpecification<
     clock: (iso: string) => IntegrationSpecification<Services, DatabaseKey>;
     /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<IntegrationSpecification<Services, DatabaseKey>>;
-    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run before the call. */
+    /** Queue a SQL seed — ``sql`…` `` written in the test, or `file('./seeds/<name>.sql')` shared — to run before the call. */
     seed: (
-        source: DiskFile<'.sql'>,
+        source: SeedSource,
         options?: { database?: DatabaseKey },
     ) => IntegrationSpecification<Services, DatabaseKey>;
 
@@ -306,9 +311,9 @@ export type CliSpecification<DatabaseKey extends string = string> = {
      * Chained calls layer.
      */
     fixture: (source: DiskTarget) => CliSpecification<DatabaseKey>;
-    /** Queue a SQL seed, `file('./seeds/<name>.sql')`, to run against a database before the action. */
+    /** Queue a SQL seed — ``sql`…` `` written in the test, or `file('./seeds/<name>.sql')` shared — to run against a database before the action. */
     seed: (
-        source: DiskFile<'.sql'>,
+        source: SeedSource,
         options?: { database?: DatabaseKey },
     ) => CliSpecification<DatabaseKey>;
 
@@ -433,18 +438,22 @@ export class SpecificationBuilder
     }
 
     /**
-     * Queue a SQL seed, named with `file()`, to run before the action.
+     * Queue a SQL seed to run before the action: the statements written in the
+     * test with ``sql`…` ``, or a file several tests share, named with `file()`.
      *
      * With two or more declared databases the `database` option is mandatory;
      * with exactly one it is forbidden (CONVENTIONS A7).
      *
      * @example
-     *   api.seed(file('./seeds/users.sql'), { database: 'db' }).get('/users');
+     *   api.seed(sql`INSERT INTO users (name) VALUES ('Ada');`, { database: 'db' }).get('/users');
+     *   api.seed(file('../../seeds/users.sql'), { database: 'db' }).get('/users');
      */
-    seed(source: DiskFile<'.sql'>, options?: { database?: string }): this {
-        const seed = requireDiskFile('seed', source, '.sql');
+    seed(source: SeedSource, options?: { database?: string }): this {
+        const seed = isSqlText(source)
+            ? { text: source.text }
+            : { path: requireDiskFile('seed', source, '.sql').path };
         validateDatabaseOption('seed', this.config, options?.database);
-        this.seeds.push({ database: options?.database, path: seed.path });
+        this.seeds.push({ database: options?.database, source: seed });
         return this;
     }
 
@@ -882,11 +891,14 @@ export class SpecificationBuilder
                 throw new Error('seed() requires a database adapter');
             }
 
-            const sql = readFileSync(
-                resolveSpecPath('seed', entry.path, entry.dir ?? this.testDir),
-                'utf8',
-            );
-            await db.seed(sql);
+            const statements =
+                'text' in entry.source
+                    ? entry.source.text
+                    : readFileSync(
+                          resolveSpecPath('seed', entry.source.path, entry.dir ?? this.testDir),
+                          'utf8',
+                      );
+            await db.seed(statements);
         }
 
         // Copy fixtures into the working directory, layered in chain order —
@@ -971,7 +983,11 @@ export class SpecificationBuilder
                     seed.line,
                 );
             }
-            this.seeds.push({ database: seed.database ?? undefined, dir, path: seed.path });
+            this.seeds.push({
+                database: seed.database ?? undefined,
+                dir,
+                source: { path: seed.path },
+            });
         }
         const contracts = await loadIntercepts(file.document, dir, place);
         if (contracts.length > 0) {

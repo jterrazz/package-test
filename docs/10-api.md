@@ -65,7 +65,8 @@ Without `root`, the framework finds the package being tested by walking up from 
 
 | Setup                                           | Description                                                                                                                     |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `.seed(file('./seeds/file.sql'))`               | Load that `.sql` file, named by its path from the spec file, into the database                                                  |
+| ``.seed(sql`INSERT …`)``                        | Load the statements written in the test — a test's own state, dedented, no `${}` hole                                           |
+| `.seed(file('../../seeds/file.sql'))`           | Load that `.sql` file, named by its path from the spec file — the state several tests share                                     |
 | `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                              |
 | `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                       |
 | `.intercept(contract)`                          | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                          |

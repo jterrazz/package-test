@@ -1,13 +1,35 @@
 import { Hono } from 'hono';
 import { describe, expect, test } from 'vitest';
 
-import { file, specification } from '../../../src/index.js';
+import { file, specification, sql } from '../../../src/index.js';
 import type { ApiSpecification } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 // What a seed loads, in order and per database, is data: the documents beside
 // This file state it. What stays here is what a chain REFUSES (A7, a missing
 // File, an unknown database) and a runner with no database at all.
+
+describe('seeding', () => {
+    test('lays the statements written in the test, in the database it names', async () => {
+        // Given - a user written in the test, and the shared pool's two under it
+        const result = await api
+            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
+            .seed(
+                sql`
+                    INSERT INTO "users" (name, email) VALUES ('Carol', 'carol@test.com');
+                `,
+                { database: 'db' },
+            )
+            .get('/users');
+
+        // Then - the three rows, in the order the seeds ran
+        await expect(result.table('users', { database: 'db' })).toMatch([
+            [1, 'Alice', 'alice@test.com'],
+            [2, 'Bob', 'bob@test.com'],
+            [3, 'Carol', 'carol@test.com'],
+        ]);
+    });
+});
 
 describe('seeding details', () => {
     // RUNTIME A7 — with two databases `database:` is required on every seed,
