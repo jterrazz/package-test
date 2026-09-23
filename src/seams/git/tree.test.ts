@@ -79,6 +79,25 @@ describe('the tree git does not ignore', () => {
         expect(treeNames(join(root, 'specs'))).toStrictEqual(['rm']);
     });
 
+    test('reads the disk inside a `node_modules/` git ignores — a dependency is no project file', () => {
+        // Given - a checkout ignoring node_modules, with a package installed under it
+        const root = project(
+            [
+                'src/a.ts',
+                'node_modules/@scope/pkg/package.json',
+                'node_modules/@scope/pkg/dist/index.js',
+            ],
+            { add: ['src'], ignore: 'node_modules/\n' },
+        );
+        const installed = join(root, 'node_modules', '@scope', 'pkg');
+
+        // Then - the project's walk still never enters it, and a read of the dependency sees the disk
+        expect(treeNames(root).toSorted()).toStrictEqual(['.gitignore', 'src']);
+        expect(treeNames(installed).toSorted()).toStrictEqual(['dist', 'package.json']);
+        expect(treeKind(join(installed, 'package.json'))).toBe('file');
+        expect(treeKind(join(installed, 'dist'))).toBe('directory');
+    });
+
     test('throws on a directory that is not there, as the disk does', () => {
         // Given - a repository, and a path inside it that names nothing
         const root = project(['specs/rm/rm.spec.yaml'], { add: ['specs'] });

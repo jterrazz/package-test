@@ -17,6 +17,10 @@ import { basename, dirname, join, resolve, sep } from 'node:path';
  * there, and a hand-made `.git` folder fails it too — is read from the disk,
  * which is where every E2E fixture the runner copies and every rule test's
  * scratch tree live.
+ *
+ * The listing judges the project's OWN files. A path inside a `node_modules/`
+ * is a dependency's, whatever `.gitignore` says of it, and is read from the
+ * disk too.
  */
 
 /** A listed child: the part of `Dirent` the walks read. */
@@ -76,8 +80,16 @@ function indexOf(top: string, paths: string[]): WorkTree {
     return { children, top };
 }
 
-/** The work tree `dir` lies in, or null when git places it in none. */
+/** Is `path` inside an installed dependency? */
+function inDependency(path: string): boolean {
+    return path.split(sep).includes('node_modules');
+}
+
+/** The work tree `dir` lies in, or null when git places it in none or it is a dependency's. */
 function workTreeOf(dir: string): null | WorkTree {
+    if (inDependency(dir)) {
+        return null;
+    }
     const known = trees.find(({ top }) => under(dir, top));
     if (known !== undefined) {
         return known;

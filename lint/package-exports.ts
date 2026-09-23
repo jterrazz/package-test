@@ -1,7 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import { readFileCached } from './fs-cache.js';
 
 /**
  * The subpaths this package actually publishes, read from its OWN
@@ -19,12 +18,24 @@ import { readFileCached } from './fs-cache.js';
  * depend on where the linted file sits: `<pkg>/dist/oxlint.js` in an install,
  * `<repo>/lint/` when the framework lints itself. `import.meta.url` is
  * safe in both bundle formats — the CJS build shims it to `__filename`.
+ *
+ * The manifest is read from the disk, never through the tree listing: in an
+ * install it is a dependency's file under a `node_modules/` the consumer's
+ * `.gitignore` names, and the listing judges the project's own files only.
  */
 
 const PACKAGE = '@jterrazz/test';
 
 /** Manifests are read once per lint process. */
 let cached: null | string[] = null;
+
+function readManifest(path: string): null | string {
+    try {
+        return readFileSync(path, 'utf8');
+    } catch {
+        return null;
+    }
+}
 
 /**
  * Walk up from `startDir` for the `package.json` that declares {@link PACKAGE}.
@@ -34,7 +45,7 @@ let cached: null | string[] = null;
 function findOwnManifest(startDir: string): null | Record<string, unknown> {
     let dir = startDir;
     for (;;) {
-        const text = readFileCached(join(dir, 'package.json'));
+        const text = readManifest(join(dir, 'package.json'));
         if (text !== null) {
             try {
                 const manifest = JSON.parse(text) as Record<string, unknown>;

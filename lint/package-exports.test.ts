@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import {
     existsSync,
     mkdirSync,
@@ -107,6 +108,27 @@ describe('package-exports — F1 reads the published contract', () => {
         mkdirSync(dist, { recursive: true });
 
         // Then - the root export is not a subpath; the other two are, specifier-formed
+        expect(declaredSubpaths(dist)).toStrictEqual([
+            '@jterrazz/test/oxlint',
+            '@jterrazz/test/vitest',
+        ]);
+    });
+
+    test('reads an install in a gitignored node_modules — a dependency is read from the disk', () => {
+        // Given - a consumer checkout that ignores node_modules, with the package installed as a copy under it
+        const root = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
+        manifestAt(root, { name: 'some-consumer' });
+        writeFileSync(resolve(root, '.gitignore'), 'node_modules/\n');
+        execFileSync('git', ['init', '--quiet'], { cwd: root });
+        const installed = resolve(root, 'node_modules/@jterrazz/test');
+        manifestAt(installed, {
+            exports: { '.': {}, './oxlint': {}, './vitest': {} },
+            name: '@jterrazz/test',
+        });
+        const dist = resolve(installed, 'dist');
+        mkdirSync(dist, { recursive: true });
+
+        // Then - git's listing does not decide what a dependency publishes
         expect(declaredSubpaths(dist)).toStrictEqual([
             '@jterrazz/test/oxlint',
             '@jterrazz/test/vitest',
