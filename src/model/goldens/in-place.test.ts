@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
@@ -11,6 +11,7 @@ import {
     renderText,
     renderValue,
     writeInPlace,
+    writePendingRewrites,
 } from './in-place.js';
 
 /** A scratch test file holding `source`, removed when the test ends. */
@@ -162,5 +163,24 @@ describe('writeInPlace — the test file rewritten where its toMatch stands', ()
             writeInPlace({ column: 1, file, line: 1 }, () => '``');
         }).toThrow(`update mode: no toMatch( stands at ${file}:1:1`);
         expect(readFileSync(file, 'utf8')).toBe('const x = 1;\n');
+    });
+
+    test('with a pending folder the file waits for the run to end, then is written', () => {
+        // Given - a scratch test, and a pending folder for the run
+        const file = scratchFile('expect(one).toMatch(``);\n');
+        const folder = join(file, '..', 'pending');
+
+        // When - a value is written in place
+        writeInPlace(
+            { column: 13, file, line: 1 },
+            (indent) => renderText('first', indent),
+            folder,
+        );
+
+        // Then - the test file is untouched until the pending rewrites are written, and none is left waiting
+        expect(readFileSync(file, 'utf8')).toBe('expect(one).toMatch(``);\n');
+        writePendingRewrites(folder);
+        expect(readFileSync(file, 'utf8')).toBe('expect(one).toMatch(`first`);\n');
+        expect(existsSync(folder)).toBe(false);
     });
 });

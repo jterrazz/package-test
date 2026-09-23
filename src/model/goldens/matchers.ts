@@ -48,7 +48,14 @@ import {
 } from '../result/text-assertions.js';
 import type { ValueRoute, WholeCall } from '../result/text-assertions.js';
 import { TextAccessor } from '../result/text.js';
-import { callSiteOf, renderRows, renderText, renderValue, writeInPlace } from './in-place.js';
+import {
+    callSiteOf,
+    deferRewritesTo,
+    renderRows,
+    renderText,
+    renderValue,
+    writeInPlace,
+} from './in-place.js';
 
 type MatcherResult = {
     message: () => string;
@@ -708,7 +715,8 @@ export async function registerMatchers(): Promise<void> {
     globals[REGISTERED] = true;
 
     try {
-        const { chai, expect } = await import('vitest');
+        const { chai, expect, inject } = await import('vitest');
+        deferRewritesTo(() => inject('inPlaceRewrites'));
         expect.extend({
             [GOLDEN_MATCHER]: toMatchGolden,
             [WHOLE_MATCHER]: toMatchWhole,

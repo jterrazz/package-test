@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { configDefaults, mergeConfig } from 'vitest/config';
 import type {
     TestProjectConfiguration,
@@ -87,6 +89,17 @@ const HYGIENE = {
 } as const;
 
 /**
+ * The global setup that writes update mode's rewrites once the run is
+ * reported — `in-place-setup.ts` beside this module in a source checkout,
+ * `in-place-setup.js` in the built package, where the bundle and its entries
+ * share one folder.
+ */
+export function inPlaceSetup(): string {
+    const source = join(import.meta.dirname, 'in-place-setup.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'in-place-setup.js');
+}
+
+/**
  * Options are a vite/vitest config plus one key of the framework's own.
  * Everything stated here wins over the preset's defaults.
  */
@@ -119,6 +132,7 @@ export function projectDefaults(): TestProjectInlineConfiguration {
         test: {
             attachmentsDir: ATTACHMENTS_DIR,
             exclude: EXCLUDE,
+            globalSetup: [inPlaceSetup()],
             hookTimeout: HOOK_TIMEOUT_MS,
             ...HYGIENE,
             testTimeout: TEST_TIMEOUT_MS,
@@ -175,6 +189,7 @@ function rootDefaults(): ViteUserConfig {
             attachmentsDir: ATTACHMENTS_DIR,
             coverage: COVERAGE,
             exclude: EXCLUDE,
+            globalSetup: [inPlaceSetup()],
             hookTimeout: HOOK_TIMEOUT_MS,
             ...HYGIENE,
             outputFile: REPORTER_OUTPUT_FILES,

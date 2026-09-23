@@ -6,7 +6,7 @@ import {
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../model/artifacts/artifacts.js';
-import { defineSpecConfig } from './preset.js';
+import { defineSpecConfig, inPlaceSetup } from './preset.js';
 import { unit } from './projects.js';
 
 describe('defineSpecConfig() — artefact paths', () => {
@@ -228,6 +228,21 @@ describe('defineSpecConfig() — the hygiene a suite does not have to write', ()
 
         // Then - the preset is a default, not a ceiling
         expect(config.test?.retry).toBe(2);
+    });
+});
+
+describe('defineSpecConfig() — update mode writes once the run is reported', () => {
+    test('the root and every inline project carry the setup that writes the rewrites', () => {
+        // Given - a config with one inline project
+        const config = defineSpecConfig({
+            test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
+        });
+
+        // Then - both carry the setup, which exists where the preset names it
+        const [project] = config.test?.projects ?? [];
+        expect(config.test?.globalSetup).toStrictEqual([inPlaceSetup()]);
+        expect(project).toMatchObject({ test: { globalSetup: [inPlaceSetup()] } });
+        expect(inPlaceSetup()).toMatch(/in-place-setup\.ts$/u);
     });
 });
 

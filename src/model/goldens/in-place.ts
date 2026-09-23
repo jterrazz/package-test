@@ -1,5 +1,6 @@
-import { readFileSync, writeFileSync } from 'node:fs';
-import { sep } from 'node:path';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { isFrameworkFrame } from '../chain/caller.js';
@@ -14,6 +15,14 @@ import { dedent } from '../matching/dedent.js';
  * source the run loaded: every rewrite of one file during a run is laid on
  * that same original text, so a second rewrite lands where its stack says
  * even after a first one moved the lines below it.
+ *
+ * Under the preset the test file itself is written when the run ENDS: vitest
+ * prints a failure's code frame by reading the file on disk at the line the
+ * run loaded, so a file rewritten mid-run would frame a later failure at
+ * another test's code. A worker writes the rewritten source to the run's
+ * pending folder instead, and the global setup the preset registers writes
+ * each pending source to its test file once the report is printed. With no
+ * pending folder — a run outside the preset — the file is written at once.
  */
 
 /** Where a `toMatch(<value>)` call stands in a test's source, 1-based. */
@@ -217,13 +226,56 @@ type Ledger = { edits: Map<number, { end: number; text: string }>; original: str
 
 const LEDGERS = new Map<string, Ledger>();
 
+/** A test file's rewritten source, waiting in the pending folder for the run to end. */
+type Pending = { file: string; source: string };
+
+/** Where this run's rewrites wait, or `null` when they are written at once. */
+let pendingFolder: (() => string | undefined) | null = null;
+
+/**
+ * Name where this run's rewrites wait until it ends — a function, read at
+ * each write: the folder is the project's, and one worker may serve several.
+ * `null` writes each rewrite at once.
+ */
+export function deferRewritesTo(folder: (() => string | undefined) | null): void {
+    pendingFolder = folder;
+}
+
+/** Save `source` as `file`'s rewrite: into the pending `folder` when there is one, over the file otherwise. */
+function save(file: string, source: string, folder: string | undefined): void {
+    if (folder === undefined) {
+        writeFileSync(file, source);
+        return;
+    }
+    mkdirSync(folder, { recursive: true });
+    const name = createHash('sha256').update(file).digest('hex').slice(0, 16);
+    const pending: Pending = { file, source };
+    writeFileSync(join(folder, `${name}.json`), JSON.stringify(pending));
+}
+
+/** Write every rewrite waiting in `folder` over its test file, then remove the folder. */
+export function writePendingRewrites(folder: string): void {
+    if (!existsSync(folder)) {
+        return;
+    }
+    for (const name of readdirSync(folder).filter((entry) => entry.endsWith('.json'))) {
+        const pending = JSON.parse(readFileSync(join(folder, name), 'utf8')) as Pending;
+        writeFileSync(pending.file, pending.source);
+    }
+    rmSync(folder, { force: true, recursive: true });
+}
+
 /**
  * Write the value `render` states over the argument of the `toMatch(` call
- * standing at `site`, and save the test file. Every rewrite of a file is laid
+ * standing at `site`, and save the test file's new source. Every rewrite of a file is laid
  * on the source the run loaded, so a line a first rewrite moved is still
  * found where the stack of the second one says.
  */
-export function writeInPlace(site: CallSite, render: (indent: string) => string): void {
+export function writeInPlace(
+    site: CallSite,
+    render: (indent: string) => string,
+    folder: string | undefined = pendingFolder?.(),
+): void {
     const ledger: Ledger = LEDGERS.get(site.file) ?? {
         edits: new Map(),
         original: readFileSync(site.file, 'utf8'),
@@ -244,5 +296,14 @@ export function writeInPlace(site: CallSite, render: (indent: string) => string)
             source = source.slice(0, start) + edit.text + source.slice(edit.end);
         }
     }
-    writeFileSync(site.file, source);
+    save(site.file, source, folder);
+}
+
+/** Where the run's rewrites wait — what the preset's global setup provides to each project. */
+declare module 'vitest' {
+    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
+    interface ProvidedContext {
+        /** Where update mode leaves each rewritten test source until the run ends. */
+        inPlaceRewrites?: string;
+    }
 }

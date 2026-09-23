@@ -640,4 +640,18 @@ describe('update mode writes the value in place', () => {
             });
         `);
     });
+
+    test('a failure after a value was written in place frames its own line, and the value lands once the run is reported', async () => {
+        // Given - a scratch test recording a value of several lines, then failing below it, run under update mode and the preset's setup
+        const result = await vitestCli
+            .fixture(directory('./fixtures/in-place-failure/'))
+            .env({ TEST_UPDATE: '1' })
+            .exec('run');
+
+        // Then - the failure's code frame is the failing expect, not the lines the recorded value pushed down
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toMatch(/13\|\s+expect\(marker\)\.toBe\('another line'\);/u);
+        // And - the value is written in place all the same
+        expect(result.file('recorded.test.mjs').content).toContain('"lines": 2');
+    });
 });

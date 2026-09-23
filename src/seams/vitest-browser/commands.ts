@@ -75,8 +75,10 @@ export const inPlaceWrite: BrowserCommand<[string, string], string> = (context, 
             'update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written.',
         );
     }
-    writeInPlace({ column: frame.column, file, line: frame.line }, (indent) =>
-        renderText(text, indent),
+    writeInPlace(
+        { column: frame.column, file, line: frame.line },
+        (indent) => renderText(text, indent),
+        context.project.getProvidedContext().inPlaceRewrites,
     );
     return `${file}:${frame.line}`;
 };

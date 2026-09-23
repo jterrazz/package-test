@@ -7,6 +7,7 @@ import {
     beforeEach,
     describe,
     expect,
+    inject,
     onTestFinished,
     test,
     vi,
@@ -24,6 +25,7 @@ import { ResponseAccessor } from '../result/response.js';
 import { TableAccessor } from '../result/table.js';
 import { WHOLE_MATCHER } from '../result/text-assertions.js';
 import { TextAccessor } from '../result/text.js';
+import { deferRewritesTo } from './in-place.js';
 import { buildUpdatedResponse, compareResponse, registerMatchers } from './matchers.js';
 
 const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
@@ -626,8 +628,11 @@ function scratchTest(call: string): { file: string; read: () => string; stack: s
     const scratch = mkdtempSync(join(tmpdir(), 'whole-in-place-'));
     const testFile = join(scratch, 'scratch.test.ts');
     writeFileSync(testFile, `test('records', async () => {\n    ${call}\n});\n`);
+    // A scratch test is read back by the test that wrote it: written at once, never left for the run's end.
+    deferRewritesTo(null);
     onTestFinished(() => {
         rmSync(scratch, { force: true, recursive: true });
+        deferRewritesTo(() => inject('inPlaceRewrites'));
     });
     return {
         file: testFile,
