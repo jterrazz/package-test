@@ -93,10 +93,12 @@ const FRAMEWORK_LAYERS = {
             'facets/integration/integration.result',
             'facets/mobile/mobile.result',
             'facets/website/website.result',
-            // The three seams that carry no engine of their own: a docker
-            // Lookup is a shell read, a yaml document is a parse, a process is
+            // The four seams that carry no engine of their own: a docker
+            // Lookup is a shell read, the tree git does not ignore is one
+            // `git ls-files`, a yaml document is a parse, a process is
             // `node:child_process`.
             'seams/docker/',
+            'seams/git/',
             'seams/process/',
             'seams/yaml/document',
             // Update-mode detection is a pure env read the literate runner

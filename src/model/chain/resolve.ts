@@ -1,6 +1,7 @@
 import { existsSync, realpathSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
 
+import { treeKind } from '../../seams/git/tree.js';
 import type { CliEnv } from '../ports/cli.port.js';
 import { requireRelativePath } from './spec-path.js';
 
@@ -18,7 +19,8 @@ const ROOT_MARKER = 'package.json';
  *
  * The existence probe is injected so the lint layer can pass its cached one
  * (A9's `a9w-redundant-root` derives the same root, and must derive it the
- * same way).
+ * same way): both read the tree git does not ignore, so a `.gitignore`d
+ * `package.json` marks no root for either.
  */
 export function findRoot(startDir: string, exists: (path: string) => boolean): string | undefined {
     let dir = startDir;
@@ -36,11 +38,12 @@ export function findRoot(startDir: string, exists: (path: string) => boolean): s
 
 /**
  * Auto-discover the project root from a starting directory (CONVENTIONS A9):
- * walk up to the first directory that carries `package.json`; if none does,
- * the starting directory itself.
+ * walk up to the first directory that carries a `package.json` git does not
+ * ignore (outside a work tree, any on disk); if none does, the starting
+ * directory itself.
  */
 export function discoverRoot(startDir: string): string {
-    return findRoot(startDir, existsSync) ?? startDir;
+    return findRoot(startDir, (path) => treeKind(path) === 'file') ?? startDir;
 }
 
 /**

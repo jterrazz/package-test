@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
@@ -109,6 +110,22 @@ describe('root discovery (CONVENTIONS A9)', () => {
         // Given - the ordinary single-package repo
         // Then - the nearest ancestor carrying the manifest is the root
         expect(discoverRoot(resolve(base, 'project/tests/feature'))).toBe(resolve(base, 'project'));
+    });
+
+    test('in a git checkout, a `.gitignore`d manifest marks no root and a new one does', () => {
+        // Given - a repository whose `pkg/package.json` is ignored, and a `fresh/` package nobody added
+        const repository = resolve(base, 'repository');
+        mkdirSync(resolve(repository, 'pkg/src'), { recursive: true });
+        mkdirSync(resolve(repository, 'fresh/src'), { recursive: true });
+        writeFileSync(resolve(repository, 'package.json'), '{"name":"repository"}\n');
+        writeFileSync(resolve(repository, 'pkg/package.json'), '{"name":"pkg"}\n');
+        writeFileSync(resolve(repository, 'fresh/package.json'), '{"name":"fresh"}\n');
+        writeFileSync(resolve(repository, '.gitignore'), 'pkg/package.json\n');
+        execFileSync('git', ['init', '--quiet'], { cwd: repository });
+
+        // Then - the walk passes the ignored marker, and stops at the unstaged one
+        expect(discoverRoot(resolve(repository, 'pkg/src'))).toBe(repository);
+        expect(discoverRoot(resolve(repository, 'fresh/src'))).toBe(resolve(repository, 'fresh'));
     });
 
     test('an absolute root override is used verbatim', () => {
