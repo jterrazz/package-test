@@ -29,7 +29,8 @@ import { testing } from './dist/oxlint.js';
  * - `lint/` — zero runtime imports: no external packages, and from `model/`
  *   only the pure helpers (the token list, the case conversions, fixture
  *   markers, the root walk a rule must share with the runner, the
- *   spec-document parser).
+ *   spec-document parser, the indentation a value written in place shares
+ *   with the test around it).
  *
  * `src/index.ts`, `src/surface.ts` and `src/browser/` are composition roots and
  * name no layer, so they are out of scope; module tests and `*.fixtures.ts`
@@ -67,6 +68,10 @@ const FRAMEWORK_LAYERS = {
             'model/literate/spec-document',
             'seams/yaml/document',
             'model/matching/match',
+            // C28's fixer writes a value in place; the runtime's own
+            // dedent is what reads it back, so the fixer proves its guess
+            // against it rather than reimplementing the indentation rule.
+            'model/matching/dedent',
             'model/chain/binding',
             // The path law the runner refuses by is the one the rules read by.
             'model/chain/spec-path',

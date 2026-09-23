@@ -1,0 +1,19 @@
+description: --fix inlines a golden of blank lines as the value in place, not a quoted escape of it
+fixture: ./fixtures/blank-golden/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/widget/expected: absent
+          specs/widget/widget.test.ts:
+              equals: |
+                  import { text } from '@jterrazz/test';
+                  import { expect, test } from 'vitest';
+
+                  test('a blank golden', () => {
+                      expect(text('\n\n\n')).toMatch(`
+
+
+
+                      `);
+                  });

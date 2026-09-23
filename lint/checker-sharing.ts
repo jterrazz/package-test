@@ -8,6 +8,7 @@ import {
     isGroundName,
 } from '../src/model/chain/ground.js';
 import { isRelativePath } from '../src/model/chain/spec-path.js';
+import { dedent } from '../src/model/matching/dedent.js';
 import { forgetTree, treeKind } from '../src/seams/git/tree.js';
 import {
     blankComments,
@@ -262,19 +263,17 @@ function block(text: string, indent: string): string {
     if (lines.length === 1) {
         return `\`${escapeTemplate(text)}\``;
     }
-    // A block reads back without the indentation its lines share and without
-    // Its closing line's spaces: text every line of which is indented, or whose
-    // Last line is spaces alone, would lose them, and is written as one quoted line.
-    if (
-        lines.every((line) => line === '' || /^\s/u.test(line)) ||
-        /^\s+$/u.test(lines.at(-1) ?? '')
-    ) {
-        return JSON.stringify(text);
-    }
     const inner = `${indent}    `;
     const last = lines.pop() ?? '';
     const body = lines.map((line) => (line === '' ? '' : `${inner}${line}`)).join('\n');
-    return `\`\n${escapeTemplate(body)}\n${last === '' ? indent : `${inner}${escapeTemplate(last)}`}\``;
+    const closing = last === '' ? indent : `${inner}${last}`;
+    // The literal is read back by the runtime's own dedent, so the fixer
+    // proves the round trip instead of guessing at the shapes that lose it
+    // (text already indented, a last line of spaces alone): a candidate that
+    // does not come back unchanged is written as one quoted line instead.
+    return dedent(`\n${body}\n${closing}`) === text
+        ? `\`\n${escapeTemplate(body)}\n${escapeTemplate(closing)}\``
+        : JSON.stringify(text);
 }
 
 /** A JSON value as code, each line after the first indented with the call. */
