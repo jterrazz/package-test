@@ -59,10 +59,37 @@ describe('lint — checker CLI contract', () => {
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
             .exec(['baseline .', '.']);
 
-        // Then - the file holds the one finding, and the run it holds exits 0
+        // Then - the family file holds the test section and its one finding, and the run it holds exits 0
         expect(result.exitCode).toBe(0);
-        expect(result.file('test.baseline.json').content).toBe(
-            '{\n    "jterrazz-check/c9": 1\n}\n',
+        expect(result.file('jterrazz.baseline.json').content).toBe(
+            '{\n    "test": {\n        "jterrazz-check/c9": 1\n    }\n}\n',
+        );
+    });
+
+    test('`baseline` rewrites the test section and keeps the typescript section byte for byte', async () => {
+        // Given - a family file holding both sections, the typescript one spelled on one line
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
+            .exec('baseline .');
+
+        // Then - the recorded debt is the tree's, and the other package's section is untouched
+        expect(result.exitCode).toBe(0);
+        expect(result.file('jterrazz.baseline.json').content).toBe(
+            '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {\n        "jterrazz-check/c9": 1\n    }\n}\n',
+        );
+    });
+
+    test('a project still holding test.baseline.json is told to move it, and never read', async () => {
+        // Given - the retired file, recording the very finding the tree holds
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(file('./fixtures/lint-violations/retired-baseline/test.baseline.json'))
+            .exec('.');
+
+        // Then - the run fails on the file itself, naming where the counts live now
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toBe(
+            "baseline-ratchet  test.baseline.json  is retired — the counts live in jterrazz.baseline.json › test: run 'jterrazz-test-check baseline', then delete test.baseline.json\n",
         );
     });
 
@@ -101,7 +128,7 @@ describe('lint — checker CLI contract', () => {
     });
 
     test('with no ratchet, the root member run judges and prints only its own findings', async () => {
-        // Given - a dead fixture under specs/, no test.baseline.json
+        // Given - a dead fixture under specs/, no jterrazz.baseline.json
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
             .exec('--member .');
@@ -138,7 +165,7 @@ describe('lint — checker CLI contract', () => {
 
 describe('lint — checker CLI, the logs a ratchet run prints', () => {
     test('a run another run judges prints its findings, names the judge, and exits 0', async () => {
-        // Given - one specs tree of a project keeping test.baseline.json, the tree holding a finding the file does not
+        // Given - one specs tree of a project keeping jterrazz.baseline.json › test, the tree holding a finding the section does not
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
             .exec('specs');
@@ -183,7 +210,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
 
         // Then - one line and nothing after it: what typescript check shows on a green run
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('test.baseline.json: 2 held across 2 rules\n');
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 2 held across 2 rules\n');
         expect(result.stderr.text).toBe('');
     });
 });

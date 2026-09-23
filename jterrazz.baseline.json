@@ -1,0 +1,11 @@
+{
+    "test": {
+        "jterrazz/d15w-status-only-probe": 2,
+        "jterrazz/d16w-ambient-value": 10,
+        "jterrazz/d18w-existence-only-oracle": 12,
+        "jterrazz/e9w-env-assignment-in-test": 39,
+        "jterrazz/i1-layer-boundaries": 1,
+        "jterrazz/j6w-given-in-the-test": 36,
+        "jterrazz/w5w-scenario-settles": 4
+    }
+}

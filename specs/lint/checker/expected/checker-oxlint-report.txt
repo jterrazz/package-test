@@ -1,3 +1,3 @@
 src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module
-jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no test.baseline.json
+jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
 Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.

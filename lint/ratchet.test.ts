@@ -4,13 +4,15 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import {
+    BASELINE_FILE,
     countsOf,
+    holdsRetiredBaseline,
     judge,
     keepsBaseline,
     keyOf,
     pluginDiagnostics,
     readBaseline,
-    TEST_BASELINE,
+    RETIRED_BASELINE,
     writeBaseline,
 } from './ratchet.js';
 
@@ -56,7 +58,7 @@ describe('the test ratchet — counts that may fall and never rise', () => {
         ).toStrictEqual([]);
     });
 
-    test('the file sits at the project root, written sorted for a burn-down diff', () => {
+    test('the section sits in the family file at the project root, written sorted for a burn-down diff', () => {
         // Given - a project keeping its ratchet, and a member below it
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
         const member = join(root, 'apps', 'web');
@@ -64,24 +66,74 @@ describe('the test ratchet — counts that may fall and never rise', () => {
         writeBaseline(root, { 'jterrazz/z': 1, 'jterrazz-check/a': 2 });
 
         // Then - the root keeps it and the member does not, and it reads back as written
-        expect(keepsBaseline(root)).toBeTruthy();
-        expect(keepsBaseline(member)).toBeFalsy();
+        expect(keepsBaseline(root)).toBe(true);
+        expect(keepsBaseline(member)).toBe(false);
         expect(readBaseline(root)).toStrictEqual({ 'jterrazz-check/a': 2, 'jterrazz/z': 1 });
-        expect(readFileSync(join(root, TEST_BASELINE), 'utf8')).toBe(
-            '{\n    "jterrazz-check/a": 2,\n    "jterrazz/z": 1\n}\n',
+        expect(readFileSync(join(root, BASELINE_FILE), 'utf8')).toBe(
+            '{\n    "test": {\n        "jterrazz-check/a": 2,\n        "jterrazz/z": 1\n    }\n}\n',
         );
     });
 
-    test('an unreadable file records nothing rather than failing the run', () => {
-        // Given - a baseline that is not JSON
+    test('records its section and keeps every other section byte for byte', () => {
+        // Given - a family file whose typescript section is spelled its own way, and a test section to replace
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
-        writeFileSync(join(root, TEST_BASELINE), 'not json');
+        const typescript = '{"eslint/complexity":3,   "eslint/max-depth" : 1}';
+        writeFileSync(
+            join(root, BASELINE_FILE),
+            `{\n  "typescript": ${typescript},\n  "test": { "jterrazz/old": 9 }\n}\n`,
+        );
 
-        // Then - no entry, so every finding reads as new debt — and a count that is no number is no entry
+        // When - the test section is recorded, then recorded into a file that has none
+        writeBaseline(root, { 'jterrazz/new': 1 });
+        const other = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        writeFileSync(join(other, BASELINE_FILE), `{ "typescript": ${typescript} }`);
+        writeBaseline(other, { 'jterrazz/new': 1 });
+
+        // Then - only the test section moved, and a missing one closes the object
+        expect(readFileSync(join(root, BASELINE_FILE), 'utf8')).toBe(
+            `{\n  "typescript": ${typescript},\n  "test": {\n        "jterrazz/new": 1\n    }\n}\n`,
+        );
+        expect(readFileSync(join(other, BASELINE_FILE), 'utf8')).toBe(
+            `{ "typescript": ${typescript},\n    "test": {\n        "jterrazz/new": 1\n    } }`,
+        );
+    });
+
+    test("a file holding another package's section alone keeps no test ratchet", () => {
+        // Given - a family file with a typescript section only
+        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        writeFileSync(join(root, BASELINE_FILE), '{ "typescript": { "eslint/complexity": 3 } }\n');
+
+        // Then - no test section: the project keeps no ratchet of this package's
+        expect(keepsBaseline(root)).toBe(false);
         expect(readBaseline(root)).toStrictEqual({});
-        writeFileSync(join(root, TEST_BASELINE), '5');
+    });
+
+    test('the retired file is seen, and never read', () => {
+        // Given - a project still holding the file this package kept alone
+        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        writeFileSync(join(root, RETIRED_BASELINE), '{ "jterrazz-check/c9": 1 }\n');
+
+        // Then - it is seen as held, and it records nothing
+        expect(holdsRetiredBaseline(root)).toBe(true);
+        expect(keepsBaseline(root)).toBe(false);
         expect(readBaseline(root)).toStrictEqual({});
-        writeFileSync(join(root, TEST_BASELINE), '{ "jterrazz-check/c9": "two", "jterrazz/x": 1 }');
+    });
+
+    test('an unreadable file records nothing rather than failing the run, and refuses a recording', () => {
+        // Given - a family file that is not JSON
+        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        writeFileSync(join(root, BASELINE_FILE), 'not json');
+
+        // Then - it keeps a ratchet with no entry, so every finding reads as new debt — and a count that is no number is no entry
+        expect(keepsBaseline(root)).toBe(true);
+        expect(readBaseline(root)).toStrictEqual({});
+        expect(() => {
+            writeBaseline(root, { 'jterrazz/x': 1 });
+        }).toThrow('holds no JSON object');
+        writeFileSync(
+            join(root, BASELINE_FILE),
+            '{ "test": { "jterrazz-check/c9": "two", "jterrazz/x": 1 } }',
+        );
         expect(readBaseline(root)).toStrictEqual({ 'jterrazz/x': 1 });
     });
 });

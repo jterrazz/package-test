@@ -103,8 +103,12 @@ has run. What it leaves to the reader:
 - **The ratchet splits by owner.** `oxlint.baseline.json` is gone:
   `typescript baseline` records `typescript.baseline.json` and refuses a
   `jterrazz/…` or `jterrazz-check/…` key in it, and `jterrazz-test-check
-baseline` records those in `test.baseline.json` — rename the file, then run
-  the two gestures once ([19 § The ratchet](19-linting.md#the-ratchet-testbaselinejson)).
+baseline` records those in the `test` section of `jterrazz.baseline.json` —
+  rename the file, then run the two gestures once
+  ([19 § The ratchet](19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson)).
+  A `test.baseline.json` an earlier migration wrote is retired the same way:
+  the checker fails on it until `jterrazz-test-check baseline` has recorded
+  the section and the file is deleted.
 - **A helper that named ground moves where it stands.** The mover writes the
   `file()` where the string was, inside the helper, and C26 refuses it there:
   a path resolves against the spec that starts the chain, so the helper takes

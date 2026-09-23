@@ -18,13 +18,16 @@ import {
 } from './checker.js';
 import type { TokenViolation } from './checker.js';
 import {
+    BASELINE_FILE,
+    BASELINE_LABEL,
     CHECKER_NAMESPACE,
     countsOf,
+    holdsRetiredBaseline,
     judge,
     keepsBaseline,
     pluginDiagnostics,
     readBaseline,
-    TEST_BASELINE,
+    RETIRED_BASELINE,
     writeBaseline,
 } from './ratchet.js';
 import type { PluginDiagnostic } from './ratchet.js';
@@ -38,7 +41,7 @@ import { codeOf } from './rule-code.js';
  *     node dist/checker.js [dir] [--fix]              # a specs tree, or a project root
  *     node dist/checker.js --format json              # every root, every member
  *     node dist/checker.js --member <dir>             # one workspace member
- *     node dist/checker.js baseline [root]            # record test.baseline.json
+ *     node dist/checker.js baseline [root]            # record jterrazz.baseline.json › test
  *     node dist/checker.js … --oxlint-report <file>   # read the plugin's diagnostics from a report
  *     node dist/checker.js … --summary                # a green ratchet run prints its held line alone
  *
@@ -74,18 +77,21 @@ import { codeOf } from './rule-code.js';
  * the project root itself, the run `typescript check` always makes. It counts
  * every checker finding of the project and every diagnostic of this package's
  * oxlint plugin (the toolchain sets those aside, so they are judged here or
- * nowhere) against `test.baseline.json` at the root: within it, exit 0; grown,
- * new, or an entry at zero, exit 1. A project that keeps no baseline fails on
+ * nowhere) against the `test` section of `jterrazz.baseline.json` at the root:
+ * within it, exit 0; grown, new, or an entry at zero, exit 1. A project still
+ * holding the retired `test.baseline.json` fails, told to record the section
+ * and delete it — the file is never read. A project that keeps no section fails on
  * any ERROR finding and on any plugin diagnostic. Every other run under a
  * project that keeps a baseline reports what it found and leaves the verdict
  * to that one run; without a baseline it fails on an ERROR finding, as ever.
- * A green verdict is one line — `test.baseline.json: <n> held across <k>
- * rules` — and a failing one prints every finding it counted and every plugin
+ * A green verdict is one line — `jterrazz.baseline.json › test: <n> held
+ * across <k> rules` — and a failing one prints every finding it counted and every plugin
  * diagnostic before its reasons, so a verdict and its evidence are one log.
  * `--summary` cuts the green line to its first half, exactly
- * `test.baseline.json: <n> held across <k> rules`, the line `typescript
- * check` shows beside its own ratchet's; it changes nothing else.
- * `baseline [root]` writes the file from the current counts.
+ * `jterrazz.baseline.json › test: <n> held across <k> rules`, the line
+ * `typescript check` shows beside its own ratchet's; it changes nothing else.
+ * `baseline [root]` writes the `test` section from the current counts, and
+ * leaves every other section of the file as it stands.
  *
  * The plugin's diagnostics come from `--oxlint-report <file>` when it is given
  * — the JSON report `typescript check` already wrote for its own pass, so a
@@ -154,7 +160,8 @@ const PROJECT_PASSES = CHECKER_PASS_IDS.join(', ');
 /**
  * The project whose ratchet judges a partial run: the directory the run was
  * started from, where `typescript check` starts every run it makes, when it
- * keeps a `test.baseline.json`. A run started anywhere else judges itself.
+ * keeps a `test` section in `jterrazz.baseline.json`. A run started anywhere
+ * else judges itself.
  */
 function judgingProject(): string | undefined {
     return keepsBaseline(process.cwd()) ? process.cwd() : undefined;
@@ -220,7 +227,7 @@ function say(line: string): void {
  * ones that ACTUALLY ran: a member run that claimed the tree passes would be
  * telling the reader a `specs/` tree was judged when none was walked.
  *
- * `deferredTo` is the project root whose `test.baseline.json` judges this run's
+ * `deferredTo` is the project root whose `jterrazz.baseline.json` judges this run's
  * findings: the run reports them and exits 0, the ratchet run decides.
  */
 function report(
@@ -243,7 +250,7 @@ function verdict(
     const errors = violations.filter((violation) => violation.severity === 'error');
     if (deferredTo !== undefined && violations.length > 0) {
         say(
-            `conventions checker: ${violations.length} finding(s) ${what}, judged by ${join(deferredTo, TEST_BASELINE)}`,
+            `conventions checker: ${violations.length} finding(s) ${what}, judged by ${join(deferredTo, BASELINE_FILE)} › test`,
         );
         process.exit(0);
     }
@@ -275,11 +282,17 @@ type RatchetRun = {
 
 /**
  * The ratchet run's verdict: the project's findings and its plugin diagnostics,
- * counted against `test.baseline.json` at `root` — or, with no file, its own
+ * counted against `jterrazz.baseline.json › test` at `root` — or, with no section, its own
  * findings and the plugin diagnostics judged one by one. Either way it prints
  * exactly what it judges, so a verdict and its evidence are one log.
  */
 function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): never {
+    if (holdsRetiredBaseline(root)) {
+        say(
+            `baseline-ratchet  ${RETIRED_BASELINE}  is retired — the counts live in ${BASELINE_LABEL}: run 'jterrazz-test-check baseline', then delete ${RETIRED_BASELINE}`,
+        );
+        process.exit(1);
+    }
     if (keepsBaseline(root)) {
         const findings = counted();
         const counts = countsOf([
@@ -291,7 +304,7 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
             printFindings(findings, plugin);
         }
         for (const reason of broken) {
-            say(`baseline-ratchet  ${TEST_BASELINE}  ${reason}`);
+            say(`baseline-ratchet  ${BASELINE_LABEL}  ${reason}`);
         }
         if (broken.length > 0) {
             say("Run 'jterrazz-test-check baseline' to record where the project stands.");
@@ -307,7 +320,7 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
     for (const [key, count] of Object.entries(unrecorded).toSorted(([a], [b]) =>
         a < b ? -1 : 1,
     )) {
-        say(`${key}  ${count} diagnostic(s), and the project keeps no ${TEST_BASELINE}`);
+        say(`${key}  ${count} diagnostic(s), and the project keeps no ${BASELINE_LABEL}`);
     }
     if (plugin.length > 0) {
         say("Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.");
@@ -328,7 +341,7 @@ function heldSummary(
     passes: string,
 ): string {
     const rules = Object.keys(counts).length;
-    const held = `${TEST_BASELINE}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'}`;
+    const held = `${BASELINE_LABEL}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'}`;
     return summary ? held : `${held} — conventions checker ${what} (${passes})`;
 }
 
@@ -600,7 +613,7 @@ if (recording) {
     ]);
     writeBaseline(root, counts);
     console.log(
-        `${TEST_BASELINE} written — ${findings.length + plugin.length} finding(s) across ${Object.keys(counts).length} rule(s)`,
+        `${BASELINE_LABEL} written — ${findings.length + plugin.length} finding(s) across ${Object.keys(counts).length} rule(s)`,
     );
     process.exit(0);
 }
