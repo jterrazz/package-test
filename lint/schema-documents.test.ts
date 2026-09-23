@@ -92,6 +92,11 @@ describe('the published schema refuses a wrong document of every kind', () => {
         ['cli', 'a document with no runs', 'description: x\nfixture: ./fixtures/shop/\n'],
         [
             'cli',
+            'a fixture whose first ground folder is seeds/',
+            'description: x\nfixture: ./seeds/fixtures/shop/\nruns:\n    - command: build\n      exit: 0\n',
+        ],
+        [
+            'cli',
             'a key another kind reads',
             'description: x\nseed: ./seeds/one.sql\nruns:\n    - command: build\n      exit: 0\n',
         ],
@@ -138,6 +143,10 @@ describe('the published schema refuses a wrong document of every kind', () => {
         [
             'jobs',
             'kind: jobs\ndescription: x\ntrigger: sync\ntables:\n    users:\n        columns: [name]\n        rows: []\n',
+        ],
+        [
+            'cli',
+            'description: x\nfixture: [./fixtures/, ../../fixtures/shop/]\nruns:\n    - command: build\n      exit: 0\n',
         ],
     ])('%s: the well-formed twin validates', (_kind, text) => {
         // Given - the document's data

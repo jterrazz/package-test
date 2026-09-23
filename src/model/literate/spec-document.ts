@@ -472,26 +472,6 @@ function readStream(context: Context, node: Node | null, what: string): SpecStre
 
 // ── Fields ──
 
-function readFixtures(context: Context, node: Node | null): SpecFixture[] {
-    return stringList(context, node, 'fixture:').map(({ line, value }) => {
-        if (!isRelativePath(value)) {
-            throw new SpecSyntaxError(
-                context.fileName,
-                line,
-                `fixture: "${value}" is not a relative path — name it from this document (./… or ../…)`,
-            );
-        }
-        if (!value.split('/').includes(GROUND_FIXTURES)) {
-            throw new SpecSyntaxError(
-                context.fileName,
-                line,
-                `fixture: "${value}" reaches no ${GROUND_FIXTURES}/ folder — file state lives in ./${GROUND_FIXTURES}/ beside the document, or in specs/${GROUND_FIXTURES}/ if several leaves share it (C24)`,
-            );
-        }
-        return { line, path: value };
-    });
-}
-
 function readEnv(context: Context, node: Node | null): SpecEnvToken[] {
     return stringList(context, node, 'env:').map(({ line, value }) => {
         const separator = value.indexOf('=');
@@ -649,6 +629,8 @@ function groundOf(path: string): string | undefined {
 
 /** Where a path key reads, and what it may name there. */
 type PathRole = {
+    /** May the path name a directory — a trailing `/`? Only `fixture:` spreads one. */
+    directories: boolean;
     /** The extensions the file may carry; empty takes any. */
     extensions: readonly string[];
     /** The folder the key reads — a ground name, or `contracts`. */
@@ -657,9 +639,11 @@ type PathRole = {
 };
 
 /**
- * A path a key names, judged by the same law as the chain's `file()`: relative
- * to this document, one file, in the folder its key reads (C24) — a contract
- * module under `contracts/`, which is no ground.
+ * A path a key names, judged by the same law as the chain's `file()` and
+ * `directory()`: relative to this document, one file — a directory only where
+ * the key spreads one — in the folder its key reads, the first ground folder
+ * the path passes through (C24); a contract module under `contracts/`, which
+ * is no ground.
  */
 function readPath(context: Context, line: number, value: string, role: PathRole): SpecPath {
     const at = (message: string): never => {
@@ -670,7 +654,7 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
             `${role.key}: "${value}" is not a relative path — name it from this document (./… or ../…)`,
         );
     }
-    if (value.endsWith('/')) {
+    if (value.endsWith('/') && !role.directories) {
         at(`${role.key}: "${value}" names a directory — ${role.key}: reads one file`);
     }
     const found = groundOf(value);
@@ -703,15 +687,47 @@ function readPaths(context: Context, node: Node | null, role: PathRole): SpecPat
     );
 }
 
-const SEED_ROLE: PathRole = { extensions: ['.sql'], folder: GROUND_SEEDS, key: 'seed' };
+const FIXTURE_ROLE: PathRole = {
+    directories: true,
+    extensions: [],
+    folder: GROUND_FIXTURES,
+    key: 'fixture',
+};
+const SEED_ROLE: PathRole = {
+    directories: false,
+    extensions: ['.sql'],
+    folder: GROUND_SEEDS,
+    key: 'seed',
+};
 const INTERCEPT_ROLE: PathRole = {
+    directories: false,
     extensions: ['.ts', '.mts', '.js', '.mjs'],
     folder: CONTRACTS_FOLDER,
     key: 'intercept',
 };
-const REQUEST_ROLE: PathRole = { extensions: ['.http'], folder: GROUND_REQUESTS, key: 'request' };
-const BODY_ROLE: PathRole = { extensions: [], folder: GROUND_REQUESTS, key: 'body' };
-const RESPONSE_ROLE: PathRole = { extensions: ['.http'], folder: GROUND_EXPECTED, key: 'response' };
+const REQUEST_ROLE: PathRole = {
+    directories: false,
+    extensions: ['.http'],
+    folder: GROUND_REQUESTS,
+    key: 'request',
+};
+const BODY_ROLE: PathRole = {
+    directories: false,
+    extensions: [],
+    folder: GROUND_REQUESTS,
+    key: 'body',
+};
+const RESPONSE_ROLE: PathRole = {
+    directories: false,
+    extensions: ['.http'],
+    folder: GROUND_EXPECTED,
+    key: 'response',
+};
+
+/** `fixture:` — paths of file state, each judged by its first ground folder like every path key. */
+function readFixtures(context: Context, node: Node | null): SpecFixture[] {
+    return readPaths(context, node, FIXTURE_ROLE);
+}
 
 /** One seed: its path, and the database it targets. */
 function seedAt({ line, path }: SpecPath, database: null | string): SpecSeed {
@@ -1559,9 +1575,6 @@ export function updateSpecResponses(file: SpecFile, rewrites: readonly ResponseR
 
 // ── Schema ──
 
-/** What a path in a document starts with — the same law as every file verb. */
-const RELATIVE_PATH_PATTERN = String.raw`^\.\.?/`;
-
 const STRING_OR_LIST = {
     oneOf: [{ type: 'string' }, { items: { type: 'string' }, minItems: 1, type: 'array' }],
 };
@@ -1572,11 +1585,16 @@ const NOT_GROUND_SEGMENT = String.raw`(?!(?:${GROUND_DIRS.join('|')})/)[^/]+/`;
 /**
  * A relative path whose FIRST ground folder is `folder`, as a pattern — C24's
  * reading, for an editor. `contracts/` is no ground, so a contract path passes
- * through no ground folder at all.
+ * through no ground folder at all; `fixtures/` is the one a path may end on,
+ * a directory `fixture:` spreads whole.
  */
 function pathIn(folder: string, extension = ''): SchemaNode {
     const rest =
-        folder === CONTRACTS_FOLDER ? `(?:${NOT_GROUND_SEGMENT})*[^/]+` : String.raw`[^/].*`;
+        folder === CONTRACTS_FOLDER
+            ? `(?:${NOT_GROUND_SEGMENT})*[^/]+`
+            : folder === GROUND_FIXTURES
+              ? '.*'
+              : String.raw`[^/].*`;
     return {
         pattern: String.raw`^\.\.?/(?:${NOT_GROUND_SEGMENT})*?${folder}/${rest}${extension.replaceAll('.', String.raw`\.`)}$`,
         type: 'string',
@@ -1843,15 +1861,8 @@ export const SPEC_SCHEMA: SpecSchema = {
         },
         fixture: {
             description:
-                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The shared pool is reached by the path that climbs to it.",
-            oneOf: [
-                { pattern: RELATIVE_PATH_PATTERN, type: 'string' },
-                {
-                    items: { pattern: RELATIVE_PATH_PATTERN, type: 'string' },
-                    minItems: 1,
-                    type: 'array',
-                },
-            ],
+                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is fixtures/ — ./fixtures/ beside the document, or specs/fixtures/ reached by the path that climbs to it.",
+            ...oneOrMany(pathIn(GROUND_FIXTURES)),
         },
         kind: {
             default: 'cli',
