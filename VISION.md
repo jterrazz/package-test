@@ -830,3 +830,64 @@ implementation (the commits say what was broken).
 | 51                     | Every single-path check (C9/C14 `isDir`, C13 `existsSync`, the member pass's anchors, checker-placement, checker-spec) reads through the same listing.                                                                                                                                                                                                |
 | 52                     | `region()`/`section` joins the context landmarks, so an ambiguity error can suggest it.                                                                                                                                                                                                                                                               |
 | 53                     | A spec server or process binds port 0 and reads the port it got; no spec picks a port.                                                                                                                                                                                                                                                                |
+
+### What the package-test branch decided (iteration 6, the owner's answers)
+
+- **The tree law (49).** The listing is `src/seams/git/tree.ts` — one
+  `git ls-files --cached --others --exclude-standard` per work tree, a
+  deleted file the index still holds left out, the disk outside git — and
+  its API says what it lists: `treeEntries`, `treeNames`, `treeKind`,
+  `forgetTree`. It left `lint/` because the runtime reads it too (50); git
+  is its dependency, so it is a seam folder of its own, with no npm
+  package. Every move drops it, a plain rename included: an untracked
+  file is in the listing now. Every reader follows — the checker walks,
+  `lint/fs-cache.ts`, C8 (whose message says `is ignored by git`), the
+  moves, and the siblings meta-test (K7), which walked the disk.
+- **One root (50).** `discoverRoot` hands `findRoot` the same probe A9w
+  does: a `.gitignore`d `package.json` marks no root for either, a new one
+  does.
+- **Every single path (51).** C9 and C14's `isDir`, C13's golden,
+  specification and nested-package probes, the member pass's manifest,
+  pnpm workspace and vitest config probes, the placement walk's package
+  stop and D5's `fixture:` read all go through `treeKind`. Left on disk on
+  purpose: `.git`, the fixers' collision guards before a move, and the
+  CLI's checks of paths an operator passes (`--oxlint-report` sits under
+  the ignored `.artifacts/`).
+- **Requests (41).** C2 is renamed `c2-request-extension`, and the mover
+  renames a directive naming its old id. It accepts a `.http` and any body
+  file, and refuses a file under `requests/` with no extension — the
+  extension is how the builder sends a body (`.json` parsed, anything else
+  verbatim), the ground C6 stands on for a golden; a folder there is not
+  judged. The `specs/api/sending/` suppression is gone.
+- **`region()` (52).** `ElementMatch.contextName` carries the landmark's
+  accessible name (`aria-label`, else what `aria-labelledby` points at),
+  read by both adapters; a named `<section>` is offered as
+  `within(region("<name>"), …)`, an unnamed one stays evidence.
+- **Port 0 (53).** Every server a spec starts binds port 0 and prints
+  `listening on port <n>`, read through a `ready` banner; meta-test K9
+  (`lint/port-readers.ts`) fails a spec file or a module test reading
+  `process.env.PORT`/`$PORT`, a folder holding a `Dockerfile` excepted.
+  The stop spec asks whether the server's pid is gone, not whether its
+  port answers.
+
+### Raised by the package-test branch, iteration 6 (the owner's answers)
+
+54. C2's residual refusal — a file under `requests/` with no extension —
+    is the maker's call, not the owner's (41 said only "accepts both").
+    Keep it, refuse something else (a golden-shaped `.http` whose first
+    line is a status line is D4b's already), or retire C2?
+55. The listing is kept per process until a move. In the editor the
+    plugin may live across lint runs, so a file created after the first
+    listing would be invisible to it until the host restarts —
+    HYPOTHESIS (2026-09-23): oxlint's language server keeps the JS plugin
+    module loaded between runs; running it on a file, creating a sibling,
+    and linting again settles it. Key the listing on something that moves
+    (the index's mtime), or accept the restart?
+56. With every spec server on a banner, the framework's PORT form (pick,
+    release, inject, poll `ready` as a path) — the one chapter 08 shows
+    first and the appium server uses — is proven by no spec of this
+    package, and its window is inherent. Prove it on one spec and accept
+    the rare flake, prove it without binding, or make the banner the form
+    the chapter shows first?
+57. The root walk is stated twice, in chapter 10 (`root`) and chapter 17
+    (services); the tree clause landed in 17 only. Which chapter owns it?
