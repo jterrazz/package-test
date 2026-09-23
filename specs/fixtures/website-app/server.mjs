@@ -135,11 +135,12 @@ const pages = {
     </script>
     </body></html>`,
     // A search landmark the HTML `<search>` element carries, with no `role`
-    // Attribute to spell it.
+    // Attribute to spell it — and a "Go" button inside it and outside it.
     '/search': `<!doctype html><html lang="en"><head>${head('Fixture — Search', '/search')}
     </head><body>
     <h1>Search</h1>
-    <search aria-label="Site"><label for="site-query">Query</label><input id="site-query" type="search"></search>
+    <search aria-label="Site"><label for="site-query">Query</label><input id="site-query" type="search"><button type="button">Go</button></search>
+    <main><button type="button">Go</button></main>
     </body></html>`,
     // A page whose script throws, with nothing to catch it and nothing logged.
     '/thrown': `<!doctype html><html lang="en"><head><title>Fixture — Thrown</title></head>

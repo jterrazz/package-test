@@ -40,6 +40,17 @@ test('enumerates the candidates and the rewrites that would resolve them', async
     expect(message).toContain('CONVENTIONS W3');
 });
 
+test('names a candidate inside a `<search>` element by its landmark', async () => {
+    // Given - a "Go" button inside the page's `<search>` and another in its `<main>`
+    const message = await refusalOf('/search', async (visitor) => {
+        await visitor.click(button('Go'));
+    });
+
+    // Then - the element's landmark is evidence, and its scope a rewrite
+    expect(message).toContain('in <search>');
+    expect(message).toContain('within(search(), button("Go"))');
+});
+
 test('resolves the ambiguity when the descriptor is scoped to a landmark', async () => {
     // Given - the same page, the link designated inside the nav
     const result = await website.visit('/ambiguous', async (visitor) => {

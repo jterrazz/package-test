@@ -6,6 +6,7 @@ import {
     AmbiguousElementError,
     describeAmbiguity,
     formatElement,
+    LANDMARK_SELECTOR,
 } from '../../model/elements/ambiguity.js';
 import type { ElementMatch, ElementRef } from '../../model/ports/browser.port.js';
 import type { ComponentUi, DomMount } from './ui.js';
@@ -28,9 +29,6 @@ import type { ComponentUi, DomMount } from './ui.js';
 
 /** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
-
-/** The landmark ancestors the ambiguity evidence names. */
-const LANDMARKS = 'nav, header, footer, main, aside, section, form, [role]';
 
 /** What a mounted subject offers the chain, React or vanilla DOM alike. */
 export type MountedSurface = {
@@ -152,7 +150,7 @@ function candidates(locator: Locator): ElementMatch[] {
         .elements()
         .slice(0, MAX_REPORTED_MATCHES)
         .map((node) => {
-            const landmark = node.parentElement?.closest(LANDMARKS);
+            const landmark = node.parentElement?.closest(LANDMARK_SELECTOR);
             const context = landmark?.getAttribute('role') ?? landmark?.tagName.toLowerCase();
             const detail = node.getAttribute('href') ?? node.getAttribute('name');
             const text = (node.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80);

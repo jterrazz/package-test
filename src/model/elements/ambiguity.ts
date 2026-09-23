@@ -1,4 +1,4 @@
-import type { ElementMatch, ElementRef } from '../ports/browser.port.js';
+import type { ElementMatch, ElementRef, LandmarkKind } from '../ports/browser.port.js';
 
 /**
  * The ambiguity refusal — CONVENTIONS W3.
@@ -38,6 +38,24 @@ const CONSTRUCTORS: Record<ElementRef['kind'], string> = {
     testId: 'testId',
     text: 'content',
 };
+
+/** The HTML element that carries each landmark of the vocabulary without a `role`. */
+const LANDMARK_ELEMENTS: Record<LandmarkKind, string> = {
+    banner: 'header',
+    complementary: 'aside',
+    contentinfo: 'footer',
+    form: 'form',
+    main: 'main',
+    navigation: 'nav',
+    region: 'section',
+    search: 'search',
+};
+
+/**
+ * The ancestors a candidate's evidence names as its landmark, in both
+ * adapters: every landmark's element, and any element that spells a role.
+ */
+export const LANDMARK_SELECTOR = [...Object.values(LANDMARK_ELEMENTS), '[role]'].join(', ');
 
 /** The landmark a context string maps back to, for a copy-pasteable suggestion. */
 const CONTEXT_LANDMARKS: Record<string, string> = {

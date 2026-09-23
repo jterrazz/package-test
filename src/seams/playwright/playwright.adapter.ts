@@ -8,6 +8,7 @@ import {
     AmbiguousElementError,
     describeAmbiguity,
     formatElement,
+    LANDMARK_SELECTOR,
 } from '../../model/elements/ambiguity.js';
 import type {
     BrowserConsoleMessage,
@@ -118,26 +119,30 @@ function isStrictViolation(error: unknown): boolean {
 
 /** Capture the candidates in-page — the evidence the refusal enumerates. */
 async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
-    return await locator.evaluateAll((nodes, limit) => {
-        const LANDMARKS = 'nav, header, footer, main, aside, section, form, [role]';
-        return nodes.slice(0, limit).map((node) => {
-            const element = node as HTMLElement;
-            const landmark = element.parentElement?.closest(LANDMARKS);
-            const context = landmark
-                ? (landmark.getAttribute('role') ?? landmark.tagName.toLowerCase())
-                : null;
-            const detail = element.getAttribute('href') ?? element.getAttribute('name');
-            const text = (element.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80);
-            const label = element.getAttribute('aria-label')?.trim();
-            return {
-                accessibleName: label && label !== text ? label : undefined,
-                context: context ?? undefined,
-                detail: detail ?? undefined,
-                tag: element.tagName.toLowerCase(),
-                text,
-            };
-        });
-    }, MAX_REPORTED_MATCHES);
+    return await locator.evaluateAll(
+        (nodes, { landmarks, limit }) =>
+            nodes.slice(0, limit).map((node) => {
+                const element = node as HTMLElement;
+                const landmark = element.parentElement?.closest(landmarks);
+                const context = landmark
+                    ? (landmark.getAttribute('role') ?? landmark.tagName.toLowerCase())
+                    : null;
+                const detail = element.getAttribute('href') ?? element.getAttribute('name');
+                const text = (element.textContent ?? '')
+                    .replaceAll(/\s+/gu, ' ')
+                    .trim()
+                    .slice(0, 80);
+                const label = element.getAttribute('aria-label')?.trim();
+                return {
+                    accessibleName: label && label !== text ? label : undefined,
+                    context: context ?? undefined,
+                    detail: detail ?? undefined,
+                    tag: element.tagName.toLowerCase(),
+                    text,
+                };
+            }),
+        { landmarks: LANDMARK_SELECTOR, limit: MAX_REPORTED_MATCHES },
+    );
 }
 
 /**

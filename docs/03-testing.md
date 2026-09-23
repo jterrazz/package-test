@@ -288,7 +288,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `see`      | —   | —    | —   | —           | 10      | 0      | 18        | —      |
 | `fill`     | —   | —    | —   | —           | 4       | 0      | 2         | —      |
-| `click`    | —   | —    | —   | —           | 3       | —      | 6         | —      |
+| `click`    | —   | —    | —   | —           | 3       | —      | 7         | —      |
 | `gone`     | —   | —    | —   | —           | 3       | —      | 6         | —      |
 | `press`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
 | `hover`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
@@ -303,7 +303,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `button`        | —   | —    | —   | —           | 4       | 0      | 6         | —      |
+| `button`        | —   | —    | —   | —           | 4       | 0      | 7         | —      |
 | `field`         | —   | —    | —   | —           | 5       | 0      | 5         | —      |
 | `content`       | —   | —    | —   | —           | 7       | 0      | 12        | —      |
 | `testId`        | —   | —    | —   | —           | 1       | 0      | 1         | —      |
