@@ -339,9 +339,31 @@ function importText(clause: ImportClause, keeps: (local: string) => boolean): st
         : `import ${clause.typeOnly ? 'type ' : ''}${parts.join(', ')} from '${clause.source}';\n`;
 }
 
+/**
+ * The code alone: comments, strings and regular expressions blanked — a name
+ * written in a message (`'cli-app'`, `'the text'`) is no read of it. A
+ * template stays whole, since what its holes hold is code.
+ */
+function codeOnly(text: string): string {
+    const blank = withoutComments(text);
+    let out = '';
+    for (let index = 0; index < blank.length;) {
+        const end = literalEnd(blank, index);
+        if (end === index) {
+            out += blank[index] ?? '';
+            index += 1;
+            continue;
+        }
+        const literal = blank.slice(index, end);
+        out += literal.startsWith('`') ? literal : literal.replaceAll(/[^\n]/gu, ' ');
+        index = end;
+    }
+    return out;
+}
+
 /** Is `name` read anywhere in `text` outside the span it is declared in? */
 function isRead(text: string, name: string, declared: Span): boolean {
-    const body = withoutComments(`${text.slice(0, declared.start)}\n${text.slice(declared.end)}`);
+    const body = codeOnly(`${text.slice(0, declared.start)}\n${text.slice(declared.end)}`);
     return new RegExp(
         String.raw`(?<![\w$.])${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
         'u',

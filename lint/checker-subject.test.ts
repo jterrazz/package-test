@@ -140,6 +140,28 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         );
     });
 
+    test('the split drops an import only a string of the file names', () => {
+        // Given - a file whose second route's test only names `cli` inside a string
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': [
+                "import { cli } from '../../cli/cli.specification.js';",
+                "import { api } from '../api.specification.js';",
+                "test('lists', async () => { await api.get('/orders'); await cli.exec('x'); });",
+                "test('creates', async () => { await api.post('/orders', { from: 'cli-app' }); });",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix splits it
+        fixSubjects(root);
+
+        // Then - the create file keeps only what its code reads
+        expect(readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8')).not.toContain(
+            'import { cli }',
+        );
+    });
+
     test('a move leaves a path naming nothing, and a call spelled in a string, as written', () => {
         // Given - a negative spec's missing file, and a refusal message quoting a call on a file that exists
         const root = specsTree({
