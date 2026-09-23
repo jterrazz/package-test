@@ -699,3 +699,56 @@ implementation (the commits say what was broken).
 44. `result.errors` on a website visit holds the console's `error`
     messages and not an uncaught exception of the page. Is an uncaught
     exception an error the result should carry?
+
+## Iteration 5 — the calls on questions 42 to 44 (2026-09-23)
+
+| #   | Decision                                                                                                                                             |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 42  | The conventions checker reads tracked files only, like every tree gate of the toolchain; a directory git places in no work tree keeps the disk walk. |
+| 43  | The role locator finds an HTML `<search>` element as the `search` landmark on every surface.                                                         |
+| 44  | An uncaught page exception lands in `result.errors`, on the website and on the component facet.                                                      |
+
+### What the package-test branch decided (iteration 5)
+
+- **Tracked files.** Every walk of `lint/checker*.ts` lists through
+  `lint/tracked.ts`: inside a work tree, one `git ls-files --cached` from
+  its top level, kept for the run, answers each directory with its tracked
+  children still on disk. A directory is placed in a work tree by
+  `git rev-parse --show-cdup` succeeding there — not by a `.git` probe,
+  which the rule tests fake with an empty folder — and one where it fails
+  is walked on disk: every copied E2E fixture and scratch tree. A `git mv`
+  of the fixers drops the listing. `lint/tracked.test.ts` proves an
+  untracked C12 document is never reported and a tracked one is.
+- **`<search>`.** Playwright 1.63 maps the element itself, so the website
+  needed only its spec. Browser Mode's role engine gives the element no
+  role, so the component adapter locates `search()` as the role or
+  `css=search:not([role])`, registered through `locators.extend`; a name
+  keeps the elements whose label is that name.
+- **Uncaught exceptions.** The website adapter records `pageerror` as an
+  `error` line spelled `Uncaught <name>: <message>`, the browser's own
+  `ErrorEvent` spelling, which the component facet already carried
+  through its `error` listener — now named by a spec.
+
+### Raised by the package-test branch, iteration 5
+
+45. A component's uncaught exception reaches `result.errors` TWICE —
+    `Error: Uncaught Error: …` through `console.error`, then
+    `Uncaught Error: …` from the facet's listener — while the website
+    carries it once. HYPOTHESIS (2026-09-23): vitest's browser client logs
+    a page error through `console.error`, instead of failing the run as
+    unhandled, when the page holds its own `error` listener; read
+    `@vitest/browser`'s window-error catcher to settle it. Carry one line
+    per exception on the component (and which one), or accept the pair?
+46. C14's fixer moves a tracked pool fixture with a plain rename, so after
+    `--fix` the moved file is untracked and invisible to the checks that
+    run next, until the author stages it. Move it through `git mv`, as
+    C12 and C13 already do?
+47. The listing covers the checker's WALKS. The oxlint plugin's
+    disk-anchored rules (`lint/fs-cache.ts`: A9w, C2, C6, C7, I2) and the
+    checker's single-path probes (C8's target exists) still read the disk,
+    so an untracked sibling still answers them. Hold them to the listing
+    too, or is a probe of a path the test names out of the law's reach?
+48. The W3 refusal's evidence names a candidate's landmark from
+    `nav, header, footer, main, aside, section, form, [role]` in both
+    adapters, so a candidate inside a `<search>` element is reported with
+    no landmark and its scope is never suggested. Add `search` there?
