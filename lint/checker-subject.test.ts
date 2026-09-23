@@ -307,6 +307,28 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         ]);
     });
 
+    test("a spec holding two runners reads each chain with its own runner's list", () => {
+        // Given - a spec importing a runner with no list first, and running `db migrate` through the one declaring it
+        const root = specsTree({
+            'cli/cli.specification.ts':
+                'export const { cleanup, cli } = await specification.cli(BIN);\n',
+            'cli/db-cli.specification.ts':
+                "export const { cleanup, cli } = await specification.cli(BIN, { commands: ['db', 'migrate'] });\n",
+            'cli/db/runs.spec.ts': [
+                "import { cli } from '../cli.specification.js';",
+                "import { cli as dbCli } from '../db-cli.specification.js';",
+                "test('a', async () => { await dbCli.exec('db migrate --dry-run'); });",
+                "test('b', async () => { await cli.exec('db'); });",
+                '',
+            ].join('\n'),
+        });
+
+        // Then - the chain on `dbCli` names both declared words, so the file holds two subjects
+        expect(checkOneSubject(root).map(({ found }) => found)).toStrictEqual([
+            'a spec reaching 2 subjects — exec db migrate, exec db',
+        ]);
+    });
+
     test('a collection no plural names is listed once the repository declares it', () => {
         // Given - GET /data filed as a singleton would be, in a unit whose config names `data` a collection
         const root = specsTree({

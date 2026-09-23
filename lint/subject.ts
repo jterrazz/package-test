@@ -22,17 +22,18 @@
  * plural test that tells a collection (`events`) from a singleton (`status`)
  * takes the irregular collections `jterrazz.config.ts` names
  * (`test: { collections: ['data', 'people'] }`); and a command's words stop at
- * the first word not in the list its runner declares
- * (`specification.cli(bin, { commands: ['db', 'migrate'] })`), or after the
- * first word when it declares none.
+ * the first word not in the list the chain's own runner declares
+ * (`specification.cli(bin, { commands: ['db', 'migrate'] })`, the list written
+ * there or bound to a `const` of the runner's file), or after the first word
+ * when it declares none.
  */
 
 /** What a repository declared that the reading takes: its runner's commands, its irregular collections. */
 export type SubjectReading = {
     /** The collections no plural test recognises, by their segment. */
     collections?: readonly string[] | undefined;
-    /** The words a cli runner declares its commands with. */
-    commands?: readonly string[] | undefined;
+    /** The words each cli runner declares its commands with, by the handle a spec holds it by. */
+    commands?: Readonly<Record<string, readonly string[]>> | undefined;
 };
 
 /** A method an api chain sends, or `ALL` for a route that takes any. */
@@ -401,10 +402,28 @@ export function commandWords(line: string, commands?: readonly string[]): string
 /** A runner's constructor call and the options it opens: `specification.cli(bin, {`. */
 const CLI_CONSTRUCTOR = /\bspecification\s*\.\s*cli\s*\(/u;
 
+/** The words of an array literal, from the text just past its `[`. */
+function wordsOf(text: string, open: number): string[] {
+    return argumentsOf(text.slice(open + 1, closingOf(text, open))).flatMap((entry) => {
+        const word = literalOf(entry);
+        return word === undefined ? [] : [word];
+    });
+}
+
+/** The array a `const` of the file binds to `name`, as its words. */
+function constantWords(text: string, name: string): string[] | undefined {
+    const escaped = name.replaceAll('$', String.raw`\$`);
+    const binding = new RegExp(String.raw`\bconst\s+${escaped}\s*(?::[^=]+)?=\s*\[`, 'u').exec(
+        text,
+    );
+    return binding === null ? undefined : wordsOf(text, binding.index + binding[0].length - 1);
+}
+
 /**
  * The command list a specification module declares for its cli runner — the
- * literal `commands: [...]` of its `specification.cli(bin, { … })` — or
- * nothing when it declares none.
+ * `commands` of its `specification.cli(bin, { … })`, written there as an array
+ * or bound to a `const` of the same file (`commands: COMMANDS`, or the
+ * shorthand `{ commands }`) — or nothing when it declares none.
  */
 export function declaredCommands(door: string): string[] | undefined {
     const text = withoutComments(door);
@@ -415,24 +434,44 @@ export function declaredCommands(door: string): string[] | undefined {
     const open = call.index + call[0].length - 1;
     const [, options = ''] = argumentsOf(text.slice(open + 1, closingOf(text, open)));
     const list = /(?:^|[{,\s])commands\s*:\s*\[/u.exec(options);
-    if (list === null) {
-        return undefined;
+    if (list !== null) {
+        return wordsOf(options, list.index + list[0].length - 1);
     }
-    const start = list.index + list[0].length - 1;
-    return argumentsOf(options.slice(start + 1, closingOf(options, start))).flatMap((entry) => {
-        const word = literalOf(entry);
-        return word === undefined ? [] : [word];
-    });
+    const named =
+        /(?:^|[{,\s])commands\s*:\s*(?<name>[A-Za-z_$][\w$]*)/u.exec(options)?.groups?.name ??
+        (/(?:^|[{,\s])commands\s*(?=[,}])/u.test(options) ? 'commands' : undefined);
+    return named === undefined ? undefined : constantWords(text, named);
 }
 
-/** The specification module a spec imports a facet's runner from — its specifier, as written. */
-export function doorOf(text: string, facet: (typeof SUBJECT_FACETS)[number]): string | undefined {
-    for (const found of text.matchAll(SPECIFICATION_DOOR)) {
-        if (importedHandles(found.groups?.names ?? '', facet).length > 0) {
-            return found.groups?.from;
+/**
+ * The specification module each of a facet's handles comes from, by the
+ * local name a spec holds it by — a view bound to one (`const db =
+ * cli.with(…)`) included, under the module of the handle it was made from.
+ */
+export function doorsOf(
+    text: string,
+    facet: (typeof SUBJECT_FACETS)[number],
+): Record<string, string> {
+    const doors = new Map<string, string>();
+    for (const { groups } of text.matchAll(SPECIFICATION_DOOR)) {
+        for (const handle of importedHandles(groups?.names ?? '', facet)) {
+            doors.set(handle, groups?.from ?? '');
         }
     }
-    return undefined;
+    const views = [...text.matchAll(VIEW)].map(({ groups }) => ({
+        from: groups?.from ?? '',
+        view: groups?.view ?? '',
+    }));
+    for (let size = -1; size !== doors.size;) {
+        ({ size } = doors);
+        for (const { from, view } of views) {
+            const door = doors.get(from);
+            if (door !== undefined) {
+                doors.set(view, door);
+            }
+        }
+    }
+    return Object.fromEntries(doors);
 }
 
 /** The route a `.http`'s request line sends. */
@@ -445,11 +484,11 @@ function requestLineOf(text: string): Subject[] {
 /** Reads a `.http` a chain names by `file()`, from the spec's directory. */
 type RequestReader = (path: string) => string | undefined;
 
-/** What one terminal action reaches, from its first argument. */
+/** What one terminal action reaches, from its first argument — and, for a cli one, its runner's command list. */
 type TerminalReader = (
     first: string | undefined,
     readRequest: RequestReader,
-    reading: SubjectReading,
+    commands: readonly string[] | undefined,
 ) => Subject[];
 
 /** A page a website chain visits or fetches. */
@@ -462,15 +501,13 @@ const pageOf: TerminalReader = (first) => {
 
 /** The terminal actions that reach a subject, by name — the HTTP verbs apart. */
 const TERMINALS: Record<string, TerminalReader> = {
-    exec: (first, _readRequest, reading) => {
+    exec: (first, _readRequest, commands) => {
         // A sequence is one session of the binary, opened by its first command.
         const line =
             first?.trim().startsWith('[') === true
                 ? literalOf(argumentsOf(first.trim().slice(1, -1))[0])
                 : literalOf(first);
-        return line === undefined
-            ? []
-            : [{ command: commandWords(line, reading.commands), facet: 'cli' }];
+        return line === undefined ? [] : [{ command: commandWords(line, commands), facet: 'cli' }];
     },
     fetch: pageOf,
     open: (first) => [{ facet: 'mobile', journey: literalOf(first) ?? '(launch)' }],
@@ -504,7 +541,7 @@ export function subjectsOfChain(
         const path = literalOf(first);
         return path?.startsWith('/') === true ? [{ facet: 'api', method, path }] : [];
     }
-    return TERMINALS[terminal.name]?.(first, readRequest, reading) ?? [];
+    return TERMINALS[terminal.name]?.(first, readRequest, reading.commands?.[chain.handle]) ?? [];
 }
 
 /** Where the comment that opens at `index` ends, or `index` when none opens there. */

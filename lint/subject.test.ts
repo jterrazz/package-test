@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import {
     commandWords,
     declaredCommands,
-    doorOf,
+    doorsOf,
     pathTemplate,
     subjectFolder,
     subjectName,
@@ -197,8 +197,28 @@ describe('the subject a spec reaches, read statically', () => {
         ].join('\n');
 
         // Then - both words name the command, and the folder
-        const [at] = subjectsOf(source, undefined, { commands: ['db', 'migrate'] });
+        const [at] = subjectsOf(source, undefined, { commands: { cli: ['db', 'migrate'] } });
         expect(at === undefined ? undefined : subjectFolder(at.subject)).toBe('db/migrate');
+    });
+
+    test('each chain reads the list of the runner its handle came from', () => {
+        // Given - two runners in one spec, only the second declaring a list, and a view of it
+        const source = [
+            "import { cli } from '../cli.specification.js';",
+            "import { cli as dbCli } from '../db-cli.specification.js';",
+            'const db = dbCli.with({});',
+            "await cli.exec('db migrate');",
+            "await dbCli.exec('db migrate');",
+            "await db.exec('db migrate');",
+        ].join('\n');
+
+        // When - each chain is read
+        const folders = subjectsOf(source, undefined, {
+            commands: { db: ['db', 'migrate'], dbCli: ['db', 'migrate'] },
+        }).map(({ subject }) => subjectFolder(subject));
+
+        // Then - the first word for the plain runner, the declared words for the other and its view
+        expect(folders).toStrictEqual(['db', 'db/migrate', 'db/migrate']);
     });
 });
 
@@ -213,7 +233,7 @@ describe('what a repository declares — its runner commands, its irregular coll
         const silent =
             'export const { cleanup, cli } = await specification.cli(BIN, { commands });';
 
-        // Then - the literal words, and nothing where the list is no literal or absent
+        // Then - the literal words, and nothing where the list is bound to nothing or absent
         expect(declaredCommands(declaring)).toStrictEqual(['db', 'migrate']);
         expect(declaredCommands(silent)).toBeUndefined();
         expect(
@@ -221,17 +241,37 @@ describe('what a repository declares — its runner commands, its irregular coll
         ).toBeUndefined();
     });
 
-    test('the door of a facet is the specification module its runner is imported from', () => {
-        // Given - a spec importing its cli and its api from two doors
-        const source = [
-            "import { api } from '../api.specification.js';",
-            "import { cli as run } from '../db-cli.specification.js';",
+    test.each([
+        ['commands: COMMANDS', "const COMMANDS = ['db', 'migrate'] as const;"],
+        ['commands', "const commands: readonly string[] = ['db', 'migrate'];"],
+    ])('a list bound to a const of the runner file is followed (%s)', (option, binding) => {
+        // Given - the runner naming its list by a const of its own file
+        const door = [
+            binding,
+            `export const { cleanup, cli } = await specification.cli(BIN, { ${option} });`,
         ].join('\n');
 
-        // Then - each facet's door, and none for a facet not imported
-        expect(doorOf(source, 'cli')).toBe('../db-cli.specification.js');
-        expect(doorOf(source, 'api')).toBe('../api.specification.js');
-        expect(doorOf(source, 'jobs')).toBeUndefined();
+        // Then - the words the const binds
+        expect(declaredCommands(door)).toStrictEqual(['db', 'migrate']);
+    });
+
+    test('the door of a handle is the specification module it is imported from', () => {
+        // Given - a spec importing an api and two clis, one under another name and viewed
+        const source = [
+            "import { api } from '../api.specification.js';",
+            "import { cli } from '../cli.specification.js';",
+            "import { cli as run } from '../db-cli.specification.js';",
+            'const db = run.with({});',
+        ].join('\n');
+
+        // Then - each handle's door, a view under its runner's, for the facet asked about
+        expect(doorsOf(source, 'cli')).toStrictEqual({
+            cli: '../cli.specification.js',
+            db: '../db-cli.specification.js',
+            run: '../db-cli.specification.js',
+        });
+        expect(doorsOf(source, 'api')).toStrictEqual({ api: '../api.specification.js' });
+        expect(doorsOf(source, 'jobs')).toStrictEqual({});
     });
 
     test.each<[string, readonly string[], string | undefined]>([

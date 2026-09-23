@@ -9,7 +9,7 @@ import { projectRootOf } from './role.js';
 import {
     closingOf,
     declaredCommands,
-    doorOf,
+    doorsOf,
     literalEnd,
     SUBJECT_FACETS,
     subjectFolder,
@@ -126,14 +126,20 @@ function readBeside(file: string, path: string): string | undefined {
 
 /**
  * What the spec's subjects are read with: the irregular collections of the
- * unit's `jterrazz.config.ts`, and the command list of the runner the spec
- * imports its `cli` from.
+ * unit's `jterrazz.config.ts`, and the command list of each runner the spec
+ * imports a `cli` from, by the handle it holds that runner by.
  */
 function readingOf(specsRoot: string, file: string, text: string): SubjectReading {
     const { collections } = testSettingsAt(projectRootOf(specsRoot) ?? dirname(specsRoot));
-    const door = doorOf(withoutComments(text), 'cli');
-    const source = door === undefined ? undefined : readBeside(file, door.replace(/\.js$/u, '.ts'));
-    return { collections, commands: source === undefined ? undefined : declaredCommands(source) };
+    const commands: Record<string, readonly string[]> = {};
+    for (const [handle, door] of Object.entries(doorsOf(withoutComments(text), 'cli'))) {
+        const source = readBeside(file, door.replace(/\.js$/u, '.ts'));
+        const declared = source === undefined ? undefined : declaredCommands(source);
+        if (declared !== undefined) {
+            commands[handle] = declared;
+        }
+    }
+    return { collections, commands };
 }
 
 /** Read one spec for its subjects and its tests. */
