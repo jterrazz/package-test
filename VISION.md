@@ -1036,3 +1036,11 @@ held across <k> rules`. The path and the pass list moved to
 64. `typescript check` still passes `--summary`, which a 17 checker
     ignores; it stays for the 16.x releases that print the long line
     without it. Drop it when 16.x leaves the floor?
+
+## Iteration 9 — the calls on 62–64 (2026-09-23), to implement with the owner's review round
+
+| #   | Decision                                                                                                                                                                                |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 62  | A green run with no `test` section prints one line too: `jterrazz.baseline.json › test: nothing held`; a deferring run names the root's file relative to the project, never absolutely. |
+| 63  | A stream given a value `toMatch` at run time gets the framework's message naming `.text` (the D14 test that pins vitest's message changes with it).                                     |
+| 64  | No legacy: `check.sh` stops passing `--summary`, and `CHECKER_FLOOR` becomes 17.0.0 in the release.                                                                                     |
