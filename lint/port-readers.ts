@@ -12,7 +12,13 @@ import { treeEntries } from '../src/seams/git/tree.js';
  * reads it off that line; nothing this package runs on the host reads
  * `process.env.PORT` or `$PORT`. A folder holding a `Dockerfile` is a
  * container's, whose ports are its own.
+ *
+ * One file is out of reach by name: the proof of the PORT form itself, whose
+ * children report the port they were handed and never bind it.
  */
+
+/** The module test that proves the PORT form, relative to the root. */
+const PORT_FORM_PROOF = 'src/seams/process/serve.adapter.test.ts';
 
 /** Where a port is read from what the process was handed. */
 const HANDED_PORT = /process\.env\.PORT\b|\$PORT\b|\$\{PORT\}/u;
@@ -47,5 +53,6 @@ export function portReaders(root: string): string[] {
     return [...specs, ...moduleTests]
         .filter((path) => SOURCE.test(path) && HANDED_PORT.test(readFileSync(path, 'utf8')))
         .map((path) => relative(root, path).replaceAll('\\', '/'))
+        .filter((path) => path !== PORT_FORM_PROOF)
         .toSorted();
 }
