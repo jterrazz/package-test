@@ -1146,7 +1146,8 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
  * Apply C14: move each single-reader pool entry beside its leaf and rewrite the
  * paths that climbed to it into the path from the leaf. The move is a `git mv`
  * in a work tree, so the moved fixture keeps its history; a plain rename elsewhere.
- * Returns what moved, relative to `rootDir`.
+ * A pool the move empties goes with it, as C27's leaf folder does. Returns what
+ * moved, relative to `rootDir`.
  */
 export function fixPoolFixtures(rootDir: string): string[] {
     const moved: string[] = [];
@@ -1165,6 +1166,9 @@ export function fixPoolFixtures(rootDir: string): string[] {
             if (next !== text) {
                 writeFileSync(file, next);
             }
+        }
+        if (readdirSync(pool).length === 0) {
+            rmSync(pool, { recursive: true });
         }
         moved.push(`${relative(rootDir, join(pool, entry))} → ${relative(rootDir, destination)}`);
     }

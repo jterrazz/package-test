@@ -1,10 +1,11 @@
-description: --fix moves the lonely seed into its leaf's seeds/ and rewrites the path that named it
+description: --fix moves the lonely seed into its leaf's seeds/, repoints it and removes the emptied folder
 fixture: ./fixtures/lonely-seed/
 runs:
     - command: checker . --fix
       exit: 0
       files:
           specs/seeds/one-user.sql: absent
+          specs/seeds: absent
           specs/api/users/seeds/one-user.sql: exists
           specs/api/users/listed.spec.yaml:
               contains: 'seed: ./seeds/one-user.sql'

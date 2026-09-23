@@ -1098,7 +1098,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "A pool entry is SHARED, or it is local: an entry — a file or a directory — of the specs root's own ground, `<specs>/fixtures/`, `seeds/`, `requests/` or `expected/`, reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, in its folder of the same role (`<leaf>/seeds/<name>`), named by the path from the leaf (`./seeds/<name>`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the entry is moved — a `git mv` in a work tree, so it keeps its history — and the literals rewritten.",
+            "A pool entry is SHARED, or it is local: an entry — a file or a directory — of the specs root's own ground, `<specs>/fixtures/`, `seeds/`, `requests/` or `expected/`, reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, in its folder of the same role (`<leaf>/seeds/<name>`), named by the path from the leaf (`./seeds/<name>`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the entry is moved — a `git mv` in a work tree, so it keeps its history — the literals rewritten, and a pool folder the move empties removed.",
         facet: 'model',
         family: 'C',
         fix: 'Run `jterrazz-test-check <root> --fix`; it moves the entry with `git mv` (a plain rename outside git) and rewrites what named it.',

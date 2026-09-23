@@ -1,10 +1,11 @@
-description: --fix moves the lonely pool fixture beside its leaf and rewrites the path that named it
+description: --fix moves the lonely pool fixture beside its leaf, repoints it and removes the emptied pool
 fixture: ./fixtures/lonely/
 runs:
     - command: checker . --fix
       exit: 0
       files:
           specs/fixtures/lonely-stub/main.js: absent
+          specs/fixtures: absent
           specs/widget/fixtures/lonely-stub/main.js: exists
           specs/widget/widget.test.ts:
               contains: ./fixtures/lonely-stub/
