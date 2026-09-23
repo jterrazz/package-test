@@ -106,6 +106,7 @@ const apiChain = {
     post: 'action',
     put: 'action',
     request: 'action',
+    with: 'setup',
 } satisfies Record<keyof ApiSpecification, FacetRole>;
 
 const jobsChain = {
@@ -114,6 +115,7 @@ const jobsChain = {
     seed: 'setup',
 
     trigger: 'action',
+    with: 'setup',
 } satisfies Record<keyof JobsSpecification, FacetRole>;
 
 const integrationChain = {
@@ -122,6 +124,7 @@ const integrationChain = {
     seed: 'setup',
 
     call: 'action',
+    with: 'setup',
 } satisfies Record<keyof IntegrationSpecification, FacetRole>;
 
 const cliChain = {
@@ -131,6 +134,7 @@ const cliChain = {
 
     exec: 'action',
     run: 'action',
+    with: 'setup',
 } satisfies Record<keyof CliSpecification, FacetRole>;
 
 const websiteChain = {
@@ -140,6 +144,7 @@ const websiteChain = {
 
     fetch: 'action',
     visit: 'action',
+    with: 'setup',
 } satisfies Record<keyof WebsiteSpecification, FacetRole>;
 
 const mobileChain = {

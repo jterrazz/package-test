@@ -391,6 +391,38 @@ describe('builder — service env injection', () => {
     });
 });
 
+describe('builder — what a file shares, with()', () => {
+    test('every chain of the view starts from the context, and its own setups merge over it', async () => {
+        // Given - a cli facet with a file's environment, and one chain adding to it
+        const command = new FakeCommandAdapter();
+        const cli = createCliFacet({ command }).with({ env: { LANG: 'fr', TZ: 'UTC' } });
+
+        // When - a chain overrides one variable of the context
+        await cli.env({ TZ: 'Europe/Paris' }).exec('run');
+        const overridden = command.lastEnv;
+        await cli.exec('run');
+
+        // Then - the chain's own setting wins, and the next chain starts from the context again
+        expect(overridden).toMatchObject({ LANG: 'fr', TZ: 'Europe/Paris' });
+        expect(command.lastEnv).toMatchObject({ LANG: 'fr', TZ: 'UTC' });
+    });
+
+    test('a context states only what it names: no clock, no headers, nothing set', () => {
+        // Given - a chain handed an empty context
+        const builder = new SpecificationBuilder({}, '/tmp').with({});
+
+        // Then - it pins nothing and carries no header
+        const internals = builder as unknown as {
+            pinnedClock: null | string;
+            requestHeaders: object;
+        };
+        expect({ clock: internals.pinnedClock, headers: internals.requestHeaders }).toStrictEqual({
+            clock: null,
+            headers: {},
+        });
+    });
+});
+
 describe('builder — the calendar a chain pins', () => {
     test('.clock() takes the instant and travels with the chain', () => {
         // Given - a plain builder

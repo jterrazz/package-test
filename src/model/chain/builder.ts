@@ -170,6 +170,20 @@ export type RequestEntry = {
 };
 
 /**
+ * What a FILE shares on every chain it starts: the settings, never the state.
+ * A clock, headers, an environment are how the file reaches its subject; a
+ * seed or a contract is the Given of one test, and stays on its chain.
+ */
+export type ChainContext = {
+    /** The instant every chain pins — a chain's own `.clock()` wins. */
+    clock?: string;
+    /** The environment every command runs with — a chain's own `.env()` merges over it. */
+    env?: CliEnv;
+    /** The headers every request carries — a chain's own `.headers()` merges over them. */
+    headers?: Record<string, string>;
+};
+
+/**
  * The `.intercept()` overload set, identical on every facet: one contract, a
  * list, a composite — or the inline `(request, response)` pair for a one-off.
  */
@@ -209,6 +223,11 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
     put: (path: string, body?: unknown) => Promise<HttpResult>;
     /** Send a complete request: its `.http` text written in the test, or `file('./requests/<name>.http')`. */
     request: (source: DiskFile<'.http'> | string) => Promise<HttpResult>;
+    /**
+     * The facet with what a whole file shares — `const events = api.with({ clock, headers })` —
+     * every chain it starts beginning with those settings.
+     */
+    with: (context: Pick<ChainContext, 'clock' | 'headers'>) => ApiSpecification<DatabaseKey>;
 };
 
 /**
@@ -239,6 +258,8 @@ export type JobsSpecification<DatabaseKey extends string = string> = {
 
     /** Execute the named job registered via the `jobs` option and resolve with the result. */
     trigger: (name: string) => Promise<JobsResult>;
+    /** The facet with the clock a whole file shares, every chain it starts pinned at it. */
+    with: (context: Pick<ChainContext, 'clock'>) => JobsSpecification<DatabaseKey>;
 };
 
 /**
@@ -270,6 +291,8 @@ export type IntegrationSpecification<
      * connection strings rather than with a double.
      */
     call: <T>(subject: (services: Services) => Promise<T> | T) => Promise<CallResult<T>>;
+    /** The facet with the clock a whole file shares, every chain it starts pinned at it. */
+    with: (context: Pick<ChainContext, 'clock'>) => IntegrationSpecification<Services, DatabaseKey>;
 };
 
 /**
@@ -309,6 +332,8 @@ export type CliSpecification<DatabaseKey extends string = string> = {
      * the test file beside it.
      */
     run: (document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags) => Promise<CliResult>;
+    /** The facet with the environment a whole file shares, every command it runs starting from it. */
+    with: (context: Pick<ChainContext, 'env'>) => CliSpecification<DatabaseKey>;
 };
 
 /**
@@ -339,6 +364,8 @@ export type WebsiteSpecification = {
      * the capture reflects the FINAL page state.
      */
     visit: (path: string, scenario?: VisitScenario) => Promise<PageResult>;
+    /** The facet with the clock and headers a whole file shares, every chain it starts beginning with them. */
+    with: (context: Pick<ChainContext, 'clock' | 'headers'>) => WebsiteSpecification;
 };
 
 /**
@@ -474,6 +501,28 @@ export class SpecificationBuilder
      */
     headers(headers: Record<string, string>): this {
         this.requestHeaders = { ...this.requestHeaders, ...headers };
+        return this;
+    }
+
+    /**
+     * Start from what a whole file shares: its clock, its headers, its
+     * environment — each as its own setup would state it, so a later setup of
+     * the chain overrides or merges exactly as it would over an earlier one.
+     *
+     * @example
+     *   const events = api.with({ clock: '2026-03-04T09:30:00Z', headers: { 'Accept-Language': 'fr' } });
+     *   await events.get('/events');
+     */
+    with({ clock, env, headers }: ChainContext): this {
+        if (clock !== undefined) {
+            this.clock(clock);
+        }
+        if (env !== undefined) {
+            this.env(env);
+        }
+        if (headers !== undefined) {
+            this.headers(headers);
+        }
         return this;
     }
 
@@ -1240,6 +1289,7 @@ function apiView(builder: SpecificationBuilder): ApiSpecification {
         put: async (path, body) => await builder.put(path, body),
         request: async (source) => await builder.request(source),
         seed: (source, options) => apiView(builder.seed(source, options)),
+        with: (context) => apiView(builder.with(context)),
     };
     apiViews.set(builder, view);
     return view;
@@ -1250,8 +1300,11 @@ function apiView(builder: SpecificationBuilder): ApiSpecification {
  * file directory is auto-detected from the call stack at each chain start.
  */
 export function createApiFacet(config: SpecificationConfig): ApiSpecification {
-    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
+    return apiFacet(() => new SpecificationBuilder(config, getCallerDir()));
+}
 
+/** The api facet over a chain start — `with()` hands back one over a start that states the context. */
+function apiFacet(start: () => SpecificationBuilder): ApiSpecification {
     return {
         clock: (iso) => apiView(start().clock(iso)),
         delete: async (path) => await start().delete(path),
@@ -1262,6 +1315,7 @@ export function createApiFacet(config: SpecificationConfig): ApiSpecification {
         put: async (path, body) => await start().put(path, body),
         request: async (source) => await start().request(source),
         seed: (source, options) => apiView(start().seed(source, options)),
+        with: (context) => apiFacet(() => start().with(context)),
     };
 }
 
@@ -1276,6 +1330,7 @@ function jobsView(builder: SpecificationBuilder): JobsSpecification {
         intercept: interceptInto(() => builder, jobsView),
         seed: (source, options) => jobsView(builder.seed(source, options)),
         trigger: async (name) => await builder.trigger(name),
+        with: (context) => jobsView(builder.with(context)),
     };
     jobsViews.set(builder, view);
     return view;
@@ -1285,13 +1340,17 @@ function jobsView(builder: SpecificationBuilder): JobsSpecification {
  * Create the `jobs` facet bound to the given adapter configuration.
  */
 export function createJobsFacet(config: SpecificationConfig): JobsSpecification {
-    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
+    return jobsFacet(() => new SpecificationBuilder(config, getCallerDir()));
+}
 
+/** The jobs facet over a chain start. */
+function jobsFacet(start: () => SpecificationBuilder): JobsSpecification {
     return {
         clock: (iso) => jobsView(start().clock(iso)),
         intercept: interceptInto(start, jobsView),
         seed: (source, options) => jobsView(start().seed(source, options)),
         trigger: async (name) => await start().trigger(name),
+        with: (context) => jobsFacet(() => start().with(context)),
     };
 }
 
@@ -1302,13 +1361,19 @@ export function createIntegrationFacet<
     Services extends Record<string, unknown>,
     DatabaseKey extends string,
 >(config: SpecificationConfig): IntegrationSpecification<Services, DatabaseKey> {
-    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
+    return integrationFacet(() => new SpecificationBuilder(config, getCallerDir()));
+}
 
+/** The integration facet over a chain start. */
+function integrationFacet<Services extends Record<string, unknown>, DatabaseKey extends string>(
+    start: () => SpecificationBuilder,
+): IntegrationSpecification<Services, DatabaseKey> {
     return {
         call: async (subject) => await start().call(subject),
         clock: (iso) => start().clock(iso),
         intercept: interceptOn(start),
         seed: (source, options) => start().seed(source, options),
+        with: (context) => integrationFacet(() => start().with(context)),
     };
 }
 
@@ -1316,14 +1381,18 @@ export function createIntegrationFacet<
  * Create the `website` facet bound to the given adapter configuration.
  */
 export function createWebsiteFacet(config: SpecificationConfig): WebsiteSpecification {
-    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
+    return websiteFacet(() => new SpecificationBuilder(config, getCallerDir()));
+}
 
+/** The website facet over a chain start. */
+function websiteFacet(start: () => SpecificationBuilder): WebsiteSpecification {
     return {
         clock: (iso) => start().clock(iso),
         fetch: async (path) => await start().fetch(path),
         headers: (headers) => start().headers(headers),
         intercept: interceptOn(start),
         visit: async (path, scenario) => await start().visit(path, scenario),
+        with: (context) => websiteFacet(() => start().with(context)),
     };
 }
 
@@ -1344,13 +1413,17 @@ export function createMobileFacet(config: SpecificationConfig): MobileSpecificat
  */
 export function createCliFacet(config: SpecificationConfig): CliSpecification {
     const resolved = withDockerTestRunId(config);
-    const start = (): SpecificationBuilder => new SpecificationBuilder(resolved, getCallerDir());
+    return cliFacet(() => new SpecificationBuilder(resolved, getCallerDir()));
+}
 
+/** The cli facet over a chain start. */
+function cliFacet(start: () => SpecificationBuilder): CliSpecification {
     return {
         env: (env) => start().env(env),
         exec: async (args, options) => await start().exec(args, options),
         fixture: (source) => start().fixture(source),
         run: async (document, options) => await start().run(document, options),
         seed: (source, options) => start().seed(source, options),
+        with: (context) => cliFacet(() => start().with(context)),
     };
 }

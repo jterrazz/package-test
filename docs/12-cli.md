@@ -174,6 +174,7 @@ test('isolates HOME per spec', async () => {
 - `'$WORKDIR'` expands to the spec's temp cwd — pin `HOME`, caches, config dirs onto isolated ground.
 - `null` **removes** a variable from the child env — shield the spec from the developer's shell.
 - Repeated `.env()` calls merge; later keys win.
+- `cli.with({ env })` is the environment a whole FILE shares: every chain of the view it hands back starts from it, and a chain's own `.env()` merges over it ([18](18-conventions.md#what-a-file-shares)). What every run of the binary needs, whichever file, is the runner's `defaults`.
 
 #### Auto-injected connection URLs (rule B6)
 

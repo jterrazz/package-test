@@ -61,7 +61,7 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule A3
 
 ## The chain
 
-Setups: `.seed()`, `.intercept()`, `.clock()`. Terminal action: `.call(subject)` (rule B2).
+Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule B2).
 
 | Setup                             | Means                                                                                           |
 | --------------------------------- | ----------------------------------------------------------------------------------------------- |

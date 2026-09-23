@@ -186,6 +186,10 @@ test('sends chain headers on the raw exchange', async () => {
 });
 ```
 
+### Setup: `website.with({ clock, headers })`
+
+The clock and the headers a whole FILE shares are stated once, on a view of the facet whose every chain starts with them — `const french = website.with({ headers: { 'Accept-Language': 'fr' } })` — and a chain's own setup merges over it ([18](18-conventions.md#what-a-file-shares)).
+
 ### Setup: `.clock()`
 
 `.clock('2026-03-04T09:30:00Z')` pins the calendar of the PAGE — what the site's own scripts read when they call `new Date()` — before the first byte is parsed, so a stamp rendered on load is the stated instant and not the moment the navigation happened to start. It is released with the visit.

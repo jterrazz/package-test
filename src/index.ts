@@ -70,6 +70,7 @@ export type { JobsResult } from './facets/jobs/jobs.result.js';
 export type { MobileSpecification } from './facets/mobile/mobile.chain.js';
 export type { WebsiteSpecification } from './facets/website/website.chain.js';
 export type {
+    ChainContext,
     DockerSpecConfig,
     JobHandle,
     SeedSource,

@@ -239,6 +239,12 @@ export const CAPABILITIES: Capability[] = [
         name: '.headers()',
         probe: '.headers(',
     },
+    {
+        columns: ['api', 'jobs', 'cli', 'integration', 'website'],
+        group: 'Setup',
+        name: '.with()',
+        probe: '.with({',
+    },
     { columns: ['cli'], group: 'Setup', name: '.fixture()', probe: '.fixture(' },
     { columns: ['cli'], group: 'Setup', name: '.env()', probe: '.env(' },
     { columns: ['component'], group: 'Setup', name: '.wrap()', probe: '.wrap(' },

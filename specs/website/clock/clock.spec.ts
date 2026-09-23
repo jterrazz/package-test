@@ -12,6 +12,14 @@ describe('clock', () => {
         expect(result.content.text).toContain('2026-03-04T09:30:00.000Z');
     });
 
+    test('a view made with() pins every visit it starts', async () => {
+        // Given - the instant a whole file shares
+        const result = await website.with({ clock: '2026-03-04T09:30:00Z' }).visit('/clock');
+
+        // Then - the stamp is the stated instant
+        expect(result.content.text).toContain('2026-03-04T09:30:00.000Z');
+    });
+
     test('a raw exchange refuses the setup rather than ignoring it', async () => {
         // Given - a chain pinning a clock, then asking for one raw exchange
         // Then - the refusal says a fetch opens no page

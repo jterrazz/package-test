@@ -86,6 +86,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 - **Awaiting a sync matcher, or not awaiting an IO one** — a table's `toMatch(<rows>)`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (D2).
 - **A double before the real thing** — the ladder is: the real thing → a declared service → a contract (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits.
 - **Time** — `clock` only (`.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope); never `vi.useFakeTimers`.
+- **A setting every chain of a file repeats** — state it once, on a view: `const events = api.with({ clock: '<iso>', headers })`; a seed or a contract stays on its test's chain.
 - **A 16.x tree** — `npx jterrazz-test-check --fix` renames the ground folders and rewrites every literal call and document, module tests included.
 
 ## Read next

@@ -41,7 +41,7 @@ There is **no `server`** option: jobs run in-process by definition, and the reco
 
 ## The chain
 
-Setups: `.seed()` (``sql`…` `` written in the test, or a shared `file()`), `.intercept()`, `.clock()`. Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
+Setups: `.seed()` (``sql`…` `` written in the test, or a shared `file()`), `.intercept()`, `.clock()`, and `jobs.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
 
 `.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 

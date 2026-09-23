@@ -3,6 +3,11 @@ import { describe, expect, test } from 'vitest';
 import { file } from '../../../src/index.js';
 import { integration } from '../pure.specification.js';
 
+/** A module that stamps the moment it ran. */
+function stamp(): { stampedAt: string } {
+    return { stampedAt: new Date().toISOString() };
+}
+
 describe('clock', () => {
     test('stamps the instant the chain stated', async () => {
         // Given - a module that stamps the moment it ran
@@ -11,6 +16,14 @@ describe('clock', () => {
             .call(() => ({ stampedAt: new Date().toISOString() }));
 
         // Then - the stamp is that instant, not the run's
+        expect(result.value).toMatch(file('./expected/stamped.json'));
+    });
+
+    test('a view made with() pins every call it starts', async () => {
+        // Given - the instant a whole file shares
+        const result = await integration.with({ clock: '2026-03-04T09:30:00Z' }).call(stamp);
+
+        // Then - the stamp is that instant
         expect(result.value).toMatch(file('./expected/stamped.json'));
     });
 

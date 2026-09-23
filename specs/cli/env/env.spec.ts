@@ -58,6 +58,19 @@ describe('command — env', () => {
         expect(result.stdout.text).toContain('MY_VAR=hello');
     });
 
+    test('a view made with() starts every command from the file’s environment', async () => {
+        // Given - the environment a whole file shares, and one chain adding to it
+        const shared = cli.with({ env: { MY_VAR: 'shared' } });
+        const result = await shared
+            .fixture(directory('../../fixtures/cli-app/'))
+            .env({ EXTRA: 'own' })
+            .exec('env');
+
+        // Then - the command sees both, the file's and the chain's
+        expect(result.stdout.text).toContain('MY_VAR=shared');
+        expect(result.stdout.text).toContain('EXTRA=own');
+    });
+
     test('merges multiple .env() calls', async () => {
         // Given - two .env() calls setting different keys
         const result = await cli
