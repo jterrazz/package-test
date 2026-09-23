@@ -197,15 +197,21 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
 
     // RUNTIME D14 — `toMatch` routes the disk to the golden and a value to
     // Vitest, and a golden handed a subject of the other kind is refused.
-    test('a stream accessor is not a string: vitest refuses it, and its .text matches', () => {
+    test('a stream accessor is not a string: a value is refused naming .text, and its .text matches', () => {
         // Given - a stream subject, ANSI included
         const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m', 'stdout', '/tmp');
 
-        // Then - vitest's own refusal on the accessor, and vitest's own match on its comparable text
+        // Then - the framework's refusal naming the text, and vitest's own match on that comparable text
         expect(() => {
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value matcher on a stream
             expect(subject as unknown as string).toMatch(/built in/u);
-        }).toThrow('.toMatch() expects to receive a string, but got object');
+        }).toThrow(
+            '"stdout" is a stream, and a stream compared as a value is its text — write expect(<stream>.text).toMatch(…)',
+        );
+        expect(() => {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value matcher on a stream
+            expect(subject as unknown as string).not.toMatch('failed');
+        }).toThrow('expect(<stream>.text).toMatch(…)');
         expect(subject.text).toMatch(/^built in \ds$/u);
         expect(subject.text).not.toMatch('failed');
     });

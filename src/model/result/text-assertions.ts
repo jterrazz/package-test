@@ -2,7 +2,7 @@ import { formatStdoutDiff } from '../chain/reporter.js';
 import { isDiskTarget } from '../chain/spec-path.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
-import type { TextAccessor } from './text.js';
+import { TextAccessor } from './text.js';
 
 /**
  * What a stream assertion DECIDES, with no idea of where the fixture came from.
@@ -71,6 +71,19 @@ export function emptyStreamRefusal(accessor: TextAccessor): TypeError {
     return new TypeError(
         `toBeEmpty: "${accessor.streamName}" is a stream, and an empty stream is an empty text — write expect(<stream>.text).toBe('')`,
     );
+}
+
+/**
+ * A value `toMatch` on a stream is refused, in both builds: a stream is no
+ * string, and the value it is compared as is its `.text` — the comparable text
+ * a golden reads. Any other subject is not this refusal's to answer.
+ */
+export function streamValueRefusal(subject: unknown): TypeError | undefined {
+    return subject instanceof TextAccessor
+        ? new TypeError(
+              `toMatch: "${subject.streamName}" is a stream, and a stream compared as a value is its text — write expect(<stream>.text).toMatch(…), or toMatch(file(…)) for its golden.`,
+          )
+        : undefined;
 }
 
 /** The name the golden comparison is registered under — no member access can spell it. */

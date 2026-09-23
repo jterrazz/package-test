@@ -39,6 +39,7 @@ import {
     GOLDEN_MATCHER,
     matchThroughGolden,
     requireExtension,
+    streamValueRefusal,
 } from '../result/text-assertions.js';
 import { TextAccessor } from '../result/text.js';
 
@@ -443,8 +444,9 @@ async function toBeRunning(received: unknown): Promise<MatcherResult> {
 
 /**
  * What each result accessor other than a stream takes instead of a value — its
- * golden, its rows, its state. A stream is left to vitest: its value is its
- * `.text`, and any subject absent from this list is vitest's to read.
+ * golden, its rows, its state. A stream's refusal names its `.text`
+ * ({@link streamValueRefusal}), and any subject absent from both is vitest's
+ * to read.
  */
 const VALUELESS: readonly {
     readonly is: (subject: unknown) => boolean;
@@ -476,6 +478,10 @@ const VALUELESS: readonly {
 
 /** The refusal of a value handed to a subject that takes none, or nothing for any other. */
 function valueRefusal(received: unknown): TypeError | undefined {
+    const stream = streamValueRefusal(received);
+    if (stream !== undefined) {
+        return stream;
+    }
     const valueless = VALUELESS.find(({ is }) => is(received));
     return valueless === undefined
         ? undefined

@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../chain/spec-path.js';
-import { GOLDEN_MATCHER, matchThroughGolden } from './text-assertions.js';
+import { GOLDEN_MATCHER, matchThroughGolden, streamValueRefusal } from './text-assertions.js';
+import { TextAccessor } from './text.js';
 
 /**
  * The framework routes `toMatch`'s disk arguments to the golden and leaves every
@@ -83,5 +84,22 @@ describe('matchThroughGolden', () => {
         expect(() => {
             toMatch.call(chai.Assertion.prototype, 'out');
         }).toThrow('takes toMatch(file(…))');
+    });
+
+    test('a stream handed a value is refused naming its .text, in the route both builds lay', () => {
+        // Given - the route laid with the stream refusal, over a stream subject
+        const answered: string[] = [];
+        const chai = chaiWith(answered, new TextAccessor('built\n', 'stderr', '/tmp'));
+        matchThroughGolden(chai, streamValueRefusal);
+        const toMatch = toMatchOf(chai);
+
+        // Then - a value is refused naming the text, vitest is never asked, and a non-stream is left alone
+        expect(() => {
+            toMatch.call(chai.Assertion.prototype, /built/u);
+        }).toThrow(
+            '"stderr" is a stream, and a stream compared as a value is its text — write expect(<stream>.text).toMatch(…)',
+        );
+        expect(answered).toStrictEqual([]);
+        expect(streamValueRefusal('built')).toBeUndefined();
     });
 });

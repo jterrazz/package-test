@@ -8,6 +8,7 @@ import {
     GOLDEN_MATCHER,
     matchThroughGolden,
     requireExtension,
+    streamValueRefusal,
 } from '../../model/result/text-assertions.js';
 import { TextAccessor } from '../../model/result/text.js';
 import { readGolden, writeGolden } from './vitest-browser.adapter.js';
@@ -103,5 +104,5 @@ export function registerBrowserMatchers(): void {
     }
     registered = true;
     expect.extend({ [GOLDEN_MATCHER]: toMatchGolden, toBeEmpty });
-    matchThroughGolden(chai);
+    matchThroughGolden(chai, streamValueRefusal);
 }
