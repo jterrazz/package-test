@@ -1,5 +1,6 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { COLUMNS } from './facet-matrix.js';
@@ -36,6 +37,28 @@ describe('capability matrix (meta-test K6)', () => {
         expect(holes, 'a declared capability nothing exercises, and nothing excuses').toStrictEqual(
             [],
         );
+    });
+
+    test('a call counts where it is written in code, never where a string or a comment names it', () => {
+        // Given - a cli tree whose one file names `.exec(` in a string and a comment, and another that calls it
+        const root = mkdtempSync(join(tmpdir(), 'matrix-'));
+        try {
+            mkdirSync(join(root, 'specs/cli/exec'), { recursive: true });
+            writeFileSync(join(root, 'vitest.config.ts'), 'export default {};\n');
+            writeFileSync(
+                join(root, 'specs/cli/exec/named.spec.ts'),
+                "// cli.exec('x') runs the binary\nconst sentence = \"cli.exec('x')\";\n",
+            );
+            const named = matrixRows(root).find((row) => row.capability.name === '.exec()');
+            writeFileSync(join(root, 'specs/cli/exec/called.spec.ts'), "await cli.exec('x');\n");
+            const called = matrixRows(root).find((row) => row.capability.name === '.exec()');
+
+            // Then - the file that only names it is no exercise; the file that calls it is one
+            expect(named?.cells.cli).toBe(0);
+            expect(called?.cells.cli).toBe(1);
+        } finally {
+            rmSync(root, { force: true, recursive: true });
+        }
     });
 
     test('an empty mobile cell names M1, and the day one fills the exemption goes', () => {

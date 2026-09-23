@@ -88,16 +88,73 @@ function withoutComments(source: string): string {
         .replaceAll(/^\s*#[^\n]*/gmu, '');
 }
 
+/**
+ * Where each string literal of a source sits: `true` at every index inside
+ * one, its quotes included. A capability named inside a string — a golden's
+ * text, a RuleTester case, a message — is not exercised by the file that
+ * names it.
+ */
+function stringsOf(source: string): boolean[] {
+    const inside: boolean[] = [];
+    let quote = '';
+    for (let index = 0; index < source.length; index += 1) {
+        const char = source[index] ?? '';
+        if (quote === '') {
+            quote = char === '"' || char === "'" || char === '`' ? char : '';
+            inside[index] = quote !== '';
+        } else {
+            inside[index] = true;
+            if (char === '\\') {
+                index += 1;
+                inside[index] = true;
+            } else if (char === quote) {
+                quote = '';
+            }
+        }
+    }
+    return inside;
+}
+
+/** The groups whose probe is a call or a key, written in code — never a string's content. */
+const WRITTEN_IN_CODE = new Set<Capability['group']>([
+    'Constructor option',
+    'Descriptor',
+    'Result accessor',
+    'Setup',
+    'Terminal action',
+    'Verb',
+]);
+
+/** A test file, as its capabilities are read from it. */
+type Source = {
+    /** Which indexes of `text` sit inside a string literal (none, for a document). */
+    strings: boolean[];
+    /** The text, comments stripped. */
+    text: string;
+};
+
+/** Does the source carry the probe — where it is written in code, when the row's group is? */
+function carries(source: Source, matcher: RegExp, inCode: boolean): boolean {
+    if (!inCode) {
+        return matcher.test(source.text);
+    }
+    const global = new RegExp(matcher.source, `${matcher.flags}g`);
+    return [...source.text.matchAll(global)].some((match) => source.strings[match.index] !== true);
+}
+
 /** The source of every test file a column owns, read once per generation. */
-function sourcesOf(root: string): Record<Column, string[]> {
-    const read = (column: Column): string[] => {
+function sourcesOf(root: string): Record<Column, Source[]> {
+    const read = (column: Column): Source[] => {
         const tree = COLUMN_TREES[column];
         return [
             ...tree.roots.flatMap((relative) =>
                 filesUnder(resolve(root, relative), tree.extensions),
             ),
             ...(tree.files ?? []).map((relative) => resolve(root, relative)),
-        ].map((path) => withoutComments(readFileSync(path, 'utf8')));
+        ].map((path) => {
+            const text = withoutComments(readFileSync(path, 'utf8'));
+            return { strings: path.endsWith('.spec.yaml') ? [] : stringsOf(text), text };
+        });
     };
     // Written out rather than folded: the compiler then holds the invariant
     // That every column has a tree, which a `fromEntries` cast would drop.
@@ -171,7 +228,8 @@ export function matrixRows(root: string): MatrixRow[] {
             return null;
         }
         const matcher = matcherOf(capability.probeByColumn?.[column] ?? capability.probe);
-        return sources[column].filter((source) => matcher.test(source)).length;
+        const inCode = WRITTEN_IN_CODE.has(capability.group);
+        return sources[column].filter((source) => carries(source, matcher, inCode)).length;
     };
     return capabilities().map((capability) => ({
         capability,
@@ -235,7 +293,7 @@ export function renderMatrixBody(root: string): string {
     }
     const notes = [...byReason].map(([why, cells]) => `- ${why} — ${cells.join(', ')}`);
     const intro =
-        'What the framework can do, and how many of this package\u2019s own test FILES carry the literal that exercises it, per facet (comments stripped, so a sentence about a capability never counts as a test of it). A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
+        'What the framework can do, and how many of this package\u2019s own test FILES carry the literal that exercises it, per facet (comments stripped, and for a call or a key strings too, so a sentence or a string naming a capability never counts as a test of it). A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
     return [intro, ...sections, '### Exemptions', notes.join('\n')].join('\n\n');
 }
 

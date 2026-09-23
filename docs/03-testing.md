@@ -223,7 +223,7 @@ already share, and a scan of the trees each column owns.
 
 <!-- GENERATED:matrix — do not edit by hand; run `npm run docs`. Source: lint/matrix.ts -->
 
-What the framework can do, and how many of this package’s own test FILES carry the literal that exercises it, per facet (comments stripped, so a sentence about a capability never counts as a test of it). A blank (`—`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.
+What the framework can do, and how many of this package’s own test FILES carry the literal that exercises it, per facet (comments stripped, and for a call or a key strings too, so a sentence or a string naming a capability never counts as a test of it). A blank (`—`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.
 
 ### Constructor option
 
@@ -240,9 +240,9 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `app`       | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `timeouts`  | —   | —    | —   | —           | —       | 0      | —         | —      |
 | `defaults`  | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `env`       | —   | —    | 4   | —           | —       | —      | —         | —      |
+| `env`       | —   | —    | 3   | —           | —       | —      | —         | —      |
 | `docker`    | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `serve`     | —   | —    | 4   | —           | —       | —      | —         | —      |
+| `serve`     | —   | —    | 3   | —           | —       | —      | —         | —      |
 | `transform` | —   | —    | 2   | —           | 1       | —      | —         | —      |
 | `wrap`      | —   | —    | —   | —           | —       | —      | 1         | —      |
 | `vite`      | —   | —    | —   | —           | —       | —      | 1         | —      |
@@ -320,10 +320,10 @@ What the framework can do, and how many of this package’s own test FILES carry
 | `contentinfo`   | —   | —    | —   | —           | 1       | —      | 0         | —      |
 | `form`          | —   | —    | —   | —           | 0       | —      | 0         | —      |
 | `main`          | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `navigation`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
+| `navigation`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `region`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `search`        | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `within`        | —   | —    | —   | —           | 2       | —      | 5         | —      |
+| `within`        | —   | —    | —   | —           | 2       | —      | 4         | —      |
 | `focused`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `selected`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `valued`        | —   | —    | —   | —           | 1       | —      | 2         | —      |
@@ -449,7 +449,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/facet-matrix.test.ts`                 | facet capability declaration (K1 guard)                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 6     |
 | `lint/fork.test.ts`                         | the fork — generation freshness (meta-test)                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 2     |
 | `lint/makefile.test.ts`                     | the Makefile — the six targets a repository answers                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 3     |
-| `lint/matrix.test.ts`                       | capability matrix (meta-test K6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 5     |
+| `lint/matrix.test.ts`                       | capability matrix (meta-test K6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 6     |
 | `lint/meta-tests.test.ts`                   | the meta-test channel, read off its own files                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3     |
 | `lint/oxlint-pin.test.ts`                   | the oxlint pin — the toolchain owns it and this manifest mirrors it                                                                                                                                                                                                                                                                                                                                                                                                                                  | 2     |
 | `lint/package-exports.test.ts`              | package-exports — F1 reads the published contract · package-exports — the root has two runtimes and one type surface · package-exports — the tarball carries what a message points at                                                                                                                                                                                                                                                                                                                | 8     |
