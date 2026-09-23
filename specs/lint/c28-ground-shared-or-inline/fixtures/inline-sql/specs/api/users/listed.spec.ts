@@ -4,7 +4,7 @@ import { expect, test } from 'vitest';
 import { api } from '../api.specification.js';
 
 test('lists the users', async () => {
-    // Given - two users, the first named by its comment, the second by this test's title — a name another seed holds
+    // Given - two users, the first named by its comment, the second by this test's title, its filler dropped — a name another seed holds
     const result = await api
         .seed(sql`
             -- Two users, one admin
@@ -19,7 +19,7 @@ test('lists the users', async () => {
 
 test('lists the user its seed file holds', async () => {
     // Given - one user, from the seed this test alone reads
-    const result = await api.seed(file('./seeds/lists-the-users.sql')).get('/users');
+    const result = await api.seed(file('./seeds/lists-users.sql')).get('/users');
 
     // Then - the user
     expect(result.response).toMatch('HTTP/1.1 200 OK');

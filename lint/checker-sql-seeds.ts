@@ -8,7 +8,7 @@ import { forgetTree } from '../src/seams/git/tree.js';
 import { findSpecsRoots, listFiles, suppressedLines } from './checker-crossfile.js';
 import { importsFromEntry, withEntryImport, withoutEntryImport } from './checker-migration.js';
 import type { TokenViolation } from './checker.js';
-import { isInside, kebabName, literalSpans, nameAround } from './spec-values.js';
+import { isInside, kebabName, literalSpans, titleAround } from './spec-values.js';
 import { skipString, withoutComments } from './subject.js';
 
 /**
@@ -19,8 +19,9 @@ import { skipString, withoutComments } from './subject.js';
  * `sql` template of the vision/17 prototype — imported from the framework's
  * entry, which exports it no more — is refused where the tag stands, and
  * `--fix` writes the statements to `./seeds/<name>.sql` beside the spec: the
- * name is the first `--` comment of the SQL, kebab-cased, else the title of
- * the test that holds it, else `seed`; a name taken by other bytes gains
+ * name is the first `--` comment of the SQL, kebab-cased, else the first four
+ * meaningful words of the title of the test that holds it, else `seed`; a
+ * name taken by other bytes gains
  * `-2`, `-3`, …, and one holding the same bytes is reused.
  */
 
@@ -49,6 +50,44 @@ export function commentName(statements: string): string | undefined {
     const comment = /^\s*--\s*(?<words>.*\S)/mu.exec(statements)?.groups?.words;
     const name = comment === undefined ? '' : kebabName(comment);
     return name === '' ? undefined : name;
+}
+
+/** The words a title reads through without them saying what the seed holds. */
+const FILLER = new Set([
+    'a',
+    'an',
+    'and',
+    'are',
+    'as',
+    'at',
+    'be',
+    'by',
+    'each',
+    'for',
+    'from',
+    'in',
+    'into',
+    'is',
+    'it',
+    'its',
+    'of',
+    'on',
+    'or',
+    'that',
+    'the',
+    'then',
+    'this',
+    'to',
+    'when',
+    'with',
+]);
+
+/** A test's title as a seed's file name: its first four meaningful words, kebab-cased — `undefined` when it has none. */
+export function titleName(title: string): string | undefined {
+    const words = kebabName(title)
+        .split('-')
+        .filter((word) => word !== '' && !FILLER.has(word));
+    return words.length === 0 ? undefined : words.slice(0, 4).join('-');
 }
 
 /** The statements a hole-less template states, escapes read — `undefined` when it holds a hole. */
@@ -84,7 +123,8 @@ function inlineSeedsIn(file: string): InlineSeed[] {
             line: before.split('\n').length,
             name:
                 (statements === undefined ? undefined : commentName(statements)) ??
-                nameAround(text, found.index, 'seed'),
+                titleName(titleAround(text, found.index) ?? '') ??
+                'seed',
             start: found.index,
             statements,
         });
