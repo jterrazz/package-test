@@ -1,0 +1,13 @@
+description: --fix on a named specs tree moves that tree, and leaves the member's 16 module tests
+fixture: ./fixtures/on-16-tree-and-module/
+runs:
+    - command: checker specs --fix
+      exit: 0
+      files:
+          specs/cli/build/_expected/build.txt: absent
+          specs/cli/build/expected/build.txt: exists
+          specs/cli/build/build.spec.ts:
+              contains: toMatch(file('./expected/build.txt'))
+          src/report/_expected/total.json: exists
+          src/report/report.test.ts:
+              contains: toMatch('total.json')
