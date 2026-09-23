@@ -752,3 +752,70 @@ implementation (the commits say what was broken).
     `nav, header, footer, main, aside, section, form, [role]` in both
     adapters, so a candidate inside a `<search>` element is reported with
     no landmark and its scope is never suggested. Add `search` there?
+
+## Iteration 6 — the calls on questions 45 to 48 (2026-09-23)
+
+| #   | Decision                                                                                                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 45  | A component's uncaught exception appears ONCE in `result.errors`, worded like the website's (`Uncaught <name>: <message>`), deduped at the facet. |
+| 46  | C14's fixer moves with `git mv` in a git checkout, and with a plain rename otherwise.                                                             |
+| 47  | The plugin's disk-reading rules and the checker's C8 probe read the tracked listing; outside git, the disk.                                       |
+| 48  | W3's ambiguity evidence names the `search` landmark, and the selector is checked against every landmark of the vocabulary.                        |
+
+### What the package-test branch decided (iteration 6)
+
+- **One uncaught line.** The double source is vitest's own
+  `@vitest/browser/dist/client/error-catcher.js`: it wraps
+  `window.addEventListener`, and while the page holds an `error` listener
+  of its own it stops reporting the event as unhandled and logs it as
+  `console.error(new Error(e.message))` instead — the HYPOTHESIS of 45,
+  now read. Its listener runs first, so the relay is the entry the
+  facet's recorder pushed just before its own listener fires; the listener
+  drops that entry when it logged one `Error` carrying the event's
+  message. Both `console` and `errors` carry one line.
+- **`moveKeepingHistory`.** The history-keeping move lives in
+  `lint/tracked.ts`, beside the listing it invalidates, and C12, C13 and
+  C14 all call it; the C14 line no longer asks the author to stage.
+- **The listing answers single paths.** `trackedKind(path)` in
+  `lint/tracked.ts` gives the disk's kind, or nothing when the path is
+  off disk or not in its parent's tracked names. `lint/fs-cache.ts`
+  answers `listDirectory`, `isFile`, `isDirectory` and `readFileCached`
+  through it, so EVERY rule importing the cache follows — C1, C4, C11,
+  C13, D9w, E7w, E8, I1 as well as the five the question named — and the
+  role and config anchors with them. `.git` is the one path read on disk
+  (`isOnDisk`): git never lists it. C6 never read the disk; the old
+  header's list was stale. C8 tells an untracked target from a missing
+  one in its message.
+- **`LANDMARK_SELECTOR`.** One owner in `src/model/elements/ambiguity.ts`,
+  derived from a `Record<LandmarkKind, string>`, so a landmark added to
+  the union fails the typecheck until it names its element. `search` was
+  the only one of the eight missing.
+
+### Raised by the package-test branch, iteration 6
+
+49. The plugin runs in the editor, where the file being written is
+    usually untracked. Now that an untracked file satisfies nothing, a
+    new module and its new test both unstaged draw I2's "no neighbour",
+    and E8 refuses a new `*.specification.ts` door, until `git add`.
+    Accept that cost, or exempt the neighbour of the file oxlint is
+    visiting (the evidence the author is typing)?
+50. A9w passes the tracked `isFile` to `findRoot`, the runtime's own
+    walk-up, whose comment says the two MUST be one function. The runtime
+    still reads the disk, so an untracked root anchor makes them disagree.
+    Keep A9w on the listing, or give it the disk walk the runtime uses?
+51. The checker's other single-path probes still read the disk: C9 and
+    C14's `isDir` of a pool entry (`checker-crossfile.ts`), C13's golden
+    and specification `existsSync` (`checker-migration.ts`), the member
+    pass's `package.json` and workspace anchors (`checker-member.ts`),
+    `checker-placement.ts`'s package stop and `checker-spec.ts`'s
+    `statSync`. Hold them to the listing too, or were only C8's probes
+    meant?
+52. `CONTEXT_LANDMARKS` maps no `section` or `region`, so a candidate in
+    a named `<section>` shows `in <section>` and `region()` is never
+    offered as a rewrite. Offer `region()` — named, since several regions
+    are the norm — or leave the section as evidence only?
+53. `make check` failed once on `src/model/chain/process.test.ts` (the
+    served environment answered `{"error":"not found"}`) and
+    `src/seams/process/serve.adapter.test.ts` (a dying command's port
+    answered), both passing alone and on the rerun — another server
+    holding the port they picked. A port-picking flake to chase, or known?
