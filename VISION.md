@@ -891,3 +891,52 @@ implementation (the commits say what was broken).
     the chapter shows first?
 57. The root walk is stated twice, in chapter 10 (`root`) and chapter 17
     (services); the tree clause landed in 17 only. Which chapter owns it?
+
+## Iteration 7 — one config, one baseline (2026-09-23)
+
+| Decision     | Owner (2026-09-23)                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One config   | Family settings live in `jterrazz.config.ts` at the root, not package.json. `@jterrazz/typescript` owns it and exports `defineConfig` and the `JterrazzConfig` interface from `@jterrazz/typescript/config`; `@jterrazz/test` adds its `test` section by declaration merging. No `jterrazz.*` key in package.json any more. A workspace member may carry its own file beside its package.json.                                                |
+| One baseline | The ratchet files merge into ONE generated `jterrazz.baseline.json`, a section per package: `{ "typescript": {...}, "test": {...} }`. The checker reads, judges and writes ONLY `test` and keeps `typescript` byte for byte; `--summary` prints `jterrazz.baseline.json › test: <n> held across <k> rules`. No legacy reading of `test.baseline.json`; only `@jterrazz/typescript` flags a leftover per-package file (its `baseline-legacy`). |
+
+### What the package-test branch decided (iteration 7)
+
+- **The `test` section of the ratchet.** `lint/ratchet.ts` reads and
+  judges `test` alone and splices it into the file's text on a recording
+  — replacing its value where it stood, or closing the object with it —
+  so every other section keeps its bytes; it refuses to record over a
+  file that holds no JSON object rather than lose them. Every line a
+  reader sees names `jterrazz.baseline.json › test`. The checker raised
+  its own refusal of a leftover `test.baseline.json` first; it was
+  withdrawn once the toolchain's `baseline-legacy` landed, and the old
+  file is now only proven never read.
+- **This repository's files.** `test.baseline.json` and
+  `typescript.baseline.json` are gone; both sections were recorded by
+  their owners' `baseline` commands, the `typescript` one by the
+  toolchain installed from package-typescript `abd364e`.
+- **`TestSettings`.** `src/settings.ts` merges `test?: TestSettings`
+  into `JterrazzConfig` and `src/index.ts` exports the type, so the merge
+  ships in `dist/index.d.ts`. The section holds nothing yet, so it is
+  `Record<string, never>`: `{}` compiles, an unread key does not.
+  `src/settings.test-d.ts` is the proof. The merge is an `interface`
+  under a reasoned `consistent-type-definitions` suppression — kept in a
+  `.ts`, since the build carries a `.ts` module's merge into the
+  published types — and the file imports the module it augments with an
+  empty type import (two more reasoned suppressions): the augmentation
+  alone failed with TS2664 in the docs-typecheck scratch project, which
+  imports nothing else of `@jterrazz/typescript`.
+- **`jterrazz.config.ts`** holds the `schema/` root under
+  `typescript.roots`; package.json lost its `jterrazz` key.
+
+### Raised by the package-test branch, iteration 7
+
+58. `dist/index.d.ts` now names `@jterrazz/typescript/config`, which is
+    only a devDependency. A consumer that installs `@jterrazz/test`
+    without the toolchain and typechecks without `skipLibCheck` gets
+    TS2664 from the merge. Declare `@jterrazz/typescript` an optional
+    peer, or accept it for an estate where every repository has both?
+59. Nothing reads the `test` section yet, and a member's own
+    `jterrazz.config.ts` is read per unit by the toolchain. When the
+    first setting moves in, does the checker load the file the way the
+    toolchain does (Node's type stripping, per unit), or through an
+    export of `@jterrazz/typescript/config` so the two loaders are one?
