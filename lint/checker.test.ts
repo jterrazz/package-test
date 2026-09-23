@@ -1,11 +1,16 @@
-import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { fixPoolFixtures } from './checker-crossfile.js';
 import {
     checkConventionFiles,
     findKnownTokens,
     findUnknownTokens,
     formatViolations,
+    runAllChecks,
 } from './checker.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees.
@@ -94,5 +99,129 @@ describe('conventions checker — checkConventionFiles (D4)', () => {
 
         // Then - clean
         expect(violations).toStrictEqual([]);
+    });
+});
+
+/** A document whose name only repeats its directory — a C12 finding wherever it is read. */
+const REPEATED_NAME = [
+    'description: names its directory again instead of naming the case',
+    'runs:',
+    '    - command: widget rm',
+    '      exit: 0',
+    '      stdout: |',
+    '          Removed.',
+    '',
+].join('\n');
+
+/** A repository holding `files`, of which it adds `add` and ignores what `ignore` names. */
+function repository(files: string[], add: string[], ignore = ''): string {
+    const root = mkdtempSync(join(tmpdir(), 'checker-tree-'));
+    for (const path of files) {
+        mkdirSync(dirname(join(root, path)), { recursive: true });
+        writeFileSync(join(root, path), path.endsWith('.spec.yaml') ? REPEATED_NAME : `${path}\n`);
+    }
+    writeFileSync(join(root, '.gitignore'), ignore);
+    execFileSync('git', ['init', '--quiet'], { cwd: root });
+    if (add.length > 0) {
+        execFileSync('git', ['add', ...add], { cwd: root });
+    }
+    return root;
+}
+
+/** The findings of `rule` a run over `<root>/specs` reports, as `file:line: message`. */
+function findings(root: string, rule: string): string[] {
+    return runAllChecks(join(root, 'specs'))
+        .filter((violation) => violation.rule === rule)
+        .map(({ file, line, message }) => `${file}:${line}: ${message}`)
+        .toSorted();
+}
+
+describe('the tree the checker judges — what git does not ignore', () => {
+    test('judges an untracked document, and never an ignored one', () => {
+        // Given - three documents repeating their directory: tracked, new, and ignored
+        const root = repository(
+            ['specs/rm/rm.spec.yaml', 'specs/cp/cp.spec.yaml', 'specs/mv/mv.spec.yaml'],
+            ['specs/rm/rm.spec.yaml'],
+            'specs/mv/\n',
+        );
+
+        // Then - the tracked and the new one are reported, the ignored one is not
+        expect(findings(root, 'c12').map((line) => line.split(':')[0])).toStrictEqual([
+            'cp/cp.spec.yaml',
+            'rm/rm.spec.yaml',
+        ]);
+    });
+
+    test('reads a `file()` whose target is new as existing, and an ignored one as not (C8)', () => {
+        // Given - a spec naming three goldens on disk: tracked, new, and ignored
+        const root = repository(
+            [
+                'specs/api/expected/added.txt',
+                'specs/api/expected/new.txt',
+                'specs/api/expected/local.txt',
+            ],
+            ['specs/api/expected/added.txt'],
+            'local.txt\n',
+        );
+        writeFileSync(
+            join(root, 'specs', 'api', 'boot.spec.ts'),
+            [
+                "expect(a).toMatch(file('./expected/added.txt'));",
+                "expect(b).toMatch(file('./expected/new.txt'));",
+                "expect(c).toMatch(file('./expected/local.txt'));",
+                '',
+            ].join('\n'),
+        );
+
+        // Then - only the ignored golden names nothing a checkout holds
+        expect(findings(root, 'c8-disk-target-exists')).toStrictEqual([
+            "api/boot.spec.ts:3: file('./expected/local.txt') names nothing — api/expected/local.txt is ignored by git",
+        ]);
+    });
+});
+
+/** A tree whose pool holds `app/`, reached from the one leaf `specs/api/`. */
+function singleReaderPool(git: boolean): string {
+    const root = mkdtempSync(join(tmpdir(), 'checker-c14-'));
+    mkdirSync(join(root, 'specs', 'fixtures', 'app'), { recursive: true });
+    mkdirSync(join(root, 'specs', 'api'), { recursive: true });
+    writeFileSync(join(root, 'specs', 'fixtures', 'app', 'index.txt'), 'app\n');
+    writeFileSync(
+        join(root, 'specs', 'api', 'boot.spec.ts'),
+        "await api.fixture(directory('../fixtures/app/')).get('/');\n",
+    );
+    if (git) {
+        execFileSync('git', ['init', '--quiet'], { cwd: root });
+        execFileSync('git', ['add', '.'], { cwd: root });
+    }
+    return root;
+}
+
+describe('the moves the fixers make', () => {
+    test('keeps the history of a fixture C14 moves in a git checkout', () => {
+        // Given - a tracked single-reader pool fixture
+        const root = singleReaderPool(true);
+
+        // When - the fixer moves it beside its leaf
+        fixPoolFixtures(join(root, 'specs'));
+
+        // Then - the index holds the new path and not the old one
+        const indexed = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' });
+        expect(indexed.split('\n').filter(Boolean).toSorted()).toStrictEqual([
+            'specs/api/boot.spec.ts',
+            'specs/api/fixtures/app/index.txt',
+        ]);
+    });
+
+    test('moves a C14 fixture by plain rename where git places the tree in no work tree', () => {
+        // Given - the same tree, and no repository
+        const root = singleReaderPool(false);
+
+        // When - the fixer moves it beside its leaf
+        fixPoolFixtures(join(root, 'specs'));
+
+        // Then - the disk holds it at its new place only
+        expect(existsSync(join(root, 'specs', 'api', 'fixtures', 'app', 'index.txt'))).toBe(true);
+        expect(existsSync(join(root, 'specs', 'fixtures', 'app'))).toBe(false);
     });
 });

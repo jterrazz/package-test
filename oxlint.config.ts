@@ -76,6 +76,8 @@ const FRAMEWORK_LAYERS = {
             'model/chain/ground',
             // A9's rule must derive the root with the framework's own walk, not a copy.
             'model/chain/resolve',
+            // Every gate judges the tree the runtime reads: what git does not ignore.
+            'seams/git/tree',
         ],
     },
     model: {
@@ -125,6 +127,7 @@ const FRAMEWORK_LAYERS = {
             anthropic: ['@anthropic-ai/sdk'],
             appium: ['webdriverio'],
             docker: [],
+            git: [],
             hono: ['hono', '@hono/node-server'],
             msw: ['msw'],
             openai: ['openai'],

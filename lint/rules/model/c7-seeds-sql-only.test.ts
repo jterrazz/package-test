@@ -24,7 +24,7 @@ const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/seeds']);
 writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.json'), '[]\n');
 writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.csv'), 'id\n');
 
-/** A git checkout whose seeds/ tracks one `.sql` and holds an untracked `.json` beside it. */
+/** A git checkout whose seeds/ tracks one `.sql` and holds a new, unstaged `.json` beside it. */
 const UNTRACKED_STRAY = checkoutUnder('work', ['specs/app/widget/seeds']);
 writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
 writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
@@ -33,6 +33,13 @@ execFileSync('git', ['add', 'package.json', 'specs/app/widget/seeds/users.sql'],
     cwd: UNTRACKED_STRAY,
 });
 
+/** The same checkout, its `.json` named by `.gitignore`. */
+const IGNORED_STRAY = checkoutUnder('work', ['specs/app/widget/seeds']);
+writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
+writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
+writeFileSync(join(IGNORED_STRAY, '.gitignore'), '*.json\n');
+execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_STRAY });
+
 ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
     invalid: [
         // Every stray is named, whatever its extension: two strays, two reports.
@@ -40,6 +47,12 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
             code: 'test("x", () => {});',
             errors: [{ messageId: 'notSql' }, { messageId: 'notSql' }],
             filename: `${TWO_STRAYS}/specs/app/widget/widget.test.ts`,
+        },
+        // A file nobody added is still in the tree: it violates like a tracked one.
+        {
+            code: 'test("x", () => {});',
+            errors: [{ messageId: 'notSql' }],
+            filename: `${UNTRACKED_STRAY}/specs/app/widget/widget.test.ts`,
         },
         // The violation fixture keeps a .json next to the .sql.
         {
@@ -59,10 +72,10 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/compliant/specs/app/app.test.ts`,
         },
-        // A file git does not track is on no clean checkout: it violates nothing.
+        // A file `.gitignore` names is on no checkout: it violates nothing.
         {
             code: 'test("x", () => {});',
-            filename: `${UNTRACKED_STRAY}/specs/app/widget/widget.test.ts`,
+            filename: `${IGNORED_STRAY}/specs/app/widget/widget.test.ts`,
         },
         // Outside specs/ the rule is inert.
         {

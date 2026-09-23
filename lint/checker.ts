@@ -15,6 +15,7 @@ import {
     SpecSyntaxError,
 } from '../src/model/literate/spec-document.js';
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
+import { treeEntries } from '../src/seams/git/tree.js';
 import {
     checkDatabaseProperty,
     checkDeadFixtures,
@@ -36,7 +37,6 @@ import {
     volatileLiteralIn,
 } from './checker-spec.js';
 import { codeOf } from './rule-code.js';
-import { trackedEntries } from './tracked.js';
 
 /**
  * The conventions checker — the non-oxlint static channel.
@@ -353,7 +353,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
     ): void => {
         let entries;
         try {
-            entries = trackedEntries(dir);
+            entries = treeEntries(dir);
         } catch {
             return;
         }

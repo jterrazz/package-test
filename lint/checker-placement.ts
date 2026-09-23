@@ -2,10 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
+import { treeEntries } from '../src/seams/git/tree.js';
 import { isUnderSpecs } from './ast.js';
 import { reachesRunner } from './checker-facets.js';
 import type { TokenViolation } from './checker.js';
-import { trackedEntries } from './tracked.js';
 
 /**
  * C12 placement — the suffix says the kind, so the tree has to agree with it.
@@ -59,7 +59,7 @@ const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 function* walk(dir: string, stopAtPackages = false): Generator<string> {
     let entries;
     try {
-        entries = trackedEntries(dir);
+        entries = treeEntries(dir);
     } catch {
         return;
     }
@@ -161,7 +161,7 @@ export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
  */
 function isRootedFacetTree(specsRoot: string): boolean {
     try {
-        return trackedEntries(specsRoot).some(
+        return treeEntries(specsRoot).some(
             (entry) => entry.isFile() && entry.name.includes('.specification.'),
         );
     } catch {

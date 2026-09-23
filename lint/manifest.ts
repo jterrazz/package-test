@@ -1084,7 +1084,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A pool fixture is SHARED, or it is local: a directory of the pool `<specs>/fixtures/` reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/fixtures/<name>/`, named by the path from the leaf (`./fixtures/<name>/`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved — a `git mv` in a work tree, so it stays tracked — and the literals rewritten.',
+            'A pool fixture is SHARED, or it is local: a directory of the pool `<specs>/fixtures/` reached from a single spec directory — two documents of one leaf count as one — must live beside that leaf, at `<leaf>/fixtures/<name>/`, named by the path from the leaf (`./fixtures/<name>/`). Zero references is the dead-fixture error (C9). Fixed by `--fix`: the directory is moved — a `git mv` in a work tree, so it keeps its history — and the literals rewritten.',
         facet: 'model',
         family: 'C',
         fix: 'Run `jterrazz-test-check <root> --fix`; it moves the directory with `git mv` (a plain rename outside git) and rewrites what named it.',
@@ -1110,10 +1110,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every `fixture:` of a document names an entry that exists — inside a git work tree, one git tracks — of the kind the wrapper says, resolved from the test file's directory: a missing or untracked path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed path is out of reach, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
+            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every `fixture:` of a document names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed path is out of reach, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
         facet: 'model',
         family: 'C',
-        fix: 'Create the entry (and `git add` it), or fix the path — the message names what it resolved to.',
+        fix: 'Create the entry (out of `.gitignore`), or fix the path — the message names what it resolved to.',
         id: 'C8',
         name: 'c8-disk-target-exists',
         rationale:

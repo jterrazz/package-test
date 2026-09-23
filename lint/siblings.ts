@@ -1,6 +1,6 @@
-import { readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 
+import { treeEntries } from '../src/seams/git/tree.js';
 import { cell, table } from './catalog.js';
 
 /**
@@ -34,13 +34,22 @@ export type SiblinglessKind = {
 /** The two trees of the spine that hold code a module test sits beside. */
 const CODE_ROOTS = ['src', 'lint'];
 
+/** Every path of the tree under `dir` git does not ignore, `/`-separated and prefixed by `at`. */
+function listed(dir: string, at: string): string[] {
+    const paths: string[] = [];
+    for (const entry of treeEntries(dir)) {
+        const path = `${at}/${entry.name}`;
+        paths.push(path);
+        if (entry.isDirectory()) {
+            paths.push(...listed(join(dir, entry.name), path));
+        }
+    }
+    return paths;
+}
+
 /** Every file of the code trees, `/`-separated and relative to the root. */
 function codeFiles(root: string): string[] {
-    return CODE_ROOTS.flatMap((tree) =>
-        readdirSync(resolve(root, tree), { recursive: true }).map(
-            (entry) => `${tree}/${String(entry).replaceAll('\\', '/')}`,
-        ),
-    );
+    return CODE_ROOTS.flatMap((tree) => listed(resolve(root, tree), tree));
 }
 
 /** Every source module, `/`-separated and relative to the root. */

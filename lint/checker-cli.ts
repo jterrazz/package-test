@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
+import { moveKeepingHistory } from '../src/seams/git/tree.js';
 import { fixPoolFixtures } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
 import { migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
@@ -29,7 +30,6 @@ import {
 import type { PluginDiagnostic } from './ratchet.js';
 import { packageRootOf, projectRootOf } from './role.js';
 import { codeOf } from './rule-code.js';
-import { moveKeepingHistory } from './tracked.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**

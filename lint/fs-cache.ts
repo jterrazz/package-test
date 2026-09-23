@@ -1,16 +1,17 @@
 import { readFileSync, statSync } from 'node:fs';
 
-import { forgetTracked, trackedKind, trackedNames } from './tracked.js';
+import { forgetTree, treeKind, treeNames } from '../src/seams/git/tree.js';
 
 /**
  * Cached filesystem probes for the plugin's fs-anchored rules — every rule
  * that reads the tree beside the file oxlint visits — and the anchors they
  * stand on.
  *
- * A rule's evidence is read through the checker's tracked listing
- * (`tracked.ts`): inside a git work tree a file git does not track neither
- * satisfies nor violates a rule, and elsewhere the disk answers. The one
- * exception is {@link isOnDisk}, for what git never tracks by construction —
+ * A rule's evidence is read through the tree the checker walks
+ * (`src/seams/git/tree.ts`): inside a git work tree a file git ignores
+ * neither satisfies nor violates a rule, an untracked one it does not ignore
+ * counts like a tracked one, and elsewhere the disk answers. The one
+ * exception is {@link isOnDisk}, for what git never lists by construction —
  * a repository's own `.git`.
  *
  * Rules only ever look at directories NEXT TO files oxlint is already
@@ -22,7 +23,7 @@ import { forgetTracked, trackedKind, trackedNames } from './tracked.js';
 
 const dirListings = new Map<string, null | string[]>();
 
-/** The tracked children of `dir`, or null when it is not a directory. */
+/** The children of `dir` git does not ignore, or null when it is not a directory. */
 export function listDirectory(dir: string): null | string[] {
     const cached = dirListings.get(dir);
     if (cached !== undefined) {
@@ -30,7 +31,7 @@ export function listDirectory(dir: string): null | string[] {
     }
     let result: null | string[];
     try {
-        result = trackedNames(dir);
+        result = treeNames(dir);
     } catch {
         result = null;
     }
@@ -44,7 +45,7 @@ function kindOf(path: string): 'directory' | 'file' | undefined {
     if (kinds.has(path)) {
         return kinds.get(path);
     }
-    const result = trackedKind(path);
+    const result = treeKind(path);
     kinds.set(path, result);
     return result;
 }
@@ -57,7 +58,7 @@ export function isFile(path: string): boolean {
     return kindOf(path) === 'file';
 }
 
-/** Is anything at `path` on disk, tracked or not — for `.git`, which git never lists. */
+/** Is anything at `path` on disk, listed or not — for `.git`, which git never lists. */
 export function isOnDisk(path: string): boolean {
     try {
         statSync(path);
@@ -69,7 +70,7 @@ export function isOnDisk(path: string): boolean {
 
 const fileContents = new Map<string, null | string>();
 
-/** Read a tracked file as UTF-8, cached. Returns null when untracked or unreadable (missing/binary). */
+/** Read a listed file as UTF-8, cached. Returns null when ignored or unreadable (missing/binary). */
 export function readFileCached(path: string): null | string {
     const cached = fileContents.get(path);
     if (cached !== undefined) {
@@ -92,5 +93,5 @@ export function resetFsCache(): void {
     dirListings.clear();
     kinds.clear();
     fileContents.clear();
-    forgetTracked();
+    forgetTree();
 }

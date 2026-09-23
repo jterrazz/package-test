@@ -1,7 +1,10 @@
-import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
+import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { i2SiblingTestNaming } from './i2-sibling-test-naming.js';
 
 RuleTester.describe = describe;
@@ -26,8 +29,24 @@ const OWN = resolve(import.meta.dirname, '../../../specs/lint/i2-sibling-test-na
 // The repo root DOES carry a package.json — the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../..');
 
+/**
+ * A git checkout nobody has staged anything in: a new module and its new test,
+ * and a test whose module `.gitignore` names.
+ */
+const UNSTAGED = checkoutUnder('work', ['src']);
+writeFileSync(join(UNSTAGED, 'src/fresh.ts'), 'export {};\n');
+writeFileSync(join(UNSTAGED, 'src/local.ts'), 'export {};\n');
+writeFileSync(join(UNSTAGED, '.gitignore'), 'src/local.ts\n');
+execFileSync('git', ['init', '--quiet'], { cwd: UNSTAGED });
+
 ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as OxlintRule, {
     invalid: [
+        // A neighbour `.gitignore` names is on no checkout: the test is an orphan.
+        {
+            code: 'test("x", () => {});',
+            errors: [{ messageId: 'orphanTest' }],
+            filename: `${UNSTAGED}/src/local.test.ts`,
+        },
         // No util.ts neighbour in the violation fixture.
         {
             code: 'test("x", () => {});',
@@ -60,6 +79,11 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
         },
     ],
     valid: [
+        // A new module is a neighbour before anyone runs `git add`.
+        {
+            code: 'test("x", () => {});',
+            filename: `${UNSTAGED}/src/fresh.test.ts`,
+        },
         // Neighbour exists in the compliant twin.
         {
             code: 'test("x", () => {});',

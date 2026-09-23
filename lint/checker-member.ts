@@ -3,11 +3,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
+import { treeEntries, treeNames } from '../src/seams/git/tree.js';
 import { diskTargetFindings } from './checker-crossfile.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
 import { isTestFileName } from './role.js';
-import { trackedEntries, trackedNames } from './tracked.js';
 
 /**
  * The MEMBER pass — what a workspace member owes, read from the member itself
@@ -156,7 +156,7 @@ function findJestConfigs(rootDir: string): string[] {
         }
         let entries;
         try {
-            entries = trackedEntries(dir);
+            entries = treeEntries(dir);
         } catch {
             return;
         }
@@ -275,7 +275,7 @@ function holdsTests(dir: string): boolean {
         first = false;
         let entries;
         try {
-            entries = trackedEntries(current);
+            entries = treeEntries(current);
         } catch {
             continue;
         }
@@ -468,7 +468,7 @@ function holdsGround(path: string, memberDir: string): boolean {
         return true;
     }
     try {
-        return !trackedNames(path).some((name) => CODE_MODULE.test(name));
+        return !treeNames(path).some((name) => CODE_MODULE.test(name));
     } catch {
         return false;
     }
@@ -486,7 +486,7 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
     const walk = (dir: string): void => {
         let entries;
         try {
-            entries = trackedEntries(dir);
+            entries = treeEntries(dir);
         } catch {
             return;
         }
@@ -523,7 +523,7 @@ function moduleTestTargets(memberDir: string, rootDir: string): TokenViolation[]
     const walk = (dir: string): void => {
         let entries;
         try {
-            entries = trackedEntries(dir);
+            entries = treeEntries(dir);
         } catch {
             return;
         }
@@ -617,7 +617,7 @@ export function discoverMembers(rootDir: string): string[] {
         }
         let entries;
         try {
-            entries = trackedEntries(dir);
+            entries = treeEntries(dir);
         } catch {
             return;
         }
@@ -694,7 +694,7 @@ export function discoverSpecRoots(rootDir: string): string[] {
             }
             let entries;
             try {
-                entries = trackedEntries(dir);
+                entries = treeEntries(dir);
             } catch {
                 return;
             }

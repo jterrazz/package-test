@@ -3,29 +3,31 @@ import { lstatSync, readdirSync, renameSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve, sep } from 'node:path';
 
 /**
- * The directory listing every walk of the conventions checker reads: what git
- * TRACKS, like every tree gate of the toolchain, so a file nobody added counts
- * nowhere — not on the workstation that holds it, not on the checkout that
- * does not.
+ * The tree every gate judges and the runtime reads: what git does NOT ignore
+ * — tracked files, and untracked ones no `.gitignore` names. A `.gitignore`d
+ * path counts nowhere; a file nobody has added yet counts everywhere, so a new
+ * module and its new test are judged the moment they are written, in the
+ * editor as in CI.
  *
  * A directory inside a git work tree is answered from ONE `git ls-files
- * --cached` of that tree, run from its top level and kept for the run: its
- * tracked paths that are still on disk, typed as the disk types them. A
- * directory git does not place in any work tree — `git rev-parse --show-cdup`
- * fails there, and a hand-made `.git` folder fails it too — is read from the
- * disk, which is where every E2E fixture the runner copies and every rule
- * test's scratch tree live.
+ * --cached --others --exclude-standard` of that tree, run from its top level
+ * and kept until {@link forgetTree}: its listed paths still on disk (a deleted
+ * file the index still holds is gone), typed as the disk types them. A
+ * directory git places in no work tree — `git rev-parse --show-cdup` fails
+ * there, and a hand-made `.git` folder fails it too — is read from the disk,
+ * which is where every E2E fixture the runner copies and every rule test's
+ * scratch tree live.
  */
 
 /** A listed child: the part of `Dirent` the walks read. */
-export type TrackedEntry = {
+export type TreeEntry = {
     isDirectory: () => boolean;
     isFile: () => boolean;
     isSymbolicLink: () => boolean;
     name: string;
 };
 
-/** One work tree: its top level and, per tracked directory, the names it holds. */
+/** One work tree: its top level and, per listed directory, the names it holds. */
 type WorkTree = { children: Map<string, Set<string>>; top: string };
 
 const trees: WorkTree[] = [];
@@ -36,14 +38,18 @@ function under(dir: string, root: string): boolean {
     return dir === root || dir.startsWith(root.endsWith(sep) ? root : `${root}${sep}`);
 }
 
-/** The tracked paths of the tree at `top`, `/`-separated, or null when git will not say. */
-function listTracked(top: string): null | string[] {
-    const listed = spawnSync('git', ['ls-files', '--cached', '-z'], {
-        cwd: top,
-        encoding: 'utf8',
-        maxBuffer: 256 * 1024 * 1024,
-        stdio: ['ignore', 'pipe', 'ignore'],
-    });
+/** The paths git does not ignore in the tree at `top`, `/`-separated, or null when git will not say. */
+function listNotIgnored(top: string): null | string[] {
+    const listed = spawnSync(
+        'git',
+        ['ls-files', '--cached', '--others', '--exclude-standard', '-z'],
+        {
+            cwd: top,
+            encoding: 'utf8',
+            maxBuffer: 256 * 1024 * 1024,
+            stdio: ['ignore', 'pipe', 'ignore'],
+        },
+    );
     if (listed.error !== undefined || listed.status !== 0) {
         return null;
     }
@@ -53,7 +59,9 @@ function listTracked(top: string): null | string[] {
 function indexOf(top: string, paths: string[]): WorkTree {
     const children = new Map<string, Set<string>>();
     for (const path of paths) {
-        const segments = path.split('/');
+        // An untracked nested repository is listed as `sub/`: the trailing
+        // Separator names no child.
+        const segments = path.split('/').filter((segment) => segment !== '');
         let parent = top;
         for (const segment of segments) {
             let names = children.get(parent);
@@ -82,21 +90,19 @@ function workTreeOf(dir: string): null | WorkTree {
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'ignore'],
     });
-    const paths =
-        cdup.error === undefined && cdup.status === 0
-            ? listTracked(resolve(dir, cdup.stdout.trim()))
-            : null;
+    const top = resolve(dir, cdup.stdout?.trim() ?? '');
+    const paths = cdup.error === undefined && cdup.status === 0 ? listNotIgnored(top) : null;
     if (paths === null) {
         outside.add(dir);
         return null;
     }
-    const tree = indexOf(resolve(dir, cdup.stdout.trim()), paths);
+    const tree = indexOf(top, paths);
     trees.push(tree);
     return tree;
 }
 
-/** A tracked child as the disk types it, or null when it is gone from the disk. */
-function entryOf(dir: string, name: string): null | TrackedEntry {
+/** A listed child as the disk types it, or null when it is gone from the disk. */
+function entryOf(dir: string, name: string): null | TreeEntry {
     let stats;
     try {
         stats = lstatSync(join(dir, name));
@@ -112,11 +118,11 @@ function entryOf(dir: string, name: string): null | TrackedEntry {
 }
 
 /**
- * The children of `dir` a walk may read — tracked ones in a work tree, every
- * one elsewhere. It throws where `readdirSync` throws: a directory that is
- * not there is not an empty one.
+ * The children of `dir` a walk may read — the ones git does not ignore in a
+ * work tree, every one elsewhere. It throws where `readdirSync` throws: a
+ * directory that is not there is not an empty one.
  */
-export function trackedEntries(dir: string): TrackedEntry[] {
+export function treeEntries(dir: string): TreeEntry[] {
     const absolute = resolve(dir);
     const onDisk = readdirSync(absolute, { withFileTypes: true });
     const tree = workTreeOf(absolute);
@@ -126,20 +132,20 @@ export function trackedEntries(dir: string): TrackedEntry[] {
     const names = tree.children.get(absolute) ?? new Set<string>();
     return [...names]
         .map((name) => entryOf(absolute, name))
-        .filter((entry): entry is TrackedEntry => entry !== null);
+        .filter((entry): entry is TreeEntry => entry !== null);
 }
 
-/** The names `trackedEntries` lists. */
-export function trackedNames(dir: string): string[] {
-    return trackedEntries(dir).map(({ name }) => name);
+/** The names `treeEntries` lists. */
+export function treeNames(dir: string): string[] {
+    return treeEntries(dir).map(({ name }) => name);
 }
 
 /**
  * What one path names, read through the same listing: `directory` or `file` as
  * the disk types it (a link followed), or undefined when it is not on disk or,
- * inside a work tree, when git tracks neither it nor anything below it.
+ * inside a work tree, when git ignores it and everything below it.
  */
-export function trackedKind(path: string): 'directory' | 'file' | undefined {
+export function treeKind(path: string): 'directory' | 'file' | undefined {
     const absolute = resolve(path);
     let directory: boolean;
     try {
@@ -158,8 +164,8 @@ export function trackedKind(path: string): 'directory' | 'file' | undefined {
     return listed ? kind : undefined;
 }
 
-/** Forget every listing: a `git mv` changed what the index holds. */
-export function forgetTracked(): void {
+/** Forget every listing: a move changed what the tree holds. */
+export function forgetTree(): void {
     trees.length = 0;
     outside.clear();
 }
@@ -169,18 +175,17 @@ export function forgetTracked(): void {
  *
  * `git mv` is tried first and its failure is not an error: a path outside a
  * working tree, or one git does not track yet, moves exactly as well with
- * `renameSync`. A plain rename inside a work tree would leave the moved path
- * untracked — invisible to this listing until the author stages it — and lose
- * its history. A `git mv` changes the index, so the listing is read again.
+ * `renameSync`. A plain rename of a tracked path would lose its history and
+ * leave the old path deleted in the index. Either move changes the tree, so
+ * the listing is read again.
  */
 export function moveKeepingHistory(from: string, to: string): void {
     const moved = spawnSync('git', ['mv', from, to], {
         cwd: dirname(from),
         stdio: 'ignore',
     });
-    if (moved.status === 0) {
-        forgetTracked();
-    } else {
+    if (moved.status !== 0) {
         renameSync(from, to);
     }
+    forgetTree();
 }

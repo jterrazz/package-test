@@ -4,9 +4,9 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
 import { isRelativePath } from '../src/model/chain/spec-path.js';
 import { parseSpecDocument, SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
+import { moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
 import type { Severity, TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
-import { moveKeepingHistory, trackedEntries, trackedKind } from './tracked.js';
 
 /**
  * The cross-file checker passes — the analyses oxlint cannot express because
@@ -75,7 +75,7 @@ function listFiles(dir: string, predicate: (path: string) => boolean): string[] 
     const visit = (current: string): void => {
         let entries;
         try {
-            entries = trackedEntries(current);
+            entries = treeEntries(current);
         } catch {
             return;
         }
@@ -101,7 +101,7 @@ function listDirs(dir: string): string[] {
         out.push(current);
         let entries;
         try {
-            entries = trackedEntries(current);
+            entries = treeEntries(current);
         } catch {
             return;
         }
@@ -130,7 +130,7 @@ function findSpecsRoots(dir: string): string[] {
         }
         let entries;
         try {
-            entries = trackedEntries(current);
+            entries = treeEntries(current);
         } catch {
             return;
         }
@@ -150,7 +150,7 @@ function findPools(dir: string): string[] {
     const visit = (current: string): void => {
         let entries;
         try {
-            entries = trackedEntries(current);
+            entries = treeEntries(current);
         } catch {
             return;
         }
@@ -791,7 +791,7 @@ function isConventionalSubdir(path: string): boolean {
     }
     let children;
     try {
-        children = trackedEntries(path);
+        children = treeEntries(path);
     } catch {
         return false;
     }
@@ -807,7 +807,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
         }
         let entries;
         try {
-            entries = trackedEntries(dir);
+            entries = treeEntries(dir);
         } catch {
             continue;
         }
@@ -862,7 +862,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
 
         for (const sub of groundSubdirs) {
             const subPath = join(dir, sub);
-            for (const entry of trackedEntries(subPath)) {
+            for (const entry of treeEntries(subPath)) {
                 const entryIsDir = entry.isDirectory();
                 if (entryReferenced(entry.name, entryIsDir, literals, patterns)) {
                     continue;
@@ -904,7 +904,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                 literals.add(literal);
             }
         }
-        for (const entry of trackedEntries(pool)) {
+        for (const entry of treeEntries(pool)) {
             const referenced = [...literals].some((literal) => literal.includes(entry.name));
             if (!referenced) {
                 const relEntry = relative(rootDir, join(pool, entry.name));
@@ -1113,7 +1113,7 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
 /**
  * Apply C14: move each single-reader pool entry beside its leaf and rewrite the
  * paths that climbed to it into the path from the leaf. The move is a `git mv`
- * in a work tree, so the moved fixture stays tracked; a plain rename elsewhere.
+ * in a work tree, so the moved fixture keeps its history; a plain rename elsewhere.
  * Returns what moved, relative to `rootDir`.
  */
 export function fixPoolFixtures(rootDir: string): string[] {
@@ -1182,8 +1182,9 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
  * A `file()` or `directory()` with a literal path, and a document's `fixture:`,
  * resolved from the test's own directory: a path that names nothing, a
  * `file()` naming a directory, or a `directory()` naming a file is reported at
- * the path. Inside a git work tree a path names only what git tracks: an
- * untracked target is on this workstation and on no clean checkout. The catch is the typo that would only fail a run — a test later,
+ * the path. Inside a git work tree a path names only what git does not
+ * ignore: an ignored target is on this workstation and on no checkout. The
+ * catch is the typo that would only fail a run — a test later,
  * far from the line that made it. A call written inside a string (a rule's
  * test case, a sample) is text, not a call, and is not read.
  */
@@ -1194,7 +1195,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
         : suppressedLines(readText(file), 'c8');
     for (const { column, kind, line, path } of collectFixtureReferences(file, DISK_CALL, true)) {
         const target = resolve(dirname(file), path);
-        const found = trackedKind(target);
+        const found = treeKind(target);
         if (found === kind || suppressed.has(line)) {
             continue;
         }
@@ -1206,7 +1207,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
             line,
             message:
                 found === undefined
-                    ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} ${existsSync(target) ? 'is not tracked by git' : 'does not exist'}`
+                    ? `${kind}('${path}') names nothing — ${relative(rootDir, target)} ${existsSync(target) ? 'is ignored by git' : 'does not exist'}`
                     : `${kind}('${path}') names a ${found} — write ${found}('${spelled}')`,
             rule: 'c8-disk-target-exists',
             severity: 'error',

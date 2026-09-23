@@ -1,8 +1,10 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { classified, SIBLINGLESS_KINDS, spliceSiblings } from './siblings.js';
+import { classified, siblingless, SIBLINGLESS_KINDS, spliceSiblings } from './siblings.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
@@ -19,6 +21,22 @@ const ROOT = resolve(import.meta.dirname, '..');
  * a coverage number moved.
  */
 describe('modules with no sibling test (meta-test K7)', () => {
+    test('reads the tree git does not ignore: a new module counts, an ignored one does not', () => {
+        // Given - a checkout holding a new module and an ignored one, neither with a test
+        const root = mkdtempSync(join(tmpdir(), 'siblings-'));
+        mkdirSync(join(root, 'src'));
+        mkdirSync(join(root, 'lint'));
+        writeFileSync(join(root, 'src', 'fresh.ts'), 'export {};\n');
+        writeFileSync(join(root, 'src', 'local.ts'), 'export {};\n');
+        writeFileSync(join(root, 'lint', 'rule.ts'), 'export {};\n');
+        writeFileSync(join(root, 'lint', 'rule.test.ts'), 'export {};\n');
+        writeFileSync(join(root, '.gitignore'), 'src/local.ts\n');
+        execFileSync('git', ['init', '--quiet'], { cwd: root });
+
+        // Then - only the new one is siblingless
+        expect(siblingless(root)).toStrictEqual(['src/fresh.ts']);
+    });
+
     test('every one of them falls into a declared kind', () => {
         // Given - the modules with no `<file>.test.ts` beside them
         const unclaimed = classified(ROOT)
