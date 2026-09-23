@@ -418,14 +418,45 @@ function relativePath(from: string, to: string): string {
 const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
-/** The code, every relative path it names rebased from `from` to `to`, pointing where it pointed. */
+/** The spans of the file's string literals, templates and regular expressions — text, never a call. */
+function literalSpans(text: string): Span[] {
+    const blank = withoutComments(text);
+    const spans: Span[] = [];
+    for (let index = 0; index < blank.length;) {
+        const end = literalEnd(blank, index);
+        if (end === index) {
+            index += 1;
+        } else {
+            spans.push({ end, start: index });
+            index = end;
+        }
+    }
+    return spans;
+}
+
+/**
+ * The code, every relative path it names rebased from `from` to `to`, pointing
+ * where it pointed. A call spelled inside a string is text, and a path naming
+ * nothing — a negative spec's missing file — says the same from anywhere.
+ */
 function rebased(text: string, from: string, to: string): string {
-    return text.replaceAll(RELATIVE_LITERAL, (whole, lead: string, quote: string, path: string) => {
+    const strings = literalSpans(text);
+    let out = '';
+    let last = 0;
+    for (const found of text.matchAll(RELATIVE_LITERAL)) {
+        const { lead = '', path = '', quote = "'" } = found.groups ?? {};
         const target = resolve(from, path);
+        const inText = strings.some((span) => found.index > span.start && found.index < span.end);
+        const isModule = /^(?:from|import)\b/u.test(lead);
+        if (inText || (!isModule && !existsSync(target))) {
+            continue;
+        }
         const next =
             relativePath(to, target) + (path.endsWith('/') && !path.endsWith('../') ? '/' : '');
-        return `${lead}${quote}${next.replace(/\/\/$/u, '/')}${quote}`;
-    });
+        out += `${text.slice(last, found.index)}${lead}${quote}${next.replace(/\/\/$/u, '/')}${quote}`;
+        last = found.index + found[0].length;
+    }
+    return out + text.slice(last);
 }
 
 /** A top-level `describe(` call, opening at the start of its line. */

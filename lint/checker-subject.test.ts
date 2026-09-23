@@ -140,6 +140,30 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         );
     });
 
+    test('a move leaves a path naming nothing, and a call spelled in a string, as written', () => {
+        // Given - a negative spec's missing file, and a refusal message quoting a call on a file that exists
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/requests/x.http': 'GET /orders\n',
+            'api/orders/listing.spec.ts': [
+                "import { api } from '../api.specification.js';",
+                "test('a', async () => { await api.request(file('./requests/nonexistent.http')); });",
+                "test('b', async () => { await expect(api.get('/orders')).rejects.toThrow('file(\"./requests/x.http\")'); });",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix moves the file one folder down
+        fixSubjects(root);
+
+        // Then - both read as they did: the missing file is missing from anywhere, the string is text
+        const moved = readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8');
+        expect({
+            missing: moved.includes("file('./requests/nonexistent.http')"),
+            quoted: moved.includes('file("./requests/x.http")'),
+        }).toStrictEqual({ missing: true, quoted: true });
+    });
+
     test('a test reaching two subjects is reported with its title, and nothing is cut', () => {
         // Given - one test that creates, then lists
         const source = [
