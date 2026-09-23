@@ -1395,3 +1395,14 @@ imported from …/geocoder.contracts.ts`. The fix (loading the module
     three runs above passed. The read that settles it: a `make check` loop
     with `DEBUG=vite:deps` until a failure, reading whether "new
     dependencies optimized" precedes it.
+
+## Iteration 14 — variant B: TypeScript with the whole result inline (owner, 2026-09-23)
+
+The api/jobs documents turned into indexes of links (a 6-line document pointing at 5 files), the opposite of "everything a test touches is visible on its line". Decided:
+
+- **The form is TypeScript with the whole result inline.** `.seed(sql\`…\`)`for a test's own state,`.seed(file('../../seeds/x.sql'))`only for shared state;`expect(result.response).toMatch(\`HTTP/1.1 200 OK …\`)` compares the whole response to the text written in place, tokens (`{{uuid}}`, `{{iso8601}}`…) allowed; `toMatch(file(...))`when the expectation is a shared or 150+-line file;`await expect(result.table('X')).toMatch([[...]])` for tables (`toMatchRows`retires). ONE verb compares a whole result — response, json, table, tree — and its argument says where the expectation lives: a value written in place (the default) or`file()`/`directory()`. On a plain string (`result.stdout.text`) `toMatch` stays Vitest's own; our subjects are not strings, so Vitest's substring meaning never applied to them; contracts are calls (`.intercept(pipeline({ composition: 'perspectives' }))`), never a module written only to be pointed at.
+- **The api and jobs `.spec.yaml` documents are retired** (grammar, runner, schema kinds, chapter sections). The cli and lint-rule documents stay: they are self-contained (their output is inline, their fixtures are real trees).
+- **Rule — a file exists only if it is shared.** The checker counts the tests that reference each ground file: referenced by ONE test → it must be inline (error), unless it is a directory tree, binary, or longer than **150 lines** (owner's cap); referenced by 2+ tests of one leaf → beside them (`./seeds/`, `./expected/`…); by tests of 2+ leaves → the specs-root pool. `make fix` inlines a single-use file (deleting it) and moves a shared one to its level.
+- **Rule — every test compares its whole result.** A test that reads a response, a json or a table holds one whole-result comparison (`toMatch(<value>)` or `toMatch(file())`); a precise assertion (`expect(result.json.value.total).toBe(1)`) is allowed only IN ADDITION to it. Multi-field probes alone are an error.
+- **Update mode writes the expectation into the test.** `TEST_UPDATE=1` rewrites a `toMatch(<value>)` argument in place (and a `toMatch(file())` file) (like Vitest's `toMatchInlineSnapshot`), keeping tokens where the old expectation had them.
+- **Route coverage** is computed at run time from the app's own route table (no OpenAPI required): at the end of the api project, every declared route no test reached is reported (ratchet-recordable in the `test` section); a declared OpenAPI file stays an optional source.
