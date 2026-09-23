@@ -16,8 +16,8 @@ describe('lint — c8 spec registered name (CONVENTIONS C8)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml:3:1: error jterrazz-check(c8): env: "frozn" is not a registered env set — registered: frozen
-            specs/widget/builds.spec.yaml:5:1: error jterrazz-check(c8): serve: "dashbord" is not a registered server — registered: api
+            specs/widget/builds.spec.yaml:3:1: error jterrazz-check(c8): found: env: "frozn", which no specification registers · why: A document's bare \`env:\` words and \`serve:\` names are keys of the \`env\`/\`serve\` objects of a \`specification.cli(…)\` in the nearest directory carrying \`*.specification.ts\` files (literals read statically; ignored otherwise). · fix: name one of frozen, or register "frozn" in \`specification.cli({ env })\` · read: docs/19-linting.md#c8-spec-registered-name
+            specs/widget/builds.spec.yaml:5:1: error jterrazz-check(c8): found: serve: "dashbord", which no specification registers · why: A document's bare \`env:\` words and \`serve:\` names are keys of the \`env\`/\`serve\` objects of a \`specification.cli(…)\` in the nearest directory carrying \`*.specification.ts\` files (literals read statically; ignored otherwise). · fix: name one of api, or register "dashbord" in \`specification.cli({ serve })\` · read: docs/19-linting.md#c8-spec-registered-name
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);

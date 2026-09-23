@@ -1,4 +1,5 @@
 import { child, childList, identifierName, importSourceVisitor, stringValue } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, projectSegments, roleOf } from '../../role.js';
@@ -172,13 +173,20 @@ export const i4NoModuleDoubles: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['i4-no-module-doubles'],
-        messages: {
-            assetImport:
-                'A module test must not import the data asset "{{source}}" — inline it as code or move the test under specs/ as a `.spec.ts`.',
-            bannedDir:
-                '`{{dir}}/` directories are banned — mocks and data are code: mockOf inline, payloads in a *.fixtures.ts neighbour.',
-            viMock: '`vi.mock` doubles a module for everyone — double the PORT instead: `mockOf<Port>()`, `vi.fn()`, `vi.spyOn`. A native module a consumer cannot inject goes on the `modules` allow-list, with the reason beside it (chapter 05 § Doubles).',
-        },
+        messages: lessons('i4-no-module-doubles', {
+            assetImport: {
+                found: 'a module test imports the data asset "{{source}}"',
+                fix: 'write the data as code in a `*.fixtures.ts` neighbour, or move the test under `specs/` as a `.spec.ts`',
+            },
+            bannedDir: {
+                found: 'a `{{dir}}/` directory',
+                fix: 'write the doubles as code — `mockOf<Port>()` inline, payloads in a `*.fixtures.ts` neighbour — and delete the directory',
+            },
+            viMock: {
+                found: '`vi.mock` doubles a module for every importer',
+                fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list, with its reason',
+            },
+        }),
         schema: [
             {
                 additionalProperties: false,

@@ -16,7 +16,7 @@ describe('lint — d4b spec shape (CONVENTIONS D4b)', () => {
         // Then - the grammar the runner parses is the grammar the lint enforces
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml:2:1: error jterrazz-check(d4b): unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs
+            specs/widget/builds.spec.yaml:2:1: error jterrazz-check(d4b): found: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs · why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`fixtures/\`. · fix: rewrite the document to its grammar — chapter 20 lists the keys, their order and what each run requires · read: docs/19-linting.md#d4b-spec-shape
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

@@ -7,6 +7,7 @@ import {
     memberPropertyName,
     walk,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -220,10 +221,12 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d13w-unfrozen-negative-fixture'],
-        messages: {
-            unfrozenNegativeFixture:
-                'This golden matcher asserts a mismatch (wrapped in expect(…).toThrow/.rejects) — pass { frozen: true } so TEST_UPDATE=1 never overwrites the deliberately-wrong golden, a file or a value in place.',
-        },
+        messages: lessons('d13w-unfrozen-negative-fixture', {
+            unfrozenNegativeFixture: {
+                found: 'a golden matcher whose mismatch is the subject, with no `{ frozen: true }`',
+                fix: 'pass `{ frozen: true }` as its last argument, so `TEST_UPDATE=1` never rewrites the deliberately wrong expectation',
+            },
+        }),
         type: 'suggestion',
     },
 };

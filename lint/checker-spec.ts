@@ -14,8 +14,8 @@ import type { SpecDocument, SpecFile } from '../src/model/literate/spec-document
 import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
 import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../src/seams/yaml/document.js';
 import type { Node, Pair, YAMLMap } from '../src/seams/yaml/document.js';
-import type { Severity, TokenViolation } from './checker.js';
-import { codeOf } from './rule-code.js';
+import type { CheckerPassId, Severity, TokenViolation } from './checker.js';
+import type { Teaching } from './lesson.js';
 
 /**
  * The `<case>.spec.yaml` conventions — the checker passes that judge a document
@@ -36,21 +36,20 @@ import { codeOf } from './rule-code.js';
 // ── Shared ──
 
 /** A violation before it knows its file — the passes below return these. */
-type Finding = {
+type Finding = Teaching & {
     line: number;
-    message: string;
-    /** The catalogue pass this finding belongs to, named in the message. */
-    rule: string;
+    /** The catalogue pass this finding belongs to. */
+    rule: CheckerPassId;
     severity: Severity;
 };
 
 function finding(
-    rule: string,
+    rule: CheckerPassId,
     line: number,
-    message: string,
+    { fix, found }: Teaching,
     severity: Severity = 'error',
 ): Finding {
-    return { line, message, rule, severity };
+    return { fix, found, line, rule, severity };
 }
 
 /** Directories the walks never enter — `fixtures/` holds INPUTS, never scenarios. */
@@ -168,11 +167,10 @@ function checkKeyOrder(file: SpecFile, lineAt: (node: Pair<Node, Node>) => numbe
             }
             if (rank < highest) {
                 findings.push(
-                    finding(
-                        'd4b-spec-key-order',
-                        lineAt(pair),
-                        `"${key}:" comes after "${highestKey}:" in ${where} — the canonical order is ${order.join(', ')} (fixable: \`node dist/checker.js <root> --fix\`)`,
-                    ),
+                    finding('d4b-spec-key-order', lineAt(pair), {
+                        fix: `order the keys ${order.join(', ')} — \`make fix\` reorders them`,
+                        found: `"${key}:" after "${highestKey}:" in ${where}`,
+                    }),
                 );
                 return;
             }
@@ -205,11 +203,10 @@ function checkBlockScalars(file: SpecFile, lineOf: (scalar: Scalar) => number): 
                 continue;
             }
             findings.push(
-                finding(
-                    'd4b-spec-block-scalar',
-                    lineOf(scalar),
-                    `${key} is a ${scalar.type === Scalar.PLAIN ? 'plain' : 'quoted'} scalar — a stream is written as a block scalar (\`|\` keeps the final newline, \`|-\` drops it) (fixable: \`node dist/checker.js <root> --fix\`)`,
-                ),
+                finding('d4b-spec-block-scalar', lineOf(scalar), {
+                    fix: `write ${key} as a block scalar (\`|\` keeps the final newline, \`|-\` drops it) — \`make fix\` re-styles it`,
+                    found: `${key} written as a ${scalar.type === Scalar.PLAIN ? 'plain' : 'quoted'} scalar`,
+                }),
             );
         }
     }
@@ -234,32 +231,29 @@ function checkFileName(rel: string): Finding[] {
     const findings: Finding[] = [];
     if (!KEBAB.test(caseName)) {
         findings.push(
-            finding(
-                'c12-spec-file-name',
-                1,
-                `"${name}" — <case> is kebab-case: lowercase words joined by single hyphens`,
-            ),
+            finding('c12-spec-file-name', 1, {
+                fix: `rename it in kebab-case — lowercase words joined by single hyphens, \`<case>${SPEC_EXTENSION}\``,
+                found: `"${name}" is not kebab-case`,
+            }),
         );
         return findings;
     }
     const redundant = caseName.split('-').filter((word) => REDUNDANT_WORDS.has(word));
     if (redundant.length > 0) {
         findings.push(
-            finding(
-                'c12-spec-file-name',
-                1,
-                `"${name}" repeats "${redundant[0]}" — the .spec.yaml suffix already says it; name the CASE instead`,
-            ),
+            finding('c12-spec-file-name', 1, {
+                fix: `drop "${redundant[0]}" from the name and name the case it proves`,
+                found: `"${name}" repeats "${redundant[0]}", which the \`${SPEC_EXTENSION}\` suffix already says`,
+            }),
         );
     }
     const folder = basename(dirname(rel));
     if (caseName === folder) {
         findings.push(
-            finding(
-                'c12-spec-file-name',
-                1,
-                `"${name}" repeats its directory "${folder}/" — name what this case proves, not where it sits`,
-            ),
+            finding('c12-spec-file-name', 1, {
+                fix: 'name it for what this case proves, not where it sits',
+                found: `"${name}" repeats its directory "${folder}/"`,
+            }),
         );
     }
     return findings;
@@ -280,24 +274,38 @@ function checkDescription(document: SpecDocument): Finding[] {
     const findings: Finding[] = [];
     const text = document.description;
     const line = document.descriptionLine;
-    const at = (message: string): Finding => finding('j5-spec-description', line, message);
+    const at = (found: string, fix: string): Finding =>
+        finding('j5-spec-description', line, { fix, found });
     if (text.includes('\n')) {
-        findings.push(at('description: is one line — the vitest title, not a paragraph'));
+        findings.push(
+            at('a `description:` of several lines', 'write the vitest title on one line'),
+        );
         return findings;
     }
     if (text.length > MAX_DESCRIPTION) {
         findings.push(
-            at(`description: is ${text.length} characters — keep it under ${MAX_DESCRIPTION}`),
+            at(
+                `a \`description:\` of ${text.length} characters`,
+                `shorten it under ${MAX_DESCRIPTION} characters — a title, not a paragraph`,
+            ),
         );
     }
     if (text.endsWith('.')) {
         findings.push(
-            at('description: ends with a period — a title is a fragment, not a sentence'),
+            at(
+                'a `description:` ending with a period',
+                'drop the period — a title is a fragment, not a sentence',
+            ),
         );
     }
     const first = text.split(/\s+/u)[0] ?? '';
     if (/^[A-Z]/u.test(text) && !SYMBOL_WORD.test(first)) {
-        findings.push(at('description: starts with a capital — a title is lowercase prose'));
+        findings.push(
+            at(
+                'a `description:` starting with a capital',
+                `start it lowercase: "${text.charAt(0).toLowerCase()}${text.slice(1)}"`,
+            ),
+        );
     }
     return findings;
 }
@@ -383,11 +391,10 @@ function checkVolatileLiterals(document: SpecDocument, dir: string): Finding[] {
                 continue;
             }
             findings.push(
-                finding(
-                    'd5-spec-volatile-literal',
-                    stream.line + index,
-                    `"${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token}`,
-                ),
+                finding('d5-spec-volatile-literal', stream.line + index, {
+                    fix: `write ${volatileLiteral.token} where "${volatileLiteral.found}" stands`,
+                    found: `"${volatileLiteral.found}", a value the next run will not reproduce`,
+                }),
             );
         }
     }
@@ -478,7 +485,10 @@ function checkPinnedValues(document: SpecDocument, dir: string): Finding[] {
                     finding(
                         'd5w-spec-pinned-value',
                         stream.line + index,
-                        `"${found[0]}" is not fixed by any fixture: or stdin: of this document — write ${token}`,
+                        {
+                            fix: `write ${token} where "${found[0]}" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document`,
+                            found: `"${found[0]}", which no \`fixture:\` or \`stdin:\` of this document pins`,
+                        },
                         'warn',
                     ),
                 );
@@ -506,7 +516,10 @@ function checkEmptyAssertions(document: SpecDocument): Finding[] {
                 finding(
                     'j3w-spec-empty-assertion',
                     stream.line,
-                    'a stream that is only {{any}} asserts nothing — golden what the command actually printed',
+                    {
+                        fix: 'write what the command actually printed, tokens for what moves',
+                        found: 'a stream that is only {{any}}',
+                    },
                     'warn',
                 ),
             );
@@ -529,7 +542,10 @@ function checkSilentRefusals(document: SpecDocument): Finding[] {
             finding(
                 'd11w-spec-silent-refusal',
                 run.commandLine,
-                `exit: ${run.exitCode} with no stdout: and no stderr: — golden the words the refusal printed`,
+                {
+                    fix: 'write the words the refusal printed under `stderr:` (or `stdout:`)',
+                    found: `\`exit: ${run.exitCode}\` with no \`stdout:\` and no \`stderr:\``,
+                },
                 'warn',
             ),
         );
@@ -650,22 +666,26 @@ function checkRegisteredNames(document: SpecDocument, dir: string): Finding[] {
     for (const token of document.env) {
         if (token.kind === 'set' && !registered.env.has(token.name)) {
             findings.push(
-                finding(
-                    'c8-spec-registered-name',
-                    token.line,
-                    `env: "${token.name}" is not a registered env set${registered.env.size === 0 ? '' : ` — registered: ${[...registered.env].sort().join(', ')}`}`,
-                ),
+                finding('c8-spec-registered-name', token.line, {
+                    fix:
+                        registered.env.size === 0
+                            ? `register "${token.name}" in the \`env\` option of \`specification.cli(…)\`, or write the variable as \`NAME=value\``
+                            : `name one of ${[...registered.env].sort().join(', ')}, or register "${token.name}" in \`specification.cli({ env })\``,
+                    found: `env: "${token.name}", which no specification registers`,
+                }),
             );
         }
     }
     for (const entry of document.serve) {
         if (!registered.serve.has(entry.name)) {
             findings.push(
-                finding(
-                    'c8-spec-registered-name',
-                    entry.line,
-                    `serve: "${entry.name}" is not a registered server${registered.serve.size === 0 ? '' : ` — registered: ${[...registered.serve].sort().join(', ')}`}`,
-                ),
+                finding('c8-spec-registered-name', entry.line, {
+                    fix:
+                        registered.serve.size === 0
+                            ? `register "${entry.name}" in the \`serve\` option of \`specification.cli(…)\``
+                            : `name one of ${[...registered.serve].sort().join(', ')}, or register "${entry.name}" in \`specification.cli({ serve })\``,
+                    found: `serve: "${entry.name}", which no specification registers`,
+                }),
             );
         }
     }
@@ -705,11 +725,12 @@ export function checkSpecConventions(text: string, rel: string, path: string): T
         ...checkSilentRefusals(file.document),
         ...checkRegisteredNames(file.document, dir),
     ];
-    return findings.map(({ line, message, rule, severity }) => ({
+    return findings.map(({ fix, found, line, rule, severity }) => ({
         file: rel,
+        fix,
+        found,
         line,
-        message,
-        rule: codeOf(rule),
+        rule,
         severity,
     }));
 }
@@ -741,8 +762,9 @@ export function checkSpecDescriptionsUnique(rootDir: string): TokenViolation[] {
         violations.push({
             file: rel,
             line: document.descriptionLine,
-            message: `"${document.description}" is already the description of ${first} — two documents of one directory cannot share a title`,
-            rule: 'j4',
+            fix: `retitle one of the two for what it proves apart from the other`,
+            found: `"${document.description}", already the description of ${first}`,
+            rule: 'j4-spec-description-unique',
             severity: 'error',
         });
     }

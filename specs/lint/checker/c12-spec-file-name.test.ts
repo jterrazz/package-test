@@ -20,7 +20,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/rm/rm.spec.yaml:1:1: error jterrazz-check(c12): "rm.spec.yaml" repeats its directory "rm/" — name what this case proves, not where it sits
+            specs/rm/rm.spec.yaml:1:1: error jterrazz-check(c12): found: "rm.spec.yaml" repeats its directory "rm/" · why: The suffix says the kind, and the tree agrees with it. · fix: name it for what this case proves, not where it sits · read: docs/19-linting.md#c12-spec-file-name
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
@@ -49,8 +49,8 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
         // Then - the facet folder already says what it specifies; only the word is wrong
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            api/users/creation.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/api/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
-            api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+            api/users/creation.test.ts:1:1: error jterrazz-check(c12): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#c12-spec-file-name
+            api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/19-linting.md#c18-module-test-under-facet
 
             conventions checker: 2 error(s) found under {{workdir}}/specs
         `);
@@ -70,7 +70,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
             conventions checker: vitest.config.ts: specs/api/users/creation.test.ts names a file this run renamed — it is \`specs/api/users/creation.spec.ts\` now, and the entry collects nothing until it follows (C12)
         `);
         expect(result.stderr).toMatch(`
-            api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+            api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/19-linting.md#c18-module-test-under-facet
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
         `);
@@ -88,7 +88,7 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
         // Then - the spec is named, and the ground module's own test beside its module is not
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            operator/manifest/manifest.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
+            operator/manifest/manifest.test.ts:1:1: error jterrazz-check(c12): found: a \`.test.ts\` under \`specs/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`operator/manifest/manifest.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#c12-spec-file-name
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
         `);
@@ -100,6 +100,6 @@ describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
 
         // Then - the member pass is the only run that sees outside a specs tree
         expect(result.exitCode).toBe(1);
-        expect(result.stderr.text).toContain('a `.spec.ts` lives under `specs/<facet>/`');
+        expect(result.stderr.text).toContain('found: a `.spec.ts` outside every `specs/` tree');
     });
 });

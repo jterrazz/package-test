@@ -2,6 +2,7 @@ import { dirname, resolve } from 'node:path';
 
 import { collectsAFile, projectLiterals, staticPrefix } from '../../config-shape.js';
 import { isDirectory } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -54,11 +55,16 @@ export const e7wIncludePrefixExists: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['e7w-include-prefix-exists'],
-        messages: {
-            collectsNothing:
-                '`{{glob}}` matches no file — the folder is there and the suite is not: a renamed suffix (`.test.ts` → `.spec.ts`) leaves the glob behind and the run stays green with fewer files.',
-            missingPrefix: '`{{glob}}` collects nothing — the folder `{{prefix}}` does not exist.',
-        },
+        messages: lessons('e7w-include-prefix-exists', {
+            collectsNothing: {
+                found: '`{{glob}}` matches no file, though its folder exists',
+                fix: 'point the glob at the suffix the files carry now (`.spec.ts` after a rename), or delete it',
+            },
+            missingPrefix: {
+                found: '`{{glob}}` collects nothing: the folder `{{prefix}}` does not exist',
+                fix: 'point the glob at the folder that holds the suite, or delete it',
+            },
+        }),
         type: 'suggestion',
     },
 };

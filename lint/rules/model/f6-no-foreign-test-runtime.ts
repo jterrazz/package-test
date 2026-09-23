@@ -1,4 +1,5 @@
 import { importSourceVisitor } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -115,9 +116,12 @@ export const f6NoForeignTestRuntime: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['f6-no-foreign-test-runtime'],
-        messages: {
-            foreignRuntime: '`{{source}}` is a second test runtime in a test file: {{fix}}.',
-        },
+        messages: lessons('f6-no-foreign-test-runtime', {
+            foreignRuntime: {
+                found: '`{{source}}` is a second test runtime in a test file',
+                fix: '{{fix}}',
+            },
+        }),
         type: 'problem',
     },
 };

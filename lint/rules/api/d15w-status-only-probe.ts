@@ -1,4 +1,5 @@
 import { findTestCallback, isTestCallee, memberPropertyName, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -110,10 +111,12 @@ export const d15wStatusOnlyProbe: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d15w-status-only-probe'],
-        messages: {
-            statusOnlyProbe:
-                "The test's only assertion(s) are status probes — pin the full response: expect(result.response).toMatch(file('./expected/case.http')).",
-        },
+        messages: lessons('d15w-status-only-probe', {
+            statusOnlyProbe: {
+                found: "the test's only assertions probe the HTTP status",
+                fix: 'compare the whole response, ``expect(result.response).toMatch(`HTTP/1.1 …`)`` (`TEST_UPDATE=1` fills an empty one), and keep the status probe beside it only if the status is the point',
+            },
+        }),
         type: 'suggestion',
     },
 };

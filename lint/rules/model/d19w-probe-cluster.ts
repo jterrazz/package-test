@@ -8,6 +8,7 @@ import {
     memberPath,
     walk,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -113,10 +114,12 @@ export const d19wProbeCluster: LintRule = {
     meta: {
         defaultOptions: [{ threshold: DEFAULT_THRESHOLD }],
         docs: RULE_DOCS['d19w-probe-cluster'],
-        messages: {
-            cluster:
-                "{{count}} probes on `{{subject}}` — golden the subject: `expect({{subject}}).toMatch(file('./expected/<case>.txt'))`, tokens for what moves.",
-        },
+        messages: lessons('d19w-probe-cluster', {
+            cluster: {
+                found: '{{count}} probes on `{{subject}}`',
+                fix: 'compare it whole — ``expect({{subject}}).toMatch(`…`)``, `TEST_UPDATE=1` writing the value — with tokens for what moves',
+            },
+        }),
         schema: [
             {
                 additionalProperties: false,

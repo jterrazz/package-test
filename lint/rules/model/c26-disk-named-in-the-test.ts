@@ -1,6 +1,7 @@
 import { dirname, resolve } from 'node:path';
 
 import { child, childList, identifierName, stringValue } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -61,10 +62,12 @@ export const c26DiskNamedInTheTest: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c26-disk-named-in-the-test'],
-        messages: {
-            builtOutsideTest:
-                '{{name}}() is called outside a test: its path resolves against whichever spec reaches this line — take the {{name}}() as a parameter, and build it in the test.',
-        },
+        messages: lessons('c26-disk-named-in-the-test', {
+            builtOutsideTest: {
+                found: '`{{name}}()` called outside a test',
+                fix: 'take the `{{name}}()` as a parameter, and build it in the test that stands on it',
+            },
+        }),
         type: 'problem',
     },
 };

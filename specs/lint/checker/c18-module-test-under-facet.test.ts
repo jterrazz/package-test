@@ -16,7 +16,7 @@ describe('lint — c18-module-test-under-facet (CONVENTIONS C18)', () => {
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            api/orders/total.spec.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+            api/orders/total.spec.ts:1:1: error jterrazz-check(c18): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/19-linting.md#c18-module-test-under-facet
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
         `);

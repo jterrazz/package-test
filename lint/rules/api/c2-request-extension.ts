@@ -2,6 +2,7 @@ import { dirname, extname, join } from 'node:path';
 
 import { GROUND_REQUESTS } from '../../../src/model/chain/ground.js';
 import { isDirectory, listDirectory } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -35,10 +36,12 @@ export const c2RequestExtension: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c2-request-extension'],
-        messages: {
-            noExtension:
-                'requests/{{entry}} carries no extension — a request is a `.http`, a body names how it is sent (`.json` is parsed, anything else is sent verbatim).',
-        },
+        messages: lessons('c2-request-extension', {
+            noExtension: {
+                found: '`requests/{{entry}}` carries no extension',
+                fix: 'name it by how it is sent — `requests/{{entry}}.http` for a whole request, `requests/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
+            },
+        }),
         type: 'problem',
     },
 };

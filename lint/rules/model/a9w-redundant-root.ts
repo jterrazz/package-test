@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { findRoot } from '../../../src/model/chain/resolve.js';
 import { findProperty, specificationMember, stringValue } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -48,10 +49,12 @@ export const a9wRedundantRoot: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['a9w-redundant-root'],
-        messages: {
-            redundant:
-                'root: "{{root}}" is redundant — walking up from the specification file already resolves to that directory.',
-        },
+        messages: lessons('a9w-redundant-root', {
+            redundant: {
+                found: '`root: "{{root}}"` names the directory the walk already finds',
+                fix: 'delete the `root` option',
+            },
+        }),
         type: 'suggestion',
     },
 };

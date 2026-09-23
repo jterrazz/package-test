@@ -1,4 +1,5 @@
 import { importSourceVisitor } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -30,10 +31,12 @@ export const c10ContractsBoundary: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c10-contracts-boundary'],
-        messages: {
-            internal:
-                'Import "{{source}}" reaches into a provider folder — only contracts/*.contracts.ts is importable from a test; add a named scenario export there instead.',
-        },
+        messages: lessons('c10-contracts-boundary', {
+            internal: {
+                found: 'the import "{{source}}" reaches into a provider folder',
+                fix: 'export a named scenario from the `contracts/*.contracts.ts` facade, and import that',
+            },
+        }),
         type: 'problem',
     },
 };

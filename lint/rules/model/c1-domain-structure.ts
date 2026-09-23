@@ -1,6 +1,7 @@
 import { isGroundName } from '../../../src/model/chain/ground.js';
 import { specsAnchor } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -178,24 +179,40 @@ export const c1DomainStructure: LintRule = {
     meta: {
         defaultOptions: [{ depth: DEFAULT_DEPTH }],
         docs: RULE_DOCS['c1-domain-structure'],
-        messages: {
-            specInGround:
-                'A spec must not live under "{{ground}}/" — fixtures/, expected/, requests/ and seeds/ are reserved: they name GROUND (what the specs of a row stand on), never a facet, domain or suite folder. Rename a domain that took one of them. Ground that is CODE keeps its own unit test: `<module>.test.ts` NEXT to the `<module>.ts` it tests (I2), and nothing else.',
-            specNotAtFacetRoot:
-                'A `*.specification.ts` must sit at the facet root: `specs/<facet>/<name>.specification.ts`.',
-            testAtFacetRoot:
-                'A spec must live in a domain folder: `specs/<facet>/<domain>/<aspect>.spec.ts` — tests directly at the facet root are forbidden.',
-            testAtSpecsRoot:
-                'A spec must live in a directory under specs/ — with `depth: "mirror"` the tree mirrors a structure, and the specs root mirrors nothing.',
-            testNotMirroringDirectory:
-                'A spec must be named after the directory holding it — `{{directory}}/{{directory}}.spec.ts` — with `depth: "mirror"`.',
-            testOutsideFacet:
-                'A spec must live in a facet folder — `specs/<facet>/<aspect>.spec.ts`, or one domain deeper: with `depth: "facet"` the specs root holds facets, not tests.',
-            testTooDeep:
-                'A spec must sit at facet/domain depth: `specs/<facet>/<domain>/<aspect>.spec.ts` — no deeper nesting.',
-            testTooDeepForFacet:
-                'A spec must sit at the facet root or one domain folder down — `specs/<facet>/<aspect>.spec.ts` or `specs/<facet>/<domain>/<aspect>.spec.ts`: with `depth: "facet"` nothing nests deeper.',
-        },
+        messages: lessons('c1-domain-structure', {
+            specInGround: {
+                found: 'a spec under `{{ground}}/`, a reserved ground name',
+                fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
+            },
+            specNotAtFacetRoot: {
+                found: 'a `*.specification.ts` below its facet root',
+                fix: 'move it to `specs/<facet>/<name>.specification.ts`',
+            },
+            testAtFacetRoot: {
+                found: 'a spec directly at its facet root',
+                fix: 'move it into a domain folder: `specs/<facet>/<domain>/<aspect>.spec.ts`',
+            },
+            testAtSpecsRoot: {
+                found: 'a spec at the specs root, under `depth: "mirror"`',
+                fix: 'move it into the directory it mirrors',
+            },
+            testNotMirroringDirectory: {
+                found: 'a spec not named after its directory, under `depth: "mirror"`',
+                fix: 'rename it `{{directory}}/{{directory}}.spec.ts`',
+            },
+            testOutsideFacet: {
+                found: 'a spec outside every facet folder, under `depth: "facet"`',
+                fix: 'move it to `specs/<facet>/<aspect>.spec.ts`, or one domain deeper',
+            },
+            testTooDeep: {
+                found: 'a spec nested below its domain folder',
+                fix: 'move it up to `specs/<facet>/<domain>/<aspect>.spec.ts`',
+            },
+            testTooDeepForFacet: {
+                found: 'a spec more than one folder below its facet, under `depth: "facet"`',
+                fix: 'move it to `specs/<facet>/<aspect>.spec.ts` or `specs/<facet>/<domain>/<aspect>.spec.ts`',
+            },
+        }),
         schema: [
             {
                 additionalProperties: false,

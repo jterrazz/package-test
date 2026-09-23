@@ -3,6 +3,7 @@ import { dirname, join, resolve } from 'node:path';
 import { isRelativePath } from '../../../src/model/chain/spec-path.js';
 import { goldenOf, memberPropertyName, stringValue, walk } from '../../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -116,10 +117,12 @@ export const d9wSingleUseRef: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d9w-single-use-ref'],
-        messages: {
-            singleUse:
-                'Capture ref "{{ref}}" is used only once in this spec — a ref earns its name by asserting equality across occurrences; use a plain matcher instead.',
-        },
+        messages: lessons('d9w-single-use-ref', {
+            singleUse: {
+                found: 'the capture ref "{{ref}}" is used once in this spec',
+                fix: 'use the plain token or matcher; a ref earns its name by asserting equality across two places',
+            },
+        }),
         type: 'suggestion',
     },
 };

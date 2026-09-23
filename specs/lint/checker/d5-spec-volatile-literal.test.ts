@@ -16,7 +16,7 @@ describe('lint — d5 spec volatile literal (CONVENTIONS D5)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/serves.spec.yaml:6:1: error jterrazz-check(d5): "{{ip}}:{{port}}" is a value the next run will not reproduce — write {{string}}
+            specs/widget/serves.spec.yaml:6:1: error jterrazz-check(d5): found: "127.0.0.1:52341", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands · read: docs/19-linting.md#d5-spec-volatile-literal
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
@@ -34,8 +34,8 @@ describe('lint — d5 spec volatile literal (CONVENTIONS D5)', () => {
         // Then - ground is judged by the list documents are judged by: one rule, one reach
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/cli/report/expected/summary.txt:1:1: error jterrazz-check(d5): "{{string}}" is a value the next run will not reproduce — write {{string}}
-            specs/cli/report/expected/summary.txt:2:1: error jterrazz-check(d5): "{{string}}" is a value the next run will not reproduce — write {{string}}
+            specs/cli/report/expected/summary.txt:1:1: error jterrazz-check(d5): found: "/tmp/", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} where "/tmp/" stands · read: docs/19-linting.md#d5-spec-volatile-literal
+            specs/cli/report/expected/summary.txt:2:1: error jterrazz-check(d5): found: "127.0.0.1:52341", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands · read: docs/19-linting.md#d5-spec-volatile-literal
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);

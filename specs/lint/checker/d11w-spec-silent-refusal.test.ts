@@ -16,7 +16,7 @@ describe('lint — d11w spec silent refusal (CONVENTIONS D11)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch(`
-            specs/widget/refuses.spec.yaml:3:1: warning jterrazz-check(d11w): exit: 1 with no stdout: and no stderr: — golden the words the refusal printed
+            specs/widget/refuses.spec.yaml:3:1: warning jterrazz-check(d11w): found: \`exit: 1\` with no \`stdout:\` and no \`stderr:\` · why: A run whose \`exit:\` is non-zero with neither \`stdout:\` nor \`stderr:\` → warning: the document does not say why the command refused. · fix: write the words the refusal printed under \`stderr:\` (or \`stdout:\`) · read: docs/19-linting.md#d11w-spec-silent-refusal
         `);
     });
 

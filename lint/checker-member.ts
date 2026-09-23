@@ -366,10 +366,9 @@ function configPresent(
         {
             file: join(label, 'package.json'),
             line: 1,
-            message:
-                `${subject} has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`fixtures/\` ` +
-                `are running your tests; write \`export default defineSpecConfig()\``,
-            rule: 'e3',
+            fix: `write ${join(label, 'vitest.config.ts')}: \`export default defineSpecConfig()\`, from \`@jterrazz/test/vitest\``,
+            found: `${subject} has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`fixtures/\` are running its tests`,
+            rule: 'e3-config-present',
             severity: 'error',
         },
     ];
@@ -387,11 +386,9 @@ function simulatedDom(config: string, rootDir: string): TokenViolation[] {
         {
             file: relConfig,
             line: text.slice(0, found.index).split('\n').length,
-            message:
-                `\`environment: '${found.groups.dom}'\` gives every file of this project ` +
-                `a drawing of a browser — a rendered thing is a \`.test.tsx\` beside its component, ` +
-                `collected by \`component()\``,
-            rule: 'e5b',
+            fix: `delete \`environment: '${found.groups.dom}'\`, and write each rendered test as a \`.test.tsx\` beside its component, collected by \`component()\``,
+            found: `\`environment: '${found.groups.dom}'\` gives every file of this project a drawing of a browser`,
+            rule: 'e5b-no-simulated-dom-config-member',
             severity: 'error',
         },
     ];
@@ -418,12 +415,15 @@ function seamDependencies(member: {
     return declaredSeams(manifest, jestRuns).map((seam) => ({
         file: join(label, 'package.json'),
         line: lineOfKey(memberDir, seam.name),
-        message:
+        fix:
             seam.kind === 'carried'
-                ? `${subject}: \`${seam.name}\` is a transitive of \`@jterrazz/test\` — remove the declaration`
-                : `${subject}: \`${seam.name}\` is a seam \`@jterrazz/test\` replaced — the facet is \`component()\`, ` +
-                  `\`website()\`, \`clock\` or \`intercept()\`; remove the declaration`,
-        rule: 'f8' as const,
+                ? `remove \`${seam.name}\` from ${join(label, 'package.json')}`
+                : `remove \`${seam.name}\` from ${join(label, 'package.json')}, and write its tests on \`component()\`, \`website()\`, \`clock\` or \`intercept()\``,
+        found:
+            seam.kind === 'carried'
+                ? `${subject}: \`${seam.name}\` is a transitive of \`@jterrazz/test\``
+                : `${subject}: \`${seam.name}\` is a seam \`@jterrazz/test\` replaced`,
+        rule: 'f8-no-seam-dependency' as const,
         severity: 'error' as const,
     }));
 }
@@ -499,7 +499,8 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
                 found.push({
                     file: join(label, relative(memberDir, path), '/'),
                     line: 1,
-                    message: `\`${entry.name}/\` names what \`expected/\` already means — a golden sits in expected/ beside the test that reads it`,
+                    fix: `rename \`${entry.name}/\` to \`expected/\`, beside the test that reads it`,
+                    found: `\`${entry.name}/\`, a synonym of \`expected/\``,
                     rule: 'c25-no-ground-synonym',
                     severity: 'error',
                 });

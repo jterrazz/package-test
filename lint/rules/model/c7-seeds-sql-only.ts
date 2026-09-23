@@ -2,6 +2,7 @@ import { dirname, join } from 'node:path';
 
 import { GROUND_SEEDS } from '../../../src/model/chain/ground.js';
 import { listDirectory } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -32,9 +33,12 @@ export const c7SeedsSqlOnly: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c7-seeds-sql-only'],
-        messages: {
-            notSql: 'seeds/{{entry}} is not a .sql file — seeds/ carries database state only; file state goes through .fixture().',
-        },
+        messages: lessons('c7-seeds-sql-only', {
+            notSql: {
+                found: '`seeds/{{entry}}` is not a `.sql` file',
+                fix: 'move it to `fixtures/` and lay it with `.fixture(file(…))`; `seeds/` holds database state only',
+            },
+        }),
         type: 'problem',
     },
 };

@@ -16,6 +16,7 @@ import {
     formatViolations,
     runAllChecks,
 } from './checker.js';
+import { codeOf } from './rule-code.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees.
 const FIXTURES = resolve(import.meta.dirname, '../specs/lint/checker/fixtures/lint-violations');
@@ -132,11 +133,11 @@ function repository(files: string[], add: string[], ignore = ''): string {
     return root;
 }
 
-/** The findings of `rule` a run over `<root>/specs` reports, as `file:line: message`. */
+/** The findings of `rule` a run over `<root>/specs` reports, as `file:line: found`. */
 function findings(root: string, rule: string): string[] {
     return runAllChecks(join(root, 'specs'))
-        .filter((violation) => violation.rule === rule)
-        .map(({ file, line, message }) => `${file}:${line}: ${message}`)
+        .filter((violation) => violation.rule === rule || codeOf(violation.rule) === rule)
+        .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
         .toSorted();
 }
 

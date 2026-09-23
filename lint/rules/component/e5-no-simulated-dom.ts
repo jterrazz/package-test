@@ -1,3 +1,4 @@
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -38,9 +39,12 @@ export const e5NoSimulatedDom: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['e5-no-simulated-dom'],
-        messages: {
-            pragma: '`@vitest-environment {{environment}}` simulates a browser this framework can open for real — a rendered thing is a `.test.tsx` beside its component, collected by the `component()` project (E5 — docs/19-linting.md#e5-no-simulated-dom).',
-        },
+        messages: lessons('e5-no-simulated-dom', {
+            pragma: {
+                found: '`@vitest-environment {{environment}}` simulates a browser',
+                fix: 'delete the pragma, and write the rendered test as a `.test.tsx` beside its component, collected by the `component()` project',
+            },
+        }),
         type: 'problem',
     },
 };

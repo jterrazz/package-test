@@ -37,6 +37,8 @@ import {
     checkSpecDescriptionsUnique,
     volatileLiteralIn,
 } from './checker-spec.js';
+import { lessonOf } from './lesson.js';
+import type { Teaching } from './lesson.js';
 import { codeOf } from './rule-code.js';
 
 /**
@@ -168,26 +170,31 @@ export const CHECKER_PASS_IDS: string[] = [
     ...new Set<string>([...TREE_PASS_IDS, ...MEMBER_PASS_IDS]),
 ];
 
+/** The name of a pass the checker runs — its catalogue row's. */
+export type CheckerPassId = (typeof MEMBER_PASS_IDS)[number] | (typeof TREE_PASS_IDS)[number];
+
 export type Severity = 'error' | 'warn';
 
-export type TokenViolation = {
+export type TokenViolation = Teaching & {
     /** 1-based; a finding about a whole file or folder points at its first column. */
     column?: number;
     file: string;
     line: number;
-    /** The sentence alone: the position and the code are the report line's. */
-    message: string;
     /**
-     * The convention code this finding belongs to, lowercased (`d4`, `c9`,
-     * `e3`). It is what the JSON contract publishes as
-     * `jterrazz-check(<code>)` and what the toolchain's ratchet counts under
-     * `jterrazz-check/<code>` — so a finding without one could never be held
-     * down, and the field is required for that reason.
+     * The pass this finding belongs to. Its row gives the lesson its `why` and
+     * its `read`, and its code (`d4`, `c9`, `e3`) is what the JSON contract
+     * publishes as `jterrazz-check(<code>)` and the toolchain's ratchet counts
+     * under `jterrazz-check/<code>`.
      */
-    rule: string;
+    rule: CheckerPassId;
     severity: Severity;
     token?: string;
 };
+
+/** A finding as the lesson a reader acts on: found, why, fix, read. */
+export function messageOf(violation: TokenViolation): string {
+    return lessonOf(violation.rule, violation);
+}
 
 /**
  * Scan one fixture text for tokens outside the grammar: unknown kinds
@@ -216,6 +223,24 @@ export function findUnknownTokens(text: string): { line: number; token: string }
         }
     }
     return violations;
+}
+
+/** An unknown or malformed token, as the lesson the D4 pass prints. */
+function tokenLesson(token: string): Pick<TokenViolation, 'fix' | 'found' | 'rule'> {
+    const inner = token.slice(2, -2);
+    if (VALID_TOKEN.test(inner)) {
+        return {
+            fix: `write one of the tokens the vocabulary has, between double braces: ${[...TOKEN_KINDS].join(', ')}`,
+            found: `the unknown token ${token}`,
+            rule: 'd4-unknown-token',
+        };
+    }
+    const kind = LEADING_WORD.exec(inner)?.groups?.kind ?? '';
+    return {
+        fix: `write ${kind} bare, or its named capture ${kind}#<name>, between double braces`,
+        found: `the malformed token ${token}`,
+        rule: 'd4-malformed-ref',
+    };
 }
 
 /** Known tokens present in a text — for the `requests/` leak warning (D10). */
@@ -280,8 +305,9 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
             {
                 file: rel,
                 line: error.line,
-                message: error.reason,
-                rule: 'd4b',
+                fix: 'rewrite the document to its grammar — chapter 20 lists the keys, their order and what each run requires',
+                found: error.reason,
+                rule: 'd4b-spec-shape',
                 severity: 'error',
             },
         ];
@@ -294,8 +320,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: at,
-                message: `unknown token ${token} — the D4 vocabulary is frozen (known: ${[...TOKEN_KINDS].join(', ')})`,
-                rule: 'd4',
+                ...tokenLesson(token),
                 severity: 'error',
                 token,
             });
@@ -335,7 +360,8 @@ function checkSeedClockReads(path: string, rel: string, name: string): TokenViol
         violations.push({
             file: rel,
             line: index + 1,
-            message: `\`${found[0]}\` reads the clock — a seed states the instant the case is about, and the chain pins the run's with \`.clock()\``,
+            fix: `replace \`${found[0]}\` with the instant the case is about (\`'2026-01-01T00:00:00Z'\`), and pin the run's clock on the chain with \`.clock()\``,
+            found: `\`${found[0]}\` reads the clock in a seed`,
             rule: 'c23-seed-no-clock-read',
             severity: 'error',
         });
@@ -383,7 +409,8 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line: 1,
-                        message: `a \`${SPEC_EXTENSION}\` document is a SPEC, not ground — move it beside the test that runs it`,
+                        fix: `move ${entry.name} out of the ground folder, beside the test that runs it`,
+                        found: `a \`${SPEC_EXTENSION}\` document under a ground folder`,
                         rule: 'c16-document-outside-ground',
                         severity: 'error',
                     });
@@ -420,8 +447,9 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line: 1,
-                        message: `a requests/*.http file must start with a request line "METHOD /path"`,
-                        rule: 'd4b',
+                        fix: `start ${entry.name} with its request line, \`GET /path\` or another method`,
+                        found: `the first line of ${entry.name} is no request line`,
+                        rule: 'd4b-http-first-line',
                         severity: 'error',
                     });
                 }
@@ -429,8 +457,9 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     violations.push({
                         file: rel,
                         line,
-                        message: `token ${token} in a requests/ file — requests are inputs, never matched; tokens are not validated here`,
-                        rule: 'd10w',
+                        fix: 'write the literal value the request sends — a request is sent, never matched',
+                        found: `the token ${token} in a requests/ file`,
+                        rule: 'd10w-tokens-in-requests',
                         severity: 'warn',
                         token,
                     });
@@ -447,8 +476,9 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line: 1,
-                    message: `an expected/*.http file must start with a status line "HTTP/1.1 <status>"`,
-                    rule: 'd4b',
+                    fix: `start ${entry.name} with its status line, \`HTTP/1.1 200 OK\` or the status it expects`,
+                    found: `the first line of ${entry.name} is no status line`,
+                    rule: 'd4b-http-first-line',
                     severity: 'error',
                 });
             }
@@ -456,8 +486,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `unknown token ${token} — the D4 vocabulary is frozen (known: ${[...TOKEN_KINDS].join(', ')})`,
-                    rule: 'd4',
+                    ...tokenLesson(token),
                     severity: 'error',
                     token,
                 });
@@ -474,7 +503,8 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line: index + 1,
-                    message: `"${volatileLiteral.found}" is a value the next run will not reproduce — write ${volatileLiteral.token}`,
+                    fix: `write ${volatileLiteral.token} where "${volatileLiteral.found}" stands`,
+                    found: `"${volatileLiteral.found}", a value the next run will not reproduce`,
                     rule: 'd5-spec-volatile-literal',
                     severity: 'error',
                 });
@@ -515,16 +545,10 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
  * compiler convention oxlint's own findings normalise to:
  * `<file>:<line>:<column>: <severity> jterrazz-check(<code>): <message>`.
  */
-export function formatViolation({
-    column,
-    file,
-    line,
-    message,
-    rule,
-    severity,
-}: TokenViolation): string {
+export function formatViolation(violation: TokenViolation): string {
+    const { column, file, line, rule, severity } = violation;
     const level = severity === 'error' ? 'error' : 'warning';
-    return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${codeOf(rule)}): ${message}`;
+    return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${codeOf(rule)}): ${messageOf(violation)}`;
 }
 
 /** Render violations the way the lint chain prints them. One line per finding. */

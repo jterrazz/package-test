@@ -9,6 +9,7 @@ import {
     nodeStart,
     walk,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -93,10 +94,12 @@ export const d16wAmbientValue: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d16w-ambient-value'],
-        messages: {
-            ambientValue:
-                'Time or randomness sampled here: `clock.at()`, `clock.advance()`, or a token in the golden.',
-        },
+        messages: lessons('d16w-ambient-value', {
+            ambientValue: {
+                found: 'time or randomness sampled in the test',
+                fix: 'pin the time with `clock.at(…)`/`clock.advance(…)`, or absorb the value with a token in the expectation',
+            },
+        }),
         type: 'suggestion',
     },
 };

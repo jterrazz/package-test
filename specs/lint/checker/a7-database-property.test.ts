@@ -16,7 +16,7 @@ describe('lint — a7 database property (CONVENTIONS A7)', () => {
         // Then - the checker fails with the full cross-file diagnostic
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): .seed() must pass { database } — 2 SQL databases are declared
+            specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): found: \`.seed()\` with no \`{ database }\`, while 2 SQL databases are declared · why: With ≥ 2 databases, \`database:\` is required on every \`.seed()\`/\`.table()\`; with exactly one it is forbidden — checked by crossing the \`services:\` record with the calls in the tests. · fix: pass \`.seed(…, { database: '<key>' })\`, naming one of the 2 databases the services record declares · read: docs/19-linting.md#a7-database-property
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
@@ -42,7 +42,7 @@ describe('lint — a7 database property (CONVENTIONS A7)', () => {
         // Then - the inverse branch fails: a lone database must not be named
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): .seed() must not pass { database } — a single SQL database is declared
+            specs/widget/widget.test.ts:9:1: error jterrazz-check(a7): found: \`.seed()\` passes \`{ database }\`, while a single SQL database is declared · why: With ≥ 2 databases, \`database:\` is required on every \`.seed()\`/\`.table()\`; with exactly one it is forbidden — checked by crossing the \`services:\` record with the calls in the tests. · fix: delete the \`{ database }\` option of \`.seed()\` · read: docs/19-linting.md#a7-database-property
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

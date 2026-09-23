@@ -7,6 +7,7 @@ import {
     markerOf,
     nodeStart,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -101,10 +102,12 @@ export const b11MarkerOneLine: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['b11-marker-one-line'],
-        messages: {
-            wrapped:
-                'A marker is exactly one line: fold the continuation into the sentence or separate it with a blank line.',
-        },
+        messages: lessons('b11-marker-one-line', {
+            wrapped: {
+                found: 'a marker continued on the comment line under it',
+                fix: "fold the continuation into the marker's one line, or separate the two with a blank line",
+            },
+        }),
         type: 'problem',
     },
 };

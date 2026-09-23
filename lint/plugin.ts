@@ -7,8 +7,7 @@
  */
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
-import type { LintPlugin, LintRule } from './oxlint-api.js';
-import { anchorOf } from './rule-code.js';
+import type { LintPlugin } from './oxlint-api.js';
 import { c2RequestExtension } from './rules/api/c2-request-extension.js';
 import { d15wStatusOnlyProbe } from './rules/api/d15w-status-only-probe.js';
 import { b6wRedundantEnvUrl } from './rules/cli/b6w-redundant-env-url.js';
@@ -80,34 +79,6 @@ import { w5wScenarioSettles } from './rules/model/w5w-scenario-settles.js';
  * conversions, the fixture-marker list), so the bundle stays free of the heavy
  * adapters (msw, pg, testcontainers, …) that the main entry pulls in.
  */
-/**
- * Give every message of a rule its generated tail — `(I2 — docs/…#i2-…)`.
- *
- * The anchor is the only route most readers ever take into the catalogue, and
- * it carries the id they cite in a suppression. Generated here rather than
- * typed into each message: forty-odd hand-written tails drifted from the
- * chapter the first time one heading moved, and nothing failed when they did.
- */
-function anchored(name: string, rule: LintRule): LintRule {
-    const { messages } = rule.meta ?? {};
-    const id = rule.meta?.docs?.id;
-    if (messages === undefined || id === undefined) {
-        return rule;
-    }
-    const tail = anchorOf(id, name);
-    const routed = Object.fromEntries(
-        Object.entries(messages).map(([key, text]) => [key, `${text} ${tail}`]),
-    );
-    return { ...rule, meta: { ...rule.meta, messages: routed } };
-}
-
-/** Every shipped rule, each with the anchor its diagnostics end on. */
-function withAnchors(rules: Record<string, LintRule>): Record<string, LintRule> {
-    return Object.fromEntries(
-        Object.entries(rules).map(([name, rule]) => [name, anchored(name, rule)]),
-    );
-}
-
 const plugin: LintPlugin = {
     meta: { name: 'jterrazz' },
     rules: {
@@ -169,9 +140,6 @@ const plugin: LintPlugin = {
         'w5w-scenario-settles': w5wScenarioSettles,
     },
 };
-
-// The published plugin is the one whose messages carry their anchor.
-const routedPlugin: LintPlugin = { ...plugin, rules: withAnchors(plugin.rules) };
 
 /**
  * The full catalogue at its intended severities — spread into an oxlint
@@ -297,4 +265,4 @@ export const testing: OxlintConfig = {
     rules: recommendedRules,
 };
 
-export default routedPlugin;
+export default plugin;

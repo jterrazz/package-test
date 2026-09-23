@@ -1,4 +1,5 @@
 import { memberPropertyName, SCENARIO_ACTIONS, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -86,10 +87,12 @@ export const w2TestIdStatesWhatIsMissing: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['w2-testid-states-what-is-missing'],
-        messages: {
-            unexplainedTestId:
-                '`testId()` is the escape hatch: state what the element lacks with `// testId: <no accessible name|no role|…>` on this line or the one above, or name it with `button()`/`link()`/`field()`/`heading()`/`content()`.',
-        },
+        messages: lessons('w2-testid-states-what-is-missing', {
+            unexplainedTestId: {
+                found: '`testId()` with no line saying what the element lacks',
+                fix: 'name the element with `button()`/`link()`/`field()`/`heading()`/`content()`, or write `// testId: <no accessible name|no role|…>` on this line or the one above',
+            },
+        }),
         type: 'problem',
     },
 };

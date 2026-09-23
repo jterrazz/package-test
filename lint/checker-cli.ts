@@ -14,6 +14,7 @@ import {
     CHECKER_PASS_IDS,
     formatViolation,
     MEMBER_PASS_IDS,
+    messageOf,
     runAllChecks,
     TREE_PASS_IDS,
 } from './checker.js';
@@ -201,7 +202,7 @@ function printFindings(violations: TokenViolation[], plugin: PluginDiagnostic[] 
                     code: codeOfFinding(violation),
                     file: violation.file,
                     line: violation.line,
-                    message: violation.message,
+                    message: messageOf(violation),
                     severity: violation.severity,
                 })),
             ),

@@ -1,4 +1,5 @@
 import { importSourceVisitor } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { declaredSubpaths } from '../../package-exports.js';
@@ -38,10 +39,12 @@ export const f1NoSubpathImport: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['f1-no-subpath-import'],
-        messages: {
-            subpath:
-                'Import from "@jterrazz/test", not "{{source}}" — internal subpaths do not exist. Published subpaths, exempt everywhere: {{published}}.',
-        },
+        messages: lessons('f1-no-subpath-import', {
+            subpath: {
+                found: 'the import "{{source}}" names a subpath the package does not publish',
+                fix: 'import from "@jterrazz/test"; the published subpaths are {{published}}',
+            },
+        }),
         type: 'problem',
     },
 };

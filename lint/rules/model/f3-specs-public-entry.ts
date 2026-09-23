@@ -1,4 +1,5 @@
 import { importSourceVisitor, specsAnchor } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { declaredSubpaths } from '../../package-exports.js';
@@ -77,10 +78,12 @@ export const f3SpecsPublicEntry: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['f3-specs-public-entry'],
-        messages: {
-            deepImport:
-                'specs/ must not deep-import framework internals — reach the framework via its public entry (@jterrazz/test, or src/index.js in this repo), not "{{source}}". Exempt: the published subpaths {{published}}. A probe whose subject is not on the public entry is a module test beside its module.',
-        },
+        messages: lessons('f3-specs-public-entry', {
+            deepImport: {
+                found: 'a spec deep-imports "{{source}}", a framework internal',
+                fix: 'import it from `@jterrazz/test` (`src/index.js` in this repository); the published subpaths {{published}} are exempt, and a probe of what the entry does not publish is a module test beside its module',
+            },
+        }),
         type: 'problem',
     },
 };

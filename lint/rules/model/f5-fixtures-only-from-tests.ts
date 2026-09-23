@@ -1,4 +1,5 @@
 import { importSourceVisitor } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -27,10 +28,12 @@ export const f5FixturesOnlyFromTests: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['f5-fixtures-only-from-tests'],
-        messages: {
-            fixturesImport:
-                'A *.fixtures.ts module ("{{source}}") is only importable from *.test.ts files.',
-        },
+        messages: lessons('f5-fixtures-only-from-tests', {
+            fixturesImport: {
+                found: 'a non-test file imports the fixtures module "{{source}}"',
+                fix: 'import it from a `*.test.ts` only, or move what the file needs into a module of its own',
+            },
+        }),
         type: 'problem',
     },
 };

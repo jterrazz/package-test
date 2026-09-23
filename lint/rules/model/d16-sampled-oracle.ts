@@ -9,6 +9,7 @@ import {
     memberPath,
     walk,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -112,10 +113,12 @@ export const d16SampledOracle: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d16-sampled-oracle'],
-        messages: {
-            sampledOracle:
-                'A sampled value under `expect` is a flake: pin it with `clock.at()`, or match it with an `iso8601` token or `match.uuid`.',
-        },
+        messages: lessons('d16-sampled-oracle', {
+            sampledOracle: {
+                found: 'a sampled value under `expect`',
+                fix: "pin it with `clock.at('2026-01-01T00:00:00Z')`, or match it with an `iso8601` token or `match.uuid`",
+            },
+        }),
         type: 'problem',
     },
 };

@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { lessonParts } from '../src/model/lesson/lesson.js';
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import { anchor, spliceCatalog } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
@@ -18,7 +19,7 @@ import {
     UPSTREAM_RULES,
 } from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
-import { anchorOf, CATALOGUE_CHAPTER } from './rule-code.js';
+import { CATALOGUE_CHAPTER } from './rule-code.js';
 
 /**
  * Catalogue meta-test — the docs-as-code contract.
@@ -76,6 +77,7 @@ function metaProofs(): Set<string> {
         read('lint/plugin.test.ts'),
         read('lint/document-report.test.ts'),
         read('lint/env-allowlist.test.ts'),
+        read('lint/lesson.test.ts'),
         read('lint/matrix.test.ts'),
         read('lint/port-readers.test.ts'),
         read('lint/siblings.test.ts'),
@@ -304,15 +306,15 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         }
     });
 
-    test('k3 — every diagnostic ends with its own generated anchor', () => {
-        // Given - the shipped plugin, whose messages carry a generated tail
+    test('k3 — every diagnostic reads at its own row, on a heading that exists', () => {
+        // Given - the shipped plugin, whose messages carry a generated `read:` part
         const chapter = read(CATALOGUE_CHAPTER);
         for (const [name, rule] of Object.entries(plugin.rules)) {
-            const id = rule.meta?.docs?.id ?? '';
-            const tail = anchorOf(id, name);
             for (const [key, message] of Object.entries(rule.meta?.messages ?? {})) {
-                // Then - it routes to a heading that EXISTS in the chapter
-                expect(message.endsWith(tail), `${name}.${key} is missing its anchor`).toBe(true);
+                // Then - it routes to its own row's heading, which EXISTS in the chapter
+                expect(lessonParts(message)?.read, `${name}.${key} reads elsewhere`).toBe(
+                    `${CATALOGUE_CHAPTER}#${name}`,
+                );
             }
             expect(chapter).toContain(`<a id="${name}"></a>`);
         }

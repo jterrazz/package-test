@@ -1,4 +1,5 @@
 import { child, identifierName, propertyKeyName, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -71,10 +72,12 @@ export const e6ComponentProjectHelper: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['e6-component-project-helper'],
-        messages: {
-            handRolled:
-                'Use `component({ vite })` — the provider, the worker and the pipeline are its, and a hand-rolled `browser:` block is the run that passes here and fails on the next machine.',
-        },
+        messages: lessons('e6-component-project-helper', {
+            handRolled: {
+                found: 'a hand-rolled `browser:` block in a vitest config',
+                fix: "replace it with `component({ vite: './vite.config.ts' })`, which sets the provider, the worker and the pipeline",
+            },
+        }),
         type: 'problem',
     },
 };

@@ -2,6 +2,7 @@ import { dirname, join, resolve } from 'node:path';
 
 import { importSourceVisitor } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { projectRootOf, projectSegments } from '../../role.js';
@@ -149,12 +150,16 @@ export const i1LayerBoundaries: LintRule = {
     meta: {
         defaultOptions: [{ layers: {} }],
         docs: RULE_DOCS['i1-layer-boundaries'],
-        messages: {
-            crossLayer:
-                'Layer "{{layer}}" must not import "{{source}}" — outside the edges its layer map declares.',
-            foreignDependency:
-                '"{{source}}" is not a dependency layer "{{layer}}" declares — one layer states the packages it may import.',
-        },
+        messages: lessons('i1-layer-boundaries', {
+            crossLayer: {
+                found: 'the layer "{{layer}}" imports "{{source}}", outside the edges its map declares',
+                fix: 'reach it through a layer the map allows, or declare the edge in the layer map with the reason',
+            },
+            foreignDependency: {
+                found: '"{{source}}" is not a dependency the layer "{{layer}}" declares',
+                fix: 'import it from the seam that owns it, or declare it on the layer with the reason',
+            },
+        }),
         schema: [
             {
                 additionalProperties: false,

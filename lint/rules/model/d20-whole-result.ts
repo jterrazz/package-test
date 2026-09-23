@@ -10,6 +10,7 @@ import {
     stringValue,
     walk,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -161,10 +162,12 @@ export const d20WholeResult: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d20-whole-result'],
-        messages: {
-            partialOracle:
-                'The test reads {{subject}} and never compares it whole — write expect({{subject}}).toMatch(…) with the whole result in place (TEST_UPDATE=1 fills an empty one); a precise assertion stays, beside it.',
-        },
+        messages: lessons('d20-whole-result', {
+            partialOracle: {
+                found: 'the test reads {{subject}} and never compares it whole',
+                fix: 'add ``expect({{subject}}).toMatch(`…`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',
+            },
+        }),
         type: 'problem',
     },
 };

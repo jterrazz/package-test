@@ -16,7 +16,7 @@ describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            jobs:1:1: error jterrazz-check(c20): \`specs/jobs/\` is a facet folder with no \`jobs.specification.ts\` constructing \`specification.jobs()\` — create it, or rename the folder
+            jobs:1:1: error jterrazz-check(c20): found: \`specs/jobs/\`, a facet folder with no specification constructing \`specification.jobs()\` · why: A first-level folder named for one of the six facets holds a \`*.specification.ts(x)\` calling \`specification.<facet>(\`. · fix: create \`specs/jobs/jobs.specification.ts\` calling \`specification.jobs()\`, or rename the folder · read: docs/19-linting.md#c20-facet-folder
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
         `);

@@ -1,4 +1,5 @@
 import { child, childList, identifierName, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -100,10 +101,12 @@ export const e2PresetConfig: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['e2-preset-config'],
-        messages: {
-            offPreset:
-                "Start from `defineSpecConfig()` — budgets, the artefact dir and the ground exclusion are the preset's.",
-        },
+        messages: lessons('e2-preset-config', {
+            offPreset: {
+                found: 'a vitest config that does not default-export `defineSpecConfig(…)`',
+                fix: "wrap it: `export default defineSpecConfig({ … })`, from `@jterrazz/test/vitest` — the budgets, the artefact directory and the ground exclusion are the preset's",
+            },
+        }),
         type: 'problem',
     },
 };

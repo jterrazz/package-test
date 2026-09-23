@@ -15,7 +15,7 @@ describe('lint — b5 await-using inference (CONVENTIONS B5)', () => {
         // Then - the checker fails with the full diagnostic naming the runner
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/widget.test.ts:8:1: error jterrazz-check(b5): result of docker-aware runner "dockerCli" must be bound with \`await using\` so its containers are disposed
+            specs/widget/widget.test.ts:8:1: error jterrazz-check(b5): found: a result of the docker-aware runner "dockerCli" bound without \`await using\` · why: B5's one channel: docker-aware runners are inferred from the \`docker:\` option of the imported specification file, and every \`.exec()\` result bound without \`await using\` is reported. · fix: bind it with \`await using result = await dockerCli…\`, so the containers it started are removed at the end of the scope · read: docs/19-linting.md#b5-await-using-inference
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

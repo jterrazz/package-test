@@ -16,7 +16,7 @@ describe('lint — d4b spec key order (CONVENTIONS D4b)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml:7:1: error jterrazz-check(d4b): "env:" comes after "runs:" in a spec document — the canonical order is description, fixture, env, serve, runs (fixable: \`node dist/checker.js <root> --fix\`)
+            specs/widget/builds.spec.yaml:7:1: error jterrazz-check(d4b): found: "env:" after "runs:" in a spec document · why: The keys of a \`<case>.spec.yaml\` follow the canonical order — \`description, fixture, env, serve, runs\` at document level, \`command, stdin, timeout, waitFor, exit, stdout, stderr, files\` inside a run. · fix: order the keys description, fixture, env, serve, runs — \`make fix\` reorders them · read: docs/19-linting.md#d4b-spec-key-order
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

@@ -15,7 +15,7 @@ describe('lint — d4b http first line (CONVENTIONS D4b)', () => {
         // Then - the checker fails with the full D4b grammar diagnostic
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/requests/create.http:1:1: error jterrazz-check(d4b): a requests/*.http file must start with a request line "METHOD /path"
+            specs/widget/requests/create.http:1:1: error jterrazz-check(d4b): found: the first line of create.http is no request line · why: The first line of a depth-1 \`.http\` follows its grammar: a request line (\`METHOD /path\`) under \`requests/\`, a status line (\`HTTP/1.1 <status>\`) under \`expected/\`. · fix: start create.http with its request line, \`GET /path\` or another method · read: docs/19-linting.md#d4b-http-first-line
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

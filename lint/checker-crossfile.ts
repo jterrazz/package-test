@@ -12,6 +12,7 @@ import {
 import { moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
 import { specsAnchor } from './ast.js';
 import type { Severity, TokenViolation } from './checker.js';
+import type { Teaching } from './lesson.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 
 /**
@@ -653,8 +654,9 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line,
-                message: `result of docker-aware runner "${runner}" must be bound with \`await using\` so its containers are disposed`,
-                rule: 'b5',
+                fix: `bind it with \`await using result = await ${runner}…\`, so the containers it started are removed at the end of the scope`,
+                found: `a result of the docker-aware runner "${runner}" bound without \`await using\``,
+                rule: 'b5-await-using-inference',
                 severity: 'error',
             });
         }
@@ -745,16 +747,18 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: rel,
                     line,
-                    message: `.${verb}() must pass { database } — ${count} SQL databases are declared`,
-                    rule: 'a7',
+                    fix: `pass \`.${verb}(…, { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
+                    found: `\`.${verb}()\` with no \`{ database }\`, while ${count} SQL databases are declared`,
+                    rule: 'a7-database-property',
                     severity: 'error',
                 });
             } else if (count === 1 && hasDatabase) {
                 violations.push({
                     file: rel,
                     line,
-                    message: `.${verb}() must not pass { database } — a single SQL database is declared`,
-                    rule: 'a7',
+                    fix: `delete the \`{ database }\` option of \`.${verb}()\``,
+                    found: `\`.${verb}()\` passes \`{ database }\`, while a single SQL database is declared`,
+                    rule: 'a7-database-property',
                     severity: 'error',
                 });
             }
@@ -884,8 +888,9 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `domain directory has ground subdirs (${groundSubdirs.join(', ')}) but no *.test.ts(x) or *.spec.yaml`,
-                rule: 'c9',
+                fix: `write the test that stands on ${groundSubdirs.join(', ')}, or delete the folder`,
+                found: `a domain folder holding ${groundSubdirs.join(', ')} and no test or document`,
+                rule: 'c9-dead-fixtures',
                 severity: 'error',
             });
             continue;
@@ -911,8 +916,9 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `dead fixture — no test literal in ${feature} references ${sub}/${entry.name}`,
-                    rule: 'c9',
+                    fix: `delete ${sub}/${entry.name}, or name it from the test that stands on it`,
+                    found: `${sub}/${entry.name}, which no test of ${feature} names`,
+                    rule: 'c9-dead-fixtures',
                     severity,
                 });
             }
@@ -939,8 +945,9 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                 violations.push({
                     file: relEntry,
                     line: 1,
-                    message: `dead pool entry — no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} references ${entry.name}`,
-                    rule: 'c9',
+                    fix: `delete ${entry.name}, or name it from the specs that share it`,
+                    found: `the pool entry ${entry.name}, which no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} names`,
+                    rule: 'c9-dead-fixtures',
                     severity: 'error',
                 });
             }
@@ -1135,8 +1142,9 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
         return {
             file: relEntry,
             line: 1,
-            message: `only ${relLeaf} reaches for this pool entry — the specs root's ground is what SEVERAL leaves share; move it to ${relLeaf}/${role}/${entry} and name it ${named} — \`--fix\` does both`,
-            rule: 'c28',
+            fix: `move it to ${relLeaf}/${role}/${entry} and name it ${named} — \`make fix\` does both`,
+            found: `a pool entry only ${relLeaf} reaches for`,
+            rule: 'c28-ground-shared-or-inline',
             severity: 'error',
         };
     });
@@ -1270,13 +1278,13 @@ function copiedGround(rootDir: string): CopiedGround[] {
 /** What a copy's warning ends on: where the entry goes, or why `--fix` leaves it. */
 function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): string {
     if (target === null) {
-        return ' — the copies go by several names, so `--fix` moves none: give them the one name the entry should keep';
+        return 'give the copies the one name the entry should keep — they go by several, so `make fix` moves none';
     }
     const where = relative(rootDir, target);
     if (treeKind(target) !== undefined && fingerprintOf(target) !== fingerprint) {
-        return `, in ${where}, which holds another ${basename(target)}: rename one of the two`;
+        return `keep one copy in ${where} — it holds another ${basename(target)}, so rename one of the two first`;
     }
-    return `, in ${where} — \`--fix\` moves it there and rewrites every path that named a copy`;
+    return `keep one copy in ${where} — \`make fix\` moves it there and rewrites every path that named a copy`;
 }
 
 /**
@@ -1298,10 +1306,11 @@ export function checkCopiedGround(rootDir: string): TokenViolation[] {
         return group.copies.map((copy) => ({
             file: relative(rootDir, copy),
             line: 1,
-            message: `the same ${isDir(copy) ? 'tree' : 'file'} is in ${group.copies
+            fix: advice,
+            found: `the same ${isDir(copy) ? 'tree' : 'file'} as ${group.copies
                 .filter((other) => other !== copy)
                 .map((other) => relative(rootDir, other))
-                .join(', ')} — ground several leaves share lives once${advice}`,
+                .join(', ')}`,
             rule: 'c27w-duplicate-ground',
             severity: 'warn' as const,
         }));
@@ -1453,8 +1462,9 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
                     column,
                     file: rel,
                     line,
-                    message: `"${path}" leaves ${relative(rootDir, leaf)} — a leaf's ground sits beside it; ground several leaves share goes to the specs root's own ground, ${GROUND_DIRS.map((ground) => `${relative(rootDir, join(specsRoot, ground))}/`).join(', ')}`,
-                    rule: 'c15',
+                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the specs root's folder of its role: ${GROUND_DIRS.map((ground) => `${relative(rootDir, join(specsRoot, ground))}/`).join(', ')}`,
+                    found: `"${path}" leaves ${relative(rootDir, leaf)}`,
+                    rule: 'c15-local-fixture-reach',
                     severity: 'error',
                 });
             }
@@ -1475,6 +1485,35 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
  * far from the line that made it. A call written inside a string (a rule's
  * test case, a sample) is text, not a call, and is not read.
  */
+/** A path naming nothing git keeps: what it names, and the gesture. */
+function missingTarget(named: string, target: string, onDisk: boolean): Teaching {
+    return onDisk
+        ? {
+              fix: `track ${target} (it is ignored by git), or name a file that is`,
+              found: `${named} names nothing — ${target} is ignored by git`,
+          }
+        : {
+              fix: `create ${target}, or correct the path`,
+              found: `${named} names nothing — ${target} does not exist`,
+          };
+}
+
+/** A path naming the other kind of entry than its wrapper says. */
+function crossedTarget(
+    named: string,
+    { found, key, path }: { found: 'directory' | 'file'; key: string | undefined; path: string },
+): Teaching {
+    const bare = path.replace(/\/+$/u, '');
+    const spelled = found === 'directory' ? `${bare}/` : bare;
+    if (key === undefined) {
+        return { fix: `write ${found}('${spelled}')`, found: `${named} names a ${found}` };
+    }
+    return {
+        fix: key === 'fixture' ? `write "${spelled}"` : `${key}: reads one file — name one`,
+        found: `${named} names a ${found}`,
+    };
+}
+
 export function diskTargetFindings(file: string, rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     const suppressed = file.endsWith(SPEC_EXTENSION)
@@ -1490,21 +1529,14 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
         if (found === kind || suppressed.has(line)) {
             continue;
         }
-        const bare = path.replace(/\/+$/u, '');
-        const spelled = found === 'directory' ? `${bare}/` : bare;
         const named = key === undefined ? `${kind}('${path}')` : `${key}: "${path}"`;
-        const fix =
-            key === undefined || key === 'fixture'
-                ? `write ${key === undefined ? `${found}('${spelled}')` : `"${spelled}"`}`
-                : `${key}: reads one file`;
         violations.push({
             column,
             file: relative(rootDir, file),
             line,
-            message:
-                found === undefined
-                    ? `${named} names nothing — ${relative(rootDir, target)} ${existsSync(target) ? 'is ignored by git' : 'does not exist'}`
-                    : `${named} names a ${found} — ${fix}`,
+            ...(found === undefined
+                ? missingTarget(named, relative(rootDir, target), existsSync(target))
+                : crossedTarget(named, { found, key, path })),
             rule: 'c8-disk-target-exists',
             severity: 'error',
         });
@@ -1546,6 +1578,12 @@ function isReadableText(path: string): boolean {
     return READABLE.test(path);
 }
 
+/** The ids a directive names, or the placeholder a reader fills. */
+function idOf(rest: string | undefined): string {
+    const ids = rest?.trim() ?? '';
+    return ids === '' ? '<id>' : ids;
+}
+
 /** A reason: the `--` separator with something after it. */
 const REASON = /--\s*\S/u;
 
@@ -1579,7 +1617,8 @@ export function checkSuppressionReason(rootDir: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: index + 1,
-                message: `say why: \`checker-disable-next-line <id> -- <reason>\``,
+                fix: `end the directive with its reason: \`checker-disable-next-line ${idOf(match.groups?.rest)} -- <why this line is the exception>\``,
+                found: 'a checker suppression that does not say why',
                 rule: 'j9-checker-suppression-reason',
                 severity: 'error',
             });

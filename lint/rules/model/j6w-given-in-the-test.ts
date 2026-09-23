@@ -1,4 +1,5 @@
 import { child, childList, identifierName, memberPath, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -85,12 +86,16 @@ export const j6wGivenInTheTest: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['j6w-given-in-the-test'],
-        messages: {
-            givenInAHook:
-                '`{{hook}}` moves the Given out of the test: a shared value is a function each test calls, and `clock.at()` restores itself.',
-            teardownDoesMore:
-                '`{{hook}}` does more than give back what the test took — keep the restores here and move the rest into the test.',
-        },
+        messages: lessons('j6w-given-in-the-test', {
+            givenInAHook: {
+                found: '`{{hook}}` moves the Given out of the tests',
+                fix: 'write the Given in each test — a shared value is a function each test calls, and `clock.at()` restores itself',
+            },
+            teardownDoesMore: {
+                found: '`{{hook}}` does more than give back what the test took',
+                fix: 'keep the restores in `{{hook}}`, and move the rest into the tests',
+            },
+        }),
         type: 'suggestion',
     },
 };

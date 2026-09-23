@@ -1,5 +1,6 @@
 import { isGroundName } from '../../../src/model/chain/ground.js';
 import { importSourceVisitor, isUnderSpecs } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -54,12 +55,16 @@ export const f2NoTestImportsInProd: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['f2-no-test-imports-in-prod'],
-        messages: {
-            groundImport:
-                'Production code must not import "{{source}}" — a fixtures/, expected/, requests/ or seeds/ folder is what a test stands on, and only a test may read it.',
-            testImport:
-                'Production code must not import the test artefact "{{source}}" — test imports are only legal from specs/, *.test.ts, *.fixtures.ts or *.specification.ts.',
-        },
+        messages: lessons('f2-no-test-imports-in-prod', {
+            groundImport: {
+                found: 'production code imports "{{source}}", under a ground folder',
+                fix: 'move what production needs out of the ground folder; `fixtures/`, `expected/`, `requests/` and `seeds/` are what a test stands on',
+            },
+            testImport: {
+                found: 'production code imports the test artefact "{{source}}"',
+                fix: 'move the import into a test — specs, `*.test.ts`, `*.fixtures.ts` or `*.specification.ts` — or move what production needs out of it',
+            },
+        }),
         type: 'problem',
     },
 };

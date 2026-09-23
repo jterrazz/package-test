@@ -1,4 +1,5 @@
 import { specificationMember, stringValue, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -73,10 +74,12 @@ export const b9wProductCommand: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['b9w-product-command'],
-        messages: {
-            thirdPartyBinary:
-                'specification.cli() points at a third-party binary in node_modules/.bin — a spec should exercise your product command (cli.exec("check"), …), not the tool underneath. Suppress with a reason if the product genuinely is this binary.',
-        },
+        messages: lessons('b9w-product-command', {
+            thirdPartyBinary: {
+                found: '`specification.cli()` points at a third-party binary under `node_modules/.bin`',
+                fix: "point it at the product's own command (`bin/<product>`), or suppress with a reason when the product genuinely is this binary",
+            },
+        }),
         type: 'suggestion',
     },
 };

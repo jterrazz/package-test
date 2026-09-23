@@ -1,4 +1,5 @@
 import { memberPropertyName } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -30,10 +31,12 @@ export const a2KnownConstructors: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['a2-known-constructors'],
-        messages: {
-            unknownConstructor:
-                'specification.{{member}} does not exist — the only constructors are specification.api(), specification.jobs(), specification.cli(), specification.integration(), specification.website() and specification.mobile().',
-        },
+        messages: lessons('a2-known-constructors', {
+            unknownConstructor: {
+                found: '`specification.{{member}}` is no constructor',
+                fix: 'call `specification.api()`, `.jobs()`, `.cli(bin)`, `.integration()`, `.website()` or `.mobile()` — a rendered unit is the `component` chain',
+            },
+        }),
         type: 'problem',
     },
 };

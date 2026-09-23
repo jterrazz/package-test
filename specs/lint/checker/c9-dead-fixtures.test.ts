@@ -15,7 +15,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         // Then - the checker fails with the full diagnostic naming the dead fixture
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/seeds/dead.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in widget references seeds/dead.sql
+            specs/widget/seeds/dead.sql:1:1: error jterrazz-check(c9): found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
@@ -41,7 +41,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         // Then - the orphan directory is flagged (the no-test branch)
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget:1:1: error jterrazz-check(c9): domain directory has ground subdirs (expected) but no *.test.ts(x) or *.spec.yaml
+            specs/widget:1:1: error jterrazz-check(c9): found: a domain folder holding expected and no test or document · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: write the test that stands on expected, or delete the folder · read: docs/19-linting.md#c9-dead-fixtures
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
@@ -56,7 +56,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         // Then - the unreferenced seed is advisory only (warn, exit 0)
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch(`
-            specs/widget/seeds/orphaned.sql:1:1: warning jterrazz-check(c9): dead fixture — no test literal in widget references seeds/orphaned.sql
+            specs/widget/seeds/orphaned.sql:1:1: warning jterrazz-check(c9): found: seeds/orphaned.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/orphaned.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures
         `);
     });
 
@@ -69,8 +69,8 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         // Then - the pool-scan branch flags the orphaned entry
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/fixtures/orphan.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references orphan.sql
-            specs/fixtures/used-app:1:1: error jterrazz-check(c28): only widget reaches for this pool entry — the specs root's ground is what SEVERAL leaves share; move it to widget/fixtures/used-app and name it directory('./fixtures/used-app/') — \`--fix\` does both
+            specs/fixtures/orphan.sql:1:1: error jterrazz-check(c9): found: the pool entry orphan.sql, which no spec under specs names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete orphan.sql, or name it from the specs that share it · read: docs/19-linting.md#c9-dead-fixtures
+            specs/fixtures/used-app:1:1: error jterrazz-check(c28): found: a pool entry only widget reaches for · why: A ground file exists only if it is shared: the checker counts the TESTS that read each file of the specs trees — a \`test()\`/\`it()\` whose body names it with a literal \`file()\`/\`directory()\`, a document — and judges its level. · fix: move it to widget/fixtures/used-app and name it directory('./fixtures/used-app/') — \`make fix\` does both · read: docs/19-linting.md#c28-ground-shared-or-inline
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);
@@ -85,7 +85,7 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         // Then - the unnamed seed is dead, the shared one is not
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/seeds/orphan.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references orphan.sql
+            specs/seeds/orphan.sql:1:1: error jterrazz-check(c9): found: the pool entry orphan.sql, which no spec under specs names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete orphan.sql, or name it from the specs that share it · read: docs/19-linting.md#c9-dead-fixtures
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
@@ -100,8 +100,8 @@ describe('lint — c9 dead fixtures (CONVENTIONS C9)', () => {
         // Then - the entry no path resolves to is dead, whichever of the two it is
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/api/orders/seeds/one-user.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in orders references seeds/one-user.sql
-            specs/seeds/two-users.sql:1:1: error jterrazz-check(c9): dead pool entry — no spec under specs references two-users.sql
+            specs/api/orders/seeds/one-user.sql:1:1: error jterrazz-check(c9): found: seeds/one-user.sql, which no test of orders names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/one-user.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures
+            specs/seeds/two-users.sql:1:1: error jterrazz-check(c9): found: the pool entry two-users.sql, which no spec under specs names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete two-users.sql, or name it from the specs that share it · read: docs/19-linting.md#c9-dead-fixtures
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);

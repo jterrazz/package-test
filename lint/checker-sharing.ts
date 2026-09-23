@@ -236,8 +236,9 @@ export function checkGroundSharing(rootDir: string): TokenViolation[] {
         column: reference.column,
         file: relative(rootDir, reference.file),
         line: reference.line,
-        message: `${relative(rootDir, target)} is read by this test alone — a file is for what several tests share: write it here, ${inPlaceForm(reference)} (\`--fix\` inlines it)`,
-        rule: 'c28',
+        fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`make fix\` inlines it`,
+        found: `${relative(rootDir, target)}, read by this test alone`,
+        rule: 'c28-ground-shared-or-inline' as const,
         severity: 'error' as const,
     }));
     const inlined = new Set(singleUseFiles(rootDir).map(({ target }) => relative(rootDir, target)));

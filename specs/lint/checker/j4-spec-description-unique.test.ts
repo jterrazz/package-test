@@ -16,7 +16,7 @@ describe('lint — j4 spec description unique (CONVENTIONS J4)', () => {
         // Then - the second one is named, with the first it collides with
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/rebuilds.spec.yaml:1:1: error jterrazz-check(j4): "builds the widget" is already the description of widget/builds.spec.yaml — two documents of one directory cannot share a title
+            specs/widget/rebuilds.spec.yaml:1:1: error jterrazz-check(j4): found: "builds the widget", already the description of widget/builds.spec.yaml · why: Two \`<case>.spec.yaml\` documents in one directory do not share a \`description:\`. · fix: retitle one of the two for what it proves apart from the other · read: docs/19-linting.md#j4-spec-description-unique
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

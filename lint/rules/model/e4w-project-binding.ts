@@ -1,4 +1,5 @@
 import { collectedSegments, facetOfSegments, FACETS, projectLiterals } from '../../config-shape.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -60,14 +61,20 @@ export const e4wProjectBinding: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['e4w-project-binding'],
-        messages: {
-            nameTheFacet:
-                '`{{name}}` collects `specs/{{facet}}/**` — name it `{{facet}}` so `--project` means the same in every repository ({ include, exclude } stay yours).',
-            rootTheFacet:
-                '`{{name}}` is a facet name — root its `{ include, exclude }` at `specs/{{name}}/`, or call the project something else.',
-            unitOutsideSpecs:
-                '`unit` collects the tests that sit beside their modules — a specs tree belongs to the facet that owns it.',
-        },
+        messages: lessons('e4w-project-binding', {
+            nameTheFacet: {
+                found: 'the project `{{name}}` collects `specs/{{facet}}/**`',
+                fix: 'name it `{{facet}}`, so `--project {{facet}}` means the same in every repository',
+            },
+            rootTheFacet: {
+                found: 'the project `{{name}}` carries a facet name and collects elsewhere',
+                fix: 'root its `include` at `specs/{{name}}/`, or call the project something else',
+            },
+            unitOutsideSpecs: {
+                found: 'the `unit` project collects under `specs/`',
+                fix: 'move the specs tree to the project of the facet that owns it; `unit` collects the tests beside their modules',
+            },
+        }),
         type: 'suggestion',
     },
 };

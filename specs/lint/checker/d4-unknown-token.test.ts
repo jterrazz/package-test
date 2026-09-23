@@ -16,7 +16,7 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
         // Then - the checker fails with the full diagnostic (file, token, frozen vocabulary)
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/expected/out.txt:1:1: error jterrazz-check(d4): unknown token {{string}} — the D4 vocabulary is frozen (known: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir)
+            specs/widget/expected/out.txt:1:1: error jterrazz-check(d4): found: the unknown token {{userid}} · why: Every \`{{token}}\` in an \`expected/\` fixture — or in an expected stream of a \`<case>.spec.yaml\` document — belongs to the frozen vocabulary; an unknown token is an error. · fix: write one of the tokens the vocabulary has, between double braces: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir · read: docs/19-linting.md#d4-unknown-token
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
@@ -31,7 +31,7 @@ describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
         // Then - one finding, on the stream line: a description is text, not tokens
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml:6:1: error jterrazz-check(d4): unknown token {{string}} — the D4 vocabulary is frozen (known: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir)
+            specs/widget/builds.spec.yaml:6:1: error jterrazz-check(d4): found: the unknown token {{widget}} · why: Every \`{{token}}\` in an \`expected/\` fixture — or in an expected stream of a \`<case>.spec.yaml\` document — belongs to the frozen vocabulary; an unknown token is an error. · fix: write one of the tokens the vocabulary has, between double braces: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir · read: docs/19-linting.md#d4-unknown-token
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

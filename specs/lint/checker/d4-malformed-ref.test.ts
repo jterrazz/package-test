@@ -15,7 +15,7 @@ describe('lint — d4 malformed ref (CONVENTIONS D4)', () => {
         // Then - the checker fails with the full diagnostic naming the offending token
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/expected/out.txt:1:1: error jterrazz-check(d4): unknown token {{string}} — the D4 vocabulary is frozen (known: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir)
+            specs/widget/expected/out.txt:1:1: error jterrazz-check(d4): found: the malformed token {{iso8601#}} · why: A malformed ref of a known kind (\`{{iso8601#}}\`, \`{{uuid #id}}\`) in a text file under \`expected/\` is an error. · fix: write iso8601 bare, or its named capture iso8601#<name>, between double braces · read: docs/19-linting.md#d4-malformed-ref
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

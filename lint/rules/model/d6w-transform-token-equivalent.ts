@@ -1,5 +1,6 @@
 import { TOKEN_KINDS } from '../../../src/model/matching/match.js';
 import { findProperty, memberPropertyName, specificationMember, stringValue } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -69,10 +70,12 @@ export const d6wTransformTokenEquivalent: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d6w-transform-token-equivalent'],
-        messages: {
-            tokenEquivalent:
-                'This transform only rewrites output into known token literals — write the tokens in the expected/ fixture instead; transform is an escape hatch for uncovered noise.',
-        },
+        messages: lessons('d6w-transform-token-equivalent', {
+            tokenEquivalent: {
+                found: 'a `transform` that only rewrites output into token literals',
+                fix: 'delete the transform and write the tokens in the expectation; `transform` is for noise no token covers',
+            },
+        }),
         type: 'suggestion',
     },
 };

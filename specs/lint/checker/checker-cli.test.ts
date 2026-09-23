@@ -16,8 +16,8 @@ describe('lint — checker CLI contract', () => {
         // Then - the facet passes report what `specs` reports, anchored on the root that was named
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/api/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
-            specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): reaches no runner under the \`api\` facet: import \`{ api }\` from \`api.specification.js\`, or move a module test beside its module
+            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#c12-spec-file-name
+            specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/19-linting.md#c18-module-test-under-facet
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);
@@ -32,7 +32,7 @@ describe('lint — checker CLI contract', () => {
         // Then - the `specs` above the package is the machine's: the run walks the project's own tree
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): a \`.test.ts\` under \`specs/api/\` specifies the assembled product — rename it \`.spec.ts\` (fixable: \`jterrazz-test-check <root> --fix\`)
+            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#c12-spec-file-name
 
             conventions checker: 1 error(s) found under {{workdir}}/specs/checkout
         `);
@@ -211,7 +211,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         // Then - the finding and the file that judges it, and no verdict of its own
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch(`
-            widget/seeds/dead.sql:1:1: error jterrazz-check(c9): dead fixture — no test literal in widget references seeds/dead.sql
+            widget/seeds/dead.sql:1:1: error jterrazz-check(c9): found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures
             conventions checker: 1 finding(s) under {{workdir}}/specs, judged by jterrazz.baseline.json › test
         `);
     });
@@ -225,7 +225,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         // Then - the record, then the held finding as JSON: the machine format carries the findings whatever the verdict
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"dead fixture — no test literal in widget references seeds/dead.sql","severity":"error"}]
+            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures","severity":"error"}]
         `);
     });
 
@@ -239,7 +239,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         // Then - the verdict fails on both, and the JSON holds the tree's finding alone
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
-            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"dead fixture — no test literal in widget references seeds/dead.sql","severity":"error"}]
+            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures","severity":"error"}]
         `);
     });
 

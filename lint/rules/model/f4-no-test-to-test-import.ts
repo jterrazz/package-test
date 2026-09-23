@@ -1,4 +1,5 @@
 import { importSourceVisitor } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -27,10 +28,12 @@ export const f4NoTestToTestImport: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['f4-no-test-to-test-import'],
-        messages: {
-            testToTest:
-                'A test file must not import another test file ("{{source}}") — share data via a *.fixtures.ts neighbour or a *.specification.ts runner.',
-        },
+        messages: lessons('f4-no-test-to-test-import', {
+            testToTest: {
+                found: 'a test file imports the test file "{{source}}"',
+                fix: 'share the data through a `*.fixtures.ts` neighbour, or the runner through a `*.specification.ts`',
+            },
+        }),
         type: 'problem',
     },
 };

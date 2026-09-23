@@ -16,7 +16,7 @@ describe('lint — d5w spec pinned value (CONVENTIONS D5)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch(`
-            specs/widget/stamps.spec.yaml:6:1: warning jterrazz-check(d5w): "2026-07-17T10:00:00.000Z" is not fixed by any fixture: or stdin: of this document — write {{string}}
+            specs/widget/stamps.spec.yaml:6:1: warning jterrazz-check(d5w): found: "2026-07-17T10:00:00.000Z", which no \`fixture:\` or \`stdin:\` of this document pins · why: A literal ISO-8601 timestamp or uuid in an expected stream of a \`<case>.spec.yaml\` → warning, unless the same value appears in a \`fixture:\`, the document's sibling \`fixtures/\`, a \`stdin:\`, a command argument or an \`env:\`/\`serve:\` value of the same document (it is then pinned, not volatile). · fix: write {{string}} where "2026-07-17T10:00:00.000Z" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document · read: docs/19-linting.md#d5w-spec-pinned-value
         `);
     });
 

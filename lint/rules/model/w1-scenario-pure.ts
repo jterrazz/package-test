@@ -1,4 +1,5 @@
 import { child, identifierName, scenarioCallbackOf, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -32,10 +33,12 @@ export const w1ScenarioPure: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['w1-scenario-pure'],
-        messages: {
-            expectInScenario:
-                'No expect() inside a scenario — the scenario is the When; assert the final state on the returned result in the Then.',
-        },
+        messages: lessons('w1-scenario-pure', {
+            expectInScenario: {
+                found: '`expect()` inside a scenario',
+                fix: 'move the assertion after the scenario, onto the result it returns',
+            },
+        }),
         type: 'problem',
     },
 };

@@ -1,4 +1,5 @@
 import { child, memberPath } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -54,10 +55,12 @@ export const e9wEnvAssignmentInTest: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['e9w-env-assignment-in-test'],
-        messages: {
-            rawAssignment:
-                "Use `vi.stubEnv('X', 'y')` — it restores itself; a CLI default belongs to `specification.cli({ defaults })`.",
-        },
+        messages: lessons('e9w-env-assignment-in-test', {
+            rawAssignment: {
+                found: 'the test writes the process environment directly',
+                fix: "write `vi.stubEnv('<NAME>', '<value>')`, which restores itself; a CLI default belongs to `specification.cli({ defaults })`",
+            },
+        }),
         type: 'suggestion',
     },
 };

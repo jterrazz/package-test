@@ -82,6 +82,8 @@ const FRAMEWORK_LAYERS = {
             'model/chain/resolve',
             // Every gate judges the tree the runtime reads: what git does not ignore.
             'seams/git/tree',
+            // A finding and a refusal teach in one form: the four parts, and how they read.
+            'model/lesson/lesson',
             // The run owns one key of the ratchet the checker writes: route coverage.
             'model/routes/routes',
         ],

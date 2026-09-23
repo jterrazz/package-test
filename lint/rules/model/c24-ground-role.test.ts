@@ -24,7 +24,7 @@ ruleTester.run('c24-ground-role', c24GroundRole as unknown as OxlintRule, {
             errors: [
                 {
                     message:
-                        "seed() reads seeds/, and file('../../fixtures/seeds/rows.sql') names fixtures/ — put the file in ./seeds/ beside the test, or in specs/seeds/ if several leaves share it.",
+                        /^found: `seed\(\)` reads seeds\/, and `file\('\.\.\/\.\.\/fixtures\/seeds\/rows\.sql'\)` names fixtures\/ · .* · fix: move the file to \.\/seeds\/ beside the test, or in specs\/seeds\/ if several leaves share it/u,
                 },
             ],
             filename: SPEC,

@@ -1,6 +1,7 @@
 import { dirname, join } from 'node:path';
 
 import { listDirectory } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -59,9 +60,12 @@ export const c11ContractDataPairing: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c11-contract-data-pairing'],
-        messages: {
-            orphan: 'contracts/{{provider}}/{{entry}} has no owning contract — data pairs with the sibling {{owner}} (stem = name up to the first dot).',
-        },
+        messages: lessons('c11-contract-data-pairing', {
+            orphan: {
+                found: '`contracts/{{provider}}/{{entry}}` has no contract beside it',
+                fix: 'write `contracts/{{provider}}/{{owner}}` — data pairs with the unit named by its stem, up to the first dot — or delete the orphan',
+            },
+        }),
         type: 'problem',
     },
 };

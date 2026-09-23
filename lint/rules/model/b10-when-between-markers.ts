@@ -6,6 +6,7 @@ import {
     isTestCallee,
     markerComments,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -53,12 +54,16 @@ export const b10WhenBetweenMarkers: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['b10-when-between-markers'],
-        messages: {
-            afterThen:
-                '`// When -` comes after `// Then -`: move it to the action it narrates, or drop it when the chain is the action.',
-            beforeGiven:
-                '`// When -` comes before `// Given -`: move it to the action it narrates, or drop it when the chain is the action.',
-        },
+        messages: lessons('b10-when-between-markers', {
+            afterThen: {
+                found: '`// When -` written after `// Then -`',
+                fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
+            },
+            beforeGiven: {
+                found: '`// When -` written before `// Given -`',
+                fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
+            },
+        }),
         type: 'problem',
     },
 };

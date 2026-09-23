@@ -7,6 +7,7 @@ import {
     scenarioCallbackOf,
     walk,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -163,10 +164,12 @@ export const w5wScenarioSettles: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['w5w-scenario-settles'],
-        messages: {
-            unsettled:
-                'End on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)` — the capture reads the settled screen.',
-        },
+        messages: lessons('w5w-scenario-settles', {
+            unsettled: {
+                found: 'a scenario that acts and ends without reading the screen',
+                fix: 'end it on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`',
+            },
+        }),
         type: 'suggestion',
     },
 };

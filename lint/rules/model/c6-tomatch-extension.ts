@@ -1,4 +1,5 @@
 import { goldenOf } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -37,10 +38,12 @@ export const c6ToMatchExtension: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c6-tomatch-extension'],
-        messages: {
-            missingExtension:
-                'toMatch(file("{{name}}")) is missing its extension — the extension is part of the golden\'s path ("./expected/help.txt", never "./expected/help"); a tree is toMatch(directory("./expected/<name>/")).',
-        },
+        messages: lessons('c6-tomatch-extension', {
+            missingExtension: {
+                found: '`toMatch(file("{{name}}"))` names a golden with no extension',
+                fix: 'add the extension to the path (`"./expected/help.txt"`), or compare a tree with `toMatch(directory("./expected/<name>/"))`',
+            },
+        }),
         type: 'problem',
     },
 };

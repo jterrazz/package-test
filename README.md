@@ -184,7 +184,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | Services, init scripts, per-worker isolation, `process()`        | [docs/17](docs/17-services.md)                                   |
 | The conventions, and the catalogue that enforces them            | [docs/18](docs/18-conventions.md), [docs/19](docs/19-linting.md) |
 
-The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships oxlint cannot. Every diagnostic ends in a rule id and an anchor into the generated catalogue.
+The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`) and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships oxlint cannot. Every diagnostic teaches in four parts — what it found, why the convention holds, the fix for this case, and the catalogue row to read.
 
 Node 24, vitest 5 and `@jterrazz/typescript` 11 are the required peers; everything else — a browser, a database driver, a simulator — is an optional peer, loaded the first time a spec needs it and named in the refusal when it is not there. What to install, and when: [docs/04](docs/04-operating.md#what-a-consumer-must-bring).
 

@@ -319,6 +319,12 @@ takes of them anyway, so neither side is silently dropped.
 | contract realism                                  | only a recorded exchange could judge it                               | —                                                                                                                         |
 | the depth a repository declares                   | reviewed once, when the tree is born                                  | C1 thereafter                                                                                                             |
 
+## A message teaches
+
+A finding is the only page of the catalogue most readers ever see, so it carries what the reader needs to act without opening another: **what was found** and where, **why** the convention holds, **the fix for this case** — its paths and names, and `make fix` when a fixer does it — and **where to read** the rule whole. A message that names the fault and stops sends its reader to the chapter for what the line could have said; one that states the rule and not the case sends them back to the code to find out what it saw.
+
+The four parts are the same everywhere a rule speaks — a static rule, a checker pass, a refusal the runtime throws — and none is optional. How each channel prints them is [19 — Linting](19-linting.md#what-a-finding-says)'s.
+
 ## Maintaining the constitution
 
 - A new **mechanizable** rule is added to the **code** (`lint/manifest.ts` + its implementation), not here — then `npm run docs` regenerates the catalogue. The freshness meta-test fails if the committed catalogue is no longer byte-identical.

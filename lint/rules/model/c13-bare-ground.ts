@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { RENAMED_GROUND_DIRS } from '../../../src/model/chain/ground.js';
 import { specsAnchor } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -58,10 +59,12 @@ export const c13BareGround: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c13-bare-ground'],
-        messages: {
-            underscored:
-                'The directory "{{legacy}}/" is a 16.x ground name — rename it to "{{ground}}/" (`git mv {{legacy}} {{ground}}`, or `jterrazz-test-check --fix`), and the paths that name it with it.',
-        },
+        messages: lessons('c13-bare-ground', {
+            underscored: {
+                found: '"{{legacy}}/" is a 16.x ground name',
+                fix: 'rename it "{{ground}}/" with the paths that name it — `jterrazz-test-check --fix` does both (`make fix`)',
+            },
+        }),
         type: 'problem',
     },
 };

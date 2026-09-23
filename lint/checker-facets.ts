@@ -145,7 +145,8 @@ export function checkFacetFolder(specsRoot: string): TokenViolation[] {
         violations.push({
             file: rel,
             line: 1,
-            message: `\`specs/${facet}/\` is a facet folder with no \`${facet}.specification.ts\` constructing \`specification.${facet}()\` — create it, or rename the folder`,
+            fix: `create \`specs/${facet}/${facet}.specification.ts\` calling \`specification.${facet}()\`, or rename the folder`,
+            found: `\`specs/${facet}/\`, a facet folder with no specification constructing \`specification.${facet}()\``,
             rule: 'c20-facet-folder',
             severity: 'error',
         });
@@ -188,7 +189,8 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `reaches no runner under the \`${facet}\` facet: import \`{ ${facet} }\` from \`${facet}.specification.js\`, or move a module test beside its module`,
+                fix: `import \`{ ${facet} }\` from \`${facet}.specification.js\` and drive the product through it, or move the module test beside its module`,
+                found: `a test under the \`${facet}\` facet that reaches no runner`,
                 rule: 'c18-module-test-under-facet',
                 severity: 'error',
             });
@@ -272,7 +274,8 @@ export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
             violations.push({
                 file: rel,
                 line: 1,
-                message: `\`${ground}/\` here is read by \`${relative(directory, reader)}\` alone — give it its own domain folder`,
+                fix: `give \`${relative(directory, reader)}\` a domain folder of its own, and move \`${ground}/\` into it`,
+                found: `\`${ground}/\`, read by \`${relative(directory, reader)}\` alone of the tests beside it`,
                 rule: 'c21w-ground-owned-by-one',
                 severity: 'warn',
             });

@@ -1,4 +1,5 @@
 import { isFile } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -73,16 +74,24 @@ export const i2SiblingTestNaming: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['i2-sibling-test-naming'],
-        messages: {
-            orphanComponent:
-                'A component test must sit NEXT to what it renders — no neighbour "{{expected}}" found. A hook or a DOM function is the `.ts` of the same basename, with its Host in the test file.',
-            orphanTest:
-                'A module test must sit NEXT to the module it tests — no neighbour "{{expected}}" found. A test needing more than its module is a specification: move it under specs/ as a `.spec.ts`.',
-            rootTests:
-                'A package-level `{{directory}}/` directory is banned — module tests are siblings under src/, product specifications live in specs/.',
-            testsDir:
-                '__tests__/ directories are banned — the test of <file>.ts is its neighbour <file>.test.ts.',
-        },
+        messages: lessons('i2-sibling-test-naming', {
+            orphanComponent: {
+                found: 'a component test with no neighbour "{{expected}}"',
+                fix: 'move it next to what it renders — a hook or a DOM function is the `.ts` of the same basename, its Host in the test',
+            },
+            orphanTest: {
+                found: 'a module test with no neighbour "{{expected}}"',
+                fix: 'move it next to the module it tests; a test needing more than its module is a spec — move it under `specs/` as a `.spec.ts`',
+            },
+            rootTests: {
+                found: 'a package-level `{{directory}}/` directory',
+                fix: 'move each module test beside its module under `src/`, and each product specification under `specs/`',
+            },
+            testsDir: {
+                found: 'a `__tests__/` directory',
+                fix: 'move each test beside its module: the test of `<file>.ts` is `<file>.test.ts`',
+            },
+        }),
         type: 'problem',
     },
 };

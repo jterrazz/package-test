@@ -9,6 +9,7 @@ import {
     memberPath,
     walk,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -112,10 +113,12 @@ export const d17wDoubleOnlyOracle: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d17w-double-only-oracle'],
-        messages: {
-            doubleOnly:
-                'Every assertion reads a double this test built — assert the returned value or the resulting state.',
-        },
+        messages: lessons('d17w-double-only-oracle', {
+            doubleOnly: {
+                found: 'every assertion reads a double this test built',
+                fix: 'assert the value the subject returned, or the state it left',
+            },
+        }),
         type: 'suggestion',
     },
 };

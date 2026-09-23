@@ -8,6 +8,7 @@ import {
     markerComments,
     testCalleeHasModifier,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -62,12 +63,16 @@ export const b4GivenThen: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['b4-given-then'],
-        messages: {
-            givenAfterThen:
-                'The `// Given -` marker comes after `// Then -` — Given describes the setup and must precede Then.',
-            missing:
-                'Test is missing a `// {{marker}} -` comment — every test needs both `// Given -` and `// Then -`.',
-        },
+        messages: lessons('b4-given-then', {
+            givenAfterThen: {
+                found: '`// Given -` written after `// Then -`',
+                fix: 'move the Given marker above the setup it narrates, before the Then',
+            },
+            missing: {
+                found: 'the test has no `// {{marker}} -` marker',
+                fix: 'write `// {{marker}} - <a sentence about the subject>` — every test carries a Given, then a Then',
+            },
+        }),
         type: 'problem',
     },
 };

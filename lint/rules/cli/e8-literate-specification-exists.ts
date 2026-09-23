@@ -2,6 +2,7 @@ import { dirname, resolve } from 'node:path';
 
 import { literateSpecifications } from '../../config-shape.js';
 import { isFile } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -37,10 +38,12 @@ export const e8LiterateSpecificationExists: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['e8-literate-specification-exists'],
-        messages: {
-            missing:
-                '`literate.specification` must name the `*.specification.ts` exporting the runner its documents name by `kind:` (`cli`, `api`, `jobs`) — `{{path}}` resolves to no file.',
-        },
+        messages: lessons('e8-literate-specification-exists', {
+            missing: {
+                found: '`literate.specification` names `{{path}}`, which resolves to no file',
+                fix: 'point it at the `*.specification.ts` exporting the runner the documents run on — `./specs/cli/cli.specification.ts` by convention',
+            },
+        }),
         type: 'problem',
     },
 };

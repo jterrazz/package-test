@@ -1216,14 +1216,27 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
-            'Every diagnostic ends with its own generated anchor, and the anchor exists in the generated chapter.',
+            "Every diagnostic's `read:` part is its own row's heading, generated from the row, and the heading exists in the generated chapter.",
         facet: 'model',
         family: 'K',
-        fix: 'Let `withAnchors()` generate the tail; never type one.',
+        fix: 'Let `lessons()` write the `read:` part; never type one.',
         id: 'K3',
         name: 'k3-message-anchors',
         rationale:
             'The anchor is the only route most readers ever take into the catalogue, and forty hand-written tails drifted the first time a heading moved.',
+        reach: 'all',
+    },
+    {
+        channel: 'meta',
+        convention:
+            'Every message a static rule, a checker pass or a runtime refusal of the catalogue prints teaches in four parts, in this order — `found:` the finding located, `why:` the convention in one sentence, `fix:` the gesture for this case, `read:` the chapter anchor; a message that lacks a part, leaves one empty or garbles their order is refused.',
+        facet: 'model',
+        family: 'K',
+        fix: "Write the message as its `found` and its `fix` — `lessons()` in a rule, the finding's two fields in a checker pass, `refusal()` in the runtime — and let the row give the `why` and the `read`.",
+        id: 'K11',
+        name: 'k11-messages-teach',
+        rationale:
+            'A message is the only page of the catalogue most readers see: one that names the fault without its reason or its gesture sends the reader to the chapter for what the line could have said.',
         reach: 'all',
     },
     {

@@ -1,4 +1,5 @@
 import { memberPropertyName, propertyKeyName } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -41,10 +42,12 @@ export const b6wRedundantEnvUrl: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['b6w-redundant-env-url'],
-        messages: {
-            redundant:
-                '.env({ {{key}}: ….connectionString }) is redundant — the framework already injects <KEY>_URL (and the DATABASE_URL/REDIS_URL aliases) for every service.',
-        },
+        messages: lessons('b6w-redundant-env-url', {
+            redundant: {
+                found: '`.env({ {{key}}: ….connectionString })` restates what the framework injects',
+                fix: 'delete the `{{key}}` entry — the service record key already injects `<KEY>_URL`, and `DATABASE_URL`/`REDIS_URL` when unambiguous',
+            },
+        }),
         type: 'suggestion',
     },
 };

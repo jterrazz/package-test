@@ -1,4 +1,5 @@
 import { propertyKeyName, specificationMember, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -75,10 +76,12 @@ export const a4CleanupAfterall: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['a4-cleanup-afterall'],
-        messages: {
-            unregistered:
-                '`cleanup` is destructured but never passed to afterAll — add `afterAll(cleanup)` to the specification file.',
-        },
+        messages: lessons('a4-cleanup-afterall', {
+            unregistered: {
+                found: '`cleanup` is destructured and never handed to `afterAll`',
+                fix: 'add `afterAll(cleanup);` at the end of the specification file',
+            },
+        }),
         type: 'problem',
     },
 };

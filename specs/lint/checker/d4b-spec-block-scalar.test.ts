@@ -16,7 +16,7 @@ describe('lint — d4b spec block scalar (CONVENTIONS D4b)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml:5:1: error jterrazz-check(d4b): stdout is a quoted scalar — a stream is written as a block scalar (\`|\` keeps the final newline, \`|-\` drops it) (fixable: \`node dist/checker.js <root> --fix\`)
+            specs/widget/builds.spec.yaml:5:1: error jterrazz-check(d4b): found: stdout written as a quoted scalar · why: \`stdout\`, \`stderr\`, \`stdin\` and \`files.*.equals\` of a \`<case>.spec.yaml\` are written as block scalars (\`|\` keeps the trailing newline, \`|-\` drops it), never as a quoted string carrying \`\\n\`. · fix: write stdout as a block scalar (\`|\` keeps the final newline, \`|-\` drops it) — \`make fix\` re-styles it · read: docs/19-linting.md#d4b-spec-block-scalar
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);

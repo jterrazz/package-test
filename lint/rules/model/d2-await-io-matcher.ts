@@ -1,4 +1,5 @@
 import { child, childList, goldenOf, identifierName, memberPropertyName } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -116,10 +117,12 @@ export const d2AwaitIoMatcher: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d2-await-io-matcher'],
-        messages: {
-            mustAwait:
-                'expect(…).{{matcher}} is IO-backed and returns a promise — it must be awaited or returned, else the assertion never runs.',
-        },
+        messages: lessons('d2-await-io-matcher', {
+            mustAwait: {
+                found: '`expect(…).{{matcher}}` not awaited — it returns a promise',
+                fix: 'write `await expect(…).{{matcher}}(…)`, or return it',
+            },
+        }),
         type: 'problem',
     },
 };

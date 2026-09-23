@@ -7,6 +7,7 @@ import {
 } from '../../../src/model/chain/ground.js';
 import { child, childList, diskCallOf, identifierName, memberPropertyName } from '../../ast.js';
 import type { DiskCall } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -130,10 +131,12 @@ export const c24GroundRole: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c24-ground-role'],
-        messages: {
-            crossed:
-                "{{verb}}() reads {{reads}}, and {{kind}}('{{path}}') names {{found}} — put the file in {{where}}.",
-        },
+        messages: lessons('c24-ground-role', {
+            crossed: {
+                found: "`{{verb}}()` reads {{reads}}, and `{{kind}}('{{path}}')` names {{found}}",
+                fix: 'move the file to {{where}}, and name it from there',
+            },
+        }),
         type: 'problem',
     },
 };

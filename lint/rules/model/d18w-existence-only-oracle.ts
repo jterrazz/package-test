@@ -1,4 +1,5 @@
 import { assertionOf, child, childList, findTestCallback, isTestCallee, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -69,10 +70,12 @@ export const d18wExistenceOnlyOracle: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d18w-existence-only-oracle'],
-        messages: {
-            existenceOnly:
-                "`{{matcher}}()` passes for almost anything and is this test's only oracle: assert the value, a golden, or a row.",
-        },
+        messages: lessons('d18w-existence-only-oracle', {
+            existenceOnly: {
+                found: "`{{matcher}}()` is this test's only oracle, and passes for almost anything",
+                fix: 'assert the value itself — `toBe`/`toStrictEqual`, the whole result with `toMatch`, or the rows',
+            },
+        }),
         type: 'suggestion',
     },
 };

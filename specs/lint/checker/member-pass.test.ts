@@ -73,7 +73,7 @@ describe('checker CLI — the member pass', () => {
                 file: 'packages/seam-dependency/package.json',
                 line: 4,
                 message:
-                    'packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced — the facet is `component()`, `website()`, `clock` or `intercept()`; remove the declaration',
+                    'found: packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `@testing-library/react` from packages/seam-dependency/package.json, and write its tests on `component()`, `website()`, `clock` or `intercept()` · read: docs/19-linting.md#f8-no-seam-dependency',
                 severity: 'error',
             },
             {
@@ -81,7 +81,7 @@ describe('checker CLI — the member pass', () => {
                 file: 'packages/seam-dependency/package.json',
                 line: 5,
                 message:
-                    'packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` — remove the declaration',
+                    'found: packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `msw` from packages/seam-dependency/package.json · read: docs/19-linting.md#f8-no-seam-dependency',
                 severity: 'error',
             },
         ]);

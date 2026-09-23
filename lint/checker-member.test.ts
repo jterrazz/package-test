@@ -3,6 +3,8 @@ import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
+import { messageOf } from './checker.js';
+import { codeOf } from './rule-code.js';
 import { checkoutUnder } from './rule-tester.fixtures.js';
 
 /** The fixture workspace: one member per finding, plus one that is clean. */
@@ -11,7 +13,7 @@ const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
 
 /** The codes a run produced, in order. */
 function codes(dir: string, root = WORKSPACE): string[] {
-    return checkMember(dir, root).map((violation) => violation.rule);
+    return checkMember(dir, root).map((violation) => codeOf(violation.rule));
 }
 
 describe('the member pass — what a workspace member owes', () => {
@@ -20,9 +22,11 @@ describe('the member pass — what a workspace member owes', () => {
         const [violation] = checkMember(memberAt('tested-no-config'), WORKSPACE);
 
         // Then - the finding names the budget and the fixtures that are running
-        expect(violation?.rule).toBe('e3');
-        expect(violation?.message).toContain('no vitest.config.ts');
-        expect(violation?.message).toContain('defineSpecConfig()');
+        expect(codeOf(violation?.rule ?? '')).toBe('e3');
+        expect(violation === undefined ? '' : messageOf(violation)).toContain(
+            'no vitest.config.ts',
+        );
+        expect(violation === undefined ? '' : messageOf(violation)).toContain('defineSpecConfig()');
     });
 
     test('the pass reaches a member with no specs/ root at all (E3)', () => {
@@ -42,9 +46,11 @@ describe('the member pass — what a workspace member owes', () => {
         const [violation] = checkMember(memberAt('simulated-dom'), WORKSPACE);
 
         // Then - the finding names the line and the move
-        expect(violation?.rule).toBe('e5b');
+        expect(codeOf(violation?.rule ?? '')).toBe('e5b');
         expect(violation?.line).toBe(5);
-        expect(violation?.message).toContain('a drawing of a browser');
+        expect(violation === undefined ? '' : messageOf(violation)).toContain(
+            'a drawing of a browser',
+        );
     });
 
     test('a dependency the framework carries, and a seam it replaced (F8)', () => {
@@ -52,11 +58,17 @@ describe('the member pass — what a workspace member owes', () => {
         const found = checkMember(memberAt('seam-dependency'), WORKSPACE);
 
         // Then - the two are named, each by what it actually is, and playwright - an optional peer a consumer declares - is not
-        expect(found.map((violation) => violation.rule)).toStrictEqual(['f8', 'f8']);
-        expect(found[0]?.message).toContain('@testing-library/react');
-        expect(found[0]?.message).toContain('is a seam `@jterrazz/test` replaced');
-        expect(found[1]?.message).toContain('`msw` is a transitive of `@jterrazz/test`');
-        expect(found.every((violation) => !violation.message.includes('playwright'))).toBe(true);
+        expect(found.map((violation) => codeOf(violation.rule))).toStrictEqual(['f8', 'f8']);
+        expect(found[0] === undefined ? '' : messageOf(found[0])).toContain(
+            '@testing-library/react',
+        );
+        expect(found[0] === undefined ? '' : messageOf(found[0])).toContain(
+            'is a seam `@jterrazz/test` replaced',
+        );
+        expect(found[1] === undefined ? '' : messageOf(found[1])).toContain(
+            '`msw` is a transitive of `@jterrazz/test`',
+        );
+        expect(found.every((violation) => !violation.found.includes('playwright'))).toBe(true);
     });
 
     test('a finding points at the line the declaration is written on (F8)', () => {
@@ -159,17 +171,10 @@ describe('the member pass — what a workspace member owes', () => {
 
     test('every member is judged in one run', () => {
         // Given - the whole fixture workspace
-        const found = checkMembers(WORKSPACE).map((violation) => violation.rule);
+        const found = checkMembers(WORKSPACE).map((violation) => codeOf(violation.rule));
 
         // Then - one E3, one E5b, three F8 and one C12, whatever the order they walk in
-        expect(found.toSorted()).toStrictEqual([
-            'c12-spec-file-name',
-            'e3',
-            'e5b',
-            'f8',
-            'f8',
-            'f8',
-        ]);
+        expect(found.toSorted()).toStrictEqual(['c12', 'e3', 'e5b', 'f8', 'f8', 'f8']);
     });
 
     test('the path-less run reaches a specs-rooted member of the workspace', () => {

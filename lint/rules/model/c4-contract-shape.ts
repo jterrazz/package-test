@@ -10,6 +10,7 @@ import {
     walk,
 } from '../../ast.js';
 import { isDirectory, listDirectory } from '../../fs-cache.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { projectSegments, roleOf } from '../../role.js';
@@ -355,31 +356,56 @@ export const c4ContractShape: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['c4-contract-shape'],
-        messages: {
-            badName:
-                'Contract unit "{{base}}" must be named <kebab-name>.ts — the folder already carries the provider.',
-            badProviderDir:
-                'contracts/{{entry}}/ is not a provider directory — a contracts/ root holds only http/, openai/, anthropic/ and *.contracts.ts files.',
-            exportsNothing:
-                'Contract facade "{{base}}" exports nothing — a facade exports its builders and sets by name.',
-            missingDefault:
-                'Contract unit "{{base}}" has no default export — a unit default-exports `defineContract(...)` or a factory returning one.',
-            notDefineContract:
-                'The default export of a contract unit must be `defineContract(...)` or a factory returning a contract.',
-            notDefineContracts:
-                'The default export of "{{base}}" must be built from `defineContracts(...)`, a composition re-export, a scenario imported from a sibling facade, or a builder declared to return `Contracts`.',
-            providerEntry:
-                'contracts/{{provider}}/{{child}} is neither a *.ts contract nor a *.response.json payload.',
-            providerMismatch:
-                'This contract lives in contracts/{{provider}}/ but its request is a `{{declared}}.*` builder — the folder carries the provider.',
-            providerSubfolder:
-                'contracts/{{provider}}/{{child}}/ is nested — a provider folder is flat.',
-            rootEntry:
-                'contracts/{{entry}} is not a *.contracts.ts facade — data files live in a provider folder next to their contract.',
-            rootFile:
-                'Contract file "{{base}}" sits at the contracts/ root, which holds only *.contracts.ts facades — a unit contract belongs in http/, openai/ or anthropic/.',
-            tooDeep: 'Contract file "{{base}}" is nested deeper than contracts/<provider>/.',
-        },
+        messages: lessons('c4-contract-shape', {
+            badName: {
+                found: 'the contract unit "{{base}}" is not named `<kebab-name>.ts`',
+                fix: 'rename it in kebab-case, without the provider — the folder carries it',
+            },
+            badProviderDir: {
+                found: '`contracts/{{entry}}/` is no provider folder',
+                fix: 'move its units into `http/`, `openai/` or `anthropic/`',
+            },
+            exportsNothing: {
+                found: 'the contract facade "{{base}}" exports nothing',
+                fix: 'export its builders and sets by name',
+            },
+            missingDefault: {
+                found: 'the contract unit "{{base}}" has no default export',
+                fix: 'default-export `defineContract(…)`, or a factory returning one',
+            },
+            notDefineContract: {
+                found: "a contract unit's default export is not a contract",
+                fix: 'default-export `defineContract(…)`, or a factory returning one',
+            },
+            notDefineContracts: {
+                found: 'the default export of "{{base}}" is not built from contracts',
+                fix: 'build it from `defineContracts(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Contracts`',
+            },
+            providerEntry: {
+                found: '`contracts/{{provider}}/{{child}}` is neither a `*.ts` contract nor a `*.response.json` payload',
+                fix: 'make it one of the two, or move it out of `contracts/`',
+            },
+            providerMismatch: {
+                found: 'a contract under `contracts/{{provider}}/` whose request is a `{{declared}}.*` builder',
+                fix: 'move it to `contracts/{{declared}}/`',
+            },
+            providerSubfolder: {
+                found: '`contracts/{{provider}}/{{child}}/` nests a folder in a provider folder',
+                fix: 'move its files up into `contracts/{{provider}}/`',
+            },
+            rootEntry: {
+                found: '`contracts/{{entry}}` at the contracts root',
+                fix: 'move it into the provider folder of the contract it pairs with',
+            },
+            rootFile: {
+                found: 'the contract unit "{{base}}" sits at the `contracts/` root',
+                fix: 'move it into `http/`, `openai/` or `anthropic/`; the root holds only `*.contracts.ts` facades',
+            },
+            tooDeep: {
+                found: 'the contract file "{{base}}" is nested below `contracts/<provider>/`',
+                fix: 'move it up into its provider folder',
+            },
+        }),
         type: 'problem',
     },
 };

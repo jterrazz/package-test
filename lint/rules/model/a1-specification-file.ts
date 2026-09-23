@@ -1,4 +1,5 @@
 import { specificationMember } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -40,10 +41,12 @@ export const a1SpecificationFile: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['a1-specification-file'],
-        messages: {
-            outsideSpecification:
-                'specification.{{member}}() must be called from a `*.specification.ts` file under specs/.',
-        },
+        messages: lessons('a1-specification-file', {
+            outsideSpecification: {
+                found: '`specification.{{member}}()` called outside a `*.specification.ts` file',
+                fix: 'move the call into `specs/{{member}}/{{member}}.specification.ts` and import the handle it exports',
+            },
+        }),
         type: 'problem',
     },
 };

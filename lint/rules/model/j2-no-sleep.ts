@@ -6,6 +6,7 @@ import {
     nodeEnd,
     nodeStart,
 } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole, roleOf } from '../../role.js';
@@ -130,11 +131,16 @@ export const j2NoSleep: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['j2-no-sleep'],
-        messages: {
-            sleep: 'No arbitrary sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil(predicate)` everywhere else.',
-            timersImport:
-                'No timer-based sleep in a test — `see()`/`gone()` inside a scenario, `waitUntil(predicate)` everywhere else.',
-        },
+        messages: lessons('j2-no-sleep', {
+            sleep: {
+                found: 'an arbitrary sleep in a test',
+                fix: 'wait on what the sleep stands for: `await waitUntil(() => <condition>)`, or `see()`/`gone()` inside a scenario',
+            },
+            timersImport: {
+                found: 'a timer-based sleep imported into a test',
+                fix: 'delete the import and wait on the condition: `await waitUntil(() => <condition>)`, or `see()`/`gone()` inside a scenario',
+            },
+        }),
         type: 'problem',
     },
 };

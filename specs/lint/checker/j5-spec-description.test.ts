@@ -16,8 +16,8 @@ describe('lint — j5 spec description (CONVENTIONS J5)', () => {
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): description: ends with a period — a title is a fragment, not a sentence
-            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): description: starts with a capital — a title is lowercase prose
+            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): found: a \`description:\` ending with a period · why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters. · fix: drop the period — a title is a fragment, not a sentence · read: docs/19-linting.md#j5-spec-description
+            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(j5): found: a \`description:\` starting with a capital · why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters. · fix: start it lowercase: "builds the widget." · read: docs/19-linting.md#j5-spec-description
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);

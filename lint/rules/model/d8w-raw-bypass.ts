@@ -1,4 +1,5 @@
 import { child, childList, identifierName, memberPropertyName } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -59,10 +60,12 @@ export const d8wRawBypass: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d8w-raw-bypass'],
-        messages: {
-            rawBypass:
-                'expect(x.raw).{{matcher}}(…) asserts on the stream as captured — compare x.text, the text a golden compares (ANSI stripped, transform applied).',
-        },
+        messages: lessons('d8w-raw-bypass', {
+            rawBypass: {
+                found: '`expect(x.raw).{{matcher}}(…)` asserts on the stream as captured',
+                fix: 'compare `x.text` — ANSI stripped, `transform` applied, the text an expectation compares',
+            },
+        }),
         type: 'suggestion',
     },
 };

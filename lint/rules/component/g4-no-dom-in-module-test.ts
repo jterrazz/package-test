@@ -1,4 +1,5 @@
 import { child, identifierName, isNode, walk } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
@@ -125,10 +126,12 @@ export const g4NoDomInModuleTest: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['g4-no-dom-in-module-test'],
-        messages: {
-            domGlobal:
-                '`{{name}}` does not exist where a module test runs — a rendered thing is a `.test.tsx` beside its component, collected by the `component()` project (G4 — docs/19-linting.md#g4-no-dom-in-module-test).',
-        },
+        messages: lessons('g4-no-dom-in-module-test', {
+            domGlobal: {
+                found: '`{{name}}` in a module test, where no DOM exists',
+                fix: 'move what renders into a `.test.tsx` beside its component, collected by the `component()` project',
+            },
+        }),
         type: 'problem',
     },
 };

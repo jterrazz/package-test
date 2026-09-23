@@ -1,4 +1,5 @@
 import { propertyKeyName, specificationMember } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -53,10 +54,12 @@ export const a3NoDestructureAlias: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['a3-no-destructure-alias'],
-        messages: {
-            aliased:
-                'Destructure the specification result with its canonical name: `{{key}}`, not `{{key}}: {{alias}}`. Rename at the import site if a different local name is needed.',
-        },
+        messages: lessons('a3-no-destructure-alias', {
+            aliased: {
+                found: '`{ {{key}}: {{alias}} }` renames the handle',
+                fix: 'destructure `{ {{key}} }`, and rename at the import site if a local name must differ',
+            },
+        }),
         type: 'problem',
     },
 };

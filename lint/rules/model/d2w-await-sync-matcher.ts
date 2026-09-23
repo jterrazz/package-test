@@ -1,4 +1,5 @@
 import { memberPropertyName } from '../../ast.js';
+import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 
@@ -62,10 +63,12 @@ export const d2wAwaitSyncMatcher: LintRule = {
     },
     meta: {
         docs: RULE_DOCS['d2w-await-sync-matcher'],
-        messages: {
-            redundantAwait:
-                'await on expect(…).{{matcher}}(…) is redundant — that matcher is synchronous; only IO-backed matchers (a table compared whole with toMatch(<rows>), toMatch(directory(…)), toBeEmpty, toBeRunning) are awaited.',
-        },
+        messages: lessons('d2w-await-sync-matcher', {
+            redundantAwait: {
+                found: '`await` on the synchronous `expect(…).{{matcher}}(…)`',
+                fix: 'delete the `await`; only an IO matcher is awaited — a table compared whole, `toMatch(directory(…))`, `toBeEmpty`, `toBeRunning`',
+            },
+        }),
         type: 'suggestion',
     },
 };
