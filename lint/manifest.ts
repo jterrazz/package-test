@@ -889,7 +889,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'Ground in a leaf holding ≥ 2 node tests (`.test.ts`, `.spec.ts`) that a single one of them reads is a warning. A `.test.tsx` tree is out of reach, as it is for C1.',
+            'Ground in a leaf holding ≥ 2 node tests (`.test.ts`, `.spec.ts`) that a single one of them reads is a warning. A `.test.tsx` tree is out of reach, as it is for C1, and so are the api, cli and jobs facets: there a leaf is its subject’s standard name (C30), its aspect files share it by design, and a folder of one spec’s own is one C30 moves the spec back out of.',
         facet: 'model',
         family: 'C',
         fix: 'Give that spec its own domain folder, with the ground beside it.',

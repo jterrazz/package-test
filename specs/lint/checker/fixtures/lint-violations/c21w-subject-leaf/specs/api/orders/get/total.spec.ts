@@ -1,7 +1,7 @@
-import { expect, test } from 'vitest'; // checker-disable-line c30 -- an input of C21: this folder is the case the rule reads, not a subject's standard name
+import { expect, test } from 'vitest';
 import { file } from '@jterrazz/test';
 
-import { api } from '../api.specification.js';
+import { api } from '../../api.specification.js';
 
 test('answers the total of the order', async () => {
     // Given - an order with two lines

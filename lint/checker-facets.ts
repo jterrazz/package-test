@@ -215,6 +215,9 @@ function* walkDirectories(dir: string): Generator<string> {
     }
 }
 
+/** The facets whose folders are their subjects' standard names (C30). */
+const SUBJECT_FOLDER_FACETS = new Set(['api', 'cli', 'jobs']);
+
 /** The ground names a leaf can hold. */
 const GROUND = new Set<string>(GROUND_DIRS);
 
@@ -234,10 +237,18 @@ const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u
  * names reads as shared material: the next author assumes someone else depends
  * on it and nobody dares touch it. The fix is C1's — the spec that stands on
  * its own ground earns its own domain folder.
+ *
+ * Not where the folder is the subject's standard name (api, cli, jobs — C30):
+ * there the leaf IS the subject, its aspect files share it by design, and a
+ * folder of its own is one C30 would move the spec back out of.
  */
 export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
-    for (const directory of [specsRoot, ...walkDirectories(specsRoot)]) {
+    const derived = (directory: string): boolean =>
+        SUBJECT_FOLDER_FACETS.has(relative(specsRoot, directory).split(/[/\\]/u)[0] ?? '');
+    for (const directory of [specsRoot, ...walkDirectories(specsRoot)].filter(
+        (candidate) => !derived(candidate),
+    )) {
         const entries = entriesOf(directory);
         // A `.test.tsx` is out of reach, as it is for C1: a rendered unit sits
         // Beside its component, and a tree of them has no domain folders for
