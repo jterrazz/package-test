@@ -30,11 +30,18 @@ describe('isProductionModule', () => {
         { path: 'src/domain/order.fixtures.ts', production: false },
         { path: 'src/domain/fixtures/app.ts', production: false },
         { path: 'src/news/contracts/http/events.ts', production: false },
-        { path: 'scripts/seed.ts', production: false },
+        { path: 'scripts/seed.ts', production: true },
+        { path: 'bin/cli.js', production: true },
+        { path: 'index.ts', production: true },
+        { path: 'specs/setup/seed.ts', production: false },
+        { path: 'vitest.config.ts', production: false },
+        { path: 'apps/web/vite.config.mts', production: false },
+        { path: 'tests/helpers.ts', production: false },
+        { path: 'src/__tests__/helpers.ts', production: false },
         { path: 'src/domain/order.json', production: false },
     ])('`$path` is production: $production', ({ path, production }) => {
         // Given - a module below the package root
-        // Then - a source module of `src/` or `lint/` is production, unless it is test material
+        // Then - every source module is production, unless it is test material, a tool's config or under a retired test root
         expect(isProductionModule(join(ROOT, path))).toBe(production);
     });
 });

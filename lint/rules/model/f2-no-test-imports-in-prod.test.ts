@@ -15,9 +15,9 @@ const ROOT = packageWith({
     'src/features/contracts/http/events.ts': 'export default {};\n',
     'src/features/contracts/news.contracts.ts': 'export const news = {};\n',
     'src/model/contracts/engine.ts': 'export const engine = {};\n',
-    'testing/data.ts': "export * from '../specs/fixtures/users.js';\n",
-    'testing/render.ts': "export { render } from '@testing-library/react';\n",
-    'testing/format.ts': 'export const format = String;\n',
+    'tests/data.ts': "export * from '../specs/fixtures/users.js';\n",
+    'tests/render.ts': "export { render } from '@testing-library/react';\n",
+    'tests/format.ts': 'export const format = String;\n',
     'tsconfig.json': [
         '{',
         '    // The aliases a module may be reached by.',
@@ -92,11 +92,22 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
             'pathRead',
         ),
         refused(`const golden = \`\${__dirname}/expected/out.txt\`;`, 'pathRead'),
-        // A reach through a module that is not production: the barrel re-exports it.
-        refused('export * from "../testing/render.js";', 'reachThrough', BARREL),
-        refused('export { users } from "../testing/data.js";', 'reachThrough', BARREL),
-        // `lint/` is production as much as `src/`.
+        // A reach through a module that is not production — a retired test root: the barrel re-exports it.
+        refused('export * from "../tests/render.js";', 'reachThrough', BARREL),
+        refused('export { users } from "../tests/data.js";', 'reachThrough', BARREL),
+        // Production is every module outside the test material: `lint/`, a script, a bin, the root.
         refused('import { it } from "vitest";', 'reach', join(ROOT, 'lint/rule.ts')),
+        refused('import { expect } from "vitest";', 'reach', join(ROOT, 'scripts/seed.ts')),
+        refused(
+            'import { users } from "./specs/fixtures/users.js";',
+            'reach',
+            join(ROOT, 'index.ts'),
+        ),
+        refused(
+            'const { mockOf } = require("@jterrazz/test");',
+            'reach',
+            join(ROOT, 'bin/cli.cjs'),
+        ),
     ],
     valid: [
         // Prod importing prod — a name that merely contains a ground word included.
@@ -111,7 +122,7 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
         // Clean, the helper that imports the fixtures is where the finding is.
         { code: 'export * from "./domain/helpers.js";', filename: BARREL },
         // A module that is not production and reaches nothing.
-        { code: 'export * from "../testing/format.js";', filename: BARREL },
+        { code: 'export * from "../tests/format.js";', filename: BARREL },
         // A path built from a root the caller hands in is not the module's own tree.
         { code: 'const all = readdirSync(join(root, "fixtures"));', filename: PROD },
         { code: 'const asset = new URL("./assets/logo.png", import.meta.url);', filename: PROD },
@@ -127,12 +138,12 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
             code: 'import { specification } from "@jterrazz/test";',
             filename: join(ROOT, 'specs/setup/api.specification.ts'),
         },
-        // Outside `src/` and `lint/` is not production: a tool config, a script.
+        // A tool's config is the toolchain's, and a retired test root is I2's.
         {
             code: 'import { defineConfig } from "vitest/config";',
             filename: join(ROOT, 'vitest.config.ts'),
         },
-        { code: 'import { expect } from "vitest";', filename: join(ROOT, 'scripts/seed.ts') },
+        { code: 'import { expect } from "vitest";', filename: join(ROOT, 'tests/helpers.ts') },
         // The tool-facing, zero-runtime lint entry is exempt even from prod code
         // (a shared oxlint preset imports it to wire the plugin — F1/F2).
         { code: 'import { testing } from "@jterrazz/test/oxlint";', filename: PROD },

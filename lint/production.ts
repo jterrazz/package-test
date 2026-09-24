@@ -1,4 +1,4 @@
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
 import {
@@ -12,16 +12,18 @@ import {
 import type { ImportSource } from './ast.js';
 import { isFile, listDirectory, readFileCached } from './fs-cache.js';
 import type { AstNode } from './oxlint-api.js';
-import { packageRootOf, projectRootOf, projectSegments } from './role.js';
+import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
 import { withoutComments } from './subject.js';
 
 /**
  * Production, and the test material it must never reach — ONE reader, for
  * every guard that keeps the two apart (F2, F5, I1).
  *
- * A **production module** is a source module under a `src/` folder or a
- * `lint/` one, below the project root that holds it — an app's `src/` in a
- * workspace included — that is not test material itself.
+ * A **production module** is every source module that is not test material
+ * itself — `src/`, `lint/`, `bin/`, `scripts/` and the modules at a project's
+ * root alike — except a tool's config (`*.config.*`) and a module under a
+ * retired test root (`__tests__/`, a root `test/` or `tests/`), which I2
+ * refuses on its own.
  *
  * **Test material** is what a test is made of or stands on:
  *
@@ -52,8 +54,8 @@ const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures)\.[cm]?
 /** A contract facade — the file that makes its folder a contracts folder. */
 const CONTRACTS_FACADE = /\.contracts\.[cm]?[jt]sx?$/u;
 
-/** The folders production lives in. */
-const PRODUCTION_FOLDERS = new Set(['lint', 'src']);
+/** A tool's config — `vitest.config.ts`, `oxlint.config.ts`: the toolchain's, never shipped. */
+const TOOL_CONFIG = /\.config\.[cm]?[jt]sx?$/u;
 
 /** The test packages, by whole name. */
 const TEST_PACKAGES = new Set([
@@ -133,14 +135,12 @@ export function materialNamed(path: string): MaterialKind | undefined {
     return materialAt(path) ?? materialAt(path, true);
 }
 
-/** Is this file a production module — source under `src/` or `lint/`, and no test material? */
+/** Is this file a production module — a source module that is no test material, no config and under no retired test root? */
 export function isProductionModule(filename: string): boolean {
     if (!SOURCE.test(filename) || materialAt(filename) !== undefined) {
         return false;
     }
-    return projectSegments(filename)
-        .slice(0, -1)
-        .some((folder) => PRODUCTION_FOLDERS.has(folder));
+    return !TOOL_CONFIG.test(basename(filename)) && roleOf(filename).legacyDir === null;
 }
 
 /** The test package a bare specifier names, when it names one. */
