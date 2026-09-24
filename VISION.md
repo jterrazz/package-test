@@ -2786,3 +2786,45 @@ held`.
       to `api/headers/` once this page is folded.
     - Commit `f46408f` landed on the unit branch while `make check` exited 2
       (Docker specs under load). Later commits ran the full check green.
+
+## Batch 2 of 2026-09-24 (hybrid): typescript, the publish guard
+
+No unit landed on package-typescript's `vision/17` in this pass. @jterrazz/test
+was reinstalled from package-test `0aa5a546` (`npm ci`). HEAD stays
+`77f2d92`. `make fix` exit 0, `make check` exit 0 (144 files, 422 tests).
+
+- **The Publish build guard against test material** (branch
+  `vision17-typescript-publish-guard`, `943b504`…`927d5a7`, 6 commits).
+  Skipped, because its review came back `fix-first` after one round. What
+  it would close: the Publish pass builds the package and refuses a build
+  compiled from test material, and a failed build becomes a
+  `publish-build` finding while the pass carries on to publint. The
+  worktree `ptc-publish-guard` and the branch are kept for the fix round.
+  What stays open:
+    - **Major.** Nothing proves the `publish-build` verdict fails the pass.
+      The fixture of `publish-broken-build.spec.yaml` also fails
+      `publish-files` and publint. When `failed = true` is removed at
+      `src/cli/check-publish.js:147`, the spec stays green. Add a
+      `publish-broken-build-alone` document whose only Publish output is
+      the `publish-build` line with exit 1, and check that it goes red.
+    - `isPacked` ignores negated `files` entries. On package-test it judges
+      `dist/catalog.js` and `dist/coverage.js`, which npm leaves out. Give
+      it npm's negation semantics with a module case, or state the limit at
+      docs/06:311.
+    - **Owner call.** The guard does not exempt the same test packages as
+      F2. The guard exempts any test package declared in `dependencies` or
+      `peerDependencies`. F2 exempts only `test.production.allow`. Either
+      read the allowance from @jterrazz/test (`allowedTestPackagesAt`,
+      published on `./oxlint`), or have docs/06:315 state that the two
+      rules differ.
+    - The opening sentence of docs/06:287 ("invisible in the repository and
+      fatal in the registry") is false for the two new rules. Reword it.
+    - When no reader loads (a resolved @jterrazz/test older than 17), the
+      guard is skipped with no output line. State the version condition in
+      the docs/06:26 row, and optionally print a note.
+    - A config's own tsdown `hooks` still run during the guard's build.
+      This is documented at docs/06:308. None of the estate's five
+      own-config packages declares hooks today.
+    - **Owner call, carried from the unit.** Keep the toolchain-name
+      fallback for the reader, or replace it with a chain that links
+      `node_modules` (C18 debt 22 against 21).
