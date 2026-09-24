@@ -2555,3 +2555,39 @@ import.meta.url)` — for existence; a bare literal and a command string are
   chapter 03's project table follows. Red: `mobile()` called bare, before
   the change, left `fileParallelism` undefined (`src/runner/projects.test.ts`).
 - **Gates.** `make fix` then `make check` exit 0; `npm run build` exit 0.
+
+## Batch of 2026-09-24 (hybrid): typescript
+
+Two reviewed units landed on package-typescript's `vision/17` by
+cherry-pick, with no conflicts, then one integrator commit. HEAD `3fcfc96`.
+`make fix` exit 0, `make check` exit 0 (141 files, 419 tests).
+
+- **The ratchet's held lines** (`fe1bdd6`, `56c898e`, `d98d530`).
+  What it closed: an emptied `typescript` section now reads
+  `jterrazz.baseline.json › typescript: nothing held`; Test Conventions
+  keeps @jterrazz/test's own `nothing held` line; the root checker run
+  passes no `--summary`. Integrator commit `3fcfc96` removed the false claim
+  that the phrase mirrors @jterrazz/test (docs/06, check-baseline.js header).
+  What stays open:
+  - **Owner call.** Should `nothing held` mean the same case in both
+    packages? Today typescript prints it for an EMPTIED section and nothing
+    for an absent one; @jterrazz/test prints it for an ABSENT section and
+    `0 held across 0 rules` for an emptied one (item 2).
+  - **Owner call.** The Publish build guard against test material (item 6)
+    needs @jterrazz/test to publish `materialAt` / `testPackageOf` on
+    `./oxlint`. A copy in typescript would give one fact two owners.
+  - **Item 5's premise was false.** The drift block runs only when a
+    project has an oxlint config. If the question is wanted, restate it as
+    "open the drift gate for projects with no config?".
+  - **Optional.** The root-argv stub in `baseline-ownership.spec.ts` works
+    only if it runs as CommonJS; it would be sturdier as `checker.cjs`.
+- **Rulebook edges and tree gate** (`3216c45`…`54ef4a0`, 7 test
+  commits). What it closed: complexity 12, max-lines 300 and
+  max-lines-per-function 60 are each pinned on both sides of the cap; the
+  size overrides are proven not to reach where they must not; the Makefile
+  contract requires six targets and forbids none; the empty-directory walk's
+  `.artifacts` and `dist` exclusions each have a case. What stays open:
+  `.next`, `.turbo`, `.vite` and `coverage` have no case of their own;
+  whether `fix` forwards `--ignore-pattern` in general is unproven; under
+  `fix`, the `.artifacts` entry is not load-bearing (the check case proves
+  it).
