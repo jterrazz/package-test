@@ -3,10 +3,11 @@ import { describe, expect, test } from 'vitest';
 import { defineContracts } from '../contracts/contract.js';
 import type { Contract } from '../contracts/contract.js';
 import { http } from '../contracts/http.js';
+import type { BrowserOpenOptions, BrowserPage, BrowserPort } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
-import { createCliFacet, SpecificationBuilder } from './builder.js';
+import { createCliFacet, createWebsiteFacet, SpecificationBuilder } from './builder.js';
 import { directory, file } from './spec-path.js';
 import { StubBackend } from './stub-backend.js';
 
@@ -33,6 +34,22 @@ function fakeDatabase(): DatabasePort {
         query: async () => [],
         reset: async () => {},
         seed: async () => {},
+    };
+}
+
+/** A page with nothing rendered — what a visit hands back when only its request matters. */
+function blankPage(): BrowserPage {
+    return {
+        consoleMessages: [],
+        html: '',
+        jsonLdBlocks: [],
+        links: [],
+        metas: [],
+        status: 200,
+        text: '',
+        title: '',
+        tree: '',
+        url: 'http://127.0.0.1:9/',
     };
 }
 
@@ -405,6 +422,36 @@ describe('builder — what a file shares, with()', () => {
         // Then - the chain's own setting wins, and the next chain starts from the context again
         expect(overridden).toMatchObject({ LANG: 'fr', TZ: 'Europe/Paris' });
         expect(command.lastEnv).toMatchObject({ LANG: 'fr', TZ: 'UTC' });
+    });
+
+    test('a website view sends its headers on every visit, and a chain own headers win', async () => {
+        // Given - a website view over a browser recording the headers of each visit
+        const sent: BrowserOpenOptions['headers'][] = [];
+        const browser: BrowserPort = {
+            close: async () => {
+                await Promise.resolve();
+            },
+            open: async (_url, options) => {
+                sent.push(options.headers);
+                return await Promise.resolve(blankPage());
+            },
+        };
+        const website = createWebsiteFacet({
+            baseUrl: 'http://127.0.0.1:9',
+            browser: async () => await Promise.resolve(browser),
+        }).with({ headers: { 'x-chain': 'file' } });
+
+        // When - two chains of the view, then one setting its own header
+        await website.visit('/');
+        await website.visit('/');
+        await website.headers({ 'x-chain': 'own' }).visit('/');
+
+        // Then - the shared header on both chains, the chain's own replacing it
+        expect(sent).toStrictEqual([
+            { 'x-chain': 'file' },
+            { 'x-chain': 'file' },
+            { 'x-chain': 'own' },
+        ]);
     });
 
     test('a context states only what it names: no clock, no headers, nothing set', () => {
