@@ -77,11 +77,9 @@ function isStatusProbe(node: AstNode): boolean {
  * the legitimate scalpel and stays silent.
  */
 export const d15wStatusOnlyProbe: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (!isTestCallee(node.callee as AstNode | undefined)) {
                     return;

@@ -3,7 +3,7 @@ import type { Context } from '@oxlint/plugins';
 import { memberPropertyName, propertyKeyName } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 const URL_KEY = /^[A-Z0-9]+(?:_[A-Z0-9]+)*_URL$/u;
 
@@ -15,7 +15,7 @@ const URL_KEY = /^[A-Z0-9]+(?:_[A-Z0-9]+)*_URL$/u;
  * hand and is flagged as redundant.
  */
 export const b6wRedundantEnvUrl: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;

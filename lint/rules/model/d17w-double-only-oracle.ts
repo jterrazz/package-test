@@ -72,12 +72,12 @@ function doubleBindings(root: AstNode): Set<string> {
  * which the tree passes judge.
  */
 export const d17wDoubleOnlyOracle: LintRule = {
-    create(context: Context): Visitor {
-        const identity = identityOf(context);
-        if (identity.role !== 'module' || identity.inSpecs) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const identity = identityOf(context);
+                return identity.role === 'module' && !identity.inSpecs;
+            },
             Program(program: AstNode) {
                 const doubles = doubleBindings(program);
                 walk(program, (node) => {

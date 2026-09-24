@@ -18,18 +18,20 @@ const INTERNAL_UNIT = /(?:^|\/)contracts\/(?:anthropic|http|openai)\//u;
  * scenario is named once, next to the world it derives from.
  */
 export const c10ContractsBoundary: LintRule = {
-    create(context: Context): Visitor {
-        const { inSpecs, role } = identityOf(context);
-        // Inside contracts/ the internal half is the file's own business — and
-        // That folder IS a role, so the rule asks the identity, not the path.
-        if (!inSpecs || role === 'contract') {
-            return {};
-        }
-        return importSourceVisitor(({ node, source }) => {
-            if (INTERNAL_UNIT.test(source)) {
-                context.report({ data: { source }, messageId: 'internal', node });
-            }
-        });
+    createOnce(context: Context): Visitor {
+        return {
+            ...importSourceVisitor(({ node, source }) => {
+                if (INTERNAL_UNIT.test(source)) {
+                    context.report({ data: { source }, messageId: 'internal', node });
+                }
+            }),
+            before() {
+                const { inSpecs, role } = identityOf(context);
+                // Inside contracts/ the internal half is the file's own business — and
+                // That folder IS a role, so the rule asks the identity, not the path.
+                return inSpecs && role !== 'contract';
+            },
+        };
     },
     meta: {
         docs: RULE_DOCS['c10-contracts-boundary'],

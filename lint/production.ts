@@ -390,9 +390,12 @@ function namedIn(module: string, text: string): Named {
         moduleReferenceVisitor(({ source }) => {
             named.specifiers.push(source);
         }),
-        pathReferenceVisitor(module, ({ path }) => {
-            named.paths.push(path);
-        }),
+        pathReferenceVisitor(
+            () => module,
+            ({ path }) => {
+                named.paths.push(path);
+            },
+        ),
     );
     visitProgram(program, visitor);
     return named;

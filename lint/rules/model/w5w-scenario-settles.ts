@@ -128,15 +128,15 @@ function settles(node: AstNode, visitor: string): boolean {
  * for the rename would say nothing about the tree it is asked to migrate.
  */
 export const w5wScenarioSettles: LintRule = {
-    create(context: Context): Visitor {
-        const identity = identityOf(context);
-        // A scenario of the ASSEMBLED product: a `.spec.ts`, or — in a tree
-        // That has not taken the suffix yet — a `.test.ts` under `specs/`. A
-        // `.test.tsx` is the component's, and out of reach.
-        if (identity.role !== 'spec' && !(identity.role === 'module' && identity.inSpecs)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const identity = identityOf(context);
+                // A scenario of the ASSEMBLED product: a `.spec.ts`, or — in a tree
+                // That has not taken the suffix yet — a `.test.ts` under `specs/`. A
+                // `.test.tsx` is the component's, and out of reach.
+                return identity.role === 'spec' || (identity.role === 'module' && identity.inSpecs);
+            },
             CallExpression(node: AstNode) {
                 const scenario = scenarioCallbackOf(node);
                 if (scenario === undefined) {

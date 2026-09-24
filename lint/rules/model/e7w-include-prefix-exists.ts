@@ -20,13 +20,11 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
  * that still exists (C12's `--fix` moving `.test.ts` to `.spec.ts`).
  */
 export const e7wIncludePrefixExists: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'config') {
-            return {};
-        }
-        const configDirectory = dirname(context.physicalFilename);
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'config',
             Program(program: AstNode) {
+                const configDirectory = dirname(context.physicalFilename);
                 for (const project of projectLiterals(program)) {
                     for (const glob of project.include) {
                         const prefix = staticPrefix(glob.value);

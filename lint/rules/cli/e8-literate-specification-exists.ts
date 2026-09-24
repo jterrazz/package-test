@@ -17,13 +17,11 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
  * The config states a path relative to itself, so the check is one `stat`.
  */
 export const e8LiterateSpecificationExists: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'config') {
-            return {};
-        }
-        const configDirectory = dirname(context.physicalFilename);
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'config',
             Program(program: AstNode) {
+                const configDirectory = dirname(context.physicalFilename);
                 for (const door of literateSpecifications(program)) {
                     if (isFile(resolve(configDirectory, door.value))) {
                         continue;

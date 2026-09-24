@@ -39,14 +39,11 @@ const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams'])
  * the public entry is a module test beside its module, not a spec.
  */
 export const f3SpecsPublicEntry: LintRule = {
-    create(context: Context) {
-        const anchor = specsAnchorOf(context);
-        if (anchor === undefined) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         const published = new Set(declaredSubpaths());
         const exempt = published.size === 0 ? 'none' : [...published].join(', ');
-        const visitor: Visitor = {
+        return {
+            before: () => specsAnchorOf(context) !== undefined,
             ...importSourceVisitor(({ node, source }) => {
                 // Framework subpath imports (overlaps F1, kept specs-specific).
                 if (source.startsWith(`${PACKAGE}/`)) {
@@ -77,7 +74,6 @@ export const f3SpecsPublicEntry: LintRule = {
                 });
             }),
         };
-        return visitor;
     },
     meta: {
         docs: RULE_DOCS['f3-specs-public-entry'],

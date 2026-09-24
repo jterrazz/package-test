@@ -219,11 +219,9 @@ function declareOnce(
  * A warning: two chains alike may be a coincidence the next test breaks.
  */
 export const b16wFileContext: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'spec') {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'spec',
             Program(program: AstNode) {
                 const handles = handlesOf(program);
                 const { text } = context.sourceCode;

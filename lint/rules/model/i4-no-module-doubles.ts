@@ -95,6 +95,40 @@ function withoutSuffix(source: string): string {
     return source.replace(/[?#].*$/u, '');
 }
 
+/** What I4 reads of the file it judges. */
+type Scope = {
+    /** The modules the config lets a test double. */
+    allowed: Set<string>;
+    /** The banned folder the file sits in, when it does. */
+    banned: string | undefined;
+    /** Is the file a module test — the one role the data-asset clause binds? */
+    isTest: boolean;
+};
+
+/** I4's scope over the file being linted — none for a file it does not judge. */
+function scopeOf(context: Context): Scope | undefined {
+    const option = context.options[0];
+    const stated =
+        typeof option === 'object' && option !== null && 'modules' in option
+            ? option.modules
+            : undefined;
+    const allowed = new Set(
+        Array.isArray(stated) ? stated.filter((entry) => typeof entry === 'string') : [],
+    );
+    const { role } = identityOf(context);
+    const banned = segmentsOf(context)
+        .slice(0, -1)
+        .find((part) => part === '__mocks__' || part === '__fixtures__');
+    // Every TEST file — plus any file sitting inside one of the two banned
+    // Directories, which is the clause that names the directory itself.
+    if (!isTestRole(role) && banned === undefined) {
+        return undefined;
+    }
+    // The data-asset clause is the MODULE role's alone: a contract unit
+    // Legitimately imports the `.response.json` it stands for.
+    return { allowed, banned, isTest: role === 'module' && TEST_FILE.test(context.filename) };
+}
+
 /**
  * CONVENTIONS I4 — a test doubles a PORT, never a module.
  *
@@ -122,29 +156,18 @@ function withoutSuffix(source: string): string {
  * `<subject>.<role>` module names are a naming convention, not a file type.
  */
 export const i4NoModuleDoubles: LintRule = {
-    create(context: Context) {
-        const option = context.options[0];
-        const stated =
-            typeof option === 'object' && option !== null && 'modules' in option
-                ? option.modules
-                : undefined;
-        const allowed = new Set(
-            Array.isArray(stated) ? stated.filter((entry) => typeof entry === 'string') : [],
-        );
-        const { role } = identityOf(context);
-        const parts = segmentsOf(context);
-        const banned = parts
-            .slice(0, -1)
-            .find((part) => part === '__mocks__' || part === '__fixtures__');
-        // Every TEST file — plus any file sitting inside one of the two banned
-        // Directories, which is the clause that names the directory itself.
-        if (!isTestRole(role) && banned === undefined) {
-            return {};
-        }
-        // The data-asset clause is the MODULE role's alone: a contract unit
-        // Legitimately imports the `.response.json` it stands for.
-        const isTest = role === 'module' && TEST_FILE.test(context.filename);
-        const visitor: Visitor = {
+    createOnce(context: Context): Visitor {
+        let scope: Scope | undefined;
+        return {
+            ...importSourceVisitor(({ node, source }) => {
+                if (scope?.isTest === true && DATA_ASSET.test(withoutSuffix(source))) {
+                    context.report({ data: { source }, messageId: 'assetImport', node });
+                }
+            }),
+            before() {
+                scope = scopeOf(context);
+                return scope !== undefined;
+            },
             CallExpression(node: AstNode) {
                 if (!isModuleDouble(node)) {
                     return;
@@ -152,27 +175,16 @@ export const i4NoModuleDoubles: LintRule = {
                 const named = mockedSpecifier(childList(node, 'arguments')[0]);
                 // A native module a consumer cannot inject is the one case the
                 // Ladder cannot reach, and the config says which.
-                if (named === undefined || !allowed.has(named)) {
+                if (named === undefined || scope?.allowed.has(named) !== true) {
                     context.report({ messageId: 'viMock', node });
                 }
             },
             Program(node: AstNode) {
-                if (banned !== undefined) {
-                    context.report({ data: { dir: banned }, messageId: 'bannedDir', node });
+                if (scope?.banned !== undefined) {
+                    context.report({ data: { dir: scope.banned }, messageId: 'bannedDir', node });
                 }
             },
         };
-        if (isTest) {
-            Object.assign(
-                visitor,
-                importSourceVisitor(({ node, source }) => {
-                    if (DATA_ASSET.test(withoutSuffix(source))) {
-                        context.report({ data: { source }, messageId: 'assetImport', node });
-                    }
-                }),
-            );
-        }
-        return visitor;
     },
     meta: {
         docs: RULE_DOCS['i4-no-module-doubles'],

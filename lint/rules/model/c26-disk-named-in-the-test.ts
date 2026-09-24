@@ -35,13 +35,13 @@ function isTest(file: LintedFile): boolean {
  * the `file()` as a parameter; the test builds it, on the line a reader reads.
  */
 export const c26DiskNamedInTheTest: LintRule = {
-    create(context: Context): Visitor {
-        const filename = context.physicalFilename;
-        if (isTest(context)) {
-            return {};
-        }
-        const bound = new Set<string>();
+    createOnce(context: Context): Visitor {
+        let bound = new Set<string>();
         return {
+            before() {
+                bound = new Set();
+                return !isTest(context);
+            },
             CallExpression(node: AstNode) {
                 const name = identifierName(child(node, 'callee'));
                 if (name !== undefined && bound.has(name)) {
@@ -50,7 +50,7 @@ export const c26DiskNamedInTheTest: LintRule = {
             },
             ImportDeclaration(node: AstNode) {
                 const source = stringValue(child(node, 'source'));
-                if (source === undefined || !isEntry(source, filename)) {
+                if (source === undefined || !isEntry(source, context.physicalFilename)) {
                     return;
                 }
                 for (const specifier of childList(node, 'specifiers')) {

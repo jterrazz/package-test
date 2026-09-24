@@ -49,11 +49,9 @@ function insideComponentCall(node: AstNode): boolean {
  * machine, so the helper owns them and a config states only what is its own.
  */
 export const e6ComponentProjectHelper: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'config') {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'config',
             Program(node: AstNode) {
                 walk(node, (candidate: AstNode) => {
                     if (candidate.type !== 'Property' || propertyKeyName(candidate) !== 'browser') {

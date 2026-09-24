@@ -12,7 +12,7 @@ import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS B10 — `// When -` is optional, but where it is written it narrates
@@ -25,11 +25,9 @@ import type { AstNode, LintRule } from '../../rule-shape.js';
  * where the chain IS the action.
  */
 export const b10WhenBetweenMarkers: LintRule = {
-    create(context: Context) {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {
                     return;

@@ -12,7 +12,7 @@ import {
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS B4 — every test carries `// Given -` and `// Then -` (always both),
@@ -33,7 +33,7 @@ import type { AstNode, LintRule } from '../../rule-shape.js';
  * there, not only inside the callback.
  */
 export const b4GivenThen: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {

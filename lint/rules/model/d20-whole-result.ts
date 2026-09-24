@@ -128,11 +128,9 @@ function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string 
  * reach — the rule stays silent rather than guess.
  */
 export const d20WholeResult: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role) || !identityOf(context).inSpecs) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role) && identityOf(context).inSpecs,
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {
                     return;

@@ -3,7 +3,7 @@ import type { Context } from '@oxlint/plugins';
 import { child, childList, goldenOf, identifierName, memberPropertyName } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** Matchers backed by IO (SQL query, docker) whatever their argument — must be awaited (D2). */
 const IO_MATCHERS = new Set(['toBeEmpty', 'toBeRunning']);
@@ -89,7 +89,7 @@ function isDropped(node: AstNode): boolean {
  * resolves nothing and the assertion never runs.
  */
 export const d2AwaitIoMatcher: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;

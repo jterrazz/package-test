@@ -114,9 +114,18 @@ export type RuleDoc = {
         | 'tests';
 };
 
-/** A rule as this layer writes it: its visitor over {@link AstNode}, and its catalogue entry. */
+/**
+ * A rule as this layer writes it: its visitor over {@link AstNode}, and its
+ * catalogue entry.
+ *
+ * `createOnce` builds the visitor once per run; `before` opens each file,
+ * resets what the rule keeps for one file, and returns `false` for a file the
+ * rule does not judge, which skips it. The context answers only inside the
+ * hooks and the handlers: it is a file's context, and none is open while the
+ * visitor is built.
+ */
 export type LintRule = {
-    create: (context: Context) => Visitor;
+    createOnce: (context: Context) => Visitor;
     meta: RuleMeta & { docs: RuleDoc & RuleDocs };
 };
 

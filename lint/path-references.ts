@@ -132,15 +132,17 @@ function anchoredPath(node: AstNode, here: string, anchors: Set<string>): string
 }
 
 /**
- * Visitor fragment for every path a module in `file` names in its own tree.
- * Its `Program` handler reads the module-scope anchors first, so it is handed
- * the program before any node inside it.
+ * Visitor fragment for every path a module names in its own tree — the module
+ * `file()` returns, asked when its program is entered, so one fragment serves
+ * every file of a run. Its `Program` handler reads where the module sits and
+ * its module-scope anchors first, so it is handed the program before any node
+ * inside it.
  */
 export function pathReferenceVisitor(
-    file: string,
+    file: () => string,
     onPath: (entry: PathReference) => void,
 ): Visitor {
-    const here = dirname(file);
+    let here = '';
     let anchors = new Set<string>();
     const anchored = (node: AstNode): void => {
         const path = anchoredPath(node, here, anchors);
@@ -175,6 +177,7 @@ export function pathReferenceVisitor(
             }
         },
         Program(node: AstNode) {
+            here = dirname(file());
             anchors = anchorsOf(node);
         },
         TemplateLiteral: anchored,

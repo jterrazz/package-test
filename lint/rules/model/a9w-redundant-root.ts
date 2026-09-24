@@ -6,7 +6,7 @@ import { findProperty, specificationMember, stringValue } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * The root the convention would derive: the
@@ -24,7 +24,7 @@ function derivedRoot(startDir: string): string | undefined {
  * walk-up would have found, it is redundant and flagged.
  */
 export const a9wRedundantRoot: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
                 if (specificationMember(node) === undefined) {

@@ -24,11 +24,9 @@ const REACHED = new Set<FileRole>(['component', 'module', 'specification']);
  * already drives, so the pragma has nothing left to buy.
  */
 export const e5NoSimulatedDom: LintRule = {
-    create(context: Context): Visitor {
-        if (!REACHED.has(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => REACHED.has(identityOf(context).role),
             Program(node: AstNode) {
                 for (const comment of context.sourceCode.getAllComments()) {
                     const environment = PRAGMA.exec(comment.value)?.groups?.environment;

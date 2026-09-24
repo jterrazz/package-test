@@ -16,15 +16,14 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
  * test file (the listing of the sibling `seeds/`).
  */
 export const c7SeedsSqlOnly: LintRule = {
-    create(context: Context): Visitor {
-        const file = context.physicalFilename;
-        const { inSpecs, role } = identityOf(context);
-        if (!isTestRole(role) || !inSpecs) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const { inSpecs, role } = identityOf(context);
+                return isTestRole(role) && inSpecs;
+            },
             Program(node: AstNode) {
-                const seedsDir = join(dirname(file), GROUND_SEEDS);
+                const seedsDir = join(dirname(context.physicalFilename), GROUND_SEEDS);
                 for (const entry of listDirectory(seedsDir) ?? []) {
                     if (!entry.endsWith('.sql')) {
                         context.report({ data: { entry }, messageId: 'notSql', node });

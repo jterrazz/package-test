@@ -4,7 +4,7 @@ import { toKebabCase } from '../../../src/model/chain/binding.js';
 import { memberPropertyName, stringValue } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** Stable kebab-case job identifier: `nightly-report`, `send-welcome-emails`. */
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
@@ -22,7 +22,7 @@ function kebabOf(name: string): string {
  * literals are checked — dynamic names are out of static reach.
  */
 export const b8KebabTrigger: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;

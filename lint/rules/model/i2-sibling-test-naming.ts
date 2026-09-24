@@ -5,7 +5,7 @@ import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { FileIdentity } from '../../role.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
@@ -44,11 +44,18 @@ function owesANeighbour({ inSpecs, legacyDir, role }: FileIdentity): boolean {
 }
 
 export const i2SiblingTestNaming: LintRule = {
-    create(context: Context) {
-        const file = context.physicalFilename;
-        const identity = identityOf(context);
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const identity = identityOf(context);
+                return (
+                    identity.legacyDir !== null ||
+                    (owesANeighbour(identity) && TEST_FILE.test(context.physicalFilename))
+                );
+            },
             Program(node: AstNode) {
+                const file = context.physicalFilename;
+                const identity = identityOf(context);
                 if (identity.legacyDir !== null) {
                     const messageId = identity.legacyDir === '__tests__' ? 'testsDir' : 'rootTests';
                     context.report({

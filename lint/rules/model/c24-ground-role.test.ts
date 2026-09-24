@@ -45,6 +45,12 @@ ruleTester.run('c24-ground-role', c24GroundRole as unknown as OxlintRule, {
             errors: 1,
             filename: SPEC,
         },
+        // A binding is the file's own: the `rows` the case above declared names nothing here.
+        {
+            code: "api.seed(rows);\napi.seed(file('./fixtures/rows.sql'));",
+            errors: 1,
+            filename: SPEC,
+        },
         {
             code: "test('x', async () => {\n    const golden = file('./requests/out.txt');\n    expect(r.stdout).toMatch(golden);\n});",
             errors: 1,

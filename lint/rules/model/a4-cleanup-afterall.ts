@@ -54,11 +54,9 @@ function isAfterAllWithCleanup(node: AstNode): boolean {
  * a callback).
  */
 export const a4CleanupAfterall: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'specification') {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'specification',
             Program(node: AstNode) {
                 let cleanupDeclarator: AstNode | undefined;
                 let registered = false;

@@ -53,6 +53,15 @@ function goldenableSubject(subject: AstNode | undefined): string | undefined {
     return GOLDENABLE.has(tail) ? path : undefined;
 }
 
+/** The cluster size the rule's option states, else the default. */
+function thresholdOf(option: unknown): number {
+    const stated =
+        typeof option === 'object' && option !== null && 'threshold' in option
+            ? option.threshold
+            : undefined;
+    return typeof stated === 'number' ? stated : DEFAULT_THRESHOLD;
+}
+
 /**
  * CONVENTIONS D19w (warning) — three probes on one goldenable subject and no
  * golden on it.
@@ -65,17 +74,9 @@ function goldenableSubject(subject: AstNode | undefined): string | undefined {
  * subject silences it however many probes stand beside it.
  */
 export const d19wProbeCluster: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
-        const option = context.options[0];
-        const stated =
-            typeof option === 'object' && option !== null && 'threshold' in option
-                ? option.threshold
-                : undefined;
-        const threshold = typeof stated === 'number' ? stated : DEFAULT_THRESHOLD;
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {
                     return;
@@ -106,6 +107,7 @@ export const d19wProbeCluster: LintRule = {
                         probes.set(subject, (probes.get(subject) ?? 0) + 1);
                     }
                 });
+                const threshold = thresholdOf(context.options[0]);
                 for (const [subject, count] of probes) {
                     if (count >= threshold && !goldened.has(subject)) {
                         context.report({ data: { count, subject }, messageId: 'cluster', node });

@@ -14,12 +14,12 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
  * reach.
  */
 export const c6ToMatchExtension: LintRule = {
-    create(context: Context): Visitor {
-        const { inSpecs, role } = identityOf(context);
-        if (!isTestRole(role) || !inSpecs) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const { inSpecs, role } = identityOf(context);
+                return isTestRole(role) && inSpecs;
+            },
             CallExpression(node: AstNode) {
                 const golden = goldenOf(node);
                 const name = golden?.kind === 'file' ? golden.path : undefined;

@@ -23,13 +23,11 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
  * called `specs` collects nothing of the kind.
  */
 export const e4wProjectBinding: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'config') {
-            return {};
-        }
-        const config = context.physicalFilename;
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'config',
             Program(program: AstNode) {
+                const config = context.physicalFilename;
                 for (const project of projectLiterals(program)) {
                     const { name } = project;
                     const [first] = project.include;

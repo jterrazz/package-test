@@ -40,11 +40,9 @@ export function groupsOf(titles: string[]): string {
  * today is recorded on the ratchet and may only shrink.
  */
 export const c33FileSize: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'spec') {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'spec',
             Program(program: AstNode) {
                 const lines = context.sourceCode.text.replace(/\n$/u, '').split('\n').length;
                 if (lines <= MAX_SPEC_LINES) {

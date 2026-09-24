@@ -17,9 +17,12 @@ function pathsIn(source: string): string[] {
     if (isNode(program)) {
         visitProgram(
             program,
-            pathReferenceVisitor(file, ({ path }) => {
-                paths.push(path);
-            }),
+            pathReferenceVisitor(
+                () => file,
+                ({ path }) => {
+                    paths.push(path);
+                },
+            ),
         );
     }
     return paths;

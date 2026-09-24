@@ -3,7 +3,7 @@ import type { Context } from '@oxlint/plugins';
 import { child, identifierName, scenarioCallbackOf, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS W1 — a scenario is the When: the visitor interacts, the capture
@@ -15,7 +15,7 @@ import type { AstNode, LintRule } from '../../rule-shape.js';
  * visitor to the same kind of callback.
  */
 export const w1ScenarioPure: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
                 const scenario = scenarioCallbackOf(node);

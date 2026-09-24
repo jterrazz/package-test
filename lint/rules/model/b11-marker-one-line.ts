@@ -13,7 +13,7 @@ import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * A directive, not prose — a tool's instruction that happens to be a comment.
@@ -57,12 +57,9 @@ function lineEndAt(text: string, offset: number): number {
  * comment of its own.
  */
 export const b11MarkerOneLine: LintRule = {
-    create(context: Context) {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
-        const { text } = context.sourceCode;
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {
                     return;
@@ -71,6 +68,7 @@ export const b11MarkerOneLine: LintRule = {
                 if (callback === undefined) {
                     return;
                 }
+                const { text } = context.sourceCode;
                 const comments = context.sourceCode
                     .getCommentsInside(callback)
                     .filter((comment) => comment.type === 'Line' && nodeStart(comment) >= 0)

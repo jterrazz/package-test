@@ -294,6 +294,47 @@ function checkUnit(context: Context, program: AstNode, base: string, provider: s
     }
 }
 
+/** What C4 checks of a file's program. */
+type Check = (node: AstNode) => void;
+
+/** What C4 checks of the file being linted, by where it sits — nothing out of every contract tree. */
+function checkOf(context: Context): Check | undefined {
+    const file = context.physicalFilename;
+    const parts = segmentsOf(context);
+    // `src/**/contracts/` is the framework's own contract MODULE, not a
+    // Feature's contract tree — only specs carry the convention.
+    if (!identityOf(context).inSpecs) {
+        return undefined;
+    }
+    const contractsIndex = parts.lastIndexOf('contracts');
+    if (contractsIndex === -1) {
+        return TEST_FILE.test(file)
+            ? (node) => {
+                  checkLayout(context, node, join(dirname(file), 'contracts'));
+              }
+            : undefined;
+    }
+    const base = parts.at(-1) ?? '';
+    const depth = parts.length - 1 - contractsIndex;
+    if (depth === 1) {
+        return (node) => {
+            checkComposite(context, node, base);
+        };
+    }
+    if (depth === 2) {
+        const provider = parts[contractsIndex + 1] ?? '';
+        // A non-provider directory is reported once, by the layout half.
+        return PROVIDERS.has(provider)
+            ? (node) => {
+                  checkUnit(context, node, base, provider);
+              }
+            : undefined;
+    }
+    return (node) => {
+        context.report({ data: { base }, messageId: 'tooDeep', node });
+    };
+}
+
 /**
  * CONVENTIONS C4 — the structure of a feature's `contracts/` tree. The ROOT
  * holds only `*.contracts.ts` facades (their builders and sets exported by
@@ -310,48 +351,15 @@ function checkUnit(context: Context, program: AstNode, base: string, provider: s
  * `.json` fixture or an empty directory).
  */
 export const c4ContractShape: LintRule = {
-    create(context: Context): Visitor {
-        const file = context.physicalFilename;
-        const parts = segmentsOf(context);
-        // `src/**/contracts/` is the framework's own contract MODULE, not a
-        // Feature's contract tree — only specs carry the convention.
-        if (!identityOf(context).inSpecs) {
-            return {};
-        }
-        const contractsIndex = parts.lastIndexOf('contracts');
-        if (contractsIndex === -1) {
-            if (!TEST_FILE.test(file)) {
-                return {};
-            }
-            return {
-                Program(node: AstNode) {
-                    checkLayout(context, node, join(dirname(file), 'contracts'));
-                },
-            };
-        }
-        const base = parts.at(-1) ?? '';
-        const depth = parts.length - 1 - contractsIndex;
-        if (depth === 1) {
-            return {
-                Program(node: AstNode) {
-                    checkComposite(context, node, base);
-                },
-            };
-        }
-        if (depth === 2) {
-            const provider = parts[contractsIndex + 1] ?? '';
-            // A non-provider directory is reported once, by the layout half.
-            return PROVIDERS.has(provider)
-                ? {
-                      Program(node: AstNode) {
-                          checkUnit(context, node, base, provider);
-                      },
-                  }
-                : {};
-        }
+    createOnce(context: Context): Visitor {
+        let check: Check | undefined;
         return {
+            before() {
+                check = checkOf(context);
+                return check !== undefined;
+            },
             Program(node: AstNode) {
-                context.report({ data: { base }, messageId: 'tooDeep', node });
+                check?.(node);
             },
         };
     },

@@ -116,11 +116,9 @@ function fileConstants(program: AstNode): { declarator: AstNode; statement: AstN
  * shared: no scan can tell how many tests call the helper.
  */
 export const d28SharedExpectation: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'spec') {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'spec',
             Program(program: AstNode) {
                 const expected = expectedNames(program);
                 const tests = testSpans(program);

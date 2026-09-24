@@ -28,15 +28,14 @@ function ownerOf(entry: string): string {
  * test file, since oxlint never visits a `.json`.
  */
 export const c11ContractDataPairing: LintRule = {
-    create(context: Context): Visitor {
-        const file = context.physicalFilename;
-        const { inSpecs, role } = identityOf(context);
-        if (!isTestRole(role) || !inSpecs) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const { inSpecs, role } = identityOf(context);
+                return isTestRole(role) && inSpecs;
+            },
             Program(node: AstNode) {
-                const contractsDir = join(dirname(file), 'contracts');
+                const contractsDir = join(dirname(context.physicalFilename), 'contracts');
                 for (const provider of PROVIDERS) {
                     const entries = listDirectory(join(contractsDir, provider));
                     if (entries === null) {

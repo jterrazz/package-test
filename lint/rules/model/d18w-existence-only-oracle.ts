@@ -34,11 +34,9 @@ const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
  * and fails for every other, so it is a whole proof on its own.
  */
 export const d18wExistenceOnlyOracle: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {
                     return;

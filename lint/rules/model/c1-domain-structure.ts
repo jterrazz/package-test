@@ -115,14 +115,15 @@ function testsItsNeighbour(filename: string): boolean {
  * in every mode.
  */
 export const c1DomainStructure: LintRule = {
-    create(context: Context): Visitor {
-        const depth = (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
+    createOnce(context: Context): Visitor {
         return {
+            before: () => specsAnchorOf(context) !== undefined,
             Program(node: AstNode) {
                 const anchor = specsAnchorOf(context);
                 if (anchor === undefined) {
                     return;
                 }
+                const depth = (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
                 const base = anchor.relative.at(-1) ?? '';
                 // Segments strictly between `specs` and the file: [facet, domain, …].
                 const nesting = anchor.relative.length - 1;

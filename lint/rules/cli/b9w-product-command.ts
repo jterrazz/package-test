@@ -40,7 +40,7 @@ function embedsThirdPartyBin(root: AstNode | null | undefined): boolean {
  * binary (e.g. a package whose product is a lint plugin driving oxlint).
  */
 export const b9wProductCommand: LintRule = {
-    create(context: Context): Visitor {
+    createOnce(context: Context): Visitor {
         return {
             Program(program: AstNode) {
                 // Local `const X = …/.bin/…` bindings whose value is a bin path.

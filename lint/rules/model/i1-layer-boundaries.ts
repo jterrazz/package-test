@@ -69,6 +69,41 @@ function matchesPath(target: string, patterns: string[]): boolean {
     );
 }
 
+/** The layer a production module sits in, and what it may reach from there. */
+type Boundary = {
+    allowsExternal: (source: string) => boolean;
+    allowsInternal: (target: string) => boolean;
+    layer: string;
+};
+
+/** The boundary of the file being linted — none when no layer is declared, or it sits in none. */
+function boundaryOf(context: Context): Boundary | undefined {
+    const layers = (context.options[0] as Options | undefined)?.layers;
+    if (layers === undefined || Object.keys(layers).length === 0) {
+        return undefined;
+    }
+    if (!isProductionFile(context)) {
+        return undefined;
+    }
+    const inside = pathInLayers(context.physicalFilename);
+    const layer = inside?.split('/')[0];
+    const rules = layer === undefined ? undefined : layers[layer];
+    if (inside === undefined || layer === undefined || rules === undefined) {
+        return undefined;
+    }
+    const folder = rules.folders === undefined ? undefined : inside.split('/')[1];
+    const ownPackages = [...(rules.packages ?? []), ...(rules.folders?.[folder ?? ''] ?? [])];
+    const ownImports = [...(rules.imports ?? []), ...(rules.seams?.[inside] ?? [])];
+    return {
+        allowsExternal: (source) => matchesPackage(source, ownPackages),
+        allowsInternal: (target) =>
+            matchesPath(target, ownImports) ||
+            // A folder always owns its own files (`integrations/redis/*`).
+            (folder !== undefined && target.startsWith(`${layer}/${folder}/`)),
+        layer,
+    };
+}
+
 /**
  * CONVENTIONS I1 — the layers under `src/` and their sanctioned edges, DECLARED
  * by the project:
@@ -99,43 +134,17 @@ function matchesPath(target: string, patterns: string[]): boolean {
  * read in every form a module names another, `require()` included.
  */
 export const i1LayerBoundaries: LintRule = {
-    create(context: Context): Visitor {
-        const layers = (context.options[0] as Options | undefined)?.layers;
-        if (layers === undefined || Object.keys(layers).length === 0) {
-            return {};
-        }
-        const file = context.physicalFilename;
-        if (!isProductionFile(context)) {
-            return {};
-        }
-        const inside = pathInLayers(file);
-        const layer = inside?.split('/')[0];
-        const rules = layer === undefined ? undefined : layers[layer];
-        if (inside === undefined || layer === undefined || rules === undefined) {
-            return {};
-        }
-        const folder = rules.folders === undefined ? undefined : inside.split('/')[1];
-        const ownPackages = [...(rules.packages ?? []), ...(rules.folders?.[folder ?? ''] ?? [])];
-        const ownImports = [...(rules.imports ?? []), ...(rules.seams?.[inside] ?? [])];
-
-        const allowsExternal = (source: string): boolean => matchesPackage(source, ownPackages);
-
-        const allowsInternal = (target: string): boolean => {
-            if (matchesPath(target, ownImports)) {
-                return true;
-            }
-            // A folder always owns its own files (`integrations/redis/*`).
-            return folder !== undefined && target.startsWith(`${layer}/${folder}/`);
-        };
-
-        const visitor: Visitor = {
+    createOnce(context: Context): Visitor {
+        let boundary: Boundary | undefined;
+        return {
             ...moduleReferenceVisitor(({ node, source }) => {
-                if (source.startsWith('node:')) {
+                if (boundary === undefined || source.startsWith('node:')) {
                     return;
                 }
+                const { allowsExternal, allowsInternal, layer } = boundary;
                 let messageId: null | string;
                 if (source.startsWith('.')) {
-                    const target = pathInLayers(resolve(dirname(file), source));
+                    const target = pathInLayers(resolve(dirname(context.physicalFilename), source));
                     messageId =
                         target === undefined || !allowsInternal(target) ? 'crossLayer' : null;
                 } else {
@@ -145,8 +154,11 @@ export const i1LayerBoundaries: LintRule = {
                     context.report({ data: { layer, source }, messageId, node });
                 }
             }),
+            before() {
+                boundary = boundaryOf(context);
+                return boundary !== undefined;
+            },
         };
-        return visitor;
     },
     meta: {
         defaultOptions: [{ layers: {} }],

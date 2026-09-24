@@ -83,12 +83,13 @@ function groundOf(path: string): string | undefined {
  * follows to the verb it reaches. A computed path is out of reach.
  */
 export const c24GroundRole: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
-        const bindings = new Map<string, AstNode[]>();
+    createOnce(context: Context): Visitor {
+        let bindings = new Map<string, AstNode[]>();
         return {
+            before() {
+                bindings = new Map();
+                return isTestRole(identityOf(context).role);
+            },
             CallExpression(node: AstNode) {
                 const callee = child(node, 'callee');
                 const verb = callee === undefined ? undefined : memberPropertyName(callee);

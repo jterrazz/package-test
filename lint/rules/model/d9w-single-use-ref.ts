@@ -61,15 +61,14 @@ function refsInFixture(target: string): string[] {
  * everywhere is a plain matcher wearing a name.
  */
 export const d9wSingleUseRef: LintRule = {
-    create(context: Context): Visitor {
-        const file = context.physicalFilename;
-        const { inSpecs, role } = identityOf(context);
-        if (!isTestRole(role) || !inSpecs) {
-            return {};
-        }
-        const featureDir = dirname(file);
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const { inSpecs, role } = identityOf(context);
+                return isTestRole(role) && inSpecs;
+            },
             Program(program: AstNode) {
+                const featureDir = dirname(context.physicalFilename);
                 const counts = new Map<string, number>();
                 const codeNodes = new Map<string, AstNode>();
                 // Fallback report site for a ref that lives ONLY in a fixture:

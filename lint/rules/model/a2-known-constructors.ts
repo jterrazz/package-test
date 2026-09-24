@@ -3,7 +3,7 @@ import type { Context } from '@oxlint/plugins';
 import { memberPropertyName } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The six constructors, and only six. */
 const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile', 'website']);
@@ -17,7 +17,7 @@ const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile
  * starts nothing, so it is a chain, not a member of this record.
  */
 export const a2KnownConstructors: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             MemberExpression(node: AstNode) {
                 const object = node.object as AstNode | undefined;

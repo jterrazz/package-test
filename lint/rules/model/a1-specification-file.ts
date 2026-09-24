@@ -25,14 +25,11 @@ const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
  * specification file for A1 to point at.
  */
 export const a1SpecificationFile: LintRule = {
-    create(context: Context): Visitor {
-        if (
-            SPECIFICATION_SUFFIXES.some((suffix) => context.filename.endsWith(suffix)) ||
-            identityOf(context).role === 'component'
-        ) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () =>
+                !SPECIFICATION_SUFFIXES.some((suffix) => context.filename.endsWith(suffix)) &&
+                identityOf(context).role !== 'component',
             CallExpression(node: AstNode) {
                 const member = specificationMember(node);
                 if (member !== undefined) {

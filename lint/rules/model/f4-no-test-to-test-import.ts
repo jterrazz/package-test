@@ -15,18 +15,15 @@ const TEST_IMPORT = /\.test(?:\.[cm]?[jt]sx?)?$/u;
  * `*.specification.ts` file (A1).
  */
 export const f4NoTestToTestImport: LintRule = {
-    create(context: Context) {
-        if (!TEST_FILE.test(context.filename)) {
-            return {};
-        }
-        const visitor: Visitor = {
+    createOnce(context: Context): Visitor {
+        return {
             ...importSourceVisitor(({ node, source }) => {
                 if (TEST_IMPORT.test(source)) {
                     context.report({ data: { source }, messageId: 'testToTest', node });
                 }
             }),
+            before: () => TEST_FILE.test(context.filename),
         };
-        return visitor;
     },
     meta: {
         docs: RULE_DOCS['f4-no-test-to-test-import'],

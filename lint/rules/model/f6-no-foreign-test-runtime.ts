@@ -93,13 +93,10 @@ const REACHED = new Set<FileRole>(['component', 'module', 'spec', 'specification
  * and in a `.test.tsx` it is a legitimate thing for a component to do.
  */
 export const f6NoForeignTestRuntime: LintRule = {
-    create(context: Context) {
-        const { role } = identityOf(context);
-        if (!REACHED.has(role)) {
-            return {};
-        }
-        const visitor: Visitor = {
+    createOnce(context: Context): Visitor {
+        return {
             ...importSourceVisitor(({ node, source }) => {
+                const { role } = identityOf(context);
                 const group = GROUPS.find(
                     (candidate) =>
                         candidate.matches(source) &&
@@ -113,8 +110,8 @@ export const f6NoForeignTestRuntime: LintRule = {
                     });
                 }
             }),
+            before: () => REACHED.has(identityOf(context).role),
         };
-        return visitor;
     },
     meta: {
         docs: RULE_DOCS['f6-no-foreign-test-runtime'],

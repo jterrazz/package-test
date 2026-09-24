@@ -54,11 +54,9 @@ function rootRead(argument: AstNode): string | undefined {
  * helpers — a helper is CALLED, and what it builds is the test's own.
  */
 export const d29NoForeignExpectation: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'spec') {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'spec',
             Program(program: AstNode) {
                 const foreign = foreignNames(program);
                 if (foreign.size === 0) {

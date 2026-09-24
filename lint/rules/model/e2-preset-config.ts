@@ -78,11 +78,9 @@ function startsFromThePreset(node: AstNode | undefined): boolean {
  * is `mergeConfig(defineSpecConfig(…), …)`.
  */
 export const e2PresetConfig: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'config') {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'config',
             Program(program: AstNode) {
                 walk(program, (node) => {
                     if (node.type !== 'ExportDefaultDeclaration') {

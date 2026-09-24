@@ -12,8 +12,8 @@ import { c7SeedsSqlOnly } from './c7-seeds-sql-only.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: oxlint does not export its `Rule` type, and our structural
-// `LintRule` is intentionally decoupled from its internal (alpha) typings.
+// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
+// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
@@ -101,11 +101,13 @@ function lintPass(file: string): string[] {
         sourceCode: {} as Context['sourceCode'],
     };
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reads only the file's name and `report`; the rest of oxlint's context is not what this pass is about
-    const visitor = c7SeedsSqlOnly.create(context as Context);
+    const visitor = c7SeedsSqlOnly.createOnce(context as Context);
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reports on the program node and reads nothing of its span
     const program = { type: 'Program' } as AstNode;
-    const enterProgram = visitor.Program;
-    enterProgram?.(program);
+    const { before, Program: enterProgram } = visitor;
+    if (before?.() !== false) {
+        enterProgram?.(program);
+    }
     return reported;
 }
 

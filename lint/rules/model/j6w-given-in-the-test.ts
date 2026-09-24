@@ -67,11 +67,9 @@ function restoreOnly(hook: AstNode): boolean {
  * where it gives them back.
  */
 export const j6wGivenInTheTest: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 const name = identifierName(child(node, 'callee'));
                 if (name === undefined) {

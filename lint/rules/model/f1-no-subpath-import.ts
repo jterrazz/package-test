@@ -20,9 +20,9 @@ const PACKAGE = '@jterrazz/test';
  * oxlint config, a shared preset, a vitest config.
  */
 export const f1NoSubpathImport: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         const allowed = new Set(declaredSubpaths());
-        const visitor: Visitor = {
+        return {
             ...importSourceVisitor(({ node, source }) => {
                 if (!source.startsWith(`${PACKAGE}/`) || allowed.has(source)) {
                     return;
@@ -37,7 +37,6 @@ export const f1NoSubpathImport: LintRule = {
                 });
             }),
         };
-        return visitor;
     },
     meta: {
         docs: RULE_DOCS['f1-no-subpath-import'],

@@ -28,13 +28,11 @@ export const GENERIC_ASPECTS = new Set([
  * which question about it the file answers.
  */
 export const c32AspectName: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'spec') {
-            return {};
-        }
-        const aspect = aspectOf(context.filename);
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'spec',
             Program(program: AstNode) {
+                const aspect = aspectOf(context.filename);
                 if (!KEBAB.test(aspect)) {
                     context.report({
                         data: {

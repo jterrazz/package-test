@@ -70,18 +70,19 @@ function implementationOf(node: AstNode): AstNode | undefined {
  * said without a factory, and it counts too.
  */
 export const j2NoSleep: LintRule = {
-    create(context: Context) {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
-        // The source spans of the double implementations seen so far. The walk
-        // Is top-down, so a double's span is recorded before anything inside it
-        // Is visited — which is what makes "inside a double" answerable without
-        // A parent pointer the plugin API does not give.
-        const doubles: { end: number; start: number }[] = [];
+    createOnce(context: Context): Visitor {
+        // The source spans of the double implementations seen so far in the
+        // File. The walk is top-down, so a double's span is recorded before
+        // Anything inside it is visited — which is what makes "inside a double"
+        // Answerable without a parent pointer the plugin API does not give.
+        let doubles: { end: number; start: number }[] = [];
         const insideADouble = (node: AstNode): boolean =>
             doubles.some((span) => nodeStart(node) >= span.start && nodeEnd(node) <= span.end);
-        const visitor: Visitor = {
+        return {
+            before() {
+                doubles = [];
+                return isTestRole(identityOf(context).role);
+            },
             // A function-valued property of an object literal: the object is a
             // Double, and its methods are implementations. Opened here rather
             // Than on the object, so a `setTimeout(…)` sitting in a non-function
@@ -130,7 +131,6 @@ export const j2NoSleep: LintRule = {
                 }
             }),
         };
-        return visitor;
     },
     meta: {
         docs: RULE_DOCS['j2-no-sleep'],

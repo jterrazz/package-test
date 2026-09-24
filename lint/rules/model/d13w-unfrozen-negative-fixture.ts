@@ -203,11 +203,9 @@ function inPlaceOf(node: AstNode): boolean {
 }
 
 export const d13wUnfrozenNegativeFixture: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (goldenOf(node) === undefined && !inPlaceOf(node)) {
                     return;

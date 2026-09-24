@@ -37,11 +37,9 @@ function isEnvTarget(node: AstNode | undefined): boolean {
  * environment legitimately writes to it, and says so in a line.
  */
 export const e9wEnvAssignmentInTest: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             AssignmentExpression(node: AstNode) {
                 if (isEnvTarget(child(node, 'left'))) {
                     context.report({ messageId: 'rawAssignment', node });

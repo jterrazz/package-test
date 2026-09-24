@@ -16,18 +16,15 @@ const FIXTURES_IMPORT = /\.fixtures(?:\.[cm]?[jt]sx?)?$/u;
  * (`production.ts` reads them for F2 and F5 alike).
  */
 export const f5FixturesOnlyFromTests: LintRule = {
-    create(context: Context) {
-        if (TEST_FILE.test(context.filename)) {
-            return {};
-        }
-        const visitor: Visitor = {
+    createOnce(context: Context): Visitor {
+        return {
             ...moduleReferenceVisitor(({ node, source }) => {
                 if (FIXTURES_IMPORT.test(source)) {
                     context.report({ data: { source }, messageId: 'fixturesImport', node });
                 }
             }),
+            before: () => !TEST_FILE.test(context.filename),
         };
-        return visitor;
     },
     meta: {
         docs: RULE_DOCS['f5-fixtures-only-from-tests'],

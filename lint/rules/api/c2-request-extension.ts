@@ -19,15 +19,14 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
  * not judged here.
  */
 export const c2RequestExtension: LintRule = {
-    create(context: Context): Visitor {
-        const file = context.physicalFilename;
-        const { inSpecs, role } = identityOf(context);
-        if (!isTestRole(role) || !inSpecs) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before() {
+                const { inSpecs, role } = identityOf(context);
+                return isTestRole(role) && inSpecs;
+            },
             Program(node: AstNode) {
-                const requestsDir = join(dirname(file), GROUND_REQUESTS);
+                const requestsDir = join(dirname(context.physicalFilename), GROUND_REQUESTS);
                 for (const entry of listDirectory(requestsDir) ?? []) {
                     if (extname(entry) === '' && !isDirectory(join(requestsDir, entry))) {
                         context.report({ data: { entry }, messageId: 'noExtension', node });

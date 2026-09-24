@@ -3,7 +3,7 @@ import type { Context } from '@oxlint/plugins';
 import { child, childList, identifierName, memberPropertyName } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The value matcher that tempts a `.raw` bypass (D8). */
 const TEXT_MATCHERS = new Set(['toContain']);
@@ -34,7 +34,7 @@ function unnegated(node: AstNode | undefined): AstNode | undefined {
 }
 
 export const d8wRawBypass: LintRule = {
-    create(context: Context) {
+    createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;

@@ -46,11 +46,9 @@ function sampledOffsets(node: AstNode | undefined, into: Set<number>): void {
  * directory name is the one sampled value the framework cannot mint for you.
  */
 export const d16wAmbientValue: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {
                     return;

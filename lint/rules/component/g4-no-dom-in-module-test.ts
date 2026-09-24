@@ -102,13 +102,13 @@ function isValueReference(node: AstNode): boolean {
  * runtimes is tested by exactly that guard.
  */
 export const g4NoDomInModuleTest: LintRule = {
-    create(context: Context): Visitor {
-        const identity = identityOf(context);
-        if (identity.role !== 'module' || identity.inSpecs) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         let declared = new Set<string>();
         return {
+            before() {
+                const identity = identityOf(context);
+                return identity.role === 'module' && !identity.inSpecs;
+            },
             Identifier(node: AstNode) {
                 const name = identifierName(node);
                 if (

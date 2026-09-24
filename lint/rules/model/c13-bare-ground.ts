@@ -27,14 +27,12 @@ const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
  * when the test sits under one.
  */
 export const c13BareGround: LintRule = {
-    create(context: Context): Visitor {
-        const file = context.physicalFilename;
-        const anchor = specsAnchorOf(context);
-        if (!TEST_FILE.test(file)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         return {
+            before: () => TEST_FILE.test(context.physicalFilename),
             Program(node: AstNode) {
+                const file = context.physicalFilename;
+                const anchor = specsAnchorOf(context);
                 const seen = new Set<string>();
                 const probe = (parent: string, legacy: string): void => {
                     const path = join(parent, legacy);

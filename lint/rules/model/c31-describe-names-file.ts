@@ -83,13 +83,11 @@ function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
  * merging groups is a reading.
  */
 export const c31DescribeNamesFile: LintRule = {
-    create(context: Context): Visitor {
-        if (identityOf(context).role !== 'spec') {
-            return {};
-        }
-        const aspect = aspectOf(context.filename);
+    createOnce(context: Context): Visitor {
         return {
+            before: () => identityOf(context).role === 'spec',
             Program(program: AstNode) {
+                const aspect = aspectOf(context.filename);
                 const statements = childList(program, 'body');
                 const describes = statements.filter((statement) =>
                     isDescribeCallee(calleeOf(statement)),

@@ -76,16 +76,14 @@ function sampledUnder(node: AstNode | undefined): AstNode[] {
  * legitimately samples (a per-run label, a temp directory).
  */
 export const d16SampledOracle: LintRule = {
-    create(context: Context): Visitor {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
+    createOnce(context: Context): Visitor {
         const report = (found: AstNode[]): void => {
             for (const node of found) {
                 context.report({ messageId: 'sampledOracle', node });
             }
         };
         return {
+            before: () => isTestRole(identityOf(context).role),
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {
                     return;

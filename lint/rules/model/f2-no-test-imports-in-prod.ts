@@ -6,7 +6,7 @@ import { isProductionFile } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../path-references.js';
 import { materialNamed, moduleReferenceVisitor, reachOf } from '../../production.js';
-import type { LintRule } from '../../rule-shape.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS F2 — production never reaches test material. In a production
@@ -26,15 +26,11 @@ import type { LintRule } from '../../rule-shape.js';
  * own oxlint config.
  */
 export const f2NoTestImportsInProd: LintRule = {
-    create(context: Context) {
-        const file = context.physicalFilename;
-        if (!isProductionFile(context)) {
-            return {};
-        }
-        const here = dirname(file);
-        const shown = (path: string): string => relative(here, path) || path;
+    createOnce(context: Context): Visitor {
+        const shown = (path: string): string =>
+            relative(dirname(context.physicalFilename), path) || path;
         const references = moduleReferenceVisitor(({ node, source }) => {
-            const reach = reachOf(file, source);
+            const reach = reachOf(context.physicalFilename, source);
             if (reach === undefined) {
                 return;
             }
@@ -47,13 +43,20 @@ export const f2NoTestImportsInProd: LintRule = {
                 context.report({ data, messageId: 'reach', node });
             }
         });
-        const paths = pathReferenceVisitor(file, ({ node, path }) => {
-            const kind = materialNamed(path);
-            if (kind !== undefined) {
-                context.report({ data: { kind, path: shown(path) }, messageId: 'pathRead', node });
-            }
-        });
-        return mergeVisitors(references, paths);
+        const paths = pathReferenceVisitor(
+            () => context.physicalFilename,
+            ({ node, path }) => {
+                const kind = materialNamed(path);
+                if (kind !== undefined) {
+                    context.report({
+                        data: { kind, path: shown(path) },
+                        messageId: 'pathRead',
+                        node,
+                    });
+                }
+            },
+        );
+        return { ...mergeVisitors(references, paths), before: () => isProductionFile(context) };
     },
     meta: {
         docs: RULE_DOCS['f2-no-test-imports-in-prod'],

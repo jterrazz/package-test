@@ -5,7 +5,7 @@ import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
-import type { AstNode, LintRule } from '../../rule-shape.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The invariant a `testId()` owes: what the element lacks, in the author's words. */
 const REASON = /\/\/\s*testId:\s*\S/u;
@@ -27,12 +27,9 @@ const REASON = /\/\/\s*testId:\s*\S/u;
  * allows.
  */
 export const w2TestIdStatesWhatIsMissing: LintRule = {
-    create(context: Context) {
-        if (!isTestRole(identityOf(context).role)) {
-            return {};
-        }
-        const lines = context.sourceCode.text.split('\n');
-        const comments = context.sourceCode.getAllComments();
+    createOnce(context: Context): Visitor {
+        let lines: string[] = [];
+        let comments: Comment[] = [];
 
         /** The 1-based line a node starts on, counted from its source offset. */
         const lineOf = (node: AstNode): number => {
@@ -59,6 +56,14 @@ export const w2TestIdStatesWhatIsMissing: LintRule = {
         };
 
         return {
+            before() {
+                if (!isTestRole(identityOf(context).role)) {
+                    return false;
+                }
+                lines = context.sourceCode.text.split('\n');
+                comments = context.sourceCode.getAllComments();
+                return true;
+            },
             CallExpression(node: AstNode) {
                 const callee = node.callee as AstNode | undefined;
                 const member = callee ? memberPropertyName(callee) : undefined;
