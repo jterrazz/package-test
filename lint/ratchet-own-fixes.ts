@@ -124,7 +124,7 @@ const JSONC_READER = [
  * armed through `extends` keeps its rules, and every other rule it sets is
  * dropped. A JSON config — the base or one in `extends` — is read as oxlint
  * reads it, comments and trailing commas allowed; an extended one's relative
- * `jsPlugins` resolve from its own folder.
+ * `jsPlugins`, its overrides' included, resolve from its own folder.
  */
 export function ownFixesConfig(config: string): string {
     const off = Object.fromEntries(CATEGORIES.map((category) => [category, 'off']));
@@ -161,7 +161,11 @@ export function ownFixesConfig(config: string): string {
         '          }),',
         '    ...(config.jsPlugins === undefined ? {} : { jsPlugins: plugins(config.jsPlugins, folder) }),',
         "    options: { ...config.options, reportUnusedDisableDirectives: 'off', typeAware: false },",
-        '    overrides: (config.overrides ?? []).map((override) => ({ ...override, rules: own(override.rules) })),',
+        '    overrides: (config.overrides ?? []).map((override) => ({',
+        '        ...override,',
+        '        ...(override.jsPlugins === undefined ? {} : { jsPlugins: plugins(override.jsPlugins, folder) }),',
+        '        rules: own(override.rules),',
+        '    })),',
         '    rules: own(config.rules),',
         '});',
         '',

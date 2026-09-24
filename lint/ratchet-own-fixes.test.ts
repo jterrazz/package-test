@@ -133,7 +133,7 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
     });
 
     test('a JSON config and every JSON it extends are read as oxlint reads them, comments and trailing commas allowed', async () => {
-        // Given - a commented `.oxlintrc.json` extending a commented JSON
+        // Given - a commented `.oxlintrc.json` extending a commented JSON, whose override arms a plugin of its folder
         const root = projectWith({
             '.oxlintrc.json':
                 '// The project config.\n{ "extends": ["./base/base.json"], /* shared */ "rules": { "jterrazz/b16w-file-context": "warn", "no-debugger": "error", }, }\n',
@@ -141,7 +141,7 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
                 '{',
                 '    // A string is never a comment: "a // b" and "/* c */" stay whole.',
                 '    "overrides": [',
-                String.raw`        { "files": ["a // b", "/* c */", "d\\"], "rules": { "jterrazz/c31-describe-names-file": "error", }, },`,
+                String.raw`        { "files": ["a // b", "/* c */", "d\\"], "jsPlugins": ["./plugin.js"], "rules": { "jterrazz/c31-describe-names-file": "error", }, },`,
                 '    ],',
                 '}',
             ].join('\n'),
@@ -149,7 +149,7 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         const wrapper = join(root, 'wrapper.mjs');
         writeFileSync(wrapper, ownFixesConfig(join(root, '.oxlintrc.json')));
 
-        // Then - both parse, the override keeps its files whole
+        // Then - both parse, the override keeps its files whole and finds its plugin from its folder
         const module: unknown = await import(pathToFileURL(wrapper).href);
         expect(module).toHaveProperty('default', {
             categories: off,
@@ -160,6 +160,7 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
                     overrides: [
                         {
                             files: ['a // b', '/* c */', 'd\\'],
+                            jsPlugins: [join(root, 'base', 'plugin.js')],
                             rules: { 'jterrazz/c31-describe-names-file': 'error' },
                         },
                     ],
