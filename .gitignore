@@ -11,5 +11,7 @@ dist
 !specs/lint/checker/fixtures/lint-violations/checker-oxlint-run/node_modules/
 # The oxlint a checker spec's project runs: the repository's own, behind a stub.
 !specs/lint/checker/fixtures/lint-violations/checker-own-fixes/node_modules/
+# The oxlint of a checker spec's JSON-configured project, which lays its configs down.
+!specs/lint/checker/fixtures/lint-violations/checker-own-fixes-json/node_modules/
 # The Appium a spawned-server mobile run starts: a stub serving the protocol double.
 !specs/cli/appium/fixtures/mobile-spawned-session/app/node_modules/

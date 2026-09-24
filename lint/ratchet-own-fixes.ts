@@ -86,21 +86,55 @@ const CATEGORIES = [
 ] as const;
 
 /**
+ * The wrapper's reader of a JSON config, as oxlint reads one: line and block
+ * comments and trailing commas dropped, outside strings.
+ */
+const JSONC_READER = [
+    'const parseJsonc = (text) => {',
+    "    let out = '';",
+    '    for (let at = 0; at < text.length; at += 1) {',
+    '        const char = text[at];',
+    "        if (char === '\"') {",
+    '            let end = at + 1;',
+    "            while (end < text.length && text[end] !== '\"') {",
+    String.raw`                end += text[end] === '\\' ? 2 : 1;`,
+    '            }',
+    '            out += text.slice(at, end + 1);',
+    '            at = end;',
+    "        } else if (char === '/' && text[at + 1] === '/') {",
+    String.raw`            const end = text.indexOf('\n', at);`,
+    '            at = (end === -1 ? text.length : end) - 1;',
+    "        } else if (char === '/' && text[at + 1] === '*') {",
+    "            const end = text.indexOf('*/', at + 2);",
+    '            at = end === -1 ? text.length : end + 1;',
+    "        } else if (char === '}' || char === ']') {",
+    String.raw`            out = out.replace(/,\s*$/u, '') + char;`,
+    '        } else {',
+    '            out += char;',
+    '        }',
+    '    }',
+    '    return JSON.parse(out);',
+    '};',
+];
+
+/**
  * The wrapper module's source around the config at `config` (absolute). Every
  * config it reaches — the base, each config the base extends, and theirs —
  * arms the plugin's rules alone: an extended rulebook is carried, so a plugin
  * armed through `extends` keeps its rules, and every other rule it sets is
- * dropped. A JSON path in `extends` is read in place, its relative `jsPlugins`
- * resolved from its own folder.
+ * dropped. A JSON config — the base or one in `extends` — is read as oxlint
+ * reads it, comments and trailing commas allowed; an extended one's relative
+ * `jsPlugins` resolve from its own folder.
  */
 export function ownFixesConfig(config: string): string {
-    const attributes = /\.jsonc?$/u.test(config) ? " with { type: 'json' }" : '';
     const off = Object.fromEntries(CATEGORIES.map((category) => [category, 'off']));
+    const json = /\.jsonc?$/u.test(config);
     return [
         "import { readFileSync } from 'node:fs';",
         "import { dirname, resolve } from 'node:path';",
+        ...(json ? [] : ['', `import base from ${JSON.stringify(config)};`]),
         '',
-        `import base from ${JSON.stringify(config)}${attributes};`,
+        ...JSONC_READER,
         '',
         'const own = (rules) =>',
         "    Object.fromEntries(Object.entries(rules ?? {}).filter(([rule]) => rule.startsWith('jterrazz/')));",
@@ -131,9 +165,11 @@ export function ownFixesConfig(config: string): string {
         '    rules: own(config.rules),',
         '});',
         '',
-        "const read = (path) => armed(JSON.parse(readFileSync(path, 'utf8')), dirname(path));",
+        "const read = (path) => armed(parseJsonc(readFileSync(path, 'utf8')), dirname(path));",
         '',
-        'export default armed(base);',
+        ...(json
+            ? [`export default armed(parseJsonc(readFileSync(${JSON.stringify(config)}, 'utf8')));`]
+            : ['export default armed(base);']),
         '',
     ].join('\n');
 }

@@ -19,6 +19,20 @@ import {
     ownFixesConfig,
 } from './ratchet-own-fixes.js';
 
+/** Every category, as the wrapper turns it off. */
+const off = {
+    correctness: 'off',
+    nursery: 'off',
+    pedantic: 'off',
+    perf: 'off',
+    restriction: 'off',
+    style: 'off',
+    suspicious: 'off',
+};
+
+/** The options the wrapper sets, whatever the config's. */
+const disarmed = { reportUnusedDisableDirectives: 'off', typeAware: false };
+
 /** A project root holding `files`, each written as given. */
 function projectWith(files: Record<string, string>): string {
     const root = mkdtempSync(join(tmpdir(), 'own-fixes-'));
@@ -29,13 +43,13 @@ function projectWith(files: Record<string, string>): string {
     return root;
 }
 
-/** A stub oxlint that appends its arguments and the folder it ran in, copies the wrapper it was handed, prints `stdout`, then exits `status`. */
-function stubOxlint(root: string, status: number, stdout = ''): void {
+/** A stub oxlint that appends its arguments and the folder it ran in, copies the wrapper it was handed, runs `script`, then exits `status`. */
+function stubOxlint(root: string, status: number, script = ''): void {
     mkdirSync(join(root, 'node_modules', '.bin'), { recursive: true });
     const bin = join(root, 'node_modules', '.bin', 'oxlint');
     writeFileSync(
         bin,
-        `#!/bin/sh\necho "$@" >> "${root}/args.txt"\npwd -P >> "${root}/cwds.txt"\ncp ${OWN_FIXES_WRAPPER} wrapper.mjs\necho "cannot run" >&2\necho "${stdout}"\nexit ${status}\n`,
+        `#!/bin/sh\necho "$@" >> "${root}/args.txt"\npwd -P >> "${root}/cwds.txt"\ncp ${OWN_FIXES_WRAPPER} wrapper.mjs\necho "cannot run" >&2\n${script}\nexit ${status}\n`,
     );
     chmodSync(bin, 0o755);
 }
@@ -59,17 +73,9 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         // Then - only `jterrazz/*` survives, every category is off, and the run reads no type
         const module: unknown = await import(pathToFileURL(wrapper).href);
         expect(module).toHaveProperty('default', {
-            categories: {
-                correctness: 'off',
-                nursery: 'off',
-                pedantic: 'off',
-                perf: 'off',
-                restriction: 'off',
-                style: 'off',
-                suspicious: 'off',
-            },
+            categories: off,
             jsPlugins: ['./dist/oxlint.js'],
-            options: { reportUnusedDisableDirectives: 'off', typeAware: false },
+            options: disarmed,
             overrides: [
                 { files: ['specs/**'], rules: { 'jterrazz/c31-describe-names-file': 'error' } },
             ],
@@ -98,16 +104,6 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         writeFileSync(wrapper, ownFixesConfig(join(root, 'oxlint.config.mjs')));
 
         // Then - each extended config keeps its plugins and the plugin's rules alone, the JSON's plugin found from its folder
-        const off = {
-            correctness: 'off',
-            nursery: 'off',
-            pedantic: 'off',
-            perf: 'off',
-            restriction: 'off',
-            style: 'off',
-            suspicious: 'off',
-        };
-        const disarmed = { reportUnusedDisableDirectives: 'off', typeAware: false };
         const module: unknown = await import(pathToFileURL(wrapper).href);
         expect(module).toHaveProperty('default', {
             categories: off,
@@ -136,12 +132,58 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         });
     });
 
-    test('a JSON config is imported as JSON', () => {
-        // Given - a root config written as `.oxlintrc.json`
-        // Then - the import carries its type attribute
-        expect(ownFixesConfig('/project/.oxlintrc.json').split('\n')).toContain(
-            'import base from "/project/.oxlintrc.json" with { type: \'json\' };',
-        );
+    test('a JSON config and every JSON it extends are read as oxlint reads them, comments and trailing commas allowed', async () => {
+        // Given - a commented `.oxlintrc.json` extending a commented JSON
+        const root = projectWith({
+            '.oxlintrc.json':
+                '// The project config.\n{ "extends": ["./base/base.json"], /* shared */ "rules": { "jterrazz/b16w-file-context": "warn", "no-debugger": "error", }, }\n',
+            'base/base.json': [
+                '{',
+                '    // A string is never a comment: "a // b" and "/* c */" stay whole.',
+                '    "overrides": [',
+                String.raw`        { "files": ["a // b", "/* c */", "d\\"], "rules": { "jterrazz/c31-describe-names-file": "error", }, },`,
+                '    ],',
+                '}',
+            ].join('\n'),
+        });
+        const wrapper = join(root, 'wrapper.mjs');
+        writeFileSync(wrapper, ownFixesConfig(join(root, '.oxlintrc.json')));
+
+        // Then - both parse, the override keeps its files whole
+        const module: unknown = await import(pathToFileURL(wrapper).href);
+        expect(module).toHaveProperty('default', {
+            categories: off,
+            extends: [
+                {
+                    categories: off,
+                    options: disarmed,
+                    overrides: [
+                        {
+                            files: ['a // b', '/* c */', 'd\\'],
+                            rules: { 'jterrazz/c31-describe-names-file': 'error' },
+                        },
+                    ],
+                    rules: {},
+                },
+            ],
+            options: disarmed,
+            overrides: [],
+            rules: { 'jterrazz/b16w-file-context': 'warn' },
+        });
+    });
+
+    test('a `.jsonc` config is read, never imported', async () => {
+        // Given - a root config written as `.oxlintrc.jsonc`, which Node refuses to import
+        const root = projectWith({
+            '.oxlintrc.jsonc':
+                '{ /* armed */ "rules": { "jterrazz/b16w-file-context": "warn" } }\n',
+        });
+        const wrapper = join(root, 'wrapper.mjs');
+        writeFileSync(wrapper, ownFixesConfig(join(root, '.oxlintrc.jsonc')));
+
+        // Then - the wrapper loads, and arms the plugin's rule
+        const module: unknown = await import(pathToFileURL(wrapper).href);
+        expect(module).toHaveProperty('default.rules', { 'jterrazz/b16w-file-context': 'warn' });
     });
 
     test('runs the project oxlint with --fix under the wrapper, then deletes it', () => {
@@ -215,13 +257,32 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
     test('a config oxlint could not load is a failure naming it, though oxlint exits 1', () => {
         // Given - an oxlint that prints its load failure on stdout and exits 1, as it does
         const root = projectWith({ '.oxlintrc.json': '{}\n' });
-        stubOxlint(root, 1, 'Failed to parse oxlint configuration file.');
+        stubOxlint(root, 1, "echo 'Failed to parse oxlint configuration file.'");
 
         // Then - the pass throws naming the config, and the wrapper is deleted
         expect(() => {
             applyOwnFixes(root);
         }).toThrow(`could not load the wrapper of ${join(root, '.oxlintrc.json')}`);
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
+    });
+
+    test('a subtree under a `.oxlintrc.jsonc` is fixed under a wrapper that loads', () => {
+        // Given - a commented nested `.jsonc`, and an oxlint that loads the wrapper it is handed as oxlint does
+        const root = projectWith({
+            'oxlint.config.ts': 'export default {};\n',
+            'web/.oxlintrc.jsonc': '{\n    // web\'s own rulebook\n    "rules": {},\n}\n',
+        });
+        stubOxlint(
+            root,
+            1,
+            `node --input-type=module -e "await import('./${OWN_FIXES_WRAPPER}')" 2>/dev/null || echo 'Failed to load config'`,
+        );
+
+        // Then - both runs load their wrapper, so the pass completes
+        applyOwnFixes(root);
+        expect(readFileSync(join(root, 'cwds.txt'), 'utf8')).toBe(
+            [realpathSync(root), join(realpathSync(root), 'web'), ''].join('\n'),
+        );
     });
 
     test('a project with no oxlint, or no root config, has nothing to fix', () => {

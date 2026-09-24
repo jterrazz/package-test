@@ -1,0 +1,5 @@
+{
+    "extends": ["./base.json"],
+    "jsPlugins": ["JTERRAZZ_TEST_REPO/dist/oxlint.js"],
+    "rules": { "jterrazz/b16w-file-context": "warn" }
+}

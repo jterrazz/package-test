@@ -125,6 +125,28 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.file('src/nothing.ts').content).toContain('nothing(undefined)');
     });
 
+    test('`--fix` settles a JSON root that extends a commented JSON, and a `.jsonc` subtree, in one run', async () => {
+        // Given - recorded debt in two trees: the root's `.oxlintrc.json` extends a commented JSON, and a commented `.oxlintrc.jsonc` governs web/
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-own-fixes-json/'))
+            .exec(['baseline .', '. --fix']);
+
+        // Then - both views written, the debt paid, nothing held
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe(
+            [
+                'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz/b16w-file-context 2 → 0',
+                'jterrazz.baseline.json › test: nothing held',
+                '',
+            ].join('\n'),
+        );
+        for (const tree of ['', 'web/']) {
+            expect(
+                result.file(`${tree}specs/api/events/list/pagination.spec.ts`).content,
+            ).toContain("const events = api.with({ clock: '2026-03-04T09:30:00Z' });");
+        }
+    });
+
     test("`--fix` renames before the plugin's own fixes, so the check after it counts the same tree", async () => {
         // Given - a spec still named `.test.ts`, whose chains all state one clock, fixed on the root member
         const result = await cli
