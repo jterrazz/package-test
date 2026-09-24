@@ -2530,3 +2530,28 @@ import.meta.url)` — for existence; a bare literal and a command string are
 142. `appium: { url }` is a new constructor option name (the one other
      candidate, `server`, already means "the app's server" on api and
      website). Keep the name?
+
+## Iteration 33 — the calls on 139–142 (owner, 2026-09-24)
+
+- **139.** `make test-mobile` stays a seventh target: the toolchain's
+  Makefile contract requires the six and does not forbid more, and this
+  repository's own meta-test (`lint/makefile.test.ts`, iteration 32) already
+  holds it to the six plus the declared extra. No code follows.
+- **140.** `mobile()` runs its project files serially BY DEFAULT — one
+  simulator, and a second worker would open a second session on it — so
+  `fileParallelism: false` moves from something a caller states
+  (`mobile({ serial: true })`) to the helper's own default; `serial` no
+  longer needs passing, and passing it changes nothing.
+- **141.** Noted for later: one driver session shared across a run's files,
+  instead of a fresh one per file. No code follows the note.
+- **142.** `appium: { url }` keeps its name; `server` stays reserved for
+  "the app's server" on api and website. No code follows.
+
+### What the package-test branch did (iteration 33)
+
+- **140** (`8ba05585`). `mobile()` merges `fileParallelism: false` into
+  every project it returns, whatever `options.serial` says; the repository's
+  own `vitest.config.ts` drops the now-redundant `{ serial: true }`, and
+  chapter 03's project table follows. Red: `mobile()` called bare, before
+  the change, left `fileParallelism` undefined (`src/runner/projects.test.ts`).
+- **Gates.** `make fix` then `make check` exit 0; `npm run build` exit 0.
