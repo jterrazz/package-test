@@ -32,13 +32,14 @@ fix: build
 #
 # `SHARD=<index>/<count>` runs one shard of that suite, for a CI job that
 # Splits the run: its blob report lands under `.artifacts/vitest/blob/`, its
-# Route ledgers in a folder of their own, and the floor and the route ratchet
+# Route ledgers in a folder of their own it empties first, and the floor and the route ratchet
 # Are judged once, on the merged run — `make test-merge`, run after every
 # Shard, never on a shard's part of the run. A whole run empties both, so a
 # Merge reads the shards of one split alone.
 test: node_modules/.install
 ifdef SHARD
 	@if [ -f .artifacts/vitest/blob ]; then rm .artifacts/vitest/blob; fi
+	rm -rf .artifacts/vitest/routes/shard-$(subst /,-,$(SHARD))
 	npm test -- --coverage --shard=$(SHARD) --reporter=default --reporter=blob
 else
 	rm -rf .artifacts/vitest/blob
