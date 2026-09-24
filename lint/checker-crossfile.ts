@@ -14,6 +14,7 @@ import { specsAnchor } from './ast.js';
 import type { Severity, TokenViolation } from './checker.js';
 import type { Teaching } from './lesson.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
+import { literalSpans } from './spec-values.js';
 
 /**
  * The cross-file checker passes — the analyses oxlint cannot express because
@@ -1368,12 +1369,13 @@ function repointSource(file: string, move: (path: string) => string | undefined)
     const scanned = blankComments(text);
     let next = '';
     let last = 0;
-    for (const match of scanned.matchAll(STRING_LITERAL)) {
-        const value = match.groups?.single ?? match.groups?.double ?? match.groups?.template;
-        const moved = value === undefined || !isRelativePath(value) ? undefined : move(value);
+    for (const { end, start } of literalSpans(scanned)) {
+        const value = scanned.slice(start + 1, end - 1);
+        const quoted = `'"\``.includes(scanned[start] ?? '') && !value.includes('${');
+        const moved = quoted && isRelativePath(value) ? move(value) : undefined;
         if (moved !== undefined) {
-            next += `${text.slice(last, match.index + 1)}${moved}`;
-            last = match.index + 1 + (value?.length ?? 0);
+            next += `${text.slice(last, start + 1)}${moved}`;
+            last = end - 1;
         }
     }
     return `${next}${text.slice(last)}`;

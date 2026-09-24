@@ -1,0 +1,9 @@
+description: --fix rewrites a path written after a template literal with a hole
+fixture: ./fixtures/after-a-template/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/seeds/two-users.sql: exists
+          specs/api/orders/orders.spec.ts:
+              contains: file('../../seeds/two-users.sql')
