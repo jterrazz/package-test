@@ -3189,3 +3189,53 @@ conflict. @jterrazz/test was reinstalled from package-test `ca9b1445`
       `oxlint.config.ts:5:43` fails `no-unsafe-argument`, and vision/17
       fails the same way. The owner of the `file:../package-test` linkage
       decides, for example with a tsconfig `paths` entry to src/.
+
+## Speed fix round of 2026-09-25: test
+
+Both units landed on package-test's `vision/17` by cherry-pick, with no
+merge commit and no fixup to fold. The toolchain was reinstalled from
+package-typescript `cc9c3a4` (`npm ci`). `make fix` exit 0, `make check`
+exit 0 (567 files, 2604 tests). The conflicts were the generated counts
+of docs/03-testing.md and the entries of tsdown.config.ts, which keep both
+units' bundles (`route-split`, `services-setup`, `temp-root`).
+`428e616e` regenerates the counts: 83 module tests, 10 exempt seam
+adapters, 4 bundled CLI entries. No hand-written line either unit added
+was dropped. No speed gain is claimed for either unit.
+
+- **Declared services once per run, fast postgres, pinned slim images**
+  (branch `vision17-test-service-containers`, `ebf2ad93`…`aaf96192`, 16
+  commits). Its review came back `integrate`, with both majors from the
+  last round shown red under mutation. The worktree
+  `pt-service-containers` and the branch are removed. What stays open:
+    - docs/17-services.md:140 says a container is started once per RUN.
+      Vitest runs global setup once per PROJECT, so `api()`, `jobs()` and
+      `integration()` each start their own. The sentence should read
+      "once per project of a run".
+    - docs/17-services.md:152 names the leak question without a link. The
+      maintainer creates the package-test follow-ups page, and the clause
+      then links to it. The leak's root cause is not investigated: the
+      Ryuk prune race is still a hypothesis.
+    - The load-matched after-run of api/jobs/integration
+      (`scratchpad/sc-after/run.sh`, load1 < 6) is not appended to
+      timings-before.md.
+    - `cli()`, `website()` and `mobile()` still start a container per
+      specification.
+- **Dedicated temp root, per-worker browser, preset speed knobs, build
+  cache, shard split** (branch `vision17-test-runner-browser-temp`,
+  `f0cc2dbf`…`113d7628`, 20 commits). Its review came back `integrate`.
+  The worktree `pt-runner-browser-temp` and the branch are removed. What
+  stays open:
+    - The split judge passes in silence when there are no shard ledgers.
+      An unsharded api run, a partial one included, empties the
+      `shard-*` folders (routes.ts:181), and `node dist/route-split.js`
+      then exits 0 with no output, so the merge never judges the routes.
+      `judgeSplit` should fail on zero ledgers, with a test red on HEAD.
+      A non-shard setup should also leave `shard-*` alone, or
+      docs/03-testing.md:516 should say it empties them.
+    - A shard with a `-t` filter is still classed `shard`
+      (route-coverage.ts:64), so the merge judges a partial ledger as a
+      whole run. Neither the Makefile nor CI combines the two today.
+    - The stale-shard fix was not run end to end, only through
+      `make -n`.
+    - **Owner call:** whether the split judge (`route-split.js`) is
+      published as a bin for consumers.
