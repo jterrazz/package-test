@@ -57,7 +57,7 @@
         "vitest/require-to-throw-message": 2
     },
     "test": {
-        "jterrazz/c34-test-body-size": 3,
+        "jterrazz/c34-test-body-size": 2,
         "jterrazz/d15w-status-only-probe": 2,
         "jterrazz/d16w-ambient-value": 10,
         "jterrazz/d18w-existence-only-oracle": 12,
