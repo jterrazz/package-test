@@ -2691,3 +2691,98 @@ installed from package-test `5900b968` (`npm ci`). HEAD `77f2d92`.
     - If the Names pass dies before it writes `names.json`, the absent-section
       path still prints `nothing held`. The present-section path has the same
       gap: print no held line when the Names report cannot be read.
+
+## Batch 2 of 2026-09-24 (hybrid): test
+
+Three reviewed units landed on package-test's `vision/17` by cherry-pick,
+over the toolchain installed from package-typescript `77f2d92` (`npm ci`).
+Every conflict was in a generated file (`docs/03-testing.md`,
+`jterrazz.baseline.json`) except one: `specs/api/intercepts.specification.ts`,
+whose inline app the capability filing moved to
+`specs/shared/fixtures/specimen-api-outbound/app.ts`. Keeping one side of
+chapter 03 whole dropped the filing's prose, and `ed29775` restores it.
+Integrator commits: `382bae0` re-files the two specs and the fixture the
+other units added, and `9f3ce1f` regenerates chapter 03 and re-records the
+ratchet. `make fix` exit 0, `make check` exit 0 (555 files, 2496 tests).
+
+- **Non-JSON bodies, and a cancelled intercepted body** (`b02a59e`,
+  `ef9263d`). What it closed: an HTML or event-stream response is read and
+  compared as its text (`specs/api/response/bodies.spec.ts`). Signews
+  defect 4 is closed too: under node, `response.body.cancel()` on a reply
+  that `intercept()` served now settles, because the seam hands the body
+  back as a stream this package owns. `specs/api/intercept/body-cancel.spec.ts`
+  runs, and chapter 16's M3 escape is gone. What stays open:
+    - `src/model/contracts/intercept.ts` still calls the origin wrapper "the
+      one place `fetch` is wrapped", but `src/seams/msw/server.ts` now wraps
+      it too.
+    - ADR-006 (Proposed) still says the cancel repro is skipped and that M3
+      sanctions a suppression. Amend it to state the present.
+    - A mismatched text body prints as one JSON-escaped line
+      (`formatResponseDiff`). Diff it line by line and add a test.
+    - `readBody` ignores content-type. A `text/plain` body `42`, `true` or
+      `null` parses to a JSON value, and a binary body decodes to
+      replacement characters where it used to be `null`. docs/10 states
+      neither case.
+    - docs/10 says a text body has its "blank lines" trimmed, but `trim()`
+      drops all surrounding whitespace. docs/16 says "every reply", but only
+      replies to `fetch` are owned, not replies over `node:http`.
+    - The browser worker is not wrapped, and no test proves that a
+      passthrough cancel settles (both HYPOTHESIS).
+- **`make fix` order, the mobile shared server, the published readers,
+  `nothing held`** (`078a86a`…`ec48abd`, 10 commits). What it closed:
+  `--fix` applies the plugin's own autofixes (B16w, C31, D28) before the
+  ratchet counts, so one `make fix` settles them (Signews defect 3). A
+  green run over an emptied `test` section prints `nothing held`.
+  `materialAt` and `testPackageOf` are published on `./oxlint`, which
+  answers the typescript batch's owner call. A `mobile({ device })`
+  project shares one spawned Appium server and session per run, and a spec
+  that names another device is refused. What stays open:
+    - The own-fixes wrapper drops `extends`, so a root config that arms the
+      plugin through `extends` (cap01's web app) gets no fixes, silently.
+      Nested-config subtrees are ignored by the pass but counted by the
+      ratchet, so they settle only on the second `make fix`. docs/19:522
+      states neither.
+    - The C27 and C15 rows in `lint/manifest.ts` still say "every path"
+      is rewritten. That file is hand-authored, not generated output, so
+      edit the rows and run `npm run docs`.
+    - `runDevice` compares `os` strictly, so `'iOS 26.5'` and `'26.5'`
+      refuse each other, although the simulator matcher treats them as the
+      same runtime.
+    - A `test` section that holds only `routes/unreached` prints `nothing
+held`.
+    - **Owner call.** `device` is still required in
+      `MobileSpecificationOptions`, so each spec restates the project's
+      device, which gives one fact two owners. Decide whether to make it
+      optional when the run serves the session.
+    - **Toolchain owner.** The oxlint config-name list is duplicated from
+      package-typescript's `oxlint-config-names.json`, which that package
+      does not export.
+    - One possible orphan-process flake was seen once and not reproduced
+      (HYPOTHESIS).
+- **A spec is filed by what it specifies** (iteration 34, `8228d20`…`6ddd18c`,
+  6 commits). What it closed: C1 refuses a first-level folder that holds no
+  test. C30 files a method-less route under its segments. The fixture apps
+  are specimens (`specs/shared/fixtures/specimen-<facet>…`), a spec of a
+  specimen is no subject for C29 or C30, and C35 files it under a
+  capability of the matrix. The domain vocabulary file is retired. What stays open:
+    - With the domain vocabulary retired, nothing guards integration's folder names:
+      `specs/integration/intercepts/` sits beside `api/intercept/` and
+      `jobs/intercept/`. Rename it.
+    - `specs/api/initiation-errors/` is neither a capability nor a route,
+      and C35 misses it because its runners are built inline. Together with
+      the VISION-pinned `specs/api/echo/create/headers.spec.ts`, it
+      contradicts docs/03's "every spec here". Move it, or name both
+      exceptions in docs/03.
+    - `capabilityFolders()` ignores each row's `columns`, so
+      `specs/cli/appium/` passes although `appium` is a mobile row.
+    - Specimen detection counts `root:` as a runner's app, so
+      `integration.specification.ts` passing `root: '../shared/fixtures/specimen-api'`
+      reads as reaching the specimen.
+    - C1's stray-folder clause exempts a `.specification.ts` in `support/`
+      and a whole folder for one `.test.ts`, and no `.spec.yaml` document
+      proves its message end to end.
+    - `mobile-app` is not renamed `specimen-mobile`, because this page
+      names its path. `params` is not a matrix row. `headers.spec.ts` moves
+      to `api/headers/` once this page is folded.
+    - Commit `f46408f` landed on the unit branch while `make check` exited 2
+      (Docker specs under load). Later commits ran the full check green.
