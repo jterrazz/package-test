@@ -8,17 +8,12 @@
 
 - Production never imports test code: every target × form refused by F2 through one production reader, proven case by case; production = every non-test module outside `specs/` and ground; a reasoned `test.production.allow` in `jterrazz.config.ts` for a legitimate case (spwn's gate runs playwright).
 - Route templates in tests: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`; route coverage and the subject rules read the template; an ambiguous literal path is reported, never guessed.
-- Size and complexity: `max-lines` 300 and `max-lines-per-function` 60 (off in test files), `complexity` 12 `modified`; a test body at most 60 lines (C34); every tsgolint rule decided by name; empty directories reported and removed by `make fix`.
+- Size and complexity: `max-lines` 300 and `max-lines-per-function` 60 (off in test files), `complexity` 12 `modified`; a test body at most 60 lines of gestures (C34, a `toMatch` value not counted); every tsgolint rule decided by name; empty directories reported and removed by `make fix`.
 - Performance: package-test's own lint 8.4 s → 2.5 s (a file's role computed once, cached reach walks, rules skipping what they do not judge); `typescript check` runs oxlint once and renders the human log from its JSON; a project without a config is handed the default one (no parent-folder walk).
 - Upgrades: oxlint 1.85, tsgolint 7.0.2002, oxfmt 0.70, knip 6.38, tsdown 0.23, better-sqlite3 13 (prebuilt binding), perfectionist, dependency-cruiser, prettier, @types/*; research in the session notes; not taken: oxfmt for Astro (unsupported), tsgo declarations (output differs), the React Compiler transform (experimental), Rust replacements for the Markdown/secret passes (immature).
 - Defects fixed along the way: the `toMatch(file())` false green on a string; table order; route tables; C4; seeds shared by nested routes; `make fix` order (checker first, formatter last); hooks copied by the split; the `prefer-spread` / `no-misused-spread` fix loop; wrong code frame after an in-place update.
 
-**Waiting for you:**
-
-1. ADR-009 (every type-aware rule decided, nursery included) and ADR-010 (a spec file's size has one judge) in package-typescript, `Proposed`.
-2. Fix mode's nested configs: the unsafe-fixer wrapper (passed with `-c`) turns nested configs off during `fix`. Re-declare them in the wrapper, or rely on oxlint's own safe/dangerous fix split?
-3. C28 vs C34: an unshared expectation up to 150 lines stays inline, but a test body is capped at 60 — nine signews tests are exactly this. Proposal: C34 does not count the lines of a `toMatch(<value>)` argument (the claim may be long, the gestures may not).
-4. The route template form is longer (8 chart tests repeat it): accept, or let `with({ params })`… carry a file's template?
+**Waiting for you:** nothing — the four questions the night left (ADR-009 and ADR-010, fix mode's nested configs, C28 vs C34, the route template) were answered on 2026-09-24; see "Iteration 29 — the owner's answers" at the end.
 
 **Decided overnight by the orchestrator (reversible):** every call listed in iterations 21–28 below; the route template (your default was asked, none came).
 
@@ -2267,3 +2262,52 @@ dist/checker.js`), the `jterrazz(*)` diagnostics behind a broken
      variable holding the chain (`const next = api.get(…); await next`)
      is not followed, and the rule reports the read, as before — read from
      the code, not proven by a case. Follow it, or keep the shape?
+
+## Iteration 29 — the owner's answers (owner, 2026-09-24)
+
+The four questions of the overnight summary, and 129 and 130 raised above.
+
+- **ADR-009 and ADR-010** (package-typescript) are `Accepted`: every
+  type-aware rule decided, nursery included; a spec file's size has one
+  judge. package-typescript records them; no code here.
+- **Fix mode's nested configs.** Fix mode moves to oxlint's own
+  safe/dangerous fix split rather than re-declaring the nested configs
+  in the unsafe-fixer wrapper. The toolchain's change, no code here.
+- **C28 vs C34.** C34 does not count the lines of a `toMatch(<value>)`
+  argument: the gestures of a test are capped at 60 lines, the claim may
+  be long, up to C28's 150-line inline cap, which already holds it.
+- **The route template** stays written on every chain
+  (`.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`);
+  no file-level template. Nothing changes.
+- **129.** A checker that ran oxlint itself — no `--oxlint-report`
+  given — prints the plugin diagnostics it saw: it is their only printer
+  then. Handed a report, it prints the count line only, and oxlint's own
+  pass prints each diagnostic.
+- **130.** D20 follows a request chain held in a variable
+  (`const next = api.get(…); await next`).
+
+### What the package-test branch did (the owner's answers)
+
+- **C34 counts gestures** (`de31d106`). The rule subtracts the lines a
+  `toMatch(<value>)` argument holds past the line it opens on; the
+  message reads "a test body of <n> lines of gestures, over 60", and
+  adds that the lines of a `toMatch(<value>)` argument are not counted. Cases: 20
+  gestures and a 90-line inline expectation pass (a rule-tester case
+  and a new literate document, `fixtures/claim/`); 60 gestures beside a
+  90-line claim pass; 61 gestures fail. Red: counting the claim again
+  failed 5 of 16, undercounting by one failed 8 of 16.
+- **129** (`5d690a84`). With no report, the checker prints each plugin
+  diagnostic on its own report line; with one, the count line. The case
+  runs the checker over a fixture whose `node_modules/.bin/oxlint` is a
+  stub printing a JSON report (a `.gitignore` negation keeps it
+  tracked). Red: the previous printer (the count line where the
+  diagnostic is expected); printing in full whatever the source (the
+  two `--oxlint-report` cases).
+- **130** (`ace65760`). A chain held whole in a declarator is a request
+  when the test awaits that name after it; held and never awaited, the
+  read stays a read. The carry analysis moved to `lint/carried.ts` (the
+  rule file was at the 300-line cap). Red: the previous rule (the
+  accepting rule-tester case and the accepting document, 2 of 15); the
+  awaited-later check forced true (the never-awaited case, 1 of 15).
+- **Gates.** `make fix` then `make check` exit 0 after each commit
+  (2372 tests passed, 1 skipped, on the last).
