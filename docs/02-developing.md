@@ -331,7 +331,7 @@ A run keeps every scratch folder it makes in ONE folder of its own, and removes 
 
 A run that dies before its teardown leaves its root behind, named by its pid. The next run removes every root in `jterrazz-test-runs/` whose pid no longer runs. It reads that folder alone, never the OS temp directory itself, which can hold hundreds of thousands of entries.
 
-A CLI spec's working directory does not wait for the run to end: it is removed once its test has finished, after the test's `afterEach` hooks.
+A CLI spec's working directory does not wait for the run to end: it is removed once its test has finished, after the test's `afterEach` hooks. Under `test.concurrent` it does wait. Vitest attaches a test hook to whichever test is current, and among concurrent tests that may be a sibling that ends first, so a concurrent test's scratch is left to the run's root.
 
 ### Framework environment variables
 
