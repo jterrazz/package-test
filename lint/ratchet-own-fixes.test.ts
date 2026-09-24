@@ -1,3 +1,4 @@
+import configNames from '@jterrazz/typescript/oxlint-config-names' with { type: 'json' };
 import {
     chmodSync,
     existsSync,
@@ -187,21 +188,20 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         expect(module).toHaveProperty('default.rules', { 'jterrazz/b16w-file-context': 'warn' });
     });
 
-    test('runs the project oxlint with --fix under the wrapper, then deletes it', () => {
-        // Given - a project with a root config and an oxlint that leaves diagnostics (exit 1)
-        const root = projectWith({ 'oxlint.config.ts': 'export default {};\n' });
+    test.each(configNames)('fixes under the wrapper of a root `%s`, then deletes it', (name) => {
+        // Given - a root config under a name the toolchain lists, and an oxlint leaving diagnostics (exit 1)
+        const root = projectWith({ [name]: '{}\n' });
         stubOxlint(root, 1);
 
         // When - the pass runs
         applyOwnFixes(root);
 
-        // Then - the fix ran by the wrapper around the root config, which is gone
+        // Then - the fix ran by the wrapper around that config, which is gone
         expect(readFileSync(join(root, 'args.txt'), 'utf8')).toBe(
             `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER}\n`,
         );
-        expect(readFileSync(join(root, 'wrapper.mjs'), 'utf8')).toBe(
-            ownFixesConfig(join(root, 'oxlint.config.ts')),
-        );
+        const wrapped = ownFixesConfig(join(root, name));
+        expect(readFileSync(join(root, 'wrapper.mjs'), 'utf8')).toBe(wrapped);
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
     });
 

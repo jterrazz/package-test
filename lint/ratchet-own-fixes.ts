@@ -1,3 +1,4 @@
+import configNames from '@jterrazz/typescript/oxlint-config-names' with { type: 'json' };
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -30,15 +31,7 @@ import { oxlintOf } from './ratchet.js';
  */
 
 /** The config names oxlint looks for at a root, in its order. */
-const CONFIG_NAMES = [
-    'oxlint.config.ts',
-    'oxlint.config.mts',
-    'oxlint.config.mjs',
-    'oxlint.config.js',
-    'oxlint.config.cjs',
-    '.oxlintrc.json',
-    '.oxlintrc.jsonc',
-] as const;
+const CONFIG_NAMES: readonly string[] = configNames;
 
 /** The name the wrapper takes, beside the config it wraps. */
 export const OWN_FIXES_WRAPPER = 'oxlint.test-fix.config.mjs';

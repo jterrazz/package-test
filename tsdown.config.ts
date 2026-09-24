@@ -24,6 +24,9 @@ import { defineConfig } from 'tsdown';
 export default defineConfig([
     {
         clean: true,
+        deps: {
+            alwaysBundle: ['@jterrazz/typescript/oxlint-config-names'],
+        },
         dts: true,
         entry: {
             catalog: 'lint/catalog-cli.ts',
