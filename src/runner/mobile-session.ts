@@ -32,8 +32,12 @@ export default async function setup(project: SessionProject): Promise<() => Prom
         declared === undefined
             ? undefined
             : await serveAppium(declared.device, resolve(project.config.root, declared.root));
-    if (served !== undefined) {
-        project.provide('mobileServer', { udid: served.udid, url: served.server.url });
+    if (declared !== undefined && served !== undefined) {
+        project.provide('mobileServer', {
+            device: declared.device,
+            udid: served.udid,
+            url: served.server.url,
+        });
     }
     return async () => {
         await endSessions(directory);

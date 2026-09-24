@@ -79,14 +79,14 @@ export const { cleanup, mobile } = await specification.mobile({
 
 Under a server that outlives the file — a declared `appium` server, or the run's own — a `mobile()` project opens **one driver session for the whole run**, not one per spec file. The project's global setup hands every file an empty ledger under `.artifacts/vitest/mobile-sessions/`. The first `.open()` of the run creates the session and records it there, and every later file asking the same server for the same capabilities attaches to it instead of creating its own. `cleanup` leaves that session alone; the setup ends it once the last file has run. Global setups tear down in the reverse of their order, so a setup of the project's own that SERVES the declared Appium server — a protocol double, a server started for the run — is listed before `mobile()`'s: the run's session is then ended while its server still answers.
 
-**The run's own server** is the project's to declare: `mobile({ device, root })` names the simulator and where the `appium` binary is resolved from (`<root>/node_modules/.bin/appium`, `root` read against the config's root, `.` when absent). The project's global setup resolves and boots that simulator, spawns the server once for the run, and hands both to the workers. A runner with no `appium` of its own drives that server, asking it for its own `device` — the booted simulator's UDID standing in when that `device` names none — and spawns nothing. The setup stops the server once it has ended the run's sessions.
+**The run's own server** is the project's to declare: `mobile({ device, root })` names the simulator and where the `appium` binary is resolved from (`<root>/node_modules/.bin/appium`, `root` read against the config's root, `.` when absent). The project's global setup resolves and boots that simulator, spawns the server once for the run, and hands both to the workers. A runner with no `appium` of its own drives that server on the project's device and spawns nothing. Its own `device` restates the project's, and the booted simulator's UDID stands in when it names none. A `device` that names another simulator, another `os` or another UDID is refused, naming both devices: the setup booted the project's device alone. The setup stops the server once it has ended the run's sessions.
 
 ```typescript
 // vitest.config.ts — one simulator, one Appium server, one session for the run
 mobile({ device: { name: 'iPhone 17', os: '26.5' }, root: 'apps/mobile' }),
 ```
 
-The session is keyed on the server's URL and the capabilities asked for, so a second specification naming another app or another device gets a session of its own, recorded and ended the same way. Files still run one at a time (`fileParallelism: false` is `mobile()`'s default): the app is terminated and relaunched by every `.open()`, and two files driving it at once would fight over it.
+The session is keyed on the server's URL and the capabilities asked for, so a second specification naming another app — or, under a declared `appium` server, another device — gets a session of its own, recorded and ended the same way. Files still run one at a time (`fileParallelism: false` is `mobile()`'s default): the app is terminated and relaunched by every `.open()`, and two files driving it at once would fight over it.
 
 Two runs keep a session per runner instead, which `cleanup` ends:
 

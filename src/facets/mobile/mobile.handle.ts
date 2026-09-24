@@ -8,7 +8,7 @@ import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { DevicePort, DeviceTimeouts, SessionLedger } from '../../model/ports/device.port.js';
 import { mobileServer, mobileSessions } from '../../runner/provided.js';
 import { serveAppium } from './appium-server.js';
-import type { AppiumServer, MobileDevice } from './appium-server.js';
+import type { AppiumServer, MobileDevice, RunServer } from './appium-server.js';
 import { createMobileFacet } from './mobile.chain.js';
 import type { MobileSpecification } from './mobile.chain.js';
 import { sessionLedger } from './session-ledger.js';
@@ -58,8 +58,9 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
     backend?: MobileBackendOptions;
     /**
      * The simulator to run on — resolved through `xcrun simctl`. Under a
-     * `mobile({ device })` project the run's server already drives one: its
-     * UDID stands for a device that declares none.
+     * `mobile({ device })` project the run's server already drives one: this
+     * device restates it, never another, and its UDID stands for a device
+     * that declares none.
      */
     device: MobileDevice;
     /**
@@ -125,6 +126,33 @@ function notOurs(url: string): AppiumServer {
     };
 }
 
+/** A device as a refusal names it. */
+function named({ name, os, udid }: MobileDevice): string {
+    return [
+        `'${name}'`,
+        os === undefined ? '' : ` (${os})`,
+        udid === undefined ? '' : ` [${udid}]`,
+    ].join('');
+}
+
+/**
+ * The device a runner asks the run's server for: the one the project declared
+ * and the setup booted. A specification may restate it, and never names
+ * another — no other simulator was booted for the run.
+ */
+export function runDevice(device: MobileDevice, run: RunServer): MobileDevice {
+    const agrees =
+        device.name === run.device.name &&
+        (device.os === undefined || device.os === run.device.os) &&
+        (device.udid === undefined || device.udid === run.udid);
+    if (!agrees) {
+        throw new Error(
+            `specification.mobile() names the device ${named(device)}, and the run's Appium server drives ${named({ ...run.device, udid: run.udid })}, the device its mobile({ device }) project declares — name that device, or declare no device on mobile() so each file serves its own`,
+        );
+    }
+    return { ...run.device, udid: run.udid };
+}
+
 /**
  * The Appium server the runner drives, the simulator it asks it for, and
  * whether that server outlives the file. A declared server owns its devices:
@@ -136,17 +164,17 @@ function notOurs(url: string): AppiumServer {
 async function reachAppium(
     options: MobileSpecificationOptions,
     root: string,
-): Promise<{ appium: AppiumServer; outlivesFile: boolean; udid: string | undefined }> {
+): Promise<{ appium: AppiumServer; device: MobileDevice; outlivesFile: boolean }> {
     const { appium: declared, device } = options;
     if (declared !== undefined) {
-        return { appium: notOurs(declared.url), outlivesFile: true, udid: device.udid };
+        return { appium: notOurs(declared.url), device, outlivesFile: true };
     }
     const run = await mobileServer();
     if (run !== undefined) {
-        return { appium: notOurs(run.url), outlivesFile: true, udid: device.udid ?? run.udid };
+        return { appium: notOurs(run.url), device: runDevice(device, run), outlivesFile: true };
     }
     const { server, udid } = await serveAppium(device, root);
-    return { appium: server, outlivesFile: false, udid };
+    return { appium: server, device: { ...device, udid }, outlivesFile: false };
 }
 
 /**
@@ -167,7 +195,7 @@ export async function startMobile<Services extends ServiceRecord>(
     await registerMatchers();
 
     const root = resolveRoot(options.root, callerDir);
-    const { appium, outlivesFile, udid } = await reachAppium(options, root);
+    const { appium, device: driven, outlivesFile } = await reachAppium(options, root);
 
     // The declared services come up before the app is ever launched: a dev
     // Build reaches its bundler on the first frame it renders.
@@ -205,7 +233,7 @@ export async function startMobile<Services extends ServiceRecord>(
         if (!device) {
             const { AppiumAdapter } = await import('../../seams/appium/appium.adapter.js');
             device = new AppiumAdapter({
-                device: { name: options.device.name, os: options.device.os, udid },
+                device: driven,
                 serverUrl: appium.url,
                 ledger: await runLedger(outlivesFile),
                 timeouts: options.timeouts,
@@ -239,6 +267,6 @@ export async function startMobile<Services extends ServiceRecord>(
             }
         },
         mobile: createMobileFacet(config),
-        udid,
+        udid: driven.udid,
     };
 }

@@ -23,6 +23,9 @@ export type MobileDevice = {
     udid?: string;
 };
 
+/** The run's Appium server as a worker reads it: where it answers, the device the project declared, and the simulator booted for it. */
+export type RunServer = { device: MobileDevice; udid: string; url: string };
+
 /** A running appium server: its base URL and a group-killing stop. */
 export type AppiumServer = {
     stop: () => Promise<void>;
@@ -81,6 +84,6 @@ declare module 'vitest' {
         /** The simulator a `mobile({ device, root })` project serves one Appium server for, and where its binary is resolved from. */
         mobileAppium?: { device: MobileDevice; root: string };
         /** The run's Appium server, spawned by the project's global setup, and the simulator it drives. */
-        mobileServer?: { udid: string; url: string };
+        mobileServer?: RunServer;
     }
 }

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { startMobile } from './mobile.handle.js';
+import { runDevice, startMobile } from './mobile.handle.js';
 
 /**
  * The constructor under a declared `appium` server. The device named here
@@ -43,5 +43,38 @@ describe('startMobile — a declared appium server', () => {
         // Then - the handle names the declared simulator
         expect(handle.udid).toBe('SIM-UDID');
         await handle.cleanup();
+    });
+});
+
+describe('runDevice — the device the run serves', () => {
+    /** The run's server, booted for an iPhone 17 on iOS 26.5. */
+    const run = {
+        device: { name: 'iPhone 17', os: '26.5' },
+        udid: 'SIM-17',
+        url: 'http://127.0.0.1:4723',
+    };
+
+    test("a specification restating the project's device drives the booted simulator", () => {
+        // Given - the same name, the os left out
+        // Then - the project's device, on the udid the setup booted
+        expect(runDevice({ name: 'iPhone 17' }, run)).toStrictEqual({
+            name: 'iPhone 17',
+            os: '26.5',
+            udid: 'SIM-17',
+        });
+    });
+
+    test('a specification naming another device is refused, naming both', () => {
+        // Given - another name, then the same name on another os, then another udid
+        // Then - each is refused with the device the run drives
+        expect(() => runDevice({ name: 'iPad Pro' }, run)).toThrow(
+            "specification.mobile() names the device 'iPad Pro', and the run's Appium server drives 'iPhone 17' (26.5) [SIM-17], the device its mobile({ device }) project declares — name that device, or declare no device on mobile() so each file serves its own",
+        );
+        expect(() => runDevice({ name: 'iPhone 17', os: '18.0' }, run)).toThrow(
+            "names the device 'iPhone 17' (18.0)",
+        );
+        expect(() => runDevice({ name: 'iPhone 17', udid: 'SIM-OTHER' }, run)).toThrow(
+            "names the device 'iPhone 17' [SIM-OTHER]",
+        );
     });
 });

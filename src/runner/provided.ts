@@ -1,3 +1,5 @@
+import type { RunServer } from '../facets/mobile/appium-server.js';
+
 /**
  * What the run's global setups provide to a worker, read on the worker's side.
  * The runner owns the `vitest` edge, so a facet asks here rather than
@@ -35,7 +37,7 @@ export async function mobileSessions(): Promise<string | undefined> {
  * The run's Appium server — what a `mobile({ device })` project's global
  * setup spawned and provides; `undefined` when each runner reaches its own.
  */
-export async function mobileServer(): Promise<undefined | { udid: string; url: string }> {
+export async function mobileServer(): Promise<RunServer | undefined> {
     try {
         const { inject } = await import('vitest');
         return inject('mobileServer');
