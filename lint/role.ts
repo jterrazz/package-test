@@ -1,7 +1,7 @@
 import { basename, dirname, join, relative } from 'node:path';
 
 import { isProjectRoot, isUnderSpecs, segments } from './ast.js';
-import { isFile } from './fs-cache.js';
+import { folderChanged, isFile } from './fs-cache.js';
 
 /**
  * What KIND of file a rule is looking at, decided from its path alone.
@@ -168,18 +168,34 @@ export function packageRootOf(directory: string): string | undefined {
     }
 }
 
+/** The project root a directory answered with, the last time this run walked up for it. */
+const projectRoots = new Map<string, string | undefined>();
+
 /**
  * The nearest project root at or above a directory: a package root, or — for a
  * tree no nearer package holds — the repository root ({@link isProjectRoot}).
+ *
+ * Remembered per folder — the segments, the role and the material every
+ * production module's path is read through all walk up from here, so the
+ * same folder asks this dozens of times in one run. Forgotten, for a
+ * directory alone, once its own tree listing answers differently than it did
+ * the last time this asked: a package a directory holds is a directory
+ * entry, so a `package.json` written or removed AT it is what the memo has
+ * to see, never a directory above or below it.
  */
 export function projectRootOf(directory: string): string | undefined {
+    if (!folderChanged(directory) && projectRoots.has(directory)) {
+        return projectRoots.get(directory);
+    }
     let current = directory;
     for (;;) {
         if (isProjectRoot(current)) {
+            projectRoots.set(directory, current);
             return current;
         }
         const parent = dirname(current);
         if (parent === current) {
+            projectRoots.set(directory, undefined);
             return undefined;
         }
         current = parent;

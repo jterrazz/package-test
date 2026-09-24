@@ -1,8 +1,9 @@
+import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import type { FileRole, LegacyDir } from './role.js';
-import { isTestFile, isTestRole, projectSegments, roleOf } from './role.js';
+import { isTestFile, isTestRole, projectRootOf, projectSegments, roleOf } from './role.js';
 import { checkoutUnder, repositoryUnder } from './rule-tester.fixtures.js';
 
 /** This package's own root — the one `tests/` guard reads a real package.json at. */
@@ -148,6 +149,21 @@ describe('roleOf — read below the project root', () => {
             'api',
             'x.spec.ts',
         ]);
+    });
+});
+
+describe('projectRootOf — remembered per folder', () => {
+    test('a package.json written at a folder already answered is seen the next time it is asked', () => {
+        // Given - a repository with no package below its app folder, answered once
+        const root = repositoryUnder('memo', ['src/app']);
+        const before = projectRootOf(join(root, 'src/app'));
+
+        // When - a package.json is written right there
+        writeFileSync(join(root, 'src/app/package.json'), '{}\n');
+
+        // Then - the memo is not kept past what its own folder now says
+        expect(before).toBe(root);
+        expect(projectRootOf(join(root, 'src/app'))).toBe(join(root, 'src/app'));
     });
 });
 
