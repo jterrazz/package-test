@@ -80,4 +80,24 @@ describe('the hono adapter — the body it read', () => {
             null,
         ]);
     });
+
+    test('a text type is its text though it parses as JSON, and a binary type is not read', async () => {
+        // Given - a text reply that reads as a number, and an image
+        const app = new Hono();
+        app.get('/count', (context) => context.text('42'));
+        app.get('/logo', (context) =>
+            context.body(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), 200, {
+                'content-type': 'image/png',
+            }),
+        );
+        const adapter = new HonoAdapter(app);
+
+        // When - each is requested
+        const responses = await Promise.all(
+            ['/count', '/logo'].map(async (path) => await adapter.request('GET', path)),
+        );
+
+        // Then - the text, and null for the bytes
+        expect(responses.map((response) => response.body)).toStrictEqual(['42', null]);
+    });
 });

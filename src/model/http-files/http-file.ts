@@ -99,16 +99,50 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
     };
 }
 
+/** How a body is read, by the media type that labels it. */
+export type BodyKind = 'binary' | 'json' | 'sniffed' | 'text';
+
+/** The media types outside `text/*` and `+xml` whose bodies are text. */
+const TEXT_MEDIA_TYPES = new Set([
+    'application/javascript',
+    'application/x-ndjson',
+    'application/x-www-form-urlencoded',
+    'application/xml',
+    'application/yaml',
+]);
+
 /**
- * The value a body's text holds, read the way a response `.http` reads its
- * body section: the surrounding whitespace dropped, then the JSON value the
- * text parses to — or the text itself when it is not JSON (an HTML page, an
- * event stream, a plain message). A blank text holds no body: `undefined`.
+ * The kind a `content-type` labels: JSON (`application/json`, `+json`),
+ * text (`text/*`, `+xml`, and the text media types above), binary (any other
+ * type), or sniffed when no type is stated.
  */
-export function readBody(text: string): unknown {
+export function bodyKind(contentType: string | undefined): BodyKind {
+    const media = contentType?.split(';')[0]?.trim().toLowerCase() ?? '';
+    if (media === '') {
+        return 'sniffed';
+    }
+    if (media === 'application/json' || media.endsWith('+json')) {
+        return 'json';
+    }
+    if (media.startsWith('text/') || media.endsWith('+xml') || TEXT_MEDIA_TYPES.has(media)) {
+        return 'text';
+    }
+    return 'binary';
+}
+
+/**
+ * The value a body's text holds, read by its `content-type`: the surrounding
+ * whitespace dropped, then a text type's body as its text, and any other
+ * body as the JSON value it parses to — or its text when it is not JSON. A
+ * blank text holds no body: `undefined`.
+ */
+export function readBody(text: string, contentType?: string): unknown {
     const body = text.trim();
     if (body.length === 0) {
         return undefined;
+    }
+    if (bodyKind(contentType) === 'text') {
+        return body;
     }
     try {
         return JSON.parse(body);
@@ -117,8 +151,21 @@ export function readBody(text: string): unknown {
     }
 }
 
-/** Parse a response `.http` file. First line must be `HTTP/1.1 <status>`. */
-export function parseResponseFile(content: string, fileName: string): ParsedResponseFile {
+/** The `content-type` a header map states, whatever the case of its name. */
+function statedContentType(headers: Record<string, string>): string | undefined {
+    return Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-type')?.[1];
+}
+
+/**
+ * Parse a response `.http` file. First line must be `HTTP/1.1 <status>`. Its
+ * body is read by the `content-type` the file states, or by `contentType` —
+ * the actual response's — when it states none.
+ */
+export function parseResponseFile(
+    content: string,
+    fileName: string,
+    contentType?: string,
+): ParsedResponseFile {
     const { body, headerLines, startLine } = splitSections(content);
 
     const start = /^HTTP\/1\.1\s+(?<status>\S+)(?:\s+.*)?$/u.exec(startLine.trim());
@@ -129,10 +176,11 @@ export function parseResponseFile(content: string, fileName: string): ParsedResp
         );
     }
 
+    const headers = parseHeaders(headerLines, fileName);
     return {
-        body: readBody(body),
+        body: readBody(body, statedContentType(headers) ?? contentType),
         hasBody: body.length > 0,
-        headers: parseHeaders(headerLines, fileName),
+        headers,
         status,
     };
 }
@@ -157,13 +205,21 @@ const STATUS_TEXT: Record<number, string> = {
     503: 'Service Unavailable',
 };
 
-/** Serialize a response fixture (used by update mode). */
-export function serializeResponseFile(response: {
-    body: unknown;
-    hasBody: boolean;
-    headers: Record<string, string>;
-    status: string;
-}): string {
+/**
+ * Serialize a response fixture (used by update mode). A text body is written
+ * as it is when the fixture's `content-type` — or `contentType`, the actual
+ * response's, when it states none — labels it text, as JSON when it labels
+ * it JSON, and as it is otherwise unless the text would read back as JSON.
+ */
+export function serializeResponseFile(
+    response: {
+        body: unknown;
+        hasBody: boolean;
+        headers: Record<string, string>;
+        status: string;
+    },
+    contentType?: string,
+): string {
     const statusNumber = Number(response.status);
     const statusText = STATUS_TEXT[statusNumber];
     const lines = [`HTTP/1.1 ${response.status}${statusText ? ` ${statusText}` : ''}`];
@@ -173,15 +229,24 @@ export function serializeResponseFile(response: {
     }
 
     if (response.hasBody) {
+        const kind = bodyKind(statedContentType(response.headers) ?? contentType);
         lines.push(
             '',
-            typeof response.body === 'string' && !isJsonLike(response.body)
+            writtenAsText(response.body, kind)
                 ? response.body
                 : JSON.stringify(response.body, null, 4),
         );
     }
 
     return `${lines.join('\n')}\n`;
+}
+
+/** Is this body written as its own text, rather than as JSON? */
+function writtenAsText(body: unknown, kind: BodyKind): body is string {
+    if (typeof body !== 'string' || kind === 'json') {
+        return false;
+    }
+    return kind === 'text' || !isJsonLike(body);
 }
 
 function isJsonLike(text: string): boolean {

@@ -259,11 +259,14 @@ export function matchResponseFile(
 
     if (shouldUpdateSnapshots() && !frozen) {
         const recorded = recordedGolden(filePath);
-        const previous = recorded === null ? null : parseResponseFile(recorded, name);
+        const previous =
+            recorded === null
+                ? null
+                : parseResponseFile(recorded, name, accessor.headers['content-type']);
 
         const updated = buildUpdatedResponse(previous, accessor, accessor.captures.workdir);
         mkdirSync(dirname(filePath), { recursive: true });
-        writeFileSync(filePath, serializeResponseFile(updated));
+        writeFileSync(filePath, serializeResponseFile(updated, accessor.headers['content-type']));
         return passed(`updated ${name}`);
     }
 
@@ -273,7 +276,11 @@ export function matchResponseFile(
         );
     }
 
-    const expected = parseResponseFile(readFileSync(filePath, 'utf8'), name);
+    const expected = parseResponseFile(
+        readFileSync(filePath, 'utf8'),
+        name,
+        accessor.headers['content-type'],
+    );
     const failure = compareResponse(name, expected, accessor, accessor.captures);
     return failure === null ? passed(`expected response not to match ${name}`) : failed(failure);
 }
@@ -485,7 +492,9 @@ function matchResponseValue(
     expected: string,
     context: InPlace,
 ): MatcherResult {
-    const previous = unrecorded(expected) ? null : parseResponseFile(dedent(expected), IN_PLACE);
+    const previous = unrecorded(expected)
+        ? null
+        : parseResponseFile(dedent(expected), IN_PLACE, accessor.headers['content-type']);
     const failure =
         previous === null
             ? `Response (${IN_PLACE}): ${UNRECORDED}`
@@ -497,7 +506,9 @@ function matchResponseValue(
         return failed(failure);
     }
     const updated = buildUpdatedResponse(previous, accessor, accessor.captures.workdir);
-    return writeAt(context, (indent) => renderText(serializeResponseFile(updated), indent));
+    return writeAt(context, (indent) =>
+        renderText(serializeResponseFile(updated, accessor.headers['content-type']), indent),
+    );
 }
 
 /** A json against the value written in place, tokens and `match.*` included. */

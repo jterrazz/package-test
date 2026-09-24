@@ -112,7 +112,7 @@ Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the r
 | `.put(path, body?, { params }?)`         | Inline PUT                                                                            |
 | `.delete(path, { params }?)`             | Inline DELETE                                                                         |
 
-The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
+The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: its surrounding whitespace is trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
 
 A route with parameters is written as the app declares it, its values beside it: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`. The template types the params — every `:name` it holds takes a value, and no other name does (rule B12) — and the chain sends the path filled, each value URI-encoded, the query kept. The template is what the test's reader, the subject reader (C29, C30) and route coverage read, so none of them has to guess that `btc` is a value. A path with no parameter takes no options, or `{ params: {} }` to state that it is the route itself.
 
@@ -166,18 +166,18 @@ Location: /users/{{uuid#user}}
 - First line: `HTTP/1.1 <status>` — mandatory.
 - Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule C3).
 - Body and headers both accept `{{token}}` placeholders, including `#ref` captures — `{{uuid#user}}` above must be the _same_ UUID in the `Location` header and the body. See [tokens](15-tokens.md).
-- The body is a JSON value when its text parses as JSON, and the text itself otherwise — an HTML page, an event stream, a plain message is compared as the text it is, its surrounding blank lines trimmed on both sides.
+- The body is read by its `content-type` — the file's own, or the actual response's when the file states none — with its surrounding whitespace trimmed on both sides. A text type (`text/*`, `+xml`, `application/xml`, `application/x-ndjson`, …) is the text it is, even a `42` or a `true`: an HTML page, an event stream, a plain message. A JSON type, or no type at all, is the JSON value its text parses to, or its text when it does not parse. A binary type (`image/png`, `application/octet-stream`, …) is not read: its body is `null`, so its `.http` states the status and the headers and no body.
 
 ## The result
 
 The result of an API action exposes read-only accessors (rule D1); all assertions go through `expect()`:
 
-| Member                      | Type             | Description                                                                                             |
-| --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
-| `result.status`             | `number`         | HTTP status code — assert with native `expect(...).toBe(...)`                                           |
-| `result.response`           | response subject | Full response (status + headers + body) — compared whole, `toMatch(<.http text>)` or `toMatch(file(…))` |
-| `result.response.body`      | body             | The JSON value, or the text of a body that is not JSON; `null` when empty — for native assertions       |
-| `result.table(name, opts?)` | table subject    | Database table — compared whole, `toMatch(<rows>)` / `toBeEmpty()` (async, `await expect`)              |
+| Member                      | Type             | Description                                                                                                             |
+| --------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `result.status`             | `number`         | HTTP status code — assert with native `expect(...).toBe(...)`                                                           |
+| `result.response`           | response subject | Full response (status + headers + body) — compared whole, `toMatch(<.http text>)` or `toMatch(file(…))`                 |
+| `result.response.body`      | body             | The JSON value, or the text of a text body or one that is not JSON; `null` when empty or binary — for native assertions |
+| `result.table(name, opts?)` | table subject    | Database table — compared whole, `toMatch(<rows>)` / `toBeEmpty()` (async, `await expect`)                              |
 
 `expect(result.response).toMatch(file('./expected/user-created.http'))` reads the path it is given, like every other golden matcher (rule D3) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).
 

@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseRequestFile, parseResponseFile, serializeResponseFile } from './http-file.js';
+import {
+    parseRequestFile,
+    parseResponseFile,
+    readBody,
+    serializeResponseFile,
+} from './http-file.js';
 
 describe('http-files — requests', () => {
     test('parses method, path, headers, and body', () => {
@@ -183,5 +188,64 @@ describe('http-files — responses', () => {
         expect(text).toBe(
             'HTTP/1.1 200 OK\ncontent-type: application/json\n\n{\n    "id": "{{uuid}}"\n}\n',
         );
+    });
+});
+
+describe('http-files — a body read by its content-type', () => {
+    test('a text type keeps its text, even one that would parse as JSON', () => {
+        // Given - bodies that parse as JSON, labelled as text
+        const read = ['42', 'true', 'null'].map((text) =>
+            readBody(text, 'text/plain; charset=UTF-8'),
+        );
+
+        // Then - each is its text
+        expect(read).toStrictEqual(['42', 'true', 'null']);
+    });
+
+    test('a JSON type, or no type, is the value its text parses to, or the text when it does not parse', () => {
+        // Given - the same bodies, labelled JSON, labelled nothing, and a JSON label on a text
+        const read = [
+            readBody('42', 'application/json'),
+            readBody('{"ok":true}', 'application/problem+json'),
+            readBody('42'),
+            readBody('not json', 'application/json'),
+        ];
+
+        // Then - the values, and the text that did not parse
+        expect(read).toStrictEqual([42, { ok: true }, 42, 'not json']);
+    });
+
+    test('its surrounding whitespace is dropped, and a blank text holds no body', () => {
+        // Given - a text padded with spaces and blank lines, and a blank one
+        const read = [readBody('  \n  hello \n\n', 'text/plain'), readBody(' \n ', 'text/plain')];
+
+        // Then - the text alone, then nothing
+        expect(read).toStrictEqual(['hello', undefined]);
+    });
+
+    test('a fixture is read by its own content-type first, then by the actual one', () => {
+        // Given - a text fixture stating its type, one stating none, and a JSON type stated over a text actual
+        const own = parseResponseFile('HTTP/1.1 200\ncontent-type: text/plain\n\n42\n', 'own.http');
+        const borrowed = parseResponseFile('HTTP/1.1 200\n\n42\n', 'borrowed.http', 'text/plain');
+        const stated = parseResponseFile(
+            'HTTP/1.1 200\nContent-Type: application/json\n\n42\n',
+            'stated.http',
+            'text/plain',
+        );
+
+        // Then - the text, the text, and the stated JSON value
+        expect([own.body, borrowed.body, stated.body]).toStrictEqual(['42', '42', 42]);
+    });
+
+    test('a text body is written as it is when its type is text, and reads back the same', () => {
+        // Given - the text "42" recorded from a text/plain reply whose fixture states no type
+        const text = serializeResponseFile(
+            { body: '42', hasBody: true, headers: {}, status: '200' },
+            'text/plain',
+        );
+
+        // Then - written bare, and read back as the text under the same actual type
+        expect(text).toBe('HTTP/1.1 200 OK\n\n42\n');
+        expect(parseResponseFile(text, 'written.http', 'text/plain').body).toBe('42');
     });
 });
