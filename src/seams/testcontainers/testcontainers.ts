@@ -107,12 +107,15 @@ export class TestcontainersAdapter implements ContainerPort {
         return `${this.getHost()}:${this.getMappedPort(this.containerPort)}`;
     }
 
-    async getLogs(): Promise<string> {
+    async getLogs(since?: Date): Promise<string> {
         if (!this.container) {
             return '';
         }
 
-        const stream = await this.container.logs();
+        // The runtime reads `since` as UNIX seconds, a fraction taken as a fraction of one.
+        const stream = await this.container.logs(
+            since === undefined ? undefined : { since: since.getTime() / 1000 },
+        );
         return await new Promise((resolve) => {
             let output = '';
             stream.on('data', (chunk: Buffer) => {

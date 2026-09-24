@@ -17,6 +17,18 @@ describe('a container of the run, as a worker holds it', () => {
         await expect(container.getLogs()).resolves.toBe('logs of 40001');
     });
 
+    test('reads only what the run container logged since the moment it names', async () => {
+        // Given - a worker's container of the run, asked for its logs since one moment
+        const url = await servedRun(fakeRuntime());
+        const container = new RunContainer(url, POSTGRES);
+        await container.start();
+
+        // Then - the run reads its container from that moment, not the whole shared log
+        await expect(container.getLogs(new Date('2026-09-24T10:00:00.125Z'))).resolves.toBe(
+            'logs of 40001 since 2026-09-24T10:00:00.125Z',
+        );
+    });
+
     test('is never stopped by the worker — the run stops it', async () => {
         // Given - a worker's container of the run, started then stopped by the worker
         const runtime = fakeRuntime();

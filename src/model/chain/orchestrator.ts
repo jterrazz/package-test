@@ -42,6 +42,9 @@ export type OrchestratorOptions = {
 /** Where a service reads its init script from — `<root>/docker/<service>/`. */
 const DOCKER_DIR = 'docker';
 
+/** How far before a start its failure report reads logs, for a runtime clock behind the host's. */
+const LOG_CLOCK_MARGIN_MS = 500;
+
 /**
  * The infrastructure a specification declares, started and stopped as a unit.
  *
@@ -138,7 +141,10 @@ export class Orchestrator {
             } catch (error: any) {
                 let logs = '';
                 try {
-                    logs = await container.getLogs();
+                    // A container of the run logs every file's work: the report reads this start's.
+                    logs = await container.getLogs(
+                        new Date(serviceStartTime - LOG_CLOCK_MARGIN_MS),
+                    );
                 } catch {
                     /* Ignore log fetch errors */
                 }

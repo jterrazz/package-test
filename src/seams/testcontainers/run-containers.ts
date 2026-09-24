@@ -67,13 +67,13 @@ export class RunContainers {
         return { host: container.getHost(), key, port: container.getMappedPort(request.port) };
     }
 
-    async logs(key: string): Promise<string> {
+    async logs(key: string, since?: Date): Promise<string> {
         const pending = this.started.get(key);
         if (pending === undefined) {
             return '';
         }
         const container = await pending;
-        return await container.getLogs();
+        return await container.getLogs(since);
     }
 
     /** Stop every container the run started, whatever the others did. */
@@ -138,7 +138,10 @@ async function respond(
         }
         if (request.method === 'GET' && url.pathname === '/logs') {
             response.writeHead(200, { 'content-type': 'text/plain' });
-            response.end(await containers.logs(url.searchParams.get('key') ?? ''));
+            const key = url.searchParams.get('key') ?? '';
+            const since = url.searchParams.get('since');
+            const moment = since === null ? undefined : new Date(Number(since));
+            response.end(await containers.logs(key, moment));
             return;
         }
         response.writeHead(404).end();

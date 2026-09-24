@@ -69,13 +69,15 @@ export class RunContainer implements ContainerPort {
         return `${host}:${port}`;
     }
 
-    async getLogs(): Promise<string> {
+    async getLogs(since?: Date): Promise<string> {
         if (this.address === null) {
             return '';
         }
-        const response = await fetch(
-            `${this.url}/logs?key=${encodeURIComponent(this.address.key)}`,
-        );
+        const query = new URLSearchParams({ key: this.address.key });
+        if (since !== undefined) {
+            query.set('since', String(since.getTime()));
+        }
+        const response = await fetch(`${this.url}/logs?${query.toString()}`);
         return await response.text();
     }
 

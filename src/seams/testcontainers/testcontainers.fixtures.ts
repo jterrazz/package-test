@@ -21,7 +21,12 @@ export function fakeRuntime(options: { failFirstStart?: boolean } = {}): Runtime
         return {
             getConnectionString: () => `127.0.0.1:${port}`,
             getHost: () => '127.0.0.1',
-            getLogs: async () => await Promise.resolve(`logs of ${port}`),
+            getLogs: async (since?: Date) =>
+                await Promise.resolve(
+                    since === undefined
+                        ? `logs of ${port}`
+                        : `logs of ${port} since ${since.toISOString()}`,
+                ),
             getMappedPort: () => port,
             start: async () => {
                 if (failing) {

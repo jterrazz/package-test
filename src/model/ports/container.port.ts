@@ -18,8 +18,8 @@ export type ContainerPort = {
     /** Get a full connection string for this service. */
     getConnectionString: () => string;
 
-    /** Get container logs (stdout + stderr). */
-    getLogs: () => Promise<string>;
+    /** Get container logs (stdout + stderr) — all of them, or those logged since a moment. */
+    getLogs: (since?: Date) => Promise<string>;
 };
 
 /**

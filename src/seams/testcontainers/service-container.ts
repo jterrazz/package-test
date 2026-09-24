@@ -45,8 +45,8 @@ export class ServiceContainer implements ContainerPort {
         return this.started().getConnectionString();
     }
 
-    async getLogs(): Promise<string> {
-        return (await this.delegate?.getLogs()) ?? '';
+    async getLogs(since?: Date): Promise<string> {
+        return (await this.delegate?.getLogs(since)) ?? '';
     }
 
     private started(): ContainerPort {
