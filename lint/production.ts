@@ -475,15 +475,60 @@ export function allowedTestPackagesAt(filename: string): ReadonlySet<string> {
 }
 
 /**
- * The test material a specifier written in `from` reaches, if it reaches any —
- * the test packages in `allowed` aside.
+ * What each specifier reached in this run, by the folder it is written in —
+ * the walk from one folder is the same whichever production module of it
+ * asks, since a production module on the way ends the walk.
+ *
+ * A run is every lint until a file is linted a second time, or until a module
+ * a walk passed through is linted: a CLI run lints each file once, and the
+ * editor's host lints again the file that changed. Only a walk's middle can
+ * move its answer — the tree it resolves in and the modules that are neither
+ * production nor test material — and a change there reaches this cache
+ * through the file linted next.
+ */
+const reaches = new Map<string, Reach | undefined>();
+
+/** The files linted in this run. */
+const linted = new Set<string>();
+
+/** The modules this run's walks passed through. */
+const walked = new Set<string>();
+
+/**
+ * A file's lint begins: when it was linted in this run already, or a walk
+ * passed through it, a new run begins and every reach is walked again.
+ */
+export function lintBegins(filename: string): void {
+    if (linted.has(filename) || walked.has(filename)) {
+        reaches.clear();
+        linted.clear();
+        walked.clear();
+    }
+    linted.add(filename);
+}
+
+/**
+ * The test material a specifier written in `from` — a production module —
+ * reaches, if it reaches any, the test packages in `allowed` aside; walked
+ * once per folder and specifier in a run.
  */
 export function reachOf(
     from: string,
     specifier: string,
     allowed: ReadonlySet<string> = new Set(),
 ): Reach | undefined {
-    return reachFrom(from, specifier, new Set([from]), allowed);
+    const key = [dirname(from), specifier, ...[...allowed].toSorted()].join('\0');
+    if (reaches.has(key)) {
+        return reaches.get(key);
+    }
+    const seen = new Set([from]);
+    const reach = reachFrom(from, specifier, seen, allowed);
+    seen.delete(from);
+    for (const module of seen) {
+        walked.add(module);
+    }
+    reaches.set(key, reach);
+    return reach;
 }
 
 /** The first string argument of a call, with the node that carries it. */

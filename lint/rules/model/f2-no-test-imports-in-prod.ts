@@ -7,6 +7,7 @@ import { RULE_DOCS } from '../../manifest.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../path-references.js';
 import {
     allowedTestPackagesAt,
+    lintBegins,
     materialNamed,
     moduleReferenceVisitor,
     reachOf,
@@ -67,6 +68,7 @@ export const f2NoTestImportsInProd: LintRule = {
         return {
             ...mergeVisitors(references, paths),
             before() {
+                lintBegins(context.physicalFilename);
                 if (!isProductionFile(context)) {
                     return false;
                 }

@@ -1,8 +1,10 @@
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import {
     isProductionModule,
+    lintBegins,
     materialAt,
     reachOf,
     resolveSpecifier,
@@ -194,5 +196,60 @@ describe('reachOf', () => {
         // Given - two tool modules importing each other
         // Then - the walk visits each once and finds no material
         expect(reachOf(join(ROOT, 'src/domain/order.ts'), '../../tools/a.js')).toBeUndefined();
+    });
+});
+
+/** A package whose production imports a module under a retired test root that reaches nothing yet. */
+function helperPackage(): { from: (name: string) => string; later: () => void } {
+    const root = packageWith({ 'tests/helper.ts': 'export const helper = 1;\n' });
+    return {
+        from: (name) => join(root, 'src', name),
+        later: () => {
+            writeFileSync(
+                join(root, 'tests/helper.ts'),
+                "export { users } from '../specs/fixtures/users.js';\n",
+            );
+        },
+    };
+}
+
+describe('reachOf across a run', () => {
+    test('a specifier is walked once per folder: a module that changes after is not read again in the run', () => {
+        // Given - a walk through the helper, the helper then reaching the specs tree
+        const { from, later } = helperPackage();
+        lintBegins(from('a.ts'));
+        const before = reachOf(from('a.ts'), '../tests/helper.js');
+        later();
+
+        // Then - another module of the folder, linted for the first time, is answered from the run
+        lintBegins(from('b.ts'));
+        expect(before).toBeUndefined();
+        expect(reachOf(from('b.ts'), '../tests/helper.js')).toBeUndefined();
+    });
+
+    test('a file linted a second time begins a new run', () => {
+        // Given - the same walk, the helper changed, and the first file linted again
+        const { from, later } = helperPackage();
+        lintBegins(from('a.ts'));
+        reachOf(from('a.ts'), '../tests/helper.js');
+        later();
+        lintBegins(from('a.ts'));
+
+        // Then - the helper is read again
+        expect(reachOf(from('a.ts'), '../tests/helper.js')?.through).toHaveLength(1);
+    });
+
+    test('a module a walk passed through, linted, begins a new run', () => {
+        // Given - the same walk, then the helper itself linted after its change
+        const { from, later } = helperPackage();
+        lintBegins(from('a.ts'));
+        reachOf(from('a.ts'), '../tests/helper.js');
+        later();
+        lintBegins(from('../tests/helper.ts'));
+
+        // Then - the folder's next question is walked again
+        expect(reachOf(from('b.ts'), '../tests/helper.js')?.what).toMatch(
+            /specs\/fixtures\/users\.js$/u,
+        );
     });
 });
