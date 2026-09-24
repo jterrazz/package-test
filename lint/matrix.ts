@@ -45,7 +45,7 @@ const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roo
     component: {
         extensions: ['.test.tsx', '.specification.ts'],
         files: ['vitest.config.ts'],
-        roots: ['specs/component-app'],
+        roots: ['specs/component'],
     },
     integration: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/integration'] },
     jobs: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/jobs'] },

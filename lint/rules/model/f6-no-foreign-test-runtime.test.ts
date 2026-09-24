@@ -108,7 +108,7 @@ tester.run('f6-no-foreign-test-runtime', asOxlintRule(f6NoForeignTestRuntime), {
         // A providers module is the app's frame, not a spec speaking a dialect.
         {
             code: 'import { render } from "vitest-browser-react";',
-            filename: '/repo/specs/component-app/providers.tsx',
+            filename: '/repo/specs/component/providers.tsx',
         },
     ],
 });

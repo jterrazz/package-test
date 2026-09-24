@@ -185,7 +185,7 @@ describe('component() — the browser project', () => {
     test('loads the project wrap through a setup file, not a fetch under the run', async () => {
         // Given - a project whose providers live in a module of its own
         const project = testOf(
-            await component({ root: process.cwd(), wrap: './specs/component-app/providers.tsx' }),
+            await component({ root: process.cwd(), wrap: './specs/component/providers.tsx' }),
         );
         const setup = project.setupFiles;
 

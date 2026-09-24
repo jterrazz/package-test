@@ -70,10 +70,10 @@ const config = defineSpecConfig({
                 // The package's own component app is the subject its component
                 // Specs stand on, and A2's law holds for it too: the test of a
                 // Component is the `.test.tsx` NEXT to it.
-                include: ['specs/component-app/**/*.test.tsx'],
+                include: ['specs/component/**/*.test.tsx'],
                 locale: 'fr-FR',
                 // `wrap` is read against the app's folder, not the config's.
-                root: resolve(import.meta.dirname, 'specs/component-app'),
+                root: resolve(import.meta.dirname, 'specs/component'),
                 timezone: 'Europe/Paris',
                 viewport: { height: 640, width: 1024 },
                 vite: {
