@@ -114,3 +114,13 @@ export function mobileSessionSetup(): string {
     const source = join(import.meta.dirname, 'mobile-session.ts');
     return existsSync(source) ? source : join(import.meta.dirname, 'mobile-session.js');
 }
+
+/**
+ * The global setup that serves the run's service containers — the testcontainers
+ * seam's `run-setup.ts` in a source checkout, `services-setup.js` in the built
+ * package, where the bundle and its entries share one folder.
+ */
+export function servicesSetup(): string {
+    const source = join(import.meta.dirname, '../seams/testcontainers/run-setup.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'services-setup.js');
+}

@@ -113,7 +113,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: 'it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse',
     },
     {
-        claims: oneOf('src/model/artifacts/artifacts.ts', 'lint/manifest.ts', 'lint/rule-code.ts'),
+        claims: oneOf(
+            'src/model/artifacts/artifacts.ts',
+            'src/model/chain/service-images.ts',
+            'lint/manifest.ts',
+            'lint/rule-code.ts',
+        ),
         name: 'constant data',
         why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifest)',
     },
@@ -168,6 +173,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/seams/msw/server.ts',
             'src/seams/msw/worker.ts',
             'src/seams/playwright/playwright.adapter.ts',
+            'src/seams/postgres/template.ts',
             'src/seams/vitest-browser/commands.ts',
             'src/seams/vitest-browser/golden.ts',
             'src/seams/vitest-browser/page-runtime.ts',

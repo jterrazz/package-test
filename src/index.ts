@@ -1,7 +1,8 @@
 import { registerContainerIntegrations } from './model/chain/registry.js';
 import { interceptThrough } from './model/contracts/intercept.js';
 import type { Intercept } from './model/contracts/intercept.js';
-import { TestcontainersAdapter } from './seams/testcontainers/testcontainers.js';
+import { serviceContainers } from './runner/provided.js';
+import { ServiceContainer } from './seams/testcontainers/service-container.js';
 
 // ── The surface both runtimes share (browser-safe) ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
@@ -118,5 +119,5 @@ export { sqlite, type SqliteOptions } from './seams/sqlite/sqlite.js';
 // The single entry point every consumer imports (F1).
 
 registerContainerIntegrations({
-    createContainer: (options) => new TestcontainersAdapter(options),
+    createContainer: (request) => new ServiceContainer(request, serviceContainers),
 });

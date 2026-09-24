@@ -36,6 +36,7 @@ export default defineConfig([
             'in-place-setup': 'src/runner/in-place-setup.ts',
             'mobile-session': 'src/runner/mobile-session.ts',
             'route-coverage': 'src/runner/route-coverage.ts',
+            'services-setup': 'src/seams/testcontainers/run-setup.ts',
             vitest: 'src/runner/index.ts',
         },
         format: ['esm'],

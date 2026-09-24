@@ -25,7 +25,9 @@ export type PostgresOptions = {
 
 /**
  * A test database holds nothing worth a crash: its data lives on a memory
- * disk, and postgres skips every write that only exists to survive one.
+ * disk, and postgres skips every write that only exists to survive one. Its
+ * log keeps what a failed start is read for — the checkpoint a clone forces
+ * is not that.
  */
 const DISPOSABLE: ContainerOptions = {
     command: [
@@ -36,6 +38,8 @@ const DISPOSABLE: ContainerOptions = {
         'synchronous_commit=off',
         '-c',
         'full_page_writes=off',
+        '-c',
+        'log_checkpoints=off',
     ],
     tmpfs: { '/var/lib/postgresql/data': 'rw' },
 };

@@ -55,7 +55,8 @@ const config = defineSpecConfig({
                     specification: './specs/cli/literate-cli.specification.ts',
                 },
             }),
-            // Parallel: each worker gets an isolated DB schema + Redis DB.
+            // Parallel: the run's containers are shared, and each worker gets a
+            // Database of its own and a Redis index.
             api(),
             jobs(),
             // Serial: the facet's own probes of the container seams start

@@ -135,6 +135,14 @@ A chain's scope is ONE terminal action, and a contract's `required` is checked a
 
 This is the same boundary rule B1 already states from the other side — one chain, one action — read from the contract's end. A test that wants a contract to hold across two actions writes two chains, each declaring what it expects to see.
 
+## One container per run
+
+A container-backed service is started once per RUN, not once per file. The `api()`, `jobs()` and `integration()` projects carry a global setup that serves the run's containers on a loopback port and provides its address to the workers. The first file that declares a service starts its container; every later file, in any worker, is handed the same one; the run stops them all after the last file. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation-rule-g2)).
+
+A project written by hand, or a facet whose helper carries no such setup (`cli()`, `website()`, `mobile()`), starts a container per specification and stops it with the file.
+
+The setup reaches Docker in the background and pulls each pinned default image the daemon lacks, so the first file waits on a pull at most once. When no Docker daemon answers, every file that declares a service fails with one sentence that names Docker, and a project whose specs declare no service never needs Docker at all.
+
 ## Per-worker isolation (rule G2)
 
 Vitest runs test files in parallel workers; the framework isolates them automatically — no configuration, no sharding:

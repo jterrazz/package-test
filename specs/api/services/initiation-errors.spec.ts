@@ -104,8 +104,10 @@ describe('initiation-errors', () => {
 
     test('postgres init script failure — error report includes postgres container logs', () => {
         // Given - the captured startup report
-        // Then - report includes container log lines from the failing postgres
-        expect(brokenInit.output).toContain('database system is ready to accept connections');
+        // Then - report includes the line the container logged for the failing statement, which only its logs carry
+        expect(brokenInit.output).toContain(
+            'STATEMENT:  CREATE TABLE "users" (id SERIAL PRIMARY KEY, name TEXTTTT NOT NULL);',
+        );
     });
 
     test('multi-service failure — redis succeeds, postgres fails — error report shows both services under their record keys', () => {
@@ -141,7 +143,9 @@ describe('initiation-errors', () => {
 
     test('multi-postgres failure — first succeeds, second fails — second postgres failure includes its own container logs', () => {
         // Given - the captured startup report
-        // Then - logs are from the broken-db container
-        expect(multiPostgres.output).toContain('database system is ready to accept connections');
+        // Then - the logs hold the statement of broken-db's own script
+        expect(multiPostgres.output).toContain(
+            'STATEMENT:  CREATE TABLE "events" (id SERIAL PRIMARY KEY, type TEXTTTT NOT NULL);',
+        );
     });
 });
