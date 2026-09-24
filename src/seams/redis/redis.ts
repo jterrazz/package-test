@@ -49,7 +49,7 @@ export class RedisHandle implements ServiceHandle {
             const client = createClient({ url: this.connectionString });
             await client.connect();
             await client.ping();
-            await client.disconnect();
+            client.destroy();
         } catch (error: any) {
             throw new Error(
                 `redis healthcheck failed: ${error.message || error.code || String(error)}`,
@@ -75,7 +75,7 @@ export class RedisHandle implements ServiceHandle {
         try {
             await client.flushDb();
         } finally {
-            await client.disconnect();
+            client.destroy();
         }
     }
 

@@ -49,14 +49,14 @@ describe('redis', () => {
             const writer = createClient({ url: probe.connectionString });
             await writer.connect();
             await writer.set('probe-key', 'probe-value');
-            await writer.disconnect();
+            writer.destroy();
 
             await probe.reset();
 
             const reader = createClient({ url: probe.connectionString });
             await reader.connect();
             const after = await reader.get('probe-key');
-            await reader.disconnect();
+            reader.destroy();
             return { after };
         });
 
@@ -77,7 +77,7 @@ describe('redis', () => {
             const client = createClient({ url: probe.connectionString });
             await client.connect();
             await client.set('before', 'value1');
-            await client.disconnect();
+            client.destroy();
 
             await probe.reset();
 
@@ -86,7 +86,7 @@ describe('redis', () => {
             await after.set('after', 'value2');
             const written = await after.get('after');
             const flushed = await after.get('before');
-            await after.disconnect();
+            after.destroy();
             return { flushed, written };
         });
 

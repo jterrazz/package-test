@@ -27,7 +27,6 @@
         "promise/prefer-await-to-then": 1,
         "typescript/consistent-return": 1,
         "typescript/no-base-to-string": 1,
-        "typescript/no-deprecated": 6,
         "typescript/no-dynamic-delete": 1,
         "typescript/no-explicit-any": 31,
         "typescript/no-inferrable-types": 1,
