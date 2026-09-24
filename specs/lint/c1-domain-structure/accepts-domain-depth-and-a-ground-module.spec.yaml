@@ -1,4 +1,4 @@
-description: a test at facet/domain depth, and a ground module with its unit test beside it, pass
+description: a test at facet/domain depth and a ground module beside its unit test pass, under shared/ too
 fixture: ./fixtures/compliant/
 runs:
     - command: .

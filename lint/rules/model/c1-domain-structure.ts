@@ -1,6 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { isGroundName } from '../../../src/model/chain/ground.js';
+import { isGroundName, SHARED_GROUND } from '../../../src/model/chain/ground.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
@@ -105,6 +105,12 @@ function testsItsNeighbour(filename: string): boolean {
  * inside one: a domain named with a reserved word is refused here. That is not a
  * question of depth, which is why no project's declared shape switches it off.
  *
+ * `shared/` is reserved beside the four, in every mode: it is the one folder
+ * the specs root keeps beside its facets, holding the ground several leaves
+ * share, so a spec under `specs/shared/` is refused. Under `facet` and
+ * `facet-domain`, a domain named `shared` is refused too — the one word means
+ * one folder.
+ *
  * Ground is not always inert, though: it may be CODE the specs stand on — the
  * build of the subject under test, a harness the runner spawns. A `<module>.ts`
  * there keeps its own unit test under I2's law, `<module>.test.ts` NEXT to it,
@@ -140,7 +146,21 @@ export const c1DomainStructure: LintRule = {
                         return;
                     }
                 }
+                const spec = isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX);
+                if (spec && nesting >= 1 && anchor.relative[0] === SHARED_GROUND) {
+                    context.report({ messageId: 'specInShared', node });
+                    return;
+                }
                 if (depth === 'off') {
+                    return;
+                }
+                if (
+                    spec &&
+                    depth !== 'mirror' &&
+                    nesting >= 2 &&
+                    anchor.relative[1] === SHARED_GROUND
+                ) {
+                    context.report({ messageId: 'sharedDomain', node });
                     return;
                 }
 
@@ -201,6 +221,14 @@ export const c1DomainStructure: LintRule = {
             specInGround: {
                 found: 'a spec under `{{ground}}/`, a reserved ground name',
                 fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
+            },
+            sharedDomain: {
+                found: 'a domain named `shared`, the name the specs root keeps for its shared ground',
+                fix: 'rename the domain: `shared` names `specs/shared/`, the ground several leaves share',
+            },
+            specInShared: {
+                found: 'a spec under `specs/shared/`, the ground several leaves share',
+                fix: 'move it into its facet: `specs/shared/` holds only `fixtures/`, `seeds/`, `requests/` and `expected/`',
             },
             specNotAtFacetRoot: {
                 found: 'a `*.specification.ts` below its facet root',

@@ -1,8 +1,9 @@
-description: a test at the facet root, and one in a ground folder with no module beside it, are refused
+description: a test at the facet root, one in ground with no module beside it, and one under shared/ are refused
 fixture: ./fixtures/violation/
 runs:
     - command: .
       exit: 1
       stdout: |
+          specs/shared/listed/listed.test.ts:1:1  jterrazz(c1-domain-structure)
           specs/widget/fixtures/binary/scenarios.test.ts:1:1  jterrazz(c1-domain-structure)
           specs/widget/widget.test.ts:1:1  jterrazz(c1-domain-structure)
