@@ -2828,3 +2828,80 @@ was reinstalled from package-test `0aa5a546` (`npm ci`). HEAD stays
     - **Owner call, carried from the unit.** Keep the toolchain-name
       fallback for the reader, or replace it with a chain that links
       `node_modules` (C18 debt 22 against 21).
+
+## Batch 3 of 2026-09-24 (hybrid): typescript
+
+One unit landed on package-typescript's `vision/17`, by cherry-pick with no
+conflict. @jterrazz/test was reinstalled from package-test `8b57b457`
+(`npm ci`). HEAD is now `0a024e8`. `make fix` exit 0, `make check` exit 0
+(149 files, 440 tests).
+
+- **The Publish build guard, fix round** (branch
+  `vision17-typescript-publish-guard`, `e72deab`…`0a024e8`, 13 commits).
+  Its review came back `integrate`. The worktree `ptc-publish-guard` and the
+  branch are removed. What it closed:
+    - The Publish pass builds the package and refuses a build compiled from
+      test material. A failed build is a `publish-build` finding, and that
+      finding alone fails the pass (`publish/broken-build-alone`, shown red).
+    - The build runs without a reader and fails the pass all the same
+      (`publish-build-unresolved.spec.yaml`). A package with no build hears
+      nothing.
+    - The reader of test material comes only from the @jterrazz/test the
+      package resolves. The toolchain fallback is gone, which settles the
+      carried owner call. With no reader, the pass prints
+      `publish-test-material: nothing to judge` and names the reason:
+      `absent`, `readerless` or `unloadable`. In a workspace it also names
+      the member.
+    - The guard judges only the chunks `files` ships. It builds the entries
+      the `exports` map earns, and names chunks as `typescript bundle`
+      writes them (the `.mjs` hypothesis was checked and is false). Its
+      build turns off the config's `copy`, `exe` and `onSuccess`.
+- What stays open:
+    - **C18 debt 22.** `specs/cli/check/publish-guard.spec.ts` stays a raw
+      chain. Paying it off needs a `.link()` or install setup verb in
+      @jterrazz/test's `CliSpecification`, and that is a backlog row for
+      this package. docs/03:88 names only the rulebook third door, and
+      docs/03:85 says "link" where two cases write a stub install.
+    - Unproved branches (a mutation stays green): the `src/index.ts`
+      fallback of `buildOf` (publish-material.js:121-123, which covers
+      string `exports` or `main`-only packages), the `dynamicImports` half
+      of externals (:158), and the `!existsSync(entry)` readerless guard
+      (:85).
+    - **Owner call.** There is one build definition. The guard prefers a
+      package's own `tsdown.config.*`, but `typescript bundle` always passes
+      the preset, and the entry rule is written twice (bin/typescript.sh:76-86
+      and `buildOf`). docs/06:306 "builds the package as it builds" is false
+      for an own-config package. No estate package has one today.
+    - The Publish pass is now a writer (check.sh:958), so a green run
+      prints whatever check-publish writes: config hooks, and side effects
+      of importing `./oxlint`. Give the nothing-to-judge note its own
+      channel.
+    - skills/jterrazz-typescript/SKILL.md:37 does not name `publish-build`.
+    - Rule lines in a workspace still print a member-relative path. Only
+      the nothing-to-judge note names the member.
+    - Carried from batch 2: `isPacked` ignores negated `files` entries, the
+      opening sentence of docs/06:287 is false for the two new rules, the
+      guard's exemption (any test package in `dependencies` or
+      `peerDependencies`) still differs from F2's `test.production.allow`
+      (**owner call**), and a config's tsdown `hooks` still run.
+- **Drift words and JSON, the config-name export, the proofs and perf**
+  (branch `vision17-typescript-drift-and-names`, `f9ea4cd`…`978fa47`,
+  12 commits). Skipped, because its review came back `fix-first` after one
+  round. The worktree `ptc-drift-and-names` and the branch are kept. It
+  would close the test section's **Toolchain owner** row: `1eb6900`
+  publishes the oxlint config-name list as a subpath. Strike that row once
+  the unit lands. What stays open for its fix round:
+    - **Major.** docs/03-testing.md:23 does not name the `node` spawn of
+      `src/cli/check-baseline.test.ts`.
+    - **Major.** The two new cases in `specs/cli/check/drift.spec.ts:241-280`
+      run `check-drift.js` directly, which is hidden C18 debt. Move them
+      into a new `src/cli/check-drift.test.ts`.
+    - **Major.** Nothing proves the JSON contract at docs/06:337 (an absent
+      section reads `null`, an emptied one reads `0`). Add a `{ "typescript":
+      {} }` `--json` case and show it red.
+    - No test proves that the unreadable case drops the human `test` row.
+    - `typescript baseline` refusing when the Names pass writes no report
+      is proved only by the module test. Add a spec document on
+      `names-refused` that pins exit 1 and the untouched baseline.
+    - The judge's `oxlint wrote no JSON report` message keeps its wording.
+      That was a choice the unit documented.
