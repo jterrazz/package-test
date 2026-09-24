@@ -114,8 +114,8 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 73    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 139   |
-| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 165   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 140   |
+| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 169   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 40    |
 
 <!-- /GENERATED:layers -->
@@ -271,8 +271,8 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.clock()`     | 1   | 1    | —   | 1           | 1       | —      | 1         | —      |
 | `.intercept()` | 10  | 1    | —   | 1           | 1       | 1      | 4         | —      |
 | `.seed()`      | 9   | 1    | 1   | 3           | —       | —      | —         | —      |
-| `.headers()`   | 2   | —    | —   | —           | 1       | —      | —         | —      |
-| `.with()`      | 2   | 1    | 1   | 1           | 1       | —      | —         | —      |
+| `.headers()`   | 3   | —    | —   | —           | 1       | —      | —         | —      |
+| `.with()`      | 3   | 1    | 1   | 1           | 1       | —      | —         | —      |
 | `.fixture()`   | —   | —    | 28  | —           | —       | —      | —         | —      |
 | `.env()`       | —   | —    | 4   | —           | —       | —      | —         | —      |
 | `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
@@ -283,7 +283,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability   | api | jobs | cli | integration | website | mobile | component | module |
 | ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `.get()`     | 19  | —    | —   | —           | —       | —      | —         | —      |
-| `.post()`    | 4   | —    | —   | —           | —       | —      | —         | —      |
+| `.post()`    | 5   | —    | —   | —           | —       | —      | —         | —      |
 | `.put()`     | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.request()` | 2   | —    | —   | —           | —       | —      | —         | —      |
@@ -453,7 +453,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/checker-migration.test.ts`            | the 16 → 17 mover (C13 --fix) · the 16 → 17 mover — the oxlint config                                                                                                                                                                                                                                                                                                                                                                                                                                | 22    |
 | `lint/checker-spec.test.ts`                 | fixSpecDocument — key order and block scalars                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5     |
 | `lint/checker-sql-seeds.test.ts`            | the seed branch of C28 — a seed file is named by its first comment · the seed branch of C28 — a seed with no comment is named by its test                                                                                                                                                                                                                                                                                                                                                            | 3     |
-| `lint/checker-subject.test.ts`              | c29 and c30 — one subject per file, filed under its standard name                                                                                                                                                                                                                                                                                                                                                                                                                                    | 19    |
+| `lint/checker-subject.test.ts`              | c29 and c30 — one subject per file, filed under its standard name                                                                                                                                                                                                                                                                                                                                                                                                                                    | 20    |
 | `lint/checker.test.ts`                      | conventions checker — findUnknownTokens (D4) · conventions checker — findKnownTokens (D10) · conventions checker — checkConventionFiles (D4) · the tree the checker judges — what git does not ignore · the moves the fixers make · the single paths the checker probes — through the same tree                                                                                                                                                                                                      | 17    |
 | `lint/coverage.test.ts`                     | the coverage ratchet · what the count reaches — the child processes the suite spawns (meta-test)                                                                                                                                                                                                                                                                                                                                                                                                     | 10    |
 | `lint/docs-typecheck.test.ts`               | docs-typecheck — block selection · docs-typecheck — the published samples typecheck · docs-typecheck — the corpus does not await a sync matcher · docs-typecheck — harness                                                                                                                                                                                                                                                                                                                           | 6     |
