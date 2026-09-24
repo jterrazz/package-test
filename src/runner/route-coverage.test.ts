@@ -6,6 +6,12 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 import { heldUnreached, writeLedger } from '../model/routes/routes.js';
 import { judgeRoutes, UNKNOWN_TABLE } from './route-coverage.js';
 
+/** A green run, judged. */
+const GREEN = { failed: 0, update: false };
+
+/** A green run, recorded with TEST_UPDATE=1. */
+const RECORDING = { failed: 0, update: true };
+
 /** A project root holding one run's ledgers: two specifications of one table of three routes, one request. */
 function runWithOneRouteReached(): { directory: string; root: string } {
     const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
@@ -29,7 +35,7 @@ describe('route coverage — the api run judged', () => {
         const { directory, root } = runWithOneRouteReached();
 
         // Then - the failure names the two
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             failure:
                 'api routes: 2 declared route(s) no test reached, the ratchet holds 0 — send each from a spec, or record them with TEST_UPDATE=1:\n  GET /users\n  DELETE /users/:id',
         });
@@ -38,11 +44,11 @@ describe('route coverage — the api run judged', () => {
     test('update mode records where the run stands, and the next run is held by it', async () => {
         // Given - the same run, recorded
         const { directory, root } = runWithOneRouteReached();
-        await judgeRoutes(root, directory, true);
+        await judgeRoutes(root, directory, RECORDING);
 
         // Then - two held, and the judged run passes naming them
         expect(heldUnreached(root)).toBe(2);
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: 2 unreached, held by jterrazz.baseline.json › test › routes/unreached:\n  GET /users\n  DELETE /users/:id',
         });
     });
@@ -50,16 +56,32 @@ describe('route coverage — the api run judged', () => {
     test('a run that reaches more than the ratchet holds fails, until it is recorded', async () => {
         // Given - the run recorded, then one more route reached
         const { directory, root } = runWithOneRouteReached();
-        await judgeRoutes(root, directory, true);
+        await judgeRoutes(root, directory, RECORDING);
         writeLedger(directory, { declared: [], reached: [{ method: 'GET', path: '/users' }] });
 
         // Then - the fall is a failure naming the gesture; recorded, the run passes
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             failure:
                 'api routes: 1 declared route(s) no test reached, below the 2 the ratchet holds — the debt fell, record it with TEST_UPDATE=1',
         });
-        await judgeRoutes(root, directory, true);
+        await judgeRoutes(root, directory, RECORDING);
         expect(heldUnreached(root)).toBe(1);
+    });
+
+    test('update mode refuses to record a run a test of which failed, and keeps the entry', async () => {
+        // Given - the run recorded, then the same run judged for recording with one failed test and one route fewer reached
+        const { directory, root } = runWithOneRouteReached();
+        await judgeRoutes(root, directory, RECORDING);
+        writeLedger(directory, { declared: [], reached: [{ method: 'GET', path: '/users' }] });
+
+        // Then - the refusal names why, and the ratchet still holds where the green run stood
+        await expect(
+            judgeRoutes(root, directory, { failed: 1, update: true }),
+        ).resolves.toStrictEqual({
+            failure:
+                'api routes: not recorded — 1 test(s) of the run failed, and a failed test may not have sent its requests; make the run green, then record with TEST_UPDATE=1',
+        });
+        expect(heldUnreached(root)).toBe(2);
     });
 
     test('a route two specifications declare counts once', async () => {
@@ -74,7 +96,7 @@ describe('route coverage — the api run judged', () => {
         });
 
         // Then - three routes, not six
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: all 3 declared routes reached',
         });
     });
@@ -89,7 +111,7 @@ describe('route coverage — the api run judged', () => {
         );
 
         // Then - every declared route reached
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: all 1 declared routes reached',
         });
     });
@@ -102,7 +124,7 @@ describe('route coverage — the api run judged', () => {
         });
 
         // Then - nothing to judge
-        await expect(judgeRoutes(root, join(root, 'ledgers'), false)).resolves.toStrictEqual({});
+        await expect(judgeRoutes(root, join(root, 'ledgers'), GREEN)).resolves.toStrictEqual({});
     });
 
     test('an app whose table is unknown fails the run, naming how to declare it', async () => {
@@ -111,7 +133,7 @@ describe('route coverage — the api run judged', () => {
         writeLedger(directory, { reached: [{ method: 'GET', path: '/health' }] });
 
         // Then - the run fails rather than reading as every route reached
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             failure: UNKNOWN_TABLE,
         });
     });
@@ -131,7 +153,7 @@ describe('route coverage — the api run judged', () => {
         );
 
         // Then - measured against the document
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: all 1 declared routes reached',
         });
     });
@@ -149,7 +171,7 @@ describe('route coverage — the api run judged', () => {
         });
 
         // Then - reached
-        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: all 1 declared routes reached',
         });
     });
