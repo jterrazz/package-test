@@ -48,7 +48,7 @@ export const SHARED_DOMAINS = [
 /** Each facet's own domains — a name here may not appear under another facet. */
 export const FACET_DOMAINS: Record<string, string[]> = {
     integration: ['call', 'postgres', 'redis', 'table'],
-    mobile: ['launch'],
+    mobile: ['drafts', 'launch', 'notes', 'sign-in'],
     website: ['console', 'fetch', 'services', 'visit'],
 };
 

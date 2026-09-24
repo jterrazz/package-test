@@ -93,7 +93,7 @@ a declared name nothing carries fails too.
 | Facet         | Shared domains it carries | Its own                                     |
 | ------------- | ------------------------- | ------------------------------------------- |
 | `integration` | `clock/`, `intercepts/`   | `call/`, `postgres/`, `redis/`, `table/`    |
-| `mobile`      | —                         | `launch/`                                   |
+| `mobile`      | —                         | `drafts/`, `launch/`, `notes/`, `sign-in/`  |
 | `website`     | `assertions/`, `clock/`   | `console/`, `fetch/`, `services/`, `visit/` |
 
 <!-- /GENERATED:domains -->
@@ -114,7 +114,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 69    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 133   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 138   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 165   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 40    |
 
@@ -269,7 +269,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability     | api | jobs | cli | integration | website | mobile | component | module |
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 1   | 1    | —   | 1           | 1       | —      | 1         | —      |
-| `.intercept()` | 10  | 1    | —   | 1           | 1       | 0      | 4         | —      |
+| `.intercept()` | 10  | 1    | —   | 1           | 1       | 1      | 4         | —      |
 | `.seed()`      | 9   | 1    | 1   | 3           | —       | —      | —         | —      |
 | `.headers()`   | 2   | —    | —   | —           | 1       | —      | —         | —      |
 | `.with()`      | 2   | 1    | 1   | 1           | 1       | —      | —         | —      |
@@ -293,15 +293,15 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.run()`     | —   | —    | 4   | —           | —       | —      | —         | —      |
 | `.visit()`   | —   | —    | —   | —           | 20      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
-| `.open()`    | —   | —    | —   | —           | —       | 2      | —         | —      |
+| `.open()`    | —   | —    | —   | —           | —       | 7      | —         | —      |
 | `.render()`  | —   | —    | —   | —           | —       | —      | 20        | —      |
 
 ### Verb
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 11      | 1      | 18        | —      |
-| `fill`     | —   | —    | —   | —           | 4       | 0      | 2         | —      |
+| `see`      | —   | —    | —   | —           | 11      | 6      | 18        | —      |
+| `fill`     | —   | —    | —   | —           | 4       | 1      | 2         | —      |
 | `click`    | —   | —    | —   | —           | 3       | —      | 8         | —      |
 | `gone`     | —   | —    | —   | —           | 3       | —      | 6         | —      |
 | `press`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
@@ -309,7 +309,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `check`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
 | `select`   | —   | —    | —   | —           | 1       | —      | 2         | —      |
 | `goto`     | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `tap`      | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `tap`      | —   | —    | —   | —           | —       | 3      | —         | —      |
 | `rerender` | —   | —    | —   | —           | —       | —      | 1         | —      |
 | `unmount`  | —   | —    | —   | —           | —       | —      | 1         | —      |
 
@@ -317,10 +317,10 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `button`        | —   | —    | —   | —           | 4       | 0      | 8         | —      |
-| `field`         | —   | —    | —   | —           | 6       | 0      | 5         | —      |
-| `content`       | —   | —    | —   | —           | 7       | 1      | 12        | —      |
-| `testId`        | —   | —    | —   | —           | 1       | 0      | 1         | —      |
+| `button`        | —   | —    | —   | —           | 4       | 3      | 8         | —      |
+| `field`         | —   | —    | —   | —           | 6       | 1      | 5         | —      |
+| `content`       | —   | —    | —   | —           | 7       | 6      | 12        | —      |
+| `testId`        | —   | —    | —   | —           | 1       | 1      | 1         | —      |
 | `heading`       | —   | —    | —   | —           | 3       | —      | 2         | —      |
 | `link`          | —   | —    | —   | —           | 3       | —      | 3         | —      |
 | `dialog`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
@@ -362,7 +362,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.value`        | —   | —    | —   | 6           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
 | `.tree`         | —   | —    | —   | —           | 5       | —      | 4         | —      |
-| `.content`      | —   | —    | —   | —           | 9       | 1      | 13        | —      |
+| `.content`      | —   | —    | —   | —           | 9       | 5      | 13        | —      |
 | `.console`      | —   | —    | —   | —           | 4       | —      | 3         | —      |
 | `.errors`       | —   | —    | —   | —           | 8       | —      | 8         | —      |
 | `.html`         | —   | —    | —   | —           | 2       | —      | 5         | —      |
@@ -378,7 +378,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.json`         | —   | —    | 5   | —           | 1       | —      | —         | —      |
 | `.headers`      | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.location`     | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.screen`       | —   | —    | —   | —           | —       | 1      | —         | —      |
+| `.screen`       | —   | —    | —   | —           | —       | 3      | —         | —      |
 
 ### Golden
 
@@ -430,7 +430,6 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 ### Exemptions
 
-- the mobile tree does not reach it yet (M1) — `.intercept()`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `testId`·mobile
 - every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared — `toMatch(file())`·website, `toMatch(file())`·component, `.aria.yaml tree`·website, `.aria.yaml tree`·component, `.json body`·website
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·cli, `{{iso8601}}`·website, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
@@ -467,7 +466,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/linted-file.test.ts`                  | linted-file — what every rule asks, answered once per file                                                                                                                                                                                                                                                                                                                                                                                                                                           | 3     |
 | `lint/makefile.test.ts`                     | the Makefile — the six targets a repository answers                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 4     |
 | `lint/matrix-calls.test.ts`                 | the matrix reads a call probe as a shape of the syntax tree                                                                                                                                                                                                                                                                                                                                                                                                                                          | 5     |
-| `lint/matrix.test.ts`                       | capability matrix (meta-test K6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 9     |
+| `lint/matrix.test.ts`                       | capability matrix (meta-test K6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 8     |
 | `lint/meta-tests.test.ts`                   | the meta-test channel, read off its own files                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3     |
 | `lint/module-tests.test.ts`                 | the module tests of a member — what C8 and the ground fixers read beside specs/                                                                                                                                                                                                                                                                                                                                                                                                                      | 1     |
 | `lint/oxlint-pin.test.ts`                   | the oxlint pin — the toolchain owns it and this manifest mirrors it                                                                                                                                                                                                                                                                                                                                                                                                                                  | 2     |

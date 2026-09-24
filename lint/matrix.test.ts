@@ -18,9 +18,9 @@ const read = (relative: string): string => readFileSync(resolve(ROOT, relative),
  * green tests says so: the suite proves what it runs, never what it does not.
  * The matrix is the projection that makes that visible, and this test is what
  * makes it a gate rather than a poster — a capability a facet DECLARES with no
- * test file exercising it fails here, unless the row names the reason
- * (mobile's simulator, a golden kind a facet's result cannot produce, a token
- * family the engine owns). No row excuses a hole as owed: the last of those
+ * test file exercising it fails here, unless the row names the reason (a
+ * golden kind a facet's result cannot produce, a token family the engine
+ * owns). No row excuses a hole as owed: the last of those
  * became specs.
  */
 describe('capability matrix (meta-test K6)', () => {
@@ -113,20 +113,6 @@ describe('capability matrix (meta-test K6)', () => {
 
         // Then - no reason outlives the hole it excused
         expect(stale, 'an exemption on a cell a spec now fills').toStrictEqual([]);
-    });
-
-    test('an empty mobile cell names M1, and the day one fills the exemption goes', () => {
-        // Given - the mobile column, which has no tree of its own today (M1)
-        const rows = matrixRows(ROOT);
-        const declared = rows.filter((row) => row.capability.columns.includes('mobile'));
-
-        // Then - each EMPTY mobile cell names M1; a cell that fills retires its exemption
-        expect(declared.length).toBeGreaterThan(0);
-        for (const row of declared.filter((candidate) => candidate.cells.mobile === 0)) {
-            expect(row.capability.exempt?.mobile, `${row.capability.name} on mobile`).toContain(
-                'M1',
-            );
-        }
     });
 
     test('the committed projection is byte-identical to a fresh generation', () => {

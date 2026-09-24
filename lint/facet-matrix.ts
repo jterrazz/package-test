@@ -99,9 +99,6 @@ export function memberOf(capability: Capability): string {
     return capability.member ?? capability.name.replace(/^\./u, '').replace(/\(\)$/u, '');
 }
 
-/** Why a mobile cell is empty while its tree grows (M1, chapter 03). */
-const NOT_YET = { mobile: 'the mobile tree does not reach it yet (M1)' } as const;
-
 /** Why a column holds no golden FILE: every golden of its tree is read by one test, and written in place. */
 const IN_PLACE =
     "every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared";
@@ -216,7 +213,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'jobs', 'integration', 'website', 'mobile', 'component'],
-        exempt: NOT_YET,
         group: 'Setup',
         name: '.intercept()',
         probe: '.intercept(',
@@ -296,7 +292,7 @@ export const CAPABILITIES: Capability[] = [
 
     // ── The verbs a scenario drives (the visitor's own members) ──
     { columns: DRAWS, group: 'Verb', name: 'see', probe: '.see(' },
-    { columns: DRAWS, exempt: NOT_YET, group: 'Verb', name: 'fill', probe: '.fill(' },
+    { columns: DRAWS, group: 'Verb', name: 'fill', probe: '.fill(' },
     { columns: BROWSERS, group: 'Verb', name: 'click', probe: '.click(' },
     { columns: BROWSERS, group: 'Verb', name: 'gone', probe: '.gone(' },
     {
@@ -326,7 +322,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['mobile'],
-        exempt: NOT_YET,
         group: 'Verb',
         name: 'tap',
         probe: '.tap(',
@@ -337,12 +332,11 @@ export const CAPABILITIES: Capability[] = [
     // ── The element vocabulary (chapter 13 owns the words) ──
     {
         columns: DRAWS,
-        exempt: NOT_YET,
         group: 'Descriptor',
         name: 'button',
         probe: 'button(',
     },
-    { columns: DRAWS, exempt: NOT_YET, group: 'Descriptor', name: 'field', probe: 'field(' },
+    { columns: DRAWS, group: 'Descriptor', name: 'field', probe: 'field(' },
     {
         columns: DRAWS,
         group: 'Descriptor',
@@ -352,7 +346,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: DRAWS,
-        exempt: NOT_YET,
         group: 'Descriptor',
         name: 'testId',
         probe: 'testId(',
