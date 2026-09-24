@@ -1,0 +1,14 @@
+description: --fix moves the seed a route and its sub-route share into the route's seeds/, both reaching it
+fixture: ./fixtures/nested-route/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/seeds: absent
+          specs/api/map/pois/seeds/single-base.sql: exists
+          specs/api/map/pois/listing.spec.ts:
+              contains: file('./seeds/single-base.sql')
+          specs/api/map/pois/detail/listing.spec.ts:
+              contains: file('../seeds/single-base.sql')
+    - command: checker .
+      exit: 0

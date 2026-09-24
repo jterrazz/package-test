@@ -1084,6 +1084,27 @@ function poolUsage(specsRoot: string, pool: string): Map<string, Map<string, str
     return usage;
 }
 
+/**
+ * The leaf every one of `leaves` is, or sits under: the one leaf, or the
+ * route's that encloses the others — `undefined` when they only meet above
+ * any leaf, where the pool is their common level.
+ */
+function commonLeaf(leaves: readonly string[]): string | undefined {
+    const [first, ...others] = leaves;
+    if (first === undefined) {
+        return undefined;
+    }
+    let common = first;
+    while (!others.every((leaf) => leaf === common || isWithin(common, leaf))) {
+        const parent = dirname(common);
+        if (parent === common) {
+            return undefined;
+        }
+        common = parent;
+    }
+    return leaves.includes(common) || (others.length > 0 && isLeaf(common)) ? common : undefined;
+}
+
 /** A pool entry only one leaf reaches for, and the leaf it belongs to. */
 type MisplacedPoolFixture = {
     entry: string;
@@ -1103,16 +1124,11 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     for (const pool of findPools(rootDir)) {
         const usage = poolUsage(dirname(pool), pool);
         for (const [entry, leaves] of usage) {
-            const [only] = leaves;
-            if (
-                leaves.size !== 1 ||
-                only === undefined ||
-                treeKind(join(pool, entry)) === undefined
-            ) {
+            const leaf = commonLeaf([...leaves.keys()]);
+            if (leaf === undefined || treeKind(join(pool, entry)) === undefined) {
                 continue;
             }
-            const [leaf, referrers] = only;
-            misplaced.push({ entry, leaf, pool, referrers });
+            misplaced.push({ entry, leaf, pool, referrers: [...leaves.values()].flat() });
         }
     }
     return misplaced;
@@ -1132,18 +1148,23 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
  * referrers.
  */
 export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
-    return misplacedPoolFixtures(rootDir).map(({ entry, leaf, pool }) => {
+    return misplacedPoolFixtures(rootDir).map(({ entry, leaf, pool, referrers }) => {
         const relEntry = relative(rootDir, join(pool, entry));
         const relLeaf = relative(rootDir, leaf);
         const role = basename(pool);
         const named = isDir(join(pool, entry))
             ? `directory('./${role}/${entry}/')`
             : `file('./${role}/${entry}')`;
+        const nested = referrers.some((file) => dirname(file) !== leaf);
         return {
             file: relEntry,
             line: 1,
-            fix: `move it to ${relLeaf}/${role}/${entry} and name it ${named} — \`make fix\` does both`,
-            found: `a pool entry only ${relLeaf} reaches for`,
+            fix: nested
+                ? `move it to ${relLeaf}/${role}/${entry}, the route's own ground, and name it from each leaf — ${named} there, the path that climbs to it from the leaves inside — \`make fix\` does both`
+                : `move it to ${relLeaf}/${role}/${entry} and name it ${named} — \`make fix\` does both`,
+            found: nested
+                ? `a pool entry only ${relLeaf} and the leaves inside it reach for`
+                : `a pool entry only ${relLeaf} reaches for`,
             rule: 'c28-ground-shared-or-inline',
             severity: 'error',
         };
@@ -1170,7 +1191,11 @@ export function fixPoolFixtures(rootDir: string): string[] {
         for (const file of referrers) {
             const text = readText(file);
             const climb = relative(dirname(file), pool).split(sep).join('/');
-            const next = text.replaceAll(`${climb}/${entry}`, `./${role}/${entry}`);
+            const down = relative(dirname(file), join(leaf, role)).split(sep).join('/');
+            const next = text.replaceAll(
+                `${climb}/${entry}`,
+                `${down.startsWith('.') ? down : `./${down}`}/${entry}`,
+            );
             if (next !== text) {
                 writeFileSync(file, next);
             }
@@ -1433,9 +1458,37 @@ export function fixCopiedGround(rootDir: string): string[] {
     return moved;
 }
 
+/** Does this folder hold a test of its own — is it a leaf? */
+function isLeaf(directory: string): boolean {
+    return treeEntries(directory).some(
+        (entry) =>
+            entry.isFile() && (isTestFileName(entry.name) || entry.name.endsWith(SPEC_EXTENSION)),
+    );
+}
+
+/**
+ * The ground folders of the leaves that enclose `leaf` below the specs root —
+ * a route's, reached from the leaf of a route under it (`map/pois/` holds the
+ * ground `map/pois/detail/` shares with it).
+ */
+function enclosingGround(specsRoot: string, leaf: string): string[] {
+    const ground: string[] = [];
+    for (let folder = dirname(leaf); isWithin(specsRoot, folder) && folder !== specsRoot;) {
+        if (isLeaf(folder)) {
+            ground.push(...GROUND_DIRS.map((role) => join(folder, role)));
+        }
+        const parent = dirname(folder);
+        if (parent === folder) {
+            break;
+        }
+        folder = parent;
+    }
+    return ground;
+}
+
 /**
  * CONVENTIONS C15 — a path leaves its leaf only into the specs root's own
- * ground. Every `file()` and `directory()` names its entry from the spec file;
+ * ground, or into the ground of a leaf that encloses it. Every `file()` and `directory()` names its entry from the spec file;
  * a path whose target stays under the spec's own directory is the leaf's
  * ground, one under `<specs>/fixtures/`, `seeds/`, `requests/` or `expected/`
  * is a pool, and anything else reaches into a sibling's ground — a pool by
@@ -1454,7 +1507,11 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
             const leaf = dirname(file);
             for (const { column, line, path } of collectFixtureReferences(file, DISK_CALL)) {
                 const target = resolve(leaf, path);
-                if (isWithin(leaf, target) || pools.some((pool) => isWithin(pool, target))) {
+                if (
+                    isWithin(leaf, target) ||
+                    pools.some((pool) => isWithin(pool, target)) ||
+                    enclosingGround(specsRoot, leaf).some((ground) => isWithin(ground, target))
+                ) {
                     continue;
                 }
                 const rel = relative(rootDir, file);
