@@ -107,27 +107,49 @@ const TEXT_MEDIA_TYPES = new Set([
     'application/javascript',
     'application/x-ndjson',
     'application/x-www-form-urlencoded',
+    'application/x-yaml',
     'application/xml',
     'application/yaml',
 ]);
 
+/** The top-level types whose bodies are bytes. */
+const BINARY_TOP_LEVEL_TYPES = ['audio/', 'font/', 'image/', 'video/'];
+
+/** The media types outside those top-level types whose bodies are bytes. */
+const BINARY_MEDIA_TYPES = new Set([
+    'application/gzip',
+    'application/octet-stream',
+    'application/pdf',
+    'application/protobuf',
+    'application/vnd.google.protobuf',
+    'application/wasm',
+    'application/x-gzip',
+    'application/x-protobuf',
+    'application/x-tar',
+    'application/zip',
+]);
+
 /**
  * The kind a `content-type` labels: JSON (`application/json`, `+json`),
- * text (`text/*`, `+xml`, and the text media types above), binary (any other
- * type), or sniffed when no type is stated.
+ * text (`text/*`, `+xml`, and the text media types above), binary (`audio/*`,
+ * `font/*`, `image/*`, `video/*` and the binary media types above), or
+ * sniffed — any other type, and no type at all.
  */
 export function bodyKind(contentType: string | undefined): BodyKind {
     const media = contentType?.split(';')[0]?.trim().toLowerCase() ?? '';
-    if (media === '') {
-        return 'sniffed';
-    }
     if (media === 'application/json' || media.endsWith('+json')) {
         return 'json';
     }
     if (media.startsWith('text/') || media.endsWith('+xml') || TEXT_MEDIA_TYPES.has(media)) {
         return 'text';
     }
-    return 'binary';
+    if (
+        BINARY_MEDIA_TYPES.has(media) ||
+        BINARY_TOP_LEVEL_TYPES.some((type) => media.startsWith(type))
+    ) {
+        return 'binary';
+    }
+    return 'sniffed';
 }
 
 /**

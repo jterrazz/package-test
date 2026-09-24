@@ -81,6 +81,37 @@ describe('the hono adapter — the body it read', () => {
         ]);
     });
 
+    test('a type named neither text nor binary is read, and only a binary type drops its body', async () => {
+        // Given - a YAML document, a GraphQL query, and an archive
+        const app = new Hono();
+        app.get('/schema', (context) =>
+            context.body('count: 42\n', 200, { 'content-type': 'application/x-yaml' }),
+        );
+        app.get('/query', (context) =>
+            context.body('{ user { id } }', 200, { 'content-type': 'application/graphql' }),
+        );
+        app.get('/archive', (context) =>
+            context.body(new Uint8Array([0x50, 0x4b, 0x03, 0x04]), 200, {
+                'content-type': 'application/zip',
+            }),
+        );
+        const adapter = new HonoAdapter(app);
+
+        // When - each is requested
+        const responses = await Promise.all(
+            ['/schema', '/query', '/archive'].map(
+                async (path) => await adapter.request('GET', path),
+            ),
+        );
+
+        // Then - both texts, and null for the bytes
+        expect(responses.map((response) => response.body)).toStrictEqual([
+            'count: 42',
+            '{ user { id } }',
+            null,
+        ]);
+    });
+
     test('a text type is its text though it parses as JSON, and a binary type is not read', async () => {
         // Given - a text reply that reads as a number, and an image
         const app = new Hono();
