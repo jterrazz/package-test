@@ -2461,3 +2461,72 @@ import.meta.url)` — for existence; a bare literal and a command string are
 1293 held` against 1396 recorded: once package-typescript's half of 134
      lands, this repository's check fails until its `typescript` section is
      re-recorded — a gesture of that package's release, not of this branch.
+
+## Iteration 32 — the component facet's name, and mobile coverage (owner, 2026-09-24)
+
+- The tree named `component-app` becomes `specs/component/`: the component
+  facet's tree, whose own shape is a component and its test side by side
+  (A2/I2 unchanged). Chapters, vitest project, C1 and every rule that names it
+  follow.
+- Mobile gets a tree under `specs/mobile/`, run two ways by the SAME specs:
+  (A) in `make check`, against a WebDriver-protocol double of Appium (a
+  small server answering like Appium from a screen described as data) —
+  every mobile capability cell covered, the M1 exemption and the 17 matrix
+  exemptions go; (B) `make test-mobile`, outside CI, against a real iOS
+  simulator and a small test app on this machine (Xcode present) — the
+  real-device proof before a release or when the adapter changes. A macOS
+  CI runner (C) only later, if B finds gaps A misses.
+
+### What the package-test branch did (iteration 32)
+
+- **The rename** (`37d5fc63`). `git mv`, and every path that named the old
+  tree: the `component()` project, the matrix column, M1, chapter 03 (whose
+  "the one non-facet folder says so in its name" became false).
+- **A declared Appium server, and the double** (`9c3415e3`).
+  `specification.mobile({ appium: { url } })` connects instead of spawning,
+  and hands the server the device by capabilities (`appium:deviceName`,
+  `appium:platformVersion`, `appium:udid` when known) instead of resolving
+  and booting it through `simctl`; the handle's `udid` becomes optional.
+  The double is a fixture, `specs/shared/fixtures/appium-double/` (the
+  specs reach it beside the public entry, F3): the W3C endpoints the
+  adapter calls, the predicate subset parsed, `unknown command` for the
+  rest. The app is data, `specs/shared/fixtures/mobile-app/specimen.ts`.
+  Red: the declared server ignored, each capability dropped or unstripped,
+  the double drawing everything invisible.
+- **Every mobile cell** (`2e7f36dd`). Four journeys — `launch/`,
+  `sign-in/`, `notes/`, `drafts/` — declared as mobile's domains; the
+  matrix's last mobile exemptions and the M1-only meta-test go. Red, on the
+  11 cases: tap, fill, see, scope, scroll-into-view, the backend, the
+  projection, the services, the double's `==`, each broken in turn.
+- **B** (`a7e1d4d1`). Specimen in SwiftUI (`mobile-app/ios/`, one file,
+  built with `swiftc` — no Xcode project); `make test-mobile` builds,
+  boots the simulator `specimen.ts` names, installs, starts a pinned
+  Appium + XCUITest driver under `.artifacts/mobile/`, and runs the
+  `mobile` project against it. It ran here: 10 of 11 green, every golden
+  identical to the double's; `drafts/scroll` red.
+- **The gap B found** (`3af16162`). The adapter's scroll-into-view sent
+  `mobile: scroll { toVisible }`, which WebDriverAgent refuses on a SwiftUI
+  scroll view; it now sends `mobile: scrollToElement`, and the double
+  refuses the old call with the device's message, so `make check` holds
+  the gap. `make test-mobile`: 11 of 11, exit 0.
+- **Gates.** `make fix` then `make check` exit 0 after each commit (2413
+  tests passed, 1 skipped, on the last); `npm run build` exit 0.
+
+### Raised by the package-test branch, iteration 32
+
+139. The Makefile contract is six targets "and no other", held by a
+     meta-test; `make test-mobile` is a seventh, so the meta-test now holds
+     the six plus it, and a second case proves `check` never reaches it.
+     Keep the seventh target, or move the gesture below the six as
+     `npm run test:mobile` (like `test:repeat`)?
+140. `mobile()` runs its project last (group 3) because "a simulator cannot
+     share a machine with itself", yet its files run in parallel, each
+     opening a session on the one simulator; this repository passes
+     `serial: true`. Make `serial` the mobile project's default?
+141. One driver session per FILE, not per run: on the simulator each of the
+     7 files paid about 40 s of session start (5 min for 11 cases). A
+     session shared across a run's files would cut it — worth a
+     `globalSetup`, or is the per-file fresh session the point?
+142. `appium: { url }` is a new constructor option name (the one other
+     candidate, `server`, already means "the app's server" on api and
+     website). Keep the name?
