@@ -2196,3 +2196,74 @@ npx oxlint --type-aware --format=json`, two runs each): before
      (2026-09-24): the flag's aggregation/print side is not wired in this
      release. Settled by reading oxlint's own source at the pinned tag,
      or filing upstream — the toolchain round already tracks its debt.
+
+## Iteration 29 — two signews-api defects (orchestrator, 2026-09-24)
+
+From the signews-api night (its `VISION-signews-api.md`, "What reads
+worse" 2 and 5): D20 blocks the cursor split C34 asks for, and a failing
+`make fix` prints every `jterrazz(*)` rule twice. C28 × C34 (question 3
+of the overnight summary) is left to the owner.
+
+### What the package-test branch did (iteration 29)
+
+- **D20, a carried read** (`fe7e9e8`). A read of `<result>.response`,
+  `.json` or `.table('…')` whose value is only CARRIED into a later
+  request of the same test owes no comparison: every use of the value,
+  through the names (up to four hops) and helpers it passes, ends in the
+  arguments of a later awaited chain off a handle — the path, `params`,
+  a body, a header. One `expect(…)` of the value makes it a read again,
+  and the result the test does claim is still compared whole.
+- **D20's cases.** The signews split (`facts/list/pagination.spec.ts`,
+  the cursor followed in a test of its own) is the accepted fixture, in
+  its helper form (`nextCursor(first.response)`) and its in-place form.
+  Red: the accepted case on the old rule (exit 1, and an extra finding
+  at the carried read in the refused case); the refused case with the
+  binding check forced true (the claimed cursor's read unreported).
+- **One printer per finding** (`e9cf1ab`). The checker owns the `test`
+  ratchet section and prints its own passes' findings; oxlint's
+  diagnostics are the toolchain's Oxlint pass to print. A failing
+  ratchet run of the checker now prints the plugin's share as one line,
+  `conventions checker: <n> plugin diagnostic(s) judged, printed by
+oxlint's own pass`, beside its reasons, which still name each rule
+  that broke. Red: the old printer, on the new broken-ratchet case and
+  on the updated no-section case (the per-diagnostic line where the
+  count line is expected).
+
+#### The contract the toolchain's Oxlint pass needs
+
+With the checker counting the plugin's diagnostics and no longer
+printing them, the toolchain's Oxlint pass is their one printer. Today
+it prints oxlint's log only when its OWN verdict fails ("only a failing
+pass needs the log", `src/cli/oxlint-report.js`), so a run whose
+`typescript` section holds and whose `test` section breaks on a
+`jterrazz(*)` rule prints the rule and its count and no location.
+
+- **When.** The Oxlint pass prints oxlint's log when its own verdict
+  fails OR when the Test Conventions pass's verdict fails — the log
+  holds the `jterrazz(*)` diagnostics the member runs judged off the
+  same report.
+- **What.** The same lines, in the same form, as its own failing log:
+  one print of each diagnostic across the whole run. The Test
+  Conventions pass prints the checker's output as it comes; it carries
+  the `jterrazz-check(*)` findings and one count line for the plugin's.
+- **Order.** The Test Conventions pass runs after the report is
+  complete, so the Oxlint pass can draw its log once both verdicts are
+  known — or draw the `jterrazz(*)` lines alone after the Test
+  Conventions pass fails. Which of the two is the toolchain's call.
+
+### Raised by the package-test branch, iteration 29
+
+129. A checker started by hand with no `--oxlint-report` lints the
+     project itself and now prints only the count line: in this
+     package's own `npm run lint` (`typescript check && node
+dist/checker.js`), the `jterrazz(*)` diagnostics behind a broken
+     `test` entry are printed by nobody when `typescript check` is
+     green. Keep the one-printer rule there too (read them with
+     `npx oxlint`), or let a checker that ran oxlint itself print what
+     only it saw?
+130. D20's carried read follows a value into a later request chain it
+     recognises by shape (an awaited chain off a handle that is neither
+     a result nor `expect`). A value handed to a request through a
+     variable holding the chain (`const next = api.get(…); await next`)
+     is not followed, and the rule reports the read, as before — read from
+     the code, not proven by a case. Follow it, or keep the shape?
