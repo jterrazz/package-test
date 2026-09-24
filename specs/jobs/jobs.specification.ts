@@ -83,7 +83,7 @@ export const { cleanup, jobs } = await specification.jobs({
             name: 'stamp-now',
         },
     ],
-    root: '../shared/fixtures/app',
+    root: '../shared/fixtures/specimen-api',
     services: {
         analyticsDb: analyticsHandle,
         db: postgres(),

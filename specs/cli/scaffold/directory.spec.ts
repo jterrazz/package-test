@@ -19,7 +19,7 @@ describe('directory', () => {
     test('matches an identical fixture tree', async () => {
         // Given - scaffold writes the exact tree committed under expected/cli-scaffold/
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('scaffold');
 
         // Then - the snapshot matches (a slash in the name creates a subfolder)
@@ -32,7 +32,7 @@ describe('directory', () => {
     test('detects a missing fixture', async () => {
         // Given - a fixture name that was never created
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('scaffold');
 
         // Then - clear error with the TEST_UPDATE hint. Frozen: under TEST_UPDATE the missing snapshot must still throw rather than be created
@@ -49,7 +49,7 @@ describe('directory', () => {
         const fixtureName = `transient-fixture-${Date.now()}`;
 
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('scaffold');
 
         // When - update mode writes the fixture
@@ -62,7 +62,7 @@ describe('directory', () => {
 
         // Then - running again without update mode now matches
         const result2 = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('scaffold');
         await expect(result2.directory('out')).toMatch(directory(`./expected/${fixtureName}/`));
 
@@ -73,7 +73,7 @@ describe('directory', () => {
     test('files() helper — lists files recursively, sorted', async () => {
         // Given - a scaffold run
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('scaffold');
 
         // Then - the tree listing is complete and sorted

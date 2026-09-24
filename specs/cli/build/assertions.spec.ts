@@ -13,7 +13,9 @@ import { cli } from '../cli.specification.js';
 describe('assertions', () => {
     test('exists check', async () => {
         // Given - build creates files
-        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('build');
+        const result = await cli
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .exec('build');
 
         // Then - file exists and absent file doesn't
         expect(result.file('dist/index.js').exists).toBeTruthy();
@@ -22,7 +24,9 @@ describe('assertions', () => {
 
     test('content check', async () => {
         // Given - build creates files
-        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('build');
+        const result = await cli
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .exec('build');
 
         // Then - file contains expected content
         expect(result.file('dist/index.js').content).toContain('Hello from CLI app');
@@ -30,7 +34,9 @@ describe('assertions', () => {
 
     test('chains multiple assertions on one result', async () => {
         // Given - a successful build
-        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('build');
+        const result = await cli
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .exec('build');
 
         // Then - several read accessors on one result
         expect(result.exitCode).toBe(0);

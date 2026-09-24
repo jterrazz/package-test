@@ -26,7 +26,7 @@ describe('assertions', () => {
     test('cwd points to the temp working directory', async () => {
         // Given - a scaffold run
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('scaffold');
 
         // Then - cwd is the isolated temp dir
@@ -36,10 +36,10 @@ describe('assertions', () => {
     test('files() lists the whole tree sorted, filtering defaults', async () => {
         // Given - a scaffold run
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('scaffold');
 
-        // Then - cli.sh (spread via .fixture(directory('../../shared/fixtures/cli-app/'))) and scaffold output both appear, sorted
+        // Then - cli.sh (spread via .fixture(directory('../../shared/fixtures/specimen-cli/'))) and scaffold output both appear, sorted
         const files = await result.filesystem.files();
         expect(files).toContain('cli.sh');
         expect(files).toContain('out/main.go');
@@ -52,7 +52,7 @@ describe('assertions', () => {
         const fixtureName = `fs-transient-${Date.now()}`;
         try {
             const a = await cli
-                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .fixture(directory('../../shared/fixtures/specimen-cli/'))
                 .exec('scaffold');
             vi.stubEnv('TEST_UPDATE', '1');
             try {
@@ -63,7 +63,7 @@ describe('assertions', () => {
 
             // Then - a second identical run matches
             const b = await cli
-                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .fixture(directory('../../shared/fixtures/specimen-cli/'))
                 .exec('scaffold');
             await expect(b.filesystem).toMatch(directory(`./expected/${fixtureName}/`));
         } finally {
@@ -76,7 +76,7 @@ describe('assertions', () => {
         const fixtureName = `fs-diff-${Date.now()}`;
         try {
             const a = await cli
-                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .fixture(directory('../../shared/fixtures/specimen-cli/'))
                 .exec('scaffold');
             vi.stubEnv('TEST_UPDATE', '1');
             try {
@@ -88,7 +88,7 @@ describe('assertions', () => {
             // Then - the changed tree fails with a directory diff. Frozen: the fixture written above must not be overwritten with the changed tree under TEST_UPDATE
             // checker-disable-next-line c29 -- the changed tree is the second run the golden is compared against
             const b = await cli
-                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .fixture(directory('../../shared/fixtures/specimen-cli/'))
                 .exec('scaffold-changed');
             await expect(
                 expect(b.filesystem).toMatch(directory(`./expected/${fixtureName}/`), {

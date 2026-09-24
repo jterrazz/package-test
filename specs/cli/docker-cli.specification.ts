@@ -3,7 +3,10 @@ import { afterAll } from 'vitest';
 
 import { specification } from '../../src/index.js';
 
-const DOCKER_CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/docker-cli/cli.sh');
+const DOCKER_CLI_BIN = resolve(
+    import.meta.dirname,
+    '../shared/fixtures/specimen-cli-docker/cli.sh',
+);
 
 export const { cleanup, cli } = await specification.cli(DOCKER_CLI_BIN, {
     docker: {

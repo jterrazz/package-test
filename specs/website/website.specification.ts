@@ -3,7 +3,7 @@ import { afterAll } from 'vitest';
 
 export const { cleanup, url, website } = await specification.website({
     server: {
-        command: 'node specs/shared/fixtures/website-app/server.mjs',
+        command: 'node specs/shared/fixtures/specimen-website/server.mjs',
         ready: /listening on port (?<port>\d+)/u,
     },
 });

@@ -15,7 +15,7 @@ describe('exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — resolves when the waitFor pattern is matched in stderr', async () => {
         // Given - a process whose readiness banner goes to stderr
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('dev-stderr', { timeout: 10_000, waitFor: 'Listening on stderr' });
 
         // Then - resolved at the stderr pattern with the output captured so far

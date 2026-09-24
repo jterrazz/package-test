@@ -15,7 +15,7 @@ describe('exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — terminates the whole process group, not just the direct child', async () => {
         // Given - a command that spawns a looping background grandchild (like a tsdown --watch under a dev command) and records its pid
         const result = await cli
-            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('spawn-daemon', { timeout: 10_000, waitFor: 'daemon ready' });
         expect(result.exitCode).toBe(0);
         const daemonPid = Number(result.file('daemon.pid').content.trim());

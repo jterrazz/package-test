@@ -8,7 +8,7 @@ import { postgres, specification } from '../../src/index.js';
  * the test — it is handed a connection string and called.
  */
 export const { cleanup, integration } = await specification.integration({
-    root: '../shared/fixtures/app',
+    root: '../shared/fixtures/specimen-api',
     services: { db: postgres() },
 });
 
