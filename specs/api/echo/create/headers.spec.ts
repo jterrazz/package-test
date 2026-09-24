@@ -3,14 +3,15 @@ import { describe, expect, test } from 'vitest';
 import { api } from '../../api.specification.js';
 
 describe('headers', () => {
-    test('a view made with() sends its headers on every chain, and a chain own headers win', async () => {
-        // Given - the header a whole file shares, then two chains of it and one overriding it
+    test("a view made with() sends its headers on every chain, and a chain's own headers win for that chain alone", async () => {
+        // Given - the header a whole file shares, two chains of it, one overriding it, then one more chain of it
         const tagged = api.with({ headers: { 'x-chain': 'file' } });
         const first = await tagged.post('/echo', { greeting: 'first' });
         const second = await tagged.post('/echo', { greeting: 'second' });
         const own = await tagged.headers({ 'x-chain': 'own' }).post('/echo', { greeting: 'own' });
+        const after = await tagged.post('/echo', { greeting: 'after' });
 
-        // Then - both chains carry the shared header, and the chain's own replaces it
+        // Then - every chain of the view carries the shared header, and the chain's own replaces it on that chain alone
         expect(first.response).toMatch(`
             HTTP/1.1 200 OK
             content-type: application/json
@@ -28,6 +29,12 @@ describe('headers', () => {
             content-type: application/json
 
             {"body": {"greeting": "own"}, "headers": {"x-chain": "own", "x-file": null}}
+        `);
+        expect(after.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {"body": {"greeting": "after"}, "headers": {"x-chain": "file", "x-file": null}}
         `);
     });
 });

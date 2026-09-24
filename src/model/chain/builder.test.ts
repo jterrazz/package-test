@@ -424,7 +424,7 @@ describe('builder — what a file shares, with()', () => {
         expect(command.lastEnv).toMatchObject({ LANG: 'fr', TZ: 'UTC' });
     });
 
-    test('a website view sends its headers on every visit, and a chain own headers win', async () => {
+    test("a website view sends its headers on every visit, and a chain's own headers win for that chain alone", async () => {
         // Given - a website view over a browser recording the headers of each visit
         const sent: BrowserOpenOptions['headers'][] = [];
         const browser: BrowserPort = {
@@ -441,16 +441,18 @@ describe('builder — what a file shares, with()', () => {
             browser: async () => await Promise.resolve(browser),
         }).with({ headers: { 'x-chain': 'file' } });
 
-        // When - two chains of the view, then one setting its own header
+        // When - two chains of the view, one setting its own header, then one more chain of the view
         await website.visit('/');
         await website.visit('/');
         await website.headers({ 'x-chain': 'own' }).visit('/');
+        await website.visit('/');
 
-        // Then - the shared header on both chains, the chain's own replacing it
+        // Then - the shared header on every chain, the chain's own replacing it on that chain alone
         expect(sent).toStrictEqual([
             { 'x-chain': 'file' },
             { 'x-chain': 'file' },
             { 'x-chain': 'own' },
+            { 'x-chain': 'file' },
         ]);
     });
 
