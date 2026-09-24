@@ -62,6 +62,27 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
+    test('a call counts from the syntax tree, however a formatter splits it', () => {
+        // Given - a cli file whose golden call the formatter broke after each paren
+        const root = mkdtempSync(join(tmpdir(), 'matrix-'));
+        try {
+            mkdirSync(join(root, 'specs/cli/build'), { recursive: true });
+            writeFileSync(join(root, 'vitest.config.ts'), 'export default {};\n');
+            writeFileSync(
+                join(root, 'specs/cli/build/tree.spec.ts'),
+                "expect(result.filesystem).toMatch(\n    directory(\n        '../../shared/fixtures/tree/',\n    ),\n);\n",
+            );
+            const golden = matrixRows(root).find(
+                (row) => row.capability.name === 'toMatch(directory())',
+            );
+
+            // Then - the file exercises the golden
+            expect(golden?.cells.cli).toBe(1);
+        } finally {
+            rmSync(root, { force: true, recursive: true });
+        }
+    });
+
     test('a glob in a string opens no comment, and the option after it still counts', () => {
         // Given - a config whose first project collects `x/*` + `/*.yaml`, and whose component project states its clock after it
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));

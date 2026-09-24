@@ -56,12 +56,14 @@ export type CapabilityGroup =
 /**
  * One thing the framework can do, and where it is declared.
  *
- * `probe` is the literal a test that EXERCISES the capability carries. It is
- * deliberately literal: a regex over test sources would answer a question about
- * the regex, and the point of the matrix is that a reader can grep the same
- * string and land on the same files. A probe that starts with an identifier
- * character is matched on a word boundary, so `row(` is not found inside
- * `narrow(` and the landmark `table(` is not found in the accessor `.table(`.
+ * `probe` is what a test that EXERCISES the capability writes, spelled as it
+ * reads. A CALL — `button(`, `.seed(file(`, `.get('/`, `result.table(` — is
+ * read as a shape and matched against the calls of each file's syntax tree
+ * (`matrix-calls.ts` owns its grammar), so a formatter splitting the call
+ * across lines leaves the count as it was, and the landmark `table(` is never
+ * the accessor `.table(`. Any other probe — a key, an accessor, a golden's
+ * extension, a token — is matched as its literal, on a word boundary when it
+ * starts with an identifier character.
  *
  * `member` is the key of the facet interface, the result class or the options
  * type this row answers for, where the row's `name` spells it differently
@@ -82,7 +84,7 @@ export type Capability = {
     member?: string;
     /** How the capability is written in a spec, e.g. `.seed()`. */
     name: string;
-    /** The literal a test exercising it carries. */
+    /** What a test exercising it writes: a call's shape, or a literal. */
     probe: string;
     /**
      * Where one column writes the capability differently. A `{{token}}` family

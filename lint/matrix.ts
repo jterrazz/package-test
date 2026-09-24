@@ -5,6 +5,8 @@ import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import { cell, table } from './catalog.js';
 import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
 import type { Capability, Column } from './facet-matrix.js';
+import { callShapeOf, callsOf, isCallOf } from './matrix-calls.js';
+import type { AstNode } from './rule-shape.js';
 
 /**
  * The capability matrix — what the package proves about itself, per facet.
@@ -159,7 +161,7 @@ function stringsOf(source: string): boolean[] {
     return inside;
 }
 
-/** The groups whose probe is a call or a key, written in code — never a string's content. */
+/** The groups whose literal probe is a key or an accessor, written in code — never a string's content. */
 const WRITTEN_IN_CODE = new Set<Capability['group']>([
     'Constructor option',
     'Descriptor',
@@ -171,6 +173,8 @@ const WRITTEN_IN_CODE = new Set<Capability['group']>([
 
 /** A test file, as its capabilities are read from it. */
 type Source = {
+    /** Every call its program holds (none, for a document). */
+    calls: AstNode[];
     /** Which indexes of `text` sit inside a string literal (none, for a document). */
     strings: boolean[];
     /** The text, comments stripped. */
@@ -200,12 +204,13 @@ function sourcesOf(root: string): Record<Column, Source[]> {
             // A document is YAML: its only comments are `#` lines, and an apostrophe in its prose is no quote.
             if (path.endsWith('.spec.yaml')) {
                 return {
+                    calls: [],
                     strings: [],
                     text: source.replaceAll(/^\s*#[^\n]*/gmu, ''),
                 };
             }
             const text = withoutComments(source);
-            return { strings: stringsOf(text), text };
+            return { calls: callsOf(path, source), strings: stringsOf(text), text };
         });
     };
     // Written out rather than folded: the compiler then holds the invariant
@@ -260,12 +265,11 @@ export function capabilities(): Capability[] {
 const ESCAPE = /[$()*+.?[\\\]^{|}]/gu;
 
 /**
- * A probe matched where it is WRITTEN, not wherever its letters occur.
- *
- * A probe that opens on an identifier character is anchored on a word
- * boundary that also refuses a leading dot, so the landmark `table(` is not
- * found inside the accessor `.table(` and `row(` is not found inside
- * `narrow(`. A probe that opens on a dot is already anchored by that dot.
+ * A literal probe — a key, an accessor, a text; never a call, which the
+ * syntax tree answers — matched where it is WRITTEN, not wherever its letters
+ * occur: one that opens on an identifier character is anchored on a word
+ * boundary that also refuses a leading dot, so `result.json` is not found
+ * inside `myresult.json`. A probe that opens on a dot is anchored by that dot.
  */
 function matcherOf(probe: string): RegExp {
     const lead = /^[$A-Z_a-z]/u.test(probe) ? String.raw`(?<![$.\w])` : '';
@@ -279,7 +283,14 @@ export function matrixRows(root: string): MatrixRow[] {
         if (!capability.columns.includes(column)) {
             return null;
         }
-        const matcher = matcherOf(capability.probeByColumn?.[column] ?? capability.probe);
+        const probe = capability.probeByColumn?.[column] ?? capability.probe;
+        const shape = callShapeOf(probe);
+        if (shape !== undefined) {
+            return sources[column].filter((source) =>
+                source.calls.some((call) => isCallOf(call, shape)),
+            ).length;
+        }
+        const matcher = matcherOf(probe);
         const inCode = WRITTEN_IN_CODE.has(capability.group);
         return sources[column].filter((source) => carries(source, matcher, inCode)).length;
     };
@@ -345,7 +356,7 @@ export function renderMatrixBody(root: string): string {
     }
     const notes = [...byReason].map(([why, cells]) => `- ${why} — ${cells.join(', ')}`);
     const intro =
-        'What the framework can do, and how many of this package\u2019s own test FILES carry the literal that exercises it, per facet (comments stripped, and for a call or a key strings too, so a sentence or a string naming a capability never counts as a test of it). A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
+        'What the framework can do, and how many of this package\u2019s own test FILES exercise it, per facet: a call read from each file\u2019s syntax tree, whatever lines a formatter splits it across, and any other probe read as its literal with comments stripped \u2014 strings too for a key or an accessor \u2014 so a sentence or a string naming a capability never counts as a test of it. A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
     return [intro, ...sections, '### Exemptions', notes.join('\n')].join('\n\n');
 }
 
