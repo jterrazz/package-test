@@ -262,7 +262,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         started,
     });
 
-    // One browser per runner, launched lazily on the first `.visit()` so
+    // The worker's one browser, launched lazily on the first `.visit()` so
     // `.fetch()`-only spec files never pay the browser cost. The playwright
     // Integration stays a lazy import (CONVENTIONS I1) — the dependency is
     // Optional and only loaded when a spec actually renders a page.

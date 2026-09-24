@@ -1,7 +1,7 @@
 import { mkdtempSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
-import type { Browser, BrowserType, Locator, Page } from 'playwright';
+import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwright';
 
 import { evidenceDirectory } from '../../model/artifacts/artifacts.js';
 import {
@@ -339,30 +339,99 @@ function createVisitor(page: Page, baseUrl: string): Visitor {
 }
 
 /**
+ * How the worker's chromium is launched: the headless shell, named rather than
+ * left to playwright's default, so the lighter binary is what every visit
+ * gets whatever that default becomes.
+ */
+const LAUNCH_OPTIONS = { channel: 'chromium-headless-shell', headless: true } as const;
+
+/** Launch chromium, with an actionable error when playwright is absent. */
+async function launchChromium(): Promise<Browser> {
+    let chromium: BrowserType;
+    try {
+        ({ chromium } = await import('playwright'));
+    } catch {
+        throw new Error(
+            '.visit() requires playwright (optional peer dependency): npm install -D playwright && npx playwright install chromium',
+        );
+    }
+    return await chromium.launch(LAUNCH_OPTIONS);
+}
+
+/** What the sharing reads of a browser: the moment it is lost. */
+type Disconnectable = { on: (event: 'disconnected', listener: () => void) => unknown };
+
+/**
+ * One browser for everyone who asks: launched on the first ask, handed to
+ * every later one, and launched again once it has disconnected. A launch that
+ * failed is not kept, so the next ask tries again.
+ */
+export function createSharedBrowser<T extends Disconnectable>(
+    launch: () => Promise<T>,
+): () => Promise<T> {
+    let shared: Promise<T> | undefined;
+    const attempt = async (): Promise<T> => {
+        try {
+            const browser = await launch();
+            browser.on('disconnected', () => {
+                shared = undefined;
+            });
+            return browser;
+        } catch (error) {
+            shared = undefined;
+            throw error;
+        }
+    };
+    return async () => {
+        shared ??= attempt();
+        return await shared;
+    };
+}
+
+/**
+ * The worker's chromium, shared by every runner the worker hosts and kept
+ * until the worker exits — playwright ends the browsers it launched with the
+ * process.
+ */
+const workerBrowser = createSharedBrowser(launchChromium);
+
+/**
  * Browser adapter backed by playwright chromium.
  *
- * ONE browser process per adapter (= per runner = per vitest worker),
- * launched lazily on the first `open()`. Each visit gets a fresh
- * `BrowserContext` — isolation without paying a browser launch per spec.
+ * ONE browser process per vitest worker, launched lazily on the first
+ * `open()` of any runner the worker hosts. Each visit gets a fresh
+ * `BrowserContext` — isolation without paying a browser launch per spec or per
+ * runner. A visit records no video and no trace; a scenario that fails leaves
+ * one screenshot.
  *
  * Playwright is an optional peer dependency: it is only imported here, and
  * this module is only loaded when a spec calls `.visit()`.
  */
 export class PlaywrightAdapter implements BrowserPort {
-    private browser: Browser | null = null;
+    private readonly browser: () => Promise<Browser>;
+    private readonly contexts = new Set<BrowserContext>();
 
+    constructor(options: { browser?: () => Promise<Browser> } = {}) {
+        this.browser = options.browser ?? workerBrowser;
+    }
+
+    /** Close what the runner's visits still hold open; the worker's browser outlives the runner. */
     async close(): Promise<void> {
-        if (this.browser) {
-            await this.browser.close();
-            this.browser = null;
-        }
+        const open = [...this.contexts];
+        this.contexts.clear();
+        await Promise.all(
+            open.map(async (context) => {
+                await context.close();
+            }),
+        );
     }
 
     async open(url: string, options: BrowserOpenOptions): Promise<BrowserPage> {
-        const browser = await this.launch();
+        const browser = await this.browser();
         const context = await browser.newContext({
             extraHTTPHeaders: options.headers ?? {},
         });
+        this.contexts.add(context);
 
         // Cross-origin policy: with 'block', any request leaving the site
         // Under test is aborted — analytics and CDNs never make the visit
@@ -468,11 +537,12 @@ export class PlaywrightAdapter implements BrowserPort {
                 ...extraction,
             };
         } finally {
+            this.contexts.delete(context);
             await context.close();
         }
     }
 
-    /** Screenshot the failing state into a temp file; never masks the original error. */
+    /** Screenshot the failing state into the evidence folder; never masks the original error. */
     private async captureEvidence(page: Page): Promise<null | string> {
         try {
             const dir = mkdtempSync(evidenceDirectory('website-'));
@@ -482,22 +552,5 @@ export class PlaywrightAdapter implements BrowserPort {
         } catch {
             return null;
         }
-    }
-
-    /** Launch the shared chromium instance (once), with an actionable error when playwright is absent. */
-    private async launch(): Promise<Browser> {
-        if (this.browser) {
-            return this.browser;
-        }
-        let chromium: BrowserType;
-        try {
-            ({ chromium } = await import('playwright'));
-        } catch {
-            throw new Error(
-                '.visit() requires playwright (optional peer dependency): npm install -D playwright && npx playwright install chromium',
-            );
-        }
-        this.browser = await chromium.launch();
-        return this.browser;
     }
 }

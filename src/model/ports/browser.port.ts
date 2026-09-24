@@ -233,11 +233,12 @@ export type BrowserPage = {
 
 /**
  * Abstract browser interface for the website specification runner.
- * One implementation lives in `integrations/playwright/` — a single shared
- * browser instance per runner; each `open()` gets a fresh, isolated context.
+ * One implementation lives in `seams/playwright/` — one browser per vitest
+ * worker, shared by every runner the worker hosts; each `open()` gets a fresh,
+ * isolated context.
  */
 export type BrowserPort = {
-    /** Close the shared browser instance (idempotent). */
+    /** Release the runner's use of the browser (idempotent); the browser is the worker's. */
     close: () => Promise<void>;
     /** Load `url` in a fresh context, run the scenario, capture the final page. */
     open: (url: string, options: BrowserOpenOptions) => Promise<BrowserPage>;
