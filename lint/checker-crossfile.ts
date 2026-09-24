@@ -1129,21 +1129,22 @@ type MisplacedPoolFixture = {
 };
 
 /**
- * The pool entries the member's module tests name by a relative literal. A
- * module test reads its ground outside every leaf, so an entry one of them
- * names is shared, whatever the leaves say.
+ * Every path the member's module tests name: each relative literal one
+ * writes, resolved from its directory, and each path one builds from literal
+ * pieces — the paths C8 reads. A module test reads its ground from outside
+ * every leaf, so what it names is shared, whatever the specs say.
  */
-function poolEntriesModuleTestsRead(moduleTests: readonly string[], pool: string): Set<string> {
-    const read = new Set<string>();
-    for (const file of moduleTests) {
+function pathsModuleTestsName(member: string): string[] {
+    const named: string[] = [];
+    for (const file of moduleTestsOf(member)) {
         for (const { value } of relativeLiterals(readText(file))) {
-            const entry = poolEntryOf(file, value, pool);
-            if (entry !== undefined) {
-                read.add(entry);
-            }
+            named.push(resolve(dirname(file), value));
+        }
+        for (const { target } of anchoredPaths(file)) {
+            named.push(target);
         }
     }
-    return read;
+    return named;
 }
 
 /**
@@ -1155,13 +1156,15 @@ function poolEntriesModuleTestsRead(moduleTests: readonly string[], pool: string
  */
 function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     const misplaced: MisplacedPoolFixture[] = [];
-    const moduleTests = new Map<string, string[]>();
+    const named = new Map<string, string[]>();
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
         const member = dirname(specsRoot);
-        const tests = moduleTests.get(member) ?? moduleTestsOf(member);
-        moduleTests.set(member, tests);
-        const readOutside = poolEntriesModuleTestsRead(tests, pool);
+        const paths = named.get(member) ?? pathsModuleTestsName(member);
+        named.set(member, paths);
+        const readOutside = new Set(
+            paths.flatMap((path) => poolEntryOf(dirname(path), path, pool) ?? []),
+        );
         for (const [entry, leaves] of poolUsage(specsRoot, pool)) {
             const leaf = commonLeaf([...leaves.keys()]);
             if (
