@@ -7,20 +7,14 @@ import type { ContainerOptions } from '../../model/ports/container.port.js';
 import type { DatabasePort } from '../../model/ports/database.port.js';
 import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
 import type { ServiceHandle } from '../../model/ports/service.port.js';
-import { loadPeer } from '../peer.js';
-
-/**
- * `pg`'s client constructor, loaded on the first connection.
- *
- * The driver is an OPTIONAL peer: a repository that specifies a CLI never
- * reaches this line, and never pays for the import.
- */
-async function clientConstructor(): Promise<typeof Client> {
-    return await loadPeer('pg', 'postgres()', async () => {
-        const pg = await import('pg');
-        return pg.Client;
-    });
-}
+import {
+    buildTemplate,
+    clientConstructor,
+    cloneName,
+    endQuietly,
+    withClient,
+    withDatabase,
+} from './template.js';
 
 export type PostgresOptions = {
     /** Override image. */
@@ -58,8 +52,12 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     started = false;
 
     private client: Client | null = null;
-    private originalConnectionString = '';
-    private schema = 'public';
+    /** The container's own string, which a worker's clone replaces and is restored from. */
+    private containerConnectionString = '';
+    /** The template the init script built — `null` for a service with no script. */
+    private template: null | string = null;
+    /** The worker's clone, while one is acquired. */
+    private database: null | string = null;
 
     constructor(options: PostgresOptions = {}) {
         this.defaultImage = options.image ?? SERVICE_IMAGES.postgres;
@@ -116,17 +114,11 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
 
         for (const initPath of initPaths) {
             if (existsSync(initPath)) {
-                const sql = readFileSync(initPath, 'utf8');
-                try {
-                    await this.seed(sql);
-                } catch (error: any) {
-                    throw new Error(
-                        `postgres init script failed (${initPath}):\n${error.message}`,
-                        {
-                            cause: error,
-                        },
-                    );
-                }
+                this.template = await buildTemplate(
+                    this.connectionString,
+                    readFileSync(initPath, 'utf8'),
+                    initPath,
+                );
                 return;
             }
         }
@@ -154,15 +146,14 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
 
     async reset(): Promise<void> {
         const client = await this.getClient();
-        const result = await client.query(`
+        const result = await client.query<{ tablename: string }>(`
             SELECT tablename FROM pg_tables
-            WHERE schemaname = '${this.schema}'
+            WHERE schemaname = 'public'
             AND tablename NOT LIKE '_prisma%'
         `);
-        for (const row of result.rows) {
-            await client.query(
-                `TRUNCATE "${this.schema}"."${row.tablename}" RESTART IDENTITY CASCADE`,
-            );
+        const tables = result.rows.map(({ tablename }) => `"public"."${tablename}"`);
+        if (tables.length > 0) {
+            await client.query(`TRUNCATE ${tables.join(', ')} RESTART IDENTITY CASCADE`);
         }
     }
 
@@ -170,7 +161,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         const client = await this.getClient();
         const columnList = columns.join(', ');
         const result = await client.query(
-            `SELECT ${columnList} FROM "${this.schema}"."${table}" ORDER BY 1`,
+            `SELECT ${columnList} FROM "public"."${table}" ORDER BY 1`,
         );
         return result.rows.map((row: Record<string, unknown>) => columns.map((col) => row[col]));
     }
@@ -179,7 +170,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         const client = await this.getClient();
         const result = await client.query<{ column_name: string }>(
             'SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = $2 ORDER BY ordinal_position',
-            [this.schema, table],
+            ['public', table],
         );
         return result.rows.map((row) => row.column_name);
     }
@@ -187,35 +178,21 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     isolation(): IsolationStrategy {
         return {
             acquire: async (workerId: string) => {
-                const workerSchema = `worker_${workerId}`;
-                this.originalConnectionString = this.connectionString;
-                const client = await this.getClient();
-
-                // Create schema by cloning all tables from public
-                await client.query(`DROP SCHEMA IF EXISTS "${workerSchema}" CASCADE`);
-                await client.query(`CREATE SCHEMA "${workerSchema}"`);
-
-                // Copy table structures (no data) from public
-                const tables = await client.query(`
-                    SELECT tablename FROM pg_tables
-                    WHERE schemaname = 'public'
-                    AND tablename NOT LIKE '_prisma%'
-                `);
-                for (const row of tables.rows) {
-                    await client.query(
-                        `CREATE TABLE "${workerSchema}"."${row.tablename}" (LIKE "public"."${row.tablename}" INCLUDING ALL)`,
+                const database = cloneName(
+                    this.environment.POSTGRES_DB ?? 'test',
+                    this.serviceName ?? this.type,
+                    workerId,
+                );
+                await withClient(this.connectionString, async (admin) => {
+                    await admin.query(`DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`);
+                    await admin.query(
+                        `CREATE DATABASE "${database}" TEMPLATE "${this.template ?? 'template1'}"`,
                     );
-                }
-                await ownSequences(client, workerSchema);
-
-                // Switch this handle to use the worker schema
-                this.schema = workerSchema;
-                await client.query(`SET search_path TO "${workerSchema}", public`);
-
-                // Update connectionString so app connections also use the worker schema
-                const url = new URL(this.connectionString);
-                url.searchParams.set('options', `-c search_path=${workerSchema},public`);
-                this.connectionString = url.toString();
+                });
+                await this.closeClient();
+                this.containerConnectionString = this.connectionString;
+                this.connectionString = withDatabase(this.connectionString, database);
+                this.database = database;
             },
 
             reset: async () => {
@@ -223,45 +200,24 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
             },
 
             release: async () => {
-                const client = await this.getClient();
-                const workerSchema = this.schema;
-                this.schema = 'public';
-                this.connectionString = this.originalConnectionString;
-                await client.query(`SET search_path TO public`);
-                await client.query(`DROP SCHEMA IF EXISTS "${workerSchema}" CASCADE`);
+                await this.closeClient();
+                const { database } = this;
+                if (database === null) {
+                    return;
+                }
+                this.connectionString = this.containerConnectionString;
+                this.database = null;
+                await withClient(this.connectionString, async (admin) => {
+                    await admin.query(`DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`);
+                });
             },
         };
     }
-}
 
-/**
- * Give the cloned tables' serial columns sequences of their own schema.
- *
- * `LIKE … INCLUDING ALL` copies a serial column's default as written, so a
- * clone would still draw from the public table's sequence — shared by every
- * worker, never restarted by the clone's reset. Each such column gets a
- * sequence owned by its clone instead: its ids count from 1 in each worker,
- * and `TRUNCATE … RESTART IDENTITY` restarts them.
- */
-async function ownSequences(client: Client, schema: string): Promise<void> {
-    const serials = await client.query<{ column: string; table: string }>(
-        `SELECT c.relname AS table, a.attname AS column
-        FROM pg_attrdef d
-        JOIN pg_attribute a ON a.attrelid = d.adrelid AND a.attnum = d.adnum
-        JOIN pg_class c ON c.oid = d.adrelid
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE n.nspname = $1 AND pg_get_expr(d.adbin, d.adrelid) LIKE 'nextval(%'`,
-        [schema],
-    );
-    const statements = serials.rows.map(({ column, table }) => {
-        const sequence = `"${schema}"."${table}_${column}_seq"`;
-        return (
-            `CREATE SEQUENCE ${sequence} OWNED BY "${schema}"."${table}"."${column}"; ` +
-            `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${column}" SET DEFAULT nextval('${sequence}');`
-        );
-    });
-    if (statements.length > 0) {
-        await client.query(statements.join('\n'));
+    private async closeClient(): Promise<void> {
+        const { client } = this;
+        this.client = null;
+        await endQuietly(client);
     }
 }
 

@@ -6,6 +6,9 @@ import { describe, expect, test } from 'vitest';
 import { file, postgres } from '../../../src/index.js';
 import { integration } from '../integration.specification.js';
 
+/** The docker directory the specimen's services initialise from. */
+const SPECIMEN_DOCKER = resolve(import.meta.dirname, '../../shared/fixtures/specimen-api/docker');
+
 /*
  * The postgres seam, met the way a consumer meets it: the facet starts the
  * container, the chain hands the started handle to the call, and every chain
@@ -14,16 +17,20 @@ import { integration } from '../integration.specification.js';
  */
 
 describe('postgres', () => {
-    test('builds a connection string carrying the credentials and the database', async () => {
-        // Given - the service the runner started
+    test('builds a connection string carrying the credentials and the worker own database', async () => {
+        // Given - the service the runner started, the worker's number read off its database
         const result = await integration.call(({ db }) => {
             const url = new URL(db.connectionString);
-            return { database: url.pathname, protocol: url.protocol, username: url.username };
+            return {
+                database: url.pathname.replace(/_\d+$/u, '_<worker>'),
+                protocol: url.protocol,
+                username: url.username,
+            };
         });
 
-        // Then - the parts a consumer reads come from the compose file
+        // Then - the credentials are the handle's, and the database is this worker's clone of the service's
         expect(result.value).toMatch({
-            database: '/test',
+            database: '/test_db_<worker>',
             protocol: 'postgresql:',
             username: 'test',
         });
@@ -132,8 +139,8 @@ describe('postgres', () => {
         expect(result.value).toMatch(['id', 'name', 'email']);
     });
 
-    test('runs the init script the compose directory carries', async () => {
-        // Given - a docker/ directory holding postgres/init.sql
+    test('builds its template from the init script the docker directory carries, and a worker clones it', async () => {
+        // Given - a docker/ directory holding postgres/init.sql, and a handle initialised from it then acquired
         const result = await integration.call(async ({ db }) => {
             const dockerDir = mkdtempSync(resolve(tmpdir(), 'postgres-init-'));
             mkdirSync(resolve(dockerDir, 'postgres'), { recursive: true });
@@ -143,17 +150,20 @@ describe('postgres', () => {
                     ' INSERT INTO "init_probe" (val) VALUES (\'ok\');',
             );
             const initDb = postgres();
-            initDb.serviceName = 'db';
+            initDb.serviceName = 'probe';
             initDb.connectionString = db.connectionString;
             initDb.started = true;
 
             await initDb.initialize(dockerDir);
-            const rows = await db.query('init_probe', ['val']);
-            await db.seed('DROP TABLE "init_probe"');
-            return rows;
+            await initDb.isolation().acquire('1');
+            try {
+                return await initDb.query('init_probe', ['val']);
+            } finally {
+                await initDb.isolation().release();
+            }
         });
 
-        // Then - the script ran against the real database
+        // Then - the clone holds what the script created and inserted
         expect(result.value).toMatch([['ok']]);
     });
 
@@ -206,16 +216,18 @@ describe('postgres', () => {
     });
 
     // RUNTIME G2 — two workers on one container never share a row.
-    test('two workers take two schemas, and a row one writes the other never reads', async () => {
-        // Given - two handles on the runner's container, acquired by two workers, one of them seeding
+    test('two workers take two databases cloned from the template, and a row one writes the other never reads', async () => {
+        // Given - two handles on the runner's container, initialised from the specimen's docker directory and acquired by two workers, one of them seeding
         const result = await integration.call(async ({ db }) => {
             const container = new URL(db.connectionString);
-            container.searchParams.delete('options');
+            container.pathname = '/test';
             const [first, second] = [postgres(), postgres()];
             await Promise.all(
                 [first, second].map(async (handle, index) => {
+                    handle.serviceName = 'worker';
                     handle.connectionString = container.toString();
                     handle.started = true;
+                    await handle.initialize(SPECIMEN_DOCKER);
                     await handle.isolation().acquire(String(7 + index));
                 }),
             );
@@ -227,22 +239,51 @@ describe('postgres', () => {
                 first: await first.query('users', ['name']),
                 second: await second.query('users', ['name']),
             };
-            const schemas = [first, second].map((handle) =>
-                new URL(handle.connectionString).searchParams.get('options'),
+            const databases = [first, second].map(
+                (handle) => new URL(handle.connectionString).pathname,
             );
 
             await first.isolation().release();
             await second.isolation().release();
-            return { rows, schemas };
+            return { databases, rows };
         });
 
-        // Then - each worker has its own schema, and the row stayed in the one that wrote it
+        // Then - each worker has its own database, and the row stayed in the one that wrote it
         expect(result.value).toMatch({
+            databases: ['/test_worker_7', '/test_worker_8'],
             rows: {
                 first: [['Alice']],
                 second: [],
             },
-            schemas: ['-c search_path=worker_7,public', '-c search_path=worker_8,public'],
         });
+    });
+
+    test('drops a worker database on release, and hands the handle back the container own', async () => {
+        // Given - a handle acquired then released by one worker
+        const result = await integration.call(async ({ db }) => {
+            const container = new URL(db.connectionString);
+            container.pathname = '/test';
+            const handle = postgres();
+            handle.serviceName = 'released';
+            handle.connectionString = container.toString();
+            handle.started = true;
+            await handle.isolation().acquire('3');
+            await handle.isolation().release();
+
+            const { Client } = await import('pg');
+            const client = new Client({ connectionString: container.toString() });
+            await client.connect();
+            try {
+                const left = await client.query(
+                    "SELECT datname FROM pg_database WHERE datname = 'test_released_3'",
+                );
+                return { database: new URL(handle.connectionString).pathname, left: left.rows };
+            } finally {
+                await client.end();
+            }
+        });
+
+        // Then - no clone is left on the container, and the handle speaks for the container again
+        expect(result.value).toMatch({ database: '/test', left: [] });
     });
 });

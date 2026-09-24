@@ -124,7 +124,8 @@ docker/
     └── init.sql            # schema for the "analytics-db" service
 ```
 
-- `docker/<service>/init.sql` executes when the corresponding service starts — matched by the **kebab-case of the record key**, so the analytics schema above belongs to `analytics-db/` (the folder `analyticsDb` names).
+- `docker/<service>/init.sql` builds the service's **template database** — matched by the **kebab-case of the record key**, so the analytics schema above belongs to `analytics-db/` (the folder `analyticsDb` names).
+- The template is built ONCE per container: its name is the script's digest, one worker builds it under an advisory lock while the others wait and then find it, and each worker then takes `CREATE DATABASE … TEMPLATE` — a copy of the finished schema, whatever the script did to build it. A script that fails leaves no template behind, and the error names the script.
 - A project with one database needs no folder of its own: a postgres handle falls back to `docker/postgres/init.sql` when nothing sits under its own name.
 - Testcontainers starts each declared service from the handle's image and environment. There is no second definition of the stack to keep in step.
 
@@ -138,15 +139,15 @@ This is the same boundary rule B1 already states from the other side — one cha
 
 Vitest runs test files in parallel workers; the framework isolates them automatically — no configuration, no sharding:
 
-| Service      | Isolation strategy                                                       |
-| ------------ | ------------------------------------------------------------------------ |
-| `postgres()` | Cloned schema per worker, named in the connection string's `search_path` |
-| `redis()`    | Dedicated database index per worker (1–15), the connection string's path |
-| `sqlite()`   | Template file copied per worker                                          |
+| Service      | Isolation strategy                                                                                   |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path |
+| `redis()`    | Dedicated database index per worker (1–15), the connection string's path                             |
+| `sqlite()`   | Template file copied per worker                                                                      |
 
 The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address talks to another worker.
 
-On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers. The reset restarts every generated id too, and a postgres worker's cloned schema counts its serial columns on sequences of its own: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
+On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
 
 ## Root auto-discovery (rule A9)
 
