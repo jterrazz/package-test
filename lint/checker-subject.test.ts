@@ -149,6 +149,35 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         );
     });
 
+    test('a move removes the folders it empties, up to the first that still holds something', () => {
+        // Given - a spec filed two folders deep, alone in both, and one in a folder below its own subject
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/misc/deep/listing.spec.ts': [
+                "import { api } from '../../api.specification.js';",
+                "test('a', async () => { await api.get('/orders'); });",
+                '',
+            ].join('\n'),
+            'cli/cli.specification.ts':
+                'export const { cleanup, cli } = await specification.cli(BIN);\n',
+            'cli/spawn/shop/runs.spec.ts': [
+                "import { cli } from '../../cli.specification.js';",
+                "test('a', async () => { await cli.exec('spawn shop'); });",
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fixer moves both
+        fixSubjects(root);
+
+        // Then - both folders the first emptied are gone, and the one the second moved into stays
+        expect(
+            ['api/misc/deep', 'api/misc', 'cli/spawn/shop', 'cli/spawn/runs.spec.ts'].map((path) =>
+                existsSync(join(root, path)),
+            ),
+        ).toStrictEqual([false, false, false, true]);
+    });
+
     test('the split drops an import only a string of the file names', () => {
         // Given - a file whose second route's test only names `cli` inside a string
         const root = specsTree({

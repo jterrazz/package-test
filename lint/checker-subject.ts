@@ -896,6 +896,23 @@ export function fixSubjects(specsRoot: string): string[] {
         );
         forgetTree();
         done.push(...liftGround(specsRoot, dirname(spec.file)));
+        removeEmptied(specsRoot, dirname(spec.file));
     }
     return done;
+}
+
+/**
+ * Remove the folder a move left empty, and each parent it empties in turn, up
+ * to the specs root — as C14 and C27 remove the folders theirs empty.
+ */
+function removeEmptied(specsRoot: string, folder: string): void {
+    let current = folder;
+    while (current !== specsRoot && current.startsWith(specsRoot) && existsSync(current)) {
+        if (readdirSync(current).length > 0) {
+            break;
+        }
+        rmSync(current, { recursive: true });
+        current = dirname(current);
+    }
+    forgetTree();
 }
