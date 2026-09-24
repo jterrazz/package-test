@@ -90,4 +90,21 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
             checkCapabilityFolder(root).map(({ file, line }) => `${file}:${line}`),
         ).toStrictEqual(['api/users/get/reading.spec.ts:2']);
     });
+
+    test('a repository suite, which has no column, files a specimen’s spec under a capability of any', () => {
+        // Given - a suite's specs of a specimen under an api capability, a mobile one, and neither
+        const suite = "import { surface } from '../surface.specification.js';\n";
+        const root = specsTree({
+            'surface/surface.specification.ts':
+                "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n",
+            'surface/seed/nominal.spec.ts': suite,
+            'surface/appium/session.spec.ts': suite,
+            'surface/misc/grab-bag.spec.ts': suite,
+        });
+
+        // Then - only the folder no column names is refused
+        expect(checkCapabilityFolder(root).map(({ file }) => file)).toStrictEqual([
+            'surface/misc/grab-bag.spec.ts',
+        ]);
+    });
 });
