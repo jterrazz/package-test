@@ -505,6 +505,16 @@ TEST_UPDATE=1 npx vitest --run --project unit   # or: npx vitest --run -u
 
 What update mode writes, what it preserves and the discipline it asks for are [15 — Tokens § Update mode](15-tokens.md#update-mode-tokens-are-preserved)'s, whole.
 
+## Hunting a flake
+
+A test that fails once and passes on the rerun is chased, never retried: the preset sets `retry: 0`. The gesture is Vitest's `--repeats`, which runs every test of the files it is handed ten times in one process:
+
+```bash
+npm run test:repeat -- --project unit lint/type-channel.test.ts
+```
+
+It is aimed at named files, not at a whole project. A rule test declares its cases through oxlint's `RuleTester`, which refuses a case it has already seen, so a repeated rule test fails on its second pass whatever the rule does. A test that fails on its own second pass is a defect all the same: it cannot run twice in one process.
+
 ## What CI runs
 
 The workflow is `.github/workflows/validate.yaml`, on every push to `main` and every pull request, delegating to the estate's shared `validate.yaml`. It restores `.artifacts/`, then runs `make build`, `make lint` and `make test` in that order, with chromium provisioned because the website specs drive a real browser. The same three targets are what a local run owes before a push; the ordering is not decorative, since lint loads what build produced.

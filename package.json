@@ -68,7 +68,8 @@
         "lint": "typescript check && node dist/checker.js",
         "test": "vitest --run",
         "coverage": "npm run build && vitest --run --coverage && node dist/coverage.js --write",
-        "coverage:check": "node dist/coverage.js"
+        "coverage:check": "node dist/coverage.js",
+        "test:repeat": "vitest --run --repeats 10"
     },
     "dependencies": {
         "@oxlint/plugins": "^1.85.0",

@@ -166,8 +166,8 @@ describe('isValidSqliteTemplate (regression guard)', () => {
     });
 
     test('accepts a real SQLite database file', () => {
-        // Given - an actual SQLite file created by better-sqlite3
-        const real = resolve(workdir, 'real.sqlite');
+        // Given - an actual SQLite file created by better-sqlite3, in a folder of this run's own
+        const real = resolve(mkdtempSync(resolve(workdir, 'real-')), 'real.sqlite');
         const db = new Database(real);
         db.exec('CREATE TABLE "t" (id INTEGER PRIMARY KEY)');
         db.close();
