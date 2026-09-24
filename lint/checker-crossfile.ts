@@ -1380,7 +1380,7 @@ function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): str
  * one leaf's gains a column, the next does not — and the reader of either
  * cannot tell a deliberate difference from a forgotten one. A warning, since
  * two leaves may mean to diverge tomorrow; `--fix` moves one copy and rewrites
- * every path that named any of them — only when the copies share one name,
+ * every whole relative literal that named any of them — only when the copies share one name,
  * since that name is the only one a fix could keep.
  */
 export function checkCopiedGround(rootDir: string): TokenViolation[] {
@@ -1494,8 +1494,8 @@ export function repointModuleTests(specsRoot: string, moves: readonly Move[]): s
 /**
  * Apply C27: one copy of each copied entry moves to the specs root's shared
  * folder of its role — a `git mv` in a work tree — the others are deleted, and every
- * path of the specs tree and of the member's module tests that named a copy
- * names the moved entry. An entry the
+ * whole relative literal of the specs tree and of the member's module tests
+ * that named a copy names the moved entry. An entry the
  * target already holds byte for byte keeps it and deletes every copy; one
  * holding something else is the author's call, and nothing moves; so are
  * copies of several names. A leaf's ground folder the move empties goes with it. Returns
@@ -1644,9 +1644,8 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
 /**
  * Apply C15 to the shared ground outside `shared/`: every entry of a role
  * folder at the specs root moves to the shared folder of its role — a `git mv`
- * in a work tree — and every path that named it, a source's literal or a
- * document's key of the specs tree, a module test's relative literal, names it
- * there. An entry the shared folder
+ * in a work tree — and every whole relative literal that named it, a source's
+ * or a document's key of the specs tree, a module test's, names it there. An entry the shared folder
  * already holds by that name stays, for the author. A root folder the move
  * empties goes with it. Returns what moved, relative to `rootDir`.
  */
