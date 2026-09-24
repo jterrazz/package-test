@@ -1,0 +1,5 @@
+description: a result read only for the cursor the next request sends owes no comparison
+fixture: ./fixtures/cursor-carried/
+runs:
+    - command: .
+      exit: 0
