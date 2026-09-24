@@ -4,6 +4,7 @@ import {
     mkdirSync,
     mkdtempSync,
     readFileSync,
+    realpathSync,
     writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -28,13 +29,13 @@ function projectWith(files: Record<string, string>): string {
     return root;
 }
 
-/** A stub oxlint that writes its arguments and the wrapper it was handed, then exits `status`. */
+/** A stub oxlint that appends its arguments and the folder it ran in, copies the wrapper it was handed, then exits `status`. */
 function stubOxlint(root: string, status: number): void {
     mkdirSync(join(root, 'node_modules', '.bin'), { recursive: true });
     const bin = join(root, 'node_modules', '.bin', 'oxlint');
     writeFileSync(
         bin,
-        `#!/bin/sh\necho "$@" > args.txt\ncp ${OWN_FIXES_WRAPPER} wrapper.mjs\necho "cannot run" >&2\nexit ${status}\n`,
+        `#!/bin/sh\necho "$@" >> "${root}/args.txt"\npwd -P >> "${root}/cwds.txt"\ncp ${OWN_FIXES_WRAPPER} wrapper.mjs\necho "cannot run" >&2\nexit ${status}\n`,
     );
     chmodSync(bin, 0o755);
 }
@@ -161,7 +162,7 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
     });
 
-    test('every subtree under a nested oxlint config is ignored by the pass', () => {
+    test('every subtree under a nested oxlint config is fixed by a run of its own, under its own config', () => {
         // Given - a nested config at sub/, another inside it, one under a skipped folder, one oxlint never nests
         const root = projectWith({
             'loose/oxlint.config.mjs': 'export default {};\n',
@@ -177,10 +178,25 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         // When - the pass runs
         applyOwnFixes(root);
 
-        // Then - the outermost nested directory alone is ignored
+        // Then - the root's run ignores sub/, whose own run ignores deeper/, whose own run ignores nothing
+        const real = realpathSync(root);
         expect(nestedConfigDirectories(root)).toStrictEqual(['sub']);
+        expect(readFileSync(join(root, 'cwds.txt'), 'utf8')).toBe(
+            [real, join(real, 'sub'), join(real, 'sub', 'deeper'), ''].join('\n'),
+        );
         expect(readFileSync(join(root, 'args.txt'), 'utf8')).toBe(
-            `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER} --ignore-pattern sub/**\n`,
+            [
+                `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER} --ignore-pattern sub/**`,
+                `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER} --ignore-pattern deeper/**`,
+                `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER}`,
+                '',
+            ].join('\n'),
+        );
+        expect(readFileSync(join(root, 'sub', 'wrapper.mjs'), 'utf8')).toBe(
+            ownFixesConfig(join(root, 'sub', 'oxlint.config.ts')),
+        );
+        expect(readFileSync(join(root, 'sub', 'deeper', 'wrapper.mjs'), 'utf8')).toBe(
+            ownFixesConfig(join(root, 'sub', 'deeper', '.oxlintrc.json')),
         );
     });
 

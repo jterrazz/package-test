@@ -23,8 +23,10 @@ import { oxlintOf } from './ratchet.js';
  * root config to arm the plugin, has nothing to fix.
  *
  * A config handed with `-c` switches oxlint's nested-config discovery off, so
- * every subtree under a nested oxlint config is ignored by the pass: the root's
- * fixers never write where another config governs.
+ * every subtree under a nested oxlint config is ignored by the root's run and
+ * fixed by a run of its own, under the wrapper of its own config: the root's
+ * fixers never write where another config governs, and one pass settles the
+ * whole tree the ratchet counts.
  */
 
 /** The config names oxlint looks for at a root, in its order. */
@@ -126,10 +128,10 @@ export function ownFixesConfig(config: string): string {
     ].join('\n');
 }
 
-/** The config oxlint would find at `root`, or `undefined`. */
-function rootConfigOf(root: string): string | undefined {
-    const name = CONFIG_NAMES.find((candidate) => existsSync(join(root, candidate)));
-    return name === undefined ? undefined : join(root, name);
+/** The first of `names` present in `directory`, as an absolute path, or `undefined`. */
+function configIn(directory: string, names: readonly string[]): string | undefined {
+    const name = names.find((candidate) => existsSync(join(directory, candidate)));
+    return name === undefined ? undefined : join(directory, name);
 }
 
 /**
@@ -156,23 +158,14 @@ export function nestedConfigDirectories(root: string): string[] {
 }
 
 /**
- * Apply the plugin's autofixes over the project at `root`. oxlint exits 1 when
- * diagnostics remain — the ratchet's to count — and past 1 when it could not
- * run, which is refused naming the binary.
+ * Run `oxlint --fix` over `directory` under the wrapper of `config`, ignoring
+ * the subtrees `nested` names — each governed by a config of its own.
  */
-export function applyOwnFixes(root: string): void {
-    const oxlint = oxlintOf(root);
-    const config = rootConfigOf(root);
-    if (oxlint === undefined || config === undefined) {
-        return;
-    }
-    const wrapper = join(root, OWN_FIXES_WRAPPER);
+function fixUnder(oxlint: string, directory: string, config: string, nested: string[]): void {
+    const wrapper = join(directory, OWN_FIXES_WRAPPER);
     writeFileSync(wrapper, ownFixesConfig(config));
     try {
-        const ignored = [
-            OWN_FIXES_WRAPPER,
-            ...nestedConfigDirectories(root).map((dir) => `${dir}/**`),
-        ];
+        const ignored = [OWN_FIXES_WRAPPER, ...nested.map((dir) => `${dir}/**`)];
         const run = spawnSync(
             oxlint,
             [
@@ -181,7 +174,7 @@ export function applyOwnFixes(root: string): void {
                 OWN_FIXES_WRAPPER,
                 ...ignored.flatMap((pattern) => ['--ignore-pattern', pattern]),
             ],
-            { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 },
+            { cwd: directory, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 },
         );
         if (run.status === null || run.status > 1) {
             throw new Error(
@@ -190,5 +183,33 @@ export function applyOwnFixes(root: string): void {
         }
     } finally {
         rmSync(wrapper, { force: true });
+    }
+}
+
+/**
+ * Apply the plugin's autofixes over the project at `root`, and over every
+ * subtree a nested config governs, each under its own config — the one the
+ * ratchet's run, which discovers nested configs, judges it by. oxlint exits 1
+ * when diagnostics remain — the ratchet's to count — and past 1 when it could
+ * not run, which is refused naming the binary.
+ */
+export function applyOwnFixes(root: string): void {
+    const oxlint = oxlintOf(root);
+    const config = configIn(root, CONFIG_NAMES);
+    if (oxlint === undefined || config === undefined) {
+        return;
+    }
+    const pending = [{ config, directory: root }];
+    for (let next = pending.shift(); next !== undefined; next = pending.shift()) {
+        const { directory } = next;
+        const nested = nestedConfigDirectories(directory);
+        fixUnder(oxlint, directory, next.config, nested);
+        for (const dir of nested) {
+            const inner = join(directory, dir);
+            const own = configIn(inner, NESTED_CONFIG_NAMES);
+            if (own !== undefined) {
+                pending.push({ config: own, directory: inner });
+            }
+        }
     }
 }
