@@ -105,11 +105,11 @@ function testsItsNeighbour(filename: string): boolean {
  * inside one: a domain named with a reserved word is refused here. That is not a
  * question of depth, which is why no project's declared shape switches it off.
  *
- * `shared/` is reserved beside the four, in every mode: it is the one folder
- * the specs root keeps beside its facets, holding the ground several leaves
- * share, so a spec under `specs/shared/` is refused. Under `facet` and
- * `facet-domain`, a domain named `shared` is refused too — the one word means
- * one folder.
+ * `shared/` is reserved DIRECTLY under `specs/`, in every mode: it is the one
+ * folder the specs root keeps beside its facets, holding the ground several
+ * leaves share, so a spec under `specs/shared/` is refused. Deeper, the word is
+ * the author's — a domain or a route's segment (`specs/api/shared/get/` for
+ * `GET /shared`) is no facet level and cannot be read as that folder.
  *
  * Ground is not always inert, though: it may be CODE the specs stand on — the
  * build of the subject under test, a harness the runner spawns. A `<module>.ts`
@@ -152,15 +152,6 @@ export const c1DomainStructure: LintRule = {
                     return;
                 }
                 if (depth === 'off') {
-                    return;
-                }
-                if (
-                    spec &&
-                    depth !== 'mirror' &&
-                    nesting >= 2 &&
-                    anchor.relative[1] === SHARED_GROUND
-                ) {
-                    context.report({ messageId: 'sharedDomain', node });
                     return;
                 }
 
@@ -221,10 +212,6 @@ export const c1DomainStructure: LintRule = {
             specInGround: {
                 found: 'a spec under `{{ground}}/`, a reserved ground name',
                 fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
-            },
-            sharedDomain: {
-                found: 'a domain named `shared`, the name the specs root keeps for its shared ground',
-                fix: 'rename the domain: `shared` names `specs/shared/`, the ground several leaves share',
             },
             specInShared: {
                 found: 'a spec under `specs/shared/`, the ground several leaves share',

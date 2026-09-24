@@ -96,7 +96,7 @@ a declared name nothing carries fails too.
 
 <!-- /GENERATED:domains -->
 
-A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; `fixtures/`, `expected/`, `requests/` and `seeds/` are ground, never a domain, and `shared/` is the shared ground, never a facet or a domain. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
+A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; `fixtures/`, `expected/`, `requests/` and `seeds/` are ground, never a domain, and `shared/` directly under `specs/` is the shared ground, never a facet — deeper, a domain or a route's segment may take the word. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
 
 The fixture apps the specs drive live in the pool, `specs/shared/fixtures/`: `app` and `website-app` for the served facets, `cli-app`, `docker-cli`, `checker-cli` and `lint-cli` for the command facets, and the `broken-*` trees for the infrastructure failure paths. A lint rule's trees are not in the pool: a rule specified by documents keeps them in its own `specs/lint/<rule-id>/fixtures/`, and the checker's twins sit in `specs/lint/checker/fixtures/`.
 
@@ -113,7 +113,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 68    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 131   |
-| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 159   |
+| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 160   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 37    |
 
 <!-- /GENERATED:layers -->

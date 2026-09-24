@@ -46,12 +46,6 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
             errors: [{ messageId: 'specInShared' }],
             filename: '/repo/specs/shared/shared.specification.ts',
         },
-        // Nor a domain.
-        {
-            code: 'const x = 1;',
-            errors: [{ messageId: 'sharedDomain' }],
-            filename: '/repo/specs/integration/shared/shared.spec.ts',
-        },
         // The facet level is reserved whatever depth the tree declares.
         {
             code: 'const x = 1;',
@@ -68,8 +62,16 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
         // Specifications at the facet root.
         { code: 'const x = 1;', filename: '/repo/specs/api/api.specification.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/cli/cli.specification.ts' },
-        // A folder named `shared` below a domain is the author's: a route's segment.
+        // `shared` is reserved only directly under `specs/`: deeper, a domain or a
+        // route's segment takes the word (`GET /shared` files under `api/shared/get/`).
+        { code: 'const x = 1;', filename: '/repo/specs/integration/shared/shared.spec.ts' },
+        { code: 'const x = 1;', filename: '/repo/specs/api/shared/get/listed.spec.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/api/documents/shared/sharing.spec.ts' },
+        {
+            code: 'const x = 1;',
+            filename: '/repo/specs/integration/shared/shared.spec.ts',
+            options: [{ depth: 'facet' }],
+        },
         // Module tests under src/ follow the neighbour rule (I2), not C1.
         { code: 'const x = 1;', filename: '/repo/src/specification/matching/match.test.ts' },
         // The default is explicit-equivalent: stating it changes nothing.
