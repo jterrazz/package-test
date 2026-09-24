@@ -32,11 +32,14 @@ fix: build
 # `SHARD=<index>/<count>` runs one shard of that suite, for a CI job that
 # Splits the run: its blob report lands under `.artifacts/vitest/blob/`, and
 # The floor is judged once, on the merged report — `make test-merge`, run
-# After every shard, never on a shard's partial coverage.
+# After every shard, never on a shard's partial coverage. A whole run empties
+# That folder, so a merge reads the shards of one split alone.
 test: node_modules/.install
 ifdef SHARD
+	@if [ -f .artifacts/vitest/blob ]; then rm .artifacts/vitest/blob; fi
 	npm test -- --coverage --shard=$(SHARD) --reporter=default --reporter=blob
 else
+	rm -rf .artifacts/vitest/blob
 	npm test -- --coverage
 	npm run coverage:check
 endif
