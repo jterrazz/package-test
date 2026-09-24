@@ -5,6 +5,9 @@ node_modules/
 # Its coverage report, the sqlite schema templates. `dist` is the one exception.
 .artifacts/
 dist
+# Turborepo's per-task log, at a path it offers no key to move; its cache is
+# Under `.artifacts/turbo/`.
+.turbo
 *.tgz
 
 # The stub oxlint a checker spec runs in place of the project's own.

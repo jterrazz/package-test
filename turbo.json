@@ -1,0 +1,19 @@
+{
+    "$schema": "https://turborepo.com/schema.json",
+    "cacheDir": ".artifacts/turbo",
+    "tasks": {
+        "build": {
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                "!docs/**",
+                "!specs/**",
+                "!skills/**",
+                "!**/*.md",
+                "!**/*.test.ts",
+                "!**/*.test.tsx"
+            ],
+            "outputs": ["dist/**"]
+        }
+    },
+    "ui": "stream"
+}

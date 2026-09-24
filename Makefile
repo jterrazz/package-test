@@ -6,8 +6,10 @@ node_modules/.install: package-lock.json
 
 install: node_modules/.install
 
+# The bundle, through Turborepo's content-hash cache: an unchanged tree
+# Restores `dist/` from `.artifacts/turbo/` instead of bundling again.
 build: node_modules/.install
-	npm run build
+	TURBO_TELEMETRY_DISABLED=1 npx turbo run build --output-logs=new-only
 
 lint: node_modules/.install
 	npm run lint
@@ -53,7 +55,7 @@ test-changed: node_modules/.install
 # lint and the specs both need, then the linters, then the suite and the floor
 # it may not fall through — the same three targets CI runs, in the same order.
 check: node_modules/.install
-	npm run build
+	$(MAKE) build
 	npm run lint
 	$(MAKE) test
 

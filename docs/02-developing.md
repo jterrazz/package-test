@@ -11,7 +11,7 @@ The repository answers six `make` targets, the same six every repository of the 
 | Target         | Does                                                                                                                                                                                      |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `make install` | Install the dependencies (`npm ci`, again only when the lockfile moves)                                                                                                                   |
-| `make build`   | Build the bundle — before `lint` and before the `unit` project                                                                                                                            |
+| `make build`   | Build the bundle — before `lint` and before the `unit` project; an unchanged tree restores it from the build cache instead                                                                |
 | `make lint`    | Typecheck, lint, format check, knip, then the conventions checker                                                                                                                         |
 | `make fix`     | Build, then the two fixers — the checker's `--fix`, then `npx typescript fix`, whose formatter formats what the checker wrote — each run whatever the other said, and fails if either did |
 | `make test`    | Every suite, with coverage, then the coverage floor                                                                                                                                       |
@@ -24,6 +24,8 @@ Three targets stand beside them, and no flow speaks them. `make test-mobile` run
 ### The build comes first
 
 `oxlint.config.ts` loads this package's OWN plugin from `./dist/oxlint.js`, and the end-to-end lint specs load it too. Node's type-stripping does not resolve a `.js` specifier back to its `.ts` source, so **`npm run build` must precede `npm run lint`** and must precede the `unit` project. A lint run on a stale bundle judges the previous build's rules.
+
+`make build` runs that build through Turborepo, whose cache is keyed by the content of what the bundle is made of: every file git tracks or would track, less `docs/`, `specs/`, `skills/`, the Markdown and the test files. An unchanged tree restores `dist/` from `.artifacts/turbo/` rather than bundling again, so `make fix`, `make check` and `npm run docs` pay the build once per change. `turbo.json` states those inputs; Turborepo's per-task log lands in `.turbo/`, which it offers no key to move, and `.gitignore` holds it.
 
 That config is also where this repository DECLARES its own architecture: `i1-layer-boundaries` ships inert, and `FRAMEWORK_LAYERS` in `oxlint.config.ts` is the enforced statement of the five trees [01 — Architecture](01-architecture.md) describes.
 

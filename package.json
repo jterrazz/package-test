@@ -64,10 +64,10 @@
     },
     "scripts": {
         "build": "tsdown --config tsdown.config.ts",
-        "docs": "npm run build && node dist/catalog.js",
+        "docs": "turbo run build --output-logs=new-only && node dist/catalog.js",
         "lint": "typescript check && node dist/checker.js",
         "test": "vitest --run",
-        "coverage": "npm run build && vitest --run --coverage && node dist/coverage.js --write",
+        "coverage": "turbo run build --output-logs=new-only && vitest --run --coverage && node dist/coverage.js --write",
         "coverage:check": "node dist/coverage.js",
         "test:repeat": "vitest --run --repeats 10"
     },
@@ -100,6 +100,7 @@
         "redis": "^6.2.1",
         "testcontainers": "^12.1.0",
         "tsdown": "^0.23.0",
+        "turbo": "^2.11.3",
         "vite": "^8.3.0",
         "vitest": "5.0.1",
         "vitest-browser-react": "^2.3.0",
@@ -161,5 +162,6 @@
     },
     "engines": {
         "node": ">=24"
-    }
+    },
+    "packageManager": "npm@12.0.2"
 }
