@@ -7,8 +7,10 @@ node_modules/.install: package-lock.json
 install: node_modules/.install
 
 # The bundle, through Turborepo's content-hash cache: an unchanged tree
-# Restores `dist/` from `.artifacts/turbo/` instead of bundling again.
+# Restores `dist/` from `.artifacts/turbo/` instead of bundling again. The
+# Restore adds to `dist/` and removes nothing, so it starts from none.
 build: node_modules/.install
+	rm -rf dist
 	TURBO_TELEMETRY_DISABLED=1 npx turbo run build --output-logs=new-only
 
 lint: node_modules/.install
