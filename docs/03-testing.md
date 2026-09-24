@@ -371,7 +371,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `toMatch(<rows>)`      | 7   | 3    | 1   | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `.json body`           | 2   | —    | 2   | 2           | 0       | —      | —         | 9      |
+| `.json body`           | 2   | —    | 2   | 2           | 0       | —      | —         | 10     |
 | `.txt stream`          | 1   | —    | 7   | 1           | 1       | —      | —         | 10     |
 | `{ frozen }`           | 2   | —    | 11  | —           | —       | —      | 1         | 3      |
 

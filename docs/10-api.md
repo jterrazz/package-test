@@ -309,6 +309,8 @@ The measure is the `api()` project's global setup; a project written by hand mea
 
 A shard of a split run (`vitest --shard`) judges nothing: its requests are a part of the run's, so it writes its ledgers to a folder of its own, `.artifacts/vitest/routes/shard-<index>-<count>/`, and prints `api routes: not judged`. `vitest --merge-reports` runs no global setup, so the merge judges no routes either; this package's own split judges them after its merge, over every shard's ledgers ([03 — Testing § What CI runs](03-testing.md#what-ci-runs)).
 
+Nor is any other partial run judged: one that ran some of the project's test files — `vitest --changed`, a file filter — or some of its tests, `-t`, reached only some routes, so it prints `api routes: not judged — a partial run …`, and `TEST_UPDATE=1` records nothing.
+
 The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).
 
 ## Pitfalls

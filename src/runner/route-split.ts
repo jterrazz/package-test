@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 
 import { readShardLedgers, ROUTES_DIR } from '../model/routes/routes.js';
-import { judgeLedgers } from './route-coverage.js';
-import type { RouteRun, RouteVerdict } from './route-coverage.js';
+import { judgeLedgers } from './route-judge.js';
+import type { RouteRun, RouteVerdict } from './route-judge.js';
 
 /**
  * The route ratchet of a split run, judged once its shards have run.
@@ -14,10 +14,10 @@ import type { RouteRun, RouteVerdict } from './route-coverage.js';
  */
 export async function judgeSplit(
     root: string,
-    run: Omit<RouteRun, 'shard'>,
+    run: Omit<RouteRun, 'scope'>,
 ): Promise<RouteVerdict> {
     return await judgeLedgers(root, readShardLedgers(join(root, ROUTES_DIR)), {
         ...run,
-        shard: false,
+        scope: 'whole',
     });
 }

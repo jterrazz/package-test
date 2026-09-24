@@ -1,270 +1,151 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, onTestFinished, test } from 'vitest';
+import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
-import { heldUnreached, writeLedger } from '../model/routes/routes.js';
-import { judgeRoutes, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-coverage.js';
+import { ROUTES_DIR, shardLedgersDir, writeLedger } from '../model/routes/routes.js';
+import type { Shard } from '../model/routes/routes.js';
+import { setupRoutes } from './route-coverage.js';
+import type { RouteProject } from './route-coverage.js';
+import { PARTIAL_UNJUDGED, SHARD_UNJUDGED } from './route-judge.js';
 
-/** A green run, judged. */
-const GREEN = { failed: 0, shard: false, update: false };
-
-/** A green run, recorded with TEST_UPDATE=1. */
-const RECORDING = { failed: 0, shard: false, update: true };
-
-/** A project root holding one run's ledgers: two specifications of one table of three routes, one request. */
-function runWithOneRouteReached(): { directory: string; root: string } {
-    const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
-    onTestFinished(() => {
-        rmSync(root, { force: true, recursive: true });
-    });
-    const directory = join(root, 'ledgers');
-    const declared = [
-        { method: 'GET', path: '/users' },
-        { method: 'GET', path: '/users/:id' },
-        { method: 'DELETE', path: '/users/:id' },
-    ];
-    writeLedger(directory, { declared, reached: [{ method: 'GET', path: '/users/7' }] });
-    writeLedger(directory, { declared, reached: [] });
-    return { directory, root };
-}
-
-describe('route coverage — the api run judged', () => {
-    test('a declared route no test reached fails the run, naming each', async () => {
-        // Given - a run reaching one route of three, and no ratchet
-        const { directory, root } = runWithOneRouteReached();
-
-        // Then - the failure names the two
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                'api routes: 2 declared route(s) no test reached, the ratchet holds 0 — send each from a spec, or record them with TEST_UPDATE=1:\n  GET /users\n  DELETE /users/:id',
+describe('route coverage — the global setup reads the run', () => {
+    test("a shard's ledgers go to its own folder, a whole run's are left, and its teardown judges nothing", async () => {
+        // Given - a whole run's ledger at the root of the run's folder, and the setup of shard 1/2 over every file
+        const { project, provided, root } = stubProject({
+            ran: ['a.spec.ts', 'b.spec.ts'],
+            shard: { count: 2, index: 1 },
         });
+        writeLedger(join(root, ROUTES_DIR), { declared: [], reached: [] });
+        const teardown = setupRoutes(project);
+
+        // When - the shard's one specification reaches one route of three, and the run ends
+        const directory = String(provided.get('routesLedger'));
+        const lines = recordedLines();
+        writeOneOfThree(directory);
+
+        // Then - the shard's own folder, the whole run's ledger kept, and no verdict
+        expect(directory).toBe(join(root, shardLedgersDir({ count: 2, index: 1 })));
+        await expect(teardown()).resolves.toBeUndefined();
+        expect(
+            readdirSync(join(root, ROUTES_DIR)).filter((name) => name.endsWith('.json')),
+        ).toHaveLength(1);
+        expect(lines).toStrictEqual([`${SHARD_UNJUDGED}\n`]);
     });
 
-    test('update mode records where the run stands, and the next run is held by it', async () => {
-        // Given - the same run, recorded
-        const { directory, root } = runWithOneRouteReached();
-        await judgeRoutes(root, directory, RECORDING);
+    test('a run one of whose project files did not run judges nothing', async () => {
+        // Given - the setup of a run that ran one file of the project's two
+        const { project, provided } = stubProject({ ran: ['a.spec.ts'] });
+        const teardown = setupRoutes(project);
 
-        // Then - two held, and the judged run passes naming them
-        expect(heldUnreached(root)).toBe(2);
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: 2 unreached, held by jterrazz.baseline.json › test › routes/unreached:\n  GET /users\n  DELETE /users/:id',
-        });
+        // When - its one specification reaches one route of three, and the run ends
+        const lines = recordedLines();
+        writeOneOfThree(String(provided.get('routesLedger')));
+
+        // Then - no verdict
+        await expect(teardown()).resolves.toBeUndefined();
+        expect(lines).toStrictEqual([`${PARTIAL_UNJUDGED}\n`]);
     });
 
-    test('a run that reaches more than the ratchet holds fails, until it is recorded', async () => {
-        // Given - the run recorded, then one more route reached
-        const { directory, root } = runWithOneRouteReached();
-        await judgeRoutes(root, directory, RECORDING);
-        writeLedger(directory, { declared: [], reached: [{ method: 'GET', path: '/users' }] });
-
-        // Then - the fall is a failure naming the gesture; recorded, the run passes
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                'api routes: 1 declared route(s) no test reached, below the 2 the ratchet holds — the debt fell, record it with TEST_UPDATE=1',
+    test('a run whose tests a name filters judges nothing', async () => {
+        // Given - the setup of a run of every file, filtered by -t
+        const { project, provided } = stubProject({
+            ran: ['a.spec.ts', 'b.spec.ts'],
+            testNamePattern: /users/u,
         });
-        await judgeRoutes(root, directory, RECORDING);
-        expect(heldUnreached(root)).toBe(1);
+        const teardown = setupRoutes(project);
+
+        // When - its one specification reaches one route of three, and the run ends
+        const lines = recordedLines();
+        writeOneOfThree(String(provided.get('routesLedger')));
+
+        // Then - no verdict
+        await expect(teardown()).resolves.toBeUndefined();
+        expect(lines).toStrictEqual([`${PARTIAL_UNJUDGED}\n`]);
     });
 
-    test('update mode refuses to record a run a file of which failed, and keeps the entry', async () => {
-        // Given - the run recorded, then the same run judged for recording with one failed file and one route fewer reached
-        const { directory, root } = runWithOneRouteReached();
-        await judgeRoutes(root, directory, RECORDING);
-        writeLedger(directory, { declared: [], reached: [{ method: 'GET', path: '/users' }] });
+    test('a run of every project file is judged', async () => {
+        // Given - the setup of a run that ran the project's two files
+        const { project, provided } = stubProject({ ran: ['a.spec.ts', 'b.spec.ts'] });
+        const teardown = setupRoutes(project);
 
-        // Then - the refusal names why, and the ratchet still holds where the green run stood
-        await expect(
-            judgeRoutes(root, directory, { failed: 1, shard: false, update: true }),
-        ).resolves.toStrictEqual({
-            failure:
-                'api routes: not recorded — 1 file(s) of the run failed, and a failed file may not have sent its requests; make the run green, then record with TEST_UPDATE=1',
-        });
-        expect(heldUnreached(root)).toBe(2);
-    });
+        // When - its one specification reaches one route of three, and the run ends
+        writeOneOfThree(String(provided.get('routesLedger')));
 
-    test('a run a file of which failed is not judged: the routes it did not reach are no failure of theirs', async () => {
-        // Given - a run reaching one route of three, the ratchet holding none, and two files failed
-        const { directory, root } = runWithOneRouteReached();
-
-        // Then - one neutral line, never the ratchet's failure naming routes the failed files may have sent
-        await expect(
-            judgeRoutes(root, directory, { failed: 2, shard: false, update: false }),
-        ).resolves.toStrictEqual({
-            line: 'api routes: not judged — 2 file(s) of the run failed, and a failed file may not have sent its requests',
-        });
-    });
-
-    test('a route two specifications declare counts once', async () => {
-        // Given - the same table in two ledgers, every route reached
-        const { directory, root } = runWithOneRouteReached();
-        writeLedger(directory, {
-            declared: [],
-            reached: [
-                { method: 'GET', path: '/users' },
-                { method: 'DELETE', path: '/users/7' },
-            ],
-        });
-
-        // Then - three routes, not six
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: all 3 declared routes reached',
-        });
-    });
-
-    test('a declared OpenAPI document is the table, when the member states one', async () => {
-        // Given - the member declares only the route the run reached
-        const { directory, root } = runWithOneRouteReached();
-        writeFileSync(join(root, 'openapi.json'), '{"paths": {"/users/{id}": {"get": {}}}}');
-        writeFileSync(
-            join(root, 'jterrazz.config.ts'),
-            "export default { test: { routes: './openapi.json' } };\n",
+        // Then - the ratchet fails the run
+        await expect(teardown()).rejects.toThrow(
+            'api routes: 2 declared route(s) no test reached, the ratchet holds 0',
         );
-
-        // Then - every declared route reached
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: all 1 declared routes reached',
-        });
-    });
-
-    test('a run no api specification wrote to says nothing', async () => {
-        // Given - an empty ledger folder
-        const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
-        onTestFinished(() => {
-            rmSync(root, { force: true, recursive: true });
-        });
-
-        // Then - nothing to judge
-        await expect(judgeRoutes(root, join(root, 'ledgers'), GREEN)).resolves.toStrictEqual({});
-    });
-
-    test('an app whose table is unknown fails the run, naming how to declare it', async () => {
-        // Given - a specification whose app exposed no route table, and no OpenAPI document
-        const { directory, root } = runWithOneRouteReached();
-        writeLedger(directory, { reached: [{ method: 'GET', path: '/health' }] });
-
-        // Then - the run fails rather than reading as every route reached
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure: UNKNOWN_TABLE,
-        });
-    });
-
-    test('an app whose table is unknown is measured against the OpenAPI document it declares', async () => {
-        // Given - no table from the app, the one route declared in a document, and reached
-        const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
-        onTestFinished(() => {
-            rmSync(root, { force: true, recursive: true });
-        });
-        const directory = join(root, 'ledgers');
-        writeLedger(directory, { reached: [{ method: 'GET', path: '/health' }] });
-        writeFileSync(join(root, 'openapi.json'), '{"paths": {"/health": {"get": {}}}}');
-        writeFileSync(
-            join(root, 'jterrazz.config.ts'),
-            "export default { test: { routes: './openapi.json' } };\n",
-        );
-
-        // Then - measured against the document
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: all 1 declared routes reached',
-        });
-    });
-
-    test('an ALL route is reached by a request of any method', async () => {
-        // Given - one app.all() route the member declares method-less, reached by a POST
-        const { directory, root } = methodlessRun(['/mcp']);
-
-        // Then - reached
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: all 2 declared routes reached',
-        });
-    });
-
-    test('an ALL route the member does not declare method-less fails the run, in update mode too', async () => {
-        // Given - the app takes /mcp on any method, and jterrazz.config.ts names no route so
-        const { directory, root } = methodlessRun([]);
-
-        // Then - the drift is named, whatever the mode
-        const failure = {
-            failure:
-                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp'",
-        };
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual(failure);
-        await expect(judgeRoutes(root, directory, RECORDING)).resolves.toStrictEqual(failure);
-    });
-
-    test('a method-less route the app takes on its own methods only, or not at all, fails the run', async () => {
-        // Given - /mcp, /health and /gone declared method-less, the app taking /health on GET alone and no /gone
-        const { directory, root } = methodlessRun(['/mcp', '/health', '/gone']);
-
-        // Then - each declaration that drifted is named
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  /health — the list names it, and the app takes it on its own methods only: remove '/health'\n  /gone — the list names it, and the app's table holds no such route: remove '/gone'",
-        });
-    });
-
-    test('a method-less route is the app’s whatever its parameters are named', async () => {
-        // Given - the app takes /mcp/:id on any method, the list naming /mcp/:session, then /mcp/:id/x
-        const agreeing = methodlessRun(['/mcp/:session'], '/mcp/:id');
-        const drifted = methodlessRun(['/mcp/:id/x'], '/mcp/:id');
-
-        // Then - one route by its shape, and a deeper path is another route
-        await expect(judgeRoutes(agreeing.root, agreeing.directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: all 2 declared routes reached',
-        });
-        await expect(judgeRoutes(drifted.root, drifted.directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'\n  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
-        });
-    });
-});
-
-describe('route coverage — a shard of a split run', () => {
-    test('a shard judges nothing, and records nothing, whatever its ledgers reached', async () => {
-        // Given - one shard's ledgers, reaching one route of three
-        const { directory, root } = runWithOneRouteReached();
-
-        // Then - no failure, judged or recording, and no entry written
-        await expect(
-            Promise.all(
-                [false, true].map(
-                    async (update) =>
-                        await judgeRoutes(root, directory, { failed: 0, shard: true, update }),
-                ),
-            ),
-        ).resolves.toStrictEqual([{ line: SHARD_UNJUDGED }, { line: SHARD_UNJUDGED }]);
-        expect(heldUnreached(root)).toBe(0);
     });
 });
 
 /**
- * A run over an app taking `any` (`/mcp` unless named) on any method and
- * `/health` on GET, both reached, whose `jterrazz.config.ts` names
- * `methodless` routes.
+ * A stub api project of two test files, `a.spec.ts` and `b.spec.ts`, of which
+ * the run ran those named, with the run's shard and test name filter.
  */
-function methodlessRun(
-    methodless: readonly string[],
-    any = '/mcp',
-): { directory: string; root: string } {
+function stubProject({
+    ran,
+    shard,
+    testNamePattern,
+}: {
+    ran: readonly string[];
+    shard?: Shard;
+    testNamePattern?: RegExp;
+}): { project: RouteProject; provided: Map<string, unknown>; root: string } {
     const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
     onTestFinished(() => {
         rmSync(root, { force: true, recursive: true });
     });
-    const directory = join(root, 'ledgers');
+    vi.stubEnv('TEST_UPDATE', '');
+    onTestFinished(() => {
+        vi.unstubAllEnvs();
+    });
+    const provided = new Map<string, unknown>();
+    const project: RouteProject = {
+        config: { root },
+        globTestFiles: async () =>
+            await Promise.resolve({
+                testFiles: ['a.spec.ts', 'b.spec.ts'].map((file) => join(root, file)),
+            }),
+        name: 'api',
+        provide: (key, value) => {
+            provided.set(key, value);
+        },
+        vitest: {
+            config: { shard, testNamePattern },
+            state: {
+                getFailedFilepaths: () => [],
+                getFiles: () => [
+                    ...ran.map((file) => ({ filepath: join(root, file), projectName: 'api' })),
+                    { filepath: join(root, 'b.spec.ts'), projectName: 'unit' },
+                ],
+            },
+        },
+    };
+    return { project, provided, root };
+}
+
+/** One specification's ledger in `directory`: a table of three routes, one reached. */
+function writeOneOfThree(directory: string): void {
     writeLedger(directory, {
         declared: [
-            { method: 'ALL', path: any },
-            { method: 'GET', path: '/health' },
+            { method: 'GET', path: '/users' },
+            { method: 'GET', path: '/users/:id' },
+            { method: 'DELETE', path: '/users/:id' },
         ],
-        reached: [
-            { method: 'POST', path: any.replaceAll(/:[^/]+/gu, '7') },
-            { method: 'GET', path: '/health' },
-        ],
+        reached: [{ method: 'GET', path: '/users/7' }],
     });
-    writeFileSync(
-        join(root, 'jterrazz.config.ts'),
-        `export default { test: { methodless: ${JSON.stringify(methodless)} } };\n`,
-    );
-    return { directory, root };
+}
+
+/** The lines the teardown writes to stdout, from now until the test ends. */
+function recordedLines(): string[] {
+    const lines: string[] = [];
+    const write = vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+        lines.push(String(chunk));
+        return true;
+    });
+    onTestFinished(() => {
+        write.mockRestore();
+    });
+    return lines;
 }

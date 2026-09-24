@@ -1,20 +1,10 @@
 import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
-import {
-    clearLedgers,
-    declaredMethodless,
-    declaredRoutes,
-    heldUnreached,
-    measure,
-    readLedgers,
-    recordUnreached,
-    ROUTES_DIR,
-    ROUTES_KEY,
-    shardLedgersDir,
-    unreachedRoutes,
-} from '../model/routes/routes.js';
-import type { Ledger, Route, Shard } from '../model/routes/routes.js';
+import { clearLedgers, ROUTES_DIR, shardLedgersDir } from '../model/routes/routes.js';
+import type { Shard } from '../model/routes/routes.js';
+import { judgeRoutes } from './route-judge.js';
+import type { RunScope } from './route-judge.js';
 import { shouldUpdateSnapshots } from './update.js';
 
 /**
@@ -34,9 +24,13 @@ import { shouldUpdateSnapshots } from './update.js';
  * the run too: a measure against nothing reads as every route reached.
  *
  * A shard of a split run (`--shard`) judges nothing: its ledgers are a part
- * of the run's, so it writes them to a folder of its own and prints that they
- * wait for the merge, whose judge is `route-split.ts` — `vitest
- * --merge-reports` runs no global setup, so the merge calls it itself.
+ * of the run's, so it writes them to a folder of its own, and the judge of
+ * every shard's ledgers is `route-split.ts` — `vitest --merge-reports` runs
+ * no global setup, so the merge calls it itself.
+ *
+ * Neither is any other partial run judged or recorded — `--changed`, a file
+ * filter, `-t`: one that ran some of the project's files, or some of its
+ * tests, reached only some routes, and the ratchet counts the whole run's.
  *
  * The app's own table also holds the member's `test: { methodless }` to what
  * it declares: the routes it takes on any method (`ALL`) are exactly the paths
@@ -47,151 +41,44 @@ import { shouldUpdateSnapshots } from './update.js';
  * when it exposes none.
  */
 
-/** The failure of a run whose app exposes no route table, and names none. */
-export const UNKNOWN_TABLE =
-    'api routes: an app specification.api() started exposes no route table, so no route can be judged reached — ' +
-    'hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: ' +
-    "`test: { routes: './openapi.yaml' }` in jterrazz.config.ts.";
-
-/** How a route reads in the report. */
-function spelled(route: Route): string {
-    return `${route.method} ${route.path}`;
-}
-
-/**
- * What the judge is told of the run: whether it records, how many of its
- * files failed, and whether it is one shard of a split run.
- */
-export type RouteRun = { failed: number; shard: boolean; update: boolean };
-
-/** The line a shard prints in place of a verdict. */
-export const SHARD_UNJUDGED =
-    "api routes: not judged — a shard's ledgers are a part of the run, and the merge of the split judges them";
-
-/** A path with its parameters' names dropped: `/mcp/:id` and `/mcp/:session` are one route. */
-function shapeOf(path: string): string {
-    return path.replaceAll(/:[^/]+/gu, ':');
-}
-
-/**
- * Where the method-less list and the app's table disagree: each route the
- * table takes on any method that the list misses, then each path the list
- * names that the table does not take on any method — nothing when they agree.
- */
-function methodlessDrift(table: readonly Route[], methodless: readonly string[]): string[] {
-    const named = new Set(methodless.map((path) => shapeOf(path)));
-    const any = [
-        ...new Map(
-            table
-                .filter((route) => route.method === 'ALL')
-                .map((route) => [shapeOf(route.path), route.path]),
-        ),
-    ];
-    const taken = new Set(any.map(([shape]) => shape));
-    const missed = any
-        .filter(([shape]) => !named.has(shape))
-        .map(
-            ([, path]) =>
-                `  ALL ${path} — the app takes it on any method, and the list misses it: add '${path}'`,
-        );
-    const stale = methodless
-        .filter((path) => !taken.has(shapeOf(path)))
-        .map((path) =>
-            table.some((route) => shapeOf(route.path) === shapeOf(path))
-                ? `  ${path} — the list names it, and the app takes it on its own methods only: remove '${path}'`
-                : `  ${path} — the list names it, and the app's table holds no such route: remove '${path}'`,
-        );
-    return [...missed, ...stale];
-}
-
-/** What the judge returns: the line the report prints, or the error that fails the run. */
-export type RouteVerdict = { failure?: string; line?: string };
-
-/**
- * Judge the run's measure, read from the ledgers in `directory` — nothing for
- * a run no api specification wrote to.
- */
-export async function judgeRoutes(
-    root: string,
-    directory: string,
-    run: RouteRun,
-): Promise<RouteVerdict> {
-    return await judgeLedgers(root, readLedgers(directory), run);
-}
-
-/** What a run no verdict may be read from prints: a shard's, or one a file of which failed. */
-function unjudgedRun({ failed, shard, update }: RouteRun): RouteVerdict | undefined {
-    if (shard) {
-        return { line: SHARD_UNJUDGED };
-    }
-    if (failed === 0) {
-        return undefined;
-    }
-    const why = `${failed} file(s) of the run failed, and a failed file may not have sent its requests`;
-    return update
-        ? {
-              failure: `api routes: not recorded — ${why}; make the run green, then record with TEST_UPDATE=1`,
-          }
-        : { line: `api routes: not judged — ${why}` };
-}
-
-/** Judge the run's measure over its ledgers — nothing when there are none. */
-export async function judgeLedgers(
-    root: string,
-    ledgers: readonly Ledger[],
-    { failed, shard, update }: RouteRun,
-): Promise<RouteVerdict> {
-    if (ledgers.length === 0) {
-        return {};
-    }
-    const unjudged = unjudgedRun({ failed, shard, update });
-    if (unjudged !== undefined) {
-        return unjudged;
-    }
-    const run = measure(ledgers);
-    const table = (await declaredRoutes(root)) ?? run.declared;
-    if (table === undefined) {
-        return { failure: UNKNOWN_TABLE };
-    }
-    const drift =
-        run.declared === undefined
-            ? []
-            : methodlessDrift(run.declared, await declaredMethodless(root));
-    if (drift.length > 0) {
-        return {
-            failure: `api routes: \`test: { methodless }\` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n${drift.join('\n')}`,
+/** What the setup reads of the vitest project it runs for. */
+export type RouteProject = {
+    config: { root: string };
+    globTestFiles: () => Promise<{ testFiles: string[] }>;
+    name: string;
+    provide: (key: 'routesLedger', value: string) => void;
+    vitest: {
+        config: { shard?: Shard | undefined; testNamePattern?: RegExp | undefined };
+        state: {
+            getFailedFilepaths: () => string[];
+            getFiles: () => readonly { filepath: string; projectName?: string | undefined }[];
         };
-    }
-    // Every specification of the run declares the same table: a route counts once.
-    const declared = [...new Map(table.map((route) => [spelled(route), route])).values()];
-    const missing = unreachedRoutes(declared, run.reached);
-    const named = missing.map((route) => `  ${spelled(route)}`).join('\n');
-    if (update) {
-        recordUnreached(root, missing.length);
-        return {
-            line: `api routes: ${missing.length} unreached recorded under jterrazz.baseline.json › test › ${ROUTES_KEY}`,
-        };
-    }
-    const held = heldUnreached(root);
-    if (missing.length > held) {
-        return {
-            failure: `api routes: ${missing.length} declared route(s) no test reached, the ratchet holds ${held} — send each from a spec, or record them with TEST_UPDATE=1:\n${named}`,
-        };
-    }
-    if (missing.length < held) {
-        return {
-            failure: `api routes: ${missing.length} declared route(s) no test reached, below the ${held} the ratchet holds — the debt fell, record it with TEST_UPDATE=1`,
-        };
-    }
-    return {
-        line:
-            missing.length === 0
-                ? `api routes: all ${declared.length} declared routes reached`
-                : `api routes: ${missing.length} unreached, held by jterrazz.baseline.json › test › ${ROUTES_KEY}:\n${named}`,
     };
+};
+
+/**
+ * How much of the project the run ran: a shard's, or partial when a test name
+ * filters it or one of the project's test files did not run.
+ */
+async function scopeOf(project: RouteProject): Promise<RunScope> {
+    if (project.vitest.config.shard !== undefined) {
+        return 'shard';
+    }
+    if (project.vitest.config.testNamePattern !== undefined) {
+        return 'partial';
+    }
+    const ran = new Set(
+        project.vitest.state
+            .getFiles()
+            .filter((file) => file.projectName === project.name)
+            .map((file) => file.filepath),
+    );
+    const { testFiles } = await project.globTestFiles();
+    return testFiles.every((file) => ran.has(file)) ? 'whole' : 'partial';
 }
 
-export default function setup(project: TestProject): () => Promise<void> {
+/** The setup over what it reads of the project: the ledger folder handed out, and the teardown that judges. */
+export function setupRoutes(project: RouteProject): () => Promise<void> {
     const { root } = project.config;
     const shard: Shard | undefined = project.vitest.config.shard;
     const directory = join(root, shard === undefined ? ROUTES_DIR : shardLedgersDir(shard));
@@ -200,7 +87,7 @@ export default function setup(project: TestProject): () => Promise<void> {
     return async () => {
         const { failure, line } = await judgeRoutes(root, directory, {
             failed: project.vitest.state.getFailedFilepaths().length,
-            shard: shard !== undefined,
+            scope: await scopeOf(project),
             update: shouldUpdateSnapshots(),
         });
         if (failure !== undefined) {
@@ -210,4 +97,8 @@ export default function setup(project: TestProject): () => Promise<void> {
             process.stdout.write(`${line}\n`);
         }
     };
+}
+
+export default function setup(project: TestProject): () => Promise<void> {
+    return setupRoutes(project);
 }
