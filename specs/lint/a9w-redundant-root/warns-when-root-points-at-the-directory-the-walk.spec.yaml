@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          specs/setup/rooted.specification.ts:6:5  jterrazz(a9w-redundant-root)
+          specs/cli/rooted.specification.ts:6:5  jterrazz(a9w-redundant-root)

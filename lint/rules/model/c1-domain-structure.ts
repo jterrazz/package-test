@@ -119,9 +119,10 @@ function testsItsNeighbour(filename: string): boolean {
  * beside it, or a `*.specification.ts`, is a spec that wandered into the ground.
  *
  * A first-level folder is a facet, `shared/`, or a repository suite — which
- * holds tests of its own — in every mode. One holding no test (a `support/` of
- * helpers and mocks) is none of the three: each module in it is refused, and
- * the message names where it belongs.
+ * holds tests of its own, one being enough — in every mode. One holding no
+ * test (a `support/` of helpers and mocks) is none of the three: each module
+ * in it, a runner included, is refused, and the message names where it
+ * belongs.
  *
  * Module tests under `src/` follow the neighbour rule (I2) and are out of scope
  * in every mode.
@@ -137,8 +138,7 @@ export const c1DomainStructure: LintRule = {
                 }
                 const depth = (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
                 const base = anchor.relative.at(-1) ?? '';
-                const module = !declaresTests(base) && !base.endsWith(SPECIFICATION_SUFFIX);
-                if (module && isStrayFolder(anchor.directory, anchor.relative)) {
+                if (!declaresTests(base) && isStrayFolder(anchor.directory, anchor.relative)) {
                     context.report({
                         data: { folder: anchor.relative[0] ?? '' },
                         messageId: 'strayFolder',
@@ -238,7 +238,7 @@ export const c1DomainStructure: LintRule = {
             },
             strayFolder: {
                 found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `shared/`, and holds no test of its own',
-                fix: 'move a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/shared/fixtures/`; then remove `specs/{{folder}}/`',
+                fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/shared/fixtures/`; then remove `specs/{{folder}}/`',
             },
             testAtFacetRoot: {
                 found: 'a spec directly at its facet root',

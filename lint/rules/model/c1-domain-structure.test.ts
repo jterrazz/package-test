@@ -15,6 +15,9 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
+/** Two repository suites on disk, each a door because it holds a test: a runner in either is judged by depth. */
+const SUITES = groundTree({ 'posts/add/add.test.ts': '', 'tree/row-names.test.ts': '' });
+
 ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule, {
     invalid: [
         // A test directly at the facet root — no domain folder.
@@ -103,7 +106,7 @@ ruleTester.run('c1-domain-structure (depth: facet)', c1DomainStructure as unknow
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specNotAtFacetRoot' }],
-            filename: '/repo/specs/tree/rows/tree.specification.ts',
+            filename: `${SUITES}/tree/rows/tree.specification.ts`,
             options: [{ depth: 'facet' }],
         },
     ],
@@ -123,7 +126,7 @@ ruleTester.run('c1-domain-structure (depth: facet)', c1DomainStructure as unknow
         // Specifications sit at the facet root, exactly as in facet-domain.
         {
             code: 'const x = 1;',
-            filename: '/repo/specs/tree/tree.specification.ts',
+            filename: `${SUITES}/tree/tree.specification.ts`,
             options: [{ depth: 'facet' }],
         },
         // Still out of scope under src/.
@@ -179,7 +182,7 @@ ruleTester.run('c1-domain-structure (depth: mirror)', c1DomainStructure as unkno
         },
         {
             code: 'const x = 1;',
-            filename: '/repo/specs/posts/add/add.specification.ts',
+            filename: `${SUITES}/posts/add/add.specification.ts`,
             options: [{ depth: 'mirror' }],
         },
         // Still out of scope under src/.
@@ -213,8 +216,9 @@ const CODE_GROUND = groundTree({
     'cli/fixtures/binary/binary.ts': '',
     'cli/fixtures/binary/orphan.test.ts': '',
     'cli/fixtures/binary/binary.specification.ts': '',
-    // A first-level folder of helpers, holding no test.
+    // A first-level folder of helpers and a runner, holding no test.
     'support/next-cursor.ts': '',
+    'support/support.specification.ts': '',
 });
 
 ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as OxlintRule, {
@@ -245,6 +249,12 @@ ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as O
             filename: `${CODE_GROUND}/support/next-cursor.ts`,
             options: [{ depth }],
         })),
+        // A runner is a module too: it makes no suite of a folder holding no test.
+        {
+            code: 'const x = 1;',
+            errors: [{ messageId: 'strayFolder' }],
+            filename: `${CODE_GROUND}/support/support.specification.ts`,
+        },
         // The four names are reserved: a domain named with one is ground, and refused.
         ...['expected', 'fixtures', 'requests', 'seeds'].map((reserved) => ({
             code: 'const x = 1;',

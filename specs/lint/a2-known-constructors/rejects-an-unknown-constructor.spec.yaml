@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/setup/app.specification.ts:5:39  jterrazz(a2-known-constructors)
+          specs/api/app.specification.ts:5:39  jterrazz(a2-known-constructors)

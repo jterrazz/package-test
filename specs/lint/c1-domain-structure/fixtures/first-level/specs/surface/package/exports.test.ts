@@ -1,0 +1,7 @@
+import { expect, test } from 'vitest';
+
+test('publishes its entry', () => {
+    // Given - one test in a first-level folder that is no facet
+    // Then - the one test is enough to make the folder a repository suite
+    expect(1).toBe(1);
+});

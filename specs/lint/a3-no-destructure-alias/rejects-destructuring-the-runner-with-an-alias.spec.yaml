@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/setup/alias.specification.ts:5:25  jterrazz(a3-no-destructure-alias)
+          specs/cli/alias.specification.ts:5:25  jterrazz(a3-no-destructure-alias)

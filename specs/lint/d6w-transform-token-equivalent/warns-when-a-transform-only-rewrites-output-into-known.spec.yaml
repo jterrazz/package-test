@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          specs/setup/tf.specification.ts:6:5  jterrazz(d6w-transform-token-equivalent)
+          specs/cli/tf.specification.ts:6:5  jterrazz(d6w-transform-token-equivalent)

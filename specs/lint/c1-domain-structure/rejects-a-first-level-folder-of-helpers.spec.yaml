@@ -1,0 +1,8 @@
+description: a first-level folder of modules alone is refused, its runner too; a single test makes a suite
+fixture: ./fixtures/first-level/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/support/next-cursor.ts:2:1  jterrazz(c1-domain-structure)
+          specs/support/support.specification.ts:2:1  jterrazz(c1-domain-structure)

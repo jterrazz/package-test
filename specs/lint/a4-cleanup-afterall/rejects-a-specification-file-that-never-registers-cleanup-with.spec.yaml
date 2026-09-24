@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/setup/leak.specification.ts:3:14  jterrazz(a4-cleanup-afterall)
+          specs/cli/leak.specification.ts:3:14  jterrazz(a4-cleanup-afterall)
