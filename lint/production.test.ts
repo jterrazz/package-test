@@ -94,7 +94,58 @@ describe('testPackageOf', () => {
     });
 });
 
+/** A workspace whose app's tsconfig states no `paths` of its own and inherits them. */
+const EXTENDED = packageWith({
+    'apps/web/package.json': '{}',
+    'apps/web/tsconfig.json': JSON.stringify({
+        extends: ['@org/config/tsconfig', './tsconfig.app.json'],
+    }),
+    'apps/web/tsconfig.app.json': [
+        '{',
+        '    // The app config, itself built on the repository base.',
+        '    "extends": "../../tsconfig.base",',
+        '    "compilerOptions": { "baseUrl": "." },',
+        '}',
+    ].join('\n'),
+    'node_modules/@org/config/tsconfig.json': JSON.stringify({
+        compilerOptions: { paths: { '@shared/*': ['./shared/*'] } },
+    }),
+    'package.json': '{}',
+    'tsconfig.base.json': JSON.stringify({
+        compilerOptions: { paths: { '@data/*': ['specs/fixtures/*'] } },
+        extends: './tsconfig.json',
+    }),
+    'tsconfig.json': JSON.stringify({ extends: './tsconfig.base.json' }),
+});
+
 describe('resolveSpecifier', () => {
+    test('follows `paths` through the `extends` chain, the last base winning, the baseUrl read where it is stated', () => {
+        // Given - a module of the app, whose aliases come from two levels up the chain
+        const from = join(EXTENDED, 'apps/web/src/page.ts');
+
+        // Then - the repository base's alias, read from the app's own baseUrl; a cycle ends; the earlier base is overridden
+        expect(resolveSpecifier(from, '@data/users.js')).toStrictEqual([
+            join(EXTENDED, 'apps/web/specs/fixtures/users.js'),
+        ]);
+        expect(resolveSpecifier(from, '@shared/x.js')).toStrictEqual([]);
+    });
+
+    test('reads a base config from a package when no relative one states the paths', () => {
+        // Given - a module of an app extending only the package config
+        const root = packageWith({
+            'node_modules/@org/config/tsconfig.json': JSON.stringify({
+                compilerOptions: { paths: { '@shared/*': ['./shared/*'] } },
+            }),
+            'package.json': '{}',
+            'tsconfig.json': JSON.stringify({ extends: '@org/config/tsconfig' }),
+        });
+
+        // Then - the alias resolves beside the config that states it
+        expect(resolveSpecifier(join(root, 'src/a.ts'), '@shared/x.js')).toStrictEqual([
+            join(root, 'node_modules/@org/config/shared/x.js'),
+        ]);
+    });
+
     test('follows a relative path, a `paths` alias and an `imports` entry', () => {
         // Given - a module in the package
         const from = join(ROOT, 'src/domain/order.ts');

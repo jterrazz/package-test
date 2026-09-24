@@ -42,12 +42,12 @@ import { withoutComments } from './subject.js';
  * A module REFERENCES what it names in any of the forms {@link
  * moduleReferenceVisitor} reads; a reference REACHES test material when the
  * specifier is a test package, when it resolves — relatively, through a
- * tsconfig `paths` alias or through the package's `imports` map — to test
- * material, or when it resolves to a local module that is neither production
- * nor test material and reaches some in turn — that module parsed, so every
- * form it names a module or a path in is read as F2 reads a production one. A
- * production module on the way ends the walk: it is judged for its own
- * references.
+ * tsconfig `paths` alias (its `extends` chain followed) or through the
+ * package's `imports` map — to test material, or when it resolves to a local
+ * module that is neither production nor test material and reaches some in
+ * turn — that module parsed, so every form it names a module or a path in is
+ * read as F2 reads a production one. A production module on the way ends the
+ * walk: it is judged for its own references.
  */
 
 /** A source module, whatever its dialect. */
@@ -266,19 +266,77 @@ function tsconfigOf(directory: string): string | undefined {
     }
 }
 
-/** Where the tsconfig's `paths` send a bare specifier. */
+/** The `paths` a tsconfig resolves a specifier through, and the folder its targets are read from. */
+type PathsMap = { base: string; paths: Record<string, unknown> };
+
+/** What a tsconfig states of module resolution, its `extends` chain folded in. */
+type Resolution = { baseUrl?: string; paths?: PathsMap };
+
+/** The files an `extends` entry may name at a base path, in the compiler's order. */
+function configCandidates(base: string): string[] {
+    return [base, `${base}.json`, join(base, 'tsconfig.json')];
+}
+
+/** The config an `extends` entry names: a relative or absolute file, or a package's. */
+function extendedConfig(from: string, entry: string): string | undefined {
+    const directory = dirname(from);
+    if (entry.startsWith('.') || entry.startsWith('/')) {
+        return configCandidates(resolve(directory, entry)).find((path) => isFile(path));
+    }
+    for (let current = directory; ; current = dirname(current)) {
+        const found = configCandidates(join(current, 'node_modules', entry)).find((path) =>
+            isFile(path),
+        );
+        if (found !== undefined || dirname(current) === current) {
+            return found;
+        }
+    }
+}
+
+/**
+ * A tsconfig's resolution, its `extends` chain folded in the compiler's way:
+ * a later base overrides an earlier one, the config itself overrides them
+ * all, and `baseUrl` and `paths` are each read relative to the file that
+ * states them.
+ */
+function resolutionOf(tsconfig: string, seen: Set<string>): Resolution {
+    if (seen.has(tsconfig)) {
+        return {};
+    }
+    seen.add(tsconfig);
+    const config = recordOf(readJsonc(tsconfig));
+    const extended = config?.extends;
+    const bases = typeof extended === 'string' ? [extended] : targetsOf(extended);
+    const resolution: Resolution = {};
+    for (const entry of bases) {
+        const base = extendedConfig(tsconfig, entry);
+        if (base !== undefined) {
+            Object.assign(resolution, resolutionOf(base, seen));
+        }
+    }
+    const options = recordOf(config?.compilerOptions);
+    const directory = dirname(tsconfig);
+    if (typeof options?.baseUrl === 'string') {
+        resolution.baseUrl = resolve(directory, options.baseUrl);
+    }
+    const paths = recordOf(options?.paths);
+    if (paths !== undefined) {
+        resolution.paths = { base: directory, paths };
+    }
+    return resolution;
+}
+
+/** Where the tsconfig's `paths`, through its `extends` chain, send a bare specifier. */
 function throughPaths(directory: string, specifier: string): string[] {
     const tsconfig = tsconfigOf(directory);
     if (tsconfig === undefined) {
         return [];
     }
-    const options = recordOf(recordOf(readJsonc(tsconfig))?.compilerOptions);
-    const paths = recordOf(options?.paths);
+    const { baseUrl, paths } = resolutionOf(tsconfig, new Set());
     if (paths === undefined) {
         return [];
     }
-    const baseUrl = typeof options?.baseUrl === 'string' ? options.baseUrl : '.';
-    return mapped(paths, specifier, resolve(dirname(tsconfig), baseUrl));
+    return mapped(paths.paths, specifier, baseUrl ?? paths.base);
 }
 
 /** Where the package's `imports` map sends a `#…` specifier. */
