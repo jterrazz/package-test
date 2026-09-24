@@ -258,6 +258,8 @@ type Oversized = {
     name: string;
     role: string;
     start: number;
+    /** The subject, when it is a plain value — a string has no golden, so the value stays in place. */
+    subject: string | undefined;
     /** What the file holds — `undefined` when the value is no literal the fixer can read. */
     text: string | undefined;
 };
@@ -273,6 +275,14 @@ const JSON_SUBJECT = /\.(?:head|json|jsonLd|screen|value)\s*\)\s*\.(?:not\s*\.\s
 
 /** A string subject — vitest's own `toMatch`, no whole result. */
 const STRING_SUBJECT = /\.(?:text|raw)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
+
+/**
+ * A subject that is a plain value — a name or a string literal handed to
+ * `expect()`, no result's accessor: vitest's own `toMatch`, whose argument is
+ * no file. Its long value is reported, never written to one.
+ */
+const PLAIN_SUBJECT =
+    /expect\s*\(\s*(?<subject>[A-Za-z_$][\w$]*|'[^'\n]*'|"[^"\n]*")\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 
 /** The arguments of the call opening at `open`, each by its trimmed span. */
 function argumentSpans(text: string, open: number): Span[] {
@@ -373,7 +383,14 @@ function oversizedIn(file: string): Oversized[] {
         if (candidate === undefined) {
             return [];
         }
-        const form = fileForm(candidate.verb, candidate.before, literalValue(candidate.source));
+        const subject =
+            candidate.verb === 'toMatch'
+                ? PLAIN_SUBJECT.exec(candidate.before)?.groups?.subject
+                : undefined;
+        const form =
+            subject === undefined
+                ? fileForm(candidate.verb, candidate.before, literalValue(candidate.source))
+                : { extension: undefined, text: undefined };
         const lines = valueLines(form.text ?? candidate.source);
         const position = text.slice(0, candidate.start);
         const line = position.split('\n').length;
@@ -391,6 +408,7 @@ function oversizedIn(file: string): Oversized[] {
                 name: nameAround(text, candidate.start, candidate.role),
                 role: candidate.role,
                 start: candidate.start,
+                subject,
                 text: form.extension === undefined ? undefined : form.text,
             },
         ];
@@ -418,6 +436,16 @@ function freePath(file: string, oversized: Oversized): string {
     }
 }
 
+/** How C28 tells the author to take a value past its cap out of the test. */
+function capFix(oversized: Oversized, target: string): string {
+    if (oversized.subject !== undefined) {
+        return `a string has no golden: wrap it — \`expect(text(${oversized.subject})).toMatch(file('./${oversized.role}/${oversized.name}.txt'))\` — or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file`;
+    }
+    return oversized.text === undefined
+        ? `move it to a file under ./${oversized.role}/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only`
+        : `move it to ${target} and name it with file('${target}') — \`make fix\` moves it`;
+}
+
 /** What C28 tells the author of a value past its cap. */
 function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
     const kind = oversized.role === GROUND_EXPECTED ? 'an expectation' : 'a request';
@@ -425,10 +453,7 @@ function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
     return {
         column: oversized.column,
         file: relative(rootDir, oversized.file),
-        fix:
-            oversized.text === undefined
-                ? `move it to a file under ./${oversized.role}/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only`
-                : `move it to ${target} and name it with file('${target}') — \`make fix\` moves it`,
+        fix: capFix(oversized, target),
         found: `${kind} of ${oversized.lines} lines written in the test, past the ${oversized.role}/ cap of ${INLINE_CAPS[oversized.role] ?? 0}`,
         line: oversized.line,
         rule: 'c28-ground-shared-or-inline',

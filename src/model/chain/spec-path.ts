@@ -86,7 +86,29 @@ export function file<const Path extends RelativePath>(
             }),
         );
     }
-    return Object.freeze({ [DISK]: 'file', path }) as FileAt<Path>;
+    return diskValue('file', path) as FileAt<Path>;
+}
+
+/**
+ * The branded value a disk call returns. A string never matches it: handed
+ * where a pattern is read — vitest's own `toMatch` on a plain string, with no
+ * runner to route it to the golden comparison — it refuses, where a plain
+ * object would be read as the pattern `[object Object]` and pass on any text
+ * holding one of its letters.
+ */
+function diskValue(brand: 'directory' | 'file', path: string): object {
+    const value = { [DISK]: brand, path };
+    Object.defineProperty(value, Symbol.match, {
+        value: () => {
+            throw new TypeError(
+                refusal('d14-one-verb-per-meaning', {
+                    fix: `wrap the string to golden it — \`expect(text(value)).toMatch(${brand}(…))\` — or compare it to a value, \`toMatch('…')\``,
+                    found: `toMatch(${brand}(${JSON.stringify(path)})) on a string, a value with no golden`,
+                }),
+            );
+        },
+    });
+    return Object.freeze(value);
 }
 
 /**
@@ -108,7 +130,7 @@ export function directory<const Path extends RelativePath<'/'>>(
             }),
         );
     }
-    return Object.freeze({ [DISK]: 'directory', path }) as DiskDirectory & {
+    return diskValue('directory', path) as DiskDirectory & {
         readonly path: Path;
     };
 }

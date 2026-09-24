@@ -72,3 +72,30 @@ describe('the disk — file() and directory()', () => {
         );
     });
 });
+
+describe('the disk — a golden is no value', () => {
+    // RUNTIME D14 — a plain string has no golden: vitest's own toMatch, handed a
+    // File() where no runner registered the golden, is refused instead of
+    // Reading the path object as a pattern.
+    test('toMatch(file()) on a plain string is refused, with no runner to route it', () => {
+        // Given - a string holding every letter of `[object Object]`, the pattern a path object would read as
+        const text = 'the object of this test';
+
+        // Then - refused, naming the subject that has a golden
+        expect(() => {
+            // checker-disable-next-line c8 -- negative spec: the golden is refused before it is read, so it names nothing on disk
+            expect(text).toMatch(file('./expected/text.txt') as never);
+        }).toThrow(
+            'found: toMatch(file("./expected/text.txt")) on a string, a value with no golden',
+        );
+    });
+
+    test('a file() matched by a string outside an assertion is refused the same way', () => {
+        // Given - the path object handed where a pattern is read
+        // checker-disable-next-line c8 -- negative spec: the path object is refused as a pattern, never read
+        const golden = file('./expected/text.txt');
+
+        // Then - no pattern is made of it
+        expect(() => 'text'.match(golden as never)).toThrow(/on a string, a value with no golden/u);
+    });
+});

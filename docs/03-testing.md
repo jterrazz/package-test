@@ -112,7 +112,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 68    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 62    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 131   |
-| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 155   |
+| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 156   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 34    |
 
 <!-- /GENERATED:layers -->
@@ -380,7 +380,7 @@ What the framework can do, and how many of this package’s own test FILES carry
 
 | Capability             | api | jobs | cli | integration | website | mobile | component | module |
 | ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —    | 6   | 3           | 0       | —      | 0         | 2      |
+| `toMatch(file())`      | 1   | —    | 6   | 3           | 0       | —      | 0         | 3      |
 | `toMatch(directory())` | 1   | —    | 5   | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 3    | 1   | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 3      |
