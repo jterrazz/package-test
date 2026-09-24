@@ -9,6 +9,9 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 /** Both suffixes a specification wears — a `wrap` written in JSX needs the `x`. */
 const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
 
+/** What a `specification.<member>(…)` call always writes — absent, the file has none to find. */
+const MEMBER_CALL = 'specification.';
+
 /**
  * CONVENTIONS A1 — a runner is created in a `*.specification.ts(x)` file under
  * `specs/`. Any `specification.<member>(…)` call in a file that is not a
@@ -23,11 +26,16 @@ const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
  * runner to create: no server to start, no database to isolate, no binary to
  * find — which is why the component facet has no constructor and no
  * specification file for A1 to point at.
+ *
+ * No role narrows the rule the way B9w's does: it reads every file but a
+ * specification. The text pre-check does instead — a file whose source never
+ * says `specification.` cannot hold the member call the visitor looks for.
  */
 export const a1SpecificationFile: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () =>
+                context.sourceCode.text.includes(MEMBER_CALL) &&
                 !SPECIFICATION_SUFFIXES.some((suffix) => context.filename.endsWith(suffix)) &&
                 identityOf(context).role !== 'component',
             CallExpression(node: AstNode) {
