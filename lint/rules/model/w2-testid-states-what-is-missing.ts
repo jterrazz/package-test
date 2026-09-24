@@ -1,9 +1,11 @@
+import type { Comment, Context } from '@oxlint/plugins';
+
 import { memberPropertyName, SCENARIO_ACTIONS, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 /** The invariant a `testId()` owes: what the element lacks, in the author's words. */
 const REASON = /\/\/\s*testId:\s*\S/u;
@@ -25,7 +27,7 @@ const REASON = /\/\/\s*testId:\s*\S/u;
  * allows.
  */
 export const w2TestIdStatesWhatIsMissing: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }
@@ -108,7 +110,7 @@ function startOf(node: AstNode): number | undefined {
 }
 
 /** The 1-based line a comment starts on. */
-function commentLine(context: RuleContext, comment: Comment): number {
+function commentLine(context: Context, comment: Comment): number {
     const offset = comment.start ?? comment.range?.[0];
     if (offset === undefined) {
         return 0;

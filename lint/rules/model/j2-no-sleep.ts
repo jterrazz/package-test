@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     child,
     identifierName,
@@ -9,8 +11,8 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The doubles whose implementation STAGES the world rather than waits on it. */
 const DOUBLE_FACTORIES = new Set(['fn', 'mockImplementation', 'mockImplementationOnce', 'mockOf']);
@@ -68,7 +70,7 @@ function implementationOf(node: AstNode): AstNode | undefined {
  * said without a factory, and it counts too.
  */
 export const j2NoSleep: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }

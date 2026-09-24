@@ -1,9 +1,11 @@
+import type { Context } from '@oxlint/plugins';
+
 import { isGroundName } from '../../../src/model/chain/ground.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The two node suffixes a spec tree collects — `.test.ts` beside ground code, `.spec.ts` for the product. */
 const NODE_TEST_SUFFIXES = ['.spec.ts', '.test.ts'];
@@ -113,7 +115,7 @@ function testsItsNeighbour(filename: string): boolean {
  * in every mode.
  */
 export const c1DomainStructure: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const depth = (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
         return {
             Program(node: AstNode) {

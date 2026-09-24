@@ -1,7 +1,9 @@
+import type { Context } from '@oxlint/plugins';
+
 import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
@@ -13,7 +15,7 @@ const TEST_IMPORT = /\.test(?:\.[cm]?[jt]sx?)?$/u;
  * `*.specification.ts` file (A1).
  */
 export const f4NoTestToTestImport: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         if (!TEST_FILE.test(context.filename)) {
             return {};
         }

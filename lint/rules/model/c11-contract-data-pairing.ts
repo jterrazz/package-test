@@ -1,11 +1,12 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
 import { listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The provider folders that may carry data files. */
 const PROVIDERS = ['anthropic', 'http', 'openai'];
@@ -27,7 +28,7 @@ function ownerOf(entry: string): string {
  * test file, since oxlint never visits a `.json`.
  */
 export const c11ContractDataPairing: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const file = context.physicalFilename;
         const { inSpecs, role } = identityOf(context);
         if (!isTestRole(role) || !inSpecs) {

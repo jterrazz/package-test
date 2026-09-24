@@ -1,5 +1,5 @@
 import { REFUSAL_WHY } from '../src/model/lesson/refusal.js';
-import type { RuleDoc } from './oxlint-api.js';
+import type { RuleDoc } from './rule-shape.js';
 
 /**
  * The rule manifest — the single source of truth for the mechanized conventions

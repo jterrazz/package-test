@@ -1,7 +1,9 @@
+import type { Context } from '@oxlint/plugins';
+
 import { specificationMember, stringValue, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** A path segment that marks a third-party package's installed binary. */
 const THIRD_PARTY_BIN = /node_modules[/\\]\.bin[/\\]/u;
@@ -38,7 +40,7 @@ function embedsThirdPartyBin(root: AstNode | null | undefined): boolean {
  * binary (e.g. a package whose product is a lint plugin driving oxlint).
  */
 export const b9wProductCommand: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         return {
             Program(program: AstNode) {
                 // Local `const X = …/.bin/…` bindings whose value is a bin path.

@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     assertionOf,
     child,
@@ -12,7 +14,7 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** A source span: where a node starts and ends. */
 type Span = { end: number; start: number };
@@ -114,7 +116,7 @@ function fileConstants(program: AstNode): { declarator: AstNode; statement: AstN
  * shared: no scan can tell how many tests call the helper.
  */
 export const d28SharedExpectation: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'spec') {
             return {};
         }
@@ -146,21 +148,21 @@ export const d28SharedExpectation: LintRule = {
                     const { text } = context.sourceCode;
                     context.report({
                         data: { name },
-                        fix: inlinable
-                            ? (fixer) => {
-                                  const end =
-                                      text[nodeEnd(statement)] === '\n'
-                                          ? nodeEnd(statement) + 1
-                                          : nodeEnd(statement);
-                                  return [
-                                      fixer.replaceTextRange(
-                                          [nodeStart(only), nodeEnd(only)],
-                                          text.slice(nodeStart(init), nodeEnd(init)),
-                                      ),
-                                      fixer.removeRange([nodeStart(statement), end]),
-                                  ];
-                              }
-                            : undefined,
+                        ...(inlinable && {
+                            fix: (fixer) => {
+                                const end =
+                                    text[nodeEnd(statement)] === '\n'
+                                        ? nodeEnd(statement) + 1
+                                        : nodeEnd(statement);
+                                return [
+                                    fixer.replaceTextRange(
+                                        [nodeStart(only), nodeEnd(only)],
+                                        text.slice(nodeStart(init), nodeEnd(init)),
+                                    ),
+                                    fixer.removeRange([nodeStart(statement), end]),
+                                ];
+                            },
+                        }),
                         messageId: 'singleReader',
                         node: declarator,
                     });

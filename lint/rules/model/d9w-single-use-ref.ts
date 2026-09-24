@@ -1,3 +1,4 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
 import { isRelativePath } from '../../../src/model/chain/spec-path.js';
@@ -6,8 +7,8 @@ import { isDirectory, isFile, listDirectory, readFileCached } from '../../fs-cac
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The relative path a golden matcher names, when the call is one and names it literally. */
 function goldenPathOf(node: AstNode): string | undefined {
@@ -60,7 +61,7 @@ function refsInFixture(target: string): string[] {
  * everywhere is a plain matcher wearing a name.
  */
 export const d9wSingleUseRef: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const file = context.physicalFilename;
         const { inSpecs, role } = identityOf(context);
         if (!isTestRole(role) || !inSpecs) {

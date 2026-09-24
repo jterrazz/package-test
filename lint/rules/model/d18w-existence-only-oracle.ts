@@ -1,9 +1,11 @@
+import type { Context } from '@oxlint/plugins';
+
 import { assertionOf, child, childList, findTestCallback, isTestCallee, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** Matchers that pass for almost any value — the shape of an existence check. */
 const EXISTENCE_MATCHERS = new Set(['toBeDefined', 'toBeTruthy']);
@@ -32,7 +34,7 @@ const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
  * and fails for every other, so it is a whole proof on its own.
  */
 export const d18wExistenceOnlyOracle: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }

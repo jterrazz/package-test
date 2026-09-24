@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { isNode } from './ast.js';
-import type { AstNode } from './oxlint-api.js';
 import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
+import type { AstNode } from './rule-shape.js';
 import { packageWith } from './rule-tester.fixtures.js';
 
 const ROOT = packageWith({ 'src/a.ts': '' });
@@ -77,7 +77,8 @@ describe('mergeVisitors', () => {
                 },
             },
         );
-        const node: AstNode = { type: 'Identifier' };
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the handlers under test read the type alone, never the span a parsed node carries
+        const node = { type: 'Identifier' } as AstNode;
         const { Identifier: onIdentifier } = visitor;
         onIdentifier?.(node);
 

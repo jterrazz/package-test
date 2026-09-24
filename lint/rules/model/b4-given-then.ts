@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     child,
     childList,
@@ -10,7 +12,7 @@ import {
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS B4 — every test carries `// Given -` and `// Then -` (always both),
@@ -31,7 +33,7 @@ import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
  * there, not only inside the callback.
  */
 export const b4GivenThen: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         return {
             CallExpression(node: AstNode) {
                 if (!isTestCallee(child(node, 'callee'))) {

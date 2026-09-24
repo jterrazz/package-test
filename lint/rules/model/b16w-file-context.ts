@@ -1,3 +1,5 @@
+import type { Context, Fix, Fixer } from '@oxlint/plugins';
+
 import {
     child,
     childList,
@@ -11,7 +13,7 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, Fix, LintRule, RuleContext, RuleFixer, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 import { subjectFolder, subjectsOf } from '../../subject.js';
 import type { Subject } from '../../subject.js';
 
@@ -172,7 +174,7 @@ function viewName(handle: string, text: string, program: AstNode): string {
 
 /** The edits that declare the view once and start every chain from it, its shared settings dropped. */
 function declareOnce(
-    fixer: RuleFixer,
+    fixer: Fixer,
     {
         chains,
         program,
@@ -217,7 +219,7 @@ function declareOnce(
  * A warning: two chains alike may be a coincidence the next test breaks.
  */
 export const b16wFileContext: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'spec') {
             return {};
         }
@@ -247,7 +249,7 @@ export const b16wFileContext: LintRule = {
                         },
                         fix: (fixer) => declareOnce(fixer, { chains, program, shared, text, view }),
                         messageId: 'repeated',
-                        node: chains[0]?.root,
+                        node: chains[0]?.root ?? program,
                     });
                 }
             },

@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     assertionOf,
     child,
@@ -11,8 +13,8 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** How many probes on one subject make a cluster, unless the option says otherwise. */
 const DEFAULT_THRESHOLD = 3;
@@ -63,7 +65,7 @@ function goldenableSubject(subject: AstNode | undefined): string | undefined {
  * subject silences it however many probes stand beside it.
  */
 export const d19wProbeCluster: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }

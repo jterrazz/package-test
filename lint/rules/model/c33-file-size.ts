@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { child, isTestCallee, testName, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The most lines a spec file holds. */
 export const MAX_SPEC_LINES = 400;
@@ -38,7 +40,7 @@ export function groupsOf(titles: string[]): string {
  * today is recorded on the ratchet and may only shrink.
  */
 export const c33FileSize: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'spec') {
             return {};
         }

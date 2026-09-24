@@ -1,10 +1,11 @@
+import type { Context } from '@oxlint/plugins';
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, expect, it, test } from 'vitest';
 
-import type { AstNode, RuleContext } from '../../oxlint-api.js';
+import type { AstNode } from '../../rule-shape.js';
 import { checkoutUnder } from '../../rule-tester.fixtures.js';
 import { c7SeedsSqlOnly } from './c7-seeds-sql-only.js';
 
@@ -89,7 +90,7 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
 /** One lint pass of C7 over `file`, in this process: the reports it makes. */
 function lintPass(file: string): string[] {
     const reported: string[] = [];
-    const context: Pick<RuleContext, 'filename' | 'physicalFilename' | 'report' | 'sourceCode'> = {
+    const context: Pick<Context, 'filename' | 'physicalFilename' | 'report' | 'sourceCode'> = {
         filename: file,
         physicalFilename: file,
         report: (diagnostic) => {
@@ -97,11 +98,12 @@ function lintPass(file: string): string[] {
         },
         // A lint of its own: oxlint forgets what a file's lint answered when it ends.
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the rule keys its answers on this object and reads nothing of it
-        sourceCode: {} as RuleContext['sourceCode'],
+        sourceCode: {} as Context['sourceCode'],
     };
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reads only the file's name and `report`; the rest of oxlint's context is not what this pass is about
-    const visitor = c7SeedsSqlOnly.create(context as RuleContext);
-    const program: AstNode = { type: 'Program' };
+    const visitor = c7SeedsSqlOnly.create(context as Context);
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reports on the program node and reads nothing of its span
+    const program = { type: 'Program' } as AstNode;
     const enterProgram = visitor.Program;
     enterProgram?.(program);
     return reported;

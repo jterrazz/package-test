@@ -71,6 +71,7 @@
         "coverage:check": "node dist/coverage.js"
     },
     "dependencies": {
+        "@oxlint/plugins": "^1.85.0",
         "msw": "^2.15.0",
         "oxc-parser": "^0.150.0",
         "vitest-mock-extended": "^5.0.0",

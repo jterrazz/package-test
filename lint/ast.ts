@@ -1,7 +1,8 @@
+import type { Comment } from '@oxlint/plugins';
 import { basename, dirname, join } from 'node:path';
 
 import { isFile, isOnDisk } from './fs-cache.js';
-import type { AstNode, Comment } from './oxlint-api.js';
+import type { AstNode } from './rule-shape.js';
 
 /**
  * Shared AST helpers for the rule files. Everything here is pure and

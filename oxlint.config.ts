@@ -26,7 +26,8 @@ import { testing } from './dist/oxlint.js';
  *   container exec produces).
  * - `runner/` — the config surface: the preset, the project index, update
  *   mode, the literate plugin. It couples to `vite`/`vitest` by design.
- * - `lint/` — no external package of its own: from `model/` only the pure
+ * - `lint/` — no external package of its own but oxlint's plugin types
+ *   (`@oxlint/plugins`, erased from the bundle): from `model/` only the pure
  *   helpers (the token list, the case conversions, fixture markers, the root
  *   walk a rule must share with the runner, the spec-document parser, the
  *   indentation a value written in place shares with the test around it),
@@ -99,6 +100,8 @@ const FRAMEWORK_LAYERS = {
             // The run owns one key of the ratchet the checker writes: route coverage.
             'model/routes/routes',
         ],
+        // oxlint's plugin types: a type import, erased from the bundle.
+        packages: ['@oxlint/plugins'],
     },
     model: {
         imports: [

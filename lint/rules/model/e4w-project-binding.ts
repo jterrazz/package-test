@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { collectedSegments, facetOfSegments, FACETS, projectLiterals } from '../../config-shape.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS E4w (warning) — a project that collects a facet root is NAMED for
@@ -21,7 +23,7 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.j
  * called `specs` collects nothing of the kind.
  */
 export const e4wProjectBinding: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'config') {
             return {};
         }

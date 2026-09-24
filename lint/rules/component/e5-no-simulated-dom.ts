@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import type { FileRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The pragma vitest reads to swap a test file's environment. */
 const PRAGMA = /@vitest-environment\s+(?<environment>[\w-]+)/u;
@@ -22,7 +24,7 @@ const REACHED = new Set<FileRole>(['component', 'module', 'specification']);
  * already drives, so the pragma has nothing left to buy.
  */
 export const e5NoSimulatedDom: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (!REACHED.has(identityOf(context).role)) {
             return {};
         }

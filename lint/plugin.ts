@@ -7,7 +7,7 @@
  */
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
-import type { LintPlugin } from './oxlint-api.js';
+import type { LintPlugin } from './rule-shape.js';
 import { c2RequestExtension } from './rules/api/c2-request-extension.js';
 import { d15wStatusOnlyProbe } from './rules/api/d15w-status-only-probe.js';
 import { b6wRedundantEnvUrl } from './rules/cli/b6w-redundant-env-url.js';

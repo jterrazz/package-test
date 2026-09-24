@@ -1,3 +1,4 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
 import { collectsAFile, projectLiterals, staticPrefix } from '../../config-shape.js';
@@ -5,7 +6,7 @@ import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS E7w (warning) — an `include` whose static prefix is not a
@@ -19,7 +20,7 @@ import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.j
  * that still exists (C12's `--fix` moving `.test.ts` to `.spec.ts`).
  */
 export const e7wIncludePrefixExists: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'config') {
             return {};
         }

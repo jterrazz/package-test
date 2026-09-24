@@ -13,9 +13,9 @@ import {
 } from './ast.js';
 import type { ImportSource } from './ast.js';
 import { isFile, listDirectory, readFileCached } from './fs-cache.js';
-import type { AstNode } from './oxlint-api.js';
 import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
+import type { AstNode } from './rule-shape.js';
 import { withoutComments } from './subject.js';
 
 /**

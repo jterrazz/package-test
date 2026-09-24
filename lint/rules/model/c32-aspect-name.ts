@@ -1,7 +1,9 @@
+import type { Context } from '@oxlint/plugins';
+
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 import { aspectOf } from './c31-describe-names-file.js';
 
 /** An aspect is lowercase words joined by single hyphens. */
@@ -26,7 +28,7 @@ export const GENERIC_ASPECTS = new Set([
  * which question about it the file answers.
  */
 export const c32AspectName: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'spec') {
             return {};
         }

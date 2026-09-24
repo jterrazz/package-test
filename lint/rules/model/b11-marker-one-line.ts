@@ -1,3 +1,5 @@
+import type { Comment, Context } from '@oxlint/plugins';
+
 import {
     child,
     childList,
@@ -10,8 +12,8 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 /**
  * A directive, not prose — a tool's instruction that happens to be a comment.
@@ -55,7 +57,7 @@ function lineEndAt(text: string, offset: number): number {
  * comment of its own.
  */
 export const b11MarkerOneLine: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }

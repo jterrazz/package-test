@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { specificationMember } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** Both suffixes a specification wears — a `wrap` written in JSX needs the `x`. */
 const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
@@ -23,7 +25,7 @@ const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
  * specification file for A1 to point at.
  */
 export const a1SpecificationFile: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (
             SPECIFICATION_SUFFIXES.some((suffix) => context.filename.endsWith(suffix)) ||
             identityOf(context).role === 'component'

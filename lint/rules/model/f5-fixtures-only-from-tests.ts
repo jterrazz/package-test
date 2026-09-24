@@ -1,7 +1,9 @@
+import type { Context } from '@oxlint/plugins';
+
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { moduleReferenceVisitor } from '../../production.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
@@ -14,7 +16,7 @@ const FIXTURES_IMPORT = /\.fixtures(?:\.[cm]?[jt]sx?)?$/u;
  * (`production.ts` reads them for F2 and F5 alike).
  */
 export const f5FixturesOnlyFromTests: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         if (TEST_FILE.test(context.filename)) {
             return {};
         }

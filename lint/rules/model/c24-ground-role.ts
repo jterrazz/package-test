@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     GROUND_EXPECTED,
     GROUND_FIXTURES,
@@ -10,8 +12,8 @@ import type { DiskCall } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * The ground folder each verb reads, and which argument names the disk. `run`
@@ -81,7 +83,7 @@ function groundOf(path: string): string | undefined {
  * follows to the verb it reaches. A computed path is out of reach.
  */
 export const c24GroundRole: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }

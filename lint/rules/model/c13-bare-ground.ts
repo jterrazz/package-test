@@ -1,3 +1,4 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
 import { RENAMED_GROUND_DIRS } from '../../../src/model/chain/ground.js';
@@ -5,7 +6,7 @@ import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
@@ -26,7 +27,7 @@ const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
  * when the test sits under one.
  */
 export const c13BareGround: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const file = context.physicalFilename;
         const anchor = specsAnchorOf(context);
         if (!TEST_FILE.test(file)) {

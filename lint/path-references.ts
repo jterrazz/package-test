@@ -1,8 +1,8 @@
 import { dirname, resolve } from 'node:path';
 
 import { child, childList, identifierName, memberPropertyName, stringValue, walk } from './ast.js';
-import type { AstNode, Visitor } from './oxlint-api.js';
 import { projectRootOf } from './role.js';
+import type { AstNode, Visitor } from './rule-shape.js';
 
 /**
  * The paths a module names in its own tree — what it builds from where it

@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     chainRootName,
     child,
@@ -10,7 +12,7 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The verbs that CHANGE the screen — after one of them, something is in flight. */
 const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);
@@ -126,7 +128,7 @@ function settles(node: AstNode, visitor: string): boolean {
  * for the rename would say nothing about the tree it is asked to migrate.
  */
 export const w5wScenarioSettles: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const identity = identityOf(context);
         // A scenario of the ASSEMBLED product: a `.spec.ts`, or — in a tree
         // That has not taken the suffix yet — a `.test.ts` under `specs/`. A

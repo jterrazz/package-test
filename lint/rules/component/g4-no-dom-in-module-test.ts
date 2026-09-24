@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { child, identifierName, isNode, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The globals that only exist where a document does. */
 const DOM_GLOBALS = new Set(['document', 'HTMLElement', 'navigator', 'window']);
@@ -100,7 +102,7 @@ function isValueReference(node: AstNode): boolean {
  * runtimes is tested by exactly that guard.
  */
 export const g4NoDomInModuleTest: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const identity = identityOf(context);
         if (identity.role !== 'module' || identity.inSpecs) {
             return {};

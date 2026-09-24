@@ -1,3 +1,5 @@
+import type { Context, Fix, Fixer } from '@oxlint/plugins';
+
 import {
     child,
     childList,
@@ -10,8 +12,8 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, Fix, LintRule, RuleContext, RuleFixer, Visitor } from '../../oxlint-api.js';
 import { baseNameOf } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The aspect a spec file names: `pagination.spec.ts` → `pagination`. */
 export function aspectOf(filename: string): string {
@@ -44,7 +46,7 @@ function firstArgumentOf(statement: AstNode): AstNode | undefined {
  * The edit that brings `describe` into the file: into its `vitest` import when
  * it has one naming other hooks, else a line of its own above everything.
  */
-function importDescribe(fixer: RuleFixer, statements: AstNode[]): Fix | undefined {
+function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
     const vitest = statements.find(
         (statement) =>
             statement.type === 'ImportDeclaration' &&
@@ -81,7 +83,7 @@ function importDescribe(fixer: RuleFixer, statements: AstNode[]): Fix | undefine
  * merging groups is a reading.
  */
 export const c31DescribeNamesFile: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'spec') {
             return {};
         }

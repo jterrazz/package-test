@@ -1,9 +1,11 @@
+import type { Context } from '@oxlint/plugins';
+
 import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { declaredSubpaths } from '../../package-exports.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 
 const PACKAGE = '@jterrazz/test';
 
@@ -37,7 +39,7 @@ const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams'])
  * the public entry is a module test beside its module, not a spec.
  */
 export const f3SpecsPublicEntry: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         const anchor = specsAnchorOf(context);
         if (anchor === undefined) {
             return {};

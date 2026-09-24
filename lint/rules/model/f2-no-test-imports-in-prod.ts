@@ -1,11 +1,12 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, relative } from 'node:path';
 
 import { lessons } from '../../lesson.js';
 import { isProductionFile } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext } from '../../oxlint-api.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../path-references.js';
 import { materialNamed, moduleReferenceVisitor, reachOf } from '../../production.js';
+import type { LintRule } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS F2 — production never reaches test material. In a production
@@ -25,7 +26,7 @@ import { materialNamed, moduleReferenceVisitor, reachOf } from '../../production
  * own oxlint config.
  */
 export const f2NoTestImportsInProd: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         const file = context.physicalFilename;
         if (!isProductionFile(context)) {
             return {};

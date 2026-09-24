@@ -1,7 +1,9 @@
+import type { Context } from '@oxlint/plugins';
+
 import { memberPropertyName } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 /** Always-synchronous matchers — awaiting them is redundant noise (D2). */
 const SYNC_MATCHERS = new Set(['toBe', 'toContain', 'toEqual', 'toHaveLength']);
@@ -40,7 +42,7 @@ function rootsAtSyncExpect(node: AstNode | undefined): boolean {
  * `await`.
  */
 export const d2wAwaitSyncMatcher: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         return {
             CallExpression(node: AstNode) {
                 const parent = node.parent as AstNode | undefined;

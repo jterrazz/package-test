@@ -1,3 +1,4 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
 import {
@@ -13,7 +14,7 @@ import { isDirectory, listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { identityOf, segmentsOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The only directories a `contracts/` root may hold — the provider carriers. */
 const PROVIDERS = new Set(['anthropic', 'http', 'openai']);
@@ -91,7 +92,7 @@ function requestProvider(request: AstNode | undefined): string | undefined {
  * a directory that is not a provider, a nested folder or a foreign extension
  * inside a provider folder.
  */
-function checkLayout(context: RuleContext, node: AstNode, contractsDir: string): void {
+function checkLayout(context: Context, node: AstNode, contractsDir: string): void {
     const entries = listDirectory(contractsDir);
     if (entries === null) {
         return;
@@ -216,7 +217,7 @@ function composes(node: AstNode): boolean {
  * The facade: `<kebab>.contracts.ts`, exporting its builders and sets by
  * name — and, when it has a default export, a composition there.
  */
-function checkComposite(context: RuleContext, program: AstNode, base: string): void {
+function checkComposite(context: Context, program: AstNode, base: string): void {
     if (!COMPOSITE_FILE.test(base)) {
         context.report({ data: { base }, messageId: 'rootFile', node: program });
         return;
@@ -252,7 +253,7 @@ function checkComposite(context: RuleContext, program: AstNode, base: string): v
 }
 
 /** A unit contract under its provider folder. */
-function checkUnit(context: RuleContext, program: AstNode, base: string, provider: string): void {
+function checkUnit(context: Context, program: AstNode, base: string, provider: string): void {
     if (REQUEST_DATA_FILE.test(base)) {
         return; // Matched data (a prompt, an expected body) — it exports a value.
     }
@@ -309,7 +310,7 @@ function checkUnit(context: RuleContext, program: AstNode, base: string, provide
  * `.json` fixture or an empty directory).
  */
 export const c4ContractShape: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const file = context.physicalFilename;
         const parts = segmentsOf(context);
         // `src/**/contracts/` is the framework's own contract MODULE, not a

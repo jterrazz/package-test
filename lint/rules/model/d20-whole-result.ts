@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     assertionOf,
     child,
@@ -12,8 +14,8 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The accessors a result is compared WHOLE through — the subjects this rule counts. */
 const WHOLE_SUBJECTS = new Set(['json', 'response']);
@@ -126,7 +128,7 @@ function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string 
  * reach — the rule stays silent rather than guess.
  */
 export const d20WholeResult: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (!isTestRole(identityOf(context).role) || !identityOf(context).inSpecs) {
             return {};
         }

@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { declaredSubpaths } from '../../package-exports.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 
 const PACKAGE = '@jterrazz/test';
 
@@ -18,7 +20,7 @@ const PACKAGE = '@jterrazz/test';
  * oxlint config, a shared preset, a vitest config.
  */
 export const f1NoSubpathImport: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         const allowed = new Set(declaredSubpaths());
         const visitor: Visitor = {
             ...importSourceVisitor(({ node, source }) => {

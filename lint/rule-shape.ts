@@ -1,74 +1,27 @@
+import type { AfterHook, BeforeHook, Context, Node, RuleDocs, RuleMeta } from '@oxlint/plugins';
+
 /**
- * Local structural types for the slice of oxlint's JS-plugin API this layer uses.
+ * The shapes this layer writes its rules in, over oxlint's own plugin types.
  *
- * oxlint 1.74 does not publicly export its `Plugin` / `Rule` / `Context` types
- * (only `RuleTester`, from `oxlint/plugins-dev`), so we describe the exact subset
- * we depend on here. Declaring them locally keeps the rules layer importing
- * NOTHING from the framework runtime — only these ambient shapes and, where a
- * rule needs it, pure helpers from `specification/` (e.g. the token list, the kebab-case
- * utilities). The API is ESLint-compatible, so these shapes mirror ESTree.
+ * oxlint's API — the context a rule is handed, what it reports, the fixer, the
+ * comments — belongs to `@oxlint/plugins` and is imported from it. Two things
+ * are this layer's own: the view a rule takes of a node, read by its `type`
+ * and its span and every other field defensively, so a rule is decoupled from
+ * the generated ESTree union and its churn; and the documentation a rule
+ * carries, the {@link RuleDoc} the catalogue is generated from.
+ *
+ * The published declarations import these types, so `@oxlint/plugins` is a
+ * dependency, not a dev one.
  */
 
-/** A source comment, as exposed by oxlint's ESTree-compatible `sourceCode`. */
-export type Comment = {
-    end?: number;
-    range?: [number, number];
-    start?: number;
-    type: 'Block' | 'Line' | 'Shebang';
-    value: string;
+/** A node as a rule reads it: oxlint's span and its `type`, every other field unknown until read. */
+export type AstNode = Node & { type: string; [key: string]: unknown };
+
+/** A rule's handlers, by node type, and the hooks that open and close each file. */
+export type Visitor = Record<string, (node: AstNode) => void> & {
+    after?: AfterHook;
+    before?: BeforeHook;
 };
-
-/**
- * Minimal AST node. Rules narrow by `type` and read known fields defensively —
- * the full generated node union is not re-exported, and structural access keeps
- * the layer decoupled from oxlint's internal type churn.
- */
-export type AstNode = {
-    type: string;
-    [key: string]: unknown;
-};
-
-/** The slice of `context.sourceCode` the rules read. */
-export type SourceCode = {
-    getAllComments: () => Comment[];
-    getCommentsInside: (node: AstNode) => Comment[];
-    text: string;
-};
-
-/** One text edit a fixer returns: a source range and what replaces it. */
-export type Fix = { range: [number, number]; text: string };
-
-/** The slice of oxlint's ESLint-compatible fixer the rules use — ranges are source offsets. */
-export type RuleFixer = {
-    insertTextAfterRange: (range: [number, number], text: string) => Fix;
-    insertTextBeforeRange: (range: [number, number], text: string) => Fix;
-    removeRange: (range: [number, number]) => Fix;
-    replaceTextRange: (range: [number, number], text: string) => Fix;
-};
-
-/** A diagnostic accepted by `context.report`. */
-export type Diagnostic = {
-    data?: Record<string, number | string> | undefined;
-    /** The edits `--fix` applies — a rule whose meta states `fixable`. */
-    fix?: ((fixer: RuleFixer) => Fix | Fix[] | null) | undefined;
-    messageId?: string | undefined;
-    message?: string | undefined;
-    node?: AstNode | undefined;
-};
-
-/** Rule context passed to `create`. */
-export type RuleContext = {
-    filename: string;
-    id: string;
-    /** Configured rule options (`['error', …options]` minus the severity). */
-    options: readonly unknown[];
-    physicalFilename: string;
-    report: (diagnostic: Diagnostic) => void;
-    sourceCode: SourceCode;
-};
-
-/** A visitor: node-type keys → handlers invoked on entry. */
-export type Visitor = Record<string, (node: AstNode) => void>;
 
 /**
  * The normative documentation a rule carries — the code is the source of truth
@@ -161,25 +114,13 @@ export type RuleDoc = {
         | 'tests';
 };
 
-/** Rule metadata (the subset we set). */
-export type RuleMeta = {
-    defaultOptions?: unknown[];
-    /** Set when a diagnostic carries a `fix` — oxlint refuses a fix from a rule that does not say so. */
-    fixable?: 'code';
-    docs?: RuleDoc & { description?: string };
-    messages?: Record<string, string>;
-    /** JSON schema for options — required by oxlint for rules that take options. */
-    schema?: false | unknown[];
-    type?: 'layout' | 'problem' | 'suggestion';
-};
-
-/** A lint rule in oxlint's `create` form. */
+/** A rule as this layer writes it: its visitor over {@link AstNode}, and its catalogue entry. */
 export type LintRule = {
-    create: (context: RuleContext) => Visitor;
-    meta?: RuleMeta;
+    create: (context: Context) => Visitor;
+    meta: RuleMeta & { docs: RuleDoc & RuleDocs };
 };
 
-/** An oxlint JS plugin: a namespace plus its rules. */
+/** The plugin: its namespace, and its rules as this layer writes them. */
 export type LintPlugin = {
     meta: { name: string };
     rules: Record<string, LintRule>;

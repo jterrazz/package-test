@@ -1,9 +1,11 @@
+import type { Context } from '@oxlint/plugins';
+
 import { child, childList, identifierName, memberPath, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The hooks that BUILD something — there is no restore-only form of these. */
 const BUILDERS = new Set(['beforeAll', 'beforeEach']);
@@ -65,7 +67,7 @@ function restoreOnly(hook: AstNode): boolean {
  * where it gives them back.
  */
 export const j6wGivenInTheTest: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }

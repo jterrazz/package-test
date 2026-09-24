@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { child, identifierName, propertyKeyName, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** Is this property the RUNNER's browser block, rather than a key that shares its name? */
 function isRunnerBrowserBlock(node: AstNode): boolean {
@@ -47,7 +49,7 @@ function insideComponentCall(node: AstNode): boolean {
  * machine, so the helper owns them and a config states only what is its own.
  */
 export const e6ComponentProjectHelper: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'config') {
             return {};
         }

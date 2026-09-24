@@ -1,9 +1,11 @@
+import type { Context } from '@oxlint/plugins';
+
 import { goldenOf } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS C6 — the extension is part of a golden file's path and mandatory
@@ -12,7 +14,7 @@ import { isTestRole } from '../../role.js';
  * reach.
  */
 export const c6ToMatchExtension: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const { inSpecs, role } = identityOf(context);
         if (!isTestRole(role) || !inSpecs) {
             return {};

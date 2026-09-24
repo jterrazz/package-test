@@ -1,3 +1,4 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, extname, join } from 'node:path';
 
 import { GROUND_REQUESTS } from '../../../src/model/chain/ground.js';
@@ -5,8 +6,8 @@ import { isDirectory, listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS C2 — `requests/` holds what a spec SENDS: a whole request as a
@@ -18,7 +19,7 @@ import { isTestRole } from '../../role.js';
  * not judged here.
  */
 export const c2RequestExtension: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const file = context.physicalFilename;
         const { inSpecs, role } = identityOf(context);
         if (!isTestRole(role) || !inSpecs) {

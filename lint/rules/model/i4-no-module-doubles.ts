@@ -1,9 +1,11 @@
+import type { Context } from '@oxlint/plugins';
+
 import { child, childList, identifierName, importSourceVisitor, stringValue } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf, segmentsOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
@@ -120,7 +122,7 @@ function withoutSuffix(source: string): string {
  * `<subject>.<role>` module names are a naming convention, not a file type.
  */
 export const i4NoModuleDoubles: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         const option = context.options[0];
         const stated =
             typeof option === 'object' && option !== null && 'modules' in option

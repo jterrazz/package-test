@@ -108,7 +108,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/model/ports/service.port.ts',
             'src/settings.ts',
             'lint/config-shape.ts',
-            'lint/oxlint-api.ts',
+            'lint/rule-shape.ts',
         ),
         name: 'type-only declaration',
         why: 'it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse',

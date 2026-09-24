@@ -1,9 +1,11 @@
+import type { Context } from '@oxlint/plugins';
+
 import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import type { FileRole } from '../../role.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 
 /**
  * A foreign runtime, and what the framework offers in its place. The message a
@@ -91,7 +93,7 @@ const REACHED = new Set<FileRole>(['component', 'module', 'spec', 'specification
  * and in a `.test.tsx` it is a legitimate thing for a component to do.
  */
 export const f6NoForeignTestRuntime: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         const { role } = identityOf(context);
         if (!REACHED.has(role)) {
             return {};

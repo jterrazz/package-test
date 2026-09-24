@@ -5,14 +5,14 @@ import { dirname, join } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { it as declareCase, describe as declareSuite } from 'vitest';
 
-import type { LintRule } from './oxlint-api.js';
+import type { LintRule } from './rule-shape.js';
 
 /**
  * One wiring of oxlint's `RuleTester`, for every rule test in this layer.
  *
  * The tester reaches for a describe/it pair and for oxlint's own `Rule` type,
- * which the package does not export — four lines and a boundary cast every rule
- * test would otherwise open on. Stating them once is what keeps a new rule's
+ * whose visitor is typed over the generated ESTree union — four lines and a
+ * boundary cast every rule test would otherwise open on. Stating them once is what keeps a new rule's
  * test about the RULE.
  *
  * It is a `*.fixtures.ts` because that is what it IS: material a test stands on,
@@ -20,7 +20,7 @@ import type { LintRule } from './oxlint-api.js';
  * the prod-import ban should reach (F2/I1).
  */
 
-/** oxlint's own rule shape, named through the only place it surfaces. */
+/** oxlint's own rule shape, as the tester takes it. */
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 /** A tester bound to vitest's runner. */
@@ -38,12 +38,12 @@ export function ruleTester(): RuleTester {
 }
 
 /**
- * The boundary cast: oxlint does not export its `Rule` type, and the structural
- * {@link LintRule} this layer writes against is deliberately decoupled from its
- * internal (alpha) typings.
+ * The boundary cast: a {@link LintRule} reads every node as an `AstNode` — the
+ * span and the type, every other field read defensively — where oxlint types
+ * each handler with its node's interface, and neither is assignable to the other.
  */
 export function asOxlintRule(rule: LintRule): OxlintRule {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the two shapes describe the same object; only oxlint's is unpublished
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the two shapes describe the same object; only the node each handler is typed with differs
     return rule as unknown as OxlintRule;
 }
 

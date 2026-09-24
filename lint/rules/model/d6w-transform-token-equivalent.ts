@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { TOKEN_KINDS } from '../../../src/model/matching/match.js';
 import { findProperty, memberPropertyName, specificationMember, stringValue } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 const KNOWN_TOKEN_LITERAL = new RegExp(
     `^\\{\\{(?:${TOKEN_KINDS.join('|')})(?:#[\\w.-]+)?\\}\\}$`,
@@ -52,7 +54,7 @@ function isTokenEquivalentTransform(fn: AstNode): boolean {
  * fixture instead.
  */
 export const d6wTransformTokenEquivalent: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         return {
             CallExpression(node: AstNode) {
                 if (specificationMember(node) === undefined) {

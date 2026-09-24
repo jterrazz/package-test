@@ -1,12 +1,13 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
 import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { isProductionFile } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { moduleReferenceVisitor } from '../../production.js';
 import { projectRootOf, projectSegments } from '../../role.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 
 /** What one layer under `src/` may import. */
 export type LayerOptions = {
@@ -98,7 +99,7 @@ function matchesPath(target: string, patterns: string[]): boolean {
  * read in every form a module names another, `require()` included.
  */
 export const i1LayerBoundaries: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const layers = (context.options[0] as Options | undefined)?.layers;
         if (layers === undefined || Object.keys(layers).length === 0) {
             return {};

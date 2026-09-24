@@ -1,6 +1,7 @@
+import type { Context } from '@oxlint/plugins';
+
 import { specsAnchor } from './ast.js';
 import type { SpecsAnchor } from './ast.js';
-import type { RuleContext } from './oxlint-api.js';
 import { isProductionModule } from './production.js';
 import { projectSegments, roleOf } from './role.js';
 import type { FileIdentity } from './role.js';
@@ -23,7 +24,7 @@ import type { FileIdentity } from './role.js';
  */
 
 /** The part of a rule's context the answers are read from. */
-export type LintedFile = Pick<RuleContext, 'physicalFilename' | 'sourceCode'>;
+export type LintedFile = Pick<Context, 'physicalFilename' | 'sourceCode'>;
 
 /** One file's answers, each filled the first time a rule asks. */
 type Answers = {

@@ -1,8 +1,10 @@
+import type { Context } from '@oxlint/plugins';
+
 import { child, childList, identifierName, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The helper every vitest config in this vocabulary starts from. */
 const PRESET = 'defineSpecConfig';
@@ -76,7 +78,7 @@ function startsFromThePreset(node: AstNode | undefined): boolean {
  * is `mergeConfig(defineSpecConfig(…), …)`.
  */
 export const e2PresetConfig: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         if (identityOf(context).role !== 'config') {
             return {};
         }

@@ -1,3 +1,5 @@
+import type { Context } from '@oxlint/plugins';
+
 import {
     child,
     childList,
@@ -9,8 +11,8 @@ import {
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 /**
  * CONVENTIONS B10 — `// When -` is optional, but where it is written it narrates
@@ -23,7 +25,7 @@ import { isTestRole } from '../../role.js';
  * where the chain IS the action.
  */
 export const b10WhenBetweenMarkers: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         if (!isTestRole(identityOf(context).role)) {
             return {};
         }

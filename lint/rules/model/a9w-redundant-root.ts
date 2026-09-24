@@ -1,3 +1,4 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
 import { findRoot } from '../../../src/model/chain/resolve.js';
@@ -5,7 +6,7 @@ import { findProperty, specificationMember, stringValue } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 /**
  * The root the convention would derive: the
@@ -23,7 +24,7 @@ function derivedRoot(startDir: string): string | undefined {
  * walk-up would have found, it is redundant and flagged.
  */
 export const a9wRedundantRoot: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         return {
             CallExpression(node: AstNode) {
                 if (specificationMember(node) === undefined) {

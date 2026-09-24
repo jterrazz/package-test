@@ -1,7 +1,9 @@
+import type { Context } from '@oxlint/plugins';
+
 import { propertyKeyName, specificationMember } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
+import type { AstNode, LintRule } from '../../rule-shape.js';
 
 /** Unwrap `await <expr>` down to the call expression, if that is what it is. */
 function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
@@ -21,7 +23,7 @@ function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
  * legal — the canonical name is enforced where the record is destructured.
  */
 export const a3NoDestructureAlias: LintRule = {
-    create(context: RuleContext) {
+    create(context: Context) {
         return {
             VariableDeclarator(node: AstNode) {
                 const call = unwrapAwaitedCall(node.init as AstNode | undefined);

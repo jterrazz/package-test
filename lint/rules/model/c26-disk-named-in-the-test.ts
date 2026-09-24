@@ -1,3 +1,4 @@
+import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
 import { child, childList, identifierName, stringValue } from '../../ast.js';
@@ -5,8 +6,8 @@ import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import type { LintedFile } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { isTestRole } from '../../role.js';
+import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The two calls that name the disk. */
 const WRAPPERS = new Set(['directory', 'file']);
@@ -34,7 +35,7 @@ function isTest(file: LintedFile): boolean {
  * the `file()` as a parameter; the test builds it, on the line a reader reads.
  */
 export const c26DiskNamedInTheTest: LintRule = {
-    create(context: RuleContext): Visitor {
+    create(context: Context): Visitor {
         const filename = context.physicalFilename;
         if (isTest(context)) {
             return {};
