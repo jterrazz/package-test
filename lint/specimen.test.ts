@@ -76,12 +76,26 @@ describe('specimen', () => {
         ).toBeUndefined();
     });
 
-    test('the root a runner reads its services’ ground from is no app', () => {
-        // Given - an integration runner whose root holds only the database's init scripts
-        const root = specsTree({
-            'integration/integration.specification.ts':
-                "specification.integration({ root: '../shared/fixtures/specimen-api', services: { db: postgres() } });",
-        });
+    test.each([
+        [
+            'written inline',
+            "specification.integration({ root: '../shared/fixtures/specimen-api', services: { db: postgres() } });",
+        ],
+        [
+            'hoisted into a const',
+            "const ROOT = '../shared/fixtures/specimen-api';\nspecification.integration({ root: ROOT, services });",
+        ],
+        [
+            'beside a service that runs a command',
+            "specification.integration({ root: '../shared/fixtures/specimen-api', services: { worker: process({ command: 'node w.mjs' }) } });",
+        ],
+        [
+            'under an app handed in, not started',
+            "const BROKEN = resolve(import.meta.dirname, '../shared/fixtures/broken-init');\nspecification.api({ root: BROKEN, server: () => app });",
+        ],
+    ])('the root a runner reads its services’ ground from is no app, %s', (_, door) => {
+        // Given - a runner whose root holds only its services' ground
+        const root = specsTree({ 'integration/integration.specification.ts': door });
         const spec = "import { integration } from '../integration.specification.js';\n";
 
         // Then - no specimen reached
@@ -90,15 +104,35 @@ describe('specimen', () => {
         ).toBeUndefined();
     });
 
-    test('a spec building its runner inline drives the specimen it names', () => {
-        // Given - a spec that starts its own runner over a broken tree of the shared fixtures
-        const spec =
-            "const BROKEN = resolve(import.meta.dirname, '../../shared/fixtures/broken-init');\nawait specification.api({ root: BROKEN, server: () => app });\n";
-        const root = specsTree({ 'api/services/refusals.spec.ts': spec });
+    test.each([
+        [
+            'written inline',
+            "specification.website({ root: '../shared/fixtures/specimen-website', server: { command: 'node server.mjs' } });",
+        ],
+        [
+            'hoisted into a const',
+            "const SITE = resolve(import.meta.dirname, '../shared/fixtures/specimen-website');\nspecification.website({ root: SITE, server: { command: 'node server.mjs' } });",
+        ],
+    ])('the root a server command runs from is the app, %s', (_, door) => {
+        // Given - a runner whose server command runs from a specimen's folder
+        const root = specsTree({ 'website/website.specification.ts': door });
+        const spec = "import { website } from '../website.specification.js';\n";
 
-        // Then - the tree it names
-        expect(specimenOf(join(root, 'api/services/refusals.spec.ts'), spec, 'api')).toBe(
-            'broken-init',
+        // Then - the specimen, by its folder
+        expect(specimenOf(join(root, 'website/visit/page.spec.ts'), spec, 'website')).toBe(
+            'specimen-website',
+        );
+    });
+
+    test('a spec building its runner inline drives the specimen it names', () => {
+        // Given - a spec that starts its own runner over a binary of the shared fixtures
+        const spec =
+            "const BIN = resolve(import.meta.dirname, '../../shared/fixtures/specimen-cli/cli.sh');\nexport const { cli } = await specification.cli(BIN);\n";
+        const root = specsTree({ 'cli/exec/refusals.spec.ts': spec });
+
+        // Then - the specimen the binary sits in
+        expect(specimenOf(join(root, 'cli/exec/refusals.spec.ts'), spec, 'cli')).toBe(
+            'specimen-cli',
         );
     });
 
