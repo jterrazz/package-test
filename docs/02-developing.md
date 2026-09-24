@@ -329,9 +329,9 @@ What it does **not** write there: the fresh temp directory each CLI spec runs in
 
 ### Scratch lives in the run's temp root
 
-A run keeps every scratch folder it makes in ONE folder of its own, and removes that folder when it ends. The preset's temp-root setup creates `jterrazz-test-runs/<pid>-…` in the OS temp directory before the first worker starts, and points `TMPDIR` (with `TMP` and `TEMP`) at it. So every `mkdtemp` under `os.tmpdir()` lands inside it: in a worker, in a child a spec spawns, in a tool that child runs. The teardown of the project whose setup made it (the first project, which vitest tears down last) removes it and restores the variables.
+A run keeps every scratch folder it makes in ONE folder of its own, and removes that folder when it ends. The preset's temp-root setup creates `jterrazz-test-runs-<uid>/<pid>-…` in the OS temp directory before the first worker starts, and points `TMPDIR` (with `TMP` and `TEMP`) at it. So every `mkdtemp` under `os.tmpdir()` lands inside it: in a worker, in a child a spec spawns, in a tool that child runs. The teardown of the project whose setup made it (the first project, which vitest tears down last) removes it and restores the variables.
 
-A run that dies before its teardown leaves its root behind, named by its pid. The next run removes every root in `jterrazz-test-runs/` whose pid no longer runs. It reads that folder alone, never the OS temp directory itself, which can hold hundreds of thousands of entries.
+A run that dies before its teardown leaves its root behind, named by its pid. The next run removes every root in `jterrazz-test-runs-<uid>/` whose pid no longer runs. It reads that folder alone, never the OS temp directory itself, which can hold hundreds of thousands of entries. The folder is named for the user, so on a temp directory several users share, such as Linux's `/tmp` with `TMPDIR` unset, a user never meets a folder another user made and cannot write or sweep.
 
 A CLI spec's working directory does not wait for the run to end: it is removed once its test has finished, after the test's `afterEach` hooks. Under `test.concurrent` it does wait. Vitest attaches a test hook to whichever test is current, and among concurrent tests that may be a sibling that ends first, so a concurrent test's scratch is left to the run's root.
 

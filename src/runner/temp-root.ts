@@ -17,11 +17,13 @@ import { basename, dirname, join } from 'node:path';
  * vitest tears the setups down once every project has run. Every root sits in
  * ONE parent folder of the system temp directory, named by its run's pid; a
  * root whose run died before its teardown is swept by the next run, which
- * reads that parent alone and never the system temp directory itself.
+ * reads that parent alone and never the system temp directory itself. The
+ * parent is the user's own, named by their uid: a temp directory several
+ * users share never holds a folder one of them cannot write or sweep.
  */
 
-/** The folder, below the system temp directory, holding every run's root. */
-export const TEMP_ROOTS_PARENT = 'jterrazz-test-runs';
+/** The folder, below the system temp directory, holding every run's root of this user. */
+export const TEMP_ROOTS_PARENT = `jterrazz-test-runs-${process.getuid?.() ?? 'user'}`;
 
 /** The variables a runtime reads its temp directory from. */
 const TEMP_VARIABLES = ['TMPDIR', 'TMP', 'TEMP'] as const;
