@@ -2569,18 +2569,18 @@ cherry-pick, with no conflicts, then one integrator commit. HEAD `3fcfc96`.
   passes no `--summary`. Integrator commit `3fcfc96` removed the false claim
   that the phrase mirrors @jterrazz/test (docs/06, check-baseline.js header).
   What stays open:
-  - **Owner call.** Should `nothing held` mean the same case in both
-    packages? Today typescript prints it for an EMPTIED section and nothing
-    for an absent one; @jterrazz/test prints it for an ABSENT section and
-    `0 held across 0 rules` for an emptied one (item 2).
-  - **Owner call.** The Publish build guard against test material (item 6)
-    needs @jterrazz/test to publish `materialAt` / `testPackageOf` on
-    `./oxlint`. A copy in typescript would give one fact two owners.
-  - **Item 5's premise was false.** The drift block runs only when a
-    project has an oxlint config. If the question is wanted, restate it as
-    "open the drift gate for projects with no config?".
-  - **Optional.** The root-argv stub in `baseline-ownership.spec.ts` works
-    only if it runs as CommonJS; it would be sturdier as `checker.cjs`.
+    - **Owner call.** Should `nothing held` mean the same case in both
+      packages? Today typescript prints it for an EMPTIED section and nothing
+      for an absent one; @jterrazz/test prints it for an ABSENT section and
+      `0 held across 0 rules` for an emptied one (item 2).
+    - **Owner call.** The Publish build guard against test material (item 6)
+      needs @jterrazz/test to publish `materialAt` / `testPackageOf` on
+      `./oxlint`. A copy in typescript would give one fact two owners.
+    - **Item 5's premise was false.** The drift block runs only when a
+      project has an oxlint config. If the question is wanted, restate it as
+      "open the drift gate for projects with no config?".
+    - **Optional.** The root-argv stub in `baseline-ownership.spec.ts` works
+      only if it runs as CommonJS; it would be sturdier as `checker.cjs`.
 - **Rulebook edges and tree gate** (`3216c45`…`54ef4a0`, 7 test
   commits). What it closed: complexity 12, max-lines 300 and
   max-lines-per-function 60 are each pinned on both sides of the cap; the
@@ -2591,3 +2591,64 @@ cherry-pick, with no conflicts, then one integrator commit. HEAD `3fcfc96`.
   whether `fix` forwards `--ignore-pattern` in general is unproven; under
   `fix`, the `.artifacts` entry is not load-bearing (the check case proves
   it).
+
+## Batch of 2026-09-24 (hybrid): test
+
+Four reviewed units landed on package-test's `vision/17` by cherry-pick,
+over the toolchain installed from package-typescript `3fcfc96` (`npm ci`).
+The only conflicts were in the generated `docs/03-testing.md`; chore commit
+`c1d694da` regenerates it with `npm run docs`. `make fix` exit 0,
+`make check` exit 0 (547 files passed, 1 skipped; 2449 tests passed).
+
+- **Mobile: one Appium session per run** (`abecb03e`). What it closed:
+  **141**. Under `mobile()` with a declared `appium: { url }`, the first
+  `.open()` records its session in a run ledger. Later files attach to it,
+  and the run's global teardown ends it. This supersedes iteration 33's
+  "No code follows the note" for 141. What stays open:
+    - **Owner call.** A spawned Appium server (no `url`) still opens one
+      session per file. Sharing it would need the project to declare the root
+      and the device. That is an API decision.
+    - A dead recorded session is not recovered: `openSession` attaches without
+      a probe, and no `appium:newCommandTimeout` is set. Settle it with a
+      timed `make test-mobile`, which also settles docs/09's "seconds" on a
+      warm simulator against the 40 s per file measured earlier.
+    - The ledger key includes `appium:bundleId`, so two apps on one simulator
+      keep two live sessions. docs/09 claims this works, and nothing proves it.
+    - Unfixed: builder.ts's `.open()` JSDoc still says "one driver session per
+      runner". docs/09 does not state that a global setup serving the Appium
+      server must come before `mobile()`'s own setups. The 7-file mobile run
+      prints its session count but does not assert it.
+- **Checker ground: C28's readers, C8's anchored paths** (`d2cf87d9`…
+  `65e1bc80`, 8 commits). What it closed: **135** and **136**. A module
+  test counts as a reader of shared ground outside every leaf. C8 and C28
+  read a path built from several literal pieces, but not a lone bare piece.
+  C28 never writes in place a file a module test names, and its writers
+  reuse a file that already holds the same bytes. What stays open:
+    - **Owner confirmation.** In
+      `specs/lint/c29-one-subject/fixes-a-file-of-two-routes.spec.yaml`,
+      the seed now stays in `specs/shared/seeds/`.
+    - A fixer that moves ground rewrites only whole relative literals, not a
+      path built from pieces, so `--fix` can leave a C8 error. docs/18's "A
+      fixer that moves ground rewrites every path that named it" is now false
+      for pieces. Either extend `repointModuleTests` or narrow the sentence.
+    - No spec pins two things: the relative-literal half of
+      `pathsModuleTestsName`, and the folder half of C28's inline exemption.
+      The folder half also silences a whole facet, while the pool side
+      ignores folders.
+    - `test.each` past its cap is unpinned. A spec that fails to parse drops
+      all its anchored C8 reads.
+- **Subject split and static-rule edges** (`9247f37a`…`be55d63f`,
+  5 commits, the branch's fixup folded into the first). What it closed:
+  C29 leaves an author's fixtures module alone and splits a website file
+  by page. C32 refuses every generic aspect. D20's carry depth is pinned
+  on both sides of its boundary, and F2's allow list on a walk through a
+  relay. What stays open: the mobile-journey split has no case of its own,
+  there is no YAML spec under `specs/lint/d20-whole-result/`, and the
+  generated C32 cases carry no name.
+- **Chain `with()` headers, and the routes ratchet's recorder**
+  (`dc953985`, `b61fea5f`, `74cb963f`). What it closed: `with()` sends its
+  headers on every chain it starts, and a chain's own headers win for that
+  chain alone. docs/19 now states that a test run under `TEST_UPDATE=1` is
+  the only recorder of `routes/unreached`. What stays open: the spec lives
+  at `specs/api/echo/create/headers.spec.ts` rather than beside
+  `users/create/sending.spec.ts`, and `specs/website/clock/` is untouched.
