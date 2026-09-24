@@ -2385,3 +2385,79 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
      `typescript` section held 1293 against 1396 recorded on the same run.
      Keep the slack (the entry is a ceiling), or fail a count below its
      entry the way an entry at zero fails?
+
+## Iteration 31 — the calls on 131–134 (orchestrator, 2026-09-24)
+
+- **131.** `shared` is reserved only DIRECTLY under `specs/`, beside the
+  facets; a domain named `shared` deeper (`<specs>/api/shared/get/` for a
+  `/shared` route) is legal.
+- **132.** The path fixers and C8 reach every test that stands on a file,
+  module tests outside `specs/` included; a shell command naming a path
+  (`node specs/fixtures/…`) stays the author's.
+- **133.** The capability matrix counts calls from the AST, not a literal
+  string match.
+- **134.** A ratchet is exact in both packages: a count BELOW its entry is a
+  finding ("the debt fell — re-record"), like an entry at zero, and
+  `make fix` re-records it — package-test for the `test` section,
+  package-typescript for the `typescript` one.
+
+### What the package-test branch did (iteration 31)
+
+- **131** (`cb72c1fb`). C1 drops its domain check: a spec under
+  `specs/shared/` is still refused in every mode, and a folder named
+  `shared` below a facet is the author's. Red: the domain check restored
+  (4 of 46 — three accepting rule-tester cases and the accepting document).
+- **132** (`f36b282b`). Every fixer that moves ground — C15's root ground,
+  C27, C28's level half, C29's lift, the mover's renames — rewrites the
+  relative literals of the member's module tests that named the moved entry
+  (one walk of them, `lint/module-tests.ts`). C8 reads a path a test
+  resolves from its own directory with one `./`/`../` literal —
+  `resolve`/`join` from `import.meta.dirname` or `__dirname`, `new URL('…',
+import.meta.url)` — for existence; a bare literal and a command string are
+  not read. Red: the helper a no-op, each call site removed, each anchored
+  form off, the walk entering `specs/`, ground or a nested package.
+- **C8's first finding.** `src/model/result/result.test.ts` resolved its CLI
+  two levels above the repository since `89782e41` moved the file; fixed in
+  the same commit.
+- **133** (`b105ff64`). A call probe keeps its spelling and is read as a
+  shape in a closed grammar (`lint/matrix-calls.ts`): the callee (bare, a
+  method on any object, on one identifier), the first argument (a call of a
+  name, a string and its opening, an object, an array), a leading `))`. Each
+  file is parsed once; a type assertion around an argument is transparent.
+  Keys, accessors, extensions and tokens stay literal. The matrix moved one
+  cell: `toMatch(directory())`·cli 3 → 5. Red: the literal match back, and
+  each part of the shape ignored in turn.
+- **134** (`29414cfe`). `judge` breaks on a count below its entry; the
+  ratchet run under `--fix` lowers every entry that fell and drops one at
+  zero (`lint/ratchet-fix.ts`), never raising one nor adding a key, names
+  each, then judges. `routes/unreached` is judged by the run that counts
+  it: the api teardown now fails a run whose unreached count is below the
+  entry, and `TEST_UPDATE=1` records it; the checker keeps leaving the key
+  alone, so `make fix` does not re-record it. This package's `test` section
+  was exact already. Red: the slack back, the fix raising, the fix not
+  writing, the run's key dropped, the routes' slack back.
+- **Gates.** `make fix` then `make check` exit 0 after each commit (2399
+  tests passed, 1 skipped, on the last); `npm run build` exit 0.
+
+### Raised by the package-test branch, iteration 31
+
+135. C28's judgement counts the leaves of the specs tree only. A pool entry
+     one leaf and a module test both read is moved down to that leaf, and
+     the module test's path follows it into a leaf's ground, which nothing
+     judges for a module test (C15 reads specs). Count a module test as a
+     reader outside every leaf — the entry stays shared — or keep the leaf's
+     move?
+136. C8's anchored read takes ONE literal after `import.meta.dirname`:
+     `resolve(import.meta.dirname, '..', 'specs', 'x')` and a bare segment
+     (`resolve(…, 'expected')`, an output folder a test creates, in seven
+     cli specs here) are out of reach, by design. Read the joined segments
+     when every one is a literal, or keep the one-literal form?
+137. An exact `routes/unreached` fails the api run the day a new spec reaches
+     a route, until `TEST_UPDATE=1` records it — and `make fix` cannot, since
+     no fix runs the suite. Keep the run as the key's one recorder, or let
+     `TEST_UPDATE=1` stay the gesture and name it in the checker's green line
+     as well?
+138. `typescript check` here prints `jterrazz.baseline.json › typescript:
+1293 held` against 1396 recorded: once package-typescript's half of 134
+     lands, this repository's check fails until its `typescript` section is
+     re-recorded — a gesture of that package's release, not of this branch.
