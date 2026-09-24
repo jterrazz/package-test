@@ -1127,18 +1127,46 @@ type MisplacedPoolFixture = {
 };
 
 /**
+ * The pool entries the member's module tests name by a relative literal. A
+ * module test reads its ground outside every leaf, so an entry one of them
+ * names is shared, whatever the leaves say.
+ */
+function poolEntriesModuleTestsRead(moduleTests: readonly string[], pool: string): Set<string> {
+    const read = new Set<string>();
+    for (const file of moduleTests) {
+        for (const { value } of relativeLiterals(readText(file))) {
+            const entry = poolEntryOf(file, value, pool);
+            if (entry !== undefined) {
+                read.add(entry);
+            }
+        }
+    }
+    return read;
+}
+
+/**
  * Pool entries — a file or a directory, in any of the four pools — reached
- * from exactly ONE spec directory. Two documents of the same leaf count as
- * one — the unit is the folder, not the file. An entry no reference names at
- * all is C9's dead-fixture case, not this one.
+ * from exactly ONE spec directory, and named by no module test of the member.
+ * Two documents of the same leaf count as one — the unit is the folder, not
+ * the file. An entry no reference names at all is C9's dead-fixture case, not
+ * this one.
  */
 function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     const misplaced: MisplacedPoolFixture[] = [];
+    const moduleTests = new Map<string, string[]>();
     for (const pool of findPools(rootDir)) {
-        const usage = poolUsage(specsRootOfPool(pool), pool);
-        for (const [entry, leaves] of usage) {
+        const specsRoot = specsRootOfPool(pool);
+        const member = dirname(specsRoot);
+        const tests = moduleTests.get(member) ?? moduleTestsOf(member);
+        moduleTests.set(member, tests);
+        const readOutside = poolEntriesModuleTestsRead(tests, pool);
+        for (const [entry, leaves] of poolUsage(specsRoot, pool)) {
             const leaf = commonLeaf([...leaves.keys()]);
-            if (leaf === undefined || treeKind(join(pool, entry)) === undefined) {
+            if (
+                leaf === undefined ||
+                readOutside.has(entry) ||
+                treeKind(join(pool, entry)) === undefined
+            ) {
                 continue;
             }
             misplaced.push({ entry, leaf, pool, referrers: [...leaves.values()].flat() });
@@ -1150,7 +1178,8 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
 /**
  * CONVENTIONS C28, its level half — a pool entry is SHARED, or it is local. An entry of one of
  * the specs root's shared folders — `shared/fixtures/`, `shared/seeds/`,
- * `shared/requests/`, `shared/expected/` — that exactly one spec directory reaches for is misplaced: it
+ * `shared/requests/`, `shared/expected/` — that exactly one spec directory
+ * reaches for, and no module test of the member names, is misplaced: it
  * belongs beside that leaf, in the leaf's folder of the same role
  * (`<leaf>/seeds/<name>`), named by the path from the leaf (`./seeds/<name>`).
  *
@@ -1186,8 +1215,8 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
 
 /**
  * Apply C28's level half: move each single-reader pool entry beside its leaf and rewrite the
- * paths that climbed to it into the path from the leaf, a module test's
- * relative literal included. The move is a `git mv`
+ * paths that climbed to it into the path from the leaf — no module test names
+ * it, or it would be shared. The move is a `git mv`
  * in a work tree, so the moved fixture keeps its history; a plain rename elsewhere.
  * A pool the move empties goes with it, and the shared folder when it was the
  * last, as C27's leaf folder does. Returns what
@@ -1203,9 +1232,6 @@ export function fixPoolFixtures(rootDir: string): string[] {
         }
         mkdirSync(dirname(destination), { recursive: true });
         moveKeepingHistory(join(pool, entry), destination);
-        repointModuleTests(specsRootOfPool(pool), [
-            { copy: join(pool, entry), target: destination },
-        ]);
         for (const file of referrers) {
             const text = readText(file);
             const climb = relative(dirname(file), pool).split(sep).join('/');
@@ -1388,16 +1414,23 @@ function repointed(from: string, path: string, { copy, target }: Move): string |
     return path.endsWith('/') && !moved.endsWith('/') ? `${moved}/` : moved;
 }
 
+/** Every relative path a source writes as a whole string literal, a template with a hole left out, with its span. */
+function relativeLiterals(text: string): { end: number; start: number; value: string }[] {
+    const scanned = blankComments(text);
+    return literalSpans(scanned).flatMap(({ end, start }) => {
+        const value = scanned.slice(start + 1, end - 1);
+        const quoted = `'"\``.includes(scanned[start] ?? '') && !value.includes('${');
+        return quoted && isRelativePath(value) ? [{ end, start, value }] : [];
+    });
+}
+
 /** The literal paths a source writes, rewritten where one names a copy. */
 function repointSource(file: string, move: (path: string) => string | undefined): string {
     const text = readText(file);
-    const scanned = blankComments(text);
     let next = '';
     let last = 0;
-    for (const { end, start } of literalSpans(scanned)) {
-        const value = scanned.slice(start + 1, end - 1);
-        const quoted = `'"\``.includes(scanned[start] ?? '') && !value.includes('${');
-        const moved = quoted && isRelativePath(value) ? move(value) : undefined;
+    for (const { end, start, value } of relativeLiterals(text)) {
+        const moved = move(value);
         if (moved !== undefined) {
             next += `${text.slice(last, start + 1)}${moved}`;
             last = end - 1;

@@ -1,4 +1,4 @@
-description: --fix splits a file of two routes, each file with what it reads, the seed with its reader
+description: --fix splits a file of two routes; the seed a module test reads too goes to the shared ground
 fixture: ./fixtures/split/
 runs:
     - command: checker . --fix
@@ -6,9 +6,10 @@ runs:
       files:
           specs/api/orders/orders.spec.ts: absent
           specs/api/orders/seeds: absent
-          specs/api/orders/list/seeds/one-order.sql: exists
+          specs/api/orders/list/seeds: absent
+          specs/shared/seeds/one-order.sql: exists
           specs/api/orders/list/orders.spec.ts:
-              contains: api.seed(file('./seeds/one-order.sql'))
+              contains: api.seed(file('../../../shared/seeds/one-order.sql'))
           specs/api/orders/create/orders.spec.ts:
               equals: |
                   import { describe, expect, test } from 'vitest';
@@ -28,4 +29,4 @@ runs:
                       });
                   });
           src/orders/orders.test.ts:
-              contains: resolve(import.meta.dirname, '../../specs/api/orders/list/seeds/one-order.sql')
+              contains: resolve(import.meta.dirname, '../../specs/shared/seeds/one-order.sql')

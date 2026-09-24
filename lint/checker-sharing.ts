@@ -39,7 +39,8 @@ import { closingOf, literalEnd, withoutComments } from './subject.js';
  *   a program reads, and `seeds/`: SQL is never written in a test, so a seed
  *   one test reads lives beside it, in `./seeds/`;
  * - read by several tests of ONE leaf → beside them, in the leaf's own ground;
- *   a shared entry one leaf alone reaches is moved down (what C14 was);
+ *   a shared entry one leaf alone reaches, and no module test names, is moved
+ *   down (what C14 was);
  * - read from several leaves → the specs root's shared ground, where C15 already
  *   holds a path that leaves its leaf, and C27 finds copies.
  *
