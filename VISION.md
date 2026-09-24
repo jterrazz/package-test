@@ -2017,3 +2017,101 @@ playwright: 'the gate drives a browser in production' } } }` — and F2
 122. The toolchain's chapter (`docs/06-quality-checks.md` § The six
      gestures) still shows `typescript fix` before the checker; it is the
      toolchain's to turn in its next round.
+
+## Iteration 27 — the calls on 119 to 122, and the toolchain round's findings (orchestrator, 2026-09-24)
+
+- **119.** `toBeEmpty` and `toBeRunning` are left to the type-aware
+  `typescript/no-floating-promises`, on in every profile; D2 drops its own
+  check for them and keeps the argument-dependent `toMatch`. The handoff is
+  proven: the typed rule catches a missing `await` on each.
+- **121.** F2's reach walks are cached per run; B9w is gated to the roles
+  it judges; re-measured.
+- **A test body is at most 60 lines**: a new rule on `test(…)`/`it(…)`
+  callbacks. The toolchain's `max-lines-per-function` goes off in test
+  files, because C31's one `describe` is itself a long function.
+- **C31's fix** keeps module-level helpers at module scope, and handles a
+  `describe.each` and a second top-level `describe`.
+- **D29** judges only imports of other spec files: a spec may compare
+  against a production module's data (`package.json`).
+- The prototype's version is 17.0.0, and the toolchain's 11.0.0, so the
+  peer `^11.0.0` resolves locally; no release is cut.
+
+### What the package-test branch did (iteration 27)
+
+- **The version** (`4d106b4`): 17.0.0 in `package.json` and the
+  lockfile's two root entries.
+- **119** (`952c0da`). D2 no longer names the two matchers. A new
+  meta-test, lint/type-aware.test.ts over lint/type-aware.ts, holds all
+  six profiles of the toolchain to `no-floating-promises` at `error` with
+  `typeAware` on, and lints a scratch source typed by this package's
+  augmentation: a bare `toBeEmpty`, `.not.toBeEmpty` and `toBeRunning` are
+  refused; the awaited, returned, assigned and `rejects` forms are not.
+  Chapters 14 and 11 say who holds which `await`.
+- **121** (`6fa395f`, `5a8f698`). `reachOf` keeps each answer by folder,
+  specifier and allowed packages: a production module on the way ends a
+  walk, so one folder's answer is every module's there. oxlint shows a
+  plugin no run boundary, so `lintBegins` (F2's `before()`) draws it:
+  the answers are dropped when a file is linted a second time, or a
+  module a walk passed through is linted. B9w reads the `specification`
+  role alone, its reach narrowed to it: A1 refuses a runner created
+  anywhere else. `oxlint --type-aware --debug=timings`, this repository,
+  two runs each:
+
+    |                           | F2           | B9w          | JS runtime       | rule callbacks   | wall          |
+    | ------------------------- | ------------ | ------------ | ---------------- | ---------------- | ------------- |
+    | before (610 files)        | 511 / 505 ms | 242 / 242 ms | 1,906 / 1,894 ms | 1,695 / 1,690 ms | 2.98 / 2.91 s |
+    | F2 cached (612 files)     | 296 / 296 ms | 242 / 240 ms | 1,674 / 1,678 ms | 1,471 / 1,474 ms | 2.65 / 2.66 s |
+    | B9w gated (612 files)     | 294 / 297 ms | 2.8 / 2.5 ms | 1,443 / 1,451 ms | 1,241 / 1,250 ms | 2.42 / 2.46 s |
+    | the iteration (614 files) | 334 / 298 ms | 2.8 / 2.6 ms | 1,550 / 1,456 ms | 1,333 / 1,252 ms | 2.63 / 2.43 s |
+
+    The jterrazz diagnostics are the same before and after each of the
+    two steps (74, across 7 rules). The last row carries C34, 3.8 ms.
+
+- **C34** (`1743ea8`). `c34-test-body-size`: the function a
+  `test(…)`/`it(…)` runs, modifiers and tables included, spans at most 60
+  lines, counted as the toolchain counts; in the three test roles; two
+  documents, chapter 18 and the skill. This repository has three test
+  bodies past it, recorded (`jterrazz/c34-test-body-size: 3`).
+- **C31** (`15ed568`). The wrap and the merge are one edit: what stands
+  between the first test or group and the last stays above the new
+  `describe`; a group titled with the aspect is unwrapped; another
+  group's tests take its title, `<group> — <test>`, one level deep as J10
+  wants and the prefix C33 groups by. A group with a hook or a local, a
+  modified group and a table beside another group are scopes, refused
+  without a fix. A lone `describe.each` passes when its title starts with
+  `<aspect> — `, and its fix prefixes the aspect.
+- **D29** (`dd24793`). An import counts only when its path resolves under
+  the spec's `specs/` anchor; chapter 18 says the product's data may be
+  compared against.
+- **Red on a broken implementation:** `toBeEmpty` typed `() => void` (the
+  type-aware test, 1) and D2 given back the two names (3); the reach cache
+  bypassed (1), `lintBegins` never clearing (2), the walked modules not
+  tracked (1); B9w's gate removed (1); C34's cap raised to 600 (2); C31's
+  hoisting bypassed (2), a table read as a plain group (3), no group ever
+  flattened (3); D29's anchor check removed (2).
+
+### Raised by the package-test branch, iteration 27
+
+123. F2's run boundary is drawn from what oxlint does, not from a hook.
+     HYPOTHESIS (2026-09-24): in the editor's host, a file created after
+     a folder's answer was kept, and asked about first by a sibling never
+     linted in the run, reads the kept answer until any file is linted
+     again. Settled by one session in an editor with the language server,
+     creating `x.test.ts` beside a module whose sibling imports `./x.test`.
+     Accept, or ask oxlint for a run hook?
+124. F2 is still the plugin's largest rule (~300 ms): the first walk of each
+     folder, where every candidate is probed three times through the git
+     tree seam (the file, the index, its folder). A project-root memo per
+     folder, under the same boundary, is the next cut. Take it?
+125. A1 is next (103–170 ms over the runs, 12.5k calls): by its
+     convention it reads every file but a specification, so no role gate
+     narrows it; its cost is the `CallExpression` visit. Skip a file whose
+     text never says `specification.` in `before()`, or leave it?
+126. Until the toolchain turns `max-lines-per-function` off in test
+     files, C34's three findings here are reported twice, and every long
+     `describe` still counts on the toolchain's ratchet.
+127. `make fix` ran `npm ci` because the version bump moved the lockfile,
+     reinstalling `@jterrazz/typescript` from its clone through
+     install-links; that clone still says 10.3.2 against the peer
+     `^11.0.0`. npm did not refuse it: the dev dependency is a `file:`
+     link. The peer only resolves once the toolchain's prototype is 11.0.0.
