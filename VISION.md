@@ -3032,3 +3032,61 @@ The units:
 
 The three worktrees (`pt-bodies-followups`, `pt-runtime-followups`,
 `pt-filing-followups`) and their branches are removed.
+
+## Speed batch of 2026-09-24: typescript
+
+One unit landed on package-typescript's `vision/17`, by cherry-pick with no
+conflict. @jterrazz/test was reinstalled from package-test `2d54d941`
+(`npm ci`). HEAD is now `7fc5dcd`. `make fix` exit 0, `make check` exit 0
+(154 files, 452 tests).
+
+- **Drift words and JSON, the config-name export** (branch
+  `vision17-typescript-drift-and-names`, `4f3b834`…`b4e1e6b`, 19 commits,
+  plus `7fc5dcd`). Its review came back `integrate`. The worktree
+  `ptc-drift-and-names` and the branch are removed. It closes batch 3's
+  fix-first list: the two direct `check-drift.js` cases are the module's
+  own tests (`src/cli/check-drift.test.ts`), the JSON contract (absent
+  `null`, emptied `0`) and the dropped human `test` row are pinned, and
+  `baseline-record-names-refused.spec.yaml` pins the product command's
+  refusal. `6b5fd94` publishes the oxlint config-name list as the subpath
+  `@jterrazz/typescript/oxlint-config-names`, so the test section's
+  **Toolchain owner** row can be struck. `7fc5dcd` repairs docs/03's unit
+  row and spawn list from the review. It also carries three batch-3 items:
+  `f3a33a6` (the sweep drops a tracked file under an unswept build folder)
+  and `b955029`, `95bb352` (the ignore-pattern documents). What stays open:
+    - The CONFIG_NAMES swap in this package (lint/checker-cli.ts,
+      lint/checker-member.ts, lint/ratchet-own-fixes.ts): import the new
+      subpath once a @jterrazz/typescript carrying `6b5fd94` is installable.
+    - docs/06-quality-checks.md:361 does not match check-drift.js for the
+      test section: an absent section prints no row (not `nothing held`),
+      and for an unreadable file `--json` marks the test section unreadable
+      while the human block prints no test row. **Owner call:** rescope
+      the sentence, or print `test  unreadable` and flip `ba54b7e`.
+    - No timeout on `oxlint --print-config` (check-drift.js:67) or on the
+      spawnSync calls in `src/cli/check-drift.test.ts`. A stall in
+      `os.tmpdir()` would hang the unit project, which runs first.
+- **A spec runs only the pass it specifies; shared sandbox template and temp
+  dir** (branch `vision17-typescript-toolchain-spec-speed`, 12 commits).
+  Skipped, because its review came back `fix-first` after one round. The
+  worktree `ptc-toolchain-spec-speed` and the branch are kept. What stays
+  open for its fix round:
+    - **Major.** docs/02-developing.md:202 and :204 state as laws what
+      holds only for some chains: eight chain files and about 69 goldens
+      still run every pass, and 22 sites (13 cli chain, 4 unit, 2 in
+      drift.spec.ts) still call `tmpdir()` directly. The report's notDone
+      does not say so.
+    - The Names pass running under the ratchet's held line with only
+      `oxlint` selected (check.sh:500) has no spec. Add an
+      `onlyPasses('oxlint')` case on `FOUR_TARGETS` and show it red.
+    - Three new goldens (`passes-*.spec.yaml`) and a re-recorded
+      `jterrazz.baseline.json` land outside the unit's area. Move them into
+      a `.spec.ts` chain or state them as cross-unit touches, and correct
+      the report.
+    - Item 4 (split or concurrent long files) was not done, item 5 (the
+      install-matrix cache) was declined for the reason in `69c1e21`, and
+      the cli project measured about 590 → 470 s CPU with the wall time
+      flat at about 74 s. The selector bought CPU, not wall time. Say so in
+      the report.
+    - Now that drift-and-names has landed, rebase the branch on
+      `vision/17`: `drift.spec.ts` lost two cases to
+      `src/cli/check-drift.test.ts`, and the baseline file may re-record.
