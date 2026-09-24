@@ -1,3 +1,4 @@
+import { SERVICE_IMAGES } from '../../model/chain/service-images.js';
 import type { DatabasePort } from '../../model/ports/database.port.js';
 import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
 import type { ServiceHandle } from '../../model/ports/service.port.js';
@@ -24,7 +25,7 @@ export class RedisHandle implements ServiceHandle {
     private sharedConnectionString = '';
 
     constructor(options: RedisOptions = {}) {
-        this.defaultImage = options.image ?? 'redis:7';
+        this.defaultImage = options.image ?? SERVICE_IMAGES.redis;
     }
 
     buildConnectionString(host: string, port: number): string {

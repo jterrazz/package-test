@@ -29,6 +29,13 @@ describe('postgres handle', () => {
         );
     });
 
+    test('defaults to the slim postgres:17 image pinned by digest, and takes an override', () => {
+        // Given - one handle with no image option and one with an explicit image
+        // Then - the default is the pinned slim image, and the override wins
+        expect(postgres().defaultImage).toMatch(/^postgres:17-alpine@sha256:[0-9a-f]{64}$/u);
+        expect(postgres({ image: 'postgres:17' }).defaultImage).toBe('postgres:17');
+    });
+
     test('is its own database adapter', () => {
         // Given - a postgres handle
         const handle = postgres();

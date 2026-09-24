@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Client } from 'pg';
 
+import { SERVICE_IMAGES } from '../../model/chain/service-images.js';
 import type { DatabasePort } from '../../model/ports/database.port.js';
 import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
 import type { ServiceHandle } from '../../model/ports/service.port.js';
@@ -42,7 +43,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     private schema = 'public';
 
     constructor(options: PostgresOptions = {}) {
-        this.defaultImage = options.image ?? 'postgres:17';
+        this.defaultImage = options.image ?? SERVICE_IMAGES.postgres;
         this.environment = {
             POSTGRES_DB: 'test',
             POSTGRES_PASSWORD: 'test',

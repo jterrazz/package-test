@@ -19,7 +19,11 @@ import { postgres, process, redis, sqlite } from '@jterrazz/test';
 
 **Each factory names its own optional peer**, and names it at startup rather than at install time: `postgres()` and `redis()` need `testcontainers` (and `pg` / `redis` for the driver a table read uses), `sqlite()` needs `better-sqlite3`, and `process()` needs nothing but node. A project that declares none of them installs none of them — the seams are optional peers since 16.0, loaded lazily by the one module that owns each ([04 — Operating](04-operating.md#what-a-consumer-must-bring)). The refusal, when one is missing, names the facet that asked, the peer, the install command of the package manager the project's own lockfile names, and — under pnpm — the `onlyBuiltDependencies` line a native binding also needs before it is built at all.
 
-`image` overrides the container image and `env` (postgres only) the environment variables; each factory carries a default for both, so a record that states neither still starts a real service. After the runner starts, each service handle exposes `.connectionString`, which is what you pass to your app:
+`image` overrides the container image and `env` (postgres only) the environment variables; each factory carries a default for both, so a record that states neither still starts a real service.
+
+The default image is the slim one, pinned by digest: `postgres:17-alpine` and `redis:7-alpine`, each at the digest of its multi-platform index, held in one constant (`src/model/chain/service-images.ts`). Every machine and every run starts the same bytes; a bare tag would move under the suite, and bumping the pin is a deliberate edit of that constant.
+
+After the runner starts, each service handle exposes `.connectionString`, which is what you pass to your app:
 
 ```typescript
 export const { api, cleanup } = await specification.api({

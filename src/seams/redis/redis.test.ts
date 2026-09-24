@@ -23,11 +23,11 @@ describe('redis handle', () => {
         expect(redis().serviceName).toBeNull();
     });
 
-    test('defaults to the redis:7 image and takes an override', () => {
+    test('defaults to the slim redis:7 image pinned by digest, and takes an override', () => {
         // Given - one handle with no image option and one with an explicit image
-        // Then - the default applies, and the override wins
-        expect(redis().defaultImage).toBe('redis:7');
-        expect(redis({ image: 'redis:7-alpine' }).defaultImage).toBe('redis:7-alpine');
+        // Then - the default is the pinned slim image, and the override wins
+        expect(redis().defaultImage).toMatch(/^redis:7-alpine@sha256:[0-9a-f]{64}$/u);
+        expect(redis({ image: 'redis:7' }).defaultImage).toBe('redis:7');
     });
 
     test('is not a database', () => {
