@@ -1909,3 +1909,111 @@ the module out of the entry`; read the F2 row.
      literal): an accessor held in a variable (`const out = result.stdout;
 expect(out).toMatch(…)`) is now left in place with the `text()`
      advice. Accept, or resolve the binding?
+
+## Iterations 25 and 26 — the upgrade pass, and the calls on 116 to 118 (orchestrator, 2026-09-24)
+
+- **Lint performance.** A file's role is read once per file for every
+  rule; every rule moves from `create` to `createOnce`, with a `before()`
+  that returns `false` for a file it does not judge; oxlint's plugin types
+  come from `@oxlint/plugins`. Measured with `oxlint --debug=timings`
+  before and after; no rule's verdict moves.
+- **D2** hands `toBeEmpty`/`toBeRunning` to `vitest/valid-expect`'s
+  `asyncMatchers` where that removes a JS check.
+- **Upgrades.** tsdown 0.23 (check `dist/oxlint.d.cts`); declarations from
+  the `tsgo` generator if the output is identical; better-sqlite3 13 with
+  @types 9, the peer widened to `^12.11.1 || ^13` if green; every safe
+  patch and minor bump.
+- **Flakes.** A `--repeats` gesture for the known flaky tests (the
+  chromium component import, the container log capture, the type
+  channel's compiler run); the cause fixed if the repeats reproduce it.
+  `fsModuleCache` on the unit project, kept only if faster and green.
+- **116.** A production module that legitimately runs a test package
+  declares it in `jterrazz.config.ts` — `test: { production: { allow: {
+playwright: 'the gate drives a browser in production' } } }` — and F2
+  honours it; no other exemption.
+- **117.** Consumers copy the `make fix` recipe from the chapter: the
+  checker first, the formatter last. **118** is accepted as a
+  HYPOTHESIS, revisited if a consumer trips it.
+
+### What the package-test branch did (iterations 25 and 26)
+
+- **The toolchain** (`02b7c2d`) is package-typescript's `c87e969`: oxlint
+  1.85, oxlint-tsgolint 7.0.2002, oxfmt 0.70, knip 6.38. Its ratchet
+  delta: the size caps (`max-lines` 43, `max-lines-per-function` 125,
+  recorded), `unicorn/consistent-function-scoping` 12 (six paid, six
+  recorded — Given steps and a test-local type), `prefer-optional-chain`
+  4 and one unused `oxlint-disable` (paid); nine counts fell and were
+  re-recorded. Its empty-directory gate then found the cli matcher specs
+  leaving `expected/` folders empty (`4882559`): a transient golden now
+  takes its emptied folder with it.
+- **Lint performance** (`094de28`, `7127fbb`, `e089f27`).
+  `oxlint --type-aware --debug=timings`, this repository, two runs each:
+
+    |                                             | JS runtime       | rule callbacks   | wall        |
+    | ------------------------------------------- | ---------------- | ---------------- | ----------- |
+    | before (607 files)                          | 7,321 / 7,162 ms | 7,059 / 6,900 ms | 8.4 / 8.3 s |
+    | a file's identity once per lint (609 files) | 1,922 / 1,903 ms | 1,697 / 1,682 ms | 3.1 / 2.9 s |
+    | every rule `createOnce` (610 files)         | 1,990 / 1,969 ms | 1,762 / 1,745 ms | 3.2 / 3.0 s |
+
+    The memo (lint/linted-file.ts, keyed on `context.sourceCode`, which
+    oxlint's `WeakMap` forgets when a file's lint ends) is the whole gain;
+    `createOnce` is flat, oxlint 1.85 not yet skipping JS on
+    `before() → false`. The jterrazz diagnostics are the same, rule by rule,
+    before and after. `createOnce` opened a failure class RuleTester cannot
+    see (it builds a fresh rule per case: C24 with its reset removed passed
+    every test): lint/rule-shape.test.ts holds every rule to no unreset
+    `let`, and to the same verdicts from each E2E fixture alone and after
+    its corpus through one visitor. `@oxlint/plugins` is a dependency: the
+    published declarations import its types. Typed by them, three report
+    sites (B8, B16w, D28) failed to compile and were narrowed.
+
+- **D2** is unchanged — see question 119.
+- **Upgrades.** tsdown 0.23 (`d54aaf0`): the declarations are the same
+  surface, written as inline `export declare`; `dist/oxlint.d.cts`
+  included. The `tsgo` generator was tried and not taken (question 120).
+  better-sqlite3 13 and @types 9 (`5510727`): 13 ships its binding
+  prebuilt, so `npm ci` needs no rebuild; the peer takes
+  `^12.11.1 || ^13`. The development floors (`f571126`). redis's
+  deprecated `disconnect()` gives way to `destroy()` (`682e243`),
+  `typescript/no-deprecated` leaving the ratchet. oxc-parser 0.151 (a 0.x
+  minor of a runtime dependency) is left for its own change.
+- **Flakes** (`2beaacf`). `npm run test:repeat -- <files>`. None of the
+  three reproduced: type-channel ×10 and the log capture ×10 alone, the
+  whole suite ×2 under full load, three full `--coverage` runs on an
+  emptied component dependency cache. The repeats found a test that could
+  not run twice (the sqlite template guard, fixed) and that a RuleTester
+  file refuses its own second pass. `fsModuleCache` on the unit project:
+  25.27 / 25.26 s off, 25.36 / 25.44 s on a warm cache — not kept.
+- **116** (`3e879ec`). `test.production.allow` in the settings type; the
+  checker's reader keeps the list only when every entry has a reason; F2
+  reads an allowed package as reaching nothing, directly or through a
+  module that is not production.
+- **117** (`256a622`). Chapter 19 states the order, with the recipe.
+- **Red on a broken implementation:** the shared-answer memo recomputed
+  (1), the memo keyed without the filename (1); C24's per-file reset
+  removed (the reset test), E2's gate inverted (5); the sqlite guard
+  before its fix under `--repeats 3` (1); F2's allow check removed (1),
+  the settings reader keeping a reasonless entry (1).
+
+### Raised by the package-test branch, iterations 25 and 26
+
+119. `vitest/valid-expect` with `asyncMatchers: ['toBeEmpty',
+'toBeRunning']` flags the negative-spec form D2 sanctions,
+     `await expect(expect(x).toBeEmpty()).rejects.toThrow(…)` (four sites
+     here), and an assigned-then-awaited matcher. The two matchers are
+     typed `Promise<void>`, so the type-aware `no-floating-promises`, on
+     in every profile, already refuses the bare statement and accepts
+     both forms. Hand them to it and keep D2's JS for the
+     argument-dependent `toMatch`, or keep D2 whole?
+120. The `tsgo` declaration generator writes the same declarations but
+     two string-literal types in `index.d.ts`, single-quoted (`'any'`
+     for `"any"`), builds in 1.7 s against 2.8 s, warns that TypeScript 7
+     has no stable API, and needs the platform binary's path (TypeScript
+     7 is not the `typescript` package here). Take it with that diff, or
+     wait for 7.1?
+121. With the memo in, the JS plugin's cost is F2 (~500 ms, a reach walk
+     per import), B9w (~250 ms: two walks of every file, no role gate)
+     and A1 (110–175 ms). Gate B9w by role, which would narrow its reach?
+122. The toolchain's chapter (`docs/06-quality-checks.md` § The six
+     gestures) still shows `typescript fix` before the checker; it is the
+     toolchain's to turn in its next round.
