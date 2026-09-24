@@ -50,53 +50,24 @@ A second hole is the RENDERER's, and it is not this repository's to close: a Rea
 
 ## How a spec tree is laid out
 
-The layout is the one the conventions enforce on every consumer (rules C1, C29, C30), and this repository is its first consumer. A facet carries its runners at its ROOT and its tests below, one file per aspect of one subject — in the api, cli and jobs facets under the subject's standard folder, derived from the route, the command or the job ([18 — Conventions § One file, one subject](18-conventions.md#one-file-one-subject)):
+The layout is the one the conventions enforce on every consumer (rules C1, C29, C30, C35), and this repository is its first consumer — with one difference an application never meets: every app its specs drive is a SPECIMEN, kept as ground under `specs/shared/fixtures/`, so every spec here specifies the FRAMEWORK, and is filed by the CAPABILITY it asks about rather than by the route, the command or the job it reaches ([18 — Conventions § A specimen's spec](18-conventions.md#a-specimens-spec)). A facet carries its runners at its ROOT and its tests one folder below, one file per aspect of the capability:
 
 ```
 specs/
 ├── api/
 │   ├── api.specification.ts          # runners at the facet root
 │   ├── intercepts.specification.ts
-│   └── echo-raw/create/              # POST /echo-raw — the subject's standard folder
-│       ├── sending.spec.ts           # the aspect this file asks of it
-│       └── requests/                 # ground: what it sends, *.http and bodies
+│   └── intercept/                    # the capability, named as the matrix names it
+│       ├── exhausted.spec.ts         # one aspect asked of it
+│       └── contracts/                # the contracts its specs declare
 ├── website/
-│   └── visit/                        # a domain: a website's folders are its author's
+│   └── visit/
 └── shared/                           # the ground several leaves share, and nothing else:
-    ├── fixtures/                     # file state, reached by ../../shared/fixtures/…;
+    ├── fixtures/                     # the specimens and file state, reached by ../../shared/fixtures/…;
     └── seeds/                        # seeds/, requests/, expected/ share the same way
 ```
 
-**Where the folder is the author's — integration, website — a domain shared by two facets carries the same name in both.** Seven
-capabilities belong to no facet in particular — a runner's `lifecycle`, the
-declared network (`intercepts`), the ground a chain loads (`seeding`), what a
-result answers (`assertions`), the `{{token}}` engine (`tokens`), the pinned
-calendar (`clock`) and the document door (`literate`) — and a facet that gives one of them a FOLDER calls it by
-that name, so `specs/integration/clock/` and `specs/website/clock/` are the same
-question asked of two constructors. An api, cli or jobs folder is no domain at
-all: it is the subject's name, and the capability becomes the ASPECT — the
-file — asked of it (`specs/api/session/get/clock.spec.ts`). Everything else is one facet's own, and a
-name that is one facet's own is never another's: two names for one capability
-is the drift the vocabulary exists to stop.
-
-It says nothing about where a METHOD may appear. `.seed()` is used inside
-integration's `call/` scenarios, because seeding is the
-Given there and not the subject; a capability earns a folder when it is what
-the specs in it are ABOUT.
-
-The vocabulary is declared in `lint/domains.ts` and `domains.test.ts` holds
-the tree equal to it in both directions — a folder nothing declares fails, and
-a declared name nothing carries fails too.
-
-<!-- GENERATED:domains — do not edit by hand; run `npm run docs`. Source: lint/domains.ts -->
-
-| Facet         | Shared domains it carries | Its own                                     |
-| ------------- | ------------------------- | ------------------------------------------- |
-| `integration` | `clock/`, `intercepts/`   | `call/`, `postgres/`, `redis/`, `table/`    |
-| `mobile`      | —                         | `drafts/`, `launch/`, `notes/`, `sign-in/`  |
-| `website`     | `assertions/`, `clock/`   | `console/`, `fetch/`, `services/`, `visit/` |
-
-<!-- /GENERATED:domains -->
+**The folder names come from the capability matrix below, and nowhere else** — C35 holds them to it. A capability belongs to no facet in particular, so a facet that gives one a folder calls it by the matrix's name — `specs/api/clock/`, `specs/jobs/clock/` and `specs/website/clock/` are the same question asked of three constructors, and two names for one capability is the drift a closed vocabulary stops. It says nothing about where a METHOD may appear: `.seed()` is used inside integration's `call/` scenarios, because seeding is the Given there and not the subject; a capability earns a folder when it is what the specs in it are ABOUT. A spec that reaches no specimen — integration's module-only runner, `pure.specification.ts` — is out of that reach, and its folder is its author's.
 
 A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; `fixtures/`, `expected/`, `requests/` and `seeds/` are ground, never a domain, and `shared/` directly under `specs/` is the shared ground, never a facet — deeper, a domain or a route's segment may take the word. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
 
