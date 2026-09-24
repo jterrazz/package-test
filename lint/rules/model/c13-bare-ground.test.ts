@@ -29,6 +29,21 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
             errors: 1,
             filename: `${SPECS_LINT}/c13-bare-ground/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
+        // The 16 pool is named with the place 17 keeps it: the shared ground.
+        {
+            code: 'test("x", () => {});',
+            errors: [
+                { message: /rename it "expected\/"/u },
+                { message: /rename it "fixtures\/"/u },
+                { message: /rename it "requests\/"/u },
+                { message: /rename it "seeds\/"/u },
+                {
+                    message:
+                        /^found: "_fixtures\/" is a 16\.x ground name · .* · fix: rename it "shared\/fixtures\/"/u,
+                },
+            ],
+            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/every-16-folder/specs/app/widget/widget.test.ts`,
+        },
         // A module test stands on ground as surely as a spec: its 16 folder is named too.
         {
             code: 'test("x", () => {});',

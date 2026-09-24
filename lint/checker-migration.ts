@@ -1,7 +1,12 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
-import { GROUND_FIXTURES, isGroundName, RENAMED_GROUND_DIRS } from '../src/model/chain/ground.js';
+import {
+    GROUND_FIXTURES,
+    isGroundName,
+    RENAMED_GROUND_DIRS,
+    SHARED_GROUND,
+} from '../src/model/chain/ground.js';
 import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import { treeEntries, treeKind } from '../src/seams/git/tree.js';
 import { isTestFileName } from './role.js';
@@ -21,11 +26,13 @@ import { isTestFileName } from './role.js';
  *
  * Its gestures, in this order:
  *
- * 1. every 16 ground folder takes its bare name (C13), deepest first;
+ * 1. every 16 ground folder takes its bare name (C13), deepest first — the
+ *    16 pool, `<specs>/_fixtures/`, goes to the shared ground,
+ *    `<specs>/shared/fixtures/`;
  * 2. in a 16.x-shaped file, every call names the disk with `file()` or `directory()`, by the path from
  *    the spec: `.seed('x.sql')` → `.seed(file('./seeds/x.sql'))`,
  *    `.request('x.http')` → `.request(file('./requests/x.http'))`,
- *    `.fixture('$FIXTURES/app/')` → `.fixture(directory('../../fixtures/app/'))`,
+ *    `.fixture('$FIXTURES/app/')` → `.fixture(directory('../../shared/fixtures/app/'))`,
  *    `.fixture('x.toml')` → `.fixture(file('./fixtures/x.toml'))`,
  *    `toMatch('help.txt')` → `toMatch(file('./expected/help.txt'))`, a golden
  *    tree → `toMatch(directory('./expected/<name>/'))`, `.run('x.spec.yaml')` →
@@ -119,7 +126,7 @@ function specFiles(root: string): string[] {
         for (const entry of treeEntries(dir)) {
             const path = join(dir, entry.name);
             if (entry.isDirectory()) {
-                const isPool = depth === 0 && entry.name === GROUND_FIXTURES;
+                const isPool = depth === 0 && entry.name === SHARED_GROUND;
                 if (!SKIPPED.has(entry.name) && !isGroundName(entry.name) && !isPool) {
                     walk(path, depth + 1);
                 }
@@ -144,7 +151,7 @@ function fixturePath(value: string, specDir: string, root: string): string | und
         return undefined;
     }
     if (value.startsWith('$FIXTURES/')) {
-        return `${pathFrom(specDir, join(root, GROUND_FIXTURES))}/${value.slice('$FIXTURES/'.length)}`;
+        return `${pathFrom(specDir, join(root, SHARED_GROUND, GROUND_FIXTURES))}/${value.slice('$FIXTURES/'.length)}`;
     }
     if (value.startsWith('$')) {
         return undefined;
@@ -723,13 +730,22 @@ function movedToSeventeen(text: string, file: string, specsRoot: string): string
     return bare === text ? bare : importWrappers(bare, file);
 }
 
-/** Rename every 16 folder to its bare name, deepest first; what moved, relative to `root`. */
-function renameFolders(root: string, folders: string[], rename: Rename): string[] {
+/**
+ * Rename every 16 folder to its bare name, deepest first — one at the specs
+ * root to the shared ground's folder of its role; what moved, relative to `root`.
+ */
+function renameFolders(
+    root: string,
+    { folders, specsRoot }: Pick<Walked, 'folders' | 'specsRoot'>,
+    rename: Rename,
+): string[] {
     const renamed: string[] = [];
     for (const dir of folders) {
         const bare = RENAMED_GROUND_DIRS[dir.split(sep).at(-1) ?? ''];
-        const target = bare === undefined ? undefined : join(dirname(dir), bare);
+        const parent = dirname(dir) === specsRoot ? join(specsRoot, SHARED_GROUND) : dirname(dir);
+        const target = bare === undefined ? undefined : join(parent, bare);
         if (target !== undefined && !existsSync(target)) {
+            mkdirSync(parent, { recursive: true });
             rename(dir, target);
             renamed.push(`${relative(root, dir)} → ${relative(root, target)}`);
         }
@@ -749,7 +765,7 @@ function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Re
     const sixteenPool = folders.includes(join(specsRoot, `_${GROUND_FIXTURES}`));
     const migration: Migration = {
         directives: [],
-        renamed: renameFolders(root, folders, rename),
+        renamed: renameFolders(root, { folders, specsRoot }, rename),
         rewritten: [],
     };
     for (const file of files()) {

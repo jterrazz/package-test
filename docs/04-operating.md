@@ -75,10 +75,11 @@ Containers are the one resource that outlives a process badly, which is why `aft
 
 `npx jterrazz-test-check --fix` is the migration: over every `specs/` tree
 and every member's module tests, it renames the four ground folders to their
-bare names, deepest first, rewrites every literal call and document to name the
+bare names, deepest first — the 16 pool, `<specs>/_fixtures/`, becomes the
+shared ground's `<specs>/shared/fixtures/` — rewrites every literal call and document to name the
 disk with `file()` or `directory()` and a full relative path —
 `.seed('x.sql')` to `.seed(file('./seeds/x.sql'))`,
-`.fixture('$FIXTURES/app/')` to `.fixture(directory('../../fixtures/app/'))`,
+`.fixture('$FIXTURES/app/')` to `.fixture(directory('../../shared/fixtures/app/'))`,
 `toMatch('help.txt')` to `toMatch(file('./expected/help.txt'))`,
 `.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
 wrappers from the entry the specification file already uses.

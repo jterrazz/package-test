@@ -1,4 +1,11 @@
-import { mkdirSync, mkdtempSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import {
+    existsSync,
+    mkdirSync,
+    mkdtempSync,
+    readFileSync,
+    renameSync,
+    writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -57,15 +64,17 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
                 "const a = await api.seed(file('./seeds/users.sql'), { database: 'db' }).request(file('./requests/create.http'));",
                 "expect(a.response).toMatch(file('./expected/created.http'));",
                 "expect(message).toMatch('not a file');",
-                "const b = await cli.fixture(directory('../../fixtures/shop/')).fixture(file('./fixtures/config.toml')).exec('build');",
+                "const b = await cli.fixture(directory('../../shared/fixtures/shop/')).fixture(file('./fixtures/config.toml')).exec('build');",
                 "await expect(b.filesystem).toMatch(directory('./expected/scaffold/'));",
                 "await cli.run(file('./case.spec.yaml'));",
                 '',
             ].join('\n'),
         );
         expect(readFileSync(join(root, 'cli/build/case.spec.yaml'), 'utf8')).toContain(
-            'fixture: ../../fixtures/shop/',
+            'fixture: ../../shared/fixtures/shop/',
         );
+        expect(migration.renamed).toContain('_fixtures → shared/fixtures');
+        expect(existsSync(join(root, 'shared/fixtures/shop/index.ts'))).toBe(true);
     });
 
     test('is idempotent on a tree already on 17', () => {
@@ -101,7 +110,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         const root = tree16({
             'cli/build/build.spec.ts': source,
             'cli/build/expected/build.txt': '',
-            'fixtures/cli-app/index.ts': '',
+            'shared/fixtures/cli-app/index.ts': '',
         });
 
         // When - the mover runs
@@ -171,7 +180,9 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             ].join('\n'),
         );
         expect(readFileSync(join(root, 'cli/build/case.spec.yaml'), 'utf8')).toContain(
-            ['fixture:', '    - ../../fixtures/shop/', '    - ./fixtures/config.toml'].join('\n'),
+            ['fixture:', '    - ../../shared/fixtures/shop/', '    - ./fixtures/config.toml'].join(
+                '\n',
+            ),
         );
     });
 
@@ -437,7 +448,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             'cli/build/build.spec.ts': "expect(result.stdout).toMatch('build.txt');\n",
             'cli/refusal/expected/refused.txt': '',
             'cli/refusal/refusal.spec.ts': refusal,
-            'fixtures/cli-app/index.ts': '',
+            'shared/fixtures/cli-app/index.ts': '',
         });
 
         // When - the mover runs

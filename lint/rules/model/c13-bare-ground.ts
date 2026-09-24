@@ -1,7 +1,11 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import { RENAMED_GROUND_DIRS } from '../../../src/model/chain/ground.js';
+import {
+    GROUND_FIXTURES,
+    RENAMED_GROUND_DIRS,
+    SHARED_GROUND,
+} from '../../../src/model/chain/ground.js';
 import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
@@ -34,14 +38,18 @@ export const c13BareGround: LintRule = {
                 const file = context.physicalFilename;
                 const anchor = specsAnchorOf(context);
                 const seen = new Set<string>();
-                const probe = (parent: string, legacy: string): void => {
+                const probe = (
+                    parent: string,
+                    legacy: string,
+                    ground = RENAMED_GROUND_DIRS[legacy] ?? legacy,
+                ): void => {
                     const path = join(parent, legacy);
                     if (seen.has(path) || !isDirectory(path)) {
                         return;
                     }
                     seen.add(path);
                     context.report({
-                        data: { ground: RENAMED_GROUND_DIRS[legacy] ?? legacy, legacy },
+                        data: { ground, legacy },
                         messageId: 'underscored',
                         node,
                     });
@@ -49,9 +57,9 @@ export const c13BareGround: LintRule = {
                 for (const legacy of Object.keys(RENAMED_GROUND_DIRS)) {
                     probe(dirname(file), legacy);
                 }
-                // The pool is ground for the whole tree, and no spec sits beside it.
+                // The pool is ground for the whole tree, no spec sits beside it, and 17 keeps it under `shared/`.
                 if (anchor !== undefined) {
-                    probe(anchor.directory, '_fixtures');
+                    probe(anchor.directory, '_fixtures', `${SHARED_GROUND}/${GROUND_FIXTURES}`);
                 }
             },
         };
