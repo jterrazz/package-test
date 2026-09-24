@@ -197,8 +197,8 @@ goldens where `main` carried 51, so the wave adds 15. They are three shapes,
 and none of them is debt: a test whose SUBJECT is the primitive the rule bans —
 the clock seam, `waitUntil`, the adapter deadlines, the marker rule's own
 one-line fixture; a negative spec whose violation IS the behaviour under test;
-and one skipped spec, the repro of the seam defect chapter 16 names, which
-leaves the day the seam answers. A rule cannot exempt the test that proves it
+and one skipped spec, the repro of a seam defect, which left once the seam
+answered: it runs as `specs/api/intercept/body-cancel.spec.ts`. A rule cannot exempt the test that proves it
 without exempting the class it guards, so the directive carries the reason
 instead.
 
@@ -221,9 +221,10 @@ reading.
   until chapter 13 existed, and the references had no generated card to be
   replaced by. Both landed with it — 13 owns the vocabulary, and
   `references/<kind>.md` is generated from the facet matrix.
-- **`response.body.cancel()`.** A seam defect, not a catalogue one: chapter 16
-  states it and M3's row names the one suppression it sanctions, with the repro
-  skipped beside the other intercept specs.
+- **`response.body.cancel()`.** A seam defect, not a catalogue one, left out
+  of the cut. It is fixed since: the node engine hands every reply's body back
+  as a stream the package owns, so the repro runs and M3 sanctions no
+  suppression ([16 — Contracts](../16-contracts.md)).
 - **W4 stays a runtime row** rather than a type one, for the reason written in
   `src/type-channel.test-d.ts`.
 - **The three statuses.** ADR-006, 007 and 008 are `Proposed`; only the owner
