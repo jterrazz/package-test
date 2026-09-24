@@ -1,8 +1,8 @@
 import { assertionOf, child, childList, identifierName, stringValue, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /**
  * An import a spec may draw a value from without it being an expectation of
@@ -53,7 +53,7 @@ function rootRead(argument: AstNode): string | undefined {
  */
 export const d29NoForeignExpectation: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'spec') {
+        if (identityOf(context).role !== 'spec') {
             return {};
         }
         return {

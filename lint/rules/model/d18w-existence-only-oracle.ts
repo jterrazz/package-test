@@ -1,8 +1,9 @@
 import { assertionOf, child, childList, findTestCallback, isTestCallee, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** Matchers that pass for almost any value — the shape of an existence check. */
 const EXISTENCE_MATCHERS = new Set(['toBeDefined', 'toBeTruthy']);
@@ -32,7 +33,7 @@ const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
  */
 export const d18wExistenceOnlyOracle: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         return {

@@ -3,9 +3,9 @@ import { dirname, resolve } from 'node:path';
 import { collectsAFile, projectLiterals, staticPrefix } from '../../config-shape.js';
 import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /**
  * CONVENTIONS E7w (warning) — an `include` whose static prefix is not a
@@ -20,7 +20,7 @@ import { roleOf } from '../../role.js';
  */
 export const e7wIncludePrefixExists: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.physicalFilename).role !== 'config') {
+        if (identityOf(context).role !== 'config') {
             return {};
         }
         const configDirectory = dirname(context.physicalFilename);

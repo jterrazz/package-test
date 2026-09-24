@@ -1,8 +1,8 @@
 import { child, identifierName, propertyKeyName, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** Is this property the RUNNER's browser block, rather than a key that shares its name? */
 function isRunnerBrowserBlock(node: AstNode): boolean {
@@ -48,7 +48,7 @@ function insideComponentCall(node: AstNode): boolean {
  */
 export const e6ComponentProjectHelper: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.physicalFilename).role !== 'config') {
+        if (identityOf(context).role !== 'config') {
             return {};
         }
         return {

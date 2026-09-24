@@ -3,9 +3,10 @@ import { dirname, extname, join } from 'node:path';
 import { GROUND_REQUESTS } from '../../../src/model/chain/ground.js';
 import { isDirectory, listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /**
  * CONVENTIONS C2 — `requests/` holds what a spec SENDS: a whole request as a
@@ -19,7 +20,7 @@ import { isTestRole, roleOf } from '../../role.js';
 export const c2RequestExtension: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        const { inSpecs, role } = roleOf(file);
+        const { inSpecs, role } = identityOf(context);
         if (!isTestRole(role) || !inSpecs) {
             return {};
         }

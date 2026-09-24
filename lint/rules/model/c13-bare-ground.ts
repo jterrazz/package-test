@@ -1,9 +1,9 @@
 import { dirname, join } from 'node:path';
 
 import { RENAMED_GROUND_DIRS } from '../../../src/model/chain/ground.js';
-import { specsAnchor } from '../../ast.js';
 import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -28,7 +28,7 @@ const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 export const c13BareGround: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        const anchor = specsAnchor(file);
+        const anchor = specsAnchorOf(context);
         if (!TEST_FILE.test(file)) {
             return {};
         }

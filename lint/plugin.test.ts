@@ -342,14 +342,14 @@ describe('conventions catalogue — completeness (meta-test)', () => {
             'specification',
         ]);
 
-        // Then - its rule asks `roleOf` (directly, or through the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and W2 was one — any file with a `.visit/.render/.open` scenario was judged
+        // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and W2 was one — any file with a `.visit/.render/.open` scenario was judged
         for (const entry of catalog) {
             if (entry.channel !== 'statique' || !ROLE_REACH.has(entry.reach)) {
                 continue;
             }
             const source = read(`lint/rules/${entry.facet}/${entry.name}.ts`);
             expect(
-                source.includes('roleOf(') || source.includes('isTestRole('),
+                source.includes('identityOf(') || source.includes('isTestRole('),
                 `${entry.name} states reach \`${entry.reach}\` and reads no role`,
             ).toBe(true);
         }

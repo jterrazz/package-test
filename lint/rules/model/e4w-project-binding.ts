@@ -1,8 +1,8 @@
 import { collectedSegments, facetOfSegments, FACETS, projectLiterals } from '../../config-shape.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /**
  * CONVENTIONS E4w (warning) — a project that collects a facet root is NAMED for
@@ -22,7 +22,7 @@ import { roleOf } from '../../role.js';
  */
 export const e4wProjectBinding: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.physicalFilename).role !== 'config') {
+        if (identityOf(context).role !== 'config') {
             return {};
         }
         const config = context.physicalFilename;

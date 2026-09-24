@@ -1,8 +1,8 @@
 import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 import type { FileRole } from '../../role.js';
 
 /**
@@ -92,7 +92,7 @@ const REACHED = new Set<FileRole>(['component', 'module', 'spec', 'specification
  */
 export const f6NoForeignTestRuntime: LintRule = {
     create(context: RuleContext) {
-        const { role } = roleOf(context.physicalFilename);
+        const { role } = identityOf(context);
         if (!REACHED.has(role)) {
             return {};
         }

@@ -10,9 +10,9 @@ import {
     walk,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** A source span: where a node starts and ends. */
 type Span = { end: number; start: number };
@@ -115,7 +115,7 @@ function fileConstants(program: AstNode): { declarator: AstNode; statement: AstN
  */
 export const d28SharedExpectation: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'spec') {
+        if (identityOf(context).role !== 'spec') {
             return {};
         }
         return {

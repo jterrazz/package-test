@@ -8,9 +8,10 @@ import {
 import { child, childList, diskCallOf, identifierName, memberPropertyName } from '../../ast.js';
 import type { DiskCall } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /**
  * The ground folder each verb reads, and which argument names the disk. `run`
@@ -81,7 +82,7 @@ function groundOf(path: string): string | undefined {
  */
 export const c24GroundRole: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.physicalFilename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         const bindings = new Map<string, AstNode[]>();

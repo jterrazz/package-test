@@ -7,9 +7,10 @@ import {
     markerComments,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /**
  * CONVENTIONS B10 — `// When -` is optional, but where it is written it narrates
@@ -23,7 +24,7 @@ import { isTestRole, roleOf } from '../../role.js';
  */
 export const b10WhenBetweenMarkers: LintRule = {
     create(context: RuleContext) {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         return {

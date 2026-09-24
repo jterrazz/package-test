@@ -2,9 +2,10 @@ import { dirname, join } from 'node:path';
 
 import { listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** The provider folders that may carry data files. */
 const PROVIDERS = ['anthropic', 'http', 'openai'];
@@ -28,7 +29,7 @@ function ownerOf(entry: string): string {
 export const c11ContractDataPairing: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        const { inSpecs, role } = roleOf(file);
+        const { inSpecs, role } = identityOf(context);
         if (!isTestRole(role) || !inSpecs) {
             return {};
         }

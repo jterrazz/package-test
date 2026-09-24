@@ -1,8 +1,9 @@
 import { child, childList, identifierName, importSourceVisitor, stringValue } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf, segmentsOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, projectSegments, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
@@ -128,8 +129,8 @@ export const i4NoModuleDoubles: LintRule = {
         const allowed = new Set(
             Array.isArray(stated) ? stated.filter((entry) => typeof entry === 'string') : [],
         );
-        const { role } = roleOf(context.filename);
-        const parts = projectSegments(context.filename);
+        const { role } = identityOf(context);
+        const parts = segmentsOf(context);
         const banned = parts
             .slice(0, -1)
             .find((part) => part === '__mocks__' || part === '__fixtures__');

@@ -10,9 +10,9 @@ import {
     walk,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** The three ways this vocabulary makes a double. */
 const DOUBLE_FACTORIES = new Set(['mockOf', 'vi.fn', 'vi.spyOn']);
@@ -71,7 +71,7 @@ function doubleBindings(root: AstNode): Set<string> {
  */
 export const d17wDoubleOnlyOracle: LintRule = {
     create(context: RuleContext): Visitor {
-        const identity = roleOf(context.filename);
+        const identity = identityOf(context);
         if (identity.role !== 'module' || identity.inSpecs) {
             return {};
         }

@@ -9,9 +9,10 @@ import {
     walk,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** How many probes on one subject make a cluster, unless the option says otherwise. */
 const DEFAULT_THRESHOLD = 3;
@@ -63,7 +64,7 @@ function goldenableSubject(subject: AstNode | undefined): string | undefined {
  */
 export const d19wProbeCluster: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         const option = context.options[0];

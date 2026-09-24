@@ -3,9 +3,9 @@ import { dirname, resolve } from 'node:path';
 import { literateSpecifications } from '../../config-shape.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /**
  * CONVENTIONS E8 — `literate.specification` names a file that exists.
@@ -17,7 +17,7 @@ import { roleOf } from '../../role.js';
  */
 export const e8LiterateSpecificationExists: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.physicalFilename).role !== 'config') {
+        if (identityOf(context).role !== 'config') {
             return {};
         }
         const configDirectory = dirname(context.physicalFilename);

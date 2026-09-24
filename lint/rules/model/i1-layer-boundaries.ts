@@ -2,9 +2,10 @@ import { dirname, join, resolve } from 'node:path';
 
 import { isDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { isProductionFile } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isProductionModule, moduleReferenceVisitor } from '../../production.js';
+import { moduleReferenceVisitor } from '../../production.js';
 import { projectRootOf, projectSegments } from '../../role.js';
 
 /** What one layer under `src/` may import. */
@@ -103,7 +104,7 @@ export const i1LayerBoundaries: LintRule = {
             return {};
         }
         const file = context.physicalFilename;
-        if (!isProductionModule(file)) {
+        if (!isProductionFile(context)) {
             return {};
         }
         const inside = pathInLayers(file);

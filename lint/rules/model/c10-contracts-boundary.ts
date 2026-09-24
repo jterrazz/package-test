@@ -1,8 +1,8 @@
 import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** A specifier reaching into a provider folder — the internal half of contracts/. */
 const INTERNAL_UNIT = /(?:^|\/)contracts\/(?:anthropic|http|openai)\//u;
@@ -17,7 +17,7 @@ const INTERNAL_UNIT = /(?:^|\/)contracts\/(?:anthropic|http|openai)\//u;
  */
 export const c10ContractsBoundary: LintRule = {
     create(context: RuleContext): Visitor {
-        const { inSpecs, role } = roleOf(context.physicalFilename);
+        const { inSpecs, role } = identityOf(context);
         // Inside contracts/ the internal half is the file's own business — and
         // That folder IS a role, so the rule asks the identity, not the path.
         if (!inSpecs || role === 'contract') {

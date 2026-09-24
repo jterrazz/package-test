@@ -8,9 +8,10 @@ import {
     stringValue,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, Fix, LintRule, RuleContext, RuleFixer, Visitor } from '../../oxlint-api.js';
-import { baseNameOf, roleOf } from '../../role.js';
+import { baseNameOf } from '../../role.js';
 
 /** The aspect a spec file names: `pagination.spec.ts` → `pagination`. */
 export function aspectOf(filename: string): string {
@@ -81,7 +82,7 @@ function importDescribe(fixer: RuleFixer, statements: AstNode[]): Fix | undefine
  */
 export const c31DescribeNamesFile: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'spec') {
+        if (identityOf(context).role !== 'spec') {
             return {};
         }
         const aspect = aspectOf(context.filename);

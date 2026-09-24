@@ -5,15 +5,15 @@ import {
     findTestCallback,
     identifierName,
     isTestCallee,
-    isUnderSpecs,
     memberPropertyName,
     stringValue,
     walk,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** The accessors a result is compared WHOLE through — the subjects this rule counts. */
 const WHOLE_SUBJECTS = new Set(['json', 'response']);
@@ -127,7 +127,7 @@ function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string 
  */
 export const d20WholeResult: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.filename).role) || !isUnderSpecs(context.filename)) {
+        if (!isTestRole(identityOf(context).role) || !identityOf(context).inSpecs) {
             return {};
         }
         return {

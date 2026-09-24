@@ -8,9 +8,9 @@ import {
     walk,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** The verbs that CHANGE the screen — after one of them, something is in flight. */
 const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);
@@ -127,7 +127,7 @@ function settles(node: AstNode, visitor: string): boolean {
  */
 export const w5wScenarioSettles: LintRule = {
     create(context: RuleContext): Visitor {
-        const identity = roleOf(context.filename);
+        const identity = identityOf(context);
         // A scenario of the ASSEMBLED product: a `.spec.ts`, or — in a tree
         // That has not taken the suffix yet — a `.test.ts` under `specs/`. A
         // `.test.tsx` is the component's, and out of reach.

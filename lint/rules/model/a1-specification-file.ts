@@ -1,8 +1,8 @@
 import { specificationMember } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** Both suffixes a specification wears — a `wrap` written in JSX needs the `x`. */
 const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
@@ -26,7 +26,7 @@ export const a1SpecificationFile: LintRule = {
     create(context: RuleContext): Visitor {
         if (
             SPECIFICATION_SUFFIXES.some((suffix) => context.filename.endsWith(suffix)) ||
-            roleOf(context.physicalFilename).role === 'component'
+            identityOf(context).role === 'component'
         ) {
             return {};
         }

@@ -1,8 +1,8 @@
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 import type { FileIdentity } from '../../role.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
@@ -44,7 +44,7 @@ function owesANeighbour({ inSpecs, legacyDir, role }: FileIdentity): boolean {
 export const i2SiblingTestNaming: LintRule = {
     create(context: RuleContext) {
         const file = context.physicalFilename;
-        const identity = roleOf(file);
+        const identity = identityOf(context);
         return {
             Program(node: AstNode) {
                 if (identity.legacyDir !== null) {

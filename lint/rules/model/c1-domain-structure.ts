@@ -1,7 +1,7 @@
 import { isGroundName } from '../../../src/model/chain/ground.js';
-import { specsAnchor } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 
@@ -117,7 +117,7 @@ export const c1DomainStructure: LintRule = {
         const depth = (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
         return {
             Program(node: AstNode) {
-                const anchor = specsAnchor(context.filename);
+                const anchor = specsAnchorOf(context);
                 if (anchor === undefined) {
                     return;
                 }

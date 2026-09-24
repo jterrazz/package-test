@@ -1,8 +1,9 @@
 import { memberPropertyName, SCENARIO_ACTIONS, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** The invariant a `testId()` owes: what the element lacks, in the author's words. */
 const REASON = /\/\/\s*testId:\s*\S/u;
@@ -25,7 +26,7 @@ const REASON = /\/\/\s*testId:\s*\S/u;
  */
 export const w2TestIdStatesWhatIsMissing: LintRule = {
     create(context: RuleContext) {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         const lines = context.sourceCode.text.split('\n');

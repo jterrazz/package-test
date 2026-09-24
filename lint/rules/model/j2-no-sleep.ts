@@ -7,9 +7,10 @@ import {
     nodeStart,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** The doubles whose implementation STAGES the world rather than waits on it. */
 const DOUBLE_FACTORIES = new Set(['fn', 'mockImplementation', 'mockImplementationOnce', 'mockOf']);
@@ -68,7 +69,7 @@ function implementationOf(node: AstNode): AstNode | undefined {
  */
 export const j2NoSleep: LintRule = {
     create(context: RuleContext) {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         // The source spans of the double implementations seen so far. The walk

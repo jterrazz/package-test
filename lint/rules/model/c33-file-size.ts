@@ -1,8 +1,8 @@
 import { child, isTestCallee, testName, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** The most lines a spec file holds. */
 export const MAX_SPEC_LINES = 400;
@@ -39,7 +39,7 @@ export function groupsOf(titles: string[]): string {
  */
 export const c33FileSize: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'spec') {
+        if (identityOf(context).role !== 'spec') {
             return {};
         }
         return {

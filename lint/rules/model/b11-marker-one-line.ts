@@ -8,9 +8,10 @@ import {
     nodeStart,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, Comment, LintRule, RuleContext } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /**
  * A directive, not prose — a tool's instruction that happens to be a comment.
@@ -55,7 +56,7 @@ function lineEndAt(text: string, offset: number): number {
  */
 export const b11MarkerOneLine: LintRule = {
     create(context: RuleContext) {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         const { text } = context.sourceCode;

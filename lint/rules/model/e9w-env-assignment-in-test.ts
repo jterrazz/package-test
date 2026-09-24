@@ -1,8 +1,9 @@
 import { child, memberPath } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /**
  * Is the target the process environment, or a variable of it?
@@ -35,7 +36,7 @@ function isEnvTarget(node: AstNode | undefined): boolean {
  */
 export const e9wEnvAssignmentInTest: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         return {

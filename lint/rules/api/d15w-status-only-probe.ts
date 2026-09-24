@@ -1,8 +1,9 @@
 import { findTestCallback, isTestCallee, memberPropertyName, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** An HTTP status code lives in this range — the numeric-literal gate. */
 const MIN_STATUS = 100;
@@ -75,7 +76,7 @@ function isStatusProbe(node: AstNode): boolean {
  */
 export const d15wStatusOnlyProbe: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         return {

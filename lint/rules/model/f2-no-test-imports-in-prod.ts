@@ -1,15 +1,11 @@
 import { dirname, relative } from 'node:path';
 
 import { lessons } from '../../lesson.js';
+import { isProductionFile } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext } from '../../oxlint-api.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../path-references.js';
-import {
-    isProductionModule,
-    materialNamed,
-    moduleReferenceVisitor,
-    reachOf,
-} from '../../production.js';
+import { materialNamed, moduleReferenceVisitor, reachOf } from '../../production.js';
 
 /**
  * CONVENTIONS F2 — production never reaches test material. In a production
@@ -31,7 +27,7 @@ import {
 export const f2NoTestImportsInProd: LintRule = {
     create(context: RuleContext) {
         const file = context.physicalFilename;
-        if (!isProductionModule(file)) {
+        if (!isProductionFile(context)) {
             return {};
         }
         const here = dirname(file);

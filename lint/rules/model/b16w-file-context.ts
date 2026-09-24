@@ -9,9 +9,9 @@ import {
     walk,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, Fix, LintRule, RuleContext, RuleFixer, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 import { subjectFolder, subjectsOf } from '../../subject.js';
 import type { Subject } from '../../subject.js';
 
@@ -218,7 +218,7 @@ function declareOnce(
  */
 export const b16wFileContext: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'spec') {
+        if (identityOf(context).role !== 'spec') {
             return {};
         }
         return {

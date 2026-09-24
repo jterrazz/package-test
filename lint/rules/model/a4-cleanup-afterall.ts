@@ -1,8 +1,8 @@
 import { propertyKeyName, specificationMember, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 
 /** Does this declarator destructure `cleanup` out of a specification call? */
 function destructuresCleanup(node: AstNode): boolean {
@@ -53,7 +53,7 @@ function isAfterAllWithCleanup(node: AstNode): boolean {
  */
 export const a4CleanupAfterall: LintRule = {
     create(context: RuleContext): Visitor {
-        if (roleOf(context.filename).role !== 'specification') {
+        if (identityOf(context).role !== 'specification') {
             return {};
         }
         return {

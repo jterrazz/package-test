@@ -1,5 +1,6 @@
-import { importSourceVisitor, specsAnchor } from '../../ast.js';
+import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
 import { declaredSubpaths } from '../../package-exports.js';
@@ -37,7 +38,7 @@ const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams'])
  */
 export const f3SpecsPublicEntry: LintRule = {
     create(context: RuleContext) {
-        const anchor = specsAnchor(context.filename);
+        const anchor = specsAnchorOf(context);
         if (anchor === undefined) {
             return {};
         }

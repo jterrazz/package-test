@@ -4,9 +4,10 @@ import { isRelativePath } from '../../../src/model/chain/spec-path.js';
 import { goldenOf, memberPropertyName, stringValue, walk } from '../../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /** The relative path a golden matcher names, when the call is one and names it literally. */
 function goldenPathOf(node: AstNode): string | undefined {
@@ -61,7 +62,7 @@ function refsInFixture(target: string): string[] {
 export const d9wSingleUseRef: LintRule = {
     create(context: RuleContext): Visitor {
         const file = context.physicalFilename;
-        const { inSpecs, role } = roleOf(file);
+        const { inSpecs, role } = identityOf(context);
         if (!isTestRole(role) || !inSpecs) {
             return {};
         }

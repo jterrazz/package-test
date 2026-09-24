@@ -8,9 +8,10 @@ import {
     walk,
 } from '../../ast.js';
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { isTestRole, roleOf } from '../../role.js';
+import { isTestRole } from '../../role.js';
 
 /**
  * Does `arguments[1]` of a `toMatch(file(path), options)` call carry `{ frozen: true }`?
@@ -201,7 +202,7 @@ function inPlaceOf(node: AstNode): boolean {
 
 export const d13wUnfrozenNegativeFixture: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!isTestRole(roleOf(context.filename).role)) {
+        if (!isTestRole(identityOf(context).role)) {
             return {};
         }
         return {

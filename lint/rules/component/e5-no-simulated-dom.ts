@@ -1,7 +1,7 @@
 import { lessons } from '../../lesson.js';
+import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, RuleContext, Visitor } from '../../oxlint-api.js';
-import { roleOf } from '../../role.js';
 import type { FileRole } from '../../role.js';
 
 /** The pragma vitest reads to swap a test file's environment. */
@@ -23,7 +23,7 @@ const REACHED = new Set<FileRole>(['component', 'module', 'specification']);
  */
 export const e5NoSimulatedDom: LintRule = {
     create(context: RuleContext): Visitor {
-        if (!REACHED.has(roleOf(context.physicalFilename).role)) {
+        if (!REACHED.has(identityOf(context).role)) {
             return {};
         }
         return {

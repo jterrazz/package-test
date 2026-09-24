@@ -89,12 +89,15 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
 /** One lint pass of C7 over `file`, in this process: the reports it makes. */
 function lintPass(file: string): string[] {
     const reported: string[] = [];
-    const context: Pick<RuleContext, 'filename' | 'physicalFilename' | 'report'> = {
+    const context: Pick<RuleContext, 'filename' | 'physicalFilename' | 'report' | 'sourceCode'> = {
         filename: file,
         physicalFilename: file,
         report: (diagnostic) => {
             reported.push(String(diagnostic.data?.entry));
         },
+        // A lint of its own: oxlint forgets what a file's lint answered when it ends.
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the rule keys its answers on this object and reads nothing of it
+        sourceCode: {} as RuleContext['sourceCode'],
     };
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reads only the file's name and `report`; the rest of oxlint's context is not what this pass is about
     const visitor = c7SeedsSqlOnly.create(context as RuleContext);
