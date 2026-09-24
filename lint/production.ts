@@ -17,6 +17,7 @@ import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-refere
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
 import type { AstNode } from './rule-shape.js';
 import { withoutComments } from './subject.js';
+import { testSettingsAt } from './test-settings.js';
 
 /**
  * Production, and the test material it must never reach — ONE reader, for
@@ -402,7 +403,11 @@ function namedIn(module: string, text: string): Named {
 }
 
 /** What a module that is neither production nor test material reaches, if anything. */
-function reachThrough(module: string, seen: Set<string>): Reach | undefined {
+function reachThrough(
+    module: string,
+    seen: Set<string>,
+    allowed: ReadonlySet<string>,
+): Reach | undefined {
     if (seen.has(module)) {
         return undefined;
     }
@@ -419,7 +424,7 @@ function reachThrough(module: string, seen: Set<string>): Reach | undefined {
         }
     }
     for (const specifier of specifiers) {
-        const reach = reachFrom(module, specifier, seen);
+        const reach = reachFrom(module, specifier, seen, allowed);
         if (reach !== undefined) {
             return { ...reach, through: [module, ...reach.through] };
         }
@@ -427,11 +432,20 @@ function reachThrough(module: string, seen: Set<string>): Reach | undefined {
     return undefined;
 }
 
-/** What one specifier written in `from` reaches, walking what `seen` has not. */
-function reachFrom(from: string, specifier: string, seen: Set<string>): Reach | undefined {
+/**
+ * What one specifier written in `from` reaches, walking what `seen` has not. A
+ * test package in `allowed` is one the unit's production runs by design, and
+ * reaches nothing.
+ */
+function reachFrom(
+    from: string,
+    specifier: string,
+    seen: Set<string>,
+    allowed: ReadonlySet<string>,
+): Reach | undefined {
     const name = testPackageOf(specifier);
     if (name !== undefined) {
-        return { kind: 'a test package', through: [], what: name };
+        return allowed.has(name) ? undefined : { kind: 'a test package', through: [], what: name };
     }
     for (const target of resolveSpecifier(from, specifier)) {
         const kind = materialAt(target);
@@ -441,7 +455,7 @@ function reachFrom(from: string, specifier: string, seen: Set<string>): Reach | 
     }
     for (const target of resolveSpecifier(from, specifier)) {
         if (SOURCE.test(target) && isFile(target) && !isProductionModule(target)) {
-            const reach = reachThrough(target, seen);
+            const reach = reachThrough(target, seen, allowed);
             if (reach !== undefined) {
                 return reach;
             }
@@ -450,9 +464,26 @@ function reachFrom(from: string, specifier: string, seen: Set<string>): Reach | 
     return undefined;
 }
 
-/** The test material a specifier written in `from` reaches, if it reaches any. */
-export function reachOf(from: string, specifier: string): Reach | undefined {
-    return reachFrom(from, specifier, new Set([from]));
+/**
+ * The test packages the unit holding `filename` lets its production run — the
+ * names under `test.production.allow` of its `jterrazz.config.ts`.
+ */
+export function allowedTestPackagesAt(filename: string): ReadonlySet<string> {
+    const root = packageRootOf(dirname(filename));
+    const allow = root === undefined ? undefined : testSettingsAt(root).production?.allow;
+    return new Set(Object.keys(allow ?? {}));
+}
+
+/**
+ * The test material a specifier written in `from` reaches, if it reaches any —
+ * the test packages in `allowed` aside.
+ */
+export function reachOf(
+    from: string,
+    specifier: string,
+    allowed: ReadonlySet<string> = new Set(),
+): Reach | undefined {
+    return reachFrom(from, specifier, new Set([from]), allowed);
 }
 
 /** The first string argument of a call, with the node that carries it. */

@@ -31,6 +31,14 @@ const ROOT = packageWith({
 });
 
 const PROD = join(ROOT, 'src/domain/user.ts');
+
+// A service whose product IS a browser, and says so in its config.
+const GATE = packageWith({
+    'jterrazz.config.ts':
+        "export default { test: { production: { allow: { playwright: 'the gate drives a browser in production' } } } };\n",
+    'package.json': JSON.stringify({ name: 'gate' }),
+});
+const GATE_SERVICE = join(GATE, 'src/browser/service.ts');
 const BARREL = join(ROOT, 'src/index.ts');
 
 /** A case in the production module, and the message it must raise. */
@@ -42,6 +50,8 @@ const refused = (code: string, messageId: string, filename = PROD) => ({
 
 ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInProd), {
     invalid: [
+        // An allowed package is the only one: the unit's other test packages stay refused.
+        refused('import { expect } from "vitest";', 'reach', GATE_SERVICE),
         // The test packages.
         refused('import { expect } from "vitest";', 'reach'),
         refused('import { mockOf } from "@jterrazz/test";', 'reach'),
@@ -114,6 +124,8 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
         ),
     ],
     valid: [
+        // A test package the unit's `test.production.allow` names, with its reason.
+        { code: 'import { chromium } from "playwright";', filename: GATE_SERVICE },
         // Prod importing prod — a name that merely contains a ground word included.
         { code: 'import { other } from "./other.js";', filename: PROD },
         { code: 'import { seedsOf } from "./seeds-of.js";', filename: PROD },

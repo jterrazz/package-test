@@ -23,6 +23,8 @@ import { join } from 'node:path';
 export type CheckerSettings = {
     /** The api collections no plural names — `TestSettings.collections`. */
     collections?: readonly string[];
+    /** The test packages production runs, each with its reason — `TestSettings.production`. */
+    production?: { allow: Readonly<Record<string, string>> };
 };
 
 const loadModule = createRequire(import.meta.url);
@@ -42,6 +44,34 @@ function wordsOf(value: unknown): string[] | undefined {
         : undefined;
 }
 
+/** Package names, each with the sentence that says why — or nothing, when one has none. */
+function reasonsOf(value: unknown): Record<string, string> | undefined {
+    if (!isRecord(value)) {
+        return undefined;
+    }
+    const reasons: Record<string, string> = {};
+    for (const [name, reason] of Object.entries(value)) {
+        if (typeof reason !== 'string' || reason.trim() === '') {
+            return undefined;
+        }
+        reasons[name] = reason;
+    }
+    return reasons;
+}
+
+/** The section's keys a pass reads, each kept only in the shape it is declared in. */
+function checkerSettingsOf(test: unknown): CheckerSettings {
+    if (!isRecord(test)) {
+        return {};
+    }
+    const collections = wordsOf(test.collections);
+    const allow = isRecord(test.production) ? reasonsOf(test.production.allow) : undefined;
+    return {
+        ...(collections === undefined ? {} : { collections }),
+        ...(allow === undefined ? {} : { production: { allow } }),
+    };
+}
+
 /** The `test` section the unit at `root` declares — `{}` when it declares none. */
 export function testSettingsAt(root: string): CheckerSettings {
     const path = join(root, 'jterrazz.config.ts');
@@ -56,9 +86,7 @@ export function testSettingsAt(root: string): CheckerSettings {
     try {
         const loaded: unknown = loadModule(path);
         const config = isRecord(loaded) ? loaded.default : undefined;
-        const test = isRecord(config) ? config.test : undefined;
-        const collections = isRecord(test) ? wordsOf(test.collections) : undefined;
-        settings = collections === undefined ? {} : { collections };
+        settings = checkerSettingsOf(isRecord(config) ? config.test : undefined);
     } catch {
         settings = {};
     }

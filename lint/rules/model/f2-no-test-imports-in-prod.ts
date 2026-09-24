@@ -5,7 +5,12 @@ import { lessons } from '../../lesson.js';
 import { isProductionFile } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../path-references.js';
-import { materialNamed, moduleReferenceVisitor, reachOf } from '../../production.js';
+import {
+    allowedTestPackagesAt,
+    materialNamed,
+    moduleReferenceVisitor,
+    reachOf,
+} from '../../production.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 
 /**
@@ -19,18 +24,21 @@ import type { LintRule, Visitor } from '../../rule-shape.js';
  * `join(import.meta.dirname, …)`) or reads (`readFileSync('./…')`) into test
  * material.
  *
- * Sanctioned exception: `@jterrazz/test/oxlint`, the tool-facing, zero-runtime
- * lint entry (F1) — a shared oxlint preset legitimately imports it.
+ * Sanctioned exceptions: `@jterrazz/test/oxlint`, the tool-facing, zero-runtime
+ * lint entry (F1) — a shared oxlint preset legitimately imports it; and a test
+ * package the unit's `jterrazz.config.ts` allows under `test.production.allow`,
+ * with the reason its product runs it.
  *
  * This repository's runner coupling (I1) turns the rule off by path in its
  * own oxlint config.
  */
 export const f2NoTestImportsInProd: LintRule = {
     createOnce(context: Context): Visitor {
+        let allowed: ReadonlySet<string> = new Set();
         const shown = (path: string): string =>
             relative(dirname(context.physicalFilename), path) || path;
         const references = moduleReferenceVisitor(({ node, source }) => {
-            const reach = reachOf(context.physicalFilename, source);
+            const reach = reachOf(context.physicalFilename, source, allowed);
             if (reach === undefined) {
                 return;
             }
@@ -56,7 +64,16 @@ export const f2NoTestImportsInProd: LintRule = {
                 }
             },
         );
-        return { ...mergeVisitors(references, paths), before: () => isProductionFile(context) };
+        return {
+            ...mergeVisitors(references, paths),
+            before() {
+                if (!isProductionFile(context)) {
+                    return false;
+                }
+                allowed = allowedTestPackagesAt(context.physicalFilename);
+                return true;
+            },
+        };
     },
     meta: {
         docs: RULE_DOCS['f2-no-test-imports-in-prod'],

@@ -25,6 +25,28 @@ describe('the test section of jterrazz.config.ts, as the checker reads it', () =
         expect(testSettingsAt(root)).toStrictEqual({ collections: ['data', 'people'] });
     });
 
+    test('the test packages production runs are read with their reasons', () => {
+        // Given - a unit whose service drives a browser
+        const root = unit(
+            "export default { test: { production: { allow: { playwright: 'the gate drives a browser in production' } } } };\n",
+        );
+
+        // Then - the allow list, reasons and all
+        expect(testSettingsAt(root)).toStrictEqual({
+            production: { allow: { playwright: 'the gate drives a browser in production' } },
+        });
+    });
+
+    test('an allowed package with no reason leaves the whole list unread', () => {
+        // Given - one package stated without the sentence that says why
+        const root = unit(
+            "export default { test: { production: { allow: { playwright: 'drives a browser', vitest: '' } } } };\n",
+        );
+
+        // Then - nothing is allowed
+        expect(testSettingsAt(root)).toStrictEqual({});
+    });
+
     test('no file, no section, a key of the wrong shape and a file that does not load are no settings', () => {
         // Given - four units the reading finds nothing usable in
         const roots = [

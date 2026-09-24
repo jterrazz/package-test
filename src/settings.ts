@@ -17,6 +17,13 @@ export type TestSettings = {
      */
     collections?: readonly string[];
     /**
+     * What a production module of this unit legitimately runs that F2 reads as
+     * test material: under `allow`, a test package by name, with the reason
+     * the product needs it — a service whose product IS a browser runs
+     * `playwright`. F2 honours the list; nothing else is exempted.
+     */
+    production?: { allow: Readonly<Record<string, string>> };
+    /**
      * The routes the member's api declares, when its app carries no table the
      * api facet reads (Hono's `app.routes`): a path, from the config's
      * directory, to an OpenAPI document (JSON or YAML). The api project's run
