@@ -6,7 +6,7 @@ import { integration } from '../pure.specification.js';
 
 const PRICING = 'https://pricing.spec.test';
 
-describe('intercepts', () => {
+describe('declared', () => {
     test('answers the module with what the contract declared', async () => {
         // Given - the one call this module makes, declared for the chain
         const result = await integration

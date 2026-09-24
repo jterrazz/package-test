@@ -186,7 +186,7 @@ function subjectSpecs(specsRoot: string): SpecRead[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts'))
         .filter((file) => (SUBJECT_FACETS as readonly string[]).includes(facetOf(specsRoot, file)))
         .map((file) => readSpec(specsRoot, file))
-        .filter((spec) => specimenOf(spec.file, spec.text) === undefined);
+        .filter((spec) => specimenOf(spec.file, spec.text, spec.facet) === undefined);
 }
 
 /** The 1-based line and column of an offset. */

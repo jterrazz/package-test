@@ -2766,9 +2766,9 @@ held`.
   specimen is no subject for C29 or C30, and C35 files it under a
   capability of the matrix. The domain vocabulary file is retired. What stays open:
     - With the domain vocabulary retired, nothing guards integration's folder names:
-      `specs/integration/intercepts/` sits beside `api/intercept/` and
+      `integration/intercepts/` sits beside `api/intercept/` and
       `jobs/intercept/`. Rename it.
-    - `specs/api/initiation-errors/` is neither a capability nor a route,
+    - `api/initiation-errors/` is neither a capability nor a route,
       and C35 misses it because its runners are built inline. Together with
       the VISION-pinned `specs/api/echo/create/headers.spec.ts`, it
       contradicts docs/03's "every spec here". Move it, or name both

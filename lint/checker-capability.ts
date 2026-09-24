@@ -87,7 +87,7 @@ export function checkCapabilityFolder(specsRoot: string): TokenViolation[] {
             return [];
         }
         const text = readFileSync(file, 'utf8');
-        const specimen = specimenOf(file, text);
+        const specimen = specimenOf(file, text, facet);
         const vocabulary = vocabularyOf(facet);
         const folders = foldersBelowFacet(specsRoot, file);
         const [folder = ''] = folders;
