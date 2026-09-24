@@ -3,17 +3,14 @@ import { c32AspectName } from './c32-aspect-name.js';
 
 ruleTester().run('c32-aspect-name', asOxlintRule(c32AspectName), {
     invalid: [
-        // A catch-all name answers no question.
-        {
-            code: '',
-            errors: [{ messageId: 'generic' }],
-            filename: '/repo/specs/api/events/list/misc.spec.ts',
-        },
-        {
-            code: '',
-            errors: [{ messageId: 'generic' }],
-            filename: '/repo/specs/api/events/list/edge-cases.spec.ts',
-        },
+        // Each catch-all name the convention lists answers no question.
+        ...['basic', 'edge-cases', 'general', 'main', 'misc', 'more', 'other', 'tests'].map(
+            (aspect) => ({
+                code: '',
+                errors: [{ messageId: 'generic' }],
+                filename: `/repo/specs/api/events/list/${aspect}.spec.ts`,
+            }),
+        ),
         // An aspect is kebab-case, and the message spells the one to write.
         {
             code: '',
