@@ -2652,3 +2652,42 @@ The only conflicts were in the generated `docs/03-testing.md`; chore commit
   the only recorder of `routes/unreached`. What stays open: the spec lives
   at `specs/api/echo/create/headers.spec.ts` rather than beside
   `users/create/sending.spec.ts`, and `specs/website/clock/` is untouched.
+
+## Batch 2 of 2026-09-24 (hybrid): typescript
+
+One reviewed unit landed on package-typescript's `vision/17` by
+cherry-pick, with no conflicts and no fixups to fold, over @jterrazz/test
+installed from package-test `5900b968` (`npm ci`). HEAD `77f2d92`.
+`make fix` exit 0, `make check` exit 0 (144 files, 422 tests).
+
+- **Drift for configless projects, nothing held, the unswept members,
+  `--ignore-pattern` under fix** (`f3b4186`…`77f2d92`, 5 commits). What it
+  closed: a project with no oxlint config of its own now gets a drift
+  report, measured against its default profile (`node`), and an absent tool
+  is named without a null version. A green check with no `typescript`
+  section prints `typescript: nothing held`. `.next`, `.turbo`, `.vite` and
+  `coverage` each have an empty-directory walk case. A fix run with
+  `--ignore-pattern` is pinned. What stays open:
+    - **Owner call.** For an absent section, the Oxlint pass prints
+      `nothing held`, the drift row prints `absent`, and `--json` gives
+      `baseline: null`. That is two words for one state. Either print
+      `nothing held` in the drift row, or state in docs/06 §The drift report
+      that `absent` is a separate state on purpose.
+    - **Owner call.** In `--json`, a configless project reports
+      `profile: "node"`, the same as a config that extends node, so a fleet
+      sweep cannot tell them apart. Proposed: a `config: "default" | "own"`
+      field, pinned in `drift-default-config.spec.yaml`.
+    - The file-level sweep filter in `src/cli/project-files.js`
+      (`UNSWEPT.has(segment)`) has no case. The proof covers only the
+      empty-directory walk, so Names, Secrets or Markdown could lose the
+      filter and stay green.
+    - The `--ignore-pattern` spec goes red only at the suppressions rewriter
+      and the Names pass. Forwarding at the fixer loop and at the fix-mode
+      JSON re-run is redundant, because the target list already drops the
+      globbed paths. The spec proves less than the commit title claims:
+      narrow the wording, or delete the redundant forwarding.
+    - A configless check runs `oxlint --print-config` on `node.js` twice to
+      compare it with itself. Resolve it once.
+    - If the Names pass dies before it writes `names.json`, the absent-section
+      path still prints `nothing held`. The present-section path has the same
+      gap: print no held line when the Names report cannot be read.
