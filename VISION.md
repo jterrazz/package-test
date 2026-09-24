@@ -1631,3 +1631,199 @@ Audit F2 (and whatever else guards it) against every way production code can rea
 | 107 | A seed named from a test title keeps its first four meaningful words, kebab-cased.                                       |
 | 108 | Settled on signews-api (next round).                                                                                     |
 | 109 | Coverage collects the checker's child processes too (`NODE_V8_COVERAGE`), so documents that run `dist/checker.js` count. |
+
+### What the package-test branch did (iteration 20)
+
+**The audit.** Targets against forms, per guard, at `5f0381e` and after
+`73408ac`. `P` proves (a spec case, red when the guard goes), `W` catches
+with no spec, `—` nothing, `n/a` the form cannot name the target. A
+package is never read by path, so the path and alias columns are `n/a` for
+the six packages.
+
+Before:
+
+| Target                                               | static      | `import type` | `export {…} from` | `export *`  | `import()`  | `require()` | URL / fs path | `paths` / `#…` | through a non-prod module |
+| ---------------------------------------------------- | ----------- | ------------- | ----------------- | ----------- | ----------- | ----------- | ------------- | -------------- | ------------------------- |
+| `*.test.ts(x)`                                       | F2 P        | F2 W          | F2 W              | F2 W        | F2 W        | —           | —             | —              | —                         |
+| `*.spec.ts`                                          | —           | —             | —                 | —           | —           | —           | —             | —              | —                         |
+| `*.specification.ts`                                 | —           | —             | —                 | —           | —           | —           | —             | —              | —                         |
+| `*.fixtures.ts`                                      | F2 P · F5 P | F2 W · F5 W   | F2 W · F5 W       | F2 W · F5 W | F2 W · F5 W | —           | —             | —              | —                         |
+| ground (`fixtures/` `expected/`)                     | F2 P        | F2 W          | F2 W              | F2 W        | F2 W        | —           | —             | —              | —                         |
+| ground (`requests/` `seeds/`)                        | F2 W        | F2 W          | F2 W              | F2 W        | F2 W        | —           | —             | —              | —                         |
+| `specs/`                                             | —           | —             | —                 | —           | —           | —           | —             | —              | —                         |
+| `contracts/`                                         | —           | —             | —                 | —           | —           | —           | —             | —              | —                         |
+| `@jterrazz/test`, `vitest`                           | F2 P        | F2 W          | F2 W              | F2 W        | F2 W        | —           | n/a           | n/a            | —                         |
+| `@vitest/*`, `msw`, `@testing-library/*`, playwright | I1 W        | I1 W          | I1 W              | I1 W        | I1 W        | —           | n/a           | n/a            | —                         |
+| a `dist/` compiled from any of them                  | —           | —             | —                 | —           | —           | —           | —             | —              | —                         |
+
+I1 is `W` for the four packages because it holds only where a project
+declares a layer map, and only for a layer that does not list them. F4, F6
+and I4 guard tests, not production: nothing. F2 read as production every
+file that was not a test, a config or under `specs/` — `scripts/` and a
+root `index.ts` included — and a `.test-d.ts` as production (this
+package's own type channel disabled F2 to import `expect`).
+
+After, every cell of the first ten rows is `P` but the `n/a` ones, for
+F2; F5 and I1 read every form too. The proof factors: every form yields a
+specifier through ONE visitor (`moduleReferenceVisitor`) and every
+specifier is judged by ONE reader (`reachOf`), so the F2 spec proves each
+form once (on `*.fixtures.ts`, `vitest` for `require.resolve`) and each
+target once (static), and a guard removed from either half turns it red.
+The path form is proven on ground and `specs/` (`new URL`, a directory
+`new URL`, `join(import.meta.dirname, …)`, a module-scope binding of
+`import.meta.url`, a `${__dirname}` template, `readFileSync('./…')`); the
+aliases on `specs/fixtures/`; the reach through a non-production module on
+a package and on a `specs/` file. The `dist/` row stays `—`: it is the
+toolchain's (below).
+
+**One reader, `lint/production.ts`.** A production module is a source
+module under a `src/` or a `lint/` folder, below the project root that
+holds it, that is no test material. Test material: the suffixes
+`.test` `.spec` `.test-d` `.spec-d` `.specification` `.fixtures`; ground
+and `specs/` anywhere in the path; a `*.contracts.ts` facade and the
+`contracts/` folder that holds one (so this package's `src/model/contracts/`,
+which holds none, stays production); the packages `@jterrazz/test` (but
+`/oxlint`), `vitest`, `@vitest/*`, `vitest-browser-*`,
+`vitest-mock-extended`, `msw`, `@testing-library/*`, `playwright`,
+`playwright-core`, `@playwright/test` — the last four beyond the
+iteration's list, as the same runtimes' other names. F2, F5 and I1 read
+it.
+
+A specifier resolves relatively (a `.js` to its `.ts`), through the
+nearest `tsconfig.json`'s `paths` (JSONC read, `baseUrl` honoured) or the
+package's `imports` (every condition's target).
+
+A local module that is
+neither production nor material is walked in turn (its specifiers read by
+text, comments blanked, cycles cut); a production module on the way ends
+the walk, since it is judged for its own references — so a barrel is
+reported where the chain leaves production, and an override that exempts
+a module (this package's runner seams) is not re-judged at every importer.
+
+**This package's own production is test tooling.** `seams/msw/` and
+`seams/playwright/` join the F2 overrides, and so do `src/index.ts` and
+`src/facets/specification.ts`: they re-export the facet constructors,
+which the layout names `<facet>.specification.ts` — the suffix F2 now reads
+as test material (question 110).
+
+**Red on a broken implementation, the targets** (the F2 spec, 59 cases,
+unless named): the package list emptied but `@jterrazz/test` (6), the
+`@vitest/` and `@testing-library/` prefixes (3), the suffixes cut to
+`test|fixtures` (5, with I1), `specs/` not read (2), ground not read (9,
+with I1), a facade not read (1), a `contracts/` folder taken without its
+facade (1), no contracts folder (1), `lint/` not production (1),
+production = everything non-material (3), the `/oxlint` entry refused (1),
+I1 back on its own regex (2, the I1 spec).
+
+**Red on a broken implementation, the forms:** no `paths` (1), no
+`imports` (1), no transitive walk (2), a walk that does not stop at
+production (1), no `require()` (3, with F5 and I1),
+no `require.resolve`/`import.meta.resolve` (2), no type `import('…')` (1),
+no `import x = require()` (1), no `export *` (3), no `export {…} from` (2),
+no `import()` (1), `import type` skipped (2), no `new URL` (2), no anchored
+path (2), no template path (1), no module-scope anchor (1), no fs literal
+(1).
+
+**Measured on the estate** (the rule alone over each clone,
+`oxlint -c f2only.json .`, 2026-09-24): jterrazz-design 59 — 56
+`@testing-library/react-native` imports in `packages/native/src/**/*.render.tsx`,
+3 `./atlas.fixtures` imports (question 112); package-manifest 2, the
+`src/testing/` entry importing `@jterrazz/test` it already had; every other
+clone 0 (hoverfly-lsp's one finding of ADR-006's census is gone with the
+narrower definition, question 111).
+
+#### The contract the toolchain's Publish pass needs
+
+The build guard is `@jterrazz/typescript`'s: its Publish pass fails when a
+shipped file is compiled from test material. What it needs, and what this
+package owes it:
+
+- **Where.** On the files the tarball ships (`npm pack --dry-run --json`),
+  after the build, for every package the pass already judges.
+- **Evidence of origin.** For each shipped `.js`, the source modules
+  compiled into it. The module graph is the one that needs no change to
+  what ships: the pass builds with a plugin of its own on the tsdown /
+  rolldown config, whose `generateBundle(_, bundle)` hook lists each
+  chunk's `moduleIds` by `fileName` — bundled `node_modules` modules
+  included. Source maps are the other way (`sources` of each `.map`); this
+  package now writes them (call 109) but keeps them out of the tarball, and
+  a package that writes none would need a second build.
+- **The judgement, one owner.** A module id is test material by THIS
+  package's reader: `materialAt(path)` for a local id,
+  `testPackageOf(name)` for an id under `node_modules/<name>/`. An import
+  left external in a shipped file (`import 'vitest'` in `dist/index.js`) is
+  judged by `testPackageOf` too, unless the package declares that package
+  in `dependencies` or `peerDependencies` — a test tool ships its runtime on
+  purpose. For one owner, `@jterrazz/test` has to publish the reader: the
+  two functions, zero-runtime, on the `./oxlint` entry the toolchain
+  already resolves by name. Not done here — it widens the published surface
+  (owner's call); until then the toolchain would copy the definition.
+- **The finding**, four parts: found `dist/index.js is compiled from
+src/domain/user.fixtures.ts, a test file`; why `A published build never
+carries test material.`; fix `cut the production edge F2 names, or take
+the module out of the entry`; read the F2 row.
+- **Proof.** A fixture package whose entry imports a `*.fixtures.ts` with
+  F2 turned off: the pass fails; the same package without the import:
+  green; the check removed: the first case goes green.
+- **Known collision.** On this package the pass would read `dist/index.js`
+  as compiled from `src/facets/*/<facet>.specification.ts` — question 110
+  again.
+
+### What the package-test branch did (iteration 21)
+
+- **103, 104** (`737df9b`). `SubjectReading.commands` is a record by
+  handle: `doorsOf` maps each local name a spec holds a cli runner by to
+  its module, a `.with()` view under its runner's, and each chain reads its
+  own handle's list. `declaredCommands` follows `commands: NAME` and
+  `{ commands }` to a `const` of the runner's file. `doorOf` is gone.
+- **105** (`663ee64`). `fixSubjects` removes the leaf a move emptied and
+  each parent that empties in turn, up to the specs root.
+- **106** (`cfde5fb`). `type X` and `interface X` are declarations: they
+  follow a moved helper into the fixtures module and never seed a move;
+  a file reading only types imports them with `import type`, one reading
+  values too marks each type inline. Unread types are pruned from split
+  files like any declaration.
+- **107** (`9a491a0`). A seed with no leading comment takes the first four
+  words of its test's title that are not filler, kebab-cased
+  (`seeds-apply-order-listed`).
+- **109** (`8f2b4a4`). This repository's vitest config turns on
+  `autoAttachSubprocess`, reads `dist/` and judges after the remap
+  (`excludeAfterRemap`); every build group writes source maps, left out of
+  the tarball. `checker-sql-seeds.ts` 22.8 → 95.4 %, `checker-sharing.ts`
+  36.6 → 91.8 %, the run 84.41 → 92.96 % of statements over 12 607 instead
+  of 10 383. The maps had a runtime cost found by the website specs: vitest
+  applies them to the stacks of specs importing the package's own `dist/`,
+  a bundle frame read as `src/…`, and caller detection took the framework
+  for its caller (`spawn /bin/sh ENOENT`). A build's framework trees are now
+  the bundle and the `src/` its maps point to (`frameworkTreesOf`).
+- **Red on a broken implementation:** every chain read with the first list
+  (1), views not mapped (1), the const not followed (2), the shorthand not
+  read (1); the emptied folder kept (1), the emptied parent kept (1); types
+  not declarations (1), a type two tests read moved (1), types imported as
+  values (1), no `import type` (1); the whole title (3), filler kept (4);
+  subprocesses not attached, `dist/**` excluded before the remap, maps
+  off, maps shipped (1 each); the map-aware caller removed (the two website
+  `services` specs).
+
+### Raised by the package-test branch, iterations 20 and 21
+
+110. This package names its production facet constructors
+     `<facet>.specification.ts`, the suffix F2 reads as test material; the
+     two barrels re-exporting them are exempted by path, and the dist guard
+     would trip on `dist/index.js`. Rename them (`<facet>.constructor.ts`,
+     the layer map and chapter 01 with them), or keep the exemption?
+111. Production is `src/` and `lint/` now, as the iteration defined it;
+     F2 used to judge every non-test file, so `scripts/`, `bin/`, a root
+     `index.ts` or an app with no `src/` are no longer held. Read a
+     package's `main`/`exports`/`bin` targets as production too?
+112. jterrazz-design's native render tests are `*.render.tsx` under
+     `src/` (jest runs them, F8's React Native exception): F2 reads them as
+     production and reports 59. Rename them to the `.test.tsx` suffix, or
+     is `.render.tsx` a suffix the reader should know?
+113. The walk through a non-production module reads its specifiers as
+     text; a path it builds (`new URL`, fs) is not seen there. Parse those
+     modules, or accept?
+114. `paths` is read from the nearest `tsconfig.json` alone: an `extends`
+     carrying `paths` is not followed. Follow it?
+115. The coverage floor records 76.90 % of statements; the suite reads
+     92.96 % since 109. Re-record it (`npm run coverage`)?
