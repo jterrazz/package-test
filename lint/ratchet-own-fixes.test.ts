@@ -76,30 +76,69 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         });
     });
 
-    test('the wrapper carries no `extends`, so an extended rulebook arms nothing', async () => {
-        // Given - a base config extending another that arms a foreign rule
+    test('the wrapper carries `extends`, arming the plugin alone in every config extended', async () => {
+        // Given - the cap01 shape: a root arming the plugin only through an extended object, which extends a JSON file
         const root = projectWith({
-            'base.json': '{ "rules": { "no-debugger": "error" } }\n',
+            'base/base.json':
+                '{ "jsPlugins": ["./plugin.js"], "rules": { "jterrazz/c31-describe-names-file": "error", "no-debugger": "error" } }\n',
             'oxlint.config.mjs': [
                 'export default {',
-                "    extends: ['./base.json'],",
-                "    rules: { 'jterrazz/b16w-file-context': 'warn' },",
+                '    extends: [{',
+                "        extends: ['./base/base.json'],",
+                "        jsPlugins: ['@jterrazz/test/oxlint'],",
+                '        options: { typeAware: true },',
+                "        rules: { 'jterrazz/b16w-file-context': 'warn', 'unicorn/no-useless-undefined': 'error' },",
+                '    }],',
+                "    ignorePatterns: ['.react-router/**'],",
                 '};',
             ].join('\n'),
         });
         const wrapper = join(root, 'wrapper.mjs');
         writeFileSync(wrapper, ownFixesConfig(join(root, 'oxlint.config.mjs')));
 
-        // Then - the extended config is not carried
+        // Then - each extended config keeps its plugins and the plugin's rules alone, the JSON's plugin found from its folder
+        const off = {
+            correctness: 'off',
+            nursery: 'off',
+            pedantic: 'off',
+            perf: 'off',
+            restriction: 'off',
+            style: 'off',
+            suspicious: 'off',
+        };
+        const disarmed = { reportUnusedDisableDirectives: 'off', typeAware: false };
         const module: unknown = await import(pathToFileURL(wrapper).href);
-        expect(module).not.toHaveProperty('default.extends');
-        expect(module).toHaveProperty('default.rules', { 'jterrazz/b16w-file-context': 'warn' });
+        expect(module).toHaveProperty('default', {
+            categories: off,
+            extends: [
+                {
+                    categories: off,
+                    extends: [
+                        {
+                            categories: off,
+                            jsPlugins: [join(root, 'base', 'plugin.js')],
+                            options: disarmed,
+                            overrides: [],
+                            rules: { 'jterrazz/c31-describe-names-file': 'error' },
+                        },
+                    ],
+                    jsPlugins: ['@jterrazz/test/oxlint'],
+                    options: disarmed,
+                    overrides: [],
+                    rules: { 'jterrazz/b16w-file-context': 'warn' },
+                },
+            ],
+            ignorePatterns: ['.react-router/**'],
+            options: disarmed,
+            overrides: [],
+            rules: {},
+        });
     });
 
     test('a JSON config is imported as JSON', () => {
         // Given - a root config written as `.oxlintrc.json`
         // Then - the import carries its type attribute
-        expect(ownFixesConfig('/project/.oxlintrc.json').split('\n')[0]).toBe(
+        expect(ownFixesConfig('/project/.oxlintrc.json').split('\n')).toContain(
             'import base from "/project/.oxlintrc.json" with { type: \'json\' };',
         );
     });

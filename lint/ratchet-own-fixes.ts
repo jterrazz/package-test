@@ -13,10 +13,10 @@ import { oxlintOf } from './ratchet.js';
  * settles it.
  *
  * It runs the project's own oxlint with `--fix` under a wrapper of the
- * project's root config that arms the plugin's rules alone: every other rule
- * and every category off, and no `extends` carried, so no fixer of another
- * rulebook — the toolchain's, whose meaning-changing fixers its own `fix`
- * disarms — writes a byte here.
+ * project's root config that arms the plugin's rules alone, in the config and
+ * in every config it extends: every other rule and every category off, so no
+ * fixer of another rulebook — the toolchain's, whose meaning-changing fixers
+ * its own `fix` disarms — writes a byte here.
  * The wrapper sits beside the config it wraps (oxlint resolves `jsPlugins`,
  * `ignorePatterns` and override globs against that directory), is ignored by
  * the run it configures, and is deleted by it. A project with no oxlint, or no
@@ -73,25 +73,55 @@ const CATEGORIES = [
     'suspicious',
 ] as const;
 
-/** The wrapper module's source around the config at `config` (absolute). */
+/**
+ * The wrapper module's source around the config at `config` (absolute). Every
+ * config it reaches — the base, each config the base extends, and theirs —
+ * arms the plugin's rules alone: an extended rulebook is carried, so a plugin
+ * armed through `extends` keeps its rules, and every other rule it sets is
+ * dropped. A JSON path in `extends` is read in place, its relative `jsPlugins`
+ * resolved from its own folder.
+ */
 export function ownFixesConfig(config: string): string {
     const attributes = /\.jsonc?$/u.test(config) ? " with { type: 'json' }" : '';
     const off = Object.fromEntries(CATEGORIES.map((category) => [category, 'off']));
     return [
+        "import { readFileSync } from 'node:fs';",
+        "import { dirname, resolve } from 'node:path';",
+        '',
         `import base from ${JSON.stringify(config)}${attributes};`,
         '',
         'const own = (rules) =>',
         "    Object.fromEntries(Object.entries(rules ?? {}).filter(([rule]) => rule.startsWith('jterrazz/')));",
         '',
-        'const { extends: _extended, ...unextended } = base;',
+        'const located = (specifier, folder) =>',
+        "    folder !== undefined && specifier.startsWith('.') ? resolve(folder, specifier) : specifier;",
         '',
-        'export default {',
-        '    ...unextended,',
+        'const plugins = (entries, folder) =>',
+        '    entries.map((entry) =>',
+        "        typeof entry === 'string'",
+        '            ? located(entry, folder)',
+        '            : { ...entry, specifier: located(entry.specifier, folder) },',
+        '    );',
+        '',
+        'const armed = (config, folder) => ({',
+        '    ...config,',
         `    categories: ${JSON.stringify(off)},`,
-        '    rules: own(base.rules),',
-        '    overrides: (base.overrides ?? []).map((override) => ({ ...override, rules: own(override.rules) })),',
-        "    options: { ...base.options, reportUnusedDisableDirectives: 'off', typeAware: false },",
-        '};',
+        '    ...(config.extends === undefined',
+        '        ? {}',
+        '        : {',
+        '              extends: config.extends.map((entry) =>',
+        "                  typeof entry === 'string' ? read(resolve(folder ?? import.meta.dirname, entry)) : armed(entry),",
+        '              ),',
+        '          }),',
+        '    ...(config.jsPlugins === undefined ? {} : { jsPlugins: plugins(config.jsPlugins, folder) }),',
+        "    options: { ...config.options, reportUnusedDisableDirectives: 'off', typeAware: false },",
+        '    overrides: (config.overrides ?? []).map((override) => ({ ...override, rules: own(override.rules) })),',
+        '    rules: own(config.rules),',
+        '});',
+        '',
+        "const read = (path) => armed(JSON.parse(readFileSync(path, 'utf8')), dirname(path));",
+        '',
+        'export default armed(base);',
         '',
     ].join('\n');
 }

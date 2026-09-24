@@ -107,6 +107,24 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.file('oxlint.test-fix.config.mjs').exists).toBe(false);
     });
 
+    test("`--fix` applies the plugin's own fixes when the root arms it through `extends`", async () => {
+        // Given - the same project, its plugin and the other fixer armed only by a config the root extends
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
+            .fixture(
+                file('./fixtures/lint-violations/checker-own-fixes-extended/oxlint.config.mjs'),
+            )
+            .exec('. --fix');
+
+        // Then - the view written and held, the other fixer still left to the toolchain
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+        expect(result.file('specs/api/events/list/pagination.spec.ts').content).toContain(
+            "const events = api.with({ clock: '2026-03-04T09:30:00Z' });",
+        );
+        expect(result.file('src/nothing.ts').content).toContain('nothing(undefined)');
+    });
+
     test("`--fix` renames before the plugin's own fixes, so the check after it counts the same tree", async () => {
         // Given - a spec still named `.test.ts`, whose chains all state one clock, fixed on the root member
         const result = await cli
