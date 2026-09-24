@@ -8,7 +8,8 @@ import { integration } from '../redis.specification.js';
  * container and the chain calls the handle with the live connection string.
  * A probe that flushes keys binds a FRESH handle to the same container — the
  * runner's own handle has taken a worker database index (rule G2), and a
- * client opened at the default index would be talking to another database.
+ * client opened at the default index reaches the container's own index 0,
+ * which no worker uses and no reset flushes.
  */
 
 describe('redis', () => {
@@ -36,8 +37,7 @@ describe('redis', () => {
     });
 
     // RUNTIME G2 — isolation is per WORKER: the runner's handle holds this
-    // Worker's database index, and a client opened at the default index would
-    // Be talking to another database entirely.
+    // Worker's database index, and the default index is the container's own.
     test('flushes every key on reset', async () => {
         // Given - a key written to the container, then a reset
         const result = await integration.call(async ({ cache }) => {

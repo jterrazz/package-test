@@ -119,7 +119,7 @@ await expect(result.table('events', { database: 'analyticsDb' })).toMatch([…])
 ```
 docker/
 ├── db/
-│   └── init.sql            # schema for the "db" service — runs on service start
+│   └── init.sql            # schema for the "db" service — builds its template database
 └── analytics-db/
     └── init.sql            # schema for the "analytics-db" service
 ```
@@ -163,7 +163,7 @@ Vitest runs test files in parallel workers; the framework isolates them automati
 | `redis()`    | A database index per worker (1–255), acquired empty — the connection string's path                   |
 | `sqlite()`   | Template file copied per worker                                                                      |
 
-The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address talks to another worker.
+The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address reaches the container's own database, which no worker uses and no reset flushes.
 
 On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
 
