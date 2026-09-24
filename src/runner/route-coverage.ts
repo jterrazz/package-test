@@ -36,8 +36,9 @@ import { shouldUpdateSnapshots } from './update.js';
  * it declares: the routes it takes on any method (`ALL`) are exactly the paths
  * the list names, or the run fails naming each drift — the checker files a
  * spec of such a route by its path, and a list nothing checks would drift
- * from the app unseen. A table read from an OpenAPI document has no `ALL`,
- * and leaves the list unjudged.
+ * from the app unseen. The list is judged whenever the app exposes a table of
+ * its own, an OpenAPI document declared or not, and is left unjudged only
+ * when it exposes none.
  */
 
 /** The failure of a run whose app exposes no route table, and names none. */
