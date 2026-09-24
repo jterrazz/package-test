@@ -65,10 +65,11 @@
     },
     "scripts": {
         "build": "tsdown --config tsdown.config.ts",
-        "docs": "turbo run build --output-logs=new-only && node dist/catalog.js",
+        "build:cached": "rm -rf dist && TURBO_TELEMETRY_DISABLED=1 turbo run build --output-logs=new-only",
+        "docs": "npm run build:cached && node dist/catalog.js",
         "lint": "typescript check && node dist/checker.js",
         "test": "vitest --run",
-        "coverage": "turbo run build --output-logs=new-only && vitest --run --coverage && node dist/coverage.js --write",
+        "coverage": "npm run build:cached && vitest --run --coverage && node dist/coverage.js --write",
         "coverage:check": "node dist/coverage.js",
         "test:repeat": "vitest --run --repeats 10"
     },

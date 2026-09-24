@@ -8,10 +8,9 @@ install: node_modules/.install
 
 # The bundle, through Turborepo's content-hash cache: an unchanged tree
 # Restores `dist/` from `.artifacts/turbo/` instead of bundling again. The
-# Restore adds to `dist/` and removes nothing, so it starts from none.
+# Script is the one path `docs` and `coverage` take too (docs/02).
 build: node_modules/.install
-	rm -rf dist
-	TURBO_TELEMETRY_DISABLED=1 npx turbo run build --output-logs=new-only
+	npm run build:cached
 
 lint: node_modules/.install
 	npm run lint
