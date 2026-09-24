@@ -97,9 +97,9 @@ export type SpecificationConfig = {
     databases?: Map<string, DatabasePort> | undefined;
     /**
      * Lazy device accessor (mobile facet only). The first `.open()` creates
-     * the shared driver session; the appium/webdriverio integration stays a
-     * lazy import so the optional peer is only loaded when a spec opens the
-     * app.
+     * the driver session, or attaches to the run's; the appium/webdriverio
+     * integration stays a lazy import so the optional peer is only loaded
+     * when a spec opens the app.
      */
     device?: (() => Promise<DevicePort>) | undefined;
     dockerConfig?: DockerSpecConfig | undefined;
@@ -779,8 +779,11 @@ export class SpecificationBuilder
     /**
      * Terminate and relaunch the app on the simulator, apply the deep link,
      * run the scenario, and resolve with the captured final screen — the
-     * projected accessibility tree and the visible texts. One driver session
-     * per runner; every open starts from a deterministic fresh app state.
+     * projected accessibility tree and the visible texts. The driver session
+     * is the run's under a `mobile()` project whose Appium server outlives the
+     * file — a declared one, or the one its global setup spawned — and the
+     * runner's otherwise; every open starts from a deterministic fresh app
+     * state.
      *
      * @example
      *   const result = await mobile.open('news://events');
