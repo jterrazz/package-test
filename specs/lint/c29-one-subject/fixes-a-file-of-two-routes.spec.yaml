@@ -27,3 +27,5 @@ runs:
                           expect(result.response).toMatch(`HTTP/1.1 201 Created`);
                       });
                   });
+          src/orders/orders.test.ts:
+              contains: resolve(import.meta.dirname, '../../specs/api/orders/list/seeds/one-order.sql')

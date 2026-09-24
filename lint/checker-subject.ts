@@ -3,7 +3,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { GROUND_DIRS, SHARED_GROUND } from '../src/model/chain/ground.js';
 import { forgetTree, moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
-import { listFiles, suppressedLines } from './checker-crossfile.js';
+import { listFiles, repointModuleTests, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
 import { projectRootOf } from './role.js';
 import {
@@ -703,6 +703,7 @@ function liftGround(specsRoot: string, leaf: string): string[] {
             }
             mkdirSync(dirname(destination), { recursive: true });
             moveKeepingHistory(path, destination);
+            repointModuleTests(specsRoot, [{ copy: path, target: destination }]);
             for (const file of new Set(readers.map((reader) => reader.file))) {
                 const text = readFileSync(file, 'utf8');
                 const next = text.replaceAll(

@@ -1,4 +1,4 @@
-description: a module test's golden beside its module passes, and a call written inside a string is not read
+description: a module test's golden and resolved paths pass; a call in a string or a command is not read
 fixture: ./fixtures/module-present/
 runs:
     - command: checker --member .

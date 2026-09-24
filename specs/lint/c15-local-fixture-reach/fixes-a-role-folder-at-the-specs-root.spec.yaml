@@ -1,4 +1,4 @@
-description: --fix moves a role folder at the specs root under shared/ and rewrites every path to it
+description: --fix moves a root role folder under shared/ and every path to it, a module test's too
 fixture: ./fixtures/root-ground/
 runs:
     - command: checker . --fix
@@ -15,3 +15,7 @@ runs:
               contains: file('../../shared/seeds/catalog.sql')
           specs/tool/widget/renders.spec.yaml:
               contains: 'fixture: ../../shared/fixtures/stub/'
+          src/stub/stub.test.ts:
+              contains:
+                  - resolve(import.meta.dirname, '../../specs/shared/fixtures/stub/main.js')
+                  - "'node specs/fixtures/stub/main.js'"

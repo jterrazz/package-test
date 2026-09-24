@@ -9,3 +9,5 @@ runs:
           specs/widget/fixtures/lonely-stub/main.js: exists
           specs/widget/widget.test.ts:
               contains: ./fixtures/lonely-stub/
+          src/stub/stub.test.ts:
+              contains: resolve(import.meta.dirname, '../../specs/widget/fixtures/lonely-stub/')

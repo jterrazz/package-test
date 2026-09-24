@@ -9,6 +9,7 @@ import {
 } from '../src/model/chain/ground.js';
 import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import { treeEntries, treeKind } from '../src/seams/git/tree.js';
+import { repointModuleTests } from './checker-crossfile.js';
 import { isTestFileName } from './role.js';
 
 /**
@@ -786,13 +787,23 @@ function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Re
     return migration;
 }
 
-/** Apply the 16 → 17 migration to a specs tree: its 16.x-shaped files, and every file's directives. */
+/**
+ * Apply the 16 → 17 migration to a specs tree: its 16.x-shaped files, every
+ * file's directives, and the paths the member's module tests name into a
+ * renamed folder.
+ */
 export function migrateTo17(root: string, rename: Rename): Migration {
-    return migrate(
+    const moves: { copy: string; target: string }[] = [];
+    const migration = migrate(
         root,
         { files: () => specFiles(root), folders: oldGroundFolders(root), specsRoot: root },
-        rename,
+        (from, to) => {
+            rename(from, to);
+            moves.push({ copy: from, target: to });
+        },
     );
+    const rewritten = repointModuleTests(root, moves).map((file) => relative(root, file));
+    return { ...migration, rewritten: [...migration.rewritten, ...rewritten] };
 }
 
 /**

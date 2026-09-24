@@ -13,6 +13,7 @@ import { moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree
 import { specsAnchor } from './ast.js';
 import type { Severity, TokenViolation } from './checker.js';
 import type { Teaching } from './lesson.js';
+import { moduleTestsOf } from './module-tests.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 import { literalSpans } from './spec-values.js';
 
@@ -1185,7 +1186,8 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
 
 /**
  * Apply C28's level half: move each single-reader pool entry beside its leaf and rewrite the
- * paths that climbed to it into the path from the leaf. The move is a `git mv`
+ * paths that climbed to it into the path from the leaf, a module test's
+ * relative literal included. The move is a `git mv`
  * in a work tree, so the moved fixture keeps its history; a plain rename elsewhere.
  * A pool the move empties goes with it, and the shared folder when it was the
  * last, as C27's leaf folder does. Returns what
@@ -1201,6 +1203,9 @@ export function fixPoolFixtures(rootDir: string): string[] {
         }
         mkdirSync(dirname(destination), { recursive: true });
         moveKeepingHistory(join(pool, entry), destination);
+        repointModuleTests(specsRootOfPool(pool), [
+            { copy: join(pool, entry), target: destination },
+        ]);
         for (const file of referrers) {
             const text = readText(file);
             const climb = relative(dirname(file), pool).split(sep).join('/');
@@ -1370,12 +1375,11 @@ function pathFrom(from: string, to: string): string {
     return rest.startsWith('.') ? rest : `./${rest}`;
 }
 
+/** An entry a fixer moves: where it was, and where it goes. */
+type Move = { copy: string; target: string };
+
 /** `path`, written from `from`, moved from the entry `copy` to the entry `target` — or `undefined` when it names no part of the copy. */
-function repointed(
-    from: string,
-    path: string,
-    { copy, target }: { copy: string; target: string },
-): string | undefined {
+function repointed(from: string, path: string, { copy, target }: Move): string | undefined {
     const reached = resolve(from, path);
     if (reached !== copy && !isWithin(copy, reached)) {
         return undefined;
@@ -1428,9 +1432,32 @@ function repointDocument(file: string, move: (path: string) => string | undefine
 }
 
 /**
+ * Rewrite, in every module test of the member holding `specsRoot`, the
+ * relative literals that name a moved entry: a module test stands on the
+ * ground it names as a spec does, so the path follows the move. Returns the
+ * files rewritten.
+ */
+export function repointModuleTests(specsRoot: string, moves: readonly Move[]): string[] {
+    const rewritten: string[] = [];
+    for (const file of moduleTestsOf(dirname(specsRoot))) {
+        const from = dirname(file);
+        const text = readText(file);
+        const next = repointSource(file, (path) =>
+            moves.map((each) => repointed(from, path, each)).find((moved) => moved !== undefined),
+        );
+        if (next !== text) {
+            writeFileSync(file, next);
+            rewritten.push(file);
+        }
+    }
+    return rewritten;
+}
+
+/**
  * Apply C27: one copy of each copied entry moves to the specs root's shared
  * folder of its role — a `git mv` in a work tree — the others are deleted, and every
- * path of the specs tree that named a copy names the moved entry. An entry the
+ * path of the specs tree and of the member's module tests that named a copy
+ * names the moved entry. An entry the
  * target already holds byte for byte keeps it and deletes every copy; one
  * holding something else is the author's call, and nothing moves; so are
  * copies of several names. A leaf's ground folder the move empties goes with it. Returns
@@ -1461,6 +1488,10 @@ export function fixCopiedGround(rootDir: string): string[] {
                 writeFileSync(file, next);
             }
         }
+        repointModuleTests(
+            specsRoot,
+            copies.map((copy) => ({ copy, target })),
+        );
         const [first, ...others] = copies;
         if (first !== undefined && !held) {
             mkdirSync(dirname(target), { recursive: true });
@@ -1575,8 +1606,9 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
 /**
  * Apply C15 to the shared ground outside `shared/`: every entry of a role
  * folder at the specs root moves to the shared folder of its role — a `git mv`
- * in a work tree — and every path of the specs tree that named it, a source's
- * literal or a document's key, names it there. An entry the shared folder
+ * in a work tree — and every path that named it, a source's literal or a
+ * document's key of the specs tree, a module test's relative literal, names it
+ * there. An entry the shared folder
  * already holds by that name stays, for the author. A root folder the move
  * empties goes with it. Returns what moved, relative to `rootDir`.
  */
@@ -1608,6 +1640,7 @@ export function fixRootGround(rootDir: string): string[] {
                     writeFileSync(file, next);
                 }
             }
+            repointModuleTests(specsRoot, moves);
             mkdirSync(shared, { recursive: true });
             for (const { copy, target } of moves) {
                 moveKeepingHistory(copy, target);
@@ -1622,9 +1655,10 @@ export function fixRootGround(rootDir: string): string[] {
 /**
  * CONVENTIONS C8 — every path a test names exists, as what it says it is.
  *
- * A `file()` or `directory()` with a literal path, and a document's `fixture:`,
- * resolved from the test's own directory: a path that names nothing, a
- * `file()` naming a directory, or a `directory()` naming a file is reported at
+ * A `file()` or `directory()` with a literal path, a document's `fixture:`,
+ * and a path the test resolves from its own directory, each resolved from the
+ * test's own directory: a path that names nothing, a `file()` naming a
+ * directory, or a `directory()` naming a file is reported at
  * the path. Inside a git work tree a path names only what git does not
  * ignore: an ignored target is on this workstation and on no checkout. The
  * catch is the typo that would only fail a run — a test later,
@@ -1660,11 +1694,55 @@ function crossedTarget(
     };
 }
 
+/**
+ * A path a test resolves from its own directory with one literal —
+ * `resolve(import.meta.dirname, '…')`, `join(…)` alike, `__dirname` alike —
+ * and the same by URL, `new URL('…', import.meta.url)` — spelled `./` or `../`,
+ * as a `file()` is. A path spelled into a
+ * command a process runs is the author's: no pattern reads it.
+ */
+const ANCHORED_PATHS = [
+    /(?<![\w$.])(?:path\.)?(?:join|resolve)\(\s*(?:import\.meta\.dirname|__dirname)\s*,\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>\s*,?\s*\)/gu,
+    /(?<![\w$.])new\s+URL\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>\s*,\s*import\.meta\.url\s*,?\s*\)/gu,
+];
+
+/** The paths a source resolves from its own directory, each where its literal starts. */
+function anchoredPaths(file: string): { column: number; line: number; path: string }[] {
+    const text = readSource(file);
+    const quoted = stringMask(text);
+    return ANCHORED_PATHS.flatMap((pattern) =>
+        [...text.matchAll(pattern)].flatMap((match) => {
+            const path = match.groups?.path ?? '';
+            if (quoted[match.index] === true || !isRelativePath(path) || path.includes('${')) {
+                return [];
+            }
+            const at = match.index + match[0].lastIndexOf(`${match.groups?.quote ?? ''}${path}`);
+            return [{ column: columnAt(text, at), line: lineAt(text, at), path }];
+        }),
+    );
+}
+
 export function diskTargetFindings(file: string, rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     const suppressed = file.endsWith(SPEC_EXTENSION)
         ? new Set<number>()
         : suppressedLines(readText(file), 'c8');
+    if (!file.endsWith(SPEC_EXTENSION)) {
+        for (const { column, line, path } of anchoredPaths(file)) {
+            const target = resolve(dirname(file), path);
+            if (treeKind(target) !== undefined || suppressed.has(line)) {
+                continue;
+            }
+            violations.push({
+                column,
+                file: relative(rootDir, file),
+                line,
+                ...missingTarget(`'${path}'`, relative(rootDir, target), existsSync(target)),
+                rule: 'c8-disk-target-exists',
+                severity: 'error',
+            });
+        }
+    }
     for (const { column, key, kind, line, path } of collectFixtureReferences(
         file,
         DISK_CALL,

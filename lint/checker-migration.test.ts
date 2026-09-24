@@ -476,6 +476,34 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')).toBe(other);
     });
 
+    test('a module test naming the 16 pool follows it, and a command naming it is left', () => {
+        // Given - a 16 pool, and a module test of the member resolving it and running it
+        const root = tree16({ '_fixtures/workspace/main.js': '' });
+        const moduleTest = join(dirname(root), 'lint/member.test.ts');
+        mkdirSync(dirname(moduleTest), { recursive: true });
+        writeFileSync(
+            moduleTest,
+            [
+                "const WORKSPACE = resolve(import.meta.dirname, '../specs/_fixtures/workspace/');",
+                "const COMMAND = 'node specs/_fixtures/workspace/main.js';",
+                '',
+            ].join('\n'),
+        );
+
+        // When - the mover runs over the specs tree
+        const migration = migrateTo17(root, renameSync);
+
+        // Then - the resolved path names the pool under shared/, the command is the author's
+        expect(migration.rewritten).toStrictEqual(['../lint/member.test.ts']);
+        expect(readFileSync(moduleTest, 'utf8')).toBe(
+            [
+                "const WORKSPACE = resolve(import.meta.dirname, '../specs/shared/fixtures/workspace/');",
+                "const COMMAND = 'node specs/_fixtures/workspace/main.js';",
+                '',
+            ].join('\n'),
+        );
+    });
+
     test('a stream asserted empty is an empty text, and a table keeps its matcher', () => {
         // Given - 16's toBeEmpty on streams, awaited and negated, beside a table's
         const root = tree16({

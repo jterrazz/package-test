@@ -1,4 +1,4 @@
-description: --fix moves one copy to the specs root's shared/seeds/ and rewrites the paths that named either
+description: --fix moves one copy to shared/seeds/ and every path naming either, a module test's too
 fixture: ./fixtures/copied/
 runs:
     - command: checker . --fix
@@ -12,3 +12,7 @@ runs:
               contains: file('../../shared/seeds/two-users.sql')
           specs/api/orders/orders.spec.ts:
               contains: file('../../shared/seeds/two-users.sql')
+          lint/seeds.test.ts:
+              contains:
+                  - resolve(import.meta.dirname, '../specs/shared/seeds/two-users.sql')
+                  - new URL('../specs/shared/seeds/two-users.sql', import.meta.url)

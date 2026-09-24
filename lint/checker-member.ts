@@ -7,6 +7,7 @@ import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
 import { diskTargetFindings } from './checker-crossfile.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';
+import { moduleTestsOf } from './module-tests.js';
 import { isTestFileName } from './role.js';
 
 /**
@@ -513,40 +514,6 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
     return found;
 }
 
-/**
- * C8 over the module tests of a member — every test that does not live under
- * a `specs/` tree (the tree pass reads those): a `file()`/`directory()` in
- * `src/` or `lint/` names ground beside its module, and names it as surely.
- * The walk stops at a nested package and never enters ground.
- */
-function moduleTestTargets(memberDir: string, rootDir: string): TokenViolation[] {
-    const found: TokenViolation[] = [];
-    const walk = (dir: string): void => {
-        let entries;
-        try {
-            entries = treeEntries(dir);
-        } catch {
-            return;
-        }
-        for (const entry of entries) {
-            const path = join(dir, entry.name);
-            if (entry.isFile() && isTestFileName(entry.name)) {
-                found.push(...diskTargetFindings(path, rootDir));
-            } else if (
-                entry.isDirectory() &&
-                !SKIPPED.has(entry.name) &&
-                !isGroundName(entry.name) &&
-                entry.name !== 'specs' &&
-                treeKind(join(path, 'package.json')) !== 'file'
-            ) {
-                walk(path);
-            }
-        }
-    };
-    walk(memberDir);
-    return found;
-}
-
 export function checkMember(memberDir: string, rootDir: string): TokenViolation[] {
     const manifest = readManifest(memberDir);
     if (manifest === null) {
@@ -566,7 +533,8 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         // That never reached a `specs/` tree.
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
         ...groundSynonyms(memberDir, label),
-        ...moduleTestTargets(memberDir, rootDir),
+        // C8 over the module tests: the tree pass reads the tests under `specs/`.
+        ...moduleTestsOf(memberDir).flatMap((test) => diskTargetFindings(test, rootDir)),
     ];
 }
 
