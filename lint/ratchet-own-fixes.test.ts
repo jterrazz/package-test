@@ -29,13 +29,13 @@ function projectWith(files: Record<string, string>): string {
     return root;
 }
 
-/** A stub oxlint that appends its arguments and the folder it ran in, copies the wrapper it was handed, then exits `status`. */
-function stubOxlint(root: string, status: number): void {
+/** A stub oxlint that appends its arguments and the folder it ran in, copies the wrapper it was handed, prints `stdout`, then exits `status`. */
+function stubOxlint(root: string, status: number, stdout = ''): void {
     mkdirSync(join(root, 'node_modules', '.bin'), { recursive: true });
     const bin = join(root, 'node_modules', '.bin', 'oxlint');
     writeFileSync(
         bin,
-        `#!/bin/sh\necho "$@" >> "${root}/args.txt"\npwd -P >> "${root}/cwds.txt"\ncp ${OWN_FIXES_WRAPPER} wrapper.mjs\necho "cannot run" >&2\nexit ${status}\n`,
+        `#!/bin/sh\necho "$@" >> "${root}/args.txt"\npwd -P >> "${root}/cwds.txt"\ncp ${OWN_FIXES_WRAPPER} wrapper.mjs\necho "cannot run" >&2\necho "${stdout}"\nexit ${status}\n`,
     );
     chmodSync(bin, 0o755);
 }
@@ -209,6 +209,18 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         expect(() => {
             applyOwnFixes(root);
         }).toThrow(`the checker ran ${join(root, 'node_modules', '.bin', 'oxlint')} --fix`);
+        expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
+    });
+
+    test('a config oxlint could not load is a failure naming it, though oxlint exits 1', () => {
+        // Given - an oxlint that prints its load failure on stdout and exits 1, as it does
+        const root = projectWith({ '.oxlintrc.json': '{}\n' });
+        stubOxlint(root, 1, 'Failed to parse oxlint configuration file.');
+
+        // Then - the pass throws naming the config, and the wrapper is deleted
+        expect(() => {
+            applyOwnFixes(root);
+        }).toThrow(`could not load the wrapper of ${join(root, '.oxlintrc.json')}`);
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
     });
 

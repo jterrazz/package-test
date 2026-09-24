@@ -64,6 +64,16 @@ const UNWALKED = new Set<string>([
     ...GROUND_DIRS,
 ]);
 
+/**
+ * How a line of oxlint's stdout opens when a config fails to load — an exit
+ * 1, which alone reads as diagnostics left.
+ */
+const CONFIG_FAILURES = [
+    'Failed to build configuration',
+    'Failed to load config',
+    'Failed to parse oxlint configuration file',
+] as const;
+
 /** Every category oxlint ships, each turned off by the wrapper. */
 const CATEGORIES = [
     'correctness',
@@ -157,6 +167,14 @@ export function nestedConfigDirectories(root: string): string[] {
     return found.toSorted();
 }
 
+/** Does oxlint's stdout open a line on a config that failed to load? */
+function failedToLoad(stdout: string): boolean {
+    return stdout
+        .split('\n')
+        .map((line) => line.replace(/^[\s|x]*/u, ''))
+        .some((line) => CONFIG_FAILURES.some((failure) => line.startsWith(failure)));
+}
+
 /**
  * Run `oxlint --fix` over `directory` under the wrapper of `config`, ignoring
  * the subtrees `nested` names — each governed by a config of its own.
@@ -181,6 +199,11 @@ function fixUnder(oxlint: string, directory: string, config: string, nested: str
                 `the checker ran ${oxlint} --fix for the plugin's own fixes and it failed:\n${run.stderr}${run.stdout}`,
             );
         }
+        if (failedToLoad(run.stdout)) {
+            throw new Error(
+                `the checker ran ${oxlint} --fix for the plugin's own fixes, and it could not load the wrapper of ${config}:\n${run.stdout}`,
+            );
+        }
     } finally {
         rmSync(wrapper, { force: true });
     }
@@ -191,7 +214,8 @@ function fixUnder(oxlint: string, directory: string, config: string, nested: str
  * subtree a nested config governs, each under its own config — the one the
  * ratchet's run, which discovers nested configs, judges it by. oxlint exits 1
  * when diagnostics remain — the ratchet's to count — and past 1 when it could
- * not run, which is refused naming the binary.
+ * not run, which is refused naming the binary; a config it could not load,
+ * also an exit 1, is refused naming the config.
  */
 export function applyOwnFixes(root: string): void {
     const oxlint = oxlintOf(root);
