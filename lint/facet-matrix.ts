@@ -69,10 +69,9 @@ export type CapabilityGroup =
  * type this row answers for, where the row's `name` spells it differently
  * (`.request()` → `request`). It is what the sibling test pins against `keyof`.
  *
- * `exempt` is what a declared-but-empty cell is allowed to say, per column. It
- * exists for the shape M1 already sanctions — a surface the package publishes
- * and cannot prove on its own machine — and for the holes this package owes
- * itself, each named where it is rather than hidden by a blank.
+ * `exempt` is what a declared-but-empty cell is allowed to say, per column: a
+ * hole this package owes itself, named where it is rather than hidden by a
+ * blank.
  */
 export type Capability = {
     /** The columns that DECLARE it. Every other column's cell is blank. */
@@ -100,11 +99,8 @@ export function memberOf(capability: Capability): string {
     return capability.member ?? capability.name.replace(/^\./u, '').replace(/\(\)$/u, '');
 }
 
-/** The one reason the mobile column is empty, stated once (M1, chapter 03). */
-const NO_SIMULATOR = 'no mobile tree: an iOS simulator is not something CI provisions (M1)';
-
-/** Every mobile cell carries the same reason; written once, spread per row. */
-const MOBILE_EXEMPT = { mobile: NO_SIMULATOR } as const;
+/** Why a mobile cell is empty while its tree grows (M1, chapter 03). */
+const NOT_YET = { mobile: 'the mobile tree does not reach it yet (M1)' } as const;
 
 /** Why a column holds no golden FILE: every golden of its tree is read by one test, and written in place. */
 const IN_PLACE =
@@ -124,14 +120,12 @@ export const CAPABILITIES: Capability[] = [
     // ── Constructor options (stated in a `*.specification.ts`, rule A1) ──
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'website', 'mobile'],
-        exempt: MOBILE_EXEMPT,
         group: 'Constructor option',
         name: 'services',
         probe: 'services:',
     },
     {
         columns: ['api', 'jobs', 'cli', 'integration', 'website', 'mobile', 'component'],
-        exempt: { mobile: NO_SIMULATOR },
         group: 'Constructor option',
         name: 'root',
         probe: 'root:',
@@ -146,7 +140,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['website', 'mobile'],
-        exempt: { mobile: NO_SIMULATOR },
         group: 'Constructor option',
         name: 'backend',
         probe: 'backend:',
@@ -159,21 +152,19 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['mobile'],
-        exempt: MOBILE_EXEMPT,
         group: 'Constructor option',
         name: 'device',
         probe: 'device:',
     },
     {
         columns: ['mobile'],
-        exempt: MOBILE_EXEMPT,
         group: 'Constructor option',
         name: 'app',
         probe: 'app:',
     },
+    { columns: ['mobile'], group: 'Constructor option', name: 'appium', probe: 'appium:' },
     {
         columns: ['mobile'],
-        exempt: MOBILE_EXEMPT,
         group: 'Constructor option',
         name: 'timeouts',
         probe: 'timeouts:',
@@ -225,7 +216,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['api', 'jobs', 'integration', 'website', 'mobile', 'component'],
-        exempt: { mobile: NO_SIMULATOR },
+        exempt: NOT_YET,
         group: 'Setup',
         name: '.intercept()',
         probe: '.intercept(',
@@ -297,7 +288,6 @@ export const CAPABILITIES: Capability[] = [
     { columns: ['website'], group: 'Terminal action', name: '.fetch()', probe: ".fetch('" },
     {
         columns: ['mobile'],
-        exempt: MOBILE_EXEMPT,
         group: 'Terminal action',
         name: '.open()',
         probe: '.open(',
@@ -305,8 +295,8 @@ export const CAPABILITIES: Capability[] = [
     { columns: ['component'], group: 'Terminal action', name: '.render()', probe: '.render(' },
 
     // ── The verbs a scenario drives (the visitor's own members) ──
-    { columns: DRAWS, exempt: MOBILE_EXEMPT, group: 'Verb', name: 'see', probe: '.see(' },
-    { columns: DRAWS, exempt: MOBILE_EXEMPT, group: 'Verb', name: 'fill', probe: '.fill(' },
+    { columns: DRAWS, group: 'Verb', name: 'see', probe: '.see(' },
+    { columns: DRAWS, exempt: NOT_YET, group: 'Verb', name: 'fill', probe: '.fill(' },
     { columns: BROWSERS, group: 'Verb', name: 'click', probe: '.click(' },
     { columns: BROWSERS, group: 'Verb', name: 'gone', probe: '.gone(' },
     {
@@ -336,7 +326,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['mobile'],
-        exempt: MOBILE_EXEMPT,
+        exempt: NOT_YET,
         group: 'Verb',
         name: 'tap',
         probe: '.tap(',
@@ -347,15 +337,14 @@ export const CAPABILITIES: Capability[] = [
     // ── The element vocabulary (chapter 13 owns the words) ──
     {
         columns: DRAWS,
-        exempt: MOBILE_EXEMPT,
+        exempt: NOT_YET,
         group: 'Descriptor',
         name: 'button',
         probe: 'button(',
     },
-    { columns: DRAWS, exempt: MOBILE_EXEMPT, group: 'Descriptor', name: 'field', probe: 'field(' },
+    { columns: DRAWS, exempt: NOT_YET, group: 'Descriptor', name: 'field', probe: 'field(' },
     {
         columns: DRAWS,
-        exempt: MOBILE_EXEMPT,
         group: 'Descriptor',
         member: 'content',
         name: 'content',
@@ -363,7 +352,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: DRAWS,
-        exempt: { mobile: NO_SIMULATOR },
+        exempt: NOT_YET,
         group: 'Descriptor',
         name: 'testId',
         probe: 'testId(',
@@ -507,7 +496,6 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['website', 'mobile', 'component'],
-        exempt: MOBILE_EXEMPT,
         group: 'Result accessor',
         name: '.content',
         probe: 'result.content',
@@ -575,7 +563,6 @@ export const CAPABILITIES: Capability[] = [
     { columns: ['website'], group: 'Result accessor', name: '.location', probe: 'result.location' },
     {
         columns: ['mobile'],
-        exempt: MOBILE_EXEMPT,
         group: 'Result accessor',
         name: '.screen',
         probe: 'result.screen',

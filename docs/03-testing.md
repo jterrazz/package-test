@@ -12,9 +12,9 @@ What proves a change here: this package specifies itself with itself. The suites
 | Spec documents  | `specs/cli/<domain>/<case>.spec.yaml`      | A cli session as data, collected as a test file by `literate()` ([20](20-documents.md)) |
 | Meta-tests      | `lint/*.test.ts`                           | The framework applied to itself and to its own projections                              |
 
-## The seven projects
+## The eight projects
 
-`test.projects` in `vitest.config.ts` declares seven, and which one you can run is decided by what is installed and running on the machine.
+`test.projects` in `vitest.config.ts` declares eight, and which one you can run is decided by what is installed and running on the machine.
 
 | Project       | Collects                                                                                        | Needs                                                                |
 | ------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
@@ -25,6 +25,7 @@ What proves a change here: this package specifies itself with itself. The suites
 | `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included | Docker                                                               |
 | `website`     | `specs/website/**`, built by `website()`                                                        | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component/**/*.test.tsx`, built by `component()`                                         | the same chromium; no Docker. Runs in its own group, after `website` |
+| `mobile`      | `specs/mobile/**`, built by `mobile({ serial: true })`                                          | Nothing — the Appium protocol double                                 |
 
 Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. A member without `"type": "module"` writes its config as `vitest.config.mts`: the helpers ship ESM only, a CJS config would have to `require()` them, and `roleOf` already reads `.mts` as the config role — so the rules that judge a config still find it.
 
@@ -43,7 +44,7 @@ npx vitest --run --project website  # after npx playwright install chromium
 npx vitest --run --project component  # the same chromium, a mounted unit at a time
 ```
 
-There is no mobile tree under `specs/`, and that is a hole this chapter states rather than hides: an iOS simulator is not something CI provisions, so the mobile facet is proven by module tests under `src/facets/mobile/` — the simulator resolution, the page-source projection, the ambiguity messages — and by nothing end-to-end.
+**The mobile tree runs against a double of the Appium protocol.** `specs/mobile/` drives Specimen, a small native app, and its runner connects to `specs/shared/fixtures/appium-double/`: a WebDriver server that answers like Appium's XCUITest driver, drawing the app from its description as data (`specs/shared/fixtures/mobile-app/specimen.ts`). An iOS simulator is not something CI provisions; the double is what every run has instead.
 
 A second hole is the RENDERER's, and it is not this repository's to close: a React Native screen never reaches the real Chromium the component facet mounts in, so jest stays on that surface until the `react-native-web` spike says otherwise — [07 — Component specs](07-component.md) lists it with the other three shapes the facet does not take.
 
@@ -92,6 +93,7 @@ a declared name nothing carries fails too.
 | Facet         | Shared domains it carries | Its own                                     |
 | ------------- | ------------------------- | ------------------------------------------- |
 | `integration` | `clock/`, `intercepts/`   | `call/`, `postgres/`, `redis/`, `table/`    |
+| `mobile`      | —                         | `launch/`                                   |
 | `website`     | `assertions/`, `clock/`   | `console/`, `fetch/`, `services/`, `visit/` |
 
 <!-- /GENERATED:domains -->
@@ -110,9 +112,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 68    |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 69    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 131   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 133   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 165   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 40    |
 
@@ -197,7 +199,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **80 modules** have no sibling test, and every one of them is claimed:
+Today **79 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -206,7 +208,7 @@ Today **80 modules** have no sibling test, and every one of them is claimed:
 | constant data (3)                       | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifest)                                                                                                  |
 | the facet file set, as a re-export (12) | the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name                                                                                       |
 | a facet's vitest project (7)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                |
-| a mobile module that needs a device (2) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
+| a mobile module that needs a device (1) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
 | a facet module (8)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
 | a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
 | a seam adapter (10)                     | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
@@ -238,16 +240,17 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability  | api | jobs | cli | integration | website | mobile | component | module |
 | ----------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `services`  | 2   | 1    | 1   | 2           | 1       | 0      | —         | —      |
-| `root`      | 2   | 1    | 1   | 2           | 1       | 0      | 1         | —      |
+| `services`  | 2   | 1    | 1   | 2           | 1       | 1      | —         | —      |
+| `root`      | 2   | 1    | 1   | 2           | 1       | 1      | 1         | —      |
 | `server`    | 4   | —    | —   | —           | 4       | —      | —         | —      |
 | `jobs`      | —   | 2    | —   | —           | —       | —      | —         | —      |
 | `url`       | —   | —    | —   | —           | 2       | —      | —         | —      |
-| `backend`   | —   | —    | —   | —           | 1       | 0      | —         | —      |
+| `backend`   | —   | —    | —   | —           | 1       | 1      | —         | —      |
 | `external`  | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `device`    | —   | —    | —   | —           | —       | 0      | —         | —      |
-| `app`       | —   | —    | —   | —           | —       | 0      | —         | —      |
-| `timeouts`  | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `device`    | —   | —    | —   | —           | —       | 1      | —         | —      |
+| `app`       | —   | —    | —   | —           | —       | 1      | —         | —      |
+| `appium`    | —   | —    | —   | —           | —       | 1      | —         | —      |
+| `timeouts`  | —   | —    | —   | —           | —       | 1      | —         | —      |
 | `commands`  | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `defaults`  | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `env`       | —   | —    | 4   | —           | —       | —      | —         | —      |
@@ -290,14 +293,14 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.run()`     | —   | —    | 4   | —           | —       | —      | —         | —      |
 | `.visit()`   | —   | —    | —   | —           | 20      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
-| `.open()`    | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `.open()`    | —   | —    | —   | —           | —       | 2      | —         | —      |
 | `.render()`  | —   | —    | —   | —           | —       | —      | 20        | —      |
 
 ### Verb
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 11      | 0      | 18        | —      |
+| `see`      | —   | —    | —   | —           | 11      | 1      | 18        | —      |
 | `fill`     | —   | —    | —   | —           | 4       | 0      | 2         | —      |
 | `click`    | —   | —    | —   | —           | 3       | —      | 8         | —      |
 | `gone`     | —   | —    | —   | —           | 3       | —      | 6         | —      |
@@ -316,7 +319,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `button`        | —   | —    | —   | —           | 4       | 0      | 8         | —      |
 | `field`         | —   | —    | —   | —           | 6       | 0      | 5         | —      |
-| `content`       | —   | —    | —   | —           | 7       | 0      | 12        | —      |
+| `content`       | —   | —    | —   | —           | 7       | 1      | 12        | —      |
 | `testId`        | —   | —    | —   | —           | 1       | 0      | 1         | —      |
 | `heading`       | —   | —    | —   | —           | 3       | —      | 2         | —      |
 | `link`          | —   | —    | —   | —           | 3       | —      | 3         | —      |
@@ -359,7 +362,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.value`        | —   | —    | —   | 6           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
 | `.tree`         | —   | —    | —   | —           | 5       | —      | 4         | —      |
-| `.content`      | —   | —    | —   | —           | 9       | 0      | 13        | —      |
+| `.content`      | —   | —    | —   | —           | 9       | 1      | 13        | —      |
 | `.console`      | —   | —    | —   | —           | 4       | —      | 3         | —      |
 | `.errors`       | —   | —    | —   | —           | 8       | —      | 8         | —      |
 | `.html`         | —   | —    | —   | —           | 2       | —      | 5         | —      |
@@ -375,7 +378,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.json`         | —   | —    | 5   | —           | 1       | —      | —         | —      |
 | `.headers`      | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `.location`     | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.screen`       | —   | —    | —   | —           | —       | 0      | —         | —      |
+| `.screen`       | —   | —    | —   | —           | —       | 1      | —         | —      |
 
 ### Golden
 
@@ -427,7 +430,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 ### Exemptions
 
-- no mobile tree: an iOS simulator is not something CI provisions (M1) — `services`·mobile, `root`·mobile, `backend`·mobile, `device`·mobile, `app`·mobile, `timeouts`·mobile, `.intercept()`·mobile, `.open()`·mobile, `see`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `content`·mobile, `testId`·mobile, `.content`·mobile, `.screen`·mobile
+- the mobile tree does not reach it yet (M1) — `.intercept()`·mobile, `fill`·mobile, `tap`·mobile, `button`·mobile, `field`·mobile, `testId`·mobile
 - every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared — `toMatch(file())`·website, `toMatch(file())`·component, `.aria.yaml tree`·website, `.aria.yaml tree`·component, `.json body`·website
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·cli, `{{iso8601}}`·website, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 

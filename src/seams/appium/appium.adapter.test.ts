@@ -62,7 +62,7 @@ async function openedAdapter(timeouts?: { action?: number; launch?: number }): P
         remote,
         serverUrl: SERVER_URL,
         timeouts,
-        udid: 'SIM-UDID',
+        device: { name: 'iPhone 17', udid: 'SIM-UDID' },
     });
     await adapter.open({ bundleId: BUNDLE_ID });
     return { adapter, sessions };
@@ -136,6 +136,24 @@ describe('appium adapter — the declared timeouts', () => {
         expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(90_000);
     });
 
+    test('asks the server for the device by name and platform version', async () => {
+        // Given - an adapter over a device named with its OS, and no udid
+        const { remote, sessions } = stubDriver();
+        const adapter = new AppiumAdapter({
+            device: { name: 'iPhone 17', os: 'iOS 26.5' },
+            remote,
+            serverUrl: SERVER_URL,
+        });
+        await adapter.open({ bundleId: BUNDLE_ID });
+
+        // Then - the capabilities carry the name and the bare version, and no udid
+        expect(sessions[0]?.capabilities).toMatchObject({
+            'appium:deviceName': 'iPhone 17',
+            'appium:platformVersion': '26.5',
+        });
+        expect(sessions[0]?.capabilities).not.toHaveProperty('appium:udid');
+    });
+
     test('falls back to the 240s launch default when none is declared', async () => {
         // Given - a runner that declares no timeouts at all
         const { sessions } = await openedAdapter();
@@ -192,7 +210,7 @@ describe('appium adapter — names are exact', () => {
             remote,
             serverUrl: SERVER_URL,
             timeouts: { action: 1 },
-            udid: 'SIM-UDID',
+            device: { name: 'iPhone 17', udid: 'SIM-UDID' },
         });
 
         // When - the scenario taps the partial name

@@ -1,6 +1,6 @@
 # 09 — Mobile specs (`specification.mobile`)
 
-`specification.mobile()` tests a native app on the iOS simulator — its screens (the accessibility tree a user's assistive tech sees) and its flows (tap, fill, see) — through a real XCUITest session driven by appium. It resolves and boots the simulator itself, and starts the appium server from the caller project.
+`specification.mobile()` tests a native app on the iOS simulator — its screens (the accessibility tree a user's assistive tech sees) and its flows (tap, fill, see) — through a real XCUITest session driven by appium. It resolves and boots the simulator itself, and starts the appium server from the caller project — unless it is pointed at an Appium server someone else runs.
 
 Use it when the subject under test is an installed native app. For a browser-rendered page use [website](08-website.md); for a JSON/HTTP API surface use [api](10-api.md).
 
@@ -28,7 +28,8 @@ afterAll(cleanup);
 | Option     | Description                                                                                                                                              |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app`      | `{ bundleId }` — the installed app under test. Every `.open()` terminates and relaunches it                                                              |
-| `device`   | `{ name, os?, udid? }` — the simulator to run on, resolved through `xcrun simctl` and booted when shut down                                              |
+| `appium`   | `{ url }` — an Appium server already running, connected to instead of spawned; see [A declared Appium server](#a-declared-appium-server)                 |
+| `device`   | `{ name, os?, udid? }` — the simulator to run on, resolved through `xcrun simctl` and booted when shut down — or, under `appium`, asked of the server    |
 | `backend`  | `{ port? }` — start a declared stub backend; the handle gains `backendUrl` — see [Declared backend](#declared-backend)                                   |
 | `root`     | **Project-root override** (rule A9): where the `appium` binary is resolved from (`node_modules/.bin`). Auto-discovered from the calling file when absent |
 | `services` | A named record started with the runner and stopped with it — a `process()` for the bundler the app loads from, a database a dev build reads              |
@@ -58,9 +59,21 @@ export const { cleanup, mobile, udid } = await specification.mobile({
 });
 ```
 
-The appium server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](08-website.md) serve adapter.
+Without a declared `appium`, the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](08-website.md) serve adapter.
 
-The handle destructures to `{ mobile, cleanup, udid }` (rule A3) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session. With the `backend` option it additionally carries `backendUrl`.
+The handle destructures to `{ mobile, cleanup, udid }` (rule A3) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
+
+### A declared Appium server
+
+`appium: { url }` points the runner at a server someone else runs — a device farm, a Mac across the network, the protocol double this package specifies its own mobile facet against. The runner connects to it instead of spawning the project's own, and it hands the server the device by capabilities (`appium:deviceName`, `appium:platformVersion` from `os`, `appium:udid` when declared) instead of resolving and booting it through `simctl`: the machine the server runs on owns its simulators. `cleanup` ends the session and stops nothing it did not start.
+
+```typescript
+export const { cleanup, mobile } = await specification.mobile({
+    app: { bundleId: 'com.jterrazz.fakenews' },
+    appium: { url: 'http://mac-mini.local:4723' },
+    device: { name: 'iPhone 17', os: '26.5' },
+});
+```
 
 ### Declared timeouts
 
@@ -214,7 +227,7 @@ test('renders the events feed from the declared backend', async () => {
 | --------------- | --------------------------------------------------------------------------------- |
 | `port`          | Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port |
 
-**The ownership boundary.** The framework owns the simulator and the appium server — it does NOT own the JS bundler: Metro belongs to the caller's repo, exactly like `next build` belongs to a website's. So nothing is injected anywhere; the handle exposes `backendUrl` and **the caller wires it into its own bundler env** (e.g. `EXPO_PUBLIC_API_URL=<backendUrl> npx expo start`). This is why `port` exists: Metro inlines `EXPO_PUBLIC_*` values at bundle-serve time, and a stable port lets a warm Metro survive between runs instead of re-bundling against a fresh URL.
+**The ownership boundary.** The framework owns the simulator and the appium server it started — it does NOT own the JS bundler: Metro belongs to the caller's repo, exactly like `next build` belongs to a website's. So nothing is injected anywhere; the handle exposes `backendUrl` and **the caller wires it into its own bundler env** (e.g. `EXPO_PUBLIC_API_URL=<backendUrl> npx expo start`). This is why `port` exists: Metro inlines `EXPO_PUBLIC_*` values at bundle-serve time, and a stable port lets a warm Metro survive between runs instead of re-bundling against a fresh URL.
 
 The stub behaves exactly as on the website facet ([08 — Website specs](08-website.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared contract is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero contracts leaves the stub unguarded.
 
@@ -249,7 +262,7 @@ specs/mobile/
         └── http/…
 ```
 
-No `seeds/` or `requests/` — `specification.mobile()` has no `services` option and no request-file format; `.open()` calls are inline, and the golden is always `expected/<name>`.
+No `seeds/` or `requests/` — a mobile chain has no `.seed()` and no request-file format; `.open()` calls are inline, and the golden is always `expected/<name>`.
 
 ## Pitfalls
 

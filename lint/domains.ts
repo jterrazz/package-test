@@ -24,8 +24,8 @@ import { cell, table } from './catalog.js';
  * declared here and `domains.test.ts` holds the tree equal to it, in both
  * directions.
  *
- * It judges the facets whose folders are their AUTHOR's to name — integration
- * and website. An api, cli or jobs folder is its subject's standard name,
+ * It judges the facets whose folders are their AUTHOR's to name — integration,
+ * website and mobile, whose folders are the journeys of the app it drives. An api, cli or jobs folder is its subject's standard name,
  * derived from the route, the command or the job (C30): no vocabulary lists it.
  *
  * What it does NOT say is that a capability is only ever exercised under its
@@ -48,6 +48,7 @@ export const SHARED_DOMAINS = [
 /** Each facet's own domains — a name here may not appear under another facet. */
 export const FACET_DOMAINS: Record<string, string[]> = {
     integration: ['call', 'postgres', 'redis', 'table'],
+    mobile: ['launch'],
     website: ['console', 'fetch', 'services', 'visit'],
 };
 

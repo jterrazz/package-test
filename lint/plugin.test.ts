@@ -627,12 +627,10 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         const constructors = ['api', 'cli', 'integration', 'jobs', 'mobile', 'website'];
         const trees = new Set(readdirSync(resolve(ROOT, 'specs')));
 
-        // Then - each has one, except mobile: a simulator is not a container, and the facet is proven on a consumer rather than here (docs/03)
+        // Then - each has one, mobile included: its specs run against the Appium protocol double (docs/03)
         for (const facet of constructors) {
-            const exempt = facet === 'mobile';
-            expect(trees.has(facet), `${facet} has no specs tree`).toBe(!exempt);
+            expect(trees.has(facet), `${facet} has no specs tree`).toBe(true);
         }
-        expect(read('docs/03-testing.md')).toContain('mobile');
 
         // Then - the seventh subject is held too: `component` is a chain rather than a constructor, so its tree is the fixture app its colocated `.test.tsx` files sit in
         expect(trees.has('component'), 'component has no fixture app tree').toBe(true);

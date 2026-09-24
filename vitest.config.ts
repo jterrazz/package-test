@@ -8,6 +8,7 @@ import {
     integration,
     jobs,
     literate,
+    mobile,
     unit,
     website,
 } from './src/runner/index.js';
@@ -63,6 +64,9 @@ const config = defineSpecConfig({
             integration({ serial: true }),
             // Needs playwright + `npx playwright install chromium`; no Docker.
             website(),
+            // Serial: every file's runner opens its own session, and a
+            // Simulator drives one session at a time.
+            mobile({ serial: true }),
             component({
                 // Every render's context, stated away from every default so the
                 // Component app proves each one reaches the page (locale-note).

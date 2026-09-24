@@ -214,6 +214,7 @@ const websiteOptions = {
 
 const mobileOptions = {
     app: true,
+    appium: true,
     backend: true,
     device: true,
     root: true,

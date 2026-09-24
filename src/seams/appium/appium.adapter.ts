@@ -164,6 +164,14 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
     };
 }
 
+/** The device a session asks the server for: the simulator's name, its OS, its UDID when known. */
+type AdapterDevice = { name: string; os?: string | undefined; udid?: string | undefined };
+
+/** `'iOS 26.5'` or `'26.5'` → the `appium:platformVersion` XCUITest reads, `'26.5'`. */
+function platformVersion(os: string): string {
+    return os.replace(/^ios\s+/iu, '');
+}
+
 /**
  * Device adapter backed by appium's XCUITest driver over webdriverio.
  *
@@ -181,7 +189,7 @@ export class AppiumAdapter implements DevicePort {
     private driver: Driver | null = null;
     /** The WebDriverAgent launch budget — the runner's `timeouts.launch`, or the default. */
     private readonly launchTimeoutMs: number;
-    private readonly options: { serverUrl: string; udid: string };
+    private readonly options: { device: AdapterDevice; serverUrl: string };
     /**
      * The session factory. Absent in production — webdriverio is then loaded
      * lazily on the first `open()`. Injected by this module's own unit test,
@@ -191,12 +199,12 @@ export class AppiumAdapter implements DevicePort {
     private readonly remote?: RemoteFn | undefined;
 
     constructor(options: {
+        device: AdapterDevice;
         remote?: RemoteFn | undefined;
         serverUrl: string;
         timeouts?: DeviceTimeouts | undefined;
-        udid: string;
     }) {
-        this.options = { serverUrl: options.serverUrl, udid: options.udid };
+        this.options = { device: options.device, serverUrl: options.serverUrl };
         this.remote = options.remote;
         this.actionTimeoutMs = options.timeouts?.action ?? DEFAULT_ACTION_TIMEOUT_MS;
         this.launchTimeoutMs = options.timeouts?.launch ?? DEFAULT_WDA_LAUNCH_TIMEOUT_MS;
@@ -424,12 +432,15 @@ export class AppiumAdapter implements DevicePort {
         }
         const remoteFn = this.remote ?? (await loadRemote());
         const url = new URL(this.options.serverUrl);
+        const { name, os, udid } = this.options.device;
         this.driver = await remoteFn({
             capabilities: {
                 'appium:automationName': 'XCUITest',
                 'appium:bundleId': bundleId,
+                'appium:deviceName': name,
                 'appium:noReset': true,
-                'appium:udid': this.options.udid,
+                ...(os === undefined ? {} : { 'appium:platformVersion': platformVersion(os) }),
+                ...(udid === undefined ? {} : { 'appium:udid': udid }),
                 'appium:wdaLaunchTimeout': this.launchTimeoutMs,
                 platformName: 'iOS',
             },

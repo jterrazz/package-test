@@ -7,6 +7,7 @@ import { StubBackend } from '../../model/chain/stub-backend.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { DevicePort, DeviceTimeouts } from '../../model/ports/device.port.js';
 import { startAppiumServer } from './appium-server.js';
+import type { AppiumServer } from './appium-server.js';
 import { createMobileFacet } from './mobile.chain.js';
 import type { MobileSpecification } from './mobile.chain.js';
 import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
@@ -35,6 +36,18 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
     app: {
         /** Bundle id of the installed app (`com.example.app`). */
         bundleId: string;
+    };
+    /**
+     * An Appium server already running — a device farm, a server another
+     * machine owns, a protocol double. The runner connects to it instead of
+     * spawning the project's own, and hands it the device by capabilities
+     * (`appium:deviceName`, `appium:platformVersion`, `appium:udid` when
+     * declared) instead of resolving and booting it through `simctl`: the
+     * machine the server runs on owns its simulators.
+     */
+    appium?: {
+        /** The server's base URL (`http://127.0.0.1:4723`). */
+        url: string;
     };
     /**
      * Declared stub backend: started with the runner, serving the contracts
@@ -90,11 +103,42 @@ export type MobileHandle = {
     /** End the driver session, stop the appium server and the stub backend. */
     cleanup: () => Promise<void>;
     mobile: MobileSpecification;
-    /** The resolved simulator UDID the specs run against. */
-    udid: string;
+    /**
+     * The simulator UDID the specs run against — resolved by the runner, or
+     * the declared one. Absent when a declared `appium` server owns the
+     * device and none was named.
+     */
+    udid: string | undefined;
 };
 
 // ── Constructor ──
+
+/**
+ * The Appium server the runner drives, and the simulator it asks it for. A
+ * declared server owns its devices: the runner neither resolves nor boots one,
+ * and stops nothing it did not start. Otherwise the simulator is resolved and
+ * booted here, and the project's own server spawned beside it.
+ */
+async function reachAppium(
+    options: MobileSpecificationOptions,
+    root: string,
+): Promise<{ appium: AppiumServer; udid: string | undefined }> {
+    const { appium: declared, device } = options;
+    if (declared !== undefined) {
+        return {
+            appium: {
+                stop: async () => {
+                    await Promise.resolve();
+                },
+                url: declared.url,
+            },
+            udid: device.udid,
+        };
+    }
+    const udid = device.udid ?? (await resolveSimulatorUdid(device));
+    await ensureBooted(udid);
+    return { appium: await startAppiumServer(root), udid };
+}
 
 export async function startMobile<Services extends ServiceRecord>(
     options: MobileSpecificationOptions<Services>,
@@ -105,9 +149,7 @@ export async function startMobile<Services extends ServiceRecord>(
     await registerMatchers();
 
     const root = resolveRoot(options.root, callerDir);
-    const udid = options.device.udid ?? (await resolveSimulatorUdid(options.device));
-    await ensureBooted(udid);
-    const appium = await startAppiumServer(root);
+    const { appium, udid } = await reachAppium(options, root);
 
     // The declared services come up before the app is ever launched: a dev
     // Build reaches its bundler on the first frame it renders.
@@ -141,9 +183,9 @@ export async function startMobile<Services extends ServiceRecord>(
         if (!device) {
             const { AppiumAdapter } = await import('../../seams/appium/appium.adapter.js');
             device = new AppiumAdapter({
+                device: { name: options.device.name, os: options.device.os, udid },
                 serverUrl: appium.url,
                 timeouts: options.timeouts,
-                udid,
             });
         }
         return device;

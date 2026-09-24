@@ -25,7 +25,7 @@ src/domain/posts/
 
 The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<facet>/` is rule C12's error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule G4's, with the fix "rename it `.test.tsx`" ([07 — Component specs](07-component.md)).
 
-Nothing in this kind is slow, so the `unit` project is the one every developer runs on every save: this package gates its own at twelve seconds ([03 — Testing](03-testing.md#the-seven-projects)).
+Nothing in this kind is slow, so the `unit` project is the one every developer runs on every save: this package gates its own at twelve seconds ([03 — Testing](03-testing.md#the-eight-projects)).
 
 ## The constructor: there is none
 
