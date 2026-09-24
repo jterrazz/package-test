@@ -37,9 +37,10 @@ let serverInstance: any = null;
 let engineFetch: null | typeof fetch = null;
 
 /**
- * Start the MSW server (once per process), with every reply's body handed to
- * the caller as a stream this package owns ({@link owningBodies}), so a
- * subject that cancels a body sees the cancel settle.
+ * Start the MSW server (once per process), with the body of every reply to
+ * `fetch` handed to the caller as a stream this package owns
+ * ({@link owningBodies}), so a subject that cancels a body sees the cancel
+ * settle.
  */
 export async function ensureContractServer(): Promise<void> {
     if (serverInstance !== null) {
