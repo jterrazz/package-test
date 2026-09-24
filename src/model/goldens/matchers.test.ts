@@ -575,6 +575,58 @@ describe('response comparison — compareResponse', () => {
     });
 });
 
+describe("a golden that states no content-type reads its body by the actual response's", () => {
+    test('in place and by file, a bare 42 is the text of a text/plain reply', async () => {
+        await registerMatchers();
+        // Given - a text/plain "42", and a golden with no content-type on disk
+        const golden = goldenDir('HTTP/1.1 200 OK\n\n42\n');
+
+        // Then - both read the golden's 42 as text, and match
+        expect(plainCount('/tmp')).toMatch('HTTP/1.1 200 OK\n\n42');
+        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        expect(plainCount(golden.dir)).toMatch(file('./expected/count.http'), { frozen: true });
+    });
+
+    test('update mode writes a text/plain reply back as its bare text, by file and in place', async () => {
+        await registerMatchers();
+        // Given - update mode, a stale golden with no content-type on disk, and the same in place
+        vi.stubEnv('TEST_UPDATE', '1');
+        const golden = goldenDir('HTTP/1.1 200 OK\n\n41\n');
+        const scratch = scratchTest(
+            String.raw`expect(result.response).toMatch('HTTP/1.1 200 OK\n\n41');`,
+        );
+
+        // When - the reply is compared to each
+        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        expect(plainCount(golden.dir)).toMatch(file('./expected/count.http'));
+        void wholeOf(plainCount('/tmp'))('HTTP/1.1 200 OK\n\n41', undefined, scratch.stack);
+
+        // Then - both hold the text 42, never the JSON string "42"
+        expect(golden.read()).toBe('HTTP/1.1 200 OK\n\n42\n');
+        expect(scratch.read()).toContain(
+            'toMatch(`\n        HTTP/1.1 200 OK\n\n        42\n    `);',
+        );
+    });
+
+    test('update mode reads the golden it rewrites as text too: a token in a text/plain body is kept', async () => {
+        await registerMatchers();
+        // Given - update mode, a text/plain reply that looks like JSON, and a golden with no content-type holding a token
+        vi.stubEnv('TEST_UPDATE', '1');
+        const golden = goldenDir('HTTP/1.1 200 OK\n\n["{{int}}"]\n');
+        const reply = new ResponseAccessor(
+            { body: '["7"]', headers: { 'content-type': 'text/plain' }, status: 200 },
+            golden.dir,
+        );
+
+        // When - the golden is re-recorded
+        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        expect(reply).toMatch(file('./expected/count.http'));
+
+        // Then - the text still matched its token, so the token stays
+        expect(golden.read()).toBe('HTTP/1.1 200 OK\n\n["{{int}}"]\n');
+    });
+});
+
 describe('the hint a missing golden gives names a run that does something', () => {
     beforeAll(async () => {
         await registerMatchers();
@@ -604,6 +656,26 @@ describe('the hint a missing golden gives names a run that does something', () =
         }).toThrow('Write the file by hand');
     });
 });
+
+/** A text/plain reply whose text would parse as JSON. */
+function plainCount(dir: string): ResponseAccessor {
+    return new ResponseAccessor(
+        { body: '42', headers: { 'content-type': 'text/plain' }, status: 200 },
+        dir,
+    );
+}
+
+/** A scratch directory holding `expected/count.http` with `content`, removed afterwards. */
+function goldenDir(content: string): { dir: string; read: () => string } {
+    const dir = mkdtempSync(join(tmpdir(), 'untyped-golden-'));
+    onTestFinished(() => {
+        rmSync(dir, { force: true, recursive: true });
+    });
+    mkdirSync(join(dir, 'expected'));
+    const path = join(dir, 'expected', 'count.http');
+    writeFileSync(path, content);
+    return { dir, read: () => readFileSync(path, 'utf8') };
+}
 
 /** The whole-result comparison as a test calls it: a value, its options, and a stack of the test's making. */
 type Whole = (expected: unknown, options: unknown, stack: string) => unknown;
