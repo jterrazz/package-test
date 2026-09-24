@@ -389,11 +389,21 @@ export function createSharedBrowser<T extends Disconnectable>(
 }
 
 /**
- * The worker's chromium, shared by every runner the worker hosts and kept
- * until the worker exits — playwright ends the browsers it launched with the
- * process.
+ * The worker's browser of each launcher, shared by every runner the worker
+ * hosts and kept until the worker exits — playwright ends the browsers it
+ * launched with the process.
  */
-const workerBrowser = createSharedBrowser(launchChromium);
+const workerBrowsers = new Map<() => Promise<Browser>, () => Promise<Browser>>();
+
+/** The one browser the worker holds for `launch`, created on the first ask. */
+function workerBrowser(launch: () => Promise<Browser>): () => Promise<Browser> {
+    let shared = workerBrowsers.get(launch);
+    if (shared === undefined) {
+        shared = createSharedBrowser(launch);
+        workerBrowsers.set(launch, shared);
+    }
+    return shared;
+}
 
 /**
  * Browser adapter backed by playwright chromium.
@@ -411,8 +421,8 @@ export class PlaywrightAdapter implements BrowserPort {
     private readonly browser: () => Promise<Browser>;
     private readonly contexts = new Set<BrowserContext>();
 
-    constructor(options: { browser?: () => Promise<Browser> } = {}) {
-        this.browser = options.browser ?? workerBrowser;
+    constructor(options: { launch?: () => Promise<Browser> } = {}) {
+        this.browser = workerBrowser(options.launch ?? launchChromium);
     }
 
     /** Close what the runner's visits still hold open; the worker's browser outlives the runner. */
