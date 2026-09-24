@@ -24,7 +24,13 @@ export class RedisHandle implements ServiceHandle {
     readonly defaultPort = 6379;
     readonly defaultImage: string;
     readonly environment: Record<string, string> = {};
-    readonly containerOptions = WORKER_INDEXES;
+
+    /** A container of its own: its worker indexes are one per container, not one per service. */
+    get containerOptions(): ContainerOptions {
+        return this.serviceName === null
+            ? WORKER_INDEXES
+            : { ...WORKER_INDEXES, service: this.serviceName };
+    }
 
     connectionString = '';
     started = false;

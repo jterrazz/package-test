@@ -97,6 +97,31 @@ describe('redis', () => {
         });
     });
 
+    // RUNTIME G2 — two redis services of one record are two stores: the worker's index is one per container.
+    test('two redis services keep their own keys, whatever the other one resets', async () => {
+        // Given - a key written through the first service, then the second one reset
+        const result = await integration.call(async ({ cache, queue }) => {
+            const { createClient } = await import('redis');
+            const writer = createClient({ url: cache.connectionString });
+            await writer.connect();
+            await writer.set('cache-key', 'cache-value');
+            await writer.quit();
+
+            await queue.reset();
+
+            const reader = createClient({ url: cache.connectionString });
+            await reader.connect();
+            const kept = await reader.get('cache-key');
+            await reader.quit();
+            return { kept };
+        });
+
+        // Then - the first service's key outlived the second's reset
+        expect(result.value).toMatch({
+            kept: 'cache-value',
+        });
+    });
+
     // RUNTIME G2 — each worker takes its own database index, and the string the app is handed says which.
     test('two workers take two database indexes, and the connection string carries each', async () => {
         // Given - two handles on the runner's container, acquired by workers 1 and 2

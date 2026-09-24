@@ -137,7 +137,7 @@ This is the same boundary rule B1 already states from the other side — one cha
 
 ## One container per run
 
-A container-backed service is started once per RUN, not once per file. The `api()`, `jobs()` and `integration()` projects carry a global setup that serves the run's containers on a loopback port and provides its address to the workers. The first file that declares a service starts its container; every later file, in any worker, is handed the same one; the run stops them all after the last file. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation-rule-g2)).
+A container-backed service is started once per RUN, not once per file. The `api()`, `jobs()` and `integration()` projects carry a global setup that serves the run's containers on a loopback port and provides its address to the workers. The first file that declares a service starts its container; every later file, in any worker, is handed the same one; the run stops them all after the last file. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation-rule-g2)). A redis isolates a worker by an index, one per container, so each `redis()` of a record asks for a container of its own: `cache: redis()` and `queue: redis()` are two containers, and one's reset never reaches the other's keys.
 
 A project written by hand, or a facet whose helper carries no such setup (`cli()`, `website()`, `mobile()`), starts a container per specification and stops it with the file.
 
@@ -147,7 +147,7 @@ The setup reaches Docker in the background and pulls each pinned default image t
 
 `TESTCONTAINERS_REUSE_ENABLE=true` keeps the containers alive between runs: the next run finds them by the hash of their definition instead of starting them, and a postgres finds its templates already built. It is off unless asked for, and off on CI whatever the variable says — a CI run starts from nothing and leaves nothing. A reused container is one run's at a time: two runs at once on one machine share it, and each would drop the other's worker databases.
 
-Every container the package starts carries the label `com.jterrazz.test=true`, and a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it. The containers of a run that is not reused are removed at teardown, and by testcontainers' reaper if the run dies. The reused ones are removed by hand:
+Every container the package starts carries the label `com.jterrazz.test=true`, a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it, and a container one service holds alone `com.jterrazz.test.service=<service>`, so a reused one is found again by its service. The containers of a run that is not reused are removed at teardown, and by testcontainers' reaper if the run dies. The reused ones are removed by hand:
 
 ```bash
 docker rm -f $(docker ps -aq --filter label=com.jterrazz.test.reuse=true)

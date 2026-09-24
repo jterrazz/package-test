@@ -76,6 +76,18 @@ describe('redis handle', () => {
         });
     });
 
+    test('asks for a container of its own once the stack names it', () => {
+        // Given - a handle the stack named "queue"
+        const queue = redis();
+        queue.serviceName = 'queue';
+
+        // Then - its request names the service, so a second redis of the record is a second container
+        expect(queue.containerOptions).toStrictEqual({
+            command: ['redis-server', '--databases', '256'],
+            service: 'queue',
+        });
+    });
+
     test('refuses a worker past its container indexes, naming the way out', async () => {
         // Given - a handle acquired by pool id 255, the first with no index left
         const crowded = redis();
