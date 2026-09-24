@@ -29,13 +29,21 @@ export { website, type WebsiteProjectOptions } from '../facets/website/website.p
 export { type FacetProjectOptions, type LiterateDoor } from './facet-project.js';
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */
-export type UnitProjectOptions = FacetProjectOptions & {
+export type UnitProjectOptions = {
+    /**
+     * `false` runs every file of a worker in ONE module graph instead of a
+     * fresh one per file (`isolate: false`), so a worker imports each module
+     * once. For a pure project only: a test that leaves state in a module — a
+     * registry, a global matcher, a cache — reaches the next file of its
+     * worker. Absent, vitest isolates each file.
+     */
+    isolate?: boolean;
     /**
      * The trees module tests live in, when they do not live in `src/`. Each
      * root becomes `<root>/**\/*.test.ts`; `include` states the globs outright.
      */
     roots?: string[];
-};
+} & FacetProjectOptions;
 
 /**
  * A module test runs beside the module it covers: no DOM, no browser, no
@@ -52,6 +60,7 @@ export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfigu
         test: {
             exclude: options.exclude ?? ['specs/**', '**/*.test.tsx'],
             include: options.include ?? fromRoots ?? ['**/*.test.ts'],
+            ...(options.isolate === undefined ? {} : { isolate: options.isolate }),
             ...(options.serial === true ? { fileParallelism: false } : {}),
             name: 'unit',
             // Node projects run first; the two browser projects follow.

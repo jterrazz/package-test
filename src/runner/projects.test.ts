@@ -61,6 +61,15 @@ describe('unit() — module tests, and only module tests', () => {
         expect(project.include).toStrictEqual(['packages/**/*.test.ts', 'apps/**/*.test.ts']);
     });
 
+    test('shares one module graph per worker when a pure project says so, and isolates otherwise', () => {
+        // Given - a project whose tests leave no state behind, and one stated by nobody
+        const shared = testOf(unit({ isolate: false }));
+
+        // Then - the pure one runs its files in one graph per worker, the other is vitest's default
+        expect(shared.isolate).toBe(false);
+        expect(testOf(unit())).not.toHaveProperty('isolate');
+    });
+
     test('runs before either browser project', () => {
         // Given - the canonical project
         // Then - node first (0), the page facets after
