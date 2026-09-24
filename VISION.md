@@ -2857,7 +2857,7 @@ conflict. @jterrazz/test was reinstalled from package-test `8b57b457`
       writes them (the `.mjs` hypothesis was checked and is false). Its
       build turns off the config's `copy`, `exe` and `onSuccess`.
 - What stays open:
-    - **C18 debt 22.** `specs/cli/check/publish-guard.spec.ts` stays a raw
+    - **C18 debt 22.** `cli/check/publish-guard.spec.ts` stays a raw
       chain. Paying it off needs a `.link()` or install setup verb in
       @jterrazz/test's `CliSpecification`, and that is a backlog row for
       this package. docs/03:88 names only the rulebook third door, and
@@ -2897,11 +2897,138 @@ conflict. @jterrazz/test was reinstalled from package-test `8b57b457`
       run `check-drift.js` directly, which is hidden C18 debt. Move them
       into a new `src/cli/check-drift.test.ts`.
     - **Major.** Nothing proves the JSON contract at docs/06:337 (an absent
-      section reads `null`, an emptied one reads `0`). Add a `{ "typescript":
-      {} }` `--json` case and show it red.
+      section reads `null`, an emptied one reads `0`). Add a
+      `{ "typescript": {} }` `--json` case and show it red.
     - No test proves that the unreadable case drops the human `test` row.
     - `typescript baseline` refusing when the Names pass writes no report
       is proved only by the module test. Add a spec document on
       `names-refused` that pins exit 1 and the untouched baseline.
     - The judge's `oxlint wrote no JSON report` message keeps its wording.
       That was a choice the unit documented.
+
+## Batch 3 of 2026-09-24 (hybrid): test
+
+Three reviewed units landed on package-test's `vision/17` by cherry-pick,
+in the listed order, with no merge commit. The toolchain was reinstalled
+from package-typescript `0a024e8` (`npm ci`; better-sqlite3 loaded with no
+rebuild). The last commit before this record is `42ebeadd`. `make fix` exit 0,
+`make check` exit 0 (558 files, 2543 tests).
+
+How the conflicts were settled:
+
+- The generated blocks of docs/03 (layer counts, matrix, meta-tests)
+  conflicted four times. Each took the HEAD side, and `42ebeadd`
+  regenerated them with `npm run docs`. The prose of both sides is kept.
+  One resolution first took the whole file and lost the appium sentence
+  of `0bc88de6`; `8146284c` brings it back, so only that one commit reads
+  without it.
+- `src/runner/route-coverage.ts` kept both sides: the failed-run guard
+  (`RouteRun`) and the method-less drift check. The filing unit's tests
+  called `judgeRoutes` with a boolean. They now pass `GREEN` or
+  `RECORDING`, inside `e294f1dc` and `1affbb86`.
+- The filing unit renamed `integration/intercepts/` to
+  `integration/intercept/`. The bodies unit's new
+  `passthrough-cancel.spec.ts` moved with it, and docs/16's path to it was
+  updated in `8146284c`.
+- The oxlint config-name list is not exported by the installed toolchain
+  (`0a024e8` has no `./oxlint-config-names` subpath), so the `CONFIG_NAMES`
+  copy in `lint/ratchet-own-fixes.ts` stays. It matches the toolchain's
+  `oxlint-config-names.json` today. Swap it once the typescript
+  drift-and-names unit lands.
+- This batch rewrapped two lines of the typescript batches above. oxfmt
+  un-indented a line that started with `{}`, and the Markdown pass held a
+  typescript spec path to this repository's disk.
+
+The units:
+
+- **api-bodies follow-ups** (branch `vision17-test-bodies-followups`,
+  `eee66bea`…`6f876c41`, 14 commits). Review `integrate`. What it closed:
+  a response body is read by its content-type, and only a type known to be
+  binary drops its body. A mismatched text body is diffed line by line. A
+  golden with no content-type reads its body by the reply's. A failed run
+  is not judged (`api routes: not judged`), and `TEST_UPDATE=1` refuses to
+  record `routes/unreached` over it. A cancel settles on a reply that
+  passes through to a real server, and in a page. ADR-006 says the cancel
+  repro runs. What stays open:
+    - The bodyKind table at docs/10-api.md:169 is only partly pinned. Three
+      mutations stay green: dropping `+xml`, dropping
+      `application/x-ndjson`, and dropping `.toLowerCase()`
+      (http-file.ts:108-143). Add one table-driven case and show it red.
+    - The live input of the failed-run guard
+      (`getFailedFilepaths().length`, route-coverage.ts) has no test. That
+      it counts correctly is a HYPOTHESIS, backed by a reviewer probe. A
+      guard needs a nested-vitest harness, which the repo does not have.
+    - A filtered run still records a false ratchet:
+      `TEST_UPDATE=1 vitest run --project api <one file>` recorded 12
+      unreached. **Owner call:** refuse to record over a filtered run, and
+      say so at docs/10-api.md:297.
+    - `specs/component/quote-status.test.tsx` proves how the browser
+      behaves, and guards no package code. docs/16's "the proof" could say
+      so.
+    - `hono.adapter.test.ts:84` is titled "neither text nor binary", but
+      its YAML input is now a named text type. Rename it, or test YAML with
+      a body that would parse as JSON.
+    - ADR-006:195-208 still counts the gone repro's directive in its 66/15
+      figures, and line 201 is unwrapped.
+- **Runtime-and-surface follow-ups** (branch
+  `vision17-test-runtime-followups`, `9ec9d721`…`8c9d6ccb`, 10 commits).
+  Review `integrate`. What it closed: a spec's os agrees with the run's,
+  and a spec leaves its device to `mobile({ device })`. The own-fixes pass
+  keeps a plugin the root arms through `extends`, and one `make fix`
+  settles a subtree under a nested oxlint config. It stops on a config
+  oxlint could not load, reads a JSON config as oxlint does, and resolves
+  an extended JSON's override plugins from its folder. The C27 and C15
+  rows say their fixers rewrite whole relative literals. The green line
+  counts `routes/unreached` as held. What stays open:
+    - The JSONC reader's escape branch (ratchet-own-fixes.ts:245) is
+      unpinned: `end += 1` stays green. Add a string with an escaped quote
+      followed by `//`.
+    - The C27 warning (`copyAdvice`, checker-crossfile.ts:1370) still says
+      `make fix` rewrites "every path that named a copy", and so does the
+      comment at checker-subject.ts:692. Narrow both to whole relative
+      literals.
+    - **Product defect, open.** The run's Appium server is spawned
+      `detached` (serve.adapter.ts:124). It and every ServeAdapter child
+      outlive a SIGKILLed vitest. Only the fixture's stand-in was fixed.
+      The runner's mobile setup needs a parent watchdog.
+    - The green line's "N held across M rules" now counts
+      `routes/unreached` as a rule. **Owner call:** keep it, or print
+      "entries". Check whether package-typescript parses the line.
+    - The case "the wrapper carries `extends`…" pins a string `extends` in
+      a JS config, which oxlint 1.85 refuses. Rewrite it over a JSON root.
+- **Capability filing follow-ups** (branch
+  `vision17-test-filing-followups`, `d2a45edb`…`50e60f44`, 14 commits).
+  Review `integrate`. What it closed, which covers most of Batch 2's
+  filing list: the mobile specimen is `specimen-mobile`, and `params` is a
+  matrix row. C1 refuses a runner parked in a folder with no test. C35
+  files a spec under its own facet's column. A specimen is what a server
+  command runs, so `initiation-errors` moved to `api/services/`.
+  integration's folders are guarded, and `intercepts/` is `intercept/`.
+  The `with()` headers spec is under `api/headers/`. The run holds
+  `test: { methodless }` to the app's route table, by the route's shape.
+  The session spec's env leak under `make test-mobile` is fixed. What stays
+  open:
+    - Batch 2's filing bullets and its headers line are still worded as
+      open. The commits above close them. Their `specs/` prefixes were
+      stripped to quiet the Markdown pass, and that workaround can go once
+      the bullets are folded.
+    - Nothing pins the rule that the method-less list is judged against
+      the app's own table and not against the OpenAPI one
+      (route-coverage.ts:108). Two mutations stay green. Add the two cases
+      the review names.
+    - docs/18-conventions.md:181 says the list "cannot drift from the app".
+      That is false for an app known only by its OpenAPI document.
+    - `RUNS_A_COMMAND` (lint/specimen.ts:52) misses the shorthand
+      `server: { command }` that its own rule prose writes.
+    - Two specimen guards are unpinned: the `;` boundary in `constHolding`
+      and the `command` test in `runsAServerCommand`.
+    - `specs/shared/fixtures/orders/` is now a specimen. It is not named
+      `specimen-*`, and docs/03's pool sentence does not list it. Any
+      import of the shared fixtures counts for an integration spec. This
+      needs an **owner call** on the name.
+    - Out of the unit's area, but needed: `src/model/routes/routes.ts`,
+      `src/settings.ts` and docs/10-api.md.
+    - `make test-mobile` on a real simulator was not run (HYPOTHESIS).
+
+The three worktrees (`pt-bodies-followups`, `pt-runtime-followups`,
+`pt-filing-followups`) and their branches are removed.
