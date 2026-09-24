@@ -196,6 +196,10 @@ A file holds at most 400 lines (C33); past it, the tests usually group by a pref
 
 A test's body spans at most 60 lines of gestures (C34), in a module test as in a spec; the value a `toMatch` compares is the claim, not a gesture, and C28 caps it instead. The toolchain's function cap leaves a test file alone, because the file's one `describe` is a function as long as the file; the cap it would have put on each test is this one.
 
+### A specimen's spec
+
+A framework specifies itself against apps it keeps as ground, under `specs/shared/fixtures/` — SPECIMENS, not the project's product. A spec whose runner drives one (its specification module, or the one that module builds on, names the shared fixtures: the root, the app module, the binary) specifies the FRAMEWORK, and the route, the job or the command the specimen answers on is no subject of the project: C29 and C30 leave it alone. An application's specs keep the route's folder — its routes are its product.
+
 ### What a file shares
 
 A file shares only what its tests share. A SETTING every chain of a file repeats — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)` — is stated once, on a view of the facet: `const events = api.with({ clock: '2026-03-04T09:30:00Z' })`, every chain of `events` starting with it and its own setups merging over it. A seed and a contract are the Given of one test and stay on its chain; B16w warns on the setting every chain repeats, and `make fix` declares the view. A file-level expectation serves two tests or more, and one a single test reads is written in that test (D28). An expectation is never imported from another module of the specs tree (D29): a helper the test calls, a contract, the runner are imports; the value a matcher compares is the test's own. The product's own data is the subject's, not an expectation — a spec may compare against `package.json`'s version or a constant the product exports.

@@ -511,6 +511,27 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         expect([...checkOneSubject(root), ...checkSubjectFolder(root)]).toStrictEqual([]);
     });
 
+    test('a spec of a specimen is no subject: its routes are neither split nor filed', () => {
+        // Given - a runner driving a specimen, and a spec under seed/ reaching two of its routes
+        const root = specsTree({
+            'api/api.specification.ts':
+                "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n",
+            'api/seed/ordering.spec.ts': [
+                "import { api } from '../api.specification.js';",
+                "test('a', async () => { await api.get('/users'); });",
+                "test('b', async () => { await api.post('/orders', {}); });",
+                '',
+            ].join('\n'),
+        });
+
+        // Then - neither C29 nor C30 reads it, and the fixer leaves it where it is
+        expect([
+            ...checkOneSubject(root),
+            ...checkSubjectFolder(root),
+            ...fixSubjects(root),
+        ]).toStrictEqual([]);
+    });
+
     test('the types a moved helper reads move with it, and a type only the tests read stays', () => {
         // Given - three routes: two share a helper typed by an alias and an interface and a type they read themselves, one reads only the interface
         const root = specsTree({

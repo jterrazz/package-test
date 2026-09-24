@@ -6,6 +6,7 @@ import { forgetTree, moveKeepingHistory, treeEntries, treeKind } from '../src/se
 import { listFiles, repointModuleTests, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
 import { projectRootOf } from './role.js';
+import { specimenOf } from './specimen.js';
 import {
     ambiguousSegment,
     closingOf,
@@ -23,7 +24,8 @@ import { testSettingsAt } from './test-settings.js';
 
 /**
  * C29 and C30 — a spec file is about ONE subject, filed under that subject's
- * standard name.
+ * standard name. A spec of a specimen (`lint/specimen.ts`) is out of their
+ * reach: it is filed by the capability it specifies.
  *
  * The subject is what the file's chains reach (`lint/subject.ts`): a route, a
  * job, a command, a page, a journey. A file that reaches several is several
@@ -175,11 +177,16 @@ function readSpec(specsRoot: string, file: string): SpecRead {
     return { facet, file, reading, subjects, tests, text };
 }
 
-/** Every `.spec.ts` of a facet whose chains reach a subject. */
+/**
+ * Every `.spec.ts` of a facet whose chains reach a subject of the project's
+ * own app — a spec of a specimen is filed by its capability, never by
+ * the route, the job or the command it reaches.
+ */
 function subjectSpecs(specsRoot: string): SpecRead[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts'))
         .filter((file) => (SUBJECT_FACETS as readonly string[]).includes(facetOf(specsRoot, file)))
-        .map((file) => readSpec(specsRoot, file));
+        .map((file) => readSpec(specsRoot, file))
+        .filter((spec) => specimenOf(spec.file, spec.text) === undefined);
 }
 
 /** The 1-based line and column of an offset. */
