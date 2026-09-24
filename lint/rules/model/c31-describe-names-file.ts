@@ -56,7 +56,7 @@ function importDescribe(fixer: RuleFixer, statements: AstNode[]): Fix | undefine
         return undefined;
     }
     const [first] = specifiers;
-    if (first !== undefined && first.type === 'ImportSpecifier') {
+    if (first?.type === 'ImportSpecifier') {
         return fixer.insertTextBeforeRange([nodeStart(first), nodeStart(first)], 'describe, ');
     }
     const [top] = statements;

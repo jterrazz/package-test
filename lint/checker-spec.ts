@@ -773,6 +773,18 @@ export function checkSpecDescriptionsUnique(rootDir: string): TokenViolation[] {
 
 // ── Fix ──
 
+/** Put the keys `order` names in its order, in the slots they already hold. */
+function reorder(map: YAMLMap, order: readonly string[]): void {
+    const known = pairsOf(map).filter((pair) => order.includes(keyName(pair) ?? ''));
+    const sorted = [...known].sort(
+        (a, b) => order.indexOf(keyName(a)!) - order.indexOf(keyName(b)!),
+    );
+    let cursor = 0;
+    map.items = pairsOf(map).map(
+        (pair) => (order.includes(keyName(pair) ?? '') ? sorted[cursor++] : pair) ?? pair,
+    );
+}
+
 /**
  * Apply the two fixable passes to one document: reorder its keys, and re-style
  * every stream as a block scalar. Returns `null` when nothing moved — the
@@ -785,16 +797,6 @@ export function fixSpecDocument(text: string, rel: string): null | string {
     } catch {
         return null;
     }
-    const reorder = (map: YAMLMap, order: readonly string[]): void => {
-        const known = pairsOf(map).filter((pair) => order.includes(keyName(pair) ?? ''));
-        const sorted = [...known].sort(
-            (a, b) => order.indexOf(keyName(a)!) - order.indexOf(keyName(b)!),
-        );
-        let cursor = 0;
-        map.items = pairsOf(map).map(
-            (pair) => (order.includes(keyName(pair) ?? '') ? sorted[cursor++] : pair) ?? pair,
-        );
-    };
     const map = documentMap(file);
     if (map === null) {
         return null;

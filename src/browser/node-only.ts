@@ -32,7 +32,6 @@ export function refuse(name: string): never {
  * lose the one thing the stub exists to say — which name it reached for.
  */
 export const nodeOnlyClass = (name: string): never =>
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the stub is deliberately narrower than the class it stands in for: constructing it is the only thing a page may do with it, and that throws
     function NodeOnly(): never {
         return refuse(name);
     } as never;

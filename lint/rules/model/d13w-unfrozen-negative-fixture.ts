@@ -18,7 +18,7 @@ import { isTestRole, roleOf } from '../../role.js';
  */
 function hasFrozenOption(args: AstNode[]): boolean {
     const options = args[1];
-    if (options === undefined || options.type !== 'ObjectExpression') {
+    if (options?.type !== 'ObjectExpression') {
         return false;
     }
     const frozen = findProperty(options, 'frozen');

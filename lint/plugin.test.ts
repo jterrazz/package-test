@@ -430,27 +430,58 @@ describe('testing fragment — standalone oxlint config', () => {
     });
 });
 
+/** The files a citation can live in — the corpus a reader follows. */
+const citingFiles = (): string[] => {
+    const found: string[] = [];
+    for (const root of ['docs', 'skills']) {
+        for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
+            const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
+            // A decision record is written once and never edited: it names
+            // The rules its decision REMOVED, and those ids resolve to
+            // Nothing by design.
+            if (path.endsWith('.md') && !path.startsWith('docs/decisions/')) {
+                found.push(path);
+            }
+        }
+    }
+    found.push('README.md');
+    return found;
+};
+
+/** Every file of the LAYER that implements the surface — comments cite too. */
+const citingSources = (): string[] => {
+    const found: string[] = [];
+    for (const root of ['src', 'specs']) {
+        for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
+            const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
+            if (path.endsWith('.ts') || path.endsWith('.tsx')) {
+                found.push(path);
+            }
+        }
+    }
+    return found;
+};
+
+/** What a name may resolve to: a rule, a pass, a row — and the cases named after one. */
+const knownNames = (): Set<string> =>
+    new Set([
+        ...Object.keys(plugin.rules),
+        ...CHECKER_PASS_IDS,
+        ...catalog.map((entry) => entry.name),
+        // A fixture tree is named after the rule it stands for, with a tail
+        // Saying which case it holds — the inventory meta-test already pairs
+        // Each of them with its rule, so the directory listing IS the vocabulary.
+        ...readdirSync(resolve(ROOT, 'specs/lint/checker/fixtures/lint-violations')),
+        // A golden is named after the case it holds, which is the rule's
+        // Name plus what the run did to the tree.
+        ...readdirSync(resolve(ROOT, 'specs/lint/checker/expected')).map((file) =>
+            file.replace(/\.[a-z]+$/u, ''),
+        ),
+    ]);
+
 describe('conventions catalogue — the channels answer for themselves (meta-test)', () => {
     /** Every id the catalogue publishes, as the corpus would cite it. */
     const rowIds = new Set(catalog.map((entry) => entry.id));
-
-    /** The files a citation can live in — the corpus a reader follows. */
-    const citingFiles = (): string[] => {
-        const found: string[] = [];
-        for (const root of ['docs', 'skills']) {
-            for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
-                const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
-                // A decision record is written once and never edited: it names
-                // The rules its decision REMOVED, and those ids resolve to
-                // Nothing by design.
-                if (path.endsWith('.md') && !path.startsWith('docs/decisions/')) {
-                    found.push(path);
-                }
-            }
-        }
-        found.push('README.md');
-        return found;
-    };
 
     /** The letters a family is spelled with — what makes a citation one. */
     const letters = Object.keys(FAMILIES).join('');
@@ -477,20 +508,6 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         new RegExp(String.raw`\b([${letters}]\d+w?)'s\b`, 'gu'),
     ];
 
-    /** Every file of the LAYER that implements the surface — comments cite too. */
-    const citingSources = (): string[] => {
-        const found: string[] = [];
-        for (const root of ['src', 'specs']) {
-            for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
-                const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
-                if (path.endsWith('.ts') || path.endsWith('.tsx')) {
-                    found.push(path);
-                }
-            }
-        }
-        return found;
-    };
-
     /** Every rule id a text cites, in any of the four shapes, its warning tail dropped. */
     const idsCitedIn = (text: string): string[] =>
         citationPatterns().flatMap((pattern) =>
@@ -512,23 +529,6 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
                 ),
             ),
         ].map((match) => match[1] ?? '');
-
-    /** What a name may resolve to: a rule, a pass, a row — and the cases named after one. */
-    const knownNames = (): Set<string> =>
-        new Set([
-            ...Object.keys(plugin.rules),
-            ...CHECKER_PASS_IDS,
-            ...catalog.map((entry) => entry.name),
-            // A fixture tree is named after the rule it stands for, with a tail
-            // Saying which case it holds — the inventory meta-test already pairs
-            // Each of them with its rule, so the directory listing IS the vocabulary.
-            ...readdirSync(resolve(ROOT, 'specs/lint/checker/fixtures/lint-violations')),
-            // A golden is named after the case it holds, which is the rule's
-            // Name plus what the run did to the tree.
-            ...readdirSync(resolve(ROOT, 'specs/lint/checker/expected')).map((file) =>
-                file.replace(/\.[a-z]+$/u, ''),
-            ),
-        ]);
 
     test('k2 — a citation that resolves to nothing is caught, in every shape it takes', () => {
         // Given - one false id in each of the four citation shapes, beside a true one, and a false name beside a true one
@@ -682,6 +682,14 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
     });
 });
 
+/** The rules a standalone config enables, by name. */
+const rulesOf = (path: string): string[] => {
+    const parsed: unknown = JSON.parse(read(path));
+    const rules =
+        typeof parsed === 'object' && parsed !== null && 'rules' in parsed ? parsed.rules : {};
+    return typeof rules === 'object' && rules !== null ? Object.keys(rules) : [];
+};
+
 describe('conventions catalogue — E2E inventory (meta-test)', () => {
     // A rule's E2E specification takes one of two forms: its documents in
     // `specs/lint/<id>/` with their fixtures beside them, or a
@@ -758,14 +766,6 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
 
     test('the reach config enables exactly the rules the standard one does', () => {
         // Given - the two standalone configs the lint E2E specs run with
-        const rulesOf = (path: string): string[] => {
-            const parsed: unknown = JSON.parse(read(path));
-            const rules =
-                typeof parsed === 'object' && parsed !== null && 'rules' in parsed
-                    ? parsed.rules
-                    : {};
-            return typeof rules === 'object' && rules !== null ? Object.keys(rules) : [];
-        };
 
         // Then - the reach fixture is judged by the SAME catalogue; only C1's declared depth differs, which is what the fixture is there to state
         expect(rulesOf('specs/fixtures/lint-cli/oxlint.reach.json').toSorted()).toStrictEqual(
@@ -863,15 +863,15 @@ function pages(): string[] {
     return found.filter((path) => existsSync(resolve(ROOT, path)));
 }
 
-describe('the corpus’ own coordinates (meta-test K8)', () => {
-    /** Where a link lands on disk, from the page that carries it. */
-    const landingOf = (coordinate: Coordinate): string => {
-        const file = coordinate.target.split('#')[0];
-        return file === undefined || file === ''
-            ? resolve(ROOT, coordinate.from)
-            : resolve(ROOT, coordinate.from, '..', file);
-    };
+/** Where a link lands on disk, from the page that carries it. */
+const landingOf = (coordinate: Coordinate): string => {
+    const file = coordinate.target.split('#')[0];
+    return file === undefined || file === ''
+        ? resolve(ROOT, coordinate.from)
+        : resolve(ROOT, coordinate.from, '..', file);
+};
 
+describe('the corpus’ own coordinates (meta-test K8)', () => {
     test('k8 — every relative link lands on a file, and every anchor on a heading', () => {
         // Given - the pages, and the anchors each of them offers
         const texts = new Map(

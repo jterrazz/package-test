@@ -21,7 +21,7 @@ export function dedent(text: string): string {
     }
     const lines = text.slice(1).split('\n');
     const last = lines.at(-1);
-    if (last !== undefined && last.trim() === '') {
+    if (last?.trim() === '') {
         lines[lines.length - 1] = '';
     }
     const indents = lines

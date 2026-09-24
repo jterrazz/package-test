@@ -59,7 +59,7 @@ export function readFileCached(path: string): null | string {
     }
     const changedAt = statSync(path, { throwIfNoEntry: false })?.mtimeMs ?? 0;
     const cached = fileContents.get(path);
-    if (cached !== undefined && cached.changedAt === changedAt) {
+    if (cached?.changedAt === changedAt) {
         return cached.text;
     }
     let text: null | string;
