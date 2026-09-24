@@ -38,6 +38,7 @@ import { c26DiskNamedInTheTest } from './rules/model/c26-disk-named-in-the-test.
 import { c31DescribeNamesFile } from './rules/model/c31-describe-names-file.js';
 import { c32AspectName } from './rules/model/c32-aspect-name.js';
 import { c33FileSize } from './rules/model/c33-file-size.js';
+import { c34TestBodySize } from './rules/model/c34-test-body-size.js';
 import { d2AwaitIoMatcher } from './rules/model/d2-await-io-matcher.js';
 import { d2wAwaitSyncMatcher } from './rules/model/d2w-await-sync-matcher.js';
 import { d6wTransformTokenEquivalent } from './rules/model/d6w-transform-token-equivalent.js';
@@ -110,6 +111,7 @@ const plugin: LintPlugin = {
         'c31-describe-names-file': c31DescribeNamesFile,
         'c32-aspect-name': c32AspectName,
         'c33-file-size': c33FileSize,
+        'c34-test-body-size': c34TestBodySize,
         'c4-contract-shape': c4ContractShape,
         'c6-tomatch-extension': c6ToMatchExtension,
         'c7-seeds-sql-only': c7SeedsSqlOnly,

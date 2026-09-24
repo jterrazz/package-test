@@ -386,6 +386,18 @@ export const RULE_DOCS = {
             'A file past a few hundred lines asks several questions of its subject, and a reader looking for one scrolls through the others; a cap written as a number is the one a reviewer does not have to argue.',
         reach: 'spec',
     },
+    'c34-test-body-size': {
+        channel: 'statique',
+        convention:
+            'A test body spans at most 60 lines — the function a `test(…)`/`it(…)` runs, from the line it opens on to the line it closes on, blank lines and comments included; a longer one is refused at the function. A body already past it is recorded on the ratchet and may only shrink.',
+        facet: 'model',
+        family: 'C',
+        fix: 'Split it into one test per behaviour, or move a long Given into a function the test calls.',
+        id: 'C34',
+        rationale:
+            "A test past a screen asks several things of its subject, and the one that fails is the one a reader has to find; the toolchain's function cap leaves a test file alone, because a file's one `describe` is a function as long as the file, so this cap is the test's own.",
+        reach: 'tests',
+    },
     'd16-sampled-oracle': {
         channel: 'statique',
         convention:

@@ -31,6 +31,7 @@
         "jterrazz/c31-describe-names-file": "error",
         "jterrazz/c32-aspect-name": "error",
         "jterrazz/c33-file-size": "error",
+        "jterrazz/c34-test-body-size": "error",
         "jterrazz/d20-whole-result": "error",
         "jterrazz/d28-shared-expectation": "error",
         "jterrazz/d29-no-foreign-expectation": "error",

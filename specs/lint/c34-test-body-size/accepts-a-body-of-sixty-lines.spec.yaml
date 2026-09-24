@@ -1,0 +1,5 @@
+description: a test whose body spans sixty lines passes
+fixture: ./fixtures/short/
+runs:
+    - command: .
+      exit: 0
