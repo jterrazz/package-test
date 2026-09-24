@@ -1,6 +1,6 @@
 import type { TestProject } from 'vitest/node';
 
-import { specimen } from '../mobile-app/specimen.js';
+import { specimen } from '../specimen-mobile/specimen.js';
 import { startAppiumDouble } from './server.js';
 
 /**

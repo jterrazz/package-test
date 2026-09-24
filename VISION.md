@@ -2490,7 +2490,7 @@ import.meta.url)` — for existence; a bare literal and a command string are
   The double is a fixture, `specs/shared/fixtures/appium-double/` (the
   specs reach it beside the public entry, F3): the W3C endpoints the
   adapter calls, the predicate subset parsed, `unknown command` for the
-  rest. The app is data, `specs/shared/fixtures/mobile-app/specimen.ts`.
+  rest. The app is data, `specs/shared/fixtures/specimen-mobile/specimen.ts`.
   Red: the declared server ignored, each capability dropped or unstripped,
   the double drawing everything invisible.
 - **Every mobile cell** (`2e7f36dd`). Four journeys — `launch/`,
@@ -2498,7 +2498,7 @@ import.meta.url)` — for existence; a bare literal and a command string are
   matrix's last mobile exemptions and the M1-only meta-test go. Red, on the
   11 cases: tap, fill, see, scope, scroll-into-view, the backend, the
   projection, the services, the double's `==`, each broken in turn.
-- **B** (`a7e1d4d1`). Specimen in SwiftUI (`mobile-app/ios/`, one file,
+- **B** (`a7e1d4d1`). Specimen in SwiftUI (`specimen-mobile/ios/`, one file,
   built with `swiftc` — no Xcode project); `make test-mobile` builds,
   boots the simulator `specimen.ts` names, installs, starts a pinned
   Appium + XCUITest driver under `.artifacts/mobile/`, and runs the

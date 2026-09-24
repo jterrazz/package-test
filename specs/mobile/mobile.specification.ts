@@ -1,7 +1,7 @@
 import { process as processService, specification } from '@jterrazz/test';
 import { afterAll, inject } from 'vitest';
 
-import { simulator, specimen } from '../shared/fixtures/mobile-app/specimen.js';
+import { simulator, specimen } from '../shared/fixtures/specimen-mobile/specimen.js';
 
 /**
  * The mobile runner, over Specimen. `make test-mobile` names a real Appium
@@ -24,7 +24,7 @@ export const { backendUrl, cleanup, mobile } = await specification.mobile({
     backend: {},
     device: simulator,
     // The app's own folder: the commands its services run are the app's.
-    root: '../shared/fixtures/mobile-app',
+    root: '../shared/fixtures/specimen-mobile',
     services: { notes },
     // A verb gives the app five seconds to draw what it names; the first
     // Session on a cold simulator builds WebDriverAgent, which takes minutes.

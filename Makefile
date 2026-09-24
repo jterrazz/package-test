@@ -42,4 +42,4 @@ check: node_modules/.install
 # Tells the truth about a device. Needs Xcode and a simulator; no CI job runs
 # It, and `check` never calls it (docs/03 § the mobile tree).
 test-mobile: build
-	node specs/shared/fixtures/mobile-app/on-simulator.mjs
+	node specs/shared/fixtures/specimen-mobile/on-simulator.mjs
