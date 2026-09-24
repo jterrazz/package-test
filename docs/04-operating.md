@@ -39,7 +39,7 @@ The package refuses to guess at its environment, so several things it uses are t
     in package.json (or `only-built-dependencies` in .npmrc) and reinstall.
     ```
 
-    **A native peer has a second way of not being there**, and it is the one that costs an afternoon: the package installed, and its `.node` never compiled, because the package manager withheld the install script — npm since 11, pnpm since 10 and bun since 1.2 all do, by default. `sqlite()` opens one in-memory database the first time it loads the driver, so that failure is caught where it can be named rather than surfacing as a `bindings` stack trace from whichever spec seeded first:
+    **A native peer has a second way of not being there**, and it is the one that costs an afternoon: the package installed, and its `.node` never compiled, because the package manager withheld the install script — npm since 11, pnpm since 10 and bun since 1.2 all do, by default. It is `better-sqlite3` 12's: the peer range takes `^12.11.1 || ^13`, and 13 ships its binding prebuilt, so it loads with no install script at all. `sqlite()` opens one in-memory database the first time it loads the driver, so that failure is caught where it can be named rather than surfacing as a `bindings` stack trace from whichever spec seeded first:
 
     ```
     sqlite() found `better-sqlite3` but its native binding is not built — npm does not run a

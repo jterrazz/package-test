@@ -19,7 +19,7 @@ The repository answers six `make` targets, the same six every repository of the 
 
 Every target installs first. CI calls `build`, `lint` and `test` — [03 — Testing](03-testing.md) § What CI runs. Two gestures sit below the six, for the loop: `npx vitest --run --project unit` runs the fast suite with no infrastructure, and `npm run docs` regenerates the generated tables.
 
-`better-sqlite3` is a native dependency, and an npm that does not run install scripts by default leaves it unbuilt: the `sqlite()` specs of the `unit` project then fail on a missing binding. `npm rebuild better-sqlite3` after the install fixes it, once per checkout.
+`better-sqlite3` is a native dependency, and this repository runs its 13 line, which ships its binding prebuilt for every platform it supports: an npm that withholds install scripts leaves nothing unbuilt, so the `sqlite()` specs of the `unit` project need no rebuild after `npm ci`.
 
 ### The build comes first
 
