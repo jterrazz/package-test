@@ -1,4 +1,4 @@
-description: a test whose body spans more than sixty lines is refused at its function
+description: a test whose body spans more than sixty lines of gestures is refused at its function
 fixture: ./fixtures/long/
 runs:
     - command: .

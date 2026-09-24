@@ -389,7 +389,7 @@ export const RULE_DOCS = {
     'c34-test-body-size': {
         channel: 'statique',
         convention:
-            'A test body spans at most 60 lines — the function a `test(…)`/`it(…)` runs, from the line it opens on to the line it closes on, blank lines and comments included; a longer one is refused at the function. A body already past it is recorded on the ratchet and may only shrink.',
+            'A test body spans at most 60 lines of gestures — the function a `test(…)`/`it(…)` runs, from the line it opens on to the line it closes on, blank lines and comments included, less the lines a `toMatch(<value>)` argument holds past the one it opens on: the claim is capped by C28, not here; a longer one is refused at the function. A body already past it is recorded on the ratchet and may only shrink.',
         facet: 'model',
         family: 'C',
         fix: 'Split it into one test per behaviour, or move a long Given into a function the test calls.',

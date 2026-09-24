@@ -189,7 +189,7 @@ The file name is the aspect, and the file's one top-level `describe` is titled w
 
 A file holds at most 400 lines (C33); past it, the tests usually group by a prefix of their titles, and that is where the file is cut.
 
-A test's body spans at most 60 lines (C34), in a module test as in a spec. The toolchain's function cap leaves a test file alone, because the file's one `describe` is a function as long as the file; the cap it would have put on each test is this one.
+A test's body spans at most 60 lines of gestures (C34), in a module test as in a spec; the value a `toMatch` compares is the claim, not a gesture, and C28 caps it instead. The toolchain's function cap leaves a test file alone, because the file's one `describe` is a function as long as the file; the cap it would have put on each test is this one.
 
 ### What a file shares
 

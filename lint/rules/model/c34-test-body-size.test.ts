@@ -8,11 +8,28 @@ function testOf(lines: number, opener = "test('a', () => {"): string {
     return [opener, ...Array.from({ length: lines - 2 }, () => '    // …'), '});'].join('\n');
 }
 
+/** A test of `gestures` lines of gestures whose one assertion's `toMatch` value spans `claim` lines. */
+function claimedTestOf(gestures: number, claim: number): string {
+    const value = ['`', ...Array.from({ length: claim - 2 }, () => '        line'), '    `'];
+    return [
+        "test('a', () => {",
+        ...Array.from({ length: gestures - 3 }, () => '    // …'),
+        `    expect(result).toMatch(${value.join('\n')});`,
+        '});',
+    ].join('\n');
+}
+
 ruleTester().run('c34-test-body-size', asOxlintRule(c34TestBodySize), {
     invalid: [
         {
             code: testOf(MAX_TEST_LINES + 1),
-            errors: [{ message: /found: a test body of 61 lines, over 60/u }],
+            errors: [{ message: /found: a test body of 61 lines of gestures, over 60/u }],
+            filename: SPEC,
+        },
+        // A `toMatch` value spares its own lines, never the gestures around it.
+        {
+            code: claimedTestOf(MAX_TEST_LINES + 1, 5),
+            errors: [{ message: /found: a test body of 61 lines of gestures, over 60/u }],
             filename: SPEC,
         },
         // Every form of the test call: `it`, a modifier, a table.
@@ -37,6 +54,9 @@ ruleTester().run('c34-test-body-size', asOxlintRule(c34TestBodySize), {
     ],
     valid: [
         { code: testOf(MAX_TEST_LINES), filename: SPEC },
+        // The claim is not counted: twenty lines of gestures and a ninety-line inline expectation.
+        { code: claimedTestOf(20, 90), filename: SPEC },
+        { code: claimedTestOf(MAX_TEST_LINES, 90), filename: SPEC },
         // The file's describe is as long as the file: only the test is capped.
         {
             code: `describe('pagination', () => {\n${testOf(MAX_TEST_LINES)}\n${testOf(MAX_TEST_LINES)}\n});`,

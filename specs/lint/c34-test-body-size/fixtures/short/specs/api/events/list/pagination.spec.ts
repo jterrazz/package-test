@@ -5,6 +5,59 @@ import { api } from '../../api.specification.js';
 describe('pagination', () => {
     test('pagination — the first page', async () => {
         // Given - the events the app holds
+
+        // the app holds event 1
+        // the app holds event 2
+        // the app holds event 3
+        // the app holds event 4
+        // the app holds event 5
+        // the app holds event 6
+        // the app holds event 7
+        // the app holds event 8
+        // the app holds event 9
+        // the app holds event 10
+        // the app holds event 11
+        // the app holds event 12
+        // the app holds event 13
+        // the app holds event 14
+        // the app holds event 15
+        // the app holds event 16
+        // the app holds event 17
+        // the app holds event 18
+        // the app holds event 19
+        // the app holds event 20
+        // the app holds event 21
+        // the app holds event 22
+        // the app holds event 23
+        // the app holds event 24
+        // the app holds event 25
+        // the app holds event 26
+        // the app holds event 27
+        // the app holds event 28
+        // the app holds event 29
+        // the app holds event 30
+        // the app holds event 31
+        // the app holds event 32
+        // the app holds event 33
+        // the app holds event 34
+        // the app holds event 35
+        // the app holds event 36
+        // the app holds event 37
+        // the app holds event 38
+        // the app holds event 39
+        // the app holds event 40
+        // the app holds event 41
+        // the app holds event 42
+        // the app holds event 43
+        // the app holds event 44
+        // the app holds event 45
+        // the app holds event 46
+        // the app holds event 47
+        // the app holds event 48
+        // the app holds event 49
+        // the app holds event 50
+        // the app holds event 51
+        // the app holds event 52
         const result = await api.get('/events?page=0');
 
         // Then - the whole page
@@ -12,54 +65,7 @@ describe('pagination', () => {
             HTTP/1.1 200 OK
 
             [
-                { "id": 1 },
-                { "id": 2 },
-                { "id": 3 },
-                { "id": 4 },
-                { "id": 5 },
-                { "id": 6 },
-                { "id": 7 },
-                { "id": 8 },
-                { "id": 9 },
-                { "id": 10 },
-                { "id": 11 },
-                { "id": 12 },
-                { "id": 13 },
-                { "id": 14 },
-                { "id": 15 },
-                { "id": 16 },
-                { "id": 17 },
-                { "id": 18 },
-                { "id": 19 },
-                { "id": 20 },
-                { "id": 21 },
-                { "id": 22 },
-                { "id": 23 },
-                { "id": 24 },
-                { "id": 25 },
-                { "id": 26 },
-                { "id": 27 },
-                { "id": 28 },
-                { "id": 29 },
-                { "id": 30 },
-                { "id": 31 },
-                { "id": 32 },
-                { "id": 33 },
-                { "id": 34 },
-                { "id": 35 },
-                { "id": 36 },
-                { "id": 37 },
-                { "id": 38 },
-                { "id": 39 },
-                { "id": 40 },
-                { "id": 41 },
-                { "id": 42 },
-                { "id": 43 },
-                { "id": 44 },
-                { "id": 45 },
-                { "id": 46 },
-                { "id": 47 },
-                { "id": 48 }
+                { "id": 1 }
             ]
         `);
     });
