@@ -75,7 +75,7 @@ await cli.fixtureDirectory('../../fixtures/shop/').exec('build'); // the shared 
 - `seed()`, `request()`, `fixture()` and the file form of `toMatch(name)` are
   removed. `toMatch`, `toBe`, `toContain` keep their Vitest meaning: a string
   is a value.
-- `$FIXTURES/` is removed. The shared pool is `specs/fixtures/`, reached by a
+- `$FIXTURES/` is removed. The shared pool is `<specs>/fixtures/`, reached by a
   relative path. A path may leave its leaf only to reach the pool (C15
   restated); anything else is an error.
 - The `.spec.yaml` documents follow the same law: `fixture: ./fixtures/shop/`.
@@ -85,13 +85,13 @@ await cli.fixtureDirectory('../../fixtures/shop/').exec('build'); // the shared 
 
 ## 2. Ground folders are bare, reserved names
 
-| 16                             | 17                | Holds                                          |
-| ------------------------------ | ----------------- | ---------------------------------------------- |
-| `_fixtures/`                   | `fixtures/`       | input files and file-system state              |
-| `_seeds/`                      | `seeds/`          | database state, `.sql`                         |
-| `_requests/`                   | `requests/`       | input requests, `.http`                        |
-| `_expected/`                   | `expected/`       | everything asserted, response `.http` included |
-| `_fixtures/` at the specs root | `specs/fixtures/` | the shared pool                                |
+| 16                             | 17                  | Holds                                          |
+| ------------------------------ | ------------------- | ---------------------------------------------- |
+| `_fixtures/`                   | `fixtures/`         | input files and file-system state              |
+| `_seeds/`                      | `seeds/`            | database state, `.sql`                         |
+| `_requests/`                   | `requests/`         | input requests, `.http`                        |
+| `_expected/`                   | `expected/`         | everything asserted, response `.http` included |
+| `_fixtures/` at the specs root | `<specs>/fixtures/` | the shared pool                                |
 
 - The four names are reserved under `specs/`: C1 refuses a facet, domain or
   suite folder that takes one of them.
@@ -375,12 +375,12 @@ trailing `/` if the grammar stays one key — the branch decides and says so).
 
 The guards, one per level:
 
-| Level     | Guard                                                                                                                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type      | `file()`/`directory()` accept `RelativePath` only; each verb accepts only their branded return (or a value where a value makes sense)                                                         |
-| role      | static rule: the verb and the ground folder agree — `seed` → `seeds/*.sql`, `request`/body → `requests/`, `toMatch` → `expected/`, `fixture` → `fixtures/`                                    |
-| locality  | a path stays in its leaf or reaches `specs/fixtures/`, nothing else (C15); a pool entry one leaf uses moves beside it (C14, autofix); a leaf's ground reached from a sibling is refused (C17) |
-| existence | the checker verifies statically that every `file()`/`directory()` target exists; at runtime a missing target fails with its resolved path                                                     |
+| Level     | Guard                                                                                                                                                                                           |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type      | `file()`/`directory()` accept `RelativePath` only; each verb accepts only their branded return (or a value where a value makes sense)                                                           |
+| role      | static rule: the verb and the ground folder agree — `seed` → `seeds/*.sql`, `request`/body → `requests/`, `toMatch` → `expected/`, `fixture` → `fixtures/`                                      |
+| locality  | a path stays in its leaf or reaches `<specs>/fixtures/`, nothing else (C15); a pool entry one leaf uses moves beside it (C14, autofix); a leaf's ground reached from a sibling is refused (C17) |
+| existence | the checker verifies statically that every `file()`/`directory()` target exists; at runtime a missing target fails with its resolved path                                                       |
 
 ### What the package-test branch decided (iteration 1)
 
@@ -1199,24 +1199,24 @@ body }`, token-aware, an absent part not asserted; `tables:` table →
 
 ## Iteration 11 — the calls on 65 and 69 (orchestrator, 2026-09-23)
 
-| #   | Decision                                                                                                                                                                                                                                                                                                                                                                                                |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 65  | The shared pool is not one `fixtures/` folder but the SPECS ROOT's own ground — `<specs>/fixtures/`, `<specs>/seeds/`, `<specs>/requests/`, `<specs>/expected/`, the four roles one level up. A path leaves its leaf only into one of those (C15); C24 judges the role folder the path lands in, so a shared seed is `specs/seeds/`; C14's move applies to all four; the mover and the chapters follow. |
-| 69  | ajv joins the dev dependencies, and a meta-test validates every `.spec.yaml` of this repository against the published schema — the deliberately invalid fixtures excluded — with a negative case per document kind.                                                                                                                                                                                     |
+| #   | Decision                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 65  | The shared pool is not one `fixtures/` folder but the SPECS ROOT's own ground — `<specs>/fixtures/`, `<specs>/seeds/`, `<specs>/requests/`, `<specs>/expected/`, the four roles one level up. A path leaves its leaf only into one of those (C15); C24 judges the role folder the path lands in, so a shared seed is `<specs>/seeds/`; C14's move applies to all four; the mover and the chapters follow. |
+| 69  | ajv joins the dev dependencies, and a meta-test validates every `.spec.yaml` of this repository against the published schema — the deliberately invalid fixtures excluded — with a negative case per document kind.                                                                                                                                                                                       |
 
 ### What the package-test branch did (iteration 11)
 
 - **65.** C24 kept its reading, the first ground folder, which now lands
-  `../../seeds/x.sql` in `specs/seeds/`; its refusal — the oxlint rule and
+  `../../seeds/x.sql` in `<specs>/seeds/`; its refusal — the oxlint rule and
   the document grammar alike — names where the file goes, so
-  `../../fixtures/seeds/x.sql` is refused naming `specs/seeds/`. C15 admits
+  `../../fixtures/seeds/x.sql` is refused naming `<specs>/seeds/`. C15 admits
   the four root folders. C14 reads the four pools, a file entry as a
   directory, and moves a root seed one leaf reaches for to `<leaf>/seeds/`;
   it now counts every literal `file()`/`directory()` reference, not only
   `.fixture(…)`, or a root seed reached by a document in one leaf and a
   `.seed(file())` in another would have been moved. C9's dead-entry scan
   reads the four. This repository keeps one shared seed,
-  `specs/seeds/two-users.sql`: an api document lays it under its leaf's
+  `<specs>/seeds/two-users.sql`: an api document lays it under its leaf's
   delta, a jobs document seeds it.
 - **69.** `lint/schema-documents.test.ts` walks the 237 documents git keeps.
   "Deliberately invalid" is the parser's verdict, not a hand list: every
@@ -1246,7 +1246,7 @@ body }`, token-aware, an absent part not asserted; `tables:` table →
     leaves, the D25 of seeds, or leave promotion to review?
 78. C9's pool scan counts an entry referenced when any literal of the tree
     CONTAINS its name, so a leaf's `./seeds/two-users.sql` vouches for
-    `specs/seeds/two-users.sql`. Seeds share names far more than fixture
+    `<specs>/seeds/two-users.sql`. Seeds share names far more than fixture
     trees did. Resolve each literal from its file, as C14 does?
 79. The pool law is stated twice: `docs/12-cli.md` § Where a fixture lives
     and `docs/18-conventions.md` § The naming recap. With seeds, requests and
@@ -1297,7 +1297,7 @@ body }`, token-aware, an absent part not asserted; `tables:` table →
 - **78.** A reference is an absolute path: a document's keys and a
   `file()`/`directory()` argument from the file; each word of the other
   literals from the file AND the project root — the website services run
-  `node specs/fixtures/api-app/server.mjs` from the root, the one live
+  `node <specs>/fixtures/api-app/server.mjs` from the root, the one live
   reference no file-relative reading reaches; a template table from the
   folders before its hole. The `file()` arguments get their own pattern:
   the literal scan desyncs after a template with a hole, and four live
@@ -1689,7 +1689,7 @@ target once (static), and a guard removed from either half turns it red.
 The path form is proven on ground and `specs/` (`new URL`, a directory
 `new URL`, `join(import.meta.dirname, …)`, a module-scope binding of
 `import.meta.url`, a `${__dirname}` template, `readFileSync('./…')`); the
-aliases on `specs/fixtures/`; the reach through a non-production module on
+aliases on `<specs>/fixtures/`; the reach through a non-production module on
 a package and on a `specs/` file. The `dist/` row stays `—`: it is the
 toolchain's (below).
 
