@@ -54,6 +54,12 @@ export function evidenceDirectory(prefix: string): string {
 export const SCREENSHOTS_DIR = `${VITEST_ARTIFACTS_DIR}/screenshots`;
 
 /**
+ * Where the blob reporter writes: one file per run, or per shard of a run,
+ * so the shards of one run land side by side for `--merge-reports`.
+ */
+export const BLOB_DIR = `${VITEST_ARTIFACTS_DIR}/blob`;
+
+/**
  * What each file-writing reporter writes, by reporter name.
  *
  * Vitest 5 turned the json and junit reporters into FILE writers (they printed
@@ -62,12 +68,6 @@ export const SCREENSHOTS_DIR = `${VITEST_ARTIFACTS_DIR}/screenshots`;
  * four at once rather than leaving a repository to discover them one CI run at
  * a time.
  */
-/**
- * Where the blob reporter writes: one file per run, or per shard of a run,
- * so the shards of one run land side by side for `--merge-reports`.
- */
-export const BLOB_DIR = `${VITEST_ARTIFACTS_DIR}/blob`;
-
 export const REPORTER_OUTPUT_FILES: Record<string, string> = {
     blob: `${BLOB_DIR}/blob.json`,
     html: `${VITEST_ARTIFACTS_DIR}/html/index.html`,
