@@ -1,4 +1,4 @@
-import type { ContainerPort } from '../../model/ports/container.port.js';
+import type { ContainerPort, ContainerRequest } from '../../model/ports/container.port.js';
 import { loadPeer } from '../peer.js';
 
 /**
@@ -9,18 +9,17 @@ export class TestcontainersAdapter implements ContainerPort {
     private readonly image: string;
     private readonly containerPort: number;
     private readonly env: Record<string, string>;
+    private readonly command: string[] | undefined;
+    private readonly tmpfs: Record<string, string> | undefined;
     private readonly reuse: boolean;
     private container: any = null;
 
-    constructor(options: {
-        image: string;
-        port: number;
-        env?: Record<string, string>;
-        reuse?: boolean;
-    }) {
+    constructor(options: ContainerRequest & { reuse?: boolean }) {
         this.image = options.image;
         this.containerPort = options.port;
         this.env = options.env ?? {};
+        this.command = options.command;
+        this.tmpfs = options.tmpfs;
         this.reuse = options.reuse ?? false;
     }
 
@@ -35,6 +34,14 @@ export class TestcontainersAdapter implements ContainerPort {
 
         for (const [key, value] of Object.entries(this.env)) {
             builder = builder.withEnvironment({ [key]: value });
+        }
+
+        if (this.command !== undefined) {
+            builder = builder.withCommand(this.command);
+        }
+
+        if (this.tmpfs !== undefined) {
+            builder = builder.withTmpFs(this.tmpfs);
         }
 
         if (this.image.startsWith('postgres')) {

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import type { Client } from 'pg';
 
 import { SERVICE_IMAGES } from '../../model/chain/service-images.js';
+import type { ContainerOptions } from '../../model/ports/container.port.js';
 import type { DatabasePort } from '../../model/ports/database.port.js';
 import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
 import type { ServiceHandle } from '../../model/ports/service.port.js';
@@ -28,12 +29,30 @@ export type PostgresOptions = {
     env?: Record<string, string>;
 };
 
+/**
+ * A test database holds nothing worth a crash: its data lives on a memory
+ * disk, and postgres skips every write that only exists to survive one.
+ */
+const DISPOSABLE: ContainerOptions = {
+    command: [
+        'postgres',
+        '-c',
+        'fsync=off',
+        '-c',
+        'synchronous_commit=off',
+        '-c',
+        'full_page_writes=off',
+    ],
+    tmpfs: { '/var/lib/postgresql/data': 'rw' },
+};
+
 export class PostgresHandle implements DatabasePort, ServiceHandle {
     readonly type = 'postgres';
     serviceName: null | string = null;
     readonly defaultPort = 5432;
     readonly defaultImage: string;
     readonly environment: Record<string, string>;
+    readonly containerOptions = DISPOSABLE;
 
     connectionString = '';
     started = false;

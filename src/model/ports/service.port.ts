@@ -1,3 +1,4 @@
+import type { ContainerOptions } from './container.port.js';
 import type { DatabasePort } from './database.port.js';
 import type { IsolationStrategy } from './isolation.port.js';
 
@@ -26,6 +27,9 @@ export type ServiceHandle = {
 
     /** Environment variables to pass to the container. */
     readonly environment: Record<string, string>;
+
+    /** How the container runs beyond its image, port and environment — none when absent. */
+    readonly containerOptions?: ContainerOptions;
 
     /** Connection string — populated after start. */
     connectionString: string;

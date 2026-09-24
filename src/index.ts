@@ -105,7 +105,7 @@ export type {
     ServerRequestOptions,
     ServerResponse,
 } from './model/ports/server.port.js';
-export type { ContainerPort } from './model/ports/container.port.js';
+export type { ContainerOptions, ContainerPort } from './model/ports/container.port.js';
 
 // Services
 export { postgres, type PostgresOptions } from './seams/postgres/postgres.js';

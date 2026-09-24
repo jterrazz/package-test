@@ -96,6 +96,7 @@ export class Orchestrator {
                 image: handle.defaultImage,
                 port: handle.defaultPort,
                 env: { ...handle.environment },
+                ...handle.containerOptions,
             });
             containerServices.push({ container, handle });
         }

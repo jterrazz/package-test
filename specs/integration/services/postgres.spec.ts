@@ -29,6 +29,30 @@ describe('postgres', () => {
         });
     });
 
+    test('runs on a memory disk with every crash-only write turned off', async () => {
+        // Given - the durability settings the started server answers with
+        const result = await integration.call(async ({ db }) => {
+            const { Client } = await import('pg');
+            const client = new Client({ connectionString: db.connectionString });
+            await client.connect();
+            try {
+                const settings = await client.query<{ name: string; setting: string }>(
+                    "SELECT name, setting FROM pg_settings WHERE name IN ('fsync', 'full_page_writes', 'synchronous_commit') ORDER BY name",
+                );
+                return settings.rows.map(({ name, setting }) => [name, setting]);
+            } finally {
+                await client.end();
+            }
+        });
+
+        // Then - a test database pays for no write that only survives a crash
+        expect(result.value).toMatch([
+            ['fsync', 'off'],
+            ['full_page_writes', 'off'],
+            ['synchronous_commit', 'off'],
+        ]);
+    });
+
     test('passes its healthcheck on a reachable container', async () => {
         // Given - the started service asked whether it answers
         const result = await integration.call(async ({ db }) => {

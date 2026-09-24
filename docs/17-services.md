@@ -23,6 +23,8 @@ import { postgres, process, redis, sqlite } from '@jterrazz/test';
 
 The default image is the slim one, pinned by digest: `postgres:17-alpine` and `redis:7-alpine`, each at the digest of its multi-platform index, held in one constant (`src/model/chain/service-images.ts`). Every machine and every run starts the same bytes; a bare tag would move under the suite, and bumping the pin is a deliberate edit of that constant.
 
+A postgres container is disposable, and it is started as one: its data directory is a memory disk (`tmpfs` on `/var/lib/postgresql/data`), and the server runs with `fsync`, `synchronous_commit` and `full_page_writes` off — every write that exists only to survive a crash is skipped. A handle states this as its `containerOptions` (a `command` and `tmpfs` mounts), which the container is started with; a handle of your own may state them too.
+
 After the runner starts, each service handle exposes `.connectionString`, which is what you pass to your app:
 
 ```typescript

@@ -1,4 +1,4 @@
-import type { ContainerPort } from '../ports/container.port.js';
+import type { ContainerPort, ContainerRequest } from '../ports/container.port.js';
 
 /**
  * Integration registry — the seam that keeps `specification/` free of external
@@ -12,11 +12,7 @@ import type { ContainerPort } from '../ports/container.port.js';
 /** The container-runtime factory the testcontainers integration provides. */
 export type ContainerIntegrations = {
     /** Start a single container programmatically (testcontainers). */
-    createContainer: (options: {
-        image: string;
-        port: number;
-        env?: Record<string, string>;
-    }) => ContainerPort;
+    createContainer: (options: ContainerRequest) => ContainerPort;
 };
 
 let containerIntegrations: ContainerIntegrations | null = null;
