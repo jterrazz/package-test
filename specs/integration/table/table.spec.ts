@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../../../src/index.js';
+import { tally } from '../../shared/fixtures/orders/tally.js';
 import { integration } from '../pure.specification.js';
 
 /**
@@ -18,10 +19,7 @@ const CASES = [
 describe('table', () => {
     test.each(CASES)('totals $name', async ({ name, of }) => {
         // Given - the module summing what the row carries
-        const result = await integration.call(() => ({
-            count: of.length,
-            total: of.reduce((sum, each) => sum + each, 0),
-        }));
+        const result = await integration.call(() => tally(of));
 
         // Then - the golden the row names is the oracle
         expect(result.value).toMatch(file(`./expected/${name}.json`));

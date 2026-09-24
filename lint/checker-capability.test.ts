@@ -107,4 +107,20 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
             'surface/misc/grab-bag.spec.ts',
         ]);
     });
+
+    test('an integration spec is filed by capability when its module is the shared fixtures’, and its author’s when inline', () => {
+        // Given - two specs on a module-only runner under a folder the matrix never names
+        const runner = "import { integration } from '../pure.specification.js';\n";
+        const root = specsTree({
+            'integration/pure.specification.ts':
+                'export const { integration } = await specification.integration();\n',
+            'integration/timekeeping/imported.spec.ts': `import { stamp } from '../../shared/fixtures/orders/stamp.js';\n${runner}`,
+            'integration/timekeeping/inline.spec.ts': `${runner}const stamp = () => ({ at: new Date() });\n`,
+        });
+
+        // Then - the one calling the shared fixtures' module is refused; the inline module is out of reach
+        expect(checkCapabilityFolder(root).map(({ file }) => file)).toStrictEqual([
+            'integration/timekeeping/imported.spec.ts',
+        ]);
+    });
 });

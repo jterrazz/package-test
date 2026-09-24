@@ -59,7 +59,7 @@
     "test": {
         "jterrazz/c34-test-body-size": 2,
         "jterrazz/d15w-status-only-probe": 2,
-        "jterrazz/d16w-ambient-value": 10,
+        "jterrazz/d16w-ambient-value": 7,
         "jterrazz/d18w-existence-only-oracle": 12,
         "jterrazz/e9w-env-assignment-in-test": 10,
         "jterrazz/i1-layer-boundaries": 1,
