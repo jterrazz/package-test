@@ -1,4 +1,4 @@
-import { readFileSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -6,6 +6,14 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+
+/** Remove a golden a test wrote, and `expected/` once it holds nothing — git keeps no empty folder. */
+function removeGolden(path: string): void {
+    rmSync(path, { force: true, recursive: true });
+    if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
+        rmdirSync(EXPECTED_DIR);
+    }
+}
 
 describe('tokens', () => {
     test('update mode substitutes the workdir inside JSON (CONVENTIONS D5, text/json parity)', async () => {
@@ -32,7 +40,7 @@ describe('tokens', () => {
             const second = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json-cwd');
             expect(second.json).toMatch(file(`./expected/${fixtureName}`));
         } finally {
-            rmSync(fixturePath, { force: true });
+            removeGolden(fixturePath);
         }
     });
 });

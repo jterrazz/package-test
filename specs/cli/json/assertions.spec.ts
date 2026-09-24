@@ -1,4 +1,12 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+    existsSync,
+    mkdirSync,
+    readdirSync,
+    readFileSync,
+    rmdirSync,
+    rmSync,
+    writeFileSync,
+} from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -6,6 +14,14 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+
+/** Remove a golden a test wrote, and `expected/` once it holds nothing — git keeps no empty folder. */
+function removeGolden(path: string): void {
+    rmSync(path, { force: true, recursive: true });
+    if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
+        rmdirSync(EXPECTED_DIR);
+    }
+}
 
 /** Run a block with TEST_UPDATE=1 so toMatch writes the fixture. */
 function inUpdateMode(block: () => void): void {
@@ -38,7 +54,7 @@ describe('assertions', () => {
             const b = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json');
             expect(b.stdout).toMatch(file(`./expected/${fixtureName}`));
         } finally {
-            rmSync(resolve(EXPECTED_DIR, fixtureName), { force: true });
+            removeGolden(resolve(EXPECTED_DIR, fixtureName));
         }
     });
 
@@ -55,7 +71,7 @@ describe('assertions', () => {
                 expect(result.stdout).toMatch(file(`./expected/${fixtureName}`), { frozen: true });
             }).toThrow(/Output mismatch/u);
         } finally {
-            rmSync(resolve(EXPECTED_DIR, fixtureName), { force: true });
+            removeGolden(resolve(EXPECTED_DIR, fixtureName));
         }
     });
 
@@ -78,7 +94,7 @@ describe('assertions', () => {
             });
             expect(readFileSync(fixturePath, 'utf8')).toBe('deliberately wrong\n');
         } finally {
-            rmSync(fixturePath, { force: true });
+            removeGolden(fixturePath);
         }
     });
 
@@ -125,7 +141,7 @@ describe('assertions', () => {
             const b = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json');
             expect(b.json).toMatch(file(`./expected/${fixtureName}`));
         } finally {
-            rmSync(fixturePath, { force: true });
+            removeGolden(fixturePath);
         }
     });
 
@@ -148,7 +164,7 @@ describe('assertions', () => {
             const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json');
             expect(result.json).toMatch(file(`./expected/${fixtureName}`));
         } finally {
-            rmSync(fixturePath, { force: true });
+            removeGolden(fixturePath);
         }
     });
 
@@ -178,7 +194,7 @@ describe('assertions', () => {
             expect(written.name).toBe('{{string}}');
             expect(written.version).toBe('1.0.0');
         } finally {
-            rmSync(fixturePath, { force: true });
+            removeGolden(fixturePath);
         }
     });
 });
