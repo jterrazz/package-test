@@ -72,7 +72,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
 
         // Then - the view written and held, the other fixer left to the toolchain, no wrapper behind
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 0 held across 0 rules\n');
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
         expect(result.file('specs/api/events/list/pagination.spec.ts').content).toBe(
             [
                 "import { describe, expect, test } from 'vitest';",
@@ -118,5 +118,17 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.stderr).toMatch(`
             conventions checker: \`--fix\` counts what its own fixes leave, and a report written before them counts the tree they changed — drop \`--oxlint-report\`
         `);
+    });
+
+    test('a green run over a section that holds nothing prints `nothing held`', async () => {
+        // Given - a clean project, recorded — an emptied section — then judged
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures-ok/'))
+            .exec(['baseline .', '.']);
+
+        // Then - the same line as a project that keeps no section, never a count of nothing
+        expect(result.exitCode).toBe(0);
+        expect(result.file('jterrazz.baseline.json').content).toBe('{\n    "test": {}\n}\n');
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
     });
 });

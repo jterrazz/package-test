@@ -90,8 +90,8 @@ import { codeOf } from './rule-code.js';
  * A green verdict is exactly one line — `jterrazz.baseline.json › test: <n>
  * held across <k> rules`, whether the run checked, fixed or judged the root
  * member — the line `typescript check` shows beside its own ratchet's; a
- * project that keeps no section prints `jterrazz.baseline.json › test: nothing
- * held`, and a run that defers names the judging file relative to the project. A
+ * project whose section is absent or holds nothing prints `jterrazz.baseline.json
+ * › test: nothing held`, and a run that defers names the judging file relative to the project. A
  * failing one prints every finding it counted before its reasons, so a verdict
  * and its evidence are one log — and the plugin's diagnostics as one count
  * when they come from `--oxlint-report`, whose pass prints each of them, or
@@ -247,7 +247,7 @@ function printFindings(violations: TokenViolation[], plugin: PluginDiagnostic[] 
     }
 }
 
-/** The one line a green run of a project keeping no `test` section prints. */
+/** The one line a green run prints when the `test` section is absent or holds nothing. */
 const NOTHING_HELD = `${BASELINE_LABEL}: nothing held`;
 
 /** A line of the verdict, on the stream a human reads it from; never in the JSON. */
@@ -381,8 +381,9 @@ function reRecorded(root: string, counts: Record<string, number>): Record<string
 
 /**
  * The one line a green ratchet run prints: what the file holds, by count and
- * by rule — and, asked for with `--verbose`, what ran and where. The findings
- * themselves print only with a failing verdict, where they are the evidence.
+ * by rule, or {@link NOTHING_HELD} for a section that holds nothing — and,
+ * asked for with `--verbose`, what ran and where. The findings themselves
+ * print only with a failing verdict, where they are the evidence.
  */
 function heldSummary(
     total: number,
@@ -391,7 +392,10 @@ function heldSummary(
     passes: string,
 ): string {
     const rules = Object.keys(counts).length;
-    const held = `${BASELINE_LABEL}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'}`;
+    const held =
+        rules === 0
+            ? NOTHING_HELD
+            : `${BASELINE_LABEL}: ${total} held across ${rules} rule${rules === 1 ? '' : 's'}`;
     return verbose ? `${held} — conventions checker ${what} (${passes})` : held;
 }
 
