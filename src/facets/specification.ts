@@ -1,9 +1,9 @@
-import { startApi } from './api/api.specification.js';
-import { startCli } from './cli/cli.specification.js';
-import { startIntegration } from './integration/integration.specification.js';
-import { startJobs } from './jobs/jobs.specification.js';
-import { startMobile } from './mobile/mobile.specification.js';
-import { startWebsite } from './website/website.specification.js';
+import { startApi } from './api/api.handle.js';
+import { startCli } from './cli/cli.handle.js';
+import { startIntegration } from './integration/integration.handle.js';
+import { startJobs } from './jobs/jobs.handle.js';
+import { startMobile } from './mobile/mobile.handle.js';
+import { startWebsite } from './website/website.handle.js';
 
 /**
  * The six specification constructors (CONVENTIONS A2) — created in a

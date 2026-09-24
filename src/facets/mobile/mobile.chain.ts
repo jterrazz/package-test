@@ -1,7 +1,7 @@
 /**
  * The mobile chain — the shared builder's, named here.
  *
- * Every facet folder carries the SAME four files (mobile.specification.ts,
+ * Every facet folder carries the SAME four files (mobile.handle.ts,
  * mobile.chain.ts, mobile.result.ts, mobile.project.ts) so a reader who has seen one
  * facet has seen the shape of all seven. This one is a re-export rather than
  * an implementation: the setups and the terminal actions of the node facets

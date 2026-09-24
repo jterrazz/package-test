@@ -1,19 +1,19 @@
 import { describe, expect, test } from 'vitest';
 
+import type { ApiSpecificationOptions } from '../src/facets/api/api.handle.js';
 import type { HttpResult } from '../src/facets/api/api.result.js';
-import type { ApiSpecificationOptions } from '../src/facets/api/api.specification.js';
+import type { CliSpecificationOptions } from '../src/facets/cli/cli.handle.js';
 import type { CliResult } from '../src/facets/cli/cli.result.js';
-import type { CliSpecificationOptions } from '../src/facets/cli/cli.specification.js';
 import type { ComponentProjectOptions } from '../src/facets/component/component.project.js';
 import type { RenderResult } from '../src/facets/component/component.result.js';
 import type { ComponentChain, ComponentVisitor } from '../src/facets/component/component.shape.js';
+import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.handle.js';
 import type { CallResult } from '../src/facets/integration/integration.result.js';
-import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.specification.js';
-import type { JobsSpecificationOptions } from '../src/facets/jobs/jobs.specification.js';
+import type { JobsSpecificationOptions } from '../src/facets/jobs/jobs.handle.js';
+import type { MobileSpecificationOptions } from '../src/facets/mobile/mobile.handle.js';
 import type { ScreenResult } from '../src/facets/mobile/mobile.result.js';
-import type { MobileSpecificationOptions } from '../src/facets/mobile/mobile.specification.js';
+import type { WebsiteSpecificationOptions } from '../src/facets/website/website.handle.js';
 import type { FetchResult, PageResult } from '../src/facets/website/website.result.js';
-import type { WebsiteSpecificationOptions } from '../src/facets/website/website.specification.js';
 import type {
     ApiSpecification,
     CliSpecification,

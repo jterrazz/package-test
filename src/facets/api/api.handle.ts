@@ -10,6 +10,7 @@ import {
 import type { DatabaseKeys, ServiceRecord } from '../../model/chain/services.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import { writeLedger } from '../../model/routes/routes.js';
+import { routesLedger } from '../../runner/provided.js';
 import type { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { HonoAdapter } from '../../seams/hono/hono.adapter.js';
 import { createApiFacet } from './api.chain.js';
@@ -62,19 +63,6 @@ export type ApiHandle<DatabaseKey extends string = string> = {
      */
     docker: (containerId: string) => ContainerAccessor;
 };
-
-/**
- * Where the run collects route ledgers — what the api project's global setup
- * provides; `undefined` for a run that measures no route coverage.
- */
-async function routesLedger(): Promise<string | undefined> {
-    try {
-        const { inject } = await import('vitest');
-        return inject('routesLedger');
-    } catch {
-        return undefined;
-    }
-}
 
 // ── Constructor ──
 

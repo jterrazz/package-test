@@ -1,7 +1,7 @@
 /**
  * The website chain — the shared builder's, named here.
  *
- * Every facet folder carries the SAME four files (website.specification.ts,
+ * Every facet folder carries the SAME four files (website.handle.ts,
  * website.chain.ts, website.result.ts, website.project.ts) so a reader who has seen one
  * facet has seen the shape of all seven. This one is a re-export rather than
  * an implementation: the setups and the terminal actions of the node facets

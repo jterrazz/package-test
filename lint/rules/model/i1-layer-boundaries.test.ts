@@ -18,7 +18,7 @@ const ruleTester = new RuleTester();
 const FRAMEWORK_LAYERS = {
     facets: {
         imports: ['facets/', 'model/'],
-        seams: { 'facets/api/api.specification.ts': ['seams/hono/'] },
+        seams: { 'facets/api/api.handle.ts': ['seams/hono/'] },
     },
     lint: { imports: ['lint/', 'model/chain/binding'] },
     model: {
@@ -135,7 +135,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         // A declared EXACT module edge (not a prefix).
         {
             code: 'import { HonoAdapter } from "../../seams/hono/hono.adapter.js";',
-            filename: '/repo/src/facets/api/api.specification.ts',
+            filename: '/repo/src/facets/api/api.handle.ts',
             options: framework,
         },
         // The seam, from the module that owns it.

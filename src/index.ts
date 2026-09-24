@@ -20,13 +20,13 @@ export const intercept: Intercept = interceptThrough(async (contracts) => {
     const { registerContracts } = await import('./seams/msw/server.js');
     return await registerContracts(contracts);
 });
-export { component } from './facets/component/component.specification.js';
+export { component } from './facets/component/component.handle.js';
 export {
     type ApiHandle,
     type ApiSpecificationOptions,
     type HonoApp,
-} from './facets/api/api.specification.js';
-export { type CliHandle, type CliSpecificationOptions } from './facets/cli/cli.specification.js';
+} from './facets/api/api.handle.js';
+export { type CliHandle, type CliSpecificationOptions } from './facets/cli/cli.handle.js';
 export { type LiterateRunFlags, type LiterateServeRegistration } from './facets/cli/literate.js';
 export {
     type SpecDocument,
@@ -40,23 +40,20 @@ export {
 export {
     type IntegrationHandle,
     type IntegrationSpecificationOptions,
-} from './facets/integration/integration.specification.js';
-export {
-    type JobsHandle,
-    type JobsSpecificationOptions,
-} from './facets/jobs/jobs.specification.js';
+} from './facets/integration/integration.handle.js';
+export { type JobsHandle, type JobsSpecificationOptions } from './facets/jobs/jobs.handle.js';
 export {
     type MobileBackendOptions,
     type MobileHandle,
     type MobileSpecificationOptions,
-} from './facets/mobile/mobile.specification.js';
+} from './facets/mobile/mobile.handle.js';
 export {
     type WebsiteBackendOptions,
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
-} from './facets/website/website.specification.js';
+} from './facets/website/website.handle.js';
 export { type ProcessOptions } from './seams/process/serve.adapter.js';
-export { type ServerSpec } from './facets/website/website.specification.js';
+export { type ServerSpec } from './facets/website/website.handle.js';
 export { processService as process, ProcessHandle } from './model/chain/process.js';
 export { type DatabaseKeys, type ServiceRecord } from './model/chain/services.js';
 

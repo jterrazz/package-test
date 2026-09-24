@@ -17,7 +17,7 @@ import { testing } from './dist/oxlint.js';
  *   of its two openers owns, and — to CONSTRUCT what a terminal action hands
  *   back — the facet module that declares that result.
  * - `facets/<facet>/` — the same four files in every folder
- *   (`<facet>.specification.ts`, `.chain.ts`, `.result.ts`, `.project.ts`)
+ *   (`<facet>.handle.ts`, `.chain.ts`, `.result.ts`, `.project.ts`)
  *   plus what is unique to the facet. It reaches `model/` freely, and each
  *   constructor opens the one seam its runtime needs.
  * - `seams/<dep>/` — one folder = one external dependency (or one node
@@ -38,12 +38,19 @@ import { testing } from './dist/oxlint.js';
  */
 const FRAMEWORK_LAYERS = {
     facets: {
-        imports: ['facets/', 'model/', 'runner/facet-project', 'runner/preset', 'runner/update'],
+        imports: [
+            'facets/',
+            'model/',
+            'runner/facet-project',
+            'runner/preset',
+            'runner/provided',
+            'runner/update',
+        ],
         packages: ['vite', 'vitest', 'vitest/config', '@vitest/browser-playwright'],
         seams: {
-            'facets/api/api.specification.ts': ['seams/docker/', 'seams/hono/'],
+            'facets/api/api.handle.ts': ['seams/docker/', 'seams/hono/'],
             'facets/cli/cli.result.ts': ['seams/docker/'],
-            'facets/cli/cli.specification.ts': ['seams/docker/'],
+            'facets/cli/cli.handle.ts': ['seams/docker/'],
             // The component model reaches its two seams and never the runner:
             // "after this test", "pin the clock" and "what did the project
             // Provide" are asked of `seams/vitest-browser/`, which owns the
@@ -53,8 +60,8 @@ const FRAMEWORK_LAYERS = {
             'facets/component/component.project.ts': ['seams/vitest-browser/commands'],
             'facets/cli/literate.ts': ['seams/process/'],
             'facets/mobile/appium-server.ts': ['seams/process/'],
-            'facets/mobile/mobile.specification.ts': ['seams/appium/'],
-            'facets/website/website.specification.ts': ['seams/playwright/', 'seams/process/'],
+            'facets/mobile/mobile.handle.ts': ['seams/appium/'],
+            'facets/website/website.handle.ts': ['seams/playwright/', 'seams/process/'],
         },
     },
     lint: {
@@ -200,13 +207,6 @@ const config: OxlintConfig = defineConfig(
                     'src/model/doubles/**',
                     'src/model/goldens/**',
                 ],
-                rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
-            },
-            {
-                // The two barrels that re-export the facet constructors, which
-                // This package's layout names `<facet>.specification.ts`: the
-                // Suffix F2 reads as test material names production here.
-                files: ['src/index.ts', 'src/facets/specification.ts'],
                 rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
             },
         ],

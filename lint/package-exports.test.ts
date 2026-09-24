@@ -8,10 +8,11 @@ import {
     writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { declaredSubpaths } from './package-exports.js';
+import { materialAt } from './production.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
@@ -253,5 +254,35 @@ describe('package-exports — the tarball carries what a message points at', () 
         // Then - the anchor's file ships, so the pointer resolves where it is read
         expect(cited.length).toBeGreaterThan(0);
         expect(unpublished(cited)).toStrictEqual([]);
+    });
+});
+
+/** Every source module a build's maps say it was compiled from, by its path in the repository. */
+function compiledSources(): string[] {
+    const sources = new Set<string>();
+    for (const entry of readdirSync(resolve(ROOT, 'dist'), { recursive: true })) {
+        const map = resolve(ROOT, 'dist', String(entry));
+        if (map.endsWith('.map')) {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `sources` is the one field this reads
+            const { sources: listed } = JSON.parse(readFileSync(map, 'utf8')) as {
+                sources: string[];
+            };
+            for (const source of listed) {
+                sources.add(resolve(dirname(map), source));
+            }
+        }
+    }
+    return [...sources].filter((source) => !source.includes('/node_modules/'));
+}
+
+describe('package-exports — the build is compiled from production alone', () => {
+    test('no module a bundle is built from is test material', () => {
+        // Given - the source modules every bundle's map lists (`npm run build` first)
+        const sources = compiledSources();
+
+        // Then - the facet constructors among them, and not one test, fixture, spec or ground file
+        expect(sources).toContain(resolve(ROOT, 'src/facets/api/api.handle.ts'));
+        const material = sources.filter((source) => materialAt(source) !== undefined);
+        expect(material.map((source) => relative(ROOT, source))).toStrictEqual([]);
     });
 });
