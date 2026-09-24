@@ -95,7 +95,7 @@ describe('redis handle', () => {
 
         // Then - it refuses before it connects, rather than sharing an index
         await expect(crowded.isolation().acquire('255')).rejects.toThrow(
-            'redis: worker 255 has no database index — a container serves 255 workers; run with fewer (--maxWorkers)',
+            'redis: worker 255 has no database index — a container serves 254 workers; run with fewer (--maxWorkers)',
         );
     });
 });

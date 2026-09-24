@@ -102,7 +102,7 @@ export class RedisHandle implements ServiceHandle {
                 const numericId = Number.parseInt(workerId, 10) || 0;
                 if (numericId + 1 >= DATABASES) {
                     throw new Error(
-                        `redis: worker ${workerId} has no database index — a container serves ${DATABASES - 1} workers; run with fewer (--maxWorkers)`,
+                        `redis: worker ${workerId} has no database index — a container serves ${DATABASES - 2} workers; run with fewer (--maxWorkers)`,
                     );
                 }
                 this.dbIndex = numericId + 1;

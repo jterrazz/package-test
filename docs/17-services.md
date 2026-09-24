@@ -147,9 +147,12 @@ The setup reaches Docker in the background and pulls each pinned default image t
 
 `TESTCONTAINERS_REUSE_ENABLE=true` keeps the containers alive between runs: the next run finds them by the hash of their definition instead of starting them, and a postgres finds its templates already built. It is off unless asked for, and off on CI whatever the variable says — a CI run starts from nothing and leaves nothing. A reused container is one run's at a time: two runs at once on one machine share it, and each would drop the other's worker databases.
 
-Every container the package starts carries the label `com.jterrazz.test=true`, a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it, and a container one service holds alone `com.jterrazz.test.service=<service>`, so a reused one is found again by its service. The containers of a run that is not reused are removed at teardown, and by testcontainers' reaper if the run dies. The reused ones are removed by hand:
+Every container the package starts carries the label `com.jterrazz.test=true`, a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it, and a container one service holds alone `com.jterrazz.test.service=<service>`, so a reused one is found again by its service.
+
+The containers of a run that is not reused are removed at teardown. A run that dies leaves them to testcontainers' reaper, which is not proven to catch every one: containers started before the label existed have been seen to outlive it, and why is an open question. Whatever the reaper did, the label lists every container the package started, and the reused ones are removed by hand:
 
 ```bash
+docker ps -a --filter label=com.jterrazz.test=true
 docker rm -f $(docker ps -aq --filter label=com.jterrazz.test.reuse=true)
 ```
 
@@ -157,11 +160,11 @@ docker rm -f $(docker ps -aq --filter label=com.jterrazz.test.reuse=true)
 
 Vitest runs test files in parallel workers; the framework isolates them automatically — no configuration, no sharding:
 
-| Service      | Isolation strategy                                                                                   |
-| ------------ | ---------------------------------------------------------------------------------------------------- |
-| `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path |
-| `redis()`    | A database index per worker (1–255), acquired empty — the connection string's path                   |
-| `sqlite()`   | Template file copied per worker                                                                      |
+| Service      | Isolation strategy                                                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------- |
+| `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path          |
+| `redis()`    | A database index per worker (2–255, 1 outside a vitest worker), acquired empty — the connection string's path |
+| `sqlite()`   | Template file copied per worker                                                                               |
 
 The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address reaches the container's own database, which no worker uses and no reset flushes.
 
