@@ -34,7 +34,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
             [
                 'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz-check/c15 2 → 0',
                 'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz-check/c9 3 → 1',
-                'jterrazz.baseline.json › test: 1 held across 1 rule',
+                'jterrazz.baseline.json › test: 3 held across 2 rules',
                 '',
             ].join('\n'),
         );
@@ -211,5 +211,17 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.exitCode).toBe(0);
         expect(result.file('jterrazz.baseline.json').content).toBe('{\n    "test": {}\n}\n');
         expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+    });
+
+    test("a green run over a section holding only the run's `routes/unreached` counts it held", async () => {
+        // Given - a clean project whose section holds the api run's key alone
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures-ok/'))
+            .fixture(file('./fixtures/lint-violations/routes-only-baseline/jterrazz.baseline.json'))
+            .exec('.');
+
+        // Then - the key the checker never counts is still held, never `nothing held`
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 2 held across 1 rule\n');
     });
 });

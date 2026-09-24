@@ -327,7 +327,8 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
             ...findings.map(codeOfFinding),
             ...plugin.map((diagnostic) => diagnostic.code),
         ]);
-        const broken = judge(counts, fix ? reRecorded(root, counts) : readBaseline(root));
+        const baseline = fix ? reRecorded(root, counts) : readBaseline(root);
+        const broken = judge(counts, baseline);
         if (json || broken.length > 0) {
             printFindings(findings, plugin);
         }
@@ -339,7 +340,7 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
             process.exit(1);
         }
         if (!json) {
-            console.log(heldSummary(findings.length + plugin.length, counts, what, passes));
+            console.log(heldSummary(baseline, what, passes));
         }
         process.exit(0);
     }
@@ -380,18 +381,16 @@ function reRecorded(root: string, counts: Record<string, number>): Record<string
 }
 
 /**
- * The one line a green ratchet run prints: what the file holds, by count and
- * by rule, or {@link NOTHING_HELD} for a section that holds nothing — and,
- * asked for with `--verbose`, what ran and where. The findings themselves
- * print only with a failing verdict, where they are the evidence.
+ * The one line a green ratchet run prints: what the section holds, by count
+ * and by rule — the run's `routes/unreached` with the checker's own — or
+ * {@link NOTHING_HELD} for a section that holds nothing — and, asked for with
+ * `--verbose`, what ran and where. The findings themselves print only with a
+ * failing verdict, where they are the evidence.
  */
-function heldSummary(
-    total: number,
-    counts: Record<string, number>,
-    what: string,
-    passes: string,
-): string {
-    const rules = Object.keys(counts).length;
+function heldSummary(baseline: Record<string, number>, what: string, passes: string): string {
+    const entries = Object.values(baseline).filter((count) => count > 0);
+    const rules = entries.length;
+    const total = entries.reduce((sum, count) => sum + count, 0);
     const held =
         rules === 0
             ? NOTHING_HELD
