@@ -13,6 +13,9 @@ export const withRouteSource = defineConfig({ test: { routes: './openapi.yaml' }
 /** The collections no plural names are a list of route segments. */
 export const withCollections = defineConfig({ test: { collections: ['data', 'people'] } });
 
+/** The method-less routes are a list of paths. */
+export const withMethodless = defineConfig({ test: { methodless: ['/mcp'] } });
+
 // @ts-expect-error the collections are a list, never one word [`Type 'string' is not assignable to type 'readonly string[]'`]
 export const withOneCollection = defineConfig({ test: { collections: 'data' } });
 

@@ -18,10 +18,12 @@
  * singleton (`GET /health`) `health/get/`, a method-less route (`ALL /mcp`)
  * its segments; a job is its name, a cli command its first word.
  *
- * Two readings a repository may correct, each where it is declared: the
+ * Three readings a repository may correct, each where it is declared: the
  * plural test that tells a collection (`events`) from a singleton (`status`)
  * takes the irregular collections `jterrazz.config.ts` names
- * (`test: { collections: ['data', 'people'] }`); and a command's words stop at
+ * (`test: { collections: ['data', 'people'] }`); a route that takes any method
+ * is named there too (`test: { methodless: ['/mcp'] }`), and a chain sending
+ * it any verb reaches `ALL /mcp`; and a command's words stop at
  * the first word not in the list the chain's own runner declares
  * (`specification.cli(bin, { commands: ['db', 'migrate'] })`, the list written
  * there or bound to a `const` of the runner's file), or after the first word
@@ -34,6 +36,8 @@ export type SubjectReading = {
     collections?: readonly string[] | undefined;
     /** The words each cli runner declares its commands with, by the handle a spec holds it by. */
     commands?: Readonly<Record<string, readonly string[]>> | undefined;
+    /** The routes that take any method, by their path. */
+    methodless?: readonly string[] | undefined;
 };
 
 /** A method an api chain sends, or `ALL` for a route that takes any. */
@@ -575,6 +579,17 @@ function routeOf(method: Method, args: readonly string[]): Subject[] {
     return [{ facet: 'api', method, path, template }];
 }
 
+/** The route a chain sends, as the app declares it: `ALL` where the repository names its path method-less. */
+function declaredMethod(subject: Subject, methodless: readonly string[]): Subject {
+    if (subject.facet !== 'api' || methodless.length === 0) {
+        return subject;
+    }
+    const template = pathTemplate(subject.path);
+    return methodless.some((path) => pathTemplate(path.replaceAll(/:[^/]+/gu, HOLE)) === template)
+        ? { ...subject, method: 'ALL' }
+        : subject;
+}
+
 /**
  * The subject a chain's terminal action reaches — a cli sequence is one
  * session, opened by its first command.
@@ -591,10 +606,12 @@ export function subjectsOfChain(
     const args = argumentsOf(terminal.args);
     const [first] = args;
     const method = HTTP_VERBS[terminal.name];
-    if (method !== undefined) {
-        return routeOf(method, args);
-    }
-    return TERMINALS[terminal.name]?.(first, readRequest, reading.commands?.[chain.handle]) ?? [];
+    const reached =
+        method === undefined
+            ? (TERMINALS[terminal.name]?.(first, readRequest, reading.commands?.[chain.handle]) ??
+              [])
+            : routeOf(method, args);
+    return reached.map((subject) => declaredMethod(subject, reading.methodless ?? []));
 }
 
 /** Where the comment that opens at `index` ends, or `index` when none opens there. */

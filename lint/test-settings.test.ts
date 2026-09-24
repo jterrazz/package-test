@@ -25,6 +25,14 @@ describe('the test section of jterrazz.config.ts, as the checker reads it', () =
         expect(testSettingsAt(root)).toStrictEqual({ collections: ['data', 'people'] });
     });
 
+    test('the method-less routes a unit declares are read', () => {
+        // Given - a unit whose api takes any method on /mcp
+        const root = unit("export default { test: { methodless: ['/mcp'] } };\n");
+
+        // Then - the paths, as declared
+        expect(testSettingsAt(root)).toStrictEqual({ methodless: ['/mcp'] });
+    });
+
     test('the test packages production runs are read with their reasons', () => {
         // Given - a unit whose service drives a browser
         const root = unit(

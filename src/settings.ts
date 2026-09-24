@@ -17,6 +17,12 @@ export type TestSettings = {
      */
     collections?: readonly string[];
     /**
+     * The routes the member's api takes on any method — `app.all('/mcp', …)` —
+     * by their path. The conventions checker files a spec of one under its
+     * path segments (`mcp/`), whatever verb a test sends it.
+     */
+    methodless?: readonly string[];
+    /**
      * What a production module of this unit legitimately runs that F2 reads as
      * test material: under `allow`, a test package by name, with the reason
      * the product needs it — a service whose product IS a browser runs

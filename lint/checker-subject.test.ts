@@ -488,6 +488,29 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         ]);
     });
 
+    test('a method-less route is one subject whatever verbs its tests send, filed by its segments', () => {
+        // Given - a POST and a PUT to /mcp in one file under mcp/, in a unit that declares /mcp method-less
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/mcp/transport.spec.ts': [
+                "import { api } from '../api.specification.js';",
+                "test('a', async () => { await api.post('/mcp', {}); });",
+                "test('b', async () => { await api.put('/mcp', {}); });",
+                '',
+            ].join('\n'),
+        });
+        const undeclared = checkOneSubject(root).map(({ found }) => found);
+        writeFileSync(
+            join(dirname(root), 'jterrazz.config.ts'),
+            "export default { test: { methodless: ['/mcp'] } };\n",
+        );
+        writeFileSync(join(dirname(root), 'package.json'), '{}\n');
+
+        // Then - two subjects before the declaration, one filed where it sits after it
+        expect(undeclared).toStrictEqual(['a spec reaching 2 subjects — POST /mcp, PUT /mcp']);
+        expect([...checkOneSubject(root), ...checkSubjectFolder(root)]).toStrictEqual([]);
+    });
+
     test('the types a moved helper reads move with it, and a type only the tests read stays', () => {
         // Given - three routes: two share a helper typed by an alias and an interface and a type they read themselves, one reads only the interface
         const root = specsTree({

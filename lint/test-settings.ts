@@ -23,6 +23,8 @@ import { join } from 'node:path';
 export type CheckerSettings = {
     /** The api collections no plural names — `TestSettings.collections`. */
     collections?: readonly string[];
+    /** The api routes that take any method, by their path — `TestSettings.methodless`. */
+    methodless?: readonly string[];
     /** The test packages production runs, each with its reason — `TestSettings.production`. */
     production?: { allow: Readonly<Record<string, string>> };
 };
@@ -65,9 +67,11 @@ function checkerSettingsOf(test: unknown): CheckerSettings {
         return {};
     }
     const collections = wordsOf(test.collections);
+    const methodless = wordsOf(test.methodless);
     const allow = isRecord(test.production) ? reasonsOf(test.production.allow) : undefined;
     return {
         ...(collections === undefined ? {} : { collections }),
+        ...(methodless === undefined ? {} : { methodless }),
         ...(allow === undefined ? {} : { production: { allow } }),
     };
 }

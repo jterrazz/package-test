@@ -126,12 +126,14 @@ function readBeside(file: string, path: string): string | undefined {
 }
 
 /**
- * What the spec's subjects are read with: the irregular collections of the
- * unit's `jterrazz.config.ts`, and the command list of each runner the spec
+ * What the spec's subjects are read with: the irregular collections and the
+ * method-less routes of the unit's `jterrazz.config.ts`, and the command list of each runner the spec
  * imports a `cli` from, by the handle it holds that runner by.
  */
 function readingOf(specsRoot: string, file: string, text: string): SubjectReading {
-    const { collections } = testSettingsAt(projectRootOf(specsRoot) ?? dirname(specsRoot));
+    const { collections, methodless } = testSettingsAt(
+        projectRootOf(specsRoot) ?? dirname(specsRoot),
+    );
     const commands: Record<string, readonly string[]> = {};
     for (const [handle, door] of Object.entries(doorsOf(withoutComments(text), 'cli'))) {
         const source = readBeside(file, door.replace(/\.js$/u, '.ts'));
@@ -140,7 +142,7 @@ function readingOf(specsRoot: string, file: string, text: string): SubjectReadin
             commands[handle] = declared;
         }
     }
-    return { collections, commands };
+    return { collections, commands, methodless };
 }
 
 /** Read one spec for its subjects and its tests. */

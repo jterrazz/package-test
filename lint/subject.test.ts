@@ -329,4 +329,24 @@ describe('what a repository declares — its runner commands, its irregular coll
         // Then - a declared collection is listed, the plural test holding for the rest
         expect(subjectFolder(subject, { collections })).toBe(folder);
     });
+
+    test('a route the repository names method-less is reached by any verb, and filed by its segments', () => {
+        // Given - a POST and a PUT to /mcp, and a GET to /events, with /mcp declared method-less
+        const source = [
+            "import { api } from '../api.specification.js';",
+            "await api.post('/mcp', {});",
+            "await api.put('/mcp', {});",
+            "await api.get('/events');",
+        ].join('\n');
+        const reached = subjectsOf(source, undefined, { methodless: ['/mcp'] }).map(
+            ({ subject }) => [subjectName(subject), subjectFolder(subject)],
+        );
+
+        // Then - both verbs reach ALL /mcp, under mcp/, and the undeclared route keeps its verb
+        expect(reached).toStrictEqual([
+            ['ALL /mcp', 'mcp'],
+            ['ALL /mcp', 'mcp'],
+            ['GET /events', 'events/list'],
+        ]);
+    });
 });
