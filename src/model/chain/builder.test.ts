@@ -1,4 +1,5 @@
-import { describe, expect, test } from 'vitest';
+import { existsSync } from 'node:fs';
+import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { defineContracts } from '../contracts/contract.js';
 import type { Contract } from '../contracts/contract.js';
@@ -15,10 +16,12 @@ import { StubBackend } from './stub-backend.js';
 
 class FakeCommandAdapter implements CliPort {
     lastArgs: string | undefined;
+    lastCwd: string | undefined;
     lastEnv: CliEnv | undefined;
 
-    async exec(args: string, _cwd: string, env?: CliEnv): Promise<CliOutput> {
+    async exec(args: string, cwd: string, env?: CliEnv): Promise<CliOutput> {
         this.lastArgs = args;
+        this.lastCwd = cwd;
         this.lastEnv = env;
         return { exitCode: 0, stderr: '', stdout: '' };
     }
@@ -525,5 +528,21 @@ describe('builder — a string is a value, and the disk is file() or directory()
         await expect(cli.fixture(file('./fixtures/shop')).exec('go')).rejects.toThrow(
             /names a directory\n.*\nfix: end its path in \//u,
         );
+    });
+});
+
+describe('builder — the folder a command runs in', () => {
+    test('exists while the test runs, and is removed once it has finished', async () => {
+        // Given - a check that runs after the test's own teardowns, and a cli facet over a fake binary
+        const command = new FakeCommandAdapter();
+        onTestFinished(() => {
+            expect(existsSync(command.lastCwd ?? '')).toBe(false);
+        });
+
+        // When - a command runs
+        await createCliFacet({ command }).exec('go');
+
+        // Then - it ran in a folder that is there for the rest of the test
+        expect(existsSync(command.lastCwd ?? '')).toBe(true);
     });
 });
