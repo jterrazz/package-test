@@ -1,5 +1,7 @@
+import { materialAt, testPackageOf } from '@jterrazz/test/oxlint';
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
@@ -944,5 +946,44 @@ describe('the corpus never offers an option the rulebook refuses', () => {
         // Then - a title opening on an identifier is renamed, or deviated on in the consumer's own fragment
         expect(swept.length).toBeGreaterThan(20);
         expect(claimed, 'a page offering `allowedPrefixes` as a setting').toStrictEqual([]);
+    });
+});
+
+/** The two test-material readers the `./oxlint` entry publishes. */
+type MaterialReaders = { materialAt: typeof materialAt; testPackageOf: typeof testPackageOf };
+
+/** What one build's readers answer for a module id and a specifier of each kind. */
+function answersOf(readers: MaterialReaders): unknown[] {
+    return [
+        readers.materialAt(resolve(ROOT, 'src/index.test.ts')),
+        readers.materialAt(resolve(ROOT, 'specs/shared/fixtures/api-app/app.ts')),
+        readers.materialAt(resolve(ROOT, 'specs/shared'), true),
+        readers.materialAt(resolve(ROOT, 'src/index.ts')),
+        readers.testPackageOf('vitest/config'),
+        readers.testPackageOf('@testing-library/react'),
+        readers.testPackageOf('@jterrazz/test/oxlint'),
+        readers.testPackageOf('hono'),
+    ];
+}
+
+describe('the ./oxlint entry publishes what test material is', () => {
+    test('both builds answer materialAt and testPackageOf, typed from the published declarations', () => {
+        // Given - the entry as a consumer imports it, and its CommonJS build (`npm run build` first)
+        // oxlint-disable-next-line typescript/no-unsafe-assignment -- `require` answers `any`: the ESM build's published types are the shape the CJS build must carry
+        const cjs: MaterialReaders = createRequire(import.meta.url)('@jterrazz/test/oxlint');
+
+        // Then - each build reads a module id and a specifier as the F2 guard does
+        const answers = [
+            'a test file',
+            'the specs tree',
+            'the specs tree',
+            undefined,
+            'vitest',
+            '@testing-library/react',
+            undefined,
+            undefined,
+        ];
+        expect(answersOf({ materialAt, testPackageOf })).toStrictEqual(answers);
+        expect(answersOf(cjs)).toStrictEqual(answers);
     });
 });

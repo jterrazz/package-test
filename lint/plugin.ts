@@ -73,6 +73,17 @@ import { w2TestIdStatesWhatIsMissing } from './rules/model/w2-testid-states-what
 import { w5wScenarioSettles } from './rules/model/w5w-scenario-settles.js';
 
 /**
+ * What test material is, published for a build guard: `materialAt(path)`
+ * names what a local module id is (a test file, ground, the specs tree, a
+ * contract) or answers `undefined`, and `testPackageOf(specifier)` names the
+ * test package a bare specifier belongs to (`vitest/config` → `vitest`),
+ * `@jterrazz/test/oxlint` aside. This package is the one owner of the
+ * answer, for every guard that asks it.
+ */
+export { materialAt, testPackageOf } from './production.js';
+export type { MaterialKind } from './production.js';
+
+/**
  * The `@jterrazz/test` oxlint plugin — the tool-facing lint layer that enforces
  * the statically-checkable CONVENTIONS rules (the `Lint(statique)` catalogue).
  *
