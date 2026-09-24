@@ -662,4 +662,49 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
             module: readFileSync(join(root, 'api/orders/orders.fixtures.ts'), 'utf8'),
         }).toStrictEqual({ copies: [true, true], module: authored });
     });
+
+    test('a file of two pages keeps the first in place and writes the second beside it, named for it', () => {
+        // Given - one website file visiting the pricing page and an article page
+        const root = specsTree({
+            'website/pages/home.spec.ts': [
+                "import { test } from 'vitest';",
+                '',
+                "import { website } from '../website.specification.js';",
+                '',
+                "test('shows the prices', async () => {",
+                "    await website.visit('/pricing', async () => {});",
+                '});',
+                '',
+                "test('shows an article', async () => {",
+                "    await website.visit('/articles/42', async () => {});",
+                '});',
+                '',
+            ].join('\n'),
+            'website/website.specification.ts':
+                'export const { cleanup, website } = await specification.website({});\n',
+        });
+
+        // When - the fix splits it
+        fixSubjects(root);
+
+        // Then - each page's test in its own file, both in the authored folder, no derived folder made
+        const read = (file: string): string => readFileSync(join(root, file), 'utf8');
+        expect({
+            article: read('website/pages/home-articles-id.spec.ts').includes("'shows an article'"),
+            articleLeft: read('website/pages/home.spec.ts').includes("'shows an article'"),
+            derived: ['website/pages/pricing', 'website/pages/articles'].map((path) =>
+                existsSync(join(root, path)),
+            ),
+            pricing: read('website/pages/home.spec.ts').includes("'shows the prices'"),
+            pricingCopied: read('website/pages/home-articles-id.spec.ts').includes(
+                "'shows the prices'",
+            ),
+        }).toStrictEqual({
+            article: true,
+            articleLeft: false,
+            derived: [false, false],
+            pricing: true,
+            pricingCopied: false,
+        });
+    });
 });
