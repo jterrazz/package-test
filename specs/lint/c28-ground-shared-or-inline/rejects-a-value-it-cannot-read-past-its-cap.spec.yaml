@@ -1,4 +1,4 @@
-description: a value past its cap the fixer cannot read, a name or a hole in it, is refused where written
+description: a value past its cap the fixer cannot read — a name, a hole, a matcher — is refused
 fixture: ./fixtures/past-cap-unreadable/
 runs:
     - command: checker .
@@ -6,3 +6,4 @@ runs:
       stderr: |
           specs/api/users/create/created.spec.ts:9:45  jterrazz-check(c28)
           specs/api/users/create/created.spec.ts:47:38  jterrazz-check(c28)
+          specs/api/users/create/created.spec.ts:90:33  jterrazz-check(c28)
