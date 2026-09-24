@@ -1,9 +1,13 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { afterAll, describe, expect, test } from 'vitest';
+import { afterAll, describe, expect, test, vi } from 'vitest';
 
+import { clock } from '../clock/clock.js';
+import type { ContainerPort } from '../ports/container.port.js';
+import type { ServiceHandle } from '../ports/service.port.js';
 import { Orchestrator } from './orchestrator.js';
+import { registerContainerIntegrations } from './registry.js';
 
 describe('the orchestrator measures from the root it is given', () => {
     const elsewhere = mkdtempSync(resolve(tmpdir(), 'orchestrator-root-'));
@@ -33,5 +37,72 @@ describe('the orchestrator measures from the root it is given', () => {
         } finally {
             await orchestrator.stop();
         }
+    });
+});
+
+/** A container that takes ten seconds to start, recording the moment each logs request reads from. */
+function slowContainer(asked: (Date | undefined)[]): ContainerPort {
+    return {
+        getConnectionString: () => '127.0.0.1:1',
+        getHost: () => '127.0.0.1',
+        getLogs: async (since?: Date) => {
+            asked.push(since);
+            return await Promise.resolve('boot line');
+        },
+        getMappedPort: () => 1,
+        start: async () => {
+            await clock.advance(10_000);
+        },
+        stop: async () => {
+            await Promise.resolve();
+        },
+    };
+}
+
+/** A step that does nothing, and settles. */
+async function settled(): Promise<void> {
+    await Promise.resolve();
+}
+
+/** A container-backed service whose healthcheck always refuses. */
+function unhealthyService(): ServiceHandle {
+    return {
+        buildConnectionString: () => 'fake://127.0.0.1:1',
+        connectionString: '',
+        createDatabaseAdapter: () => null,
+        defaultImage: 'fake:1',
+        defaultPort: 1,
+        environment: {},
+        healthcheck: async () => {
+            await Promise.reject(new Error('not ready'));
+        },
+        initialize: settled,
+        isolation: () => ({ acquire: settled, release: settled, reset: settled }),
+        reset: settled,
+        serviceName: null,
+        started: false,
+        type: 'fake',
+    };
+}
+
+describe('a failed start reports the logs its own container wrote', () => {
+    test('reads them from before the container started, so a fresh one keeps its boot lines', async () => {
+        // Given - a container whose start takes ten seconds, then a healthcheck that fails
+        using _ = clock.at('2026-09-25T10:00:00.000Z');
+        const asked: (Date | undefined)[] = [];
+        const container = slowContainer(asked);
+        registerContainerIntegrations({ createContainer: () => container });
+        const report = vi.spyOn(console, 'error').mockReturnValue();
+        const orchestrator = new Orchestrator({
+            root: tmpdir(),
+            services: { cache: unhealthyService() },
+        });
+
+        // Then - the start fails, and the logs were asked for from before the start, less the clock margin
+        await expect(orchestrator.start()).rejects.toThrow('not ready');
+        report.mockRestore();
+        expect(asked.map((since) => since?.toISOString())).toStrictEqual([
+            '2026-09-25T09:59:59.500Z',
+        ]);
     });
 });

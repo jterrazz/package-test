@@ -105,6 +105,7 @@ export class Orchestrator {
         }
 
         // Phase 1: start containers in parallel + initialize embedded services
+        const startedAt = Date.now();
         await Promise.all([
             ...containerServices.map(async ({ container }) => {
                 await container.start();
@@ -141,10 +142,8 @@ export class Orchestrator {
             } catch (error: any) {
                 let logs = '';
                 try {
-                    // A container of the run logs every file's work: the report reads this start's.
-                    logs = await container.getLogs(
-                        new Date(serviceStartTime - LOG_CLOCK_MARGIN_MS),
-                    );
+                    // A container of the run logs every file's work: the report reads from this start's.
+                    logs = await container.getLogs(new Date(startedAt - LOG_CLOCK_MARGIN_MS));
                 } catch {
                     /* Ignore log fetch errors */
                 }
