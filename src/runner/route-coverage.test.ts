@@ -68,8 +68,8 @@ describe('route coverage — the api run judged', () => {
         expect(heldUnreached(root)).toBe(1);
     });
 
-    test('update mode refuses to record a run a test of which failed, and keeps the entry', async () => {
-        // Given - the run recorded, then the same run judged for recording with one failed test and one route fewer reached
+    test('update mode refuses to record a run a file of which failed, and keeps the entry', async () => {
+        // Given - the run recorded, then the same run judged for recording with one failed file and one route fewer reached
         const { directory, root } = runWithOneRouteReached();
         await judgeRoutes(root, directory, RECORDING);
         writeLedger(directory, { declared: [], reached: [{ method: 'GET', path: '/users' }] });
@@ -79,9 +79,21 @@ describe('route coverage — the api run judged', () => {
             judgeRoutes(root, directory, { failed: 1, update: true }),
         ).resolves.toStrictEqual({
             failure:
-                'api routes: not recorded — 1 test(s) of the run failed, and a failed test may not have sent its requests; make the run green, then record with TEST_UPDATE=1',
+                'api routes: not recorded — 1 file(s) of the run failed, and a failed file may not have sent its requests; make the run green, then record with TEST_UPDATE=1',
         });
         expect(heldUnreached(root)).toBe(2);
+    });
+
+    test('a run a file of which failed is not judged: the routes it did not reach are no failure of theirs', async () => {
+        // Given - a run reaching one route of three, the ratchet holding none, and two files failed
+        const { directory, root } = runWithOneRouteReached();
+
+        // Then - one neutral line, never the ratchet's failure naming routes the failed files may have sent
+        await expect(
+            judgeRoutes(root, directory, { failed: 2, update: false }),
+        ).resolves.toStrictEqual({
+            line: 'api routes: not judged — 2 file(s) of the run failed, and a failed file may not have sent its requests',
+        });
     });
 
     test('a route two specifications declare counts once', async () => {

@@ -24,9 +24,9 @@ import { shouldUpdateSnapshots } from './update.js';
  * ledger and judges the declared routes no request reached against the
  * ratchet, which is exact: more than `jterrazz.baseline.json › test` holds
  * fails the run, naming each, and fewer fails it too — the debt fell, and the
- * entry says where the run stood; `TEST_UPDATE=1` records where it stands,
- * unless a test of the run failed: a failed test may have sent none of its
- * requests, so its run is no count to record.
+ * entry says where the run stood; `TEST_UPDATE=1` records where it stands.
+ * A run a file of which failed is neither judged nor recorded: a failed file
+ * may have sent none of its requests, so its run is no count.
  * The run is the key's one judge: it alone counts the routes. An app whose
  * table is unknown — no `app.routes`, no OpenAPI document declared — fails
  * the run too: a measure against nothing reads as every route reached.
@@ -43,7 +43,7 @@ function spelled(route: Route): string {
     return `${route.method} ${route.path}`;
 }
 
-/** What the judge is told of the run: whether it records, and how many of its tests failed. */
+/** What the judge is told of the run: whether it records, and how many of its files failed. */
 export type RouteRun = { failed: number; update: boolean };
 
 /**
@@ -59,10 +59,13 @@ export async function judgeRoutes(
     if (ledgers.length === 0) {
         return {};
     }
-    if (update && failed > 0) {
-        return {
-            failure: `api routes: not recorded — ${failed} test(s) of the run failed, and a failed test may not have sent its requests; make the run green, then record with TEST_UPDATE=1`,
-        };
+    if (failed > 0) {
+        const why = `${failed} file(s) of the run failed, and a failed file may not have sent its requests`;
+        return update
+            ? {
+                  failure: `api routes: not recorded — ${why}; make the run green, then record with TEST_UPDATE=1`,
+              }
+            : { line: `api routes: not judged — ${why}` };
     }
     const run = measure(ledgers);
     const table = (await declaredRoutes(root)) ?? run.declared;
@@ -105,7 +108,7 @@ export default function setup(project: TestProject): () => Promise<void> {
     project.provide('routesLedger', directory);
     return async () => {
         const { failure, line } = await judgeRoutes(root, directory, {
-            failed: project.vitest.state.getCountOfFailedTests(),
+            failed: project.vitest.state.getFailedFilepaths().length,
             update: shouldUpdateSnapshots(),
         });
         if (failure !== undefined) {
