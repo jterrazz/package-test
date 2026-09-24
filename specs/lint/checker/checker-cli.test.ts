@@ -150,6 +150,25 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
     });
 
+    test("a broken ratchet prints its own findings, and counts the plugin's in one line", async () => {
+        // Given - the broken ratchet, and a report holding a diagnostic of the plugin and one of another
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
+            .fixture(file('./fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'))
+            .exec('. --oxlint-report oxlint-report.json');
+
+        // Then - the tree's finding in full, the plugin's counted: oxlint's own pass is the one that prints it
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(`
+            specs/widget/seeds/dead.sql:1:1: error jterrazz-check(c9): found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's own four; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures
+            conventions checker: 1 plugin diagnostic(s) judged, printed by oxlint's own pass
+            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/c9 has 1 finding(s) and no entry — it is new debt
+            baseline-ratchet  jterrazz.baseline.json › test  jterrazz/i2-sibling-test-naming has 1 finding(s) and no entry — it is new debt
+            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/c14 is at zero — the ratchet moved, delete its entry
+            Run 'jterrazz-test-check baseline' to record where the project stands.
+        `);
+    });
+
     test('the root member run judges the ratchet, and prints the tree finding it fails on', async () => {
         // Given - the broken ratchet, judged by the run typescript check makes
         const result = await cli
@@ -178,10 +197,10 @@ describe('lint — checker CLI contract', () => {
             .fixture(directory('./fixtures/lint-violations/checker-oxlint-report/'))
             .exec('--oxlint-report oxlint-report.json');
 
-        // Then - the value of the flag is no project root, and the one diagnostic is counted
+        // Then - the value of the flag is no project root, and the one diagnostic is counted, not printed again
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module
+            conventions checker: 1 plugin diagnostic(s) judged, printed by oxlint's own pass
             jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
             Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.
         `);
