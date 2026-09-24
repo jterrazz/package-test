@@ -342,11 +342,11 @@ export class AppiumAdapter implements DevicePort {
                     const first = offscreen[0];
                     if (first !== undefined) {
                         try {
-                            // Scroll the FOUND element into view directly (by
-                            // Id) — a predicate-driven `mobile: scroll` would
-                            // Start its own slow native scroll-search instead.
-                            await driver.executeScript('mobile: scroll', [
-                                { elementId: first.elementId, toVisible: true },
+                            // The FOUND element is scrolled into view by id,
+                            // Whatever its container; `mobile: scroll`'s
+                            // `toVisible` is for table and collection views.
+                            await driver.executeScript('mobile: scrollToElement', [
+                                { elementId: first.elementId },
                             ]);
                         } catch {
                             // Not scrollable (or already settling) — keep polling.

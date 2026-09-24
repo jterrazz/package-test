@@ -13,9 +13,9 @@ import { InvalidSelectorError, compilePredicate } from './predicate.js';
  *
  * It speaks the W3C endpoints the mobile facet's adapter calls: a session
  * created for the app's bundle id on a named device, the `mobile:` scripts
- * that terminate, activate, deep-link and scroll, element search by
- * `-ios predicate string`, click, clear and value, attributes, the page
- * source and a screenshot. Every other endpoint answers `unknown command`, the
+ * that terminate, activate, deep-link and scroll to an element, element
+ * search by `-ios predicate string`, click, clear and value, attributes, the
+ * page source and a screenshot. Every other endpoint answers `unknown command`, the
  * way a driver refuses one it does not implement — so a new call the adapter
  * starts making fails here before it fails on a device.
  */
@@ -128,9 +128,18 @@ class Session {
                 await this.app.deepLink(String(argument?.url));
                 return null;
             }
-            case 'mobile: scroll': {
+            case 'mobile: scrollToElement': {
                 this.app.scrollTo(this.app.element(String(argument?.elementId)));
                 return null;
+            }
+            case 'mobile: scroll': {
+                // What WebDriverAgent answers `toVisible` with on a SwiftUI
+                // Scroll view, as a simulator run met it.
+                throw new ProtocolError(
+                    'unknown error',
+                    500,
+                    'Failed to perform scroll with visible cell due to max scroll count reached',
+                );
             }
             default: {
                 throw new ProtocolError('unknown command', 404, `unsupported script: ${script}`);
