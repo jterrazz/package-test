@@ -3150,3 +3150,42 @@ tests).
       published package.json:165.
     - About 540k `spec-command-*` entries leaked into the system TMPDIR
       await a one-off removal by the owner.
+
+## Speed fix round of 2026-09-25: typescript
+
+One unit landed on package-typescript's `vision/17` by cherry-pick, with no
+conflict. @jterrazz/test was reinstalled from package-test `ca9b1445`
+(`npm ci`). HEAD is now `cc9c3a4`. `make fix` exit 0, `make check` exit 0
+(157 files, 458 tests).
+
+- **A spec runs only the pass it specifies, and the temp root** (branch
+  `vision17-typescript-toolchain-spec-speed`, `080721e`…`e8e32ea`, 13
+  commits). Its review came back `integrate`. Two commits were folded out:
+  the shared-template commit and its revert cancel exactly, so neither
+  landed. `cc9c3a4` narrows docs/02-developing.md:202 from the review: the
+  three `passes-*.spec.yaml` goldens are the spec documents that name
+  passes. The worktree `ptc-toolchain-spec-speed` and the branch are
+  removed. What stays open:
+    - Item 4 (splitting the long serial files or running them
+      concurrently) was not done. The cli runner spawns synchronously, and
+      the wall time is bounded by CPU saturation. Item 5 (the
+      install-matrix cache keyed on the lockfile) was declined, because the
+      store copies bin/, lint/ and src/, which the lockfile does not cover.
+    - **Owner call:** whether to bring back the shared node_modules template,
+      rebuilt on every rerun and refusing scoped names. It measured no gain.
+    - About 69 goldens and 8 chains still run every pass (secrets,
+      markdown-ignored, astro, docs-layout, committed-artefact,
+      default-config, oxlint-config-unparsed,
+      suppressions-resolved-config). Converting each one changes what it
+      records.
+    - The launch trace (`TYPESCRIPT_CHECK_TRACE`) is not built, so no spec
+      proves which passes a run launches.
+    - **Owner call:** a c18 exception for repository-ground chains.
+      names-repository.spec.ts is 335 lines, and splitting it would add a
+      c18 entry above the recorded 22.
+    - Type-aware lint resolves `@jterrazz/typescript/oxlint` (imported by
+      @jterrazz/test's `dist/oxlint.d.ts`) through the estate root's
+      node_modules, not this checkout. In a clone outside the estate,
+      `oxlint.config.ts:5:43` fails `no-unsafe-argument`, and vision/17
+      fails the same way. The owner of the `file:../package-test` linkage
+      decides, for example with a tsconfig `paths` entry to src/.
