@@ -1,4 +1,4 @@
-import type { Context, Fix, Fixer } from '@oxlint/plugins';
+import type { Context, Fix, Fixer, FixFn } from '@oxlint/plugins';
 
 import {
     child,
@@ -42,10 +42,88 @@ function firstArgumentOf(statement: AstNode): AstNode | undefined {
     return childList(child(statement, 'expression'), 'arguments')[0];
 }
 
+/** The statements of the block a group's function runs, when it is a plain `describe` with one. */
+function groupBodyOf(group: AstNode): AstNode | undefined {
+    if (identifierName(calleeOf(group)) !== 'describe') {
+        return undefined;
+    }
+    const run = childList(child(group, 'expression'), 'arguments')[1];
+    const body = child(run, 'body');
+    return body?.type === 'BlockStatement' ? body : undefined;
+}
+
+/** A title written in quotes or backticks, escaped for its own delimiter. */
+function escapedFor(title: AstNode, text: string): string {
+    const raw = typeof title.raw === 'string' ? title.raw : "'";
+    const delimiter = title.type === 'TemplateLiteral' ? '`' : raw.charAt(0);
+    const escaped = text.replaceAll('\\', String.raw`\\`).replaceAll(delimiter, `\\${delimiter}`);
+    return delimiter === '`' ? escaped.replaceAll('${', '\\${') : escaped;
+}
+
+/** A group's tests, each title prefixed with the group's (C33's grouping), or `undefined` when it holds anything else. */
+function flattenedGroup(source: string, group: AstNode, aspect: string): string | undefined {
+    const body = groupBodyOf(group);
+    const title = stringValue(firstArgumentOf(group));
+    const statements = childList(body, 'body');
+    if (body === undefined || title === undefined) {
+        return undefined;
+    }
+    let text = '';
+    let from = nodeStart(body) + 1;
+    for (const statement of statements) {
+        const testTitle = firstArgumentOf(statement);
+        const written = testTitle?.type === 'Literal' || testTitle?.type === 'TemplateLiteral';
+        if (!isTestCallee(calleeOf(statement)) || testTitle === undefined || !written) {
+            return undefined;
+        }
+        if (title !== aspect) {
+            const at = nodeStart(testTitle) + 1;
+            text += `${source.slice(from, at)}${escapedFor(testTitle, `${title} — `)}`;
+            from = at;
+        }
+    }
+    return text + source.slice(from, nodeEnd(body) - 1);
+}
+
 /**
- * The edit that brings `describe` into the file: into its `vitest` import when
- * it has one naming other hooks, else a line of its own above everything.
+ * The text replacing the run from the first member (a group or a test) to the
+ * last: the statements between them kept at module scope above, then one
+ * `describe` of the aspect holding every test. `undefined` when a group cannot flatten.
  */
+function mergedText(
+    source: string,
+    statements: AstNode[],
+    members: Set<AstNode>,
+    aspect: string,
+): string | undefined {
+    const inRun = statements.filter(
+        (statement) =>
+            nodeStart(statement) >= nodeStart([...members][0]) &&
+            nodeEnd(statement) <= nodeEnd([...members].at(-1)),
+    );
+    let hoisted = '';
+    let grouped = '';
+    let previous: number | undefined;
+    for (const statement of inRun) {
+        const lead = previous === undefined ? '' : source.slice(previous, nodeStart(statement));
+        previous = nodeEnd(statement);
+        const own = source.slice(nodeStart(statement), nodeEnd(statement));
+        if (!members.has(statement)) {
+            hoisted += `${lead.trimStart()}${own}\n`;
+        } else if (isDescribeCallee(calleeOf(statement))) {
+            const flattened = flattenedGroup(source, statement, aspect);
+            if (flattened === undefined) {
+                return undefined;
+            }
+            grouped += `${lead}${flattened.trim()}`;
+        } else {
+            grouped += `${lead}${own}`;
+        }
+    }
+    return `${hoisted}describe('${aspect}', () => {\n${grouped.trim()}\n});`;
+}
+
+/** The edit that brings `describe` into its `vitest` import, else a line of its own on top. */
 function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
     const vitest = statements.find(
         (statement) =>
@@ -71,16 +149,98 @@ function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
           );
 }
 
+/** Is this top-level statement a group — `describe(…)` or one of its forms? */
+function isGroup(statement: AstNode): boolean {
+    return isDescribeCallee(calleeOf(statement));
+}
+
+/** Is this top-level statement a test? */
+function isTest(statement: AstNode): boolean {
+    return isTestCallee(calleeOf(statement));
+}
+
+/** How a file's top level falls short of one group holding every test, and where it shows. */
+function runFinding(members: AstNode[]): undefined | { messageId: string; node: AstNode } {
+    const [only, second] = members.filter((statement) => isGroup(statement));
+    const stray = members.find((statement) => isTest(statement));
+    if (only === undefined) {
+        return stray === undefined ? undefined : { messageId: 'noDescribe', node: stray };
+    }
+    if (second !== undefined) {
+        return { messageId: 'severalDescribes', node: second };
+    }
+    return stray === undefined ? undefined : { messageId: 'testOutside', node: stray };
+}
+
+/**
+ * The finding on the one group's title when it is not the aspect, with its
+ * fix: a plain group's renamed; a table's — `describe.each(…)(…)`, run once
+ * per row — prefixed so what names its rows stays, unless it is computed.
+ */
+function titleFinding(
+    group: AstNode,
+    aspect: string,
+): undefined | { fix?: FixFn; messageId: string; node: AstNode } {
+    const title = firstArgumentOf(group);
+    const said = stringValue(title);
+    const parametrised = calleeOf(group)?.type === 'CallExpression';
+    if (
+        title === undefined ||
+        said === aspect ||
+        (parametrised && said?.startsWith(`${aspect} — `) === true)
+    ) {
+        return undefined;
+    }
+    const messageId = parametrised ? 'tableTitle' : 'wrongTitle';
+    if (!parametrised) {
+        const fix: FixFn = (fixer) =>
+            fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${aspect}'`);
+        return { fix, messageId, node: title };
+    }
+    if (title.type !== 'Literal' && title.type !== 'TemplateLiteral') {
+        return { messageId, node: title };
+    }
+    const at = nodeStart(title) + 1;
+    const fix: FixFn = (fixer) =>
+        fixer.insertTextBeforeRange([at, at], escapedFor(title, `${aspect} — `));
+    return { fix, messageId, node: title };
+}
+
+/** The fix that merges `members` into one describe, when the merge is mechanical. */
+function mergeFix(
+    source: string,
+    statements: AstNode[],
+    members: AstNode[],
+    aspect: string,
+): FixFn | undefined {
+    const text = mergedText(source, statements, new Set(members), aspect);
+    const [first] = members;
+    const last = members.at(-1);
+    if (text === undefined || first === undefined || last === undefined) {
+        return undefined;
+    }
+    const described = members.some((statement) => isGroup(statement));
+    return (fixer) =>
+        [
+            described ? undefined : importDescribe(fixer, statements),
+            fixer.replaceTextRange([nodeStart(first), nodeEnd(last)], text),
+        ].filter((edit) => edit !== undefined);
+}
+
 /**
  * CONVENTIONS C31 — a spec file holds ONE top-level `describe`, titled with
  * the file's aspect: `pagination.spec.ts` → `describe('pagination', …)`. The
  * runner's report reads `pagination > …` for every test, so a reader finds
- * the file a failure came from by its first word.
+ * the file a failure came from by its first word. A `describe.each` names its
+ * rows, so its title starts with the aspect: `'pagination — page %s'`.
  *
- * `--fix` renames a title that says something else, and wraps the tests of a
- * file that has no `describe` in one, `describe` imported with them; a file
- * with several, or with a test beside its one, is left to its author —
- * merging groups is a reading.
+ * `--fix` renames a title that says something else (a table's by prefixing
+ * the aspect), wraps the tests of a file that has no `describe` in one, and
+ * merges several groups, or a test beside the one, into one — a group's
+ * tests titled `<group> — <test>`, one level deep as J10 wants. The
+ * statements between the tests stay at module scope, above the `describe`. A
+ * group that holds anything but tests, or runs per row, is left to its
+ * author: its hooks and its table are a scope the merge would change.
  */
 export const c31DescribeNamesFile: LintRule = {
     createOnce(context: Context): Visitor {
@@ -89,57 +249,21 @@ export const c31DescribeNamesFile: LintRule = {
             Program(program: AstNode) {
                 const aspect = aspectOf(context.filename);
                 const statements = childList(program, 'body');
-                const describes = statements.filter((statement) =>
-                    isDescribeCallee(calleeOf(statement)),
-                );
-                const tests = statements.filter((statement) => isTestCallee(calleeOf(statement)));
-                const [only, second] = describes;
-                const [first] = tests;
-                const last = tests.at(-1);
-                if (only === undefined) {
-                    if (first !== undefined && last !== undefined) {
-                        context.report({
-                            data: { aspect },
-                            fix: (fixer) =>
-                                [
-                                    importDescribe(fixer, statements),
-                                    fixer.insertTextBeforeRange(
-                                        [nodeStart(first), nodeStart(first)],
-                                        `describe('${aspect}', () => {\n`,
-                                    ),
-                                    fixer.insertTextAfterRange(
-                                        [nodeEnd(last), nodeEnd(last)],
-                                        '\n});',
-                                    ),
-                                ].filter((edit) => edit !== undefined),
-                            messageId: 'noDescribe',
-                            node: first,
-                        });
-                    }
+                const members = statements.filter((node) => isGroup(node) || isTest(node));
+                const finding = runFinding(members);
+                if (finding !== undefined) {
+                    const source = context.sourceCode.text;
+                    const fix = mergeFix(source, statements, members, aspect);
+                    context.report({ ...finding, ...(fix && { fix }), data: { aspect } });
                     return;
                 }
-                if (second !== undefined) {
+                const [only] = members;
+                const title = only === undefined ? undefined : titleFinding(only, aspect);
+                if (title !== undefined) {
+                    const said = stringValue(firstArgumentOf(only ?? program));
                     context.report({
-                        data: { aspect },
-                        messageId: 'severalDescribes',
-                        node: second,
-                    });
-                    return;
-                }
-                if (first !== undefined) {
-                    context.report({ data: { aspect }, messageId: 'testOutside', node: first });
-                }
-                const title = firstArgumentOf(only);
-                if (title !== undefined && stringValue(title) !== aspect) {
-                    context.report({
-                        data: { aspect, title: stringValue(title) ?? 'a computed title' },
-                        fix: (fixer) =>
-                            fixer.replaceTextRange(
-                                [nodeStart(title), nodeEnd(title)],
-                                `'${aspect}'`,
-                            ),
-                        messageId: 'wrongTitle',
-                        node: title,
+                        ...title,
+                        data: { aspect, title: said ?? 'a computed title' },
                     });
                 }
             },
@@ -155,11 +279,15 @@ export const c31DescribeNamesFile: LintRule = {
             },
             severalDescribes: {
                 found: 'a second top-level `describe` in a file about one aspect',
-                fix: "merge the groups under `describe('{{aspect}}', …)`, or move this one to a file of its own aspect",
+                fix: "merge the groups under `describe('{{aspect}}', …)`, each test titled `<group> — <test>` — `make fix` does it when every group holds tests alone — or move this one to a file of its own aspect",
+            },
+            tableTitle: {
+                found: 'the file’s `describe.each` is titled "{{title}}"',
+                fix: "start its title with the file's aspect, '{{aspect}} — …', keeping what names its rows — `make fix` prefixes it",
             },
             testOutside: {
                 found: 'a test beside the `describe` of the file',
-                fix: "move it inside `describe('{{aspect}}', …)`",
+                fix: "move it inside `describe('{{aspect}}', …)` — `make fix` does it when the group holds tests alone",
             },
             wrongTitle: {
                 found: 'the file’s `describe` is titled "{{title}}"',
