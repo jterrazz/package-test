@@ -391,6 +391,9 @@ const componentVisitor = {
     unmount: true,
 } satisfies Record<keyof ComponentVisitor, Published>;
 
+/** What scopes a descriptor on a device rather than naming an element: no kind of its own, translated by the device. */
+const MOBILE_SCOPES = ['within'];
+
 /** The mobile element kinds, as the vocabulary spells them (`text` is `content()`). */
 const MOBILE_DESCRIPTORS: Record<MobileElementKind, string> = {
     button: 'button',
@@ -453,11 +456,11 @@ describe('facet capability declaration (K1 guard)', () => {
         // Given - the element module, which is the vocabulary's one home
         const exported = Object.keys(elements).toSorted();
 
-        // Then - the browsers declare them all, the device the four XCUITest kinds
+        // Then - the browsers declare them all, the device the four XCUITest kinds and the scope
         expect(declared('website', 'Descriptor')).toStrictEqual(exported);
         expect(declared('component', 'Descriptor')).toStrictEqual(exported);
         expect(declared('mobile', 'Descriptor')).toStrictEqual(
-            Object.values(MOBILE_DESCRIPTORS).toSorted(),
+            [...Object.values(MOBILE_DESCRIPTORS), ...MOBILE_SCOPES].toSorted(),
         );
     });
 

@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { directory } from '../../../src/index.js';
-import { cli as vitestCli } from '../vitest-cli.specification.js';
+import { cli as vitestCli } from '../../cli/vitest-cli.specification.js';
 
 /** The Appium double served once per run, which prints the sessions it saw when the run is over. */
 const DOUBLE_SETUP = resolve(import.meta.dirname, '../../shared/fixtures/appium-double/per-run.ts');

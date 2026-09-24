@@ -2774,7 +2774,7 @@ held`.
       contradicts docs/03's "every spec here". Move it, or name both
       exceptions in docs/03.
     - `capabilityFolders()` ignores each row's `columns`, so
-      `specs/cli/appium/` passes although `appium` is a mobile row.
+      `cli/appium/` passes although `appium` is a mobile row.
     - Specimen detection counts `root:` as a runner's app, so
       `integration.specification.ts` passing `root: '../shared/fixtures/specimen-api'`
       reads as reaching the specimen.

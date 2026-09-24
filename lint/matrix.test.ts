@@ -164,17 +164,34 @@ describe('the capability folders — the vocabulary a spec of a specimen is file
     });
 
     test('the vocabulary is the matrix, closed', () => {
-        // Given - the folders the matrix names
-        const folders = capabilityFolders();
+        // Given - the folders the matrix names for the api column
+        const folders = capabilityFolders('api');
 
         // Then - the capabilities are in it, a route's word and a grab-bag are not
         expect(
-            ['seed', 'intercept', 'clock', 'to-match', 'exec', 'params'].every((name) =>
-                folders.has(name),
-            ),
+            ['seed', 'intercept', 'clock', 'to-match', 'params'].every((name) => folders.has(name)),
         ).toBe(true);
         expect(['users', 'label', 'assertions', 'misc'].some((name) => folders.has(name))).toBe(
             false,
         );
+    });
+
+    test("a column's vocabulary holds only the capabilities its row declares there", () => {
+        // Given - the folders of the cli and mobile columns
+        const cli = capabilityFolders('cli');
+        const mobile = capabilityFolders('mobile');
+
+        // Then - `appium` and `open` are mobile's, `exec` and `fixture` cli's
+        expect([
+            cli.has('appium'),
+            cli.has('open'),
+            cli.has('exec'),
+            cli.has('fixture'),
+        ]).toStrictEqual([false, false, true, true]);
+        expect([mobile.has('appium'), mobile.has('open'), mobile.has('exec')]).toStrictEqual([
+            true,
+            true,
+            false,
+        ]);
     });
 });

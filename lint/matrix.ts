@@ -277,11 +277,16 @@ export function capabilityFolder(name: string): string {
 }
 
 /**
- * The folders a spec of a specimen may be filed under: one per capability the
- * matrix declares, closed — a capability the matrix does not name is no folder.
+ * The folders a spec of a specimen may be filed under in a column: one per
+ * capability the matrix declares there, closed — a capability the matrix does
+ * not name, or names for other columns only, is no folder of this one.
  */
-export function capabilityFolders(): Set<string> {
-    return new Set(capabilities().map(({ name }) => capabilityFolder(name)));
+export function capabilityFolders(column: Column): Set<string> {
+    return new Set(
+        capabilities()
+            .filter(({ columns }) => columns.includes(column))
+            .map(({ name }) => capabilityFolder(name)),
+    );
 }
 
 /** The probe, as a matcher. */

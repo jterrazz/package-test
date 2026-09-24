@@ -1210,10 +1210,10 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     {
         channel: 'checker',
         convention:
-            'A spec of a SPECIMEN is filed by the capability it specifies. A `.spec.ts` whose runner drives an app under `<specs>/shared/fixtures/` — a specification module it imports a runner from, or one that module imports a runner from, names the shared fixtures in a literal: the root, the app module, the binary — specifies the framework, not that app, and sits one folder below its facet, in a folder the capability matrix names (`<specs>/api/seed/<aspect>.spec.ts`), one file per aspect of the capability. The vocabulary is closed: each capability of the matrix, the words before its first parenthesis kebab-cased (`.seed()` → `seed`, `toMatch(file())` → `to-match`, `.exitCode` → `exit-code`). C29 and C30 leave such a spec alone. An error at the file’s first line of code, where a reasoned `checker-disable-next-line c35` above it silences it.',
+            'A spec of a SPECIMEN is filed by the capability it specifies. A `.spec.ts` whose runner drives an app under `<specs>/shared/fixtures/` — a specification module it imports a runner from, or one that module imports a runner from, names the shared fixtures in a literal: the root, the app module, the binary — specifies the framework, not that app, and sits one folder below its facet, in a folder the capability matrix names for that facet’s column (`<specs>/api/seed/<aspect>.spec.ts`), one file per aspect of the capability. The vocabulary is closed: each capability the matrix declares for the column, the words before its first parenthesis kebab-cased (`.seed()` → `seed`, `toMatch(file())` → `to-match`, `.exitCode` → `exit-code`); a capability of another column is no folder of this facet (`appium` is mobile’s, never `cli/appium/`). A first-level folder that is no facet has no column, and takes a capability of any. C29 and C30 leave such a spec alone. An error at the file’s first line of code, where a reasoned `checker-disable-next-line c35` above it silences it.',
         facet: 'model',
         family: 'C',
-        fix: 'Move the file to `<specs>/<facet>/<capability>/<aspect>.spec.ts`, the capability it asks about, named as the matrix names it.',
+        fix: 'Move the file to `<specs>/<facet>/<capability>/<aspect>.spec.ts`, the capability it asks about, named as the matrix names it in that facet’s column.',
         id: 'C35',
         name: 'c35-capability-folder',
         rationale:

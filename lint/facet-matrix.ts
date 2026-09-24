@@ -432,7 +432,7 @@ export const CAPABILITIES: Capability[] = [
         name: 'search',
         probe: 'search(',
     },
-    { columns: BROWSERS, group: 'Descriptor', name: 'within', probe: 'within(' },
+    { columns: DRAWS, group: 'Descriptor', name: 'within', probe: 'within(' },
     { columns: BROWSERS, group: 'Descriptor', name: 'focused', probe: 'focused(' },
     { columns: BROWSERS, group: 'Descriptor', name: 'selected', probe: 'selected(' },
     { columns: BROWSERS, group: 'Descriptor', name: 'valued', probe: 'valued(' },

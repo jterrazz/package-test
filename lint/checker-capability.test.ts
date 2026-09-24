@@ -45,6 +45,20 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         ]);
     });
 
+    test('a capability another column declares is no folder of this facet', () => {
+        // Given - a cli spec of a specimen filed under `appium/`, a capability of the mobile column
+        const root = specsTree({
+            'cli/cli.specification.ts':
+                "const BIN = resolve(import.meta.dirname, '../shared/fixtures/specimen-cli/cli.sh');\n",
+            'cli/appium/session.spec.ts': "import { cli } from '../cli.specification.js';\n",
+        });
+
+        // Then - refused, naming the cli column's own capabilities
+        expect(checkCapabilityFolder(root).map(({ file, fix }) => `${file} ${fix}`)).toStrictEqual([
+            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its facet — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/03-testing.md § The capability matrix)',
+        ]);
+    });
+
     test('a capability folder passes, and a spec of the project’s own app is C30’s', () => {
         // Given - a specimen spec under seed/, and a project whose runner starts its own app
         const specimen = specsTree({

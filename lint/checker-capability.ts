@@ -4,6 +4,7 @@ import { dirname, relative, sep } from 'node:path';
 import { SHARED_GROUND } from '../src/model/chain/ground.js';
 import { listFiles, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
+import { COLUMNS } from './facet-matrix.js';
 import { capabilityFolders } from './matrix.js';
 import { specimenOf } from './specimen.js';
 
@@ -13,12 +14,43 @@ import { specimenOf } from './specimen.js';
  * A spec whose runner drives an app under `specs/shared/fixtures/`
  * (`lint/specimen.ts`) specifies the FRAMEWORK, not that app: its folder is
  * the capability it asks about, one below its facet —
- * `specs/api/seed/<aspect>.spec.ts` — named from the capability matrix, a
- * closed vocabulary (`lint/matrix.ts`), and its file the aspect asked of it.
+ * `specs/api/seed/<aspect>.spec.ts` — named from the capability matrix's
+ * column for that facet, a closed vocabulary (`lint/matrix.ts`), and its file
+ * the aspect asked of it.
  */
 
-/** The capabilities a finding names as the first to reach for. */
-const EXAMPLES = ['seed', 'intercept', 'clock', 'to-match', 'get', 'exec', 'trigger'];
+/** The capabilities a finding names as the first to reach for, those of the facet's column. */
+const EXAMPLES = [
+    'seed',
+    'intercept',
+    'clock',
+    'to-match',
+    'get',
+    'exec',
+    'trigger',
+    'call',
+    'visit',
+    'open',
+];
+
+/**
+ * The folders a facet files a specimen's spec under: its column's. A
+ * first-level folder that is no facet — a repository suite — has no column,
+ * and takes a capability of any.
+ */
+function vocabularyOf(facet: string): Set<string> {
+    const column = COLUMNS.find((name) => name === facet && name !== 'module');
+    if (column !== undefined) {
+        return capabilityFolders(column);
+    }
+    const any = new Set<string>();
+    for (const name of COLUMNS) {
+        for (const folder of capabilityFolders(name)) {
+            any.add(folder);
+        }
+    }
+    return any;
+}
 
 /** The 1-based line of a file's first code — past the comments and blank lines it opens on. */
 function firstCodeLine(text: string): number {
@@ -49,7 +81,6 @@ function foldersBelowFacet(specsRoot: string, file: string): string[] {
  * it silences the finding.
  */
 export function checkCapabilityFolder(specsRoot: string): TokenViolation[] {
-    const vocabulary = capabilityFolders();
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts')).flatMap((file) => {
         const [facet = ''] = relative(specsRoot, file).split(sep);
         if (facet === SHARED_GROUND) {
@@ -57,6 +88,7 @@ export function checkCapabilityFolder(specsRoot: string): TokenViolation[] {
         }
         const text = readFileSync(file, 'utf8');
         const specimen = specimenOf(file, text);
+        const vocabulary = vocabularyOf(facet);
         const folders = foldersBelowFacet(specsRoot, file);
         const [folder = ''] = folders;
         const line = firstCodeLine(text);
@@ -71,7 +103,7 @@ export function checkCapabilityFolder(specsRoot: string): TokenViolation[] {
         return [
             {
                 file: relative(specsRoot, file).split(sep).join('/'),
-                fix: `file it under the capability it specifies, one folder below its facet — \`${facet}/<capability>/<aspect>.spec.ts\`, the capability a name of the matrix kebab-cased (\`${EXAMPLES.join('`, `')}\`, …; docs/03-testing.md § The capability matrix)`,
+                fix: `file it under the capability it specifies, one folder below its facet — \`${facet}/<capability>/<aspect>.spec.ts\`, the capability a name the matrix gives the \`${facet}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/03-testing.md § The capability matrix)`,
                 found: `a spec of the specimen \`${SHARED_GROUND}/fixtures/${specimen}\`, filed under \`${shown}/\``,
                 line,
                 rule: 'c35-capability-folder' as const,
