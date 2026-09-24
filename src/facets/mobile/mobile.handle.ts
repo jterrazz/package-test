@@ -58,12 +58,14 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
      */
     backend?: MobileBackendOptions;
     /**
-     * The simulator to run on — resolved through `xcrun simctl`. Under a
-     * `mobile({ device })` project the run's server already drives one: this
-     * device restates it, never another, and its UDID stands for a device
-     * that declares none.
+     * The simulator to run on — resolved through `xcrun simctl`, or asked of
+     * a declared `appium` server. Under a `mobile({ device })` project the
+     * run's server already drives one, and the project owns it: left out
+     * here, the runner drives the project's; stated, it restates that device,
+     * never another, and the booted UDID stands for a device that declares
+     * none. Anywhere else a runner with no device is refused.
      */
-    device: MobileDevice;
+    device?: MobileDevice;
     /**
      * Project-root override (CONVENTIONS A9): where the appium binary is
      * resolved from (`node_modules/.bin`). Auto-discovered from the calling
@@ -138,10 +140,13 @@ function named({ name, os, udid }: MobileDevice): string {
 
 /**
  * The device a runner asks the run's server for: the one the project declared
- * and the setup booted. A specification may restate it, and never names
- * another — no other simulator was booted for the run.
+ * and the setup booted. A specification leaves it out or restates it, and
+ * never names another — no other simulator was booted for the run.
  */
-export function runDevice(device: MobileDevice, run: RunServer): MobileDevice {
+export function runDevice(device: MobileDevice | undefined, run: RunServer): MobileDevice {
+    if (device === undefined) {
+        return { ...run.device, udid: run.udid };
+    }
     const agrees =
         device.name === run.device.name &&
         (device.os === undefined ||
@@ -160,8 +165,10 @@ export function runDevice(device: MobileDevice, run: RunServer): MobileDevice {
  * whether that server outlives the file. A declared server owns its devices:
  * the runner neither resolves nor boots one. The run's server, spawned by a
  * `mobile({ device })` project's global setup, drives the device that setup
- * booted. Otherwise the simulator is resolved and booted here, and the
- * project's own server spawned beside it, for this file alone.
+ * booted, whether the runner restates it or leaves it to the project.
+ * Otherwise the simulator is resolved and booted here, and the project's own
+ * server spawned beside it, for this file alone. A runner with no device and
+ * no run's server to lend one is refused.
  */
 async function reachAppium(
     options: MobileSpecificationOptions,
@@ -169,11 +176,21 @@ async function reachAppium(
 ): Promise<{ appium: AppiumServer; device: MobileDevice; outlivesFile: boolean }> {
     const { appium: declared, device } = options;
     if (declared !== undefined) {
+        if (device === undefined) {
+            throw new Error(
+                `specification.mobile() names no device to ask the Appium server at ${declared.url} for — a declared server is handed its device by capabilities: name the simulator with \`device: { name }\``,
+            );
+        }
         return { appium: notOurs(declared.url), device, outlivesFile: true };
     }
     const run = await mobileServer();
     if (run !== undefined) {
         return { appium: notOurs(run.url), device: runDevice(device, run), outlivesFile: true };
+    }
+    if (device === undefined) {
+        throw new Error(
+            "specification.mobile() names no device, and no mobile({ device }) project serves one — name the simulator with `device: { name }`, or declare it once on the project, mobile({ device, root }), so every file drives the run's",
+        );
     }
     const { server, udid } = await serveAppium(device, root);
     return { appium: server, device: { ...device, udid }, outlivesFile: false };

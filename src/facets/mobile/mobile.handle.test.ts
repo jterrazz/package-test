@@ -46,6 +46,32 @@ describe('startMobile — a declared appium server', () => {
     });
 });
 
+describe('startMobile — a runner with no device', () => {
+    test('is refused when no run serves one, naming the project declaration', async () => {
+        // Given - no device, no declared server, and no mobile({ device }) project around the file
+        // Then - the constructor refuses before resolving or spawning anything
+        await expect(
+            startMobile({ app: { bundleId: 'com.example.app' }, root: bareRoot() }),
+        ).rejects.toThrow(
+            "specification.mobile() names no device, and no mobile({ device }) project serves one — name the simulator with `device: { name }`, or declare it once on the project, mobile({ device, root }), so every file drives the run's",
+        );
+    });
+
+    test('is refused under a declared server, which is handed its device by capabilities', async () => {
+        // Given - a server someone else runs, and no device to ask it for
+        // Then - the constructor refuses, naming the server
+        await expect(
+            startMobile({
+                app: { bundleId: 'com.example.app' },
+                appium: { url: 'http://127.0.0.1:4723' },
+                root: bareRoot(),
+            }),
+        ).rejects.toThrow(
+            'specification.mobile() names no device to ask the Appium server at http://127.0.0.1:4723 for',
+        );
+    });
+});
+
 describe('runDevice — the device the run serves', () => {
     /** The run's server, booted for an iPhone 17 on iOS 26.5. */
     const run = {
@@ -58,6 +84,16 @@ describe('runDevice — the device the run serves', () => {
         // Given - the same name, the os left out
         // Then - the project's device, on the udid the setup booted
         expect(runDevice({ name: 'iPhone 17' }, run)).toStrictEqual({
+            name: 'iPhone 17',
+            os: '26.5',
+            udid: 'SIM-17',
+        });
+    });
+
+    test("a specification naming no device drives the project's, on the booted simulator", () => {
+        // Given - no device on the specification
+        // Then - the project's device, on the udid the setup booted
+        expect(runDevice(undefined, run)).toStrictEqual({
             name: 'iPhone 17',
             os: '26.5',
             udid: 'SIM-17',

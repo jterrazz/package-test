@@ -22,7 +22,7 @@ describe('session', () => {
     });
 
     test('a run whose project declares the device spawns one server, and its files drive one session', async () => {
-        // Given - a scratch project declaring its simulator and appium root, and two files spawning no server of their own
+        // Given - a scratch project declaring its simulator and appium root, and two files naming no device and spawning no server
         const result = await vitestCli
             .fixture(directory('./fixtures/mobile-spawned-session/'))
             .env({ DOUBLE_SETUP })
