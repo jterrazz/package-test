@@ -1,6 +1,29 @@
 import type { ContainerPort, ContainerRequest } from '../../model/ports/container.port.js';
 import { loadPeer } from '../peer.js';
 
+/** The label every container this package starts carries — what a cleanup filters on. */
+export const CONTAINER_LABEL = 'com.jterrazz.test';
+
+/** The label a reused container carries besides: it outlives the run by design. */
+export const REUSED_LABEL = 'com.jterrazz.test.reuse';
+
+/**
+ * Whether a container is reused across runs: asked for with
+ * `TESTCONTAINERS_REUSE_ENABLE=true`, and never on CI, where a run starts
+ * from nothing and leaves nothing.
+ */
+export function reuseEnabled(env: NodeJS.ProcessEnv): boolean {
+    const onCi = env.CI !== undefined && env.CI !== '' && env.CI !== 'false';
+    return env.TESTCONTAINERS_REUSE_ENABLE === 'true' && !onCi;
+}
+
+/** The labels a container is started with. */
+export function containerLabels(reuse: boolean): Record<string, string> {
+    return reuse
+        ? { [CONTAINER_LABEL]: 'true', [REUSED_LABEL]: 'true' }
+        : { [CONTAINER_LABEL]: 'true' };
+}
+
 /**
  * Container adapter using testcontainers.
  * Wraps a GenericContainer for programmatic container lifecycle.
@@ -20,7 +43,7 @@ export class TestcontainersAdapter implements ContainerPort {
         this.env = options.env ?? {};
         this.command = options.command;
         this.tmpfs = options.tmpfs;
-        this.reuse = options.reuse ?? false;
+        this.reuse = options.reuse ?? reuseEnabled(process.env);
     }
 
     async start(): Promise<void> {
@@ -30,7 +53,9 @@ export class TestcontainersAdapter implements ContainerPort {
             async () => await import('testcontainers'),
         );
 
-        let builder = new GenericContainer(this.image).withExposedPorts(this.containerPort);
+        let builder = new GenericContainer(this.image)
+            .withExposedPorts(this.containerPort)
+            .withLabels(containerLabels(this.reuse));
 
         for (const [key, value] of Object.entries(this.env)) {
             builder = builder.withEnvironment({ [key]: value });
