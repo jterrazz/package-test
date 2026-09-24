@@ -7,6 +7,7 @@ import { listFiles, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
 import { projectRootOf } from './role.js';
 import {
+    ambiguousSegment,
     closingOf,
     declaredCommands,
     doorsOf,
@@ -305,14 +306,45 @@ export function checkOneSubject(specsRoot: string): TokenViolation[] {
 }
 
 /**
+ * The C30 finding of a subject whose path holds a word that may be a value:
+ * no folder is derived from it, and the author writes the template that says
+ * which it is. Reported at the chain that sends it.
+ */
+function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): TokenViolation | undefined {
+    const at = spec.subjects.get(name);
+    const segment = at === undefined ? undefined : ambiguousSegment(at.subject, spec.reading);
+    if (at === undefined || segment === undefined || at.subject.facet !== 'api') {
+        return undefined;
+    }
+    const { method, path } = at.subject;
+    const verb = method.toLowerCase();
+    const bare = path.split(/[?#]/u)[0] ?? '';
+    const template = bare.replace(`/${segment}/`, '/:<name>/');
+    const collection = bare.split('/').at(bare.split('/').indexOf(segment) - 1) ?? '';
+    return {
+        ...positionOf(spec.text, at.index),
+        file: shown(specsRoot, spec.file),
+        fix: `write the route's template: \`.${verb}('${template}', { params: { <name>: '${segment}' } })\` — or, if \`${segment}\` is the route's own segment, state that the path is the route: \`.${verb}('${bare}', { params: {} })\``,
+        found: `\`${method} ${bare}\` names \`${segment}\` right after the collection \`${collection}\`: a value or a segment of the route, and the folder depends on which`,
+        rule: 'c30-subject-folder' as const,
+        severity: 'error' as const,
+    };
+}
+
+/**
  * CONVENTIONS C30 — a spec file about one subject sits in its subject's
- * standard folder. Reported at the file's first line.
+ * standard folder. Reported at the file's first line; a subject whose path
+ * reads two ways is reported at its chain, and never moved.
  */
 export function checkSubjectFolder(specsRoot: string): TokenViolation[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         const [only] = [...spec.subjects.keys()];
         if (spec.subjects.size !== 1 || only === undefined || silenced(spec)) {
             return [];
+        }
+        const ambiguity = ambiguityOf(specsRoot, spec, only);
+        if (ambiguity !== undefined) {
+            return [ambiguity];
         }
         const target = targetOf(specsRoot, spec, only, true);
         if (dirname(target) === dirname(spec.file)) {

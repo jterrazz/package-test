@@ -55,6 +55,24 @@ const TWO_ROUTES = [
     '',
 ].join('\n');
 
+/** A spec whose one test ends its chain on `terminal`. */
+function chartSpec(terminal: string): string {
+    return [
+        "import { api } from '../api.specification.js';",
+        `test('a', async () => { await api.${terminal}; });`,
+        '',
+    ].join('\n');
+}
+
+/** The chart route, once written as its template and once as the path it fills. */
+const CHARTS = {
+    'api/api.specification.ts': RUNNER,
+    'api/charts/filled.spec.ts': chartSpec("get('/indicators/btc/chart?range=1D')"),
+    'api/charts/templated.spec.ts': chartSpec(
+        "get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })",
+    ),
+};
+
 /** A spec running `db migrate`, its `cli` imported from the named specification module. */
 function migrating(door: string): string {
     return [
@@ -126,6 +144,44 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
             path: listed.includes("file('../../../expected/listed.http')"),
             unread: listed.includes('ORDER'),
         }).toStrictEqual({ golden: true, helper: true, path: true, unread: false });
+    });
+
+    test('a route written as its template is filed under the route, and a filled one that reads two ways teaches the template', () => {
+        // Given - the chart route twice: once as a template, once as the path it fills
+        const root = specsTree(CHARTS);
+
+        // Then - the template's file goes to indicators/chart/; the filled one is reported at its chain
+        expect(checkSubjectFolder(root)).toStrictEqual([
+            {
+                column: 31,
+                file: 'api/charts/filled.spec.ts',
+                fix: "write the route's template: `.get('/indicators/:<name>/chart', { params: { <name>: 'btc' } })` — or, if `btc` is the route's own segment, state that the path is the route: `.get('/indicators/btc/chart', { params: {} })`",
+                found: '`GET /indicators/btc/chart` names `btc` right after the collection `indicators`: a value or a segment of the route, and the folder depends on which',
+                line: 2,
+                rule: 'c30-subject-folder',
+                severity: 'error',
+            },
+            {
+                file: 'api/charts/templated.spec.ts',
+                fix: 'move it to api/indicators/chart/templated.spec.ts — `make fix` moves it, and the ground it stands on',
+                found: 'a spec of GET /indicators/:id/chart, filed under api/charts/',
+                line: 1,
+                rule: 'c30-subject-folder',
+                severity: 'error',
+            },
+        ]);
+    });
+
+    test('the fix moves a templated route to its folder and never a path that reads two ways', () => {
+        // Given - the same two files
+        const root = specsTree(CHARTS);
+
+        // When - the fix runs
+        fixSubjects(root);
+
+        // Then - the template's file moved, the filled one left where it was
+        expect(existsSync(join(root, 'api/indicators/chart/templated.spec.ts'))).toBe(true);
+        expect(existsSync(join(root, 'api/charts/filled.spec.ts'))).toBe(true);
     });
 
     test('a spec of one route outside its folder is moved there, its paths rebased', () => {

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+    ambiguousSegment,
     commandWords,
     declaredCommands,
     doorsOf,
@@ -126,6 +127,47 @@ describe('the subject a spec reaches, read statically', () => {
             'POST /events/:id/publish',
         ]);
     });
+
+    test('reads a route template as the route, the params beside it telling a literal path that it is one', () => {
+        // Given - the same chart route as a template, a filled path, and a literal path stated as its route
+        const source = [
+            "import { api } from '../api.specification.js';",
+            "await api.get('/indicators/:symbol/chart?range=1D', { params: { symbol: 'btc' } });",
+            "await api.get('/indicators/btc/chart');",
+            "await api.post('/indicators/latest/refresh', {}, { params: {} });",
+        ].join('\n');
+        const subjects = subjectsOf(source).map(({ subject }) => subject);
+
+        // Then - the template files under the route's literals; the filled path reads two ways; the stated one is literal
+        expect(subjects.map((subject) => subjectFolder(subject))).toStrictEqual([
+            'indicators/chart',
+            undefined,
+            'indicators/latest/refresh',
+        ]);
+        expect(subjects.map((subject) => ambiguousSegment(subject))).toStrictEqual([
+            undefined,
+            'btc',
+            undefined,
+        ]);
+    });
+
+    test.each([
+        ['/indicators/btc/chart', 'btc'],
+        ['/users/me/settings', 'me'],
+        ['/map/pois/detail', undefined],
+        ['/market/btc/chart', undefined],
+        ['/events/42/timeline', undefined],
+        ['/data/series/points', 'series'],
+    ])(
+        'a word after a collection, with more path after it, reads two ways: %s → %s',
+        (path, segment) => {
+            // Given - a literal path sent with no template, `data` a declared collection
+            const subject = { facet: 'api' as const, method: 'GET' as const, path };
+
+            // Then - the word that may be a value, if any
+            expect(ambiguousSegment(subject, { collections: ['data'] })).toBe(segment);
+        },
+    );
 
     test('reads the request line of a .http the chain sends', () => {
         // Given - a request named by file(), and the disk that holds it

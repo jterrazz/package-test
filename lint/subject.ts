@@ -42,7 +42,13 @@ export type Method = 'ALL' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | '
 /** What a chain reaches — one per facet that has a subject. */
 export type Subject =
     | { command: string[]; facet: 'cli' }
-    | { facet: 'api'; method: Method; path: string }
+    | {
+          facet: 'api';
+          method: Method;
+          path: string;
+          /** Did the chain write the route's template — a `:name` segment, or `{ params }` beside the path? */
+          template?: boolean;
+      }
     | { facet: 'jobs'; job: string }
     | { facet: 'mobile'; journey: string }
     | { facet: 'website'; page: string };
@@ -98,6 +104,35 @@ function actionOf(
     return method.toLowerCase();
 }
 
+/**
+ * The segment of a literal path that may be a value or the route's own —
+ * `btc` in `/indicators/btc/chart`: a word right after a collection, with
+ * more of the path after it. A template settles it, and so does a segment
+ * that is plainly a value (a number, an id). The last segment is read as the
+ * route's: after a collection it names a sub-route (`/map/pois/detail`) far
+ * more often than an item.
+ */
+export function ambiguousSegment(
+    subject: Subject,
+    reading: SubjectReading = {},
+): string | undefined {
+    if (subject.facet !== 'api' || subject.template === true) {
+        return undefined;
+    }
+    const segments = (subject.path.split(/[?#]/u)[0] ?? '')
+        .split('/')
+        .filter((segment) => segment !== '');
+    const collections = reading.collections ?? [];
+    return segments.find(
+        (segment, index) =>
+            index > 0 &&
+            index < segments.length - 1 &&
+            LITERAL_SEGMENT.test(segment) &&
+            !segment.includes(HOLE) &&
+            isCollection(segments[index - 1] ?? '', collections),
+    );
+}
+
 /** The folder an api route is filed under — see {@link subjectFolder}. */
 function routeFolder(
     method: Method,
@@ -123,7 +158,9 @@ function routeFolder(
  */
 export function subjectFolder(subject: Subject, reading: SubjectReading = {}): string | undefined {
     if (subject.facet === 'api') {
-        return routeFolder(subject.method, subject.path, reading.collections ?? []);
+        return ambiguousSegment(subject, reading) === undefined
+            ? routeFolder(subject.method, subject.path, reading.collections ?? [])
+            : undefined;
     }
     if (subject.facet === 'cli') {
         return subject.command.length === 0 ? undefined : subject.command.join('/');
@@ -478,7 +515,8 @@ export function doorsOf(
 function requestLineOf(text: string): Subject[] {
     const { method = '', path = '/' } = REQUEST_LINE.exec(text)?.groups ?? {};
     const verb = HTTP_VERBS[method.toLowerCase()];
-    return verb === undefined ? [] : [{ facet: 'api', method: verb, path }];
+    // A request file's line is written as the route: there is no template to write beside it.
+    return verb === undefined ? [] : [{ facet: 'api', method: verb, path, template: true }];
 }
 
 /** Reads a `.http` a chain names by `file()`, from the spec's directory. */
@@ -523,6 +561,21 @@ const TERMINALS: Record<string, TerminalReader> = {
 };
 
 /**
+ * The route an HTTP verb sends: its path, and whether the chain wrote it as
+ * the route's template — a `:name` segment, or `{ params }` handed beside it
+ * (second to `get`/`delete`, third to `post`/`put`, after the body).
+ */
+function routeOf(method: Method, args: readonly string[]): Subject[] {
+    const path = literalOf(args[0]);
+    if (path?.startsWith('/') !== true) {
+        return [];
+    }
+    const options = args[method === 'POST' || method === 'PUT' ? 2 : 1] ?? '';
+    const template = /\/:[A-Za-z_$]/u.test(path) || /(?<![\w$])params(?![\w$])/u.test(options);
+    return [{ facet: 'api', method, path, template }];
+}
+
+/**
  * The subject a chain's terminal action reaches — a cli sequence is one
  * session, opened by its first command.
  */
@@ -535,11 +588,11 @@ export function subjectsOfChain(
     if (terminal === undefined) {
         return [];
     }
-    const [first] = argumentsOf(terminal.args);
+    const args = argumentsOf(terminal.args);
+    const [first] = args;
     const method = HTTP_VERBS[terminal.name];
     if (method !== undefined) {
-        const path = literalOf(first);
-        return path?.startsWith('/') === true ? [{ facet: 'api', method, path }] : [];
+        return routeOf(method, args);
     }
     return TERMINALS[terminal.name]?.(first, readRequest, reading.commands?.[chain.handle]) ?? [];
 }
