@@ -94,6 +94,19 @@ describe('intercept — the network double in module scope', () => {
         await expect(response.json()).resolves.toStrictEqual({ celsius: 21 });
     });
 
+    test('settles a cancel of the body the subject was served', async () => {
+        // Given - an error reply with a body, which the subject drops unread
+        await using _ = await intercept(
+            http.get('https://weather.test/today'),
+            http.error(503, { reason: 'the station is down' }),
+        );
+        const response = await fetch('https://weather.test/today');
+
+        // Then - the cancel resolves, the status still readable
+        await expect(response.body?.cancel()).resolves.toBeUndefined();
+        expect(response.status).toBe(503);
+    });
+
     test('refuses an origin that is not one', async () => {
         // Given - a scope stating a bare host
         const scope = async (): Promise<void> => {

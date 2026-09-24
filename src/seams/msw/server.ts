@@ -14,6 +14,7 @@
 import type { Contract } from '../../model/contracts/contract.js';
 import { buildContractHandlers, NO_CONTRACTS } from './handlers.js';
 import type { ContractRegistration } from './handlers.js';
+import { owningBodies } from './owned-body.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import */
 
@@ -32,8 +33,13 @@ async function loadMsw(): Promise<{ msw: any; node: any }> {
 
 let serverInstance: any = null;
 
+/** The `fetch` the engine installed, which the owning wrapper sits on while it listens. */
+let engineFetch: null | typeof fetch = null;
+
 /**
- * Start the MSW server (once per process).
+ * Start the MSW server (once per process), with every reply's body handed to
+ * the caller as a stream this package owns ({@link owningBodies}), so a
+ * subject that cancels a body sees the cancel settle.
  */
 export async function ensureContractServer(): Promise<void> {
     if (serverInstance !== null) {
@@ -42,6 +48,8 @@ export async function ensureContractServer(): Promise<void> {
     const { node } = await loadMsw();
     serverInstance = node.setupServer();
     serverInstance.listen({ onUnhandledRequest: 'bypass' });
+    engineFetch = globalThis.fetch;
+    globalThis.fetch = owningBodies(engineFetch);
 }
 
 /**
@@ -74,6 +82,10 @@ export async function registerContracts(
  */
 export async function stopContractServer(): Promise<void> {
     if (serverInstance !== null) {
+        if (engineFetch !== null) {
+            globalThis.fetch = engineFetch;
+            engineFetch = null;
+        }
         serverInstance.close();
         serverInstance = null;
     }

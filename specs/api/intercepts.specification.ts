@@ -33,8 +33,7 @@ async function readChunks(response: Response, decoder: TextDecoder): Promise<str
 const routes: Record<string, () => Promise<Response>> = {
     '/cancel': async () => {
         // The subject drops the body it did not need — what an SDK client does
-        // Before a retry, and the one shape msw's node interceptor never
-        // Settles (specs/api/intercepts/body-cancel.spec.ts).
+        // Before a retry.
         const response = await fetch(QUOTES_URL);
         await response.body?.cancel();
         return Response.json({ status: response.status });

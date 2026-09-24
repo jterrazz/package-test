@@ -244,29 +244,7 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 **An empty list is refused.** `intercept(defineContracts())` guards nothing, and a subject with no network needs no intercept at all — the message says so. "This subject makes no network call" is said the other way round: declare the call with `http.unreachable()` on every feed it could reach, and the spec fails if it makes one.
 
-**A cancelled body does not settle, and here is why.** `response.body.cancel()` never resolves while msw is listening. Reading the same body with `.text()`/`.json()` resolves at once, and so does a `getReader().read()`; only the cancellation hangs.
-
-The cause is msw's, above the interceptor, and it is the STREAMS specification working as written: msw hands the caller one branch of a TEED stream — the other branch is its own, for the `response` lifecycle event it emits — and a tee branch's `cancel()` resolves only once BOTH branches have been cancelled. msw never cancels its own, so the caller's promise stays pending forever.
-
-Four measurements place it, on msw 2.15.0 with `@mswjs/interceptors` 0.41.9 under node 24:
-
-| Setup                                            | `body.cancel()` |
-| ------------------------------------------------ | --------------- |
-| a real server, nothing installed                 | 12 ms           |
-| `FetchInterceptor` alone, passing through        | 12 ms           |
-| msw listening, the request passing THROUGH to it | never           |
-| msw listening, the reply MOCKED                  | never           |
-
-So it is neither undici, nor the mocked body, nor `@mswjs/interceptors`, nor this package's seam: a passthrough request hangs exactly as a mocked one does, and the one thing both have that the interceptor alone has not is msw's tee. The nearest upstream issue, [mswjs/interceptors#799](https://github.com/mswjs/interceptors/issues/799), is a passthrough body closed as fixed, and it is the wrong layer. The repro is `specs/api/cancel/get/body-cancel.spec.ts`, skipped: it is the acceptance test of the fix.
-
-That is the ONE escape rule M3 sanctions, and it is narrow because the upstream option carries no allow-list. A subject whose own code cancels a body keeps `vi.stubGlobal('fetch')`, behind a directive written on the call that states the defect:
-
-```typescript
-// oxlint-disable-next-line vitest/no-restricted-vi-methods -- reason: the subject cancels the reply body, which never settles through intercept() under msw's node interceptor (docs/16 § A cancelled body does not settle)
-vi.stubGlobal('fetch', fetchStub);
-```
-
-Every other subject has `intercept()`, and this one gets it back the day the seam answers.
+**A body the subject cancels settles.** Under node, every reply reaches the subject with its body as a stream this package owns, so `response.body.cancel()` — what an SDK client does with a body it will not read, before a retry — resolves at once. The status, the headers and the address the reply came from are read as they were served. msw keeps a branch of every body for itself and never cancels it; the owned stream is what stands between that branch and the subject's cancel. `specs/api/cancel/get/body-cancel.spec.ts` is the proof: an app that cancels the body of `http.error(503, { … })` answers its request.
 
 **Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its contracts last and its strictness is total ([07](07-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
