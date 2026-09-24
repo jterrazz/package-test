@@ -90,6 +90,8 @@ export class RedisHandle implements ServiceHandle {
                 // Would write to the shared index 0 while reset flushes this one.
                 this.sharedConnectionString = this.connectionString;
                 this.connectionString = `${this.connectionString}/${this.dbIndex}`;
+                // The container outlives the file that held this index before.
+                await this.reset();
             },
 
             reset: async () => {

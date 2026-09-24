@@ -97,6 +97,68 @@ describe('redis', () => {
         });
     });
 
+    // RUNTIME G2 — each worker takes its own database index, and the string the app is handed says which.
+    test('two workers take two database indexes, and the connection string carries each', async () => {
+        // Given - two handles on the runner's container, acquired by workers 1 and 2
+        const result = await integration.call(async ({ cache }) => {
+            const container = new URL(cache.connectionString);
+            container.pathname = '';
+            const [first, second] = [redis(), redis()];
+            await Promise.all(
+                [first, second].map(async (handle, worker) => {
+                    handle.connectionString = container.toString().replace(/\/$/u, '');
+                    handle.started = true;
+                    await handle.isolation().acquire(String(worker + 1));
+                }),
+            );
+            const indexes = [first, second].map(
+                (handle) => new URL(handle.connectionString).pathname,
+            );
+            await first.isolation().release();
+            await second.isolation().release();
+            return indexes;
+        });
+
+        // Then - index 0 stays the container's own, and neither worker is on the other's
+        expect(result.value).toMatch(['/2', '/3']);
+    });
+
+    // RUNTIME G2 — the run's container outlives a file, and a file that died
+    // Before its release left its keys at its index.
+    test('a worker acquires its index empty, whatever a worker before it left there', async () => {
+        // Given - one handle that writes at its index and never releases, then another acquired by the same worker
+        const result = await integration.call(async ({ cache }) => {
+            const { createClient } = await import('redis');
+            const container = new URL(cache.connectionString);
+            container.pathname = '';
+            const bare = container.toString().replace(/\/$/u, '');
+            const [died, next] = [redis(), redis()];
+
+            died.connectionString = bare;
+            died.started = true;
+            await died.isolation().acquire('9');
+            const writer = createClient({ url: died.connectionString });
+            await writer.connect();
+            await writer.set('leftover', 'from-the-file-that-died');
+            await writer.quit();
+
+            next.connectionString = bare;
+            next.started = true;
+            await next.isolation().acquire('9');
+            const reader = createClient({ url: next.connectionString });
+            await reader.connect();
+            const seen = await reader.get('leftover');
+            await reader.quit();
+            await next.isolation().release();
+            return { seen };
+        });
+
+        // Then - the second worker starts on nothing
+        expect(result.value).toMatch({
+            seen: null,
+        });
+    });
+
     // RUNTIME G2 — two workers on one container never share a key.
     test('two workers take two database indexes, and a key one writes the other never reads', async () => {
         // Given - two handles on the runner's container, acquired by two workers, one of them writing

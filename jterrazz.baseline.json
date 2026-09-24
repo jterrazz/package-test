@@ -40,7 +40,7 @@
         "typescript/no-unsafe-return": 8,
         "typescript/no-unsafe-type-assertion": 258,
         "typescript/prefer-nullish-coalescing": 5,
-        "typescript/require-await": 16,
+        "typescript/require-await": 15,
         "typescript/restrict-template-expressions": 1,
         "typescript/strict-boolean-expressions": 80,
         "typescript/strict-void-return": 43,
